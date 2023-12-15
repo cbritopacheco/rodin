@@ -391,7 +391,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override
       {
-        return Region::Domain;
+        return Region::Cells;
       }
 
       inline Potential* copy() const noexcept override
@@ -464,23 +464,25 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      void assemble(const Geometry::Polytope& tau, const Geometry::Polytope& t) final override
+      void assemble(const Geometry::Polytope& trp, const Geometry::Polytope& tep) final override
       {
-        const auto& tautrans = tau.getTransformation();
-        const auto& ttrans = t.getTransformation();
+        const auto& trptrans = trp.getTransformation();
+        const auto& teptrans = tep.getTransformation();
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
         const auto& trialfes = lhs.getOperand().getFiniteElementSpace();
+        const auto& trialfe = trialfes.getFiniteElement(trp.getDimension(), trp.getIndex());
         const auto& testfes = rhs.getFiniteElementSpace();
-        const auto& testfe = testfes.getFiniteElement(t.getDimension(), t.getIndex());
-        const auto& trialfe = trialfes.getFiniteElement(tau.getDimension(), tau.getIndex());
+        const auto& testfe = testfes.getFiniteElement(tep.getDimension(), tep.getIndex());
         const auto& kernel = lhs.getKernel();
         auto& res = getMatrix();
         res.resize(testfe.getCount(), trialfe.getCount());
-        if (t == tau)
+        res.setZero();
+        if (tep == trp)
         {
-          switch (t.getGeometry())
+          assert(trp.getGeometry() == tep.getGeometry());
+          switch (tep.getGeometry())
           {
             case Geometry::Polytope::Type::Point:
             case Geometry::Polytope::Type::Segment:
@@ -519,12 +521,12 @@ namespace Rodin::Variational
                     rx4 << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
                     rz5 << xi, xi * eta1 * (1 - eta2);
                     rx6 << xi, xi * eta1 * (1 - eta2);
-                    const Geometry::Point x1(t, ttrans, std::cref(rx1));
-                    const Geometry::Point z2(t, ttrans, std::cref(rz2));
-                    const Geometry::Point z3(t, ttrans, std::cref(rz3));
-                    const Geometry::Point x4(t, ttrans, std::cref(rx4));
-                    const Geometry::Point z5(t, ttrans, std::cref(rz5));
-                    const Geometry::Point x6(t, ttrans, std::cref(rx6));
+                    const Geometry::Point x1(tep, teptrans, std::cref(rx1));
+                    const Geometry::Point z2(tep, teptrans, std::cref(rz2));
+                    const Geometry::Point z3(tep, teptrans, std::cref(rz3));
+                    const Geometry::Point x4(tep, teptrans, std::cref(rx4));
+                    const Geometry::Point z5(tep, teptrans, std::cref(rz5));
+                    const Geometry::Point x6(tep, teptrans, std::cref(rx6));
                     const Scalar d = xi * xi * xi * eta1 * eta1 * eta2;
                     for (size_t k = 0; k < qf.getSize(); k++)
                     {
@@ -536,12 +538,12 @@ namespace Rodin::Variational
                       rz4 << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
                       rx5 << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
                       rz6 << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
-                      const Geometry::Point z1(t, ttrans, std::cref(rz1));
-                      const Geometry::Point x2(t, ttrans, std::cref(rx2));
-                      const Geometry::Point x3(t, ttrans, std::cref(rx3));
-                      const Geometry::Point z4(t, ttrans, std::cref(rz4));
-                      const Geometry::Point x5(t, ttrans, std::cref(rx5));
-                      const Geometry::Point z6(t, ttrans, std::cref(rz6));
+                      const Geometry::Point z1(tep, teptrans, std::cref(rz1));
+                      const Geometry::Point x2(tep, teptrans, std::cref(rx2));
+                      const Geometry::Point x3(tep, teptrans, std::cref(rx3));
+                      const Geometry::Point z4(tep, teptrans, std::cref(rz4));
+                      const Geometry::Point x5(tep, teptrans, std::cref(rx5));
+                      const Geometry::Point z6(tep, teptrans, std::cref(rz6));
                       const Scalar s1 = kernel(x1, z1) * x1.getDistortion() * z1.getDistortion();
                       const Scalar s2 = kernel(x2, z2) * x2.getDistortion() * z2.getDistortion();
                       const Scalar s3 = kernel(x3, z3) * x3.getDistortion() * z3.getDistortion();
@@ -578,14 +580,14 @@ namespace Rodin::Variational
         }
         else
         {
-          const QF::GenericPolytopeQuadrature qftr(trialfe.getOrder(), tau.getGeometry());
-          const QF::GenericPolytopeQuadrature qfte(testfe.getOrder(), t.getGeometry());
+          const QF::GenericPolytopeQuadrature qftr(trialfe.getOrder(), trp.getGeometry());
+          const QF::GenericPolytopeQuadrature qfte(testfe.getOrder(), tep.getGeometry());
           for (size_t i = 0; i < qfte.getSize(); i++)
           {
-            const Geometry::Point x(t, ttrans, std::cref(qfte.getPoint(i)));
+            const Geometry::Point x(tep, teptrans, std::cref(qfte.getPoint(i)));
             for (size_t j = 0; j < qftr.getSize(); j++)
             {
-              const Geometry::Point y(tau, tautrans, std::cref(qftr.getPoint(j)));
+              const Geometry::Point y(trp, trptrans, std::cref(qftr.getPoint(j)));
               const Scalar d = x.getDistortion() * y.getDistortion();
               const Scalar kxy = kernel(x, y);
               const Scalar w = qfte.getWeight(i) * qftr.getWeight(j);
@@ -667,7 +669,7 @@ namespace Rodin::Variational
       inline
       Integrator::Region getTestRegion() const override
       {
-        return Integrator::Region::Domain;
+        return Integrator::Region::Cells;
       }
 
       inline

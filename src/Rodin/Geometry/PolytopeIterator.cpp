@@ -15,6 +15,27 @@ namespace Rodin::Geometry
     : Parent(dimension, mesh, std::move(gen))
   {}
 
+  PolytopeIterator& PolytopeIterator::operator=(CellIterator it)
+  {
+    PolytopeIterator tmp(it.getDimension(), it.getMesh(), std::move(it.getIndexGenerator()));
+    *this = std::move(tmp);
+    return *this;
+  }
+
+  PolytopeIterator& PolytopeIterator::operator=(FaceIterator it)
+  {
+    PolytopeIterator tmp(it.getDimension(), it.getMesh(), std::move(it.getIndexGenerator()));
+    *this = std::move(tmp);
+    return *this;
+  }
+
+  PolytopeIterator& PolytopeIterator::operator=(VertexIterator it)
+  {
+    PolytopeIterator tmp(it.getDimension(), it.getMesh(), std::move(it.getIndexGenerator()));
+    *this = std::move(tmp);
+    return *this;
+  }
+
   Polytope* PolytopeIterator::generate() const
   {
     if (this->end()) return nullptr;

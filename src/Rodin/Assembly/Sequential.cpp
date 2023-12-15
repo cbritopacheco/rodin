@@ -11,6 +11,39 @@
 #include "Sequential.h"
 
 namespace Rodin::Assembly
-{}
+{
+  namespace Internal
+  {
+    Geometry::PolytopeIterator getRegionIterator(
+        const Geometry::MeshBase& mesh, Variational::Integrator::Region region)
+    {
+      Geometry::PolytopeIterator it;
+      switch (region)
+      {
+        case Variational::Integrator::Region::Cells:
+        {
+          it = mesh.getCell();
+          break;
+        }
+        case Variational::Integrator::Region::Faces:
+        {
+          it = mesh.getFace();
+          break;
+        }
+        case Variational::Integrator::Region::Boundary:
+        {
+          it = mesh.getBoundary();
+          break;
+        }
+        case Variational::Integrator::Region::Interface:
+        {
+          it = mesh.getInterface();
+          break;
+        }
+      }
+      return it;
+    }
+  }
+}
 
 
