@@ -83,7 +83,7 @@ namespace Rodin::Assembly
           const auto& attrs = bfi.getAttributes();
           switch (bfi.getRegion())
           {
-            case Variational::Integrator::Region::Domain:
+            case Variational::Integrator::Region::Cells:
             {
               const size_t d = input.mesh.getDimension();
               auto loop =
@@ -368,7 +368,7 @@ namespace Rodin::Assembly
           const auto& attrs = bfi.getAttributes();
           switch (bfi.getRegion())
           {
-            case Variational::Integrator::Region::Domain:
+            case Variational::Integrator::Region::Cells:
             {
               const size_t d = input.mesh.getDimension();
               auto loop =
@@ -565,7 +565,7 @@ namespace Rodin::Assembly
           const auto& attrs = lfi.getAttributes();
           switch (lfi.getRegion())
           {
-            case Variational::Integrator::Region::Domain:
+            case Variational::Integrator::Region::Cells:
             {
               const size_t d = input.mesh.getDimension();
               auto loop =

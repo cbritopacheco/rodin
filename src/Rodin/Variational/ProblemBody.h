@@ -336,6 +336,27 @@ namespace Rodin::Variational
 
   inline
   ProblemBody<void, void> operator-(
+      const GlobalBilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody<void, void> res;
+    res.getGlobalBFIs().add(bfi);
+    res.getLFIs().add(UnaryMinus(lfi));
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator-(
+      const GlobalBilinearFormIntegratorBase& bfi,
+      const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+  {
+    ProblemBody<void, void> res;
+    res.getGlobalBFIs().add(bfi);
+    res.getLFIs().add(UnaryMinus(lfis));
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator-(
       const LinearFormIntegratorBase& lfi, const LocalBilinearFormIntegratorBase& bfi)
   {
     ProblemBody<void, void> res;
@@ -352,6 +373,39 @@ namespace Rodin::Variational
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfis);
     res.getLFIs().add(lfi);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const FormLanguage::List<LocalBilinearFormIntegratorBase>& lbfis,
+      const FormLanguage::List<GlobalBilinearFormIntegratorBase>& gbfis)
+  {
+    ProblemBody<void, void> res;
+    res.getLocalBFIs().add(lbfis);
+    res.getGlobalBFIs().add(gbfis);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const LocalBilinearFormIntegratorBase& lbfi,
+      const FormLanguage::List<GlobalBilinearFormIntegratorBase>& gbfis)
+  {
+    ProblemBody<void, void> res;
+    res.getLocalBFIs().add(lbfi);
+    res.getGlobalBFIs().add(gbfis);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const LocalBilinearFormIntegratorBase& lbfi,
+      const GlobalBilinearFormIntegratorBase& gbfi)
+  {
+    ProblemBody<void, void> res;
+    res.getLocalBFIs().add(lbfi);
+    res.getGlobalBFIs().add(gbfi);
     return res;
   }
 
