@@ -164,8 +164,7 @@ components:
   @endcode
 
   This piece of code creates a CG object in place, while setting some
-  parameters, and finally calling the @ref Rodin::Solver::CG.solve() "solve()"
-  method on the problem.
+  parameters, and finally calling the solve method on the problem.
 
   Ultimately, with the problem solved, we will want to visualize our solution.
   We can do this by saving both the solution and mesh objects to file, and then
