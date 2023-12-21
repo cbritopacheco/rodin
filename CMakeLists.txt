@@ -91,6 +91,10 @@ if (RODIN_BUILD_SRC)
   find_package(Threads REQUIRED)
   add_subdirectory(third-party/BS_thread_pool)
 
+  if (RODIN_USE_OPENMP)
+    find_package(OpenMP REQUIRED)
+  endif()
+
   # ---- Boost ----
   # set(Boost_USE_STATIC_LIBS        OFF)
   # set(Boost_USE_STATIC_RUNTIME     OFF)

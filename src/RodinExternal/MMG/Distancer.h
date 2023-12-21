@@ -196,7 +196,6 @@ namespace Rodin::External::MMG
               retcode = m_mshdist.run(
                   boxp.string(),
                   "-dom",
-                  "-fmm",
                   "-ncpu", m_ncpu
                   );
             }

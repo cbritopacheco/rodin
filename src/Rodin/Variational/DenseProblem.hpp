@@ -117,42 +117,30 @@ namespace Rodin::Variational
   {
     const auto& trial = getTrialFunction();
     const auto& trialFES = trial.getFiniteElementSpace();
-
     const auto& test = getTestFunction();
     const auto& testFES = test.getFiniteElementSpace();
-
-    if (trialFES == testFES)
+    for (auto& dbc : m_dbcs)
     {
-      for (auto& dbc : m_dbcs)
+      dbc.assemble();
+      const auto& dofs = dbc.getDOFs();
+      // Move essential degrees of freedom in the LHS to the RHS
+      for (const auto& kv : dofs)
       {
-        dbc.assemble();
-        const auto& dofs = dbc.getDOFs();
+         const Index& global = kv.first;
+         const auto& dof = kv.second;
+         m_mass -= dof * m_stiffness.col(global);
+      }
+      for (const auto& [global, dof] : dofs)
+      {
+        // Impose essential degrees of freedom on RHS
+        m_mass.coeffRef(global) = dof;
 
-        // Move essential degrees of freedom in the LHS to the RHS
-        for (const auto& kv : dofs)
-        {
-           const Index& global = kv.first;
-           const auto& dof = kv.second;
-           m_mass -= dof * m_stiffness.col(global);
-        }
-
-        for (const auto& [global, dof] : dofs)
-        {
-          // Impose essential degrees of freedom on RHS
-          m_mass.coeffRef(global) = dof;
-
-          // Impose essential degrees of freedom on LHS
-          m_stiffness.col(global).setZero();
-          m_stiffness.row(global).setZero();
-          m_stiffness.coeffRef(global, global) = 1;
-        }
+        // Impose essential degrees of freedom on LHS
+        m_stiffness.col(global).setZero();
+        m_stiffness.row(global).setZero();
+        m_stiffness.coeffRef(global, global) = 1;
       }
     }
-    else
-    {
-      assert(false); // Not handled yet
-    }
-
     return *this;
   }
 

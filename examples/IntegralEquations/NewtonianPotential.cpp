@@ -67,11 +67,6 @@ int main(int, char**)
   GridFunction one(fes);
   one = ScalarFunction(1);
 
-  std::cout << "exact\n";
-  GridFunction ex(fes);
-  ex = exact;
-  ex.save("exact.gf");
-
   std::cout << "phi\n";
   GridFunction phi(fes);
   phi = Potential(K, u.getSolution());
@@ -79,8 +74,8 @@ int main(int, char**)
 
   std::cout << "potential\n";
   phi.setWeights();
-  ex.setWeights();
-  std::cout << Integral(phi).compute() << std::endl;
+  one.setWeights();
+  std::cout << Integral(phi).compute() / Integral(one) << std::endl;
 
   return 0;
 }

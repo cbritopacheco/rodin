@@ -30,7 +30,7 @@ int main(int argc, char** argv)
   P1 fes(mesh, d);
 
   // Lamé coefficients
-  Scalar lambda = 0.5769, mu = 0.3846;
+  const Scalar lambda = 0.5769, mu = 0.3846;
 
   // Pull force
   VectorFunction f{0, -1};

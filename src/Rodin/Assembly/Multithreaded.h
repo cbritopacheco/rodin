@@ -8,6 +8,7 @@
 #define RODIN_ASSEMBLY_MULTITHREADED_H
 
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/Kernels.h"
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "Rodin/Threads/Mutex.h"
@@ -20,10 +21,11 @@
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 
+#include "Rodin/Utility/Overloaded.h"
+
 #include "ForwardDecls.h"
 #include "AssemblyBase.h"
 #include "Sequential.h"
-#include "Kernels.h"
 
 namespace Rodin::Assembly
 {
@@ -66,27 +68,34 @@ namespace Rodin::Assembly
 
       using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
 
+#ifdef RODIN_MULTITHREADED
+      Multithreaded()
+        : Multithreaded(Threads::getGlobalThreadPool())
+      {}
+#else
       Multithreaded()
         : Multithreaded(std::thread::hardware_concurrency())
       {}
+#endif
+
+      Multithreaded(std::reference_wrapper<Threads::ThreadPool> pool)
+        : m_pool(pool)
+      {}
 
       Multithreaded(size_t threadCount)
-        : m_threadCount(threadCount),
-          m_pool(threadCount)
+        : m_pool(threadCount)
       {
         assert(threadCount > 0);
       }
 
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_threadCount(other.m_threadCount),
-          m_pool(m_threadCount)
+          m_pool(other.getThreadPool().getThreadCount())
       {}
 
       Multithreaded(Multithreaded&& other)
         : Parent(std::move(other)),
-          m_threadCount(std::move(other.m_threadCount)),
-          m_pool(m_threadCount)
+          m_pool(other.getThreadPool().getThreadCount())
       {}
 
       /**
@@ -100,7 +109,7 @@ namespace Rodin::Assembly
         TripletVector res;
         res.clear();
         res.reserve(capacity);
-        auto& threadPool = m_pool;
+        const size_t threadCount = getThreadPool().getThreadCount();
         for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
@@ -110,7 +119,7 @@ namespace Rodin::Assembly
             [&](const Index start, const Index end)
             {
               tl_lbfi.reset(bfi.copy());
-              tl_triplets.reserve(capacity / m_threadCount);
+              tl_triplets.reserve(capacity / threadCount);
               for (Index i = start; i < end; ++i)
               {
                 if (seq.filter(i))
@@ -121,7 +130,7 @@ namespace Rodin::Assembly
                     const auto& trialDOFs = input.trialFES.getDOFs(d, i);
                     const auto& testDOFs = input.testFES.getDOFs(d, i);
                     tl_lbfi->assemble(*it);
-                    Kernels::add(tl_triplets, tl_lbfi->getMatrix(), testDOFs, trialDOFs);
+                    Math::Kernels::add(tl_triplets, tl_lbfi->getMatrix(), testDOFs, trialDOFs);
                   }
                 }
               }
@@ -132,12 +141,22 @@ namespace Rodin::Assembly
               m_mutex.unlock();
               tl_triplets.clear();
             };
+
+          if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+          {
+            auto& threadPool = std::get<Threads::ThreadPool>(m_pool);
             threadPool.pushLoop(0, seq.getCount(), loop);
             threadPool.waitForTasks();
+          }
+          else
+          {
+            auto& threadPool = std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+            threadPool.pushLoop(0, seq.getCount(), loop);
+            threadPool.waitForTasks();
+          }
         }
         for (auto& bfi : input.gbfis)
         {
-          std::cout << "miaow\n";
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
           Internal::MultithreadedIteration testseq(input.mesh, bfi.getTestRegion());
@@ -146,7 +165,7 @@ namespace Rodin::Assembly
             [&](const Index start, const Index end)
             {
               tl_gbfi.reset(bfi.copy());
-              tl_triplets.reserve(capacity / m_threadCount);
+              tl_triplets.reserve(capacity / threadCount);
               for (Index i = start; i < end; ++i)
               {
                 if (testseq.filter(i))
@@ -162,7 +181,7 @@ namespace Rodin::Assembly
                         const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
                         const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
                         tl_gbfi->assemble(*trIt, *teIt);
-                        Kernels::add(tl_triplets, tl_gbfi->getMatrix(), testDOFs, trialDOFs);
+                        Math::Kernels::add(tl_triplets, tl_gbfi->getMatrix(), testDOFs, trialDOFs);
                       }
                     }
                   }
@@ -175,10 +194,29 @@ namespace Rodin::Assembly
               m_mutex.unlock();
               tl_triplets.clear();
             };
-          threadPool.pushLoop(0, testseq.getCount(), loop);
-          threadPool.waitForTasks();
+
+          if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+          {
+            auto& threadPool = std::get<Threads::ThreadPool>(m_pool);
+            threadPool.pushLoop(0, testseq.getCount(), loop);
+            threadPool.waitForTasks();
+          }
+          else
+          {
+            auto& threadPool = std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+            threadPool.pushLoop(0, testseq.getCount(), loop);
+            threadPool.waitForTasks();
+          }
         }
         return res;
+      }
+
+      const Threads::ThreadPool& getThreadPool() const
+      {
+        if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+          return std::get<Threads::ThreadPool>(m_pool);
+        else
+          return std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
       }
 
       Multithreaded* copy() const noexcept override
@@ -191,9 +229,8 @@ namespace Rodin::Assembly
       static thread_local std::unique_ptr<Variational::LocalBilinearFormIntegratorBase> tl_lbfi;
       static thread_local std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase> tl_gbfi;
 
-      const size_t m_threadCount;
       mutable Threads::Mutex m_mutex;
-      mutable Threads::ThreadPool m_pool;
+      mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
   };
 
   template <class TrialFES, class TestFES>
@@ -302,27 +339,34 @@ namespace Rodin::Assembly
       using Input = typename Parent::Input;
       using OperatorType = Math::Matrix;
 
+#ifdef RODIN_MULTITHREADED
+      Multithreaded()
+        : Multithreaded(Threads::getGlobalThreadPool())
+      {}
+#else
       Multithreaded()
         : Multithreaded(std::thread::hardware_concurrency())
       {}
+#endif
+
+      Multithreaded(std::reference_wrapper<Threads::ThreadPool> pool)
+        : m_pool(pool)
+      {}
 
       Multithreaded(size_t threadCount)
-        : m_threadCount(threadCount),
-          m_pool(threadCount)
+        : m_pool(threadCount)
       {
         assert(threadCount > 0);
       }
 
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_threadCount(other.m_threadCount),
-          m_pool(m_threadCount)
+          m_pool(other.getThreadPool().getThreadCount())
       {}
 
       Multithreaded(Multithreaded&& other)
         : Parent(std::move(other)),
-          m_threadCount(std::move(other.m_threadCount)),
-          m_pool(m_threadCount)
+          m_pool(other.getThreadPool().getThreadCount())
       {}
 
       /**
@@ -333,7 +377,7 @@ namespace Rodin::Assembly
       {
         Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());
         res.setZero();
-        auto& threadPool = m_pool;
+        auto& threadPool = getThreadPool();
         for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
@@ -355,7 +399,7 @@ namespace Rodin::Assembly
                     const auto& trialDOFs = input.trialFES.getDOFs(d, i);
                     const auto& testDOFs = input.testFES.getDOFs(d, i);
                     tl_lbfi->assemble(*it);
-                    Kernels::add(tl_res, tl_lbfi->getMatrix(), testDOFs, trialDOFs);
+                    Math::Kernels::add(tl_res, tl_lbfi->getMatrix(), testDOFs, trialDOFs);
                   }
                 }
               }
@@ -363,8 +407,19 @@ namespace Rodin::Assembly
               res += tl_res;
               m_mutex.unlock();
             };
-          threadPool.pushLoop(0, seq.getCount(), loop);
-          threadPool.waitForTasks();
+
+          if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+          {
+            auto& threadPool = std::get<Threads::ThreadPool>(m_pool);
+            threadPool.pushLoop(0, seq.getCount(), loop);
+            threadPool.waitForTasks();
+          }
+          else
+          {
+            auto& threadPool = std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+            threadPool.pushLoop(0, seq.getCount(), loop);
+            threadPool.waitForTasks();
+          }
         }
         for (auto& bfi : input.gbfis)
         {
@@ -393,7 +448,7 @@ namespace Rodin::Assembly
                         const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
                         const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
                         tl_gbfi->assemble(*trIt, *teIt);
-                        Kernels::add(tl_res, tl_gbfi->getMatrix(), testDOFs, trialDOFs);
+                        Math::Kernels::add(tl_res, tl_gbfi->getMatrix(), testDOFs, trialDOFs);
                       }
                     }
                   }
@@ -403,10 +458,29 @@ namespace Rodin::Assembly
               res += tl_res;
               m_mutex.unlock();
             };
-          threadPool.pushLoop(0, testseq.getCount(), loop);
-          threadPool.waitForTasks();
+
+          if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+          {
+            auto& threadPool = std::get<Threads::ThreadPool>(m_pool);
+            threadPool.pushLoop(0, testseq.getCount(), loop);
+            threadPool.waitForTasks();
+          }
+          else
+          {
+            auto& threadPool = std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+            threadPool.pushLoop(0, testseq.getCount(), loop);
+            threadPool.waitForTasks();
+          }
         }
         return res;
+      }
+
+      const Threads::ThreadPool& getThreadPool() const
+      {
+        if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+          return std::get<Threads::ThreadPool>(m_pool);
+        else
+          return std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
       }
 
       Multithreaded* copy() const noexcept override
@@ -419,9 +493,8 @@ namespace Rodin::Assembly
       static thread_local std::unique_ptr<Variational::LocalBilinearFormIntegratorBase> tl_lbfi;
       static thread_local std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase> tl_gbfi;
 
-      const size_t m_threadCount;
       mutable Threads::Mutex m_mutex;
-      mutable Threads::ThreadPool m_pool;
+      mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
   };
 
    template <class TrialFES, class TestFES>
@@ -452,27 +525,34 @@ namespace Rodin::Assembly
       using Input = typename Parent::Input;
       using VectorType = Math::Vector;
 
+#ifdef RODIN_MULTITHREADED
+      Multithreaded()
+        : Multithreaded(Threads::getGlobalThreadPool())
+      {}
+#else
       Multithreaded()
         : Multithreaded(std::thread::hardware_concurrency())
       {}
+#endif
+
+      Multithreaded(std::reference_wrapper<Threads::ThreadPool> pool)
+        : m_pool(pool)
+      {}
 
       Multithreaded(size_t threadCount)
-        : m_threadCount(threadCount),
-          m_pool(threadCount)
+        : m_pool(threadCount)
       {
         assert(threadCount > 0);
       }
 
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_threadCount(other.m_threadCount),
-          m_pool(m_threadCount)
+          m_pool(other.getThreadPool().getThreadCount())
       {}
 
       Multithreaded(Multithreaded&& other)
         : Parent(std::move(other)),
-          m_threadCount(std::move(other.m_threadCount)),
-          m_pool(m_threadCount)
+          m_pool(other.getThreadPool().getThreadCount())
       {}
 
       /**
@@ -483,7 +563,6 @@ namespace Rodin::Assembly
       {
         VectorType res(input.fes.getSize());
         res.setZero();
-        auto& threadPool = m_pool;
         for (auto& lfi : input.lfis)
         {
           const auto& attrs = lfi.getAttributes();
@@ -504,7 +583,7 @@ namespace Rodin::Assembly
                     const auto it = seq.getIterator(i);
                     const auto& dofs = input.fes.getDOFs(d, i);
                     tl_lfi->assemble(*it);
-                    Kernels::add(tl_res, tl_lfi->getVector(), dofs);
+                    Math::Kernels::add(tl_res, tl_lfi->getVector(), dofs);
                   }
                 }
               }
@@ -512,10 +591,29 @@ namespace Rodin::Assembly
               res += tl_res;
               m_mutex.unlock();
             };
-          threadPool.pushLoop(0, seq.getCount(), loop);
-          threadPool.waitForTasks();
+
+          if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+          {
+            auto& threadPool = std::get<Threads::ThreadPool>(m_pool);
+            threadPool.pushLoop(0, seq.getCount(), loop);
+            threadPool.waitForTasks();
+          }
+          else
+          {
+            auto& threadPool = std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+            threadPool.pushLoop(0, seq.getCount(), loop);
+            threadPool.waitForTasks();
+          }
         }
         return res;
+      }
+
+      const Threads::ThreadPool& getThreadPool() const
+      {
+        if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+          return std::get<Threads::ThreadPool>(m_pool);
+        else
+          return std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
       }
 
       Multithreaded* copy() const noexcept override
@@ -527,9 +625,8 @@ namespace Rodin::Assembly
       static thread_local VectorType tl_res;
       static thread_local std::unique_ptr<Variational::LinearFormIntegratorBase> tl_lfi;
 
-      const size_t m_threadCount;
       mutable Threads::Mutex m_mutex;
-      mutable Threads::ThreadPool m_pool;
+      mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
   };
 
   template <class FES>
