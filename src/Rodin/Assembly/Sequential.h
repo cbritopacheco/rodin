@@ -8,12 +8,12 @@
 #define RODIN_ASSEMBLY_SEQUENTIAL_H
 
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/Kernels.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Variational/BilinearForm.h"
 
 #include "ForwardDecls.h"
 #include "AssemblyBase.h"
-#include "Kernels.h"
 
 namespace Rodin::Assembly::Internal
 {
@@ -79,7 +79,7 @@ namespace Rodin::Assembly
               const auto& trialDOFs = input.trialFES.getDOFs(d, i);
               const auto& testDOFs = input.testFES.getDOFs(d, i);
               bfi.assemble(*it);
-              Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+              Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
             }
           }
         }
@@ -100,7 +100,7 @@ namespace Rodin::Assembly
                   const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
                   const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
                   bfi.assemble(*trIt, *teIt);
-                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
             }
@@ -221,7 +221,7 @@ namespace Rodin::Assembly
               const auto& trialDOFs = input.trialFES.getDOFs(d, i);
               const auto& testDOFs = input.testFES.getDOFs(d, i);
               bfi.assemble(*it);
-              Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+              Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
             }
           }
         }
@@ -242,7 +242,7 @@ namespace Rodin::Assembly
                   const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
                   const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
                   bfi.assemble(*trIt, *teIt);
-                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
             }
@@ -300,7 +300,7 @@ namespace Rodin::Assembly
               const size_t i = it->getIndex();
               const auto& dofs = input.fes.getDOFs(d, i);
               lfi.assemble(*it);
-              Kernels::add(res, lfi.getVector(), dofs);
+              Math::Kernels::add(res, lfi.getVector(), dofs);
             }
           }
         }

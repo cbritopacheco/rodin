@@ -379,6 +379,17 @@ namespace Rodin::Variational
   inline
   ProblemBody<void, void> operator+(
       const FormLanguage::List<LocalBilinearFormIntegratorBase>& lbfis,
+      const GlobalBilinearFormIntegratorBase& gbfi)
+  {
+    ProblemBody<void, void> res;
+    res.getLocalBFIs().add(lbfis);
+    res.getGlobalBFIs().add(gbfi);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const FormLanguage::List<LocalBilinearFormIntegratorBase>& lbfis,
       const FormLanguage::List<GlobalBilinearFormIntegratorBase>& gbfis)
   {
     ProblemBody<void, void> res;

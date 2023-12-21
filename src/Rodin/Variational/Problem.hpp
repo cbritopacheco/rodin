@@ -117,62 +117,49 @@ namespace Rodin::Variational
   {
     const auto& trial = getTrialFunction();
     const auto& trialFES = trial.getFiniteElementSpace();
-
     const auto& test = getTestFunction();
     const auto& testFES = test.getFiniteElementSpace();
-
-    if (trialFES == testFES)
+    Scalar* const valuePtr = m_stiffness.valuePtr();
+    Math::SparseMatrix::StorageIndex* const outerPtr = m_stiffness.outerIndexPtr();
+    Math::SparseMatrix::StorageIndex* const innerPtr = m_stiffness.innerIndexPtr();
+    for (auto& dbc : m_dbcs)
     {
-      Scalar* const valuePtr = m_stiffness.valuePtr();
-      Math::SparseMatrix::StorageIndex* const outerPtr = m_stiffness.outerIndexPtr();
-      Math::SparseMatrix::StorageIndex* const innerPtr = m_stiffness.innerIndexPtr();
-
-      for (auto& dbc : m_dbcs)
+      dbc.assemble();
+      const auto& dofs = dbc.getDOFs();
+      // Move essential degrees of freedom in the LHS to the RHS
+      for (const auto& kv : dofs)
       {
-        dbc.assemble();
-        const auto& dofs = dbc.getDOFs();
+         const Index& global = kv.first;
+         const auto& dof = kv.second;
+         for (Math::SparseMatrix::InnerIterator it(m_stiffness, global); it; ++it)
+            m_mass.coeffRef(it.row()) -= it.value() * dof;
+      }
+      for (const auto& [global, dof] : dofs)
+      {
+        // Impose essential degrees of freedom on RHS
+        m_mass.coeffRef(global) = dof;
 
-        // Move essential degrees of freedom in the LHS to the RHS
-        for (const auto& kv : dofs)
+        // Impose essential degrees of freedom on LHS
+        for (auto i = outerPtr[global]; i < outerPtr[global + 1]; ++i)
         {
-           const Index& global = kv.first;
-           const auto& dof = kv.second;
-           for (Math::SparseMatrix::InnerIterator it(m_stiffness, global); it; ++it)
-              m_mass.coeffRef(it.row()) -= it.value() * dof;
-        }
-
-        for (const auto& [global, dof] : dofs)
-        {
-          // Impose essential degrees of freedom on RHS
-          m_mass.coeffRef(global) = dof;
-
-          // Impose essential degrees of freedom on LHS
-          for (auto i = outerPtr[global]; i < outerPtr[global + 1]; ++i)
+          assert(innerPtr[i] >= 0);
+          // Assumes CCS format
+          const Index row = innerPtr[i];
+          valuePtr[i] = Scalar(row == global);
+          if (row != global)
           {
-            assert(innerPtr[i] >= 0);
-            // Assumes CSC format
-            const Index row = innerPtr[i];
-            valuePtr[i] = Scalar(row == global);
-            if (row != global)
+            for (auto k = outerPtr[row]; 1; k++)
             {
-              for (auto k = outerPtr[row]; 1; k++)
+              if (static_cast<Index>(innerPtr[k]) == global)
               {
-                if (static_cast<Index>(innerPtr[k]) == global)
-                {
-                   valuePtr[k] = 0.0;
-                   break;
-                }
+                 valuePtr[k] = 0.0;
+                 break;
               }
             }
           }
         }
       }
     }
-    else
-    {
-      assert(false); // Not handled yet
-    }
-
     return *this;
   }
 
@@ -237,7 +224,7 @@ namespace Rodin::Variational
             m_stiffness.col(child) += coeff * m_stiffness.col(parent);
           }
 
-          // Assumes CSC format
+          // Assumes CCS format
           for (Math::SparseMatrix::InnerIterator it(m_stiffness, parent); it; ++it)
             it.valueRef() = 0;
 

@@ -13,11 +13,14 @@
 #include "Rodin/Alert.h"
 #include "Rodin/FormLanguage/Base.h"
 
+
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "ScalarFunction.h"
 #include "ShapeFunction.h"
-#include "Grad.h"
+
+#include "LinearFormIntegrator.h"
+#include "BilinearFormIntegrator.h"
 
 namespace Rodin::FormLanguage
 {
@@ -352,7 +355,7 @@ namespace Rodin::Variational
       auto getTensorBasis(const Geometry::Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
-        const auto rhs = getRHS().getTensorBasis(p);
+        const auto& rhs = this->object(getRHS().getTensorBasis(p));
         return TensorBasis(rhs.getDOFs(), [&](size_t i){ return lhs * rhs(i); });
       }
 
@@ -407,8 +410,8 @@ namespace Rodin::Variational
       using FES = FESType;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      using LHS = ShapeFunctionBase<RHSDerived, FES, Space>;
-      using RHS = FunctionBase<LHSDerived>;
+      using LHS = ShapeFunctionBase<LHSDerived, FES, Space>;
+      using RHS = FunctionBase<RHSDerived>;
       using Parent = ShapeFunctionBase<Mult<LHS, RHS>, FES, Space>;
 
       constexpr
@@ -499,9 +502,9 @@ namespace Rodin::Variational
       constexpr
       auto getTensorBasis(const Geometry::Point& p) const
       {
-        const auto& lhs = this->object(getLHS().getTensorBasis(p));
+        const auto& lhs = getLHS().getTensorBasis(p);
         const auto& rhs = this->object(getRHS().getValue(p));
-        return TensorBasis(lhs.getDOFs(), [&](size_t i){ return lhs(i) * rhs; });
+        return TensorBasis(lhs.getDOFs(), [&](size_t i){ return this->object(lhs(i)) * rhs; });
       }
 
       inline Mult* copy() const noexcept override
@@ -535,6 +538,35 @@ namespace Rodin::Variational
   {
     return Mult(lhs, ScalarFunction(rhs));
   }
+
+  template <>
+  class Mult<Scalar, LocalBilinearFormIntegratorBase> : public LocalBilinearFormIntegratorBase
+  {
+    public:
+      Mult(Scalar lhs, const LocalBilinearFormIntegratorBase& rhs);
+
+      Mult(const Mult& other);
+
+      Mult(Mult&& other);
+
+      Region getRegion() const override;
+
+      void assemble(const Geometry::Polytope& element) override;
+
+      Mult* copy() const noexcept override
+      {
+        return new Mult(*this);
+      }
+
+    private:
+      const Scalar m_lhs;
+      std::unique_ptr<LocalBilinearFormIntegratorBase> m_rhs;
+  };
+
+  Mult(Scalar, const LocalBilinearFormIntegratorBase&) -> Mult<Scalar, LocalBilinearFormIntegratorBase>;
+
+  Mult<Scalar, LocalBilinearFormIntegratorBase> operator*(
+      Scalar lhs, const LocalBilinearFormIntegratorBase& rhs);
 }
 
 #endif

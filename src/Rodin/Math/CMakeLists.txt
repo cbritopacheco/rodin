@@ -25,6 +25,11 @@ add_library(RodinMath ${RodinMath_SRCS} ${RodinMath_HEADERS})
 add_library(Rodin::Math ALIAS RodinMath)
 
 # ---- Link targets ----------------------------------------------------------
+if (RODIN_USE_OPENMP)
+  find_package(OpenMP REQUIRED)
+  target_link_libraries(RodinMath PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
 target_link_libraries(RodinMath
   PUBLIC
   Rodin

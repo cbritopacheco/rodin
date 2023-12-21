@@ -92,6 +92,13 @@ namespace Rodin::Threads
 
       inline
       constexpr
+      Resource& write()
+      {
+        return m_resource;
+      }
+
+      inline
+      constexpr
       const Resource& read() const
       {
         return m_resource;
