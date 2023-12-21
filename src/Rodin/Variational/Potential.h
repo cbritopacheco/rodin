@@ -45,18 +45,18 @@ namespace Rodin::FormLanguage
 
     using LHSRange =
       std::conditional_t<
+      // If
+      std::is_same_v<RHSRange, Scalar>,
+      // Then
+      Scalar,
+      // Else
+      std::conditional_t<
         // If
-        std::is_same_v<RHSRange, Scalar>,
+        std::is_same_v<RHSRange, Math::Vector>,
         // Then
-        Scalar,
+        Math::Matrix,
         // Else
-        std::conditional_t<
-          // If
-          std::is_same_v<RHSRange, Math::Vector>,
-          // Then
-          Math::Matrix,
-          // Else
-          void>>;
+        void>>;
 
     using RangeType = RHSRange;
   };
@@ -87,18 +87,18 @@ namespace Rodin::FormLanguage
 
     using LHSRange =
       std::conditional_t<
+      // If
+      std::is_same_v<RHSRange, Scalar>,
+      // Then
+      Scalar,
+      // Else
+      std::conditional_t<
         // If
-        std::is_same_v<RHSRange, Scalar>,
+        std::is_same_v<RHSRange, Math::Vector>,
         // Then
-        Scalar,
+        Math::Matrix,
         // Else
-        std::conditional_t<
-          // If
-          std::is_same_v<RHSRange, Math::Vector>,
-          // Then
-          Math::Matrix,
-          // Else
-          void>>;
+        void>>;
 
     using RangeType = RHSRange;
   };
@@ -132,18 +132,18 @@ namespace Rodin::Variational
 
       using LHSRange =
         std::conditional_t<
+        // If
+        std::is_same_v<RHSRange, Scalar>,
+        // Then
+        Scalar,
+        // Else
+        std::conditional_t<
           // If
-          std::is_same_v<RHSRange, Scalar>,
+          std::is_same_v<RHSRange, Math::Vector>,
           // Then
-          Scalar,
+          Math::Matrix,
           // Else
-          std::conditional_t<
-            // If
-            std::is_same_v<RHSRange, Math::Vector>,
-            // Then
-            Math::Matrix,
-            // Else
-            void>>;
+          void>>;
 
       using Parent = FunctionBase<Potential<LHS, RHS>>;
 
@@ -164,6 +164,27 @@ namespace Rodin::Variational
       {}
 
       inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        {
+          static_assert(std::is_same_v<RHSRange, Scalar>);
+          return { 1, 1 };
+        }
+        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
+        {
+          static_assert(std::is_same_v<RHSRange, Math::Vector>);
+          return getOperand().getRangeShape();
+        }
+        else
+        {
+          assert(false);
+          return { 0, 0 };
+        }
+      }
+
+      inline
       const auto& getKernel() const
       {
         return m_kernel.get();
@@ -176,7 +197,6 @@ namespace Rodin::Variational
         return *m_u;
       }
 
-      inline
       auto getValue(const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();
@@ -221,7 +241,6 @@ namespace Rodin::Variational
             {
               const auto& polytope = *it;
               const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
-
               const auto& trans = polytope.getTransformation();
               for (size_t i = 0; i < qf.getSize(); i++)
               {
@@ -245,12 +264,43 @@ namespace Rodin::Variational
         }
       }
 
-      inline
-      constexpr
       void getValue(Math::Vector& res, const Geometry::Point& p) const
       {
-        assert(false);
-        res.setConstant(NAN);
+        const auto& kernel = getKernel();
+        const auto& operand = getOperand();
+        const auto& mesh = p.getPolytope().getMesh();
+        res.resize(getRangeShape().height());
+        Math::Matrix kxy;
+        if (m_qf.has_value())
+        {
+          for (auto it = mesh.getCell(); it; ++it)
+          {
+            const auto& polytope = *it;
+            const auto& qf = m_qf.value()(polytope);
+            const auto& trans = polytope.getTransformation();
+            for (size_t i = 0; i < qf.getSize(); i++)
+            {
+              const Geometry::Point y(polytope, trans, std::cref(qf.getPoint(i)));
+              kernel(kxy, p, y);
+              res += qf.getWeight(i) * y.getDistortion() * kxy * operand(y);
+            }
+          }
+        }
+        else
+        {
+          for (auto it = mesh.getCell(); it; ++it)
+          {
+            const auto& polytope = *it;
+            const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
+            const auto& trans = polytope.getTransformation();
+            for (size_t i = 0; i < qf.getSize(); i++)
+            {
+              const Geometry::Point y(polytope, trans, std::cref(qf.getPoint(i)));
+              kernel(kxy, p, y);
+              res += qf.getWeight(i) * y.getDistortion() * kxy * operand(y);
+            }
+          }
+        }
       }
 
       Potential& setQuadratureFormula(
@@ -319,22 +369,18 @@ namespace Rodin::Variational
 
       using LHSRange =
         std::conditional_t<
+        // If
+        std::is_same_v<RHSRange, Scalar>,
+        // Then
+        Scalar,
+        // Else
+        std::conditional_t<
           // If
-          std::is_same_v<RHSRange, Scalar>,
+          std::is_same_v<RHSRange, Math::Vector>,
           // Then
-          Scalar,
+          Math::Matrix,
           // Else
-          std::conditional_t<
-            // If
-            std::is_same_v<RHSRange, Math::Vector>,
-            // Then
-            Math::Matrix,
-            // Else
-            void>>;
-
-      static_assert(
-          (std::is_same_v<LHSRange, Scalar> && std::is_same_v<RHSRange, Scalar>) ||
-          (std::is_same_v<LHSRange, Math::Matrix> || std::is_same_v<RHSRange, Math::Vector>));
+          void>>;
 
       Potential(const Kernel& kernel, const Operand& u)
         : Parent(u.getLeaf()),
@@ -361,27 +407,6 @@ namespace Rodin::Variational
       const Operand& getOperand() const
       {
         return m_u.get();
-      }
-
-      inline
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        if constexpr (std::is_same_v<LHSRange, Scalar>)
-        {
-          static_assert(std::is_same_v<RHSRange, Scalar>);
-          return { 1, 1 };
-        }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
-        {
-          static_assert(std::is_same_v<RHSRange, Math::Vector>);
-          return { getOperand().getRangeShape()[0], 1};
-        }
-        else
-        {
-          assert(false);
-          return { 0, 0 };
-        }
       }
 
       void assemble(const Geometry::Polytope& polytope) final override
@@ -432,6 +457,8 @@ namespace Rodin::Variational
       using Integrand = Dot<LHS, RHS>;
 
       using Parent = GlobalBilinearFormIntegratorBase;
+
+      static_assert(std::is_same_v<LHSRange, RHSRange>);
 
       constexpr
       QuadratureRule(const LHS& lhs, const RHS& rhs)
@@ -544,30 +571,91 @@ namespace Rodin::Variational
                       const Geometry::Point z4(tep, teptrans, std::cref(rz4));
                       const Geometry::Point x5(tep, teptrans, std::cref(rx5));
                       const Geometry::Point z6(tep, teptrans, std::cref(rz6));
-                      const Scalar s1 = kernel(x1, z1) * x1.getDistortion() * z1.getDistortion();
-                      const Scalar s2 = kernel(x2, z2) * x2.getDistortion() * z2.getDistortion();
-                      const Scalar s3 = kernel(x3, z3) * x3.getDistortion() * z3.getDistortion();
-                      const Scalar s4 = kernel(x4, z4) * x4.getDistortion() * z4.getDistortion();
-                      const Scalar s5 = kernel(x5, z5) * x5.getDistortion() * z5.getDistortion();
-                      const Scalar s6 = kernel(x6, z6) * x6.getDistortion() * z6.getDistortion();
+
+                      Scalar s1, s2, s3, s4, s5, s6;
+                      if constexpr (std::is_same_v<LHSRange, Scalar>)
+                      {
+                        s1 = kernel(x1, z1) * x1.getDistortion() * z1.getDistortion();
+                        s2 = kernel(x2, z2) * x2.getDistortion() * z2.getDistortion();
+                        s3 = kernel(x3, z3) * x3.getDistortion() * z3.getDistortion();
+                        s4 = kernel(x4, z4) * x4.getDistortion() * z4.getDistortion();
+                        s5 = kernel(x5, z5) * x5.getDistortion() * z5.getDistortion();
+                        s6 = kernel(x6, z6) * x6.getDistortion() * z6.getDistortion();
+                      }
+                      else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+                      {
+                        kernel(m_k1, x1, z1);
+                        kernel(m_k2, x2, z2);
+                        kernel(m_k3, x3, z3);
+                        kernel(m_k4, x4, z4);
+                        kernel(m_k5, x5, z5);
+                        kernel(m_k6, x6, z6);
+                        s1 = x1.getDistortion() * z1.getDistortion();
+                        s2 = x2.getDistortion() * z2.getDistortion();
+                        s3 = x3.getDistortion() * z3.getDistortion();
+                        s4 = x4.getDistortion() * z4.getDistortion();
+                        s5 = x5.getDistortion() * z5.getDistortion();
+                        s6 = x6.getDistortion() * z6.getDistortion();
+                      }
+                      else
+                      {
+                        assert(false);
+                        s1 = s2 = s3 = s4 = s5 = s6 = NAN;
+                      }
+
                       for (size_t l = 0; l < testfe.getCount(); l++)
                       {
                         const auto& teb = testfe.getBasis(l);
                         for (size_t m = 0; m < trialfe.getCount(); m++)
                         {
                           const auto& trb = trialfe.getBasis(m);
-                          res(l, m) += d * w * s1 * trb(rx1) * teb(rz1);
-                          assert(std::isfinite(s1));
-                          res(l, m) += d * w * s2 * trb(rx2) * teb(rz2);
-                          assert(std::isfinite(s2));
-                          res(l, m) += d * w * s3 * trb(rx3) * teb(rz3);
-                          assert(std::isfinite(s3));
-                          res(l, m) += d * w * s4 * trb(rx4) * teb(rz4);
-                          assert(std::isfinite(s4));
-                          res(l, m) += d * w * s5 * trb(rx5) * teb(rz5);
-                          assert(std::isfinite(s5));
-                          res(l, m) += d * w * s6 * trb(rx6) * teb(rz6);
-                          assert(std::isfinite(s6));
+                          if constexpr (std::is_same_v<LHSRange, Scalar>)
+                          {
+                            res(l, m) += d * w * s1 * trb(rx1) * teb(rz1);
+                            assert(std::isfinite(s1));
+                            res(l, m) += d * w * s2 * trb(rx2) * teb(rz2);
+                            assert(std::isfinite(s2));
+                            res(l, m) += d * w * s3 * trb(rx3) * teb(rz3);
+                            assert(std::isfinite(s3));
+                            res(l, m) += d * w * s4 * trb(rx4) * teb(rz4);
+                            assert(std::isfinite(s4));
+                            res(l, m) += d * w * s5 * trb(rx5) * teb(rz5);
+                            assert(std::isfinite(s5));
+                            res(l, m) += d * w * s6 * trb(rx6) * teb(rz6);
+                            assert(std::isfinite(s6));
+                          }
+                          else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+                          {
+                            assert(std::isfinite(s1));
+                            trb(m_trv, rx1);
+                            teb(m_tev, rz1);
+                            res(l, m) += d * w * s1 * m_tev.dot(m_k1 * m_trv);
+                            assert(std::isfinite(s2));
+                            trb(m_trv, rx2);
+                            teb(m_tev, rz2);
+                            res(l, m) += d * w * s2 * m_tev.dot(m_k2 * m_trv);
+                            assert(std::isfinite(s3));
+                            trb(m_trv, rx3);
+                            teb(m_tev, rz3);
+                            res(l, m) += d * w * s3 * m_tev.dot(m_k3 * m_trv);
+                            assert(std::isfinite(s4));
+                            trb(m_trv, rx4);
+                            teb(m_tev, rz4);
+                            res(l, m) += d * w * s4 * m_tev.dot(m_k4 * m_trv);
+                            assert(std::isfinite(s5));
+                            trb(m_trv, rx5);
+                            teb(m_tev, rz5);
+                            res(l, m) += d * w * s5 * m_tev.dot(m_k5 * m_trv);
+                            assert(std::isfinite(s6));
+                            trb(m_trv, rx6);
+                            teb(m_tev, rz6);
+                            res(l, m) += d * w * s6 * m_tev.dot(m_k6 * m_trv);
+                          }
+                          else
+                          {
+                            assert(false);
+                            res(l, m) = NAN;
+                          }
                         }
                       }
                     }
@@ -588,16 +676,41 @@ namespace Rodin::Variational
             for (size_t j = 0; j < qftr.getSize(); j++)
             {
               const Geometry::Point y(trp, trptrans, std::cref(qftr.getPoint(j)));
-              const Scalar d = x.getDistortion() * y.getDistortion();
-              const Scalar kxy = kernel(x, y);
+              Scalar d;
+              if constexpr (std::is_same_v<LHSRange, Scalar>)
+              {
+                d = kernel(x, y) * x.getDistortion() * y.getDistortion();
+              }
+              else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+              {
+                kernel(m_k, x, y);
+                d = x.getDistortion() * y.getDistortion();
+              }
               const Scalar w = qfte.getWeight(i) * qftr.getWeight(j);
               for (size_t l = 0; l < testfe.getCount(); l++)
               {
                 const auto& teb = testfe.getBasis(l);
+                Scalar tev;
+                if constexpr (std::is_same_v<LHSRange, Scalar>)
+                {
+                  tev = teb(qfte.getPoint(i));
+                }
+                else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+                {
+                  teb(m_tev, qfte.getPoint(i));
+                }
                 for (size_t m = 0; m < trialfe.getCount(); m++)
                 {
                   const auto& trb = trialfe.getBasis(m);
-                  res(l, m) += w * d * kxy * teb(qfte.getPoint(i)) * trb(qftr.getPoint(j));
+                  if constexpr (std::is_same_v<LHSRange, Scalar>)
+                  {
+                    res(l, m) += w * d * tev * trb(qftr.getPoint(j));
+                  }
+                  else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+                  {
+                    trb(m_trv, qftr.getPoint(j));
+                    res(l, m) += w * d * m_tev.dot(m_k * m_trv);
+                  }
                 }
               }
             }
@@ -617,6 +730,10 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_integrand;
+
+      mutable Math::Matrix m_k;
+      mutable Math::Vector m_trv, m_tev;
+      mutable Math::Matrix m_k1, m_k2, m_k3, m_k4, m_k5, m_k6;
   };
 
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -647,8 +764,6 @@ namespace Rodin::Variational
           Dot<
             Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
-
-      static_assert(std::is_same_v<LHSRange, RHSRange>);
 
       Integral(const LHS& lhs, const RHS& rhs)
         : Integral(Dot(lhs, rhs))

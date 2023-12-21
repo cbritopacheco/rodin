@@ -46,7 +46,16 @@ namespace Rodin::Threads
   };
 
 #ifdef RODIN_MULTITHREADED
-  static ThreadPool globalThreadPool(RODIN_THREADPOOL_GLOBALTHREADPOOL_CONCURRENCY);
+  namespace Internal
+  {
+    static ThreadPool globalThreadPool(RODIN_THREADPOOL_GLOBALTHREADPOOL_CONCURRENCY);
+  }
+
+  inline
+  static ThreadPool& getGlobalThreadPool()
+  {
+    return Internal::globalThreadPool;
+  }
 #endif
 }
 

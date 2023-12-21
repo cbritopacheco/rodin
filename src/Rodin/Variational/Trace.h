@@ -10,6 +10,17 @@
 #include "ForwardDecls.h"
 
 #include "ScalarFunction.h"
+#include "ShapeFunction.h"
+
+namespace Rodin::FormLanguage
+{
+  template <class NestedDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FESType, SpaceType>>>
+  {
+    using FES = FESType;
+    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+  };
+}
 
 namespace Rodin::Variational
 {
@@ -87,6 +98,92 @@ namespace Rodin::Variational
 
   template <class NestedDerived>
   Trace(const FunctionBase<NestedDerived>&) -> Trace<FunctionBase<NestedDerived>>;
+
+  template <class NestedDerived, class FESType, ShapeFunctionSpaceType SpaceType>
+  class Trace<ShapeFunctionBase<NestedDerived, FESType, SpaceType>> final
+    : public ShapeFunctionBase<Trace<ShapeFunctionBase<NestedDerived, FESType, SpaceType>>>
+  {
+    public:
+      using FES = FESType;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+
+      using Operand = ShapeFunctionBase<NestedDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<Trace<Operand>>;
+
+      constexpr
+      Trace(const Operand& op)
+        : Parent(op.getFiniteElementSpace()),
+          m_op(op.copy())
+      {}
+
+      constexpr
+      Trace(const Trace& other)
+        : Parent(other),
+          m_op(other.m_op->copy())
+      {}
+
+      constexpr
+      Trace(Trace&& other)
+        : Parent(std::move(other)),
+          m_op(std::move(other.m_op))
+      {}
+
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        return *m_op;
+      }
+
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
+
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { 1, 1 };
+      }
+
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Polytope& element) const
+      {
+        return getOperand().getDOFs(element);
+      }
+
+      inline
+      constexpr
+      auto getTensorBasis(const Geometry::Point& p) const
+      {
+        const size_t d = p.getPolytope().getDimension();
+        const Index i = p.getPolytope().getIndex();
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
+        const auto& tb = m_op->getTensorBasis(p);
+        return TensorBasis(fe.getCount(),
+            [&](size_t local) { return this->object(tb(local)).transpose(); } );
+      }
+
+      const FES& getFiniteElementSpace() const
+      {
+        return getOperand().getFiniteElementSpace();
+      }
+
+      inline Trace* copy() const noexcept override
+      {
+        return new Trace(*this);
+      }
+    private:
+      std::unique_ptr<Operand> m_op;
+  };
+
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  Trace(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+    -> Trace<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
 #endif

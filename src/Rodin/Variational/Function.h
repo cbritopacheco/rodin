@@ -212,6 +212,18 @@ namespace Rodin::Variational
         }
       }
 
+      inline
+      void operator()(Math::Vector& res, const Geometry::Point& p) const
+      {
+        return getValue(res, p);
+      }
+
+      inline
+      void operator()(Math::Matrix& res, const Geometry::Point& p) const
+      {
+        return getValue(res, p);
+      }
+
       /**
        * @brief Evaluates the function on a Point belonging to the mesh.
        *

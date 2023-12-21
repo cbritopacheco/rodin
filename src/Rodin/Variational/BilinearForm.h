@@ -91,10 +91,6 @@ namespace Rodin::Variational
   class BilinearForm final
     : public BilinearFormBase<MatrixType>
   {
-    static_assert(
-        std::is_same_v<TrialFES, TestFES>,
-        "Different trial and test spaces are currently not supported.");
-
     public:
       /// Type of operator associated to the bilinear form
       using OperatorType = MatrixType;
