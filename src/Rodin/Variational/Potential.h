@@ -419,6 +419,27 @@ namespace Rodin::Variational
         return Region::Cells;
       }
 
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        {
+          static_assert(std::is_same_v<RHSRange, Scalar>);
+          return { 1, 1 };
+        }
+        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
+        {
+          static_assert(std::is_same_v<RHSRange, Math::Vector>);
+          return getOperand().getRangeShape();
+        }
+        else
+        {
+          assert(false);
+          return { 0, 0 };
+        }
+      }
+
       inline Potential* copy() const noexcept override
       {
         return new Potential(*this);
