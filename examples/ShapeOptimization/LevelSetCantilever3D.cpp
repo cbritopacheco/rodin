@@ -35,7 +35,7 @@ static double hmax = 0.1;
 static double hmin = 0.1 * hmax;
 static double hausd = 0.5 * hmin;
 static size_t hmaxIt = maxIt / 2;
-const Scalar k = 4;
+const Scalar k = 1;
 const Scalar dt = k * (hmax - hmin);
 static double alpha = dt;
 
@@ -70,7 +70,7 @@ int main(int, char**)
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Solver
-  Solver::SparseLU solver;
+  Solver::CG solver;
 
   // Optimization loop
   std::vector<double> obj;
@@ -120,7 +120,7 @@ int main(int, char**)
     TrialFunction g(vh);
     TestFunction  w(vh);
     Problem hilbert(g, w);
-    hilbert = Integral(alpha * alpha * Jacobian(g), Jacobian(w))
+    hilbert = Integral(alpha * Jacobian(g), Jacobian(w))
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
@@ -151,7 +151,6 @@ int main(int, char**)
                                     .setRMC(1e-5)
                                     .setHMax(hmax)
                                     .setHMin(hmin)
-                                    .setHausdorff(hausd)
                                     .setAngleDetection(false)
                                     .setBoundaryReference(Gamma)
                                     .setBaseReferences(GammaD)
@@ -159,7 +158,6 @@ int main(int, char**)
 
     MMG::Optimizer().setHMax(hmax)
                     .setHMin(hmin)
-                    .setHausdorff(hausd)
                     .setAngleDetection(false)
                     .optimize(th);
   }

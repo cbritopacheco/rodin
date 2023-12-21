@@ -22,6 +22,8 @@
 #include "Rodin/IO/MEDIT.h"
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
+#include "Rodin/Threads/ThreadPool.h"
+
 #include "ForwardDecls.h"
 
 #include "Function.h"
@@ -493,6 +495,43 @@ namespace Rodin::Variational
 
         if constexpr (std::is_same_v<RangeType, Scalar>)
         {
+#ifdef RODIN_MULTITHREADED
+          auto& threadPool = Threads::getGlobalThreadPool();
+          auto loop =
+            [&](const Index start, const Index end)
+            {
+              const size_t capacity = fes.getSize() / threadPool.getThreadCount();
+              std::vector<Index> is;
+              is.reserve(capacity);
+              std::vector<Scalar> vs;
+              vs.reserve(capacity);
+              for (Index i = start; i < end; ++i)
+              {
+                const auto it = mesh.getCell(i);
+                const auto& polytope = *it;
+                if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
+                {
+                  const auto& i = polytope.getIndex();
+                  const auto& fe = fes.getFiniteElement(d, i);
+                  const auto& trans = mesh.getPolytopeTransformation(d, i);
+                  for (size_t local = 0; local < fe.getCount(); local++)
+                  {
+                    const Geometry::Point p(polytope, trans, fe.getNode(local));
+                    assert(m_data.rows() == 1);
+                    is.push_back(fes.getGlobalIndex({ d, i }, local));
+                    vs.push_back(fn.getValue(p));
+                  }
+                }
+              }
+              assert(is.size() == vs.size());
+              m_mutex.lock();
+              for (Index i = 0; i < is.size(); i++)
+                m_data(is[i]) = vs[i];
+              m_mutex.unlock();
+            };
+          threadPool.pushLoop(0, mesh.getCellCount(), loop);
+          threadPool.waitForTasks();
+#else
           for (auto it = mesh.getCell(); !it.end(); ++it)
           {
             const auto& polytope = *it;
@@ -509,6 +548,7 @@ namespace Rodin::Variational
               }
             }
           }
+#endif
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
@@ -1055,6 +1095,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const FES> m_fes;
       Math::Matrix m_data;
       std::optional<Math::Vector> m_weights;
+      mutable Threads::Mutex m_mutex;
   };
 }
 

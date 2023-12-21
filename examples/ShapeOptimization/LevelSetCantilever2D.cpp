@@ -61,10 +61,10 @@ int main(int, char**)
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Solver
-  Solver::SparseLU solver;
+  Solver::CG solver;
 
   // Optimization loop
-  std::vector<double> obj;
+ std::vector<double> obj;
   std::ofstream fObj("obj.txt");
   for (size_t i = 0; i < maxIt; i++)
   {

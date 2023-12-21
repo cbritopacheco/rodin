@@ -47,12 +47,12 @@ namespace Rodin::Variational
 
   // ---- BilinearFormIntegratorBase ----------------------------------------
   UnaryMinus<LocalBilinearFormIntegratorBase>::UnaryMinus(const LocalBilinearFormIntegratorBase& op)
-    :  LocalBilinearFormIntegratorBase(op),
+    : LocalBilinearFormIntegratorBase(op),
       m_op(op.copy())
   {}
 
   UnaryMinus<LocalBilinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
-    :  LocalBilinearFormIntegratorBase(other),
+    : LocalBilinearFormIntegratorBase(other),
       m_op(other.m_op->copy())
   {}
 
