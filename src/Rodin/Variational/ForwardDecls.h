@@ -316,7 +316,7 @@ namespace Rodin::Variational
   template <class Operand>
   class Jump;
 
-  template <class ... Args>
+  template <class Operand>
   class Average;
 
   /**

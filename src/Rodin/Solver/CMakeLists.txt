@@ -7,7 +7,8 @@ set(RodinSolver_SRCS
   CG.cpp)
 
 # ---- Set targets -----------------------------------------------------------
-add_library(RodinSolver ${RodinSolver_SRCS} ${RodinSolver_HEADERS})
+# add_library(RodinSolver ${RodinSolver_SRCS} ${RodinSolver_HEADERS})
+add_library(RodinSolver INTERFACE)
 add_library(Rodin::Solver ALIAS RodinSolver)
 
 # ---- SuiteSparse -----------------------------------------------------------
@@ -19,7 +20,10 @@ endif()
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinSolver
-  PUBLIC $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
+  INTERFACE
+  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
-target_link_libraries(RodinSolver PUBLIC Eigen3::Eigen)
+target_link_libraries(RodinSolver
+  INTERFACE
+  Eigen3::Eigen)
 

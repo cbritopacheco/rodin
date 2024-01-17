@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MATH_DENSEMATRIX_H
-#define RODIN_MATH_DENSEMATRIX_H
+#ifndef RODIN_MATH_MATRIX_H
+#define RODIN_MATH_MATRIX_H
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -20,7 +20,7 @@ namespace Rodin::Math
   /**
    * @brief Dense matrix type
    */
-  using Matrix = Eigen::MatrixX<Scalar>;
+  using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
 
   /**
    * @brief Spatial matrix

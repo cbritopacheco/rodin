@@ -26,6 +26,7 @@
 
 #include "ForwardDecls.h"
 #include "Connectivity.h"
+#include "Point.h"
 #include "Polytope.h"
 #include "PolytopeCount.h"
 #include "PolytopeIndexed.h"

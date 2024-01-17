@@ -9,6 +9,7 @@ set(RodinGeometry_HEADERS
 
 set(RodinGeometry_SRCS
   Mesh.cpp
+  Point.cpp
   Polytope.cpp
   PolytopeIterator.cpp
   PolytopeTransformation.cpp

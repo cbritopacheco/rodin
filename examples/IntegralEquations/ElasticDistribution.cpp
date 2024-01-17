@@ -6,6 +6,7 @@
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Math.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
@@ -40,7 +41,7 @@ void K(Math::Matrix& res, const Point& x, const Point& y)
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("../build/D1.mesh");
+  mesh.load("D1.mesh");
   mesh.getConnectivity().compute(1, 2);
 
   P1 fes(mesh, 3);
