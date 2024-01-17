@@ -17,6 +17,8 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/BlockSparseMatrix.h"
+#include "Rodin/FormLanguage/Base.h"
+#include "Rodin/Tuple.h"
 
 #include "ForwardDecls.h"
 
@@ -29,10 +31,6 @@
 
 namespace Rodin::Variational
 {
-  template <class TrialFES, class TestFES>
-  Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> Problem<TrialFES, TestFES, typename TrialFES::Context, Math::SparseMatrix, Math::Vector>;
-
   /**
    * @defgroup ProblemSpecializations Problem Template Specializations
    * @brief Template specializations of the Problem class.
@@ -227,11 +225,128 @@ namespace Rodin::Variational
       EssentialBoundary m_dbcs;
       PeriodicBoundary  m_pbcs;
 
-      bool m_assembled;
+      bool            m_assembled;
       VectorType      m_mass;
       VectorType      m_guess;
       OperatorType    m_stiffness;
   };
+
+
+  template <class TrialFES, class TestFES>
+  Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
+    -> Problem<TrialFES, TestFES, typename TrialFES::Context, Math::SparseMatrix, Math::Vector>;
+
+  template <class ... FES, class ... Ds, ShapeFunctionSpaceType ... Space>
+  class Problem<
+    Tuple<ShapeFunction<Ds, FES, Space>...>,
+    Context::Sequential, Math::SparseMatrix, Math::Vector>
+    : public ProblemBase<Math::SparseMatrix, Math::Vector>
+  {
+    template <class T>
+    struct IsTrialShapeFunctionReferenceWrapper
+    {
+      static constexpr Boolean Value = false;
+    };
+
+    template <class T>
+    struct IsTrialShapeFunctionReferenceWrapper<std::reference_wrapper<T>>
+    {
+      static constexpr Boolean Value = IsTrialShapeFunction<T>::Value;
+    };
+
+    template <class T>
+    struct IsTestShapeFunctionReferenceWrapper
+    {
+      static constexpr Boolean Value = false;
+    };
+
+    template <class T>
+    struct IsTestShapeFunctionReferenceWrapper<std::reference_wrapper<T>>
+    {
+      static constexpr Boolean Value = IsTestShapeFunction<T>::Value;
+    };
+
+    using TrialShapeFunctionTuple =
+      decltype(std::declval<
+        Tuple<
+          std::reference_wrapper<ShapeFunction<Ds, FES, Space>>...
+            >>().template filter<IsTrialShapeFunctionReferenceWrapper>());
+
+    using TestShapeFunctionTuple =
+      decltype(std::declval<
+        Tuple<
+          std::reference_wrapper<ShapeFunction<Ds, FES, Space>>...
+            >>().template filter<IsTestShapeFunctionReferenceWrapper>());
+
+    public:
+      using Context = Context::Sequential;
+      using OperatorType = Math::SparseMatrix;
+      using VectorType = Math::Vector;
+      using Parent = ProblemBase<Math::SparseMatrix, Math::Vector>;
+
+      Problem(ShapeFunction<Ds, FES, Space>&... us)
+        : m_us(
+            Tuple{std::reference_wrapper<ShapeFunction<Ds, FES, Space>>(us)...}
+            .template filter<IsTrialShapeFunctionReferenceWrapper>()),
+          m_vs(
+            Tuple{std::reference_wrapper<ShapeFunction<Ds, FES, Space>>(us)...}
+            .template filter<IsTestShapeFunctionReferenceWrapper>())
+      {}
+
+      Problem& assemble() override
+      {
+        return *this;
+      }
+
+      void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override
+      {}
+
+      Problem& operator=(const ProblemBody<OperatorType, VectorType>& rhs) override
+      {
+        return *this;
+      }
+
+      virtual VectorType& getMassVector() override
+      {
+        return m_mass;
+      }
+
+      virtual const VectorType& getMassVector() const override
+      {
+        return m_mass;
+      }
+
+      virtual OperatorType& getStiffnessOperator() override
+      {
+        return m_stiffness;
+      }
+
+      virtual const OperatorType& getStiffnessOperator() const override
+      {
+        return m_stiffness;
+      }
+
+      virtual Problem* copy() const noexcept override
+      {
+        assert(false);
+        return nullptr;
+      }
+
+    private:
+      TrialShapeFunctionTuple m_us;
+      TestShapeFunctionTuple  m_vs;
+
+      bool            m_assembled;
+      VectorType      m_mass;
+      VectorType      m_guess;
+      OperatorType    m_stiffness;
+  };
+
+  template <class ... FES, class ... Ds, ShapeFunctionSpaceType ... Space>
+  Problem(ShapeFunction<Ds, FES, Space>&... us)
+    -> Problem<
+        Tuple<ShapeFunction<Ds, FES, Space>...>,
+        Context::Sequential, Math::SparseMatrix, Math::Vector>;
 }
 
 #include "Problem.hpp"

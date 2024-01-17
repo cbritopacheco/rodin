@@ -8,6 +8,7 @@
 #define RODIN_EXTERNAL_MMG_ISCDPROCESS_H
 
 #include <tuple>
+#include <string>
 #include <random>
 #include <vector>
 #include <sstream>

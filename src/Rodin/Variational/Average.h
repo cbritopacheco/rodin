@@ -12,120 +12,107 @@
 
 namespace Rodin::Variational
 {
-  // template <ShapeFunctionSpaceType Space>
-  // class Average<ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>
-  // {
-  //  public:
-  //   using Parent = ShapeFunctionBase<Space>;
+  template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
+  class Average<ShapeFunctionBase<Derived, FESType, SpaceType>> final
+    : public ShapeFunctionBase<Average<ShapeFunctionBase<Derived, FESType, SpaceType>>>
+  {
+    public:
+      using FES = FESType;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-  //   constexpr
-  //   Average(ShapeFunctionBase<Space>& u)
-  //     : m_u(u)
-  //   {}
+      using Operand = ShapeFunctionBase<Derived, FESType, SpaceType>;
+      using Parent = ShapeFunctionBase<Average<ShapeFunctionBase<Derived, FESType, SpaceType>>>;
+      using Range = typename FormLanguage::Traits<Operand>::RangeType;
 
-  //   constexpr
-  //   Average(const Average& other)
-  //     :  Parent(other),
-  //      m_u(other.m_u)
-  //   {}
+      constexpr
+      Average(const Operand& op)
+        : Parent(op.getFiniteElementSpace()),
+          m_op(op.copy())
+      {}
 
-  //   constexpr
-  //   Average(Average&& other)
-  //     :  Parent(std::move(other)),
-  //      m_u(std::move(other.m_u))
-  //   {}
+      constexpr
+      Average(const Average& other)
+        : Parent(other),
+          m_op(other.m_op->copy())
+      {}
 
-  //   const ShapeFunctionBase<Space>& getLeaf() const override
-  //   {
-  //     return m_u.get().getLeaf();
-  //   }
+      constexpr
+      Average(Average&& other)
+        : Parent(std::move(other)),
+          m_op(std::move(other.m_op))
+      {}
 
-  //   int getRows() const override
-  //   {
-  //     return m_u.get().getRows();
-  //   }
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        assert(m_op);
+        return *m_op;
+      }
 
-  //   int getDOFs(const Geometry::Simplex& element) const override
-  //   {
-  //     assert(false);
-  //     return 0;
-  //     // assert(dynamic_cast<const Geometry::Interface*>(&element));
-  //     // const auto& incident =
-  //     //  static_cast<const Geometry::Interface&>(element).getElements();
-  //     // assert(incident.size() == 2);
-  //     // auto first = incident.begin();
-  //     // auto second = std::next(first);
-  //     // return m_u.get().getDOFs(*first) + m_u.get().getDOFs(*second);
-  //   }
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
 
-  //   int getColumns() const override
-  //   {
-  //     return m_u.get().getColumns();
-  //   }
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return getOperand().getRangeShape();
+      }
 
-  //   void getOperator(
-  //      TensorBasis& op,
-  //      ShapeComputator& compute,
-  //      const Geometry::Simplex& element) override
-  //   {
-  //     assert(false);
-  //     // switch (element.getRegion())
-  //     // {
-  //     //  case Geometry::Region::Interface:
-  //     //  {
-  //     //    assert(dynamic_cast<const Geometry::Interface*>(&element));
-  //     //    const auto& incident = static_cast<const Geometry::Interface&>(element).getElements();
-  //     //    assert(incident.size() == 2);
-  //     //    auto first = incident.begin();
-  //     //    auto second = std::next(first);
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Polytope& element) const
+      {
+        return getOperand().getDOFs(element);
+      }
 
-  //     //    first->getTransformation().SetIntPoint(&element.getTransformation().GetIntPoint());
-  //     //    second->getTransformation().SetIntPoint(&element.getTransformation().GetIntPoint());
+      inline
+      auto getTensorBasis(const Geometry::Point& p) const
+      {
+        assert(p.getPolytope().isFace());
+        const auto& face = p.getPolytope();
+        const size_t d = face.getDimension();
+        const auto& mesh = face.getMesh();
+        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex() );
+        assert(inc.size() == 2);
+        const Index idx1 = *inc.begin();
+        const Index idx2 = *std::next(inc.begin());
+        const auto it1 = mesh.getPolytope(d + 1, idx1);
+        const auto it2 = mesh.getPolytope(d + 1, idx2);
+        const auto& pc = p.getPhysicalCoordinates();
+        const Math::SpatialVector rc1 = it1->getTransformation().inverse(pc);
+        const Math::SpatialVector rc2 = it2->getTransformation().inverse(pc);
+        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
+        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
+        const auto& lhs = this->object(getOperand().getTensorBasis(p1));
+        const auto& rhs = this->object(getOperand().getTensorBasis(p2));
+        return 0.5 * (lhs + rhs);
+      }
 
-  //     //    const int ndofs1 = m_u.get().getDOFs(*first);
-  //     //    const int ndofs2 = m_u.get().getDOFs(*second);
+      inline
+      constexpr
+      const auto& getFiniteElementSpace() const
+      {
+        return getOperand().getFiniteElementSpace();
+      }
 
-  //     //    DenseBasisOperator op1;
-  //     //    m_u.get().getOperator(op1, compute, first);
-  //     //    op1 *= 0.5;
+      inline Average* copy() const noexcept override
+      {
+        return new Average(*this);
+      }
 
-  //     //    DenseBasisOperator op2;
-  //     //    m_u.get().getOperator(op2, compute, second);
-  //     //    op1 *= 0.5;
+    private:
+      std::unique_ptr<Operand> m_op;
+  };
 
-  //     //    DenseBasisOperator res;
-  //     //    res.setSize(getRows(), getColumns(), ndofs1 + ndofs2);
-  //     //    res = 0.0;
-
-  //     //    for (int i = 0; i < ndofs1; i++)
-  //     //     res(i) = std::move(op1(i));
-
-  //     //    for (int i = 0; i < ndofs2; i++)
-  //     //     res(i + ndofs1) = std::move(op2(i));
-
-  //     //    break;
-  //     //  }
-  //     //  default:
-  //     //  {
-  //     //    assert(false);
-  //     //    break;
-  //     //  }
-  //     // }
-  //   }
-
-  //   FiniteElementSpaceBase& getFiniteElementSpace() override
-  //   {
-  //     return m_u.get().getFiniteElementSpace();
-  //   }
-
-  //   const FiniteElementSpaceBase& getFiniteElementSpace() const override
-  //   {
-  //     return m_u.get().getFiniteElementSpace();
-  //   }
-
-  //  private:
-  //   std::reference_wrapper<ShapeFunctionBase<Space>> m_u;
-  // };
+  template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
+  Average(const ShapeFunctionBase<Derived, FESType, SpaceType>&)
+    -> Average<ShapeFunctionBase<Derived, FESType, SpaceType>>;
 }
 
 #endif

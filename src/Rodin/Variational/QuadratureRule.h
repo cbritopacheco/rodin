@@ -6,10 +6,10 @@
 #include "Rodin/QF/GaussLegendre.h"
 
 #include "Dot.h"
+#include "Sum.h"
 #include "ShapeFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
-#include "Sum.h"
 
 namespace Rodin::Variational
 {

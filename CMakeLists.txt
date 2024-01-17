@@ -73,6 +73,9 @@ set(RODIN_INSTALL_INCLUDE_PATH include)
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
 
+add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
+add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)
+
 if (RODIN_LTO)
   rodin_add_compile_options(LANG CXX C OPTIONS -flto)
 endif()
@@ -100,7 +103,6 @@ if (RODIN_BUILD_SRC)
   # set(Boost_USE_STATIC_RUNTIME     OFF)
 
   if (RODIN_USE_MPI)
-    find_package(MPI REQUIRED)
     find_package(Boost 1.65 REQUIRED COMPONENTS mpi serialization)
   endif()
 

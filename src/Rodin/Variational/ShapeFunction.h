@@ -60,6 +60,44 @@ namespace Rodin::Variational
     static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Trial;
   };
 
+  template <class T>
+  struct IsTrialShapeFunction;
+
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+  struct IsTrialShapeFunction<ShapeFunction<Derived, FES, Space>>
+  {
+    static constexpr Boolean Value = (Space == ShapeFunctionSpaceType::Trial);
+
+    constexpr
+    IsTrialShapeFunction(const ShapeFunction<Derived, FES, Space>&) {}
+
+    inline
+    constexpr
+    Boolean operator()()
+    {
+      return Value;
+    }
+  };
+
+  template <class T>
+  struct IsTestShapeFunction;
+
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+  struct IsTestShapeFunction<ShapeFunction<Derived, FES, Space>>
+  {
+    static constexpr Boolean Value = (Space == ShapeFunctionSpaceType::Test);
+
+    constexpr
+    IsTestShapeFunction(const ShapeFunction<Derived, FES, Space>&) {}
+
+    inline
+    constexpr
+    Boolean operator()()
+    {
+      return Value;
+    }
+  };
+
   template <
     class Derived,
     class FESType = typename FormLanguage::Traits<Derived>::FES,

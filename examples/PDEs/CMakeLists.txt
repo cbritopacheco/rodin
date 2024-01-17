@@ -21,3 +21,11 @@ target_link_libraries(Periodic
   Rodin::Solver
   Rodin::Variational
   )
+
+add_executable(Multiphysics Multiphysics.cpp)
+target_link_libraries(Multiphysics
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  )
