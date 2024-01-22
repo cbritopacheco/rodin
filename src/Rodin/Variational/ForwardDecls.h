@@ -118,25 +118,6 @@ namespace Rodin::Variational
   class L2;
 
   /**
-   * @brief Arbitrary order @f$ H^1(\Omega)^d @f$ continuous finite element
-   * space.
-   * @tparam Context Type of context for the finite element space
-   *
-   * Given some triangulation @f$ \mathcal{T}_h @f$ of @f$ \Omega @f$,
-   * instances of this class will represent the finite element space:
-   * @f[
-   *   V_h := \left\{ v : \overline{\Omega} \rightarrow \mathbb{R}^d \mid
-   *   \forall \tau \in \mathcal{T}_h , \ v|_\tau \in \mathcal{P}_\tau
-   *   \right\}
-   * @f]
-   * where @f$ \mathcal{P}_\tau \subset H^1(\tau)^d @f$ such that @f$ V_h \subset
-   * C^0(\Omega)^d @f$.
-   *
-   */
-  template <class Range, class Context>
-  class H1;
-
-  /**
    * @brief Represents the lazy evaluation of a mesh function.
    *
    * The main objective of this class is to wrap the reference of a data-full

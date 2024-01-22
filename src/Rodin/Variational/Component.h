@@ -163,24 +163,24 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
-      template <class NestedDerived,
-               typename = std::enable_if_t<Utility::IsSpecialization<FES, H1>::Value>>
-      inline
-      constexpr
-      auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
-                              Geometry::Attribute attr)
-      {
-        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
-      }
+      // template <class NestedDerived,
+      //          typename = std::enable_if_t<Utility::IsSpecialization<FES, H1>::Value>>
+      // inline
+      // constexpr
+      // auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
+      //                         Geometry::Attribute attr)
+      // {
+      //   return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
+      // }
 
-      template <class NestedDerived,
-               typename = std::enable_if_t<Utility::IsSpecialization<FES, H1>::Value>>
-      auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
-                              const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        assert(false);
-        return *this;
-      }
+      // template <class NestedDerived,
+      //          typename = std::enable_if_t<Utility::IsSpecialization<FES, H1>::Value>>
+      // auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
+      //                         const FlatSet<Geometry::Attribute>& attrs = {})
+      // {
+      //   assert(false);
+      //   return *this;
+      // }
 
     private:
       std::reference_wrapper<GridFunction<FES>> m_u;
