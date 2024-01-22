@@ -13,7 +13,6 @@
 
 namespace Rodin::Variational
 {
-
   /**
    * @brief Degree 1 Lagrange element
    * @tparam Range Range value type
