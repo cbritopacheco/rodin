@@ -17,6 +17,7 @@
 #include "Variational/GridFunction.h"
 #include "Variational/FiniteElementSpace.h"
 
+#include "Variational/ShapeFunction.h"
 #include "Variational/TrialFunction.h"
 #include "Variational/TestFunction.h"
 
