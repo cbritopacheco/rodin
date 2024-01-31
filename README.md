@@ -227,6 +227,14 @@ Rodin supports different kinds of quadrature.
 List of features and modules that are in the works:
   - Discontinuous Galerkin methods
   - `Rodin::Plot` module
+  - H1
+  - L2
+  - HDiv
+  - HCurl
+  - P2
+  - P0
+  - PETSc
+  - METIS
 
 ## Requirements
 
