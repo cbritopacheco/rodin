@@ -13,6 +13,30 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+    template <class T>
+    struct IsTrialFunctionReferenceWrapper
+    {
+      static constexpr Boolean Value = false;
+    };
+
+    template <class T>
+    struct IsTrialFunctionReferenceWrapper<std::reference_wrapper<T>>
+    {
+      static constexpr Boolean Value = IsTrialFunction<T>::Value;
+    };
+
+    template <class T>
+    struct IsTestFunctionReferenceWrapper
+    {
+      static constexpr Boolean Value = false;
+    };
+
+    template <class T>
+    struct IsTestFunctionReferenceWrapper<std::reference_wrapper<T>>
+    {
+      static constexpr Boolean Value = IsTestFunction<T>::Value;
+    };
+
 template <class T>
 struct IsFloatingPoint
 {
@@ -24,6 +48,13 @@ auto foo(const T& v)
 {
   return 2 * v;
 }
+
+
+template <class L, class R>
+struct Pair
+{
+};
+
 
 int main(int argc, char** argv)
 {
@@ -38,7 +69,16 @@ int main(int argc, char** argv)
   TrialFunction u(vh);
   TestFunction  v(vh);
 
-  Problem problem(u, v, u, v, v);
+  Tuple us{std::ref(u), std::ref(v), std::ref(u), std::ref(v), std::ref(v), std::ref(u), std::ref(u)};
+
+  using Miaow = Utility::Product<Tuple<int, char, bool>, Tuple<float, double>>::Type<Pair>;
+  auto res = us.filter<IsTrialFunctionReferenceWrapper>();
+
+  Miaow t;
+  auto tt = t;
+  std::cout <<  res.size() << std::endl;
+  // Problem problem(u, v, u, v, v);
+
 
   // trw.apply([](auto&& v){ std::cout << v << " "; });
   std::cout << std::endl;

@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2024.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_SHAPEFUNCTION_H
 
@@ -61,41 +67,27 @@ namespace Rodin::Variational
   };
 
   template <class T>
-  struct IsTrialShapeFunction;
-
-  template <class Derived, class FES, ShapeFunctionSpaceType Space>
-  struct IsTrialShapeFunction<ShapeFunction<Derived, FES, Space>>
+  struct IsTrialFunction
   {
-    static constexpr Boolean Value = (Space == ShapeFunctionSpaceType::Trial);
+    static constexpr Boolean Value = false;
+  };
 
-    constexpr
-    IsTrialShapeFunction(const ShapeFunction<Derived, FES, Space>&) {}
-
-    inline
-    constexpr
-    Boolean operator()()
-    {
-      return Value;
-    }
+  template <class FES>
+  struct IsTrialFunction<TrialFunction<FES>>
+  {
+    static constexpr Boolean Value = true;
   };
 
   template <class T>
-  struct IsTestShapeFunction;
-
-  template <class Derived, class FES, ShapeFunctionSpaceType Space>
-  struct IsTestShapeFunction<ShapeFunction<Derived, FES, Space>>
+  struct IsTestFunction
   {
-    static constexpr Boolean Value = (Space == ShapeFunctionSpaceType::Test);
+    static constexpr Boolean Value = false;
+  };
 
-    constexpr
-    IsTestShapeFunction(const ShapeFunction<Derived, FES, Space>&) {}
-
-    inline
-    constexpr
-    Boolean operator()()
-    {
-      return Value;
-    }
+  template <class FES>
+  struct IsTestFunction<TestFunction<FES>>
+  {
+    static constexpr Boolean Value = true;
   };
 
   template <

@@ -10,6 +10,7 @@
 #include <set>
 #include <variant>
 #include <functional>
+#include <boost/mp11.hpp>
 
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry.h"
@@ -19,6 +20,8 @@
 #include "Rodin/Math/BlockSparseMatrix.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/Tuple.h"
+#include "Rodin/Utility/Extract.h"
+#include "Rodin/Utility/Product.h"
 
 #include "ForwardDecls.h"
 
@@ -89,6 +92,9 @@ namespace Rodin::Variational
 
       virtual ProblemBase* copy() const noexcept override = 0;
   };
+
+  template <>
+  class Problem<> {};
 
   /**
    * @ingroup ProblemSpecializations
@@ -236,61 +242,86 @@ namespace Rodin::Variational
   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
     -> Problem<TrialFES, TestFES, typename TrialFES::Context, Math::SparseMatrix, Math::Vector>;
 
-  template <class ... FES, class ... Ds, ShapeFunctionSpaceType ... Space>
+  template <class U1, class U2, class ... Us>
   class Problem<
-    Tuple<ShapeFunction<Ds, FES, Space>...>,
-    Context::Sequential, Math::SparseMatrix, Math::Vector>
+      Tuple<U1, U2, Us...>,
+      Context::Sequential, Math::SparseMatrix, Math::Vector>
     : public ProblemBase<Math::SparseMatrix, Math::Vector>
   {
-    template <class T>
-    struct IsTrialShapeFunctionReferenceWrapper
-    {
-      static constexpr Boolean Value = false;
-    };
-
-    template <class T>
-    struct IsTrialShapeFunctionReferenceWrapper<std::reference_wrapper<T>>
-    {
-      static constexpr Boolean Value = IsTrialShapeFunction<T>::Value;
-    };
-
-    template <class T>
-    struct IsTestShapeFunctionReferenceWrapper
-    {
-      static constexpr Boolean Value = false;
-    };
-
-    template <class T>
-    struct IsTestShapeFunctionReferenceWrapper<std::reference_wrapper<T>>
-    {
-      static constexpr Boolean Value = IsTestShapeFunction<T>::Value;
-    };
-
-    using TrialShapeFunctionTuple =
-      decltype(std::declval<
-        Tuple<
-          std::reference_wrapper<ShapeFunction<Ds, FES, Space>>...
-            >>().template filter<IsTrialShapeFunctionReferenceWrapper>());
-
-    using TestShapeFunctionTuple =
-      decltype(std::declval<
-        Tuple<
-          std::reference_wrapper<ShapeFunction<Ds, FES, Space>>...
-            >>().template filter<IsTestShapeFunctionReferenceWrapper>());
-
     public:
       using Context = Context::Sequential;
       using OperatorType = Math::SparseMatrix;
       using VectorType = Math::Vector;
       using Parent = ProblemBase<Math::SparseMatrix, Math::Vector>;
 
-      Problem(ShapeFunction<Ds, FES, Space>&... us)
+    private:
+      template <class T>
+      struct GetFES;
+
+      template <class T>
+      struct GetFES<std::reference_wrapper<T>>
+      {
+        using Type = typename FormLanguage::Traits<T>::FES;
+      };
+
+      template <class T>
+      struct IsTrialFunctionReferenceWrapper
+      {
+        static constexpr Boolean Value = false;
+      };
+
+      template <class T>
+      struct IsTrialFunctionReferenceWrapper<std::reference_wrapper<T>>
+      {
+        static constexpr Boolean Value = IsTrialFunction<T>::Value;
+      };
+
+      template <class T>
+      struct IsTestFunctionReferenceWrapper
+      {
+        static constexpr Boolean Value = false;
+      };
+
+      template <class T>
+      struct IsTestFunctionReferenceWrapper<std::reference_wrapper<T>>
+      {
+        static constexpr Boolean Value = IsTestFunction<T>::Value;
+      };
+
+      using TrialFunctionTuple =
+        decltype(std::declval<
+          Tuple<
+            std::reference_wrapper<U1>,
+            std::reference_wrapper<U2>,
+            std::reference_wrapper<Us>...>>()
+            .template filter<IsTrialFunctionReferenceWrapper>());
+
+      using TestFunctionTuple =
+        decltype(std::declval<
+          Tuple<
+            std::reference_wrapper<U1>,
+            std::reference_wrapper<U2>,
+            std::reference_wrapper<Us>...>>()
+            .template filter<IsTestFunctionReferenceWrapper>());
+
+      using TrialFESTuple = typename Utility::Extract<TrialFunctionTuple>::template Type<GetFES>;
+
+      using TestFESTuple = typename Utility::Extract<TestFunctionTuple>::template Type<GetFES>;
+
+      template <class TrialFES, class TestFES>
+      using BilinearFormType = BilinearForm<TrialFES, TestFES, OperatorType>;
+
+      using BilinearFormTuple =
+        typename Utility::Product<TrialFESTuple, TestFESTuple>::template Type<BilinearFormType>;
+
+    public:
+      Problem(U1& u1, U2& u2, Us&... us)
         : m_us(
-            Tuple{std::reference_wrapper<ShapeFunction<Ds, FES, Space>>(us)...}
-            .template filter<IsTrialShapeFunctionReferenceWrapper>()),
+            Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
+            .template filter<IsTrialFunctionReferenceWrapper>()),
           m_vs(
-            Tuple{std::reference_wrapper<ShapeFunction<Ds, FES, Space>>(us)...}
-            .template filter<IsTestShapeFunctionReferenceWrapper>())
+            Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
+            .template filter<IsTestFunctionReferenceWrapper>())
       {}
 
       Problem& assemble() override
@@ -333,8 +364,10 @@ namespace Rodin::Variational
       }
 
     private:
-      TrialShapeFunctionTuple m_us;
-      TestShapeFunctionTuple  m_vs;
+      TrialFunctionTuple m_us;
+      TestFunctionTuple  m_vs;
+
+      FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
 
       bool            m_assembled;
       VectorType      m_mass;
@@ -342,10 +375,10 @@ namespace Rodin::Variational
       OperatorType    m_stiffness;
   };
 
-  template <class ... FES, class ... Ds, ShapeFunctionSpaceType ... Space>
-  Problem(ShapeFunction<Ds, FES, Space>&... us)
+  template <class U1, class U2, class ... Us>
+  Problem(U1& u1, U2& u2, Us&... us)
     -> Problem<
-        Tuple<ShapeFunction<Ds, FES, Space>...>,
+        Tuple<U1, U2, Us...>,
         Context::Sequential, Math::SparseMatrix, Math::Vector>;
 }
 
