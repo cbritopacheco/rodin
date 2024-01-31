@@ -22,8 +22,8 @@ target_link_libraries(Periodic
   Rodin::Variational
   )
 
-add_executable(Multiphysics Multiphysics.cpp)
-target_link_libraries(Multiphysics
+add_executable(Darcy Darcy.cpp)
+target_link_libraries(Darcy
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
