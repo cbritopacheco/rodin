@@ -18,7 +18,9 @@
  */
 #define RODIN_H1_MAX_VECTOR_DIMENSION 16
 
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/FormLanguage/ForwardDecls.h"
+#include "Rodin/Variational/FiniteElement.h"
 
 #include "ForwardDecls.h"
 
@@ -36,6 +38,47 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
+  template <>
+  class H1Element<Scalar> : public FiniteElementBase<H1Element<Scalar>>
+  {
+    public:
+      /// Parent class
+      using Parent = FiniteElementBase<H1Element<Scalar>>;
+
+      /// Type of range
+      using RangeType = Scalar;
+
+      H1Element() = default;
+
+      constexpr
+      H1Element(Geometry::Polytope::Type geometry)
+        : Parent(geometry)
+      {}
+
+      constexpr
+      H1Element(const H1Element& other)
+        : Parent(other)
+      {}
+
+      constexpr
+      H1Element(H1Element&& other)
+        : Parent(std::move(other))
+      {}
+
+      constexpr
+      H1Element& operator=(const H1Element& other)
+      {
+        Parent::operator=(other);
+        return *this;
+      }
+
+      constexpr
+      H1Element& operator=(H1Element&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
+  };
 }
 
 #endif

@@ -17,12 +17,12 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
 // Parameters
-static constexpr Geometry::Attribute Gamma = 6;
-static constexpr Geometry::Attribute GammaD = 3;
-static constexpr Geometry::Attribute GammaN = 2;
+static constexpr Geometry::Attribute Anode = 2; // u = 1
+static constexpr Geometry::Attribute Cathode = 3; // u = 0
+static constexpr Geometry::Attribute Gamma = 4;
 
-static constexpr Geometry::Attribute SigmaD = 3;
-static constexpr Geometry::Attribute SigmaN = 2;
+static constexpr Geometry::Attribute dAnode = 3;
+static constexpr Geometry::Attribute dCathode = 2;
 
 static constexpr size_t maxIt = 10000;
 
@@ -46,7 +46,7 @@ size_t rmc(MeshBase& mesh)
       [](const Polytope& p1, const Polytope& p2)
       {
         return p1.getAttribute() == p2.getAttribute();
-      }, D - 1, GammaD);
+      }, D - 1, { Anode, Cathode } );
   size_t ccs = ccl.getCount();
 
   for (const auto& cc : ccl)
@@ -58,7 +58,8 @@ size_t rmc(MeshBase& mesh)
     {
       for (const Index i : cc)
       {
-        if (mesh.getFace(i)->getAttribute() == GammaD)
+        if (mesh.getFace(i)->getAttribute() == Cathode
+            || mesh.getFace(i)->getAttribute() == Anode)
           mesh.setAttribute({ D - 1, i }, Gamma);
       }
       ccs--;
@@ -92,10 +93,9 @@ int main(int, char**)
         return dd;
       };
 
-    Omega = MMG::ImplicitDomainMesher().noSplit(GammaN)
-                                       .setAngleDetection(false)
-                                       .split(GammaD, {GammaD, Gamma})
-                                       .split(Gamma, {GammaD, Gamma})
+    Omega = MMG::ImplicitDomainMesher().setAngleDetection(false)
+                                       .split(Anode, {Anode, Gamma})
+                                       .split(Cathode, {Cathode, Gamma})
                                        .setHMax(hmax)
                                        .setHMin(hmax / 5.0)
                                        .setHausdorff(hmax / 10.0)
@@ -106,7 +106,7 @@ int main(int, char**)
 
   auto J = [&](const ScalarGridFunction& u)
   {
-    return Integral(u).compute() + ell * Omega.getPerimeter(GammaD);
+    return Integral(u).compute() + ell * (Omega.getPerimeter(Anode) + Omega.getPerimeter(Cathode));
   };
 
   std::ofstream fObj("obj.txt");
@@ -145,7 +145,7 @@ int main(int, char**)
     }
 
     Alert::Info() << "Computing required connectivity..." << Alert::Raise;
-    Omega.getConnectivity().compute(2, 3);
+    Omega.getConnectivity().compute(2, 3); // Computes boundary
     Omega.getConnectivity().compute(2, 2);
     Omega.getConnectivity().compute(1, 2);
 
@@ -158,7 +158,7 @@ int main(int, char**)
 
     Alert::Info() << "Skinning mesh..." << Alert::Raise;
     auto dOmega = Omega.skin();
-    dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
+    dOmega.trace({{{Anode, Gamma}, dAnode}, {{Cathode, Gamma}, dCathode}});
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
     ScalarFES sfes(Omega);
@@ -167,8 +167,13 @@ int main(int, char**)
     VectorFES dvfes(dOmega, dOmega.getSpaceDimension());
 
     Alert::Info() << "Distancing domain..." << Alert::Raise;
-    auto dist = MMG::Distancer(dsfes).setInteriorDomain(GammaD)
-                                     .distance(dOmega);
+
+    auto distCathode =
+      MMG::Distancer(dsfes).setInteriorDomain(Cathode)
+                           .distance(dOmega);
+    auto distAnode =
+      MMG::Distancer(dsfes).setInteriorDomain(Anode)
+                           .distance(dOmega);
 
     // Parameters
     Solver::CG cg;
@@ -186,15 +191,19 @@ int main(int, char**)
         return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
     };
 
-    ScalarFunction he =
-      [&](const Geometry::Point& p) { return h(dist(p) / epsilon) / epsilon; };
+    ScalarFunction heAnode =
+      [&](const Geometry::Point& p) { return h(distAnode(p) / epsilon) / epsilon; };
+    ScalarFunction heCathode =
+      [&](const Geometry::Point& p) { return h(distCathode(p) / epsilon) / epsilon; };
 
     Alert::Info() << "Solving state equation..." << Alert::Raise;
     TrialFunction u(sfes);
     TestFunction  v(sfes);
     Problem state(u, v);
     state = Integral(Grad(u), Grad(v))
-          + FaceIntegral(he * u, v).over({Gamma, GammaD})
+          + FaceIntegral(heCathode * u, v)
+          + FaceIntegral(heAnode * u, v)
+          - FaceIntegral(heAnode, v)
           - Integral(f, v);
     state.solve(cg);
     u.getSolution().save("u.gf");
@@ -206,7 +215,9 @@ int main(int, char**)
     TestFunction  q(sfes);
     Problem adjoint(p, q);
     adjoint = Integral(Grad(p), Grad(q))
-            + BoundaryIntegral(he * p, q).over({Gamma, GammaD})
+            + FaceIntegral(heCathode * p, q)
+            + FaceIntegral(heAnode * p, q)
+            - FaceIntegral(heAnode, q)
             - Integral(dj * q);
     adjoint.solve(cg);
 
@@ -217,98 +228,102 @@ int main(int, char**)
     fObj.flush();
 
     Alert::Info() << "Computing conormal to GammaD..." << Alert::Raise;
-    GridFunction conormal(dvfes);
-    conormal = Grad(dist);
-    conormal.stableNormalize();
+    GridFunction conormalCathode(dvfes);
+    conormalCathode = Grad(distCathode);
+    conormalCathode.stableNormalize();
+
+    GridFunction conormalAnode(dvfes);
+    conormalAnode = Grad(distAnode);
+    conormalAnode.stableNormalize();
 
     Alert::Info() << "Computing shape gradient..." << Alert::Raise;
     auto hadamard = 1. / (epsilon * epsilon) * u.getSolution() * p.getSolution() + ell;
-    TrialFunction theta(dsfes);
-    TestFunction  w(dsfes);
-    Problem hilbert(theta, w);
-    hilbert = Integral(dc * dc * Grad(theta), Grad(w))
-            + Integral(theta, w)
-            + Integral(tgv * g, w).over(GammaN)
-            - FaceIntegral(hadamard, w).over(SigmaD);
-    hilbert.solve(cg);
-    GridFunction grad(dvfes);
-    grad = theta.getSolution() * conormal;
-    grad *= -1.0;
-    GridFunction norm(dsfes);
-    norm = Frobenius(grad);
-    grad /= norm.max();
 
-    Alert::Info() << "Advecting the distance function." << Alert::Raise;
-    MMG::Advect(dist, grad).step(dt);
+    // TrialFunction thetaCathode(dsfes);
+    // TestFunction  w(dsfes);
+    // Problem hilbert(theta, w);
+    // hilbert = Integral(dc * dc * Grad(theta), Grad(w))
+    //         + Integral(theta, w)
+    //         - FaceIntegral(hadamard, w).over(Cathode);
+    // hilbert.solve(cg);
 
-    if (true)
-    {
-      Alert::Info() << "Computing topological sensitivity..." << Alert::Raise;
-      GridFunction topo(dsfes);
-      topo = u.getSolution() * p.getSolution();
+    // GridFunction grad(dvfes);
+    // grad = theta.getSolution() * conormal;
+    // grad *= -1.0;
+    // GridFunction norm(dsfes);
+    // norm = Frobenius(grad);
+    // grad /= norm.max();
 
-      Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
-      const Scalar tc = topo.min();
-      std::vector<Point> cs;
-      for (auto it = dOmega.getVertex(); !it.end(); ++it)
-      {
-        const Point p(*it, it->getTransformation(),
-            Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
-        const Scalar tp = topo(p);
-        if (Math::abs(1 - tc / tp) < 1e-5)
-          cs.emplace_back(std::move(p));
-      }
+    // Alert::Info() << "Advecting the distance function." << Alert::Raise;
+    // MMG::Advect(dist, grad).step(dt);
 
-      Alert::Info() << "Nucleating " << Alert::Notation(cs.size()) << " holes..."
-                    << Alert::Raise;
-      if (cs.size())
-      {
-        auto holes =
-          [&](const Point& v)
-          {
-            Scalar d = dist(v);
-            for (const auto& c : cs)
-            {
-              const Scalar dd = (v - c).norm() - radius;
-              d = std::min(d, dd);
-            }
-            return d;
-          };
-        dist = holes;
-      }
-    }
+    // if (true)
+    // {
+    //   Alert::Info() << "Computing topological sensitivity..." << Alert::Raise;
+    //   GridFunction topo(dsfes);
+    //   topo = u.getSolution() * p.getSolution();
 
-    Alert::Info() << "Meshing the domain..." << Alert::Raise;
-    GridFunction workaround(sfes);
-    workaround.projectOnBoundary(dist);
-    try
-    {
-      Omega = MMG::ImplicitDomainMesher().noSplit(GammaN)
-                                         .split(GammaD, {GammaD, Gamma})
-                                         .split(Gamma, {GammaD, Gamma})
-                                         .setHMax(hmax)
-                                         .setHMin(hmin)
-                                         .setHausdorff(hausd)
-                                         .setGradation(hgrad)
-                                         .setAngleDetection(false)
-                                         .surface()
-                                         .discretize(workaround);
-      hmax = 1.1 * hmax > 0.05 ? 0.05 : hmax * 1.1;
-    }
-    catch (Alert::Exception& e)
-    {
-      Alert::Warning() << "Meshing failed. Trying with new parameters." << Alert::Raise;
-      hmax = 0.9 * hmax < 0.02 ? 0.02 : hmax * 0.9;
-      continue;
-    }
+    //   Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
+    //   const Scalar tc = topo.min();
+    //   std::vector<Point> cs;
+    //   for (auto it = dOmega.getVertex(); !it.end(); ++it)
+    //   {
+    //     const Point p(*it, it->getTransformation(),
+    //         Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
+    //     const Scalar tp = topo(p);
+    //     if (Math::abs(1 - tc / tp) < 1e-5)
+    //       cs.emplace_back(std::move(p));
+    //   }
 
-    Alert::Info() << "Saving files..." << Alert::Raise;
-    Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
-    dOmega.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
-    dOmega.save("out/dOmega.mfem." + std::to_string(i) +  ".mesh", IO::FileFormat::MFEM);
+    //   Alert::Info() << "Nucleating " << Alert::Notation(cs.size()) << " holes..."
+    //                 << Alert::Raise;
+    //   if (cs.size())
+    //   {
+    //     auto holes =
+    //       [&](const Point& v)
+    //       {
+    //         Scalar d = dist(v);
+    //         for (const auto& c : cs)
+    //         {
+    //           const Scalar dd = (v - c).norm() - radius;
+    //           d = std::min(d, dd);
+    //         }
+    //         return d;
+    //       };
+    //     dist = holes;
+    //   }
+    // }
 
-    Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
-    i++;
+    // Alert::Info() << "Meshing the domain..." << Alert::Raise;
+    // GridFunction workaround(sfes);
+    // workaround.projectOnBoundary(dist);
+    // try
+    // {
+    //   Omega = MMG::ImplicitDomainMesher().split(Cathode, {Cathode, Gamma})
+    //                                      .split(Anode, {Anode, Gamma})
+    //                                      .setHMax(hmax)
+    //                                      .setHMin(hmin)
+    //                                      .setHausdorff(hausd)
+    //                                      .setGradation(hgrad)
+    //                                      .setAngleDetection(false)
+    //                                      .surface()
+    //                                      .discretize(workaround);
+    //   hmax = 1.1 * hmax > 0.05 ? 0.05 : hmax * 1.1;
+    // }
+    // catch (Alert::Exception& e)
+    // {
+    //   Alert::Warning() << "Meshing failed. Trying with new parameters." << Alert::Raise;
+    //   hmax = 0.9 * hmax < 0.02 ? 0.02 : hmax * 0.9;
+    //   continue;
+    // }
+
+    // Alert::Info() << "Saving files..." << Alert::Raise;
+    // Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
+    // dOmega.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
+    // dOmega.save("out/dOmega.mfem." + std::to_string(i) +  ".mesh", IO::FileFormat::MFEM);
+
+    // Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
+    // i++;
   }
 
   return 0;

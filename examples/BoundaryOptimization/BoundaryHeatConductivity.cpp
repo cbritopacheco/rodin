@@ -197,8 +197,6 @@ int main(int, char**)
           + FaceIntegral(he * u, v).over({Gamma, GammaD})
           - Integral(f, v);
     state.solve(cg);
-    u.getSolution().save("u.gf");
-    Omega.save("miaow.mesh");
 
     auto dj = -1.0 / Omega.getVolume();
     Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
@@ -240,8 +238,13 @@ int main(int, char**)
 
     Alert::Info() << "Advecting the distance function." << Alert::Raise;
     MMG::Advect(dist, grad).step(dt);
+    dOmega.save("miaow.mesh", IO::FileFormat::MEDIT);
+    dist.save("miaow.sol", IO::FileFormat::MEDIT);
+    MMG::Distancer().redistance(dist);
+    dOmega.save("woof.mesh", IO::FileFormat::MEDIT);
+    dist.save("woof.sol", IO::FileFormat::MEDIT);
 
-    if (true)
+    if (i % 5 == 0 && i < 50)
     {
       Alert::Info() << "Computing topological sensitivity..." << Alert::Raise;
       GridFunction topo(dsfes);

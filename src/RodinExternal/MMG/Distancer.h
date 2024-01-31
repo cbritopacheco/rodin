@@ -279,90 +279,87 @@ namespace Rodin::External::MMG
 
   Distancer(const ScalarGridFunction::FES&) -> Distancer<ScalarGridFunction::FES>;
 
-  // /**
-  //  * @brief Distancer specialization for redistancing a level set function.
-  //  */
-  // template <>
-  // class Distancer<void>
-  // {
-  //  public:
-  //    Distancer()
-  //     : m_ncpu(std::thread::hardware_concurrency()),
-  //      m_mshdist(getISCDMshdistExecutable()),
-  //      m_distTheBoundary(false)
-  //    {}
+  /**
+   * @brief Distancer specialization for redistancing a level set function.
+   */
+  template <>
+  class Distancer<void>
+  {
+    public:
+      Distancer()
+        : m_ncpu(std::thread::hardware_concurrency()),
+          m_mshdist(getISCDMshdistExecutable()),
+          m_distTheBoundary(false)
+      {}
 
-  //    /**
-  //    * @brief Redistances the level set function.
-  //    *
-  //    * Given a level set function defined on the vertices of a bounding box
-  //    * @f$ D @f$, this method will regenerate the signed distance function
-  //    * associated to the the subdomain @f$ \Omega \subset D @f$ which the
-  //    * level set function represents.
-  //    *
-  //    * @param[in,out] sol Level set function
-  //    */
-  //    void redistance(Variational::GridFunction<Variational::H1<Context::Sequential>>& sol)
-  //    {
-  //     auto meshp = m_mshdist.tmpnam(".mesh", "RodinMMG");
-  //     sol.getFiniteElementSpace().getMesh().save(meshp, IO::FileFormat::MEDIT);
+     /**
+     * @brief Redistances the level set function.
+     *
+     * Given a level set function defined on the vertices of a bounding box
+     * @f$ D @f$, this method will regenerate the signed distance function
+     * associated to the the subdomain @f$ \Omega \subset D @f$ which the
+     * level set function represents.
+     *
+     * @param[in,out] sol Level set function
+     */
+     void redistance(ScalarGridFunction& sol)
+     {
+       auto meshp = m_mshdist.tmpnam(".mesh", "RodinMMG");
+       sol.getFiniteElementSpace().getMesh().save(meshp, IO::FileFormat::MEDIT);
 
-  //     boost::filesystem::path solp(meshp);
-  //     solp.replace_extension(".sol");
-  //     sol.save(solp, IO::FileFormat::MEDIT);
+       boost::filesystem::path solp(meshp);
+       solp.replace_extension(".sol");
+       sol.save(solp, IO::FileFormat::MEDIT);
 
-  //     auto name = solp;
-  //     name.replace_extension();
+       auto name = solp;
+       name.replace_extension();
 
-  //     int retcode = 1;
-  //     if (sol.getFiniteElementSpace().getMesh().isSurface())
-  //     {
-  //      retcode = m_mshdist.run(name.string(),
-  //         "-surf -fmm",
-  //         "-ncpu", m_ncpu,
-  //         "-v 0");
-  //     }
-  //     else
-  //     {
-  //      retcode = m_mshdist.run(name.string(),
-  //         m_distTheBoundary ? "-surf" : ""
-  //         "-ncpu", m_ncpu,
-  //         "-v 0");
-  //     }
+       int retcode = 1;
+       if (sol.getFiniteElementSpace().getMesh().isSurface())
+       {
+         retcode =
+           m_mshdist.run(name.string(),
+               "-surf -fmm", "-ncpu", m_ncpu, "-v 0");
+       }
+       else
+       {
+         retcode =
+           m_mshdist.run(name.string(),
+               m_distTheBoundary ? "-surf" : "", "-ncpu", m_ncpu, "-v 0");
+       }
 
-  //     if (retcode != 0)
-  //      Alert::Exception("ISCD::Mshdist invocation failed.").raise();
-  //     sol.load(solp, IO::FileFormat::MEDIT);
-  //    }
+       if (retcode != 0)
+         Alert::Exception() << "ISCD::Mshdist invocation failed." << Alert::Raise;
+       sol.load(solp, IO::FileFormat::MEDIT);
+     }
 
-  //    Distancer& surface(bool distTheBoundary = true)
-  //    {
-  //     m_distTheBoundary = distTheBoundary;
-  //     return *this;
-  //    }
+     Distancer& surface(bool distTheBoundary = true)
+     {
+       m_distTheBoundary = distTheBoundary;
+       return *this;
+     }
 
-  //    /**
-  //    * @brief Specifies how many CPUs to use when distancing in parallel.
-  //    * @param[in] ncpu Number of CPUs to use
-  //    *
-  //    * By default, it will utilize `std::thread::hardware_concurrency()`.
-  //    */
-  //    Distancer& setCPUs(unsigned int ncpu);
+     /**
+     * @brief Specifies how many CPUs to use when distancing in parallel.
+     * @param[in] ncpu Number of CPUs to use
+     *
+     * By default, it will utilize `std::thread::hardware_concurrency()`.
+     */
+     Distancer& setCPUs(unsigned int ncpu);
 
-  //    /**
-  //    * @returns Number of CPUs which will be used when performing the
-  //    * distancing.
-  //    */
-  //    unsigned int getCPUs() const;
+     /**
+     * @returns Number of CPUs which will be used when performing the
+     * distancing.
+     */
+     unsigned int getCPUs() const;
 
-  //  private:
-  //    unsigned int m_ncpu;
-  //    ISCDProcess m_mshdist;
-  //    bool m_distTheBoundary;
-  // };
-  // Distancer() -> Distancer<void>;
+   private:
+     unsigned int m_ncpu;
+     ISCDProcess m_mshdist;
+     bool m_distTheBoundary;
+  };
 
-
+  Distancer() -> Distancer<void>;
 }
 
 #endif

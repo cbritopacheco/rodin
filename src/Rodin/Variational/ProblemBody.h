@@ -512,6 +512,36 @@ namespace Rodin::Variational
     return res;
   }
 
+  inline
+  ProblemBody<void, void> operator+(
+      const ProblemBody<void, void>& pb,
+      const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody<void, void> res(pb);
+    res.getLFIs().add(lfi);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const ProblemBody<void, void>& pb,
+      const LocalBilinearFormIntegratorBase& lbfi)
+  {
+    ProblemBody<void, void> res(pb);
+    res.getLocalBFIs().add(lbfi);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const ProblemBody<void, void>& pb,
+      const GlobalBilinearFormIntegratorBase& gbfi)
+  {
+    ProblemBody<void, void> res(pb);
+    res.getGlobalBFIs().add(gbfi);
+    return res;
+  }
+
   template <class OperatorType, class VectorType>
   ProblemBody<OperatorType, VectorType> operator+(
       const ProblemBody<OperatorType, VectorType>& pb,
