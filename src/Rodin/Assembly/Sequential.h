@@ -320,6 +320,7 @@ namespace Rodin::Assembly
               {
                 return Tuple(a, b, std::cref(c));
               }, is, sz, triplets);
+        return res;
         // OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
         // res.setFromTriplets(triplets.begin(), triplets.end());
       }
