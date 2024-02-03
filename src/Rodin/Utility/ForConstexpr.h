@@ -4,7 +4,6 @@
 #include <functional>
 #include <type_traits>
 
-
 namespace Rodin::Utility
 {
   /**

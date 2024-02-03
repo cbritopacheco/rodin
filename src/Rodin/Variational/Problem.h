@@ -257,8 +257,7 @@ namespace Rodin::Variational
       static constexpr bool Value = IsTrialFunction<T>::Value || IsTestFunction<T>::Value;
     };
 
-    // static_assert(
-    //     Utility::ParameterPack<U1, U2, Us...>::template All<IsTrialOrTestFunction>::Value);
+    static_assert(Utility::ParameterPack<U1, U2, Us...>::template All<IsTrialOrTestFunction>::Value);
 
     public:
       using Context = Context::Sequential;
@@ -332,12 +331,6 @@ namespace Rodin::Variational
       using LinearFormTuple =
         typename Utility::Wrap<TestFESTuple>::template Type<LinearFormType>;
 
-      template <class FES>
-      auto makeLinearForm(std::reference_wrapper<TestFunction<FES>> v)
-      {
-        return LinearFormType<FES>(v.get());
-      }
-
     public:
       Problem(U1& u1, U2& u2, Us&... us)
         : m_us(
@@ -346,18 +339,22 @@ namespace Rodin::Variational
           m_vs(
             Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
             .template filter<IsTestFunctionReferenceWrapper>()),
-          m_lft(m_vs.map([this](auto& v)
+          m_lft(m_vs.map(
+                [this](const auto& v)
                 { return LinearFormType<
                     typename std::decay_t<
                     typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FES>(v);
                 })),
-          m_bft(m_us.template product<Pair>(m_vs).map([this](auto& uv)
-                { return BilinearFormType<
-                    typename std::decay_t<
-                    typename Utility::UnwrapRefDecay<decltype(uv.first())>::Type>::FES,
-                    typename std::decay_t<
-                    typename Utility::UnwrapRefDecay<decltype(uv.second())>::Type>::FES>(uv.first(), uv.second());
-                }))
+          m_bft(m_us.product(
+                [](const auto& u, const auto& v) { return Pair(u, v); }, m_vs)
+                    .map(
+                      [this](const auto& uv)
+                      { return BilinearFormType<
+                          typename std::decay_t<
+                          typename Utility::UnwrapRefDecay<decltype(uv.first())>::Type>::FES,
+                          typename std::decay_t<
+                          typename Utility::UnwrapRefDecay<decltype(uv.second())>::Type>::FES>(uv.first(), uv.second());
+                      }))
       {}
 
       Problem& assemble() override

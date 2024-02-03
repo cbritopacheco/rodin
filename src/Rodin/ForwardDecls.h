@@ -9,6 +9,9 @@
 
 namespace Rodin
 {
+  template <class L, class R>
+  class Pair;
+
   template <class ... Ts>
   class Tuple;
 }
