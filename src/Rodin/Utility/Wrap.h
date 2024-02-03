@@ -3,10 +3,21 @@
 
 #include <utility>
 
+#include "Rodin/Tuple.h"
+
 namespace Rodin::Utility
 {
-  template <class Internal, class External>
+  template <class ...>
   class Wrap;
+
+  template <class ... Ts>
+  class Wrap<Tuple<Ts...>>
+  {
+    public:
+      template <template <class> class External>
+      using Type = Tuple<External<Ts>...>;
+  };
+
 }
 
 #endif

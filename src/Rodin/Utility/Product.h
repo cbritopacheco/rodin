@@ -35,12 +35,14 @@ namespace Rodin::Utility
   template <class ... Gs>
   struct Product<Tuple<>, Tuple<Gs...>>
   {
+    template <template <class, class> class Pair>
     using Type = Tuple<>;
   };
 
   template <class ... Gs>
   struct Product<Tuple<Gs...>, Tuple<>>
   {
+    template <template <class, class> class Pair>
     using Type = Tuple<>;
   };
 }

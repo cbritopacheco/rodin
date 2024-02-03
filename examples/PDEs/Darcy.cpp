@@ -49,10 +49,21 @@ auto foo(const T& v)
   return 2 * v;
 }
 
-
-template <class L, class R>
-struct Pair
+template <class T>
+class Foo
 {
+  public:
+    Foo(const T& v)
+      : m_v(v)
+    {}
+
+    const T& v() const
+    {
+      return m_v;
+    }
+
+  private:
+    T m_v;
 };
 
 
@@ -66,18 +77,29 @@ int main(int argc, char** argv)
   // Functions
   P1 vh(mesh);
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
+  TrialFunction u1(vh);
+  TrialFunction u2(vh);
+  TestFunction  v1(vh);
+  TestFunction  v2(vh);
+  TestFunction  v3(vh);
 
-  Tuple us{std::ref(u), std::ref(v), std::ref(u), std::ref(v), std::ref(v), std::ref(u), std::ref(u)};
+  // Tuple us{std::ref(u), std::ref(v), std::ref(u), std::ref(u)};
+  // Tuple us{2, 'a', 4.0, true};
+  // Tuple vs{1, 'c', 3.0, false};
 
-  using Miaow = Utility::Product<Tuple<int, char, bool>, Tuple<float, double>>::Type<Pair>;
-  auto res = us.filter<IsTrialFunctionReferenceWrapper>();
+  // using Miaow = Utility::Product<Tuple<int, char, double, bool>, Tuple<int, char, double, bool>>::Type<Pair>;
+  // auto res = us.filter<IsTrialFunctionReferenceWrapper>();
+  // auto z = us.zip<std::pair>(vs);
+  // auto w = us.map([](auto& v) { return Foo(v); });
 
-  Miaow t;
-  auto tt = t;
-  std::cout <<  res.size() << std::endl;
-  // Problem problem(u, v, u, v, v);
+  // auto p = us.product<Pair>(vs);
+
+  // w.apply([](auto& p){std::cout << p.v() << std::endl;});
+
+  // Miaow t;
+  // auto tt = t;
+  // std::cout <<  res.size() << std::endl;
+  Problem problem(u1, u2, v1, v2, v3);
 
 
   // trw.apply([](auto&& v){ std::cout << v << " "; });

@@ -8,13 +8,13 @@
 #define RODIN_TUPLE_H
 
 #include <tuple>
+#include "ForwardDecls.h"
 #include "Rodin/Utility/ParameterPack.h"
+#include "Rodin/Utility/Make.h"
+#include "Rodin/Utility/UnwrapReference.h"
 
 namespace Rodin
 {
-  template <class ... Ts>
-  class Tuple;
-
   template <>
   class Tuple<> : public std::tuple<>
   {
@@ -32,6 +32,13 @@ namespace Rodin
 
       constexpr
       Tuple(Tuple&&) = default;
+
+      inline
+      constexpr
+      Tuple<> product(const Tuple<> other)
+      {
+        return Tuple<>{};
+      }
 
       template <typename ... Gs>
       inline
@@ -79,15 +86,61 @@ namespace Rodin
         : Parent(std::forward<Params>(params)...)
       {}
 
+      constexpr
       Tuple(const Tuple& other)
         : Parent(other)
       {}
 
+      constexpr
       Tuple(Tuple&& other)
         : Parent(std::move(other))
       {}
 
-      template <typename Function>
+      constexpr
+      Tuple& operator=(const Tuple& other)
+      {
+        return Parent::operator=(other);
+      }
+
+      constexpr
+      Tuple& operator=(Tuple&& other)
+      {
+        return Parent::operator=(std::move(other));
+      }
+
+      inline
+      constexpr
+      Tuple<> product(const Tuple<> other)
+      {
+        return Tuple<>{};
+      }
+
+      template <template <class, class> class Pair, class G, class ... Gs>
+      inline
+      constexpr
+      auto product(const Tuple<G, Gs...> other) const
+      {
+        return productImpl<0, 0, Pair, G, Gs...>(other);
+      }
+
+      template <template <class, class> class Pair, class G, class ... Gs>
+      inline
+      constexpr
+      Tuple<Pair<T, G>, Pair<Ts, Gs>...> zip(const Tuple<G, Gs...> other) const
+      {
+        static_assert(sizeof...(Ts) == sizeof...(Gs));
+        return zipImpl<0, Pair, G, Gs...>(other);
+      }
+
+      template <template <class> class External>
+      inline
+      constexpr
+      auto wrap() const
+      {
+        return wrapImpl<0, External>();
+      }
+
+      template <class Function>
       inline
       constexpr
       void apply(Function&& func)
@@ -151,6 +204,17 @@ namespace Rodin
       }
 
     private:
+      template <template <class, class> class Pair, class ... Gs, std::size_t ... Indices>
+      inline
+      constexpr
+      void zipImpl(const Tuple<Gs...>& other, std::index_sequence<Indices...>) const
+      {
+        return Tuple(
+            Pair<
+                decltype(get<Indices>()), decltype(other.template get<Indices>())>
+                (get<Indices>(), other.template get<Indices>())...);
+      }
+
       template <class Function, std::size_t ... Indices>
       inline
       constexpr
@@ -159,14 +223,14 @@ namespace Rodin
         (func(get<Indices>()), ...);
       }
 
-      template <size_t I0, std::size_t ... Is, typename Func>
+      template <std::size_t ... Is, typename Func>
       inline
       constexpr
-      auto mapImpl(std::index_sequence<I0, Is...>, Func&& func) const
+      auto mapImpl(std::index_sequence<Is...>, Func&& func) const
       {
-        return Tuple<
-          std::invoke_result_t<Func, T>,
-          std::invoke_result_t<Func, Ts>...>(func(get<I0>()), func(get<Is>())...);
+        using Result =
+          Tuple<typename Utility::UnwrapRefDecay<decltype(func(std::declval<Type<Is>&>()))>::Type...>;
+        return Utility::Make<Result>()(func(std::get<Is>(*this))...);
       }
 
       template <typename ... Gs, std::size_t... Indices1, std::size_t... Indices2>
@@ -196,6 +260,72 @@ namespace Rodin
         else
         {
           return filterImpl<Index + 1, Predicate>();
+        }
+      }
+
+      template <std::size_t Index, template <class, class> class Pair, class G, class ... Gs>
+      inline
+      constexpr
+      auto zipImpl(const Tuple<G, Gs...>& other) const
+      {
+        using OtherTuple = Tuple<G, Gs...>;
+        if constexpr (Index == sizeof...(Ts) + 1)
+        {
+          return Tuple<>{};
+        }
+        else
+        {
+          return
+            Tuple<
+              Pair<Type<Index>, typename OtherTuple::template Type<Index>>>(
+                Pair(get<Index>(), other.template get<Index>()))
+              .concatenate(zipImpl<Index + 1, Pair, G, Gs...>(other));
+        }
+      }
+
+      template <std::size_t Index, template <class> class External>
+      inline
+      constexpr
+      auto wrapImpl() const
+      {
+        if constexpr (Index == sizeof...(Ts) + 1)
+        {
+          return Tuple<>{};
+        }
+        else
+        {
+          return Tuple<Type<Index>>(External<Type<Index>>(get<Index>())
+              ).concatenate(wrapImpl<Index + 1, External>());
+        }
+      }
+
+      template <
+        std::size_t Index,
+        std::size_t OtherIndex,
+        template <class, class> class Pair, class G, class ... Gs>
+      inline
+      constexpr
+      auto productImpl(const Tuple<G, Gs...>& other) const
+      {
+        static_assert(Index <= sizeof...(Ts) && OtherIndex <= sizeof...(Gs));
+        using Type = Type<Index>;
+        using OtherTuple = Tuple<G, Gs...>;
+        using OtherType = typename OtherTuple::template Type<OtherIndex>;
+        using PairType = Pair<Type, OtherType>;
+        if constexpr (Index == sizeof...(Ts) && OtherIndex == sizeof...(Gs))
+        {
+          return Tuple<PairType>(PairType(get<Index>(), other.template get<OtherIndex>()));
+        }
+        else if constexpr (Index < sizeof...(Ts) && OtherIndex == sizeof...(Gs))
+        {
+          return Tuple<PairType>(PairType(get<Index>(), other.template get<OtherIndex>()))
+            .concatenate(productImpl<Index + 1, 0, Pair, G, Gs...>(other));
+        }
+        else
+        {
+          static_assert(Index <= sizeof...(Ts) && OtherIndex < sizeof...(Gs));
+          return Tuple<PairType>(PairType(get<Index>(), other.template get<OtherIndex>()))
+            .concatenate(productImpl<Index, OtherIndex + 1, Pair, G, Gs...>(other));
         }
       }
   };
