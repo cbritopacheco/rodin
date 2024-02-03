@@ -110,7 +110,7 @@ namespace Rodin
 
       inline
       constexpr
-      Tuple<> product(const Tuple<> other)
+      Tuple<> product(const Tuple<> other) const
       {
         return Tuple<>{};
       }
@@ -207,7 +207,7 @@ namespace Rodin
       template <template <class, class> class Pair, class ... Gs, std::size_t ... Indices>
       inline
       constexpr
-      void zipImpl(const Tuple<Gs...>& other, std::index_sequence<Indices...>) const
+      auto zipImpl(const Tuple<Gs...>& other, std::index_sequence<Indices...>) const
       {
         return Tuple(
             Pair<
