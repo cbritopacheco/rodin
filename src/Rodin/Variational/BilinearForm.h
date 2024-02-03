@@ -9,6 +9,7 @@
 
 #include "Rodin/Configure.h"
 
+#include "Rodin/Pair.h"
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/SparseMatrix.h"
 
@@ -102,6 +103,13 @@ namespace Rodin::Variational
 
       using MultithreadedAssembly = Assembly::Multithreaded<OperatorType, BilinearForm>;
 
+      constexpr
+      BilinearForm(Pair<
+          std::reference_wrapper<const TrialFunction<TrialFES>>,
+          std::reference_wrapper<const TestFunction<TestFES>>> uv)
+        : BilinearForm(uv.first(), uv.second())
+      {}
+
       /**
        * @brief Constructs a BilinearForm from a TrialFunction and
        * TestFunction.
@@ -110,7 +118,9 @@ namespace Rodin::Variational
        * @param[in] v Test function argument
        */
       constexpr
-      BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
+      BilinearForm(
+          std::reference_wrapper<const TrialFunction<TrialFES>> u,
+          std::reference_wrapper<const TestFunction<TestFES>> v)
         :  m_u(u), m_v(v)
       {
 #ifdef RODIN_MULTITHREADED
@@ -134,9 +144,9 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
           m_assembly(std::move(other.m_assembly)),
-          m_operator(std::move(other.m_operator)),
           m_lbfis(std::move(other.m_lbfis)),
-          m_gbfis(std::move(other.m_gbfis))
+          m_gbfis(std::move(other.m_gbfis)),
+          m_operator(std::move(other.m_operator))
       {}
 
       /**

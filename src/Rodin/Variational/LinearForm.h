@@ -100,7 +100,7 @@ namespace Rodin::Variational
        * @param[in] fes Reference to the finite element space
        */
       constexpr
-      LinearForm(const TestFunction<FES>& v)
+      LinearForm(std::reference_wrapper<const TestFunction<FES>> v)
         : m_v(v)
       {
 #ifdef RODIN_MULTITHREADED
