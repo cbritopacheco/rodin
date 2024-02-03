@@ -126,9 +126,9 @@ namespace Rodin::Variational
       // Move essential degrees of freedom in the LHS to the RHS
       for (const auto& kv : dofs)
       {
-         const Index& global = kv.first;
-         const auto& dof = kv.second;
-         m_mass -= dof * m_stiffness.col(global);
+        const Index& global = kv.first;
+        const auto& dof = kv.second;
+        m_mass -= dof * m_stiffness.col(global);
       }
       for (const auto& [global, dof] : dofs)
       {

@@ -12,6 +12,8 @@
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Variational/BilinearForm.h"
 
+#include "Rodin/Utility/Repeat.h"
+
 #include "ForwardDecls.h"
 #include "AssemblyBase.h"
 
@@ -35,7 +37,7 @@ namespace Rodin::Assembly
   template <class TrialFES, class TestFES>
   class Sequential<
     std::vector<Eigen::Triplet<Scalar>>,
-    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
+    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>> final
     : public AssemblyBase<
         std::vector<Eigen::Triplet<Scalar>>,
         Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
@@ -109,6 +111,7 @@ namespace Rodin::Assembly
         return res;
       }
 
+      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -122,7 +125,7 @@ namespace Rodin::Assembly
   template <class TrialFES, class TestFES>
   class Sequential<
     Math::SparseMatrix,
-    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
+    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>> final
     : public AssemblyBase<
         Math::SparseMatrix,
         Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
@@ -164,6 +167,7 @@ namespace Rodin::Assembly
         return res;
       }
 
+      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -177,7 +181,7 @@ namespace Rodin::Assembly
   template <class TrialFES, class TestFES>
   class Sequential<
     Math::Matrix,
-    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
+    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>> final
     : public AssemblyBase<
         Math::Matrix,
         Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
@@ -251,6 +255,76 @@ namespace Rodin::Assembly
         return res;
       }
 
+      inline
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+  };
+
+  template <class ... TrialFES, class ... TestFES>
+  class Sequential<
+    std::vector<Eigen::Triplet<Scalar>>,
+    Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>...>> final
+      : public AssemblyBase<
+          std::vector<Eigen::Triplet<Scalar>>,
+          Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>...>>
+  {
+    template <class T, class G>
+    using Enumerate = Pair<T, std::reference_wrapper<G>>;
+
+    public:
+      using Parent =
+        AssemblyBase<
+          std::vector<Eigen::Triplet<Scalar>>,
+          Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>...>>;
+      using Input = typename Parent::Input;
+      using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
+
+      Sequential() = default;
+
+      Sequential(const Sequential& other)
+        : Parent(other)
+      {}
+
+      Sequential(Sequential&& other)
+        : Parent(std::move(other))
+      {}
+
+      OperatorType execute(const Input& input) const override
+      {
+        using AssemblyTuple =
+          Tuple<Sequential<std::vector<Eigen::Triplet<Scalar>>,
+          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>...>;
+        std::vector<Eigen::Triplet<Scalar>> res;
+        AssemblyTuple assembly;
+        const auto triplets =
+          assembly.zip([](const auto& a, const auto& b) { return Pair(a, b); }, input)
+                  .map([](auto& p) { return p.first().execute(p.second()); });
+        const size_t capacity =
+          triplets.reduce(
+            [](const auto& v1, const auto& v2)
+            {
+              return v1.size() + v2.size();
+            });
+        res.reserve(capacity);
+        auto sz = assembly.map(
+            [](const auto& in)
+            {
+              return Pair(in.trialFES.getSize(), in.testFES.getSize());
+            });
+        auto is = IndexTuple<0, AssemblyTuple::Size>();
+        auto ifests =
+          triplets.zip(
+              [](const auto& a, const auto& b, const auto& c)
+              {
+                return Tuple(a, b, std::cref(c));
+              }, is, sz, triplets);
+        // OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
+        // res.setFromTriplets(triplets.begin(), triplets.end());
+      }
+
+      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -262,7 +336,7 @@ namespace Rodin::Assembly
    * object.
    */
   template <class FES>
-  class Sequential<Math::Vector, Variational::LinearForm<FES, Math::Vector>>
+  class Sequential<Math::Vector, Variational::LinearForm<FES, Math::Vector>> final
     : public AssemblyBase<Math::Vector, Variational::LinearForm<FES, Math::Vector>>
   {
     public:
@@ -307,6 +381,7 @@ namespace Rodin::Assembly
         return res;
       }
 
+      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);

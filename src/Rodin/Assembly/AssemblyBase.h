@@ -7,17 +7,18 @@
 #ifndef RODIN_ASSEMBLY_ASSEMBLYBASE_H
 #define RODIN_ASSEMBLY_ASSEMBLYBASE_H
 
-#include "Rodin/FormLanguage/List.h"
-
 #include "Rodin/Math.h"
+#include "Rodin/Tuple.h"
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/FormLanguage/List.h"
 #include "Rodin/Variational/ForwardDecls.h"
+
 #include "ForwardDecls.h"
 
 namespace Rodin::Assembly
 {
-  template <class TrialFES, class TestFES, class OperatorType>
+  template <class OperatorType, class TrialFES, class TestFES>
   class AssemblyBase<OperatorType, Variational::BilinearForm<TrialFES, TestFES, OperatorType>>
     : public FormLanguage::Base
   {
@@ -42,7 +43,16 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class FES, class VectorType>
+  template <class OperatorType, class ... TrialFES, class ... TestFES>
+  class AssemblyBase<OperatorType, Tuple<Variational::BilinearForm<TrialFES, TestFES, OperatorType>...>>
+  {
+    public:
+      static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
+      using Input =
+        Tuple<typename AssemblyBase<OperatorType, Variational::BilinearForm<TrialFES, TestFES, OperatorType>>::Input...>;
+  };
+
+  template <class VectorType, class FES>
   class AssemblyBase<VectorType, Variational::LinearForm<FES, VectorType>>
     : public FormLanguage::Base
   {

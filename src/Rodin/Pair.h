@@ -30,7 +30,7 @@ namespace Rodin
   };
 
   template <class L, class R>
-  Pair(L&&, R&&) -> Pair<L, R>;
+  Pair(L, R) -> Pair<L, R>;
 }
 
 #endif

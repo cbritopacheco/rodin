@@ -8,6 +8,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Variational/LinearElasticity.h>
+#include "Rodin/Utility/Repeat.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -84,13 +85,17 @@ int main(int argc, char** argv)
   TestFunction  v3(vh);
 
   // Tuple us{std::ref(u), std::ref(v), std::ref(u), std::ref(u)};
-  // Tuple us{2, 'a', 4.0, true};
-  // Tuple vs{1, 'c', 3.0, false};
+  Tuple us{2, 'a', 4.0, true};
+  Tuple vs{1, 'c', 3.0, false};
+  Tuple ws{0, 0, 0, 0};
 
   // using Miaow = Utility::Product<Tuple<int, char, double, bool>, Tuple<int, char, double, bool>>::Type<Pair>;
-  // auto res = us.filter<IsTrialFunctionReferenceWrapper>();
-  // auto z = us.zip<std::pair>(vs);
-  // auto w = us.map([](auto& v) { return Foo(v); });
+  auto res = us.filter<IsTrialFunctionReferenceWrapper>();
+
+  auto z = us.zip([](const auto& a, const auto& b, const auto& c) { return std::tuple{a, b, c}; }, vs, ws);
+  auto p = us.product([](const auto& a, const auto& b) { return std::pair{a, b}; }, vs);
+  auto w = us.map([](const auto& v) { return Foo(v); });
+  auto ww = us.product(vs);
 
   // auto p = us.product<Pair>(vs);
 
@@ -100,11 +105,13 @@ int main(int argc, char** argv)
   // auto tt = t;
   // std::cout <<  res.size() << std::endl;
   Problem problem(u1, u2, v1, v2, v3);
+  Tuple is = IndexTuple<0, 5>();
+  is.apply([](auto& v){ std::cout << v << std::endl; });
+  // auto res = is.reduce([](const auto& l, const auto& r){return l +r ;});
+  // std::cout << res << std::endl;
 
 
   // trw.apply([](auto&& v){ std::cout << v << " "; });
-  std::cout << std::endl;
-
 
   return 0;
 }
