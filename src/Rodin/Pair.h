@@ -16,7 +16,42 @@ namespace Rodin
   {
     public:
       using Parent = Tuple<L, R>;
+
       using Parent::Parent;
+
+      Pair(const Pair& other)
+        : Parent(other)
+      {}
+
+      Pair(Pair&& other)
+        : Parent(std::move(other))
+      {}
+
+      inline
+      constexpr
+      Pair& operator=(const Pair& other)
+      {
+        Parent::operator=(other);
+        return *this;
+      }
+
+      inline
+      constexpr
+      Pair& operator=(Pair&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
+
+      auto& first()
+      {
+        return this->template get<0>();
+      }
+
+      auto& second()
+      {
+        return this->template get<1>();
+      }
 
       const auto& first() const
       {

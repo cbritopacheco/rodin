@@ -8,7 +8,8 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Variational/LinearElasticity.h>
-#include "Rodin/Utility/Repeat.h"
+
+#include <Rodin/Assembly/Sequential.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -93,9 +94,12 @@ int main(int argc, char** argv)
   auto res = us.filter<IsTrialFunctionReferenceWrapper>();
 
   auto z = us.zip([](const auto& a, const auto& b, const auto& c) { return std::tuple{a, b, c}; }, vs, ws);
-  auto p = us.product([](const auto& a, const auto& b) { return std::pair{a, b}; }, vs);
+  auto p = us.product([](const auto& a, const auto& b) { return Pair{a, b}; }, vs);
   auto w = us.map([](const auto& v) { return Foo(v); });
   auto ww = us.product(vs);
+
+  auto zz = us.zip([](const auto& a, const auto& b){return Tuple(a, b);}, vs);
+  auto zzz = us.zip(vs);
 
   // auto p = us.product<Pair>(vs);
 
@@ -104,9 +108,18 @@ int main(int argc, char** argv)
   // Miaow t;
   // auto tt = t;
   // std::cout <<  res.size() << std::endl;
-  Problem problem(u1, u2, v1, v2, v3);
+  // Problem problem(u1, u2, v1, v2, v3);
   Tuple is = IndexTuple<0, 5>();
   is.apply([](auto& v){ std::cout << v << std::endl; });
+
+  using FES1 = decltype(u1)::FES;
+  using FES2 = decltype(u2)::FES;
+  Tuple t(
+      BilinearForm<FES1, FES2, std::vector<Eigen::Triplet<Scalar>>>(u1, v1),
+      BilinearForm<FES1, FES2, std::vector<Eigen::Triplet<Scalar>>>(u1, v2));
+
+  Assembly::Sequential<std::vector<Eigen::Triplet<Scalar>>, decltype(t)> assembly;
+
   // auto res = is.reduce([](const auto& l, const auto& r){return l +r ;});
   // std::cout << res << std::endl;
 
