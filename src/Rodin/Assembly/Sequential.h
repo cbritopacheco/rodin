@@ -296,33 +296,50 @@ namespace Rodin::Assembly
         using AssemblyTuple =
           Tuple<Sequential<std::vector<Eigen::Triplet<Scalar>>,
           Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>...>;
-        std::vector<Eigen::Triplet<Scalar>> res;
+
         AssemblyTuple assembly;
-        const auto triplets =
-          assembly.zip([](const auto& a, const auto& b) { return Pair(a, b); }, input)
-                  .map([](auto& p) { return p.first().execute(p.second()); });
-        const size_t capacity =
-          triplets.reduce(
-            [](const auto& v1, const auto& v2)
-            {
-              return v1.size() + v2.size();
-            });
+
+        // Get sizes of finite element spaces
+        std::array<Pair<size_t, size_t>, AssemblyTuple::Size> sz;
+        input.map([](const auto& in)
+                  { return Pair(in.trialFES.getSize(), in.testFES.getSize()); })
+             .iapply([&](const Index i, auto& v)
+                     { sz[i] = std::move(v); });
+
+        // Compute block offsets to build the triplets
+        std::array<Pair<size_t, size_t>, AssemblyTuple::Size> offset;
+        offset[0].first() = 0;
+        offset[0].second() = 0;
+        for (size_t i = 1; i < offset.size(); i++)
+        {
+          offset[i].first() = sz[i].first() + offset[i - 1].first();
+          offset[i].second() = sz[i].second() + offset[i - 1].second();
+        }
+
+        // Compute each block of triplets
+        std::array<std::vector<Eigen::Triplet<Scalar>>, AssemblyTuple::Size> ts;
+        assembly.zip(input)
+                .map([](const auto& p)
+                     { return p.first().execute(p.second()); })
+                .iapply([&](const Index i, auto& v)
+                        { ts[i] = std::move(v); });
+
+        // Add the triplets with the new offsets
+        std::vector<Eigen::Triplet<Scalar>> res;
+        size_t capacity = 0;
+        for (const auto& v : ts)
+          capacity += v.size();
         res.reserve(capacity);
-        auto sz = assembly.map(
-            [](const auto& in)
-            {
-              return Pair(in.trialFES.getSize(), in.testFES.getSize());
-            });
-        auto is = IndexTuple<0, AssemblyTuple::Size>();
-        auto ifests =
-          triplets.zip(
-              [](const auto& a, const auto& b, const auto& c)
-              {
-                return Tuple(a, b, std::cref(c));
-              }, is, sz, triplets);
+        for (size_t i = 0; i < ts.size(); i++)
+        {
+          for (const Eigen::Triplet<Scalar>& t : ts[i])
+          {
+            res.emplace_back(
+                t.row() + offset[i].second(), t.col() + offset[i].first(), t.value());
+          }
+        }
+
         return res;
-        // OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
-        // res.setFromTriplets(triplets.begin(), triplets.end());
       }
 
       inline

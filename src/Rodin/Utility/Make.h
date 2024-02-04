@@ -11,7 +11,7 @@ namespace Rodin::Utility
     template <class ... Params>
     T operator()(Params&&... params)
     {
-      return T(std::forward<Params>(params)...);
+      return T{std::forward<Params>(params)...};
     }
   };
 }

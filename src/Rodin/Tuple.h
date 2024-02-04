@@ -86,33 +86,33 @@ namespace Rodin
 
       using Parent = std::tuple<T, Ts...>;
 
-      static constexpr size_t Size = sizeof...(Ts) + 1;
+      using Parent::Parent;
 
-      template <class ... Params>
-      Tuple(Params&& ... params)
-        : Parent(std::forward<Params>(params)...)
-      {}
-
-      constexpr
       Tuple(const Tuple& other)
         : Parent(other)
       {}
 
-      constexpr
       Tuple(Tuple&& other)
         : Parent(std::move(other))
       {}
 
+      static constexpr size_t Size = sizeof...(Ts) + 1;
+
+      inline
       constexpr
       Tuple& operator=(const Tuple& other)
       {
-        return Parent::operator=(other);
+        if (this != &other)
+          copyImpl<0>(other);
+        return *this;
       }
 
+      inline
       constexpr
       Tuple& operator=(Tuple&& other)
       {
-        return Parent::operator=(std::move(other));
+        moveImpl<0>(std::move(other));
+        return *this;
       }
 
       inline
@@ -154,20 +154,21 @@ namespace Rodin
         return productImpl<0, 0, Function, G, Gs...>(std::forward<Function>(func), other);
       }
 
-      template <class ... Os>
+      template <class ... Gs>
       inline
       constexpr
-      auto zip(const Os&... other) const
+      auto zip(const Tuple<Gs...>& other) const
       {
-        return zip([](const auto&... vs) { return Tuple(vs...); }, other...);
+        return zip([](const auto& a, const auto& b) { return Pair(a, b); }, other);
       }
 
-      template <class Function, class ... Os>
+      template <class Function, class ... Gs, class ... Os>
       inline
       constexpr
-      auto zip(Function&& func, const Os&... other) const
+      auto zip(Function&& func, const Tuple<Gs...>& t, const Os&... other) const
       {
-        return zipImpl<0, Function, Os...>(std::forward<Function>(func), other...);
+        return zipImpl<0, Function, Tuple<Gs...>, Os...>(
+            std::forward<Function>(func), t, other...);
       }
 
       template <class Function>
@@ -176,6 +177,14 @@ namespace Rodin
       void apply(Function&& func)
       {
         applyImpl(std::forward<Function>(func), std::index_sequence_for<T, Ts...>{});
+      }
+
+      template <class Function>
+      inline
+      constexpr
+      void iapply(Function&& func)
+      {
+        iapplyImpl(std::forward<Function>(func), std::index_sequence_for<T, Ts...>{});
       }
 
       template <std::size_t Index>
@@ -235,12 +244,21 @@ namespace Rodin
         (func(get<Indices>()), ...);
       }
 
+      template <class Function, std::size_t ... Indices>
+      inline
+      constexpr
+      void iapplyImpl(Function&& func, std::index_sequence<Indices...>)
+      {
+        (func(Indices, get<Indices>()), ...);
+      }
+
       template <std::size_t ... Is, typename Func>
       inline
       constexpr
       auto mapImpl(std::index_sequence<Is...>, Func&& func) const
       {
-        return Tuple<decltype(func(get<Is>()))...>(func(std::get<Is>(*this))...);
+        return Utility::Make<Tuple<decltype(func(get<Is>()))...>>()(
+            func(std::get<Is>(*this))...);
       }
 
       template <typename ... Gs, std::size_t... Indices1, std::size_t... Indices2>
@@ -251,7 +269,8 @@ namespace Rodin
           std::index_sequence<Indices1...>,
           std::index_sequence<Indices2...>) const
       {
-        return Tuple<T, Ts..., Gs...>{get<Indices1>()..., other.template get<Indices2>()...};
+        return Utility::Make<Tuple<T, Ts..., Gs...>>()(
+            get<Indices1>()..., other.template get<Indices2>()...);
       }
 
       template <std::size_t Index, template <class> class Predicate>
@@ -265,7 +284,8 @@ namespace Rodin
         }
         else if constexpr (Predicate<Type<Index>>::Value)
         {
-          return Tuple<Type<Index>>{ get<Index>() }.concatenate(filterImpl<Index + 1, Predicate>());
+          return Utility::Make<Tuple<Type<Index>>>()(
+              get<Index>()).concatenate(filterImpl<Index + 1, Predicate>());
         }
         else
         {
@@ -285,7 +305,7 @@ namespace Rodin
         else
         {
           using R = decltype(func(get<Index>(), other.template get<Index>()...));
-          return Tuple<R>(func(get<Index>(), other.template get<Index>()...)
+          return Utility::Make<Tuple<R>>()(func(get<Index>(), other.template get<Index>()...)
               ).concatenate(zipImpl<Index + 1, Function, Os...>(std::forward<Function>(func), other...));
         }
       }
@@ -299,17 +319,20 @@ namespace Rodin
         using R = decltype(func(get<Index>(), other.template get<OtherIndex>()));
         if constexpr (Index == sizeof...(Ts) && OtherIndex == sizeof...(Gs))
         {
-          return Tuple<R>(func(get<Index>(), other.template get<OtherIndex>()));
+          return Utility::Make<Tuple<R>>()(
+              func(get<Index>(), other.template get<OtherIndex>()));
         }
         else if constexpr (Index < sizeof...(Ts) && OtherIndex == sizeof...(Gs))
         {
-          return Tuple<R>(func(get<Index>(), other.template get<OtherIndex>()))
+          return Utility::Make<Tuple<R>>()(
+              func(get<Index>(), other.template get<OtherIndex>()))
             .concatenate(productImpl<Index + 1, 0, Function, G, Gs...>(std::forward<Function>(func), other));
         }
         else
         {
           static_assert(Index <= sizeof...(Ts) && OtherIndex < sizeof...(Gs));
-          return Tuple<R>(func(get<Index>(), other.template get<OtherIndex>()))
+          return Utility::Make<Tuple<R>>()(
+              func(get<Index>(), other.template get<OtherIndex>()))
             .concatenate(productImpl<Index, OtherIndex + 1, Function, G, Gs...>(std::forward<Function>(func), other));
         }
       }
@@ -326,6 +349,30 @@ namespace Rodin
         else
         {
           return func(get<Index>(), reduceImpl<Index + 1, Function>(std::forward<Function>(func)));
+        }
+      }
+
+      template <std::size_t Index>
+      inline
+      constexpr
+      void copyImpl(const Tuple& other)
+      {
+        if constexpr (Index < Size)
+        {
+          get<Index>() = other.get<Index>();
+          copyImpl<Index + 1>(other);
+        }
+      }
+
+      template <std::size_t Index>
+      inline
+      constexpr
+      void moveImpl(Tuple&& other)
+      {
+        if constexpr (Index < Size)
+        {
+          get<Index>() = std::move(other.get<Index>());
+          moveImpl<Index + 1>(std::move(other));
         }
       }
   };

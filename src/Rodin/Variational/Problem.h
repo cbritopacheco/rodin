@@ -340,20 +340,21 @@ namespace Rodin::Variational
             Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
             .template filter<IsTestFunctionReferenceWrapper>()),
           m_lft(m_vs.map(
-                [this](const auto& v)
+                [](const auto& v)
                 { return LinearFormType<
                     typename std::decay_t<
-                    typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FES>(v);
+                    typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FES>(v.get());
                 })),
           m_bft(m_us.product(
                 [](const auto& u, const auto& v) { return Pair(u, v); }, m_vs)
                     .map(
-                      [this](const auto& uv)
+                      [](const auto& uv)
                       { return BilinearFormType<
                           typename std::decay_t<
                           typename Utility::UnwrapRefDecay<decltype(uv.first())>::Type>::FES,
                           typename std::decay_t<
-                          typename Utility::UnwrapRefDecay<decltype(uv.second())>::Type>::FES>(uv.first(), uv.second());
+                          typename Utility::UnwrapRefDecay<decltype(uv.second())>::Type>::FES>(
+                              uv.first().get(), uv.second().get());
                       }))
       {}
 

@@ -50,6 +50,16 @@ namespace Rodin::Assembly
       static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
       using Input =
         Tuple<typename AssemblyBase<OperatorType, Variational::BilinearForm<TrialFES, TestFES, OperatorType>>::Input...>;
+
+      AssemblyBase() = default;
+
+      AssemblyBase(const AssemblyBase&) = default;
+
+      AssemblyBase(AssemblyBase&&) = default;
+
+      virtual OperatorType execute(const Input& data) const = 0;
+
+      virtual AssemblyBase* copy() const noexcept = 0;
   };
 
   template <class VectorType, class FES>
