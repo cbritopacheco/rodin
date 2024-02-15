@@ -56,7 +56,7 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point& p) const
       {
-        return std::cos(Scalar(getOperand().getValue(p)));
+        return std::cos(static_cast<Scalar>(getOperand().getValue(p)));
       }
 
       inline

@@ -218,7 +218,6 @@ namespace Rodin::Variational
   {
     public:
       using Parent = LinearFormIntegratorBase;
-      using Parent::Parent;
 
       UnaryMinus(const LinearFormIntegratorBase& op);
 

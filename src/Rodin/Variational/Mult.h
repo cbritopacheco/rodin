@@ -567,6 +567,35 @@ namespace Rodin::Variational
 
   Mult<Scalar, LocalBilinearFormIntegratorBase> operator*(
       Scalar lhs, const LocalBilinearFormIntegratorBase& rhs);
+
+  template <>
+  class Mult<Scalar, LinearFormIntegratorBase> : public LinearFormIntegratorBase
+  {
+    public:
+      Mult(Scalar lhs, const LinearFormIntegratorBase& rhs);
+
+      Mult(const Mult& other);
+
+      Mult(Mult&& other);
+
+      Region getRegion() const override;
+
+      void assemble(const Geometry::Polytope& element) override;
+
+      Mult* copy() const noexcept override
+      {
+        return new Mult(*this);
+      }
+
+    private:
+      const Scalar m_lhs;
+      std::unique_ptr<LinearFormIntegratorBase> m_rhs;
+  };
+
+  Mult(Scalar, const LinearFormIntegratorBase&) -> Mult<Scalar, LinearFormIntegratorBase>;
+
+  Mult<Scalar, LinearFormIntegratorBase> operator*(
+      Scalar lhs, const LinearFormIntegratorBase& rhs);
 }
 
 #endif

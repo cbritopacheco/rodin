@@ -272,7 +272,7 @@ namespace Rodin::Variational
         return m_operator;
       }
 
-      BilinearForm& setAssembly(const Assembly::AssemblyBase<BilinearForm>& assembly)
+      BilinearForm& setAssembly(const Assembly::AssemblyBase<OperatorType, BilinearForm>& assembly)
       {
         m_assembly.reset(assembly.copy());
         return *this;

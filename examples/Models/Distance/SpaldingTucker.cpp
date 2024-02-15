@@ -26,7 +26,7 @@ int main(int, char**)
 {
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 32, 32);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
   mesh.scale(1. / (31));
   mesh.getConnectivity().compute(2, 0);
 

@@ -13,6 +13,9 @@
 
 #include "Rodin/Assembly/Sequential.h"
 
+#include "Exceptions/TrialFunctionMismatchException.h"
+#include "Exceptions/TestFunctionMismatchException.h"
+
 #include "GridFunction.h"
 #include "DirichletBC.h"
 
@@ -42,12 +45,33 @@ namespace Rodin::Variational
   ::operator=(const ProblemBody<Math::SparseMatrix, Math::Vector>& rhs)
   {
     for (auto& bfi : rhs.getLocalBFIs())
+    {
+      if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+        TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
+      if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+        TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
       m_bilinearForm.add(bfi);
+    }
+
     for (auto& bfi : rhs.getGlobalBFIs())
+    {
+      if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+        TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
+      if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+        TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
       m_bilinearForm.add(bfi);
+    }
 
     for (auto& lfi : rhs.getLFIs())
+    {
+      if (lfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+      {
+
+        std::cout << getTestFunction().getUUID() << std::endl;
+        TestFunctionMismatchException(lfi.getTestFunction()) << Alert::Raise;
+      }
       m_linearForm.add(UnaryMinus(lfi)); // Negate every linear form
+    }
 
     m_bfs = rhs.getBFs();
 
@@ -62,6 +86,10 @@ namespace Rodin::Variational
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator+=(const LocalBilinearFormIntegratorBase& rhs)
   {
+    if (rhs.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+      TrialFunctionMismatchException(rhs.getTrialFunction()) << Alert::Raise;
+    if (rhs.getTestFunction().getUUID() != getTestFunction().getUUID())
+      TestFunctionMismatchException(rhs.getTestFunction()) << Alert::Raise;
     m_bilinearForm.add(rhs);
     return *this;
   }
@@ -71,6 +99,10 @@ namespace Rodin::Variational
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator-=(const LocalBilinearFormIntegratorBase& rhs)
   {
+    if (rhs.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+      TrialFunctionMismatchException(rhs.getTrialFunction()) << Alert::Raise;
+    if (rhs.getTestFunction().getUUID() != getTestFunction().getUUID())
+      TestFunctionMismatchException(rhs.getTestFunction()) << Alert::Raise;
     m_bilinearForm.add(UnaryMinus(rhs));
     return *this;
   }
@@ -80,6 +112,8 @@ namespace Rodin::Variational
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator+=(const LinearFormIntegratorBase& rhs)
   {
+    if (rhs.getTestFunction().getUUID() != getTestFunction().getUUID())
+      TestFunctionMismatchException(rhs.getTestFunction()) << Alert::Raise;
     m_linearForm.add(rhs);
     return *this;
   }
@@ -89,6 +123,8 @@ namespace Rodin::Variational
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator-=(const LinearFormIntegratorBase& rhs)
   {
+    if (rhs.getTestFunction().getUUID() != getTestFunction().getUUID())
+      TestFunctionMismatchException(rhs.getTestFunction()) << Alert::Raise;
     m_linearForm.add(UnaryMinus(rhs));
     return *this;
   }
@@ -361,6 +397,52 @@ namespace Rodin::Variational
 
      // Recover solution
      getTrialFunction().getSolution().setWeights(std::move(m_guess));
+  }
+
+  // ------------------------------------------------------------------------
+  // ---- Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix, Math::Vector>
+  // ------------------------------------------------------------------------
+
+  template <class U1, class U2, class ... Us>
+  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix, Math::Vector>
+  ::Problem(U1& u1, U2& u2, Us&... us)
+    : m_us(
+        Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
+        .template filter<IsTrialFunctionReferenceWrapper>()),
+      m_vs(
+        Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
+        .template filter<IsTestFunctionReferenceWrapper>()),
+      m_lft(m_vs.map(
+            [](const auto& v)
+            { return LinearFormType<
+                typename std::decay_t<
+                typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FES>(v.get());
+            })),
+      m_bft(m_us.product(
+            [](const auto& u, const auto& v) { return Pair(u, v); }, m_vs)
+                .map(
+                  [](const auto& uv)
+                  { return BilinearFormType<
+                      typename std::decay_t<
+                      typename Utility::UnwrapRefDecay<decltype(uv.first())>::Type>::FES,
+                      typename std::decay_t<
+                      typename Utility::UnwrapRefDecay<decltype(uv.second())>::Type>::FES>(
+                          uv.first().get(), uv.second().get());
+                  }))
+  {
+    m_assembly.reset(new SequentialAssembly);
+  }
+
+  template <class U1, class U2, class ... Us>
+  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix, Math::Vector>::assemble()
+  {
+    m_us.apply([](auto& u) { u.get().emplace(); });
+    // auto input = m_bft.map([](const auto& bf) { return Assembly::Input(bf); });
+
+    m_assembled = true;
+
+    return *this;
   }
 }
 

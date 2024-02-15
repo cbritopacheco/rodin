@@ -677,10 +677,18 @@ namespace Rodin::Geometry
         return Builder();
       }
 
+      inline
+      static Mesh UniformGrid(Polytope::Type g, std::initializer_list<size_t> l)
+      {
+        Array<size_t> shape(l.size());
+        std::copy(l.begin(), l.end(), shape.begin());
+        return UniformGrid(g, shape);
+      }
+
       /**
        * @brief Generates a uniform grid for a given geometry.
        */
-      static Mesh UniformGrid(Polytope::Type g, size_t h, size_t w);
+      static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
       /**
       * @brief Constructs an empty mesh with no cells.

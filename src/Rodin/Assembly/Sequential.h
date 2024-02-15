@@ -67,40 +67,40 @@ namespace Rodin::Assembly
       OperatorType execute(const Input& input) const override
       {
         std::vector<Eigen::Triplet<Scalar>> res;
-        res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
-        for (auto& bfi : input.lbfis)
+        res.reserve(input.getTestFES().getSize() * std::log(input.getTrialFES().getSize()));
+        for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::SequentialIteration seq(input.mesh, bfi.getRegion());
+          Internal::SequentialIteration seq(input.getMesh(), bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
               const size_t d = it.getDimension();
               const size_t i = it->getIndex();
-              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              const auto& trialDOFs = input.getTrialFES().getDOFs(d, i);
+              const auto& testDOFs = input.getTestFES().getDOFs(d, i);
               bfi.assemble(*it);
               Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
             }
           }
         }
-        for (auto& bfi : input.gbfis)
+        for (auto& bfi : input.getGlobalBFIs())
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::SequentialIteration testseq(input.mesh, bfi.getTestRegion());
+          Internal::SequentialIteration testseq(input.getMesh(), bfi.getTestRegion());
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
             if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
             {
-              Internal::SequentialIteration trialseq(input.mesh, bfi.getTrialRegion());
+              Internal::SequentialIteration trialseq(input.getMesh(), bfi.getTrialRegion());
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
                 if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                 {
-                  const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
-                  const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
+                  const auto& trialDOFs = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
+                  const auto& testDOFs = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
                   bfi.assemble(*trIt, *teIt);
                   Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
@@ -159,10 +159,10 @@ namespace Rodin::Assembly
           Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>> assembly;
         const auto triplets =
           assembly.execute({
-            input.mesh,
-            input.trialFES, input.testFES,
-            input.lbfis, input.gbfis });
-        OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
+            input.getMesh(),
+            input.getTrialFES(), input.getTestFES(),
+            input.getLocalBFIs(), input.getGlobalBFIs() });
+        OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
         return res;
       }
@@ -210,31 +210,31 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const Input& input) const override
       {
-        Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());
+        Math::Matrix res(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
-        for (auto& bfi : input.lbfis)
+        for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::SequentialIteration seq(input.mesh, bfi.getRegion());
+          Internal::SequentialIteration seq(input.getMesh(), bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
               const size_t d = it.getDimension();
               const size_t i = it->getIndex();
-              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              const auto& trialDOFs = input.getTrialFES().getDOFs(d, i);
+              const auto& testDOFs = input.getTestFES().getDOFs(d, i);
               bfi.assemble(*it);
               Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
             }
           }
         }
-        for (auto& bfi : input.gbfis)
+        for (auto& bfi : input.getGlobalBFIs())
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::SequentialIteration trialseq(input.mesh, bfi.getTrialRegion());
-          Internal::SequentialIteration testseq(input.mesh, bfi.getTestRegion());
+          Internal::SequentialIteration trialseq(input.getMesh(), bfi.getTrialRegion());
+          Internal::SequentialIteration testseq(input.getMesh(), bfi.getTestRegion());
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
             if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
@@ -243,8 +243,8 @@ namespace Rodin::Assembly
               {
                 if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                 {
-                  const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
-                  const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
+                  const auto& trialDOFs = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
+                  const auto& testDOFs = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
                   bfi.assemble(*trIt, *teIt);
                   Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
@@ -270,9 +270,6 @@ namespace Rodin::Assembly
           std::vector<Eigen::Triplet<Scalar>>,
           Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>...>>
   {
-    template <class T, class G>
-    using Enumerate = Pair<T, std::reference_wrapper<G>>;
-
     public:
       using Parent =
         AssemblyBase<
@@ -302,7 +299,7 @@ namespace Rodin::Assembly
         // Get sizes of finite element spaces
         std::array<Pair<size_t, size_t>, AssemblyTuple::Size> sz;
         input.map([](const auto& in)
-                  { return Pair(in.trialFES.getSize(), in.testFES.getSize()); })
+                  { return Pair(in.getTrialFES().getSize(), in.getTestFES().getSize()); })
              .iapply([&](const Index i, auto& v)
                      { sz[i] = std::move(v); });
 
@@ -349,6 +346,52 @@ namespace Rodin::Assembly
       }
   };
 
+  template <class ... TrialFES, class ... TestFES>
+  class Sequential<
+    Math::SparseMatrix,
+    Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>...>> final
+      : public AssemblyBase<
+          Math::SparseMatrix,
+          Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>...>>
+    {
+      public:
+        using Parent =
+          AssemblyBase<
+            Math::SparseMatrix,
+            Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>...>>;
+
+        using Input = typename Parent::Input;
+
+        using OperatorType = Math::SparseMatrix;
+
+        Sequential() = default;
+
+        Sequential(const Sequential& other)
+          : Parent(other)
+        {}
+
+        Sequential(Sequential&& other)
+          : Parent(std::move(other))
+        {}
+
+        OperatorType execute(const Input& input) const override
+        {
+          Sequential<
+            std::vector<Eigen::Triplet<Scalar>>,
+            Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>...>> assembly;
+          //const auto triplets = assembly.execute(input);
+          OperatorType res;
+          // res.setFromTriplets(triplets.begin(), triplets.end());
+          return res;
+        }
+
+        inline
+        Sequential* copy() const noexcept override
+        {
+          return new Sequential(*this);
+        }
+    };
+
   /**
    * @brief %Sequential assembly of the Math::Vector associated to a LinearFormBase
    * object.
@@ -378,19 +421,19 @@ namespace Rodin::Assembly
        */
       VectorType execute(const Input& input) const override
       {
-        VectorType res(input.fes.getSize());
+        VectorType res(input.getFES().getSize());
         res.setZero();
-        for (auto& lfi : input.lfis)
+        for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::SequentialIteration seq(input.mesh, lfi.getRegion());
+          Internal::SequentialIteration seq(input.getMesh(), lfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
               const size_t d = it.getDimension();
               const size_t i = it->getIndex();
-              const auto& dofs = input.fes.getDOFs(d, i);
+              const auto& dofs = input.getFES().getDOFs(d, i);
               lfi.assemble(*it);
               Math::Kernels::add(res, lfi.getVector(), dofs);
             }

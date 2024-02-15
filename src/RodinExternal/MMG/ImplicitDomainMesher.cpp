@@ -325,24 +325,20 @@ namespace Rodin::External::MMG
     copySolution(ls, sol);
     MMG5::setParameters(mmgMesh);
     const bool isSurface = ls.getFiniteElementSpace().getMesh().isSurface();
+    const size_t meshDim = mesh.getDimension();
+    const auto& attributeIndex = mesh.getAttributeIndex();
+    FlatSet<Geometry::Attribute> attrs;
     if (m_meshTheSurface)
     {
-      const size_t meshDim = mesh.getDimension();
-      const auto& attributeIndex = mesh.getAttributeIndex();
-      FlatSet<Geometry::Attribute> attrs;
       for (auto it = attributeIndex.begin(meshDim - 1); it != attributeIndex.end(meshDim - 1); ++it)
         attrs.insert(it->second);
-      generateUniqueSplit(attrs);
     }
     else
     {
-      const size_t meshDim = mesh.getDimension();
-      const auto& attributeIndex = mesh.getAttributeIndex();
-      FlatSet<Geometry::Attribute> attrs;
       for (auto it = attributeIndex.begin(meshDim); it != attributeIndex.end(meshDim); ++it)
         attrs.insert(it->second);
-      generateUniqueSplit(attrs);
     }
+    generateUniqueSplit(attrs);
 
     ReturnCode retcode = MMG5_STRONGFAILURE;
     switch (mmgMesh->dim)

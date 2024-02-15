@@ -557,11 +557,10 @@ namespace Rodin::Geometry
     return static_cast<const SubMesh<Context::Sequential>&>(*this);
   }
 
-  Mesh<Context::Sequential> Mesh<Context::Sequential>::UniformGrid(Polytope::Type g, size_t h, size_t w)
+  Mesh<Context::Sequential> Mesh<Context::Sequential>::UniformGrid(Polytope::Type g, const Array<size_t>& dimensions)
   {
     Builder build;
     const size_t dim = Polytope::getGeometryDimension(g);
-    build.initialize(dim).nodes(h * w);
     switch (g)
     {
       case Polytope::Type::Point:
@@ -570,20 +569,129 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Triangle:
       {
-        assert(h * w >= 4);
-        for (size_t i = 0; i < h; i++)
+        assert(dimensions.size() == 2);
+        const size_t w = dimensions.coeff(0);
+        const size_t h = dimensions.coeff(1);
+        build.initialize(dim).nodes(w * h);
+        assert(w * h >= 4);
+        for (size_t j = 0; j < h; j++)
         {
-          for (size_t j = 0; j < w; j++)
-            build.vertex({ static_cast<Scalar>(j), static_cast<Scalar>(i) });
+          for (size_t i = 0; i < w; i++)
+            build.vertex({ static_cast<Scalar>(i), static_cast<Scalar>(j) });
         }
 
         build.reserve(dim, 2 * (h - 1) * (w - 1));
-        for (size_t i = 0; i < h - 1; i++)
+        for (size_t i = 0; i < w - 1; i++)
         {
-          for (size_t j = 0; j < w - 1; j++)
+          for (size_t j = 0; j < h - 1; j++)
           {
-            build.polytope(g, { i * w + j, i * w + j + 1, (i + 1) * w + j })
-                 .polytope(g, { i * w + j + 1, (i + 1) * w + j + 1, (i + 1) * w + j });
+            build.polytope(g, { i + j * w, (i + 1) + j * w , i + (j + 1) * w })
+                 .polytope(g, { (i + 1) + j * w, (i + 1) + (j + 1) * w, i + (j + 1) * w });
+          }
+        }
+        return build.finalize();
+      }
+      case Polytope::Type::Tetrahedron:
+      {
+        assert(dimensions.size() == 3);
+        const size_t width = dimensions.coeff(0);
+        const size_t height = dimensions.coeff(1);
+        const size_t depth = dimensions.coeff(2);
+        assert(width * height * depth >= 8);
+        build.initialize(dim)
+             .nodes(width * height * depth + (width - 1) * (height - 1) * (depth - 1))
+             .reserve(dim, 10 * (width - 1) * (height - 1) * (depth - 1));
+
+        for (size_t k = 0; k < depth; ++k)
+        {
+          for (size_t j = 0; j < height; ++j)
+          {
+            for (size_t i = 0; i < width; ++i)
+            {
+              build.vertex({
+                  static_cast<Scalar>(i),
+                  static_cast<Scalar>(j),
+                  static_cast<Scalar>(k) });
+            }
+          }
+        }
+
+        for (size_t k = 0; k < depth - 1; ++k)
+        {
+          for (size_t j = 0; j < height - 1; ++j)
+          {
+            for (size_t i = 0; i < width - 1; ++i)
+            {
+              build.vertex({
+                  static_cast<Scalar>(i) + 0.5,
+                  static_cast<Scalar>(j) + 0.5,
+                  static_cast<Scalar>(k) + 0.5 });
+            }
+          }
+        }
+
+        for (size_t i = 0; i < width - 1; ++i)
+        {
+          for (size_t j = 0; j < height - 1; ++j)
+          {
+            for (size_t k = 0; k < depth - 1; ++k)
+            {
+              const Index c =
+                  i + (width - 1) * j + (width - 1) * (height - 1) * k
+                    + (width - 1) + width * (height - 1) + width * height * (depth - 1) + 1;
+              build.polytope(g, // Front-left
+                       { i + width * j + width * height * k,
+                        (i + 1) + width * j + width * height * k,
+                         i + width * (j + 1) + width * height * k,
+                         i + width * j + width * height * (k + 1) })
+                   .polytope(g, // Front-right
+                       { (i + 1) + width * j + width * height * (k + 1),
+                          i + width * j + width * height * (k + 1),
+                          c,
+                          (i + 1) + width * j + width * height * k })
+                   .polytope(g, // Left-top
+                       { i + width * (j + 1) + width * height * (k + 1),
+                         c,
+                         i + width * j + width * height * (k + 1),
+                         i + width * (j + 1) + width * height * k })
+                   .polytope(g, // Top-left
+                       { i + width * j + width * height * (k + 1),
+                        (i + 1) + width * j + width * height * (k + 1),
+                         i + width * (j + 1) + width * height * (k + 1),
+                         c })
+                   .polytope(g, // Right-bottom
+                       { c,
+                        (i + 1) + width * j + width * height * k,
+                         (i + 1) + width * (j + 1) + width * height * k,
+                         (i + 1) + width * j + width * height * (k + 1) })
+                   .polytope(g, // Bottom-right
+                       { (i + 1) + width * j + width * height * k,
+                         i + width * (j + 1) + width * height * k,
+                         (i + 1) + width * (j + 1) + width * height * k,
+                          c
+                         })
+                   .polytope(g, // Back-left
+                       {  i + width * (j + 1) + width * height * k,
+                          (i + 1) + width * (j + 1) + width * height * k,
+                          c,
+                          i + width * (j + 1) + width * height * (k + 1) })
+                   .polytope(g, // Back-right
+                        { (i + 1) + width * (j + 1) + width * height * (k + 1),
+                           i + width * (j + 1) + width * height * (k + 1),
+                           (i + 1) + width * j + width * height * (k + 1),
+                          (i + 1) + width * (j + 1) + width * height * k })
+                   .polytope(g, // Front fill
+                       { (i + 1) + width * j + width * height * k,
+                          i + width * (j + 1) + width * height * k,
+                          c,
+                          i + width * j + width * height * (k + 1) })
+                   .polytope(g, // Back fill
+                       { (i + 1) + width * j + width * height * (k + 1),
+                          (i + 1) + width * (j + 1) + width * height * k,
+                          c,
+                          i + width * (j + 1) + width * height * (k + 1) })
+                   ;
+            }
           }
         }
         return build.finalize();

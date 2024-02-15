@@ -40,7 +40,8 @@ namespace Rodin::Variational
           m_lbfis(other.m_lbfis),
           m_gbfis(other.m_gbfis),
           m_lfis(other.m_lfis),
-          m_essBdr(other.m_essBdr)
+          m_essBdr(other.m_essBdr),
+          m_periodicBdr(other.m_periodicBdr)
       {}
 
       ProblemBodyBase(ProblemBodyBase&& other)
@@ -48,7 +49,8 @@ namespace Rodin::Variational
           m_lbfis(std::move(other.m_lbfis)),
           m_gbfis(std::move(other.m_gbfis)),
           m_lfis(std::move(other.m_lfis)),
-          m_essBdr(std::move(other.m_essBdr))
+          m_essBdr(std::move(other.m_essBdr)),
+          m_periodicBdr(std::move(other.m_periodicBdr))
       {}
 
       inline
@@ -58,6 +60,7 @@ namespace Rodin::Variational
         m_gbfis = std::move(other.m_gbfis);
         m_lfis = std::move(other.m_lfis);
         m_essBdr = std::move(other.m_essBdr);
+        m_periodicBdr = std::move(other.m_periodicBdr);
         return *this;
       }
 
@@ -237,6 +240,16 @@ namespace Rodin::Variational
       ProblemBody(const GlobalBilinearFormIntegratorBase& bfi)
       {
         getGlobalBFIs().add(bfi);
+      }
+
+      ProblemBody(const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis)
+      {
+        getLocalBFIs().add(bfis);
+      }
+
+      ProblemBody(const FormLanguage::List<GlobalBilinearFormIntegratorBase>& bfis)
+      {
+        getGlobalBFIs().add(bfis);
       }
 
       ProblemBody(const ProblemBody<OperatorType, void>& pbo)

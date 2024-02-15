@@ -30,6 +30,7 @@
 #include "Variational/Abs.h"
 #include "Variational/Dot.h"
 #include "Variational/Pow.h"
+#include "Variational/Sqrt.h"
 #include "Variational/Sum.h"
 #include "Variational/Mult.h"
 #include "Variational/Minus.h"

@@ -30,7 +30,7 @@ namespace Rodin::Variational
        */
       template <class TrialFES, class TestFES>
       BilinearFormIntegratorBase(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
-        : m_u(u), m_v(v)
+        : m_u(u.copy()), m_v(v.copy())
       {}
 
       /**
@@ -56,7 +56,7 @@ namespace Rodin::Variational
        */
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
         : Parent(other),
-          m_u(other.m_u), m_v(other.m_v),
+          m_u(other.m_u->copy()), m_v(other.m_v->copy()),
           m_matrix(other.m_matrix)
       {}
 
@@ -84,7 +84,8 @@ namespace Rodin::Variational
       inline
       const FormLanguage::Base& getTrialFunction() const
       {
-        return m_u.get();
+        assert(m_u);
+        return *m_u;
       }
 
       /**
@@ -93,7 +94,8 @@ namespace Rodin::Variational
       inline
       const FormLanguage::Base& getTestFunction() const
       {
-        return m_v.get();
+        assert(m_v);
+        return *m_v;
       }
 
       inline
@@ -117,8 +119,8 @@ namespace Rodin::Variational
       BilinearFormIntegratorBase* copy() const noexcept override = 0;
 
     private:
-      std::reference_wrapper<const FormLanguage::Base> m_u;
-      std::reference_wrapper<const FormLanguage::Base> m_v;
+      std::unique_ptr<FormLanguage::Base> m_u;
+      std::unique_ptr<FormLanguage::Base> m_v;
       Math::Matrix m_matrix;
   };
 

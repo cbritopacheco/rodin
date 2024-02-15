@@ -22,9 +22,9 @@ namespace Rodin::Variational
     public:
       using Parent = Integrator;
 
-      template <class Derived, class FES, ShapeFunctionSpaceType Space>
-      LinearFormIntegratorBase(const ShapeFunction<Derived, FES, Space>& v)
-        : m_v(v)
+      template <class FES>
+      LinearFormIntegratorBase(const TestFunction<FES>& v)
+        : m_v(v.copy())
       {}
 
       template <class FES>
@@ -32,7 +32,7 @@ namespace Rodin::Variational
 
       LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
         : Parent(other),
-          m_v(other.m_v),
+          m_v(other.m_v->copy()),
           m_attrs(other.m_attrs)
       {}
 
@@ -47,7 +47,8 @@ namespace Rodin::Variational
       inline
       const FormLanguage::Base& getTestFunction() const
       {
-        return m_v.get();
+        assert(m_v);
+        return *m_v;
       }
 
       /**
@@ -119,7 +120,7 @@ namespace Rodin::Variational
       virtual Region getRegion() const = 0;
 
     private:
-      std::reference_wrapper<const FormLanguage::Base> m_v;
+      std::unique_ptr<FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;
       Math::Vector m_vector;
   };

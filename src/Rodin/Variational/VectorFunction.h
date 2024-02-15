@@ -189,7 +189,7 @@ namespace Rodin::Variational
        * Each value passed must be convertible to any specialization of
        * ScalarFunction.
        */
-      VectorFunction(const V v, const Values... values)
+      VectorFunction(const V& v, const Values&... values)
         : m_fs(ScalarFunction(v), ScalarFunction(values)...)
       {}
 
@@ -245,12 +245,14 @@ namespace Rodin::Variational
   };
 
   template <class V, class ... Values>
-  VectorFunction(V, Values...) -> VectorFunction<V, Values...>;
+  VectorFunction(const V&, const Values&...) -> VectorFunction<V, Values...>;
 
   template <class F>
   class VectorFunction<F> final : public VectorFunctionBase<VectorFunction<F>>
   {
-    static_assert(std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>);
+    static_assert(
+        std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>
+        || std::is_invocable_v<F, Math::Vector&, const Geometry::Point&>);
 
     public:
       using Parent = VectorFunctionBase<VectorFunction<F>>;
@@ -279,9 +281,43 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::Vector getValue(const Geometry::Point& v) const
+      Math::Vector getValue(const Geometry::Point& p) const
       {
-        return m_f(v);
+        if constexpr (std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>)
+        {
+          return m_f(p);
+        }
+        else if constexpr (std::is_invocable_r_v<void, F, Math::Vector&, const Geometry::Point&>)
+        {
+          Math::Vector res;
+          m_f(res, p);
+          return res;
+        }
+        else
+        {
+          assert(false);
+          Math::Vector res;
+          res.setConstant(NAN);
+        }
+      }
+
+      inline
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      {
+        if constexpr (std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>)
+        {
+          res = m_f(p);
+        }
+        else if constexpr (std::is_invocable_v<F, Math::Vector&, const Geometry::Point&>)
+        {
+          m_f(res, p);
+        }
+        else
+        {
+          assert(false);
+          Math::Vector res;
+          res.setConstant(NAN);
+        }
       }
 
       inline VectorFunction* copy() const noexcept override
@@ -294,7 +330,9 @@ namespace Rodin::Variational
       const F m_f;
   };
 
-  template <class F, typename = std::enable_if_t<std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>>>
+  template <class F, typename = std::enable_if_t<
+    std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>
+    || std::is_invocable_v<F, Math::Vector&, const Geometry::Point&>>>
   VectorFunction(size_t, F) -> VectorFunction<F>;
 }
 

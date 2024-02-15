@@ -162,7 +162,7 @@ namespace Rodin::Variational
         return m_lfis;
       }
 
-      LinearFormBase& setAssembly(const Assembly::AssemblyBase<LinearForm>& assembly)
+      LinearFormBase& setAssembly(const Assembly::AssemblyBase<VectorType, LinearForm>& assembly)
       {
         m_assembly.reset(assembly.copy());
         return *this;

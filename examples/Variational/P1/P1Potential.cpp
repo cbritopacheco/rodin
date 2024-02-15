@@ -23,7 +23,7 @@ int main(int, char**)
 {
   size_t n = 32;
   MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.scale(2. / (n - 1));
   mesh.displace(VectorFunction{-1, -1});
 
