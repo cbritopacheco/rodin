@@ -220,7 +220,7 @@ int main(int, char**)
     conormal.stableNormalize();
 
     Alert::Info() << "Computing shape gradient..." << Alert::Raise;
-    auto hadamard = 1. / (epsilon * epsilon) * u.getSolution() * p.getSolution() + ell;
+    auto hadamard = 1. / epsilon * u.getSolution() * p.getSolution() + ell;
     TrialFunction theta(dsfes);
     TestFunction  w(dsfes);
     Problem hilbert(theta, w);

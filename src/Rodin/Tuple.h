@@ -400,6 +400,8 @@ namespace Rodin
   }
 }
 
+#include "Pair.h"
+
 #endif
 
 

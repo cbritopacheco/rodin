@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_SIN_H
-#define RODIN_VARIATIONAL_SIN_H
+#ifndef RODIN_VARIATIONAL_SQRT_H
+#define RODIN_VARIATIONAL_SQRT_H
 
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
@@ -15,39 +15,39 @@
 namespace Rodin::Variational
 {
   /**
-   * @defgroup SinSpecializations Sin Template Specializations
-   * @brief Template specializations of the Sin class.
-   * @see Sin
+   * @defgroup SqrtSpecializations Sqrt Template Specializations
+   * @brief Template specializations of the Sqrt class.
+   * @see Sqrt
    */
 
   /**
-   * @ingroup SinSpecializations
+   * @ingroup SqrtSpecializations
    */
   template <class NestedDerived>
-  class Sin<FunctionBase<NestedDerived>> final
-    : public ScalarFunctionBase<Sin<FunctionBase<NestedDerived>>>
+  class Sqrt<FunctionBase<NestedDerived>> final
+    : public ScalarFunctionBase<Sqrt<FunctionBase<NestedDerived>>>
   {
     public:
       using Operand = FunctionBase<NestedDerived>;
-      using Parent = ScalarFunctionBase<Sin<FunctionBase<NestedDerived>>>;
+      using Parent = ScalarFunctionBase<Sqrt<FunctionBase<NestedDerived>>>;
 
-      Sin(const Operand& v)
+      Sqrt(const Operand& v)
         : m_v(v.copy())
       {}
 
-      Sin(const Sin& other)
+      Sqrt(const Sqrt& other)
         : Parent(other),
           m_v(other.m_v->copy())
       {}
 
-      Sin(Sin&& other)
+      Sqrt(Sqrt&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v))
       {}
 
       inline
       constexpr
-      Sin& traceOf(Geometry::Attribute attrs)
+      Sqrt& traceOf(Geometry::Attribute attrs)
       {
         m_v.traceOf(attrs);
         return *this;
@@ -56,7 +56,7 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point& p) const
       {
-        return std::sin(static_cast<Scalar>(getOperand().getValue(p)));
+        return std::sqrt(static_cast<Scalar>(getOperand().getValue(p)));
       }
 
       inline
@@ -66,9 +66,9 @@ namespace Rodin::Variational
         return *m_v;
       }
 
-      inline Sin* copy() const noexcept override
+      inline Sqrt* copy() const noexcept override
       {
-        return new Sin(*this);
+        return new Sqrt(*this);
       }
 
     private:
@@ -76,17 +76,18 @@ namespace Rodin::Variational
   };
 
   template <class NestedDerived>
-  Sin(const FunctionBase<NestedDerived>&) -> Sin<FunctionBase<NestedDerived>>;
+  Sqrt(const FunctionBase<NestedDerived>&) -> Sqrt<FunctionBase<NestedDerived>>;
 
   /**
-   * @brief Helper function to construct objects of type Sin.
+   * @brief Helper function to construct objects of type Sqrt.
    */
   template <class NestedDerived>
-  auto sin(const FunctionBase<NestedDerived>& f)
+  auto sqrt(const FunctionBase<NestedDerived>& f)
   {
-    return Sin(f);
+    return Sqrt(f);
   }
 }
 
 #endif
+
 

@@ -10,11 +10,8 @@
 #include "Rodin/Math.h"
 #include "Rodin/Tuple.h"
 
-#include "Rodin/Geometry/Mesh.h"
-#include "Rodin/FormLanguage/List.h"
-#include "Rodin/Variational/ForwardDecls.h"
-
 #include "ForwardDecls.h"
+#include "Input.h"
 
 namespace Rodin::Assembly
 {
@@ -23,20 +20,16 @@ namespace Rodin::Assembly
     : public FormLanguage::Base
   {
     public:
-      struct Input
-      {
-        const Geometry::MeshBase& mesh;
-        const TrialFES& trialFES;
-        const TestFES& testFES;
-        FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>& lbfis;
-        FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>& gbfis;
-      };
+
+      using Input = Input<Variational::BilinearForm<TrialFES, TestFES, OperatorType>>;
 
       AssemblyBase() = default;
 
       AssemblyBase(const AssemblyBase&) = default;
 
       AssemblyBase(AssemblyBase&&) = default;
+
+      virtual ~AssemblyBase() = default;
 
       virtual OperatorType execute(const Input& data) const = 0;
 
@@ -48,14 +41,15 @@ namespace Rodin::Assembly
   {
     public:
       static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
-      using Input =
-        Tuple<typename AssemblyBase<OperatorType, Variational::BilinearForm<TrialFES, TestFES, OperatorType>>::Input...>;
+      using Input = Input<Tuple<Variational::BilinearForm<TrialFES, TestFES, OperatorType>...>>;
 
       AssemblyBase() = default;
 
       AssemblyBase(const AssemblyBase&) = default;
 
       AssemblyBase(AssemblyBase&&) = default;
+
+      virtual ~AssemblyBase() = default;
 
       virtual OperatorType execute(const Input& data) const = 0;
 
@@ -67,18 +61,15 @@ namespace Rodin::Assembly
     : public FormLanguage::Base
   {
     public:
-      struct Input
-      {
-        const Geometry::MeshBase& mesh;
-        const Variational::FiniteElementSpaceBase& fes;
-        FormLanguage::List<Variational::LinearFormIntegratorBase>& lfis;
-      };
+      using Input = Input<Variational::LinearForm<FES, VectorType>>;
 
       AssemblyBase() = default;
 
       AssemblyBase(const AssemblyBase&) = default;
 
       AssemblyBase(AssemblyBase&&) = default;
+
+      virtual ~AssemblyBase() = default;
 
       virtual VectorType execute(const Input& data) const = 0;
 

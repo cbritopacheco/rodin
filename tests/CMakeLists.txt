@@ -16,6 +16,7 @@ rodin_add_compile_options(
   -Wno-error=pedantic
   -Wno-error=sign-compare
   -Wno-error=unused-variable
+  -Wno-error=unused-but-set-variable
   -Wno-error=cast-function-type
   -Wno-error=deprecated-declarations
   -Wno-error=zero-as-null-pointer-constant)

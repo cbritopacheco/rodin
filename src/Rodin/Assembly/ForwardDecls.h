@@ -3,7 +3,10 @@
 
 namespace Rodin::Assembly
 {
-  template <class LinearAlgebraType, class ... Args>
+  template <class Operand>
+  class Input;
+
+  template <class LinearAlgebraType, class Operand>
   class AssemblyBase;
 
   template <class LinearAlgebraType, class Operand>

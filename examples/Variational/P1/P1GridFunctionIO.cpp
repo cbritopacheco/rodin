@@ -14,7 +14,7 @@ using namespace Rodin::Variational;
 int main(int, char**)
 {
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
 
   P1 fes(mesh, 2);
   GridFunction gf(fes);

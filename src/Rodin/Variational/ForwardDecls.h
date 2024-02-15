@@ -321,6 +321,9 @@ namespace Rodin::Variational
   template <class Base, class Exponent>
   class Pow;
 
+  template <class Operand>
+  class Sqrt;
+
   template <class T>
   class Component;
 

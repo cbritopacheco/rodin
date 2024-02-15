@@ -105,15 +105,15 @@ namespace Rodin::Assembly
       OperatorType execute(const Input& input) const override
       {
         using TripletVector = std::vector<Eigen::Triplet<Scalar>>;
-        const size_t capacity = input.testFES.getSize() * std::log(input.trialFES.getSize());
+        const size_t capacity = input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
         TripletVector res;
         res.clear();
         res.reserve(capacity);
         const size_t threadCount = getThreadPool().getThreadCount();
-        for (auto& bfi : input.lbfis)
+        for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::MultithreadedIteration seq(input.mesh, bfi.getRegion());
+          Internal::MultithreadedIteration seq(input.getMesh(), bfi.getRegion());
           const size_t d = seq.getDimension();
           auto loop =
             [&](const Index start, const Index end)
@@ -124,11 +124,11 @@ namespace Rodin::Assembly
               {
                 if (seq.filter(i))
                 {
-                  if (attrs.size() == 0 || attrs.count(input.mesh.getAttribute(d, i)))
+                  if (attrs.size() == 0 || attrs.count(input.getMesh().getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
-                    const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-                    const auto& testDOFs = input.testFES.getDOFs(d, i);
+                    const auto& trialDOFs = input.getTrialFES().getDOFs(d, i);
+                    const auto& testDOFs = input.getTestFES().getDOFs(d, i);
                     tl_lbfi->assemble(*it);
                     Math::Kernels::add(tl_triplets, tl_lbfi->getMatrix(), testDOFs, trialDOFs);
                   }
@@ -155,11 +155,11 @@ namespace Rodin::Assembly
             threadPool.waitForTasks();
           }
         }
-        for (auto& bfi : input.gbfis)
+        for (auto& bfi : input.getGlobalBFIs())
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::MultithreadedIteration testseq(input.mesh, bfi.getTestRegion());
+          Internal::MultithreadedIteration testseq(input.getMesh(), bfi.getTestRegion());
           const size_t d = testseq.getDimension();
           auto loop =
             [&](const Index start, const Index end)
@@ -170,16 +170,16 @@ namespace Rodin::Assembly
               {
                 if (testseq.filter(i))
                 {
-                  if (testAttrs.size() == 0 || testAttrs.count(input.mesh.getAttribute(d, i)))
+                  if (testAttrs.size() == 0 || testAttrs.count(input.getMesh().getAttribute(d, i)))
                   {
                     const auto teIt = testseq.getIterator(i);
-                    Internal::SequentialIteration trialseq{ input.mesh, tl_gbfi->getTrialRegion() };
+                    Internal::SequentialIteration trialseq{ input.getMesh(), tl_gbfi->getTrialRegion() };
                     for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                     {
                       if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                       {
-                        const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
-                        const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
+                        const auto& trialDOFs = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
+                        const auto& testDOFs = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
                         tl_gbfi->assemble(*trIt, *teIt);
                         Math::Kernels::add(tl_triplets, tl_gbfi->getMatrix(), testDOFs, trialDOFs);
                       }
@@ -301,13 +301,11 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const Input& input) const override
       {
-        const auto triplets =
-          m_assembly.execute({
-              input.mesh,
-              input.trialFES, input.testFES,
-              input.lbfis, input.gbfis
-              });
-        OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
+        const auto triplets = m_assembly.execute({
+            input.getMesh(),
+            input.getTrialFES(), input.getTestFES(),
+            input.getLocalBFIs(), input.getGlobalBFIs() });
+        OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
         return res;
       }
@@ -375,29 +373,29 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const Input& input) const override
       {
-        Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());
+        Math::Matrix res(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
         auto& threadPool = getThreadPool();
-        for (auto& bfi : input.lbfis)
+        for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::MultithreadedIteration seq(input.mesh, bfi.getRegion());
+          Internal::MultithreadedIteration seq(input.getMesh(), bfi.getRegion());
           const size_t d = seq.getDimension();
           auto loop =
             [&](const Index start, const Index end)
             {
               tl_lbfi.reset(bfi.copy());
-              tl_res.resize(input.testFES.getSize(), input.trialFES.getSize());
+              tl_res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
               tl_res.setZero();
               for (Index i = start; i < end; ++i)
               {
                 if (seq.filter(i))
                 {
-                  if (attrs.size() == 0 || attrs.count(input.mesh.getAttribute(d, i)))
+                  if (attrs.size() == 0 || attrs.count(input.getMesh().getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
-                    const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-                    const auto& testDOFs = input.testFES.getDOFs(d, i);
+                    const auto& trialDOFs = input.getTrialFES().getDOFs(d, i);
+                    const auto& testDOFs = input.getTestFES().getDOFs(d, i);
                     tl_lbfi->assemble(*it);
                     Math::Kernels::add(tl_res, tl_lbfi->getMatrix(), testDOFs, trialDOFs);
                   }
@@ -421,32 +419,32 @@ namespace Rodin::Assembly
             threadPool.waitForTasks();
           }
         }
-        for (auto& bfi : input.gbfis)
+        for (auto& bfi : input.getGlobalBFIs())
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::MultithreadedIteration testseq(input.mesh, bfi.getTestRegion());
+          Internal::MultithreadedIteration testseq(input.getMesh(), bfi.getTestRegion());
           const size_t d = testseq.getDimension();
           const auto loop =
             [&](const Index start, const Index end)
             {
               tl_gbfi.reset(bfi.copy());
-              tl_res.resize(input.testFES.getSize(), input.trialFES.getSize());
+              tl_res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
               tl_res.setZero();
               for (Index i = start; i < end; ++i)
               {
                 if (testseq.filter(i))
                 {
-                  if (testAttrs.size() == 0 || testAttrs.count(input.mesh.getAttribute(d, i)))
+                  if (testAttrs.size() == 0 || testAttrs.count(input.getMesh().getAttribute(d, i)))
                   {
                     const auto teIt = testseq.getIterator(i);
-                    Internal::SequentialIteration trialseq{ input.mesh, tl_gbfi->getTrialRegion() };
+                    Internal::SequentialIteration trialseq{ input.getMesh(), tl_gbfi->getTrialRegion() };
                     for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                     {
                       if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                       {
-                        const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
-                        const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
+                        const auto& trialDOFs = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
+                        const auto& testDOFs = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
                         tl_gbfi->assemble(*trIt, *teIt);
                         Math::Kernels::add(tl_res, tl_gbfi->getMatrix(), testDOFs, trialDOFs);
                       }
@@ -561,27 +559,27 @@ namespace Rodin::Assembly
        */
       VectorType execute(const Input& input) const override
       {
-        VectorType res(input.fes.getSize());
+        VectorType res(input.getFES().getSize());
         res.setZero();
-        for (auto& lfi : input.lfis)
+        for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::MultithreadedIteration seq(input.mesh, lfi.getRegion());
+          Internal::MultithreadedIteration seq(input.getMesh(), lfi.getRegion());
           const size_t d = seq.getDimension();
           const auto loop =
             [&](const Index start, const Index end)
             {
               tl_lfi.reset(lfi.copy());
-              tl_res.resize(input.fes.getSize());
+              tl_res.resize(input.getFES().getSize());
               tl_res.setZero();
               for (Index i = start; i < end; ++i)
               {
                 if (seq.filter(i))
                 {
-                  if (attrs.size() == 0 || attrs.count(input.mesh.getAttribute(d, i)))
+                  if (attrs.size() == 0 || attrs.count(input.getMesh().getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
-                    const auto& dofs = input.fes.getDOFs(d, i);
+                    const auto& dofs = input.getFES().getDOFs(d, i);
                     tl_lfi->assemble(*it);
                     Math::Kernels::add(tl_res, tl_lfi->getVector(), dofs);
                   }

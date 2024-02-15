@@ -16,7 +16,7 @@ namespace Rodin::Variational
   {}
 
   UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
-    :  LinearFormIntegratorBase(other),
+    : LinearFormIntegratorBase(other),
       m_op(other.m_op->copy())
   {}
 

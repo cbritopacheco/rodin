@@ -16,7 +16,7 @@ int main(int, char**)
   const size_t n = 32;
   const size_t vdim = 2;
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.scale(1.0 / (n - 1.0));
 
   P1 fes(mesh, vdim);

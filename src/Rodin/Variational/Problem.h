@@ -332,36 +332,11 @@ namespace Rodin::Variational
         typename Utility::Wrap<TestFESTuple>::template Type<LinearFormType>;
 
     public:
-      Problem(U1& u1, U2& u2, Us&... us)
-        : m_us(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
-            .template filter<IsTrialFunctionReferenceWrapper>()),
-          m_vs(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
-            .template filter<IsTestFunctionReferenceWrapper>()),
-          m_lft(m_vs.map(
-                [](const auto& v)
-                { return LinearFormType<
-                    typename std::decay_t<
-                    typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FES>(v.get());
-                })),
-          m_bft(m_us.product(
-                [](const auto& u, const auto& v) { return Pair(u, v); }, m_vs)
-                    .map(
-                      [](const auto& uv)
-                      { return BilinearFormType<
-                          typename std::decay_t<
-                          typename Utility::UnwrapRefDecay<decltype(uv.first())>::Type>::FES,
-                          typename std::decay_t<
-                          typename Utility::UnwrapRefDecay<decltype(uv.second())>::Type>::FES>(
-                              uv.first().get(), uv.second().get());
-                      }))
-      {}
+      using SequentialAssembly = Assembly::Sequential<OperatorType, BilinearFormTuple>;
 
-      Problem& assemble() override
-      {
-        return *this;
-      }
+      Problem(U1& u1, U2& u2, Us&... us);
+
+      Problem& assemble() override;
 
       void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override
       {}
@@ -408,6 +383,8 @@ namespace Rodin::Variational
       VectorType      m_mass;
       VectorType      m_guess;
       OperatorType    m_stiffness;
+
+      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>> m_assembly;
   };
 
   template <class U1, class U2, class ... Us>

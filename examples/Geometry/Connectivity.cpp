@@ -15,7 +15,7 @@ using namespace Geometry;
 int main(int, char**)
 {
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 1024, 1024);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 1024, 1024 });
 
   auto t0 = std::chrono::high_resolution_clock::now();
   mesh.getConnectivity().compute(1, 2);

@@ -91,7 +91,7 @@ namespace Rodin::FormLanguage
        */
       virtual const char* getName() const
       {
-        return "Rodin::FormLanguage::Base";
+        return nullptr;
       }
 
       /**

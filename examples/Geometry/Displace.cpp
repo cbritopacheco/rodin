@@ -15,7 +15,7 @@ int main(int, char**)
 {
   size_t n = 32;
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.scale(1. / (n - 1));
 
   auto displacement =

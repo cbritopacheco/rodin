@@ -349,9 +349,11 @@ namespace Rodin::Variational
   class Potential<
     LHSType,
     ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>> final
-    : public LinearFormIntegratorBase
+      : public FormLanguage::Base
   {
     public:
+      using Parent = FormLanguage::Base;
+
       using FES = FESType;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
@@ -362,8 +364,6 @@ namespace Rodin::Variational
       using RHS = ShapeFunctionBase<ShapeFunction<RHSDerived, FES, SpaceType>, FES, Space>;
 
       using Operand = RHS;
-
-      using Parent = LinearFormIntegratorBase;
 
       using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
 
@@ -383,8 +383,7 @@ namespace Rodin::Variational
           void>>;
 
       Potential(const Kernel& kernel, const Operand& u)
-        : Parent(u.getLeaf()),
-          m_kernel(kernel), m_u(u)
+        : m_kernel(kernel), m_u(u)
       {}
 
       Potential(const Potential& other)
@@ -409,14 +408,10 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
-      void assemble(const Geometry::Polytope& polytope) final override
+      inline
+      Integrator::Region getRegion() const
       {
-        assert(false);
-      }
-
-      Region getRegion() const override
-      {
-        return Region::Cells;
+        return Integrator::Region::Cells;
       }
 
       inline

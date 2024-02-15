@@ -286,14 +286,12 @@ namespace Rodin::Variational
 
       constexpr
       ShapeFunction(const ShapeFunction& other)
-        : Parent(other),
-          m_gf(other.m_gf)
+        : Parent(other)
       {}
 
       constexpr
       ShapeFunction(ShapeFunction&& other)
-        : Parent(std::move(other)),
-          m_gf(std::move(other.m_gf))
+        : Parent(std::move(other))
       {}
 
       inline

@@ -17,7 +17,7 @@ int main(int, char**)
   const size_t n = 32;
 
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.scale(1.0 / (n - 1.0));
   mesh.getConnectivity().compute(1, 2);
   for (auto it = mesh.getCell(); it; ++it)

@@ -18,7 +18,7 @@ int main(int, char**)
 {
   const size_t n = 16;
   MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
 
   P1 fes(mesh, 2);
   GridFunction gf(fes);

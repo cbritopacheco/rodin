@@ -16,7 +16,7 @@ int main(int, char**)
   const size_t vdim = 2;
 
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
 
   P1 fes(mesh, vdim);
 

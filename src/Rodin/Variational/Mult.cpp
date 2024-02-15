@@ -42,4 +42,39 @@ namespace Rodin::Variational
   {
     return Mult(lhs, rhs);
   }
+
+  Mult<Scalar, LinearFormIntegratorBase>::Mult(Scalar lhs, const LinearFormIntegratorBase& rhs)
+    : LinearFormIntegratorBase(rhs),
+      m_lhs(lhs), m_rhs(rhs.copy())
+  {}
+
+  Mult<Scalar, LinearFormIntegratorBase>::Mult(const Mult& other)
+    : LinearFormIntegratorBase(other),
+      m_lhs(other.m_lhs), m_rhs(other.m_rhs->copy())
+  {}
+
+  Mult<Scalar, LinearFormIntegratorBase>::Mult(Mult&& other)
+    : LinearFormIntegratorBase(std::move(other)),
+      m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+  {}
+
+  Integrator::Region
+  Mult<Scalar, LinearFormIntegratorBase>::getRegion() const
+  {
+    return m_rhs->getRegion();
+  }
+
+  void Mult<Scalar, LinearFormIntegratorBase>::assemble(const Geometry::Polytope& element)
+  {
+    m_rhs->assemble(element);
+    auto& res = getVector();
+    res = std::move(m_rhs->getVector());
+    res *= m_lhs;
+  }
+
+  Mult<Scalar, LinearFormIntegratorBase> operator*(
+      Scalar lhs, const LinearFormIntegratorBase& rhs)
+  {
+    return Mult(lhs, rhs);
+  }
 }
