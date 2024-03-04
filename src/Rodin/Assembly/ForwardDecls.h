@@ -3,9 +3,6 @@
 
 namespace Rodin::Assembly
 {
-  template <class Operand>
-  class Input;
-
   template <class LinearAlgebraType, class Operand>
   class AssemblyBase;
 
@@ -17,6 +14,15 @@ namespace Rodin::Assembly
 
   template <class Operand>
   class OpenMP;
+
+  template <class TrialFES, class TestFES>
+  class BilinearFormAssemblyInput;
+
+  template <class FES>
+  class LinearFormAssemblyInput;
+
+  template <class ... Ts>
+  class BilinearFormTupleAssemblyInput;
 }
 
 #endif

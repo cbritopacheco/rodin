@@ -12,6 +12,7 @@
 #include "Rodin/Utility.h"
 
 #include "Rodin/Assembly/Sequential.h"
+#include "Rodin/Assembly/Input.h"
 
 #include "Exceptions/TrialFunctionMismatchException.h"
 #include "Exceptions/TestFunctionMismatchException.h"
@@ -438,7 +439,16 @@ namespace Rodin::Variational
   Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix, Math::Vector>::assemble()
   {
     m_us.apply([](auto& u) { u.get().emplace(); });
-    // auto input = m_bft.map([](const auto& bf) { return Assembly::Input(bf); });
+    auto t =
+      m_bft.map(
+          [](auto& bf)
+          {
+            auto& u = bf.getTrialFunction();
+            auto& v = bf.getTestFunction();
+            return Assembly::BilinearFormAssemblyInput(
+                u.getFiniteElementSpace(), v.getFiniteElementSpace(),
+                bf.getLocalIntegrators(), bf.getGlobalIntegrators());
+          });
 
     m_assembled = true;
 

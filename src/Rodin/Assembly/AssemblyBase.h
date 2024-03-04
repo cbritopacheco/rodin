@@ -20,8 +20,7 @@ namespace Rodin::Assembly
     : public FormLanguage::Base
   {
     public:
-
-      using Input = Input<Variational::BilinearForm<TrialFES, TestFES, OperatorType>>;
+      using InputType = BilinearFormAssemblyInput<TrialFES, TestFES>;
 
       AssemblyBase() = default;
 
@@ -31,7 +30,7 @@ namespace Rodin::Assembly
 
       virtual ~AssemblyBase() = default;
 
-      virtual OperatorType execute(const Input& data) const = 0;
+      virtual OperatorType execute(const InputType& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
@@ -41,7 +40,7 @@ namespace Rodin::Assembly
   {
     public:
       static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
-      using Input = Input<Tuple<Variational::BilinearForm<TrialFES, TestFES, OperatorType>...>>;
+      using InputType = BilinearFormTupleAssemblyInput<BilinearFormAssemblyInput<TrialFES, TestFES>...>;
 
       AssemblyBase() = default;
 
@@ -51,7 +50,7 @@ namespace Rodin::Assembly
 
       virtual ~AssemblyBase() = default;
 
-      virtual OperatorType execute(const Input& data) const = 0;
+      virtual OperatorType execute(const InputType& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
@@ -61,7 +60,7 @@ namespace Rodin::Assembly
     : public FormLanguage::Base
   {
     public:
-      using Input = Input<Variational::LinearForm<FES, VectorType>>;
+      using InputType = LinearFormAssemblyInput<FES>;
 
       AssemblyBase() = default;
 
@@ -71,7 +70,7 @@ namespace Rodin::Assembly
 
       virtual ~AssemblyBase() = default;
 
-      virtual VectorType execute(const Input& data) const = 0;
+      virtual VectorType execute(const InputType& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
