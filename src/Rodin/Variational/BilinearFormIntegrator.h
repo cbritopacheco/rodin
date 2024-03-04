@@ -169,6 +169,13 @@ namespace Rodin::Variational
         return over(FlatSet<Geometry::Attribute>{attr});
       }
 
+      template <class A1, class A2, class ... As>
+      inline
+      LocalBilinearFormIntegratorBase& over(A1 a1, A2 a2, As... attrs)
+      {
+        return over(FlatSet<Geometry::Attribute>{a1, a2, attrs...});
+      }
+
       /**
        * @brief Specifies the material references over which to integrate.
        * @returns Reference to self (for method chaining)

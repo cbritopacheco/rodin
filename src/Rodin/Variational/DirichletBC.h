@@ -149,6 +149,14 @@ namespace Rodin::Variational
         return on(FlatSet<Geometry::Attribute>{bdrAtr});
       }
 
+      template <class A1, class A2, class ... As>
+      inline
+      constexpr
+      DirichletBC& on(A1 a1, A2 a2, As... as)
+      {
+        return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
+      }
+
       /**
        * @brief Specifies the regions of the boundary over which the condition
        * will be imposed.
