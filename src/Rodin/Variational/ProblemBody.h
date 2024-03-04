@@ -546,6 +546,16 @@ namespace Rodin::Variational
   }
 
   inline
+  ProblemBody<void, void> operator-(
+      const ProblemBody<void, void>& pb,
+      const LocalBilinearFormIntegratorBase& lbfi)
+  {
+    ProblemBody<void, void> res(pb);
+    res.getLocalBFIs().add(UnaryMinus(lbfi));
+    return res;
+  }
+
+  inline
   ProblemBody<void, void> operator+(
       const ProblemBody<void, void>& pb,
       const GlobalBilinearFormIntegratorBase& gbfi)

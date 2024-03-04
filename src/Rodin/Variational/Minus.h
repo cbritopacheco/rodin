@@ -26,7 +26,7 @@ namespace Rodin::Variational
   auto
   operator-(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return Sum(UnaryMinus(ScalarFunction(lhs)), rhs);
+    return Sum(ScalarFunction(lhs), UnaryMinus(rhs));
   }
 
   template <class LHSDerived, class RHSDerived>
