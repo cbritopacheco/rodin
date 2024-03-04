@@ -219,6 +219,14 @@ namespace Rodin
         return mapImpl(std::index_sequence_for<T, Ts...>(), std::forward<Function>(func));
       }
 
+      template <typename Function>
+      inline
+      constexpr
+      auto map(Function&& func)
+      {
+        return mapImpl(std::index_sequence_for<T, Ts...>(), std::forward<Function>(func));
+      }
+
       inline
       constexpr
       Tuple concatenate(const Tuple<>& other) const
@@ -256,6 +264,15 @@ namespace Rodin
       inline
       constexpr
       auto mapImpl(std::index_sequence<Is...>, Func&& func) const
+      {
+        return Utility::Make<Tuple<decltype(func(get<Is>()))...>>()(
+            func(std::get<Is>(*this))...);
+      }
+
+      template <std::size_t ... Is, typename Func>
+      inline
+      constexpr
+      auto mapImpl(std::index_sequence<Is...>, Func&& func)
       {
         return Utility::Make<Tuple<decltype(func(get<Is>()))...>>()(
             func(std::get<Is>(*this))...);

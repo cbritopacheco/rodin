@@ -18,27 +18,16 @@
 
 namespace Rodin::Assembly
 {
-  template <class OperatorType, class TrialFES, class TestFES>
-  class Input<Variational::BilinearForm<TrialFES, TestFES, OperatorType>>
+  template <class TrialFES, class TestFES>
+  class BilinearFormAssemblyInput
   {
     public:
-      Input(Variational::BilinearForm<TrialFES, TestFES, OperatorType>& bf)
-        : m_mesh(bf.getTrialFunction().getFiniteElementSpace().getMesh()),
-          m_trialFES(bf.getTrialFunction().getFiniteElementSpace()),
-          m_testFES(bf.getTestFunction().getFiniteElementSpace()),
-          m_lbfis(bf.getLocalIntegrators()), m_gbfis(bf.getGlobalIntegrators())
-      {}
-
-      Input(const Geometry::MeshBase& mesh, const TrialFES& trialFES, const TestFES& testFES,
+      BilinearFormAssemblyInput(
+          const TrialFES& trialFES, const TestFES& testFES,
           FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>& lbfis,
           FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>& gbfis)
-        : m_mesh(mesh), m_trialFES(trialFES), m_testFES(testFES), m_lbfis(lbfis), m_gbfis(gbfis)
+        : m_trialFES(trialFES), m_testFES(testFES), m_lbfis(lbfis), m_gbfis(gbfis)
       {}
-
-      const Geometry::MeshBase& getMesh() const
-      {
-        return m_mesh.get();
-      }
 
       const TrialFES& getTrialFES() const
       {
@@ -61,35 +50,27 @@ namespace Rodin::Assembly
       }
 
     private:
-      std::reference_wrapper<const Geometry::MeshBase> m_mesh;
       std::reference_wrapper<const TrialFES> m_trialFES;
       std::reference_wrapper<const TestFES> m_testFES;
       std::reference_wrapper<FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>> m_lbfis;
       std::reference_wrapper<FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>> m_gbfis;
   };
 
-  template <class OperatorType, class TrialFES, class TestFES>
-  Input(Variational::BilinearForm<TrialFES, TestFES, OperatorType>&)
-    -> Input<Variational::BilinearForm<TrialFES, TestFES, OperatorType>>;
+  template <class TrialFES, class TestFES>
+  BilinearFormAssemblyInput(
+      const TrialFES&, const TestFES&,
+      FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>&,
+      FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>&)
+    -> BilinearFormAssemblyInput<TrialFES, TestFES>;
 
-  template <class VectorType, class FES>
-  class Input<Variational::LinearForm<FES, VectorType>>
+  template <class FES>
+  class LinearFormAssemblyInput
   {
     public:
-      Input(Variational::LinearForm<FES, VectorType>& lf)
-        : m_mesh(lf.getTestFunction().getFiniteElementSpace().getMesh()),
-          m_fes(lf.getFiniteElementSpace()), m_lfis(lf.getIntegrators())
+      LinearFormAssemblyInput(
+          const FES& fes, FormLanguage::List<Variational::LinearFormIntegratorBase>& lfis)
+        : m_fes(fes), m_lfis(lfis)
       {}
-
-      Input(const Geometry::MeshBase& mesh, const FES& fes,
-          FormLanguage::List<Variational::LinearFormIntegratorBase>& lfis)
-        : m_mesh(mesh), m_fes(fes), m_lfis(lfis)
-      {}
-
-      const Geometry::MeshBase& getMesh() const
-      {
-        return m_mesh.get();
-      }
 
       const FES& getFES() const
       {
@@ -102,22 +83,41 @@ namespace Rodin::Assembly
       }
 
     private:
-      std::reference_wrapper<const Geometry::MeshBase> m_mesh;
       std::reference_wrapper<const FES> m_fes;
       std::reference_wrapper<FormLanguage::List<Variational::LinearFormIntegratorBase>> m_lfis;
   };
 
-  template <class VectorType, class FES>
-  Input(Variational::LinearForm<FES, VectorType>&)
-    -> Input<Variational::LinearForm<FES, VectorType>>;
-
-  template <class OperatorType, class ... TrialFES, class ... TestFES>
-  class Input<Tuple<Variational::BilinearForm<TrialFES, TestFES, OperatorType>...>>
-    : public Tuple<Input<Variational::BilinearForm<TrialFES, TestFES, OperatorType>>...>
+  template <class ... Ts>
+  class BilinearFormTupleAssemblyInput
   {
     public:
-      using Parent = Tuple<Input<Variational::BilinearForm<TrialFES, TestFES, OperatorType>>...>;
-      using Parent::Parent;
+      static constexpr size_t Size = sizeof...(Ts);
+
+      using Offsets = std::array<Pair<size_t, size_t>, Size>;
+
+      BilinearFormTupleAssemblyInput(const Offsets& offsets, const Tuple<Ts...>& ins)
+        : m_offsets(offsets), m_ins(ins)
+      {}
+
+      const Tuple<Ts...>& getTuple() const
+      {
+        return m_ins;
+      }
+
+      const Offsets& getOffsets() const
+      {
+        return m_offsets;
+      }
+
+      BilinearFormTupleAssemblyInput& setOffsets(const Offsets& offsets)
+      {
+        m_offsets = offsets;
+        return *this;
+      }
+
+    private:
+      std::array<Pair<size_t, size_t>, Size> m_offsets;
+      const Tuple<Ts...> m_ins;
   };
 }
 

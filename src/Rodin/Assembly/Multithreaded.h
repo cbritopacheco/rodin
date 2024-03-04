@@ -64,7 +64,7 @@ namespace Rodin::Assembly
           std::vector<Eigen::Triplet<Scalar>>,
           Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>;
 
-      using Input = typename Parent::Input;
+      using InputType = typename Parent::InputType;
 
       using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
 
@@ -102,7 +102,7 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const Input& input) const override
+      OperatorType execute(const InputType& input) const override
       {
         using TripletVector = std::vector<Eigen::Triplet<Scalar>>;
         const size_t capacity = input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
@@ -110,10 +110,11 @@ namespace Rodin::Assembly
         res.clear();
         res.reserve(capacity);
         const size_t threadCount = getThreadPool().getThreadCount();
+        const auto& mesh = input.getTestFES().getMesh();
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::MultithreadedIteration seq(input.getMesh(), bfi.getRegion());
+          Internal::MultithreadedIteration seq(mesh, bfi.getRegion());
           const size_t d = seq.getDimension();
           auto loop =
             [&](const Index start, const Index end)
@@ -124,7 +125,7 @@ namespace Rodin::Assembly
               {
                 if (seq.filter(i))
                 {
-                  if (attrs.size() == 0 || attrs.count(input.getMesh().getAttribute(d, i)))
+                  if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
                     const auto& trialDOFs = input.getTrialFES().getDOFs(d, i);
@@ -159,7 +160,7 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::MultithreadedIteration testseq(input.getMesh(), bfi.getTestRegion());
+          Internal::MultithreadedIteration testseq(mesh, bfi.getTestRegion());
           const size_t d = testseq.getDimension();
           auto loop =
             [&](const Index start, const Index end)
@@ -170,10 +171,10 @@ namespace Rodin::Assembly
               {
                 if (testseq.filter(i))
                 {
-                  if (testAttrs.size() == 0 || testAttrs.count(input.getMesh().getAttribute(d, i)))
+                  if (testAttrs.size() == 0 || testAttrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto teIt = testseq.getIterator(i);
-                    Internal::SequentialIteration trialseq{ input.getMesh(), tl_gbfi->getTrialRegion() };
+                    Internal::SequentialIteration trialseq{ mesh, tl_gbfi->getTrialRegion() };
                     for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                     {
                       if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
@@ -272,7 +273,7 @@ namespace Rodin::Assembly
           Math::SparseMatrix,
           Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>;
 
-      using Input = typename Parent::Input;
+      using InputType = typename Parent::InputType;
       using OperatorType = Math::SparseMatrix;
 
       Multithreaded()
@@ -299,10 +300,9 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const Input& input) const override
+      OperatorType execute(const InputType& input) const override
       {
         const auto triplets = m_assembly.execute({
-            input.getMesh(),
             input.getTrialFES(), input.getTestFES(),
             input.getLocalBFIs(), input.getGlobalBFIs() });
         OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
@@ -334,7 +334,7 @@ namespace Rodin::Assembly
         AssemblyBase<
           Math::Matrix,
           Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>;
-      using Input = typename Parent::Input;
+      using InputType = typename Parent::InputType;
       using OperatorType = Math::Matrix;
 
 #ifdef RODIN_MULTITHREADED
@@ -371,15 +371,16 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const Input& input) const override
+      OperatorType execute(const InputType& input) const override
       {
         Math::Matrix res(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
         auto& threadPool = getThreadPool();
+        const auto& mesh = input.getTestFES().getMesh();
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::MultithreadedIteration seq(input.getMesh(), bfi.getRegion());
+          Internal::MultithreadedIteration seq(mesh, bfi.getRegion());
           const size_t d = seq.getDimension();
           auto loop =
             [&](const Index start, const Index end)
@@ -391,7 +392,7 @@ namespace Rodin::Assembly
               {
                 if (seq.filter(i))
                 {
-                  if (attrs.size() == 0 || attrs.count(input.getMesh().getAttribute(d, i)))
+                  if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
                     const auto& trialDOFs = input.getTrialFES().getDOFs(d, i);
@@ -423,7 +424,7 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::MultithreadedIteration testseq(input.getMesh(), bfi.getTestRegion());
+          Internal::MultithreadedIteration testseq(mesh, bfi.getTestRegion());
           const size_t d = testseq.getDimension();
           const auto loop =
             [&](const Index start, const Index end)
@@ -435,10 +436,10 @@ namespace Rodin::Assembly
               {
                 if (testseq.filter(i))
                 {
-                  if (testAttrs.size() == 0 || testAttrs.count(input.getMesh().getAttribute(d, i)))
+                  if (testAttrs.size() == 0 || testAttrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto teIt = testseq.getIterator(i);
-                    Internal::SequentialIteration trialseq{ input.getMesh(), tl_gbfi->getTrialRegion() };
+                    Internal::SequentialIteration trialseq{ mesh, tl_gbfi->getTrialRegion() };
                     for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                     {
                       if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
@@ -520,7 +521,7 @@ namespace Rodin::Assembly
   {
     public:
       using Parent = AssemblyBase<Math::Vector, Variational::LinearForm<FES, Math::Vector>>;
-      using Input = typename Parent::Input;
+      using InputType = typename Parent::InputType;
       using VectorType = Math::Vector;
 
 #ifdef RODIN_MULTITHREADED
@@ -557,14 +558,15 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the vector associated to the
        * linear form.
        */
-      VectorType execute(const Input& input) const override
+      VectorType execute(const InputType& input) const override
       {
         VectorType res(input.getFES().getSize());
         res.setZero();
+        const auto& mesh = input.getFES().getMesh();
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::MultithreadedIteration seq(input.getMesh(), lfi.getRegion());
+          Internal::MultithreadedIteration seq(mesh, lfi.getRegion());
           const size_t d = seq.getDimension();
           const auto loop =
             [&](const Index start, const Index end)
@@ -576,7 +578,7 @@ namespace Rodin::Assembly
               {
                 if (seq.filter(i))
                 {
-                  if (attrs.size() == 0 || attrs.count(input.getMesh().getAttribute(d, i)))
+                  if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
                     const auto& dofs = input.getFES().getDOFs(d, i);
