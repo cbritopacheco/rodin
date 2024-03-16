@@ -49,6 +49,7 @@ int main(int, char**)
 {
   MMG::Mesh mesh;
   mesh.load("Unnamed1-Fusion001.o.mesh", IO::FileFormat::MEDIT);
+  mesh.save("Omega0.mesh");
   // mesh.load("Omega.mesh", IO::FileFormat::MEDIT);
 
   Scalar hmax = 0.5;
