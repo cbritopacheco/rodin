@@ -1,3 +1,6 @@
+#ifndef RODIN_GEOMETRY_TYPES_H
+#define RODIN_GEOMETRY_TYPES_H
+
 #include <vector>
 #include <boost/range/adaptors.hpp>
 
@@ -13,3 +16,5 @@ namespace Rodin::Geometry
   /// Represents the incidence of a polytope.
   using Incidence = std::vector<IndexSet>;
 }
+
+#endif
