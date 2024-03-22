@@ -93,15 +93,18 @@ namespace Rodin::Assembly
     public:
       static constexpr size_t Size = sizeof...(Ts);
 
-      using Offsets = std::array<Pair<size_t, size_t>, Size>;
+      using Sizes = std::array<Pair<size_t, size_t>, Size>;
 
-      BilinearFormTupleAssemblyInput(const Offsets& offsets, const Tuple<Ts...>& ins)
-        : m_offsets(offsets), m_ins(ins)
+      using Offsets = Sizes;
+
+      BilinearFormTupleAssemblyInput(
+          const Sizes& sizes, const Offsets& offsets, const Tuple<Ts...>& ins)
+        : m_sizes(sizes), m_offsets(offsets), m_ins(ins)
       {}
 
-      const Tuple<Ts...>& getTuple() const
+      const Sizes& getSizes() const
       {
-        return m_ins;
+        return m_sizes;
       }
 
       const Offsets& getOffsets() const
@@ -109,14 +112,50 @@ namespace Rodin::Assembly
         return m_offsets;
       }
 
-      BilinearFormTupleAssemblyInput& setOffsets(const Offsets& offsets)
+      const Tuple<Ts...>& getTuple() const
       {
-        m_offsets = offsets;
-        return *this;
+        return m_ins;
       }
 
     private:
-      std::array<Pair<size_t, size_t>, Size> m_offsets;
+      Sizes m_sizes;
+      Offsets m_offsets;
+      const Tuple<Ts...> m_ins;
+  };
+
+  template <class ... Ts>
+  class LinearFormTupleAssemblyInput
+  {
+    public:
+      static constexpr size_t Size = sizeof...(Ts);
+
+      using Sizes = std::array<size_t, Size>;
+
+      using Offsets = Sizes;
+
+      LinearFormTupleAssemblyInput(
+          const Sizes& sizes, const Offsets& offsets, const Tuple<Ts...>& ins)
+        : m_sizes(sizes), m_offsets(offsets), m_ins(ins)
+      {}
+
+      const Sizes& getSizes() const
+      {
+        return m_sizes;
+      }
+
+      const Offsets& getOffsets() const
+      {
+        return m_offsets;
+      }
+
+      const Tuple<Ts...>& getTuple() const
+      {
+        return m_ins;
+      }
+
+    private:
+      Sizes m_sizes;
+      Offsets m_offsets;
       const Tuple<Ts...> m_ins;
   };
 }

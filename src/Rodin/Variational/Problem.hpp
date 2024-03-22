@@ -46,33 +46,13 @@ namespace Rodin::Variational
   ::operator=(const ProblemBody<Math::SparseMatrix, Math::Vector>& rhs)
   {
     for (auto& bfi : rhs.getLocalBFIs())
-    {
-      if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
-        TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
-      if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
-        TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
       m_bilinearForm.add(bfi);
-    }
 
     for (auto& bfi : rhs.getGlobalBFIs())
-    {
-      if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
-        TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
-      if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
-        TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
       m_bilinearForm.add(bfi);
-    }
 
     for (auto& lfi : rhs.getLFIs())
-    {
-      if (lfi.getTestFunction().getUUID() != getTestFunction().getUUID())
-      {
-
-        std::cout << getTestFunction().getUUID() << std::endl;
-        TestFunctionMismatchException(lfi.getTestFunction()) << Alert::Raise;
-      }
       m_linearForm.add(UnaryMinus(lfi)); // Negate every linear form
-    }
 
     m_bfs = rhs.getBFs();
 
@@ -87,10 +67,6 @@ namespace Rodin::Variational
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator+=(const LocalBilinearFormIntegratorBase& rhs)
   {
-    if (rhs.getTrialFunction().getUUID() != getTrialFunction().getUUID())
-      TrialFunctionMismatchException(rhs.getTrialFunction()) << Alert::Raise;
-    if (rhs.getTestFunction().getUUID() != getTestFunction().getUUID())
-      TestFunctionMismatchException(rhs.getTestFunction()) << Alert::Raise;
     m_bilinearForm.add(rhs);
     return *this;
   }
@@ -100,10 +76,6 @@ namespace Rodin::Variational
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator-=(const LocalBilinearFormIntegratorBase& rhs)
   {
-    if (rhs.getTrialFunction().getUUID() != getTrialFunction().getUUID())
-      TrialFunctionMismatchException(rhs.getTrialFunction()) << Alert::Raise;
-    if (rhs.getTestFunction().getUUID() != getTestFunction().getUUID())
-      TestFunctionMismatchException(rhs.getTestFunction()) << Alert::Raise;
     m_bilinearForm.add(UnaryMinus(rhs));
     return *this;
   }
@@ -113,8 +85,6 @@ namespace Rodin::Variational
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator+=(const LinearFormIntegratorBase& rhs)
   {
-    if (rhs.getTestFunction().getUUID() != getTestFunction().getUUID())
-      TestFunctionMismatchException(rhs.getTestFunction()) << Alert::Raise;
     m_linearForm.add(rhs);
     return *this;
   }
@@ -124,8 +94,6 @@ namespace Rodin::Variational
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator-=(const LinearFormIntegratorBase& rhs)
   {
-    if (rhs.getTestFunction().getUUID() != getTestFunction().getUUID())
-      TestFunctionMismatchException(rhs.getTestFunction()) << Alert::Raise;
     m_linearForm.add(UnaryMinus(rhs));
     return *this;
   }
@@ -431,7 +399,8 @@ namespace Rodin::Variational
                           uv.first().get(), uv.second().get());
                   }))
   {
-    m_assembly.reset(new SequentialAssembly);
+    m_bfa.reset(new BilinearFormTupleSequentialAssembly);
+    m_lfa.reset(new LinearFormTupleSequentialAssembly);
   }
 
   template <class U1, class U2, class ... Us>
@@ -439,7 +408,8 @@ namespace Rodin::Variational
   Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix, Math::Vector>::assemble()
   {
     m_us.apply([](auto& u) { u.get().emplace(); });
-    auto t =
+
+    auto bt =
       m_bft.map(
           [](auto& bf)
           {
@@ -450,7 +420,93 @@ namespace Rodin::Variational
                 bf.getLocalIntegrators(), bf.getGlobalIntegrators());
           });
 
+    auto lt =
+      m_lft.map(
+          [](auto& lf)
+          {
+            auto& v = lf.getTestFunction();
+            return Assembly::LinearFormAssemblyInput(
+                v.getFiniteElementSpace(), lf.getIntegrators());
+          });
+
+    // Get sizes of finite element spaces
+    std::array<Pair<size_t, size_t>, decltype(bt)::Size> bsz;
+    bt.map([](const auto& in)
+          { return Pair(in.getTrialFES().getSize(), in.getTestFES().getSize()); })
+      .iapply([&](const Index i, auto& v)
+          { bsz[i] = std::move(v); });
+
+    std::array<size_t, decltype(lt)::Size> lsz;
+    lt.map([](const auto& in)
+          { return in.getFES().getSize(); })
+      .iapply([&](const Index i, auto& v)
+          { lsz[i] = std::move(v); });
+
+    // Compute block offsets to build the triplets
+    std::array<Pair<size_t, size_t>, decltype(bt)::Size> boffsets;
+    boffsets[0].first() = 0;
+    boffsets[0].second() = 0;
+    for (size_t i = 1; i < boffsets.size(); i++)
+    {
+      boffsets[i].first() = bsz[i].first() + boffsets[i - 1].first();
+      boffsets[i].second() = bsz[i].second() + boffsets[i - 1].second();
+    }
+
+    std::array<size_t, decltype(lt)::Size> loffsets;
+    loffsets[0] = 0;
+    for (size_t i = 1; i < loffsets.size(); i++)
+      loffsets[i] = lsz[i] + loffsets[i - 1];
+
+    m_stiffness = m_bfa->execute(Assembly::BilinearFormTupleAssemblyInput(bsz, boffsets, bt));
+    m_mass = m_lfa->execute(Assembly::LinearFormTupleAssemblyInput(lsz, loffsets, lt));
+
     m_assembled = true;
+
+    return *this;
+  }
+
+  template <class U1, class U2, class ... Us>
+  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix, Math::Vector>
+  ::operator=(const ProblemBody<Math::SparseMatrix, Math::Vector>& rhs)
+  {
+    for (auto& bfi : rhs.getLocalBFIs())
+    {
+      m_bft.apply(
+          [&](auto& bf)
+          {
+            if (bfi.getTrialFunction().getUUID() == bf.getTrialFunction().getUUID() &&
+                bfi.getTestFunction().getUUID() == bf.getTestFunction().getUUID())
+            {
+              bf.add(bfi);
+            }
+          });
+    }
+
+    for (auto& bfi : rhs.getGlobalBFIs())
+    {
+      m_bft.apply(
+          [&](auto& bf)
+          {
+            if (bfi.getTrialFunction().getUUID() == bf.getTrialFunction().getUUID() &&
+                bfi.getTestFunction().getUUID() == bf.getTestFunction().getUUID())
+            {
+              bf.add(bfi);
+            }
+          });
+    }
+
+    for (auto& lfi : rhs.getLFIs())
+    {
+      m_lft.apply(
+          [&](auto& lf)
+          {
+            if (lfi.getTestFunction().getUUID() == lf.getTestFunction().getUUID())
+            {
+              lf.add(lfi);
+            }
+          });
+    }
 
     return *this;
   }

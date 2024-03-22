@@ -15,6 +15,9 @@
 
 #include "Rodin/Assembly/ForwardDecls.h"
 
+#include "Exceptions/TrialFunctionMismatchException.h"
+#include "Exceptions/TestFunctionMismatchException.h"
+
 #include "ForwardDecls.h"
 #include "TrialFunction.h"
 #include "TestFunction.h"
@@ -311,6 +314,10 @@ namespace Rodin::Variational
        */
       virtual BilinearForm& add(const LocalBilinearFormIntegratorBase& bfi)
       {
+        if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+          TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
+        if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
         m_lbfis.add(bfi);
         return *this;
       }
@@ -348,6 +355,10 @@ namespace Rodin::Variational
        */
       virtual BilinearForm& add(const GlobalBilinearFormIntegratorBase& bfi)
       {
+        if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+          TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
+        if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
         m_gbfis.add(bfi);
         return *this;
       }
