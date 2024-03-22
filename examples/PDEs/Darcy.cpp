@@ -15,60 +15,6 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-    template <class T>
-    struct IsTrialFunctionReferenceWrapper
-    {
-      static constexpr Boolean Value = false;
-    };
-
-    template <class T>
-    struct IsTrialFunctionReferenceWrapper<std::reference_wrapper<T>>
-    {
-      static constexpr Boolean Value = IsTrialFunction<T>::Value;
-    };
-
-    template <class T>
-    struct IsTestFunctionReferenceWrapper
-    {
-      static constexpr Boolean Value = false;
-    };
-
-    template <class T>
-    struct IsTestFunctionReferenceWrapper<std::reference_wrapper<T>>
-    {
-      static constexpr Boolean Value = IsTestFunction<T>::Value;
-    };
-
-template <class T>
-struct IsFloatingPoint
-{
-  static constexpr Boolean Value = std::is_floating_point_v<std::decay_t<T>>;
-};
-
-template <class T>
-auto foo(const T& v)
-{
-  return 2 * v;
-}
-
-template <class T>
-class Foo
-{
-  public:
-    Foo(const T& v)
-      : m_v(v)
-    {}
-
-    const T& v() const
-    {
-      return m_v;
-    }
-
-  private:
-    T m_v;
-};
-
-
 int main(int argc, char** argv)
 {
   // Load mesh
@@ -87,6 +33,19 @@ int main(int argc, char** argv)
   TestFunction  q(ph);
 
   Problem darcy(u, p, v, q);
+  darcy = Integral(Grad(u), Grad(v))
+        - Integral(v);
+        //+ DirichletBC(u, Zero());
+  darcy.assemble();
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(v);
+          //+ DirichletBC(u, Zero());
+  poisson.assemble();
+
+  std::cout << darcy.getStiffnessOperator().norm() << std::endl;
+  std::cout << poisson.getStiffnessOperator().norm() << std::endl;
 
   // Assembly::Sequential<std::vector<Eigen::Triplet<Scalar>>, decltype(t)> assembly;
 

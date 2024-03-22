@@ -15,6 +15,7 @@
 #include "Rodin/Assembly/Multithreaded.h"
 
 #include "Rodin/Alert/MemberFunctionException.h"
+#include "Exceptions/TestFunctionMismatchException.h"
 
 #include "ForwardDecls.h"
 #include "TestFunction.h"
@@ -230,6 +231,8 @@ namespace Rodin::Variational
        */
       virtual LinearFormBase& add(const LinearFormIntegratorBase& lfi)
       {
+        if (lfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(lfi.getTestFunction()) << Alert::Raise;
         m_lfis.add(lfi);
         return *this;
       }

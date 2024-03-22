@@ -332,7 +332,11 @@ namespace Rodin::Variational
         typename Utility::Wrap<TestFESTuple>::template Type<LinearFormType>;
 
     public:
-      using SequentialAssembly = Assembly::Sequential<OperatorType, BilinearFormTuple>;
+      using BilinearFormTupleSequentialAssembly =
+        Assembly::Sequential<OperatorType, BilinearFormTuple>;
+
+      using LinearFormTupleSequentialAssembly =
+        Assembly::Sequential<VectorType, LinearFormTuple>;
 
       Problem(U1& u1, U2& u2, Us&... us);
 
@@ -341,10 +345,7 @@ namespace Rodin::Variational
       void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override
       {}
 
-      Problem& operator=(const ProblemBody<OperatorType, VectorType>& rhs) override
-      {
-        return *this;
-      }
+      Problem& operator=(const ProblemBody<OperatorType, VectorType>& rhs) override;
 
       virtual VectorType& getMassVector() override
       {
@@ -384,7 +385,8 @@ namespace Rodin::Variational
       VectorType      m_guess;
       OperatorType    m_stiffness;
 
-      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>> m_assembly;
+      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>> m_bfa;
+      std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>> m_lfa;
   };
 
   template <class U1, class U2, class ... Us>

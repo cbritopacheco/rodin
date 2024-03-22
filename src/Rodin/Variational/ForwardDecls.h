@@ -247,6 +247,9 @@ namespace Rodin::Variational
   template <class ... Values>
   class ScalarFunction;
 
+  template <class Range>
+  class Zero;
+
   /**
    * @brief Base class for vector-valued functions defined on a mesh.
    *

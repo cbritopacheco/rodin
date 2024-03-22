@@ -300,23 +300,6 @@ namespace Rodin::Assembly
 
         const auto& t = input.getTuple();
 
-        // Get sizes of finite element spaces
-        std::array<Pair<size_t, size_t>, AssemblyTuple::Size> sz;
-        t.map([](const auto& in)
-              { return Pair(in.getTrialFES().getSize(), in.getTestFES().getSize()); })
-         .iapply([&](const Index i, auto& v)
-                 { sz[i] = std::move(v); });
-
-        // Compute block offsets to build the triplets
-        // std::array<Pair<size_t, size_t>, AssemblyTuple::Size> offset;
-        // offset[0].first() = 0;
-        // offset[0].second() = 0;
-        // for (size_t i = 1; i < offset.size(); i++)
-        // {
-        //   offset[i].first() = sz[i].first() + offset[i - 1].first();
-        //   offset[i].second() = sz[i].second() + offset[i - 1].second();
-        // }
-
         // Compute each block of triplets
         std::array<std::vector<Eigen::Triplet<Scalar>>, AssemblyTuple::Size> ts;
         assembly.zip(t)
@@ -384,19 +367,60 @@ namespace Rodin::Assembly
           Sequential<
             std::vector<Eigen::Triplet<Scalar>>,
             Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>...>> assembly;
-          // const auto triplets = assembly.execute(input);
+          const auto& offsets = input.getOffsets();
+          const auto& sizes = input.getSizes();
+          assert(offsets.size() > 0);
+          size_t trsz = 0;
+          size_t tesz = 0;
+          for (const auto& p : sizes)
+          {
+            trsz += p.first();
+            tesz += p.second();
+          }
+          OperatorType res(tesz, trsz);
+          const auto triplets = assembly.execute(input);
+          res.setFromTriplets(triplets.begin(), triplets.end());
+          return res;
+        }
 
-          const auto t =
-            input.getTuple().map(
-                [](const auto& v)
-                {
-                  return BilinearFormAssemblyInput{
-                    v.getTrialFES(), v.getTestFES(), v.getLocalBFIs(), v.getGlobalBFIs() };
-                });
+        inline
+        Sequential* copy() const noexcept override
+        {
+          return new Sequential(*this);
+        }
+    };
 
-          // OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
-          // res.setFromTriplets(triplets.begin(), triplets.end());
-          OperatorType res;
+  template <class ... FES>
+  class Sequential<
+    Math::Vector,
+    Tuple<Variational::LinearForm<FES, Math::Vector>...>> final
+      : public AssemblyBase<
+          Math::Vector,
+          Tuple<Variational::LinearForm<FES, Math::Vector>...>>
+    {
+      public:
+        using Parent =
+          AssemblyBase<
+            Math::Vector,
+            Tuple<Variational::LinearForm<FES, Math::Vector>...>>;
+
+        using InputType = typename Parent::InputType;
+
+        using VectorType = Math::Vector;
+
+        Sequential() = default;
+
+        Sequential(const Sequential& other)
+          : Parent(other)
+        {}
+
+        Sequential(Sequential&& other)
+          : Parent(std::move(other))
+        {}
+
+        VectorType execute(const InputType& input) const override
+        {
+          VectorType res;
           return res;
         }
 

@@ -27,6 +27,7 @@
 #include "Variational/LinearForm.h"
 #include "Variational/BilinearForm.h"
 
+#include "Variational/Zero.h"
 #include "Variational/Abs.h"
 #include "Variational/Dot.h"
 #include "Variational/Pow.h"

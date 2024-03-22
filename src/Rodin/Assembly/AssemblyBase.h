@@ -40,7 +40,8 @@ namespace Rodin::Assembly
   {
     public:
       static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
-      using InputType = BilinearFormTupleAssemblyInput<BilinearFormAssemblyInput<TrialFES, TestFES>...>;
+      using InputType =
+        BilinearFormTupleAssemblyInput<BilinearFormAssemblyInput<TrialFES, TestFES>...>;
 
       AssemblyBase() = default;
 
@@ -61,6 +62,27 @@ namespace Rodin::Assembly
   {
     public:
       using InputType = LinearFormAssemblyInput<FES>;
+
+      AssemblyBase() = default;
+
+      AssemblyBase(const AssemblyBase&) = default;
+
+      AssemblyBase(AssemblyBase&&) = default;
+
+      virtual ~AssemblyBase() = default;
+
+      virtual VectorType execute(const InputType& data) const = 0;
+
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
+
+  template <class VectorType, class ... FES>
+  class AssemblyBase<VectorType, Tuple<Variational::LinearForm<FES, VectorType>...>>
+  {
+    public:
+      static_assert(sizeof...(FES) == sizeof...(FES));
+      using InputType =
+        LinearFormTupleAssemblyInput<LinearFormAssemblyInput<FES>...>;
 
       AssemblyBase() = default;
 

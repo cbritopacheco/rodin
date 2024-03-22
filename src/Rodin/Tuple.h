@@ -182,6 +182,14 @@ namespace Rodin
       template <class Function>
       inline
       constexpr
+      void apply(Function&& func) const
+      {
+        applyImpl(std::forward<Function>(func), std::index_sequence_for<T, Ts...>{});
+      }
+
+      template <class Function>
+      inline
+      constexpr
       void iapply(Function&& func)
       {
         iapplyImpl(std::forward<Function>(func), std::index_sequence_for<T, Ts...>{});
@@ -248,6 +256,14 @@ namespace Rodin
       inline
       constexpr
       void applyImpl(Function&& func, std::index_sequence<Indices...>)
+      {
+        (func(get<Indices>()), ...);
+      }
+
+      template <class Function, std::size_t ... Indices>
+      inline
+      constexpr
+      void applyImpl(Function&& func, std::index_sequence<Indices...>) const
       {
         (func(get<Indices>()), ...);
       }
