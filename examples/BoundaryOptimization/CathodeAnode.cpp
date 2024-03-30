@@ -48,9 +48,9 @@ size_t rmc(MeshBase& mesh);
 int main(int, char**)
 {
   MMG::Mesh mesh;
-  mesh.load("Unnamed1-Fusion001.o.mesh", IO::FileFormat::MEDIT);
-  mesh.save("Omega0.mesh");
-  // mesh.load("Omega.mesh", IO::FileFormat::MEDIT);
+  // mesh.load("Unnamed1-Fusion001.o.mesh", IO::FileFormat::MEDIT);
+  // mesh.save("Omega0.mesh");
+  mesh.load("Omega.mesh", IO::FileFormat::MEDIT);
 
   Scalar hmax = 0.5;
 
@@ -99,7 +99,7 @@ int main(int, char**)
   // }
 
   std::ofstream fObj("obj.txt");
-  size_t i = 0;
+  size_t i = 208;
   size_t regionCount;
   while (i < maxIt)
   {

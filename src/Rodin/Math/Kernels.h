@@ -52,6 +52,48 @@ namespace Rodin::Math::Kernels
       }
     }
   }
+
+  inline
+  static void eliminate(SparseMatrix& stiffness, Vector& mass,
+      const IndexMap<Scalar>& dofs, size_t offset = 0)
+  {
+    Scalar* const valuePtr = stiffness.valuePtr();
+    Math::SparseMatrix::StorageIndex* const outerPtr = stiffness.outerIndexPtr();
+    Math::SparseMatrix::StorageIndex* const innerPtr = stiffness.innerIndexPtr();
+    // Move essential degrees of freedom in the LHS to the RHS
+    for (const auto& kv : dofs)
+    {
+      const Index& global = kv.first + offset;
+      const auto& dof = kv.second;
+      for (Math::SparseMatrix::InnerIterator it(stiffness, global); it; ++it)
+         mass.coeffRef(it.row()) -= it.value() * dof;
+    }
+    for (const auto& [global, dof] : dofs)
+    {
+      // Impose essential degrees of freedom on RHS
+      mass.coeffRef(global + offset) = dof;
+
+      // Impose essential degrees of freedom on LHS
+      for (auto i = outerPtr[global + offset]; i < outerPtr[global + offset + 1]; ++i)
+      {
+        assert(innerPtr[i] >= 0);
+        // Assumes CCS format
+        const Index row = innerPtr[i];
+        valuePtr[i] = Scalar(row == global + offset);
+        if (row != global + offset)
+        {
+          for (auto k = outerPtr[row]; 1; k++)
+          {
+            if (static_cast<Index>(innerPtr[k]) == global + offset)
+            {
+               valuePtr[k] = 0.0;
+               break;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 #endif

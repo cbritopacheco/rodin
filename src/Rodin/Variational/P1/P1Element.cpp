@@ -294,8 +294,8 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            auto x = r.x();
-            auto y = r.y();
+            const Scalar x = r.x();
+            const Scalar y = r.y();
             return x * y - x - y + 1;
           }
           case 1:
@@ -427,13 +427,13 @@ namespace Rodin::Variational
           case 1:
           {
             out.coeffRef(0) = 1 - r.y();
-            out.coeffRef(1) = -r.y();
+            out.coeffRef(1) = -r.x();
             return;
           }
           case 2:
           {
-            out.coeffRef(0) = 1 - r.x();
-            out.coeffRef(1) = -r.x();
+            out.coeffRef(0) = -r.y();
+            out.coeffRef(1) = 1 - r.x();
             return;
           }
           case 3:

@@ -175,8 +175,6 @@ namespace Rodin::Variational
 
       Problem& imposePeriodicBCs();
 
-      Problem& imposeDirichletBCs();
-
       Problem& operator+=(const LocalBilinearFormIntegratorBase& lfi);
 
       Problem& operator-=(const LocalBilinearFormIntegratorBase& lfi);
@@ -342,8 +340,7 @@ namespace Rodin::Variational
 
       Problem& assemble() override;
 
-      void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override
-      {}
+      void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override;
 
       Problem& operator=(const ProblemBody<OperatorType, VectorType>& rhs) override;
 
@@ -380,10 +377,18 @@ namespace Rodin::Variational
       LinearFormTuple   m_lft;
       BilinearFormTuple m_bft;
 
+      EssentialBoundary m_dbcs;
+
       bool            m_assembled;
       VectorType      m_mass;
       VectorType      m_guess;
       OperatorType    m_stiffness;
+
+      std::array<size_t, TrialFunctionTuple::Size> m_trialOffsets;
+      std::array<size_t, TestFunctionTuple::Size> m_testOffsets;
+
+      boost::bimap<FormLanguage::Base::UUID, size_t> m_trialUUIDMap;
+      boost::bimap<FormLanguage::Base::UUID, size_t> m_testUUIDMap;
 
       std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>> m_bfa;
       std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>> m_lfa;

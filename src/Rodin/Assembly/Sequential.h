@@ -367,17 +367,7 @@ namespace Rodin::Assembly
           Sequential<
             std::vector<Eigen::Triplet<Scalar>>,
             Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>...>> assembly;
-          const auto& offsets = input.getOffsets();
-          const auto& sizes = input.getSizes();
-          assert(offsets.size() > 0);
-          size_t trsz = 0;
-          size_t tesz = 0;
-          for (const auto& p : sizes)
-          {
-            trsz += p.first();
-            tesz += p.second();
-          }
-          OperatorType res(tesz, trsz);
+          OperatorType res(input.getRows(), input.getColumns());
           const auto triplets = assembly.execute(input);
           res.setFromTriplets(triplets.begin(), triplets.end());
           return res;
@@ -420,7 +410,24 @@ namespace Rodin::Assembly
 
         VectorType execute(const InputType& input) const override
         {
-          VectorType res;
+          using AssemblyTuple =
+            Tuple<Sequential<Math::Vector, Variational::LinearForm<FES, Math::Vector>>...>;
+
+          AssemblyTuple assembly;
+
+          const auto& t = input.getTuple();
+
+          // Compute each block of triplets
+          auto vs = assembly.zip(t)
+                            .map([](const auto& p) { return p.first().execute(p.second()); });
+
+          Math::Vector res = Math::Vector::Zero(input.getSize());
+          const auto& offsets = input.getOffsets();
+          vs.iapply(
+              [&](size_t i, const auto& v)
+              {
+                res.segment(offsets[i], v.size()) = v;
+              });
           return res;
         }
 

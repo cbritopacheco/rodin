@@ -19,7 +19,8 @@ int main(int, char**)
 {
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.load("../resources/mfem/StarSquare.mfem.mesh");
   mesh.getConnectivity().compute(1, 2);
 
   // Functions
@@ -38,7 +39,7 @@ int main(int, char**)
           + DirichletBC(u, g);
 
   // Solve the problem
-  Solver::SparseLU solver;
+  Solver::CG solver;
   poisson.solve(solver);
 
   // Save solution

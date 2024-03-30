@@ -171,6 +171,29 @@ namespace Rodin::IO
           }
           continue; // Continue the while loop
         }
+        case MEDIT::Keyword::Quadrilaterals:
+        {
+          m_build.reserve(2, *count);
+          for (size_t i = 0; i < *count; i++)
+          {
+            getline(is, line);
+            auto data = MEDIT::ParseEntity(4)(line.begin(), line.end());
+            if (!data)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to parse Quadrilateral on line "
+                << std::to_string(m_currentLineNumber)
+                << "."
+                << Alert::Raise;
+            }
+            data->vertices -= 1;
+            std::swap(data->vertices(2), data->vertices(3));
+            m_build.polytope(Geometry::Polytope::Type::Quadrilateral, std::move(data->vertices));
+            if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
+              m_build.attribute({ 2, i }, data->attribute);
+          }
+          continue; // Continue the while loop
+        }
         case MEDIT::Keyword::Tetrahedra:
         {
           m_build.reserve(3, *count);
@@ -279,9 +302,38 @@ namespace Rodin::IO
             {
               if (it->getGeometry() == g)
               {
-                for (const auto& v : it->getVertices())
-                  os << v + 1 << " ";
-                os << it->getAttribute() << '\n';
+                const auto& vertices = it->getVertices();
+                switch (it->getGeometry())
+                {
+                  case Geometry::Polytope::Type::Point:
+                  {
+                    os << vertices(0) + 1;
+                    break;
+                  }
+                  case Geometry::Polytope::Type::Triangle:
+                  {
+                    os << vertices(0) + 1 << ' ' << vertices(1) + 1 << ' ' << vertices(2) + 1;
+                    break;
+                  }
+                  case Geometry::Polytope::Type::Segment:
+                  {
+                    os << vertices(0) + 1 << ' ' << vertices(1) + 1;
+                    break;
+                  }
+                  case Geometry::Polytope::Type::Tetrahedron:
+                  {
+                    os << vertices(0) + 1 << ' ' << vertices(1) + 1 << ' '
+                       << vertices(2) + 1 << ' ' << vertices(3) + 1;
+                    break;
+                  }
+                  case Geometry::Polytope::Type::Quadrilateral:
+                  {
+                    os << vertices(0) + 1 << ' ' << vertices(1) + 1 << ' '
+                       << vertices(3) + 1 << ' ' << vertices(2) + 1;
+                    break;
+                  }
+                }
+                os << ' ' << it->getAttribute() << '\n';
               }
             }
           }

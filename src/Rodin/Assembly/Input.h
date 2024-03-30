@@ -12,6 +12,7 @@
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/FormLanguage/List.h"
+#include "Rodin/FormLanguage/Base.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -93,32 +94,41 @@ namespace Rodin::Assembly
     public:
       static constexpr size_t Size = sizeof...(Ts);
 
-      using Sizes = std::array<Pair<size_t, size_t>, Size>;
-
-      using Offsets = Sizes;
+      using Offsets = std::array<Pair<size_t, size_t>, sizeof...(Ts)>;
 
       BilinearFormTupleAssemblyInput(
-          const Sizes& sizes, const Offsets& offsets, const Tuple<Ts...>& ins)
-        : m_sizes(sizes), m_offsets(offsets), m_ins(ins)
+          size_t rows, size_t cols,
+          const Offsets& offsets,
+          const Tuple<Ts...>& ins)
+        : m_rows(rows), m_cols(cols), m_offsets(offsets), m_ins(ins)
       {}
 
-      const Sizes& getSizes() const
+      inline
+      size_t getRows() const
       {
-        return m_sizes;
+        return m_rows;
       }
 
+      inline
+      size_t getColumns() const
+      {
+        return m_cols;
+      }
+
+      inline
       const Offsets& getOffsets() const
       {
         return m_offsets;
       }
 
+      inline
       const Tuple<Ts...>& getTuple() const
       {
         return m_ins;
       }
 
     private:
-      Sizes m_sizes;
+      size_t m_rows, m_cols;
       Offsets m_offsets;
       const Tuple<Ts...> m_ins;
   };
@@ -129,32 +139,33 @@ namespace Rodin::Assembly
     public:
       static constexpr size_t Size = sizeof...(Ts);
 
-      using Sizes = std::array<size_t, Size>;
-
-      using Offsets = Sizes;
+      using Offsets = std::array<size_t, sizeof...(Ts)>;
 
       LinearFormTupleAssemblyInput(
-          const Sizes& sizes, const Offsets& offsets, const Tuple<Ts...>& ins)
-        : m_sizes(sizes), m_offsets(offsets), m_ins(ins)
+          size_t size, const Offsets& offsets, const Tuple<Ts...>& ins)
+        : m_size(size), m_offsets(offsets), m_ins(ins)
       {}
 
-      const Sizes& getSizes() const
+      inline
+      size_t getSize() const
       {
-        return m_sizes;
+        return m_size;
       }
 
+      inline
       const Offsets& getOffsets() const
       {
         return m_offsets;
       }
 
+      inline
       const Tuple<Ts...>& getTuple() const
       {
         return m_ins;
       }
 
     private:
-      Sizes m_sizes;
+      size_t m_size;
       Offsets m_offsets;
       const Tuple<Ts...> m_ins;
   };
