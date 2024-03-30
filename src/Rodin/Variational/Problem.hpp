@@ -118,58 +118,6 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>::imposeDirichletBCs()
-  {
-    const auto& trial = getTrialFunction();
-    const auto& trialFES = trial.getFiniteElementSpace();
-    const auto& test = getTestFunction();
-    const auto& testFES = test.getFiniteElementSpace();
-    Scalar* const valuePtr = m_stiffness.valuePtr();
-    Math::SparseMatrix::StorageIndex* const outerPtr = m_stiffness.outerIndexPtr();
-    Math::SparseMatrix::StorageIndex* const innerPtr = m_stiffness.innerIndexPtr();
-    for (auto& dbc : m_dbcs)
-    {
-      dbc.assemble();
-      const auto& dofs = dbc.getDOFs();
-      // Move essential degrees of freedom in the LHS to the RHS
-      for (const auto& kv : dofs)
-      {
-        const Index& global = kv.first;
-        const auto& dof = kv.second;
-        for (Math::SparseMatrix::InnerIterator it(m_stiffness, global); it; ++it)
-           m_mass.coeffRef(it.row()) -= it.value() * dof;
-      }
-      for (const auto& [global, dof] : dofs)
-      {
-        // Impose essential degrees of freedom on RHS
-        m_mass.coeffRef(global) = dof;
-
-        // Impose essential degrees of freedom on LHS
-        for (auto i = outerPtr[global]; i < outerPtr[global + 1]; ++i)
-        {
-          assert(innerPtr[i] >= 0);
-          // Assumes CCS format
-          const Index row = innerPtr[i];
-          valuePtr[i] = Scalar(row == global);
-          if (row != global)
-          {
-            for (auto k = outerPtr[row]; 1; k++)
-            {
-              if (static_cast<Index>(innerPtr[k]) == global)
-              {
-                 valuePtr[k] = 0.0;
-                 break;
-              }
-            }
-          }
-        }
-      }
-    }
-    return *this;
-  }
-
-  template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>::imposePeriodicBCs()
   {
     const auto& trial = getTrialFunction();
@@ -342,7 +290,15 @@ namespace Rodin::Variational
     }
 
     // Impose Dirichlet boundary conditions
-    imposeDirichletBCs();
+    const auto& trialFES = trial.getFiniteElementSpace();
+    const auto& test = getTestFunction();
+    const auto& testFES = test.getFiniteElementSpace();
+    for (auto& dbc : m_dbcs)
+    {
+      dbc.assemble();
+      const auto& dofs = dbc.getDOFs();
+      Math::Kernels::eliminate(m_stiffness, m_mass, dofs);
+    }
 
     // Impose periodic boundary conditions
     imposePeriodicBCs();
@@ -401,6 +357,10 @@ namespace Rodin::Variational
   {
     m_bfa.reset(new BilinearFormTupleSequentialAssembly);
     m_lfa.reset(new LinearFormTupleSequentialAssembly);
+    m_us.iapply([&](size_t i, const auto& u)
+        { m_trialUUIDMap.right.insert({ i, u.get().getUUID() }); });
+    m_vs.iapply([&](size_t i, const auto& v)
+        { m_testUUIDMap.right.insert({ i, v.get().getUUID() }); });
   }
 
   template <class U1, class U2, class ... Us>
@@ -429,36 +389,89 @@ namespace Rodin::Variational
                 v.getFiniteElementSpace(), lf.getIntegrators());
           });
 
-    // Get sizes of finite element spaces
-    std::array<Pair<size_t, size_t>, decltype(bt)::Size> bsz;
-    bt.map([](const auto& in)
-          { return Pair(in.getTrialFES().getSize(), in.getTestFES().getSize()); })
-      .iapply([&](const Index i, auto& v)
-          { bsz[i] = std::move(v); });
+    // Compute trial offsets
+    {
+      std::array<size_t, TrialFunctionTuple::Size> sz;
+      m_us.map(
+            [](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
+          .iapply(
+            [&](const Index i, size_t s) { sz[i] = s; });
+      m_trialOffsets[0] = 0;
+      for (size_t i = 0; i < TrialFunctionTuple::Size - 1; i++)
+        m_trialOffsets[i + 1] = sz[i] + m_trialOffsets[i];
+    }
 
-    std::array<size_t, decltype(lt)::Size> lsz;
-    lt.map([](const auto& in)
-          { return in.getFES().getSize(); })
-      .iapply([&](const Index i, auto& v)
-          { lsz[i] = std::move(v); });
+    // Compute test offsets
+    {
+      std::array<size_t, TestFunctionTuple::Size> sz;
+      m_vs.map(
+            [](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
+          .iapply(
+            [&](const Index i, size_t s) { sz[i] = s; });
+      m_testOffsets[0] = 0;
+      for (size_t i = 0; i < TrialFunctionTuple::Size - 1; i++)
+        m_testOffsets[i + 1] = sz[i] + m_testOffsets[i];
+    }
+
+    size_t rows =
+      m_vs.reduce(
+        [](const auto& a, const auto& b)
+        {
+          return a.get().getFiniteElementSpace().getSize() + b.get().getFiniteElementSpace().getSize();
+        });
+
+    size_t cols =
+      m_us.reduce(
+        [](const auto& a, const auto& b)
+        {
+          return a.get().getFiniteElementSpace().getSize() + b.get().getFiniteElementSpace().getSize();
+        });
 
     // Compute block offsets to build the triplets
     std::array<Pair<size_t, size_t>, decltype(bt)::Size> boffsets;
-    boffsets[0].first() = 0;
-    boffsets[0].second() = 0;
-    for (size_t i = 1; i < boffsets.size(); i++)
-    {
-      boffsets[i].first() = bsz[i].first() + boffsets[i - 1].first();
-      boffsets[i].second() = bsz[i].second() + boffsets[i - 1].second();
-    }
-
     std::array<size_t, decltype(lt)::Size> loffsets;
-    loffsets[0] = 0;
-    for (size_t i = 1; i < loffsets.size(); i++)
-      loffsets[i] = lsz[i] + loffsets[i - 1];
 
-    m_stiffness = m_bfa->execute(Assembly::BilinearFormTupleAssemblyInput(bsz, boffsets, bt));
-    m_mass = m_lfa->execute(Assembly::LinearFormTupleAssemblyInput(lsz, loffsets, lt));
+    m_bft.iapply(
+        [&](const Index i, const auto& bf)
+        {
+          auto ui = m_trialUUIDMap.left.find(bf.getTrialFunction().getUUID());
+          auto vi = m_testUUIDMap.left.find(bf.getTestFunction().getUUID());
+          if (ui != m_trialUUIDMap.left.end() && vi != m_testUUIDMap.left.end())
+            boffsets[i] = Pair{ m_trialOffsets[ui->second], m_testOffsets[vi->second] };
+        });
+
+    m_lft.iapply(
+        [&](const Index i, const auto& lf)
+        {
+          auto vi = m_testUUIDMap.left.find(lf.getTestFunction().getUUID());
+          if (vi != m_testUUIDMap.left.end())
+            loffsets[i] = m_testOffsets[vi->second];
+        });
+
+    // Assemble stiffness operator
+    m_stiffness = m_bfa->execute(
+        Assembly::BilinearFormTupleAssemblyInput(rows, cols, boffsets, bt));
+
+    // Assemble mass vector
+    m_mass = m_lfa->execute(
+        Assembly::LinearFormTupleAssemblyInput(rows, loffsets, lt));
+
+    // Impose Dirichlet boundary conditions
+    m_us.apply(
+        [&](const auto& u)
+        {
+          auto ui = m_trialUUIDMap.left.find(u.get().getUUID());
+          size_t offset = m_trialOffsets[ui->second];
+          for (auto& dbc : m_dbcs)
+          {
+            if (dbc.getOperand().getUUID() == u.get().getUUID())
+            {
+              dbc.assemble();
+              const auto& dofs = dbc.getDOFs();
+              Math::Kernels::eliminate(m_stiffness, m_mass, dofs, offset);
+            }
+          }
+        });
 
     m_assembled = true;
 
@@ -503,12 +516,35 @@ namespace Rodin::Variational
           {
             if (lfi.getTestFunction().getUUID() == lf.getTestFunction().getUUID())
             {
-              lf.add(lfi);
+              lf.add(UnaryMinus(lfi));
             }
           });
     }
 
+    m_dbcs = rhs.getDBCs();
+
     return *this;
+  }
+
+  template <class U1, class U2, class ... Us>
+  void
+  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix, Math::Vector>
+  ::solve(Solver::SolverBase<OperatorType, VectorType>& solver)
+  {
+     // Assemble the system
+     if (!m_assembled)
+        assemble();
+
+     // Solve the system AX = B
+     solver.solve(m_stiffness, m_guess, m_mass);
+
+     // Recover solutions
+     m_us.iapply(
+         [&](size_t i, auto& u)
+         {
+          const size_t n = u.get().getFiniteElementSpace().getSize();
+          u.get().getSolution().setWeights(m_guess.segment(m_trialOffsets[i], n));
+         });
   }
 }
 

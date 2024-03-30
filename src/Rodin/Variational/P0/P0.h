@@ -139,8 +139,8 @@ namespace Rodin::Variational
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
-          InverseMapping(const CallableType& v)
-            : m_v(v.copy())
+          InverseMapping(const Function& v)
+            : m_v(v)
           {}
 
           InverseMapping(const InverseMapping&) = default;
@@ -160,7 +160,7 @@ namespace Rodin::Variational
           }
 
         private:
-          std::reference_wrapper<Function> m_v;
+          std::reference_wrapper<const Function> m_v;
       };
 
       P0(const Geometry::Mesh<Context>& mesh)

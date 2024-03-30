@@ -19,11 +19,14 @@ int main(int argc, char** argv)
 {
   // Load mesh
   Mesh mesh;
+  // mesh.load("../resources/mfem/StarSquare.mfem.mesh");
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.scale(1. / (15));
+  mesh.displace(VectorFunction{-1, -1});
   mesh.getConnectivity().compute(1, 2);
 
   // Functions
-  P1 vh(mesh);
+  P1 vh(mesh, 2);
   P0 ph(mesh);
 
   TrialFunction u(vh);
@@ -32,20 +35,25 @@ int main(int argc, char** argv)
   TrialFunction p(ph);
   TestFunction  q(ph);
 
+  Solver::CG cg;
+
+  ScalarFunction g = [](const Geometry::Point& p) { return -exp(p.x()) * sin(p.y()); };
+
+  auto n = BoundaryNormal(mesh);
+
   Problem darcy(u, p, v, q);
-  darcy = Integral(Grad(u), Grad(v))
-        - Integral(v);
-        //+ DirichletBC(u, Zero());
+  darcy = Integral(u, v)
+        - Integral(p, Div(v))
+        - Integral(Div(u), q)
+        - BoundaryIntegral(g, Dot(n, v))
+        - Integral(g, q);
   darcy.assemble();
 
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(v);
-          //+ DirichletBC(u, Zero());
-  poisson.assemble();
+  std::ofstream matrix("matrix.csv");
 
-  std::cout << darcy.getStiffnessOperator().norm() << std::endl;
-  std::cout << poisson.getStiffnessOperator().norm() << std::endl;
+  const static Eigen::IOFormat CSVFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "\n");
+  matrix << darcy.getStiffnessOperator().toDense().format(CSVFormat);
+
 
   // Assembly::Sequential<std::vector<Eigen::Triplet<Scalar>>, decltype(t)> assembly;
 
