@@ -344,6 +344,18 @@ namespace Rodin::Variational
 
       Problem& operator=(const ProblemBody<OperatorType, VectorType>& rhs) override;
 
+      inline
+      const auto& getTrialOffsets() const
+      {
+        return m_trialOffsets;
+      }
+
+      inline
+      const auto& getTestOffsets() const
+      {
+        return m_testOffsets;
+      }
+
       virtual VectorType& getMassVector() override
       {
         return m_mass;

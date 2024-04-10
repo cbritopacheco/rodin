@@ -20,7 +20,7 @@ int main(int, char**)
   // Build a mesh
   Mesh mesh;
   // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.load("../resources/mfem/StarSquare.mfem.mesh");
+  mesh.load("../resources/examples/PDEs/Elasticity.mfem.mesh");
   mesh.getConnectivity().compute(1, 2);
 
   // Functions
