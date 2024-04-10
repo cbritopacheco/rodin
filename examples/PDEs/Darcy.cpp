@@ -19,7 +19,6 @@ int main(int argc, char** argv)
 {
   // Load mesh
   Mesh mesh;
-  // mesh.load("../resources/mfem/StarSquare.mfem.mesh");
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
   mesh.scale(1. / (15));
   mesh.displace(VectorFunction{-1, -1});
@@ -37,7 +36,7 @@ int main(int argc, char** argv)
 
   Solver::CG cg;
 
-  ScalarFunction g = [](const Geometry::Point& p) { return -exp(p.x()) * sin(p.y()); };
+  ScalarFunction f = [](const Geometry::Point& p) { return -exp(p.x()) * sin(p.y()); };
 
   auto n = BoundaryNormal(mesh);
 
@@ -45,23 +44,11 @@ int main(int argc, char** argv)
   darcy = Integral(u, v)
         - Integral(p, Div(v))
         - Integral(Div(u), q)
-        - BoundaryIntegral(g, Dot(n, v))
-        - Integral(g, q);
-  darcy.assemble();
+        - BoundaryIntegral(f, Dot(n, v));
+  darcy.solve(cg);
 
-  std::ofstream matrix("matrix.csv");
-
-  const static Eigen::IOFormat CSVFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "\n");
-  matrix << darcy.getStiffnessOperator().toDense().format(CSVFormat);
-
-
-  // Assembly::Sequential<std::vector<Eigen::Triplet<Scalar>>, decltype(t)> assembly;
-
-  // auto res = is.reduce([](const auto& l, const auto& r){return l +r ;});
-  // std::cout << res << std::endl;
-
-
-  // trw.apply([](auto&& v){ std::cout << v << " "; });
+  u.getSolution().save("u.gf");
+  mesh.save("u.mesh");
 
   return 0;
 }

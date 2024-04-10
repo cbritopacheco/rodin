@@ -129,7 +129,8 @@ namespace Rodin::Variational
        * @brief Inverse mapping for the scalar P0 space.
        */
       template <class CallableType>
-      class InverseMapping : public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
+      class InverseMapping
+        : public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
       {
         public:
           using Function = CallableType;

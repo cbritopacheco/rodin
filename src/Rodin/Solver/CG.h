@@ -75,6 +75,12 @@ namespace Rodin::Solver
       }
 
       inline
+      bool success() const
+      {
+        return m_solver.info() == Eigen::Success;
+      }
+
+      inline
       CG* copy() const noexcept override
       {
         return new CG(*this);
@@ -126,6 +132,12 @@ namespace Rodin::Solver
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
         x = m_solver.compute(A).solve(b);
+      }
+
+      inline
+      bool success() const
+      {
+        return m_solver.info() == Eigen::Success;
       }
 
       inline
