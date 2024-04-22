@@ -105,4 +105,6 @@ target_link_libraries(RodinVariational
   Rodin::Utility
   Rodin::Geometry
   Rodin::Assembly
-  Rodin::FormLanguage)
+  Rodin::FormLanguage
+  PRIVATE
+  basix)

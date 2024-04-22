@@ -77,17 +77,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValueByReference(Math::Matrix& out, const Geometry::Point& p) const
+      void getValue(Math::Matrix& out, const Geometry::Point& p) const
       {
-        out = getOperand().getValue(p);
-        out.transposeInPlace();
-      }
-
-      inline
-      constexpr
-      void getValueByReference(Math::Vector& out, const Geometry::Point& p) const
-      {
-        out = getOperand().getValue(p);
+        getOperand().getValue(out, p);
         out.transposeInPlace();
       }
 

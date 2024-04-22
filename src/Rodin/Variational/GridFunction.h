@@ -14,6 +14,7 @@
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
+#include "Rodin/Configure.h"
 #include "Rodin/Math.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry/Point.h"
@@ -238,7 +239,7 @@ namespace Rodin::Variational
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 1);
-        return static_cast<const Derived&>(*this).x();
+        return Component(*this, 0);
       }
 
       inline
@@ -247,7 +248,7 @@ namespace Rodin::Variational
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 2);
-        return static_cast<const Derived&>(*this).y();
+        return Component(*this, 1);
       }
 
       inline
@@ -256,7 +257,7 @@ namespace Rodin::Variational
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 3);
-        return static_cast<const Derived&>(*this).z();
+        return Component(*this, 2);
       }
 
       inline
@@ -506,6 +507,7 @@ namespace Rodin::Variational
               is.reserve(capacity);
               std::vector<Scalar> vs;
               vs.reserve(capacity);
+              std::unique_ptr<FunctionBase<NestedDerived>> fnt(fn.copy());
               for (Index i = start; i < end; ++i)
               {
                 const auto it = mesh.getCell(i);
@@ -520,7 +522,7 @@ namespace Rodin::Variational
                     const Geometry::Point p(polytope, trans, fe.getNode(local));
                     assert(m_data.rows() == 1);
                     is.push_back(fes.getGlobalIndex({ d, i }, local));
-                    vs.push_back(fn.getValue(p));
+                    vs.push_back(fnt->getValue(p));
                   }
                 }
               }

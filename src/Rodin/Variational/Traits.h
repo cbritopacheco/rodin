@@ -113,10 +113,18 @@ namespace Rodin::FormLanguage
     static constexpr const bool Value = std::is_same_v<T, Integer>;
   };
 
-  template <class T>
-  struct IsScalarRange
+  template <class T, typename = void, typename = void>
+  struct IsMatrixRange
   {
-    static constexpr const bool Value = std::is_convertible_v<T, Scalar>;
+    static constexpr const bool Value = false;
+  };
+
+  template <class T>
+  struct IsMatrixRange<T, std::void_t<decltype(T::RowsAtCompileTime)>, std::void_t<decltype(T::ColsAtCompileTime)>>
+  {
+    static constexpr const bool Value =
+      (T::ColsAtCompileTime == Eigen::Dynamic) ||
+      (T::ColsAtCompileTime > 1);
   };
 
   template <class T, typename = void, typename = void>
@@ -131,19 +139,13 @@ namespace Rodin::FormLanguage
     static constexpr const bool Value = T::ColsAtCompileTime == 1;
   };
 
-  template <class T, typename = void, typename = void>
-  struct IsMatrixRange
-  {
-    static constexpr const bool Value = false;
-  };
-
   template <class T>
-  struct IsMatrixRange<T, std::void_t<decltype(T::RowsAtCompileTime)>, std::void_t<decltype(T::ColsAtCompileTime)>>
+  struct IsScalarRange
   {
     static constexpr const bool Value =
-      std::is_assignable_v<Math::Matrix, T>
-      && !IsVectorRange<T,
-        std::void_t<decltype(T::RowsAtCompileTime)>, std::void_t<decltype(T::ColsAtCompileTime)>>::Value;
+      std::is_convertible_v<T, Scalar> &&
+      !IsVectorRange<T>::Value &&
+      !IsMatrixRange<T>::Value;
   };
 
   template <class T>

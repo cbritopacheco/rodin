@@ -17,6 +17,7 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "ScalarFunction.h"
+#include "MatrixFunction.h"
 #include "ShapeFunction.h"
 
 #include "LinearFormIntegrator.h"
@@ -49,13 +50,14 @@ namespace Rodin::FormLanguage
       std::conditional_t<
         // If
         std::is_same_v<LHSRange, Scalar>,
-        // Then
+        // Then <----------------------------------------------- LHS is Scalar
         RHSRange,
+        // -------------------------------------------------------------------
         // Else
         std::conditional_t<
           // If
           std::is_same_v<LHSRange, Math::Vector>,
-          // Then
+          // Then <--------------------------------------------- LHS is Vector
           std::conditional_t<
             // If
             std::is_same_v<RHSRange, Scalar>,
@@ -66,7 +68,7 @@ namespace Rodin::FormLanguage
               // If
               std::is_same_v<RHSRange, Math::Vector>,
               // Then
-              Math::Matrix,
+              void,
               // Else
               std::conditional_t<
                 // If
@@ -78,12 +80,26 @@ namespace Rodin::FormLanguage
               >
             >
           >,
+          // -----------------------------------------------------------------
           // Else
           std::conditional_t<
             // If
             std::is_same_v<LHSRange, Math::Matrix>,
-            // Then
-            Math::Matrix,
+            // Then <------------------------------------------- LHS is Matrix
+            std::conditional_t<
+              std::is_same_v<RHSRange, Scalar>,
+              Math::Matrix,
+              std::conditional_t<
+                std::is_same_v<RHSRange, Math::Vector>,
+                Math::Vector,
+                std::conditional_t<
+                  std::is_same_v<RHSRange, Math::Matrix>,
+                    Math::Matrix,
+                    void
+                  >
+                >
+              >,
+            // ---------------------------------------------------------------
             // Else
             void
           >
@@ -202,6 +218,46 @@ namespace Rodin::Variational
         return this->object(getLHS().getValue(p)) * this->object(getRHS().getValue(p));
       }
 
+      inline
+      constexpr
+      void getValue(Math::Vector& out, const Geometry::Point& p) const
+      {
+        if constexpr (std::is_same_v<LHSRange, Scalar> && std::is_same_v<RHSRange, Math::Vector>)
+        {
+          getRHS().getValue(out, p);
+          out *= getLHS().getValue(p);
+        }
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector> && std::is_same_v<RHSRange, Scalar>)
+        {
+          getLHS().getValue(out, p);
+          out *= getRHS().getValue(p);
+        }
+        else
+        {
+          out = getValue(p);
+        }
+      }
+
+      inline
+      constexpr
+      void getValue(Math::Matrix& out, const Geometry::Point& p) const
+      {
+        if constexpr (std::is_same_v<LHSRange, Scalar> && std::is_same_v<RHSRange, Math::Matrix>)
+        {
+          getRHS().getValue(out, p);
+          out *= getLHS().getValue(p);
+        }
+        else if constexpr (std::is_same_v<LHSRange, Math::Matrix> && std::is_same_v<RHSRange, Scalar>)
+        {
+          getLHS().getValue(out, p);
+          out *= getRHS().getValue(p);
+        }
+        else
+        {
+          out = getValue(p);
+        }
+      }
+
       inline Mult* copy() const noexcept override
       {
         return new Mult(*this);
@@ -241,6 +297,22 @@ namespace Rodin::Variational
   operator*(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return Mult(lhs, ScalarFunction(rhs));
+  }
+
+  template <class LHSDerived>
+  inline
+  auto
+  operator*(const FunctionBase<LHSDerived>& lhs, std::reference_wrapper<const Math::Matrix> rhs)
+  {
+    return Mult(lhs, MatrixFunction(rhs));
+  }
+
+  template <class LHSDerived>
+  inline
+  auto
+  operator*(std::reference_wrapper<const Math::Matrix> lhs, const FunctionBase<LHSDerived>& rhs)
+  {
+    return Mult(MatrixFunction(lhs), rhs);
   }
 
   /**

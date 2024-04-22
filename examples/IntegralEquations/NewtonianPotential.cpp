@@ -30,7 +30,7 @@ Scalar exact(const Point& x)
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("D1.mesh");
+  mesh.load("D1.o.mesh", IO::FileFormat::MEDIT);
   // mesh.load("miaow.medit.o.mesh", IO::FileFormat::MEDIT);
   mesh.getConnectivity().compute(1, 2);
 
@@ -39,7 +39,7 @@ int main(int, char**)
   TestFunction  v(fes);
 
   DenseProblem eq(u, v);
-  eq = Integral(0.00001 * Grad(u), Grad(v))
+  eq = Integral(0.001 * Grad(u), Grad(v))
      + Integral(Potential(K, u), v)
      - Integral(v)
      ;

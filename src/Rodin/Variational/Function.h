@@ -56,7 +56,7 @@ namespace Rodin::Variational
     template <typename T, typename... Args>
     struct HasGetValueMethod<T, Args&...>
     {
-      template <typename U, typename = decltype(std::declval<U>().myMethodRef(std::declval<Args&>()...))>
+      template <typename U, typename = decltype(std::declval<U>().getValue(std::declval<Args&>()...))>
       static std::true_type Test(int);
 
       template <typename U>
@@ -64,6 +64,20 @@ namespace Rodin::Variational
 
       using Type = decltype(Test<T>(0));
       static constexpr bool Value = Type::value;
+    };
+
+    template <typename T, class... Args>
+    struct HasGetValueMethodR
+    {
+        template<typename U, typename = decltype(std::declval<U>().getValue(std::declval<Args>()...))>
+        static auto Test(int) ->
+          decltype(std::is_same<typename std::invoke_result<decltype(&U::getValue)(U, Args...)>::type, T>::value, std::true_type{});
+
+        template<typename U>
+        static std::false_type Test(...);
+
+        using Type = decltype(Test<T>(0));
+        static constexpr bool Value = Type::value;
     };
   }
 
@@ -188,7 +202,7 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Vector& res, const Geometry::Point& p) const
       {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector&>::Value)
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector&, const Geometry::Point&>::Value)
         {
           return static_cast<const Derived&>(*this).getValue(res, p);
         }
@@ -202,7 +216,7 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Matrix& res, const Geometry::Point& p) const
       {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix&>::Value)
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix&, const Geometry::Point&>::Value)
         {
           return static_cast<const Derived&>(*this).getValue(res, p);
         }
@@ -210,6 +224,18 @@ namespace Rodin::Variational
         {
           res = getValue(p);
         }
+      }
+
+      inline
+      auto coeff(size_t i, size_t j) const
+      {
+        return Component(*this, i, j);
+      }
+
+      inline
+      auto coeff(size_t i) const
+      {
+        return Component(*this, i);
       }
 
       inline

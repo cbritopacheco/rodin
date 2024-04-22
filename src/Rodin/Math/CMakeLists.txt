@@ -26,11 +26,6 @@ add_library(RodinMath INTERFACE)
 add_library(Rodin::Math ALIAS RodinMath)
 
 # ---- Link targets ----------------------------------------------------------
-if (RODIN_USE_OPENMP)
-  find_package(OpenMP REQUIRED)
-  target_link_libraries(RodinMath PUBLIC OpenMP::OpenMP_CXX)
-endif()
-
 target_link_libraries(RodinMath
   INTERFACE
   Eigen3::Eigen)

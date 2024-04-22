@@ -11,6 +11,12 @@ set(RodinSolver_SRCS
 add_library(RodinSolver INTERFACE)
 add_library(Rodin::Solver ALIAS RodinSolver)
 
+# ---- OpenMP ----------------------------------------------------------------
+if (RODIN_USE_OPENMP)
+  find_package(OpenMP REQUIRED)
+  target_link_libraries(RodinSolver INTERFACE OpenMP::OpenMP_CXX)
+endif()
+
 # ---- SuiteSparse -----------------------------------------------------------
 if (RODIN_USE_SUITESPARSE)
   find_package(SuiteSparse REQUIRED COMPONENTS UMFPACK)
