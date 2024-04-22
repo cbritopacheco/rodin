@@ -270,6 +270,7 @@ namespace Rodin::Variational
         const auto& operand = getOperand();
         const auto& mesh = p.getPolytope().getMesh();
         res.resize(getRangeShape().height());
+        res.setZero();
         Math::Matrix kxy;
         if (m_qf.has_value())
         {

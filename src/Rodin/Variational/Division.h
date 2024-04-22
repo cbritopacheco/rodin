@@ -33,7 +33,7 @@ namespace Rodin::Variational
       using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
       using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
 
-      static_assert(FormLanguage::IsScalarRange<RHSRange>::Value);
+      static_assert(std::is_same_v<RHSRange, Scalar>);
 
       Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
@@ -82,7 +82,6 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return this->object(getLHS().getValue(p)) / this->object(getRHS().getValue(p));
@@ -90,18 +89,16 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
       {
-        static_assert(FormLanguage::IsVectorRange<LHSRange>::Value);
         getLHS().getValue(res, p);
         res /= getRHS().getValue(p);
       }
 
       inline
       constexpr
-      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const
+      void getValue(Math::Matrix& res, const Geometry::Point& p) const
       {
-        static_assert(FormLanguage::IsMatrixRange<LHSRange>::Value);
         getLHS().getValue(res, p);
         res /= getRHS().getValue(p);
       }

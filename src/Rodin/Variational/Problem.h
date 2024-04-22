@@ -187,6 +187,11 @@ namespace Rodin::Variational
 
       Problem& operator+=(const PeriodicBCBase& pbc);
 
+      const LinearForm<TestFES, VectorType>& getLinearForm() const
+      {
+        return m_linearForm;
+      }
+
       Problem& assemble() override;
 
       void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override;
@@ -224,7 +229,7 @@ namespace Rodin::Variational
       std::reference_wrapper<TestFunction<TestFES>>   m_testFunction;
 
       LinearForm<TestFES, VectorType> m_linearForm;
-      BilinearForm<TrialFES, TestFES, Math::SparseMatrix> m_bilinearForm;
+      BilinearForm<TrialFES, TestFES, OperatorType> m_bilinearForm;
 
       FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
 

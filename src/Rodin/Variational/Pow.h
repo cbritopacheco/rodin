@@ -76,7 +76,16 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Pow& traceOf(Geometry::Attribute attrs)
+      Pow& traceOf(Geometry::Attribute attr)
+      {
+        assert(m_s);
+        m_s->traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      Pow& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         assert(m_s);
         m_s->traceOf(attrs);

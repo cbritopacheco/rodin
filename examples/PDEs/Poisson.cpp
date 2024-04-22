@@ -7,20 +7,18 @@
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
-#include <chrono>
+
+using namespace std::chrono;
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-static constexpr Attribute boundary = 2;
-
 int main(int, char**)
 {
   // Build a mesh
   Mesh mesh;
-  // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.load("../resources/examples/PDEs/Elasticity.mfem.mesh");
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
   mesh.getConnectivity().compute(1, 2);
 
   // Functions
@@ -30,15 +28,11 @@ int main(int, char**)
   TestFunction  v(vh);
 
   // Define problem
-  ScalarFunction f = 1.0;
-  ScalarFunction g = 0.0;
-
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, g);
+          - Integral(v)
+          + DirichletBC(u, Zero());
 
-  // Solve the problem
   Solver::CG solver;
   poisson.solve(solver);
 

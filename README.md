@@ -67,8 +67,6 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-const Geometry::Attribute Gamma = 1;
-
 int main(int, char**)
 {
   Mesh Omega;
@@ -80,15 +78,12 @@ int main(int, char**)
   TrialFunction u(Vh);
   TestFunction v(Vh);
 
-  ScalarFunction f(1.0);
-  ScalarFunction g(0.0);
-
   Solver::SparseLU solver;
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, g).on(Gamma);
+          - Integral(v)
+          + DirichletBC(u, Zero());
   poisson.solve(solver);
 
   return 0;

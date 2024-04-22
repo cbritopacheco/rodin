@@ -77,7 +77,7 @@ namespace Rodin::IO
       if (MEDIT::ParseEmptyLine()(line.begin(), line.end()))
         continue;
       assert(line.size() > 0);
-      if (!std::isalpha(line[0]))
+      if (!(std::isalpha(line[0]) || std::isspace(line[0])))
         continue;
       auto kw = MEDIT::ParseKeyword()(line.begin(), line.end());
       if (!kw)

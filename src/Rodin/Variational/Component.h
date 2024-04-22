@@ -65,15 +65,13 @@ namespace Rodin::Variational
    * instance.
    */
   template <class OperandDerived>
-  class Component<FunctionBase<OperandDerived>> final
-    : public ScalarFunctionBase<Component<FunctionBase<OperandDerived>>>
+  class Component<FunctionBase<OperandDerived>, size_t> final
+    : public ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>
   {
     public:
       using Operand = FunctionBase<OperandDerived>;
-      using Parent = ScalarFunctionBase<Component<Operand>>;
+      using Parent = ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>;
       using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
-
-      static_assert(std::is_same_v<OperandRange, Math::Vector>);
 
       constexpr
       Component(const Operand& fn, size_t component)
@@ -116,13 +114,79 @@ namespace Rodin::Variational
         return getOperand().getValue(p).coeff(m_idx);
       }
 
+      inline Component* copy() const noexcept override
+      {
+        return new Component(*this);
+      }
+
     private:
       std::unique_ptr<Operand> m_fn;
       const size_t m_idx;
   };
 
   template <class OperandDerived>
-  Component(const FunctionBase<OperandDerived>&, size_t) -> Component<FunctionBase<OperandDerived>>;
+  Component(const FunctionBase<OperandDerived>&, size_t) -> Component<FunctionBase<OperandDerived>, size_t>;
+
+  template <class OperandDerived>
+  class Component<FunctionBase<OperandDerived>, size_t, size_t> final
+    : public ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>
+  {
+    public:
+      using Operand = FunctionBase<OperandDerived>;
+      using Parent = ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>;
+      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+
+      constexpr
+      Component(const Operand& fn, size_t i, size_t j)
+        : m_fn(fn.copy()), m_i(i), m_j(j)
+      {}
+
+      constexpr
+      Component(const Component& other)
+        : Parent(other),
+          m_fn(other.m_fn->copy()),
+          m_i(other.m_i),
+          m_j(other.m_j)
+      {}
+
+      constexpr
+      Component(Component&& other)
+        : Parent(std::move(other)),
+          m_fn(std::move(other.m_fn)),
+          m_i(std::move(other.m_i)),
+          m_j(std::move(other.m_j))
+      {}
+
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        assert(m_fn);
+        return *m_fn;
+      }
+
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return getOperand().getValue(p).coeff(m_i, m_j);
+      }
+
+
+      inline Component* copy() const noexcept override
+      {
+        return new Component(*this);
+      }
+
+    private:
+      std::unique_ptr<Operand> m_fn;
+      const size_t m_i;
+      const size_t m_j;
+  };
+
+  template <class OperandDerived>
+  Component(const FunctionBase<OperandDerived>&, size_t, size_t)
+    -> Component<FunctionBase<OperandDerived>, size_t, size_t>;
 
   /**
    * @brief Represents the component (or entry) of a vectorial GridFunction.
@@ -158,9 +222,29 @@ namespace Rodin::Variational
 
       inline
       constexpr
+      GridFunction<FES>& getGridFunction()
+      {
+        return m_u.get();
+      }
+
+      inline
+      constexpr
       const GridFunction<FES>& getGridFunction() const
       {
         return m_u.get();
+      }
+
+      inline
+      Scalar getValue(const Geometry::Point& p) const
+      {
+        Math::Vector v;
+        m_u.get().getValue(v, p);
+        return v.coeff(m_idx);
+      }
+
+      inline Component* copy() const noexcept override
+      {
+        return new Component(*this);
       }
 
       // template <class NestedDerived,

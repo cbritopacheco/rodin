@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 3.16)
+
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0076 NEW)
 
@@ -129,6 +130,9 @@ if (RODIN_BUILD_SRC)
     HINTS
     "${PROJECT_BINARY_DIR}/third-party/eigen"
     "${PROJECT_BINARY_DIR}/third-party/eigen/cmake")
+
+  # ---- Basix ------
+  add_subdirectory(third-party/basix/cpp EXCLUDE_FROM_ALL)
 
   # ---- Spectra ----
   message(STATUS "Configuring Spectra...")

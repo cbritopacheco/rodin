@@ -90,12 +90,22 @@ namespace Rodin::Assembly
 
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_pool(other.getThreadPool().getThreadCount())
+          m_pool(
+            std::visit(
+              [](auto&& arg) -> std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>
+              {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, std::reference_wrapper<Threads::ThreadPool>>)
+                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(arg);
+                else
+                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(
+                      std::in_place_type_t<Threads::ThreadPool>(), arg.getThreadCount());
+              }, other.m_pool))
       {}
 
       Multithreaded(Multithreaded&& other)
         : Parent(std::move(other)),
-          m_pool(other.getThreadPool().getThreadCount())
+          m_pool(std::move(other.getThreadPool()))
       {}
 
       /**
@@ -276,8 +286,18 @@ namespace Rodin::Assembly
       using InputType = typename Parent::InputType;
       using OperatorType = Math::SparseMatrix;
 
+#ifdef RODIN_MULTITHREADED
+      Multithreaded()
+        : Multithreaded(Threads::getGlobalThreadPool())
+      {}
+#else
       Multithreaded()
         : Multithreaded(std::thread::hardware_concurrency())
+      {}
+#endif
+
+      Multithreaded(std::reference_wrapper<Threads::ThreadPool> pool)
+        : m_assembly(pool)
       {}
 
       Multithreaded(size_t threadCount)
@@ -359,12 +379,22 @@ namespace Rodin::Assembly
 
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_pool(other.getThreadPool().getThreadCount())
+          m_pool(
+            std::visit(
+              [](auto&& arg) -> std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>
+              {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, std::reference_wrapper<Threads::ThreadPool>>)
+                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(arg);
+                else
+                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(
+                      std::in_place_type_t<Threads::ThreadPool>(), arg.getThreadCount());
+              }, other.m_pool))
       {}
 
       Multithreaded(Multithreaded&& other)
         : Parent(std::move(other)),
-          m_pool(other.getThreadPool().getThreadCount())
+          m_pool(std::move(other.getThreadPool()))
       {}
 
       /**
@@ -546,12 +576,22 @@ namespace Rodin::Assembly
 
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_pool(other.getThreadPool().getThreadCount())
+          m_pool(
+            std::visit(
+              [](auto&& arg) -> std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>
+              {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, std::reference_wrapper<Threads::ThreadPool>>)
+                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(arg);
+                else
+                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(
+                      std::in_place_type_t<Threads::ThreadPool>(), arg.getThreadCount());
+              }, other.m_pool))
       {}
 
       Multithreaded(Multithreaded&& other)
         : Parent(std::move(other)),
-          m_pool(other.getThreadPool().getThreadCount())
+          m_pool(std::move(other.getThreadPool()))
       {}
 
       /**

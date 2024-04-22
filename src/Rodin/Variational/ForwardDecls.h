@@ -280,6 +280,7 @@ namespace Rodin::Variational
    *
    * @see MatrixFunctionSpecializations
    */
+  template <class T>
   class MatrixFunction;
 
   /**
@@ -327,7 +328,7 @@ namespace Rodin::Variational
   template <class Operand>
   class Sqrt;
 
-  template <class T>
+  template <class ... Args>
   class Component;
 
   /**

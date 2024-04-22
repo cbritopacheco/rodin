@@ -105,6 +105,77 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).copy();
       }
   };
+
+  template <>
+  class MatrixFunction<Math::Matrix> final
+    : public MatrixFunctionBase<MatrixFunction<Math::Matrix>>
+  {
+    public:
+      using Parent = MatrixFunctionBase<MatrixFunction<Math::Matrix>>;
+
+      MatrixFunction(std::reference_wrapper<const Math::Matrix> matrix)
+        : m_matrix(matrix)
+      {}
+
+      MatrixFunction(const MatrixFunction& other)
+        : Parent(other),
+          m_matrix(other.m_matrix)
+      {}
+
+      MatrixFunction(MatrixFunction&& other)
+        : Parent(std::move(other)),
+          m_matrix(std::move(other.m_matrix))
+      {}
+
+      inline
+      const Math::Matrix& getValue(const Geometry::Point&) const
+      {
+        return m_matrix.get();
+      }
+
+      inline
+      constexpr
+      MatrixFunction& traceOf(Geometry::Attribute)
+      {
+        return *this;
+      }
+
+      inline
+      constexpr
+      MatrixFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
+      {
+        return *this;
+      }
+
+      inline
+      constexpr
+      size_t getRows() const
+      {
+        return m_matrix.get().rows();
+      }
+
+      /**
+       * @brief Gets the number of columns in the matrix
+       * @returns Number of columns
+       */
+      inline
+      constexpr
+      size_t getColumns() const
+      {
+        return m_matrix.get().cols();
+      }
+
+      inline MatrixFunction* copy() const noexcept override
+      {
+        return new MatrixFunction(*this);
+      }
+
+    private:
+      std::reference_wrapper<const Math::Matrix> m_matrix;
+  };
+
+  MatrixFunction(std::reference_wrapper<const Math::Matrix>)
+    -> MatrixFunction<Math::Matrix>;
 }
 
 #endif

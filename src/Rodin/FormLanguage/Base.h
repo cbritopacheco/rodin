@@ -102,10 +102,17 @@ namespace Rodin::FormLanguage
       constexpr
       const T& object(T&& obj) const noexcept
       {
-        using R = typename std::remove_reference_t<T>;
-        const R* res = new R(std::forward<T>(obj));
-        m_objs.write([&](auto& obj){ obj.emplace_back(res); });;
-        return *res;
+        if constexpr (std::is_lvalue_reference_v<T>)
+        {
+          return obj;
+        }
+        else
+        {
+          using R = typename std::remove_reference_t<T>;
+          const R* res = new R(std::forward<T>(obj));
+          m_objs.write([&](auto& obj){ obj.emplace_back(res); });;
+          return *res;
+        }
       }
 
       /**
