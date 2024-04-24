@@ -35,6 +35,7 @@ option(RODIN_LTO                    "Compile with link time optimization"       
 option(RODIN_FEATURE_SUMMARY        "Print Rodin feature summary"               ON)
 option(RODIN_THREAD_SAFE            "Enforces thread-safety."                   OFF)
 option(RODIN_MULTITHREADED          "Utilizes multithreading capabalities."     OFF)
+option(BUILD_SHARED_LIBS            "Build using shared libraries"              OFF)
 
 if (RODIN_MULTITHREADED)
   set(RODIN_THREAD_SAFE ON CACHE BOOL "" FORCE)
