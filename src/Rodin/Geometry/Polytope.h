@@ -58,6 +58,12 @@ namespace Rodin::Geometry
       static const Math::PointMatrix& getVertices(Polytope::Type g);
 
       inline
+      static auto getVertex(size_t i, Polytope::Type g)
+      {
+        return getVertices(g).col(i);
+      }
+
+      inline
       constexpr
       static size_t getVertexCount(Polytope::Type g)
       {

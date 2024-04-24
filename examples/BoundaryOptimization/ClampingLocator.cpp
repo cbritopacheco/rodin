@@ -29,12 +29,12 @@ static constexpr Geometry::Attribute dLocator = 6;
 
 static constexpr size_t maxIt = 1000;
 
-static constexpr Scalar epsilon = 0.0001;
-static constexpr Scalar ellClamp = 0.1;
-static constexpr Scalar ellLocator = 1;
-static constexpr Scalar radius = 0.02;
+static constexpr Scalar epsilon = 1e-6;
+static constexpr Scalar ellClamp = 0.001;
+static constexpr Scalar ellLocator = 0.001;
+static constexpr Scalar radius = 0.2;
 static constexpr Scalar tgv = std::numeric_limits<float>::max();
-static const Scalar alpha = 1;
+static const Scalar alpha = 4;
 
 using ScalarFES = P1<Scalar, Context::Sequential>;
 using VectorFES = P1<Math::Vector, Context::Sequential>;
@@ -43,6 +43,7 @@ using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
 
 size_t rmc(MeshBase& mesh);
+void holes(ScalarGridFunction& dist, const std::vector<Point>& cs);
 
 int main(int, char**)
 {
@@ -50,7 +51,8 @@ int main(int, char**)
   Eigen::setNbThreads(8);
   std::cout << Eigen::nbThreads() << std::endl;
   MMG::Mesh mesh;
-  mesh.load("Omega0.o.mesh", IO::FileFormat::MEDIT);
+  //mesh.load("Omega0.o.mesh", IO::FileFormat::MEDIT);
+  mesh.load("Mechanical.mesh", IO::FileFormat::MEDIT);
 
   MMG::Mesh D1;
   D1.load("D1.medit.o.mesh", IO::FileFormat::MEDIT);
@@ -115,7 +117,7 @@ int main(int, char**)
 
   Threads::getGlobalThreadPool().reset(6);
 
-  Scalar hmax = 1.0;
+  Scalar hmax = 0.3;
   Scalar hmin = hmax / 10.0;
   Scalar hausd = 0.5 * hmin;
   Scalar hgrad = 1.2;
@@ -195,15 +197,19 @@ int main(int, char**)
   size_t i = 0;
   size_t regionCount;
   Scalar objective = 0, oldObjective = 9999;
-  Scalar linesearch = 0.1;
   while (i < maxIt)
   {
+    bool topologicalStep = i > 2 && i < 100 && ((i % 10) == 0 || ((i - 1) % 10 == 0));
+    bool geometricStep = !topologicalStep;
+    bool clampStep = i % 2 && false;
+    bool locatorStep = !clampStep;
+
     hmin = hmax / 10.0;
     hausd = 0.5 * hmin;
     hgrad = 1.2;
 
     const Scalar k = 0.5 * (hmax + hmin);
-    const Scalar dt = linesearch * alpha * k;
+    const Scalar dt = 0.05 * alpha * k;
     const Scalar radius = k;
 
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
@@ -216,12 +222,12 @@ int main(int, char**)
     try
     {
       Alert::Info() << "Optimizing the domain..." << Alert::Raise;
-      // MMG::Optimizer().setHMax(hmax)
-      //                 .setHMin(hmin)
-      //                 .setHausdorff(hausd)
-      //                 .setGradation(hgrad)
-      //                 .setAngleDetection(false)
-      //                 .optimize(mesh);
+      MMG::Optimizer().setHMax(hmax)
+                      .setHMin(hmin)
+                      .setHausdorff(hausd)
+                      .setGradation(hgrad)
+                      .setAngleDetection(false)
+                      .optimize(mesh);
     }
     catch (Alert::Exception& e)
     {
@@ -268,8 +274,13 @@ int main(int, char**)
     // Parameters
     const Scalar lambda = 0.5769, mu = 0.3846;
 
-    VectorFunction f{0, -1, 0};
-    VectorFunction g{1, 0, 0};
+    // VectorFunction f{0, -1, 0}; // Locator
+    auto f = -BoundaryNormal(mesh);
+    VectorFunction g{1, 0, 0}; // GammaT
+    GridFunction nnn(dvfes);
+    nnn.projectOnFaces(Average(f));
+    nnn.save("nnn.gf");
+    nnn.getFiniteElementSpace().getMesh().save("nnn.mesh");
 
     // Bump function
     auto h = [](Scalar r)
@@ -292,8 +303,16 @@ int main(int, char**)
     state = LinearElasticityIntegral(u, v)(lambda, mu)
           - BoundaryIntegral(g, v).over(GammaT)
           - BoundaryIntegral(f, v).over(Locator)
-          + FaceIntegral(heClamp * u, v).over(Clamp);
+          + FaceIntegral(heClamp * u, v).over(Clamp)
+          + BoundaryIntegral(tgv * u.z(), v.z()).over(7);
+    state.assemble();
+    Alert::Info() << "Solving state equation..." << Alert::Raise;
     state.solve(cg);
+
+    u.getSolution().save("u.gf");
+    mesh.save("u.mesh");
+
+    std::exit(1);
 
     Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
     TrialFunction p(vfes);
@@ -304,20 +323,9 @@ int main(int, char**)
             + FaceIntegral(heClamp * p, q).over(Clamp);
     adjoint.solve(cg);
 
-    u.getSolution().save("u.gf");
-    mesh.save("u.mesh");
 
     p.getSolution().save("p.gf");
     mesh.save("p.mesh");
-
-    if (((i % 10 == 0) || ((i - 1) % 10 == 0)) && i < 100)
-    {
-      GridFunction sC(sfes);
-      sC = (u.getSolution().T() * aniso * p.getSolution()).coeff(0, 0);
-      sC.save("sC.gf");
-      sfes.getMesh().save("sC.mesh");
-      std::exit(1);
-    }
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
     ScalarGridFunction j(sfes);
@@ -326,56 +334,124 @@ int main(int, char**)
     if (i > 0)
       oldObjective = objective;
 
-    objective = Integral(j).compute()
-      + ellClamp * mesh.getPerimeter(Clamp) + ellLocator * mesh.getPerimeter(Locator);
 
-    if (oldObjective < objective)
-      hmax *= 0.8;
+    const Scalar J = Integral(j).compute();
+    const Scalar pLocator = ellLocator * mesh.getPerimeter(Locator);
+    const Scalar pClamp = ellClamp * mesh.getPerimeter(Clamp);
+    objective = J + pClamp + pLocator;
 
-    Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::Raise;
+    Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::NewLine
+                  << "J: " << J << Alert::NewLine
+                  << "pClamp: " << pClamp << Alert::NewLine
+                  << "pLocator: " << pLocator
+                  << Alert::Raise;
     fObj << objective << "\n";
     fObj.flush();
 
-    Alert::Info() << "Computing conormal..." << Alert::Raise;
-    GridFunction conormalLocator(dvfes);
-    conormalLocator = Grad(distLocator);
-    conormalLocator.stableNormalize();
-
-    GridFunction conormalClamp(dvfes);
-    conormalClamp = Grad(distClamp);
-    conormalClamp.stableNormalize();
-
-    Alert::Info() << "Computing shape gradient..." << Alert::Raise;
-    TrialFunction theta(dvfes);
-    TestFunction  w(dvfes);
-    Problem hilbert(theta, w);
-    hilbert = Integral(alpha * Jacobian(theta), Jacobian(w))
-            + Integral(theta, w)
-            + 1.0 / epsilon * FaceIntegral(
-                Dot(u.getSolution(), p.getSolution()), Dot(conormalClamp, w)).over(dClamp)
-            - FaceIntegral(Dot(f, p.getSolution()), Dot(conormalLocator, w)).over(dLocator)
-            + ellClamp * FaceIntegral(conormalClamp, w).over(dClamp)
-            + ellLocator * FaceIntegral(conormalLocator, w).over(dLocator)
-            + tgv * Integral(theta, w).over(GammaT);
-    hilbert.solve(cg);
-
-    GridFunction norm(dsfes);
-    norm = Frobenius(theta.getSolution());
-    theta.getSolution() /= norm.max();
-
-    dOmega.save("Theta.mesh");
-    theta.getSolution().save("Theta.gf");
-
-    if (i % 2 == 0)
+    if (topologicalStep)
     {
-      Alert::Info() << "Advecting clamp..." << Alert::Raise;
+      Alert::Info() << "Topological optimization..." << Alert::Raise;
 
-      if (i > 1)
+      TrialFunction s(dsfes);
+      TestFunction  t(dsfes);
+
+      Problem topo(s, t);
+      if (clampStep)
+      {
+        Alert::Info() << "Inserting clamp region..." << Alert::Raise;
+        topo = Integral(alpha * Grad(s), Grad(t))
+             + Integral(s, t)
+             + Integral((u.getSolution().T() * aniso * p.getSolution()).coeff(0, 0), t)
+             + tgv * Integral(s, t).over(Clamp, Locator, GammaT);
+      }
+      else if (locatorStep)
+      {
+        Alert::Info() << "Inserting locator region..." << Alert::Raise;
+        topo = Integral(alpha * Grad(s), Grad(t))
+             + Integral(s, t)
+             - Integral(Dot(f, p.getSolution()), t)
+             + tgv * Integral(s, t).over(Clamp, Locator, GammaT);
+      }
+      topo.solve(cg);
+
+      s.getSolution().save("Topo.gf");
+      dsfes.getMesh().save("Topo.mesh");
+
+      Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
+      const Scalar tc = s.getSolution().max();
+      std::vector<Point> cs;
+      for (auto it = dOmega.getVertex(); !it.end(); ++it)
+      {
+        const Point p(*it, it->getTransformation(),
+            Polytope::getVertex(0, Polytope::Type::Point), it->getCoordinates());
+        const Scalar tp = s.getSolution()(p);
+        if (tp > 0 && (tp / tc) > (1 - 1e-12))
+        {
+          cs.emplace_back(std::move(p));
+          break;
+        }
+      }
+      Alert::Info() << "Nucleating " << Alert::Notation(cs.size()) << " holes..."
+                    << Alert::Raise;
+
+      if (clampStep)
+        holes(distClamp, cs);
+      else if (locatorStep)
+        holes(distLocator, cs);
+
+      distClamp.save("distClamp.gf");
+      distClamp.getFiniteElementSpace().getMesh().save("distClamp.mesh");
+    }
+    else if (geometricStep)
+    {
+      Alert::Info() << "Geometrical optimization..." << Alert::Raise;
+
+      Alert::Info() << "Computing conormal..." << Alert::Raise;
+      GridFunction conormalLocator(dvfes);
+      conormalLocator = Grad(distLocator);
+      conormalLocator.stableNormalize();
+
+      GridFunction conormalClamp(dvfes);
+      conormalClamp = Grad(distClamp);
+      conormalClamp.stableNormalize();
+
+      Alert::Info() << "Computing shape gradient..." << Alert::Raise;
+      TrialFunction theta(dvfes);
+      TestFunction  w(dvfes);
+      Problem hilbert(theta, w);
+      hilbert = Integral(alpha * Jacobian(theta), Jacobian(w))
+              + Integral(theta, w)
+              + (1.0 / epsilon) * FaceIntegral(
+                Dot(u.getSolution(), p.getSolution()), Dot(conormalClamp, w)).over(dClamp)
+              - FaceIntegral(
+                  Dot(Average(f), p.getSolution()), Dot(conormalLocator, w)).over(dLocator)
+              + ellClamp * FaceIntegral(conormalClamp, w).over(dClamp)
+              + ellLocator * FaceIntegral(conormalLocator, w).over(dLocator)
+              + tgv * Integral(theta, w).over(GammaT);
+      hilbert.solve(cg);
+
+      GridFunction norm(dsfes);
+      norm = Frobenius(theta.getSolution());
+      theta.getSolution() /= norm.max();
+
+      dOmega.save("Theta.mesh");
+      theta.getSolution().save("Theta.gf");
+
+      if (clampStep)
+      {
+        Alert::Info() << "Advecting clamp..." << Alert::Raise;
         MMG::Advect(distClamp, theta.getSolution()).step(dt);
+      }
+      else if (locatorStep)
+      {
+        Alert::Info() << "Advecting locator..." << Alert::Raise;
+        MMG::Advect(distLocator, theta.getSolution()).step(dt);
+      }
+    }
 
-      // dOmega.save("out/AdvectedClamp." + std::to_string(i) + ".mesh");
-      // distClamp.save("out/AdvectedClamp." + std::to_string(i) + ".gf");
 
+    if (clampStep)
+    {
       Alert::Info() << "Meshing the clamp..." << Alert::Raise;
       try
       {
@@ -392,7 +468,7 @@ int main(int, char**)
                                           .setHausdorff(hausd)
                                           .surface()
                                           .discretize(workaround);
-        hmax = 1.1 * hmax > 0.5 ? 0.5 : hmax * 1.1;
+        hmax = 1.1 * hmax > 0.4 ? 0.4 : hmax * 1.1;
       }
       catch (Alert::Exception& e)
       {
@@ -401,16 +477,8 @@ int main(int, char**)
         continue;
       }
     }
-    else
+    else if (locatorStep)
     {
-      Alert::Info() << "Advecting locator..." << Alert::Raise;
-
-      if (i > 1)
-        MMG::Advect(distLocator, theta.getSolution()).step(dt);
-
-      // dOmega.save("out/AdvectedCathode." + std::to_string(i) + ".mesh");
-      // distCathode.save("out/AdvectedCathode." + std::to_string(i) + ".gf");
-
       Alert::Info() << "Meshing the locator..." << Alert::Raise;
       try
       {
@@ -427,7 +495,7 @@ int main(int, char**)
                                           .setHausdorff(hausd)
                                           .surface()
                                           .discretize(workaround);
-        hmax = 1.1 * hmax > 0.5 ? 0.5 : hmax * 1.1;
+        hmax = 1.1 * hmax > 0.4 ? 0.4 : hmax * 1.1;
       }
       catch (Alert::Exception& e)
       {
@@ -445,120 +513,6 @@ int main(int, char**)
     Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
     i++;
   }
-
-// 
-// 
-//     GridFunction sA(sfes);
-//     sA = (uIn - u.getSolution()) * p.getSolution();
-//     sA.save("sA.gf");
-// 
-//     Alert::Info() << "Computing objective..." << Alert::Raise;
-//     GridFunction j(sfes);
-//     j = 0.5 * Frobenius(Grad(u.getSolution()));
-//     j.setWeights();
-//     mesh.save("j.mesh");
-//     j.save("j.gf");
-//     const Scalar Ij = Integral(j).compute();
-//     const Scalar objective =
-//       Ij - ellAnode * mesh.getPerimeter(Anode) - ellCathode * mesh.getPerimeter(Cathode);
-//     Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::NewLine
-//                   << "Norm: " << Alert::Notation(Ij)
-//                   << Alert::Raise;
-//     fObj << objective << "\n";
-//     fObj.flush();
-// 
-//     GridFunction norm(dsfes);
-//     norm = Frobenius(theta.getSolution());
-//     theta.getSolution() /= norm.max();
-// 
-//     dOmega.save("Theta.mesh");
-//     theta.getSolution().save("Theta.gf");
-// 
-//     // dOmega.save("out/Theta." + std::to_string(i) + ".mesh");
-//     // theta.getSolution().save("out/Theta." + std::to_string(i) + ".gf");
-// 
-//     // if (true)
-//     if (((i % 10 == 0) || ((i - 1) % 10 == 0)) && i < 100)
-//     {
-//       Alert::Info() << "Computing topological sensitivity..." << Alert::Raise;
-//       TrialFunction s(dsfes);
-//       TestFunction  t(dsfes);
-//       Problem topo(s, t);
-//       if (i % 10 == 0)
-//       {
-//         topo = Integral(alpha * alpha * Grad(s), Grad(t))
-//              + Integral(s, t)
-//              - Integral((uIn - u.getSolution()) * p.getSolution(), t)
-//              + tgv * Integral(s, t).over(Inlet, Cathode, Anode, FixedAnode, FixedCathode);
-//       }
-//       else
-//       {
-//         topo = Integral(alpha * alpha * Grad(s), Grad(t))
-//              + Integral(s, t)
-//              + Integral((u.getSolution()) * p.getSolution(), t)
-//              + tgv * Integral(s, t).over(Inlet, Cathode, Anode, FixedAnode, FixedCathode);
-//       }
-//       topo.solve(cg);
-// 
-//       s.getSolution().save("Topo.sol", IO::FileFormat::MEDIT);
-//       dsfes.getMesh().save("Topo.mesh", IO::FileFormat::MEDIT);
-// 
-//       // s.getSolution().save("out/Topo." + std::to_string(i) + ".gf");
-//       // dsfes.getMesh().save("out/Topo." + std::to_string(i) + ".mesh");
-// 
-//       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
-//       const Scalar tc = s.getSolution().max();
-//       std::vector<Point> cs;
-//       for (auto it = dOmega.getVertex(); !it.end(); ++it)
-//       {
-//         const Point p(*it, it->getTransformation(),
-//             Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
-//         const Scalar tp = s.getSolution()(p);
-//         if (tp > 0 && (tp / tc) > (1 - 1e-12))
-//         {
-//           cs.emplace_back(std::move(p));
-//           break;
-//         }
-//       }
-// 
-//       Alert::Info() << "Nucleating " << Alert::Notation(cs.size()) << " holes..."
-//                     << Alert::Raise;
-//       if (cs.size())
-//       {
-//         if (i % 10 == 0)
-//         {
-//           auto holes =
-//             [&](const Point& v)
-//             {
-//               Scalar d = distAnode(v);
-//               for (const auto& c : cs)
-//               {
-//                 const Scalar dd = (v - c).norm() - radius;
-//                 d = std::min(d, dd);
-//               }
-//               return d;
-//             };
-//           distAnode = holes;
-//         }
-//         else
-//         {
-//           auto holes =
-//             [&](const Point& v)
-//             {
-//               Scalar d = distCathode(v);
-//               for (const auto& c : cs)
-//               {
-//                 const Scalar dd = (v - c).norm() - radius;
-//                 d = std::min(d, dd);
-//               }
-//               return d;
-//             };
-//           distCathode = holes;
-//         }
-//       }
-//     }
-// 
-// 
   return 0;
 }
 
@@ -590,5 +544,24 @@ size_t rmc(MeshBase& mesh)
     }
   }
   return ccs;
+}
+
+void holes(ScalarGridFunction& dist, const std::vector<Point>& cs)
+{
+  if (cs.size())
+  {
+    auto insert =
+      [&](const Point& v)
+      {
+        Scalar d = dist(v);
+        for (const auto& c : cs)
+        {
+          const Scalar dd = (v - c).norm() - radius;
+          d = std::min(d, dd);
+        }
+        return d;
+      };
+    dist = insert;
+  }
 }
 

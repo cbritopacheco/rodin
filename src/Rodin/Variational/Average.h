@@ -12,6 +12,95 @@
 
 namespace Rodin::Variational
 {
+  template <class FunctionDerived>
+  class Average<FunctionBase<FunctionDerived>> final
+    : public FunctionBase<Average<FunctionBase<FunctionDerived>>>
+  {
+    public:
+      using Operand = FunctionBase<FunctionDerived>;
+      using Parent = FunctionBase<Average<FunctionBase<FunctionDerived>>>;
+
+      constexpr
+      Average(const Operand& op)
+        : m_op(op.copy())
+      {}
+
+      constexpr
+      Average(const Average& other)
+        : Parent(other),
+          m_op(other.m_op->copy())
+      {}
+
+      constexpr
+      Average(Average&& other)
+        : Parent(std::move(other)),
+          m_op(std::move(other.m_op))
+      {}
+
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return getOperand().getRangeShape();
+      }
+
+      inline
+      constexpr
+      const auto& getOperand() const
+      {
+        assert(m_op);
+        return *m_op;
+      }
+
+      inline
+      constexpr
+      Average& traceOf(Geometry::Attribute attr)
+      {
+        return *this;
+      }
+
+      inline
+      constexpr
+      Average& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      {
+        return *this;
+      }
+
+      inline
+      auto getValue(const Geometry::Point& p) const
+      {
+        assert(p.getPolytope().isFace());
+        const auto& face = p.getPolytope();
+        const size_t d = face.getDimension();
+        const auto& mesh = face.getMesh();
+        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex() );
+        assert(inc.size() == 2);
+        const Index idx1 = *inc.begin();
+        const Index idx2 = *std::next(inc.begin());
+        const auto it1 = mesh.getPolytope(d + 1, idx1);
+        const auto it2 = mesh.getPolytope(d + 1, idx2);
+        const auto& pc = p.getPhysicalCoordinates();
+        const Math::SpatialVector rc1 = it1->getTransformation().inverse(pc);
+        const Math::SpatialVector rc2 = it2->getTransformation().inverse(pc);
+        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
+        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
+        const auto& lhs = this->object(getOperand().getValue(p1));
+        const auto& rhs = this->object(getOperand().getValue(p2));
+        return 0.5 * (lhs + rhs);
+      }
+
+      inline Average* copy() const noexcept override
+      {
+        return new Average(*this);
+      }
+
+    private:
+      std::unique_ptr<Operand> m_op;
+  };
+
+  template <class Derived>
+  Average(const FunctionBase<Derived>&) -> Average<FunctionBase<Derived>>;
+
   template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
   class Average<ShapeFunctionBase<Derived, FESType, SpaceType>> final
     : public ShapeFunctionBase<Average<ShapeFunctionBase<Derived, FESType, SpaceType>>>

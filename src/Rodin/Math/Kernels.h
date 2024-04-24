@@ -94,6 +94,20 @@ namespace Rodin::Math::Kernels
       }
     }
   }
+
+  inline
+  static void replace(const Math::Vector& row, SparseMatrix& stiffness, Vector& mass,
+      const IndexMap<Scalar>& dofs, size_t offset = 0)
+  {
+    for (const auto& kv : dofs)
+    {
+      const Index& global = kv.first + offset;
+      const auto& dof = kv.second;
+      mass.coeffRef(global) = dof;
+      for (size_t i = 0; i < row.size(); i++)
+        stiffness.insert(global, i) = row(i);
+    }
+  }
 }
 
 #endif

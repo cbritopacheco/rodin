@@ -186,6 +186,24 @@ namespace Rodin::Variational
       }
 
       inline
+      auto x() const
+      {
+        return Component(*this, 0);
+      }
+
+      inline
+      auto y() const
+      {
+        return Component(*this, 1);
+      }
+
+      inline
+      auto z() const
+      {
+        return Component(*this, 2);
+      }
+
+      inline
       constexpr
       auto T() const
       {

@@ -17,6 +17,7 @@
 
 #include "Function.h"
 #include "ShapeFunction.h"
+#include "VectorFunction.h"
 
 namespace Rodin::Variational
 {
@@ -61,6 +62,8 @@ namespace Rodin::Variational
        * @brief Gets the global degree of freedom map.
        */
       virtual const DOFs& getDOFs() const = 0;
+
+      virtual bool isComponent() const = 0;
 
       /**
        * @brief Gets the associated operand.
@@ -230,6 +233,12 @@ namespace Rodin::Variational
             }
           }
         }
+      }
+
+      inline
+      bool isComponent() const override
+      {
+        return false;
       }
 
       inline

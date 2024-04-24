@@ -94,7 +94,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      MatrixFunctionBase& traceOf(const std::set<Geometry::Attribute>& attrs)
+      MatrixFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         Parent::traceOf(attrs);
         return *this;

@@ -680,6 +680,7 @@ namespace Rodin::Variational
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension() - 1;
+        std::vector<size_t> ns(fes.getSize(), 0);
         for (auto it = mesh.getFace(); !it.end(); ++it)
         {
           const auto& polytope = *it;
@@ -691,19 +692,23 @@ namespace Rodin::Variational
             for (size_t local = 0; local < fe.getCount(); local++)
             {
               const Geometry::Point p(polytope, trans, fe.getNode(local));
+              const Index global = fes.getGlobalIndex({ d, i }, local);
               if constexpr (std::is_same_v<RangeType, Scalar>)
               {
                 assert(m_data.rows() == 1);
-                m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+                m_data(global) =
+                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1.0);
               }
               else if constexpr (std::is_same_v<RangeType, Math::Vector>)
               {
-                m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+                m_data.col(global) =
+                  (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1.0);
               }
               else
               {
                 assert(false);
               }
+              ns[global] += 1;
             }
           }
         }
@@ -1052,10 +1057,37 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      void getValue(Math::Vector& out, const Geometry::Point& p) const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
-        interpolate(res, p);
+        const auto& polytope = p.getPolytope();
+        const auto& polytopeMesh = polytope.getMesh();
+        const auto& fes = m_fes.get();
+        const auto& fesMesh = fes.getMesh();
+        if (polytopeMesh == fesMesh)
+        {
+          interpolate(out, p);
+        }
+        else
+        {
+          if (polytopeMesh.isSubMesh())
+          {
+            const auto& submesh = polytopeMesh.asSubMesh();
+            assert(submesh.getParent() == fes.getMesh());
+            interpolate(out, submesh.inclusion(p));
+          }
+          else if (fesMesh.isSubMesh())
+          {
+            const auto& submesh = fesMesh.asSubMesh();
+            assert(submesh.getParent() == polytopeMesh);
+            interpolate(out, submesh.restriction(p));
+          }
+          else
+          {
+            assert(false);
+            out.setConstant(NAN);
+          }
+        }
       }
 
       /**

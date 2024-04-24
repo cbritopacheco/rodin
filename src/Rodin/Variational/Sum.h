@@ -98,7 +98,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Sum& traceOf(Geometry::Attribute& attr)
+      Sum& traceOf(Geometry::Attribute attr)
       {
         Parent::traceOf(attr);
         getLHS().traceOf(attr);
@@ -108,7 +108,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Sum& traceOf(const std::set<Geometry::Attribute>& attrs)
+      Sum& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         Parent::traceOf(attrs);
         getLHS().traceOf(attrs);

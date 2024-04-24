@@ -56,7 +56,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      ScalarFunctionBase& traceOf(const std::set<Geometry::Attribute>& attrs)
+      ScalarFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         Parent::traceOf(attrs);
         return *this;
