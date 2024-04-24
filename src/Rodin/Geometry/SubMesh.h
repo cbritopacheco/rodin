@@ -26,8 +26,16 @@ namespace Rodin::Geometry
   class SubMeshBase
   {
     public:
+      /**
+       * @brief Represents the inclusion of a Point of a SubMesh @f$ C @f$ into
+       * a Point of a Mesh @f$ P @f$.
+       */
       virtual Point inclusion(const Point& p) const = 0;
 
+      /**
+       * @brief Represents the restriction of a Point of a Mesh @f$ P @f$ into
+       * a Point of a SubMesh @f$ C @f$.
+       */
       virtual Point restriction(const Point& p) const = 0;
 
       /**

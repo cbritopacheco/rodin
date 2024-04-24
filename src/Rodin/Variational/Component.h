@@ -13,28 +13,36 @@ namespace Rodin::Variational
    * @brief Represents the component (or entry) of a vectorial ShapeFunction.
    */
   template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
-  class Component<ShapeFunction<OperandDerived, FES, Space>> final
+  class Component<ShapeFunctionBase<OperandDerived, FES, Space>> final
+    : public ShapeFunctionBase<Component<ShapeFunctionBase<OperandDerived, FES, Space>>, FES, Space>
   {
     public:
-      using Operand = ShapeFunction<OperandDerived, FES, Space>;
+      using Operand =
+        ShapeFunctionBase<OperandDerived, FES, Space>;
+
+      using Parent =
+        ShapeFunctionBase<Component<ShapeFunctionBase<OperandDerived, FES, Space>>, FES, Space>;
 
       /**
        * @brief Constructs the component object from a TrialFunction and its
        * component index.
        */
-      Component(Operand& u, size_t component)
-        : m_u(u),
+      Component(const Operand& u, size_t component)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u.copy()),
           m_idx(component)
       {}
 
       Component(const Component& other)
-        : m_u(other.m_u),
+        : Parent(other),
+          m_u(other.m_u->copy()),
           m_idx(other.m_idx)
       {}
 
       Component(Component&& other)
-        : m_u(other.m_u),
-          m_idx(other.m_idx)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)),
+          m_idx(std::move(other.m_idx))
       {}
 
       inline
@@ -46,19 +54,56 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Operand& getShapeFunction() const
+      const Operand& getOperand() const
       {
-        return m_u.get();
+        assert(m_u);
+        return *m_u;
+      }
+
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
+
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Polytope& polytope) const
+      {
+        const size_t d = polytope.getDimension();
+        const size_t i = polytope.getIndex();
+        return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
+      }
+
+      inline
+      constexpr
+      auto getTensorBasis(const Geometry::Point& p) const
+      {
+        using RangeType = typename FES::RangeType;
+        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        const size_t d = p.getPolytope().getDimension();
+        const Index i = p.getPolytope().getIndex();
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto& tb = this->object(getOperand().getTensorBasis(p));
+        return TensorBasis(fe.getCount(), [&](size_t local) { return tb(local).coeff(m_idx); });
+      }
+
+      inline
+      Component* copy() const noexcept override
+      {
+        return new Component(*this);
       }
 
     private:
-      std::reference_wrapper<Operand> m_u;
+      std::unique_ptr<Operand> m_u;
       const size_t m_idx;
   };
 
   template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
-  Component(ShapeFunction<OperandDerived, FES, Space>&, size_t)
-    -> Component<ShapeFunction<OperandDerived, FES, Space>>;
+  Component(const ShapeFunctionBase<OperandDerived, FES, Space>&, size_t)
+    -> Component<ShapeFunctionBase<OperandDerived, FES, Space>>;
 
   /**
    * @brief Represents the component (or entry) of a vectorial FunctionBase

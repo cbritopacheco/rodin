@@ -56,7 +56,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      IdentityMatrix& traceOf(const std::set<Geometry::Attribute>&)
+      IdentityMatrix& traceOf(const FlatSet<Geometry::Attribute>&)
       {
         return *this;
       }

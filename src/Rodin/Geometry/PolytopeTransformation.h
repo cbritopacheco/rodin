@@ -66,6 +66,10 @@ namespace Rodin::Geometry
         return m_pdim;
       }
 
+      virtual size_t getOrder() const = 0;
+
+      virtual size_t getJacobianOrder() const = 0;
+
       /**
        * @brief Computes the physical coordinates of the given reference point.
        *

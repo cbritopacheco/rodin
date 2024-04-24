@@ -46,6 +46,22 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      inline
+      constexpr
+      VectorFunctionBase& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      VectorFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
+
       /**
        * @brief Convenience function to access the 1st component of the
        * vector.
@@ -155,6 +171,65 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).copy();
       }
   };
+
+  template <>
+  class VectorFunction<Math::Vector> final
+    : public VectorFunctionBase<VectorFunction<Math::Vector>>
+  {
+    public:
+      using Parent = VectorFunctionBase<VectorFunction<Math::Vector>>;
+
+      /**
+       * @brief Constructs a vector with the given values.
+       * @param[in] values Parameter pack of values
+       *
+       * Each value passed must be convertible to any specialization of
+       * ScalarFunction.
+       */
+      VectorFunction(const Math::Vector& v)
+        : m_value(v)
+      {}
+
+      VectorFunction(const VectorFunction& other)
+        : Parent(other),
+          m_value(other.m_value)
+      {}
+
+      VectorFunction(VectorFunction&& other)
+        : Parent(std::move(other)),
+          m_value(std::move(other.m_value))
+      {}
+
+      inline
+      const Math::Vector& getValue(const Geometry::Point& p) const
+      {
+        return m_value.get();
+      }
+
+      inline
+      constexpr
+      size_t getDimension() const
+      {
+        return m_value.get().size();
+      }
+
+      inline
+      constexpr
+      VectorFunction& traceOf(Geometry::Attribute attr)
+      {
+        return *this;
+      }
+
+      inline VectorFunction* copy() const noexcept override
+      {
+        return new VectorFunction(*this);
+      }
+
+    private:
+      std::reference_wrapper<const Math::Vector> m_value;
+  };
+
+  VectorFunction(const Math::Vector&) -> VectorFunction<Math::Vector>;
 
   /**
    * @ingroup VectorFunctionSpecializations

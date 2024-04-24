@@ -16,6 +16,7 @@
 #include "RangeShape.h"
 #include "Function.h"
 #include "ScalarFunction.h"
+#include "VectorFunction.h"
 
 namespace Rodin::Variational
 {
@@ -26,22 +27,17 @@ namespace Rodin::Variational
    */
 
   template <>
-  class Zero<Scalar> final
-    : public ScalarFunctionBase<Zero<Scalar>>
+  class Zero<void> final
+    : public ScalarFunctionBase<Zero<void>>
   {
     public:
       /// Parent class
-      using Parent = ScalarFunctionBase<Zero<Scalar>>;
+      using Parent = ScalarFunctionBase<Zero<void>>;
 
-      /**
-       * @brief Constructs the Zeroer object
-       * @param[in] s Base value
-       * @param[in] p Zeroer
-       */
       Zero() {}
 
       Zero(const Zero& other)
-        : Parent(std::move(other))
+        : Parent(other)
       {}
 
       Zero(Zero&& other)
@@ -71,7 +67,62 @@ namespace Rodin::Variational
   /**
    * @brief CTAD for Zero.
    */
-  Zero() -> Zero<Scalar>;
+  Zero() -> Zero<void>;
+
+  template <>
+  class Zero<size_t> final
+    : public VectorFunctionBase<Zero<size_t>>
+  {
+    public:
+      /// Parent class
+      using Parent = VectorFunctionBase<Zero<size_t>>;
+
+      Zero(size_t d)
+        : m_d(d)
+      {}
+
+      Zero(const Zero& other)
+        : Parent(other),
+          m_d(other.m_d)
+      {}
+
+      Zero(Zero&& other)
+        : Parent(std::move(other)),
+          m_d(std::move(other.m_d))
+      {}
+
+      inline
+      constexpr
+      Zero& traceOf(Geometry::Attribute attrs)
+      {
+        return *this;
+      }
+
+      inline
+      auto getValue(const Geometry::Point&) const
+      {
+        return Math::Vector::Zero(m_d);
+      }
+
+      inline
+      void getValue(Math::Vector& out, const Geometry::Point&) const
+      {
+        out.resize(m_d);
+        out.setZero();
+      }
+
+      inline Zero* copy() const noexcept override
+      {
+        return new Zero(*this);
+      }
+
+    private:
+      const size_t m_d;
+  };
+
+  Zero(size_t) -> Zero<size_t>;
+
+  using VectorZero = Zero<size_t>;
 }
 
 #endif

@@ -103,6 +103,24 @@ namespace Rodin::Variational
         res *= -1;
       }
 
+      inline
+      constexpr
+      UnaryMinus& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        m_op->traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      UnaryMinus& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        m_op->traceOf(attrs);
+        return *this;
+      }
+
       inline UnaryMinus* copy() const noexcept override
       {
         return new UnaryMinus(*this);

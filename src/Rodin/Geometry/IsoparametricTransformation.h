@@ -90,6 +90,18 @@ namespace Rodin::Geometry
       }
 
       inline
+      size_t getOrder() const override
+      {
+        return m_fe.getOrder();
+      }
+
+      inline
+      size_t getJacobianOrder() const override
+      {
+        return m_fe.getOrder();
+      }
+
+      inline
       void transform(const Math::SpatialVector& rc, Math::SpatialVector& pc) const override
       {
         const size_t pdim = getPhysicalDimension();

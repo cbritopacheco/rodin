@@ -297,7 +297,14 @@ namespace Rodin::Variational
     {
       dbc.assemble();
       const auto& dofs = dbc.getDOFs();
-      Math::Kernels::eliminate(m_stiffness, m_mass, dofs);
+      if (dbc.isComponent())
+      {
+        assert(false);
+      }
+      else
+      {
+        Math::Kernels::eliminate(m_stiffness, m_mass, dofs);
+      }
     }
 
     // Impose periodic boundary conditions
