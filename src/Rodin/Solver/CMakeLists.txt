@@ -24,6 +24,10 @@ if (RODIN_USE_SUITESPARSE)
   target_link_libraries(RodinSolver PUBLIC SuiteSparse::UMFPACK)
 endif()
 
+if (RODIN_USE_APPLE_ACCELERATE)
+  target_sources(RodinSolver INTERFACE AppleAccelerate.h)
+endif()
+
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinSolver
   INTERFACE

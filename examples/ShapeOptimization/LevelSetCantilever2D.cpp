@@ -114,6 +114,8 @@ int main(int, char**)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     hilbert.solve(solver);
     auto& dJ = g.getSolution();
+    dJ.save("dJ.gf");
+    vh.getMesh().save("dJ.mesh");
 
     // Update objective
     double objective = compliance(u.getSolution()) + ell * th.getVolume(Interior);

@@ -23,6 +23,7 @@ static constexpr Geometry::Attribute GammaT = 6;
 
 static constexpr Geometry::Attribute Clamp = 11; // Clamp
 static constexpr Geometry::Attribute Locator = 12; // Locator
+static constexpr Geometry::Attribute Floor = 7; // Locator
 
 static constexpr Geometry::Attribute dClamp = 111;
 static constexpr Geometry::Attribute dLocator = 6;
@@ -211,6 +212,7 @@ int main(int, char**)
 
     const Scalar k = 0.5 * (hmax + hmin);
     const Scalar dt = 0.05 * alpha * k;
+    const Scalar radius = k;
 
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
                   << "HMax:      " << Alert::Notation(hmax)     << Alert::NewLine
@@ -302,6 +304,7 @@ int main(int, char**)
     Problem state(u, v);
     state = LinearElasticityIntegral(u, v)(lambda, mu)
           - Integral(VectorFunction{0, 0, -1}, v)
+          + FaceIntegral(heClamp * u, v).over(Clamp)
           + BoundaryIntegral(tgv * u.z(), v.z()).over(7)
           + DirichletBC(u, Zero(3)).on(3)
           ;
@@ -322,7 +325,9 @@ int main(int, char**)
     Problem adjoint(p, q);
     adjoint = LinearElasticityIntegral(p, q)(lambda, mu)
             + Integral(u.getSolution() / mesh.getVolume(), q)
-            + FaceIntegral(heClamp * p, q).over(Clamp);
+            + FaceIntegral(heClamp * p, q).over(Clamp)
+            + BoundaryIntegral(tgv * u.z(), v.z()).over(Floor);
+            // + DirichletBC(u, Zero(3)).on(Wall);
     adjoint.solve(cg);
 
 
@@ -567,4 +572,6 @@ void holes(ScalarGridFunction& dist, const std::vector<Point>& cs)
     dist = insert;
   }
 }
+
+
 

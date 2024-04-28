@@ -5,7 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <optional>
+
 #include "ISCDProcess.h"
+
+#include "Configure.h"
 
 namespace Rodin::External::MMG
 {
