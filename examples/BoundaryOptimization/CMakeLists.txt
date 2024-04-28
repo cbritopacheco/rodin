@@ -1,3 +1,12 @@
+add_executable(WaterTankSupport WaterTankSupport.cpp)
+target_link_libraries(WaterTankSupport
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  Rodin::External::MMG
+  )
+
 add_executable(ClampingLocator ClampingLocator.cpp)
 target_link_libraries(ClampingLocator
   PUBLIC

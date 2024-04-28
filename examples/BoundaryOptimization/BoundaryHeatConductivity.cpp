@@ -9,12 +9,14 @@
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
 
-#include <Rodin/Models/Hilbert/H1a.h>
+#include "Tools.h"
 
 using namespace Rodin;
 using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+
+using namespace Rodin::Examples::BoundaryOptimization;
 
 // Parameters
 static constexpr Geometry::Attribute Gamma = 6;
@@ -36,36 +38,6 @@ using VectorFES = P1<Math::Vector, Context::Sequential>;
 using ScalarGridFunction = GridFunction<ScalarFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
-
-inline
-size_t rmc(MeshBase& mesh)
-{
-  const size_t per = mesh.getPerimeter();
-  const size_t D = mesh.getDimension();
-  auto ccl = mesh.ccl(
-      [](const Polytope& p1, const Polytope& p2)
-      {
-        return p1.getAttribute() == p2.getAttribute();
-      }, D - 1, GammaD);
-  size_t ccs = ccl.getCount();
-
-  for (const auto& cc : ccl)
-  {
-    Scalar area = 0;
-    for (const Index i : cc)
-      area += mesh.getFace(i)->getMeasure();
-    if ((area / per) < 1e-5)
-    {
-      for (const Index i : cc)
-      {
-        if (mesh.getFace(i)->getAttribute() == GammaD)
-          mesh.setAttribute({ D - 1, i }, Gamma);
-      }
-      ccs--;
-    }
-  }
-  return ccs;
-}
 
 int main(int, char**)
 {
@@ -151,7 +123,7 @@ int main(int, char**)
 
     Alert::Info() << "RMC..." << Alert::Raise;
     prevRegionCount = regionCount;
-    regionCount = rmc(Omega);
+    regionCount = rmc(Omega, { GammaD }, Gamma);
 
     Alert::Info() << "Found " << Alert::Notation(regionCount) << " regions."
       << Alert::Raise;

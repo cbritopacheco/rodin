@@ -127,6 +127,8 @@
 
 #cmakedefine RODIN_MULTITHREADED
 
+#cmakedefine RODIN_USE_APPLE_ACCELERATE
+
 /**
  * @ingroup RodinDirectives
  * @brief Indicates the maximal space dimension.

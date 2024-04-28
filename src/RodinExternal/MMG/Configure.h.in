@@ -7,6 +7,8 @@
 #ifndef RODIN_RODINEXTERNAL_MMG_CONFIGURE_H
 #define RODIN_RODINEXTERNAL_MMG_CONFIGURE_H
 
+#include "Rodin/Configure.h"
+
 /**
  * @file MMG/Configure.h.in
  * @brief Header containing preprocessor directives for Rodin::External::MMG.

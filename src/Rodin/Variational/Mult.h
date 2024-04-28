@@ -512,7 +512,7 @@ namespace Rodin::Variational
       constexpr
       const auto& getLeaf() const
       {
-        return getRHS().getLeaf();
+        return getLHS().getLeaf();
       }
 
       inline
@@ -544,14 +544,14 @@ namespace Rodin::Variational
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
-        return getRHS().getDOFs(element);
+        return getLHS().getDOFs(element);
       }
 
       inline
       constexpr
       const auto& getFiniteElementSpace() const
       {
-        return getRHS().getFiniteElementSpace();
+        return getLHS().getFiniteElementSpace();
       }
 
       inline
