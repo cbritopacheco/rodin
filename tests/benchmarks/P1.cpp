@@ -35,19 +35,19 @@ namespace RodinBenchmark
         .finalize();
 
         uniformTriangularMesh16 =
-          SequentialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
+          SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
 
         uniformTriangularMesh32 =
-          SequentialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
+          SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 32, 32 });
 
         uniformTriangularMesh32 =
-          SequentialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
+          SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 32, 32 });
 
         uniformTriangularMesh64 =
-          SequentialMesh::UniformGrid(Polytope::Type::Triangle, 64, 64);
+          SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 64, 64 });
 
         uniformTriangularMesh128 =
-          SequentialMesh::UniformGrid(Polytope::Type::Triangle, 128, 128);
+          SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 128, 128 });
       }
 
       void TearDown(const benchmark::State&)

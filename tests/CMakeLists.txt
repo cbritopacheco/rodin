@@ -8,13 +8,13 @@ rodin_add_compile_options(
   -Werror
   -Wextra
   -Wpedantic
-  -Wno-old-style-cast
   -Wno-cast-function-type
   -Wno-unused-parameter
   -Wno-zero-as-null-pointer-constant
   -Wno-error=extra
   -Wno-error=pedantic
   -Wno-error=sign-compare
+  -Wno-error=old-style-cast
   -Wno-error=unused-variable
   -Wno-error=unused-but-set-variable
   -Wno-error=cast-function-type
