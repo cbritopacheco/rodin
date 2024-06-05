@@ -46,7 +46,7 @@ jobs:
           libvulkan-dev
           libsuitesparse-dev
           libmetis-dev
-          libboost-all-dev
+          libboost1.74-all-dev
       - name: Configure CMake
         run: >
           cmake
