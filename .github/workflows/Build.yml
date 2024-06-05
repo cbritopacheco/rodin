@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04]
-        compiler: [gcc-8, clang-7]
+        compiler: [gcc-10, clang-10]
         build_type: ['Release', 'Debug']
         multithreaded: ['ON', 'OFF']
       fail-fast: false
