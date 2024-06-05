@@ -169,31 +169,26 @@ namespace Rodin::Variational
 
       void getValue(Math::SpatialVector& out, const Geometry::Point& p) const
       {
+        out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         if (polytopeMesh == m_mesh.get())
         {
           interpolate(out, p);
         }
+        else if (const auto inclusion = m_mesh.get().inclusion(p))
+        {
+          interpolate(out, *inclusion);
+        }
+        else if (m_mesh.get().isSubMesh())
+        {
+          const auto& submesh = m_mesh.get().asSubMesh();
+          const auto restriction = submesh.restriction(p);
+          interpolate(out, *restriction);
+        }
         else
         {
-          if (polytopeMesh.isSubMesh())
-          {
-            const auto& submesh = polytopeMesh.asSubMesh();
-            assert(submesh.getParent() == fes.getMesh());
-            interpolate(out, submesh.inclusion(p));
-          }
-          else if (m_mesh.get().isSubMesh())
-          {
-            const auto& submesh = m_mesh.get().asSubMesh();
-            assert(submesh.getParent() == polytopeMesh);
-            interpolate(out, submesh.restriction(p));
-          }
-          else
-          {
-            assert(false);
-            out.setConstant(NAN);
-          }
+          assert(false);
         }
       }
 

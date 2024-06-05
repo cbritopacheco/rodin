@@ -33,6 +33,7 @@ namespace Rodin::Variational
   {
     public:
       using Parent = FunctionBase<ScalarFunctionBase<Derived>>;
+      using Parent::traceOf;
 
       ScalarFunctionBase() = default;
 
@@ -45,22 +46,6 @@ namespace Rodin::Variational
       {}
 
       virtual ~ScalarFunctionBase() = default;
-
-      inline
-      constexpr
-      ScalarFunctionBase& traceOf(Geometry::Attribute attr)
-      {
-        Parent::traceOf(attr);
-        return *this;
-      }
-
-      inline
-      constexpr
-      ScalarFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        Parent::traceOf(attrs);
-        return *this;
-      }
 
       inline
       const Derived& getDerived() const

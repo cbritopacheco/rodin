@@ -1,6 +1,7 @@
 #ifndef RODIN_TYPES_H
 #define RODIN_TYPES_H
 
+#include <stack>
 #include <cstddef>
 
 #include <boost/unordered_map.hpp>
@@ -8,6 +9,8 @@
 #include <boost/unordered_set.hpp>
 #include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
+#include <boost/container/deque.hpp>
+#include <boost/container/list.hpp>
 
 #include <Eigen/Core>
 
@@ -32,6 +35,15 @@ namespace Rodin
 
   /// Standard type for representing indices.
   using Index = std::size_t;
+
+  template <class T>
+  using List = boost::container::list<T>;
+
+  template <class T>
+  using Deque = boost::container::deque<T>;
+
+  template <class T, class Container = Deque<T>>
+  using Stack = std::stack<T, Container>;
 
   /// Standard flat set type.
   template <class T>

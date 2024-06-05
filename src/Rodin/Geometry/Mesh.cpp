@@ -350,7 +350,7 @@ namespace Rodin::Geometry
     }
   }
 
-  Scalar MeshBase::getVolume()
+  Scalar MeshBase::getVolume() const
   {
     Scalar totalVolume = 0;
     for (auto it = getCell(); !it.end(); ++it)
@@ -358,7 +358,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Scalar MeshBase::getVolume(Attribute attr)
+  Scalar MeshBase::getVolume(Attribute attr) const
   {
     Scalar totalVolume = 0;
     for (auto it = getCell(); !it.end(); ++it)
@@ -369,23 +369,105 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Scalar MeshBase::getPerimeter()
+  Scalar MeshBase::getVolume(const FlatSet<Attribute>& attrs) const
   {
     Scalar totalVolume = 0;
+    for (auto it = getCell(); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+        totalVolume += it->getMeasure();
+    }
+    return totalVolume;
+  }
+
+  Scalar MeshBase::getPerimeter() const
+  {
+    Scalar totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
+      totalPerimeter += it->getMeasure();
+    return totalPerimeter;
+  }
+
+  Scalar MeshBase::getPerimeter(Attribute attr) const
+  {
+    Scalar totalPerimeter = 0;
+    for (auto it = getBoundary(); !it.end(); ++it)
+    {
+      if (it->getAttribute() == attr)
+        totalPerimeter += it->getMeasure();
+    }
+    return totalPerimeter;
+  }
+
+  Scalar MeshBase::getPerimeter(const FlatSet<Attribute>& attrs) const
+  {
+    Scalar totalPerimeter = 0;
+    for (auto it = getBoundary(); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+        totalPerimeter += it->getMeasure();
+    }
+    return totalPerimeter;
+  }
+
+  Scalar MeshBase::getArea() const
+  {
+    Scalar totalArea = 0;
+    for (auto it = getFace(); !it.end(); ++it)
+      totalArea += it->getMeasure();
+    return totalArea;
+  }
+
+  Scalar MeshBase::getArea(Attribute attr) const
+  {
+    Scalar totalArea = 0;
+    for (auto it = getFace(); !it.end(); ++it)
+    {
+      if (it->getAttribute() == attr)
+        totalArea += it->getMeasure();
+    }
+    return totalArea;
+  }
+
+  Scalar MeshBase::getArea(const FlatSet<Attribute>& attrs) const
+  {
+    Scalar totalArea = 0;
+    for (auto it = getFace(); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+        totalArea += it->getMeasure();
+    }
+    return totalArea;
+  }
+
+  Scalar MeshBase::getMeasure(size_t d) const
+  {
+    Scalar totalVolume = 0;
+    for (auto it = getPolytope(d); !it.end(); ++it)
       totalVolume += it->getMeasure();
     return totalVolume;
   }
 
-  Scalar MeshBase::getPerimeter(Attribute attr)
+  Scalar MeshBase::getMeasure(size_t d, Attribute attr) const
   {
     Scalar totalVolume = 0;
-    for (auto it = getBoundary(); !it.end(); ++it)
+    for (auto it = getPolytope(d); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
         totalVolume += it->getMeasure();
     }
     return totalVolume;
+  }
+
+  Scalar MeshBase::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
+  {
+    Scalar totalMeasure = 0;
+    for (auto it = getPolytope(d); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+        totalMeasure += it->getMeasure();
+    }
+    return totalMeasure;
   }
 
   CCL MeshBase::ccl(
@@ -702,6 +784,50 @@ namespace Rodin::Geometry
         return build.nodes(0).finalize();
       }
     };
+  }
+
+  std::optional<Point> Mesh<Context::Sequential>::inclusion(const Point& p) const
+  {
+    const auto& polytope = p.getPolytope();
+    if (!polytope.getMesh().isSubMesh())
+    {
+      return {};
+    }
+    const auto& submesh = polytope.getMesh().asSubMesh();
+    const auto& ancestors = submesh.getAncestors();
+    const size_t d = polytope.getDimension();
+    Index i = polytope.getIndex();
+    i = submesh.getPolytopeMap(d).left.at(i);
+    auto it = ancestors.begin();
+    while (it != ancestors.end())
+    {
+      if (it->get() == *this)
+      {
+        auto pit = this->getPolytope(d, i);
+        std::unique_ptr<Polytope> parentPolytope(pit.release());
+        return Point(
+            std::move(*parentPolytope),
+            this->getPolytopeTransformation(d, i),
+            std::cref(p.getReferenceCoordinates()),
+            p.getPhysicalCoordinates());
+      }
+      else if (it->get().isSubMesh())
+      {
+        const auto& parentMesh = it->get().asSubMesh();
+        i = parentMesh.getPolytopeMap(d).left.at(i);
+      }
+      else
+      {
+        // Invalid inclusion.
+        // The SubMesh where the Point belongs to is not a descendant of this Mesh.
+        return {};
+      }
+      ++it;
+    }
+    // Invalid inclusion.
+    // The SubMesh where the Point belongs to is not a descendant of this Mesh.
+    Alert::Exception() << "miaow" << Alert::Raise;
+    return {};
   }
 }
 

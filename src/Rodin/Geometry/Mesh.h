@@ -207,6 +207,8 @@ namespace Rodin::Geometry
           size_t d,
           const FlatSet<Attribute>& attrs) const;
 
+      virtual std::optional<Point> inclusion(const Point& p) const = 0;
+
       virtual MeshBase& scale(Scalar c) = 0;
 
       virtual MeshBase& load(
@@ -326,7 +328,7 @@ namespace Rodin::Geometry
        * @brief Gets the total volume of the mesh.
        * @returns Sum of all cell volumes.
        */
-      Scalar getVolume();
+      Scalar getVolume() const;
 
       /**
        * @brief Gets the sum of the volumes of the cells given by the
@@ -336,13 +338,15 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the volume.
        */
-      Scalar getVolume(Attribute attr);
+      Scalar getVolume(Attribute attr) const;
+
+      Scalar getVolume(const FlatSet<Attribute>& attr) const;
 
       /**
        * @brief Gets the total perimeter of the mesh.
        * @returns Sum of all element perimeters.
        */
-      Scalar getPerimeter();
+      Scalar getPerimeter() const;
 
       /**
        * @brief Gets the sum of the perimeters of the cells given by the
@@ -352,7 +356,21 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the perimeter.
        */
-      Scalar getPerimeter(Attribute attr);
+      Scalar getPerimeter(Attribute attr) const;
+
+      Scalar getPerimeter(const FlatSet<Attribute>& attr) const;
+
+      Scalar getArea() const;
+
+      Scalar getArea(Attribute attr) const;
+
+      Scalar getArea(const FlatSet<Attribute>& attr) const;
+
+      Scalar getMeasure(size_t d) const;
+
+      Scalar getMeasure(size_t d, Attribute attr) const;
+
+      Scalar getMeasure(size_t d, const FlatSet<Attribute>& attr) const;
 
       /**
        * @brief Gets the labels of the domain cells in the mesh.
@@ -749,6 +767,7 @@ namespace Rodin::Geometry
         return *this;
       }
 
+
       virtual void flush() override
       {
         for (auto& mt : m_transformationIndex)
@@ -836,6 +855,8 @@ namespace Rodin::Geometry
       }
 
       virtual Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
+
+      virtual std::optional<Point> inclusion(const Point& p) const override;
 
       SubMeshBase& asSubMesh() override;
 

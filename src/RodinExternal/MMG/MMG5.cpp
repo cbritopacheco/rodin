@@ -521,6 +521,22 @@ namespace Rodin::External::MMG
         assert(r <= res->na);
         res->edge[r + 1].tag |= MG_GEO;
       }
+
+      // Tag required vertices
+      for (const auto& c : ptr->getRequiredVertices())
+      {
+        assert(c >= 0);
+        assert(c <= res->na);
+        res->point[c + 1].tag |= MG_REQ;
+      }
+
+      // Tag required edges
+      for (const auto& r : ptr->getRequiredEdges())
+      {
+        assert(r >= 0);
+        assert(r <= res->na);
+        res->edge[r + 1].tag |= MG_REQ;
+      }
     }
 
     return res;
@@ -586,6 +602,7 @@ namespace Rodin::External::MMG
       build.attribute({ 1, i - 1 }, src->edge[i].ref );
       if (src->edge[i].tag & MG_GEO)
         build.ridge(i - 1);
+      // if (src->edge[i].tag & MG_REQ)
     }
     // Add triangles
     build.reserve(2, src->nt);

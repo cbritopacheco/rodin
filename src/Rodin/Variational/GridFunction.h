@@ -494,7 +494,7 @@ namespace Rodin::Variational
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension();
-
+        std::vector<size_t> ns(fes.getSize(), 0);
         if constexpr (std::is_same_v<RangeType, Scalar>)
         {
 #ifdef RODIN_MULTITHREADED
@@ -529,7 +529,12 @@ namespace Rodin::Variational
               assert(is.size() == vs.size());
               m_mutex.lock();
               for (Index i = 0; i < is.size(); i++)
-                m_data(is[i]) = vs[i];
+              {
+                const Index global = is[i];
+                m_data(global) =
+                  (vs[i] + ns[global] * m_data(global)) / (ns[global] + 1.0);
+                ns[global] += 1;
+              }
               m_mutex.unlock();
             };
           threadPool.pushLoop(0, mesh.getCellCount(), loop);
@@ -546,8 +551,11 @@ namespace Rodin::Variational
               for (size_t local = 0; local < fe.getCount(); local++)
               {
                 const Geometry::Point p(polytope, trans, fe.getNode(local));
+                const Index global = fes.getGlobalIndex({ d, i }, local);
                 assert(m_data.rows() == 1);
-                m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+                m_data(global) =
+                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1.0);
+                ns[global] += 1;
               }
             }
           }
@@ -567,8 +575,11 @@ namespace Rodin::Variational
               for (size_t local = 0; local < fe.getCount(); local++)
               {
                 const Geometry::Point p(polytope, trans, fe.getNode(local));
+                const Index global = fes.getGlobalIndex({ d, i }, local);
                 fn.getValue(value, p);
-                m_data.col(fes.getGlobalIndex({ d, i }, local)) = value;
+                m_data.col(global) =
+                  (value + ns[global] * m_data.col(global)) / (ns[global] + 1.0);
+                ns[global] += 1;
               }
             }
           }
@@ -615,6 +626,7 @@ namespace Rodin::Variational
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension() - 1;
+        std::vector<size_t> ns(fes.getSize(), 0);
         for (auto it = mesh.getBoundary(); !it.end(); ++it)
         {
           const auto& polytope = *it;
@@ -626,19 +638,23 @@ namespace Rodin::Variational
             for (size_t local = 0; local < fe.getCount(); local++)
             {
               const Geometry::Point p(polytope, trans, fe.getNode(local));
+              const Index global = fes.getGlobalIndex({ d, i }, local);
               if constexpr (std::is_same_v<RangeType, Scalar>)
               {
                 assert(m_data.rows() == 1);
-                m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+                m_data(global) =
+                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1.0);
               }
               else if constexpr (std::is_same_v<RangeType, Math::Vector>)
               {
-                m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+                m_data.col(global) =
+                  (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1.0);
               }
               else
               {
                 assert(false);
               }
+              ns[global] += 1;
             }
           }
         }
@@ -1018,9 +1034,13 @@ namespace Rodin::Variational
        * @brief Gets the interpolated value at the point.
        */
       inline
-      auto getValue(const Geometry::Point& p) const
+      RangeType getValue(const Geometry::Point& p) const
       {
         RangeType out;
+        if constexpr (std::is_same_v<RangeType, Scalar>)
+          out = NAN;
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+          out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();
@@ -1029,28 +1049,33 @@ namespace Rodin::Variational
         {
           interpolate(out, p);
         }
-        else
+        else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          if (polytopeMesh.isSubMesh())
+          if constexpr (std::is_same_v<RangeType, Scalar>)
+            out = interpolate(*inclusion);
+          else
+            interpolate(out, *inclusion);
+        }
+        else if (fesMesh.isSubMesh())
+        {
+          const auto& submesh = fesMesh.asSubMesh();
+          const auto restriction = submesh.restriction(p);
+          if (restriction)
           {
-            const auto& submesh = polytopeMesh.asSubMesh();
-            assert(submesh.getParent() == fes.getMesh());
-            interpolate(out, submesh.inclusion(p));
-          }
-          else if (fesMesh.isSubMesh())
-          {
-            const auto& submesh = fesMesh.asSubMesh();
-            assert(submesh.getParent() == polytopeMesh);
-            interpolate(out, submesh.restriction(p));
+            if constexpr (std::is_same_v<RangeType, Scalar>)
+              out = interpolate(*restriction);
+            else
+              interpolate(out, *restriction);
           }
           else
           {
-            assert(false);
-            if constexpr (std::is_same_v<RangeType, Scalar>)
-              out = NAN;
-            else if constexpr (std::is_same_v<RangeType, Math::Vector>)
-              out.setConstant(NAN);
+            throw 1;
           }
+        }
+        else
+        {
+          assert(false);
+          throw 1;
         }
         return out;
       }
@@ -1060,6 +1085,7 @@ namespace Rodin::Variational
       void getValue(Math::Vector& out, const Geometry::Point& p) const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
+        out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();
@@ -1068,25 +1094,19 @@ namespace Rodin::Variational
         {
           interpolate(out, p);
         }
+        else if (const auto inclusion = fesMesh.inclusion(p))
+        {
+          interpolate(out, *inclusion);
+        }
+        else if (fesMesh.isSubMesh())
+        {
+          const auto& submesh = fesMesh.asSubMesh();
+          const auto restriction = submesh.restriction(p);
+          interpolate(out, *restriction);
+        }
         else
         {
-          if (polytopeMesh.isSubMesh())
-          {
-            const auto& submesh = polytopeMesh.asSubMesh();
-            assert(submesh.getParent() == fes.getMesh());
-            interpolate(out, submesh.inclusion(p));
-          }
-          else if (fesMesh.isSubMesh())
-          {
-            const auto& submesh = fesMesh.asSubMesh();
-            assert(submesh.getParent() == polytopeMesh);
-            interpolate(out, submesh.restriction(p));
-          }
-          else
-          {
-            assert(false);
-            out.setConstant(NAN);
-          }
+          assert(false);
         }
       }
 

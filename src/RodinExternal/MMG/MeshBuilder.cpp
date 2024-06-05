@@ -13,6 +13,8 @@ namespace Rodin::External::MMG
     Parent::Builder::operator=(std::move(other));
     m_cornerIndex = std::move(other.m_cornerIndex);
     m_ridgeIndex = std::move(other.m_ridgeIndex);
+    m_requiredEdgeIndex = std::move(other.m_requiredEdgeIndex);
+    m_requiredVertexIndex = std::move(other.m_requiredVertexIndex);
     return *this;
   }
 
@@ -28,12 +30,26 @@ namespace Rodin::External::MMG
     return *this;
   }
 
+  Mesh::Builder& Mesh::Builder::requiredEdge(Index edgeIdx)
+  {
+    m_requiredEdgeIndex.insert(edgeIdx);
+    return *this;
+  }
+
+  Mesh::Builder& Mesh::Builder::requiredVertex(Index vertexIdx)
+  {
+    m_requiredVertexIndex.insert(vertexIdx);
+    return *this;
+  }
+
   MMG::Mesh Mesh::Builder::finalize()
   {
     MMG::Mesh res;
     res.Parent::operator=(Parent::Builder::finalize());
     res.m_cornerIndex = std::move(m_cornerIndex);
     res.m_ridgeIndex = std::move(m_ridgeIndex);
+    res.m_requiredEdgeIndex = std::move(m_requiredEdgeIndex);
+    res.m_requiredVertexIndex = std::move(m_requiredVertexIndex);
     return res;
   }
 }

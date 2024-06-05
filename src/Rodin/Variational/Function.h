@@ -275,8 +275,15 @@ namespace Rodin::Variational
       constexpr
       Derived& traceOf(Geometry::Attribute attr)
       {
-        m_traceDomain = FlatSet<Geometry::Attribute>{attr};
-        return static_cast<Derived&>(*this);
+        return traceOf(FlatSet<Geometry::Attribute>{ attr });
+      }
+
+      template <class A1, class A2, class ... As>
+      inline
+      constexpr
+      Derived& traceOf(A1 a1, A2 a2, As ... as)
+      {
+        return traceOf(FlatSet<Geometry::Attribute>{ a1, a2, as... });
       }
 
       inline

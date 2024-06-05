@@ -8,6 +8,7 @@
 #define RODIN_MESH_MESH_HPP
 
 #include "Mesh.h"
+#include "SubMesh.h"
 
 namespace Rodin::Geometry
 {}

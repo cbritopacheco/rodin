@@ -30,7 +30,7 @@ namespace Rodin::Examples::BoundaryOptimization
 
   inline
   size_t rmc(Geometry::MeshBase& mesh,
-      const FlatSet<Geometry::Attribute>& attrs, Geometry::Attribute a)
+      const FlatSet<Geometry::Attribute>& attrs, Geometry::Attribute a, Scalar tol = 1e-5)
   {
     const size_t per = mesh.getPerimeter();
     const size_t D = mesh.getDimension();
@@ -46,7 +46,7 @@ namespace Rodin::Examples::BoundaryOptimization
       Scalar area = 0;
       for (const Index i : cc)
         area += mesh.getFace(i)->getMeasure();
-      if ((area / per) < 1e-5)
+      if ((area / per) < tol)
       {
         for (const Index i : cc)
         {

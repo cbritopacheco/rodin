@@ -26,6 +26,10 @@ namespace Rodin::External::MMG
       /// Index of ridges in the mesh
       using RidgeIndex = IndexSet;
 
+      using RequiredVertexIndex = IndexSet;
+
+      using RequiredEdgeIndex = IndexSet;
+
       /**
        * @brief Class used to build MMG::Mesh instances.
        */
@@ -48,7 +52,9 @@ namespace Rodin::External::MMG
           Builder(Builder&& other)
             : Parent::Builder(std::move(other)),
               m_cornerIndex(std::move(other.m_cornerIndex)),
-              m_ridgeIndex(std::move(other.m_ridgeIndex))
+              m_ridgeIndex(std::move(other.m_ridgeIndex)),
+              m_requiredVertexIndex(std::move(other.m_requiredVertexIndex)),
+              m_requiredEdgeIndex(std::move(other.m_requiredEdgeIndex))
           {}
 
           /**
@@ -66,6 +72,10 @@ namespace Rodin::External::MMG
            */
           Builder& ridge(Index edgeIdx);
 
+          Builder& requiredEdge(Index edgeIdx);
+
+          Builder& requiredVertex(Index vertexIdx);
+
           /**
            * @brief Finishes construction of the MMG::Mesh and returns it.
            */
@@ -74,6 +84,8 @@ namespace Rodin::External::MMG
         private:
           CornerIndex m_cornerIndex;
           RidgeIndex  m_ridgeIndex;
+          RequiredVertexIndex m_requiredVertexIndex;
+          RequiredEdgeIndex m_requiredEdgeIndex;
       };
 
       /**
@@ -103,7 +115,9 @@ namespace Rodin::External::MMG
       Mesh(const Mesh& other)
         : Parent(other),
           m_cornerIndex(other.m_cornerIndex),
-          m_ridgeIndex(other.m_ridgeIndex)
+          m_requiredVertexIndex(other.m_requiredVertexIndex),
+          m_ridgeIndex(other.m_ridgeIndex),
+          m_requiredEdgeIndex(other.m_requiredEdgeIndex)
       {}
 
       /**
@@ -112,7 +126,9 @@ namespace Rodin::External::MMG
       Mesh(Mesh&& other)
         : Parent(std::move(other)),
           m_cornerIndex(std::move(other.m_cornerIndex)),
-          m_ridgeIndex(std::move(other.m_ridgeIndex))
+          m_requiredVertexIndex(std::move(other.m_requiredVertexIndex)),
+          m_ridgeIndex(std::move(other.m_ridgeIndex)),
+          m_requiredEdgeIndex(std::move(other.m_requiredEdgeIndex))
       {}
 
       /**
@@ -121,8 +137,10 @@ namespace Rodin::External::MMG
       Mesh& operator=(Mesh&& other)
       {
         Parent::operator=(std::move(other));
-        m_ridgeIndex = std::move(other.m_ridgeIndex);
         m_cornerIndex = std::move(other.m_cornerIndex);
+        m_requiredVertexIndex = std::move(other.m_requiredVertexIndex);
+        m_ridgeIndex = std::move(other.m_ridgeIndex);
+        m_requiredEdgeIndex = std::move(other.m_requiredEdgeIndex);
         return *this;
       }
 
@@ -138,9 +156,14 @@ namespace Rodin::External::MMG
       Mesh& setCorner(Index vertexIdx);
 
       /**
+        m_cornerIndex = std::move(other.m_cornerIndex);
        * @brief Adds the edge to the ridge index.
        */
       Mesh& setRidge(Index edgeIdx);
+
+      Mesh& setRequiredEdge(Index edgeIdx);
+
+      Mesh& setRequiredVertex(Index edgeIdx);
 
       /**
        * @brief Gets the index of corners.
@@ -174,6 +197,26 @@ namespace Rodin::External::MMG
         return m_ridgeIndex;
       }
 
+      RequiredEdgeIndex& getRequiredEdges()
+      {
+        return m_requiredEdgeIndex;
+      }
+
+      const RequiredEdgeIndex& getRequiredEdges() const
+      {
+        return m_requiredEdgeIndex;
+      }
+
+      RequiredVertexIndex& getRequiredVertices()
+      {
+        return m_requiredVertexIndex;
+      }
+
+      const RequiredVertexIndex& getRequiredVertices() const
+      {
+        return m_requiredVertexIndex;
+      }
+
       void save(
          const boost::filesystem::path& filename,
          IO::FileFormat fmt = IO::FileFormat::MFEM,
@@ -185,7 +228,10 @@ namespace Rodin::External::MMG
 
     private:
       CornerIndex m_cornerIndex;
+      RequiredVertexIndex m_requiredVertexIndex;
+
       RidgeIndex  m_ridgeIndex;
+      RequiredEdgeIndex m_requiredEdgeIndex;
   };
 }
 

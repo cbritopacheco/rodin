@@ -50,6 +50,7 @@ namespace Rodin::IO::MEDIT
     SolAtPentahedra,
     SolAtHexahedra,
     RequiredVertices,
+    RequiredEdges,
     Normals,
     NormalAtVertices,
     Tangents,
@@ -97,6 +98,8 @@ namespace Rodin::IO::MEDIT
         return "SolAtHexahedra";
       case Keyword::RequiredVertices:
         return "RequiredVertices";
+      case Keyword::RequiredEdges:
+        return "RequiredEdges";
       case Keyword::Normals:
         return "Normals";
       case Keyword::NormalAtVertices:
@@ -204,6 +207,8 @@ namespace Rodin::IO::MEDIT
       res = Keyword::SolAtHexahedra;
     else if (str == Keyword::RequiredVertices)
       res = Keyword::RequiredVertices;
+    else if (str == Keyword::RequiredEdges)
+      res = Keyword::RequiredEdges;
     else if (str == Keyword::Normals)
       res = Keyword::Normals;
     else if (str == Keyword::NormalAtVertices)
