@@ -13,8 +13,10 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-const Scalar lambda = 0.5769, mu = 0.3846;
-const Scalar nu = lambda / (2 * (lambda + mu));
+const Scalar E = 100;
+const Scalar nu = 0.48;
+const Scalar lambda = (E * nu) / ((1.0 + nu) * (1.0 - 2 * nu));
+const Scalar mu = E / (1.0 + nu);
 
 inline
 void K(Math::Matrix& res, const Point& x, const Point& y)
@@ -44,12 +46,12 @@ int main(int, char**)
   // Threads::getGlobalThreadPool().reset(6);
   Mesh mesh;
   mesh.load("D1.o.mesh", IO::FileFormat::MEDIT);
-  // mesh.save("D1.o.mesh");
+  mesh.save("D1.mfem.mesh");
   mesh.getConnectivity().compute(1, 2);
 
   P1 fes(mesh, 3);
 
-  VectorFunction e1{0, 0, 1};
+  VectorFunction e1{1, 1, 0};
 
   TrialFunction u(fes);
   TestFunction  v(fes);

@@ -29,8 +29,14 @@ static constexpr Geometry::Attribute dSupport = 111;
 static constexpr size_t maxIt = 2000;
 
 static constexpr Scalar epsilon = 1e-6;
-static constexpr Scalar ell = 1e-7;
+static constexpr Scalar ellP = 0;
 static constexpr Scalar tgv = std::numeric_limits<float>::max();
+static constexpr Scalar alpha = 2;
+
+static Scalar bA = epsilon;
+static Scalar bTarget = 1.0 / epsilon;
+static Scalar ellA = 0;
+static Scalar targetArea = NAN;
 
 using ScalarFES = P1<Scalar, Context::Sequential>;
 using VectorFES = P1<Math::Vector, Context::Sequential>;
@@ -44,9 +50,10 @@ int main(int, char**)
   Eigen::setNbThreads(8);
   std::cout << Eigen::nbThreads() << std::endl;
   MMG::Mesh mesh;
-  // mesh.load("Omega0.o.mesh", IO::FileFormat::MEDIT);
+  // mesh.load("Omega0.mesh", IO::FileFormat::MEDIT);
   // mesh.load("Mechanical.mesh", IO::FileFormat::MEDIT);
   mesh.load("WaterTankVolume.o.mesh", IO::FileFormat::MEDIT);
+  // mesh.load("Omega.mesh", IO::FileFormat::MEDIT);
 
   // mesh.load("MechanicalNoMat.mesh", IO::FileFormat::MEDIT);
 
@@ -116,28 +123,6 @@ int main(int, char**)
   Scalar hausd = 0.5 * hmin;
   Scalar hgrad = 1.2;
 
-  Alert::Info() << "Initializing support region..." << Alert::Raise;
-  {
-    P1 vh(mesh);
-
-    GridFunction dist(vh);
-    dist = [&](const Point& p)
-    {
-      Math::SpatialVector c(3);
-      c << 0, 0, -5.86;
-      return (p - c).norm() - 1;
-    };
-
-    mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
-                                      .split(Gamma, { Support, Gamma })
-                                      .split(Support, { Support, Gamma })
-                                      .setHMax(hmax)
-                                      .setHMin(hmin)
-                                      .setHausdorff(hausd)
-                                      .surface()
-                                      .discretize(dist);
-  }
-
   Alert::Info() << "Initializing unsupported region..." << Alert::Raise;
   {
     P1 vh(mesh);
@@ -154,7 +139,51 @@ int main(int, char**)
     mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                       .split(Gamma, { Unsupported, Gamma })
                                       .split(Unsupported, { Unsupported, Gamma })
-                                      .noSplit(Support)
+                                      .setHMax(hmax)
+                                      .setHMin(hmin)
+                                      .setHausdorff(hausd)
+                                      .surface()
+                                      .discretize(dist);
+  }
+
+  Alert::Info() << "Initializing support region..." << Alert::Raise;
+  {
+    P1 vh(mesh);
+
+    // std::vector<Math::SpatialVector> cs;
+    // for (double x = -8; x < 8; x += 2)
+    // {
+    //   for (double y = -8; y < 8; y += 2)
+    //   {
+    //     for (double z = -6; z < 4; z += 2)
+    //     {
+    //       Math::SpatialVector c(3);
+    //       c << x, y, z;
+    //       cs.push_back(std::move(c));
+    //     }
+    //   }
+    // }
+
+    GridFunction dist(vh);
+    dist = [&](const Point& p)
+    {
+      // double d = (p - cs[0]).norm() - sqrt(2) / 2.0;
+      // for (size_t i = 1; i < cs.size(); i++)
+      // {
+      //   d = std::min(d, (p - cs[i]).norm() - sqrt(2) / 2.0);
+      // }
+      // return d;
+      Math::SpatialVector c(3);
+      c << 0, 0, -5.86;
+      return (p - c).norm() - 0.5 * alpha * (hmax + hmin);
+    };
+
+    // dist *= -1.0;
+
+    mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
+                                      .split(Gamma, { Support, Gamma })
+                                      .split(Support, { Support, Gamma })
+                                      .noSplit(Unsupported)
                                       .setHMax(hmax)
                                       .setHMin(hmin)
                                       .setHausdorff(hausd)
@@ -167,19 +196,20 @@ int main(int, char**)
   std::ofstream fObj("obj.txt");
   size_t i = 0;
   size_t regionCount;
-  Scalar objective = 0, oldObjective = 9999;
+  Scalar augmented = 0, oldAugmented = 1e+5;
+  Scalar objective = 0, oldObjective = 1e+5;
+  Scalar constraint = 0, oldConstraint = 1e+5;
   while (i < maxIt)
   {
-    bool topologicalStep = i < 100  && i % 10 == 0;
+    bool topologicalStep = (i < 20) || (i < 200  && i % 10 == 0);
     bool geometricStep = !topologicalStep;
 
     hmin = hmax / 10.0;
-    hausd = 0.5 * hmin;
+    hausd = hmin;
     hgrad = 1.2;
 
     const Scalar k = 0.5 * (hmax + hmin);
-    const Scalar dt = 4 * k;
-    static const Scalar alpha = dt;
+    const Scalar dt = k;
     const Scalar radius = k;
 
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
@@ -187,6 +217,8 @@ int main(int, char**)
                   << "HMin:      " << Alert::Notation(hmin)     << Alert::NewLine
                   << "Hausdorff: " << Alert::Notation(hausd)    << Alert::NewLine
                   << "HGrad:     " << Alert::Notation(hgrad)    << Alert::NewLine
+                  << "bA:        " << Alert::Notation(bA)    << Alert::NewLine
+                  << "ellA:      " << Alert::Notation(ellA)    << Alert::NewLine
                   << "dt:        " << Alert::Notation(dt)       << Alert::Raise;
 
     try
@@ -210,16 +242,24 @@ int main(int, char**)
     mesh.getConnectivity().compute(2, 3); // Computes boundary
     mesh.getConnectivity().compute(2, 2);
     mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(1, 0);
 
-    // Alert::Info() << "RMC..." << Alert::Raise;
-    // regionCount = rmc(mesh);
+    targetArea = 0.2 * mesh.getPerimeter();
 
-    // Alert::Info() << "Found " << Alert::Notation(regionCount) << " regions."
-    //   << Alert::Raise;
+    Alert::Info() << "Target area: " << Alert::Notation(targetArea) << Alert::Raise;
+
+    Alert::Info() << "RMC..." << Alert::Raise;
+    regionCount = rmc(mesh, { Support }, Gamma);
+
+    Alert::Info() << "Found " << Alert::Notation(regionCount) << " regions."
+      << Alert::Raise;
 
     Alert::Info() << "Skinning mesh..." << Alert::Raise;
     auto dOmega = mesh.skin();
-    dOmega.trace({{{ Support, Gamma }, dSupport }});
+    dOmega.trace({
+        {{ Support, Gamma }, dSupport },
+        {{ Unsupported, Support }, dSupport }
+        });
 
     dOmega.save("dOmega.mesh", IO::FileFormat::MEDIT);
 
@@ -285,30 +325,36 @@ int main(int, char**)
     j = Frobenius(u.getSolution()) / mesh.getVolume();
     j.setWeights();
     if (i > 0)
+    {
+      oldAugmented = augmented;
       oldObjective = objective;
+      oldConstraint = constraint;
+    }
 
     const Scalar J = Integral(j).compute();
-    const Scalar perimeter = mesh.getPerimeter(Support);
-    objective = J + ell * perimeter;
+    const Scalar area = mesh.getPerimeter(Support);
+    const Scalar perimeter = dOmega.getMeasure(1, dSupport);
+    objective = J;
+    constraint = (area / targetArea - 1);
+    augmented =
+      objective + ellA * constraint + 0.5 * bA * constraint * constraint;
 
     Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::NewLine
-                  << "J: " << J << Alert::NewLine
-                  << "Support Perimeter: " << perimeter << Alert::NewLine
-                  << "Penalization: " << ell * perimeter
+                  << "Augmented: " << Alert::Notation(augmented) << Alert::NewLine
+                  << "Support Area: " << Alert::Notation(area) << Alert::NewLine
+                  << "Constraint: " << Alert::Notation(constraint) << Alert::NewLine
                   << Alert::Raise;
-    fObj << objective << "\n";
+    fObj << augmented << "\n";
     fObj.flush();
 
     if (topologicalStep)
     {
       Alert::Info() << "Topological optimization..." << Alert::Raise;
-
+      Alert::Info() << "Inserting supporting region..." << Alert::Raise;
       TrialFunction s(dsfes);
       TestFunction  t(dsfes);
-
-      Alert::Info() << "Inserting supporting region..." << Alert::Raise;
       Problem topo(s, t);
-      topo = Integral(alpha * Grad(s), Grad(t))
+      topo = alpha * alpha * dt * dt * Integral(Grad(s), Grad(t))
            + Integral(s, t)
            + Integral((u.getSolution().T() * aniso * p.getSolution()).coeff(0, 0), t)
            + tgv * Integral(s, t).over(Support, Unsupported);
@@ -316,6 +362,11 @@ int main(int, char**)
 
       s.getSolution().save("Topo.gf");
       dsfes.getMesh().save("Topo.mesh");
+
+      GridFunction raw(dsfes);
+      raw = -(u.getSolution().T() * aniso * p.getSolution()).coeff(0, 0);
+      raw.save("Raw.gf");
+      dsfes.getMesh().save("Raw.mesh");
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
       const Scalar tc = s.getSolution().max();
@@ -350,30 +401,29 @@ int main(int, char**)
 
       Alert::Info() << "Computing shape gradient..." << Alert::Raise;
 
-      TrialFunction theta(dsfes);
-      TestFunction  w(dsfes);
+      TrialFunction theta(dvfes);
+      TestFunction  w(dvfes);
       Problem hilbert(theta, w);
-      hilbert = alpha * alpha * Integral(Grad(theta), Grad(w))
+      hilbert = alpha * alpha * dt * dt * Integral(Jacobian(theta), Jacobian(w))
               + Integral(theta, w)
               + 1.0 / epsilon * FaceIntegral(
-                  Dot(u.getSolution(), p.getSolution()), w).over(dSupport)
-              + ell * FaceIntegral(w).over(dSupport)
-              + tgv * Integral(theta, w).over(Unsupported)
+                  Dot(u.getSolution(), p.getSolution()), Dot(conormal, w)).over(dSupport)
+              + constraint * ellA * FaceIntegral(conormal, w).over(dSupport)
+              + 0.5 * 2 * bA * constraint * FaceIntegral(conormal, w).over(dSupport)
+              // + ellP * FaceIntegral(Div(conormal).traceOf(Support) * conormal, w).over(dSupport)
+              // + tgv * Integral(theta, w).over(Unsupported)
               ;
       hilbert.solve(cg);
 
-      GridFunction sgrad(dvfes);
-      sgrad = conormal * theta.getSolution();
-
       GridFunction norm(dsfes);
-      norm = Frobenius(sgrad);
-      sgrad /= norm.max();
+      norm = Frobenius(theta.getSolution());
+      theta.getSolution() /= norm.max();
 
       dOmega.save("Theta.mesh");
-      sgrad.save("Theta.gf");
+      theta.getSolution().save("Theta.gf");
 
       Alert::Info() << "Advecting support..." << Alert::Raise;
-      MMG::Advect(dist, sgrad).step(dt);
+      MMG::Advect(dist, theta.getSolution()).step(dt);
     }
 
     dist.save("dist.gf");
@@ -394,14 +444,17 @@ int main(int, char**)
                                         .setHausdorff(hausd)
                                         .surface()
                                         .discretize(workaround);
-      hmax = 1.1 * hmax > 0.4 ? 0.4 : hmax * 1.1;
+      hmax = 1.1 * hmax > 0.5 ? 0.5 : hmax * 1.1;
     }
     catch (Alert::Exception& e)
     {
       Alert::Warning() << "Meshing failed. Trying with new parameters." << Alert::Raise;
-      hmax = 0.9 * hmax < 0.1 ? 0.1 : hmax * 0.9;
+      hmax = 0.9 * hmax < 0.2 ? 0.5 : hmax * 0.9;
       continue;
     }
+
+    dist.save("dist.gf");
+    dist.getFiniteElementSpace().getMesh().save("dist.mesh");
 
     Alert::Info() << "Saving files..." << Alert::Raise;
     mesh.save("Omega.mesh", IO::FileFormat::MEDIT);
@@ -409,6 +462,12 @@ int main(int, char**)
     dOmega.save("out/dOmega.mfem." + std::to_string(i) +  ".mesh", IO::FileFormat::MFEM);
 
     Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
+
+    ellA += bA * constraint;
+    if (i > 0 && !topologicalStep)
+      bA *= 1 + alpha * alpha * abs(oldAugmented - augmented);
+    bA = fmin(bTarget, bA);
+
     i++;
   }
   return 0;

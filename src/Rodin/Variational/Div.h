@@ -70,32 +70,27 @@ namespace Rodin::Variational
         Scalar out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
-        const auto& gf = m_u.get();
+        const auto& gf = getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
-        if (polytope.getMesh() == fes.getMesh())
+        if (polytopeMesh == fesMesh)
         {
           interpolate(out, p);
         }
+        else if (const auto inclusion = fesMesh.inclusion(p))
+        {
+          interpolate(out, *inclusion);
+        }
+        else if (fesMesh.isSubMesh())
+        {
+          const auto& submesh = fesMesh.asSubMesh();
+          const auto restriction = submesh.restriction(p);
+          interpolate(out, *restriction);
+        }
         else
         {
-          if (polytopeMesh.isSubMesh())
-          {
-            const auto& submesh = polytopeMesh.asSubMesh();
-            assert(submesh.getParent() == fes.getMesh());
-            interpolate(out, submesh.inclusion(p));
-          }
-          else if (fesMesh.isSubMesh())
-          {
-            const auto& submesh = fesMesh.asSubMesh();
-            assert(submesh.getParent() == polytopeMesh);
-            interpolate(out, submesh.restriction(p));
-          }
-          else
-          {
-            assert(false);
-            out = NAN;
-          }
+          assert(false);
+          out = NAN;
         }
         return out;
       }

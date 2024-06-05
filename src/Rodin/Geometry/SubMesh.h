@@ -26,28 +26,33 @@ namespace Rodin::Geometry
   class SubMeshBase
   {
     public:
-      /**
-       * @brief Represents the inclusion of a Point of a SubMesh @f$ C @f$ into
-       * a Point of a Mesh @f$ P @f$.
-       */
-      virtual Point inclusion(const Point& p) const = 0;
+      using Ancestor = std::reference_wrapper<const MeshBase>;
 
       /**
        * @brief Represents the restriction of a Point of a Mesh @f$ P @f$ into
        * a Point of a SubMesh @f$ C @f$.
        */
-      virtual Point restriction(const Point& p) const = 0;
+      virtual std::optional<Point> restriction(const Point& p) const = 0;
 
       /**
        * @returns Reference to the parent Mesh object
        */
       virtual const MeshBase& getParent() const = 0;
 
+      virtual const Deque<Ancestor>& getAncestors() const = 0;
+
       /**
        * @brief Gets the map of polytope indices from the SubMesh to the parent
        * Mesh.
        */
       virtual const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const = 0;
+
+      inline
+      constexpr
+      bool operator==(const SubMeshBase& other) const
+      {
+        return this == &other;
+      }
   };
 
   /**
@@ -129,9 +134,7 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      Point inclusion(const Point& p) const override;
-
-      Point restriction(const Point& p) const override;
+      std::optional<Point> restriction(const Point& p) const override;
 
       bool isSubMesh() const override
       {
@@ -153,9 +156,15 @@ namespace Rodin::Geometry
         return m_s2ps.at(d);
       }
 
+      const Deque<Ancestor>& getAncestors() const override
+      {
+        return m_ancestors;
+      }
+
     private:
       std::reference_wrapper<const Mesh<Context::Sequential>> m_parent;
       std::vector<boost::bimap<Index, Index>> m_s2ps;
+      Deque<Ancestor> m_ancestors;
   };
 }
 

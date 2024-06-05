@@ -87,42 +87,37 @@ namespace Rodin::Variational
       Math::SpatialMatrix getValue(const Geometry::Point& p) const
       {
         Math::SpatialMatrix out;
-        const auto& polytope = p.getPolytope();
-        const auto& polytopeMesh = polytope.getMesh();
-        const auto& gf = getOperand();
-        const auto& fes = gf.getFiniteElementSpace();
-        const auto& fesMesh = fes.getMesh();
-        if (polytope.getMesh() == fes.getMesh())
-        {
-          interpolate(out, p);
-        }
-        else
-        {
-          if (polytopeMesh.isSubMesh())
-          {
-            const auto& submesh = polytopeMesh.asSubMesh();
-            assert(submesh.getParent() == fes.getMesh());
-            interpolate(out, submesh.inclusion(p));
-          }
-          else if (fesMesh.isSubMesh())
-          {
-            const auto& submesh = fesMesh.asSubMesh();
-            assert(submesh.getParent() == polytopeMesh);
-            interpolate(out, submesh.restriction(p));
-          }
-          else
-          {
-            assert(false);
-            out.setConstant(NAN);
-          }
-        }
+        getValue(out, p);
         return out;
       }
 
       inline
       void getValue(Math::SpatialMatrix& out, const Geometry::Point& p) const
       {
-        interpolate(out, p);
+        out.setConstant(NAN);
+        const auto& polytope = p.getPolytope();
+        const auto& polytopeMesh = polytope.getMesh();
+        const auto& gf = getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fesMesh = fes.getMesh();
+        if (polytopeMesh == fesMesh)
+        {
+          interpolate(out, p);
+        }
+        else if (const auto inclusion = fesMesh.inclusion(p))
+        {
+          interpolate(out, *inclusion);
+        }
+        else if (fesMesh.isSubMesh())
+        {
+          const auto& submesh = fesMesh.asSubMesh();
+          const auto restriction = submesh.restriction(p);
+          interpolate(out, *restriction);
+        }
+        else
+        {
+          assert(false);
+        }
       }
 
       inline
