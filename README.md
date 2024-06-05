@@ -39,7 +39,7 @@ make -j4
 
 ### Embedded form language for FEM modelling
 
-Rodin comes with a native C++17 form language for assembling
+Rodin comes with a native C++20 form language for assembling
 and solving variational formulations.
 
 For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, the Poisson problem:
@@ -234,7 +234,7 @@ List of features and modules that are in the works:
 ## Requirements
 
 - [CMake 3.16.0+](https://cmake.org/)
-- [Boost 1.65+](https://www.boost.org/)
+- [Boost 1.74+](https://www.boost.org/)
 
 Any of these should be available for quick install from your standard package
 manager.
