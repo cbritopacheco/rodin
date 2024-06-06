@@ -28,30 +28,30 @@ namespace RodinBenchmark
   BENCHMARK_F(UniformGrid, Triangular_16x16)(benchmark::State& st)
   {
     for (auto _ : st)
-      SequentialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
+      SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
   }
 
   BENCHMARK_F(UniformGrid, Triangular_64x64)(benchmark::State& st)
   {
     for (auto _ : st)
-      SequentialMesh::UniformGrid(Polytope::Type::Triangle, 64, 64);
+      SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 64, 64 });
   }
 
   BENCHMARK_F(UniformGrid, Triangular_128x128)(benchmark::State& st)
   {
     for (auto _ : st)
-      SequentialMesh::UniformGrid(Polytope::Type::Triangle, 128, 128);
+      SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 128, 128 });
   }
 
   BENCHMARK_F(UniformGrid, Triangular_256x256)(benchmark::State& st)
   {
     for (auto _ : st)
-      SequentialMesh::UniformGrid(Polytope::Type::Triangle, 256, 256);
+      SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 256, 256 });
   }
 
   BENCHMARK_F(UniformGrid, Triangular_512x512)(benchmark::State& st)
   {
     for (auto _ : st)
-      SequentialMesh::UniformGrid(Polytope::Type::Triangle, 512, 512);
+      SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 512, 512 });
   }
 }
