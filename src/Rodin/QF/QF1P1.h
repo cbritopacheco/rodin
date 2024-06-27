@@ -27,7 +27,7 @@ namespace Rodin::QF
       }
 
       inline
-      const Math::SpatialVector& getPoint(size_t i) const override
+      const Math::SpatialVector<Scalar>& getPoint(size_t i) const override
       {
         assert(i == 0);
         return s_points[getGeometry()];
@@ -47,7 +47,7 @@ namespace Rodin::QF
       }
 
     private:
-      static const Geometry::GeometryIndexed<Math::SpatialVector> s_points;
+      static const Geometry::GeometryIndexed<Math::SpatialVector<Scalar>> s_points;
       static const Geometry::GeometryIndexed<Scalar> s_weights;
   };
 }

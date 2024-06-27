@@ -101,11 +101,11 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point&) const
       {
-        return Math::Vector::Zero(m_d);
+        return Math::Vector<Scalar>::Zero(m_d);
       }
 
       inline
-      void getValue(Math::Vector& out, const Geometry::Point&) const
+      void getValue(Math::Vector<Scalar>& out, const Geometry::Point&) const
       {
         out.resize(m_d);
         out.setZero();

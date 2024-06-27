@@ -29,3 +29,11 @@ target_link_libraries(Darcy
   Rodin::Solver
   Rodin::Variational
   )
+
+add_executable(Helmholtz Helmholtz.cpp)
+target_link_libraries(Helmholtz
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  )

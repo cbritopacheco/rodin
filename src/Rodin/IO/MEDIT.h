@@ -14,6 +14,7 @@
 #include "Rodin/Types.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Context.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Types.h"
 
 #include "ForwardDecls.h"
@@ -109,6 +110,7 @@ namespace Rodin::IO::MEDIT
       case Keyword::TangentAtVertices:
         return "TangentAtVertices";
       case Keyword::End:
+#include "Rodin/Math/Vector.h"
         return "End";
     }
     return nullptr;
@@ -218,6 +220,7 @@ namespace Rodin::IO::MEDIT
     else if (str == Keyword::TangentAtVertices)
       res = Keyword::TangentAtVertices;
     else if (str == Keyword::End)
+#include "Rodin/Math/Vector.h"
       res = Keyword::End;
     else
       return {};
@@ -270,7 +273,7 @@ namespace Rodin::IO::MEDIT
     public:
       struct Data
       {
-        Math::Vector vertex;
+        Math::Vector<Rodin::Scalar> vertex;
         Geometry::Attribute attribute;
       };
 
@@ -289,7 +292,7 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         size_t i = 0;
-        Data res{ Math::Vector(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
+        Data res{ Math::Vector<Rodin::Scalar>(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
         const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
         const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
         const auto p = double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];

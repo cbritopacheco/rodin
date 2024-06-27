@@ -14,7 +14,7 @@ namespace Rodin::Geometry
 {
   // ---- Point --------------------------------------------------------------
   PointBase::PointBase(std::reference_wrapper<const Polytope> polytope, std::reference_wrapper<const PolytopeTransformation> trans,
-      const Math::SpatialVector& pc)
+      const Math::SpatialVector<Scalar>& pc)
     : m_polytopeStorage(PolytopeStorage::Reference),
       m_polytope(polytope), m_trans(trans), m_pc(pc)
   {}
@@ -25,7 +25,7 @@ namespace Rodin::Geometry
   {}
 
   PointBase::PointBase(Polytope&& polytope, std::reference_wrapper<const PolytopeTransformation> trans,
-      const Math::SpatialVector& pc)
+      const Math::SpatialVector<Scalar>& pc)
     : m_polytopeStorage(PolytopeStorage::Value),
       m_polytope(std::move(polytope)), m_trans(trans), m_pc(pc)
   {}
@@ -85,7 +85,7 @@ namespace Rodin::Geometry
     }
   }
 
-  const Math::SpatialVector& PointBase::getCoordinates(Coordinates coords) const
+  const Math::SpatialVector<Scalar>& PointBase::getCoordinates(Coordinates coords) const
   {
     if (coords == Coordinates::Physical)
     {
@@ -98,7 +98,7 @@ namespace Rodin::Geometry
     }
   }
 
-  const Math::SpatialVector& PointBase::getPhysicalCoordinates() const
+  const Math::SpatialVector<Scalar>& PointBase::getPhysicalCoordinates() const
   {
     if (!m_pc.read().has_value())
     {
@@ -112,7 +112,7 @@ namespace Rodin::Geometry
     return m_pc.read().value();
   }
 
-  const Math::SpatialMatrix& PointBase::getJacobian() const
+  const Math::SpatialMatrix<Scalar>& PointBase::getJacobian() const
   {
     if (!m_jacobian.read().has_value())
     {
@@ -126,7 +126,7 @@ namespace Rodin::Geometry
     return m_jacobian.read().value();
   }
 
-  const Math::SpatialMatrix& PointBase::getJacobianInverse() const
+  const Math::SpatialMatrix<Scalar>& PointBase::getJacobianInverse() const
   {
     if (!m_jacobianInverse.read().has_value())
     {
@@ -140,7 +140,7 @@ namespace Rodin::Geometry
         {
           case 1:
           {
-            Math::SpatialMatrix inv(1, 1);
+            Math::SpatialMatrix<Scalar> inv(1, 1);
             inv.coeffRef(0, 0) = 1 / getJacobian().coeff(0, 0);
             m_jacobianDeterminant.write(
                 [&](auto& obj)
@@ -171,7 +171,7 @@ namespace Rodin::Geometry
                   obj.emplace(det);
                 });
             assert(m_jacobianDeterminant.read().has_value());
-            Math::SpatialMatrix inv(2, 2);
+            Math::SpatialMatrix<Scalar> inv(2, 2);
             inv.coeffRef(0, 0) = d / det;
             inv.coeffRef(0, 1) = -b / det;
             inv.coeffRef(1, 0) = -c / det;
@@ -214,7 +214,7 @@ namespace Rodin::Geometry
                 });
             assert(m_jacobianDeterminant.read().has_value());
             assert(det != 0);
-            Math::SpatialMatrix inv(3, 3);
+            Math::SpatialMatrix<Scalar> inv(3, 3);
             inv.coeffRef(0, 0) = A / det;
             inv.coeffRef(0, 1) = D / det;
             inv.coeffRef(0, 2) = G / det;
@@ -408,60 +408,60 @@ namespace Rodin::Geometry
   Point::Point(
       std::reference_wrapper<const Polytope> polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      std::reference_wrapper<const Math::SpatialVector> rc,
-      const Math::SpatialVector& pc)
+      std::reference_wrapper<const Math::SpatialVector<Scalar>> rc,
+      const Math::SpatialVector<Scalar>& pc)
     : PointBase(polytope, trans, pc), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
   Point::Point(
       std::reference_wrapper<const Polytope> polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      Math::SpatialVector&& rc,
-      const Math::SpatialVector& pc)
+      Math::SpatialVector<Scalar>&& rc,
+      const Math::SpatialVector<Scalar>& pc)
     : PointBase(polytope, trans, pc), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
   Point::Point(
       std::reference_wrapper<const Polytope> polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      std::reference_wrapper<const Math::SpatialVector> rc)
+      std::reference_wrapper<const Math::SpatialVector<Scalar>> rc)
     : PointBase(polytope, trans), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
   Point::Point(
       std::reference_wrapper<const Polytope> polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      Math::SpatialVector&& rc)
+      Math::SpatialVector<Scalar>&& rc)
     : PointBase(polytope, trans), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
   Point::Point(
       Polytope&& polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      std::reference_wrapper<const Math::SpatialVector> rc,
-      const Math::SpatialVector& pc)
+      std::reference_wrapper<const Math::SpatialVector<Scalar>> rc,
+      const Math::SpatialVector<Scalar>& pc)
     : PointBase(std::move(polytope), trans, pc), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
   Point::Point(
       Polytope&& polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      Math::SpatialVector&& rc,
-      const Math::SpatialVector& pc)
+      Math::SpatialVector<Scalar>&& rc,
+      const Math::SpatialVector<Scalar>& pc)
     : PointBase(std::move(polytope), trans, pc), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
   Point::Point(
       Polytope&& polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      std::reference_wrapper<const Math::SpatialVector> rc)
+      std::reference_wrapper<const Math::SpatialVector<Scalar>> rc)
     : PointBase(std::move(polytope), trans), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
   Point::Point(
       Polytope&& polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      Math::SpatialVector&& rc)
+      Math::SpatialVector<Scalar>&& rc)
     : PointBase(std::move(polytope), trans), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
@@ -477,16 +477,16 @@ namespace Rodin::Geometry
       m_rc(std::move(other.m_rc))
   {}
 
-  const Math::SpatialVector& Point::getReferenceCoordinates() const
+  const Math::SpatialVector<Scalar>& Point::getReferenceCoordinates() const
   {
     if (m_rcStorage == RCStorage::Value)
     {
-      return std::get<const Math::SpatialVector>(m_rc);
+      return std::get<const Math::SpatialVector<Scalar>>(m_rc);
     }
     else
     {
       assert(m_rcStorage == RCStorage::Reference);
-      return std::get<std::reference_wrapper<const Math::SpatialVector>>(m_rc);
+      return std::get<std::reference_wrapper<const Math::SpatialVector<Scalar>>>(m_rc);
     }
   }
 }

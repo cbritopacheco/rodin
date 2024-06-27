@@ -51,7 +51,7 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point&) const
       {
-        return Math::Matrix::Identity(m_n, m_n);
+        return Math::Matrix<Scalar>::Identity(m_n, m_n);
       }
 
       inline

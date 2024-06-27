@@ -84,12 +84,12 @@ namespace Rodin::Variational
    * LinearFormIntegratorBase instances.
    */
   template <class FES>
-  class LinearForm<FES, Math::Vector> final
-    : public LinearFormBase<Math::Vector>
+  class LinearForm<FES, Math::Vector<Scalar>> final
+    : public LinearFormBase<Math::Vector<Scalar>>
   {
     public:
       using Context = typename FES::Context;
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Scalar>;
       using Parent = LinearFormBase<VectorType>;
 
       using SequentialAssembly = Assembly::Sequential<VectorType, LinearForm>;
@@ -269,7 +269,7 @@ namespace Rodin::Variational
       VectorType m_vector;
   };
   template <class FES>
-  LinearForm(TestFunction<FES>&) -> LinearForm<FES, Math::Vector>;
+  LinearForm(TestFunction<FES>&) -> LinearForm<FES, Math::Vector<Scalar>>;
 }
 
 #include "LinearForm.hpp"

@@ -68,7 +68,7 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
-        static_assert(std::is_same_v<OperandRange, Math::Matrix>);
+        static_assert(std::is_same_v<OperandRange, Math::Matrix<Scalar>>);
         return getOperand().getValue(p).trace();
       }
 

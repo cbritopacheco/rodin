@@ -102,7 +102,7 @@ namespace Rodin::Geometry
       }
 
       inline
-      void transform(const Math::SpatialVector& rc, Math::SpatialVector& pc) const override
+      void transform(const Math::SpatialVector<Scalar>& rc, Math::SpatialVector<Scalar>& pc) const override
       {
         const size_t pdim = getPhysicalDimension();
         assert(rc.size() >= 0);
@@ -117,7 +117,7 @@ namespace Rodin::Geometry
       }
 
       inline
-      void jacobian(const Math::SpatialVector& rc, Math::SpatialMatrix& res) const override
+      void jacobian(const Math::SpatialVector<Scalar>& rc, Math::SpatialMatrix<Scalar>& res) const override
       {
         const size_t rdim = getReferenceDimension();
         assert(rc.size() >= 0);
@@ -125,7 +125,7 @@ namespace Rodin::Geometry
         const size_t pdim = getPhysicalDimension();
         res.resize(pdim, rdim);
         res.setZero();
-        Math::SpatialVector gradient;
+        Math::SpatialVector<Scalar> gradient;
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
           m_fe.getGradient(local)(gradient, rc);

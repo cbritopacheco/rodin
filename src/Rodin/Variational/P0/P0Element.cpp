@@ -67,7 +67,7 @@ namespace Rodin::Variational
   //         {
   //           case Geometry::Polytope::Type::Point:
   //           {
-  //             res[vdim][g] = Math::SpatialMatrix::Zero(1, vdim);
+  //             res[vdim][g] = Math::SpatialMatrix<Scalar>::Zero(1, vdim);
   //             break;
   //           }
   //           default:

@@ -130,7 +130,7 @@ namespace Rodin::Variational
           constexpr
           BasisFunction& operator=(BasisFunction&&) = default;
 
-          Scalar operator()(const Math::SpatialVector& r) const;
+          Scalar operator()(const Math::SpatialVector<Scalar>& r) const;
 
         private:
           size_t m_i;
@@ -159,14 +159,14 @@ namespace Rodin::Variational
           constexpr
           GradientFunction& operator=(GradientFunction&&) = default;
 
-          Math::SpatialVector operator()(const Math::SpatialVector& r) const
+          Math::SpatialVector<Scalar> operator()(const Math::SpatialVector<Scalar>& r) const
           {
-            Math::SpatialVector out;
+            Math::SpatialVector<Scalar> out;
             operator()(out, r);
             return out;
           }
 
-          void operator()(Math::SpatialVector& out, const Math::SpatialVector& r) const;
+          void operator()(Math::SpatialVector<Scalar>& out, const Math::SpatialVector<Scalar>& r) const;
 
         private:
           size_t m_i;
@@ -278,7 +278,7 @@ namespace Rodin::Variational
    * @see @m_defelement{Vector Lagrange,https://defelement.com/elements/vector-lagrange.html}
    */
   template <>
-  class P1Element<Math::Vector> final : public FiniteElementBase<P1Element<Math::Vector>>
+  class P1Element<Math::Vector<Scalar>> final : public FiniteElementBase<P1Element<Math::Vector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -287,7 +287,7 @@ namespace Rodin::Variational
       using Parent = FiniteElementBase<P1Element>;
 
       /// Type of range
-      using RangeType = Math::Vector;
+      using RangeType = Math::Vector<Scalar>;
 
       class LinearForm
       {
@@ -357,14 +357,14 @@ namespace Rodin::Variational
           constexpr
           BasisFunction& operator=(BasisFunction&&) = default;
 
-          Math::Vector operator()(const Math::SpatialVector& r) const
+          Math::Vector<Scalar> operator()(const Math::SpatialVector<Scalar>& r) const
           {
-            Math::Vector res;
+            Math::Vector<Scalar> res;
             operator()(res, r);
             return res;
           }
 
-          void operator()(Math::Vector& out, const Math::SpatialVector& r) const;
+          void operator()(Math::Vector<Scalar>& out, const Math::SpatialVector<Scalar>& r) const;
 
         private:
           size_t m_vdim;
@@ -399,14 +399,14 @@ namespace Rodin::Variational
           constexpr
           JacobianFunction& operator=(JacobianFunction&&) = default;
 
-          Math::SpatialMatrix operator()(const Math::SpatialVector& rc) const
+          Math::SpatialMatrix<Scalar> operator()(const Math::SpatialVector<Scalar>& rc) const
           {
-            Math::SpatialMatrix res;
+            Math::SpatialMatrix<Scalar> res;
             operator()(res, rc);
             return res;
           }
 
-          void operator()(Math::SpatialMatrix& out, const Math::SpatialVector& rc) const;
+          void operator()(Math::SpatialMatrix<Scalar>& out, const Math::SpatialVector<Scalar>& rc) const;
 
         private:
           size_t m_vdim;

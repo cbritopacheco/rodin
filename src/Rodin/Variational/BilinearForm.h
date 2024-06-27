@@ -385,7 +385,7 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> BilinearForm<TrialFES, TestFES, Math::SparseMatrix>;
+    -> BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>;
 }
 
 #include "BilinearForm.hpp"

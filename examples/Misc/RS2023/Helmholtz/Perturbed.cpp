@@ -20,7 +20,7 @@ static constexpr Attribute dQ = 2; // Attribute of box boundary
 static constexpr Attribute dCurrent = 4; // Attribute of box boundary
 static constexpr Attribute dGround = 5; // Attribute of box boundary
 
-static const Math::Vector x0{{0.5, 0.5}}; // Center of domain
+static const Math::Vector<Scalar> x0{{0.5, 0.5}}; // Center of domain
 static constexpr Scalar epsilon = 0.1; // Radius of B_e(x_0)
 static_assert(epsilon > 0);
 

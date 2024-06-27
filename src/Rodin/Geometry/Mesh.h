@@ -466,7 +466,7 @@ namespace Rodin::Geometry
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
        */
-      virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const = 0;
+      virtual Eigen::Map<const Math::SpatialVector<Scalar>> getVertexCoordinates(Index idx) const = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -494,7 +494,7 @@ namespace Rodin::Geometry
        * @param[in] idx Vertex index
        * @param[in] coords New coordinates
        */
-      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector& coords) = 0;
+      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector<Scalar>& coords) = 0;
 
       virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
@@ -609,21 +609,21 @@ namespace Rodin::Geometry
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const Eigen::Map<const Math::Vector>& x);
+          Builder& vertex(const Eigen::Map<const Math::Vector<Scalar>>& x);
 
           /**
            * @brief Adds vertex with coordinates given by the vector.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(Math::Vector&& x);
+          Builder& vertex(Math::Vector<Scalar>&& x);
 
           /**
            * @brief Adds vertex with coordinates given by the vector.
            *
            * This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const Math::Vector& x);
+          Builder& vertex(const Math::Vector<Scalar>& x);
 
           /**
            * @brief Sets the attribute of the given polytope.
@@ -653,7 +653,7 @@ namespace Rodin::Geometry
            */
           Mesh finalize();
 
-          Builder& setVertices(Math::Matrix&& connectivity);
+          Builder& setVertices(Math::Matrix<Scalar>&& connectivity);
 
           Builder& setConnectivity(Connectivity<Context::Sequential>&& connectivity);
 
@@ -949,7 +949,7 @@ namespace Rodin::Geometry
         return m_connectivity;
       }
 
-      virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const override;
+      virtual Eigen::Map<const Math::SpatialVector<Scalar>> getVertexCoordinates(Index idx) const override;
 
       virtual const FlatSet<Attribute>& getAttributes(size_t d) const override;
 
@@ -957,7 +957,7 @@ namespace Rodin::Geometry
 
       virtual Mesh& setVertexCoordinates(Index idx, Scalar xi, size_t i) override;
 
-      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector& coords) override;
+      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector<Scalar>& coords) override;
 
       virtual Mesh& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;

@@ -23,7 +23,7 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD for CG
    */
-  CG() -> CG<Math::SparseMatrix, Math::Vector>;
+  CG() -> CG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 
   /**
    * @defgroup CGSpecializations CG Template Specializations
@@ -34,18 +34,18 @@ namespace Rodin::Solver
   /**
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * Math::SparseMatrix and Math::Vector.
+   * Math::SparseMatrix<Scalar> and Math::Vector<Scalar>.
    */
   template <>
-  class CG<Math::SparseMatrix, Math::Vector> final
-    : public SolverBase<Math::SparseMatrix, Math::Vector>
+  class CG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::SparseMatrix;
+      using OperatorType = Math::SparseMatrix<Scalar>;
 
       /// Type of vector
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Scalar>;
 
       /**
        * @brief Constructs the CG object with default parameters.
@@ -88,24 +88,24 @@ namespace Rodin::Solver
 
     private:
       Eigen::ConjugateGradient<
-        Math::SparseMatrix, Eigen::Lower | Eigen::Upper> m_solver;
+        Math::SparseMatrix<Scalar>, Eigen::Lower | Eigen::Upper> m_solver;
   };
 
   /**
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * Math::Matrix and Math::Vector.
+   * Math::Matrix<Scalar> and Math::Vector<Scalar>.
    */
   template <>
-  class CG<Math::Matrix, Math::Vector> final
-    : public SolverBase<Math::Matrix, Math::Vector>
+  class CG<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::Matrix;
+      using OperatorType = Math::Matrix<Scalar>;
 
       /// Type of vector
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Scalar>;
 
       /**
        * @brief Constructs the CG object with default parameters.
@@ -148,7 +148,7 @@ namespace Rodin::Solver
 
     private:
       Eigen::ConjugateGradient<
-        Math::Matrix, Eigen::Lower | Eigen::Upper> m_solver;
+        Math::Matrix<Scalar>, Eigen::Lower | Eigen::Upper> m_solver;
   };
 
 }

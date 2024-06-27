@@ -15,8 +15,8 @@ namespace Rodin::Plot::Artist::Axes
 {
   Axes2D::Axes2D(
       Figure& fig,
-      const Magnum::Math::Vector2<Integer>& bottomLeft,
-      const Magnum::Math::Vector2<Integer>& size,
+      const Magnum::Math::Vector<Scalar>2<Integer>& bottomLeft,
+      const Magnum::Math::Vector<Scalar>2<Integer>& size,
       bool frameEnabled)
     : BaseAxes(fig, bottomLeft, size, frameEnabled),
       m_camera(m_scene.addChild<Backend::Renderer::Object2D>())
@@ -28,11 +28,11 @@ namespace Rodin::Plot::Artist::Axes
   void Axes2D::drawContent()
   {
     m_camera.setProjectionMatrix(
-        Magnum::Math::Matrix3<Float>::projection({
+        Magnum::Math::Matrix<Scalar>3<Float>::projection({
           getXLimits().right - getXLimits().left,
           getYLimits().top - getYLimits().bottom }));
     m_camera.getObject2D().setTransformation(
-        Magnum::Math::Matrix3<Float>::translation({
+        Magnum::Math::Matrix<Scalar>3<Float>::translation({
           (getXLimits().right + getXLimits().left) / Float(2),
           (getYLimits().top + getYLimits().bottom) / Float(2) }));
     m_camera.draw(getDrawableGroup());

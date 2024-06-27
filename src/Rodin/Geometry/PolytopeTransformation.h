@@ -83,14 +83,14 @@ namespace Rodin::Geometry
        * @returns A vector of size @f$ s @f$ where @f$ s @f$ represents the
        * physical dimension.
        */
-      Math::SpatialVector transform(const Math::SpatialVector& rc) const
+      Math::SpatialVector<Scalar> transform(const Math::SpatialVector<Scalar>& rc) const
       {
-        Math::SpatialVector res;
+        Math::SpatialVector<Scalar> res;
         transform(rc, res);
         return res;
       }
 
-      virtual void transform(const Math::SpatialVector& rc, Math::SpatialVector&) const = 0;
+      virtual void transform(const Math::SpatialVector<Scalar>& rc, Math::SpatialVector<Scalar>&) const = 0;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation.
@@ -109,14 +109,14 @@ namespace Rodin::Geometry
        * represents the reference dimension and @f$ s @f$ represents the
        * physical dimension.
        */
-      Math::SpatialMatrix jacobian(const Math::SpatialVector& rc) const
+      Math::SpatialMatrix<Scalar> jacobian(const Math::SpatialVector<Scalar>& rc) const
       {
-        Math::SpatialMatrix res;
+        Math::SpatialMatrix<Scalar> res;
         jacobian(rc, res);
         return res;
       }
 
-      virtual void jacobian(const Math::SpatialVector& rc, Math::SpatialMatrix& jacobian) const = 0;
+      virtual void jacobian(const Math::SpatialVector<Scalar>& rc, Math::SpatialMatrix<Scalar>& jacobian) const = 0;
 
       /**
        * @brief Computes the reference coordinates of the given physical point.
@@ -129,14 +129,14 @@ namespace Rodin::Geometry
        *
        * @param[in] pc Physical coordinates of the point.
        */
-      Math::SpatialVector inverse(const Math::SpatialVector& pc) const
+      Math::SpatialVector<Scalar> inverse(const Math::SpatialVector<Scalar>& pc) const
       {
-        Math::SpatialVector res;
+        Math::SpatialVector<Scalar> res;
         inverse(pc, res);
         return res;
       }
 
-      virtual void inverse(const Math::SpatialVector& pc, Math::SpatialVector& rc) const;
+      virtual void inverse(const Math::SpatialVector<Scalar>& pc, Math::SpatialVector<Scalar>& rc) const;
 
     private:
       const size_t m_rdim;

@@ -170,11 +170,11 @@ namespace Rodin::Variational
         {
           return RangeType::Scalar;
         }
-        else if constexpr (std::is_same_v<R, Math::Vector>)
+        else if constexpr (std::is_same_v<R, Math::Vector<Scalar>>)
         {
           return RangeType::Vector;
         }
-        else if constexpr (std::is_same_v<R, Math::Matrix>)
+        else if constexpr (std::is_same_v<R, Math::Matrix<Scalar>>)
         {
           return RangeType::Matrix;
         }
@@ -369,7 +369,7 @@ namespace Rodin::Variational
                 return fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
               });
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
         {
           return TensorBasis(fe.getCount(),
               [&](size_t local)

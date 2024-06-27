@@ -47,14 +47,14 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::SpatialVector getValue(const Geometry::Point& p) const
+      Math::SpatialVector<Scalar> getValue(const Geometry::Point& p) const
       {
-        Math::SpatialVector res;
+        Math::SpatialVector<Scalar> res;
         getValue(res, p);
         return res;
       }
 
-      void getValue(Math::SpatialVector& res, const Geometry::Point& p) const
+      void getValue(Math::SpatialVector<Scalar>& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& vs = p.getPolytope().getVertices();

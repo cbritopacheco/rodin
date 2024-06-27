@@ -31,7 +31,7 @@ namespace Rodin::Variational
       using Parent = FunctionBase<Transpose<Operand>>;
 
       using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
-      static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
+      static_assert(std::is_same_v<OperandRange, Math::Vector<Scalar>> || std::is_same_v<OperandRange, Math::Matrix<Scalar>>);
 
       /**
        * @brief Constructs the Transpose matrix of the given matrix.
@@ -77,7 +77,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix& out, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Scalar>& out, const Geometry::Point& p) const
       {
         getOperand().getValue(out, p);
         out.transposeInPlace();
@@ -159,7 +159,7 @@ namespace Rodin::Variational
       auto getTensorBasis(const Geometry::Point& p) const
       {
         using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
-        static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
+        static_assert(std::is_same_v<OperandRange, Math::Vector<Scalar>> || std::is_same_v<OperandRange, Math::Matrix<Scalar>>);
         const auto& op = this->object(getOperand().getTensorBasis(p));
         return TensorBasis(op.getDOFs(), [&](size_t i){ return op(i).transpose(); });
       }

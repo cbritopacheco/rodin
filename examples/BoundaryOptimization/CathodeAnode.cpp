@@ -42,7 +42,7 @@ static constexpr Scalar tgv = std::numeric_limits<float>::max();
 static const Scalar alpha = 4;
 
 using ScalarFES = P1<Scalar, Context::Sequential>;
-using VectorFES = P1<Math::Vector, Context::Sequential>;
+using VectorFES = P1<Math::Vector<Scalar>, Context::Sequential>;
 using ScalarGridFunction = GridFunction<ScalarFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;

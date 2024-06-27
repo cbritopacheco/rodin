@@ -22,7 +22,7 @@ int main(int, char**)
   P1 fes(mesh, vdim);
   GridFunction gf(fes);
 
-  gf = [](const Geometry::Point& p) { return Math::Vector{{ p.y() - 0.5, -p.x() + 0.5 }}; };
+  gf = [](const Geometry::Point& p) { return Math::Vector<Scalar>{{ p.y() - 0.5, -p.x() + 0.5 }}; };
 
   mesh.save("Projection.mesh");
   gf.save("Projection.gf");

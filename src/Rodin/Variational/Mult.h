@@ -56,25 +56,25 @@ namespace Rodin::FormLanguage
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<LHSRange, Math::Vector>,
+          std::is_same_v<LHSRange, Math::Vector<Scalar>>,
           // Then <--------------------------------------------- LHS is Vector
           std::conditional_t<
             // If
             std::is_same_v<RHSRange, Scalar>,
             // Then
-            Math::Vector,
+            Math::Vector<Scalar>,
             // Else
             std::conditional_t<
               // If
-              std::is_same_v<RHSRange, Math::Vector>,
+              std::is_same_v<RHSRange, Math::Vector<Scalar>>,
               // Then
               void,
               // Else
               std::conditional_t<
                 // If
-                std::is_same_v<RHSRange, Math::Matrix>,
+                std::is_same_v<RHSRange, Math::Matrix<Scalar>>,
                 // Then
-                Math::Matrix,
+                Math::Matrix<Scalar>,
                 // Else
                 void
               >
@@ -84,17 +84,17 @@ namespace Rodin::FormLanguage
           // Else
           std::conditional_t<
             // If
-            std::is_same_v<LHSRange, Math::Matrix>,
+            std::is_same_v<LHSRange, Math::Matrix<Scalar>>,
             // Then <------------------------------------------- LHS is Matrix
             std::conditional_t<
               std::is_same_v<RHSRange, Scalar>,
-              Math::Matrix,
+              Math::Matrix<Scalar>,
               std::conditional_t<
-                std::is_same_v<RHSRange, Math::Vector>,
-                Math::Vector,
+                std::is_same_v<RHSRange, Math::Vector<Scalar>>,
+                Math::Vector<Scalar>,
                 std::conditional_t<
-                  std::is_same_v<RHSRange, Math::Matrix>,
-                    Math::Matrix,
+                  std::is_same_v<RHSRange, Math::Matrix<Scalar>>,
+                    Math::Matrix<Scalar>,
                     void
                   >
                 >
@@ -175,7 +175,7 @@ namespace Rodin::Variational
         {
           return getLHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector> || std::is_same_v<LHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>> || std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }
@@ -220,14 +220,14 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector& out, const Geometry::Point& p) const
+      void getValue(Math::Vector<Scalar>& out, const Geometry::Point& p) const
       {
-        if constexpr (std::is_same_v<LHSRange, Scalar> && std::is_same_v<RHSRange, Math::Vector>)
+        if constexpr (std::is_same_v<LHSRange, Scalar> && std::is_same_v<RHSRange, Math::Vector<Scalar>>)
         {
           getRHS().getValue(out, p);
           out *= getLHS().getValue(p);
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector> && std::is_same_v<RHSRange, Scalar>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>> && std::is_same_v<RHSRange, Scalar>)
         {
           getLHS().getValue(out, p);
           out *= getRHS().getValue(p);
@@ -240,14 +240,14 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix& out, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Scalar>& out, const Geometry::Point& p) const
       {
-        if constexpr (std::is_same_v<LHSRange, Scalar> && std::is_same_v<RHSRange, Math::Matrix>)
+        if constexpr (std::is_same_v<LHSRange, Scalar> && std::is_same_v<RHSRange, Math::Matrix<Scalar>>)
         {
           getRHS().getValue(out, p);
           out *= getLHS().getValue(p);
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix> && std::is_same_v<RHSRange, Scalar>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Matrix<Scalar>> && std::is_same_v<RHSRange, Scalar>)
         {
           getLHS().getValue(out, p);
           out *= getRHS().getValue(p);
@@ -302,7 +302,7 @@ namespace Rodin::Variational
   template <class LHSDerived>
   inline
   auto
-  operator*(const FunctionBase<LHSDerived>& lhs, std::reference_wrapper<const Math::Matrix> rhs)
+  operator*(const FunctionBase<LHSDerived>& lhs, std::reference_wrapper<const Math::Matrix<Scalar>> rhs)
   {
     return Mult(lhs, MatrixFunction(rhs));
   }
@@ -310,7 +310,7 @@ namespace Rodin::Variational
   template <class LHSDerived>
   inline
   auto
-  operator*(std::reference_wrapper<const Math::Matrix> lhs, const FunctionBase<LHSDerived>& rhs)
+  operator*(std::reference_wrapper<const Math::Matrix<Scalar>> lhs, const FunctionBase<LHSDerived>& rhs)
   {
     return Mult(MatrixFunction(lhs), rhs);
   }
@@ -381,7 +381,7 @@ namespace Rodin::Variational
         {
           return getLHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector> || std::is_same_v<LHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>> || std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }
@@ -529,7 +529,7 @@ namespace Rodin::Variational
         {
           return getLHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector> || std::is_same_v<LHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>> || std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }

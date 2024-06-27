@@ -22,12 +22,12 @@
 namespace Rodin::Variational
 {
   // ------------------------------------------------------------------------
-  // ---- DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
+  // ---- DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
   // ------------------------------------------------------------------------
 
   template <class TrialFES, class TestFES>
   constexpr
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
   ::DenseProblem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
      :  m_trialFunction(u),
         m_testFunction(v),
@@ -37,9 +37,9 @@ namespace Rodin::Variational
   {}
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
-  ::operator=(const ProblemBody<Math::Matrix, Math::Vector>& rhs)
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
+  ::operator=(const ProblemBody<Math::Matrix<Scalar>, Math::Vector<Scalar>>& rhs)
   {
     for (auto& bfi : rhs.getLocalBFIs())
       m_bilinearForm.add(bfi);
@@ -58,8 +58,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
   ::operator+=(const LocalBilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(rhs);
@@ -67,8 +67,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
   ::operator-=(const LocalBilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(UnaryMinus(rhs));
@@ -76,8 +76,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
   ::operator+=(const LinearFormIntegratorBase& rhs)
   {
     m_linearForm.add(rhs);
@@ -85,8 +85,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
   ::operator-=(const LinearFormIntegratorBase& rhs)
   {
     m_linearForm.add(UnaryMinus(rhs));
@@ -94,8 +94,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
   ::operator+=(const DirichletBCBase& rhs)
   {
     m_dbcs.add(rhs);
@@ -103,8 +103,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
   ::operator+=(const PeriodicBCBase& rhs)
   {
     m_pbcs.add(rhs);
@@ -112,8 +112,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>::imposeDirichletBCs()
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>::imposeDirichletBCs()
   {
     const auto& trial = getTrialFunction();
     const auto& trialFES = trial.getFiniteElementSpace();
@@ -145,8 +145,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>::imposePeriodicBCs()
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>::imposePeriodicBCs()
   {
     const auto& trial = getTrialFunction();
     const auto& trialFES = trial.getFiniteElementSpace();
@@ -214,7 +214,7 @@ namespace Rodin::Variational
           {
             bool parentFound = false;
             size_t childrenFound = 0;
-            for (Math::Matrix::InnerIterator it(m_stiffness, col); it; ++it)
+            for (Math::Matrix<Scalar>::InnerIterator it(m_stiffness, col); it; ++it)
             {
               if (parentFound && childrenFound == count)
               {
@@ -294,8 +294,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>::assemble()
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>::assemble()
   {
     auto& trial = getTrialFunction();
 
@@ -328,7 +328,7 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   void
-  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
   ::solve(Solver::SolverBase<OperatorType, VectorType>& solver)
   {
      // Assemble the system

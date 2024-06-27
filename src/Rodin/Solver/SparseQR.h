@@ -21,7 +21,7 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD for SparseQR
    */
-  SparseQR() -> SparseQR<Math::SparseMatrix, Math::Vector>;
+  SparseQR() -> SparseQR<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 
   /**
    * @defgroup SparseQRSpecializations SparseQR Template Specializations
@@ -32,19 +32,19 @@ namespace Rodin::Solver
   /**
    * @ingroup SparseQRSpecializations
    * @brief Sparse left-looking QR factorization with numerical column pivoting
-   * for use with Math::SparseMatrix and
-   * Math::Vector.
+   * for use with Math::SparseMatrix<Scalar> and
+   * Math::Vector<Scalar>.
    */
   template <>
-  class SparseQR<Math::SparseMatrix, Math::Vector> final
-    : public SolverBase<Math::SparseMatrix, Math::Vector>
+  class SparseQR<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::SparseMatrix;
+      using OperatorType = Math::SparseMatrix<Scalar>;
 
       /// Type of vector
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Scalar>;
 
       /**
        * @brief Constructs the SparseQR object with default parameters.
@@ -67,7 +67,7 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::SparseQR<Math::SparseMatrix, Eigen::COLAMDOrdering<int>> m_solver;
+      Eigen::SparseQR<Math::SparseMatrix<Scalar>, Eigen::COLAMDOrdering<int>> m_solver;
   };
 
 }

@@ -50,11 +50,11 @@ namespace Rodin::Geometry
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
-    return vertex(Eigen::Map<const Math::Vector>(data, m_sdim));
+    return vertex(Eigen::Map<const Math::Vector<Scalar>>(data, m_sdim));
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::vertex(const Eigen::Map<const Math::Vector>& x)
+  Mesh<Context::Sequential>::Builder::vertex(const Eigen::Map<const Math::Vector<Scalar>>& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -65,7 +65,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::vertex(Math::Vector&& x)
+  Mesh<Context::Sequential>::Builder::vertex(Math::Vector<Scalar>&& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -76,7 +76,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::vertex(const Math::Vector& x)
+  Mesh<Context::Sequential>::Builder::vertex(const Math::Vector<Scalar>& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -140,7 +140,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::setVertices(Math::Matrix&& vertices)
+  Mesh<Context::Sequential>::Builder::setVertices(Math::Matrix<Scalar>&& vertices)
   {
     m_vertices = std::move(vertices);
     return *this;

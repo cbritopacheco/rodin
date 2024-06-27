@@ -23,7 +23,7 @@ static constexpr Attribute dQ = 2; // Attribute of box boundary
 static constexpr Attribute dCurrent = 4; // Attribute of box boundary
 static constexpr Attribute dGround = 5; // Attribute of box boundary
 
-static const Math::Vector x0{{0.5, 0.5}}; // Center of domain
+static const Math::Vector<Scalar> x0{{0.5, 0.5}}; // Center of domain
 
 static constexpr Scalar pi = Math::Constants::pi();
 
@@ -63,10 +63,10 @@ void run(int i, const std::vector<Data>& grid);
 int main(int, char**)
 {
   // Define evaluation grid
-  Math::Vector epsilon_r = Math::Vector::LinSpaced(1.0 / hmax, hmax, 0.2);
-  Math::Vector waveNumber_r = Math::Vector::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
-  Math::Vector screen_r{{ 2.0 }};
-  Math::Vector conductivity_r{{ 2.0 }};
+  Math::Vector<Scalar> epsilon_r = Math::Vector<Scalar>::LinSpaced(1.0 / hmax, hmax, 0.2);
+  Math::Vector<Scalar> waveNumber_r = Math::Vector<Scalar>::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
+  Math::Vector<Scalar> screen_r{{ 2.0 }};
+  Math::Vector<Scalar> conductivity_r{{ 2.0 }};
 
   std::vector<Data> grid;
   grid.reserve(epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());
@@ -205,7 +205,7 @@ void run(int id, const std::vector<Data>& grid)
     ScalarFunction chi_e =
       [](const Point& p)
       {
-        return (p.getCoordinates() - Math::Vector{{0.5, 0.5}}).norm() > 0.25;
+        return (p.getCoordinates() - Math::Vector<Scalar>{{0.5, 0.5}}).norm() > 0.25;
       };
 
     GridFunction diff(vh);

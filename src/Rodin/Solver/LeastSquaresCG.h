@@ -23,7 +23,7 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD for LeastSquaresCG
    */
-  LeastSquaresCG() -> LeastSquaresCG<Math::SparseMatrix, Math::Vector>;
+  LeastSquaresCG() -> LeastSquaresCG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 
   /**
    * @defgroup LeastSquaresCGSpecializations LeastSquaresCG Template Specializations
@@ -34,18 +34,18 @@ namespace Rodin::Solver
   /**
    * @ingroup LeastSquaresCGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * Math::SparseMatrix and Math::Vector.
+   * Math::SparseMatrix<Scalar> and Math::Vector<Scalar>.
    */
   template <>
-  class LeastSquaresCG<Math::SparseMatrix, Math::Vector> final
-    : public SolverBase<Math::SparseMatrix, Math::Vector>
+  class LeastSquaresCG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::SparseMatrix;
+      using OperatorType = Math::SparseMatrix<Scalar>;
 
       /// Type of vector
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Scalar>;
 
       /**
        * @brief Constructs the LeastSquaresCG object with default parameters.
@@ -81,7 +81,7 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::LeastSquaresConjugateGradient<Math::SparseMatrix> m_solver;
+      Eigen::LeastSquaresConjugateGradient<Math::SparseMatrix<Scalar>> m_solver;
   };
 
   /**
@@ -93,18 +93,18 @@ namespace Rodin::Solver
   /**
    * @ingroup LeastSquaresCGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * Math::SparseMatrix and Math::Vector.
+   * Math::SparseMatrix<Scalar> and Math::Vector<Scalar>.
    */
   template <>
-  class LeastSquaresCG<Math::Matrix, Math::Vector> final
-    : public SolverBase<Math::Matrix, Math::Vector>
+  class LeastSquaresCG<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::Matrix;
+      using OperatorType = Math::Matrix<Scalar>;
 
       /// Type of vector
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Scalar>;
 
       /**
        * @brief Constructs the LeastSquaresCG object with default parameters.
@@ -141,7 +141,7 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::LeastSquaresConjugateGradient<Math::Matrix> m_solver;
+      Eigen::LeastSquaresConjugateGradient<Math::Matrix<Scalar>> m_solver;
   };
 }
 

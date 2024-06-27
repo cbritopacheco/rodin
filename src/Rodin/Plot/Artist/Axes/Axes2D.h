@@ -26,8 +26,8 @@ namespace Rodin::Plot::Artist::Axes
       */
       Axes2D(
          Figure& figRef,
-         const Magnum::Math::Vector2<Integer>& bottomLeft,
-         const Magnum::Math::Vector2<Integer>& size,
+         const Magnum::Math::Vector<Scalar>2<Integer>& bottomLeft,
+         const Magnum::Math::Vector<Scalar>2<Integer>& size,
          bool frameEnabled = true);
 
       virtual ~Axes2D() = default;

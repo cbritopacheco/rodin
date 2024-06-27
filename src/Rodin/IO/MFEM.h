@@ -272,7 +272,7 @@ namespace Rodin::IO::MFEM
 
       template <class Iterator>
       inline
-      std::optional<Math::Vector> operator()(Iterator begin, Iterator end) const
+      std::optional<Math::Vector<Scalar>> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::blank;
@@ -281,7 +281,7 @@ namespace Rodin::IO::MFEM
         using boost::spirit::x3::_attr;
 
         size_t i = 0;
-        Math::Vector res(m_sdim);
+        Math::Vector<Scalar> res(m_sdim);
         const auto get_double = [&](auto& ctx) { assert(i < m_sdim); res(i++) = _attr(ctx); };
         const auto p = repeat(m_sdim)[double_[get_double]];
         const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);

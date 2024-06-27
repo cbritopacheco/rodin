@@ -19,7 +19,7 @@ namespace Rodin::Models::Elasticity
   class LinearElasticity
   {
     using FESRange = typename FormLanguage::Traits<FES>::RangeType;
-    static_assert(std::is_same_v<FESRange, Math::Vector>);
+    static_assert(std::is_same_v<FESRange, Math::Vector<Scalar>>);
 
     public:
       LinearElasticity(const Lambda& l, const Mu& m, const FES& fes)

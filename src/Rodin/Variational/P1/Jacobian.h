@@ -21,9 +21,9 @@ namespace Rodin::FormLanguage
   template <class NestedDerived, class ... Ps, Variational::ShapeFunctionSpaceType SpaceType>
   struct Traits<
     Variational::Jacobian<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector, Ps...>, SpaceType>>>
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Scalar>, Ps...>, SpaceType>>>
   {
-    using FES = Variational::P1<Math::Vector, Ps...>;
+    using FES = Variational::P1<Math::Vector<Scalar>, Ps...>;
     static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
   };
 }
@@ -35,13 +35,13 @@ namespace Rodin::Variational
    * @brief Jacobian of an P1 GridFunction object.
    */
   template <class ... Ps>
-  class Jacobian<GridFunction<P1<Math::Vector, Ps...>>> final
-    : public JacobianBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>, GridFunction<P1<Math::Vector, Ps...>>>
+  class Jacobian<GridFunction<P1<Math::Vector<Scalar>, Ps...>>> final
+    : public JacobianBase<Jacobian<GridFunction<P1<Math::Vector<Scalar>, Ps...>>>, GridFunction<P1<Math::Vector<Scalar>, Ps...>>>
   {
     public:
-      using Operand = GridFunction<P1<Math::Vector, Ps...>>;
+      using Operand = GridFunction<P1<Math::Vector<Scalar>, Ps...>>;
       using Parent =
-        JacobianBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>, Operand>;
+        JacobianBase<Jacobian<GridFunction<P1<Math::Vector<Scalar>, Ps...>>>, Operand>;
 
       /**
        * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function
@@ -60,7 +60,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::SpatialMatrix& out, const Geometry::Point& p) const
+      void interpolate(Math::SpatialMatrix<Scalar>& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -76,7 +76,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+            const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -101,7 +101,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+                  const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;
@@ -121,8 +121,8 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialMatrix jacobian(vdim, d);
-          Math::SpatialMatrix res(vdim, d);
+          Math::SpatialMatrix<Scalar> jacobian(vdim, d);
+          Math::SpatialMatrix<Scalar> res(vdim, d);
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
@@ -144,19 +144,19 @@ namespace Rodin::Variational
    * @brief CTAD for Jacobian of a P1 GridFunction
    */
   template <class ... Ps>
-  Jacobian(const GridFunction<P1<Math::Vector, Ps...>>&)
-    -> Jacobian<GridFunction<P1<Math::Vector, Ps...>>>;
+  Jacobian(const GridFunction<P1<Math::Vector<Scalar>, Ps...>>&)
+    -> Jacobian<GridFunction<P1<Math::Vector<Scalar>, Ps...>>>;
 
   /**
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an P1 ShapeFunction object.
    */
   template <class ShapeFunctionDerived, ShapeFunctionSpaceType SpaceType, class ... Ts>
-  class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector, Ts...>, SpaceType>> final
-    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector, Ts...>, SpaceType>>>
+  class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Scalar>, Ts...>, SpaceType>> final
+    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Scalar>, Ts...>, SpaceType>>>
   {
     public:
-      using FES = P1<Math::Vector, Ts...>;
+      using FES = P1<Math::Vector<Scalar>, Ts...>;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       using Operand = ShapeFunction<ShapeFunctionDerived, FES, Space>;
@@ -220,7 +220,7 @@ namespace Rodin::Variational
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        const Math::Vector<Scalar>& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
         return TensorBasis(fe.getCount(),
             [&](size_t local)
             { return this->object(fe.getJacobian(local)(rc)) * p.getJacobianInverse(); });

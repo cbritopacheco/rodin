@@ -34,7 +34,7 @@ namespace Rodin::Plot::Artist
   {
     // Set size of view space equal to the figure space
     m_camera.setProjectionMatrix(
-        Magnum::Math::Matrix3<float>::projection({
+        Magnum::Math::Matrix<Scalar>3<float>::projection({
           static_cast<float>(width),
           static_cast<float>(height)
           })

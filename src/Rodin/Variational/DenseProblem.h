@@ -31,7 +31,7 @@ namespace Rodin::Variational
 {
   template <class TrialFES, class TestFES>
   DenseProblem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> DenseProblem<TrialFES, TestFES, typename TrialFES::Context, Math::Matrix, Math::Vector>;
+    -> DenseProblem<TrialFES, TestFES, typename TrialFES::Context, Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 
   /**
    * @defgroup DenseProblemSpecializations DenseProblem Template Specializations
@@ -41,21 +41,21 @@ namespace Rodin::Variational
 
   /**
    * @ingroup DenseProblemSpecializations
-   * @brief General class to assemble linear systems with `Math::Matrix`
-   * and `Math::Vector` types in a serial context.
+   * @brief General class to assemble linear systems with `Math::Matrix<Scalar>`
+   * and `Math::Vector<Scalar>` types in a serial context.
    */
   template <class TrialFES, class TestFES>
-  class DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
-    : public ProblemBase<Math::Matrix, Math::Vector>
+  class DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
+    : public ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>>
   {
       static_assert(std::is_same_v<typename TrialFES::Context, Context::Sequential>);
       static_assert(std::is_same_v<typename TestFES::Context, Context::Sequential>);
 
     public:
       using Context = Context::Sequential;
-      using OperatorType = Math::Matrix;
-      using VectorType = Math::Vector;
-      using Parent = ProblemBase<Math::Matrix, Math::Vector>;
+      using OperatorType = Math::Matrix<Scalar>;
+      using VectorType = Math::Vector<Scalar>;
+      using Parent = ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 
       /**
        * @brief Constructs an empty DenseProblem involving the trial function @f$ u @f$
@@ -167,7 +167,7 @@ namespace Rodin::Variational
       std::reference_wrapper<TestFunction<TestFES>>   m_testFunction;
 
       LinearForm<TestFES, VectorType> m_linearForm;
-      BilinearForm<TrialFES, TestFES, Math::Matrix> m_bilinearForm;
+      BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>> m_bilinearForm;
 
       FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
 

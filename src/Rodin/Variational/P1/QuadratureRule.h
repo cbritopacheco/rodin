@@ -95,7 +95,7 @@ namespace Rodin::Variational
         const Geometry::Point p(polytope, trans, std::cref(rc));
         const Scalar distortion = p.getDistortion();
         auto& res = getVector();
-        res = Math::Vector::Zero(dofs);
+        res = Math::Vector<Scalar>::Zero(dofs);
         for (size_t local = 0; local < dofs; local++)
           res.coeffRef(local) += w * distortion * fe.getBasis(local)(rc);
       }
@@ -215,18 +215,18 @@ namespace Rodin::Variational
         const Geometry::Point p(polytope, trans, std::cref(rc));
         const Scalar distortion = p.getDistortion();
         auto& res = getVector();
-        res = Math::Vector::Zero(dofs);
+        res = Math::Vector<Scalar>::Zero(dofs);
         if constexpr (std::is_same_v<Scalar, LHSRange>)
         {
           for (size_t local = 0; local < dofs; local++)
             res.coeffRef(local) += w * distortion * f(p) * fe.getBasis(local)(rc);
         }
-        else if constexpr (std::is_same_v<Math::Vector, LHSRange>)
+        else if constexpr (std::is_same_v<Math::Vector<Scalar>, LHSRange>)
         {
           for (size_t local = 0; local < dofs; local++)
             res.coeffRef(local) += w * distortion * f(p).dot(fe.getBasis(local)(rc));
         }
-        else if constexpr (std::is_same_v<Math::Matrix, LHSRange>)
+        else if constexpr (std::is_same_v<Math::Matrix<Scalar>, LHSRange>)
         {
           for (size_t local = 0; local < dofs; local++)
             res.coeffRef(local) +=
@@ -377,7 +377,7 @@ namespace Rodin::Variational
         const Scalar w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
         auto& res = getMatrix();
-        res = Math::Matrix::Zero(dofs, dofs);
+        res = Math::Matrix<Scalar>::Zero(dofs, dofs);
         if constexpr (std::is_same_v<CoefficientRange, Scalar>)
         {
           static_assert(std::is_same_v<MultiplicandRange, RHSRange>);
@@ -417,8 +417,8 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_integrand;
-      std::vector<Math::Vector> m_vvalues;
-      std::vector<Math::Matrix> m_mvalues;
+      std::vector<Math::Vector<Scalar>> m_vvalues;
+      std::vector<Math::Matrix<Scalar>> m_mvalues;
   };
 
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Context>
@@ -539,7 +539,7 @@ namespace Rodin::Variational
         const Scalar distortion = p.getDistortion();
         const auto jacInvT = p.getJacobianInverse().transpose();
         auto& res = getMatrix();
-        res = Math::Matrix::Zero(dofs, dofs);
+        res = Math::Matrix<Scalar>::Zero(dofs, dofs);
         m_pgradient.resize(dofs);
         for (size_t local = 0; local < dofs; local++)
           m_pgradient[local] = jacInvT * fe.getGradient(local)(rc);
@@ -557,8 +557,8 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_integrand;
-      std::vector<Math::SpatialVector> m_rgradient;
-      std::vector<Math::SpatialVector> m_pgradient;
+      std::vector<Math::SpatialVector<Scalar>> m_rgradient;
+      std::vector<Math::SpatialVector<Scalar>> m_pgradient;
   };
 
   template <class LHSDerived, class RHSDerived, class Context>
@@ -683,7 +683,7 @@ namespace Rodin::Variational
         const Scalar distortion = p.getDistortion();
         const auto jacInvT = p.getJacobianInverse().transpose();
         auto& res = getMatrix();
-        res = Math::Matrix::Zero(dofs, dofs);
+        res = Math::Matrix<Scalar>::Zero(dofs, dofs);
         m_rgradient.resize(dofs);
         m_pgradient.resize(dofs);
         for (size_t local = 0; local < dofs; local++)
@@ -706,8 +706,8 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_integrand;
-      std::vector<Math::SpatialVector> m_rgradient;
-      std::vector<Math::SpatialVector> m_pgradient;
+      std::vector<Math::SpatialVector<Scalar>> m_rgradient;
+      std::vector<Math::SpatialVector<Scalar>> m_pgradient;
   };
 
   /**
@@ -831,7 +831,7 @@ namespace Rodin::Variational
         const Geometry::Point p(polytope, trans, std::cref(rc));
         const Scalar distortion = p.getDistortion();
         auto& res = getMatrix();
-        res = Math::Matrix::Zero(dofs, dofs);
+        res = Math::Matrix<Scalar>::Zero(dofs, dofs);
         m_pjac.resize(dofs);
         for (size_t local = 0; local < dofs; local++)
           m_pjac[local] = fe.getJacobian(local)(rc) * p.getJacobianInverse();
@@ -849,8 +849,8 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_integrand;
-      std::vector<Math::SpatialVector> m_rjac;
-      std::vector<Math::SpatialVector> m_pjac;
+      std::vector<Math::SpatialVector<Scalar>> m_rjac;
+      std::vector<Math::SpatialVector<Scalar>> m_pjac;
   };
 
   /**
@@ -902,12 +902,12 @@ namespace Rodin::Variational
       Mult<
         FunctionBase<LHSFunctionDerived>,
         ShapeFunctionBase<
-          Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector, Context>, TrialSpace>>,
-        P1<Math::Vector, Context>, TrialSpace>>,
-      P1<Math::Vector, Context>, TrialSpace>,
+          Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Context>, TrialSpace>>,
+        P1<Math::Vector<Scalar>, Context>, TrialSpace>>,
+      P1<Math::Vector<Scalar>, Context>, TrialSpace>,
     ShapeFunctionBase<
-      Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector, Context>, TestSpace>>,
-    P1<Math::Vector, Context>, TestSpace>>>
+      Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Context>, TestSpace>>,
+    P1<Math::Vector<Scalar>, Context>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase
   {
     public:
@@ -915,7 +915,7 @@ namespace Rodin::Variational
       using Parent = LocalBilinearFormIntegratorBase;
 
       /// Type of finite element space
-      using FES = P1<Math::Vector, Context>;
+      using FES = P1<Math::Vector<Scalar>, Context>;
 
       /// Type of left hand side
       using LHS =
@@ -985,7 +985,7 @@ namespace Rodin::Variational
         const Geometry::Point p(polytope, trans, std::cref(rc));
         const Scalar distortion = p.getDistortion();
         auto& res = getMatrix();
-        res = Math::Matrix::Zero(dofs, dofs);
+        res = Math::Matrix<Scalar>::Zero(dofs, dofs);
         m_rjac.resize(dofs);
         m_pjac.resize(dofs);
         for (size_t local = 0; local < dofs; local++)
@@ -1021,8 +1021,8 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<Integrand> m_integrand;
 
-      std::vector<Math::SpatialMatrix> m_rjac;
-      std::vector<Math::SpatialMatrix> m_pjac;
+      std::vector<Math::SpatialMatrix<Scalar>> m_rjac;
+      std::vector<Math::SpatialMatrix<Scalar>> m_pjac;
   };
 
   /**
@@ -1034,9 +1034,9 @@ namespace Rodin::Variational
       ShapeFunctionBase<
         Mult<
           FunctionBase<LHSFunctionDerived>,
-          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector, Context>, TrialSpace>>>>>,
+          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Context>, TrialSpace>>>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector, Context>, TestSpace>>>>&)
+        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Context>, TestSpace>>>>&)
   ->
   QuadratureRule<
     Dot<
@@ -1044,9 +1044,9 @@ namespace Rodin::Variational
         Mult<
           FunctionBase<LHSFunctionDerived>,
           ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector, Context>, TrialSpace>>>>>,
+            Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Context>, TrialSpace>>>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector, Context>, TestSpace>>>>>;
+        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Context>, TestSpace>>>>>;
 }
 
 #endif

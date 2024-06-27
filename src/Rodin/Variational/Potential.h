@@ -52,9 +52,9 @@ namespace Rodin::FormLanguage
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRange, Math::Vector>,
+        std::is_same_v<RHSRange, Math::Vector<Scalar>>,
         // Then
-        Math::Matrix,
+        Math::Matrix<Scalar>,
         // Else
         void>>;
 
@@ -94,9 +94,9 @@ namespace Rodin::FormLanguage
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRange, Math::Vector>,
+        std::is_same_v<RHSRange, Math::Vector<Scalar>>,
         // Then
-        Math::Matrix,
+        Math::Matrix<Scalar>,
         // Else
         void>>;
 
@@ -139,9 +139,9 @@ namespace Rodin::Variational
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRange, Math::Vector>,
+          std::is_same_v<RHSRange, Math::Vector<Scalar>>,
           // Then
-          Math::Matrix,
+          Math::Matrix<Scalar>,
           // Else
           void>>;
 
@@ -172,9 +172,9 @@ namespace Rodin::Variational
           static_assert(std::is_same_v<RHSRange, Scalar>);
           return { 1, 1 };
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
         {
-          static_assert(std::is_same_v<RHSRange, Math::Vector>);
+          static_assert(std::is_same_v<RHSRange, Math::Vector<Scalar>>);
           return getOperand().getRangeShape();
         }
         else
@@ -220,9 +220,9 @@ namespace Rodin::Variational
             }
             return res;
           }
-          else if constexpr (std::is_same_v<RHSRange, Math::Vector>)
+          else if constexpr (std::is_same_v<RHSRange, Math::Vector<Scalar>>)
           {
-            Math::Vector res;
+            Math::Vector<Scalar> res;
             getValue(res, p);
             return res;
           }
@@ -250,9 +250,9 @@ namespace Rodin::Variational
             }
             return res;
           }
-          else if constexpr (std::is_same_v<RHSRange, Math::Vector>)
+          else if constexpr (std::is_same_v<RHSRange, Math::Vector<Scalar>>)
           {
-            Math::Vector res;
+            Math::Vector<Scalar> res;
             getValue(res, p);
             return res;
           }
@@ -264,14 +264,14 @@ namespace Rodin::Variational
         }
       }
 
-      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Scalar>& res, const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();
         const auto& operand = getOperand();
         const auto& mesh = p.getPolytope().getMesh();
         res.resize(getRangeShape().height());
         res.setZero();
-        Math::Matrix kxy;
+        Math::Matrix<Scalar> kxy;
         if (m_qf.has_value())
         {
           for (auto it = mesh.getCell(); it; ++it)
@@ -377,9 +377,9 @@ namespace Rodin::Variational
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRange, Math::Vector>,
+          std::is_same_v<RHSRange, Math::Vector<Scalar>>,
           // Then
-          Math::Matrix,
+          Math::Matrix<Scalar>,
           // Else
           void>>;
 
@@ -424,9 +424,9 @@ namespace Rodin::Variational
           static_assert(std::is_same_v<RHSRange, Scalar>);
           return { 1, 1 };
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
         {
-          static_assert(std::is_same_v<RHSRange, Math::Vector>);
+          static_assert(std::is_same_v<RHSRange, Math::Vector<Scalar>>);
           return getOperand().getRangeShape();
         }
         else
@@ -544,7 +544,7 @@ namespace Rodin::Variational
             {
               const size_t order = std::max(trialfe.getOrder(), testfe.getOrder());
               const QF::GenericPolytopeQuadrature qf(order, Geometry::Polytope::Type::Segment);
-              Math::SpatialVector rx1(2), rz1(2),
+              Math::SpatialVector<Scalar> rx1(2), rz1(2),
                                   rx2(2), rz2(2),
                                   rx3(2), rz3(2),
                                   rx4(2), rz4(2),
@@ -599,7 +599,7 @@ namespace Rodin::Variational
                         s5 = kernel(x5, z5) * x5.getDistortion() * z5.getDistortion();
                         s6 = kernel(x6, z6) * x6.getDistortion() * z6.getDistortion();
                       }
-                      else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+                      else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
                       {
                         kernel(m_k1, x1, z1);
                         kernel(m_k2, x2, z2);
@@ -641,7 +641,7 @@ namespace Rodin::Variational
                             res(l, m) += d * w * s6 * trb(rx6) * teb(rz6);
                             assert(std::isfinite(s6));
                           }
-                          else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+                          else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
                           {
                             assert(std::isfinite(s1));
                             trb(m_trv, rx1);
@@ -698,7 +698,7 @@ namespace Rodin::Variational
               {
                 d = kernel(x, y) * x.getDistortion() * y.getDistortion();
               }
-              else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+              else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
               {
                 kernel(m_k, x, y);
                 d = x.getDistortion() * y.getDistortion();
@@ -712,7 +712,7 @@ namespace Rodin::Variational
                 {
                   tev = teb(qfte.getPoint(i));
                 }
-                else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+                else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
                 {
                   teb(m_tev, qfte.getPoint(i));
                 }
@@ -723,7 +723,7 @@ namespace Rodin::Variational
                   {
                     res(l, m) += w * d * tev * trb(qftr.getPoint(j));
                   }
-                  else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+                  else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
                   {
                     trb(m_trv, qftr.getPoint(j));
                     res(l, m) += w * d * m_tev.dot(m_k * m_trv);
@@ -748,9 +748,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<Integrand> m_integrand;
 
-      mutable Math::Matrix m_k;
-      mutable Math::Vector m_trv, m_tev;
-      mutable Math::Matrix m_k1, m_k2, m_k3, m_k4, m_k5, m_k6;
+      mutable Math::Matrix<Scalar> m_k;
+      mutable Math::Vector<Scalar> m_trv, m_tev;
+      mutable Math::Matrix<Scalar> m_k1, m_k2, m_k3, m_k4, m_k5, m_k6;
   };
 
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>

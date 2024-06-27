@@ -250,7 +250,7 @@ namespace Rodin::Variational
       TestFunction<FES>                                 m_v;
 
       FlatSet<Geometry::Attribute>      m_attrs;
-      LinearForm<FES, Math::Vector>     m_lf;
+      LinearForm<FES, Math::Vector<Scalar>>     m_lf;
 
       std::optional<Scalar> m_value;
   };
@@ -402,7 +402,7 @@ namespace Rodin::Variational
         const size_t order = fe.getOrder();
         const QF::GenericPolytopeQuadrature qf(order, polytope.getGeometry());
         auto& res = getVector();
-        res = Math::Vector::Zero(integrand.getDOFs(polytope));
+        res = Math::Vector<Scalar>::Zero(integrand.getDOFs(polytope));
         for (size_t i = 0; i < qf.getSize(); i++)
         {
           const Geometry::Point p(polytope, trans, std::cref(qf.getPoint(i)));

@@ -21,7 +21,7 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD for SparseLU
    */
-  SparseLU() -> SparseLU<Math::SparseMatrix, Math::Vector>;
+  SparseLU() -> SparseLU<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 
   /**
    * @defgroup SparseLUSpecializations SparseLU Template Specializations
@@ -32,18 +32,18 @@ namespace Rodin::Solver
   /**
    * @ingroup SparseLUSpecializations
    * @brief Sparse supernodal LU factorization for general matrices for use
-   * with Math::SparseMatrix and Math::Vector.
+   * with Math::SparseMatrix<Scalar> and Math::Vector<Scalar>.
    */
   template <>
-  class SparseLU<Math::SparseMatrix, Math::Vector> final
-    : public SolverBase<Math::SparseMatrix, Math::Vector>
+  class SparseLU<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::SparseMatrix;
+      using OperatorType = Math::SparseMatrix<Scalar>;
 
       /// Type of vector
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Scalar>;
 
       /**
        * @brief Constructs the SparseLU object with default parameters.
@@ -66,7 +66,7 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::SparseLU<Math::SparseMatrix> m_solver;
+      Eigen::SparseLU<Math::SparseMatrix<Scalar>> m_solver;
   };
 
 }

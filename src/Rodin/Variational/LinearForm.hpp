@@ -19,7 +19,7 @@ namespace Rodin::Variational
 {
    template <class FES>
    void
-   LinearForm<FES, Math::Vector>::assemble()
+   LinearForm<FES, Math::Vector<Scalar>>::assemble()
    {
       const auto& fes = getTestFunction().getFiniteElementSpace();
       m_vector = getAssembly().execute({ fes, getIntegrators() });

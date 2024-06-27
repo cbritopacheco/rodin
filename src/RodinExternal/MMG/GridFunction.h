@@ -22,7 +22,7 @@ namespace Rodin::External::MMG
   using ScalarGridFunction = GridFunction<Scalar>;
 
   /// Type alias for a GridFunction with vector range.
-  using VectorGridFunction = GridFunction<Math::Vector>;
+  using VectorGridFunction = GridFunction<Math::Vector<Scalar>>;
 }
 
 #endif

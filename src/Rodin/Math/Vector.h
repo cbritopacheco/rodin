@@ -18,31 +18,41 @@ namespace Rodin::Math
   /**
    * @brief Dense vector type.
    */
-  using Vector = Eigen::VectorX<Scalar>;
+  template <class NumberType>
+  using Vector = Eigen::VectorX<NumberType>;
 
+  using ComplexVector = Vector<Complex>;
+
+  template <class NumberType>
   using SpatialVector =
-    Eigen::Matrix<Scalar, Eigen::Dynamic, 1, 0, RODIN_MAXIMAL_SPACE_DIMENSION, 1>;
+    Eigen::Matrix<NumberType, Eigen::Dynamic, 1, 0, RODIN_MAXIMAL_SPACE_DIMENSION, 1>;
 
-  template <size_t Size>
-  using FixedSizeVector = Eigen::Vector<Scalar, Size>;
+  template <class NumberType, size_t Size>
+  using FixedSizeVector = Eigen::Vector<NumberType, Size>;
 
-  using Vector2 = FixedSizeVector<2>;
-  using Vector3 = FixedSizeVector<3>;
-  using Vector4 = FixedSizeVector<4>;
-  using Vector8 = FixedSizeVector<8>;
-  using Vector16 = FixedSizeVector<16>;
-  using Vector32 = FixedSizeVector<32>;
-  using Vector64 = FixedSizeVector<64>;
-  using Vector128 = FixedSizeVector<128>;
+  template <class NumberType>
+  using Vector2 = FixedSizeVector<NumberType, 2>;
 
-  using Vector2i = Eigen::Vector<Integer, 2>;
-  using Vector3i = Eigen::Vector<Integer, 3>;
-  using Vector4i = Eigen::Vector<Integer, 4>;
-  using Vector8i = Eigen::Vector<Integer, 8>;
-  using Vector16i = Eigen::Vector<Integer, 16>;
-  using Vector32i = Eigen::Vector<Integer, 32>;
-  using Vector64i = Eigen::Vector<Integer, 64>;
-  using Vector128i = Eigen::Vector<Integer, 128>;
+  template <class NumberType>
+  using Vector3 = FixedSizeVector<NumberType, 3>;
+
+  template <class NumberType>
+  using Vector4 = FixedSizeVector<NumberType, 4>;
+
+  template <class NumberType>
+  using Vector8 = FixedSizeVector<NumberType, 8>;
+
+  template <class NumberType>
+  using Vector16 = FixedSizeVector<NumberType, 16>;
+
+  template <class NumberType>
+  using Vector32 = FixedSizeVector<NumberType, 32>;
+
+  template <class NumberType>
+  using Vector64 = FixedSizeVector<NumberType, 64>;
+
+  template <class NumberType>
+  using Vector128 = FixedSizeVector<NumberType, 128>;
 }
 
 #endif

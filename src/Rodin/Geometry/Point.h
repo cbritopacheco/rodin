@@ -65,7 +65,7 @@ namespace Rodin::Geometry
       PointBase(
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          const Math::SpatialVector& pc);
+          const Math::SpatialVector<Scalar>& pc);
 
       explicit
       PointBase(
@@ -76,7 +76,7 @@ namespace Rodin::Geometry
       PointBase(
           Polytope&& polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          const Math::SpatialVector& pc);
+          const Math::SpatialVector<Scalar>& pc);
 
       explicit
       PointBase(
@@ -201,15 +201,15 @@ namespace Rodin::Geometry
         return m_trans.get();
       }
 
-      const Math::SpatialVector& getPhysicalCoordinates() const;
+      const Math::SpatialVector<Scalar>& getPhysicalCoordinates() const;
 
-      const Math::SpatialVector& getCoordinates(Coordinates coords = Coordinates::Physical) const;
+      const Math::SpatialVector<Scalar>& getCoordinates(Coordinates coords = Coordinates::Physical) const;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation at the
        * point.
        */
-      virtual const Math::SpatialMatrix& getJacobian() const;
+      virtual const Math::SpatialMatrix<Scalar>& getJacobian() const;
 
       Scalar getJacobianDeterminant() const;
 
@@ -217,7 +217,7 @@ namespace Rodin::Geometry
        * @brief Computes the inverse of the Jacobian matrix of the
        * transformation at the point.
        */
-      const Math::SpatialMatrix& getJacobianInverse() const;
+      const Math::SpatialMatrix<Scalar>& getJacobianInverse() const;
 
       /**
        * @brief Computes the distortion of space of the transformation at the
@@ -225,16 +225,16 @@ namespace Rodin::Geometry
        */
       Scalar getDistortion() const;
 
-      virtual const Math::SpatialVector& getReferenceCoordinates() const = 0;
+      virtual const Math::SpatialVector<Scalar>& getReferenceCoordinates() const = 0;
 
     private:
       PolytopeStorage m_polytopeStorage;
       std::variant<const Polytope, std::reference_wrapper<const Polytope>> m_polytope;
       std::reference_wrapper<const PolytopeTransformation> m_trans;
 
-      mutable Threads::Mutable<std::optional<const Math::SpatialVector>> m_pc;
-      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix>> m_jacobian;
-      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix>> m_jacobianInverse;
+      mutable Threads::Mutable<std::optional<const Math::SpatialVector<Scalar>>> m_pc;
+      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix<Scalar>>> m_jacobian;
+      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix<Scalar>>> m_jacobianInverse;
       mutable Threads::Mutable<std::optional<const Scalar>>              m_jacobianDeterminant;
       mutable Threads::Mutable<std::optional<const Scalar>>              m_distortion;
   };
@@ -272,8 +272,8 @@ namespace Rodin::Geometry
       explicit
       Point(
           std::reference_wrapper<const Polytope> polytope,
-          std::reference_wrapper<const Math::SpatialVector> rc,
-          const Math::SpatialVector& pc)
+          std::reference_wrapper<const Math::SpatialVector<Scalar>> rc,
+          const Math::SpatialVector<Scalar>& pc)
         : Point(polytope, std::cref(polytope.get().getTransformation()), rc, pc)
       {}
 
@@ -281,63 +281,63 @@ namespace Rodin::Geometry
       Point(
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector> rc,
-          const Math::SpatialVector& pc);
+          std::reference_wrapper<const Math::SpatialVector<Scalar>> rc,
+          const Math::SpatialVector<Scalar>& pc);
 
       explicit
       Point(
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector&& rc,
-          const Math::SpatialVector& pc);
+          Math::SpatialVector<Scalar>&& rc,
+          const Math::SpatialVector<Scalar>& pc);
 
       explicit
       Point(
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector> rc);
+          std::reference_wrapper<const Math::SpatialVector<Scalar>> rc);
 
       explicit
       Point(
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector&& rc);
+          Math::SpatialVector<Scalar>&& rc);
 
       explicit
       Point(
           Polytope&& polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector> rc,
-          const Math::SpatialVector& pc);
+          std::reference_wrapper<const Math::SpatialVector<Scalar>> rc,
+          const Math::SpatialVector<Scalar>& pc);
 
       explicit
       Point(
           Polytope&& polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector&& rc,
-          const Math::SpatialVector& pc);
+          Math::SpatialVector<Scalar>&& rc,
+          const Math::SpatialVector<Scalar>& pc);
 
       explicit
       Point(
           Polytope&& polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector> rc);
+          std::reference_wrapper<const Math::SpatialVector<Scalar>> rc);
 
       explicit
       Point(
           Polytope&& polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector&& rc);
+          Math::SpatialVector<Scalar>&& rc);
 
       Point(const Point& other);
 
       Point(Point&& other);
 
-      const Math::SpatialVector& getReferenceCoordinates() const override;
+      const Math::SpatialVector<Scalar>& getReferenceCoordinates() const override;
 
     private:
       const RCStorage m_rcStorage;
-      std::variant<const Math::SpatialVector, std::reference_wrapper<const Math::SpatialVector>> m_rc;
+      std::variant<const Math::SpatialVector<Scalar>, std::reference_wrapper<const Math::SpatialVector<Scalar>>> m_rc;
   };
 
   inline

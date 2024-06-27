@@ -15,8 +15,8 @@ namespace Rodin::Plot::Artist
         "Axes must be derived from BaseAxes");
     auto ax = std::make_unique<AxesT>(*this, std::forward<Args>(args)...);
     auto& frame = draw<Backend::Renderer::Drawables::Frame>(
-        Magnum::Math::Vector2<float>(ax->getBottomLeft()),
-        Magnum::Math::Vector2<float>(ax->getSize()));
+        Magnum::Math::Vector<Scalar>2<float>(ax->getBottomLeft()),
+        Magnum::Math::Vector<Scalar>2<float>(ax->getSize()));
     auto wrapper = AxesWrapper{std::move(ax), std::ref(frame)};
     m_axes.push_back(std::move(wrapper));
     return static_cast<AxesT&>(*(m_axes.back().axes));
@@ -27,8 +27,8 @@ namespace Rodin::Plot::Artist
   {
     auto size = getWindowSize();
     return addAxes<AxesT>(
-        Magnum::Math::Vector2<int>(0.1 * size.x(), 0.1 * size.y()),
-        Magnum::Math::Vector2<int>(0.8 * size.x(), 0.8 * size.y())
+        Magnum::Math::Vector<Scalar>2<int>(0.1 * size.x(), 0.1 * size.y()),
+        Magnum::Math::Vector<Scalar>2<int>(0.8 * size.x(), 0.8 * size.y())
       );
   }
 }

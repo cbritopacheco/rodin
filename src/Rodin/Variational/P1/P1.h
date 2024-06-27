@@ -32,9 +32,9 @@ namespace Rodin::FormLanguage
   };
 
   template <class ContextType, class MeshType>
-  struct Traits<Variational::P1<Math::Vector, ContextType, MeshType>>
+  struct Traits<Variational::P1<Math::Vector<Scalar>, ContextType, MeshType>>
   {
-    using RangeType = Math::Vector;
+    using RangeType = Math::Vector<Scalar>;
     using Context = ContextType;
     using Mesh = MeshType;
     using Element = Variational::VectorP1Element;
@@ -105,7 +105,7 @@ namespace Rodin::Variational
           Mapping(const Mapping&) = default;
 
           inline
-          auto operator()(const Math::SpatialVector& r) const
+          auto operator()(const Math::SpatialVector<Scalar>& r) const
           {
             const Geometry::Point p(m_polytope, m_trans.get(), r);
             return getFunction()(p);
@@ -290,11 +290,11 @@ namespace Rodin::Variational
    * @f]
    *
    * This class is vector valued, i.e. evaluations of the function are of
-   * Math::Vector type.
+   * Math::Vector<Scalar> type.
    */
   template <>
-  class P1<Math::Vector, Context::Sequential, Geometry::Mesh<Context::Sequential>> final
-    : public FiniteElementSpace<P1<Math::Vector, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+  class P1<Math::Vector<Scalar>, Context::Sequential, Geometry::Mesh<Context::Sequential>> final
+    : public FiniteElementSpace<P1<Math::Vector<Scalar>, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -302,7 +302,7 @@ namespace Rodin::Variational
 
     public:
       /// Range value type
-      using RangeType = Math::Vector;
+      using RangeType = Math::Vector<Scalar>;
 
       /// Context type
       using Context = Context::Sequential;
@@ -326,7 +326,7 @@ namespace Rodin::Variational
           Mapping(const Mapping&) = default;
 
           inline
-          auto operator()(const Math::SpatialVector& r) const
+          auto operator()(const Math::SpatialVector<Scalar>& r) const
           {
             const Geometry::Point p(m_polytope, m_trans.get(), r);
             return getFunction()(p);
@@ -462,11 +462,11 @@ namespace Rodin::Variational
   };
 
   template <class Context>
-  P1(const Geometry::Mesh<Context>&, size_t) -> P1<Math::Vector, Context, Geometry::Mesh<Context>>;
+  P1(const Geometry::Mesh<Context>&, size_t) -> P1<Math::Vector<Scalar>, Context, Geometry::Mesh<Context>>;
 
   /// Alias for a vector valued P1 finite element space
   template <class Context>
-  using VectorP1 = P1<Math::Vector, Context, Geometry::Mesh<Context>>;
+  using VectorP1 = P1<Math::Vector<Scalar>, Context, Geometry::Mesh<Context>>;
 
   namespace Internal
   {

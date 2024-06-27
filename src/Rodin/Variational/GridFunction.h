@@ -67,12 +67,12 @@ namespace Rodin::Variational
    * @section gridfunction-data-layout Data layout
    *
    * The data of the GridFunctionBase object can be accessed via a call to @ref
-   * getData(). The i-th column of the returned Math::Matrix object corresponds
+   * getData(). The i-th column of the returned Math::Matrix<Scalar> object corresponds
    * to the value of the grid function at the global i-th degree of freedom in
    * the finite element space. Furthermore, the following conditions are
    * satisfied:
    * ```
-   *  const Math::Matrix& data = gf.getData();
+   *  const Math::Matrix<Scalar>& data = gf.getData();
    *  assert(data.rows() == gf.getFiniteElementSpace().getVectorDimension());
    *  assert(data.cols() == gf.getFiniteElementSpace().getSize());
    * ```
@@ -92,7 +92,7 @@ namespace Rodin::Variational
       /// Range type of value
       using RangeType = typename FormLanguage::Traits<FES>::RangeType;
 
-      static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector>);
+      static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector<Scalar>>);
 
       GridFunctionBase(const FES& fes)
         : Parent(std::cref(*this)),
@@ -209,7 +209,7 @@ namespace Rodin::Variational
       inline
       Derived& normalize()
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector>,
+        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>,
             "GridFunction must be vector valued.");
         for (size_t i = 0; i < getSize(); i++)
           getData().col(i).normalize();
@@ -219,7 +219,7 @@ namespace Rodin::Variational
       inline
       Derived& stableNormalize()
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector>,
+        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>,
             "GridFunction must be vector valued.");
         for (size_t i = 0; i < getSize(); i++)
           getData().col(i).stableNormalize();
@@ -237,7 +237,7 @@ namespace Rodin::Variational
       constexpr
       auto x() const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
         assert(getFiniteElementSpace().getVectorDimension() >= 1);
         return Component(*this, 0);
       }
@@ -246,7 +246,7 @@ namespace Rodin::Variational
       constexpr
       auto y() const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
         assert(getFiniteElementSpace().getVectorDimension() >= 2);
         return Component(*this, 1);
       }
@@ -255,7 +255,7 @@ namespace Rodin::Variational
       constexpr
       auto z() const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
         assert(getFiniteElementSpace().getVectorDimension() >= 3);
         return Component(*this, 2);
       }
@@ -289,10 +289,10 @@ namespace Rodin::Variational
       }
 
       inline
-      Derived& operator=(const Math::Vector& v)
+      Derived& operator=(const Math::Vector<Scalar>& v)
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector>);
-        Math::Matrix& data = m_data;
+        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
+        Math::Matrix<Scalar>& data = m_data;
         assert(data.cols() >= 0);
         for (size_t i = 0; i < static_cast<size_t>(data.cols()); i++)
           data.col(i) = v;
@@ -307,7 +307,7 @@ namespace Rodin::Variational
           assert(getFiniteElementSpace().getVectorDimension() == 1);
           return project(ScalarFunction(fn));
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
         {
           return project(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
         }
@@ -561,9 +561,9 @@ namespace Rodin::Variational
           }
 #endif
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
         {
-          Math::Vector value;
+          Math::Vector<Scalar> value;
           for (auto it = mesh.getCell(); !it.end(); ++it)
           {
             const auto& polytope = *it;
@@ -645,7 +645,7 @@ namespace Rodin::Variational
                 m_data(global) =
                   (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1.0);
               }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+              else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
               {
                 m_data.col(global) =
                   (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1.0);
@@ -715,7 +715,7 @@ namespace Rodin::Variational
                 m_data(global) =
                   (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1.0);
               }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+              else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
               {
                 m_data.col(global) =
                   (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1.0);
@@ -782,7 +782,7 @@ namespace Rodin::Variational
                 assert(m_data.rows() == 1);
                 m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
               }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+              else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
               {
                 m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
               }
@@ -892,7 +892,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      Math::Matrix& getData()
+      Math::Matrix<Scalar>& getData()
       {
         return m_data;
       }
@@ -902,21 +902,21 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      const Math::Matrix& getData() const
+      const Math::Matrix<Scalar>& getData() const
       {
         return m_data;
       }
 
       inline
       constexpr
-      std::optional<Math::Vector>& getWeights()
+      std::optional<Math::Vector<Scalar>>& getWeights()
       {
         return m_weights;
       }
 
       inline
       constexpr
-      const std::optional<Math::Vector>& getWeights() const
+      const std::optional<Math::Vector<Scalar>>& getWeights() const
       {
         return m_weights;
       }
@@ -980,7 +980,7 @@ namespace Rodin::Variational
           assert(global < static_cast<size_t>(m_data.size()));
           m_data.coeffRef(global) = std::forward<Value>(v);
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
         {
           assert(m_data.cols() >= 0);
           assert(global < static_cast<size_t>(m_data.cols()));
@@ -1017,7 +1017,7 @@ namespace Rodin::Variational
           assert(global < static_cast<size_t>(m_data.size()));
           return m_data.coeff(global);
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
         {
           assert(m_data.cols() >= 0);
           assert(global < static_cast<size_t>(m_data.cols()));
@@ -1039,7 +1039,7 @@ namespace Rodin::Variational
         RangeType out;
         if constexpr (std::is_same_v<RangeType, Scalar>)
           out = NAN;
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
           out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
@@ -1082,9 +1082,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector& out, const Geometry::Point& p) const
+      void getValue(Math::Vector<Scalar>& out, const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
         out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
@@ -1128,9 +1128,9 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      void interpolate(Math::Vector& res, const Geometry::Point& p) const
+      void interpolate(Math::Vector<Scalar>& res, const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
         static_cast<const Derived&>(*this).interpolate(res, p);
       }
 
@@ -1139,7 +1139,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      void getValue(Math::Matrix& res, const Geometry::Point& p) const = delete;
+      void getValue(Math::Matrix<Scalar>& res, const Geometry::Point& p) const = delete;
 
     private:
       void interpolate(Scalar& res, const Geometry::Point& p) const
@@ -1148,8 +1148,8 @@ namespace Rodin::Variational
       }
 
       std::reference_wrapper<const FES> m_fes;
-      Math::Matrix m_data;
-      std::optional<Math::Vector> m_weights;
+      Math::Matrix<Scalar> m_data;
+      std::optional<Math::Vector<Scalar>> m_weights;
       mutable Threads::Mutex m_mutex;
   };
 }

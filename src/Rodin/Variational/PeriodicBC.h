@@ -34,7 +34,7 @@ namespace Rodin::Variational
   class PeriodicBCBase : public FormLanguage::Base
   {
     public:
-      using DOFs = IndexMap<std::pair<IndexArray, Math::Vector>>;
+      using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
 
       /**
        * @brief Assembles the Peridodic boundary condition.
@@ -119,7 +119,7 @@ namespace Rodin::Variational
           size_t i = 0;
           for (const auto& child : v)
             dofs.coeffRef(i++) = child;
-          Math::Vector coeffs(v.size());
+          Math::Vector<Scalar> coeffs(v.size());
           coeffs.array() = 1 / Scalar(v.size());
           m_dofs.emplace(k, std::pair{ std::move(dofs), std::move(coeffs) });
         }

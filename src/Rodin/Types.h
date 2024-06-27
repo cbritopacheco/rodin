@@ -3,6 +3,7 @@
 
 #include <stack>
 #include <cstddef>
+#include <complex>
 
 #include <boost/unordered_map.hpp>
 #include <boost/container/map.hpp>
@@ -30,11 +31,14 @@ namespace Rodin
   /// Standard type for representing double precision (64 bit) floating-point values.
   using Double = double;
 
+  /// Standard type for representing indices.
+  using Index = std::size_t;
+
   /// Standard type for representing scalar values.
   using Scalar = Double;
 
-  /// Standard type for representing indices.
-  using Index = std::size_t;
+  /// Standard type for representing complex values.
+  using Complex = std::complex<Scalar>;
 
   template <class T>
   using List = boost::container::list<T>;

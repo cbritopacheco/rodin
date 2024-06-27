@@ -106,11 +106,11 @@ namespace Rodin::Variational
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
           return lhs * rhs;
-        } else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+        } else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
         {
           return lhs.dot(rhs);
         }
-        else if constexpr (std::is_same_v<RHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<RHSRange, Math::Matrix<Scalar>>)
         {
           return (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
         }
@@ -227,12 +227,12 @@ namespace Rodin::Variational
         {
           return lhs * rhs;
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
         {
           return TensorBasis(rhs.getDOFs(),
               [&](size_t i){ return lhs.dot(rhs(i)); });
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
         {
           return TensorBasis(rhs.getDOFs(),
               [&](size_t i){ return (lhs(i).array() * rhs(i).array()).rowwise().sum().colwise().sum().value(); });
@@ -337,13 +337,13 @@ namespace Rodin::Variational
             for (size_t j = 0; j < trial.getDOFs(); j++)
               m_matrix(i, j) = test(i) * trial(j);
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
         {
           for (size_t i = 0; i < test.getDOFs(); i++)
             for (size_t j = 0; j < trial.getDOFs(); j++)
               m_matrix(i, j) = test(i).dot(trial(j));
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
         {
           for (size_t i = 0; i < test.getDOFs(); i++)
             for (size_t j = 0; j < trial.getDOFs(); j++)
@@ -356,7 +356,7 @@ namespace Rodin::Variational
         }
       }
 
-      const Math::Matrix& getMatrix() const
+      const Math::Matrix<Scalar>& getMatrix() const
       {
         return m_matrix;
       }
@@ -370,7 +370,7 @@ namespace Rodin::Variational
       std::unique_ptr<LHS> m_trial;
       std::unique_ptr<RHS> m_test;
 
-      Math::Matrix m_matrix;
+      Math::Matrix<Scalar> m_matrix;
   };
 
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>

@@ -311,7 +311,7 @@ namespace Rodin::Geometry
         return getCoordinates()(i);
       }
 
-      Eigen::Map<const Math::SpatialVector> getCoordinates() const;
+      Eigen::Map<const Math::SpatialVector<Scalar>> getCoordinates() const;
 
       inline
       constexpr

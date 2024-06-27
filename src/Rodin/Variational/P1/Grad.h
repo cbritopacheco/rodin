@@ -76,14 +76,14 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::Vector& out, const Geometry::Point& p) const
+      void interpolate(Math::Vector<Scalar>& out, const Geometry::Point& p) const
       {
-        Math::SpatialVector tmp;
+        Math::SpatialVector<Scalar> tmp;
         interpolate(tmp, p);
         out = std::move(tmp);
       }
 
-      void interpolate(Math::SpatialVector& out, const Geometry::Point& p) const
+      void interpolate(Math::SpatialVector<Scalar>& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -99,7 +99,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+            const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -124,7 +124,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+                  const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;
@@ -143,8 +143,8 @@ namespace Rodin::Variational
           const auto& fes = gf.getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialVector grad(d);
-          Math::SpatialVector res(d);
+          Math::SpatialVector<Scalar> grad(d);
+          Math::SpatialVector<Scalar> res(d);
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
@@ -252,13 +252,13 @@ namespace Rodin::Variational
       }
 
     private:
-      thread_local static std::vector<Math::SpatialVector> s_gradient;
+      thread_local static std::vector<Math::SpatialVector<Scalar>> s_gradient;
       std::reference_wrapper<const Operand> m_u;
   };
 
   template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType SpaceType>
   thread_local
-  std::vector<Math::SpatialVector>
+  std::vector<Math::SpatialVector<Scalar>>
   Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, SpaceType>>::s_gradient;
 
   template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>

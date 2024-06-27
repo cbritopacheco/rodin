@@ -17,9 +17,9 @@ namespace Rodin::FormLanguage
   template <class NestedDerived, class ... Ps, Variational::ShapeFunctionSpaceType SpaceType>
   struct Traits<
     Variational::Div<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector, Ps...>, SpaceType>>>
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Scalar>, Ps...>, SpaceType>>>
   {
-    using FES = Variational::P1<Math::Vector, Ps...>;
+    using FES = Variational::P1<Math::Vector<Scalar>, Ps...>;
     static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
   };
 }
@@ -31,11 +31,11 @@ namespace Rodin::Variational
    * @brief Divient of a P1 GridFunction
    */
   template <class Context, class Mesh>
-  class Div<GridFunction<P1<Math::Vector, Context, Mesh>>> final
-    : public DivBase<Div<GridFunction<P1<Math::Vector, Context, Mesh>>>, GridFunction<P1<Math::Vector, Context, Mesh>>>
+  class Div<GridFunction<P1<Math::Vector<Scalar>, Context, Mesh>>> final
+    : public DivBase<Div<GridFunction<P1<Math::Vector<Scalar>, Context, Mesh>>>, GridFunction<P1<Math::Vector<Scalar>, Context, Mesh>>>
   {
     public:
-      using FES = P1<Math::Vector, Context, Mesh>;
+      using FES = P1<Math::Vector<Scalar>, Context, Mesh>;
 
       /// Operand type
       using Operand = GridFunction<FES>;
@@ -66,9 +66,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::Vector& out, const Geometry::Point& p) const
+      void interpolate(Math::Vector<Scalar>& out, const Geometry::Point& p) const
       {
-        Math::SpatialVector tmp;
+        Math::SpatialVector<Scalar> tmp;
         interpolate(tmp, p);
         out = std::move(tmp);
       }
@@ -89,7 +89,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+            const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -114,7 +114,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+                  const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;
@@ -134,7 +134,7 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialMatrix jacobian(vdim, d);
+          Math::SpatialMatrix<Scalar> jacobian(vdim, d);
           out = 0;
           for (size_t local = 0; local < fe.getCount(); local++)
           {
@@ -161,11 +161,11 @@ namespace Rodin::Variational
    * @ingroup DivSpecializations
    */
   template <class NestedDerived, ShapeFunctionSpaceType SpaceType, class ... Ts>
-  class Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, SpaceType>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, SpaceType>>>
+  class Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Ts...>, SpaceType>> final
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Ts...>, SpaceType>>>
   {
     public:
-      using FES = P1<Math::Vector, Ts...>;
+      using FES = P1<Math::Vector<Scalar>, Ts...>;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       using Operand = ShapeFunction<NestedDerived, FES, Space>;
@@ -225,7 +225,7 @@ namespace Rodin::Variational
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        const Math::Vector<Scalar>& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
         return TensorBasis(fe.getCount(),
             [&](size_t local) -> Scalar
             { return (fe.getJacobian(local)(rc) * p.getJacobianInverse()).trace(); });
@@ -248,8 +248,8 @@ namespace Rodin::Variational
   };
 
   template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  Div(const ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, Space>&)
-    -> Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, Space>>;
+  Div(const ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Ts...>, Space>&)
+    -> Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Ts...>, Space>>;
 }
 
 #endif

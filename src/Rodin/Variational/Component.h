@@ -81,7 +81,7 @@ namespace Rodin::Variational
       auto getTensorBasis(const Geometry::Point& p) const
       {
         using RangeType = typename FES::RangeType;
-        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fes = this->getFiniteElementSpace();
@@ -282,7 +282,7 @@ namespace Rodin::Variational
       inline
       Scalar getValue(const Geometry::Point& p) const
       {
-        Math::Vector v;
+        Math::Vector<Scalar> v;
         m_u.get().getValue(v, p);
         return v.coeff(m_idx);
       }

@@ -139,9 +139,9 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
     {
       const Scalar x = gen();
       const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
-      const Point p(polytope, trans, Math::Vector{{x, y}});
+      const Math::Vector<Scalar> rc{{x, y}};
+      const Math::Vector<Scalar> pc = trans.transform(rc);
+      const Point p(polytope, trans, Math::Vector<Scalar>{{x, y}});
       EXPECT_NEAR(gf1.getValue(p), pc.x() + pc.y(), RODIN_FUZZY_CONSTANT);
     }
   }
@@ -156,8 +156,8 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
     {
       const Scalar x = gen();
       const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Math::Vector<Scalar> rc{{x, y}};
+      const Math::Vector<Scalar> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
       EXPECT_NEAR(gf1.getValue(p), pc.x() + pc.y(), RODIN_FUZZY_CONSTANT);
     }
@@ -177,8 +177,8 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
     {
       const Scalar x = gen();
       const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Math::Vector<Scalar> rc{{x, y}};
+      const Math::Vector<Scalar> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
       EXPECT_NEAR(gf2.getValue(p), 5 * pc.x() + 100 * pc.y(), RODIN_FUZZY_CONSTANT);
     }
@@ -198,8 +198,8 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
     {
       const Scalar x = gen();
       const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Math::Vector<Scalar> rc{{x, y}};
+      const Math::Vector<Scalar> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
       EXPECT_NEAR(gf3.getValue(p), pc.x() - pc.y(), RODIN_FUZZY_CONSTANT);
     }
@@ -219,8 +219,8 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
     {
       const Scalar x = gen();
       const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Math::Vector<Scalar> rc{{x, y}};
+      const Math::Vector<Scalar> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
       EXPECT_NEAR(gf4.getValue(p), 666 * pc.x() - 999 * pc.y(), RODIN_FUZZY_CONSTANT);
     }
@@ -295,10 +295,10 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
     {
       const Scalar x = gen();
       const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Math::Vector<Scalar> rc{{x, y}};
+      const Math::Vector<Scalar> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
-      EXPECT_NEAR((gf1.getValue(p) - Math::Vector{{pc.x(), pc.y()}}).norm(), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR((gf1.getValue(p) - Math::Vector<Scalar>{{pc.x(), pc.y()}}).norm(), 0, RODIN_FUZZY_CONSTANT);
       break;
     }
   }
@@ -323,10 +323,10 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
     {
       const Scalar x = gen();
       const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Math::Vector<Scalar> rc{{x, y}};
+      const Math::Vector<Scalar> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
-      EXPECT_NEAR((gf2.getValue(p) - Math::Vector{{pc.y(), pc.x()}}).norm(), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR((gf2.getValue(p) - Math::Vector<Scalar>{{pc.y(), pc.x()}}).norm(), 0, RODIN_FUZZY_CONSTANT);
     }
   }
 
@@ -347,10 +347,10 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
     {
       const Scalar x = gen();
       const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Math::Vector<Scalar> rc{{x, y}};
+      const Math::Vector<Scalar> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
-      EXPECT_NEAR((gf3.getValue(p) - Math::Vector{{pc.x() + pc.y(), 0}}).norm(), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR((gf3.getValue(p) - Math::Vector<Scalar>{{pc.x() + pc.y(), 0}}).norm(), 0, RODIN_FUZZY_CONSTANT);
     }
   }
 
@@ -374,10 +374,10 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
     {
       const Scalar x = gen();
       const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Math::Vector<Scalar> rc{{x, y}};
+      const Math::Vector<Scalar> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
-      const Math::Vector actual{{999 * p.x() - 100 * p.y(), -5 * p.x() + 666 * p.y()}};
+      const Math::Vector<Scalar> actual{{999 * p.x() - 100 * p.y(), -5 * p.x() + 666 * p.y()}};
       EXPECT_NEAR((gf4.getValue(p) - actual).norm(), 0, RODIN_FUZZY_CONSTANT);
     }
   }
