@@ -22,7 +22,7 @@ namespace Rodin::Test::Random
           m_gen(0, 1)
       {}
 
-      Math::Vector<Scalar>2 operator()()
+      Math::Vector2<Scalar> operator()()
       {
         auto x = m_gen();
         auto y = m_gen();
@@ -30,15 +30,15 @@ namespace Rodin::Test::Random
         auto t = 0.5 * (x + y - q);
         auto u = 1 - 0.5 * (q + x + y);
         return
-          Math::Vector<Scalar>2{
+          Math::Vector2<Scalar>{
             { q * m_a.x() + t * m_b.x() + u * m_c.x(),
               q * m_b.y() + t * m_b.y() + u * m_c.y() } };
       }
 
     private:
-      Math::Vector<Scalar>2 m_a;
-      Math::Vector<Scalar>2 m_b;
-      Math::Vector<Scalar>2 m_c;
+      Math::Vector2<Scalar> m_a;
+      Math::Vector2<Scalar> m_b;
+      Math::Vector2<Scalar> m_c;
       RandomScalar m_gen;
   };
 }
