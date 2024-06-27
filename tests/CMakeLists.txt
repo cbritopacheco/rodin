@@ -19,7 +19,9 @@ rodin_add_compile_options(
   -Wno-error=unused-but-set-variable
   -Wno-error=cast-function-type
   -Wno-error=deprecated-declarations
-  -Wno-error=zero-as-null-pointer-constant)
+  -Wno-error=zero-as-null-pointer-constant
+  -Wno-error=deprecated-anon-enum-enum-conversion
+  )
 
 if (RODIN_BUILD_UNIT_TESTS)
   add_subdirectory(unit)
