@@ -16,7 +16,7 @@ namespace Rodin::Math::Kernels
 {
   inline
   static void add(
-      Math::Matrix& out, const Math::Matrix& in,
+      Matrix<Scalar>& out, const Matrix<Scalar>& in,
       const IndexArray& rows, const IndexArray& cols)
   {
     assert(rows.size() >= 0);
@@ -27,7 +27,7 @@ namespace Rodin::Math::Kernels
   }
 
   inline
-  static void add(Math::Vector& out, const Math::Vector& in, const IndexArray& s)
+  static void add(Vector<Scalar>& out, const Vector<Scalar>& in, const IndexArray& s)
   {
     assert(in.size() == s.size());
     out(s).noalias() += in;
@@ -35,7 +35,7 @@ namespace Rodin::Math::Kernels
 
   inline
   static void add(
-      std::vector<Eigen::Triplet<Scalar>>& out, const Math::Matrix& in,
+      std::vector<Eigen::Triplet<Scalar>>& out, const Math::Matrix<Scalar>& in,
       const IndexArray& rows, const IndexArray& cols)
   {
     assert(rows.size() >= 0);
@@ -54,18 +54,18 @@ namespace Rodin::Math::Kernels
   }
 
   inline
-  static void eliminate(SparseMatrix& stiffness, Vector& mass,
+  static void eliminate(SparseMatrix<Scalar>& stiffness, Vector<Scalar>& mass,
       const IndexMap<Scalar>& dofs, size_t offset = 0)
   {
     Scalar* const valuePtr = stiffness.valuePtr();
-    Math::SparseMatrix::StorageIndex* const outerPtr = stiffness.outerIndexPtr();
-    Math::SparseMatrix::StorageIndex* const innerPtr = stiffness.innerIndexPtr();
+    SparseMatrix<Scalar>::StorageIndex* const outerPtr = stiffness.outerIndexPtr();
+    SparseMatrix<Scalar>::StorageIndex* const innerPtr = stiffness.innerIndexPtr();
     // Move essential degrees of freedom in the LHS to the RHS
     for (const auto& kv : dofs)
     {
       const Index& global = kv.first + offset;
       const auto& dof = kv.second;
-      for (Math::SparseMatrix::InnerIterator it(stiffness, global); it; ++it)
+      for (SparseMatrix<Scalar>::InnerIterator it(stiffness, global); it; ++it)
          mass.coeffRef(it.row()) -= it.value() * dof;
     }
     for (const auto& [global, dof] : dofs)
@@ -96,7 +96,7 @@ namespace Rodin::Math::Kernels
   }
 
   inline
-  static void replace(const Math::Vector& row, SparseMatrix& stiffness, Vector& mass,
+  static void replace(const Vector<Scalar>& row, SparseMatrix<Scalar>& stiffness, Vector<Scalar>& mass,
       const IndexMap<Scalar>& dofs, size_t offset = 0)
   {
     for (const auto& kv : dofs)
@@ -104,7 +104,8 @@ namespace Rodin::Math::Kernels
       const Index& global = kv.first + offset;
       const auto& dof = kv.second;
       mass.coeffRef(global) = dof;
-      for (size_t i = 0; i < row.size(); i++)
+      assert(row.size() >= 0);
+      for (size_t i = 0; i < static_cast<size_t>(row.size()); i++)
         stiffness.insert(global, i) = row(i);
     }
   }

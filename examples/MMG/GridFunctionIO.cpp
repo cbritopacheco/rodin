@@ -22,7 +22,7 @@ int main(int, char**)
 
   P1 fes(mesh, 2);
   GridFunction gf(fes);
-  gf = [](const Geometry::Point& p) { return Math::Vector{{p.x(), p.y()}}; };
+  gf = [](const Geometry::Point& p) { return Math::Vector<Scalar>{{p.x(), p.y()}}; };
 
   gf.save("MMG.medit.sol", IO::FileFormat::MEDIT);
   mesh.save("MMG.medit.mesh", IO::FileFormat::MEDIT);

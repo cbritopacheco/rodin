@@ -125,7 +125,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Scalar>& res, const Geometry::Point& p) const
       {
         static_assert(FormLanguage::IsVectorRange<LHSRange>::Value);
         getLHS().getValue(res, p);
@@ -134,7 +134,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix& res, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Scalar>& res, const Geometry::Point& p) const
       {
         static_assert(FormLanguage::IsMatrixRange<LHSRange>::Value);
         getLHS().getValue(res, p);

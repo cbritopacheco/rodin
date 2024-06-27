@@ -100,21 +100,21 @@ namespace Rodin::Variational
 
   /**
    * @ingroup ProblemSpecializations
-   * @brief General class to assemble linear systems with `Math::SparseMatrix`
-   * and `Math::Vector` types in a serial context.
+   * @brief General class to assemble linear systems with `Math::SparseMatrix<Scalar>`
+   * and `Math::Vector<Scalar>` types in a serial context.
    */
   template <class TrialFES, class TestFES>
-  class Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
-    : public ProblemBase<Math::SparseMatrix, Math::Vector>
+  class Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+    : public ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   {
       static_assert(std::is_same_v<typename TrialFES::Context, Context::Sequential>);
       static_assert(std::is_same_v<typename TestFES::Context, Context::Sequential>);
 
     public:
       using Context = Context::Sequential;
-      using OperatorType = Math::SparseMatrix;
-      using VectorType = Math::Vector;
-      using Parent = ProblemBase<Math::SparseMatrix, Math::Vector>;
+      using OperatorType = Math::SparseMatrix<Scalar>;
+      using VectorType = Math::Vector<Scalar>;
+      using Parent = ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 
       /**
        * @brief Constructs an empty problem involving the trial function @f$ u @f$
@@ -245,13 +245,13 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> Problem<TrialFES, TestFES, typename TrialFES::Context, Math::SparseMatrix, Math::Vector>;
+    -> Problem<TrialFES, TestFES, typename TrialFES::Context, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 
   template <class U1, class U2, class ... Us>
   class Problem<
       Tuple<U1, U2, Us...>,
-      Context::Sequential, Math::SparseMatrix, Math::Vector>
-    : public ProblemBase<Math::SparseMatrix, Math::Vector>
+      Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+    : public ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   {
 
     template <class T>
@@ -264,9 +264,9 @@ namespace Rodin::Variational
 
     public:
       using Context = Context::Sequential;
-      using OperatorType = Math::SparseMatrix;
-      using VectorType = Math::Vector;
-      using Parent = ProblemBase<Math::SparseMatrix, Math::Vector>;
+      using OperatorType = Math::SparseMatrix<Scalar>;
+      using VectorType = Math::Vector<Scalar>;
+      using Parent = ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 
     private:
       template <class T>
@@ -415,7 +415,7 @@ namespace Rodin::Variational
   Problem(U1& u1, U2& u2, Us&... us)
     -> Problem<
         Tuple<U1, U2, Us...>,
-        Context::Sequential, Math::SparseMatrix, Math::Vector>;
+        Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #include "Problem.hpp"

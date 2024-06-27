@@ -19,7 +19,7 @@ const Scalar lambda = (E * nu) / ((1.0 + nu) * (1.0 - 2 * nu));
 const Scalar mu = E / (1.0 + nu);
 
 inline
-void K(Math::Matrix& res, const Point& x, const Point& y)
+void K(Math::Matrix<Scalar>& res, const Point& x, const Point& y)
 {
   const auto norm = (x - y).norm();
   res.resize(3, 3);
@@ -70,7 +70,7 @@ int main(int, char**)
   // file.close();
 
   std::cout << "resolution\n";
-  Solver::CG<Math::Matrix, Math::Vector> cg;
+  Solver::CG<Math::Matrix<Scalar>, Math::Vector<Scalar>> cg;
   eq.solve(cg);
 
   u.getSolution().save("u.gf");

@@ -37,7 +37,7 @@ static constexpr Scalar tgv = std::numeric_limits<float>::max();
 static const Scalar alpha = 4;
 
 using ScalarFES = P1<Scalar, Context::Sequential>;
-using VectorFES = P1<Math::Vector, Context::Sequential>;
+using VectorFES = P1<Math::Vector<Scalar>, Context::Sequential>;
 using ScalarGridFunction = GridFunction<ScalarFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
@@ -66,7 +66,7 @@ int main(int, char**)
   phi2.load("Phi_2.gf");
   phi3.load("Phi_3.gf");
 
-  Math::Matrix aniso(3, 3);
+  Math::Matrix<Scalar> aniso(3, 3);
   {
     P1 h1d1s(D1);
     GridFunction integ(h1d1s);

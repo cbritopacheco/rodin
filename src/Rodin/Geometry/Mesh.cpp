@@ -255,7 +255,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>&
-  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, const Math::SpatialVector& coords)
+  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, const Math::SpatialVector<Scalar>& coords)
   {
     m_vertices.col(idx) = coords;
     return *this;
@@ -268,7 +268,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Eigen::Map<const Math::SpatialVector> Mesh<Context::Sequential>::getVertexCoordinates(Index idx) const
+  Eigen::Map<const Math::SpatialVector<Scalar>> Mesh<Context::Sequential>::getVertexCoordinates(Index idx) const
   {
     const auto size = static_cast<Eigen::Index>(getSpaceDimension());
     return { getVertices().data() + getSpaceDimension() * idx, size };

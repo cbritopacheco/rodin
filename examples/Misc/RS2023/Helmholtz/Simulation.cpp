@@ -23,7 +23,7 @@ static constexpr Attribute dQ = 2; // Attribute of box boundary
 static constexpr Attribute dCurrent = 4; // Attribute of box boundary
 static constexpr Attribute dGround = 5; // Attribute of box boundary
 
-static const Math::Vector x0{{0.5, 0.5}}; // Center of domain
+static const Math::Vector<Scalar> x0{{0.5, 0.5}}; // Center of domain
 
 static constexpr Scalar pi = Math::Constants::pi();
 
@@ -64,14 +64,14 @@ void run(int i, const std::vector<Data>& grid);
 int main(int, char**)
 {
   // Define evaluation grid
-  Math::Vector m_r = Math::Vector::LinSpaced(161, 0, 202);
-  Math::Vector epsilon_r = Math::Vector::LinSpaced(50, hmax, 0.2);
-  // Math::Vector waveNumber_r = Math::Vector::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
-  // Math::Vector conductivity_r{{ 1e-12, 0.5, 1.0, 2.0, 1e12 }};
-  Math::Vector waveNumber_r = Math::Vector::LinSpaced(211, 0, 210);
-  // Math::Vector waveNumber_r{{ 1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 20 }};
-  Math::Vector conductivity_r{{ 2.0 }};
-  Math::Vector angle_r{{ M_PI / 4 }};
+  Math::Vector<Scalar> m_r = Math::Vector<Scalar>::LinSpaced(161, 0, 202);
+  Math::Vector<Scalar> epsilon_r = Math::Vector<Scalar>::LinSpaced(50, hmax, 0.2);
+  // Math::Vector<Scalar> waveNumber_r = Math::Vector<Scalar>::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
+  // Math::Vector<Scalar> conductivity_r{{ 1e-12, 0.5, 1.0, 2.0, 1e12 }};
+  Math::Vector<Scalar> waveNumber_r = Math::Vector<Scalar>::LinSpaced(211, 0, 210);
+  // Math::Vector<Scalar> waveNumber_r{{ 1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 20 }};
+  Math::Vector<Scalar> conductivity_r{{ 2.0 }};
+  Math::Vector<Scalar> angle_r{{ M_PI / 4 }};
 
   std::vector<Data> grid;
   grid.reserve(epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());

@@ -64,7 +64,7 @@ namespace Rodin::Variational
         const Scalar mu = getMu().getValue(p);
         const Scalar lambda = getLambda().getValue(p);
         auto& res = getMatrix();
-        res = Math::Matrix::Zero(dofs, dofs);
+        res = Math::Matrix<Scalar>::Zero(dofs, dofs);
         m_rjac.resize(dofs);
         m_pjac.resize(dofs);
         m_psym.resize(dofs);
@@ -147,10 +147,10 @@ namespace Rodin::Variational
       std::unique_ptr<Mu> m_mu;
       std::reference_wrapper<const FES> m_fes;
 
-      std::vector<Math::SpatialMatrix> m_rjac;
-      std::vector<Math::SpatialMatrix> m_pjac;
-      std::vector<Math::SpatialMatrix> m_psym;
-      Math::Vector m_pdiv;
+      std::vector<Math::SpatialMatrix<Scalar>> m_rjac;
+      std::vector<Math::SpatialMatrix<Scalar>> m_pjac;
+      std::vector<Math::SpatialMatrix<Scalar>> m_psym;
+      Math::Vector<Scalar> m_pdiv;
   };
 }
 #endif

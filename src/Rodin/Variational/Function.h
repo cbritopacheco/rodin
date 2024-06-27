@@ -172,11 +172,11 @@ namespace Rodin::Variational
         {
           return RangeType::Scalar;
         }
-        else if constexpr (std::is_same_v<R, Math::Vector>)
+        else if constexpr (std::is_same_v<R, Math::Vector<Scalar>>)
         {
           return RangeType::Vector;
         }
-        else if constexpr (std::is_same_v<R, Math::Matrix>)
+        else if constexpr (std::is_same_v<R, Math::Matrix<Scalar>>)
         {
           return RangeType::Matrix;
         }
@@ -200,9 +200,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Scalar>& res, const Geometry::Point& p) const
       {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector&, const Geometry::Point&>::Value)
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector<Scalar>&, const Geometry::Point&>::Value)
         {
           return static_cast<const Derived&>(*this).getValue(res, p);
         }
@@ -214,9 +214,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix& res, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Scalar>& res, const Geometry::Point& p) const
       {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix&, const Geometry::Point&>::Value)
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix<Scalar>&, const Geometry::Point&>::Value)
         {
           return static_cast<const Derived&>(*this).getValue(res, p);
         }
@@ -239,13 +239,13 @@ namespace Rodin::Variational
       }
 
       inline
-      void operator()(Math::Vector& res, const Geometry::Point& p) const
+      void operator()(Math::Vector<Scalar>& res, const Geometry::Point& p) const
       {
         return getValue(res, p);
       }
 
       inline
-      void operator()(Math::Matrix& res, const Geometry::Point& p) const
+      void operator()(Math::Matrix<Scalar>& res, const Geometry::Point& p) const
       {
         return getValue(res, p);
       }

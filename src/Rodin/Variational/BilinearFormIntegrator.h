@@ -99,7 +99,7 @@ namespace Rodin::Variational
       }
 
       inline
-      const Math::Matrix& getMatrix() const
+      const Math::Matrix<Scalar>& getMatrix() const
       {
         return m_matrix;
       }
@@ -110,7 +110,7 @@ namespace Rodin::Variational
        * polytope for the test (resp. trial) space.
        */
       inline
-      Math::Matrix& getMatrix()
+      Math::Matrix<Scalar>& getMatrix()
       {
         return m_matrix;
       }
@@ -121,7 +121,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<FormLanguage::Base> m_u;
       std::unique_ptr<FormLanguage::Base> m_v;
-      Math::Matrix m_matrix;
+      Math::Matrix<Scalar> m_matrix;
   };
 
   class LocalBilinearFormIntegratorBase

@@ -120,24 +120,24 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @brief Sequential assembly of the Math::SparseMatrix associated to a
+   * @brief Sequential assembly of the Math::SparseMatrix<Scalar> associated to a
    * BilinearFormBase object.
    */
   template <class TrialFES, class TestFES>
   class Sequential<
-    Math::SparseMatrix,
-    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>> final
+    Math::SparseMatrix<Scalar>,
+    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>> final
     : public AssemblyBase<
-        Math::SparseMatrix,
-        Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
+        Math::SparseMatrix<Scalar>,
+        Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
   {
     public:
       using Parent =
         AssemblyBase<
-          Math::SparseMatrix,
-          Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>;
+          Math::SparseMatrix<Scalar>,
+          Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>>;
       using InputType = typename Parent::InputType;
-      using OperatorType = Math::SparseMatrix;
+      using OperatorType = Math::SparseMatrix<Scalar>;
 
       Sequential() = default;
 
@@ -175,24 +175,24 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @brief Sequential assembly of the Math::SparseMatrix associated to a
+   * @brief Sequential assembly of the Math::SparseMatrix<Scalar> associated to a
    * BilinearFormBase object.
    */
   template <class TrialFES, class TestFES>
   class Sequential<
-    Math::Matrix,
-    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>> final
+    Math::Matrix<Scalar>,
+    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>> final
     : public AssemblyBase<
-        Math::Matrix,
-        Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
+        Math::Matrix<Scalar>,
+        Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>
   {
     public:
       using Parent =
         AssemblyBase<
-          Math::Matrix,
-          Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>;
+          Math::Matrix<Scalar>,
+          Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>;
       using InputType = typename Parent::InputType;
-      using OperatorType = Math::Matrix;
+      using OperatorType = Math::Matrix<Scalar>;
 
       Sequential() = default;
 
@@ -210,7 +210,7 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const InputType& input) const override
       {
-        Math::Matrix res(input.getTestFES().getSize(), input.getTrialFES().getSize());
+        Math::Matrix<Scalar> res(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
         const auto& mesh = input.getTrialFES().getMesh();
         for (auto& bfi : input.getLocalBFIs())
@@ -336,21 +336,21 @@ namespace Rodin::Assembly
 
   template <class ... TrialFES, class ... TestFES>
   class Sequential<
-    Math::SparseMatrix,
-    Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>...>> final
+    Math::SparseMatrix<Scalar>,
+    Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>...>> final
       : public AssemblyBase<
-          Math::SparseMatrix,
-          Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>...>>
+          Math::SparseMatrix<Scalar>,
+          Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>...>>
     {
       public:
         using Parent =
           AssemblyBase<
-            Math::SparseMatrix,
-            Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>...>>;
+            Math::SparseMatrix<Scalar>,
+            Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>...>>;
 
         using InputType = typename Parent::InputType;
 
-        using OperatorType = Math::SparseMatrix;
+        using OperatorType = Math::SparseMatrix<Scalar>;
 
         Sequential() = default;
 
@@ -382,21 +382,21 @@ namespace Rodin::Assembly
 
   template <class ... FES>
   class Sequential<
-    Math::Vector,
-    Tuple<Variational::LinearForm<FES, Math::Vector>...>> final
+    Math::Vector<Scalar>,
+    Tuple<Variational::LinearForm<FES, Math::Vector<Scalar>>...>> final
       : public AssemblyBase<
-          Math::Vector,
-          Tuple<Variational::LinearForm<FES, Math::Vector>...>>
+          Math::Vector<Scalar>,
+          Tuple<Variational::LinearForm<FES, Math::Vector<Scalar>>...>>
     {
       public:
         using Parent =
           AssemblyBase<
-            Math::Vector,
-            Tuple<Variational::LinearForm<FES, Math::Vector>...>>;
+            Math::Vector<Scalar>,
+            Tuple<Variational::LinearForm<FES, Math::Vector<Scalar>>...>>;
 
         using InputType = typename Parent::InputType;
 
-        using VectorType = Math::Vector;
+        using VectorType = Math::Vector<Scalar>;
 
         Sequential() = default;
 
@@ -411,7 +411,7 @@ namespace Rodin::Assembly
         VectorType execute(const InputType& input) const override
         {
           using AssemblyTuple =
-            Tuple<Sequential<Math::Vector, Variational::LinearForm<FES, Math::Vector>>...>;
+            Tuple<Sequential<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>...>;
 
           AssemblyTuple assembly;
 
@@ -421,7 +421,7 @@ namespace Rodin::Assembly
           auto vs = assembly.zip(t)
                             .map([](const auto& p) { return p.first().execute(p.second()); });
 
-          Math::Vector res = Math::Vector::Zero(input.getSize());
+          Math::Vector<Scalar> res = Math::Vector<Scalar>::Zero(input.getSize());
           const auto& offsets = input.getOffsets();
           vs.iapply(
               [&](size_t i, const auto& v)
@@ -439,17 +439,17 @@ namespace Rodin::Assembly
     };
 
   /**
-   * @brief %Sequential assembly of the Math::Vector associated to a LinearFormBase
+   * @brief %Sequential assembly of the Math::Vector<Scalar> associated to a LinearFormBase
    * object.
    */
   template <class FES>
-  class Sequential<Math::Vector, Variational::LinearForm<FES, Math::Vector>> final
-    : public AssemblyBase<Math::Vector, Variational::LinearForm<FES, Math::Vector>>
+  class Sequential<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>> final
+    : public AssemblyBase<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>
   {
     public:
-      using Parent = AssemblyBase<Math::Vector, Variational::LinearForm<FES, Math::Vector>>;
+      using Parent = AssemblyBase<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>;
       using InputType = typename Parent::InputType;
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Scalar>;
 
       Sequential() = default;
 

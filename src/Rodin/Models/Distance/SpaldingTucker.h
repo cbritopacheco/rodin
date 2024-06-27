@@ -25,7 +25,7 @@ namespace Rodin::Models::Distance
       auto operator()(const Variational::GridFunction<FES>& gf)
       {
         Variational::GridFunction dist(gf.getFiniteElementSpace());
-        Math::SpatialVector gu;
+        Math::SpatialVector<Scalar> gu;
         dist =
           [&](const Geometry::Point& p)
           {

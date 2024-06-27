@@ -28,7 +28,7 @@ namespace Rodin::Variational
 
   /**
    * @brief Degree 0 Lagrange finite element space
-   * @tparam Range Range value type. Either Rodin::Scalar or Math::Vector.
+   * @tparam Range Range value type. Either Rodin::Scalar or Math::Vector<Scalar>.
    * @tparam Context Context type
    * @tparam Args Additional arguments
    *
@@ -60,9 +60,9 @@ namespace Rodin::Variational
   using ScalarP0Element = P0Element<Scalar>;
 
   /**
-   * @brief Alias for P0Element<Math::Vector>
+   * @brief Alias for P0Element<Math::Vector<Scalar>>
    */
-  using VectorP0Element = P0Element<Math::Vector>;
+  using VectorP0Element = P0Element<Math::Vector<Scalar>>;
 }
 
 #endif

@@ -38,15 +38,15 @@ namespace Rodin::Geometry
       {}
 
       inline
-      Math::Vector transform(const Math::Vector& rc) const override
+      Math::Vector<Scalar> transform(const Math::Vector<Scalar>& rc) const override
       {
         return rc;
       }
 
       inline
-      Math::Matrix jacobian(const Math::Vector& rc) const override
+      Math::Matrix<Scalar> jacobian(const Math::Vector<Scalar>& rc) const override
       {
-        return Math::Matrix::Identity(m_sdim == 0 ? 1 : m_sdim, rc.size());
+        return Math::Matrix<Scalar>::Identity(m_sdim == 0 ? 1 : m_sdim, rc.size());
       }
 
     private:

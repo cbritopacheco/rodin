@@ -32,9 +32,9 @@ namespace Rodin::FormLanguage
   };
 
   template <class ContextType, class MeshType>
-  struct Traits<Variational::P0<Math::Vector, ContextType, MeshType>>
+  struct Traits<Variational::P0<Math::Vector<Scalar>, ContextType, MeshType>>
   {
-    using RangeType = Math::Vector;
+    using RangeType = Math::Vector<Scalar>;
     using Context = ContextType;
     using Mesh = MeshType;
     using Element = Variational::VectorP0Element;
@@ -105,7 +105,7 @@ namespace Rodin::Variational
           Mapping(const Mapping&) = default;
 
           inline
-          auto operator()(const Math::SpatialVector& r) const
+          auto operator()(const Math::SpatialVector<Scalar>& r) const
           {
             const Geometry::Point p(m_polytope, m_trans.get(), r);
             return getFunction()(p);

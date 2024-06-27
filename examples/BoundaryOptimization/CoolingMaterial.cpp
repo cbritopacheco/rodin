@@ -34,7 +34,7 @@ static constexpr Scalar radius = 0.02;
 static constexpr Scalar tgv = std::numeric_limits<float>::max();
 
 using ScalarFES = P1<Scalar, Context::Sequential>;
-using VectorFES = P1<Math::Vector, Context::Sequential>;
+using VectorFES = P1<Math::Vector<Scalar>, Context::Sequential>;
 using ScalarGridFunction = GridFunction<ScalarFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
@@ -56,7 +56,7 @@ int main(int, char**)
     GridFunction dist(vh);
     dist = [&](const Point& p)
       {
-        Math::Vector c1(3);
+        Math::Vector<Scalar> c1(3);
         c1(0) = 4.3 - p.x();
         c1(1) = 3.8 - p.y();
         c1(2) = 1.0 - p.z();

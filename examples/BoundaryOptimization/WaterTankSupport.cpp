@@ -39,7 +39,7 @@ static Scalar ellA = 0;
 static Scalar targetArea = NAN;
 
 using ScalarFES = P1<Scalar, Context::Sequential>;
-using VectorFES = P1<Math::Vector, Context::Sequential>;
+using VectorFES = P1<Math::Vector<Scalar>, Context::Sequential>;
 using ScalarGridFunction = GridFunction<ScalarFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
@@ -68,7 +68,7 @@ int main(int, char**)
   phi2.load("Phi_2.gf");
   phi3.load("Phi_3.gf");
 
-  Math::Matrix aniso(3, 3);
+  Math::Matrix<Scalar> aniso(3, 3);
   {
     P1 h1d1s(D1);
     GridFunction integ(h1d1s);
@@ -130,7 +130,7 @@ int main(int, char**)
     GridFunction dist(vh);
     dist = [&](const Point& p)
     {
-      Math::SpatialVector c(3);
+      Math::SpatialVector<Scalar> c(3);
       c << 0, 0, 5;
       // return (p - c).norm() - (6 + 0.622876);
       return (p - c).norm() - 6.5;
@@ -173,7 +173,7 @@ int main(int, char**)
       //   d = std::min(d, (p - cs[i]).norm() - sqrt(2) / 2.0);
       // }
       // return d;
-      Math::SpatialVector c(3);
+      Math::SpatialVector<Scalar> c(3);
       c << 0, 0, -5.86;
       return (p - c).norm() - 0.5 * alpha * (hmax + hmin);
     };

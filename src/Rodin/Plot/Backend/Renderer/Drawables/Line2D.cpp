@@ -60,7 +60,7 @@ namespace Rodin::Plot::Backend::Renderer::Drawables
    using LineSegment2D = Geometry::Euclidean::LineSegment2D<float>;
 
    struct Vertex {
-    Magnum::Math::Vector2<float>  position;
+    Magnum::Math::Vector<Scalar>2<float>  position;
    };
 
    assert(m_xData.size() == m_yData.size());
@@ -80,14 +80,14 @@ namespace Rodin::Plot::Backend::Renderer::Drawables
        {m_xData[i + 1], m_yData[i + 1]}
        );
 
-    Magnum::Math::Vector2<float> direction(segment.direction().x(), segment.direction().y());
-    Magnum::Math::Vector2<float> normal = direction.perpendicular().normalized();
+    Magnum::Math::Vector<Scalar>2<float> direction(segment.direction().x(), segment.direction().y());
+    Magnum::Math::Vector<Scalar>2<float> normal = direction.perpendicular().normalized();
 
     // Use the scaled normal to ensure same thickness regardless of scale
-    Magnum::Math::Vector2<float> scaledNormal
+    Magnum::Math::Vector<Scalar>2<float> scaledNormal
       = m_lineWidth / 2.0f * (camera.projectionMatrix().inverted() * (
-        Magnum::Math::Vector3<float>(
-          Magnum::Math::Vector2<float>(normal), 0))).xy();
+        Magnum::Math::Vector<Scalar>3<float>(
+          Magnum::Math::Vector<Scalar>2<float>(normal), 0))).xy();
     scaledNormal.x() /= Magnum::GL::defaultFramebuffer.viewport().sizeX();
     scaledNormal.y() /= Magnum::GL::defaultFramebuffer.viewport().sizeY();
 
@@ -95,13 +95,13 @@ namespace Rodin::Plot::Backend::Renderer::Drawables
     // TODO: We just draw quads for now, until probably the Core::Geometry
     // module is done so we can devise a more elegant solution
     vertices.push_back(
-        Vertex{Magnum::Math::Vector2<float>(segment.start().asVector()) - scaledNormal });
+        Vertex{Magnum::Math::Vector<Scalar>2<float>(segment.start().asVector()) - scaledNormal });
     vertices.push_back(
-        Vertex{Magnum::Math::Vector2<float>(segment.end().asVector()) - scaledNormal });
+        Vertex{Magnum::Math::Vector<Scalar>2<float>(segment.end().asVector()) - scaledNormal });
     vertices.push_back(
-        Vertex{ Magnum::Math::Vector2<float>(segment.end().asVector()) + scaledNormal });
+        Vertex{ Magnum::Math::Vector<Scalar>2<float>(segment.end().asVector()) + scaledNormal });
     vertices.push_back(
-        Vertex{ Magnum::Math::Vector2<float>(segment.start().asVector()) + scaledNormal });
+        Vertex{ Magnum::Math::Vector<Scalar>2<float>(segment.start().asVector()) + scaledNormal });
     index.insert(index.end(), {idx, idx + 1, idx + 2});
     index.insert(index.end(), {idx + 2, idx + 3, idx});
     idx += 4;

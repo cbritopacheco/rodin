@@ -22,7 +22,7 @@ static constexpr Attribute dQ = 2; // Attribute of box boundary
 static constexpr Attribute dCurrent = 4; // Attribute of box boundary
 static constexpr Attribute dGround = 5; // Attribute of box boundary
 
-static const Math::Vector x0{{0.5, 0.5}}; // Center of domain
+static const Math::Vector<Scalar> x0{{0.5, 0.5}}; // Center of domain
 
 static constexpr Scalar pi = Math::Constants::pi();
 static constexpr Scalar gamma_ek = 1.93559;
@@ -39,8 +39,8 @@ struct Data
 int main(int, char**)
 {
   const size_t N = 100;
-  Math::Vector ms = Math::Vector::LinSpaced(N, 0, 0.5 * 1. / hmax);
-  Math::Vector es = Math::Vector::LinSpaced(N, hmax, 0.2);
+  Math::Vector<Scalar> ms = Math::Vector<Scalar>::LinSpaced(N, 0, 0.5 * 1. / hmax);
+  Math::Vector<Scalar> es = Math::Vector<Scalar>::LinSpaced(N, hmax, 0.2);
   es.reverseInPlace();
   ms.reverseInPlace();
   std::vector<Data> grid;

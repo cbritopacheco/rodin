@@ -59,9 +59,9 @@ namespace Rodin::Variational
   using ScalarP1Element = P1Element<Scalar>;
 
   /**
-   * @brief Alias for P1Element<Math::Vector>
+   * @brief Alias for P1Element<Math::Vector<Scalar>>
    */
-  using VectorP1Element = P1Element<Math::Vector>;
+  using VectorP1Element = P1Element<Math::Vector<Scalar>>;
 }
 
 #endif

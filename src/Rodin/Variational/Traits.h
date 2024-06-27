@@ -65,14 +65,14 @@ namespace Rodin::FormLanguage
     template <>
     struct RangeOfSAT<false, false, false, true, false>
     {
-      using Type = Math::Vector;
+      using Type = Math::Vector<Scalar>;
       Variational::RangeType Value = Variational::RangeType::Vector;
     };
 
     template <>
     struct RangeOfSAT<false, false, false, false, true>
     {
-      using Type = Math::Matrix;
+      using Type = Math::Matrix<Scalar>;
       Variational::RangeType Value = Variational::RangeType::Matrix;
     };
   }

@@ -23,7 +23,7 @@ namespace Rodin::Solver
    */
   template <class EigenSolverType>
   EigenSolver(std::reference_wrapper<EigenSolverType>)
-    -> EigenSolver<EigenSolverType, Math::SparseMatrix, Math::Vector>;
+    -> EigenSolver<EigenSolverType, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 
   /**
    * @defgroup EigenSolverSpecializations EigenSolver Template Specializations

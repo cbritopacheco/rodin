@@ -9,16 +9,16 @@
 
 namespace Rodin::Geometry
 {
-  void PolytopeTransformation::inverse(const Math::SpatialVector& pc, Math::SpatialVector& rc) const
+  void PolytopeTransformation::inverse(const Math::SpatialVector<Scalar>& pc, Math::SpatialVector<Scalar>& rc) const
   {
     const size_t pdim = getPhysicalDimension();
     const size_t rdim = getReferenceDimension();
     assert(pc.size() >= 0);
     assert(static_cast<size_t>(pc.size()) == pdim);
     // All elements have 0 as reference coordinate
-    Math::SpatialVector rc0 = Math::SpatialVector::Zero(rdim);
-    Math::SpatialVector pc0 = transform(rc0);
-    Math::SpatialMatrix jac = jacobian(rc0);
+    Math::SpatialVector<Scalar> rc0 = Math::SpatialVector<Scalar>::Zero(rdim);
+    Math::SpatialVector<Scalar> pc0 = transform(rc0);
+    Math::SpatialMatrix<Scalar> jac = jacobian(rc0);
     if (rdim == pdim)
       rc = rc0 + jac.partialPivLu().solve(pc - pc0);
     else

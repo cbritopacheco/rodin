@@ -266,25 +266,25 @@ namespace Rodin::Assembly
     Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>::tl_gbfi;
 
   /**
-   * @brief Multithreaded assembly of the Math::SparseMatrix associated to a
+   * @brief Multithreaded assembly of the Math::SparseMatrix<Scalar> associated to a
    * BilinearFormBase object.
    */
   template <class TrialFES, class TestFES>
   class Multithreaded<
-    Math::SparseMatrix,
-    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
+    Math::SparseMatrix<Scalar>,
+    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
     : public AssemblyBase<
-        Math::SparseMatrix,
-        Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
+        Math::SparseMatrix<Scalar>,
+        Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
   {
     public:
       using Parent =
         AssemblyBase<
-          Math::SparseMatrix,
-          Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>;
+          Math::SparseMatrix<Scalar>,
+          Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>>;
 
       using InputType = typename Parent::InputType;
-      using OperatorType = Math::SparseMatrix;
+      using OperatorType = Math::SparseMatrix<Scalar>;
 
 #ifdef RODIN_MULTITHREADED
       Multithreaded()
@@ -343,19 +343,19 @@ namespace Rodin::Assembly
 
   template <class TrialFES, class TestFES>
   class Multithreaded<
-    Math::Matrix,
-    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
+    Math::Matrix<Scalar>,
+    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>
     : public AssemblyBase<
-        Math::Matrix,
-        Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
+        Math::Matrix<Scalar>,
+        Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>
   {
     public:
       using Parent =
         AssemblyBase<
-          Math::Matrix,
-          Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>;
+          Math::Matrix<Scalar>,
+          Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>;
       using InputType = typename Parent::InputType;
-      using OperatorType = Math::Matrix;
+      using OperatorType = Math::Matrix<Scalar>;
 
 #ifdef RODIN_MULTITHREADED
       Multithreaded()
@@ -403,7 +403,7 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const InputType& input) const override
       {
-        Math::Matrix res(input.getTestFES().getSize(), input.getTrialFES().getSize());
+        Math::Matrix<Scalar> res(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
         auto& threadPool = getThreadPool();
         const auto& mesh = input.getTestFES().getMesh();
@@ -518,7 +518,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      static thread_local Math::Matrix tl_res;
+      static thread_local Math::Matrix<Scalar> tl_res;
       static thread_local std::unique_ptr<Variational::LocalBilinearFormIntegratorBase> tl_lbfi;
       static thread_local std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase> tl_gbfi;
 
@@ -528,31 +528,31 @@ namespace Rodin::Assembly
 
    template <class TrialFES, class TestFES>
    thread_local
-   Math::Matrix
-   Multithreaded<Math::Matrix, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>::tl_res;
+   Math::Matrix<Scalar>
+   Multithreaded<Math::Matrix<Scalar>, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>::tl_res;
 
    template <class TrialFES, class TestFES>
    thread_local
    std::unique_ptr<Variational::LocalBilinearFormIntegratorBase>
-   Multithreaded<Math::Matrix, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>::tl_lbfi;
+   Multithreaded<Math::Matrix<Scalar>, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>::tl_lbfi;
 
    template <class TrialFES, class TestFES>
    thread_local
    std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase>
-   Multithreaded<Math::Matrix, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>::tl_gbfi;
+   Multithreaded<Math::Matrix<Scalar>, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>::tl_gbfi;
 
   /**
-   * @brief %Multithreaded assembly of the Math::Vector associated to a LinearFormBase
+   * @brief %Multithreaded assembly of the Math::Vector<Scalar> associated to a LinearFormBase
    * object.
    */
   template <class FES>
-  class Multithreaded<Math::Vector, Variational::LinearForm<FES, Math::Vector>>
-    : public AssemblyBase<Math::Vector, Variational::LinearForm<FES, Math::Vector>>
+  class Multithreaded<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>
+    : public AssemblyBase<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>
   {
     public:
-      using Parent = AssemblyBase<Math::Vector, Variational::LinearForm<FES, Math::Vector>>;
+      using Parent = AssemblyBase<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>;
       using InputType = typename Parent::InputType;
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Scalar>;
 
 #ifdef RODIN_MULTITHREADED
       Multithreaded()
@@ -671,12 +671,12 @@ namespace Rodin::Assembly
 
   template <class FES>
   thread_local
-  Math::Vector Multithreaded<Math::Vector, Variational::LinearForm<FES, Math::Vector>>::tl_res;
+  Math::Vector<Scalar> Multithreaded<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>::tl_res;
 
   template <class FES>
   thread_local
   std::unique_ptr<Variational::LinearFormIntegratorBase>
-  Multithreaded<Math::Vector, Variational::LinearForm<FES, Math::Vector>>::tl_lfi;
+  Multithreaded<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>::tl_lfi;
 }
 
 #endif

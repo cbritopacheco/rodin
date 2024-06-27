@@ -23,7 +23,7 @@ namespace Rodin::Variational
     : m_mesh(mesh)
   {}
 
-  P1<Math::Vector, Context::Sequential, Geometry::Mesh<Context::Sequential>>
+  P1<Math::Vector<Scalar>, Context::Sequential, Geometry::Mesh<Context::Sequential>>
   ::P1(const Geometry::Mesh<Context>& mesh, size_t vdim)
     : m_mesh(mesh), m_vdim(vdim)
   {
@@ -72,5 +72,5 @@ namespace Rodin::Variational
   }
 
   const std::array<Geometry::GeometryIndexed<VectorP1Element>, RODIN_P1_MAX_VECTOR_DIMENSION>
-  P1<Math::Vector, Context::Sequential, Geometry::Mesh<Context::Sequential>>::s_elements = Internal::initVectorP1Elements();
+  P1<Math::Vector<Scalar>, Context::Sequential, Geometry::Mesh<Context::Sequential>>::s_elements = Internal::initVectorP1Elements();
 }

@@ -4,18 +4,18 @@
 
 namespace Rodin::QF
 {
-  const Geometry::GeometryIndexed<Math::SpatialVector> QF1P1::s_points =
+  const Geometry::GeometryIndexed<Math::SpatialVector<Scalar>> QF1P1::s_points =
   {
     { Geometry::Polytope::Type::Point,
-      Math::SpatialVector{{0}} },
+      Math::SpatialVector<Scalar>{{0}} },
     { Geometry::Polytope::Type::Segment,
-      Math::SpatialVector{{0.5}} },
+      Math::SpatialVector<Scalar>{{0.5}} },
     { Geometry::Polytope::Type::Triangle,
-      Math::SpatialVector{{ Scalar(1) / Scalar(3), Scalar(1) / Scalar(3) }} },
+      Math::SpatialVector<Scalar>{{ Scalar(1) / Scalar(3), Scalar(1) / Scalar(3) }} },
     { Geometry::Polytope::Type::Quadrilateral,
-      Math::SpatialVector{{0.5, 0.5}} },
+      Math::SpatialVector<Scalar>{{0.5, 0.5}} },
     { Geometry::Polytope::Type::Tetrahedron,
-      Math::SpatialVector{{0.25, 0.25, 0.25}} }
+      Math::SpatialVector<Scalar>{{0.25, 0.25, 0.25}} }
   };
 
   const Geometry::GeometryIndexed<Scalar> QF1P1::s_weights =

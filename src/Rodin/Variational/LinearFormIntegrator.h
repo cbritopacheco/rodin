@@ -103,13 +103,13 @@ namespace Rodin::Variational
       }
 
       inline
-      const Math::Vector getVector() const
+      const Math::Vector<Scalar> getVector() const
       {
         return m_vector;
       }
 
       inline
-      Math::Vector& getVector()
+      Math::Vector<Scalar>& getVector()
       {
         return m_vector;
       }
@@ -129,7 +129,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;
-      Math::Vector m_vector;
+      Math::Vector<Scalar> m_vector;
   };
 }
 

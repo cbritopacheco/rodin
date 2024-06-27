@@ -18,7 +18,8 @@ namespace Rodin::Math
   /**
    * @brief Sparse matrix type
    */
-  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+  template <class NumberType>
+  using SparseMatrix = Eigen::SparseMatrix<NumberType>;
 }
 
 #endif

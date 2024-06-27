@@ -135,7 +135,7 @@ namespace Rodin::Variational
 
           inline
           constexpr
-          Scalar operator()(const Math::SpatialVector& r) const
+          Scalar operator()(const Math::SpatialVector<Scalar>& r) const
           {
             return 1;
           }
@@ -167,13 +167,13 @@ namespace Rodin::Variational
           GradientFunction& operator=(GradientFunction&&) = default;
 
           inline
-          auto operator()(const Math::SpatialVector& r) const
+          auto operator()(const Math::SpatialVector<Scalar>& r) const
           {
-            return Math::SpatialVector::Zero(Geometry::Polytope::getGeometryDimension(m_g));
+            return Math::SpatialVector<Scalar>::Zero(Geometry::Polytope::getGeometryDimension(m_g));
           }
 
           inline
-          void operator()(Math::SpatialVector& out, const Math::SpatialVector& r) const
+          void operator()(Math::SpatialVector<Scalar>& out, const Math::SpatialVector<Scalar>& r) const
           {
             assert(static_cast<size_t>(r.size()) == Geometry::Polytope::getGeometryDimension(m_g));
             out.resize(Geometry::Polytope::getGeometryDimension(m_g));

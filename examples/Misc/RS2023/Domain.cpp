@@ -20,7 +20,7 @@ static constexpr Attribute ball = 3;
 static constexpr Scalar hmax = 0.01;
 static constexpr Scalar hmin = 0.01 * hmax;
 
-static const Math::Vector x0{{0.5, 0.5}}; // Center of domain
+static const Math::Vector<Scalar> x0{{0.5, 0.5}}; // Center of domain
 
 int main(int, char**)
 {

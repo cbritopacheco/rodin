@@ -40,11 +40,11 @@ namespace Rodin::Math
 
   template <>
   class Slice<const Tensor<3>, 0>
-    : public Eigen::Map<const Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+    : public Eigen::Map<const Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<const Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<const Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
@@ -64,11 +64,11 @@ namespace Rodin::Math
 
   template <>
   class Slice<const Tensor<3>, 1>
-    : public Eigen::Map<const Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+    : public Eigen::Map<const Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<const Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<const Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
@@ -88,11 +88,11 @@ namespace Rodin::Math
 
   template <>
   class Slice<const Tensor<3>, 2>
-    : public Eigen::Map<const Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+    : public Eigen::Map<const Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<const Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<const Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
@@ -112,11 +112,11 @@ namespace Rodin::Math
 
   template <>
   class Slice<Tensor<3>, 0>
-    : public Eigen::Map<Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+    : public Eigen::Map<Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
@@ -136,11 +136,11 @@ namespace Rodin::Math
 
   template <>
   class Slice<Tensor<3>, 1>
-    : public Eigen::Map<Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+    : public Eigen::Map<Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
@@ -160,11 +160,11 @@ namespace Rodin::Math
 
   template <>
   class Slice<Tensor<3>, 2>
-    : public Eigen::Map<Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+    : public Eigen::Map<Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<Math::Matrix<Scalar>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 

@@ -116,9 +116,9 @@ namespace Rodin::Variational
         return res;
       }
 
-      void interpolate(Math::Vector& res, const Geometry::Point& p) const
+      void interpolate(Math::Vector<Scalar>& res, const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
         const auto& fes = this->getFiniteElementSpace();
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
@@ -145,7 +145,7 @@ namespace Rodin::Variational
           assert(data.rows() == 1);
           std::copy(data.data(), data.data() + data.size(), weights.data());
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
         {
           const auto& fes = this->getFiniteElementSpace();
           const size_t vdim = fes.getVectorDimension();
@@ -172,7 +172,7 @@ namespace Rodin::Variational
           assert(data.rows() == 1);
           std::copy(w.data(), w.data() + w.size(), data.data());
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
         {
           const size_t sz = w.size();
           const auto& fes = this->getFiniteElementSpace();

@@ -60,7 +60,7 @@ namespace Rodin::QF
       }
 
       inline
-      const Math::SpatialVector& getPoint(size_t i) const override
+      const Math::SpatialVector<Scalar>& getPoint(size_t i) const override
       {
         return m_qf->getPoint(i);
       }

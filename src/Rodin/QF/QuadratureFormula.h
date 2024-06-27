@@ -52,7 +52,7 @@ namespace Rodin::QF
        * @note The reference must be valid throughout the whole lifetime of the
        * program.
        */
-      virtual const Math::SpatialVector& getPoint(size_t i) const = 0;
+      virtual const Math::SpatialVector<Scalar>& getPoint(size_t i) const = 0;
 
       virtual QuadratureFormulaBase* copy() const noexcept override = 0;
 

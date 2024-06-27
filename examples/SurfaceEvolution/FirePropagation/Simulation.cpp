@@ -27,7 +27,7 @@ class Environment
   public:
     using Context = Context::Sequential;
     using ScalarFES = P1<Scalar, Context>;
-    using VectorFES = P1<Math::Vector, Context>;
+    using VectorFES = P1<Math::Vector<Scalar>, Context>;
 
     struct Plane
     {
@@ -354,7 +354,7 @@ int main()
       const Scalar r = 1000;
       Scalar rr = 0;
 
-      Math::FixedSizeVector<3> c0;
+      Math::FixedSizeVector<Scalar,  3> c0;
       c0 << 19500, 19500, p.z();
       rr = (p.getCoordinates() - c0).norm() - r;
 

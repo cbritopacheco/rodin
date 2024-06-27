@@ -110,19 +110,19 @@ namespace Rodin::External::MMG
         {
           assert(src->type == MMG5_Scalar);
           assert(dst.getFiniteElementSpace().getVectorDimension() == 1);
-          Math::Matrix& data = dst.getData();
+          Math::Matrix<Scalar>& data = dst.getData();
           assert(data.rows() == 1);
           data.resize(1, src->np);
           // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m
           // + np + 1.
           std::copy(src->m + 1, src->m + src->np + 1, data.data());
         }
-        else if constexpr (std::is_same_v<Math::Vector, Range>)
+        else if constexpr (std::is_same_v<Math::Vector<Scalar>, Range>)
         {
           const size_t vdim = src->size;
           assert(src->type == MMG5_Vector);
           assert(vdim == dst.getFiniteElementSpace().getVectorDimension());
-          Math::Matrix& data = dst.getData();
+          Math::Matrix<Scalar>& data = dst.getData();
           assert(data.rows() >= 0);
           assert(static_cast<size_t>(data.rows()) == vdim);
           data.resize(vdim, src->np);
@@ -149,7 +149,7 @@ namespace Rodin::External::MMG
         {
           assert(dst->type == MMG5_Scalar);
           assert(src.getFiniteElementSpace().getVectorDimension() == 1);
-          const Math::Matrix& data = src.getData();
+          const Math::Matrix<Scalar>& data = src.getData();
           assert(data.rows() == 1);
           assert(dst->size == 1);
           const size_t n = data.size();
@@ -175,13 +175,13 @@ namespace Rodin::External::MMG
             dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
           }
         }
-        else if constexpr (std::is_same_v<Math::Vector, Range>)
+        else if constexpr (std::is_same_v<Math::Vector<Scalar>, Range>)
         {
           assert(dst->type == MMG5_Vector);
           const size_t vdim = src.getFiniteElementSpace().getVectorDimension();
           assert(dst->size >= 0);
           assert(vdim == static_cast<size_t>(dst->size));
-          const Math::Matrix& data = src.getData();
+          const Math::Matrix<Scalar>& data = src.getData();
           assert(dst->size == data.rows());
           const size_t n = data.cols();
           assert(n > 0);
