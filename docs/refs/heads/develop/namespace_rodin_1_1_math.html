@@ -97,25 +97,32 @@
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
-            <dt id="af6e42b57ffbc658ff72baf5e721eecb3">
-              using <a href="#af6e42b57ffbc658ff72baf5e721eecb3" class="m-doc-self">Matrix</a> = Eigen::Matrix&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Eigen::Dynamic, Eigen::Dynamic&gt;
+            <dt id="a2a8f4fda4d586d6bf073355331dbad86">
+              <div class="m-doc-template">template&lt;class NumberType&gt;</div>
+              using <a href="#a2a8f4fda4d586d6bf073355331dbad86" class="m-doc-self">Matrix</a> = Eigen::Matrix&lt;NumberType, Eigen::Dynamic, Eigen::Dynamic&gt;
             </dt>
-            <dd>Dense matrix type.</dd>
-            <dt id="a39b9ca0cda4187d0e2f6080836c98669">
-              using <a href="#a39b9ca0cda4187d0e2f6080836c98669" class="m-doc-self">SpatialMatrix</a> = Eigen::Matrix&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Eigen::Dynamic, Eigen::Dynamic, 0, <a href="group___rodin_directives.html#ga0b42798412414673b17869482dbfc80e" class="m-doc">RODIN_<wbr />MAXIMAL_<wbr />SPACE_<wbr />DIMENSION</a>, <a href="group___rodin_directives.html#ga0b42798412414673b17869482dbfc80e" class="m-doc">RODIN_<wbr />MAXIMAL_<wbr />SPACE_<wbr />DIMENSION</a>&gt;
+            <dd>Dense scalar valued matrix type.</dd>
+            <dt id="a6ff081f36b453fe8932f50c3db4a2910">
+              using <a href="#a6ff081f36b453fe8932f50c3db4a2910" class="m-doc-self">ComplexMatrix</a> = <a href="namespace_rodin_1_1_math.html#a2a8f4fda4d586d6bf073355331dbad86" class="m-doc">Matrix</a>&lt;<a href="namespace_rodin.html#a5bdc16188cfbe3b279a0bd42736d13f6" class="m-doc">Complex</a>&gt;
+            </dt>
+            <dd>Dense complex valued matrix type.</dd>
+            <dt id="a2a5294beceecc2cef5028e6cb08ed91f">
+              <div class="m-doc-template">template&lt;class NumberType&gt;</div>
+              using <a href="#a2a5294beceecc2cef5028e6cb08ed91f" class="m-doc-self">SpatialMatrix</a> = Eigen::Matrix&lt;NumberType, Eigen::Dynamic, Eigen::Dynamic, 0, <a href="group___rodin_directives.html#ga0b42798412414673b17869482dbfc80e" class="m-doc">RODIN_<wbr />MAXIMAL_<wbr />SPACE_<wbr />DIMENSION</a>, <a href="group___rodin_directives.html#ga0b42798412414673b17869482dbfc80e" class="m-doc">RODIN_<wbr />MAXIMAL_<wbr />SPACE_<wbr />DIMENSION</a>&gt;
             </dt>
             <dd>Spatial matrix.</dd>
             <dt id="a4708a5b5c45fbea3083377113cd84f2c">
               using <a href="#a4708a5b5c45fbea3083377113cd84f2c" class="m-doc-self">PointMatrix</a> = Eigen::Matrix&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Eigen::Dynamic, Eigen::Dynamic, 0, <a href="group___rodin_directives.html#ga0b42798412414673b17869482dbfc80e" class="m-doc">RODIN_<wbr />MAXIMAL_<wbr />SPACE_<wbr />DIMENSION</a>, Eigen::Dynamic&gt;
             </dt>
             <dd>Point matrix.</dd>
-            <dt id="af3e58f46c16a2bb9cec30986296dea9e">
-              <div class="m-doc-template">template&lt;size_t Rows, size_t Cols&gt;</div>
-              using <a href="#af3e58f46c16a2bb9cec30986296dea9e" class="m-doc-self">FixedSizeMatrix</a> = Eigen::Matrix&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Rows, Cols&gt;
+            <dt id="a0e0641c2956cc9f25eea3e9978c91bdc">
+              <div class="m-doc-template">template&lt;class NumberType, size_t Rows, size_t Cols&gt;</div>
+              using <a href="#a0e0641c2956cc9f25eea3e9978c91bdc" class="m-doc-self">FixedSizeMatrix</a> = Eigen::Matrix&lt;NumberType, Rows, Cols&gt;
             </dt>
             <dd>Represents a fixed size matrix.</dd>
-            <dt id="ad5753e9793c61f3620f2def51b01d816">
-              using <a href="#ad5753e9793c61f3620f2def51b01d816" class="m-doc-self">SparseMatrix</a> = Eigen::SparseMatrix&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;
+            <dt id="a635476b4b75f9ce5182950ea70fbf48b">
+              <div class="m-doc-template">template&lt;class NumberType&gt;</div>
+              using <a href="#a635476b4b75f9ce5182950ea70fbf48b" class="m-doc-self">SparseMatrix</a> = Eigen::SparseMatrix&lt;NumberType&gt;
             </dt>
             <dd>Sparse matrix type.</dd>
             <dt>
@@ -123,8 +130,9 @@
               using <a href="#aba5e5dbdff5cff245f852c340e7bcc92" class="m-doc">Tensor</a> = Eigen::Tensor&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Rank&gt;
             </dt>
             <dd>Dense tensor type.</dd>
-            <dt id="a78f873273d7f8e273fcc4840d14bbc1b">
-              using <a href="#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc-self">Vector</a> = Eigen::VectorX&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;
+            <dt id="a63b4346abc2477c79a5c39cde5a7aee0">
+              <div class="m-doc-template">template&lt;class NumberType&gt;</div>
+              using <a href="#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc-self">Vector</a> = Eigen::VectorX&lt;NumberType&gt;
             </dt>
             <dd>Dense vector type.</dd>
           </dl>

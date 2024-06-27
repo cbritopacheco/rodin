@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::P1Element&lt;Math::Vector&gt; class | Rodin</title>
+  <title>Rodin::Assembly::Sequential&lt;Math::Matrix&lt;Scalar&gt;, Variational::BilinearForm&lt;TrialFES, TestFES, Math::Matrix&lt;Scalar&gt;&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,45 +64,28 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_element_8h.html">&lt;Rodin/Variational/P1/P1Element.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P1Element&lt;Math::Vector&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>Sequential&lt;Math::Matrix&lt;Scalar&gt;, Variational::BilinearForm&lt;TrialFES, TestFES, Math::Matrix&lt;Scalar&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Degree 1 vector Lagrange element.</p>
+        <p><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> assembly of the <a href="namespace_rodin_1_1_math.html#a635476b4b75f9ce5182950ea70fbf48b" class="m-doc">Math::<wbr />SparseMatrix&lt;Scalar&gt;</a> associated to a BilinearFormBase object.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://defelement.com/elements/vector-lagrange.html" class="defelement-button"><span class="defelement-name">Vector Lagrange -</span> <span class="defelement-logo">DefElement</span></a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;P1Element&lt;Math::Vector&gt;&gt;</a>
+            <dt id="a4f5f5ad636939fa5b651448b3ab2bafd">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f5f5ad636939fa5b651448b3ab2bafd" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap">const InputType&amp; input) const -&gt; OperatorType <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Base class for finite elements.</dd>
-          </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt id="a18b73a92258cc05d7a4e1a957c0ff18b">
-              using <a href="#a18b73a92258cc05d7a4e1a957c0ff18b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&gt;
-            </dt>
-            <dd>Parent class.</dd>
-            <dt id="aae9191593e1a5a1fc181e1cce5be29f1">
-              using <a href="#aae9191593e1a5a1fc181e1cce5be29f1" class="m-doc-self">RangeType</a> = <a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a>
-            </dt>
-            <dd>Type of range.</dd>
+            <dd>Executes the assembly and returns the linear operator associated to the bilinear form.</dd>
           </dl>
         </section>
       </div>

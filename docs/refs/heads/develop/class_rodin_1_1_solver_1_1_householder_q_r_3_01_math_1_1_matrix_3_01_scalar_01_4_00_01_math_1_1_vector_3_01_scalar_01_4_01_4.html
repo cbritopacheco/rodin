@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Jacobian Template Specializations module | Rodin</title>
+  <title>Rodin::Solver::HouseholderQR&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,38 +64,53 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          Jacobian Template Specializations <span class="m-thin">module</span></h1>
-        <p>Template specializations of the <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> class.</p>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>HouseholderQR&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+        </h1>
+        <p>A direct sparse <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a> Cholesky factorizations without square root for use with <a href="namespace_rodin_1_1_math.html#a635476b4b75f9ce5182950ea70fbf48b" class="m-doc">Math::<wbr />SparseMatrix&lt;Scalar&gt;</a> and <a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector&lt;Scalar&gt;</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a></p></aside>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_jacobian_base_3_01_derived_00_01_grid_function_3_01_f_e_s_type_01_4_01_4.html" class="m-doc">Rodin::Variational::JacobianBase&lt;Derived, GridFunction&lt;FESType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class ... Ps&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_grid_function_3_01_p1_3_01_math_1_1_vector_3_01_sc737ca6403d32a2725ec2ff5ed2fbb8f2.html" class="m-doc">Rodin::Variational::Jacobian&lt;GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Ps...&gt;&gt;&gt;</a>
+            <dd>Abstract base class for linear algebra solvers.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a6a3e2ebad8b3214b9c17e01f1e06562f">
+              using <a href="#a6a3e2ebad8b3214b9c17e01f1e06562f" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a2a8f4fda4d586d6bf073355331dbad86" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of an <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class ShapeFunctionDerived, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType, class ... Ts&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_shape_function_3_01_shape_function_derived_00_01_p0cc55eb9da6ccdc5d5dbdb7fb33d6b16.html" class="m-doc">Rodin::Variational::Jacobian&lt;ShapeFunction&lt;ShapeFunctionDerived, P1&lt;Math::Vector&lt;Scalar&gt;, Ts...&gt;, SpaceType&gt;&gt;</a>
+            <dd>Type of linear operator.</dd>
+            <dt id="a7182aa32062b9b891caa98a604ed2e39">
+              using <a href="#a7182aa32062b9b891caa98a604ed2e39" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of an <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</dd>
+            <dd>Type of vector.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a1f62fc1cbfa62c23bafd73c4b6a6147c">
+              <span class="m-doc-wrap-bumper"><a href="#a1f62fc1cbfa62c23bafd73c4b6a6147c" class="m-doc-self">HouseholderQR</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Constructs the <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a> object with default parameters.</dd>
           </dl>
         </section>
       </div>

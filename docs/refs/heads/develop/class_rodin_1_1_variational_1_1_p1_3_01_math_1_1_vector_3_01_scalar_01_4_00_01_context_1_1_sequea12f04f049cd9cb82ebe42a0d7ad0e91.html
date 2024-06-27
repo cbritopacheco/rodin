@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::P1&lt;Math::Vector, Context::Sequential, Geometry::Mesh&lt;Context::Sequential&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::P1&lt;Math::Vector&lt;Scalar&gt;, Context::Sequential, Geometry::Mesh&lt;Context::Sequential&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -65,7 +65,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P1&lt;Math::Vector, Context::Sequential, Geometry::Mesh&lt;Context::Sequential&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P1&lt;Math::Vector&lt;Scalar&gt;, Context::Sequential, Geometry::Mesh&lt;Context::Sequential&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Vector valued Lagrange finite element space.</p>
         <nav class="m-block m-default">
@@ -153,13 +153,13 @@ $ d $
 <use x='302.163461' y='-2.988792' xlink:href='#eq2-g1-103'/>
 <use x='311.12986' y='-2.988792' xlink:href='#eq2-g3-58'/>
 </g>
-</svg></div><p>This class is vector valued, i.e. evaluations of the function are of <a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a> type.</p>
+</svg></div><p>This class is vector valued, i.e. evaluations of the function are of <a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector&lt;Scalar&gt;</a> type.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;P1&lt;Math::Vector, Context::Sequential, Geometry::Mesh&lt;Context::Sequential&gt;&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Context::Sequential, Geometry::Mesh&lt;Context::Sequential&gt;&gt;&gt;</a>
             </dt>
             <dd>Represernts a finite element space.</dd>
           </dl>
@@ -167,8 +167,8 @@ $ d $
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="aae9191593e1a5a1fc181e1cce5be29f1">
-              using <a href="#aae9191593e1a5a1fc181e1cce5be29f1" class="m-doc-self">RangeType</a> = <a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a>
+            <dt id="a1f9f2413f0b7c0761221b0df7e358bba">
+              using <a href="#a1f9f2413f0b7c0761221b0df7e358bba" class="m-doc-self">RangeType</a> = <a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;
             </dt>
             <dd>Range value type.</dd>
             <dt id="a2f935aafcd137d0ec7e0a13c7192fe68">
@@ -176,7 +176,7 @@ $ d $
             </dt>
             <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type.</dd>
             <dt id="ab2307da9f95b928147248219b7092cfb">
-              using <a href="#ab2307da9f95b928147248219b7092cfb" class="m-doc-self">Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_vector_00_01_context_1_1_sequential_00_01_geome85f6ad15bc1efa465c13ceae02b05bcc.html#aae9191593e1a5a1fc181e1cce5be29f1" class="m-doc">RangeType</a>&gt;
+              using <a href="#ab2307da9f95b928147248219b7092cfb" class="m-doc-self">Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_vector_3_01_scalar_01_4_00_01_context_1_1_sequea12f04f049cd9cb82ebe42a0d7ad0e91.html#a1f9f2413f0b7c0761221b0df7e358bba" class="m-doc">RangeType</a>&gt;
             </dt>
             <dd>Type of finite element.</dd>
             <dt id="a1324d0f07f47cae6ff123b71842edeb5">
@@ -197,7 +197,7 @@ $ d $
             </dt>
             <dd>Gets the dimension of the range space, i.e. the number of components of each basis function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9309c6a15ceb8222986643adbad70d64" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_vector_00_01_context_1_1_sequential_00_01_geome85f6ad15bc1efa465c13ceae02b05bcc.html#a2f935aafcd137d0ec7e0a13c7192fe68" class="m-doc">Context</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9309c6a15ceb8222986643adbad70d64" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_vector_3_01_scalar_01_4_00_01_context_1_1_sequea12f04f049cd9cb82ebe42a0d7ad0e91.html#a2f935aafcd137d0ec7e0a13c7192fe68" class="m-doc">Context</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the constant reference to the mesh upon which the finite element space is built on.</dd>
             <dt>
@@ -257,7 +257,7 @@ $ (d, i) $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />Vector, Context::<wbr />Sequential, Geometry::<wbr />Mesh&lt;Context::<wbr />Sequential&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />Vector&lt;Scalar&gt;, Context::<wbr />Sequential, Geometry::<wbr />Mesh&lt;Context::<wbr />Sequential&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the total number of degrees of freedom.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -274,7 +274,7 @@ $ (d, i) $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />Vector, Context::<wbr />Sequential, Geometry::<wbr />Mesh&lt;Context::<wbr />Sequential&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />Vector&lt;Scalar&gt;, Context::<wbr />Sequential, Geometry::<wbr />Mesh&lt;Context::<wbr />Sequential&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the dimension of the range space, i.e. the number of components of each basis function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -291,7 +291,7 @@ $ (d, i) $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_vector_00_01_context_1_1_sequential_00_01_geome85f6ad15bc1efa465c13ceae02b05bcc.html#a2f935aafcd137d0ec7e0a13c7192fe68" class="m-doc">Context</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />Vector, Context::<wbr />Sequential, Geometry::<wbr />Mesh&lt;Context::<wbr />Sequential&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9309c6a15ceb8222986643adbad70d64" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_vector_3_01_scalar_01_4_00_01_context_1_1_sequea12f04f049cd9cb82ebe42a0d7ad0e91.html#a2f935aafcd137d0ec7e0a13c7192fe68" class="m-doc">Context</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />Vector&lt;Scalar&gt;, Context::<wbr />Sequential, Geometry::<wbr />Mesh&lt;Context::<wbr />Sequential&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9309c6a15ceb8222986643adbad70d64" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the constant reference to the mesh upon which the finite element space is built on.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -308,7 +308,7 @@ $ (d, i) $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />Vector, Context::<wbr />Sequential, Geometry::<wbr />Mesh&lt;Context::<wbr />Sequential&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c49b6eb692e19148f95fb35eda84f68" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />Vector&lt;Scalar&gt;, Context::<wbr />Sequential, Geometry::<wbr />Mesh&lt;Context::<wbr />Sequential&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c49b6eb692e19148f95fb35eda84f68" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets a set of global degree of freedom indices associated to the polytope of dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
@@ -364,7 +364,7 @@ $ (d, i) $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />Vector, Context::<wbr />Sequential, Geometry::<wbr />Mesh&lt;Context::<wbr />Sequential&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23c5e849f8cac22f9578b2ee39c17d9a" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />Vector&lt;Scalar&gt;, Context::<wbr />Sequential, Geometry::<wbr />Mesh&lt;Context::<wbr />Sequential&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23c5e849f8cac22f9578b2ee39c17d9a" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> local) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the global index for the local degree of freedom on the <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
