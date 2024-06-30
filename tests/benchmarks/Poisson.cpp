@@ -22,21 +22,24 @@ namespace RodinBenchmark
   struct Poisson_UniformGrid_16x16 : public benchmark::Fixture
   {
     public:
+      using MeshType = Mesh<Context::Sequential>;
+      using FESType = P1<Scalar, MeshType>;
+
       static constexpr const Geometry::Attribute dirichletAttr = 1;
 
       void SetUp(const benchmark::State&)
       {
         mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
         mesh.getConnectivity().compute(1, 2);
-        vhPtr.reset(new P1<Scalar, Context::Sequential>(mesh));
+        vhPtr.reset(new FESType(mesh));
       }
 
       void TearDown(const benchmark::State&)
       {}
 
       boost::filesystem::path meshfile;
-      Mesh<Context::Sequential> mesh;
-      std::unique_ptr<P1<Scalar, Context::Sequential>> vhPtr;
+      MeshType mesh;
+      std::unique_ptr<FESType> vhPtr;
   };
 
   BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_ConstantCoefficient_ConstantSource)
