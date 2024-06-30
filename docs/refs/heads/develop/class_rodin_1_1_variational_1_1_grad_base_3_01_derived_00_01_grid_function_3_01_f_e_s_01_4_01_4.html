@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Div&lt;GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Context, Mesh&gt;&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::GradBase&lt;Derived, GridFunction&lt;FES&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,10 +64,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Context, class Mesh&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Div&lt;GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Context, Mesh&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <div class="m-doc-template">template&lt;class Derived, class FES&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GradBase&lt;Derived, GridFunction&lt;FES&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Divient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+        <p>Gradient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -77,6 +77,7 @@
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -85,21 +86,17 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class Operand&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase&lt;Div&lt;GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Context, Mesh&gt;&gt;&gt;, GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Context, Mesh&gt;&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;GradBase&lt;Derived, GridFunction&lt;FES&gt;&gt;&gt;</a>
             </dt>
-            <dd>Base class for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> classes.</dd>
+            <dd>Base class for vector-valued functions defined on a mesh.</dd>
           </dl>
         </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a0516054d6040c53e74e97efd7db176b0">
-              using <a href="#a0516054d6040c53e74e97efd7db176b0" class="m-doc-self">Operand</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">FES</a>&gt;
-            </dt>
-            <dd>Operand type.</dd>
-            <dt id="a3187c8872141b79b0297e296565cdffd">
-              using <a href="#a3187c8872141b79b0297e296565cdffd" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="class_rodin_1_1_variational_1_1_div_3_01_grid_function_3_01_p1_3_01_math_1_1_vector_3_01_scalar_72afdf7d52a10b36abdd8a7de90c8907.html#a0516054d6040c53e74e97efd7db176b0" class="m-doc">Operand</a>&gt;, <a href="class_rodin_1_1_variational_1_1_div_3_01_grid_function_3_01_p1_3_01_math_1_1_vector_3_01_scalar_72afdf7d52a10b36abdd8a7de90c8907.html#a0516054d6040c53e74e97efd7db176b0" class="m-doc">Operand</a>&gt;
+            <dt id="a475edec933ed5c2594a291d4bcec413f">
+              using <a href="#a475edec933ed5c2594a291d4bcec413f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&lt;Derived, <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">OperandType</a>&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -108,11 +105,11 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a720cdc6d368cb2e50d0f18e2fa06b6d1" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_div_3_01_grid_function_3_01_p1_3_01_math_1_1_vector_3_01_scalar_72afdf7d52a10b36abdd8a7de90c8907.html#a0516054d6040c53e74e97efd7db176b0" class="m-doc">Operand</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a7cf7b0c71702a67dc64cebf6d848787e" class="m-doc">GradBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
-            <dd>Constructs the Divient of an <svg class="m-math" style="width: 1.202em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 11.540137 9.474739">
+            <dd>Constructs the gradient of a <svg class="m-math" style="width: 1.202em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 11.540137 10.029041">
 <title>
-$ \mathbb{P}^1 $
+$ \mathbb{P}_1 $
 </title>
 <defs>
 <path id='eq1-g1-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
@@ -120,7 +117,7 @@ $ \mathbb{P}^1 $
 </defs>
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-80'/>
-<use x='7.305954' y='-4.338437' xlink:href='#eq1-g1-49'/>
+<use x='7.305954' y='1.793263' xlink:href='#eq1-g1-49'/>
 </g>
 </svg> function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -133,28 +130,42 @@ $ u $
 <use x='0' y='0' xlink:href='#eq2-g0-117'/>
 </g>
 </svg>.</dd>
-            <dt id="abca2166abd7e47734012c3c2e52f6fa7">
-              <span class="m-doc-wrap-bumper"><a href="#abca2166abd7e47734012c3c2e52f6fa7" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp; other)</span>
+            <dt id="a71792a7e938a0aaeb329c790c4fcc78e">
+              <span class="m-doc-wrap-bumper"><a href="#a71792a7e938a0aaeb329c790c4fcc78e" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a5df8eb87e191a7662eabc19e7d7fd6b8">
-              <span class="m-doc-wrap-bumper"><a href="#a5df8eb87e191a7662eabc19e7d7fd6b8" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp;&amp; other)</span>
+            <dt id="aebe31933f205e813f0c27741c4ffd8cd">
+              <span class="m-doc-wrap-bumper"><a href="#aebe31933f205e813f0c27741c4ffd8cd" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
         </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="acfcf6eeb3e1708bc047525946eb09008">
+              <span class="m-doc-wrap-bumper">auto <a href="#acfcf6eeb3e1708bc047525946eb09008" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap">Math::SpatialVector&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Interpolation function to be overriden in Derived type.</dd>
+            <dt id="aab3cbd16cf98f13e90123411950bcf48">
+              <span class="m-doc-wrap-bumper">auto <a href="#aab3cbd16cf98f13e90123411950bcf48" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copy function to be overriden in Derived type.</dd>
+          </dl>
+        </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a720cdc6d368cb2e50d0f18e2fa06b6d1"><div>
+          <section class="m-doc-details" id="a7cf7b0c71702a67dc64cebf6d848787e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Context, class Mesh&gt;
+                template&lt;class Derived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Div&lt;GridFunction&lt;P1&lt;Math::<wbr />Vector&lt;Scalar&gt;, Context, Mesh&gt;&gt;&gt;&lt;Context, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a720cdc6d368cb2e50d0f18e2fa06b6d1" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_div_3_01_grid_function_3_01_p1_3_01_math_1_1_vector_3_01_scalar_72afdf7d52a10b36abdd8a7de90c8907.html#a0516054d6040c53e74e97efd7db176b0" class="m-doc">Operand</a>&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GradBase&lt;Derived, GridFunction&lt;FES&gt;&gt;&lt;Derived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cf7b0c71702a67dc64cebf6d848787e" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">OperandType</a>&amp; u)</span></span>
             </h3>
-            <p>Constructs the Divient of an <svg class="m-math" style="width: 1.202em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 11.540137 9.474739">
+            <p>Constructs the gradient of a <svg class="m-math" style="width: 1.202em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 11.540137 10.029041">
 <title>
-$ \mathbb{P}^1 $
+$ \mathbb{P}_1 $
 </title>
 <defs>
 <path id='eq1-g1-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
@@ -162,7 +173,7 @@ $ \mathbb{P}^1 $
 </defs>
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-80'/>
-<use x='7.305954' y='-4.338437' xlink:href='#eq1-g1-49'/>
+<use x='7.305954' y='1.793263' xlink:href='#eq1-g1-49'/>
 </g>
 </svg> function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>

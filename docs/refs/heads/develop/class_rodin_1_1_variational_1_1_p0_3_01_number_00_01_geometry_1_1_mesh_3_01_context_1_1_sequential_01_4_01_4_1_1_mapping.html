@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Grad&lt;ShapeFunction&lt;NestedDerived, P0&lt;Scalar, Ps...&gt;, SpaceType&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::P0&lt;Number, Geometry::Mesh&lt;Context::Sequential&gt;&gt;::Mapping class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,79 +64,19 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class NestedDerived, class ... Ps, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Grad&lt;ShapeFunction&lt;NestedDerived, P0&lt;Scalar, Ps...&gt;, SpaceType&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0_3_01_number_00_01_geometry_1_1_mesh_3_01_context_1_1_sequential_01_4_01_4.html">P0&lt;Number, Geometry::Mesh&lt;Context::Sequential&gt;&gt;</a>::<wbr/></span>Mapping <span class="m-thin">class</span>
         </h1>
-        <p>Gradient of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
+        <p><a href="class_rodin_1_1_variational_1_1_p0_3_01_number_00_01_geometry_1_1_mesh_3_01_context_1_1_sequential_01_4_01_4_1_1_mapping.html" class="m-doc">Mapping</a> for the scalar <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;NestedDerived, P0&lt;Scalar, Ps...&gt;, SpaceType&gt;&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space_mapping_base.html" class="m-doc">FiniteElementSpaceMappingBase&lt;Mapping&lt;FunctionDerived&gt;&gt;</a>
             </dt>
-            <dd>Base class for shape function objects.</dd>
+            <dd>Base class for mappings taking functions defined on mesh elements to reference elements.</dd>
           </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt id="a1fedc6006b57967df362592a7ed7aafd">
-              using <a href="#a1fedc6006b57967df362592a7ed7aafd" class="m-doc-self">FES</a> = <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Ps...&gt;
-            </dt>
-            <dd>Finite element space type.</dd>
-            <dt id="af87418b7aad3037af037624b71368762">
-              using <a href="#af87418b7aad3037af037624b71368762" class="m-doc-self">Operand</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;NestedDerived, <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Ps...&gt;, Space&gt;
-            </dt>
-            <dd>Operand type.</dd>
-            <dt id="abb7ea62276a46d231fda610f0abc8f3d">
-              using <a href="#abb7ea62276a46d231fda610f0abc8f3d" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&lt;<a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p0_3_01_scala6703b959d15c0406cbd634a5008743f6.html#af87418b7aad3037af037624b71368762" class="m-doc">Operand</a>&gt;, <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p0_3_01_scala6703b959d15c0406cbd634a5008743f6.html#a1fedc6006b57967df362592a7ed7aafd" class="m-doc">FES</a>, Space&gt;
-            </dt>
-            <dd>Parent class.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acf7c34b7db4f21578a2efedca933fa54" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="acf7c34b7db4f21578a2efedca933fa54"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class NestedDerived, class ... Ps, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>* Rodin::<wbr />Variational::<wbr />Grad&lt;ShapeFunction&lt;NestedDerived, P0&lt;Scalar, Ps...&gt;, SpaceType&gt;&gt;&lt;NestedDerived, Ps, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf7c34b7db4f21578a2efedca933fa54" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
-          </div></section>
         </section>
       </div>
     </div>

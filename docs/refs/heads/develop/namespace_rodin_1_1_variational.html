@@ -230,7 +230,7 @@ $ \mathbf{A} $
             <dd>Represents the component (or entry) of a vectorial <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_dense_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_context_1_850c872345a58b5edf2170e4d67a55b6.html" class="m-doc">DenseProblem&lt;TrialFES, TestFES, Context::Sequential, Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_dense_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_math_1_1_md99cfb8ab9ad0f53cb22199a64daf036.html" class="m-doc">DenseProblem&lt;TrialFES, TestFES, Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
             <dd>General class to assemble linear systems with <code><a href="namespace_rodin_1_1_math.html#a2a8f4fda4d586d6bf073355331dbad86" class="m-doc">Math::<wbr />Matrix</a>&lt;Scalar&gt;</code> and <code><a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;</code> types in a serial context.</dd>
             <dt>
@@ -248,8 +248,8 @@ $ \mathbf{A} $
             </dt>
             <dd>Base class for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> classes.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_div_base_3_01_derived_00_01_grid_function_3_01_f_e_s_type_01_4_01_4.html" class="m-doc">DivBase&lt;Derived, GridFunction&lt;FESType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Derived, class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_div_base_3_01_derived_00_01_grid_function_3_01_f_e_s_01_4_01_4.html" class="m-doc">DivBase&lt;Derived, GridFunction&lt;FES&gt;&gt;</a>
             </dt>
             <dd>Divergence of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
@@ -363,7 +363,7 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             </dt>
             <dd>Represents the lazy evaluation of a mesh function.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FESType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>
             </dt>
             <dd>Base class for grid function objects.</dd>
@@ -378,7 +378,7 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             </dt>
             <dd>Represents a tensor basis for functions defined on finite element spaces.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::SpaceType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
@@ -647,8 +647,8 @@ $ u $
             </dt>
             <dd>Base class for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> classes.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_base_3_01_derived_00_01_grid_function_3_01_f_e_s_type_01_4_01_4.html" class="m-doc">GradBase&lt;Derived, GridFunction&lt;FESType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Derived, class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_base_3_01_derived_00_01_grid_function_3_01_f_e_s_01_4_01_4.html" class="m-doc">GradBase&lt;Derived, GridFunction&lt;FES&gt;&gt;</a>
             </dt>
             <dd>Gradient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
@@ -686,8 +686,8 @@ $ u $
             </dt>
             <dd>Base class for <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> classes.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_jacobian_base_3_01_derived_00_01_grid_function_3_01_f_e_s_type_01_4_01_4.html" class="m-doc">JacobianBase&lt;Derived, GridFunction&lt;FESType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Derived, class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jacobian_base_3_01_derived_00_01_grid_function_3_01_f_e_s_01_4_01_4.html" class="m-doc">JacobianBase&lt;Derived, GridFunction&lt;FES&gt;&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
@@ -706,13 +706,13 @@ $ u $
             </dt>
             <dd>Multiplication of two <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instances.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_shape_func40c4f51c2d8efb807b5c40c49d38f0cd.html" class="m-doc">Mult&lt;FunctionBase&lt;LHSDerived&gt;, ShapeFunctionBase&lt;RHSDerived, FESType, SpaceType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_shape_func8d4c52396624d2e25a932313144862fb.html" class="m-doc">Mult&lt;FunctionBase&lt;LHSDerived&gt;, ShapeFunctionBase&lt;RHSDerived, FES, Space&gt;&gt;</a>
             </dt>
             <dd>Left Multiplication of a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> by a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_shape_function_base_3_01_l_h_s_derived_00_01_f_e_s_typ71474095290b9458a84cf02718cbc112.html" class="m-doc">Mult&lt;ShapeFunctionBase&lt;LHSDerived, FESType, SpaceType&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_shape_function_base_3_01_l_h_s_derived_00_01_f_e_s_00_d59f2b01a1d36bdc2dfb4f0750b648a9.html" class="m-doc">Mult&lt;ShapeFunctionBase&lt;LHSDerived, FES, Space&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
             </dt>
             <dd>Right multiplication of a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> by a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>.</dd>
             <dt>
@@ -730,28 +730,28 @@ $ u $
             </dt>
             <dd>Degree 0 Lagrange element.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Range, class Context, class Mesh&gt;</div>
+              <div class="m-doc-template">template&lt;class Range, class Mesh&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>
             </dt>
             <dd>Degree 0 Lagrange finite element space.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Context, class Mesh&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0_3_01_scalar_00_01_context_00_01_mesh_01_4_01_4_01_4.html" class="m-doc">Grad&lt;GridFunction&lt;P0&lt;Scalar, Context, Mesh&gt;&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Range, class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0_3_01_range_00_01_mesh_01_4_01_4_01_4.html" class="m-doc">Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;&gt;&gt;</a>
             </dt>
             <dd>Gradient of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class NestedDerived, class ... Ps, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p0_3_01_scala6703b959d15c0406cbd634a5008743f6.html" class="m-doc">Grad&lt;ShapeFunction&lt;NestedDerived, P0&lt;Scalar, Ps...&gt;, SpaceType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Range, class Mesh, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> SpaceType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p0_3_01_range3b40dd150d4ebb29e99edfc00d66e3b5.html" class="m-doc">Grad&lt;ShapeFunction&lt;NestedDerived, P0&lt;Range, Mesh&gt;, SpaceType&gt;&gt;</a>
             </dt>
             <dd>Gradient of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Range, class Context, class Mesh&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_p0_3_01_range_00_01_context_00_01_mesh_01_4_01_4.html" class="m-doc">GridFunction&lt;P0&lt;Range, Context, Mesh&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_p0_3_01_number_00_01_mesh_01_4_01_4.html" class="m-doc">GridFunction&lt;P0&lt;Number, Mesh&gt;&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_scalar_00_01_context_1_1_sequential_00_01_geometry_1_1_md530555a48b2b8c4b62760a22c819360.html" class="m-doc">P0&lt;Scalar, Context::Sequential, Geometry::Mesh&lt;Context::Sequential&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_number_00_01_geometry_1_1_mesh_3_01_context_1_1_sequential_01_4_01_4.html" class="m-doc">P0&lt;Number, Geometry::Mesh&lt;Context::Sequential&gt;&gt;</a>
             </dt>
             <dd>Scalar valued Lagrange finite element space.</dd>
             <dt>
@@ -760,8 +760,8 @@ $ u $
             </dt>
             <dd>Degree 0 scalar Lagrange element.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Context, class Mesh&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_div_3_01_grid_function_3_01_p1_3_01_math_1_1_vector_3_01_scalar_72afdf7d52a10b36abdd8a7de90c8907.html" class="m-doc">Div&lt;GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Context, Mesh&gt;&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_div_3_01_grid_function_3_01_p1_3_01_math_1_1_vector_3_01_number_01_4_00_01_mesh_01_4_01_4_01_4.html" class="m-doc">Div&lt;GridFunction&lt;P1&lt;Math::Vector&lt;Number&gt;, Mesh&gt;&gt;&gt;</a>
             </dt>
             <dd>Divient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
@@ -770,43 +770,43 @@ $ u $
             </dt>
             <dd>Degree 1 Lagrange element.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Range, class Context, class Mesh&gt;</div>
+              <div class="m-doc-template">template&lt;class Range, class Mesh&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>
             </dt>
             <dd>Degree 1 Lagrange finite element space.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Context, class Mesh&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p1_3_01_scalar_00_01_context_00_01_mesh_01_4_01_4_01_4.html" class="m-doc">Grad&lt;GridFunction&lt;P1&lt;Scalar, Context, Mesh&gt;&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p1_3_01_scalar_00_01_mesh_01_4_01_4_01_4.html" class="m-doc">Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;&gt;&gt;</a>
             </dt>
             <dd>Gradient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class NestedDerived, class ... Ps, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_scalaf9cbf3d9838854b76113258984dd90fd.html" class="m-doc">Grad&lt;ShapeFunction&lt;NestedDerived, P1&lt;Scalar, Ps...&gt;, SpaceType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Number, class Mesh, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_numbe3a85df0b9535b7d635dadf440f7e0eb5.html" class="m-doc">Grad&lt;ShapeFunction&lt;NestedDerived, P1&lt;Number, Mesh&gt;, SpaceType&gt;&gt;</a>
             </dt>
             <dd>Gradient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Range, class Context, class Mesh&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_p1_3_01_range_00_01_context_00_01_mesh_01_4_01_4.html" class="m-doc">GridFunction&lt;P1&lt;Range, Context, Mesh&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Range, class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_p1_3_01_range_00_01_mesh_01_4_01_4.html" class="m-doc">GridFunction&lt;P1&lt;Range, Mesh&gt;&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class ... Ps&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_grid_function_3_01_p1_3_01_math_1_1_vector_3_01_sc737ca6403d32a2725ec2ff5ed2fbb8f2.html" class="m-doc">Jacobian&lt;GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Ps...&gt;&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_grid_function_3_01_p1_3_01_math_1_1_vector_3_01_nuacbeb6773eb5a1bea04b18a5479a4182.html" class="m-doc">Jacobian&lt;GridFunction&lt;P1&lt;Math::Vector&lt;Number&gt;, Mesh&gt;&gt;&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of an <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class ShapeFunctionDerived, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType, class ... Ts&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_shape_function_3_01_shape_function_derived_00_01_p0cc55eb9da6ccdc5d5dbdb7fb33d6b16.html" class="m-doc">Jacobian&lt;ShapeFunction&lt;ShapeFunctionDerived, P1&lt;Math::Vector&lt;Scalar&gt;, Ts...&gt;, SpaceType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class ShapeFunctionDerived, class Number, class Mesh, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_shape_function_3_01_shape_function_derived_00_01_p89d2275b17fcf8f24958bdce7ec4b49f.html" class="m-doc">Jacobian&lt;ShapeFunction&lt;ShapeFunctionDerived, P1&lt;Math::Vector&lt;Number&gt;, Mesh&gt;, Space&gt;&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of an <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_context_1_1_sequential_00_01_geometry_1_1_m9622543adc8b64853ae1e24b8f0930dc.html" class="m-doc">P1&lt;Scalar, Context::Sequential, Geometry::Mesh&lt;Context::Sequential&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_number_00_01_geometry_1_1_mesh_3_01_context_1_1_sequential_01_4_01_4.html" class="m-doc">P1&lt;Number, Geometry::Mesh&lt;Context::Sequential&gt;&gt;</a>
             </dt>
             <dd>Scalar valued Lagrange finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_vector_3_01_scalar_01_4_00_01_context_1_1_sequea12f04f049cd9cb82ebe42a0d7ad0e91.html" class="m-doc">P1&lt;Math::Vector&lt;Scalar&gt;, Context::Sequential, Geometry::Mesh&lt;Context::Sequential&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_vector_3_01_scalar_01_4_00_01_geometry_1_1_mesh30502c22f4fb410c54e0468d0033f877.html" class="m-doc">P1&lt;Math::Vector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Sequential&gt;&gt;</a>
             </dt>
             <dd>Vector valued Lagrange finite element space.</dd>
             <dt>
@@ -864,8 +864,8 @@ $ u $
             </dt>
             <dd>Represents a Peridodic boundary condition on a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class LHSType, class RHSDerived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_potential_3_01_l_h_s_type_00_01_shape_function_base_3_01_shape_f345523d65781ed09e9a58148f83113d8.html" class="m-doc">Potential&lt;LHSType, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FESType, SpaceType&gt;, FESType, SpaceType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class LHS, class RHSDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_potential_3_01_l_h_s_00_01_shape_function_base_3_01_shape_functi4145b7b2aff814bfaf9999814be99c57.html" class="m-doc">Potential&lt;LHS, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FES, SpaceType&gt;, FES, SpaceType&gt;&gt;</a>
             </dt>
             <dd></dd>
             <dt>
@@ -875,7 +875,7 @@ $ u $
             <dd>Represents the power function.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_context_1_1_seque4224151f3aba8153627118b15520d8a.html" class="m-doc">Problem&lt;TrialFES, TestFES, Context::Sequential, Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_math_1_1_sparse_fd0e186571736417dd37f8735a4b061a.html" class="m-doc">Problem&lt;TrialFES, TestFES, Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
             <dd>General class to assemble linear systems with <code><a href="namespace_rodin_1_1_math.html#a635476b4b75f9ce5182950ea70fbf48b" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;</code> and <code><a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;</code> types in a serial context.</dd>
             <dt>
@@ -969,11 +969,6 @@ $ u $
               using <a href="#acc31ce30d1b4bf14c86ae06eabd42e29" class="m-doc-self">VectorP0Element</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;&gt;
             </dt>
             <dd>Alias for <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector&lt;Scalar&gt;</a>&gt;</dd>
-            <dt id="a1c967163186c468126c52483afe80ef4">
-              <div class="m-doc-template">template&lt;class Context&gt;</div>
-              using <a href="#a1c967163186c468126c52483afe80ef4" class="m-doc-self">ScalarP0</a> = <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Context, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;Context&gt;&gt;
-            </dt>
-            <dd>Alias for a scalar valued <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> finite element space.</dd>
             <dt id="a523cb928db9ae5555166131277b56aed">
               using <a href="#a523cb928db9ae5555166131277b56aed" class="m-doc-self">ScalarP1Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;
             </dt>
@@ -982,14 +977,14 @@ $ u $
               using <a href="#ad482d97c16987f95c6ec91690dcbc93a" class="m-doc-self">VectorP1Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;&gt;
             </dt>
             <dd>Alias for <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector&lt;Scalar&gt;</a>&gt;</dd>
-            <dt id="ad09ab27d55406830b6cf8557f292cab9">
-              <div class="m-doc-template">template&lt;class Context&gt;</div>
-              using <a href="#ad09ab27d55406830b6cf8557f292cab9" class="m-doc-self">ScalarP1</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Context, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;Context&gt;&gt;
+            <dt id="a5bbe2efd1469ce6f8dc4be5ea3cd7850">
+              <div class="m-doc-template">template&lt;class Mesh&gt;</div>
+              using <a href="#a5bbe2efd1469ce6f8dc4be5ea3cd7850" class="m-doc-self">ScalarP1</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Mesh&gt;
             </dt>
             <dd>Alias for a scalar valued <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> finite element space.</dd>
-            <dt id="a69c4dba414a68ab3df78847e4da3a747">
-              <div class="m-doc-template">template&lt;class Context&gt;</div>
-              using <a href="#a69c4dba414a68ab3df78847e4da3a747" class="m-doc-self">VectorP1</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;, Context, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;Context&gt;&gt;
+            <dt id="a772fe1babe11cb33089e796a4f48fb6e">
+              <div class="m-doc-template">template&lt;class Mesh&gt;</div>
+              using <a href="#a772fe1babe11cb33089e796a4f48fb6e" class="m-doc-self">VectorP1</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;, Mesh&gt;
             </dt>
             <dd>Alias for a vector valued <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> finite element space.</dd>
             <dt id="a813018bfa62fa4e5d03959d1b224e830">
@@ -1071,13 +1066,13 @@ $ \partial_z u $
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#ga743944d1a3b7b7a5a73e34d338e34575" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;Ts...&gt;&gt;&amp;) -&gt; Grad&lt; GridFunction&lt; P1&lt; Ts... &gt;&gt;&gt;</span>
+              <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#ga922c29f959e79de3ff6c90449edf3960" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;Number, Mesh&gt;&gt;&amp;) -&gt; Grad&lt; GridFunction&lt; P1&lt; Number, Mesh &gt;&gt;&gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class ... Ps&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#gab88bd9f951e10ec01bf9eba229e7f861" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;, Ps...&gt;&gt;&amp;) -&gt; Jacobian&lt; GridFunction&lt; P1&lt; Math::Vector&lt; Scalar &gt;, Ps... &gt;&gt;&gt;</span>
+              <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#gab5b007df40ea806c0da35e79f0581beb" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;Number&gt;, Mesh&gt;&gt;&amp;) -&gt; Jacobian&lt; GridFunction&lt; P1&lt; Math::Vector&lt; Number &gt;, Mesh &gt;&gt;&gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
