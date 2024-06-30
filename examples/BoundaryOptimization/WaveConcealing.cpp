@@ -49,8 +49,8 @@ static Scalar bTarget = 1.0;
 static Scalar ellA = 0;
 static Scalar targetArea = NAN;
 
-using ScalarFES = P1<Scalar, Context::Sequential>;
-using VectorFES = P1<Math::Vector<Scalar>, Context::Sequential>;
+using ScalarFES = P1<Scalar>;
+using VectorFES = P1<Math::Vector<Scalar>>;
 using ScalarGridFunction = GridFunction<ScalarFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;

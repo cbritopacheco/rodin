@@ -28,12 +28,14 @@ namespace Rodin::Variational
     : public BooleanFunctionBase<OR<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>>
   {
     public:
-      using LHS = BooleanFunctionBase<LHSDerived>;
-      using RHS = BooleanFunctionBase<RHSDerived>;
-      using Parent = BooleanFunctionBase<OR<LHS, RHS>>;
+      using LHSType = BooleanFunctionBase<LHSDerived>;
+
+      using RHSType = BooleanFunctionBase<RHSDerived>;
+
+      using Parent = BooleanFunctionBase<OR<LHSType, RHSType>>;
 
       constexpr
-      OR(const LHS& lhs, const RHS& rhs)
+      OR(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
@@ -78,8 +80,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived>

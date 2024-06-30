@@ -25,17 +25,23 @@ namespace Rodin::IO
   class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FES>>
   {
     public:
-      GridFunctionPrinterBase(const Variational::GridFunction<FES>& gf)
+      using FESType = FES;
+
+      using ObjectType = Variational::GridFunction<FESType>;
+
+      using Parent = IO::Printer<ObjectType>;
+
+      GridFunctionPrinterBase(const ObjectType& gf)
         : m_gf(gf)
       {}
 
       const Variational::GridFunction<FES>& getObject() const override
       {
-        return m_gf;
+        return m_gf.get();
       }
 
     private:
-      const Variational::GridFunction<FES>& m_gf;
+      std::reference_wrapper<const ObjectType> m_gf;
   };
 }
 

@@ -26,12 +26,12 @@
 namespace Rodin::Variational
 {
   // ------------------------------------------------------------------------
-  // ---- Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  // ---- Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   // ------------------------------------------------------------------------
 
   template <class TrialFES, class TestFES>
   constexpr
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
      :  m_trialFunction(u),
         m_testFunction(v),
@@ -41,8 +41,8 @@ namespace Rodin::Variational
   {}
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::operator=(const ProblemBody<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>& rhs)
   {
     for (auto& bfi : rhs.getLocalBFIs())
@@ -63,8 +63,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::operator+=(const LocalBilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(rhs);
@@ -72,8 +72,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::operator-=(const LocalBilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(UnaryMinus(rhs));
@@ -81,8 +81,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::operator+=(const LinearFormIntegratorBase& rhs)
   {
     m_linearForm.add(rhs);
@@ -90,8 +90,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::operator-=(const LinearFormIntegratorBase& rhs)
   {
     m_linearForm.add(UnaryMinus(rhs));
@@ -99,8 +99,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::operator+=(const DirichletBCBase& rhs)
   {
     m_dbcs.add(rhs);
@@ -108,8 +108,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::operator+=(const PeriodicBCBase& rhs)
   {
     m_pbcs.add(rhs);
@@ -117,8 +117,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>::imposePeriodicBCs()
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>::imposePeriodicBCs()
   {
     const auto& trial = getTrialFunction();
     const auto& trialFES = trial.getFiniteElementSpace();
@@ -268,8 +268,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>::assemble()
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>::assemble()
   {
     auto& trial = getTrialFunction();
 
@@ -317,7 +317,7 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   void
-  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::solve(Solver::SolverBase<OperatorType, VectorType>& solver)
   {
      // Assemble the system
@@ -336,7 +336,7 @@ namespace Rodin::Variational
   // ------------------------------------------------------------------------
 
   template <class U1, class U2, class ... Us>
-  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<Tuple<U1, U2, Us...>, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::Problem(U1& u1, U2& u2, Us&... us)
     : m_us(
         Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
@@ -371,8 +371,8 @@ namespace Rodin::Variational
   }
 
   template <class U1, class U2, class ... Us>
-  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>::assemble()
+  Problem<Tuple<U1, U2, Us...>, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<Tuple<U1, U2, Us...>, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>::assemble()
   {
     m_us.apply([](auto& u) { u.get().emplace(); });
 
@@ -486,8 +486,8 @@ namespace Rodin::Variational
   }
 
   template <class U1, class U2, class ... Us>
-  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
-  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<Tuple<U1, U2, Us...>, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>&
+  Problem<Tuple<U1, U2, Us...>, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::operator=(const ProblemBody<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>& rhs)
   {
     for (auto& bfi : rhs.getLocalBFIs())
@@ -535,7 +535,7 @@ namespace Rodin::Variational
 
   template <class U1, class U2, class ... Us>
   void
-  Problem<Tuple<U1, U2, Us...>, Context::Sequential, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  Problem<Tuple<U1, U2, Us...>, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
   ::solve(Solver::SolverBase<OperatorType, VectorType>& solver)
   {
      // Assemble the system

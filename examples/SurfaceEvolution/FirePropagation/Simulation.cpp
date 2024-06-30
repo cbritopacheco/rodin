@@ -26,8 +26,8 @@ class Environment
 {
   public:
     using Context = Context::Sequential;
-    using ScalarFES = P1<Scalar, Context>;
-    using VectorFES = P1<Math::Vector<Scalar>, Context>;
+    using ScalarFES = P1<Scalar>;
+    using VectorFES = P1<Math::Vector<Scalar>>;
 
     struct Plane
     {

@@ -22,22 +22,24 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class ContextType, class MeshType>
-  struct Traits<Variational::P0<Scalar, ContextType, MeshType>>
+  template <class Number, class Mesh>
+  struct Traits<Variational::P0<Number, Mesh>>
   {
-    using RangeType = Scalar;
-    using Context = ContextType;
-    using Mesh = MeshType;
-    using Element = Variational::ScalarP0Element;
+    using MeshType = Mesh;
+    using NumberType = Number;
+    using RangeType = NumberType;
+    using ContextType = typename MeshType::Context;
+    using ElementType = Variational::P0Element<RangeType>;
   };
 
-  template <class ContextType, class MeshType>
-  struct Traits<Variational::P0<Math::Vector<Scalar>, ContextType, MeshType>>
+  template <class Number, class Mesh>
+  struct Traits<Variational::P0<Math::Vector<Number>, Mesh>>
   {
-    using RangeType = Math::Vector<Scalar>;
-    using Context = ContextType;
-    using Mesh = MeshType;
-    using Element = Variational::VectorP0Element;
+    using MeshType = Mesh;
+    using NumberType = Number;
+    using RangeType = Math::Vector<NumberType>;
+    using ContextType = typename MeshType::Context;
+    using ElementType = Variational::P0Element<RangeType>;
   };
 }
 
@@ -49,7 +51,7 @@ namespace Rodin::Variational
    * @see P0
    */
 
-  template <class Range, class Context, class Mesh = Geometry::Mesh<Context>>
+  template <class Range, class Mesh = Geometry::Mesh<Context::Sequential>>
   class P0;
 
   /**
@@ -65,29 +67,31 @@ namespace Rodin::Variational
    * This class is scalar valued, i.e. evaluations of the function are of
    * Rodin::Scalar type.
    */
-  template <>
-  class P0<Scalar, Context::Sequential, Geometry::Mesh<Context::Sequential>> final
-    : public FiniteElementSpace<P0<Scalar, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+  template <class Number>
+  class P0<Number, Geometry::Mesh<Context::Sequential>> final
+    : public FiniteElementSpace<P0<Number, Geometry::Mesh<Context::Sequential>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
     using IndexMap = FlatMap<Index, Index>;
 
     public:
-      /// Type of mesh on which the finite element space is built
-      using MeshType = Geometry::Mesh<Context::Sequential>;
+      using NumberType = Number;
 
       /// Range type of value
-      using RangeType = Scalar;
+      using RangeType = NumberType;
 
       /// Represents the Context of the P0 space
-      using Context = Context::Sequential;
+      using ContextType = Context::Sequential;
 
-      //// Type of finite element
-      using Element = P0Element<RangeType>;
+      /// Type of mesh on which the finite element space is built
+      using MeshType = Geometry::Mesh<ContextType>;
+
+      /// Type of finite element
+      using ElementType = P0Element<RangeType>;
 
       /// Parent class
-      using Parent = FiniteElementSpace<P0<Scalar, Context, Geometry::Mesh<Context>>>;
+      using Parent = FiniteElementSpace<P0<RangeType, MeshType>>;
 
       /**
        * @brief Mapping for the scalar P0 space.
@@ -96,9 +100,9 @@ namespace Rodin::Variational
       class Mapping : public FiniteElementSpaceMappingBase<Mapping<FunctionDerived>>
       {
         public:
-          using Function = FunctionBase<FunctionDerived>;
+          using FunctionType = FunctionBase<FunctionDerived>;
 
-          Mapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v)
+          Mapping(const Geometry::Polytope& polytope, const FunctionType& v)
             : m_polytope(polytope), m_trans(m_polytope.getTransformation()), m_v(v.copy())
           {}
 
@@ -113,7 +117,7 @@ namespace Rodin::Variational
 
           inline
           constexpr
-          const Function& getFunction() const
+          const FunctionType& getFunction() const
           {
             assert(m_v);
             return *m_v;
@@ -122,7 +126,7 @@ namespace Rodin::Variational
         private:
           Geometry::Polytope m_polytope;
           std::reference_wrapper<const Geometry::PolytopeTransformation> m_trans;
-          std::unique_ptr<Function> m_v;
+          std::unique_ptr<FunctionType> m_v;
       };
 
       /**
@@ -133,14 +137,14 @@ namespace Rodin::Variational
         : public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
       {
         public:
-          using Function = CallableType;
+          using FunctionType = CallableType;
 
           /**
            * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
-          InverseMapping(const Function& v)
+          InverseMapping(const FunctionType& v)
             : m_v(v)
           {}
 
@@ -155,16 +159,16 @@ namespace Rodin::Variational
 
           inline
           constexpr
-          const Function& getFunction() const
+          const FunctionType& getFunction() const
           {
             return m_v.get();
           }
 
         private:
-          std::reference_wrapper<const Function> m_v;
+          std::reference_wrapper<const FunctionType> m_v;
       };
 
-      P0(const Geometry::Mesh<Context>& mesh)
+      P0(const MeshType& mesh)
         : m_mesh(mesh)
       {
         const size_t n = mesh.getCellCount();
@@ -186,7 +190,7 @@ namespace Rodin::Variational
       P0& operator=(P0&& other) = default;
 
       inline
-      const ScalarP0Element& getFiniteElement(size_t d, Index i) const
+      const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return s_elements[getMesh().getGeometry(d, i)];
       }
@@ -204,7 +208,7 @@ namespace Rodin::Variational
       }
 
       inline
-      const Geometry::Mesh<Context>& getMesh() const override
+      const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
@@ -244,14 +248,14 @@ namespace Rodin::Variational
       {
         const auto [d, i] = idx;
         const auto& mesh = getMesh();
-        return Mapping(*mesh.getPolytope(d, i), v);
+        return Mapping<FunctionDerived>(*mesh.getPolytope(d, i), v);
       }
 
       template <class FunctionDerived>
       inline
       auto getMapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v) const
       {
-        return Mapping(polytope, v);
+        return Mapping<FunctionDerived>(polytope, v);
       }
 
       /**
@@ -264,29 +268,42 @@ namespace Rodin::Variational
       inline
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
-        return InverseMapping(v);
+        return InverseMapping<CallableType>(v);
       }
 
       template <class CallableType>
       inline
       auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
       {
-        return InverseMapping(v);
+        return InverseMapping<CallableType>(v);
       }
 
     private:
-      static const Geometry::GeometryIndexed<ScalarP0Element> s_elements;
+      static const Geometry::GeometryIndexed<ElementType> s_elements;
 
       std::vector<IndexArray> m_dofs;
-      std::reference_wrapper<const Geometry::Mesh<Context>> m_mesh;
+      std::reference_wrapper<const MeshType> m_mesh;
   };
 
   template <class Context>
-  P0(const Geometry::Mesh<Context>&) -> P0<Scalar, Context, Geometry::Mesh<Context>>;
+  P0(const Geometry::Mesh<Context>&) -> P0<Scalar, Geometry::Mesh<Context>>;
 
-  /// Alias for a scalar valued P0 finite element space
-  template <class Context>
-  using ScalarP0 = P0<Scalar, Context, Geometry::Mesh<Context>>;
+  template <class Mesh>
+  using ScalarP0 = P0<Scalar, Mesh>;
+
+  template <class Mesh>
+  using ComplexP0 = P0<Complex, Mesh>;
+
+  template <class NumberType>
+  const Geometry::GeometryIndexed<P0Element<NumberType>>
+  P0<NumberType, Geometry::Mesh<Context::Sequential>>::s_elements =
+  {
+    { Geometry::Polytope::Type::Point, P0Element<NumberType>(Geometry::Polytope::Type::Point) },
+    { Geometry::Polytope::Type::Segment, P0Element<NumberType>(Geometry::Polytope::Type::Segment) },
+    { Geometry::Polytope::Type::Triangle, P0Element<NumberType>(Geometry::Polytope::Type::Triangle) },
+    { Geometry::Polytope::Type::Quadrilateral, P0Element<NumberType>(Geometry::Polytope::Type::Quadrilateral) },
+    { Geometry::Polytope::Type::Tetrahedron, P0Element<NumberType>(Geometry::Polytope::Type::Tetrahedron) }
+  };
 }
 
 #endif

@@ -17,14 +17,14 @@ namespace Rodin::FormLanguage
   /**
    * @ingroup TraitsSpecializations
    */
-  template <class Range, class ContextType, class MeshType>
-  struct Traits<Variational::GridFunction<Variational::P1<Range, ContextType, MeshType>>>
+  template <class Range, class Mesh>
+  struct Traits<Variational::GridFunction<Variational::P1<Range, Mesh>>>
   {
-    using RangeType = Range;
-    using FES = Variational::P1<RangeType, ContextType, MeshType>;
-    using Context = typename FormLanguage::Traits<FES>::Context;
-    using Mesh = typename FormLanguage::Traits<FES>::Mesh;
-    using Element = typename FormLanguage::Traits<FES>::Element;
+    using FESType = Variational::P1<Range, Mesh>;
+    using MeshType = typename FormLanguage::Traits<FESType>::MeshType;
+    using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+    using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+    using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
   };
 }
 
@@ -34,22 +34,24 @@ namespace Rodin::Variational
    * @ingroup GridFunctionSpecializations
    * @brief P1 GridFunction
    */
-  template <class Range, class Context, class Mesh>
-  class GridFunction<P1<Range, Context, Mesh>> final
-    : public GridFunctionBase<GridFunction<P1<Range, Context, Mesh>>>
+  template <class Range, class Mesh>
+  class GridFunction<P1<Range, Mesh>> final
+    : public GridFunctionBase<GridFunction<P1<Range, Mesh>>>
   {
     public:
       /// Type of finite element space to which the GridFunction belongs to
-      using FES = P1<Range, Context, Mesh>;
+      using FESType = P1<Range, Mesh>;
 
-      /// Type of finite element
-      using Element = typename FES::Element;
+      using MeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
-      /// Range type of value
-      using RangeType = typename FES::RangeType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
+      using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+
+      using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
 
       /// Parent class
-      using Parent = GridFunctionBase<GridFunction<FES>>;
+      using Parent = GridFunctionBase<GridFunction<FESType>>;
 
       using Parent::getValue;
       using Parent::operator=;
@@ -63,7 +65,7 @@ namespace Rodin::Variational
        * @param[in] fes Finite element space to which the function belongs
        * to.
        */
-      GridFunction(const FES& fes)
+      GridFunction(const FESType& fes)
         : Parent(fes)
       {}
 
@@ -194,8 +196,8 @@ namespace Rodin::Variational
 
   };
 
-  template <class ... Ts>
-  GridFunction(const P1<Ts...>&) -> GridFunction<P1<Ts...>>;
+  template <class Range, class Mesh>
+  GridFunction(const P1<Range, Mesh>&) -> GridFunction<P1<Range, Mesh>>;
 }
 
 #endif

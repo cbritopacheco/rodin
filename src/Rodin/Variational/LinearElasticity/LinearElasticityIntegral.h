@@ -10,21 +10,26 @@
 
 namespace Rodin::Variational
 {
-  template <class FESType, class LambdaDerived, class MuDerived>
+  template <class FES, class LambdaDerived, class MuDerived>
   class LinearElasticityIntegrator final
     : public LocalBilinearFormIntegratorBase
   {
     public:
-      using FES = FESType;
-      using Parent = LocalBilinearFormIntegratorBase;
+      using FESType = FES;
+
       using Mu = FunctionBase<MuDerived>;
+
       using Lambda = FunctionBase<LambdaDerived>;
 
+      using Parent = LocalBilinearFormIntegratorBase;
+
     private:
-        using MuRange = typename FormLanguage::Traits<Mu>::RangeType;
-        using LambdaRange = typename FormLanguage::Traits<Lambda>::RangeType;
-        static_assert(std::is_same_v<MuRange, Scalar>);
-        static_assert(std::is_same_v<LambdaRange, Scalar>);
+        using MuRangeType = typename FormLanguage::Traits<Mu>::RangeType;
+
+        using LambdaRangeType = typename FormLanguage::Traits<Lambda>::RangeType;
+
+        static_assert(std::is_same_v<MuRangeType, Scalar>);
+        static_assert(std::is_same_v<LambdaRangeType, Scalar>);
 
     public:
       LinearElasticityIntegrator(

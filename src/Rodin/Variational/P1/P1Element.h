@@ -270,6 +270,222 @@ namespace Rodin::Variational
       static const Geometry::GeometryIndexed<std::vector<GradientFunction>> s_gradient;
   };
 
+  template <>
+  class P1Element<Complex> final : public FiniteElementBase<P1Element<Complex>>
+  {
+    using G = Geometry::Polytope::Type;
+
+    public:
+      /// Parent class
+      using Parent = FiniteElementBase<P1Element<Complex>>;
+
+      /// Type of range
+      using RangeType = Complex;
+
+      /**
+       * @brief Represents a linear form of a P1 scalar element.
+       */
+      class LinearForm
+      {
+        public:
+          constexpr
+          LinearForm(size_t i, Geometry::Polytope::Type g)
+            : m_i(i), m_g(g)
+          {
+            assert(i < Geometry::Polytope::getVertexCount(g));
+          }
+
+          constexpr
+          LinearForm(const LinearForm&) = default;
+
+          constexpr
+          LinearForm(LinearForm&&) = default;
+
+          constexpr
+          LinearForm& operator=(const LinearForm&) = default;
+
+          constexpr
+          LinearForm& operator=(LinearForm&&) = default;
+
+          template <class T>
+          inline
+          constexpr
+          auto operator()(const T& v) const
+          {
+            return v(s_nodes[m_g].col(m_i));
+          }
+
+        private:
+          size_t m_i;
+          Geometry::Polytope::Type m_g;
+      };
+
+      /**
+       * @brief Represents a basis function of a P1 scalar element.
+       */
+      class BasisFunction
+      {
+        public:
+          using ReturnType = RangeType;
+
+          constexpr
+          BasisFunction(size_t i, Geometry::Polytope::Type g)
+            : m_i(i), m_g(g)
+          {
+            assert(i < Geometry::Polytope::getVertexCount(g));
+          }
+
+          constexpr
+          BasisFunction(const BasisFunction&) = default;
+
+          constexpr
+          BasisFunction& operator=(const BasisFunction&) = default;
+
+          constexpr
+          BasisFunction& operator=(BasisFunction&&) = default;
+
+          ReturnType operator()(const Math::SpatialVector<Scalar>& r) const;
+
+        private:
+          size_t m_i;
+          Geometry::Polytope::Type m_g;
+      };
+
+      /**
+       * @brief Represents a gradient basis function of a P1 scalar element.
+       */
+      class GradientFunction
+      {
+        public:
+          using ReturnType = Math::SpatialVector<Complex>;
+
+          constexpr
+          GradientFunction(size_t i, Geometry::Polytope::Type g)
+            : m_i(i), m_g(g)
+          {
+            assert(i < Geometry::Polytope::getVertexCount(g));
+          }
+
+          constexpr
+          GradientFunction(const GradientFunction&) = default;
+
+          constexpr
+          GradientFunction& operator=(const GradientFunction&) = default;
+
+          constexpr
+          GradientFunction& operator=(GradientFunction&&) = default;
+
+          ReturnType operator()(const Math::SpatialVector<Scalar>& r) const
+          {
+            ReturnType out;
+            operator()(out, r);
+            return out;
+          }
+
+          void operator()(ReturnType& out, const Math::SpatialVector<Scalar>& r) const;
+
+        private:
+          size_t m_i;
+          Geometry::Polytope::Type m_g;
+      };
+
+      constexpr
+      P1Element() = default;
+
+      constexpr
+      P1Element(Geometry::Polytope::Type geometry)
+        : Parent(geometry)
+      {}
+
+      constexpr
+      P1Element(const P1Element& other)
+        : Parent(other)
+      {}
+
+      constexpr
+      P1Element(P1Element&& other)
+        : Parent(std::move(other))
+      {}
+
+      constexpr
+      P1Element& operator=(const P1Element& other)
+      {
+        Parent::operator=(other);
+        return *this;
+      }
+
+      constexpr
+      P1Element& operator=(P1Element&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
+
+      /**
+       * @brief Gets the number of degrees of freedom in the finite element.
+       * @returns Number of degrees of freedom
+       */
+      inline
+      constexpr
+      size_t getCount() const
+      {
+        return 2 * Geometry::Polytope::getVertexCount(getGeometry());
+      }
+
+      inline
+      constexpr
+      const Math::PointMatrix& getNodes() const
+      {
+        return s_nodes[getGeometry()];
+      }
+
+      inline
+      const auto& getLinearForm(size_t i) const
+      {
+        assert(i < getCount());
+        return s_ls[getGeometry()][i];
+      }
+
+      inline
+      const auto& getBasis(size_t i) const
+      {
+        assert(i < getCount());
+        return s_basis[getGeometry()][i];
+      }
+
+      inline
+      const auto& getGradient(size_t i) const
+      {
+        assert(i < getCount());
+        return s_gradient[getGeometry()][i];
+      }
+
+      inline
+      constexpr
+      size_t getOrder() const
+      {
+        switch (getGeometry())
+        {
+          case Geometry::Polytope::Type::Point:
+            return 0;
+          case Geometry::Polytope::Type::Segment:
+          case Geometry::Polytope::Type::Triangle:
+          case Geometry::Polytope::Type::Tetrahedron:
+            return 1;
+          case Geometry::Polytope::Type::Quadrilateral:
+            return 2;
+        }
+        assert(false);
+        return 0;
+      }
+
+    private:
+      static const Geometry::GeometryIndexed<Math::PointMatrix> s_nodes;
+      static const Geometry::GeometryIndexed<std::vector<LinearForm>> s_ls;
+      static const Geometry::GeometryIndexed<std::vector<BasisFunction>> s_basis;
+      static const Geometry::GeometryIndexed<std::vector<GradientFunction>> s_gradient;
+  };
+
   /**
    * @ingroup FiniteElements
    * @ingroup P1ElementSpecializations

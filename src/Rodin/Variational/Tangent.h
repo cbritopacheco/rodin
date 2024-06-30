@@ -28,11 +28,12 @@ namespace Rodin::Variational
     : public ScalarFunctionBase<Tan<FunctionBase<NestedDerived>>>
   {
     public:
-      using Operand = FunctionBase<NestedDerived>;
+      using OperandType = FunctionBase<NestedDerived>;
+
       using Parent = ScalarFunctionBase<Tan<FunctionBase<NestedDerived>>>;
 
       constexpr
-      Tan(const Operand& v)
+      Tan(const OperandType& v)
         : m_v(v)
       {}
 
@@ -70,7 +71,7 @@ namespace Rodin::Variational
       }
 
     private:
-      Operand m_v;
+      OperandType m_v;
   };
 
   template <class NestedDerived>

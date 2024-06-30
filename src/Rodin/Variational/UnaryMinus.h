@@ -19,10 +19,10 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class NestedDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
-  struct Traits<Variational::UnaryMinus<Variational::ShapeFunctionBase<NestedDerived, FESType, SpaceType>>>
+  template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<Variational::UnaryMinus<Variational::ShapeFunctionBase<NestedDerived, FES, SpaceType>>>
   {
-    using FES = FESType;
+    using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
   };
 }
@@ -43,12 +43,14 @@ namespace Rodin::Variational
     : public FunctionBase<UnaryMinus<FunctionBase<NestedDerived>>>
   {
     public:
-      using Operand = FunctionBase<NestedDerived>;
-      using Parent = FunctionBase<UnaryMinus<Operand>>;
-      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+      using OperandType = FunctionBase<NestedDerived>;
+
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
+      using Parent = FunctionBase<UnaryMinus<OperandType>>;
 
       constexpr
-      UnaryMinus(const Operand& op)
+      UnaryMinus(const OperandType& op)
         : m_op(op.copy())
       {}
 
@@ -73,7 +75,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_op);
         return *m_op;
@@ -89,7 +91,7 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Vector<Scalar>& res, const Geometry::Point& p) const
       {
-        static_assert(FormLanguage::IsVectorRange<OperandRange>::Value);
+        static_assert(FormLanguage::IsVectorRange<OperandRangeType>::Value);
         getOperand().getValue(res, p);
         res *= -1;
       }
@@ -98,7 +100,7 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Matrix<Scalar>& res, const Geometry::Point& p) const
       {
-        static_assert(FormLanguage::IsMatrixRange<OperandRange>::Value);
+        static_assert(FormLanguage::IsMatrixRange<OperandRangeType>::Value);
         getOperand().getValue(res, p);
         res *= -1;
       }
@@ -127,7 +129,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_op;
+      std::unique_ptr<OperandType> m_op;
   };
 
   template <class NestedDerived>
@@ -141,19 +143,20 @@ namespace Rodin::Variational
     return UnaryMinus(op);
   }
 
-  template <class NestedDerived, class FESType, ShapeFunctionSpaceType SpaceType>
-  class UnaryMinus<ShapeFunctionBase<NestedDerived, FESType, SpaceType>> final
-    : public ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FESType, SpaceType>>>
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  class UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>> final
+    : public ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
     public:
-      using FES = FESType;
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using FESType = FES;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using Operand = ShapeFunctionBase<NestedDerived, FES, Space>;
+      using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
+
       using Parent = ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>;
 
       constexpr
-      UnaryMinus(const Operand& op)
+      UnaryMinus(const OperandType& op)
         : Parent(op.getFiniteElementSpace()),
           m_op(op.copy())
       {}
@@ -172,7 +175,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         return *m_op;
       }
@@ -215,7 +218,7 @@ namespace Rodin::Variational
         return new UnaryMinus(*this);
       }
     private:
-      std::unique_ptr<Operand> m_op;
+      std::unique_ptr<OperandType> m_op;
   };
 
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>

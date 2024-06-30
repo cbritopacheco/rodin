@@ -16,21 +16,21 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class ... Ps>
-  struct Traits<
-    Variational::Grad<Variational::GridFunction<Variational::P0<Scalar, Ps...>>>>
+  template <class Range, class Mesh>
+  struct Traits<Variational::Grad<Variational::GridFunction<Variational::P0<Range, Mesh>>>>
   {
-    using FES = Variational::P0<Scalar, Ps...>;
-    using Operand = Variational::GridFunction<FES>;
+    using FESType = Variational::P0<Range, Mesh>;
+    using OperandType = Variational::GridFunction<FESType>;
   };
 
-  template <class NestedDerived, class ... Ps, Variational::ShapeFunctionSpaceType SpaceType>
+  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Grad<
-      Variational::ShapeFunction<NestedDerived, Variational::P0<Scalar, Ps...>, SpaceType>>>
+      Variational::ShapeFunction<NestedDerived, Variational::P0<Range, Mesh>, Space>>>
   {
-    using FES = Variational::P0<Scalar, Ps...>;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = Variational::P0<Range, Mesh>;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
   };
 }
 
@@ -40,25 +40,27 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P0 GridFunction
    */
-  template <class Context, class Mesh>
-  class Grad<GridFunction<P0<Scalar, Context, Mesh>>> final
-    : public GradBase<Grad<GridFunction<P0<Scalar, Context, Mesh>>>, GridFunction<P0<Scalar, Context, Mesh>>>
+  template <class Range, class Mesh>
+  class Grad<GridFunction<P0<Range, Mesh>>> final
+    : public GradBase<Grad<GridFunction<P0<Range, Mesh>>>, GridFunction<P0<Range, Mesh>>>
   {
     public:
-      using FES = P0<Scalar, Context, Mesh>;
+      using RangeType = Range;
 
-      /// Operand type
-      using Operand = GridFunction<FES>;
+      using MeshType = Mesh;
 
-      /// Parent class
-      using Parent = GradBase<Grad<Operand>, Operand>;
+      using FESType = P0<RangeType, MeshType>;
+
+      using OperandType = GridFunction<FESType>;
+
+      using Parent = GradBase<Grad<OperandType>, OperandType>;
 
       /**
        * @brief Constructs the gradient of an @f$ \mathbb{P}^1 @f$ function
        * @f$ u @f$.
        * @param[in] u P0 GridFunction
        */
-      Grad(const Operand& u)
+      Grad(const OperandType& u)
         : Parent(u)
       {}
 
@@ -172,22 +174,24 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P0 ShapeFunction
    */
-  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType SpaceType>
-  class Grad<ShapeFunction<NestedDerived, P0<Scalar, Ps...>, SpaceType>> final
-    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P0<Scalar, Ps...>, SpaceType>>>
+  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType SpaceType>
+  class Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, SpaceType>> final
+    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, SpaceType>>>
   {
     public:
-      /// Finite element space type
-      using FES = P0<Scalar, Ps...>;
+      using RangeType = Range;
+
+      using MeshType = Mesh;
+
+      using FESType = P0<RangeType, MeshType>;
+
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      /// Operand type
-      using Operand = ShapeFunction<NestedDerived, P0<Scalar, Ps...>, Space>;
+      using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
 
-      /// Parent class
-      using Parent = ShapeFunctionBase<Grad<Operand>, FES, Space>;
+      using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
-      Grad(const Operand& u)
+      Grad(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u)
       {}
@@ -204,7 +208,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -253,18 +257,18 @@ namespace Rodin::Variational
       }
 
     private:
-      thread_local static std::vector<Math::SpatialVector<Scalar>> s_gradient;
-      std::reference_wrapper<const Operand> m_u;
+      thread_local static std::vector<Math::SpatialVector<Range>> s_gradient;
+      std::reference_wrapper<const OperandType> m_u;
   };
 
-  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType SpaceType>
+  template <class NestedDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>
   thread_local
-  std::vector<Math::SpatialVector<Scalar>>
-  Grad<ShapeFunction<NestedDerived, P0<Scalar, Ps...>, SpaceType>>::s_gradient;
+  std::vector<Math::SpatialVector<Range>>
+  Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>>::s_gradient;
 
-  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
-  Grad(const ShapeFunction<NestedDerived, P0<Scalar, Ps...>, Space>&)
-    -> Grad<ShapeFunction<NestedDerived, P0<Scalar, Ps...>, Space>>;
+  template <class NestedDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>
+  Grad(const ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>&)
+    -> Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>>;
 }
 
 #endif

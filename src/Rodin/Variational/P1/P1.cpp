@@ -8,23 +8,8 @@
 
 namespace Rodin::Variational
 {
-  const Geometry::GeometryIndexed<ScalarP1Element>
-  P1<Scalar, Context::Sequential, Geometry::Mesh<Context::Sequential>>::s_elements =
-  {
-    { Geometry::Polytope::Type::Point, ScalarP1Element(Geometry::Polytope::Type::Point) },
-    { Geometry::Polytope::Type::Segment, ScalarP1Element(Geometry::Polytope::Type::Segment) },
-    { Geometry::Polytope::Type::Triangle, ScalarP1Element(Geometry::Polytope::Type::Triangle) },
-    { Geometry::Polytope::Type::Quadrilateral, ScalarP1Element(Geometry::Polytope::Type::Quadrilateral) },
-    { Geometry::Polytope::Type::Tetrahedron, ScalarP1Element(Geometry::Polytope::Type::Tetrahedron) }
-  };
-
-  P1<Scalar, Context::Sequential, Geometry::Mesh<Context::Sequential>>
-  ::P1(const Geometry::Mesh<Context>& mesh)
-    : m_mesh(mesh)
-  {}
-
-  P1<Math::Vector<Scalar>, Context::Sequential, Geometry::Mesh<Context::Sequential>>
-  ::P1(const Geometry::Mesh<Context>& mesh, size_t vdim)
+  P1<Math::Vector<Scalar>, Geometry::Mesh<Context::Sequential>>
+  ::P1(const MeshType& mesh, size_t vdim)
     : m_mesh(mesh), m_vdim(vdim)
   {
     const size_t vn = mesh.getVertexCount();
@@ -72,5 +57,5 @@ namespace Rodin::Variational
   }
 
   const std::array<Geometry::GeometryIndexed<VectorP1Element>, RODIN_P1_MAX_VECTOR_DIMENSION>
-  P1<Math::Vector<Scalar>, Context::Sequential, Geometry::Mesh<Context::Sequential>>::s_elements = Internal::initVectorP1Elements();
+  P1<Math::Vector<Scalar>, Geometry::Mesh<Context::Sequential>>::s_elements = Internal::initVectorP1Elements();
 }

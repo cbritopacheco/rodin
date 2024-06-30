@@ -29,11 +29,13 @@ namespace Rodin::Variational
     : public ScalarFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using LHS = FunctionBase<LHSDerived>;
-      using RHS = FunctionBase<RHSDerived>;
+      using LHSType = FunctionBase<LHSDerived>;
+
+      using RHSType = FunctionBase<RHSDerived>;
+
       using Parent = ScalarFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
-      Max(const LHS& a, const RHS& b)
+      Max(const LHSType& a, const RHSType& b)
         : m_lhs(a.copy()), m_rhs(b.copy())
       {}
 
@@ -88,8 +90,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived>
@@ -104,12 +106,14 @@ namespace Rodin::Variational
     : public ScalarFunctionBase<Max<FunctionBase<NestedDerived>, Scalar>>
   {
     public:
-      using LHS = FunctionBase<NestedDerived>;
-      using RHS = Scalar;
-      using Parent = ScalarFunctionBase<Max<FunctionBase<NestedDerived>, RHS>>;
+      using LHSType = FunctionBase<NestedDerived>;
+
+      using RHSType = Scalar;
+
+      using Parent = ScalarFunctionBase<Max<FunctionBase<NestedDerived>, RHSType>>;
 
       constexpr
-      Max(const LHS& a, const RHS& b)
+      Max(const LHSType& a, const RHSType& b)
         : m_lhs(a.copy()), m_rhs(b)
       {}
 
@@ -164,8 +168,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      RHS m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      RHSType m_rhs;
   };
 
   template <class NestedDerived>
@@ -176,12 +180,14 @@ namespace Rodin::Variational
     : public Max<FunctionBase<NestedDerived>, Scalar>
   {
     public:
-      using LHS = Scalar;
-      using RHS = FunctionBase<NestedDerived>;
+      using LHSType = Scalar;
+
+      using RHSType = FunctionBase<NestedDerived>;
+
       using Parent = Max<FunctionBase<NestedDerived>, Scalar>;
 
       constexpr
-      Max(const LHS& a, const RHS& b)
+      Max(const LHSType& a, const RHSType& b)
         : Parent(b, a)
       {}
 

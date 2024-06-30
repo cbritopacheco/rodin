@@ -40,20 +40,19 @@ namespace Rodin::Variational
     : public LinearFormIntegratorBase
   {
     public:
+      using FESType = P1<Scalar, Context>;
+
+      using IntegrandType =
+        ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>>;
+
+      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+
       using Parent = LinearFormIntegratorBase;
 
-      using FES = P1<Scalar, Context>;
-
-      using Integrand =
-        ShapeFunctionBase<
-          ShapeFunction<NestedDerived, FES, TestSpace>>;
-
-      using IntegrandRange = typename FormLanguage::Traits<Integrand>::RangeType;
-
-      static_assert(std::is_same_v<IntegrandRange, Scalar>);
+      static_assert(std::is_same_v<IntegrandRangeType, Scalar>);
 
       constexpr
-      QuadratureRule(const Integrand& integrand)
+      QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -72,7 +71,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
         return *m_integrand;
@@ -105,7 +104,7 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
   };
 
   /**
@@ -155,24 +154,25 @@ namespace Rodin::Variational
     : public LinearFormIntegratorBase
   {
     public:
-      using FES = P1<Scalar, Context>;
+      using FESType = P1<Scalar, Context>;
 
-      using LHS = FunctionBase<LHSDerived>;
+      using LHSType = FunctionBase<LHSDerived>;
 
-      using RHS = ShapeFunctionBase<ShapeFunction<RHSDerived, FES, TestSpace>, FES, TestSpace>;
+      using RHSType =
+        ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, TestSpace>, FESType, TestSpace>;
 
-      using Integrand = ShapeFunctionBase<Dot<LHS, RHS>>;
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+      using IntegrandType = ShapeFunctionBase<Dot<LHSType, RHSType>>;
 
       using Parent = LinearFormIntegratorBase;
 
-      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
-
-      static_assert(std::is_same_v<LHSRange, RHSRange>);
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       constexpr
-      QuadratureRule(const Integrand& integrand)
+      QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -191,7 +191,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
         return *m_integrand;
@@ -216,17 +216,17 @@ namespace Rodin::Variational
         const Scalar distortion = p.getDistortion();
         auto& res = getVector();
         res = Math::Vector<Scalar>::Zero(dofs);
-        if constexpr (std::is_same_v<Scalar, LHSRange>)
+        if constexpr (std::is_same_v<Scalar, LHSRangeType>)
         {
           for (size_t local = 0; local < dofs; local++)
             res.coeffRef(local) += w * distortion * f(p) * fe.getBasis(local)(rc);
         }
-        else if constexpr (std::is_same_v<Math::Vector<Scalar>, LHSRange>)
+        else if constexpr (std::is_same_v<Math::Vector<Scalar>, LHSRangeType>)
         {
           for (size_t local = 0; local < dofs; local++)
             res.coeffRef(local) += w * distortion * f(p).dot(fe.getBasis(local)(rc));
         }
-        else if constexpr (std::is_same_v<Math::Matrix<Scalar>, LHSRange>)
+        else if constexpr (std::is_same_v<Math::Matrix<Scalar>, LHSRangeType>)
         {
           for (size_t local = 0; local < dofs; local++)
             res.coeffRef(local) +=
@@ -245,7 +245,7 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
   };
 
   /**
@@ -301,42 +301,41 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase
   {
     public:
-      using Parent = LocalBilinearFormIntegratorBase;
+      using FESType = P1<Scalar, Context>;
 
-      using FES = P1<Scalar, Context>;
+      using CoefficientType = FunctionBase<CoefficientDerived>;
 
-      using Coefficient =
-        FunctionBase<CoefficientDerived>;
-
-      using Multiplicand =
+      using MultiplicandType =
         Mult<
           FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<ShapeFunction<LHSDerived, FES, TrialSpace>>>;
+          ShapeFunctionBase<ShapeFunction<LHSDerived, FESType, TrialSpace>>>;
 
-      using LHS =
+      using LHSType =
         ShapeFunctionBase<
           Mult<
             FunctionBase<CoefficientDerived>,
-            ShapeFunctionBase<ShapeFunction<LHSDerived, FES, TrialSpace>>>>;
+            ShapeFunctionBase<ShapeFunction<LHSDerived, FESType, TrialSpace>>>>;
 
-      using RHS =
+      using RHSType =
         ShapeFunctionBase<
-          ShapeFunction<RHSDerived, FES, TestSpace>>;
+          ShapeFunction<RHSDerived, FESType, TestSpace>>;
 
-      using Integrand = Dot<LHS, RHS>;
+      using IntegrandType = Dot<LHSType, RHSType>;
 
-      using CoefficientRange = typename FormLanguage::Traits<Coefficient>::RangeType;
+      using CoefficientRangeType = typename FormLanguage::Traits<CoefficientType>::RangeType;
 
-      using MultiplicandRange = typename FormLanguage::Traits<Multiplicand>::RangeType;
+      using MultiplicandRangeType = typename FormLanguage::Traits<MultiplicandType>::RangeType;
 
-      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      static_assert(std::is_same_v<LHSRange, RHSRange>);
+      using Parent = LocalBilinearFormIntegratorBase;
+
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       constexpr
-      QuadratureRule(const Integrand& integrand)
+      QuadratureRule(const IntegrandType& integrand)
         : LocalBilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -355,7 +354,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrandType() const
       {
         assert(m_integrand);
         return *m_integrand;
@@ -365,7 +364,7 @@ namespace Rodin::Variational
       {
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
-        const auto& integrand = getIntegrand();
+        const auto& integrand = getIntegrandType();
         const auto& coeff = integrand.getLHS().getDerived().getLHS();
         const auto& multiplicand = integrand.getLHS();
         const auto& trans = polytope.getTransformation();
@@ -378,10 +377,10 @@ namespace Rodin::Variational
         const auto& rc = qf.getPoint(0);
         auto& res = getMatrix();
         res = Math::Matrix<Scalar>::Zero(dofs, dofs);
-        if constexpr (std::is_same_v<CoefficientRange, Scalar>)
+        if constexpr (std::is_same_v<CoefficientRangeType, Scalar>)
         {
-          static_assert(std::is_same_v<MultiplicandRange, RHSRange>);
-          if constexpr (std::is_same_v<MultiplicandRange, Scalar>)
+          static_assert(std::is_same_v<MultiplicandRangeType, RHSRangeType>);
+          if constexpr (std::is_same_v<MultiplicandRangeType, Scalar>)
           {
             const Geometry::Point p(polytope, trans, std::cref(rc));
             const Scalar distortion = p.getDistortion();
@@ -416,7 +415,7 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
       std::vector<Math::Vector<Scalar>> m_vvalues;
       std::vector<Math::Matrix<Scalar>> m_mvalues;
   };
@@ -476,22 +475,22 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase
   {
     public:
+      using FESType = P1<Scalar, Context>;
+
+      using LHSType =
+        ShapeFunctionBase<
+          Grad<ShapeFunction<LHSDerived, FESType, TrialSpace>>>;
+
+      using RHSType =
+        ShapeFunctionBase<
+          Grad<ShapeFunction<RHSDerived, FESType, TestSpace>>>;
+
+      using IntegrandType = Dot<LHSType, RHSType>;
+
       using Parent = LocalBilinearFormIntegratorBase;
 
-      using FES = P1<Scalar, Context>;
-
-      using LHS =
-        ShapeFunctionBase<
-          Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>>;
-
-      using RHS =
-        ShapeFunctionBase<
-          Grad<ShapeFunction<RHSDerived, FES, TestSpace>>>;
-
-      using Integrand = Dot<LHS, RHS>;
-
       constexpr
-      QuadratureRule(const Integrand& integrand)
+      QuadratureRule(const IntegrandType& integrand)
         : LocalBilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -514,7 +513,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrandType() const
       {
         assert(m_integrand);
         return *m_integrand;
@@ -524,7 +523,7 @@ namespace Rodin::Variational
       {
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
-        const auto& integrand = getIntegrand();
+        const auto& integrand = getIntegrandType();
         const auto& trial = integrand.getLHS();
         const auto& trans = polytope.getTransformation();
         const auto& fes = trial.getFiniteElementSpace();
@@ -556,7 +555,7 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
       std::vector<Math::SpatialVector<Scalar>> m_rgradient;
       std::vector<Math::SpatialVector<Scalar>> m_pgradient;
   };
@@ -616,25 +615,25 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase
   {
     public:
-      using Parent = LocalBilinearFormIntegratorBase;
+      using FESType = P1<Scalar, Context>;
 
-      using FES = P1<Scalar, Context>;
-
-      using LHS =
+      using LHSType =
         ShapeFunctionBase<
           Mult<
             FunctionBase<LHSFunctionDerived>,
             ShapeFunctionBase<
-              Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>>>>;
+              Grad<ShapeFunction<LHSDerived, FESType, TrialSpace>>>>>;
 
-      using RHS =
+      using RHSType =
         ShapeFunctionBase<
-          Grad<ShapeFunction<RHSDerived, FES, TestSpace>>>;
+          Grad<ShapeFunction<RHSDerived, FESType, TestSpace>>>;
 
-      using Integrand = Dot<LHS, RHS>;
+      using IntegrandType = Dot<LHSType, RHSType>;
+
+      using Parent = LocalBilinearFormIntegratorBase;
 
       constexpr
-      QuadratureRule(const Integrand& integrand)
+      QuadratureRule(const IntegrandType& integrand)
         : LocalBilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -657,7 +656,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrandType() const
       {
         assert(m_integrand);
         return *m_integrand;
@@ -667,7 +666,7 @@ namespace Rodin::Variational
       {
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
-        const auto& integrand = getIntegrand();
+        const auto& integrand = getIntegrandType();
         const auto& trial = integrand.getLHS();
         const auto& f = integrand.getLHS().getDerived().getLHS();
         const auto& trans = polytope.getTransformation();
@@ -705,7 +704,7 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
       std::vector<Math::SpatialVector<Scalar>> m_rgradient;
       std::vector<Math::SpatialVector<Scalar>> m_pgradient;
   };
@@ -769,22 +768,22 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase
   {
     public:
+      using FESType = P1<Scalar, Context>;
+
+      using LHSType =
+        ShapeFunctionBase<
+          Jacobian<ShapeFunction<LHSDerived, FESType, TrialSpace>>>;
+
+      using RHSType =
+        ShapeFunctionBase<
+          Jacobian<ShapeFunction<RHSDerived, FESType, TestSpace>>>;
+
+      using IntegrandType = Dot<LHSType, RHSType>;
+
       using Parent = LocalBilinearFormIntegratorBase;
 
-      using FES = P1<Scalar, Context>;
-
-      using LHS =
-        ShapeFunctionBase<
-          Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>>;
-
-      using RHS =
-        ShapeFunctionBase<
-          Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>>;
-
-      using Integrand = Dot<LHS, RHS>;
-
       constexpr
-      QuadratureRule(const Integrand& integrand)
+      QuadratureRule(const IntegrandType& integrand)
         : LocalBilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -807,7 +806,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrandType() const
       {
         assert(m_integrand);
         return *m_integrand;
@@ -817,7 +816,7 @@ namespace Rodin::Variational
       {
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
-        const auto& integrand = getIntegrand();
+        const auto& integrand = getIntegrandType();
         const auto& trial = integrand.getLHS();
         const auto& trans = polytope.getTransformation();
         const auto& fes = trial.getFiniteElementSpace();
@@ -848,7 +847,7 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
       std::vector<Math::SpatialVector<Scalar>> m_rjac;
       std::vector<Math::SpatialVector<Scalar>> m_pjac;
   };
@@ -911,30 +910,29 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase
   {
     public:
-      /// Parent class
-      using Parent = LocalBilinearFormIntegratorBase;
-
       /// Type of finite element space
-      using FES = P1<Math::Vector<Scalar>, Context>;
+      using FESType = P1<Math::Vector<Scalar>, Context>;
 
       /// Type of left hand side
-      using LHS =
+      using LHSType =
         ShapeFunctionBase<
           Mult<
             FunctionBase<LHSFunctionDerived>,
             ShapeFunctionBase<
-              Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>>>>;
+              Jacobian<ShapeFunction<LHSDerived, FESType, TrialSpace>>>>>;
 
       /// Type of right hand side
-      using RHS =
+      using RHSType =
         ShapeFunctionBase<
-          Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>>;
+          Jacobian<ShapeFunction<RHSDerived, FESType, TestSpace>>>;
 
       /// Type of integrand
-      using Integrand = Dot<LHS, RHS>;
+      using IntegrandType = Dot<LHSType, RHSType>;
+
+      using Parent = LocalBilinearFormIntegratorBase;
 
       constexpr
-      QuadratureRule(const Integrand& integrand)
+      QuadratureRule(const IntegrandType& integrand)
         : LocalBilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -960,7 +958,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrandType() const
       {
         assert(m_integrand);
         return *m_integrand;
@@ -970,7 +968,7 @@ namespace Rodin::Variational
       {
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
-        const auto& integrand = getIntegrand();
+        const auto& integrand = getIntegrandType();
         const auto& trial = integrand.getLHS();
         const auto& f = integrand.getLHS().getDerived().getLHS();
         const auto& trans = polytope.getTransformation();
@@ -1019,7 +1017,7 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
 
       std::vector<Math::SpatialMatrix<Scalar>> m_rjac;
       std::vector<Math::SpatialMatrix<Scalar>> m_pjac;

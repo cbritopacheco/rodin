@@ -32,24 +32,24 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P1 GridFunction
    */
-  template <class Derived, class FESType>
-  class GradBase<Derived, GridFunction<FESType>>
-    : public VectorFunctionBase<GradBase<Derived, GridFunction<FESType>>>
+  template <class Derived, class FES>
+  class GradBase<Derived, GridFunction<FES>>
+    : public VectorFunctionBase<GradBase<Derived, GridFunction<FES>>>
   {
     public:
-      using FES = FESType;
+      using FESType = FES;
 
-      using Operand = GridFunction<FES>;
+      using OperandType = GridFunction<FESType>;
 
       /// Parent class
-      using Parent = VectorFunctionBase<GradBase<Derived, Operand>>;
+      using Parent = VectorFunctionBase<GradBase<Derived, OperandType>>;
 
       /**
        * @brief Constructs the gradient of a @f$ \mathbb{P}_1 @f$ function @f$
        * u @f$.
        * @param[in] u P1 GridFunction
        */
-      GradBase(const Operand& u)
+      GradBase(const OperandType& u)
         : m_u(u)
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
@@ -127,7 +127,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -142,7 +142,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Operand> m_u;
+      std::reference_wrapper<const OperandType> m_u;
   };
 }
 

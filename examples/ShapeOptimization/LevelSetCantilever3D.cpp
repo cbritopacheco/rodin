@@ -39,7 +39,7 @@ const Scalar k = 1;
 const Scalar dt = k * (hmax - hmin);
 static double alpha = dt;
 
-using FES = VectorP1<Context::Sequential>;
+using FES = VectorP1<Mesh<Context::Sequential>>;
 
 // Compliance
 inline Scalar compliance(const GridFunction<FES>& w)

@@ -26,81 +26,81 @@ namespace Rodin::FormLanguage
    * @ingroup TraitsSpecializations
    * @brief Traits for Potential.
    */
-  template <class LHSType, class RHSDerived>
+  template <class LHS, class RHSDerived>
   struct Traits<
     Variational::Potential<
-      LHSType,
+      LHS,
       Variational::FunctionBase<RHSDerived>>>
   {
-    using LHS = LHSType;
+    using LHSType = LHS;
 
-    using RHS = Variational::FunctionBase<Variational::FunctionBase<RHSDerived>>;
+    using RHSType = Variational::FunctionBase<Variational::FunctionBase<RHSDerived>>;
 
-    using Kernel = LHS;
+    using KernelType = LHSType;
 
-    using Operand = RHS;
+    using OperandType = RHSType;
 
-    using RHSRange =
-      typename FormLanguage::Traits<RHS>::RangeType;
+    using RHSRangeType =
+      typename FormLanguage::Traits<RHSType>::RangeType;
 
-    using LHSRange =
+    using LHSRangeType =
       std::conditional_t<
       // If
-      std::is_same_v<RHSRange, Scalar>,
+      std::is_same_v<RHSRangeType, Scalar>,
       // Then
       Scalar,
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRange, Math::Vector<Scalar>>,
+        std::is_same_v<RHSRangeType, Math::Vector<Scalar>>,
         // Then
         Math::Matrix<Scalar>,
         // Else
         void>>;
 
-    using RangeType = RHSRange;
+    using RangeType = RHSRangeType;
   };
 
   /**
    * @ingroup TraitsSpecializations
    * @brief Traits for Potential.
    */
-  template <class LHSType, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  template <class LHS, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Potential<
-      LHSType,
-      Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FESType, SpaceType>>>>
+      LHS,
+      Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>>>>
   {
-    using FES = FESType;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = FES;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    using LHS = LHSType;
+    using LHSType = LHS;
 
-    using RHS = Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>, FES, Space>;
+    using RHSType = Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>, FES, Space>;
 
-    using Kernel = LHS;
+    using KernelType = LHS;
 
-    using Operand = RHS;
+    using OperandType = RHSType;
 
-    using RHSRange =
-      typename FormLanguage::Traits<RHS>::RangeType;
+    using RHSRangeType =
+      typename FormLanguage::Traits<RHSType>::RangeType;
 
-    using LHSRange =
+    using LHSRangeType =
       std::conditional_t<
       // If
-      std::is_same_v<RHSRange, Scalar>,
+      std::is_same_v<RHSRangeType, Scalar>,
       // Then
       Scalar,
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRange, Math::Vector<Scalar>>,
+        std::is_same_v<RHSRangeType, Math::Vector<Scalar>>,
         // Then
         Math::Matrix<Scalar>,
         // Else
         void>>;
 
-    using RangeType = RHSRange;
+    using RangeType = RHSRangeType;
   };
 }
 
@@ -115,39 +115,39 @@ namespace Rodin::Variational
   /**
    * @ingroup PotentialSpecializations
    */
-  template <class LHSType, class RHSDerived>
-  class Potential<LHSType, FunctionBase<RHSDerived>> final
-    : public FunctionBase<Potential<LHSType, FunctionBase<RHSDerived>>>
+  template <class LHS, class RHSDerived>
+  class Potential<LHS, FunctionBase<RHSDerived>> final
+    : public FunctionBase<Potential<LHS, FunctionBase<RHSDerived>>>
   {
     public:
-      using LHS = LHSType;
+      using LHSType = LHS;
 
-      using Kernel = LHS;
+      using KernelType = LHSType;
 
-      using RHS = FunctionBase<RHSDerived>;
+      using RHSType = FunctionBase<RHSDerived>;
 
-      using Operand = RHS;
+      using OperandType = RHSType;
 
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using LHSRange =
+      using LHSRangeType =
         std::conditional_t<
         // If
-        std::is_same_v<RHSRange, Scalar>,
+        std::is_same_v<RHSRangeType, Scalar>,
         // Then
         Scalar,
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRange, Math::Vector<Scalar>>,
+          std::is_same_v<RHSRangeType, Math::Vector<Scalar>>,
           // Then
           Math::Matrix<Scalar>,
           // Else
           void>>;
 
-      using Parent = FunctionBase<Potential<LHS, RHS>>;
+      using Parent = FunctionBase<Potential<LHSType, RHSType>>;
 
-      Potential(const Kernel& kernel, const Operand& u)
+      Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel), m_u(u.copy())
       {}
 
@@ -167,14 +167,14 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, Scalar>)
         {
-          static_assert(std::is_same_v<RHSRange, Scalar>);
+          static_assert(std::is_same_v<RHSRangeType, Scalar>);
           return { 1, 1 };
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>)
         {
-          static_assert(std::is_same_v<RHSRange, Math::Vector<Scalar>>);
+          static_assert(std::is_same_v<RHSRangeType, Math::Vector<Scalar>>);
           return getOperand().getRangeShape();
         }
         else
@@ -204,7 +204,7 @@ namespace Rodin::Variational
         const auto& mesh = p.getPolytope().getMesh();
         if (m_qf.has_value())
         {
-          if constexpr (std::is_same_v<RHSRange, Scalar>)
+          if constexpr (std::is_same_v<RHSRangeType, Scalar>)
           {
             Scalar res = 0;
             for (auto it = mesh.getCell(); it; ++it)
@@ -220,7 +220,7 @@ namespace Rodin::Variational
             }
             return res;
           }
-          else if constexpr (std::is_same_v<RHSRange, Math::Vector<Scalar>>)
+          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<Scalar>>)
           {
             Math::Vector<Scalar> res;
             getValue(res, p);
@@ -234,7 +234,7 @@ namespace Rodin::Variational
         }
         else
         {
-          if constexpr (std::is_same_v<RHSRange, Scalar>)
+          if constexpr (std::is_same_v<RHSRangeType, Scalar>)
           {
             Scalar res = 0;
             for (auto it = mesh.getCell(); it; ++it)
@@ -250,7 +250,7 @@ namespace Rodin::Variational
             }
             return res;
           }
-          else if constexpr (std::is_same_v<RHSRange, Math::Vector<Scalar>>)
+          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<Scalar>>)
           {
             Math::Vector<Scalar> res;
             getValue(res, p);
@@ -318,8 +318,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Kernel> m_kernel;
-      std::unique_ptr<Operand> m_u;
+      std::reference_wrapper<const KernelType> m_kernel;
+      std::unique_ptr<OperandType> m_u;
       std::optional<
         std::function<const QF::QuadratureFormulaBase&(const Geometry::Polytope&)>> m_qf;
   };
@@ -346,44 +346,44 @@ namespace Rodin::Variational
    *  @f]
    *  are the basis functions.
    */
-  template <class LHSType, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
+  template <class LHS, class RHSDerived, class FES, ShapeFunctionSpaceType SpaceType>
   class Potential<
-    LHSType,
-    ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>> final
+    LHS,
+    ShapeFunctionBase<ShapeFunction<RHSDerived, FES, SpaceType>, FES, SpaceType>> final
       : public FormLanguage::Base
   {
     public:
       using Parent = FormLanguage::Base;
 
-      using FES = FESType;
+      using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      using LHS = LHSType;
+      using LHSType = LHS;
 
-      using Kernel = LHS;
+      using KernelType = LHS;
 
-      using RHS = ShapeFunctionBase<ShapeFunction<RHSDerived, FES, SpaceType>, FES, Space>;
+      using RHSType = ShapeFunctionBase<ShapeFunction<RHSDerived, FES, SpaceType>, FES, Space>;
 
-      using Operand = RHS;
+      using OperandType = RHSType;
 
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using LHSRange =
+      using LHSRangeType =
         std::conditional_t<
         // If
-        std::is_same_v<RHSRange, Scalar>,
+        std::is_same_v<RHSRangeType, Scalar>,
         // Then
         Scalar,
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRange, Math::Vector<Scalar>>,
+          std::is_same_v<RHSRangeType, Math::Vector<Scalar>>,
           // Then
           Math::Matrix<Scalar>,
           // Else
           void>>;
 
-      Potential(const Kernel& kernel, const Operand& u)
+      Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel), m_u(u)
       {}
 
@@ -398,13 +398,13 @@ namespace Rodin::Variational
       {}
 
       inline
-      const Kernel& getKernel() const
+      const KernelType& getKernel() const
       {
         return m_kernel;
       }
 
       inline
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -419,14 +419,14 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, Scalar>)
         {
-          static_assert(std::is_same_v<RHSRange, Scalar>);
+          static_assert(std::is_same_v<RHSRangeType, Scalar>);
           return { 1, 1 };
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>)
         {
-          static_assert(std::is_same_v<RHSRange, Math::Vector<Scalar>>);
+          static_assert(std::is_same_v<RHSRangeType, Math::Vector<Scalar>>);
           return getOperand().getRangeShape();
         }
         else
@@ -442,8 +442,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<Kernel> m_kernel;
-      std::reference_wrapper<const Operand> m_u;
+      std::reference_wrapper<KernelType> m_kernel;
+      std::reference_wrapper<const OperandType> m_u;
   };
 
   /**
@@ -453,37 +453,37 @@ namespace Rodin::Variational
   Potential(const LHSType&, const ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>&)
     -> Potential<LHSType, ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>>;
 
-  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class QuadratureRule<
     Dot<
-      Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+      Potential<Kernel, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
         : public GlobalBilinearFormIntegratorBase
   {
     public:
-      using Kernel = KernelType;
+      using KernelType = Kernel;
 
-      using LHS = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
+      using LHSType = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
 
-      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+      using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
 
-      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using Integrand = Dot<LHS, RHS>;
+      using IntegrandType = Dot<LHSType, RHSType>;
 
       using Parent = GlobalBilinearFormIntegratorBase;
 
-      static_assert(std::is_same_v<LHSRange, RHSRange>);
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       constexpr
-      QuadratureRule(const LHS& lhs, const RHS& rhs)
+      QuadratureRule(const LHSType& lhs, const RHSType& rhs)
         : QuadratureRule(Dot(lhs, rhs))
       {}
 
       constexpr
-      QuadratureRule(const Integrand& integrand)
+      QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getOperand().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -502,7 +502,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
         return *m_integrand;
@@ -590,7 +590,7 @@ namespace Rodin::Variational
                       const Geometry::Point z6(tep, teptrans, std::cref(rz6));
 
                       Scalar s1, s2, s3, s4, s5, s6;
-                      if constexpr (std::is_same_v<LHSRange, Scalar>)
+                      if constexpr (std::is_same_v<LHSRangeType, Scalar>)
                       {
                         s1 = kernel(x1, z1) * x1.getDistortion() * z1.getDistortion();
                         s2 = kernel(x2, z2) * x2.getDistortion() * z2.getDistortion();
@@ -599,7 +599,7 @@ namespace Rodin::Variational
                         s5 = kernel(x5, z5) * x5.getDistortion() * z5.getDistortion();
                         s6 = kernel(x6, z6) * x6.getDistortion() * z6.getDistortion();
                       }
-                      else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
+                      else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
                       {
                         kernel(m_k1, x1, z1);
                         kernel(m_k2, x2, z2);
@@ -626,7 +626,7 @@ namespace Rodin::Variational
                         for (size_t m = 0; m < trialfe.getCount(); m++)
                         {
                           const auto& trb = trialfe.getBasis(m);
-                          if constexpr (std::is_same_v<LHSRange, Scalar>)
+                          if constexpr (std::is_same_v<LHSRangeType, Scalar>)
                           {
                             res(l, m) += d * w * s1 * trb(rx1) * teb(rz1);
                             assert(std::isfinite(s1));
@@ -641,7 +641,7 @@ namespace Rodin::Variational
                             res(l, m) += d * w * s6 * trb(rx6) * teb(rz6);
                             assert(std::isfinite(s6));
                           }
-                          else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
+                          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
                           {
                             assert(std::isfinite(s1));
                             trb(m_trv, rx1);
@@ -694,11 +694,11 @@ namespace Rodin::Variational
             {
               const Geometry::Point y(trp, trptrans, std::cref(qftr.getPoint(j)));
               Scalar d;
-              if constexpr (std::is_same_v<LHSRange, Scalar>)
+              if constexpr (std::is_same_v<LHSRangeType, Scalar>)
               {
                 d = kernel(x, y) * x.getDistortion() * y.getDistortion();
               }
-              else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
+              else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
               {
                 kernel(m_k, x, y);
                 d = x.getDistortion() * y.getDistortion();
@@ -708,22 +708,22 @@ namespace Rodin::Variational
               {
                 const auto& teb = testfe.getBasis(l);
                 Scalar tev;
-                if constexpr (std::is_same_v<LHSRange, Scalar>)
+                if constexpr (std::is_same_v<LHSRangeType, Scalar>)
                 {
                   tev = teb(qfte.getPoint(i));
                 }
-                else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
+                else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
                 {
                   teb(m_tev, qfte.getPoint(i));
                 }
                 for (size_t m = 0; m < trialfe.getCount(); m++)
                 {
                   const auto& trb = trialfe.getBasis(m);
-                  if constexpr (std::is_same_v<LHSRange, Scalar>)
+                  if constexpr (std::is_same_v<LHSRangeType, Scalar>)
                   {
                     res(l, m) += w * d * tev * trb(qftr.getPoint(j));
                   }
-                  else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>>)
+                  else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
                   {
                     trb(m_trv, qftr.getPoint(j));
                     res(l, m) += w * d * m_tev.dot(m_k * m_trv);
@@ -746,35 +746,35 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
 
       mutable Math::Matrix<Scalar> m_k;
       mutable Math::Vector<Scalar> m_trv, m_tev;
       mutable Math::Matrix<Scalar> m_k1, m_k2, m_k3, m_k4, m_k5, m_k6;
   };
 
-  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class Integral<
     Dot<
-      Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+      Potential<Kernel, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
     : public QuadratureRule<
         Dot<
-          Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+          Potential<Kernel, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
-      using Kernel = KernelType;
+      using KernelType = Kernel;
 
-      using LHS = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
+      using LHSType = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
 
-      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+      using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
 
-      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using Integrand = Dot<LHS, RHS>;
+      using IntegrandType = Dot<LHSType, RHSType>;
 
       using Parent =
         QuadratureRule<
@@ -782,11 +782,11 @@ namespace Rodin::Variational
             Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
-      Integral(const LHS& lhs, const RHS& rhs)
+      Integral(const LHSType& lhs, const RHSType& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
-      Integral(const Integrand& integrand)
+      Integral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 

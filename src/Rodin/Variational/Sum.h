@@ -19,14 +19,24 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  template <class LHSDerived, class RHSDerived>
+  struct Traits<
+    Variational::Sum<Variational::FunctionBase<LHSDerived>, Variational::FunctionBase<RHSDerived>>>
+  {
+    using LHSType = Variational::FunctionBase<LHSDerived>;
+    using RHSType = Variational::FunctionBase<RHSDerived>;
+  };
+
+  template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Sum<
-      Variational::ShapeFunctionBase<LHSDerived, FESType, SpaceType>,
-      Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
+      Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
+      Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
-    using FES = FESType;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = FES;
+    using LHSType = Variational::FunctionBase<LHSDerived>;
+    using RHSType = Variational::FunctionBase<RHSDerived>;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -46,15 +56,17 @@ namespace Rodin::Variational
     : public FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using LHS = FunctionBase<LHSDerived>;
-      using RHS = FunctionBase<RHSDerived>;
+      using LHSType = FunctionBase<LHSDerived>;
+      using RHSType = FunctionBase<RHSDerived>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
       using Parent = FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
-      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
-      static_assert(std::is_same_v<LHSRange, RHSRange>);
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       constexpr
-      Sum(const LHS& lhs, const RHS& rhs)
+      Sum(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
         assert(lhs.getRangeShape() == rhs.getRangeShape());
@@ -127,7 +139,7 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Vector<Scalar>& res, const Geometry::Point& p) const
       {
-        static_assert(FormLanguage::IsVectorRange<LHSRange>::Value);
+        static_assert(FormLanguage::IsVectorRange<LHSRangeType>::Value);
         getLHS().getValue(res, p);
         res += getRHS().getValue(p);
       }
@@ -136,7 +148,7 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Matrix<Scalar>& res, const Geometry::Point& p) const
       {
-        static_assert(FormLanguage::IsMatrixRange<LHSRange>::Value);
+        static_assert(FormLanguage::IsMatrixRange<LHSRangeType>::Value);
         getLHS().getValue(res, p);
         res += getRHS().getValue(p);
       }
@@ -147,8 +159,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived>
@@ -185,23 +197,27 @@ namespace Rodin::Variational
   /**
    * @ingroup SumSpecializations
    */
-  template <class LHSDerived, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
-  class Sum<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>> final
-    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  class Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>> final
+    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
     public:
-      using FES = FESType;
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using FESType = FES;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using LHS = ShapeFunctionBase<LHSDerived, FES, Space>;
-      using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
-      using Parent = ShapeFunctionBase<Sum<LHS, RHS>, FES, Space>;
-      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
-      static_assert(std::is_same_v<LHSRange, RHSRange>);
+      using LHSType = ShapeFunctionBase<LHSDerived, FES, Space>;
+
+      using RHSType = ShapeFunctionBase<RHSDerived, FES, Space>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+      using Parent = ShapeFunctionBase<Sum<LHSType, RHSType>, FES, Space>;
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       constexpr
-      Sum(const LHS& lhs, const RHS& rhs)
+      Sum(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
@@ -224,7 +240,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const LHS& getLHS() const
+      const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -232,7 +248,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const RHS& getRHS() const
+      const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -283,8 +299,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>

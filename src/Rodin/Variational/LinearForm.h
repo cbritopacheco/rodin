@@ -88,11 +88,16 @@ namespace Rodin::Variational
     : public LinearFormBase<Math::Vector<Scalar>>
   {
     public:
-      using Context = typename FES::Context;
+      using FESType = FES;
+
+      using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+
       using VectorType = Math::Vector<Scalar>;
+
       using Parent = LinearFormBase<VectorType>;
 
       using SequentialAssembly = Assembly::Sequential<VectorType, LinearForm>;
+
       using MultithreadedAssembly = Assembly::Multithreaded<VectorType, LinearForm>;
 
       /**

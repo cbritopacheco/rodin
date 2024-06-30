@@ -32,24 +32,24 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of a P1 GridFunction
    */
-  template <class Derived, class FESType>
-  class JacobianBase<Derived, GridFunction<FESType>>
-    : public MatrixFunctionBase<JacobianBase<Derived, GridFunction<FESType>>>
+  template <class Derived, class FES>
+  class JacobianBase<Derived, GridFunction<FES>>
+    : public MatrixFunctionBase<JacobianBase<Derived, GridFunction<FES>>>
   {
     public:
-      using FES = FESType;
+      using FESType = FES;
 
-      using Operand = GridFunction<FES>;
+      using OperandType = GridFunction<FES>;
 
       /// Parent class
-      using Parent = MatrixFunctionBase<JacobianBase<Derived, Operand>>;
+      using Parent = MatrixFunctionBase<JacobianBase<Derived, OperandType>>;
 
       /**
        * @brief Constructs the Jacobianient of a @f$ \mathbb{P}_1 @f$ function
        * @f$ u @f$.
        * @param[in] u P1 GridFunction
        */
-      JacobianBase(const Operand& u)
+      JacobianBase(const OperandType& u)
         : m_u(u)
       {}
 
@@ -122,7 +122,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -147,7 +147,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Operand> m_u;
+      std::reference_wrapper<const OperandType> m_u;
   };
 }
 

@@ -14,21 +14,26 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase
   {
     public:
-      using FES = VectorP1<Context>;
+      using FESType = VectorP1<Context>;
+
+      using MuType = FunctionBase<MuDerived>;
+
+      using LambdaType = FunctionBase<LambdaDerived>;
+
       using Parent = LocalBilinearFormIntegratorBase;
-      using Mu = FunctionBase<MuDerived>;
-      using Lambda = FunctionBase<LambdaDerived>;
 
     private:
-        using MuRange = typename FormLanguage::Traits<Mu>::RangeType;
-        using LambdaRange = typename FormLanguage::Traits<Lambda>::RangeType;
-        static_assert(std::is_same_v<MuRange, Scalar>);
-        static_assert(std::is_same_v<LambdaRange, Scalar>);
+        using MuRangeType = typename FormLanguage::Traits<MuType>::RangeType;
+
+        using LambdaRangeType = typename FormLanguage::Traits<LambdaType>::RangeType;
+
+        static_assert(std::is_same_v<MuRangeType, Scalar>);
+        static_assert(std::is_same_v<LambdaRangeType, Scalar>);
 
     public:
       LinearElasticityIntegrator(
-          const TrialFunction<FES>& u, const TestFunction<FES>& v,
-          const Lambda& lambda, const Mu& mu)
+          const TrialFunction<FESType>& u, const TestFunction<FESType>& v,
+          const LambdaType& lambda, const MuType& mu)
         : Parent(u, v),
           m_lambda(lambda.copy()), m_mu(mu.copy()),
           m_fes(u.getFiniteElementSpace())
@@ -111,7 +116,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Mu& getMu() const
+      const MuType& getMu() const
       {
         assert(m_mu);
         return *m_mu;
@@ -119,7 +124,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Lambda& getLambda() const
+      const LambdaType& getLambda() const
       {
         assert(m_lambda);
         return *m_lambda;
@@ -127,7 +132,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const FES& getFiniteElementSpace() const
+      const FESType& getFiniteElementSpace() const
       {
         return m_fes.get();
       }
@@ -143,9 +148,9 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Lambda> m_lambda;
-      std::unique_ptr<Mu> m_mu;
-      std::reference_wrapper<const FES> m_fes;
+      std::unique_ptr<LambdaType> m_lambda;
+      std::unique_ptr<MuType> m_mu;
+      std::reference_wrapper<const FESType> m_fes;
 
       std::vector<Math::SpatialMatrix<Scalar>> m_rjac;
       std::vector<Math::SpatialMatrix<Scalar>> m_pjac;

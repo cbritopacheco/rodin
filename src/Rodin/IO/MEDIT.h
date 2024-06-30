@@ -522,10 +522,12 @@ namespace Rodin::IO
     : public MeshLoaderBase<Context::Sequential>
   {
     public:
-      using Object = Rodin::Geometry::Mesh<Context::Sequential>;
+      using ObjectType = Rodin::Geometry::Mesh<Context::Sequential>;
 
-      MeshLoader(Object& mesh)
-        : MeshLoaderBase<Context::Sequential>(mesh),
+      using Parent = MeshLoaderBase<Context::Sequential>;
+
+      MeshLoader(ObjectType& mesh)
+        : Parent(mesh),
           m_currentLineNumber(0)
       {}
 
@@ -573,7 +575,13 @@ namespace Rodin::IO
     : public MeshPrinterBase<Context::Sequential>
   {
     public:
-      MeshPrinter(const Rodin::Geometry::Mesh<Context::Sequential>& mesh)
+      using ContextType = Context::Sequential;
+
+      using ObjectType = Geometry::Mesh<ContextType>;
+
+      using Parent = MeshPrinterBase<ContextType>;
+
+      MeshPrinter(const ObjectType& mesh)
         : MeshPrinterBase(mesh)
       {}
 
@@ -592,16 +600,19 @@ namespace Rodin::IO
 
   template <class Range>
   class GridFunctionLoader<FileFormat::MEDIT,
-        Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+        Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
     : public GridFunctionLoaderBase<
-        Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+        Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
   {
     public:
-      /// Type of finite element space
-      using FES = Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>;
+      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Sequential>>;
 
-      GridFunctionLoader(Variational::GridFunction<FES>& gf)
-        : GridFunctionLoaderBase<FES>(gf),
+      using ObjectType = Variational::GridFunction<FESType>;
+
+      using Parent = GridFunctionLoaderBase<FESType>;
+
+      GridFunctionLoader(ObjectType& gf)
+        : Parent(gf),
           m_currentLineNumber(0)
       {}
 
@@ -625,8 +636,14 @@ namespace Rodin::IO
     : public GridFunctionPrinterBase<FES>
   {
     public:
-      GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
-        : GridFunctionPrinterBase<FES>(gf)
+      using FESType = FES;
+
+      using ObjectType = Variational::GridFunction<FESType>;
+
+      using Parent = GridFunctionPrinterBase<FESType>;
+
+      GridFunctionPrinter(const ObjectType& gf)
+        : Parent(gf)
       {}
 
       void print(std::ostream& os) override

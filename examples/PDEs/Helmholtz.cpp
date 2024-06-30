@@ -20,23 +20,24 @@ int main(int, char**)
   mesh.getConnectivity().compute(1, 2);
 
   // Functions
-  P1 vh(mesh);
+  P1<Complex> vh(mesh);
+  // GridFunction gf(vh);
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
+  // TrialFunction uRe(vh), uIm(vh);
+  // TestFunction  vRe(vh), vIm(vh);
 
-  // Define problem
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(v)
-          + DirichletBC(u, Zero());
+  // // Define problem
+  // Problem helmholtz(uRe, uIm, vRe, vIm);
+  // helmholtz = Integral(Grad(u), Grad(v))
+  //           - Integral(v)
+  //           + DirichletBC(u, Zero());
 
-  Solver::CG solver;
-  poisson.solve(solver);
+  // Solver::CG solver;
+  // poisson.solve(solver);
 
   // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  // u.getSolution().save("Poisson.gf");
+  // mesh.save("Poisson.mesh");
 
   return 0;
 }

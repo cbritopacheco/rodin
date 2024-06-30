@@ -26,22 +26,28 @@ namespace Rodin::IO
   /**
    * @brief Base class for mesh loader objects.
    */
-  template <class Trait>
-  class MeshLoaderBase : public IO::Loader<Rodin::Geometry::Mesh<Trait>>
+  template <class Context>
+  class MeshLoaderBase : public IO::Loader<Rodin::Geometry::Mesh<Context>>
   {
     public:
-      MeshLoaderBase(Rodin::Geometry::Mesh<Trait>& mesh)
+      using ContextType = Context;
+
+      using ObjectType = Geometry::Mesh<ContextType>;
+
+      using Parent = IO::Loader<ObjectType>;
+
+      MeshLoaderBase(ObjectType& mesh)
         : m_mesh(mesh)
       {}
 
     protected:
-      Rodin::Geometry::Mesh<Trait>& getObject() override
+      ObjectType& getObject() override
       {
         return m_mesh.get();
       }
 
     private:
-      std::reference_wrapper<Geometry::Mesh<Context::Sequential>> m_mesh;
+      std::reference_wrapper<ObjectType> m_mesh;
   };
 }
 

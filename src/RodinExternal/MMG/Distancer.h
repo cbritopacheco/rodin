@@ -42,14 +42,16 @@ namespace Rodin::External::MMG
    * @f]
    */
   template <>
-    class Distancer<ScalarGridFunction::FES>
+    class Distancer<typename FormLanguage::Traits<ScalarGridFunction>::FESType>
     {
       public:
+        using FESType = typename FormLanguage::Traits<ScalarGridFunction>::FESType;
+
         /**
          * @brief Creates a Distancer2D object with default values.
          * @param[in] fes Finite element space for the distance function
          */
-        Distancer(const ScalarGridFunction::FES& fes)
+        Distancer(const FESType& fes)
           : m_fes(fes),
           m_scale(true),
           m_distTheBoundary(false),
@@ -269,7 +271,7 @@ namespace Rodin::External::MMG
         }
 
       private:
-        std::reference_wrapper<const ScalarGridFunction::FES> m_fes;
+        std::reference_wrapper<const FESType> m_fes;
         bool m_scale;
         bool m_distTheBoundary;
         unsigned int m_ncpu;
@@ -277,7 +279,8 @@ namespace Rodin::External::MMG
         std::optional<FlatSet<Geometry::Attribute>> m_interiorDomains;
     };
 
-  Distancer(const ScalarGridFunction::FES&) -> Distancer<ScalarGridFunction::FES>;
+  Distancer(const typename FormLanguage::Traits<ScalarGridFunction>::FESType&)
+    -> Distancer<typename FormLanguage::Traits<ScalarGridFunction>::FESType>;
 
   /**
    * @brief Distancer specialization for redistancing a level set function.

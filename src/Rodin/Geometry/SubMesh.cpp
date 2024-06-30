@@ -6,7 +6,7 @@
 
 namespace Rodin::Geometry
 {
-  SubMesh<Context::Sequential>::SubMesh(std::reference_wrapper<const Mesh<Context::Sequential>> parent)
+  SubMesh<Context::Sequential>::SubMesh(std::reference_wrapper<const Mesh<Context>> parent)
     : m_parent(parent)
   {
     if (parent.get().isSubMesh())
