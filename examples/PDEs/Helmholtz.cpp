@@ -21,7 +21,6 @@ int main(int, char**)
 
   // Functions
   P1<Complex> vh(mesh);
-  // GridFunction gf(vh);
 
   // TrialFunction uRe(vh), uIm(vh);
   // TestFunction  vRe(vh), vIm(vh);

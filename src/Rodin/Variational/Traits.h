@@ -10,10 +10,14 @@
 #include <type_traits>
 
 #include "Rodin/Types.h"
+
 #include "Rodin/Math/ForwardDecls.h"
+
 #include "Rodin/Geometry/ForwardDecls.h"
+
 #include "Rodin/FormLanguage/Traits.h"
-#include "Rodin/Utility/IsDetected.h"
+
+#include "Rodin/Utility/HasValueMember.h"
 #include "Rodin/Utility/IsSpecialization.h"
 
 #include "ForwardDecls.h"
@@ -77,18 +81,6 @@ namespace Rodin::FormLanguage
     };
   }
 
-  template <typename T, typename = void>
-  struct HasValueTypeMember
-  {
-    static constexpr const bool Value = false;
-  };
-
-  template <class T>
-  struct HasValueTypeMember<T, std::void_t<typename T::ValueType>>
-  {
-    static constexpr const bool Value = true;
-  };
-
   template <typename T, typename = void, typename = void>
   struct IsVectorAtCompileTime
   {
@@ -149,18 +141,7 @@ namespace Rodin::FormLanguage
   };
 
   template <class T>
-  struct IsPlainObject;
-
-  template <class EigenDerived>
-  struct IsPlainObject<Eigen::MatrixBase<EigenDerived>>
-  {
-    static constexpr const bool Value =
-      std::is_base_of_v<Eigen::PlainObjectBase<std::decay_t<EigenDerived>>, std::decay_t<EigenDerived>>;
-  };
-
-  template <class T>
-  struct ResultOf
-  {};
+  struct ResultOf;
 
   template <class Derived>
   struct ResultOf<Variational::FunctionBase<Derived>>
@@ -177,40 +158,36 @@ namespace Rodin::FormLanguage
   };
 
   template <class T>
-  struct RangeOf
-  {};
+  struct RangeOf;
 
   template <class Derived>
   struct RangeOf<Variational::FunctionBase<Derived>>
   {
     using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
-
     using Type =
-      typename Internal::RangeOfSAT<IsBooleanRange<ResultType>::Value,
-                                    IsIntegerRange<ResultType>::Value,
-                                    IsScalarRange<ResultType>::Value,
-                                    IsVectorRange<ResultType>::Value,
-                                    IsMatrixRange<ResultType>::Value>
-                                    ::Type;
+      typename Internal::RangeOfSAT<
+        IsBooleanRange<ResultType>::Value,
+        IsIntegerRange<ResultType>::Value,
+        IsScalarRange<ResultType>::Value,
+        IsVectorRange<ResultType>::Value,
+        IsMatrixRange<ResultType>::Value>
+      ::Type;
   };
 
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
     using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
-    static_assert(Utility::IsSpecialization<ResultType, Variational::TensorBasis>::Value,
-        "EXPECTED TensorBasis AS RETURN TYPE. GOT SOMETHING ELSE. CHECK INSTANTIATION OF THE TEMPLATE CLASS.");
-    static_assert(HasValueTypeMember<ResultType>::Value,
-        "EXPECTED ValueType MEMBER DEFINITION DOES NOT EXIST.");
-    using ValueType = typename ResultType::ValueType;
-
+    static_assert(Utility::IsSpecialization<ResultType, Variational::TensorBasis>::Value);
+    using BasisType = typename Traits<ResultType>::BasisType;
     using Type =
-      typename Internal::RangeOfSAT<IsBooleanRange<ValueType>::Value,
-                                    IsIntegerRange<ValueType>::Value,
-                                    IsScalarRange<ValueType>::Value,
-                                    IsVectorRange<ValueType>::Value,
-                                    IsMatrixRange<ValueType>::Value>
-                                    ::Type;
+      typename Internal::RangeOfSAT<
+        IsBooleanRange<BasisType>::Value,
+        IsIntegerRange<BasisType>::Value,
+        IsScalarRange<BasisType>::Value,
+        IsVectorRange<BasisType>::Value,
+        IsMatrixRange<BasisType>::Value>
+      ::Type;
   };
 }
 
