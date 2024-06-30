@@ -12,6 +12,17 @@
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Tensor.h"
 
+#include "Rodin/FormLanguage/Traits.h"
+
+namespace Rodin::FormLanguage
+{
+  template <class T>
+  struct Traits<Variational::TensorBasis<T>>
+  {
+    using BasisType = T;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -40,7 +51,7 @@ namespace Rodin::Variational
   class TensorBasis final
   {
     public:
-      using ValueType = T;
+      using BasisType = T;
 
       template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
       constexpr

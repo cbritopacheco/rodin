@@ -22,6 +22,7 @@
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "Traits.h"
+#include "IsPlaneObject.h"
 
 namespace Rodin::FormLanguage
 {
@@ -97,7 +98,8 @@ namespace Rodin::FormLanguage
       /**
        * @brief Keeps the passed object in memory for later use.
        */
-      template <class T, typename = std::enable_if_t<FormLanguage::IsPlainObject<T>::Value>>
+      template <class T, typename =
+        std::enable_if_t<FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value>>
       inline
       constexpr
       const T& object(T&& obj) const noexcept
@@ -118,7 +120,8 @@ namespace Rodin::FormLanguage
       /**
        * @brief Returns the same object.
        */
-      template <class T, typename = std::enable_if_t<!FormLanguage::IsPlainObject<T>::Value>>
+      template <class T, typename =
+        std::enable_if_t<!FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value>>
       inline
       constexpr
       T object(T&& obj) const noexcept
