@@ -103,7 +103,9 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = LazyEvaluator<GridFunctionBase<Derived, FES>>;
 
-      static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector<Scalar>>);
+      static_assert(
+          std::is_same_v<RangeType, Scalar> ||
+          std::is_same_v<RangeType, Math::Vector<Scalar>>);
 
       GridFunctionBase(const FES& fes)
         : Parent(std::cref(*this)),

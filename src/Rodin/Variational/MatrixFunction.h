@@ -106,6 +106,9 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @ingroup MatrixFunctionSpecializations
+   */
   template <>
   class MatrixFunction<Math::Matrix<Scalar>> final
     : public MatrixFunctionBase<MatrixFunction<Math::Matrix<Scalar>>>
