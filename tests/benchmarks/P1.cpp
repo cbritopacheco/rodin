@@ -22,7 +22,6 @@ namespace RodinBenchmark
   {
     public:
       using MeshType = SequentialMesh;
-      using FESType = P1<MeshType>;
 
       void SetUp(const benchmark::State&)
       {
@@ -68,7 +67,7 @@ namespace RodinBenchmark
   {
     for (auto _ : st)
     {
-      FESType fes(uniformTriangularMesh16);
+      P1 fes(uniformTriangularMesh16);
       benchmark::DoNotOptimize(fes);
     }
   }
@@ -78,7 +77,7 @@ namespace RodinBenchmark
   {
     for (auto _ : st)
     {
-      FESType fes(uniformTriangularMesh32);
+      P1 fes(uniformTriangularMesh32);
       benchmark::DoNotOptimize(fes);
     }
   }
@@ -88,7 +87,7 @@ namespace RodinBenchmark
   {
     for (auto _ : st)
     {
-      FESType fes(uniformTriangularMesh64);
+      P1 fes(uniformTriangularMesh64);
       benchmark::DoNotOptimize(fes);
     }
   }
@@ -98,7 +97,7 @@ namespace RodinBenchmark
   {
     for (auto _ : st)
     {
-      FESType fes(uniformTriangularMesh128);
+      P1 fes(uniformTriangularMesh128);
       benchmark::DoNotOptimize(fes);
     }
   }
@@ -106,7 +105,7 @@ namespace RodinBenchmark
   BENCHMARK_F(P1Benchmark, 2D_Square_GridFunction_Projection_Scalar_SumOfComponents)
   (benchmark::State& st)
   {
-    FESType fes(square2d);
+    P1 fes(square2d);
     GridFunction gf(fes);
     ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     for (auto _ : st)
@@ -116,7 +115,7 @@ namespace RodinBenchmark
   BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Scalar_SumOfComponents)
   (benchmark::State& st)
   {
-    FESType fes(uniformTriangularMesh16);
+    P1 fes(uniformTriangularMesh16);
     GridFunction gf(fes);
     ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     for (auto _ : st)
@@ -126,7 +125,7 @@ namespace RodinBenchmark
   BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Scalar_SumOfComponents)
   (benchmark::State& st)
   {
-    FESType fes(uniformTriangularMesh32);
+    P1 fes(uniformTriangularMesh32);
     GridFunction gf(fes);
     ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     for (auto _ : st)
@@ -136,8 +135,8 @@ namespace RodinBenchmark
   BENCHMARK_F(P1Benchmark, 2D_Square_GridFunction_Projection_Vector_Components)
   (benchmark::State& st)
   {
-    constexpr size_t vdim = 2;
-    FESType fes(square2d, vdim);
+    const size_t vdim = square2d.getSpaceDimension();
+    P1 fes(square2d, vdim);
     GridFunction gf(fes);
     VectorFunction c{
       [](const Geometry::Point& p) { return p.x(); },
@@ -150,8 +149,8 @@ namespace RodinBenchmark
   BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Vector_Components)
   (benchmark::State& st)
   {
-    constexpr size_t vdim = 2;
-    FESType fes(uniformTriangularMesh16, vdim);
+    const size_t vdim = uniformTriangularMesh16.getSpaceDimension();
+    P1 fes(uniformTriangularMesh16, vdim);
     GridFunction gf(fes);
     VectorFunction c{
       [](const Geometry::Point& p) { return p.x(); },
@@ -164,8 +163,8 @@ namespace RodinBenchmark
   BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Vector_Components)
   (benchmark::State& st)
   {
-    constexpr size_t vdim = 2;
-    FESType fes(uniformTriangularMesh32, vdim);
+    const size_t vdim = uniformTriangularMesh32.getSpaceDimension();
+    P1 fes(uniformTriangularMesh32, vdim);
     GridFunction gf(fes);
     VectorFunction c{
       [](const Geometry::Point& p) { return p.x(); },
