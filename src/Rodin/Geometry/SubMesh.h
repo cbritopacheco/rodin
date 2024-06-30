@@ -88,7 +88,8 @@ namespace Rodin::Geometry
   class SubMesh<Context::Sequential> final : public SubMeshBase, public Mesh<Context::Sequential>
   {
     public:
-      using Parent = Mesh<Context::Sequential>;
+      using Parent = Mesh<Rodin::Context::Sequential>;
+      using Context = typename Parent::Context;
 
       /**
        * @brief Class used to build SubMesh<Context::Sequential> instances.
@@ -98,7 +99,7 @@ namespace Rodin::Geometry
         public:
           Builder() = default;
 
-          Builder& initialize(const Mesh<Context::Sequential>& parent);
+          Builder& initialize(const Mesh<Context>& parent);
 
           Builder& include(size_t d, Index parentIdx);
 
@@ -107,15 +108,15 @@ namespace Rodin::Geometry
           SubMesh finalize();
 
         private:
-          std::optional<std::reference_wrapper<const Mesh<Context::Sequential>>> m_parent;
-          Mesh<Context::Sequential>::Builder m_build;
+          std::optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
+          Mesh<Context>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<boost::bimap<Index, Index>> m_s2ps;
           size_t m_dimension;
       };
 
       explicit
-      SubMesh(std::reference_wrapper<const Mesh<Context::Sequential>> parent);
+      SubMesh(std::reference_wrapper<const Mesh<Context>> parent);
 
       SubMesh(const SubMesh& other);
 
@@ -144,7 +145,7 @@ namespace Rodin::Geometry
       /**
        * @returns Reference to the parent Mesh object
        */
-      const Mesh<Context::Sequential>& getParent() const override;
+      const Mesh<Context>& getParent() const override;
 
       /**
        * @brief Gets the map of polytope indices from the SubMesh to the parent
@@ -162,7 +163,7 @@ namespace Rodin::Geometry
       }
 
     private:
-      std::reference_wrapper<const Mesh<Context::Sequential>> m_parent;
+      std::reference_wrapper<const Mesh<Context>> m_parent;
       std::vector<boost::bimap<Index, Index>> m_s2ps;
       Deque<Ancestor> m_ancestors;
   };

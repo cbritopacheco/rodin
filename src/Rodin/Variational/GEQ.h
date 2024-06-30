@@ -27,11 +27,13 @@ namespace Rodin::Variational
     : public BooleanFunctionBase<GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using Parent = BooleanFunctionBase<GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
-      using LHS = FunctionBase<LHSDerived>;
-      using RHS = FunctionBase<RHSDerived>;
+      using LHSType = FunctionBase<LHSDerived>;
 
-      GEQ(const LHS& lhs, const RHS& rhs)
+      using RHSType = FunctionBase<RHSDerived>;
+
+      using Parent = BooleanFunctionBase<GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+
+      GEQ(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
@@ -73,8 +75,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   /**

@@ -87,13 +87,13 @@ namespace Rodin::Geometry
     {
       case IO::FileFormat::MFEM:
       {
-        IO::MeshLoader<IO::FileFormat::MFEM, Context::Sequential> loader(*this);
+        IO::MeshLoader<IO::FileFormat::MFEM, Context> loader(*this);
         loader.load(input);
         break;
       }
       case IO::FileFormat::MEDIT:
       {
-        IO::MeshLoader<IO::FileFormat::MEDIT, Context::Sequential> loader(*this);
+        IO::MeshLoader<IO::FileFormat::MEDIT, Context> loader(*this);
         loader.load(input);
         break;
       }
@@ -124,13 +124,13 @@ namespace Rodin::Geometry
     {
       case IO::FileFormat::MFEM:
       {
-        IO::MeshPrinter<IO::FileFormat::MFEM, Context::Sequential> printer(*this);
+        IO::MeshPrinter<IO::FileFormat::MFEM, Context> printer(*this);
         printer.print(ofs);
         break;
       }
       case IO::FileFormat::MEDIT:
       {
-        IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Sequential> printer(*this);
+        IO::MeshPrinter<IO::FileFormat::MEDIT, Context> printer(*this);
         printer.print(ofs);
         break;
       }
@@ -152,7 +152,7 @@ namespace Rodin::Geometry
   SubMesh<Context::Sequential> Mesh<Context::Sequential>::keep(const FlatSet<Attribute>& attrs) const
   {
     const size_t D = getDimension();
-    SubMesh<Context::Sequential>::Builder build;
+    SubMesh<Context>::Builder build;
     build.initialize(*this);
     for (Index i = 0; i < getCellCount(); i++)
     {
@@ -174,7 +174,7 @@ namespace Rodin::Geometry
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
-    SubMesh<Context::Sequential>::Builder build;
+    SubMesh<Context>::Builder build;
     build.initialize(*this);
     for (auto it = getBoundary(); !it.end(); ++it)
     {
@@ -198,7 +198,7 @@ namespace Rodin::Geometry
   SubMesh<Context::Sequential> Mesh<Context::Sequential>::trim(const FlatSet<Attribute>& attrs) const
   {
     const size_t D = getDimension();
-    SubMesh<Context::Sequential>::Builder build;
+    SubMesh<Context>::Builder build;
     build.initialize(*this);
     for (Index i = 0; i < getCellCount(); i++)
     {
@@ -629,14 +629,14 @@ namespace Rodin::Geometry
   {
     assert(isSubMesh());
     RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH();
-    return static_cast<SubMesh<Context::Sequential>&>(*this);
+    return static_cast<SubMesh<Context>&>(*this);
   }
 
   const SubMeshBase& Mesh<Context::Sequential>::asSubMesh() const
   {
     assert(isSubMesh());
     RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH();
-    return static_cast<const SubMesh<Context::Sequential>&>(*this);
+    return static_cast<const SubMesh<Context>&>(*this);
   }
 
   Mesh<Context::Sequential> Mesh<Context::Sequential>::UniformGrid(Polytope::Type g, const Array<size_t>& dimensions)

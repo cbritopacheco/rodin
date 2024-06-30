@@ -12,20 +12,22 @@
 
 namespace Rodin::Variational
 {
-  template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
-  class Jump<ShapeFunctionBase<Derived, FESType, SpaceType>> final
-    : public ShapeFunctionBase<Jump<ShapeFunctionBase<Derived, FESType, SpaceType>>>
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+  class Jump<ShapeFunctionBase<Derived, FES, Space>> final
+    : public ShapeFunctionBase<Jump<ShapeFunctionBase<Derived, FES, Space>>>
   {
     public:
-      using FES = FESType;
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using FESType = FES;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using Operand = ShapeFunctionBase<Derived, FESType, SpaceType>;
+      using OperandType = ShapeFunctionBase<Derived, FESType, SpaceType>;
+
+      using RangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
       using Parent = ShapeFunctionBase<Jump<ShapeFunctionBase<Derived, FESType, SpaceType>>>;
-      using Range = typename FormLanguage::Traits<Operand>::RangeType;
 
       constexpr
-      Jump(const Operand& op)
+      Jump(const OperandType& op)
         : Parent(op.getFiniteElementSpace()),
           m_op(op.copy())
       {}
@@ -44,7 +46,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_op);
         return *m_op;
@@ -107,7 +109,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_op;
+      std::unique_ptr<OperandType> m_op;
   };
 
   template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>

@@ -17,11 +17,12 @@ namespace Rodin::Variational
     : public FunctionBase<Average<FunctionBase<FunctionDerived>>>
   {
     public:
-      using Operand = FunctionBase<FunctionDerived>;
+      using OperandType = FunctionBase<FunctionDerived>;
+
       using Parent = FunctionBase<Average<FunctionBase<FunctionDerived>>>;
 
       constexpr
-      Average(const Operand& op)
+      Average(const OperandType& op)
         : m_op(op.copy())
       {}
 
@@ -95,26 +96,28 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_op;
+      std::unique_ptr<OperandType> m_op;
   };
 
   template <class Derived>
   Average(const FunctionBase<Derived>&) -> Average<FunctionBase<Derived>>;
 
-  template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
-  class Average<ShapeFunctionBase<Derived, FESType, SpaceType>> final
-    : public ShapeFunctionBase<Average<ShapeFunctionBase<Derived, FESType, SpaceType>>>
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+  class Average<ShapeFunctionBase<Derived, FES, Space>> final
+    : public ShapeFunctionBase<Average<ShapeFunctionBase<Derived, FES, Space>>>
   {
     public:
-      using FES = FESType;
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using FESType = FES;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using Operand = ShapeFunctionBase<Derived, FESType, SpaceType>;
+      using OperandType = ShapeFunctionBase<Derived, FESType, SpaceType>;
+
+      using RangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
       using Parent = ShapeFunctionBase<Average<ShapeFunctionBase<Derived, FESType, SpaceType>>>;
-      using Range = typename FormLanguage::Traits<Operand>::RangeType;
 
       constexpr
-      Average(const Operand& op)
+      Average(const OperandType& op)
         : Parent(op.getFiniteElementSpace()),
           m_op(op.copy())
       {}
@@ -133,7 +136,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_op);
         return *m_op;
@@ -196,7 +199,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_op;
+      std::unique_ptr<OperandType> m_op;
   };
 
   template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>

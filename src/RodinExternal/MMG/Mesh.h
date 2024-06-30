@@ -18,7 +18,9 @@ namespace Rodin::External::MMG
   {
     public:
       /// Parent class
-      using Parent = Geometry::Mesh<Context::Sequential>;
+      using Parent = Geometry::Mesh<Rodin::Context::Sequential>;
+
+      using Context = typename Parent::Context;
 
       /// Index of corners in the mesh
       using CornerIndex = IndexSet;

@@ -20,26 +20,26 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class Derived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
-  struct Traits<Variational::ShapeFunctionBase<Derived, FESType, SpaceType>>
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
-    using FES = FESType;
+    using FESType = FES;
 
-    static constexpr const Variational::ShapeFunctionSpaceType Space = SpaceType;
+    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     using ResultType =
       typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     using RangeType =
-      typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
+      typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
   };
 
-  template <class Derived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
-  struct Traits<Variational::ShapeFunction<Derived, FESType, SpaceType>>
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::ShapeFunction<Derived, FES, Space>>
   {
-    using FES = FESType;
-    static constexpr const Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = FES;
+    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -92,12 +92,12 @@ namespace Rodin::Variational
 
   template <
     class Derived,
-    class FESType = typename FormLanguage::Traits<Derived>::FES,
-    ShapeFunctionSpaceType SpaceType = FormLanguage::Traits<Derived>::Space>
+    class FES = typename FormLanguage::Traits<Derived>::FESType,
+    ShapeFunctionSpaceType SpaceType = FormLanguage::Traits<Derived>::SpaceType>
   class ShapeFunctionBase : public FormLanguage::Base
   {
     public:
-      using FES = FESType;
+      using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       using Parent = FormLanguage::Base;

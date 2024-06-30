@@ -101,10 +101,10 @@ namespace Rodin::Variational
   {
     public:
       /// Operand type
-      using Operand = TrialFunction<FES>;
+      using OperandType = TrialFunction<FES>;
 
       /// Value type
-      using Value = FunctionBase<ValueDerived>;
+      using ValueType = FunctionBase<ValueDerived>;
 
       /// Parent class
       using Parent = DirichletBCBase;
@@ -114,7 +114,7 @@ namespace Rodin::Variational
        * @param[in] u ShapeFunction object
        * @param[in] v Value object
        */
-      DirichletBC(const Operand& u, const Value& v)
+      DirichletBC(const OperandType& u, const ValueType& v)
         : m_u(u), m_value(v.copy())
       {}
 
@@ -242,13 +242,13 @@ namespace Rodin::Variational
       }
 
       inline
-      const Operand& getOperand() const override
+      const OperandType& getOperand() const override
       {
         return m_u;
       }
 
       inline
-      const Value& getValue() const override
+      const ValueType& getValue() const override
       {
         assert(m_value);
         return *m_value;
@@ -267,8 +267,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Operand> m_u;
-      std::unique_ptr<Value> m_value;
+      std::reference_wrapper<const OperandType> m_u;
+      std::unique_ptr<ValueType> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
       IndexMap<Scalar> m_dofs;
   };

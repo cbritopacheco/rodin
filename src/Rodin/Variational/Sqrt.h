@@ -28,10 +28,11 @@ namespace Rodin::Variational
     : public ScalarFunctionBase<Sqrt<FunctionBase<NestedDerived>>>
   {
     public:
-      using Operand = FunctionBase<NestedDerived>;
+      using OperandType = FunctionBase<NestedDerived>;
+
       using Parent = ScalarFunctionBase<Sqrt<FunctionBase<NestedDerived>>>;
 
-      Sqrt(const Operand& v)
+      Sqrt(const OperandType& v)
         : m_v(v.copy())
       {}
 
@@ -60,7 +61,7 @@ namespace Rodin::Variational
       }
 
       inline
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_v);
         return *m_v;
@@ -72,7 +73,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_v;
+      std::unique_ptr<OperandType> m_v;
   };
 
   template <class NestedDerived>

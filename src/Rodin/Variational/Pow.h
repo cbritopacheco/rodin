@@ -43,10 +43,10 @@ namespace Rodin::Variational
     static_assert(std::is_arithmetic_v<Number>);
     public:
       /// Type of base
-      using Base = FunctionBase<BaseDerived>;
+      using BaseType = FunctionBase<BaseDerived>;
 
       /// Type of exponent
-      using Exponent = Number;
+      using ExponentType = Number;
 
       /// Parent class
       using Parent = ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>;
@@ -57,7 +57,7 @@ namespace Rodin::Variational
        * @param[in] p Power
        */
       constexpr
-      Pow(const Base& s, Exponent p)
+      Pow(const BaseType& s, ExponentType p)
         : m_s(s.copy()), m_p(p)
       {}
 
@@ -106,8 +106,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Base> m_s;
-      const Exponent m_p;
+      std::unique_ptr<BaseType> m_s;
+      const ExponentType m_p;
   };
 
   /**

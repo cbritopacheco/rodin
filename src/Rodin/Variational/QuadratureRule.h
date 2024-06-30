@@ -31,10 +31,10 @@ namespace Rodin::Variational
     public:
       using Parent = FormLanguage::Base;
 
-      using Integrand = FunctionBase<FunctionDerived>;
+      using IntegrandType = FunctionBase<FunctionDerived>;
 
       QuadratureRule(
-          std::reference_wrapper<const Geometry::Polytope> polytope, const Integrand& f)
+          std::reference_wrapper<const Geometry::Polytope> polytope, const IntegrandType& f)
         : m_polytope(polytope),
           m_integrand(f.copy()),
           m_qfgg(polytope.get().getGeometry()),
@@ -79,7 +79,7 @@ namespace Rodin::Variational
         return m_value;
       }
 
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
         return *m_integrand;
@@ -98,7 +98,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const Geometry::Polytope> m_polytope;
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
       const QF::GenericPolytopeQuadrature m_qfgg;
       std::reference_wrapper<const QF::QuadratureFormulaBase> m_qf;
       std::optional<Scalar> m_value;
@@ -113,7 +113,7 @@ namespace Rodin::Variational
   {
     public:
       /// Type of integrand
-      using Integrand = GridFunction<FES>;
+      using IntegrandType = GridFunction<FES>;
 
       /// Parent class
       using Parent = Integrator;
@@ -121,7 +121,7 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the integral object from the given integrand.
        */
-      QuadratureRule(const Integrand& u)
+      QuadratureRule(const IntegrandType& u)
         : m_u(u),
           m_v(u.getFiniteElementSpace()),
           m_lf(m_v)
@@ -262,12 +262,12 @@ namespace Rodin::Variational
    *
    * Represents the quadrature rule approximation of an integral:
    * @f[
-   *  \int_{\mathcal{R}_h} \mathrm{Integrand} \ dx \approx \sum_{i = 1}^{n}
-   *  w_i \ \mathrm{Integrand} (x_i)
+   *  \int_{\mathcal{R}_h} \mathrm{IntegrandType} \ dx \approx \sum_{i = 1}^{n}
+   *  w_i \ \mathrm{IntegrandType} (x_i)
    * @f]
    * where @f$ \mathcal{R}_h @f$ is some region of the mesh @f$ \mathcal{T}_h
    * @f$, the quadrature point @f$ x_i @f$ has an associated weight @f$ w_i @f$
-   * and @f$ \mathrm{Integrand}(x_i) @f$ is the value of the integrand at the
+   * and @f$ \mathrm{IntegrandType}(x_i) @f$ is the value of the integrand at the
    * quadrature point.
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -278,19 +278,19 @@ namespace Rodin::Variational
         : public LocalBilinearFormIntegratorBase
   {
     public:
-      using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+      using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
 
-      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+      using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
 
-      using Integrand = Dot<LHS, RHS>;
+      using IntegrandType = Dot<LHSType, RHSType>;
 
       using Parent = LocalBilinearFormIntegratorBase;
 
-      QuadratureRule(const LHS& lhs, const RHS& rhs)
+      QuadratureRule(const LHSType& lhs, const RHSType& rhs)
         : QuadratureRule(Dot(lhs, rhs))
       {}
 
-      QuadratureRule(const Integrand& prod)
+      QuadratureRule(const IntegrandType& prod)
         : LocalBilinearFormIntegratorBase(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
           m_prod(prod.copy())
       {}
@@ -307,7 +307,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrand() const
       {
         assert(m_prod);
         return *m_prod;
@@ -343,7 +343,7 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Integrand> m_prod;
+      std::unique_ptr<IntegrandType> m_prod;
   };
 
   /**
@@ -355,7 +355,7 @@ namespace Rodin::Variational
     : public LinearFormIntegratorBase
   {
     public:
-      using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
+      using IntegrandType = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
       using Parent = LinearFormIntegratorBase;
 
       template <class LHSDerived, class RHSDerived>
@@ -365,7 +365,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      QuadratureRule(const Integrand& integrand)
+      QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -384,7 +384,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Integrand& getIntegrand() const
+      const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
         return *m_integrand;
@@ -418,7 +418,7 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
   };
 }
 

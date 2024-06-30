@@ -27,13 +27,18 @@ namespace Rodin::Variational
     : public FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using Parent = FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
-      using LHS = FunctionBase<LHSDerived>;
-      using RHS = FunctionBase<RHSDerived>;
-      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      using LHSType = FunctionBase<LHSDerived>;
 
-      static_assert(std::is_same_v<RHSRange, Scalar>);
+      using RHSType = FunctionBase<RHSDerived>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+      using Parent =
+        FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+
+      static_assert(std::is_same_v<RHSRangeType, Scalar>);
 
       Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
@@ -67,7 +72,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const LHS& getLHS() const
+      const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -75,7 +80,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const RHS& getRHS() const
+      const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;

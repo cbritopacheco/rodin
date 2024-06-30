@@ -92,6 +92,15 @@
       << Rodin::Alert::Raise; \
   }
 
+namespace Rodin::FormLanguage
+{
+  template <class Context>
+  struct Traits<Geometry::Mesh<Context>>
+  {
+    using ContextType = Context;
+  };
+}
+
 namespace Rodin::Geometry
 {
   class CCL
@@ -526,6 +535,7 @@ namespace Rodin::Geometry
   {
     public:
       using Parent = MeshBase;
+      using Context = Context::Sequential;
 
       /**
        * @brief Class used to build Mesh<Context::Sequential> instances.
@@ -655,20 +665,20 @@ namespace Rodin::Geometry
 
           Builder& setVertices(Math::Matrix<Scalar>&& connectivity);
 
-          Builder& setConnectivity(Connectivity<Context::Sequential>&& connectivity);
+          Builder& setConnectivity(Connectivity<Context>&& connectivity);
 
           Builder& setAttributeIndex(AttributeIndex&& connectivity);
 
           Builder& setTransformationIndex(TransformationIndex&& connectivity);
 
           inline
-          Connectivity<Context::Sequential>& getConnectivity()
+          Connectivity<Context>& getConnectivity()
           {
             return m_connectivity;
           }
 
           inline
-          const Connectivity<Context::Sequential>& getConnectivity() const
+          const Connectivity<Context>& getConnectivity() const
           {
             return m_connectivity;
           }
@@ -678,7 +688,7 @@ namespace Rodin::Geometry
           size_t m_nodes;
 
           Math::PointMatrix m_vertices;
-          Connectivity<Context::Sequential> m_connectivity;
+          Connectivity<Context> m_connectivity;
 
           AttributeIndex m_attributeIndex;
           TransformationIndex m_transformationIndex;
@@ -786,7 +796,7 @@ namespace Rodin::Geometry
       * @f$ are included if the connectivity @f$ (D - 1) \longrightarrow d @f$
       * is already computed in the mesh.
       */
-      virtual SubMesh<Context::Sequential> skin() const;
+      virtual SubMesh<Context> skin() const;
 
       /**
       * @brief Trims the cells with the given attribute.
@@ -796,7 +806,7 @@ namespace Rodin::Geometry
       * Convenience function to call trim(const std::FlatSet<Attribute>&) with
       * only one attribute.
       */
-      virtual SubMesh<Context::Sequential> trim(Attribute attr) const;
+      virtual SubMesh<Context> trim(Attribute attr) const;
 
       /**
       * @brief Trims the cells with the given attribute.
@@ -813,7 +823,7 @@ namespace Rodin::Geometry
       * @returns A SubMesh object consisting of cells that have attributes
       * not in the given set.
       */
-      virtual SubMesh<Context::Sequential> trim(const FlatSet<Attribute>& attrs) const;
+      virtual SubMesh<Context> trim(const FlatSet<Attribute>& attrs) const;
 
       /**
       * @brief Keeps the cells with the given attribute.
@@ -823,7 +833,7 @@ namespace Rodin::Geometry
       * Convenience function to call keep(const std::FlatSet<Attribute>&) with
       * only one attribute.
       */
-      virtual SubMesh<Context::Sequential> keep(Attribute attr) const;
+      virtual SubMesh<Context> keep(Attribute attr) const;
 
       /**
       * @brief Trims the cells with the given attributes.
@@ -840,7 +850,7 @@ namespace Rodin::Geometry
       * @returns A SubMesh object consisting of cells that have attributes
       * not in the given set.
       */
-      virtual SubMesh<Context::Sequential> keep(const FlatSet<Attribute>& attrs) const;
+      virtual SubMesh<Context> keep(const FlatSet<Attribute>& attrs) const;
 
       inline
       Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap)
@@ -901,7 +911,7 @@ namespace Rodin::Geometry
       }
 
       inline
-      const Context::Sequential& getContext() const override
+      const Context& getContext() const override
       {
         return m_context;
       }
@@ -939,12 +949,12 @@ namespace Rodin::Geometry
 
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
 
-      virtual Connectivity<Context::Sequential>& getConnectivity() override
+      virtual Connectivity<Context>& getConnectivity() override
       {
         return m_connectivity;
       }
 
-      virtual const Connectivity<Context::Sequential>& getConnectivity() const override
+      virtual const Connectivity<Context>& getConnectivity() const override
       {
         return m_connectivity;
       }
@@ -972,14 +982,14 @@ namespace Rodin::Geometry
       size_t m_sdim;
 
       Math::PointMatrix m_vertices;
-      Connectivity<Context::Sequential> m_connectivity;
+      Connectivity<Context> m_connectivity;
 
       AttributeIndex m_attributeIndex;
       mutable TransformationIndex m_transformationIndex;
 
       std::vector<FlatSet<Attribute>> m_attributes;
 
-      Context::Sequential m_context;
+      Context m_context;
   };
 }
 

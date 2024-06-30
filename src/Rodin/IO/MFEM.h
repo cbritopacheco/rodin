@@ -449,16 +449,22 @@ namespace Rodin::IO
     : public MeshLoaderBase<Context::Sequential>
   {
     public:
-      using Object = Rodin::Geometry::Mesh<Context::Sequential>;
+      using ContextType = Context::Sequential;
 
-      MeshLoader(Object& mesh)
+      using ObjectType = Geometry::Mesh<ContextType>;
+
+      using Parent = MeshPrinterBase<ContextType>;
+
+      MeshLoader(ObjectType& mesh)
         : MeshLoaderBase<Context::Sequential>(mesh)
       {}
 
       void load(std::istream& is) override;
 
       void readHeader(std::istream& is);
+
       void readDimension(std::istream& is);
+
       void readMesh(std::istream& is);
 
     private:
@@ -466,7 +472,7 @@ namespace Rodin::IO
       size_t m_spaceDimension;
       size_t m_currentLineNumber;
       MFEM::MeshHeader m_header;
-      Rodin::Geometry::Mesh<Rodin::Context::Sequential>::Builder m_build;
+      ObjectType::Builder m_build;
   };
 
   template <>
@@ -474,7 +480,13 @@ namespace Rodin::IO
     : public MeshPrinterBase<Context::Sequential>
   {
     public:
-      MeshPrinter(const Rodin::Geometry::Mesh<Context::Sequential>& mesh)
+      using ContextType = Context::Sequential;
+
+      using ObjectType = Geometry::Mesh<ContextType>;
+
+      using Parent = MeshPrinterBase<ContextType>;
+
+      MeshPrinter(const ObjectType& mesh)
         : MeshPrinterBase(mesh)
       {}
 
@@ -485,15 +497,19 @@ namespace Rodin::IO
       void printMesh(std::ostream& os);
   };
 
-  template <class Range, class ... Args>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P0<Range, Context::Sequential, Args...>>
-    : public GridFunctionPrinterBase<Variational::P0<Range, Context::Sequential, Args...>>
+  template <class Range>
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Context::Sequential>>>
+    : public GridFunctionPrinterBase<Variational::P0<Range, Geometry::Mesh<Context::Sequential>>>
   {
     public:
-      using FES = Variational::P0<Range, Context::Sequential, Args...>;
+      using FESType = Variational::P0<Range, Geometry::Mesh<Context::Sequential>>;
 
-      GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
-        : GridFunctionPrinterBase<FES>(gf)
+      using ObjectType = Variational::GridFunction<FESType>;
+
+      using Parent = GridFunctionPrinterBase<FESType>;
+
+      GridFunctionPrinter(const ObjectType& gf)
+        : Parent(gf)
       {}
 
       void print(std::ostream& os) override
@@ -514,16 +530,18 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionLoader<FileFormat::MFEM,
-        Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
-    : public GridFunctionLoaderBase<
-        Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+  class GridFunctionLoader<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
+    : public GridFunctionLoaderBase<Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
   {
     public:
-      using FES = Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>;
+      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Sequential>>;
 
-      GridFunctionLoader(Variational::GridFunction<FES>& gf)
-        : GridFunctionLoaderBase<FES>(gf)
+      using ObjectType = Variational::GridFunction<FESType>;
+
+      using Parent = GridFunctionLoaderBase<FESType>;
+
+      GridFunctionLoader(ObjectType& gf)
+        : Parent(gf)
       {}
 
       void load(std::istream& is) override;
@@ -534,15 +552,19 @@ namespace Rodin::IO
       size_t m_currentLineNumber;
   };
 
-  template <class Range, class ... Args>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Context::Sequential, Args...>>
-    : public GridFunctionPrinterBase<Variational::P1<Range, Context::Sequential, Args...>>
+  template <class Range>
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
+    : public GridFunctionPrinterBase<Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
   {
     public:
-      using FES = Variational::P1<Range, Context::Sequential, Args...>;
+      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Sequential>>;
 
-      GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
-        : GridFunctionPrinterBase<FES>(gf)
+      using ObjectType = Variational::GridFunction<FESType>;
+
+      using Parent = GridFunctionPrinterBase<FESType>;
+
+      GridFunctionPrinter(const ObjectType& gf)
+        : Parent(gf)
       {}
 
       void print(std::ostream& os) override

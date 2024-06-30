@@ -25,54 +25,54 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Mult<
       Variational::FunctionBase<LHSDerived>,
-      Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
+      Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
-    using FES = FESType;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = FES;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    using LHS =
+    using LHSType =
       Variational::FunctionBase<LHSDerived>;
 
-    using RHS =
+    using RHSType =
       Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>;
 
-    using LHSRange =
-      typename FormLanguage::Traits<LHS>::RangeType;
+    using LHSRangeType =
+      typename FormLanguage::Traits<LHSType>::RangeType;
 
-    using RHSRange =
-      typename FormLanguage::Traits<RHS>::RangeType;
+    using RHSRangeType =
+      typename FormLanguage::Traits<RHSType>::RangeType;
 
     using RangeType =
       std::conditional_t<
         // If
-        std::is_same_v<LHSRange, Scalar>,
+        std::is_same_v<LHSRangeType, Scalar>,
         // Then <----------------------------------------------- LHS is Scalar
-        RHSRange,
+        RHSRangeType,
         // -------------------------------------------------------------------
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<LHSRange, Math::Vector<Scalar>>,
+          std::is_same_v<LHSRangeType, Math::Vector<Scalar>>,
           // Then <--------------------------------------------- LHS is Vector
           std::conditional_t<
             // If
-            std::is_same_v<RHSRange, Scalar>,
+            std::is_same_v<RHSRangeType, Scalar>,
             // Then
             Math::Vector<Scalar>,
             // Else
             std::conditional_t<
               // If
-              std::is_same_v<RHSRange, Math::Vector<Scalar>>,
+              std::is_same_v<RHSRangeType, Math::Vector<Scalar>>,
               // Then
               void,
               // Else
               std::conditional_t<
                 // If
-                std::is_same_v<RHSRange, Math::Matrix<Scalar>>,
+                std::is_same_v<RHSRangeType, Math::Matrix<Scalar>>,
                 // Then
                 Math::Matrix<Scalar>,
                 // Else
@@ -84,16 +84,16 @@ namespace Rodin::FormLanguage
           // Else
           std::conditional_t<
             // If
-            std::is_same_v<LHSRange, Math::Matrix<Scalar>>,
+            std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>,
             // Then <------------------------------------------- LHS is Matrix
             std::conditional_t<
-              std::is_same_v<RHSRange, Scalar>,
+              std::is_same_v<RHSRangeType, Scalar>,
               Math::Matrix<Scalar>,
               std::conditional_t<
-                std::is_same_v<RHSRange, Math::Vector<Scalar>>,
+                std::is_same_v<RHSRangeType, Math::Vector<Scalar>>,
                 Math::Vector<Scalar>,
                 std::conditional_t<
-                  std::is_same_v<RHSRange, Math::Matrix<Scalar>>,
+                  std::is_same_v<RHSRangeType, Math::Matrix<Scalar>>,
                     Math::Matrix<Scalar>,
                     void
                   >
@@ -107,14 +107,14 @@ namespace Rodin::FormLanguage
       >;
   };
 
-  template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Mult<
-      Variational::ShapeFunctionBase<LHSDerived, FESType, SpaceType>,
+      Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
       Variational::FunctionBase<RHSDerived>>>
   {
-    using FES = FESType;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = FES;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -135,17 +135,17 @@ namespace Rodin::Variational
     : public FunctionBase<Mult<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using LHS = FunctionBase<LHSDerived>;
+      using LHSType = FunctionBase<LHSDerived>;
 
-      using RHS = FunctionBase<RHSDerived>;
+      using RHSType = FunctionBase<RHSDerived>;
 
-      using Parent = FunctionBase<Mult<LHS, RHS>>;
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      using Parent = FunctionBase<Mult<LHSType, RHSType>>;
 
-      Mult(const LHS& lhs, const RHS& rhs)
+      Mult(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
         assert(lhs.getRangeType() == RangeType::Scalar
@@ -167,15 +167,15 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, Scalar>)
         {
           return getRHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<RHSRange, Scalar>)
+        else if constexpr (std::is_same_v<RHSRangeType, Scalar>)
         {
           return getLHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>> || std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>> || std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }
@@ -197,7 +197,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const LHS& getLHS() const
+      const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -205,7 +205,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const RHS& getRHS() const
+      const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -222,12 +222,12 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Vector<Scalar>& out, const Geometry::Point& p) const
       {
-        if constexpr (std::is_same_v<LHSRange, Scalar> && std::is_same_v<RHSRange, Math::Vector<Scalar>>)
+        if constexpr (std::is_same_v<LHSRangeType, Scalar> && std::is_same_v<RHSRangeType, Math::Vector<Scalar>>)
         {
           getRHS().getValue(out, p);
           out *= getLHS().getValue(p);
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>> && std::is_same_v<RHSRange, Scalar>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>> && std::is_same_v<RHSRangeType, Scalar>)
         {
           getLHS().getValue(out, p);
           out *= getRHS().getValue(p);
@@ -242,12 +242,12 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Matrix<Scalar>& out, const Geometry::Point& p) const
       {
-        if constexpr (std::is_same_v<LHSRange, Scalar> && std::is_same_v<RHSRange, Math::Matrix<Scalar>>)
+        if constexpr (std::is_same_v<LHSRangeType, Scalar> && std::is_same_v<RHSRangeType, Math::Matrix<Scalar>>)
         {
           getRHS().getValue(out, p);
           out *= getLHS().getValue(p);
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix<Scalar>> && std::is_same_v<RHSRange, Scalar>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<Scalar>> && std::is_same_v<RHSRangeType, Scalar>)
         {
           getLHS().getValue(out, p);
           out *= getRHS().getValue(p);
@@ -264,8 +264,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived>
@@ -326,26 +326,26 @@ namespace Rodin::Variational
    * where @f$ f @f$ is the function (scalar, vector or matrix valued), and
    * $A(u)$ is the shape function (scalar, vector, or matrix valued).
    */
-  template <class LHSDerived, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
-  class Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>> final
-    : public ShapeFunctionBase<Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  class Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>> final
+    : public ShapeFunctionBase<Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
     public:
-      using FES = FESType;
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using FESType = FES;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using LHS = FunctionBase<LHSDerived>;
+      using LHSType = FunctionBase<LHSDerived>;
 
-      using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
+      using RHSType = ShapeFunctionBase<RHSDerived, FES, SpaceType>;
 
-      using Parent = ShapeFunctionBase<Mult<LHS, RHS>, FES, Space>;
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       constexpr
-      Mult(const LHS& lhs, const RHS& rhs)
+      Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
@@ -373,15 +373,15 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, Scalar>)
         {
           return getRHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<RHSRange, Scalar>)
+        else if constexpr (std::is_same_v<RHSRangeType, Scalar>)
         {
           return getLHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>> || std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>> || std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }
@@ -408,7 +408,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const LHS& getLHS() const
+      const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -416,7 +416,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const RHS& getRHS() const
+      const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -437,8 +437,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
@@ -474,20 +474,26 @@ namespace Rodin::Variational
    * where @f$ f @f$ is the function (scalar, vector or matrix valued), and
    * $A(u)$ is the shape function (scalar, vector, or matrix valued).
    */
-  template <class LHSDerived, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
-  class Mult<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, FunctionBase<RHSDerived>> final
-    : public ShapeFunctionBase<Mult<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, FunctionBase<RHSDerived>>>
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  class Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
+    : public ShapeFunctionBase<Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>>
   {
     public:
-      using FES = FESType;
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using FESType = FES;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using LHS = ShapeFunctionBase<LHSDerived, FES, Space>;
-      using RHS = FunctionBase<RHSDerived>;
-      using Parent = ShapeFunctionBase<Mult<LHS, RHS>, FES, Space>;
+      using LHSType = ShapeFunctionBase<LHSDerived, FES, SpaceType>;
+
+      using RHSType = FunctionBase<RHSDerived>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+      using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       constexpr
-      Mult(const LHS& lhs, const RHS& rhs)
+      Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
@@ -519,17 +525,15 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
-        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, Scalar>)
         {
           return getRHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<RHSRange, Scalar>)
+        else if constexpr (std::is_same_v<RHSRangeType, Scalar>)
         {
           return getLHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector<Scalar>> || std::is_same_v<LHSRange, Math::Matrix<Scalar>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>> || std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }
@@ -556,7 +560,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const LHS& getLHS() const
+      const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -564,7 +568,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const RHS& getRHS() const
+      const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -585,8 +589,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
@@ -644,6 +648,8 @@ namespace Rodin::Variational
   class Mult<Scalar, LinearFormIntegratorBase> : public LinearFormIntegratorBase
   {
     public:
+      using Parent = LinearFormIntegratorBase;
+
       Mult(Scalar lhs, const LinearFormIntegratorBase& rhs);
 
       Mult(const Mult& other);

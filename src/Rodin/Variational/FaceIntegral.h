@@ -48,16 +48,19 @@ namespace Rodin::Variational
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
-      using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
-      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
-      using Integrand = Dot<LHS, RHS>;
-      using Parent = QuadratureRule<Integrand>;
+      using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
 
-      FaceIntegral(const LHS& lhs, const RHS& rhs)
+      using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
+      using IntegrandType = Dot<LHSType, RHSType>;
+
+      using Parent = QuadratureRule<IntegrandType>;
+
+      FaceIntegral(const LHSType& lhs, const RHSType& rhs)
         : FaceIntegral(Dot(lhs, rhs))
       {}
 
-      FaceIntegral(const Integrand& prod)
+      FaceIntegral(const IntegrandType& prod)
         : Parent(prod)
       {}
 
@@ -80,7 +83,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Integrand> m_prod;
+      std::unique_ptr<IntegrandType> m_prod;
   };
 
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -109,9 +112,9 @@ namespace Rodin::Variational
     : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
     public:
-      using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
+      using IntegrandType = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
 
-      using Parent = QuadratureRule<Integrand>;
+      using Parent = QuadratureRule<IntegrandType>;
 
       template <class LHSDerived, class RHSDerived>
       FaceIntegral(
@@ -120,7 +123,7 @@ namespace Rodin::Variational
         : FaceIntegral(Dot(lhs, rhs))
       {}
 
-      FaceIntegral(const Integrand& integrand)
+      FaceIntegral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
@@ -143,7 +146,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Integrand> m_integrand;
+      std::unique_ptr<IntegrandType> m_integrand;
   };
 
   template <class NestedDerived, class FES>

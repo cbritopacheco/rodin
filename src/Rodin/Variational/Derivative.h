@@ -27,7 +27,7 @@ namespace Rodin::Variational
   //   : public ScalarFunctionBase<Derivative<GridFunction<H1<Ts...>>>>
   // {
   //   public:
-  //     using Operand = GridFunction<H1<Ts...>>;
+  //     using OperandType = GridFunction<H1<Ts...>>;
   //     using Parent = ScalarFunctionBase<Derivative<Operand>>;
 
   //     /**

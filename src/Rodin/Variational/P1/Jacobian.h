@@ -18,13 +18,21 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class NestedDerived, class ... Ps, Variational::ShapeFunctionSpaceType SpaceType>
+  template <class Number, class Mesh>
+  struct Traits<Variational::Jacobian<Variational::GridFunction<Variational::P1<Math::Vector<Number>, Mesh>>>>
+  {
+    using FESType = Variational::P1<Math::Vector<Number>>;
+    using OperandType = Variational::GridFunction<FESType>;
+  };
+
+  template <class NestedDerived, class Number, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Jacobian<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Scalar>, Ps...>, SpaceType>>>
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Number>, Mesh>, Space>>>
   {
-    using FES = Variational::P1<Math::Vector<Scalar>, Ps...>;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = Variational::P1<Math::Vector<Number>>;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -34,22 +42,25 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an P1 GridFunction object.
    */
-  template <class ... Ps>
-  class Jacobian<GridFunction<P1<Math::Vector<Scalar>, Ps...>>> final
-    : public JacobianBase<Jacobian<GridFunction<P1<Math::Vector<Scalar>, Ps...>>>, GridFunction<P1<Math::Vector<Scalar>, Ps...>>>
+  template <class Number, class Mesh>
+  class Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>> final
+    : public JacobianBase<
+        Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>>, GridFunction<P1<Math::Vector<Number>, Mesh>>>
   {
     public:
-      using Operand = GridFunction<P1<Math::Vector<Scalar>, Ps...>>;
-      using Parent =
-        JacobianBase<Jacobian<GridFunction<P1<Math::Vector<Scalar>, Ps...>>>, Operand>;
+      using FESType = P1<Math::Vector<Number>, Mesh>;
+
+      using OperandType = GridFunction<FESType>;
+
+      using Parent = JacobianBase<Jacobian<OperandType>, OperandType>;
 
       /**
        * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function
        * @f$ u @f$.
        * @param[in] u Grid function to be differentiated
        */
-      Jacobian(const Operand& u)
-        :  Parent(u)
+      Jacobian(const OperandType& u)
+        : Parent(u)
       {}
 
       Jacobian(const Jacobian& other)
@@ -143,26 +154,27 @@ namespace Rodin::Variational
    * @ingroup RodinCTAD
    * @brief CTAD for Jacobian of a P1 GridFunction
    */
-  template <class ... Ps>
-  Jacobian(const GridFunction<P1<Math::Vector<Scalar>, Ps...>>&)
-    -> Jacobian<GridFunction<P1<Math::Vector<Scalar>, Ps...>>>;
+  template <class Number, class Mesh>
+  Jacobian(const GridFunction<P1<Math::Vector<Number>, Mesh>>&)
+    -> Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>>;
 
   /**
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an P1 ShapeFunction object.
    */
-  template <class ShapeFunctionDerived, ShapeFunctionSpaceType SpaceType, class ... Ts>
-  class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Scalar>, Ts...>, SpaceType>> final
-    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Scalar>, Ts...>, SpaceType>>>
+  template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
+  class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Number>, Mesh>, Space>> final
+    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Number>, Mesh>, Space>>>
   {
     public:
-      using FES = P1<Math::Vector<Scalar>, Ts...>;
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using FESType = P1<Math::Vector<Number>, Mesh>;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using Operand = ShapeFunction<ShapeFunctionDerived, FES, Space>;
-      using Parent = ShapeFunctionBase<Jacobian<Operand>, FES, Space>;
+      using OperandType = ShapeFunction<ShapeFunctionDerived, FESType, SpaceType>;
 
-      Jacobian(const Operand& u)
+      using Parent = ShapeFunctionBase<Jacobian<OperandType>, FESType, SpaceType>;
+
+      Jacobian(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u)
       {}
@@ -179,14 +191,14 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
       inline
       constexpr
-      const FES& getFiniteElementSpace() const
+      const FESType& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
@@ -232,12 +244,12 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Operand> m_u;
+      std::reference_wrapper<const OperandType> m_u;
   };
 
-  template <class ShapeFunctionDerived, class FES, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, FES, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, FES, Space>>;
+  template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
+  Jacobian(const ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Number>, Mesh>, Space>&)
+    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Number>, Mesh>, Space>>;
 }
 
 #endif

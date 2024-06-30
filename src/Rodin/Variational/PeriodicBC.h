@@ -71,17 +71,17 @@ namespace Rodin::Variational
   {
     public:
       /// Operand type
-      using Operand = TrialFunction<FES>;
+      using OperandType = TrialFunction<FES>;
 
       /// Parent class
       using Parent = PeriodicBCBase;
 
-      PeriodicBC(const Operand& u, const IndexMap<IndexSet>& adjacency)
+      PeriodicBC(const OperandType& u, const IndexMap<IndexSet>& adjacency)
         : m_u(u),
           m_adjacency(adjacency)
       {}
 
-      PeriodicBC(const Operand& u, IndexMap<IndexSet>&& adjacency)
+      PeriodicBC(const OperandType& u, IndexMap<IndexSet>&& adjacency)
         : m_u(u),
           m_adjacency(std::move(adjacency))
       {}
@@ -132,7 +132,7 @@ namespace Rodin::Variational
       }
 
       inline
-      const Operand& getOperand() const override
+      const OperandType& getOperand() const override
       {
         return m_u;
       }
@@ -150,7 +150,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Operand> m_u;
+      std::reference_wrapper<const OperandType> m_u;
       IndexMap<IndexSet> m_adjacency;
       DOFs m_dofs;
   };

@@ -17,7 +17,7 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Component<ShapeFunctionBase<OperandDerived, FES, Space>>, FES, Space>
   {
     public:
-      using Operand =
+      using OperandType =
         ShapeFunctionBase<OperandDerived, FES, Space>;
 
       using Parent =
@@ -27,7 +27,7 @@ namespace Rodin::Variational
        * @brief Constructs the component object from a TrialFunction and its
        * component index.
        */
-      Component(const Operand& u, size_t component)
+      Component(const OperandType& u, size_t component)
         : Parent(u.getFiniteElementSpace()),
           m_u(u.copy()),
           m_idx(component)
@@ -54,7 +54,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_u);
         return *m_u;
@@ -97,7 +97,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_u;
+      std::unique_ptr<OperandType> m_u;
       const size_t m_idx;
   };
 
@@ -114,12 +114,15 @@ namespace Rodin::Variational
     : public ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>
   {
     public:
-      using Operand = FunctionBase<OperandDerived>;
+      using OperandType = FunctionBase<OperandDerived>;
+
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
       using Parent = ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>;
-      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+
 
       constexpr
-      Component(const Operand& fn, size_t component)
+      Component(const OperandType& fn, size_t component)
         : m_fn(fn.copy()), m_idx(component)
       {}
 
@@ -146,7 +149,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_fn);
         return *m_fn;
@@ -165,7 +168,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_fn;
+      std::unique_ptr<OperandType> m_fn;
       const size_t m_idx;
   };
 
@@ -177,12 +180,14 @@ namespace Rodin::Variational
     : public ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>
   {
     public:
-      using Operand = FunctionBase<OperandDerived>;
+      using OperandType = FunctionBase<OperandDerived>;
+
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
       using Parent = ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>;
-      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
 
       constexpr
-      Component(const Operand& fn, size_t i, size_t j)
+      Component(const OperandType& fn, size_t i, size_t j)
         : m_fn(fn.copy()), m_i(i), m_j(j)
       {}
 
@@ -204,7 +209,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_fn);
         return *m_fn;
@@ -224,7 +229,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_fn;
+      std::unique_ptr<OperandType> m_fn;
       const size_t m_i;
       const size_t m_j;
   };
@@ -241,15 +246,16 @@ namespace Rodin::Variational
     : public ScalarFunctionBase<Component<GridFunction<FES>>>
   {
     public:
-      using Operand = GridFunction<FES>;
-      using Parent = ScalarFunctionBase<Component<Operand>>;
+      using OperandType = GridFunction<FES>;
+
+      using Parent = ScalarFunctionBase<Component<OperandType>>;
 
       /**
        * @brief Constructs the component object from a GridFunction and its
        * component index.
        */
       constexpr
-      Component(GridFunction<FES>& u, size_t component)
+      Component(OperandType& u, size_t component)
         : m_u(u), m_idx(component)
       {}
 
@@ -267,7 +273,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      GridFunction<FES>& getGridFunction()
+      OperandType& getGridFunction()
       {
         return m_u.get();
       }
@@ -312,7 +318,7 @@ namespace Rodin::Variational
       // }
 
     private:
-      std::reference_wrapper<GridFunction<FES>> m_u;
+      std::reference_wrapper<OperandType> m_u;
       const size_t m_idx;
   };
 

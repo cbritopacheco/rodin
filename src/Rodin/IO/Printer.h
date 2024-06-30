@@ -23,8 +23,10 @@ namespace Rodin::IO
   class Printer
   {
     public:
+      using ObjectType = T;
+
       virtual void print(std::ostream& os) = 0;
-      virtual const T& getObject() const = 0;
+      virtual const ObjectType& getObject() const = 0;
   };
 }
 

@@ -14,13 +14,22 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class NestedDerived, class ... Ps, Variational::ShapeFunctionSpaceType SpaceType>
+  template <class Number, class Mesh>
+  struct Traits<Variational::Div<Variational::GridFunction<Variational::P1<Math::Vector<Number>, Mesh>>>>
+  {
+    using FESType = Variational::P1<Math::Vector<Number>, Mesh>;
+    using OperandType = Variational::GridFunction<Variational::P1<Math::Vector<Number>, Mesh>>;
+  };
+
+  template <class NestedDerived, class Number, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Div<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Scalar>, Ps...>, SpaceType>>>
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Number>, Mesh>, Space>>>
   {
-    using FES = Variational::P1<Math::Vector<Scalar>, Ps...>;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = Variational::P1<Math::Vector<Number>, Mesh>;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    using OperandType =
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Number>, Mesh>, Space>;
   };
 }
 
@@ -30,25 +39,27 @@ namespace Rodin::Variational
    * @ingroup DivSpecializations
    * @brief Divient of a P1 GridFunction
    */
-  template <class Context, class Mesh>
-  class Div<GridFunction<P1<Math::Vector<Scalar>, Context, Mesh>>> final
-    : public DivBase<Div<GridFunction<P1<Math::Vector<Scalar>, Context, Mesh>>>, GridFunction<P1<Math::Vector<Scalar>, Context, Mesh>>>
+  template <class Number, class Mesh>
+  class Div<GridFunction<P1<Math::Vector<Number>, Mesh>>> final
+    : public DivBase<Div<GridFunction<P1<Math::Vector<Number>, Mesh>>>, GridFunction<P1<Math::Vector<Number>, Mesh>>>
   {
     public:
-      using FES = P1<Math::Vector<Scalar>, Context, Mesh>;
+      using NumberType = Number;
+
+      using FESType = Variational::P1<Math::Vector<NumberType>, Mesh>;
 
       /// Operand type
-      using Operand = GridFunction<FES>;
+      using OperandType = GridFunction<FESType>;
 
       /// Parent class
-      using Parent = DivBase<Div<Operand>, Operand>;
+      using Parent = DivBase<Div<OperandType>, OperandType>;
 
       /**
        * @brief Constructs the Divient of an @f$ \mathbb{P}^1 @f$ function
        * @f$ u @f$.
        * @param[in] u P1 GridFunction
        */
-      Div(const Operand& u)
+      Div(const OperandType& u)
         : Parent(u)
       {}
 
@@ -160,22 +171,23 @@ namespace Rodin::Variational
   /**
    * @ingroup DivSpecializations
    */
-  template <class NestedDerived, ShapeFunctionSpaceType SpaceType, class ... Ts>
-  class Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Ts...>, SpaceType>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Ts...>, SpaceType>>>
+  template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
+  class Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>> final
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Mesh>, Space>>>
   {
     public:
-      using FES = P1<Math::Vector<Scalar>, Ts...>;
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using FESType = P1<Math::Vector<Scalar>, Mesh>;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using Operand = ShapeFunction<NestedDerived, FES, Space>;
-      using Parent = ShapeFunctionBase<Div<ShapeFunction<NestedDerived, FES, Space>>, FES, Space>;
+      using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
+
+      using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
 
       /**
        * @brief Constructs Div object
        * @param[in] u ShapeFunction to be differentiated
        */
-      Div(const Operand& u)
+      Div(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u)
       {}
@@ -192,7 +204,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -244,12 +256,12 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Operand> m_u;
+      std::reference_wrapper<const OperandType> m_u;
   };
 
-  template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  Div(const ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Ts...>, Space>&)
-    -> Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Ts...>, Space>>;
+  template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
+  Div(const ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>&)
+    -> Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>>;
 }
 
 #endif

@@ -31,7 +31,7 @@ namespace Rodin::Variational
 {
   template <class TrialFES, class TestFES>
   DenseProblem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> DenseProblem<TrialFES, TestFES, typename TrialFES::Context, Math::Matrix<Scalar>, Math::Vector<Scalar>>;
+    -> DenseProblem<TrialFES, TestFES, Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 
   /**
    * @defgroup DenseProblemSpecializations DenseProblem Template Specializations
@@ -45,11 +45,14 @@ namespace Rodin::Variational
    * and `Math::Vector<Scalar>` types in a serial context.
    */
   template <class TrialFES, class TestFES>
-  class DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix<Scalar>, Math::Vector<Scalar>>
+  class DenseProblem<TrialFES, TestFES, Math::Matrix<Scalar>, Math::Vector<Scalar>>
     : public ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>>
   {
-      static_assert(std::is_same_v<typename TrialFES::Context, Context::Sequential>);
-      static_assert(std::is_same_v<typename TestFES::Context, Context::Sequential>);
+      using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
+      using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
+
+      static_assert(std::is_same_v<TrialFESContextType, Context::Sequential>);
+      static_assert(std::is_same_v<TestFESContextType, Context::Sequential>);
 
     public:
       using Context = Context::Sequential;
@@ -64,7 +67,6 @@ namespace Rodin::Variational
        * @param[in,out] u Trial function
        * @param[in,out] v %Test function
        */
-      explicit
       constexpr
       DenseProblem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v);
 
