@@ -13,6 +13,8 @@
 
 #include "Rodin/Types.h"
 
+#include "Rodin/FormLanguage/Traits.h"
+
 namespace Rodin::Math
 {
   /**
@@ -55,6 +57,28 @@ namespace Rodin::Math
 
   template <class NumberType>
   using Vector128 = FixedSizeVector<NumberType, 128>;
+}
+
+namespace Rodin::FormLanguage
+{
+  template <class Number>
+  struct Traits<Math::Vector<Number>>
+  {
+    using NumberType = Number;
+  };
+
+  template <class Number>
+  struct Traits<Math::SpatialVector<Number>>
+  {
+    using NumberType = Number;
+  };
+
+  template <class Number, size_t S>
+  struct Traits<Math::FixedSizeVector<Number, S>>
+  {
+    using NumberType = Number;
+    static constexpr size_t Size = S;
+  };
 }
 
 #endif

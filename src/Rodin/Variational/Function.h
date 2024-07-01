@@ -32,7 +32,10 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::FunctionBase<Derived>>
   {
     using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
+
     using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
+
+    using NumberType = typename FormLanguage::Traits<RangeType>::NumberType;
   };
 }
 

@@ -234,21 +234,44 @@ namespace Rodin::Variational
     return UnaryMinus(op);
   }
 
-  template <>
-  class UnaryMinus<LinearFormIntegratorBase> final : public LinearFormIntegratorBase
+  template <class Number>
+  class UnaryMinus<LinearFormIntegratorBase<Number>> final
+    : public LinearFormIntegratorBase<Number>
   {
     public:
-      using Parent = LinearFormIntegratorBase;
+      using NumberType = Number;
 
-      UnaryMinus(const LinearFormIntegratorBase& op);
+      using OperandType = LinearFormIntegratorBase<NumberType>;
 
-      UnaryMinus(const UnaryMinus& other);
+      using Parent = LinearFormIntegratorBase<NumberType>;
 
-      UnaryMinus(UnaryMinus&& other);
+      UnaryMinus(const OperandType& op)
+        : Parent(op),
+          m_op(op.copy())
+      {}
 
-      Region getRegion() const override;
+      UnaryMinus(const UnaryMinus& other)
+        : Parent(other),
+          m_op(other.m_op->copy())
+      {}
 
-      void assemble(const Geometry::Polytope& element) override;
+      UnaryMinus(UnaryMinus&& other)
+        : Parent(std::move(other)),
+          m_op(std::move(other.m_op))
+      {}
+
+      Integrator::Region getRegion() const override
+      {
+        return m_op->getRegion();
+      }
+
+      void assemble(const Geometry::Polytope& polytope) override
+      {
+        m_op->assemble(polytope);
+        auto& res = this->getVector();
+        res = std::move(m_op->getVector());
+        res *= -1.0;
+      }
 
       UnaryMinus* copy() const noexcept override
       {
@@ -256,11 +279,62 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LinearFormIntegratorBase> m_op;
+      std::unique_ptr<OperandType> m_op;
   };
-  UnaryMinus(const LinearFormIntegratorBase&) -> UnaryMinus<LinearFormIntegratorBase>;
 
-  UnaryMinus<LinearFormIntegratorBase> operator-(const LinearFormIntegratorBase& lfi);
+  template <class Number>
+  UnaryMinus(const LinearFormIntegratorBase<Number>&)
+    -> UnaryMinus<LinearFormIntegratorBase<Number>>;
+
+  template <class Number>
+  UnaryMinus<LinearFormIntegratorBase<Number>> operator-(const LinearFormIntegratorBase<Number>& lfi)
+  {
+    return UnaryMinus(lfi);
+  }
+
+  template <class Number>
+  class UnaryMinus<FormLanguage::List<LinearFormIntegratorBase<Number>>>
+    : public FormLanguage::List<LinearFormIntegratorBase<Number>>
+  {
+    public:
+      using NumberType = Number;
+
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<Number>;
+
+      using OperandType = FormLanguage::List<LinearFormIntegratorBaseType>;
+
+      using Parent = FormLanguage::List<LinearFormIntegratorBaseType>;
+
+      UnaryMinus(const OperandType& op)
+      {
+        for (const auto& p : op)
+          add(UnaryMinus<LinearFormIntegratorBaseType>(p));
+      }
+
+      UnaryMinus(const UnaryMinus& other)
+        : Parent(other)
+      {}
+
+      UnaryMinus(UnaryMinus&& other)
+        : Parent(std::move(other))
+      {}
+
+      UnaryMinus* copy() const noexcept override
+      {
+        return new UnaryMinus(*this);
+      }
+  };
+
+  template <class Number>
+  UnaryMinus(const FormLanguage::List<LinearFormIntegratorBase<Number>>&)
+    -> UnaryMinus<FormLanguage::List<LinearFormIntegratorBase<Number>>>;
+
+  template <class Number>
+  UnaryMinus<FormLanguage::List<LinearFormIntegratorBase<Number>>>
+  operator-(const FormLanguage::List<LinearFormIntegratorBase<Number>>& op)
+  {
+    return UnaryMinus(op);
+  }
 
   template <>
   class UnaryMinus<LocalBilinearFormIntegratorBase> : public LocalBilinearFormIntegratorBase
@@ -287,36 +361,6 @@ namespace Rodin::Variational
   UnaryMinus(const LocalBilinearFormIntegratorBase&) -> UnaryMinus<LocalBilinearFormIntegratorBase>;
 
   UnaryMinus<LocalBilinearFormIntegratorBase> operator-(const LocalBilinearFormIntegratorBase& op);
-
-  template <>
-  class UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
-    : public FormLanguage::List<LinearFormIntegratorBase>
-  {
-    public:
-      UnaryMinus(const FormLanguage::List<LinearFormIntegratorBase>& op)
-      {
-        for (const auto& p : op)
-          add(UnaryMinus<LinearFormIntegratorBase>(p));
-      }
-
-      UnaryMinus(const UnaryMinus& other)
-        : FormLanguage::List<LinearFormIntegratorBase>(other)
-      {}
-
-      UnaryMinus(UnaryMinus&& other)
-        : FormLanguage::List<LinearFormIntegratorBase>(std::move(other))
-      {}
-
-      UnaryMinus* copy() const noexcept override
-      {
-        return new UnaryMinus(*this);
-      }
-  };
-  UnaryMinus(const FormLanguage::List<LinearFormIntegratorBase>&)
-    -> UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>;
-
-  UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
-  operator-(const FormLanguage::List<LinearFormIntegratorBase>& op);
 
   template <>
   class UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase>>

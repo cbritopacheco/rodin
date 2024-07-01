@@ -68,8 +68,14 @@ namespace Rodin::Assembly
   class LinearFormAssemblyInput
   {
     public:
-      LinearFormAssemblyInput(
-          const FES& fes, FormLanguage::List<Variational::LinearFormIntegratorBase>& lfis)
+      using FESType = FES;
+
+      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+
+      using LinearFormIntegratorBaseList =
+        FormLanguage::List<Variational::LinearFormIntegratorBase<NumberType>>;
+
+      LinearFormAssemblyInput(const FES& fes, LinearFormIntegratorBaseList& lfis)
         : m_fes(fes), m_lfis(lfis)
       {}
 
@@ -78,14 +84,14 @@ namespace Rodin::Assembly
         return m_fes.get();
       }
 
-      FormLanguage::List<Variational::LinearFormIntegratorBase>& getLFIs() const
+      LinearFormIntegratorBaseList& getLFIs() const
       {
         return m_lfis.get();
       }
 
     private:
       std::reference_wrapper<const FES> m_fes;
-      std::reference_wrapper<FormLanguage::List<Variational::LinearFormIntegratorBase>> m_lfis;
+      std::reference_wrapper<LinearFormIntegratorBaseList> m_lfis;
   };
 
   template <class ... Ts>

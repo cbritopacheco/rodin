@@ -9,6 +9,7 @@
 
 #include <set>
 
+#include "Rodin/Cast.h"
 #include "Rodin/Math/Vector.h"
 
 #include "ForwardDecls.h"
@@ -17,9 +18,14 @@
 
 namespace Rodin::Variational
 {
+  template <class Number>
   class LinearFormIntegratorBase : public Integrator
   {
     public:
+      using NumberType = Number;
+
+      using VectorType = Math::Vector<NumberType>;
+
       using Parent = Integrator;
 
       template <class FES>
@@ -103,13 +109,13 @@ namespace Rodin::Variational
       }
 
       inline
-      const Math::Vector<Scalar> getVector() const
+      const VectorType& getVector() const
       {
         return m_vector;
       }
 
       inline
-      Math::Vector<Scalar>& getVector()
+      VectorType& getVector()
       {
         return m_vector;
       }
@@ -119,7 +125,7 @@ namespace Rodin::Variational
        * element.
        */
       virtual
-      void assemble(const Geometry::Polytope& element) = 0;
+      NumberType assemble(size_t local, const Geometry::Polytope& element) = 0;
 
       virtual
       LinearFormIntegratorBase* copy() const noexcept override = 0;
@@ -129,8 +135,11 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;
-      Math::Vector<Scalar> m_vector;
+      VectorType m_vector;
   };
 }
+
+namespace Rodin
+{}
 
 #endif

@@ -644,21 +644,46 @@ namespace Rodin::Variational
   Mult<Scalar, LocalBilinearFormIntegratorBase> operator*(
       Scalar lhs, const LocalBilinearFormIntegratorBase& rhs);
 
-  template <>
-  class Mult<Scalar, LinearFormIntegratorBase> : public LinearFormIntegratorBase
+  template <class Number>
+  class Mult<Number, LinearFormIntegratorBase<Number>>
+    : public LinearFormIntegratorBase<Number>
   {
     public:
-      using Parent = LinearFormIntegratorBase;
+      using NumberType = Number;
 
-      Mult(Scalar lhs, const LinearFormIntegratorBase& rhs);
+      using LHSType = NumberType;
 
-      Mult(const Mult& other);
+      using RHSType = LinearFormIntegratorBase<NumberType>;
 
-      Mult(Mult&& other);
+      using Parent = LinearFormIntegratorBase<NumberType>;
 
-      Region getRegion() const override;
+      Mult(NumberType lhs, const RHSType& rhs)
+        : Parent(rhs),
+          m_lhs(lhs), m_rhs(rhs.copy())
+      {}
 
-      void assemble(const Geometry::Polytope& element) override;
+      Mult(const Mult& other)
+        : Parent(other),
+          m_lhs(other.m_lhs), m_rhs(other.m_rhs->copy())
+      {}
+
+      Mult(Mult&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
+
+      Integrator::Region getRegion() const override
+      {
+        return m_rhs->getRegion();
+      }
+
+      void assemble(const Geometry::Polytope& element) override
+      {
+        m_rhs->assemble(element);
+        auto& res = this->getVector();
+        res = std::move(m_rhs->getVector());
+        res = m_lhs * res;
+      }
 
       Mult* copy() const noexcept override
       {
@@ -666,14 +691,20 @@ namespace Rodin::Variational
       }
 
     private:
-      const Scalar m_lhs;
-      std::unique_ptr<LinearFormIntegratorBase> m_rhs;
+      const LHSType m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
-  Mult(Scalar, const LinearFormIntegratorBase&) -> Mult<Scalar, LinearFormIntegratorBase>;
+  template <class Number>
+  Mult(Number, const LinearFormIntegratorBase<Number>&)
+    -> Mult<Number, LinearFormIntegratorBase<Number>>;
 
-  Mult<Scalar, LinearFormIntegratorBase> operator*(
-      Scalar lhs, const LinearFormIntegratorBase& rhs);
+  template <class Number>
+  Mult<Number, LinearFormIntegratorBase<Number>> operator*(
+      Number lhs, const LinearFormIntegratorBase<Number>& rhs)
+  {
+    return Mult(lhs, rhs);
+  }
 }
 
 #endif

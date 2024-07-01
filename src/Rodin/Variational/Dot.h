@@ -27,6 +27,7 @@ namespace Rodin::FormLanguage
           Variational::FunctionBase<RHSDerived>>>
   {
     using LHSType = Variational::FunctionBase<LHSDerived>;
+
     using RHSType = Variational::FunctionBase<RHSDerived>;
   };
 
@@ -36,8 +37,31 @@ namespace Rodin::FormLanguage
       Variational::FunctionBase<LHSDerived>,
       Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
+    using LHSType = Variational::FunctionBase<LHSDerived>;
+    using RHSType = Variational::ShapeFunctionBase<RHSDerived, FES, Space>;
     using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    using NumberType =
+      decltype(
+          std::declval<typename FormLanguage::Traits<LHSType>::NumberType>() *
+          std::declval<typename FormLanguage::Traits<RHSType>::NumberType>());
+  };
+
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  struct Traits<
+    Variational::Dot<
+      Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>,
+      Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>>>
+  {
+    using LHSType = Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>;
+    using RHSType = Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>;
+    using TrialFESType = TrialFES;
+    using TestFESType = TestFES;
+    using NumberType =
+      decltype(
+          std::declval<typename FormLanguage::Traits<TrialFESType>::NumberType>() *
+          std::declval<typename FormLanguage::Traits<TestFESType>::NumberType>());
+    using RangeType = NumberType;
   };
 }
 
@@ -282,7 +306,9 @@ namespace Rodin::Variational
    * @f]
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  class Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>> final
+  class Dot<
+    ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>> final
     : public FormLanguage::Base
   {
     public:

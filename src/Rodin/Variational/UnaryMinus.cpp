@@ -9,42 +9,6 @@
 
 namespace Rodin::Variational
 {
-  // ---- LinearFormIntegratorBase ------------------------------------------
-  UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const LinearFormIntegratorBase& op)
-    : LinearFormIntegratorBase(op),
-      m_op(op.copy())
-  {}
-
-  UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
-    : LinearFormIntegratorBase(other),
-      m_op(other.m_op->copy())
-  {}
-
-  UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(UnaryMinus&& other)
-    : LinearFormIntegratorBase(std::move(other)),
-      m_op(std::move(other.m_op))
-  {}
-
-  Integrator::Region UnaryMinus<LinearFormIntegratorBase>::getRegion() const
-  {
-    return m_op->getRegion();
-  }
-
-  void
-  UnaryMinus<LinearFormIntegratorBase>::assemble(const Geometry::Polytope& polytope)
-  {
-    m_op->assemble(polytope);
-    auto& res = getVector();
-    res = std::move(m_op->getVector());
-    res *= -1.0;
-  }
-
-  UnaryMinus<LinearFormIntegratorBase>
-  operator-(const LinearFormIntegratorBase& op)
-  {
-    return UnaryMinus(op);
-  }
-
   // ---- BilinearFormIntegratorBase ----------------------------------------
   UnaryMinus<LocalBilinearFormIntegratorBase>::UnaryMinus(const LocalBilinearFormIntegratorBase& op)
     : LocalBilinearFormIntegratorBase(op),
@@ -84,11 +48,5 @@ namespace Rodin::Variational
   operator-(const FormLanguage::List<LocalBilinearFormIntegratorBase>& op)
   {
     return UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase>>(op);
-  }
-
-  UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
-  operator-(const FormLanguage::List<LinearFormIntegratorBase>& op)
-  {
-    return UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>(op);
   }
 }

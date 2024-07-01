@@ -91,16 +91,22 @@ namespace Rodin::Variational
    * @f$ represents the size (total number of degrees-of-freedom) of the trial
    * space, and @f$ m @f$ represents the size of the test space.
    */
-  template <class TrialFES, class TestFES, class MatrixType>
+  template <class TrialFES, class TestFES, class Operator>
   class BilinearForm final
-    : public BilinearFormBase<MatrixType>
+    : public BilinearFormBase<Operator>
   {
+    using TrialFESNumberType  = typename FormLanguage::Traits<TrialFES>::NumberType;
+    using TestFESNumberType   = typename FormLanguage::Traits<TestFES>::NumberType;
+
     public:
+      using NumberType = decltype(
+          std::declval<TrialFESNumberType>() * std::declval<TestFESNumberType>());
+
       /// Type of operator associated to the bilinear form
-      using OperatorType = MatrixType;
+      using OperatorType = Operator;
 
       /// Parent class
-      using Parent = BilinearFormBase<MatrixType>;
+      using Parent = BilinearFormBase<OperatorType>;
 
       using SequentialAssembly = Assembly::Sequential<OperatorType, BilinearForm>;
 
@@ -163,7 +169,7 @@ namespace Rodin::Variational
        * at @f$ ( u, v ) @f$.
        */
       constexpr
-      Scalar operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
+      NumberType operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
       {
         const auto& trialWeights = u.getWeights();
         const auto& testWeights = v.getWeights();
@@ -188,7 +194,13 @@ namespace Rodin::Variational
         return (getOperator() * testWeights.value()).dot(trialWeights.value());
       }
 
-      void assemble() override;
+      void assemble() override
+      {
+         const auto& trialFES = getTrialFunction().getFiniteElementSpace();
+         const auto& testFES = getTestFunction().getFiniteElementSpace();
+         m_operator = getAssembly().execute({
+             trialFES, testFES, getLocalIntegrators(), getGlobalIntegrators() });
+      }
 
       const TrialFunction<TrialFES>& getTrialFunction() const override
       {
@@ -385,7 +397,10 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>;
+    -> BilinearForm<TrialFES, TestFES, Math::SparseMatrix<
+        decltype(
+          std::declval<typename FormLanguage::Traits<TrialFES>::NumberType>() *
+              std::declval<typename FormLanguage::Traits<TestFES>::NumberType>())>>;
 }
 
 #include "BilinearForm.hpp"

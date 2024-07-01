@@ -542,17 +542,29 @@ namespace Rodin::Assembly
    Multithreaded<Math::Matrix<Scalar>, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>::tl_gbfi;
 
   /**
-   * @brief %Multithreaded assembly of the Math::Vector<Scalar> associated to a LinearFormBase
-   * object.
+   * @brief %Multithreaded assembly of the Math::Vector associated to a
+   * LinearForm object.
    */
   template <class FES>
-  class Multithreaded<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>
-    : public AssemblyBase<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>
+  class Multithreaded<
+    Math::Vector<typename FormLanguage::Traits<FES>::NumberType>,
+    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::NumberType>>>
+    : public AssemblyBase<
+        Math::Vector<typename FormLanguage::Traits<FES>::NumberType>,
+        Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::NumberType>>>
   {
     public:
-      using Parent = AssemblyBase<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>;
+      using FESType = FES;
+
+      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+
+      using VectorType = Math::Vector<NumberType>;
+
+      using LinearFormType = Variational::LinearForm<FES, VectorType>;
+
+      using Parent = AssemblyBase<VectorType, LinearFormType>;
+
       using InputType = typename Parent::InputType;
-      using VectorType = Math::Vector<Scalar>;
 
 #ifdef RODIN_MULTITHREADED
       Multithreaded()
@@ -663,7 +675,7 @@ namespace Rodin::Assembly
 
     private:
       static thread_local VectorType tl_res;
-      static thread_local std::unique_ptr<Variational::LinearFormIntegratorBase> tl_lfi;
+      static thread_local std::unique_ptr<Variational::LinearFormIntegratorBase<NumberType>> tl_lfi;
 
       mutable Threads::Mutex m_mutex;
       mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
@@ -671,12 +683,19 @@ namespace Rodin::Assembly
 
   template <class FES>
   thread_local
-  Math::Vector<Scalar> Multithreaded<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>::tl_res;
+  Math::Vector<typename FormLanguage::Traits<FES>::NumberType>
+  Multithreaded<
+    Math::Vector<typename FormLanguage::Traits<FES>::NumberType>,
+    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::NumberType>>>
+  ::tl_res;
 
   template <class FES>
   thread_local
-  std::unique_ptr<Variational::LinearFormIntegratorBase>
-  Multithreaded<Math::Vector<Scalar>, Variational::LinearForm<FES, Math::Vector<Scalar>>>::tl_lfi;
+  std::unique_ptr<Variational::LinearFormIntegratorBase<typename FormLanguage::Traits<FES>::NumberType>>
+  Multithreaded<
+    Math::Vector<typename FormLanguage::Traits<FES>::NumberType>,
+    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::NumberType>>>
+  ::tl_lfi;
 }
 
 #endif

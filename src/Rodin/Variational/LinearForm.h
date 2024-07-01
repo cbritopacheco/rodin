@@ -83,22 +83,28 @@ namespace Rodin::Variational
    * A linear form can be specified by from one or more
    * LinearFormIntegratorBase instances.
    */
-  template <class FES>
-  class LinearForm<FES, Math::Vector<Scalar>> final
-    : public LinearFormBase<Math::Vector<Scalar>>
+  template <class FES, class Vector>
+  class LinearForm final
+    : public LinearFormBase<Vector>
   {
     public:
       using FESType = FES;
 
+      using VectorType = Vector;
+
+      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+
       using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
 
-      using VectorType = Math::Vector<Scalar>;
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<NumberType>;
 
-      using Parent = LinearFormBase<VectorType>;
+      using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
 
       using SequentialAssembly = Assembly::Sequential<VectorType, LinearForm>;
 
       using MultithreadedAssembly = Assembly::Multithreaded<VectorType, LinearForm>;
+
+      using Parent = LinearFormBase<VectorType>;
 
       /**
        * @brief Constructs a linear form defined on some finite element
@@ -141,7 +147,7 @@ namespace Rodin::Variational
        * @returns The value which the linear form takes at @f$ u @f$.
        */
       constexpr
-      Scalar operator()(const GridFunction<FES>& u) const
+      NumberType operator()(const GridFunction<FES>& u) const
       {
         const auto& weights = u.getWeights();
         if (!weights.has_value())
@@ -157,18 +163,18 @@ namespace Rodin::Variational
       }
 
       constexpr
-      FormLanguage::List<LinearFormIntegratorBase>& getIntegrators()
+      LinearFormIntegratorBaseListType& getIntegrators()
       {
         return m_lfis;
       }
 
       constexpr
-      const FormLanguage::List<LinearFormIntegratorBase>& getIntegrators() const
+      const LinearFormIntegratorBaseListType& getIntegrators() const
       {
         return m_lfis;
       }
 
-      LinearFormBase& setAssembly(const Assembly::AssemblyBase<VectorType, LinearForm>& assembly)
+      LinearForm& setAssembly(const Assembly::AssemblyBase<VectorType, LinearForm>& assembly)
       {
         m_assembly.reset(assembly.copy());
         return *this;
@@ -180,7 +186,11 @@ namespace Rodin::Variational
         return *m_assembly;
       }
 
-      void assemble() override;
+      void assemble() override
+      {
+        const auto& fes = getTestFunction().getFiniteElementSpace();
+        m_vector = getAssembly().execute({ fes, getIntegrators() });
+      }
 
       /**
        * @brief Gets the reference to the (local) associated vector
@@ -213,15 +223,14 @@ namespace Rodin::Variational
        * @param[in] lfi Integrator which will be used to build the linear form.
        * @returns Reference to this (for method chaining)
        */
-      virtual LinearFormBase& from(const LinearFormIntegratorBase& lfi)
+      virtual LinearForm& from(const LinearFormIntegratorBaseType& lfi)
       {
         m_lfis.clear();
         add(lfi).assemble();
         return *this;
       }
 
-      virtual LinearFormBase& from(
-          const FormLanguage::List<LinearFormIntegratorBase>& lfi)
+      virtual LinearForm& from(const LinearFormIntegratorBaseListType& lfi)
       {
         m_lfis.clear();
         add(lfi).assemble();
@@ -234,7 +243,7 @@ namespace Rodin::Variational
        * @param[in] lfi Integrator which will be used to build the linear form.
        * @returns Reference to this (for method chaining)
        */
-      virtual LinearFormBase& add(const LinearFormIntegratorBase& lfi)
+      virtual LinearForm& add(const LinearFormIntegratorBaseType& lfi)
       {
         if (lfi.getTestFunction().getUUID() != getTestFunction().getUUID())
           TestFunctionMismatchException(lfi.getTestFunction()) << Alert::Raise;
@@ -242,21 +251,19 @@ namespace Rodin::Variational
         return *this;
       }
 
-      virtual LinearFormBase& add(
-          const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+      virtual LinearForm& add(const LinearFormIntegratorBaseListType& lfis)
       {
         m_lfis.add(lfis);
         return *this;
       }
 
-      virtual LinearFormBase& operator=(const LinearFormIntegratorBase& lfi)
+      virtual LinearForm& operator=(const LinearFormIntegratorBaseType& lfi)
       {
         from(lfi).assemble();
         return *this;
       }
 
-      virtual LinearFormBase& operator=(
-          const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+      virtual LinearForm& operator=(const LinearFormIntegratorBaseListType& lfis)
       {
         from(lfis).assemble();
         return *this;
@@ -270,11 +277,13 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const TestFunction<FES>> m_v;
       std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearForm>> m_assembly;
-      FormLanguage::List<LinearFormIntegratorBase> m_lfis;
+      LinearFormIntegratorBaseListType m_lfis;
       VectorType m_vector;
   };
+
   template <class FES>
-  LinearForm(TestFunction<FES>&) -> LinearForm<FES, Math::Vector<Scalar>>;
+  LinearForm(TestFunction<FES>&)
+    -> LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::NumberType>>;
 }
 
 #include "LinearForm.hpp"
