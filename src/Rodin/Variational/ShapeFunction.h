@@ -33,6 +33,8 @@ namespace Rodin::FormLanguage
     using RangeType =
       typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
+    using NumberType = typename FormLanguage::Traits<RangeType>::NumberType;
+
   };
 
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>

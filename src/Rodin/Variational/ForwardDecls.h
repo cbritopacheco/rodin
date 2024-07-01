@@ -45,6 +45,7 @@ namespace Rodin::Variational
    * An instance of LinearFormIntegratorBase performs the assembly of the
    * element vector for each finite element.
    */
+  template <class NumberType>
   class LinearFormIntegratorBase;
 
   /**
@@ -1013,13 +1014,13 @@ namespace Rodin::Variational
   template <class Operand, class ... Parameters>
   class PeriodicBC;
 
-  template <class OperatorType, class VectorType>
+  template <class Operator, class Vector>
   class ProblemBody;
 
   /**
    * @brief Base class for variational problem objects.
    */
-  template <class OperatorType, class VectorType>
+  template <class Operator, class Vector>
   class ProblemBase;
 
   /**

@@ -32,24 +32,28 @@ namespace Rodin::Variational
    * {\vdash v : \mathbb{P}_1}
    * @f]
    */
-  template <class NestedDerived, class Context>
+  template <class NestedDerived, class Range, class Mesh>
   class QuadratureRule<
     ShapeFunctionBase<
-      ShapeFunction<NestedDerived, P1<Scalar, Context>, TestSpace>,
-        P1<Scalar, Context>, TestSpace>>
-    : public LinearFormIntegratorBase
+      ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>, P1<Range, Mesh>, TestSpace>>
+    : public LinearFormIntegratorBase<
+        typename FormLanguage::Traits<
+          typename FormLanguage::Traits<
+            ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>>::RangeType>::NumberType>
   {
     public:
-      using FESType = P1<Scalar, Context>;
+      using FESType = P1<Range, Mesh>;
+
+      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
 
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>>;
 
-      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+      using IntegrandRangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
-      using Parent = LinearFormIntegratorBase;
+      using Parent = LinearFormIntegratorBase<NumberType>;
 
-      static_assert(std::is_same_v<IntegrandRangeType, Scalar>);
+      static_assert(std::is_same_v<IntegrandRangeType, NumberType>);
 
       constexpr
       QuadratureRule(const IntegrandType& integrand)
@@ -86,20 +90,20 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
         const size_t dofs = fe.getCount();
-        assert(integrand.getRangeType() == RangeType::Scalar);
         const QF::QF1P1 qf(polytope.getGeometry());
         assert(qf.getSize() == 1);
         const Scalar w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
         const Geometry::Point p(polytope, trans, std::cref(rc));
         const Scalar distortion = p.getDistortion();
-        auto& res = getVector();
-        res = Math::Vector<Scalar>::Zero(dofs);
+        auto& res = this->getVector();
+        res.resize(dofs);
+        res.setZero();
         for (size_t local = 0; local < dofs; local++)
           res.coeffRef(local) += w * distortion * fe.getBasis(local)(rc);
       }
 
-      virtual Region getRegion() const override = 0;
+      virtual Integrator::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -110,14 +114,9 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    */
-  template <class NestedDerived, class Context>
-  QuadratureRule(const
-    ShapeFunctionBase<
-      ShapeFunction<NestedDerived, P1<Scalar, Context>, TestSpace>>&)
-  ->
-  QuadratureRule<
-    ShapeFunctionBase<
-      ShapeFunction<NestedDerived, P1<Scalar, Context>, TestSpace>>>;
+  template <class NestedDerived, class Range, class Mesh>
+  QuadratureRule(const ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>&)
+    -> QuadratureRule<ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -142,19 +141,25 @@ namespace Rodin::Variational
    * {\vdash v : \mathbb{P}_1}
    * @f]
    */
-  template <class LHSDerived, class RHSDerived, class Context>
+  template <class LHSDerived, class RHSDerived, class Range, class Mesh>
   class QuadratureRule<
     ShapeFunctionBase<
       Dot<
         FunctionBase<LHSDerived>,
-        ShapeFunctionBase<
-          ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>,
-            P1<Scalar, Context>, TestSpace>>,
-      P1<Scalar, Context>, TestSpace>>
-    : public LinearFormIntegratorBase
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>, P1<Range, Mesh>, TestSpace>>,
+          P1<Range, Mesh>, TestSpace>>
+    : public LinearFormIntegratorBase<
+        typename FormLanguage::Traits<
+          typename FormLanguage::Traits<
+            ShapeFunctionBase<
+              Dot<
+                FunctionBase<LHSDerived>,
+                ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>
+          ::RangeType>
+        ::NumberType>
   {
     public:
-      using FESType = P1<Scalar, Context>;
+      using FESType = P1<Range, Mesh>;
 
       using LHSType = FunctionBase<LHSDerived>;
 
@@ -167,7 +172,11 @@ namespace Rodin::Variational
 
       using IntegrandType = ShapeFunctionBase<Dot<LHSType, RHSType>>;
 
-      using Parent = LinearFormIntegratorBase;
+      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+
+      using NumberType = typename FormLanguage::Traits<IntegrandType>::NumberType;
+
+      using Parent = LinearFormIntegratorBase<NumberType>;
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
@@ -207,26 +216,26 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
         const size_t dofs = fe.getCount();
-        assert(integrand.getRangeType() == RangeType::Scalar);
         const QF::QF1P1 qf(polytope.getGeometry());
         assert(qf.getSize() == 1);
         const Scalar w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
         const Geometry::Point p(polytope, trans, std::cref(rc));
         const Scalar distortion = p.getDistortion();
-        auto& res = getVector();
-        res = Math::Vector<Scalar>::Zero(dofs);
-        if constexpr (std::is_same_v<Scalar, LHSRangeType>)
+        auto& res = this->getVector();
+        res.resize(dofs);
+        res.setZero();
+        if constexpr (std::is_same_v<NumberType, LHSRangeType>)
         {
           for (size_t local = 0; local < dofs; local++)
             res.coeffRef(local) += w * distortion * f(p) * fe.getBasis(local)(rc);
         }
-        else if constexpr (std::is_same_v<Math::Vector<Scalar>, LHSRangeType>)
+        else if constexpr (std::is_same_v<Math::Vector<NumberType>, LHSRangeType>)
         {
           for (size_t local = 0; local < dofs; local++)
             res.coeffRef(local) += w * distortion * f(p).dot(fe.getBasis(local)(rc));
         }
-        else if constexpr (std::is_same_v<Math::Matrix<Scalar>, LHSRangeType>)
+        else if constexpr (std::is_same_v<Math::Matrix<NumberType>, LHSRangeType>)
         {
           for (size_t local = 0; local < dofs; local++)
             res.coeffRef(local) +=
@@ -240,7 +249,7 @@ namespace Rodin::Variational
         }
       }
 
-      virtual Region getRegion() const override = 0;
+      virtual Integrator::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -251,16 +260,15 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    */
-  template <class LHSDerived, class RHSDerived, class Context>
-  QuadratureRule(const ShapeFunctionBase<
-    Dot<
-      FunctionBase<LHSDerived>,
-      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>&)
-  ->
-  QuadratureRule<ShapeFunctionBase<
-    Dot<
-      FunctionBase<LHSDerived>,
-      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>>;
+  template <class LHSDerived, class RHSDerived, class Range, class Mesh>
+  QuadratureRule(
+      const ShapeFunctionBase<
+        Dot<FunctionBase<LHSDerived>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
+    -> QuadratureRule<ShapeFunctionBase<
+        Dot<
+          FunctionBase<LHSDerived>,
+          ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -286,22 +294,20 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    */
-  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Context>
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
   class QuadratureRule<
     Dot<
       ShapeFunctionBase<
         Mult<
           FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>,
-            P1<Scalar, Context>, TrialSpace>>,
-            P1<Scalar, Context>, TrialSpace>,
+          ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>,
+            P1<Range, Mesh>, TrialSpace>>, P1<Range, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>,
-          P1<Scalar, Context>, TestSpace>>>
+        ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>, P1<Range, Mesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase
   {
     public:
-      using FESType = P1<Scalar, Context>;
+      using FESType = P1<Range, Mesh>;
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
@@ -330,7 +336,12 @@ namespace Rodin::Variational
 
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+
+      using NumberType = typename FormLanguage::Traits<IntegrandRangeType>::NumberType;
+
       using Parent = LocalBilinearFormIntegratorBase;
+
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
@@ -376,20 +387,22 @@ namespace Rodin::Variational
         const Scalar w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
         auto& res = getMatrix();
-        res = Math::Matrix<Scalar>::Zero(dofs, dofs);
-        if constexpr (std::is_same_v<CoefficientRangeType, Scalar>)
+        res.resize(dofs, dofs);
+        res.setZero();
+        if constexpr (std::is_same_v<CoefficientRangeType, NumberType>)
         {
           static_assert(std::is_same_v<MultiplicandRangeType, RHSRangeType>);
-          if constexpr (std::is_same_v<MultiplicandRangeType, Scalar>)
+          if constexpr (std::is_same_v<MultiplicandRangeType, NumberType>)
           {
             const Geometry::Point p(polytope, trans, std::cref(rc));
             const Scalar distortion = p.getDistortion();
             const Scalar c = coeff.getValue(p);
             for (size_t i = 0; i < dofs; i++)
             {
-              const Scalar basis = fe.getBasis(i)(rc);
+              const NumberType basis = fe.getBasis(i)(rc);
               res(i, i) += w * distortion * c * basis * basis;
             }
+
             for (size_t i = 0; i < dofs; i++)
               for (size_t j = 0; j < i; j++)
                 res(i, j) += w * distortion * c * fe.getBasis(i)(rc) * fe.getBasis(j)(rc);
@@ -416,28 +429,29 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<IntegrandType> m_integrand;
-      std::vector<Math::Vector<Scalar>> m_vvalues;
-      std::vector<Math::Matrix<Scalar>> m_mvalues;
+      std::vector<Math::Vector<NumberType>> m_vvalues;
+      std::vector<Math::Matrix<NumberType>> m_mvalues;
   };
 
-  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Context>
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number, class Mesh>
   QuadratureRule(const
     Dot<
       ShapeFunctionBase<
         Mult<
           FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>>,
+          ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Number, Mesh>, TrialSpace>>>>,
       ShapeFunctionBase<
-        ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>&)
+        ShapeFunction<RHSDerived, P1<Number, Mesh>, TestSpace>>>&)
   ->
   QuadratureRule<
     Dot<
       ShapeFunctionBase<
         Mult<
           FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>>,
+          ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Number, Mesh>, TrialSpace>>>>,
       ShapeFunctionBase<
-        ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>;
+
+        ShapeFunction<RHSDerived, P1<Number, Mesh>, TestSpace>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -463,19 +477,17 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    */
-  template <class LHSDerived, class RHSDerived, class Context>
+  template <class LHSDerived, class RHSDerived, class Range, class Mesh>
   class QuadratureRule<
     Dot<
       ShapeFunctionBase<
-        Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>,
-          P1<Scalar, Context>, TrialSpace>,
+        Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>, P1<Range, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>,
-          P1<Scalar, Context>, TestSpace>>>
+        Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>, P1<Range, Mesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase
   {
     public:
-      using FESType = P1<Scalar, Context>;
+      using FESType = P1<Range, Mesh>;
 
       using LHSType =
         ShapeFunctionBase<
@@ -486,6 +498,10 @@ namespace Rodin::Variational
           Grad<ShapeFunction<RHSDerived, FESType, TestSpace>>>;
 
       using IntegrandType = Dot<LHSType, RHSType>;
+
+      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+
+      using NumberType = typename FormLanguage::Traits<IntegrandRangeType>::NumberType;
 
       using Parent = LocalBilinearFormIntegratorBase;
 
@@ -538,7 +554,8 @@ namespace Rodin::Variational
         const Scalar distortion = p.getDistortion();
         const auto jacInvT = p.getJacobianInverse().transpose();
         auto& res = getMatrix();
-        res = Math::Matrix<Scalar>::Zero(dofs, dofs);
+        res.resize(dofs, dofs);
+        res.setZero();
         m_pgradient.resize(dofs);
         for (size_t local = 0; local < dofs; local++)
           m_pgradient[local] = jacInvT * fe.getGradient(local)(rc);
@@ -556,24 +573,18 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<IntegrandType> m_integrand;
-      std::vector<Math::SpatialVector<Scalar>> m_rgradient;
-      std::vector<Math::SpatialVector<Scalar>> m_pgradient;
+      std::vector<Math::SpatialVector<NumberType>> m_rgradient;
+      std::vector<Math::SpatialVector<NumberType>> m_pgradient;
   };
 
-  template <class LHSDerived, class RHSDerived, class Context>
-  QuadratureRule(const
-    Dot<
-      ShapeFunctionBase<
-        Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>,
-      ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>&)
-  ->
-  QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>,
-      ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>>;
+  template <class LHSDerived, class RHSDerived, class Range, class Mesh>
+  QuadratureRule(
+      const Dot<
+        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
+    -> QuadratureRule<Dot<
+          ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+          ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -599,23 +610,21 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    */
-  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Context>
+  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
   class QuadratureRule<
   Dot<
     ShapeFunctionBase<
       Mult<
         FunctionBase<LHSFunctionDerived>,
         ShapeFunctionBase<
-          Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>,
-        P1<Scalar, Context>, TrialSpace>>,
-      P1<Scalar, Context>, TrialSpace>,
+          Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>, P1<Range, Mesh>, TrialSpace>>,
+      P1<Range, Mesh>, TrialSpace>,
     ShapeFunctionBase<
-      Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>,
-    P1<Scalar, Context>, TestSpace>>>
+      Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>, P1<Range, Mesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase
   {
     public:
-      using FESType = P1<Scalar, Context>;
+      using FESType = P1<Range, Mesh>;
 
       using LHSType =
         ShapeFunctionBase<
@@ -629,6 +638,10 @@ namespace Rodin::Variational
           Grad<ShapeFunction<RHSDerived, FESType, TestSpace>>>;
 
       using IntegrandType = Dot<LHSType, RHSType>;
+
+      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+
+      using NumberType = typename FormLanguage::Traits<IntegrandRangeType>::NumberType;
 
       using Parent = LocalBilinearFormIntegratorBase;
 
@@ -682,7 +695,8 @@ namespace Rodin::Variational
         const Scalar distortion = p.getDistortion();
         const auto jacInvT = p.getJacobianInverse().transpose();
         auto& res = getMatrix();
-        res = Math::Matrix<Scalar>::Zero(dofs, dofs);
+        res.resize(dofs, dofs);
+        res.setZero();
         m_rgradient.resize(dofs);
         m_pgradient.resize(dofs);
         for (size_t local = 0; local < dofs; local++)
@@ -705,32 +719,27 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<IntegrandType> m_integrand;
-      std::vector<Math::SpatialVector<Scalar>> m_rgradient;
-      std::vector<Math::SpatialVector<Scalar>> m_pgradient;
+      std::vector<Math::SpatialVector<NumberType>> m_rgradient;
+      std::vector<Math::SpatialVector<NumberType>> m_pgradient;
   };
 
   /**
    * @ingroup RodinCTAD
    */
-  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Context>
-  QuadratureRule(const
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<LHSFunctionDerived>,
-          ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>>>,
-      ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>&)
-  ->
-  QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<LHSFunctionDerived>,
-          ShapeFunctionBase<
-            Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>>>,
-      ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>>;
+  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
+  QuadratureRule(
+      const Dot<
+        ShapeFunctionBase<
+          Mult<
+            FunctionBase<LHSFunctionDerived>,
+            ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
+        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
+    -> QuadratureRule<
+          Dot<ShapeFunctionBase<
+            Mult<
+              FunctionBase<LHSFunctionDerived>,
+              ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
+          ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -756,19 +765,19 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    */
-  template <class LHSDerived, class RHSDerived, class Context>
+  template <class LHSDerived, class RHSDerived, class Range, class Mesh>
   class QuadratureRule<
     Dot<
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>,
-          P1<Scalar, Context>, TrialSpace>,
+        Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+          P1<Range, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>,
-          P1<Scalar, Context>, TestSpace>>>
+        Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>,
+          P1<Range, Mesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase
   {
     public:
-      using FESType = P1<Scalar, Context>;
+      using FESType = P1<Range, Mesh>;
 
       using LHSType =
         ShapeFunctionBase<
@@ -779,6 +788,10 @@ namespace Rodin::Variational
           Jacobian<ShapeFunction<RHSDerived, FESType, TestSpace>>>;
 
       using IntegrandType = Dot<LHSType, RHSType>;
+
+      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+
+      using NumberType = typename FormLanguage::Traits<IntegrandRangeType>::NumberType;
 
       using Parent = LocalBilinearFormIntegratorBase;
 
@@ -792,16 +805,16 @@ namespace Rodin::Variational
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
-          m_rjac(other.m_rJacobianient),
-          m_pjac(other.m_pJacobianient)
+          m_rjac(other.m_rjac),
+          m_pjac(other.m_pjac)
       {}
 
       constexpr
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
-          m_rjac(std::move(other.m_rJacobianient)),
-          m_pjac(std::move(other.m_pJacobianient))
+          m_rjac(std::move(other.m_rjac)),
+          m_pjac(std::move(other.m_pjac))
       {}
 
       inline
@@ -830,7 +843,8 @@ namespace Rodin::Variational
         const Geometry::Point p(polytope, trans, std::cref(rc));
         const Scalar distortion = p.getDistortion();
         auto& res = getMatrix();
-        res = Math::Matrix<Scalar>::Zero(dofs, dofs);
+        res.resize(dofs, dofs);
+        res.setZero();
         m_pjac.resize(dofs);
         for (size_t local = 0; local < dofs; local++)
           m_pjac[local] = fe.getJacobian(local)(rc) * p.getJacobianInverse();
@@ -848,27 +862,27 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<IntegrandType> m_integrand;
-      std::vector<Math::SpatialVector<Scalar>> m_rjac;
-      std::vector<Math::SpatialVector<Scalar>> m_pjac;
+      std::vector<Math::SpatialVector<NumberType>> m_rjac;
+      std::vector<Math::SpatialVector<NumberType>> m_pjac;
   };
 
   /**
    * @ingroup RodinCTAD
    */
-  template <class LHSDerived, class RHSDerived, class Context>
+  template <class LHSDerived, class RHSDerived, class Range, class Mesh>
   QuadratureRule(const
     Dot<
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>,
+        Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>&)
-  ->
-  QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>,
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>>;
+        Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
+    ->
+      QuadratureRule<
+        Dot<
+          ShapeFunctionBase<
+            Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+          ShapeFunctionBase<
+            Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -894,24 +908,24 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    */
-  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Context>
+  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Mesh>
   class QuadratureRule<
   Dot<
     ShapeFunctionBase<
       Mult<
         FunctionBase<LHSFunctionDerived>,
         ShapeFunctionBase<
-          Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Context>, TrialSpace>>,
-        P1<Math::Vector<Scalar>, Context>, TrialSpace>>,
-      P1<Math::Vector<Scalar>, Context>, TrialSpace>,
+          Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Mesh>, TrialSpace>>,
+        P1<Math::Vector<Scalar>, Mesh>, TrialSpace>>,
+      P1<Math::Vector<Scalar>, Mesh>, TrialSpace>,
     ShapeFunctionBase<
-      Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Context>, TestSpace>>,
-    P1<Math::Vector<Scalar>, Context>, TestSpace>>>
+      Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Mesh>, TestSpace>>,
+    P1<Math::Vector<Scalar>, Mesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase
   {
     public:
       /// Type of finite element space
-      using FESType = P1<Math::Vector<Scalar>, Context>;
+      using FESType = P1<Math::Vector<Scalar>, Mesh>;
 
       /// Type of left hand side
       using LHSType =
@@ -928,6 +942,10 @@ namespace Rodin::Variational
 
       /// Type of integrand
       using IntegrandType = Dot<LHSType, RHSType>;
+
+      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+
+      using NumberType = typename FormLanguage::Traits<IntegrandRangeType>::NumberType;
 
       using Parent = LocalBilinearFormIntegratorBase;
 
@@ -1026,15 +1044,15 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    */
-  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Context>
+  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Mesh>
   QuadratureRule(const
     Dot<
       ShapeFunctionBase<
         Mult<
           FunctionBase<LHSFunctionDerived>,
-          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Context>, TrialSpace>>>>>,
+          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Mesh>, TrialSpace>>>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Context>, TestSpace>>>>&)
+        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Mesh>, TestSpace>>>>&)
   ->
   QuadratureRule<
     Dot<
@@ -1042,9 +1060,9 @@ namespace Rodin::Variational
         Mult<
           FunctionBase<LHSFunctionDerived>,
           ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Context>, TrialSpace>>>>>,
+            Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Mesh>, TrialSpace>>>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Context>, TestSpace>>>>>;
+        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Mesh>, TestSpace>>>>>;
 }
 
 #endif

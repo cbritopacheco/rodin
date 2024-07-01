@@ -22,5 +22,14 @@ namespace Rodin::Math
   using SparseMatrix = Eigen::SparseMatrix<NumberType>;
 }
 
+namespace Rodin::FormLanguage
+{
+  template <class Number>
+  struct Traits<Math::SparseMatrix<Number>>
+  {
+    using NumberType = Number;
+  };
+}
+
 #endif
 

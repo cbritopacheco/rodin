@@ -21,6 +21,30 @@ namespace Rodin::FormLanguage
 
   template <class ... Args>
   struct Traits;
+
+  template <>
+  struct Traits<Boolean>
+  {
+    using NumberType = Boolean;
+  };
+
+  template <>
+  struct Traits<Integer>
+  {
+    using NumberType = Integer;
+  };
+
+  template <>
+  struct Traits<Scalar>
+  {
+    using NumberType = Scalar;
+  };
+
+  template <>
+  struct Traits<Complex>
+  {
+    using NumberType = Complex;
+  };
 }
 
 #endif

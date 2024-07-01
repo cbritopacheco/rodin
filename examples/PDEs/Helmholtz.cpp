@@ -22,6 +22,12 @@ int main(int, char**)
   // Functions
   P1<Complex> vh(mesh);
 
+  Math::Vector<Complex> m(2);
+  m <<  Complex(3, 1), Complex(2, 9);
+
+  std::cout << m << std::endl;
+  std::cout << m.dot(m) << std::endl;
+
   // TrialFunction uRe(vh), uIm(vh);
   // TestFunction  vRe(vh), vIm(vh);
 

@@ -12,6 +12,8 @@
 
 #include "Rodin/Configure.h"
 
+#include "Rodin/FormLanguage/Traits.h"
+
 #include "Rodin/Types.h"
 #include "Rodin/Array.h"
 
@@ -48,6 +50,21 @@ namespace Rodin::Math
    */
   template <class NumberType, size_t Rows, size_t Cols>
   using FixedSizeMatrix = Eigen::Matrix<NumberType, Rows, Cols>;
+}
+
+namespace Rodin::FormLanguage
+{
+  template <class Number>
+  struct Traits<Math::Matrix<Number>>
+  {
+    using NumberType = Number;
+  };
+
+  template <class Number>
+  struct Traits<Math::SpatialMatrix<Number>>
+  {
+    using NumberType = Number;
+  };
 }
 
 #endif
