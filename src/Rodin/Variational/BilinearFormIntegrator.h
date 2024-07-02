@@ -22,7 +22,7 @@ namespace Rodin::Variational
   class BilinearFormIntegratorBase : public Integrator
   {
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
       using Parent = Integrator;
 
@@ -110,9 +110,9 @@ namespace Rodin::Variational
     : public BilinearFormIntegratorBase<Number, LocalBilinearFormIntegratorBase<Number>>
   {
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
-      using Parent = BilinearFormIntegratorBase<NumberType, LocalBilinearFormIntegratorBase>;
+      using Parent = BilinearFormIntegratorBase<ScalarType, LocalBilinearFormIntegratorBase>;
 
       using Parent::Parent;
 
@@ -180,7 +180,7 @@ namespace Rodin::Variational
 
       virtual LocalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
-      virtual NumberType integrate(size_t tr, size_t te) = 0;
+      virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
       virtual Integrator::Region getRegion() const = 0;
 
@@ -196,9 +196,9 @@ namespace Rodin::Variational
     : public BilinearFormIntegratorBase<Number, GlobalBilinearFormIntegratorBase<Number>>
   {
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
-      using Parent = BilinearFormIntegratorBase<NumberType, GlobalBilinearFormIntegratorBase<NumberType>>;
+      using Parent = BilinearFormIntegratorBase<ScalarType, GlobalBilinearFormIntegratorBase<ScalarType>>;
 
       using Parent::Parent;
 
@@ -253,7 +253,7 @@ namespace Rodin::Variational
       virtual
       GlobalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& tau, const Geometry::Polytope& t) = 0;
 
-      virtual NumberType integrate(size_t tr, size_t te) = 0;
+      virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
       virtual Integrator::Region getTrialRegion() const = 0;
 

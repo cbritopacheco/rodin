@@ -43,15 +43,15 @@ namespace Rodin::Assembly
         Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
-      using OperatorType = std::vector<Eigen::Triplet<NumberType>>;
+      using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
       using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
 
-      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<NumberType>;
+      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<NumberType>;
+      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -91,8 +91,8 @@ namespace Rodin::Assembly
               {
                 for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                 {
-                  const NumberType s = bfi.integrate(m, l);
-                  if (s != NumberType(0))
+                  const ScalarType s = bfi.integrate(m, l);
+                  if (s != ScalarType(0))
                     res.emplace_back(rows(l), cols(m), s);
                 }
               }
@@ -120,8 +120,8 @@ namespace Rodin::Assembly
                   {
                     for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                     {
-                      const NumberType s = bfi.integrate(m, l);
-                      if (s != NumberType(0))
+                      const ScalarType s = bfi.integrate(m, l);
+                      if (s != ScalarType(0))
                         res.emplace_back(rows(l), cols(m), s);
                     }
                   }
@@ -153,9 +153,9 @@ namespace Rodin::Assembly
         Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>>
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
-      using OperatorType = Math::SparseMatrix<NumberType>;
+      using OperatorType = Math::SparseMatrix<ScalarType>;
 
       using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
 
@@ -211,13 +211,13 @@ namespace Rodin::Assembly
         Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Real>>>
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
-      using OperatorType = Math::Matrix<NumberType>;
+      using OperatorType = Math::Matrix<ScalarType>;
 
-      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<NumberType>;
+      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<NumberType>;
+      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
 
@@ -305,16 +305,16 @@ namespace Rodin::Assembly
           Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>>
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
-      using OperatorType = std::vector<Eigen::Triplet<NumberType>>;
+      using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
       using TupleType =
         Tuple<Variational::BilinearForm<TrialFES, TestFES, OperatorType>...>;
 
-      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<NumberType>;
+      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<NumberType>;
+      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using Parent = AssemblyBase<OperatorType, TupleType>;
 
@@ -491,9 +491,9 @@ namespace Rodin::Assembly
     public:
       using FESType = FES;
 
-      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using VectorType = Math::Vector<NumberType>;
+      using VectorType = Math::Vector<ScalarType>;
 
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
 

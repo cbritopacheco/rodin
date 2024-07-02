@@ -35,14 +35,14 @@ namespace Rodin::FormLanguage
 
     using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    using LHSNumberType = typename FormLanguage::Traits<LHSRangeType>::NumberType;
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-    using RHSNumberType = typename FormLanguage::Traits<RHSRangeType>::NumberType;
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    using NumberType =
-      decltype(std::declval<LHSNumberType>() * std::declval<RHSNumberType>());
+    using ScalarType =
+      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
 
-    using RangeType = NumberType;
+    using RangeType = ScalarType;
   };
 
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -62,14 +62,14 @@ namespace Rodin::FormLanguage
 
     using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    using LHSNumberType = typename FormLanguage::Traits<LHSRangeType>::NumberType;
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-    using RHSNumberType = typename FormLanguage::Traits<RHSRangeType>::NumberType;
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    using NumberType =
-      decltype(std::declval<LHSNumberType>() * std::declval<RHSNumberType>());
+    using ScalarType =
+      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
 
-    using RangeType = NumberType;
+    using RangeType = ScalarType;
   };
 
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -86,14 +86,14 @@ namespace Rodin::FormLanguage
 
     using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    using LHSNumberType = typename FormLanguage::Traits<LHSRangeType>::NumberType;
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-    using RHSNumberType = typename FormLanguage::Traits<RHSRangeType>::NumberType;
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    using NumberType =
-      decltype(std::declval<LHSNumberType>() * std::declval<RHSNumberType>());
+    using ScalarType =
+      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
 
-    using RangeType = NumberType;
+    using RangeType = ScalarType;
   };
 }
 
@@ -121,14 +121,14 @@ namespace Rodin::Variational
 
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using LHSNumberType = typename FormLanguage::Traits<LHSRangeType>::NumberType;
+      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-      using RHSNumberType = typename FormLanguage::Traits<RHSRangeType>::NumberType;
+      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using NumberType =
-        decltype(std::declval<LHSNumberType>() * std::declval<RHSNumberType>());
+      using ScalarType =
+        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
 
-      using RangeType = NumberType;
+      using RangeType = ScalarType;
 
       using Parent = RealFunctionBase<Dot<LHSType, RHSType>>;
 
@@ -241,14 +241,14 @@ namespace Rodin::Variational
 
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using LHSNumberType = typename FormLanguage::Traits<LHSRangeType>::NumberType;
+      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-      using RHSNumberType = typename FormLanguage::Traits<RHSRangeType>::NumberType;
+      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using NumberType =
-        decltype(std::declval<LHSNumberType>() * std::declval<RHSNumberType>());
+      using ScalarType =
+        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
 
-      using RangeType = NumberType;
+      using RangeType = ScalarType;
 
       using Parent = ShapeFunctionBase<Dot<LHSType, RHSType>, FESType, Space>;
 
@@ -335,15 +335,15 @@ namespace Rodin::Variational
         const auto& p = getRHS().getPoint();
         const auto& lhs = this->object(getLHS().getValue(p));
         const auto& rhs = this->object(getRHS().getBasis(local));
-        if constexpr (std::is_same_v<LHSRangeType, NumberType>)
+        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
         {
           return lhs * rhs;
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
         {
           return lhs.dot(rhs);
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<NumberType>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
         {
           return (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
         }
@@ -393,14 +393,14 @@ namespace Rodin::Variational
 
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using LHSNumberType = typename FormLanguage::Traits<LHSRangeType>::NumberType;
+      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-      using RHSNumberType = typename FormLanguage::Traits<RHSRangeType>::NumberType;
+      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using NumberType =
-        decltype(std::declval<LHSNumberType>() * std::declval<RHSNumberType>());
+      using ScalarType =
+        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
 
-      using RangeType = NumberType;
+      using RangeType = ScalarType;
 
       using Parent = FormLanguage::Base;
 
@@ -463,18 +463,18 @@ namespace Rodin::Variational
        * where @f$ n @f$ is the number of trial degrees of freedom, and @f$ m
        * @f$ is the number of test degrees of freedom.
        */
-      NumberType operator()(size_t tr, size_t te)
+      ScalarType operator()(size_t tr, size_t te)
       {
         const auto& p = getPoint();
-        if constexpr (std::is_same_v<LHSRangeType, NumberType>)
+        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
         {
           return getRHS().getBasis(te) * getLHS().getBasis(tr);
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
         {
           return getRHS().getBasis(te).dot(getLHS().getBasis(tr));
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<NumberType>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
         {
           return (getRHS().getBasis(te).array() * getLHS().getBasis(te).array()).rowwise().sum().colwise().sum().value();
         }

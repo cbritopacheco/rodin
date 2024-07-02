@@ -31,13 +31,13 @@ namespace Rodin::Variational
   class ProblemBodyBase : public FormLanguage::Base
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
-      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<NumberType>;
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<ScalarType>;
 
-      using LocalBilinearFormIntegratorBaseType = LocalBilinearFormIntegratorBase<NumberType>;
+      using LocalBilinearFormIntegratorBaseType = LocalBilinearFormIntegratorBase<ScalarType>;
 
-      using GlobalBilinearFormIntegratorBaseType = GlobalBilinearFormIntegratorBase<NumberType>;
+      using GlobalBilinearFormIntegratorBaseType = GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
 
@@ -171,7 +171,7 @@ namespace Rodin::Variational
     public:
       using OperatorType = Operator;
 
-      using NumberType = typename FormLanguage::Traits<OperatorType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<OperatorType>::ScalarType;
 
       using BilinearFormBaseType = BilinearFormBase<OperatorType>;
 
@@ -263,9 +263,9 @@ namespace Rodin::Variational
 
       using OperatorType = Operator;
 
-      using VectorNumberType = typename FormLanguage::Traits<VectorType>::NumberType;
+      using VectorScalarType = typename FormLanguage::Traits<VectorType>::ScalarType;
 
-      using OperatorNumberType = typename FormLanguage::Traits<OperatorType>::NumberType;
+      using OperatorScalarType = typename FormLanguage::Traits<OperatorType>::ScalarType;
 
       using LinearFormBaseType = LinearFormBase<VectorType>;
 
@@ -275,11 +275,11 @@ namespace Rodin::Variational
 
       using BilinearFormBaseListType = FormLanguage::List<BilinearFormBaseType>;
 
-      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<VectorNumberType>;
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<VectorScalarType>;
 
-      using LocalBilinearFormIntegratorBaseType = LocalBilinearFormIntegratorBase<OperatorNumberType>;
+      using LocalBilinearFormIntegratorBaseType = LocalBilinearFormIntegratorBase<OperatorScalarType>;
 
-      using GlobalBilinearFormIntegratorBaseType = GlobalBilinearFormIntegratorBase<OperatorNumberType>;
+      using GlobalBilinearFormIntegratorBaseType = GlobalBilinearFormIntegratorBase<OperatorScalarType>;
 
       using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
 

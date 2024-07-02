@@ -27,21 +27,21 @@ namespace Rodin::Assembly
 
       using TestFESType = TestFES;
 
-      using TrialFESNumberType  = typename FormLanguage::Traits<TrialFESType>::NumberType;
+      using TrialFESScalarType  = typename FormLanguage::Traits<TrialFESType>::ScalarType;
 
-      using TestFESNumberType   = typename FormLanguage::Traits<TestFESType>::NumberType;
+      using TestFESScalarType   = typename FormLanguage::Traits<TestFESType>::ScalarType;
 
-      using NumberType = decltype(
-          std::declval<TrialFESNumberType>() * std::declval<TestFESNumberType>());
+      using ScalarType = decltype(
+          std::declval<TrialFESScalarType>() * std::declval<TestFESScalarType>());
 
       using LocalBilinearFormIntegratorBaseType =
-        Variational::LocalBilinearFormIntegratorBase<NumberType>;
+        Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
       using LocalBilinearFormIntegratorBaseListType =
         FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
 
       using GlobalBilinearFormIntegratorBaseType =
-        Variational::GlobalBilinearFormIntegratorBase<NumberType>;
+        Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using GlobalBilinearFormIntegratorBaseListType =
         FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
@@ -86,13 +86,13 @@ namespace Rodin::Assembly
       FormLanguage::List<
         Variational::LocalBilinearFormIntegratorBase<
           decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::NumberType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::NumberType>())>>&,
+            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>&,
       FormLanguage::List<
         Variational::GlobalBilinearFormIntegratorBase<
           decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::NumberType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::NumberType>())>>&)
+            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>&)
     -> BilinearFormAssemblyInput<TrialFES, TestFES>;
 
   template <class FES>
@@ -101,10 +101,10 @@ namespace Rodin::Assembly
     public:
       using FESType = FES;
 
-      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using LinearFormIntegratorBaseList =
-        FormLanguage::List<Variational::LinearFormIntegratorBase<NumberType>>;
+        FormLanguage::List<Variational::LinearFormIntegratorBase<ScalarType>>;
 
       LinearFormAssemblyInput(const FES& fes, LinearFormIntegratorBaseList& lfis)
         : m_fes(fes), m_lfis(lfis)

@@ -33,7 +33,7 @@ namespace Rodin::Variational
 
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 
-      using NumberType = typename FormLanguage::Traits<IntegrandRangeType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<IntegrandRangeType>::ScalarType;
 
       using Parent = FormLanguage::Base;
 
@@ -77,7 +77,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      NumberType compute()
+      ScalarType compute()
       {
         auto& res = m_value.emplace(0);
         const auto& qf = getQuadratureFormula();
@@ -89,7 +89,7 @@ namespace Rodin::Variational
       }
 
       inline
-      const std::optional<NumberType>& getValue() const
+      const std::optional<ScalarType>& getValue() const
       {
         return m_value;
       }
@@ -117,7 +117,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
       std::optional<const QF::GenericPolytopeQuadrature> m_qfgg;
       std::optional<std::reference_wrapper<const QF::QuadratureFormulaBase>> m_qf;
-      std::optional<NumberType> m_value;
+      std::optional<ScalarType> m_value;
 
       std::vector<Geometry::Point> m_ps;
   };
@@ -134,7 +134,7 @@ namespace Rodin::Variational
 
       using IntegrandType = GridFunction<FESType>;
 
-      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using Parent = Integrator;
 
@@ -177,7 +177,7 @@ namespace Rodin::Variational
        * @returns Value of integral
        */
       inline
-      NumberType compute()
+      ScalarType compute()
       {
         switch (getRegion())
         {
@@ -228,7 +228,7 @@ namespace Rodin::Variational
        * @returns Value of integral
        */
       inline
-      operator NumberType()
+      operator ScalarType()
       {
         if (!m_value.has_value())
           return compute();
@@ -250,7 +250,7 @@ namespace Rodin::Variational
       }
 
       inline
-      const std::optional<NumberType>& getValue() const
+      const std::optional<ScalarType>& getValue() const
       {
         return m_value;
       }
@@ -270,9 +270,9 @@ namespace Rodin::Variational
       TestFunction<FES>                                 m_v;
 
       FlatSet<Geometry::Attribute>      m_attrs;
-      LinearForm<FES, Math::Vector<NumberType>>     m_lf;
+      LinearForm<FES, Math::Vector<ScalarType>>     m_lf;
 
-      std::optional<NumberType> m_value;
+      std::optional<ScalarType> m_value;
   };
 
   /**
@@ -299,7 +299,7 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<
           Dot<
             ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
-            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>::NumberType>
+            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>::ScalarType>
   {
     public:
       using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
@@ -308,9 +308,9 @@ namespace Rodin::Variational
 
       using IntegrandType = Dot<LHSType, RHSType>;
 
-      using NumberType = typename FormLanguage::Traits<IntegrandType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
-      using Parent = LocalBilinearFormIntegratorBase<NumberType>;
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       QuadratureRule(const LHSType& lhs, const RHSType& rhs)
         : QuadratureRule(Dot(lhs, rhs))
@@ -367,9 +367,9 @@ namespace Rodin::Variational
         return *this;
       }
 
-      NumberType integrate(size_t tr, size_t te) final override
+      ScalarType integrate(size_t tr, size_t te) final override
       {
-        NumberType res = 0;
+        ScalarType res = 0;
         auto& integrand = *m_integrand;
         for (size_t i = 0; i < m_ps.size(); i++)
         {
@@ -398,16 +398,16 @@ namespace Rodin::Variational
   template <class NestedDerived, class FES>
   class QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
     : public LinearFormIntegratorBase<
-        typename FormLanguage::Traits<ShapeFunctionBase<NestedDerived, FES, TestSpace>>::NumberType>
+        typename FormLanguage::Traits<ShapeFunctionBase<NestedDerived, FES, TestSpace>>::ScalarType>
   {
     public:
       using FESType = FES;
 
       using IntegrandType = ShapeFunctionBase<NestedDerived, FESType, TestSpace>;
 
-      using NumberType = typename FormLanguage::Traits<IntegrandType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
-      using Parent = LinearFormIntegratorBase<NumberType>;
+      using Parent = LinearFormIntegratorBase<ScalarType>;
 
       template <class LHSDerived, class RHSDerived>
       constexpr
@@ -464,9 +464,9 @@ namespace Rodin::Variational
         return *this;
       }
 
-      NumberType integrate(size_t local) final override
+      ScalarType integrate(size_t local) final override
       {
-        NumberType res = 0;
+        ScalarType res = 0;
         auto& integrand = *m_integrand;
         for (size_t i = 0; i < m_ps.size(); i++)
         {

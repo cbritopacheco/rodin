@@ -34,9 +34,9 @@ namespace Rodin::Variational
   class RealFunctionBase : public NumberFunctionBase<Real, RealFunctionBase<Derived>>
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
-      using Parent = NumberFunctionBase<NumberType, RealFunctionBase<Derived>>;
+      using Parent = NumberFunctionBase<ScalarType, RealFunctionBase<Derived>>;
 
       using Parent::traceOf;
 

@@ -39,21 +39,21 @@
 //     : public LinearFormIntegratorBase<
 //         typename FormLanguage::Traits<
 //           typename FormLanguage::Traits<
-//             ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>>::RangeType>::NumberType>
+//             ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>>::RangeType>::ScalarType>
 //   {
 //     public:
 //       using FESType = P1<Range, Mesh>;
 // 
-//       using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+//       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 // 
 //       using IntegrandType =
 //         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>>;
 // 
 //       using IntegrandRangeType = typename FormLanguage::Traits<FESType>::RangeType;
 // 
-//       using Parent = LinearFormIntegratorBase<NumberType>;
+//       using Parent = LinearFormIntegratorBase<ScalarType>;
 // 
-//       static_assert(std::is_same_v<IntegrandRangeType, NumberType>);
+//       static_assert(std::is_same_v<IntegrandRangeType, ScalarType>);
 // 
 //       constexpr
 //       QuadratureRule(const IntegrandType& integrand)
@@ -156,7 +156,7 @@
 //                 FunctionBase<LHSDerived>,
 //                 ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>
 //           ::RangeType>
-//         ::NumberType>
+//         ::ScalarType>
 //   {
 //     public:
 //       using FESType = P1<Range, Mesh>;
@@ -174,9 +174,9 @@
 // 
 //       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 // 
-//       using NumberType = typename FormLanguage::Traits<IntegrandType>::NumberType;
+//       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 // 
-//       using Parent = LinearFormIntegratorBase<NumberType>;
+//       using Parent = LinearFormIntegratorBase<ScalarType>;
 // 
 //       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 // 
@@ -225,17 +225,17 @@
 //         auto& res = this->getVector();
 //         res.resize(dofs);
 //         res.setZero();
-//         if constexpr (std::is_same_v<NumberType, LHSRangeType>)
+//         if constexpr (std::is_same_v<ScalarType, LHSRangeType>)
 //         {
 //           for (size_t local = 0; local < dofs; local++)
 //             res.coeffRef(local) += w * distortion * f(p) * fe.getBasis(local)(rc);
 //         }
-//         else if constexpr (std::is_same_v<Math::Vector<NumberType>, LHSRangeType>)
+//         else if constexpr (std::is_same_v<Math::Vector<ScalarType>, LHSRangeType>)
 //         {
 //           for (size_t local = 0; local < dofs; local++)
 //             res.coeffRef(local) += w * distortion * f(p).dot(fe.getBasis(local)(rc));
 //         }
-//         else if constexpr (std::is_same_v<Math::Matrix<NumberType>, LHSRangeType>)
+//         else if constexpr (std::is_same_v<Math::Matrix<ScalarType>, LHSRangeType>)
 //         {
 //           for (size_t local = 0; local < dofs; local++)
 //             res.coeffRef(local) +=
@@ -312,7 +312,7 @@
 //                 FunctionBase<CoefficientDerived>,
 //                 ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>,
 //             ShapeFunctionBase<
-//               ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>::NumberType>
+//               ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>::ScalarType>
 //   {
 //     public:
 //       using FESType = P1<Range, Mesh>;
@@ -344,9 +344,9 @@
 // 
 //       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 // 
-//       using NumberType = typename FormLanguage::Traits<IntegrandType>::NumberType;
+//       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 // 
-//       using Parent = LocalBilinearFormIntegratorBase<NumberType>;
+//       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 // 
 // 
 //       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
@@ -395,17 +395,17 @@
 //         auto& res = getMatrix();
 //         res.resize(dofs, dofs);
 //         res.setZero();
-//         if constexpr (std::is_same_v<CoefficientRangeType, NumberType>)
+//         if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
 //         {
 //           static_assert(std::is_same_v<MultiplicandRangeType, RHSRangeType>);
-//           if constexpr (std::is_same_v<MultiplicandRangeType, NumberType>)
+//           if constexpr (std::is_same_v<MultiplicandRangeType, ScalarType>)
 //           {
 //             const Geometry::Point p(polytope, trans, std::cref(rc));
 //             const Real distortion = p.getDistortion();
 //             const Real c = coeff.getValue(p);
 //             for (size_t i = 0; i < dofs; i++)
 //             {
-//               const NumberType basis = fe.getBasis(i)(rc);
+//               const ScalarType basis = fe.getBasis(i)(rc);
 //               res(i, i) += w * distortion * c * basis * basis;
 //             }
 // 
@@ -435,8 +435,8 @@
 // 
 //     private:
 //       std::unique_ptr<IntegrandType> m_integrand;
-//       std::vector<Math::Vector<NumberType>> m_vvalues;
-//       std::vector<Math::Matrix<NumberType>> m_mvalues;
+//       std::vector<Math::Vector<ScalarType>> m_vvalues;
+//       std::vector<Math::Matrix<ScalarType>> m_mvalues;
 //   };
 // 
 //   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number, class Mesh>
@@ -507,7 +507,7 @@
 // 
 //       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 // 
-//       using NumberType = typename FormLanguage::Traits<IntegrandRangeType>::NumberType;
+//       using ScalarType = typename FormLanguage::Traits<IntegrandRangeType>::ScalarType;
 // 
 //       using Parent = LocalBilinearFormIntegratorBase;
 // 
@@ -579,8 +579,8 @@
 // 
 //     private:
 //       std::unique_ptr<IntegrandType> m_integrand;
-//       std::vector<Math::SpatialVector<NumberType>> m_rgradient;
-//       std::vector<Math::SpatialVector<NumberType>> m_pgradient;
+//       std::vector<Math::SpatialVector<ScalarType>> m_rgradient;
+//       std::vector<Math::SpatialVector<ScalarType>> m_pgradient;
 //   };
 // 
 //   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
@@ -647,7 +647,7 @@
 // 
 //       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 // 
-//       using NumberType = typename FormLanguage::Traits<IntegrandRangeType>::NumberType;
+//       using ScalarType = typename FormLanguage::Traits<IntegrandRangeType>::ScalarType;
 // 
 //       using Parent = LocalBilinearFormIntegratorBase;
 // 
@@ -725,8 +725,8 @@
 // 
 //     private:
 //       std::unique_ptr<IntegrandType> m_integrand;
-//       std::vector<Math::SpatialVector<NumberType>> m_rgradient;
-//       std::vector<Math::SpatialVector<NumberType>> m_pgradient;
+//       std::vector<Math::SpatialVector<ScalarType>> m_rgradient;
+//       std::vector<Math::SpatialVector<ScalarType>> m_pgradient;
 //   };
 // 
 //   /**
@@ -797,7 +797,7 @@
 // 
 //       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 // 
-//       using NumberType = typename FormLanguage::Traits<IntegrandRangeType>::NumberType;
+//       using ScalarType = typename FormLanguage::Traits<IntegrandRangeType>::ScalarType;
 // 
 //       using Parent = LocalBilinearFormIntegratorBase;
 // 
@@ -868,8 +868,8 @@
 // 
 //     private:
 //       std::unique_ptr<IntegrandType> m_integrand;
-//       std::vector<Math::SpatialVector<NumberType>> m_rjac;
-//       std::vector<Math::SpatialVector<NumberType>> m_pjac;
+//       std::vector<Math::SpatialVector<ScalarType>> m_rjac;
+//       std::vector<Math::SpatialVector<ScalarType>> m_pjac;
 //   };
 // 
 //   /**
@@ -951,7 +951,7 @@
 // 
 //       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 // 
-//       using NumberType = typename FormLanguage::Traits<IntegrandRangeType>::NumberType;
+//       using ScalarType = typename FormLanguage::Traits<IntegrandRangeType>::ScalarType;
 // 
 //       using Parent = LocalBilinearFormIntegratorBase;
 // 

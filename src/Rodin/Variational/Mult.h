@@ -503,11 +503,11 @@ namespace Rodin::Variational
 
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using LHSNumberType = typename FormLanguage::Traits<LHSRangeType>::NumberType;
+      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-      using RHSNumberType = typename FormLanguage::Traits<RHSRangeType>::NumberType;
+      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using NumberType = decltype(std::declval<LHSNumberType>() * std::declval<RHSNumberType>());
+      using ScalarType = decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
 
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
@@ -540,17 +540,17 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRangeType, NumberType>)
+        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
         {
           return getRHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<RHSRangeType, NumberType>)
+        else if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
         {
           return getLHS().getRangeShape();
         }
         else if constexpr (
-            std::is_same_v<LHSRangeType, Math::Vector<NumberType>> ||
-            std::is_same_v<LHSRangeType, Math::Matrix<NumberType>>)
+            std::is_same_v<LHSRangeType, Math::Vector<ScalarType>> ||
+            std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }
@@ -653,9 +653,9 @@ namespace Rodin::Variational
 
       using RHSType = LocalBilinearFormIntegratorBase<Number>;
 
-      using NumberType = decltype(std::declval<LHS>() * std::declval<Number>());
+      using ScalarType = decltype(std::declval<LHS>() * std::declval<Number>());
 
-      using Parent = LocalBilinearFormIntegratorBase<NumberType>;
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       Mult(LHSType lhs, const RHSType& rhs)
         : Parent(rhs),
@@ -699,7 +699,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      NumberType integrate(size_t tr, size_t te) override
+      ScalarType integrate(size_t tr, size_t te) override
       {
         return getLHS() * m_rhs->integrate(tr, te);
       }
@@ -736,11 +736,11 @@ namespace Rodin::Variational
 
       using RHSType = LinearFormIntegratorBase<Number>;
 
-      using NumberType = decltype(std::declval<LHS>() * std::declval<Number>());
+      using ScalarType = decltype(std::declval<LHS>() * std::declval<Number>());
 
-      using Parent = LinearFormIntegratorBase<NumberType>;
+      using Parent = LinearFormIntegratorBase<ScalarType>;
 
-      Mult(NumberType lhs, const RHSType& rhs)
+      Mult(ScalarType lhs, const RHSType& rhs)
         : Parent(rhs),
           m_lhs(lhs), m_rhs(rhs.copy())
       {}
@@ -782,7 +782,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      NumberType integrate(size_t local) override
+      ScalarType integrate(size_t local) override
       {
         return getLHS() * m_rhs->integrate(local);
       }

@@ -26,8 +26,8 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::P1<Number, Mesh>>
   {
     using MeshType = Mesh;
-    using NumberType = Number;
-    using RangeType = NumberType;
+    using ScalarType = Number;
+    using RangeType = ScalarType;
     using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
     using ElementType = Variational::P1Element<RangeType>;
   };
@@ -36,8 +36,8 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::P1<Math::Vector<Number>, Mesh>>
   {
     using MeshType = Mesh;
-    using NumberType = Number;
-    using RangeType = Math::Vector<NumberType>;
+    using ScalarType = Number;
+    using RangeType = Math::Vector<ScalarType>;
     using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
     using ElementType = Variational::P1Element<RangeType>;
   };
@@ -76,10 +76,10 @@ namespace Rodin::Variational
     using IndexMap = FlatMap<Index, Index>;
 
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
       /// Range type of value
-      using RangeType = NumberType;
+      using RangeType = ScalarType;
 
       /// Represents the Context of the P1 space
       using ContextType = Context::Sequential;
@@ -310,10 +310,10 @@ namespace Rodin::Variational
     using IndexMap = FlatMap<Index, Index>;
 
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
       /// Range type of value
-      using RangeType = Math::Vector<NumberType>;
+      using RangeType = Math::Vector<ScalarType>;
 
       /// Type of mesh on which the finite element space is built
       using MeshType = Geometry::Mesh<Context::Sequential>;
@@ -489,15 +489,15 @@ namespace Rodin::Variational
     initVectorP1Elements();
   }
 
-  template <class NumberType>
-  const Geometry::GeometryIndexed<P1Element<NumberType>>
-  P1<NumberType, Geometry::Mesh<Context::Sequential>>::s_elements =
+  template <class ScalarType>
+  const Geometry::GeometryIndexed<P1Element<ScalarType>>
+  P1<ScalarType, Geometry::Mesh<Context::Sequential>>::s_elements =
   {
-    { Geometry::Polytope::Type::Point, P1Element<NumberType>(Geometry::Polytope::Type::Point) },
-    { Geometry::Polytope::Type::Segment, P1Element<NumberType>(Geometry::Polytope::Type::Segment) },
-    { Geometry::Polytope::Type::Triangle, P1Element<NumberType>(Geometry::Polytope::Type::Triangle) },
-    { Geometry::Polytope::Type::Quadrilateral, P1Element<NumberType>(Geometry::Polytope::Type::Quadrilateral) },
-    { Geometry::Polytope::Type::Tetrahedron, P1Element<NumberType>(Geometry::Polytope::Type::Tetrahedron) }
+    { Geometry::Polytope::Type::Point, P1Element<ScalarType>(Geometry::Polytope::Type::Point) },
+    { Geometry::Polytope::Type::Segment, P1Element<ScalarType>(Geometry::Polytope::Type::Segment) },
+    { Geometry::Polytope::Type::Triangle, P1Element<ScalarType>(Geometry::Polytope::Type::Triangle) },
+    { Geometry::Polytope::Type::Quadrilateral, P1Element<ScalarType>(Geometry::Polytope::Type::Quadrilateral) },
+    { Geometry::Polytope::Type::Tetrahedron, P1Element<ScalarType>(Geometry::Polytope::Type::Tetrahedron) }
   };
 }
 

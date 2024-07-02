@@ -181,7 +181,7 @@ namespace Rodin::Variational
       using FESType = P1<Number, Mesh>;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      using NumberType = Number;
+      using ScalarType = Number;
 
       /// Operand type
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;

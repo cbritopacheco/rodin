@@ -45,15 +45,15 @@ namespace Rodin::FormLanguage
       Variational::LinearFormIntegratorBase<LHSNumber>,
       Variational::LinearFormIntegratorBase<RHSNumber>>>
   {
-    using LHSNumberType = LHSNumber;
+    using LHSScalarType = LHSNumber;
 
-    using RHSNumberType = RHSNumber;
+    using RHSScalarType = RHSNumber;
 
-    using LHSType = Variational::LinearFormIntegratorBase<LHSNumberType>;
+    using LHSType = Variational::LinearFormIntegratorBase<LHSScalarType>;
 
-    using RHSType = Variational::LinearFormIntegratorBase<RHSNumberType>;
+    using RHSType = Variational::LinearFormIntegratorBase<RHSScalarType>;
 
-    using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+    using ScalarType = decltype(std::declval<LHSScalarType>() + std::declval<RHSScalarType>());
   };
 
 }
@@ -347,17 +347,17 @@ namespace Rodin::Variational
               LinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
   {
     public:
-      using LHSNumberType = LHSNumber;
+      using LHSScalarType = LHSNumber;
 
-      using RHSNumberType = RHSNumber;
+      using RHSScalarType = RHSNumber;
 
-      using LHSType = LinearFormIntegratorBase<LHSNumberType>;
+      using LHSType = LinearFormIntegratorBase<LHSScalarType>;
 
-      using RHSType = LinearFormIntegratorBase<RHSNumberType>;
+      using RHSType = LinearFormIntegratorBase<RHSScalarType>;
 
-      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+      using ScalarType = decltype(std::declval<LHSScalarType>() + std::declval<RHSScalarType>());
 
-      using Parent = FormLanguage::List<LinearFormIntegratorBase<NumberType>>;
+      using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
@@ -395,17 +395,17 @@ namespace Rodin::Variational
               LinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
   {
     public:
-      using LHSNumberType = LHSNumber;
+      using LHSScalarType = LHSNumber;
 
-      using RHSNumberType = RHSNumber;
+      using RHSScalarType = RHSNumber;
 
-      using LHSType = LinearFormIntegratorBase<LHSNumberType>;
+      using LHSType = LinearFormIntegratorBase<LHSScalarType>;
 
       using RHSType = FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>;
 
-      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+      using ScalarType = decltype(std::declval<LHSScalarType>() + std::declval<RHSScalarType>());
 
-      using Parent = FormLanguage::List<LinearFormIntegratorBase<NumberType>>;
+      using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
@@ -444,17 +444,17 @@ namespace Rodin::Variational
               LinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
   {
     public:
-      using LHSNumberType = LHSNumber;
+      using LHSScalarType = LHSNumber;
 
-      using RHSNumberType = RHSNumber;
+      using RHSScalarType = RHSNumber;
 
       using LHSType = FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>;
 
-      using RHSType = LinearFormIntegratorBase<RHSNumberType>;
+      using RHSType = LinearFormIntegratorBase<RHSScalarType>;
 
-      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+      using ScalarType = decltype(std::declval<LHSScalarType>() + std::declval<RHSScalarType>());
 
-      using Parent = FormLanguage::List<LinearFormIntegratorBase<NumberType>>;
+      using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
@@ -495,17 +495,17 @@ namespace Rodin::Variational
           LinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
   {
     public:
-      using LHSNumberType = LHSNumber;
+      using LHSScalarType = LHSNumber;
 
-      using RHSNumberType = RHSNumber;
+      using RHSScalarType = RHSNumber;
 
       using LHSType = FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>;
 
       using RHSType = FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>;
 
-      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+      using ScalarType = decltype(std::declval<LHSScalarType>() + std::declval<RHSScalarType>());
 
-      using Parent = FormLanguage::List<LinearFormIntegratorBase<NumberType>>;
+      using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
@@ -546,17 +546,17 @@ namespace Rodin::Variational
               LocalBilinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
   {
     public:
-      using LHSNumberType = LHSNumber;
+      using LHSScalarType = LHSNumber;
 
-      using RHSNumberType = RHSNumber;
+      using RHSScalarType = RHSNumber;
 
-      using LHSType = LocalBilinearFormIntegratorBase<LHSNumberType>;
+      using LHSType = LocalBilinearFormIntegratorBase<LHSScalarType>;
 
-      using RHSType = LocalBilinearFormIntegratorBase<RHSNumberType>;
+      using RHSType = LocalBilinearFormIntegratorBase<RHSScalarType>;
 
-      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+      using ScalarType = decltype(std::declval<LHSScalarType>() + std::declval<RHSScalarType>());
 
-      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<NumberType>>;
+      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
@@ -595,17 +595,17 @@ namespace Rodin::Variational
               LocalBilinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
   {
     public:
-      using LHSNumberType = LHSNumber;
+      using LHSScalarType = LHSNumber;
 
-      using RHSNumberType = RHSNumber;
+      using RHSScalarType = RHSNumber;
 
-      using LHSType = LocalBilinearFormIntegratorBase<LHSNumberType>;
+      using LHSType = LocalBilinearFormIntegratorBase<LHSScalarType>;
 
       using RHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>;
 
-      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+      using ScalarType = decltype(std::declval<LHSScalarType>() + std::declval<RHSScalarType>());
 
-      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<NumberType>>;
+      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
@@ -647,17 +647,17 @@ namespace Rodin::Variational
               LocalBilinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
   {
     public:
-      using LHSNumberType = LHSNumber;
+      using LHSScalarType = LHSNumber;
 
-      using RHSNumberType = RHSNumber;
+      using RHSScalarType = RHSNumber;
 
       using LHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>;
 
-      using RHSType = LocalBilinearFormIntegratorBase<RHSNumberType>;
+      using RHSType = LocalBilinearFormIntegratorBase<RHSScalarType>;
 
-      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+      using ScalarType = decltype(std::declval<LHSScalarType>() + std::declval<RHSScalarType>());
 
-      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<NumberType>>;
+      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
@@ -700,17 +700,17 @@ namespace Rodin::Variational
           LocalBilinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
   {
     public:
-      using LHSNumberType = LHSNumber;
+      using LHSScalarType = LHSNumber;
 
-      using RHSNumberType = RHSNumber;
+      using RHSScalarType = RHSNumber;
 
       using LHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>;
 
       using RHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>;
 
-      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+      using ScalarType = decltype(std::declval<LHSScalarType>() + std::declval<RHSScalarType>());
 
-      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<NumberType>>;
+      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
       {

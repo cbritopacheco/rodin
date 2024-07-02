@@ -25,25 +25,25 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Boolean>
   {
-    using NumberType = Boolean;
+    using ScalarType = Boolean;
   };
 
   template <>
   struct Traits<Integer>
   {
-    using NumberType = Integer;
+    using ScalarType = Integer;
   };
 
   template <>
   struct Traits<Real>
   {
-    using NumberType = Real;
+    using ScalarType = Real;
   };
 
   template <>
   struct Traits<Complex>
   {
-    using NumberType = Complex;
+    using ScalarType = Complex;
   };
 }
 

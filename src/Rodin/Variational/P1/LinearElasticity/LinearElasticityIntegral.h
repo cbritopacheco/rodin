@@ -11,7 +11,7 @@ namespace Rodin::Variational
 {
   template <class MuDerived, class LambdaDerived, class Range, class Mesh>
   class LinearElasticityIntegrator<P1<Range, Mesh>, MuDerived, LambdaDerived> final
-    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Range, Mesh>>::NumberType>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType>
   {
     public:
       using FESType = P1<Range, Mesh>;
@@ -20,9 +20,9 @@ namespace Rodin::Variational
 
       using LambdaType = FunctionBase<LambdaDerived>;
 
-      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using Parent = LocalBilinearFormIntegratorBase<NumberType>;
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
     private:
         using MuRangeType = typename FormLanguage::Traits<MuType>::RangeType;
@@ -74,7 +74,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      NumberType integrate(size_t tr, size_t te) override
+      ScalarType integrate(size_t tr, size_t te) override
       {
         assert(false);
         // const size_t d = polytope.getDimension();

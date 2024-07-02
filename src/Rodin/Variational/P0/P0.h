@@ -26,8 +26,8 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::P0<Number, Mesh>>
   {
     using MeshType = Mesh;
-    using NumberType = Number;
-    using RangeType = NumberType;
+    using ScalarType = Number;
+    using RangeType = ScalarType;
     using ContextType = typename MeshType::Context;
     using ElementType = Variational::P0Element<RangeType>;
   };
@@ -36,8 +36,8 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::P0<Math::Vector<Number>, Mesh>>
   {
     using MeshType = Mesh;
-    using NumberType = Number;
-    using RangeType = Math::Vector<NumberType>;
+    using ScalarType = Number;
+    using RangeType = Math::Vector<ScalarType>;
     using ContextType = typename MeshType::Context;
     using ElementType = Variational::P0Element<RangeType>;
   };
@@ -76,10 +76,10 @@ namespace Rodin::Variational
     using IndexMap = FlatMap<Index, Index>;
 
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
       /// Range type of value
-      using RangeType = NumberType;
+      using RangeType = ScalarType;
 
       /// Represents the Context of the P0 space
       using ContextType = Context::Sequential;
@@ -294,15 +294,15 @@ namespace Rodin::Variational
   template <class Mesh>
   using ComplexP0 = P0<Complex, Mesh>;
 
-  template <class NumberType>
-  const Geometry::GeometryIndexed<P0Element<NumberType>>
-  P0<NumberType, Geometry::Mesh<Context::Sequential>>::s_elements =
+  template <class ScalarType>
+  const Geometry::GeometryIndexed<P0Element<ScalarType>>
+  P0<ScalarType, Geometry::Mesh<Context::Sequential>>::s_elements =
   {
-    { Geometry::Polytope::Type::Point, P0Element<NumberType>(Geometry::Polytope::Type::Point) },
-    { Geometry::Polytope::Type::Segment, P0Element<NumberType>(Geometry::Polytope::Type::Segment) },
-    { Geometry::Polytope::Type::Triangle, P0Element<NumberType>(Geometry::Polytope::Type::Triangle) },
-    { Geometry::Polytope::Type::Quadrilateral, P0Element<NumberType>(Geometry::Polytope::Type::Quadrilateral) },
-    { Geometry::Polytope::Type::Tetrahedron, P0Element<NumberType>(Geometry::Polytope::Type::Tetrahedron) }
+    { Geometry::Polytope::Type::Point, P0Element<ScalarType>(Geometry::Polytope::Type::Point) },
+    { Geometry::Polytope::Type::Segment, P0Element<ScalarType>(Geometry::Polytope::Type::Segment) },
+    { Geometry::Polytope::Type::Triangle, P0Element<ScalarType>(Geometry::Polytope::Type::Triangle) },
+    { Geometry::Polytope::Type::Quadrilateral, P0Element<ScalarType>(Geometry::Polytope::Type::Quadrilateral) },
+    { Geometry::Polytope::Type::Tetrahedron, P0Element<ScalarType>(Geometry::Polytope::Type::Tetrahedron) }
   };
 }
 

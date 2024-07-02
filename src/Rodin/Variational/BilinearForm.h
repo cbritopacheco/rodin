@@ -96,21 +96,21 @@ namespace Rodin::Variational
     : public BilinearFormBase<Operator>
   {
     public:
-      using TrialFESNumberType  = typename FormLanguage::Traits<TrialFES>::NumberType;
+      using TrialFESScalarType  = typename FormLanguage::Traits<TrialFES>::ScalarType;
 
-      using TestFESNumberType   = typename FormLanguage::Traits<TestFES>::NumberType;
+      using TestFESScalarType   = typename FormLanguage::Traits<TestFES>::ScalarType;
 
-      using NumberType = decltype(
-          std::declval<TrialFESNumberType>() * std::declval<TestFESNumberType>());
+      using ScalarType = decltype(
+          std::declval<TrialFESScalarType>() * std::declval<TestFESScalarType>());
 
       /// Type of operator associated to the bilinear form
       using OperatorType = Operator;
 
       using LocalBilinearFormIntegratorBaseType =
-        LocalBilinearFormIntegratorBase<NumberType>;
+        LocalBilinearFormIntegratorBase<ScalarType>;
 
       using GlobalBilinearFormIntegratorBaseType =
-        GlobalBilinearFormIntegratorBase<NumberType>;
+        GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using LocalBilinearFormIntegratorBaseListType
         = FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
@@ -182,7 +182,7 @@ namespace Rodin::Variational
        * at @f$ ( u, v ) @f$.
        */
       constexpr
-      NumberType operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
+      ScalarType operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
       {
         const auto& trialWeights = u.getWeights();
         const auto& testWeights = v.getWeights();
@@ -410,8 +410,8 @@ namespace Rodin::Variational
   BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
     -> BilinearForm<TrialFES, TestFES, Math::SparseMatrix<
         decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::NumberType>() *
-              std::declval<typename FormLanguage::Traits<TestFES>::NumberType>())>>;
+          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+              std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>;
 }
 
 #include "BilinearForm.hpp"
