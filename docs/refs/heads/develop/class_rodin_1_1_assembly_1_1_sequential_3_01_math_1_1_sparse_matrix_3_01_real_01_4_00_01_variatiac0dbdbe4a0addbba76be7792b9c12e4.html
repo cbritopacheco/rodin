@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Solver::CG&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt; class | Rodin</title>
+  <title>Rodin::Assembly::Sequential&lt;Math::SparseMatrix&lt;Real&gt;, Variational::BilinearForm&lt;TrialFES, TestFES, Math::SparseMatrix&lt;Real&gt;&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,53 +64,28 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>CG&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>Sequential&lt;Math::SparseMatrix&lt;Real&gt;, Variational::BilinearForm&lt;TrialFES, TestFES, Math::SparseMatrix&lt;Real&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Conjugate gradient solver for self-adjoint problems, for use with <a href="namespace_rodin_1_1_math.html#a635476b4b75f9ce5182950ea70fbf48b" class="m-doc">Math::<wbr />SparseMatrix&lt;Scalar&gt;</a> and <a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector&lt;Scalar&gt;</a>.</p>
+        <p><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> assembly of the <a href="namespace_rodin_1_1_math.html#a635476b4b75f9ce5182950ea70fbf48b" class="m-doc">Math::<wbr />SparseMatrix&lt;Real&gt;</a> associated to a BilinearFormBase object.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
+            <dt id="a4f5f5ad636939fa5b651448b3ab2bafd">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f5f5ad636939fa5b651448b3ab2bafd" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap">const InputType&amp; input) const -&gt; OperatorType <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Abstract base class for linear algebra solvers.</dd>
-          </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt id="a0aa658cee2857d8a59a6cfbabff0d381">
-              using <a href="#a0aa658cee2857d8a59a6cfbabff0d381" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a635476b4b75f9ce5182950ea70fbf48b" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;
-            </dt>
-            <dd>Type of linear operator.</dd>
-            <dt id="a7182aa32062b9b891caa98a604ed2e39">
-              using <a href="#a7182aa32062b9b891caa98a604ed2e39" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;
-            </dt>
-            <dd>Type of vector.</dd>
-          </dl>
-        </section>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt id="a016360662f94a96933dd4b1471961fe1">
-              <span class="m-doc-wrap-bumper"><a href="#a016360662f94a96933dd4b1471961fe1" class="m-doc-self">CG</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
-            </dt>
-            <dd>Constructs the <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> object with default parameters.</dd>
+            <dd>Executes the assembly and returns the linear operator associated to the bilinear form.</dd>
           </dl>
         </section>
       </div>

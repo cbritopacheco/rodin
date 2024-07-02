@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Assembly::Sequential&lt;Math::Matrix&lt;Scalar&gt;, Variational::BilinearForm&lt;TrialFES, TestFES, Math::Matrix&lt;Scalar&gt;&gt;&gt; class | Rodin</title>
+  <title>Rodin::Solver::LDLT&lt;Math::Matrix&lt;Real&gt;, Math::Vector&lt;Real&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,28 +64,53 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>Sequential&lt;Math::Matrix&lt;Scalar&gt;, Variational::BilinearForm&lt;TrialFES, TestFES, Math::Matrix&lt;Scalar&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>LDLT&lt;Math::Matrix&lt;Real&gt;, Math::Vector&lt;Real&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> assembly of the <a href="namespace_rodin_1_1_math.html#a635476b4b75f9ce5182950ea70fbf48b" class="m-doc">Math::<wbr />SparseMatrix&lt;Scalar&gt;</a> associated to a BilinearFormBase object.</p>
+        <p>A direct sparse <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorizations without square root for use with <a href="namespace_rodin_1_1_math.html#a635476b4b75f9ce5182950ea70fbf48b" class="m-doc">Math::<wbr />SparseMatrix&lt;Real&gt;</a> and <a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector&lt;Real&gt;</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
-            <dt id="a4f5f5ad636939fa5b651448b3ab2bafd">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f5f5ad636939fa5b651448b3ab2bafd" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap">const InputType&amp; input) const -&gt; OperatorType <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;Math::Matrix&lt;Real&gt;, Math::Vector&lt;Real&gt;&gt;</a>
             </dt>
-            <dd>Executes the assembly and returns the linear operator associated to the bilinear form.</dd>
+            <dd>Abstract base class for linear algebra solvers.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ab0b5319c4914c6577d38f050b3cb25c9">
+              using <a href="#ab0b5319c4914c6577d38f050b3cb25c9" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a2a8f4fda4d586d6bf073355331dbad86" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+            </dt>
+            <dd>Type of linear operator.</dd>
+            <dt id="ad9e12aae66a9911fafb6befe5cad4c9a">
+              using <a href="#ad9e12aae66a9911fafb6befe5cad4c9a" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a63b4346abc2477c79a5c39cde5a7aee0" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+            </dt>
+            <dd>Type of vector.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a245b45fdb8b9017127e1aaa5e98b55d4">
+              <span class="m-doc-wrap-bumper"><a href="#a245b45fdb8b9017127e1aaa5e98b55d4" class="m-doc-self">LDLT</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Constructs the <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> object with default parameters.</dd>
           </dl>
         </section>
       </div>

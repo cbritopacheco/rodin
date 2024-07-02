@@ -87,7 +87,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase&lt;DivBase&lt;Derived, GridFunction&lt;FES&gt;&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;DivBase&lt;Derived, GridFunction&lt;FES&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for scalar-valued functions defined on a mesh.</dd>
           </dl>
@@ -95,8 +95,8 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a2597fd4559a1b05090ea5fa755b86d57">
-              using <a href="#a2597fd4559a1b05090ea5fa755b86d57" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&lt;Derived, <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">OperandType</a>&gt;&gt;
+            <dt id="af87bc8c83ed0a7e50bc2adac37feace9">
+              using <a href="#af87bc8c83ed0a7e50bc2adac37feace9" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&lt;Derived, <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">OperandType</a>&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -143,8 +143,8 @@ $ u $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a9c5c3c67d894845f2b7c02fec86e4586">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9c5c3c67d894845f2b7c02fec86e4586" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&amp; out,
+            <dt id="a6ffe1fca03ae354cf5c8aea1a26bc4be">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6ffe1fca03ae354cf5c8aea1a26bc4be" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; out,
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Interpolation function to be overriden in Derived type.</dd>

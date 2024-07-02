@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG::Distancer&lt;typename FormLanguage::Traits&lt;ScalarGridFunction&gt;::FESType&gt; class | Rodin</title>
+  <title>Rodin::External::MMG::Distancer&lt;typename FormLanguage::Traits&lt;RealGridFunction&gt;::FESType&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -65,7 +65,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>Distancer&lt;typename FormLanguage::Traits&lt;ScalarGridFunction&gt;::FESType&gt; <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>Distancer&lt;typename FormLanguage::Traits&lt;RealGridFunction&gt;::FESType&gt; <span class="m-thin">class</span>
         </h1>
         <p>Class which generates the signed distance function of a domain.</p>
         <nav class="m-block m-default">
@@ -275,12 +275,12 @@ $ \phi : D \rightarrow \mathbb{R} $
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3dbd11db5c10fc80a48c5e9834a3bb25" class="m-doc">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; box) -&gt; <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a5332c61d0f3f1c9696dcb640b2255f1d" class="m-doc">ScalarGridFunction</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8ad9ecab837426a56cd234ff01335a2c" class="m-doc">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; box) -&gt; <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">RealGridFunction</a></span>
             </dt>
             <dd>Computes a signed distance function to a subdomain.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1c523a2e4153fc784c01bcc9990a6dec" class="m-doc">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; box,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; contour) -&gt; <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a5332c61d0f3f1c9696dcb640b2255f1d" class="m-doc">ScalarGridFunction</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a279b089ec7ac5c4ac3c6bfa0c1678b58" class="m-doc">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; box,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; contour) -&gt; <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">RealGridFunction</a></span>
             </dt>
             <dd>Computes a signed distance function from a given bounding box and contour.</dd>
           </dl>
@@ -292,7 +292,7 @@ $ \phi : D \rightarrow \mathbb{R} $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;ScalarGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a471061ae5e97e73d7a616f73b23007d3" class="m-doc-self">Distancer</a>(</span><span class="m-doc-wrap">const FESType&amp; fes)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;RealGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a471061ae5e97e73d7a616f73b23007d3" class="m-doc-self">Distancer</a>(</span><span class="m-doc-wrap">const FESType&amp; fes)</span></span>
             </h3>
             <p>Creates a Distancer2D object with default values.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -312,7 +312,7 @@ $ \phi : D \rightarrow \mathbb{R} $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer.html" class="m-doc">Distancer</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;ScalarGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a144ce9fdb073db14db791a18393736b0" class="m-doc-self">setInteriorDomain</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer.html" class="m-doc">Distancer</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;RealGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a144ce9fdb073db14db791a18393736b0" class="m-doc-self">setInteriorDomain</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref)</span></span>
             </h3>
             <p>Specifies which material reference is to be understood as the interior domains.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -339,7 +339,7 @@ $ \phi : D \rightarrow \mathbb{R} $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer.html" class="m-doc">Distancer</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;ScalarGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3822eecbd4cbd8d2c177fd68e539e710" class="m-doc-self">setInteriorDomain</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; refs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer.html" class="m-doc">Distancer</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;RealGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3822eecbd4cbd8d2c177fd68e539e710" class="m-doc-self">setInteriorDomain</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; refs)</span></span>
             </h3>
             <p>Specifies which material references are to be understood as the interior domains.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -366,7 +366,7 @@ $ \phi : D \rightarrow \mathbb{R} $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer.html" class="m-doc">Distancer</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;ScalarGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0b9e1ccbe3b18eccf894814ad8e5a44" class="m-doc-self">enableScaling</a>(</span><span class="m-doc-wrap">bool b = true)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer.html" class="m-doc">Distancer</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;RealGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0b9e1ccbe3b18eccf894814ad8e5a44" class="m-doc-self">enableScaling</a>(</span><span class="m-doc-wrap">bool b = true)</span></span>
             </h3>
             <p>Specifies whether to enable the scaling of the contour mesh.</p>
 <p>Specifies whether the contour mesh should be scaled down so that the contour&#x27;s bounding box is 95% of the enclosing bounding box.</p><p>By default, it is enabled.</p><aside class="m-note m-default"><h4>See also</h4><p>distance(Mesh&amp;, Mesh&amp;)</p></aside>
@@ -376,7 +376,7 @@ $ \phi : D \rightarrow \mathbb{R} $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer.html" class="m-doc">Distancer</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;ScalarGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a65fb6883aa3cea5c6d1efd922780b9" class="m-doc-self">setCPUs</a>(</span><span class="m-doc-wrap">unsigned int ncpu)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer.html" class="m-doc">Distancer</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;RealGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a65fb6883aa3cea5c6d1efd922780b9" class="m-doc-self">setCPUs</a>(</span><span class="m-doc-wrap">unsigned int ncpu)</span></span>
             </h3>
             <p>Specifies how many CPUs to use when distancing in parallel.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -397,7 +397,7 @@ $ \phi : D \rightarrow \mathbb{R} $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">unsigned int Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;ScalarGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af8a03320301cb6f947032fdd6b4f631f" class="m-doc-self">getCPUs</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">unsigned int Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;RealGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af8a03320301cb6f947032fdd6b4f631f" class="m-doc-self">getCPUs</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -408,12 +408,12 @@ $ \phi : D \rightarrow \mathbb{R} $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a3dbd11db5c10fc80a48c5e9834a3bb25"><div>
+          <section class="m-doc-details" id="a8ad9ecab837426a56cd234ff01335a2c"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a5332c61d0f3f1c9696dcb640b2255f1d" class="m-doc">ScalarGridFunction</a> Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;ScalarGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3dbd11db5c10fc80a48c5e9834a3bb25" class="m-doc-self">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; box)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">RealGridFunction</a> Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;RealGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ad9ecab837426a56cd234ff01335a2c" class="m-doc-self">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; box)</span></span>
             </h3>
             <p>Computes a signed distance function to a subdomain.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -517,12 +517,12 @@ $ \Omega $
 </g>
 </svg> are assumed to be specified by the number 3.</p>
           </div></section>
-          <section class="m-doc-details" id="a1c523a2e4153fc784c01bcc9990a6dec"><div>
+          <section class="m-doc-details" id="a279b089ec7ac5c4ac3c6bfa0c1678b58"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a5332c61d0f3f1c9696dcb640b2255f1d" class="m-doc">ScalarGridFunction</a> Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;ScalarGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c523a2e4153fc784c01bcc9990a6dec" class="m-doc-self">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; box,
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">RealGridFunction</a> Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer&lt;typename FormLanguage::<wbr />Traits&lt;RealGridFunction&gt;::<wbr />FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a279b089ec7ac5c4ac3c6bfa0c1678b58" class="m-doc-self">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; box,
               const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&amp; contour)</span></span>
             </h3>
             <p>Computes a signed distance function from a given bounding box and contour.</p>
