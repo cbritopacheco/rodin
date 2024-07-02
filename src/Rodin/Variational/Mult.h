@@ -381,7 +381,9 @@ namespace Rodin::Variational
         {
           return getLHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>> || std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>)
+        else if constexpr (
+            std::is_same_v<LHSRangeType, Math::Vector<Scalar>> ||
+            std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }
@@ -423,12 +425,23 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      const Geometry::Point& getPoint() const
       {
-        const auto lhs = getLHS().getValue(p);
-        const auto& rhs = this->object(getRHS().getTensorBasis(p));
-        return TensorBasis(rhs.getDOFs(), [&](size_t i){ return lhs * rhs(i); });
+        return m_rhs->getPoint();
+      }
+
+      Mult& setPoint(const Geometry::Point& p)
+      {
+        m_rhs->setPoint(p);
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        const auto& p = getRHS().getPoint();
+        return this->object(getLHS().getValue(p)) * this->object(getRHS().getBasis(local));
       }
 
       inline Mult* copy() const noexcept override
@@ -490,17 +503,19 @@ namespace Rodin::Variational
 
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      using LHSNumberType = typename FormLanguage::Traits<LHSRangeType>::NumberType;
+
+      using RHSNumberType = typename FormLanguage::Traits<RHSRangeType>::NumberType;
+
+      using NumberType = decltype(std::declval<LHSNumberType>() * std::declval<RHSNumberType>());
+
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       constexpr
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        assert(lhs.getRangeType() == RangeType::Scalar
-            || rhs.getRangeType() == RangeType::Scalar
-            || lhs.getRangeShape().width() == rhs.getRangeShape().height());
-      }
+      {}
 
       constexpr
       Mult(const Mult& other)
@@ -525,15 +540,17 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRangeType, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, NumberType>)
         {
           return getRHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<RHSRangeType, Scalar>)
+        else if constexpr (std::is_same_v<RHSRangeType, NumberType>)
         {
           return getLHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>> || std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>)
+        else if constexpr (
+            std::is_same_v<LHSRangeType, Math::Vector<NumberType>> ||
+            std::is_same_v<LHSRangeType, Math::Matrix<NumberType>>)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }
@@ -575,12 +592,24 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      const Geometry::Point& getPoint() const
       {
-        const auto& lhs = getLHS().getTensorBasis(p);
-        const auto& rhs = this->object(getRHS().getValue(p));
-        return TensorBasis(lhs.getDOFs(), [&](size_t i){ return this->object(lhs(i)) * rhs; });
+        return m_lhs->getPoint();
+      }
+
+      inline
+      Mult& setPoint(const Geometry::Point& p)
+      {
+        m_lhs->setPoint(p);
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        const auto& p = m_lhs->getPoint();
+        return this->object(getLHS().getBasis(local)) * this->object(getRHS().getValue(p));
       }
 
       inline Mult* copy() const noexcept override
@@ -615,19 +644,65 @@ namespace Rodin::Variational
     return Mult(lhs, ScalarFunction(rhs));
   }
 
-  template <>
-  class Mult<Scalar, LocalBilinearFormIntegratorBase> : public LocalBilinearFormIntegratorBase
+  template <class LHS, class Number>
+  class Mult<LHS, LocalBilinearFormIntegratorBase<Number>>
+    : public LocalBilinearFormIntegratorBase<decltype(std::declval<LHS>() * std::declval<Number>())>
   {
     public:
-      Mult(Scalar lhs, const LocalBilinearFormIntegratorBase& rhs);
+      using LHSType = LHS;
 
-      Mult(const Mult& other);
+      using RHSType = LocalBilinearFormIntegratorBase<Number>;
 
-      Mult(Mult&& other);
+      using NumberType = decltype(std::declval<LHS>() * std::declval<Number>());
 
-      Region getRegion() const override;
+      using Parent = LocalBilinearFormIntegratorBase<NumberType>;
 
-      void assemble(const Geometry::Polytope& element) override;
+      Mult(LHSType lhs, const RHSType& rhs)
+        : Parent(rhs),
+          m_lhs(lhs), m_rhs(rhs.copy())
+      {}
+
+      Mult(const Mult& other)
+        : Parent(other),
+          m_lhs(other.m_lhs), m_rhs(other.m_rhs->copy())
+      {}
+
+      Mult(Mult&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
+
+      Integrator::Region getRegion() const override
+      {
+        return getRHS().getRegion();
+      }
+
+      const LHSType& getLHS() const
+      {
+        return m_lhs;
+      }
+
+      const RHSType& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
+      const Geometry::Polytope& getPolytope() const override
+      {
+        return m_rhs->getPolytope();
+      }
+
+      Mult& setPolytope(const Geometry::Polytope& polytope) override
+      {
+        m_rhs->setPolytope(polytope);
+        return *this;
+      }
+
+      NumberType integrate(size_t tr, size_t te) override
+      {
+        return getLHS() * m_rhs->integrate(tr, te);
+      }
 
       Mult* copy() const noexcept override
       {
@@ -635,25 +710,33 @@ namespace Rodin::Variational
       }
 
     private:
-      const Scalar m_lhs;
-      std::unique_ptr<LocalBilinearFormIntegratorBase> m_rhs;
+      const LHSType m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
-  Mult(Scalar, const LocalBilinearFormIntegratorBase&) -> Mult<Scalar, LocalBilinearFormIntegratorBase>;
+  template <class LHS, class Number>
+  Mult(LHS, const LocalBilinearFormIntegratorBase<Number>&)
+    -> Mult<LHS, LocalBilinearFormIntegratorBase<Number>>;
 
-  Mult<Scalar, LocalBilinearFormIntegratorBase> operator*(
-      Scalar lhs, const LocalBilinearFormIntegratorBase& rhs);
+  template <class LHS, class Number>
+  inline
+  constexpr
+  auto
+  operator*(LHS lhs, const LocalBilinearFormIntegratorBase<Number>& rhs)
+  {
+    return Mult(lhs, rhs);
+  }
 
-  template <class Number>
-  class Mult<Number, LinearFormIntegratorBase<Number>>
-    : public LinearFormIntegratorBase<Number>
+  template <class LHS, class Number>
+  class Mult<LHS, LinearFormIntegratorBase<Number>>
+    : public LinearFormIntegratorBase<decltype(std::declval<LHS>() * std::declval<Number>())>
   {
     public:
-      using NumberType = Number;
+      using LHSType = LHS;
 
-      using LHSType = NumberType;
+      using RHSType = LinearFormIntegratorBase<Number>;
 
-      using RHSType = LinearFormIntegratorBase<NumberType>;
+      using NumberType = decltype(std::declval<LHS>() * std::declval<Number>());
 
       using Parent = LinearFormIntegratorBase<NumberType>;
 
@@ -677,12 +760,31 @@ namespace Rodin::Variational
         return m_rhs->getRegion();
       }
 
-      void assemble(const Geometry::Polytope& element) override
+      const LHSType& getLHS() const
       {
-        m_rhs->assemble(element);
-        auto& res = this->getVector();
-        res = std::move(m_rhs->getVector());
-        res = m_lhs * res;
+        return m_lhs;
+      }
+
+      const RHSType& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
+      const Geometry::Polytope& getPolytope() const override
+      {
+        return m_rhs->getPolytope();
+      }
+
+      Mult& setPolytope(const Geometry::Polytope& polytope) override
+      {
+        m_rhs->setPolytope(polytope);
+        return *this;
+      }
+
+      NumberType integrate(size_t local) override
+      {
+        return getLHS() * m_rhs->integrate(local);
       }
 
       Mult* copy() const noexcept override
@@ -695,13 +797,15 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  template <class Number>
-  Mult(Number, const LinearFormIntegratorBase<Number>&)
-    -> Mult<Number, LinearFormIntegratorBase<Number>>;
+  template <class LHS, class Number>
+  Mult(LHS, const LinearFormIntegratorBase<Number>&)
+    -> Mult<LHS, LinearFormIntegratorBase<Number>>;
 
   template <class Number>
-  Mult<Number, LinearFormIntegratorBase<Number>> operator*(
-      Number lhs, const LinearFormIntegratorBase<Number>& rhs)
+  inline
+  constexpr
+  auto
+  operator*(Number lhs, const LinearFormIntegratorBase<Number>& rhs)
   {
     return Mult(lhs, rhs);
   }

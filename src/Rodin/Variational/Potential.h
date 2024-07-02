@@ -27,11 +27,10 @@ namespace Rodin::FormLanguage
    * @brief Traits for Potential.
    */
   template <class LHS, class RHSDerived>
-  struct Traits<
-    Variational::Potential<
-      LHS,
-      Variational::FunctionBase<RHSDerived>>>
+  struct Traits<Variational::Potential<LHS, Variational::FunctionBase<RHSDerived>>>
   {
+    using NumberType = Scalar;
+
     using LHSType = LHS;
 
     using RHSType = Variational::FunctionBase<Variational::FunctionBase<RHSDerived>>;
@@ -46,15 +45,15 @@ namespace Rodin::FormLanguage
     using LHSRangeType =
       std::conditional_t<
       // If
-      std::is_same_v<RHSRangeType, Scalar>,
+      std::is_same_v<RHSRangeType, NumberType>,
       // Then
-      Scalar,
+      NumberType,
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, Math::Vector<Scalar>>,
+        std::is_same_v<RHSRangeType, Math::Vector<NumberType>>,
         // Then
-        Math::Matrix<Scalar>,
+        Math::Matrix<NumberType>,
         // Else
         void>>;
 
@@ -71,6 +70,8 @@ namespace Rodin::FormLanguage
       LHS,
       Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>>>>
   {
+    using NumberType = Scalar;
+
     using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
@@ -88,15 +89,15 @@ namespace Rodin::FormLanguage
     using LHSRangeType =
       std::conditional_t<
       // If
-      std::is_same_v<RHSRangeType, Scalar>,
+      std::is_same_v<RHSRangeType, NumberType>,
       // Then
-      Scalar,
+      NumberType,
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, Math::Vector<Scalar>>,
+        std::is_same_v<RHSRangeType, Math::Vector<NumberType>>,
         // Then
-        Math::Matrix<Scalar>,
+        Math::Matrix<NumberType>,
         // Else
         void>>;
 
@@ -120,6 +121,8 @@ namespace Rodin::Variational
     : public FunctionBase<Potential<LHS, FunctionBase<RHSDerived>>>
   {
     public:
+      using NumberType = Scalar;
+
       using LHSType = LHS;
 
       using KernelType = LHSType;
@@ -133,15 +136,15 @@ namespace Rodin::Variational
       using LHSRangeType =
         std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, Scalar>,
+        std::is_same_v<RHSRangeType, NumberType>,
         // Then
-        Scalar,
+        NumberType,
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRangeType, Math::Vector<Scalar>>,
+          std::is_same_v<RHSRangeType, Math::Vector<NumberType>>,
           // Then
-          Math::Matrix<Scalar>,
+          Math::Matrix<NumberType>,
           // Else
           void>>;
 
@@ -167,14 +170,14 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRangeType, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, NumberType>)
         {
-          static_assert(std::is_same_v<RHSRangeType, Scalar>);
+          static_assert(std::is_same_v<RHSRangeType, NumberType>);
           return { 1, 1 };
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<NumberType>>)
         {
-          static_assert(std::is_same_v<RHSRangeType, Math::Vector<Scalar>>);
+          static_assert(std::is_same_v<RHSRangeType, Math::Vector<NumberType>>);
           return getOperand().getRangeShape();
         }
         else
@@ -204,9 +207,9 @@ namespace Rodin::Variational
         const auto& mesh = p.getPolytope().getMesh();
         if (m_qf.has_value())
         {
-          if constexpr (std::is_same_v<RHSRangeType, Scalar>)
+          if constexpr (std::is_same_v<RHSRangeType, NumberType>)
           {
-            Scalar res = 0;
+            NumberType res = 0;
             for (auto it = mesh.getCell(); it; ++it)
             {
               const auto& polytope = *it;
@@ -220,9 +223,9 @@ namespace Rodin::Variational
             }
             return res;
           }
-          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<Scalar>>)
+          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<NumberType>>)
           {
-            Math::Vector<Scalar> res;
+            Math::Vector<NumberType> res;
             getValue(res, p);
             return res;
           }
@@ -234,9 +237,9 @@ namespace Rodin::Variational
         }
         else
         {
-          if constexpr (std::is_same_v<RHSRangeType, Scalar>)
+          if constexpr (std::is_same_v<RHSRangeType, NumberType>)
           {
-            Scalar res = 0;
+            NumberType res = 0;
             for (auto it = mesh.getCell(); it; ++it)
             {
               const auto& polytope = *it;
@@ -250,9 +253,9 @@ namespace Rodin::Variational
             }
             return res;
           }
-          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<Scalar>>)
+          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<NumberType>>)
           {
-            Math::Vector<Scalar> res;
+            Math::Vector<NumberType> res;
             getValue(res, p);
             return res;
           }
@@ -264,14 +267,14 @@ namespace Rodin::Variational
         }
       }
 
-      void getValue(Math::Vector<Scalar>& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<NumberType>& res, const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();
         const auto& operand = getOperand();
         const auto& mesh = p.getPolytope().getMesh();
         res.resize(getRangeShape().height());
         res.setZero();
-        Math::Matrix<Scalar> kxy;
+        Math::Matrix<NumberType> kxy;
         if (m_qf.has_value())
         {
           for (auto it = mesh.getCell(); it; ++it)
@@ -358,6 +361,8 @@ namespace Rodin::Variational
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
+      using NumberType = Scalar;
+
       using LHSType = LHS;
 
       using KernelType = LHS;
@@ -371,15 +376,15 @@ namespace Rodin::Variational
       using LHSRangeType =
         std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, Scalar>,
+        std::is_same_v<RHSRangeType, NumberType>,
         // Then
-        Scalar,
+        NumberType,
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRangeType, Math::Vector<Scalar>>,
+          std::is_same_v<RHSRangeType, Math::Vector<NumberType>>,
           // Then
-          Math::Matrix<Scalar>,
+          Math::Matrix<NumberType>,
           // Else
           void>>;
 
@@ -419,14 +424,14 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRangeType, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, NumberType>)
         {
-          static_assert(std::is_same_v<RHSRangeType, Scalar>);
+          static_assert(std::is_same_v<RHSRangeType, NumberType>);
           return { 1, 1 };
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<Scalar>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<NumberType>>)
         {
-          static_assert(std::is_same_v<RHSRangeType, Math::Vector<Scalar>>);
+          static_assert(std::is_same_v<RHSRangeType, Math::Vector<NumberType>>);
           return getOperand().getRangeShape();
         }
         else
@@ -458,9 +463,11 @@ namespace Rodin::Variational
     Dot<
       Potential<Kernel, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-        : public GlobalBilinearFormIntegratorBase
+        : public GlobalBilinearFormIntegratorBase<Scalar>
   {
     public:
+      using NumberType = Scalar;
+
       using KernelType = Kernel;
 
       using LHSType = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
@@ -508,7 +515,7 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      void assemble(const Geometry::Polytope& trp, const Geometry::Polytope& tep) final override
+      QuadratureRule& setPolytope(const Geometry::Polytope& trp, const Geometry::Polytope& tep)
       {
         const auto& trptrans = trp.getTransformation();
         const auto& teptrans = tep.getTransformation();
@@ -520,9 +527,6 @@ namespace Rodin::Variational
         const auto& testfes = rhs.getFiniteElementSpace();
         const auto& testfe = testfes.getFiniteElement(tep.getDimension(), tep.getIndex());
         const auto& kernel = lhs.getKernel();
-        auto& res = getMatrix();
-        res.resize(testfe.getCount(), trialfe.getCount());
-        res.setZero();
         if (tep == trp)
         {
           assert(trp.getGeometry() == tep.getGeometry());
@@ -543,135 +547,186 @@ namespace Rodin::Variational
             case Geometry::Polytope::Type::Triangle:
             {
               const size_t order = std::max(trialfe.getOrder(), testfe.getOrder());
-              const QF::GenericPolytopeQuadrature qf(order, Geometry::Polytope::Type::Segment);
-              Math::SpatialVector<Scalar> rx1(2), rz1(2),
-                                  rx2(2), rz2(2),
-                                  rx3(2), rz3(2),
-                                  rx4(2), rz4(2),
-                                  rx5(2), rz5(2),
-                                  rx6(2), rz6(2);
+              m_qf.reset(new QF::GenericPolytopeQuadrature(order, Geometry::Polytope::Type::Segment));
+              m_rx.resize(6);
+              m_rz.resize(6);
+              break;
+            }
+          }
+        }
+        else
+        {
+          m_qftr.reset(new QF::GenericPolytopeQuadrature(trialfe.getOrder(), trp.getGeometry()));
+          const auto& qftr = *m_qftr;
+          for (size_t i = 0; i < qftr.getSize(); i++)
+            m_y.emplace_back(trp, trptrans, std::cref(qftr.getPoint(i)));
+
+          m_qfte.reset(new QF::GenericPolytopeQuadrature(testfe.getOrder(), tep.getGeometry()));
+          const auto& qfte = *m_qfte;
+          for (size_t i = 0; i < qfte.getSize(); i++)
+            m_x.emplace_back(tep, teptrans, std::cref(qfte.getPoint(i)));
+        }
+
+        return *this;
+      }
+
+      NumberType integrate(size_t tr, size_t te) override
+      {
+        const auto& trp = m_trp.value().get();
+        const auto& tep = m_trp.value().get();
+        const auto& trptrans = trp.getTransformation();
+        const auto& teptrans = tep.getTransformation();
+        const auto& integrand = getIntegrand();
+        const auto& lhs = integrand.getLHS();
+        const auto& rhs = integrand.getRHS();
+        const auto& trialfes = lhs.getOperand().getFiniteElementSpace();
+        const auto& trialfe = trialfes.getFiniteElement(trp.getDimension(), trp.getIndex());
+        const auto& testfes = rhs.getFiniteElementSpace();
+        const auto& testfe = testfes.getFiniteElement(tep.getDimension(), tep.getIndex());
+        const auto& kernel = lhs.getKernel();
+        NumberType res = 0;
+        if (tep == trp)
+        {
+          assert(trp.getGeometry() == tep.getGeometry());
+          switch (tep.getGeometry())
+          {
+            case Geometry::Polytope::Type::Point:
+            case Geometry::Polytope::Type::Segment:
+            case Geometry::Polytope::Type::Tetrahedron:
+            {
+              assert(false);
+              break;
+            }
+            case Geometry::Polytope::Type::Quadrilateral:
+            {
+              assert(false);
+              break;
+            }
+            case Geometry::Polytope::Type::Triangle:
+            {
+              assert(m_qf);
+              const auto& qf = *m_qf;
               for (size_t i = 0; i < qf.getSize(); i++)
               {
-                const Scalar xi = 1 - qf.getPoint(i).value();
+                const NumberType xi = 1 - qf.getPoint(i).value();
                 for (size_t j = 0; j < qf.getSize(); j++)
                 {
-                  const Scalar eta1 = qf.getPoint(j).value();
+                  const NumberType eta1 = qf.getPoint(j).value();
                   for (size_t h = 0; h < qf.getSize(); h++)
                   {
-                    const Scalar eta2 = qf.getPoint(h).value();
-                    rx1 << xi, xi * (1 - eta1 + eta1 * eta2);
-                    rz2 << xi, xi * (1 - eta1 + eta1 * eta2);
-                    rz3 << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
-                    rx4 << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
-                    rz5 << xi, xi * eta1 * (1 - eta2);
-                    rx6 << xi, xi * eta1 * (1 - eta2);
-                    const Geometry::Point x1(tep, teptrans, std::cref(rx1));
-                    const Geometry::Point z2(tep, teptrans, std::cref(rz2));
-                    const Geometry::Point z3(tep, teptrans, std::cref(rz3));
-                    const Geometry::Point x4(tep, teptrans, std::cref(rx4));
-                    const Geometry::Point z5(tep, teptrans, std::cref(rz5));
-                    const Geometry::Point x6(tep, teptrans, std::cref(rx6));
-                    const Scalar d = xi * xi * xi * eta1 * eta1 * eta2;
+                    const NumberType eta2 = qf.getPoint(h).value();
+                    m_rx[0] << xi, xi * (1 - eta1 + eta1 * eta2);
+                    m_rz[1] << xi, xi * (1 - eta1 + eta1 * eta2);
+                    m_rz[2] << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
+                    m_rx[3] << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
+                    m_rz[4] << xi, xi * eta1 * (1 - eta2);
+                    m_rx[5] << xi, xi * eta1 * (1 - eta2);
+                    const Geometry::Point x0(tep, teptrans, std::cref(m_rx[0]));
+                    const Geometry::Point z1(tep, teptrans, std::cref(m_rz[1]));
+                    const Geometry::Point z2(tep, teptrans, std::cref(m_rz[2]));
+                    const Geometry::Point x3(tep, teptrans, std::cref(m_rx[3]));
+                    const Geometry::Point z4(tep, teptrans, std::cref(m_rz[4]));
+                    const Geometry::Point x5(tep, teptrans, std::cref(m_rx[5]));
+                    const NumberType d = xi * xi * xi * eta1 * eta1 * eta2;
                     for (size_t k = 0; k < qf.getSize(); k++)
                     {
-                      const Scalar w = qf.getWeight(i) * qf.getWeight(j) * qf.getWeight(h) * qf.getWeight(k);
-                      const Scalar eta3 = qf.getPoint(k).value();
-                      rz1 << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
-                      rx2 << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
-                      rx3 << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
-                      rz4 << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
-                      rx5 << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
-                      rz6 << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
-                      const Geometry::Point z1(tep, teptrans, std::cref(rz1));
-                      const Geometry::Point x2(tep, teptrans, std::cref(rx2));
-                      const Geometry::Point x3(tep, teptrans, std::cref(rx3));
-                      const Geometry::Point z4(tep, teptrans, std::cref(rz4));
-                      const Geometry::Point x5(tep, teptrans, std::cref(rx5));
-                      const Geometry::Point z6(tep, teptrans, std::cref(rz6));
-
-                      Scalar s1, s2, s3, s4, s5, s6;
-                      if constexpr (std::is_same_v<LHSRangeType, Scalar>)
+                      const NumberType w = qf.getWeight(i) * qf.getWeight(j) * qf.getWeight(h) * qf.getWeight(k);
+                      const NumberType eta3 = qf.getPoint(k).value();
+                      m_rz[0] << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
+                      m_rx[1] << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
+                      m_rx[2] << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
+                      m_rz[3] << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
+                      m_rx[4] << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
+                      m_rz[5] << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
+                      const Geometry::Point z0(tep, teptrans, std::cref(m_rz[0]));
+                      const Geometry::Point x1(tep, teptrans, std::cref(m_rx[1]));
+                      const Geometry::Point x2(tep, teptrans, std::cref(m_rx[2]));
+                      const Geometry::Point z3(tep, teptrans, std::cref(m_rz[3]));
+                      const Geometry::Point x4(tep, teptrans, std::cref(m_rx[4]));
+                      const Geometry::Point z5(tep, teptrans, std::cref(m_rz[5]));
+                      NumberType s0, s1, s2, s3, s4, s5;
+                      if constexpr (std::is_same_v<LHSRangeType, NumberType>)
                       {
+                        s0 = kernel(x0, z0) * x0.getDistortion() * z0.getDistortion();
                         s1 = kernel(x1, z1) * x1.getDistortion() * z1.getDistortion();
                         s2 = kernel(x2, z2) * x2.getDistortion() * z2.getDistortion();
                         s3 = kernel(x3, z3) * x3.getDistortion() * z3.getDistortion();
                         s4 = kernel(x4, z4) * x4.getDistortion() * z4.getDistortion();
                         s5 = kernel(x5, z5) * x5.getDistortion() * z5.getDistortion();
-                        s6 = kernel(x6, z6) * x6.getDistortion() * z6.getDistortion();
                       }
-                      else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
+                      else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
                       {
+                        kernel(m_k0, x0, z0);
                         kernel(m_k1, x1, z1);
                         kernel(m_k2, x2, z2);
                         kernel(m_k3, x3, z3);
                         kernel(m_k4, x4, z4);
                         kernel(m_k5, x5, z5);
-                        kernel(m_k6, x6, z6);
+                        s0 = x0.getDistortion() * z0.getDistortion();
                         s1 = x1.getDistortion() * z1.getDistortion();
                         s2 = x2.getDistortion() * z2.getDistortion();
                         s3 = x3.getDistortion() * z3.getDistortion();
                         s4 = x4.getDistortion() * z4.getDistortion();
                         s5 = x5.getDistortion() * z5.getDistortion();
-                        s6 = x6.getDistortion() * z6.getDistortion();
                       }
                       else
                       {
                         assert(false);
-                        s1 = s2 = s3 = s4 = s5 = s6 = NAN;
+                        s0 = s1 = s2 = s3 = s4 = s5 = NAN;
                       }
 
                       for (size_t l = 0; l < testfe.getCount(); l++)
                       {
-                        const auto& teb = testfe.getBasis(l);
+                        const auto& teb = testfe.getBasis(te);
                         for (size_t m = 0; m < trialfe.getCount(); m++)
                         {
                           const auto& trb = trialfe.getBasis(m);
-                          if constexpr (std::is_same_v<LHSRangeType, Scalar>)
+                          if constexpr (std::is_same_v<LHSRangeType, NumberType>)
                           {
-                            res(l, m) += d * w * s1 * trb(rx1) * teb(rz1);
+                            res += d * w * s0 * trb(m_rx[0]) * teb(m_rz[0]);
+                            assert(std::isfinite(s0));
+                            res += d * w * s1 * trb(m_rx[1]) * teb(m_rz[1]);
                             assert(std::isfinite(s1));
-                            res(l, m) += d * w * s2 * trb(rx2) * teb(rz2);
+                            res += d * w * s2 * trb(m_rx[2]) * teb(m_rz[2]);
                             assert(std::isfinite(s2));
-                            res(l, m) += d * w * s3 * trb(rx3) * teb(rz3);
+                            res += d * w * s3 * trb(m_rx[3]) * teb(m_rz[3]);
                             assert(std::isfinite(s3));
-                            res(l, m) += d * w * s4 * trb(rx4) * teb(rz4);
+                            res += d * w * s4 * trb(m_rx[4]) * teb(m_rz[4]);
                             assert(std::isfinite(s4));
-                            res(l, m) += d * w * s5 * trb(rx5) * teb(rz5);
+                            res += d * w * s5 * trb(m_rx[5]) * teb(m_rz[5]);
                             assert(std::isfinite(s5));
-                            res(l, m) += d * w * s6 * trb(rx6) * teb(rz6);
-                            assert(std::isfinite(s6));
                           }
-                          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
+                          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
                           {
+                            assert(std::isfinite(s0));
+                            trb(m_trv, m_rx[0]);
+                            teb(m_tev, m_rz[0]);
+                            res += d * w * s0 * m_tev.dot(m_k0 * m_trv);
                             assert(std::isfinite(s1));
-                            trb(m_trv, rx1);
-                            teb(m_tev, rz1);
-                            res(l, m) += d * w * s1 * m_tev.dot(m_k1 * m_trv);
+                            trb(m_trv, m_rx[1]);
+                            teb(m_tev, m_rz[1]);
+                            res += d * w * s1 * m_tev.dot(m_k1 * m_trv);
                             assert(std::isfinite(s2));
-                            trb(m_trv, rx2);
-                            teb(m_tev, rz2);
-                            res(l, m) += d * w * s2 * m_tev.dot(m_k2 * m_trv);
+                            trb(m_trv, m_rx[2]);
+                            teb(m_tev, m_rz[2]);
+                            res += d * w * s2 * m_tev.dot(m_k2 * m_trv);
                             assert(std::isfinite(s3));
-                            trb(m_trv, rx3);
-                            teb(m_tev, rz3);
-                            res(l, m) += d * w * s3 * m_tev.dot(m_k3 * m_trv);
+                            trb(m_trv, m_rx[3]);
+                            teb(m_tev, m_rz[3]);
+                            res += d * w * s3 * m_tev.dot(m_k3 * m_trv);
                             assert(std::isfinite(s4));
-                            trb(m_trv, rx4);
-                            teb(m_tev, rz4);
-                            res(l, m) += d * w * s4 * m_tev.dot(m_k4 * m_trv);
+                            trb(m_trv, m_rx[4]);
+                            teb(m_tev, m_rz[4]);
+                            res += d * w * s4 * m_tev.dot(m_k4 * m_trv);
                             assert(std::isfinite(s5));
-                            trb(m_trv, rx5);
-                            teb(m_tev, rz5);
-                            res(l, m) += d * w * s5 * m_tev.dot(m_k5 * m_trv);
-                            assert(std::isfinite(s6));
-                            trb(m_trv, rx6);
-                            teb(m_tev, rz6);
-                            res(l, m) += d * w * s6 * m_tev.dot(m_k6 * m_trv);
+                            trb(m_trv, m_rx[5]);
+                            teb(m_tev, m_rz[5]);
+                            res += d * w * s5 * m_tev.dot(m_k5 * m_trv);
                           }
                           else
                           {
                             assert(false);
-                            res(l, m) = NAN;
+                            res = NAN;
                           }
                         }
                       }
@@ -685,54 +740,61 @@ namespace Rodin::Variational
         }
         else
         {
-          const QF::GenericPolytopeQuadrature qftr(trialfe.getOrder(), trp.getGeometry());
-          const QF::GenericPolytopeQuadrature qfte(testfe.getOrder(), tep.getGeometry());
+          const auto& qftr = *m_qftr;
+          const auto& qfte = *m_qfte;
           for (size_t i = 0; i < qfte.getSize(); i++)
           {
-            const Geometry::Point x(tep, teptrans, std::cref(qfte.getPoint(i)));
+            const auto& x = m_x[i];
             for (size_t j = 0; j < qftr.getSize(); j++)
             {
-              const Geometry::Point y(trp, trptrans, std::cref(qftr.getPoint(j)));
+              const auto& y = m_y[i];
+
               Scalar d;
-              if constexpr (std::is_same_v<LHSRangeType, Scalar>)
+              if constexpr (std::is_same_v<LHSRangeType, NumberType>)
               {
                 d = kernel(x, y) * x.getDistortion() * y.getDistortion();
               }
-              else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
+              else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
               {
                 kernel(m_k, x, y);
                 d = x.getDistortion() * y.getDistortion();
               }
+              else
+              {
+                d = NAN;
+              }
+
               const Scalar w = qfte.getWeight(i) * qftr.getWeight(j);
               for (size_t l = 0; l < testfe.getCount(); l++)
               {
                 const auto& teb = testfe.getBasis(l);
-                Scalar tev;
-                if constexpr (std::is_same_v<LHSRangeType, Scalar>)
+                NumberType tev;
+                if constexpr (std::is_same_v<LHSRangeType, NumberType>)
                 {
                   tev = teb(qfte.getPoint(i));
                 }
-                else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
+                else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
                 {
                   teb(m_tev, qfte.getPoint(i));
                 }
                 for (size_t m = 0; m < trialfe.getCount(); m++)
                 {
                   const auto& trb = trialfe.getBasis(m);
-                  if constexpr (std::is_same_v<LHSRangeType, Scalar>)
+                  if constexpr (std::is_same_v<LHSRangeType, NumberType>)
                   {
-                    res(l, m) += w * d * tev * trb(qftr.getPoint(j));
+                    res += w * d * tev * trb(qftr.getPoint(j));
                   }
-                  else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
+                  else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
                   {
                     trb(m_trv, qftr.getPoint(j));
-                    res(l, m) += w * d * m_tev.dot(m_k * m_trv);
+                    res += w * d * m_tev.dot(m_k * m_trv);
                   }
                 }
               }
             }
           }
         }
+        return res;
       }
 
       inline
@@ -748,9 +810,22 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      mutable Math::Matrix<Scalar> m_k;
-      mutable Math::Vector<Scalar> m_trv, m_tev;
-      mutable Math::Matrix<Scalar> m_k1, m_k2, m_k3, m_k4, m_k5, m_k6;
+      std::optional<std::reference_wrapper<Geometry::Polytope>> m_trp;
+      std::optional<std::reference_wrapper<Geometry::Polytope>> m_tep;
+
+      std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
+      std::unique_ptr<QF::QuadratureFormulaBase> m_qftr;
+      std::unique_ptr<QF::QuadratureFormulaBase> m_qfte;
+
+      std::vector<Geometry::Point> m_x;
+      std::vector<Geometry::Point> m_y;
+
+      std::vector<Math::SpatialVector<NumberType>> m_rx;
+      std::vector<Math::SpatialVector<NumberType>> m_rz;
+
+      Math::Matrix<NumberType> m_k;
+      Math::Vector<NumberType> m_trv, m_tev;
+      Math::Matrix<NumberType> m_k0, m_k1, m_k2, m_k3, m_k4, m_k5;
   };
 
   template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>

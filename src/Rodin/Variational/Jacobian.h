@@ -9,7 +9,6 @@
 
 #include "ForwardDecls.h"
 #include "GridFunction.h"
-#include "TensorBasis.h"
 #include "ShapeFunction.h"
 #include "VectorFunction.h"
 #include "MatrixFunction.h"

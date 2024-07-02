@@ -315,42 +315,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      DenseProblem& operator+=(const LocalBilinearFormIntegratorBase& rhs)
-      {
-        m_bilinearForm.add(rhs);
-        return *this;
-      }
-
-      DenseProblem& operator-=(const LocalBilinearFormIntegratorBase& rhs)
-      {
-        m_bilinearForm.add(UnaryMinus(rhs));
-        return *this;
-      }
-
-      DenseProblem& operator+=(const LinearFormIntegratorBaseType& rhs)
-      {
-        m_linearForm.add(rhs);
-        return *this;
-      }
-
-      DenseProblem& operator-=(const LinearFormIntegratorBaseType& rhs)
-      {
-        m_linearForm.add(UnaryMinus(rhs));
-        return *this;
-      }
-
-      DenseProblem& operator+=(const DirichletBCBase& dbc)
-      {
-        m_dbcs.add(dbc);
-        return *this;
-      }
-
-      DenseProblem& operator+=(const PeriodicBCBase& pbc)
-      {
-        m_pbcs.add(pbc);
-        return *this;
-      }
-
       DenseProblem& assemble() override
       {
         auto& trial = getTrialFunction();

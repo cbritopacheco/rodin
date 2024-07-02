@@ -17,8 +17,10 @@
 
 #include "ForwardDecls.h"
 
-#include "Function.h"
 #include "RangeShape.h"
+
+#include "NumberFunction.h"
+
 
 namespace Rodin::Variational
 {
@@ -29,10 +31,13 @@ namespace Rodin::Variational
    */
 
   template <class Derived>
-  class ScalarFunctionBase : public FunctionBase<ScalarFunctionBase<Derived>>
+  class ScalarFunctionBase : public NumberFunctionBase<Scalar, ScalarFunctionBase<Derived>>
   {
     public:
-      using Parent = FunctionBase<ScalarFunctionBase<Derived>>;
+      using NumberType = Scalar;
+
+      using Parent = NumberFunctionBase<NumberType, ScalarFunctionBase<Derived>>;
+
       using Parent::traceOf;
 
       ScalarFunctionBase() = default;
@@ -60,25 +65,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      inline
-      constexpr
-      void getValue(Math::Vector<Scalar>&, const Geometry::Point&) const = delete;
-
-      inline
-      constexpr
-      void getValue(Math::Matrix<Scalar>&, const Geometry::Point&) const = delete;
-
-      inline
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { 1, 1 };
-      }
-
-      virtual ScalarFunctionBase* copy() const noexcept override
-      {
-        return static_cast<const Derived&>(*this).copy();
-      }
+      virtual ScalarFunctionBase* copy() const noexcept override = 0;
   };
 
   /**
@@ -90,6 +77,7 @@ namespace Rodin::Variational
   {
     public:
       using Parent = ScalarFunctionBase<ScalarFunction<NestedDerived>>;
+
       using NestedRangeType = typename FormLanguage::Traits<FunctionBase<NestedDerived>>::RangeType;
 
       static_assert(std::is_same_v<NestedRangeType, Scalar>);
@@ -202,10 +190,6 @@ namespace Rodin::Variational
    */
   ScalarFunction(Scalar) -> ScalarFunction<Scalar>;
 
-  /**
-   * @ingroup ScalarFunctionSpecializations
-   * @brief Represents a constant scalar function with type Integer.
-   */
   template <>
   class ScalarFunction<Integer> final
     : public ScalarFunctionBase<ScalarFunction<Integer>>
@@ -261,9 +245,6 @@ namespace Rodin::Variational
       const Integer m_x;
   };
 
-  /**
-   * @brief CTAD for ScalarFunction.
-   */
   ScalarFunction(Integer) -> ScalarFunction<Integer>;
 
   /**
@@ -318,7 +299,8 @@ namespace Rodin::Variational
   /**
    * @brief CTAD for ScalarFunction.
    */
-  template <class F, typename = std::enable_if_t<std::is_invocable_r_v<Scalar, F, const Geometry::Point&>>>
+  template <class F, typename =
+    std::enable_if_t<std::is_invocable_r_v<Scalar, F, const Geometry::Point&>>>
   ScalarFunction(F) -> ScalarFunction<F>;
 }
 

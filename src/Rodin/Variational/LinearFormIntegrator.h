@@ -24,8 +24,6 @@ namespace Rodin::Variational
     public:
       using NumberType = Number;
 
-      using VectorType = Math::Vector<NumberType>;
-
       using Parent = Integrator;
 
       template <class FES>
@@ -102,30 +100,16 @@ namespace Rodin::Variational
       }
 
       inline
-      Integrator::Type getType() const
-      final override
+      Integrator::Type getType() const final override
       {
         return Integrator::Type::Linear;
       }
 
-      inline
-      const VectorType& getVector() const
-      {
-        return m_vector;
-      }
+      virtual const Geometry::Polytope& getPolytope() const = 0;
 
-      inline
-      VectorType& getVector()
-      {
-        return m_vector;
-      }
+      virtual LinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
-      /**
-       * @brief Performs the assembly of the element vector for the given
-       * element.
-       */
-      virtual
-      NumberType assemble(size_t local, const Geometry::Polytope& element) = 0;
+      virtual NumberType integrate(size_t local) = 0;
 
       virtual
       LinearFormIntegratorBase* copy() const noexcept override = 0;
@@ -135,11 +119,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;
-      VectorType m_vector;
   };
 }
-
-namespace Rodin
-{}
 
 #endif

@@ -7,104 +7,27 @@
 #include "GridFunction.h"
 #include "TrialFunction.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class OperandDerived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<
+    Variational::Component<Variational::ShapeFunctionBase<OperandDerived, FES, Space>>>
+  {
+    using FESType = FES;
+    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    using OperandType = Variational::ShapeFunctionBase<OperandDerived, FESType, SpaceType>;
+
+    using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
+    using NumberType = typename FormLanguage::Traits<OperandRangeType>::NumberType;
+
+    using RangeType = NumberType;
+  };
+}
+
 namespace Rodin::Variational
 {
-  /**
-   * @brief Represents the component (or entry) of a vectorial ShapeFunction.
-   */
-  template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
-  class Component<ShapeFunctionBase<OperandDerived, FES, Space>> final
-    : public ShapeFunctionBase<Component<ShapeFunctionBase<OperandDerived, FES, Space>>, FES, Space>
-  {
-    public:
-      using OperandType =
-        ShapeFunctionBase<OperandDerived, FES, Space>;
-
-      using Parent =
-        ShapeFunctionBase<Component<ShapeFunctionBase<OperandDerived, FES, Space>>, FES, Space>;
-
-      /**
-       * @brief Constructs the component object from a TrialFunction and its
-       * component index.
-       */
-      Component(const OperandType& u, size_t component)
-        : Parent(u.getFiniteElementSpace()),
-          m_u(u.copy()),
-          m_idx(component)
-      {}
-
-      Component(const Component& other)
-        : Parent(other),
-          m_u(other.m_u->copy()),
-          m_idx(other.m_idx)
-      {}
-
-      Component(Component&& other)
-        : Parent(std::move(other)),
-          m_u(std::move(other.m_u)),
-          m_idx(std::move(other.m_idx))
-      {}
-
-      inline
-      constexpr
-      size_t getIndex() const
-      {
-        return m_idx;
-      }
-
-      inline
-      constexpr
-      const OperandType& getOperand() const
-      {
-        assert(m_u);
-        return *m_u;
-      }
-
-      inline
-      constexpr
-      const auto& getLeaf() const
-      {
-        return getOperand().getLeaf();
-      }
-
-      inline
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& polytope) const
-      {
-        const size_t d = polytope.getDimension();
-        const size_t i = polytope.getIndex();
-        return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
-      }
-
-      inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
-      {
-        using RangeType = typename FES::RangeType;
-        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& tb = this->object(getOperand().getTensorBasis(p));
-        return TensorBasis(fe.getCount(), [&](size_t local) { return tb(local).coeff(m_idx); });
-      }
-
-      inline
-      Component* copy() const noexcept override
-      {
-        return new Component(*this);
-      }
-
-    private:
-      std::unique_ptr<OperandType> m_u;
-      const size_t m_idx;
-  };
-
-  template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
-  Component(const ShapeFunctionBase<OperandDerived, FES, Space>&, size_t)
-    -> Component<ShapeFunctionBase<OperandDerived, FES, Space>>;
-
   /**
    * @brief Represents the component (or entry) of a vectorial FunctionBase
    * instance.
@@ -117,6 +40,10 @@ namespace Rodin::Variational
       using OperandType = FunctionBase<OperandDerived>;
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
+      using NumberType = typename FormLanguage::Traits<OperandRangeType>::NumberType;
+
+      using RangeType = NumberType;
 
       using Parent = ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>;
 
@@ -184,6 +111,10 @@ namespace Rodin::Variational
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
+      using NumberType = typename FormLanguage::Traits<OperandRangeType>::NumberType;
+
+      using RangeType = NumberType;
+
       using Parent = ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>;
 
       constexpr
@@ -248,6 +179,12 @@ namespace Rodin::Variational
     public:
       using OperandType = GridFunction<FES>;
 
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
+      using NumberType = typename FormLanguage::Traits<OperandRangeType>::NumberType;
+
+      using RangeType = NumberType;
+
       using Parent = ScalarFunctionBase<Component<OperandType>>;
 
       /**
@@ -286,36 +223,16 @@ namespace Rodin::Variational
       }
 
       inline
-      Scalar getValue(const Geometry::Point& p) const
+      constexpr
+      auto getValue(const Geometry::Point& p) const
       {
-        Math::Vector<Scalar> v;
-        m_u.get().getValue(v, p);
-        return v.coeff(m_idx);
+        return m_u.get().getValue(p).coeff(m_idx);
       }
 
       inline Component* copy() const noexcept override
       {
         return new Component(*this);
       }
-
-      // template <class NestedDerived,
-      //          typename = std::enable_if_t<Utility::IsSpecialization<FES, H1>::Value>>
-      // inline
-      // constexpr
-      // auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
-      //                         Geometry::Attribute attr)
-      // {
-      //   return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
-      // }
-
-      // template <class NestedDerived,
-      //          typename = std::enable_if_t<Utility::IsSpecialization<FES, H1>::Value>>
-      // auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
-      //                         const FlatSet<Geometry::Attribute>& attrs = {})
-      // {
-      //   assert(false);
-      //   return *this;
-      // }
 
     private:
       std::reference_wrapper<OperandType> m_u;
@@ -324,6 +241,117 @@ namespace Rodin::Variational
 
   template <class FES>
   Component(GridFunction<FES>&, size_t) -> Component<GridFunction<FES>>;
+
+  /**
+   * @brief Represents the component (or entry) of a vectorial ShapeFunction.
+   */
+  template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
+  class Component<ShapeFunctionBase<OperandDerived, FES, Space>> final
+    : public ShapeFunctionBase<Component<ShapeFunctionBase<OperandDerived, FES, Space>>, FES, Space>
+  {
+    public:
+      using FESType = FES;
+      static constexpr const ShapeFunctionSpaceType SpaceType = Space;
+
+      using OperandType = ShapeFunctionBase<OperandDerived, FESType, SpaceType>;
+
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
+      using NumberType = typename FormLanguage::Traits<OperandRangeType>::NumberType;
+
+      using RangeType = NumberType;
+
+      using Parent = ShapeFunctionBase<Component<OperandType>>;
+
+      static_assert(std::is_same_v<OperandRangeType, Math::Vector<NumberType>>);
+
+      /**
+       * @brief Constructs the component object from a TrialFunction and its
+       * component index.
+       */
+      Component(const OperandType& u, size_t component)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u.copy()),
+          m_idx(component)
+      {}
+
+      Component(const Component& other)
+        : Parent(other),
+          m_u(other.m_u->copy()),
+          m_idx(other.m_idx)
+      {}
+
+      Component(Component&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)),
+          m_idx(std::move(other.m_idx))
+      {}
+
+      inline
+      constexpr
+      size_t getIndex() const
+      {
+        return m_idx;
+      }
+
+      inline
+      constexpr
+      const OperandType& getOperand() const
+      {
+        assert(m_u);
+        return *m_u;
+      }
+
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
+
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Polytope& polytope) const
+      {
+        const size_t d = polytope.getDimension();
+        const size_t i = polytope.getIndex();
+        return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
+      }
+
+      inline
+      const Geometry::Point& getPoint() const
+      {
+        return m_u->getPoint();
+      }
+
+      inline
+      Component& setPoint(const Geometry::Point& p)
+      {
+        m_u->setPoint(p);
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        return this->object(getOperand().getBasis(local)).coeff(m_idx);
+      }
+
+      inline
+      Component* copy() const noexcept override
+      {
+        return new Component(*this);
+      }
+
+    private:
+      std::unique_ptr<OperandType> m_u;
+      const size_t m_idx;
+  };
+
+  template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
+  Component(const ShapeFunctionBase<OperandDerived, FES, Space>&, size_t)
+    -> Component<ShapeFunctionBase<OperandDerived, FES, Space>>;
 }
 
 #endif
