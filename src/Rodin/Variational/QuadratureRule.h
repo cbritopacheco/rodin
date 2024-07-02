@@ -43,7 +43,7 @@ namespace Rodin::Variational
 
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
-          m_polytope(other.m_polytope.get()),
+          m_polytope(other.m_polytope),
           m_integrand(other.m_integrand->copy()),
           m_qfgg(other.m_qfgg),
           m_qf(other.m_qf)

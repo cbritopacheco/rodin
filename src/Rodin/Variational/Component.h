@@ -261,7 +261,7 @@ namespace Rodin::Variational
 
       using RangeType = ScalarType;
 
-      using Parent = ShapeFunctionBase<Component<OperandType>>;
+      using Parent = ShapeFunctionBase<Component<OperandType>, FES, Space>;
 
       static_assert(std::is_same_v<OperandRangeType, Math::Vector<ScalarType>>);
 
