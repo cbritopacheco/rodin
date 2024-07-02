@@ -25,7 +25,7 @@ namespace Rodin::Math
   template <class NumberType>
   using Matrix = Eigen::Matrix<NumberType, Eigen::Dynamic, Eigen::Dynamic>;
 
-  using ScalarMatrix = Matrix<Scalar>;
+  using RealMatrix = Matrix<Real>;
 
   /**
    * @brief Dense complex valued matrix type.
@@ -43,7 +43,7 @@ namespace Rodin::Math
    * @brief Point matrix
    */
   using PointMatrix =
-    Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0, RODIN_MAXIMAL_SPACE_DIMENSION, Eigen::Dynamic>;
+    Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, 0, RODIN_MAXIMAL_SPACE_DIMENSION, Eigen::Dynamic>;
 
   /**
    * @brief Represents a fixed size matrix

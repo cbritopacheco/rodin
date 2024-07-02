@@ -171,15 +171,15 @@ namespace Rodin::Variational
         {
           return RangeType::Integer;
         }
-        else if constexpr (std::is_same_v<R, Scalar>)
+        else if constexpr (std::is_same_v<R, Real>)
         {
-          return RangeType::Scalar;
+          return RangeType::Real;
         }
-        else if constexpr (std::is_same_v<R, Math::Vector<Scalar>>)
+        else if constexpr (std::is_same_v<R, Math::Vector<Real>>)
         {
           return RangeType::Vector;
         }
-        else if constexpr (std::is_same_v<R, Math::Matrix<Scalar>>)
+        else if constexpr (std::is_same_v<R, Math::Matrix<Real>>)
         {
           return RangeType::Matrix;
         }
@@ -203,9 +203,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector<Scalar>& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector<Scalar>&, const Geometry::Point&>::Value)
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector<Real>&, const Geometry::Point&>::Value)
         {
           return static_cast<const Derived&>(*this).getValue(res, p);
         }
@@ -217,9 +217,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix<Scalar>& res, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
       {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix<Scalar>&, const Geometry::Point&>::Value)
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix<Real>&, const Geometry::Point&>::Value)
         {
           return static_cast<const Derived&>(*this).getValue(res, p);
         }
@@ -242,13 +242,13 @@ namespace Rodin::Variational
       }
 
       inline
-      void operator()(Math::Vector<Scalar>& res, const Geometry::Point& p) const
+      void operator()(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
         return getValue(res, p);
       }
 
       inline
-      void operator()(Math::Matrix<Scalar>& res, const Geometry::Point& p) const
+      void operator()(Math::Matrix<Real>& res, const Geometry::Point& p) const
       {
         return getValue(res, p);
       }

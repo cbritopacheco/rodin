@@ -29,8 +29,8 @@ int main(int, char**)
   TestFunction  v(vh);
 
   // Define problem
-  ScalarFunction f = 1.0;
-  ScalarFunction g = 0.0;
+  RealFunction f = 1.0;
+  RealFunction g = 0.0;
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))

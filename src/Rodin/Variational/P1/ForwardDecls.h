@@ -54,16 +54,16 @@ namespace Rodin::Variational
   class GridFunction<P1<Range, Mesh>>;
 
   /**
-   * @brief Alias for P1Element<Scalar>
+   * @brief Alias for P1Element<Real>
    */
-  using ScalarP1Element = P1Element<Scalar>;
+  using RealP1Element = P1Element<Real>;
 
   using ComplexP1Element = P1Element<Complex>;
 
   /**
-   * @brief Alias for P1Element<Math::Vector<Scalar>>
+   * @brief Alias for P1Element<Math::Vector<Real>>
    */
-  using VectorP1Element = P1Element<Math::Vector<Scalar>>;
+  using VectorP1Element = P1Element<Math::Vector<Real>>;
 }
 
 #endif

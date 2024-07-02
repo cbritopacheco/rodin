@@ -22,9 +22,9 @@ namespace Rodin::Variational
         os << "Boolean";
         break;
       }
-      case RangeType::Scalar:
+      case RangeType::Real:
       {
-        os << "Scalar";
+        os << "Real";
         break;
       }
       case RangeType::Vector:

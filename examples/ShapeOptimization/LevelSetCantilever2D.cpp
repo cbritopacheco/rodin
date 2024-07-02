@@ -33,11 +33,11 @@ static constexpr double hmax = 0.05;
 static constexpr double hmin = 0.1 * hmax;
 static constexpr double hausd = 0.5 * hmin;
 static constexpr double ell = 0.4;
-const constexpr Scalar dt = 4 * (hmax - hmin);
+const constexpr Real dt = 4 * (hmax - hmin);
 static constexpr double alpha = dt;
 
 // Compliance
-inline Scalar compliance(const GridFunction<FES>& w)
+inline Real compliance(const GridFunction<FES>& w)
 {
   auto& vh = w.getFiniteElementSpace();
   TrialFunction u(vh);

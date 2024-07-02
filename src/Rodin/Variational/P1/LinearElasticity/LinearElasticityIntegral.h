@@ -29,8 +29,8 @@ namespace Rodin::Variational
 
         using LambdaRangeType = typename FormLanguage::Traits<LambdaType>::RangeType;
 
-        static_assert(std::is_same_v<MuRangeType, Scalar>);
-        static_assert(std::is_same_v<LambdaRangeType, Scalar>);
+        static_assert(std::is_same_v<MuRangeType, Real>);
+        static_assert(std::is_same_v<LambdaRangeType, Real>);
 
     public:
       LinearElasticityIntegrator(
@@ -84,14 +84,14 @@ namespace Rodin::Variational
         // const size_t dofs = fe.getCount();
         // const QF::QF1P1 qf(polytope.getGeometry());
         // assert(qf.getSize() == 1);
-        // const Scalar w = qf.getWeight(0);
+        // const Real w = qf.getWeight(0);
         // const auto& rc = qf.getPoint(0);
         // const Geometry::Point p(polytope, trans, std::cref(rc));
-        // const Scalar distortion = p.getDistortion();
-        // const Scalar mu = getMu().getValue(p);
-        // const Scalar lambda = getLambda().getValue(p);
+        // const Real distortion = p.getDistortion();
+        // const Real mu = getMu().getValue(p);
+        // const Real lambda = getLambda().getValue(p);
         // auto& res = getMatrix();
-        // res = Math::Matrix<Scalar>::Zero(dofs, dofs);
+        // res = Math::Matrix<Real>::Zero(dofs, dofs);
         // m_rjac.resize(dofs);
         // m_pjac.resize(dofs);
         // m_psym.resize(dofs);
@@ -105,8 +105,8 @@ namespace Rodin::Variational
         // }
         // for (size_t i = 0; i < dofs; i++)
         // {
-        //   const Scalar lhs = lambda * m_pdiv[i];
-        //   const Scalar rhs = m_pdiv[i];
+        //   const Real lhs = lambda * m_pdiv[i];
+        //   const Real rhs = m_pdiv[i];
         //   res(i, i) += w * distortion * lhs * rhs;
         // }
         // for (size_t i = 0; i < dofs; i++)
@@ -117,10 +117,10 @@ namespace Rodin::Variational
         // }
         // for (size_t i = 0; i < dofs; i++)
         // {
-        //   const Scalar lhs = lambda * m_pdiv[i];
+        //   const Real lhs = lambda * m_pdiv[i];
         //   for (size_t j = 0; j < i; j++)
         //   {
-        //     const Scalar rhs = m_pdiv[j];P1<Range, Mesh>
+        //     const Real rhs = m_pdiv[j];P1<Range, Mesh>
         //     res(i, j) += w * distortion * lhs * rhs;
         //   }
         // }
@@ -179,10 +179,10 @@ namespace Rodin::Variational
       size_t m_d;
       size_t m_i;
 
-      std::vector<Math::SpatialMatrix<Scalar>> m_rjac;
-      std::vector<Math::SpatialMatrix<Scalar>> m_pjac;
-      std::vector<Math::SpatialMatrix<Scalar>> m_psym;
-      Math::Vector<Scalar> m_pdiv;
+      std::vector<Math::SpatialMatrix<Real>> m_rjac;
+      std::vector<Math::SpatialMatrix<Real>> m_pjac;
+      std::vector<Math::SpatialMatrix<Real>> m_psym;
+      Math::Vector<Real> m_pdiv;
 
       std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
   };

@@ -50,7 +50,7 @@ int main(int, char**)
     Alert::Info() << "Iteration: " << i << Alert::Raise;
 
     // Poisson problem
-    ScalarFunction f(1.0);
+    RealFunction f(1.0);
 
     Solver::SparseLU solver;
 
@@ -59,7 +59,7 @@ int main(int, char**)
     Problem poisson(u, v);
     poisson = Integral((gmin + (gmax - gmin) * Pow(gamma, 3)) * Grad(u), Grad(v))
             - Integral(f * v)
-            + DirichletBC(u, ScalarFunction(0.0)).on(GammaD);
+            + DirichletBC(u, RealFunction(0.0)).on(GammaD);
     poisson.solve(solver);
 
     // Adjoint problem
@@ -67,8 +67,8 @@ int main(int, char**)
     TestFunction  q(vh);
     Problem adjoint(p, q);
     adjoint = Integral((gmin + (gmax - gmin) * Pow(gamma, 3)) * Grad(p), Grad(q))
-            + Integral(ScalarFunction(1.0 / vol), q)
-            + DirichletBC(p, ScalarFunction(0.0)).on(GammaD);
+            + Integral(RealFunction(1.0 / vol), q)
+            + DirichletBC(p, RealFunction(0.0)).on(GammaD);
     adjoint.solve(solver);
 
     // Hilbert extension-regularization
@@ -80,7 +80,7 @@ int main(int, char**)
             - Integral(
                 ell + 3 * (gmax - gmin) * Pow(gamma, 2) *
                 Dot(Grad(u.getSolution()), Grad(p.getSolution())), w)
-            + DirichletBC(g, ScalarFunction(0.0)).on(GammaD);
+            + DirichletBC(g, RealFunction(0.0)).on(GammaD);
     hilbert.solve(solver);
 
     GridFunction step(ph);

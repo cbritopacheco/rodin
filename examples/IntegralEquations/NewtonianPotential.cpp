@@ -13,13 +13,13 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
 inline
-Scalar K(const Point& x, const Point& y)
+Real K(const Point& x, const Point& y)
 {
   return 1. / (4 * M_PI * ((x - y).norm()));
 }
 
 inline
-Scalar exact(const Point& x)
+Real exact(const Point& x)
 {
   if (abs(1 - x.squaredNorm()) < 0.00001)
     return 4. / (M_PI * std::sqrt(abs(0.00001)));
@@ -65,7 +65,7 @@ int main(int, char**)
   std::cout << Integral(u.getSolution()) << std::endl;
 
   GridFunction one(fes);
-  one = ScalarFunction(1);
+  one = RealFunction(1);
 
   std::cout << "phi\n";
   GridFunction phi(fes);

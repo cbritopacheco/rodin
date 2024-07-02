@@ -81,8 +81,8 @@ namespace Rodin::Variational
         const auto it1 = mesh.getPolytope(d + 1, idx1);
         const auto it2 = mesh.getPolytope(d + 1, idx2);
         const auto& pc = p.getPhysicalCoordinates();
-        const Math::SpatialVector<Scalar> rc1 = it1->getTransformation().inverse(pc);
-        const Math::SpatialVector<Scalar> rc2 = it2->getTransformation().inverse(pc);
+        const Math::SpatialVector<Real> rc1 = it1->getTransformation().inverse(pc);
+        const Math::SpatialVector<Real> rc2 = it2->getTransformation().inverse(pc);
         const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
         const auto& lhs = this->object(getOperand().getValue(p1));
@@ -190,8 +190,8 @@ namespace Rodin::Variational
   //       const auto it1 = mesh.getPolytope(d + 1, idx1);
   //       const auto it2 = mesh.getPolytope(d + 1, idx2);
   //       const auto& pc = p.getPhysicalCoordinates();
-  //       const Math::SpatialVector<Scalar> rc1 = it1->getTransformation().inverse(pc);
-  //       const Math::SpatialVector<Scalar> rc2 = it2->getTransformation().inverse(pc);
+  //       const Math::SpatialVector<Real> rc1 = it1->getTransformation().inverse(pc);
+  //       const Math::SpatialVector<Real> rc2 = it2->getTransformation().inverse(pc);
   //       const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
   //       const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
   //       const auto& lhs = this->object(getOperand().getBasis(local, p1));

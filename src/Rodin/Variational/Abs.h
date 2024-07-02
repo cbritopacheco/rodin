@@ -10,7 +10,7 @@
 #include <cmath>
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -25,15 +25,15 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class Abs<FunctionBase<NestedDerived>>
-    : public ScalarFunctionBase<Abs<FunctionBase<NestedDerived>>>
+    : public RealFunctionBase<Abs<FunctionBase<NestedDerived>>>
   {
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
-      using Parent = ScalarFunctionBase<Abs<OperandType>>;
+      using Parent = RealFunctionBase<Abs<OperandType>>;
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
-      static_assert(std::is_same_v<OperandRangeType, Scalar>);
+      static_assert(std::is_same_v<OperandRangeType, Real>);
 
       Abs(const OperandType& v)
         : m_v(v.copy())

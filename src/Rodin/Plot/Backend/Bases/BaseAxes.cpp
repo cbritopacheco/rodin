@@ -15,8 +15,8 @@ namespace Rodin::Plot::Backend::Bases
 {
   BaseAxes::BaseAxes(
     Artist::Figure& figure,
-    const Magnum::Math::Vector<Scalar>2<Integer>& bottomLeft,
-    const Magnum::Math::Vector<Scalar>2<Integer>& size,
+    const Magnum::Math::Vector<Real>2<Integer>& bottomLeft,
+    const Magnum::Math::Vector<Real>2<Integer>& size,
     Boolean frameEnabled)
     : m_figure(figure),
       m_bottomLeft(bottomLeft),
@@ -24,12 +24,12 @@ namespace Rodin::Plot::Backend::Bases
       m_frameEnabled(frameEnabled)
   {}
 
-  const Magnum::Math::Vector<Scalar>2<Integer>& BaseAxes::getBottomLeft() const
+  const Magnum::Math::Vector<Real>2<Integer>& BaseAxes::getBottomLeft() const
   {
     return m_bottomLeft;
   }
 
-  const Magnum::Math::Vector<Scalar>2<Integer>& BaseAxes::getSize() const
+  const Magnum::Math::Vector<Real>2<Integer>& BaseAxes::getSize() const
   {
     return m_size;
   }

@@ -13,7 +13,7 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "ShapeFunction.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -89,7 +89,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector<Scalar>& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
         static_assert(FormLanguage::IsVectorRange<OperandRangeType>::Value);
         getOperand().getValue(res, p);
@@ -98,7 +98,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix<Scalar>& res, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
       {
         static_assert(FormLanguage::IsMatrixRange<OperandRangeType>::Value);
         getOperand().getValue(res, p);

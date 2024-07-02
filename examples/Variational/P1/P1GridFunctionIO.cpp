@@ -18,7 +18,7 @@ int main(int, char**)
 
   P1 fes(mesh, 2);
   GridFunction gf(fes);
-  gf = [](const Geometry::Point& p) { return Math::Vector<Scalar>{{p.x(), p.y()}}; };
+  gf = [](const Geometry::Point& p) { return Math::Vector<Real>{{p.x(), p.y()}}; };
 
   mesh.save("function.mesh");
   gf.save("function.gf");

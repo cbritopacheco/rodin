@@ -35,7 +35,7 @@ namespace Rodin::Geometry::Euclidean
   {
     return
       m_center + m_radius * Point2D<T>(
-          std::cos(static_cast<Scalar>(angle)), std::sin(static_cast<Scalar>(angle)));
+          std::cos(static_cast<Real>(angle)), std::sin(static_cast<Real>(angle)));
   }
 
   template <class T>

@@ -218,7 +218,7 @@ namespace Rodin::Geometry
 
       virtual std::optional<Point> inclusion(const Point& p) const = 0;
 
-      virtual MeshBase& scale(Scalar c) = 0;
+      virtual MeshBase& scale(Real c) = 0;
 
       virtual MeshBase& load(
         const boost::filesystem::path& filename,
@@ -337,7 +337,7 @@ namespace Rodin::Geometry
        * @brief Gets the total volume of the mesh.
        * @returns Sum of all cell volumes.
        */
-      Scalar getVolume() const;
+      Real getVolume() const;
 
       /**
        * @brief Gets the sum of the volumes of the cells given by the
@@ -347,15 +347,15 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the volume.
        */
-      Scalar getVolume(Attribute attr) const;
+      Real getVolume(Attribute attr) const;
 
-      Scalar getVolume(const FlatSet<Attribute>& attr) const;
+      Real getVolume(const FlatSet<Attribute>& attr) const;
 
       /**
        * @brief Gets the total perimeter of the mesh.
        * @returns Sum of all element perimeters.
        */
-      Scalar getPerimeter() const;
+      Real getPerimeter() const;
 
       /**
        * @brief Gets the sum of the perimeters of the cells given by the
@@ -365,21 +365,21 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the perimeter.
        */
-      Scalar getPerimeter(Attribute attr) const;
+      Real getPerimeter(Attribute attr) const;
 
-      Scalar getPerimeter(const FlatSet<Attribute>& attr) const;
+      Real getPerimeter(const FlatSet<Attribute>& attr) const;
 
-      Scalar getArea() const;
+      Real getArea() const;
 
-      Scalar getArea(Attribute attr) const;
+      Real getArea(Attribute attr) const;
 
-      Scalar getArea(const FlatSet<Attribute>& attr) const;
+      Real getArea(const FlatSet<Attribute>& attr) const;
 
-      Scalar getMeasure(size_t d) const;
+      Real getMeasure(size_t d) const;
 
-      Scalar getMeasure(size_t d, Attribute attr) const;
+      Real getMeasure(size_t d, Attribute attr) const;
 
-      Scalar getMeasure(size_t d, const FlatSet<Attribute>& attr) const;
+      Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const;
 
       /**
        * @brief Gets the labels of the domain cells in the mesh.
@@ -475,7 +475,7 @@ namespace Rodin::Geometry
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
        */
-      virtual Eigen::Map<const Math::SpatialVector<Scalar>> getVertexCoordinates(Index idx) const = 0;
+      virtual Eigen::Map<const Math::SpatialVector<Real>> getVertexCoordinates(Index idx) const = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -495,7 +495,7 @@ namespace Rodin::Geometry
        *   mesh.setVertexCoordinates(0, 10.0, 2);
        * @endcode
        */
-      virtual MeshBase& setVertexCoordinates(Index idx, Scalar s, size_t i) = 0;
+      virtual MeshBase& setVertexCoordinates(Index idx, Real s, size_t i) = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -503,7 +503,7 @@ namespace Rodin::Geometry
        * @param[in] idx Vertex index
        * @param[in] coords New coordinates
        */
-      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector<Scalar>& coords) = 0;
+      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords) = 0;
 
       virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
@@ -593,7 +593,7 @@ namespace Rodin::Geometry
            */
           template <size_t Size>
           inline
-          Builder& vertex(const Scalar (&data)[Size])
+          Builder& vertex(const Real (&data)[Size])
           {
             assert(Size == m_sdim);
             m_vertices.col(m_nodes++) = data;
@@ -605,35 +605,35 @@ namespace Rodin::Geometry
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(std::initializer_list<Scalar> l);
+          Builder& vertex(std::initializer_list<Real> l);
 
           /**
            * @brief Adds vertex with coordinates given by the array pointer.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const Scalar* data);
+          Builder& vertex(const Real* data);
 
           /**
            * @brief Adds vertex with coordinates given by the mapped memory.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const Eigen::Map<const Math::Vector<Scalar>>& x);
+          Builder& vertex(const Eigen::Map<const Math::Vector<Real>>& x);
 
           /**
            * @brief Adds vertex with coordinates given by the vector.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(Math::Vector<Scalar>&& x);
+          Builder& vertex(Math::Vector<Real>&& x);
 
           /**
            * @brief Adds vertex with coordinates given by the vector.
            *
            * This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const Math::Vector<Scalar>& x);
+          Builder& vertex(const Math::Vector<Real>& x);
 
           /**
            * @brief Sets the attribute of the given polytope.
@@ -663,7 +663,7 @@ namespace Rodin::Geometry
            */
           Mesh finalize();
 
-          Builder& setVertices(Math::Matrix<Scalar>&& connectivity);
+          Builder& setVertices(Math::Matrix<Real>&& connectivity);
 
           Builder& setConnectivity(Connectivity<Context>&& connectivity);
 
@@ -892,7 +892,7 @@ namespace Rodin::Geometry
         const boost::filesystem::path& filename,
         IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
 
-      virtual Mesh& scale(Scalar c) override;
+      virtual Mesh& scale(Real c) override;
 
       const AttributeIndex& getAttributeIndex() const
       {
@@ -959,15 +959,15 @@ namespace Rodin::Geometry
         return m_connectivity;
       }
 
-      virtual Eigen::Map<const Math::SpatialVector<Scalar>> getVertexCoordinates(Index idx) const override;
+      virtual Eigen::Map<const Math::SpatialVector<Real>> getVertexCoordinates(Index idx) const override;
 
       virtual const FlatSet<Attribute>& getAttributes(size_t d) const override;
 
       virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 
-      virtual Mesh& setVertexCoordinates(Index idx, Scalar xi, size_t i) override;
+      virtual Mesh& setVertexCoordinates(Index idx, Real xi, size_t i) override;
 
-      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector<Scalar>& coords) override;
+      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords) override;
 
       virtual Mesh& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;

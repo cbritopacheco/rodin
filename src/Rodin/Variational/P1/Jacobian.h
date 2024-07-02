@@ -71,7 +71,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::SpatialMatrix<Scalar>& out, const Geometry::Point& p) const
+      void interpolate(Math::SpatialMatrix<Real>& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -87,7 +87,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
+            const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -112,7 +112,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
+                  const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;
@@ -132,8 +132,8 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialMatrix<Scalar> jacobian(vdim, d);
-          Math::SpatialMatrix<Scalar> res(vdim, d);
+          Math::SpatialMatrix<Real> jacobian(vdim, d);
+          Math::SpatialMatrix<Real> res(vdim, d);
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
@@ -245,7 +245,7 @@ namespace Rodin::Variational
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        const Math::Vector<Scalar>& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        const Math::Vector<Real>& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
         return this->object(fe.getJacobian(local)(rc)) * p.getJacobianInverse();
       }
 

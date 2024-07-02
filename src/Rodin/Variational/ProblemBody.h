@@ -31,7 +31,7 @@ namespace Rodin::Variational
   class ProblemBodyBase : public FormLanguage::Base
   {
     public:
-      using NumberType = Scalar;
+      using NumberType = Real;
 
       using LinearFormIntegratorBaseType = LinearFormIntegratorBase<NumberType>;
 
@@ -371,7 +371,7 @@ namespace Rodin::Variational
       BilinearFormBaseListType m_bfs;
   };
 
-  ProblemBody(const LocalBilinearFormIntegratorBase<Scalar>&)
+  ProblemBody(const LocalBilinearFormIntegratorBase<Real>&)
     -> ProblemBody<void, void>;
 
   template <class LHSNumber, class RHSNumber>

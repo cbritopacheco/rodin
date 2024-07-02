@@ -55,11 +55,11 @@ namespace Rodin::Plot::Backend::Bases
 
       ConstWindowHandle getWindowHandle() const;
 
-      Magnum::Math::Vector<Scalar>2<int> getWindowSize() const;
+      Magnum::Math::Vector<Real>2<int> getWindowSize() const;
 
-      Magnum::Math::Vector<Scalar>2<float> getDPIScaling() const;
+      Magnum::Math::Vector<Real>2<float> getDPIScaling() const;
 
-      Magnum::Math::Vector<Scalar>2<int> getFrameBufferSize() const;
+      Magnum::Math::Vector<Real>2<int> getFrameBufferSize() const;
 
       virtual void drawContent() = 0;
 

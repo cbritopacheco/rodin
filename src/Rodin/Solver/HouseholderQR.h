@@ -21,7 +21,7 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD for HouseholderQR
    */
-  HouseholderQR() -> HouseholderQR<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
+  HouseholderQR() -> HouseholderQR<Math::Matrix<Real>, Math::Vector<Real>>;
 
   /**
    * @defgroup HouseholderQRSpecializations HouseholderQR Template Specializations
@@ -32,18 +32,18 @@ namespace Rodin::Solver
   /**
    * @ingroup HouseholderQRSpecializations
    * @brief A direct sparse HouseholderQR Cholesky factorizations without square root
-   * for use with Math::SparseMatrix<Scalar> and Math::Vector<Scalar>.
+   * for use with Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
   template <>
-  class HouseholderQR<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>>
+  class HouseholderQR<Math::Matrix<Real>, Math::Vector<Real>> final
+    : public SolverBase<Math::Matrix<Real>, Math::Vector<Real>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::Matrix<Scalar>;
+      using OperatorType = Math::Matrix<Real>;
 
       /// Type of vector
-      using VectorType = Math::Vector<Scalar>;
+      using VectorType = Math::Vector<Real>;
 
       /**
        * @brief Constructs the HouseholderQR object with default parameters.
@@ -65,7 +65,7 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::HouseholderQR<Math::Matrix<Scalar>> m_solver;
+      Eigen::HouseholderQR<Math::Matrix<Real>> m_solver;
   };
 
 }

@@ -272,7 +272,7 @@ namespace Rodin::IO::MFEM
 
       template <class Iterator>
       inline
-      std::optional<Math::Vector<Scalar>> operator()(Iterator begin, Iterator end) const
+      std::optional<Math::Vector<Real>> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::blank;
@@ -281,7 +281,7 @@ namespace Rodin::IO::MFEM
         using boost::spirit::x3::_attr;
 
         size_t i = 0;
-        Math::Vector<Scalar> res(m_sdim);
+        Math::Vector<Real> res(m_sdim);
         const auto get_double = [&](auto& ctx) { assert(i < m_sdim); res(i++) = _attr(ctx); };
         const auto p = repeat(m_sdim)[double_[get_double]];
         const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
@@ -522,7 +522,7 @@ namespace Rodin::IO
            << "Ordering: " << MFEM::Ordering::VectorDimension
            << "\n\n";
         const auto& matrix = gf.getData();
-        const Scalar* data = matrix.data();
+        const Real* data = matrix.data();
         assert(matrix.size() >= 0);
         for (size_t i = 0; i < static_cast<size_t>(matrix.size()); i++)
           os << data[i] << '\n';
@@ -577,7 +577,7 @@ namespace Rodin::IO
            << "Ordering: " << MFEM::Ordering::VectorDimension
            << "\n\n";
         const auto& matrix = gf.getData();
-        const Scalar* data = matrix.data();
+        const Real* data = matrix.data();
         assert(matrix.size() >= 0);
         for (size_t i = 0; i < static_cast<size_t>(matrix.size()); i++)
           os << data[i] << '\n';

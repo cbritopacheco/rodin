@@ -9,7 +9,7 @@
 
 #include "ForwardDecls.h"
 
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
@@ -36,12 +36,12 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class Trace<FunctionBase<NestedDerived>> final
-    : public ScalarFunctionBase<Trace<FunctionBase<NestedDerived>>>
+    : public RealFunctionBase<Trace<FunctionBase<NestedDerived>>>
   {
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
-      using Parent = ScalarFunctionBase<Trace<OperandType>>;
+      using Parent = RealFunctionBase<Trace<OperandType>>;
 
       /**
        * @brief Constructs the Trace of the given matrix
@@ -69,7 +69,7 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         using OperandRange = typename FormLanguage::Traits<OperandType>::RangeType;
-        static_assert(std::is_same_v<OperandRange, Math::Matrix<Scalar>>);
+        static_assert(std::is_same_v<OperandRange, Math::Matrix<Real>>);
         return getOperand().getValue(p).trace();
       }
 

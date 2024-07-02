@@ -38,7 +38,7 @@ namespace Rodin::Variational
       using Parent =
         FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
-      static_assert(std::is_same_v<RHSRangeType, Scalar>);
+      static_assert(std::is_same_v<RHSRangeType, Real>);
 
       Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
@@ -94,7 +94,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector<Scalar>& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
         getLHS().getValue(res, p);
         res /= getRHS().getValue(p);
@@ -102,7 +102,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix<Scalar>& res, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
       {
         getLHS().getValue(res, p);
         res /= getRHS().getValue(p);
@@ -132,22 +132,22 @@ namespace Rodin::Variational
 
   template <class LHSDerived, class Number,
     typename = std::enable_if_t<
-      std::is_arithmetic_v<Number>, Division<LHSDerived, ScalarFunction<Number>>>>
+      std::is_arithmetic_v<Number>, Division<LHSDerived, RealFunction<Number>>>>
   inline
   auto
   operator/(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
-    return Division(lhs, ScalarFunction(rhs));
+    return Division(lhs, RealFunction(rhs));
   }
 
   template <class Number, class RHSDerived,
     typename = std::enable_if_t<
-      std::is_arithmetic_v<Number>, Division<RHSDerived, ScalarFunction<Number>>>>
+      std::is_arithmetic_v<Number>, Division<RHSDerived, RealFunction<Number>>>>
   inline
   auto
   operator/(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return Division(ScalarFunction(lhs), rhs);
+    return Division(RealFunction(lhs), rhs);
   }
 }
 #endif

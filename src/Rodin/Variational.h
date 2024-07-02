@@ -76,7 +76,7 @@
 #include "Variational/Problem.h"
 #include "Variational/DenseProblem.h"
 
-#include "Variational/ScalarFunction.h"
+#include "Variational/RealFunction.h"
 #include "Variational/VectorFunction.h"
 #include "Variational/MatrixFunction.h"
 #include "Variational/BooleanFunction.h"

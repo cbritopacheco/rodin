@@ -15,8 +15,8 @@ using namespace Rodin::Variational;
 static constexpr Attribute material = RODIN_DEFAULT_POLYTOPE_ATTRIBUTE;
 static constexpr Attribute interior = 1;
 static constexpr Attribute exterior = 2;
-static constexpr Scalar hmax = 0.1;
-static constexpr Scalar radius = 0.1;
+static constexpr Real hmax = 0.1;
+static constexpr Real radius = 0.1;
 
 int main(int, char**)
 {
@@ -26,7 +26,7 @@ int main(int, char**)
   // mesh.scale(1. / (n - 1));
 
   // P1 fes(mesh);
-  // MMG::ScalarGridFunction gf(fes);
+  // MMG::RealGridFunction gf(fes);
   // gf = [](const Geometry::Point& p)
   //      {
   //        return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - radius;
@@ -59,7 +59,7 @@ int main(int, char**)
   mesh.load("degu.mesh", IO::FileFormat::MEDIT);
   mesh.save("implicit.mesh", IO::FileFormat::MFEM);
   P1 fes(mesh);
-  // MMG::ScalarGridFunction gf(fes);
+  // MMG::RealGridFunction gf(fes);
 
   auto dist = MMG::Distancer(fes).distance(mesh);
   dist.save("implicit.gf");

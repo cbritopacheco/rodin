@@ -28,7 +28,7 @@ namespace Rodin::Variational
 
   /**
    * @brief Degree 0 Lagrange finite element space
-   * @tparam Range Range value type. Either Rodin::Scalar or Math::Vector<Scalar>.
+   * @tparam Range Range value type. Either Rodin::Real or Math::Vector<Real>.
    * @tparam Context Context type
    * @tparam Args Additional arguments
    *
@@ -55,16 +55,16 @@ namespace Rodin::Variational
   class GridFunction<P0<Range, Mesh>>;
 
   /**
-   * @brief Alias for P0Element<Scalar>
+   * @brief Alias for P0Element<Real>
    */
-  using ScalarP0Element = P0Element<Scalar>;
+  using RealP0Element = P0Element<Real>;
 
   using ComplexP0Element = P0Element<Complex>;
 
   /**
-   * @brief Alias for P0Element<Math::Vector<Scalar>>
+   * @brief Alias for P0Element<Math::Vector<Real>>
    */
-  using VectorP0Element = P0Element<Math::Vector<Scalar>>;
+  using VectorP0Element = P0Element<Math::Vector<Real>>;
 }
 
 #endif

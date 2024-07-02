@@ -41,8 +41,8 @@ namespace Rodin::FormLanguage
     template <>
     struct RangeOfSAT<true, false, true, false, false>
     {
-      using Type = Scalar;
-      Variational::RangeType Value = Variational::RangeType::Scalar;
+      using Type = Real;
+      Variational::RangeType Value = Variational::RangeType::Real;
     };
 
     template <>
@@ -55,28 +55,28 @@ namespace Rodin::FormLanguage
     template <>
     struct RangeOfSAT<false, true, true, false, false>
     {
-      using Type = Scalar;
-      Variational::RangeType Value = Variational::RangeType::Scalar;
+      using Type = Real;
+      Variational::RangeType Value = Variational::RangeType::Real;
     };
 
     template <>
     struct RangeOfSAT<false, false, true, false, false>
     {
-      using Type = Scalar;
-      Variational::RangeType Value = Variational::RangeType::Scalar;
+      using Type = Real;
+      Variational::RangeType Value = Variational::RangeType::Real;
     };
 
     template <>
     struct RangeOfSAT<false, false, false, true, false>
     {
-      using Type = Math::Vector<Scalar>;
+      using Type = Math::Vector<Real>;
       Variational::RangeType Value = Variational::RangeType::Vector;
     };
 
     template <>
     struct RangeOfSAT<false, false, false, false, true>
     {
-      using Type = Math::Matrix<Scalar>;
+      using Type = Math::Matrix<Real>;
       Variational::RangeType Value = Variational::RangeType::Matrix;
     };
   }
@@ -132,10 +132,10 @@ namespace Rodin::FormLanguage
   };
 
   template <class T>
-  struct IsScalarRange
+  struct IsRealRange
   {
     static constexpr const bool Value =
-      std::is_convertible_v<T, Scalar> &&
+      std::is_convertible_v<T, Real> &&
       !IsVectorRange<T>::Value &&
       !IsMatrixRange<T>::Value;
   };
@@ -167,7 +167,7 @@ namespace Rodin::FormLanguage
       typename Internal::RangeOfSAT<
         IsBooleanRange<ResultType>::Value,
         IsIntegerRange<ResultType>::Value,
-        IsScalarRange<ResultType>::Value,
+        IsRealRange<ResultType>::Value,
         IsVectorRange<ResultType>::Value,
         IsMatrixRange<ResultType>::Value>
       ::Type;
@@ -181,7 +181,7 @@ namespace Rodin::FormLanguage
       typename Internal::RangeOfSAT<
         IsBooleanRange<ResultType>::Value,
         IsIntegerRange<ResultType>::Value,
-        IsScalarRange<ResultType>::Value,
+        IsRealRange<ResultType>::Value,
         IsVectorRange<ResultType>::Value,
         IsMatrixRange<ResultType>::Value>
       ::Type;

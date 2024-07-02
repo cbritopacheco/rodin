@@ -14,8 +14,8 @@
 namespace Rodin::Solver
 {
   template <>
-  class AppleAccelerateLDLT<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  class AppleAccelerateLDLT<Math::SparseMatrix<Real>, Math::Vector<Real>> final
+    : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
   {
 
   };

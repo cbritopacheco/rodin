@@ -29,21 +29,21 @@ static constexpr Geometry::Attribute dLocator = 6;
 
 static constexpr size_t maxIt = 1000;
 
-static constexpr Scalar epsilon = 1e-6;
-static constexpr Scalar ellClamp = 1e-4;
-static constexpr Scalar ellLocator = 1e-4;
-static constexpr Scalar radius = 0.2;
-static constexpr Scalar tgv = std::numeric_limits<float>::max();
-static const Scalar alpha = 4;
+static constexpr Real epsilon = 1e-6;
+static constexpr Real ellClamp = 1e-4;
+static constexpr Real ellLocator = 1e-4;
+static constexpr Real radius = 0.2;
+static constexpr Real tgv = std::numeric_limits<float>::max();
+static const Real alpha = 4;
 
-using ScalarFES = P1<Scalar>;
-using VectorFES = P1<Math::Vector<Scalar>>;
-using ScalarGridFunction = GridFunction<ScalarFES>;
+using RealFES = P1<Real>;
+using VectorFES = P1<Math::Vector<Real>>;
+using RealGridFunction = GridFunction<RealFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
 
 size_t rmc(MeshBase& mesh);
-void holes(ScalarGridFunction& dist, const std::vector<Point>& cs);
+void holes(RealGridFunction& dist, const std::vector<Point>& cs);
 
 int main(int, char**)
 {
@@ -66,7 +66,7 @@ int main(int, char**)
   phi2.load("Phi_2.gf");
   phi3.load("Phi_3.gf");
 
-  Math::Matrix<Scalar> aniso(3, 3);
+  Math::Matrix<Real> aniso(3, 3);
   {
     P1 h1d1s(D1);
     GridFunction integ(h1d1s);
@@ -116,12 +116,12 @@ int main(int, char**)
   D1.save("miaow.mesh", IO::FileFormat::MEDIT);
   phi1.save("miaow.sol", IO::FileFormat::MEDIT);
 
-  Threads::getGlobalThreadPool().reset(6);
+  // Threads::getGlobalThreadPool().reset(6);
 
-  Scalar hmax = 0.3;
-  Scalar hmin = hmax / 10.0;
-  Scalar hausd = 0.5 * hmin;
-  Scalar hgrad = 1.2;
+  Real hmax = 0.3;
+  Real hmin = hmax / 10.0;
+  Real hausd = 0.5 * hmin;
+  Real hgrad = 1.2;
 
   // Alert::Info() << "Initializing clamp region..." << Alert::Raise;
   // {
@@ -197,7 +197,7 @@ int main(int, char**)
   std::ofstream fObj("obj.txt");
   size_t i = 0;
   size_t regionCount;
-  Scalar objective = 0, oldObjective = 9999;
+  Real objective = 0, oldObjective = 9999;
   while (i < maxIt)
   {
     bool topologicalStep = i < 100 && ((i % 10) == 0 || ((i - 1) % 10 == 0));
@@ -209,8 +209,8 @@ int main(int, char**)
     hausd = 0.5 * hmin;
     hgrad = 1.2;
 
-    const Scalar k = 0.5 * (hmax + hmin);
-    const Scalar dt = 0.05 * alpha * k;
+    const Real k = 0.5 * (hmax + hmin);
+    const Real dt = 0.05 * alpha * k;
 
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
                   << "HMax:      " << Alert::Notation(hmax)     << Alert::NewLine
@@ -256,9 +256,9 @@ int main(int, char**)
     dOmega.save("dOmega.mesh", IO::FileFormat::MEDIT);
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
-    ScalarFES sfes(mesh);
+    RealFES sfes(mesh);
     VectorFES vfes(mesh, mesh.getSpaceDimension());
-    ScalarFES dsfes(dOmega);
+    RealFES dsfes(dOmega);
     VectorFES dvfes(dOmega, dOmega.getSpaceDimension());
 
     Alert::Info() << "Distancing clamp and locator domains..." << Alert::Raise;
@@ -272,7 +272,7 @@ int main(int, char**)
     Solver::CG cg;
 
     // Parameters
-    const Scalar lambda = 0.5769, mu = 0.3846;
+    const Real lambda = 0.5769, mu = 0.3846;
 
     // VectorFunction f{0, -1, 0}; // Locator
     auto f = -BoundaryNormal(mesh);
@@ -283,7 +283,7 @@ int main(int, char**)
     nnn.getFiniteElementSpace().getMesh().save("nnn.mesh");
 
     // Bump function
-    auto h = [](Scalar r)
+    auto h = [](Real r)
     {
       if (r < -1.0)
         return 1.0;
@@ -293,7 +293,7 @@ int main(int, char**)
         return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
     };
 
-    ScalarFunction heClamp =
+    RealFunction heClamp =
       [&](const Geometry::Point& p) { return h(distClamp(p) / epsilon) / epsilon; };
 
     Alert::Info() << "Solving state equation..." << Alert::Raise;
@@ -330,16 +330,16 @@ int main(int, char**)
     mesh.save("p.mesh");
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
-    ScalarGridFunction j(sfes);
+    RealGridFunction j(sfes);
     j = Frobenius(u.getSolution()) / mesh.getVolume();
     j.setWeights();
     if (i > 0)
       oldObjective = objective;
 
 
-    const Scalar J = Integral(j).compute();
-    const Scalar pLocator = ellLocator * mesh.getPerimeter(Locator);
-    const Scalar pClamp = ellClamp * mesh.getPerimeter(Clamp);
+    const Real J = Integral(j).compute();
+    const Real pLocator = ellLocator * mesh.getPerimeter(Locator);
+    const Real pClamp = ellClamp * mesh.getPerimeter(Clamp);
     objective = J + pClamp + pLocator;
 
     Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::NewLine
@@ -380,13 +380,13 @@ int main(int, char**)
       dsfes.getMesh().save("Topo.mesh");
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
-      const Scalar tc = s.getSolution().max();
+      const Real tc = s.getSolution().max();
       std::vector<Point> cs;
       for (auto it = dOmega.getVertex(); !it.end(); ++it)
       {
         const Point p(*it, it->getTransformation(),
             Polytope::getVertex(0, Polytope::Type::Point), it->getCoordinates());
-        const Scalar tp = s.getSolution()(p);
+        const Real tp = s.getSolution()(p);
         if (tp > 0 && (tp / tc) > (1 - 1e-12))
         {
           cs.emplace_back(std::move(p));
@@ -532,7 +532,7 @@ size_t rmc(MeshBase& mesh)
 
   for (const auto& cc : ccl)
   {
-    Scalar area = 0;
+    Real area = 0;
     for (const Index i : cc)
       area += mesh.getFace(i)->getMeasure();
     if ((area / per) < 1e-5)
@@ -549,17 +549,17 @@ size_t rmc(MeshBase& mesh)
   return ccs;
 }
 
-void holes(ScalarGridFunction& dist, const std::vector<Point>& cs)
+void holes(RealGridFunction& dist, const std::vector<Point>& cs)
 {
   if (cs.size())
   {
     auto insert =
       [&](const Point& v)
       {
-        Scalar d = dist(v);
+        Real d = dist(v);
         for (const auto& c : cs)
         {
-          const Scalar dd = (v - c).norm() - radius;
+          const Real dd = (v - c).norm() - radius;
           d = std::min(d, dd);
         }
         return d;

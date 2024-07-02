@@ -204,7 +204,7 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
       t += std::min(dt, experiment.T - t);
     }
 
-    auto phit = ScalarFunction(
+    auto phit = RealFunction(
         [&](const Point& p) { return phi(t, p, experiment.azimuth); });
 
     // Compute L2 error

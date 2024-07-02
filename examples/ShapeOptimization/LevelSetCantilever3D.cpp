@@ -35,14 +35,14 @@ static double hmax = 0.1;
 static double hmin = 0.1 * hmax;
 static double hausd = 0.5 * hmin;
 static size_t hmaxIt = maxIt / 2;
-const Scalar k = 1;
-const Scalar dt = k * (hmax - hmin);
+const Real k = 1;
+const Real dt = k * (hmax - hmin);
 static double alpha = dt;
 
 using FES = VectorP1<Mesh<Context::Sequential>>;
 
 // Compliance
-inline Scalar compliance(const GridFunction<FES>& w)
+inline Real compliance(const GridFunction<FES>& w)
 {
   auto& vh = w.getFiniteElementSpace();
   TrialFunction u(vh);

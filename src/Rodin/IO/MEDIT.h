@@ -27,7 +27,7 @@ namespace Rodin::IO::MEDIT
 {
   enum SolutionType
   {
-    Scalar = 1,
+    Real = 1,
     Vector = 2,
     Tensor = 3
   };
@@ -273,7 +273,7 @@ namespace Rodin::IO::MEDIT
     public:
       struct Data
       {
-        Math::Vector<Rodin::Scalar> vertex;
+        Math::Vector<Rodin::Real> vertex;
         Geometry::Attribute attribute;
       };
 
@@ -292,7 +292,7 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         size_t i = 0;
-        Data res{ Math::Vector<Rodin::Scalar>(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
+        Data res{ Math::Vector<Rodin::Real>(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
         const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
         const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
         const auto p = double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];
@@ -676,7 +676,7 @@ namespace Rodin::IO
         os << MEDIT::Keyword::SolAtVertices << '\n'
            << mesh.getVertexCount() << '\n'
            << 1 // Only one solution
-           << " " << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Scalar)
+           << " " << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Real)
            << '\n';
 
         if constexpr (Utility::IsSpecialization<FES, Variational::P1>::Value)

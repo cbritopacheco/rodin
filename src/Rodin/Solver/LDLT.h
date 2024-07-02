@@ -21,7 +21,7 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD for LDLT
    */
-  LDLT() -> LDLT<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
+  LDLT() -> LDLT<Math::Matrix<Real>, Math::Vector<Real>>;
 
   /**
    * @defgroup LDLTSpecializations LDLT Template Specializations
@@ -32,18 +32,18 @@ namespace Rodin::Solver
   /**
    * @ingroup LDLTSpecializations
    * @brief A direct sparse LDLT Cholesky factorizations without square root
-   * for use with Math::SparseMatrix<Scalar> and Math::Vector<Scalar>.
+   * for use with Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
   template <>
-  class LDLT<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>>
+  class LDLT<Math::Matrix<Real>, Math::Vector<Real>> final
+    : public SolverBase<Math::Matrix<Real>, Math::Vector<Real>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::Matrix<Scalar>;
+      using OperatorType = Math::Matrix<Real>;
 
       /// Type of vector
-      using VectorType = Math::Vector<Scalar>;
+      using VectorType = Math::Vector<Real>;
 
       /**
        * @brief Constructs the LDLT object with default parameters.
@@ -65,7 +65,7 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::LDLT<Math::Matrix<Scalar>> m_solver;
+      Eigen::LDLT<Math::Matrix<Real>> m_solver;
   };
 
 }

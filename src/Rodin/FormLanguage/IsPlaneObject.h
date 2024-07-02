@@ -23,10 +23,4 @@ namespace Rodin::FormLanguage
   {
     static constexpr const bool Value = std::is_base_of_v<Eigen::PlainObjectBase<Derived>, Derived>;
   };
-
-  template <class T>
-  struct IsPlainObject<Variational::TensorBasis<T>>
-  {
-    static constexpr const bool Value = IsPlainObject<T>::Value;
-  };
 }

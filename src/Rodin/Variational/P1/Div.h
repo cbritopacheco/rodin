@@ -77,14 +77,14 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::Vector<Scalar>& out, const Geometry::Point& p) const
+      void interpolate(Math::Vector<Real>& out, const Geometry::Point& p) const
       {
-        Math::SpatialVector<Scalar> tmp;
+        Math::SpatialVector<Real> tmp;
         interpolate(tmp, p);
         out = std::move(tmp);
       }
 
-      void interpolate(Scalar& out, const Geometry::Point& p) const
+      void interpolate(Real& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -100,7 +100,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
+            const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -125,7 +125,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
+                  const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;
@@ -145,7 +145,7 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialMatrix<Scalar> jacobian(vdim, d);
+          Math::SpatialMatrix<Real> jacobian(vdim, d);
           out = 0;
           for (size_t local = 0; local < fe.getCount(); local++)
           {
@@ -173,10 +173,10 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
   class Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Mesh>, Space>>>
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Real>, Mesh>, Space>>>
   {
     public:
-      using FESType = P1<Math::Vector<Scalar>, Mesh>;
+      using FESType = P1<Math::Vector<Real>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;

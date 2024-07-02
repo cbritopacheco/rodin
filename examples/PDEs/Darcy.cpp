@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 
   Solver::CG cg;
 
-  ScalarFunction f = [](const Geometry::Point& p) { return -exp(p.x()) * sin(p.y()); };
+  RealFunction f = [](const Geometry::Point& p) { return -exp(p.x()) * sin(p.y()); };
 
   auto n = BoundaryNormal(mesh);
 

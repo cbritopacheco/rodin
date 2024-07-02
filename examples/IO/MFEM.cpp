@@ -23,7 +23,7 @@ int main(int, char** argv)
   P1 fes(mesh);
   GridFunction gf(fes);
 
-  ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+  RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
   gf.project(c);
 
   mesh.save("miaow.mesh");

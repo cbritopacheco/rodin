@@ -56,7 +56,7 @@ namespace Rodin::Variational
 
   /**
    * @ingroup P1Specializations
-   * @brief Scalar valued Lagrange finite element space
+   * @brief Real valued Lagrange finite element space
    *
    * Represents the finite element space composed of scalar valued continuous,
    * piecewise linear functions:
@@ -65,7 +65,7 @@ namespace Rodin::Variational
    * @f]
    *
    * This class is scalar valued, i.e. evaluations of the function are of
-   * Rodin::Scalar type.
+   * Rodin::Real type.
    */
   template <class Number>
   class P1<Number, Geometry::Mesh<Context::Sequential>> final
@@ -109,7 +109,7 @@ namespace Rodin::Variational
           Mapping(const Mapping&) = default;
 
           inline
-          auto operator()(const Math::SpatialVector<Scalar>& r) const
+          auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, m_trans.get(), r);
             return getFunction()(p);
@@ -279,11 +279,11 @@ namespace Rodin::Variational
   };
 
   template <class Context>
-  P1(const Geometry::Mesh<Context>&) -> P1<Scalar, Geometry::Mesh<Context>>;
+  P1(const Geometry::Mesh<Context>&) -> P1<Real, Geometry::Mesh<Context>>;
 
   /// Alias for a scalar valued P1 finite element space
   template <class Mesh>
-  using ScalarP1 = P1<Scalar, Mesh>;
+  using RealP1 = P1<Real, Mesh>;
 
   template <class Mesh>
   using ComplexP1 = P1<Complex, Mesh>;
@@ -299,18 +299,18 @@ namespace Rodin::Variational
    * @f]
    *
    * This class is vector valued, i.e. evaluations of the function are of
-   * Math::Vector<Scalar> type.
+   * Math::Vector<Real> type.
    */
   template <>
-  class P1<Math::Vector<Scalar>, Geometry::Mesh<Context::Sequential>> final
-    : public FiniteElementSpace<P1<Math::Vector<Scalar>, Geometry::Mesh<Context::Sequential>>>
+  class P1<Math::Vector<Real>, Geometry::Mesh<Context::Sequential>> final
+    : public FiniteElementSpace<P1<Math::Vector<Real>, Geometry::Mesh<Context::Sequential>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
     using IndexMap = FlatMap<Index, Index>;
 
     public:
-      using NumberType = Scalar;
+      using NumberType = Real;
 
       /// Range type of value
       using RangeType = Math::Vector<NumberType>;
@@ -340,7 +340,7 @@ namespace Rodin::Variational
           Mapping(const Mapping&) = default;
 
           inline
-          auto operator()(const Math::SpatialVector<Scalar>& r) const
+          auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, m_trans.get(), r);
             return getFunction()(p);
@@ -477,11 +477,11 @@ namespace Rodin::Variational
 
   template <class Context>
   P1(const Geometry::Mesh<Context>&, size_t)
-    -> P1<Math::Vector<Scalar>, Geometry::Mesh<Context>>;
+    -> P1<Math::Vector<Real>, Geometry::Mesh<Context>>;
 
   /// Alias for a vector valued P1 finite element space
   template <class Mesh>
-  using VectorP1 = P1<Math::Vector<Scalar>, Mesh>;
+  using VectorP1 = P1<Math::Vector<Real>, Mesh>;
 
   namespace Internal
   {

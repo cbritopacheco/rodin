@@ -7,7 +7,7 @@
 #ifndef RODIN_VARIATIONAL_F_H
 #define RODIN_VARIATIONAL_F_H
 
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 /**
  * @brief Contains built-in functions.
@@ -23,7 +23,7 @@ namespace Rodin::Variational::F
    *   f(x_1, \cdots, x_d) = x_1 \: .
    * @f]
    */
-  static ScalarFunction x([](const Geometry::Point& p) { return p.x(); });
+  static RealFunction x([](const Geometry::Point& p) { return p.x(); });
 
   /**
    * @brief Represents the first coordinate of the point.
@@ -34,7 +34,7 @@ namespace Rodin::Variational::F
    *   f(x_1, \cdots, x_d) = x_2 \: .
    * @f]
    */
-  static ScalarFunction y([](const Geometry::Point& p) { return p.y(); });
+  static RealFunction y([](const Geometry::Point& p) { return p.y(); });
 
   /**
    * @brief Represents the first coordinate of the point.
@@ -45,7 +45,7 @@ namespace Rodin::Variational::F
    *   f(x_1, \cdots, x_d) = x_3 \: .
    * @f]
    */
-  static ScalarFunction z([](const Geometry::Point& p) { return p.z(); });
+  static RealFunction z([](const Geometry::Point& p) { return p.z(); });
 }
 
 #endif

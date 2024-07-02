@@ -3,7 +3,7 @@
 
 #include "ForwardDecls.h"
 
-template <class ScalarFunction, class OutputMesh>
+template <class RealFunction, class OutputMesh>
 class MarchingTriangles;
 
 #endif

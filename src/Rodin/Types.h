@@ -35,10 +35,10 @@ namespace Rodin
   using Index = std::size_t;
 
   /// Standard type for representing scalar values.
-  using Scalar = Double;
+  using Real = Double;
 
   /// Standard type for representing complex values.
-  using Complex = std::complex<Scalar>;
+  using Complex = std::complex<Real>;
 
   template <class T>
   using List = boost::container::list<T>;

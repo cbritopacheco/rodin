@@ -50,11 +50,11 @@ namespace Rodin::Models::Distance
           const FES& fes) const
       {
         using RangeType = typename FormLanguage::Traits<FES>::RangeType;
-        static_assert(std::is_same_v<RangeType, Scalar>);
-        static_assert(std::numeric_limits<Scalar>::has_infinity);
+        static_assert(std::is_same_v<RangeType, Real>);
+        static_assert(std::numeric_limits<Real>::has_infinity);
         Variational::GridFunction u(fes);
         std::vector<Label>  labels(fes.getSize(), Label::Far);
-        u = std::numeric_limits<Scalar>::infinity();
+        u = std::numeric_limits<Real>::infinity();
         const auto& mesh = fes.getMesh();
         const auto& meshDim = mesh.getDimension();
         FlatSet<Index> considered;

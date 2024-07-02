@@ -89,9 +89,9 @@ namespace Rodin::Geometry
     return m_mesh.get().getPolytopeTransformation(m_dimension, m_index);
   }
 
-  Scalar Polytope::getMeasure() const
+  Real Polytope::getMeasure() const
   {
-    Scalar res = 0;
+    Real res = 0;
     QF::GenericPolytopeQuadrature qf(getTransformation().getJacobianOrder(), getGeometry());
     for (size_t i = 0; i < qf.getSize(); i++)
     {
@@ -141,7 +141,7 @@ namespace Rodin::Geometry
     : Polytope(0, index, mesh)
   {}
 
-  Eigen::Map<const Math::SpatialVector<Scalar>> Vertex::getCoordinates() const
+  Eigen::Map<const Math::SpatialVector<Real>> Vertex::getCoordinates() const
   {
     return getMesh().getVertexCoordinates(getIndex());
   }

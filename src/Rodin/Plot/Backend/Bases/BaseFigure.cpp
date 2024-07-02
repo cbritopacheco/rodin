@@ -120,23 +120,23 @@ namespace Rodin::Plot::Backend::Bases
     return true;
   }
 
-  Magnum::Math::Vector<Scalar>2<int> BaseFigure::getFrameBufferSize() const
+  Magnum::Math::Vector<Real>2<int> BaseFigure::getFrameBufferSize() const
   {
-   Magnum::Math::Vector<Scalar>2<int> size;
+   Magnum::Math::Vector<Real>2<int> size;
    SDL_GL_GetDrawableSize(m_window, &size.x(), &size.y());
    return size;
   }
 
-  Magnum::Math::Vector<Scalar>2<int> BaseFigure::getWindowSize() const
+  Magnum::Math::Vector<Real>2<int> BaseFigure::getWindowSize() const
   {
-   Magnum::Math::Vector<Scalar>2<int> size;
+   Magnum::Math::Vector<Real>2<int> size;
    SDL_GetWindowSize(m_window, &size.x(), &size.y());
    return size;
   }
 
-  Magnum::Math::Vector<Scalar>2<float> BaseFigure::getDPIScaling() const
+  Magnum::Math::Vector<Real>2<float> BaseFigure::getDPIScaling() const
   {
-   Magnum::Math::Vector<Scalar>2<float> dpi;
+   Magnum::Math::Vector<Real>2<float> dpi;
    if(SDL_GetDisplayDPI(0, nullptr, &dpi.x(), &dpi.y()) == 0)
    {
     return dpi;

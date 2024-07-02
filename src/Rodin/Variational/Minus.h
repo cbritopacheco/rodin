@@ -17,7 +17,7 @@ namespace Rodin::Variational
   auto
   operator-(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
-    return Sum(lhs, UnaryMinus(ScalarFunction(rhs)));
+    return Sum(lhs, UnaryMinus(RealFunction(rhs)));
   }
 
   template <class Number, class RHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
@@ -26,7 +26,7 @@ namespace Rodin::Variational
   auto
   operator-(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return Sum(ScalarFunction(lhs), UnaryMinus(rhs));
+    return Sum(RealFunction(lhs), UnaryMinus(rhs));
   }
 
   template <class LHSDerived, class RHSDerived>

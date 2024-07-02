@@ -43,10 +43,10 @@ namespace Rodin::Solver
       virtual void solve(OperatorType& A, VectorType& x, VectorType& b) = 0;
   };
 
-  class SparseSolver : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  class SparseSolver : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
   {};
 
-  class DenseSolver : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>>
+  class DenseSolver : public SolverBase<Math::Matrix<Real>, Math::Vector<Real>>
   {};
 }
 

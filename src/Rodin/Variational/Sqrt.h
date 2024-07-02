@@ -10,7 +10,7 @@
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -25,12 +25,12 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class Sqrt<FunctionBase<NestedDerived>> final
-    : public ScalarFunctionBase<Sqrt<FunctionBase<NestedDerived>>>
+    : public RealFunctionBase<Sqrt<FunctionBase<NestedDerived>>>
   {
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
-      using Parent = ScalarFunctionBase<Sqrt<FunctionBase<NestedDerived>>>;
+      using Parent = RealFunctionBase<Sqrt<FunctionBase<NestedDerived>>>;
 
       Sqrt(const OperandType& v)
         : m_v(v.copy())
@@ -57,7 +57,7 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point& p) const
       {
-        return std::sqrt(static_cast<Scalar>(getOperand().getValue(p)));
+        return std::sqrt(static_cast<Real>(getOperand().getValue(p)));
       }
 
       inline

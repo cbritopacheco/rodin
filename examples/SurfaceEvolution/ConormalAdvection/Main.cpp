@@ -10,10 +10,10 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
-constexpr Scalar T = M_PI / 2 - 0.1;
-constexpr Scalar dt = 1;
-constexpr Scalar hmax = 1;
-constexpr Scalar hmin = 0.1 * hmax;
+constexpr Real T = M_PI / 2 - 0.1;
+constexpr Real dt = 1;
+constexpr Real hmax = 1;
+constexpr Real hmin = 0.1 * hmax;
 constexpr size_t maxIt = 100;
 constexpr Geometry::Attribute sphereCap = 3;
 constexpr char meshFile[] =
@@ -27,7 +27,7 @@ int main()
 
   // Evolution
   size_t i = 0;
-  Scalar t = 0;
+  Real t = 0;
   while (true)
   {
     if (i == 0)

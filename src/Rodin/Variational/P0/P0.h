@@ -56,7 +56,7 @@ namespace Rodin::Variational
 
   /**
    * @ingroup P0Specializations
-   * @brief Scalar valued Lagrange finite element space
+   * @brief Real valued Lagrange finite element space
    *
    * Represents the finite element space composed of scalar valued continuous,
    * piecewise linear functions:
@@ -65,7 +65,7 @@ namespace Rodin::Variational
    * @f]
    *
    * This class is scalar valued, i.e. evaluations of the function are of
-   * Rodin::Scalar type.
+   * Rodin::Real type.
    */
   template <class Number>
   class P0<Number, Geometry::Mesh<Context::Sequential>> final
@@ -109,7 +109,7 @@ namespace Rodin::Variational
           Mapping(const Mapping&) = default;
 
           inline
-          auto operator()(const Math::SpatialVector<Scalar>& r) const
+          auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, m_trans.get(), r);
             return getFunction()(p);
@@ -286,10 +286,10 @@ namespace Rodin::Variational
   };
 
   template <class Context>
-  P0(const Geometry::Mesh<Context>&) -> P0<Scalar, Geometry::Mesh<Context>>;
+  P0(const Geometry::Mesh<Context>&) -> P0<Real, Geometry::Mesh<Context>>;
 
   template <class Mesh>
-  using ScalarP0 = P0<Scalar, Mesh>;
+  using RealP0 = P0<Real, Mesh>;
 
   template <class Mesh>
   using ComplexP0 = P0<Complex, Mesh>;
