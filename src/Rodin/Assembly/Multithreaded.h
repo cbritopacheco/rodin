@@ -8,7 +8,8 @@
 #define RODIN_ASSEMBLY_MULTITHREADED_H
 
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Math/Kernels.h"
+
+#include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "Rodin/Threads/Mutex.h"
@@ -63,11 +64,14 @@ namespace Rodin::Assembly
 
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType =
+        Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
 
-      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+      using LocalBilinearFormIntegratorBaseType =
+        Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
+      using GlobalBilinearFormIntegratorBaseType =
+        Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -293,7 +297,7 @@ namespace Rodin::Assembly
   template <class TrialFES, class TestFES>
   class Multithreaded<
     Math::SparseMatrix<Real>,
-    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>>
+    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>> final
     : public AssemblyBase<
         Math::SparseMatrix<Real>,
         Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>>
@@ -359,7 +363,9 @@ namespace Rodin::Assembly
       }
 
     private:
-      Multithreaded<OperatorType, BilinearFormType> m_assembly;
+      Multithreaded<
+        std::vector<Eigen::Triplet<ScalarType>>,
+        Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<ScalarType>>>> m_assembly;
   };
 
   template <class TrialFES, class TestFES>
