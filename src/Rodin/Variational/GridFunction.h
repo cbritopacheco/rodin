@@ -47,7 +47,7 @@ namespace Rodin::FormLanguage
     using RangeType = typename Traits<FESType>::RangeType;
     using ElementType = typename Traits<FESType>::ElementType;
     using ContextType = typename Traits<FESType>::ContextType;
-    using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 }
 
@@ -86,7 +86,7 @@ namespace Rodin::Variational
     public:
       using FESType = FES;
 
-      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// Range type of value
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;

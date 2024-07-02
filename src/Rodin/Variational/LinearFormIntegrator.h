@@ -22,7 +22,7 @@ namespace Rodin::Variational
   class LinearFormIntegratorBase : public Integrator
   {
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
       using Parent = Integrator;
 
@@ -109,7 +109,7 @@ namespace Rodin::Variational
 
       virtual LinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
-      virtual NumberType integrate(size_t local) = 0;
+      virtual ScalarType integrate(size_t local) = 0;
 
       virtual
       LinearFormIntegratorBase* copy() const noexcept override = 0;

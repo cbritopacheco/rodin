@@ -20,9 +20,9 @@ namespace Rodin::FormLanguage
 
     using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-    using NumberType = typename FormLanguage::Traits<OperandRangeType>::NumberType;
+    using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
-    using RangeType = NumberType;
+    using RangeType = ScalarType;
   };
 }
 
@@ -41,9 +41,9 @@ namespace Rodin::Variational
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-      using NumberType = typename FormLanguage::Traits<OperandRangeType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
-      using RangeType = NumberType;
+      using RangeType = ScalarType;
 
       using Parent = RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>;
 
@@ -111,9 +111,9 @@ namespace Rodin::Variational
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-      using NumberType = typename FormLanguage::Traits<OperandRangeType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
-      using RangeType = NumberType;
+      using RangeType = ScalarType;
 
       using Parent = RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>;
 
@@ -181,9 +181,9 @@ namespace Rodin::Variational
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-      using NumberType = typename FormLanguage::Traits<OperandRangeType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
-      using RangeType = NumberType;
+      using RangeType = ScalarType;
 
       using Parent = RealFunctionBase<Component<OperandType>>;
 
@@ -257,13 +257,13 @@ namespace Rodin::Variational
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-      using NumberType = typename FormLanguage::Traits<OperandRangeType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
-      using RangeType = NumberType;
+      using RangeType = ScalarType;
 
       using Parent = ShapeFunctionBase<Component<OperandType>>;
 
-      static_assert(std::is_same_v<OperandRangeType, Math::Vector<NumberType>>);
+      static_assert(std::is_same_v<OperandRangeType, Math::Vector<ScalarType>>);
 
       /**
        * @brief Constructs the component object from a TrialFunction and its

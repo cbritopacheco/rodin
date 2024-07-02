@@ -32,11 +32,11 @@ namespace Rodin::Variational
   class NumberFunctionBase : public FunctionBase<NumberFunctionBase<Number, Derived>>
   {
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
-      using RangeType = NumberType;
+      using RangeType = ScalarType;
 
-      using Parent = FunctionBase<NumberFunctionBase<NumberType, Derived>>;
+      using Parent = FunctionBase<NumberFunctionBase<ScalarType, Derived>>;
 
       using Parent::traceOf;
 

@@ -22,8 +22,8 @@ namespace Rodin::Math
   /**
    * @brief Dense scalar valued matrix type.
    */
-  template <class NumberType>
-  using Matrix = Eigen::Matrix<NumberType, Eigen::Dynamic, Eigen::Dynamic>;
+  template <class ScalarType>
+  using Matrix = Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic>;
 
   using RealMatrix = Matrix<Real>;
 
@@ -35,8 +35,8 @@ namespace Rodin::Math
   /**
    * @brief Spatial matrix
    */
-  template <class NumberType>
-  using SpatialMatrix = Eigen::Matrix<NumberType, Eigen::Dynamic, Eigen::Dynamic, 0,
+  template <class ScalarType>
+  using SpatialMatrix = Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, 0,
         RODIN_MAXIMAL_SPACE_DIMENSION, RODIN_MAXIMAL_SPACE_DIMENSION>;
 
   /**
@@ -48,8 +48,8 @@ namespace Rodin::Math
   /**
    * @brief Represents a fixed size matrix
    */
-  template <class NumberType, size_t Rows, size_t Cols>
-  using FixedSizeMatrix = Eigen::Matrix<NumberType, Rows, Cols>;
+  template <class ScalarType, size_t Rows, size_t Cols>
+  using FixedSizeMatrix = Eigen::Matrix<ScalarType, Rows, Cols>;
 }
 
 namespace Rodin::FormLanguage
@@ -57,13 +57,13 @@ namespace Rodin::FormLanguage
   template <class Number>
   struct Traits<Math::Matrix<Number>>
   {
-    using NumberType = Number;
+    using ScalarType = Number;
   };
 
   template <class Number>
   struct Traits<Math::SpatialMatrix<Number>>
   {
-    using NumberType = Number;
+    using ScalarType = Number;
   };
 }
 

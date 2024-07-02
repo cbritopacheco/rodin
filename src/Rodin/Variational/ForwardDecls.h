@@ -45,7 +45,7 @@ namespace Rodin::Variational
    * An instance of LinearFormIntegratorBase performs the assembly of the
    * element vector for each finite element.
    */
-  template <class NumberType>
+  template <class ScalarType>
   class LinearFormIntegratorBase;
 
   /**

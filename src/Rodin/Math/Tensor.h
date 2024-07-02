@@ -18,15 +18,15 @@ namespace Rodin::Math
    * @brief Dense tensor type.
    * @tparam Rank Rank of tensor.
    */
-  template <class NumberType, size_t Rank>
-  using Tensor = Eigen::Tensor<NumberType, Rank>;
+  template <class ScalarType, size_t Rank>
+  using Tensor = Eigen::Tensor<ScalarType, Rank>;
 
   /**
    * @brief Gets the tank of a tensor.
    */
-  template <class NumberType, auto Rank>
+  template <class ScalarType, auto Rank>
   constexpr
-  auto rank(const Tensor<NumberType, Rank>& tensor)
+  auto rank(const Tensor<ScalarType, Rank>& tensor)
   {
     return Rank;
   }
@@ -34,21 +34,21 @@ namespace Rodin::Math
   template <class T, size_t Dim>
   class Slice;
 
-  template <class NumberType, size_t Dim>
-  class Slice<const Tensor<NumberType, 3>, Dim>
+  template <class ScalarType, size_t Dim>
+  class Slice<const Tensor<ScalarType, 3>, Dim>
   {};
 
-  template <class NumberType>
-  class Slice<const Tensor<NumberType, 3>, 0>
-    : public Eigen::Map<const Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+  template <class ScalarType>
+  class Slice<const Tensor<ScalarType, 3>, 0>
+    : public Eigen::Map<const Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<const Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<const Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
-      Slice(const Tensor<NumberType, 3>& tensor, size_t offset)
+      Slice(const Tensor<ScalarType, 3>& tensor, size_t offset)
         : Parent(tensor.data() + offset, tensor.dimension(1), tensor.dimension(2),
             { tensor.dimension(0) * tensor.dimension(1), tensor.dimension(0) })
       {}
@@ -62,17 +62,17 @@ namespace Rodin::Math
       {}
   };
 
-  template <class NumberType>
-  class Slice<const Tensor<NumberType, 3>, 1>
-    : public Eigen::Map<const Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+  template <class ScalarType>
+  class Slice<const Tensor<ScalarType, 3>, 1>
+    : public Eigen::Map<const Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<const Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<const Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
-      Slice(const Tensor<NumberType, 3>& tensor, size_t offset)
+      Slice(const Tensor<ScalarType, 3>& tensor, size_t offset)
         : Parent(tensor.data() + offset * tensor.dimension(0), tensor.dimension(0), tensor.dimension(2),
             { tensor.dimension(0) * tensor.dimension(1), 1 })
       {}
@@ -86,17 +86,17 @@ namespace Rodin::Math
       {}
   };
 
-  template <class NumberType>
-  class Slice<const Tensor<NumberType, 3>, 2>
-    : public Eigen::Map<const Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+  template <class ScalarType>
+  class Slice<const Tensor<ScalarType, 3>, 2>
+    : public Eigen::Map<const Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<const Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<const Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
-      Slice(const Tensor<NumberType, 3>& tensor, size_t offset)
+      Slice(const Tensor<ScalarType, 3>& tensor, size_t offset)
         : Parent(tensor.data() + offset * tensor.dimension(0) * tensor.dimension(1),
             tensor.dimension(0), tensor.dimension(1), { tensor.dimension(0), 1 })
       {}
@@ -110,17 +110,17 @@ namespace Rodin::Math
       {}
   };
 
-  template <class NumberType>
-  class Slice<Tensor<NumberType, 3>, 0>
-    : public Eigen::Map<Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+  template <class ScalarType>
+  class Slice<Tensor<ScalarType, 3>, 0>
+    : public Eigen::Map<Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
-      Slice(Tensor<NumberType, 3>& tensor, size_t offset)
+      Slice(Tensor<ScalarType, 3>& tensor, size_t offset)
         : Parent(tensor.data() + offset, tensor.dimension(1), tensor.dimension(2),
             { tensor.dimension(0) * tensor.dimension(1), tensor.dimension(0) })
       {}
@@ -134,17 +134,17 @@ namespace Rodin::Math
       {}
   };
 
-  template <class NumberType>
-  class Slice<Tensor<NumberType, 3>, 1>
-    : public Eigen::Map<Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+  template <class ScalarType>
+  class Slice<Tensor<ScalarType, 3>, 1>
+    : public Eigen::Map<Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
-      Slice(Tensor<NumberType, 3>& tensor, size_t offset)
+      Slice(Tensor<ScalarType, 3>& tensor, size_t offset)
         : Parent(tensor.data() + offset * tensor.dimension(0), tensor.dimension(0), tensor.dimension(2),
             { tensor.dimension(0) * tensor.dimension(1), 1 })
       {}
@@ -158,17 +158,17 @@ namespace Rodin::Math
       {}
   };
 
-  template <class NumberType>
-  class Slice<Tensor<NumberType, 3>, 2>
-    : public Eigen::Map<Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+  template <class ScalarType>
+  class Slice<Tensor<ScalarType, 3>, 2>
+    : public Eigen::Map<Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
   {
     public:
       using Parent =
-        Eigen::Map<Math::Matrix<NumberType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
+        Eigen::Map<Math::Matrix<ScalarType>, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>;
 
       using Parent::operator=;
 
-      Slice(Tensor<NumberType, 3>& tensor, size_t offset)
+      Slice(Tensor<ScalarType, 3>& tensor, size_t offset)
         : Parent(tensor.data() + offset * tensor.dimension(0) * tensor.dimension(1),
             tensor.dimension(0), tensor.dimension(1), { tensor.dimension(0), 1 })
       {}

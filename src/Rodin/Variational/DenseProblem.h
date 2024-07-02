@@ -47,23 +47,23 @@ namespace Rodin::Variational
   template <class TrialFES, class TestFES>
   class DenseProblem<
     TrialFES, TestFES,
-    Math::Matrix<typename FormLanguage::Traits<TrialFES>::NumberType>,
-    Math::Vector<typename FormLanguage::Traits<TestFES>::NumberType>>
+    Math::Matrix<typename FormLanguage::Traits<TrialFES>::ScalarType>,
+    Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
     : public ProblemBase<
-        Math::Matrix<typename FormLanguage::Traits<TrialFES>::NumberType>,
-        Math::Vector<typename FormLanguage::Traits<TestFES>::NumberType>>
+        Math::Matrix<typename FormLanguage::Traits<TrialFES>::ScalarType>,
+        Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
   {
     public:
-      using TrialFESNumberType =
-        typename FormLanguage::Traits<TrialFES>::NumberType;
+      using TrialFESScalarType =
+        typename FormLanguage::Traits<TrialFES>::ScalarType;
 
-      using TestFESNumberType =
-        typename FormLanguage::Traits<TestFES>::NumberType;
+      using TestFESScalarType =
+        typename FormLanguage::Traits<TestFES>::ScalarType;
 
-      using OperatorNumberType =
-        decltype(std::declval<TrialFESNumberType>() * std::declval<TestFESNumberType>());
+      using OperatorScalarType =
+        decltype(std::declval<TrialFESScalarType>() * std::declval<TestFESScalarType>());
 
-      using VectorNumberType = TestFESNumberType;
+      using VectorScalarType = TestFESScalarType;
 
       using ContextType = Context::Sequential;
 
@@ -71,7 +71,7 @@ namespace Rodin::Variational
 
       using VectorType = Math::Vector<Real>;
 
-      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESNumberType>;
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESScalarType>;
 
       using Parent = ProblemBase<Math::Matrix<Real>, Math::Vector<Real>>;
 

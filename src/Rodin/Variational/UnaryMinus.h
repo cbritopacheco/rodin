@@ -253,11 +253,11 @@ namespace Rodin::Variational
     : public LinearFormIntegratorBase<Number>
   {
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
-      using OperandType = LinearFormIntegratorBase<NumberType>;
+      using OperandType = LinearFormIntegratorBase<ScalarType>;
 
-      using Parent = LinearFormIntegratorBase<NumberType>;
+      using Parent = LinearFormIntegratorBase<ScalarType>;
 
       UnaryMinus(const OperandType& op)
         : Parent(op),
@@ -297,7 +297,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      NumberType integrate(size_t local) override
+      ScalarType integrate(size_t local) override
       {
         return -m_op->integrate(local);
       }
@@ -326,7 +326,7 @@ namespace Rodin::Variational
     : public FormLanguage::List<LinearFormIntegratorBase<Number>>
   {
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
       using LinearFormIntegratorBaseType = LinearFormIntegratorBase<Number>;
 
@@ -370,11 +370,11 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<Number>
   {
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
-      using OperandType = LocalBilinearFormIntegratorBase<NumberType>;
+      using OperandType = LocalBilinearFormIntegratorBase<ScalarType>;
 
-      using Parent = LocalBilinearFormIntegratorBase<NumberType>;
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       UnaryMinus(const OperandType& op)
         : Parent(op),
@@ -414,7 +414,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      NumberType integrate(size_t tr, size_t te) override
+      ScalarType integrate(size_t tr, size_t te) override
       {
         return -m_op->integrate(tr, te);
       }
@@ -446,10 +446,10 @@ namespace Rodin::Variational
     : public FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>
   {
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
       using LocalBilinearFormIntegratorBaseType =
-        LocalBilinearFormIntegratorBase<NumberType>;
+        LocalBilinearFormIntegratorBase<ScalarType>;
 
       using OperandType =
         FormLanguage::List<LocalBilinearFormIntegratorBaseType>;

@@ -29,7 +29,7 @@ namespace Rodin::FormLanguage
   template <class LHS, class RHSDerived>
   struct Traits<Variational::Potential<LHS, Variational::FunctionBase<RHSDerived>>>
   {
-    using NumberType = Real;
+    using ScalarType = Real;
 
     using LHSType = LHS;
 
@@ -45,15 +45,15 @@ namespace Rodin::FormLanguage
     using LHSRangeType =
       std::conditional_t<
       // If
-      std::is_same_v<RHSRangeType, NumberType>,
+      std::is_same_v<RHSRangeType, ScalarType>,
       // Then
-      NumberType,
+      ScalarType,
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, Math::Vector<NumberType>>,
+        std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
         // Then
-        Math::Matrix<NumberType>,
+        Math::Matrix<ScalarType>,
         // Else
         void>>;
 
@@ -70,7 +70,7 @@ namespace Rodin::FormLanguage
       LHS,
       Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>>>>
   {
-    using NumberType = Real;
+    using ScalarType = Real;
 
     using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
@@ -89,15 +89,15 @@ namespace Rodin::FormLanguage
     using LHSRangeType =
       std::conditional_t<
       // If
-      std::is_same_v<RHSRangeType, NumberType>,
+      std::is_same_v<RHSRangeType, ScalarType>,
       // Then
-      NumberType,
+      ScalarType,
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, Math::Vector<NumberType>>,
+        std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
         // Then
-        Math::Matrix<NumberType>,
+        Math::Matrix<ScalarType>,
         // Else
         void>>;
 
@@ -121,7 +121,7 @@ namespace Rodin::Variational
     : public FunctionBase<Potential<LHS, FunctionBase<RHSDerived>>>
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
       using LHSType = LHS;
 
@@ -136,15 +136,15 @@ namespace Rodin::Variational
       using LHSRangeType =
         std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, NumberType>,
+        std::is_same_v<RHSRangeType, ScalarType>,
         // Then
-        NumberType,
+        ScalarType,
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRangeType, Math::Vector<NumberType>>,
+          std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
           // Then
-          Math::Matrix<NumberType>,
+          Math::Matrix<ScalarType>,
           // Else
           void>>;
 
@@ -170,14 +170,14 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRangeType, NumberType>)
+        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
         {
-          static_assert(std::is_same_v<RHSRangeType, NumberType>);
+          static_assert(std::is_same_v<RHSRangeType, ScalarType>);
           return { 1, 1 };
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<NumberType>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
         {
-          static_assert(std::is_same_v<RHSRangeType, Math::Vector<NumberType>>);
+          static_assert(std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>);
           return getOperand().getRangeShape();
         }
         else
@@ -207,9 +207,9 @@ namespace Rodin::Variational
         const auto& mesh = p.getPolytope().getMesh();
         if (m_qf.has_value())
         {
-          if constexpr (std::is_same_v<RHSRangeType, NumberType>)
+          if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
           {
-            NumberType res = 0;
+            ScalarType res = 0;
             for (auto it = mesh.getCell(); it; ++it)
             {
               const auto& polytope = *it;
@@ -223,9 +223,9 @@ namespace Rodin::Variational
             }
             return res;
           }
-          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<NumberType>>)
+          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
           {
-            Math::Vector<NumberType> res;
+            Math::Vector<ScalarType> res;
             getValue(res, p);
             return res;
           }
@@ -237,9 +237,9 @@ namespace Rodin::Variational
         }
         else
         {
-          if constexpr (std::is_same_v<RHSRangeType, NumberType>)
+          if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
           {
-            NumberType res = 0;
+            ScalarType res = 0;
             for (auto it = mesh.getCell(); it; ++it)
             {
               const auto& polytope = *it;
@@ -253,9 +253,9 @@ namespace Rodin::Variational
             }
             return res;
           }
-          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<NumberType>>)
+          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
           {
-            Math::Vector<NumberType> res;
+            Math::Vector<ScalarType> res;
             getValue(res, p);
             return res;
           }
@@ -267,14 +267,14 @@ namespace Rodin::Variational
         }
       }
 
-      void getValue(Math::Vector<NumberType>& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<ScalarType>& res, const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();
         const auto& operand = getOperand();
         const auto& mesh = p.getPolytope().getMesh();
         res.resize(getRangeShape().height());
         res.setZero();
-        Math::Matrix<NumberType> kxy;
+        Math::Matrix<ScalarType> kxy;
         if (m_qf.has_value())
         {
           for (auto it = mesh.getCell(); it; ++it)
@@ -361,7 +361,7 @@ namespace Rodin::Variational
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      using NumberType = Real;
+      using ScalarType = Real;
 
       using LHSType = LHS;
 
@@ -376,15 +376,15 @@ namespace Rodin::Variational
       using LHSRangeType =
         std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, NumberType>,
+        std::is_same_v<RHSRangeType, ScalarType>,
         // Then
-        NumberType,
+        ScalarType,
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRangeType, Math::Vector<NumberType>>,
+          std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
           // Then
-          Math::Matrix<NumberType>,
+          Math::Matrix<ScalarType>,
           // Else
           void>>;
 
@@ -424,14 +424,14 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRangeType, NumberType>)
+        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
         {
-          static_assert(std::is_same_v<RHSRangeType, NumberType>);
+          static_assert(std::is_same_v<RHSRangeType, ScalarType>);
           return { 1, 1 };
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<NumberType>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
         {
-          static_assert(std::is_same_v<RHSRangeType, Math::Vector<NumberType>>);
+          static_assert(std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>);
           return getOperand().getRangeShape();
         }
         else
@@ -466,7 +466,7 @@ namespace Rodin::Variational
         : public GlobalBilinearFormIntegratorBase<Real>
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
       using KernelType = Kernel;
 
@@ -570,7 +570,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      NumberType integrate(size_t tr, size_t te) override
+      ScalarType integrate(size_t tr, size_t te) override
       {
         const auto& trp = m_trp.value().get();
         const auto& tep = m_trp.value().get();
@@ -584,7 +584,7 @@ namespace Rodin::Variational
         const auto& testfes = rhs.getFiniteElementSpace();
         const auto& testfe = testfes.getFiniteElement(tep.getDimension(), tep.getIndex());
         const auto& kernel = lhs.getKernel();
-        NumberType res = 0;
+        ScalarType res = 0;
         if (tep == trp)
         {
           assert(trp.getGeometry() == tep.getGeometry());
@@ -608,13 +608,13 @@ namespace Rodin::Variational
               const auto& qf = *m_qf;
               for (size_t i = 0; i < qf.getSize(); i++)
               {
-                const NumberType xi = 1 - qf.getPoint(i).value();
+                const ScalarType xi = 1 - qf.getPoint(i).value();
                 for (size_t j = 0; j < qf.getSize(); j++)
                 {
-                  const NumberType eta1 = qf.getPoint(j).value();
+                  const ScalarType eta1 = qf.getPoint(j).value();
                   for (size_t h = 0; h < qf.getSize(); h++)
                   {
-                    const NumberType eta2 = qf.getPoint(h).value();
+                    const ScalarType eta2 = qf.getPoint(h).value();
                     m_rx[0] << xi, xi * (1 - eta1 + eta1 * eta2);
                     m_rz[1] << xi, xi * (1 - eta1 + eta1 * eta2);
                     m_rz[2] << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
@@ -627,11 +627,11 @@ namespace Rodin::Variational
                     const Geometry::Point x3(tep, teptrans, std::cref(m_rx[3]));
                     const Geometry::Point z4(tep, teptrans, std::cref(m_rz[4]));
                     const Geometry::Point x5(tep, teptrans, std::cref(m_rx[5]));
-                    const NumberType d = xi * xi * xi * eta1 * eta1 * eta2;
+                    const ScalarType d = xi * xi * xi * eta1 * eta1 * eta2;
                     for (size_t k = 0; k < qf.getSize(); k++)
                     {
-                      const NumberType w = qf.getWeight(i) * qf.getWeight(j) * qf.getWeight(h) * qf.getWeight(k);
-                      const NumberType eta3 = qf.getPoint(k).value();
+                      const ScalarType w = qf.getWeight(i) * qf.getWeight(j) * qf.getWeight(h) * qf.getWeight(k);
+                      const ScalarType eta3 = qf.getPoint(k).value();
                       m_rz[0] << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
                       m_rx[1] << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
                       m_rx[2] << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
@@ -644,8 +644,8 @@ namespace Rodin::Variational
                       const Geometry::Point z3(tep, teptrans, std::cref(m_rz[3]));
                       const Geometry::Point x4(tep, teptrans, std::cref(m_rx[4]));
                       const Geometry::Point z5(tep, teptrans, std::cref(m_rz[5]));
-                      NumberType s0, s1, s2, s3, s4, s5;
-                      if constexpr (std::is_same_v<LHSRangeType, NumberType>)
+                      ScalarType s0, s1, s2, s3, s4, s5;
+                      if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
                       {
                         s0 = kernel(x0, z0) * x0.getDistortion() * z0.getDistortion();
                         s1 = kernel(x1, z1) * x1.getDistortion() * z1.getDistortion();
@@ -654,7 +654,7 @@ namespace Rodin::Variational
                         s4 = kernel(x4, z4) * x4.getDistortion() * z4.getDistortion();
                         s5 = kernel(x5, z5) * x5.getDistortion() * z5.getDistortion();
                       }
-                      else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
+                      else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
                       {
                         kernel(m_k0, x0, z0);
                         kernel(m_k1, x1, z1);
@@ -681,7 +681,7 @@ namespace Rodin::Variational
                         for (size_t m = 0; m < trialfe.getCount(); m++)
                         {
                           const auto& trb = trialfe.getBasis(m);
-                          if constexpr (std::is_same_v<LHSRangeType, NumberType>)
+                          if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
                           {
                             res += d * w * s0 * trb(m_rx[0]) * teb(m_rz[0]);
                             assert(std::isfinite(s0));
@@ -696,7 +696,7 @@ namespace Rodin::Variational
                             res += d * w * s5 * trb(m_rx[5]) * teb(m_rz[5]);
                             assert(std::isfinite(s5));
                           }
-                          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
+                          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
                           {
                             assert(std::isfinite(s0));
                             trb(m_trv, m_rx[0]);
@@ -750,11 +750,11 @@ namespace Rodin::Variational
               const auto& y = m_y[i];
 
               Real d;
-              if constexpr (std::is_same_v<LHSRangeType, NumberType>)
+              if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
               {
                 d = kernel(x, y) * x.getDistortion() * y.getDistortion();
               }
-              else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
+              else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
               {
                 kernel(m_k, x, y);
                 d = x.getDistortion() * y.getDistortion();
@@ -768,23 +768,23 @@ namespace Rodin::Variational
               for (size_t l = 0; l < testfe.getCount(); l++)
               {
                 const auto& teb = testfe.getBasis(l);
-                NumberType tev;
-                if constexpr (std::is_same_v<LHSRangeType, NumberType>)
+                ScalarType tev;
+                if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
                 {
                   tev = teb(qfte.getPoint(i));
                 }
-                else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
+                else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
                 {
                   teb(m_tev, qfte.getPoint(i));
                 }
                 for (size_t m = 0; m < trialfe.getCount(); m++)
                 {
                   const auto& trb = trialfe.getBasis(m);
-                  if constexpr (std::is_same_v<LHSRangeType, NumberType>)
+                  if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
                   {
                     res += w * d * tev * trb(qftr.getPoint(j));
                   }
-                  else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<NumberType>>)
+                  else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
                   {
                     trb(m_trv, qftr.getPoint(j));
                     res += w * d * m_tev.dot(m_k * m_trv);
@@ -820,12 +820,12 @@ namespace Rodin::Variational
       std::vector<Geometry::Point> m_x;
       std::vector<Geometry::Point> m_y;
 
-      std::vector<Math::SpatialVector<NumberType>> m_rx;
-      std::vector<Math::SpatialVector<NumberType>> m_rz;
+      std::vector<Math::SpatialVector<ScalarType>> m_rx;
+      std::vector<Math::SpatialVector<ScalarType>> m_rz;
 
-      Math::Matrix<NumberType> m_k;
-      Math::Vector<NumberType> m_trv, m_tev;
-      Math::Matrix<NumberType> m_k0, m_k1, m_k2, m_k3, m_k4, m_k5;
+      Math::Matrix<ScalarType> m_k;
+      Math::Vector<ScalarType> m_trv, m_tev;
+      Math::Matrix<ScalarType> m_k0, m_k1, m_k2, m_k3, m_k4, m_k5;
   };
 
   template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>

@@ -59,15 +59,15 @@ namespace Rodin::Assembly
         Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
-      using OperatorType = std::vector<Eigen::Triplet<NumberType>>;
+      using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
       using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
 
-      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<NumberType>;
+      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<NumberType>;
+      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -119,7 +119,7 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const InputType& input) const override
       {
-        using TripletVector = std::vector<Eigen::Triplet<NumberType>>;
+        using TripletVector = std::vector<Eigen::Triplet<ScalarType>>;
         const size_t capacity = input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
         TripletVector res;
         res.clear();
@@ -150,8 +150,8 @@ namespace Rodin::Assembly
                     {
                       for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                       {
-                        const NumberType s = tl_lbfi->integrate(m, l);
-                        if (s != NumberType(0))
+                        const ScalarType s = tl_lbfi->integrate(m, l);
+                        if (s != ScalarType(0))
                           tl_triplets.emplace_back(rows(l), cols(m), s);
                       }
                     }
@@ -209,8 +209,8 @@ namespace Rodin::Assembly
                         {
                           for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                           {
-                            const NumberType s = tl_gbfi->integrate(m, l);
-                            if (s != NumberType(0))
+                            const ScalarType s = tl_gbfi->integrate(m, l);
+                            if (s != ScalarType(0))
                               tl_triplets.emplace_back(rows(l), cols(m), s);
                           }
                         }
@@ -299,9 +299,9 @@ namespace Rodin::Assembly
         Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>>
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
-      using OperatorType = Math::SparseMatrix<NumberType>;
+      using OperatorType = Math::SparseMatrix<ScalarType>;
 
       using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
 
@@ -371,13 +371,13 @@ namespace Rodin::Assembly
         Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Real>>>
   {
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
-      using OperatorType = Math::Matrix<NumberType>;
+      using OperatorType = Math::Matrix<ScalarType>;
 
-      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<NumberType>;
+      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<NumberType>;
+      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
 
@@ -579,18 +579,18 @@ namespace Rodin::Assembly
    */
   template <class FES>
   class Multithreaded<
-    Math::Vector<typename FormLanguage::Traits<FES>::NumberType>,
-    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::NumberType>>>
+    Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>,
+    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
     : public AssemblyBase<
-        Math::Vector<typename FormLanguage::Traits<FES>::NumberType>,
-        Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::NumberType>>>
+        Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>,
+        Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
   {
     public:
       using FESType = FES;
 
-      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using VectorType = Math::Vector<NumberType>;
+      using VectorType = Math::Vector<ScalarType>;
 
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
 
@@ -708,7 +708,7 @@ namespace Rodin::Assembly
 
     private:
       static thread_local VectorType tl_res;
-      static thread_local std::unique_ptr<Variational::LinearFormIntegratorBase<NumberType>> tl_lfi;
+      static thread_local std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>> tl_lfi;
 
       mutable Threads::Mutex m_mutex;
       mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
@@ -716,18 +716,18 @@ namespace Rodin::Assembly
 
   template <class FES>
   thread_local
-  Math::Vector<typename FormLanguage::Traits<FES>::NumberType>
+  Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>
   Multithreaded<
-    Math::Vector<typename FormLanguage::Traits<FES>::NumberType>,
-    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::NumberType>>>
+    Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>,
+    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
   ::tl_res;
 
   template <class FES>
   thread_local
-  std::unique_ptr<Variational::LinearFormIntegratorBase<typename FormLanguage::Traits<FES>::NumberType>>
+  std::unique_ptr<Variational::LinearFormIntegratorBase<typename FormLanguage::Traits<FES>::ScalarType>>
   Multithreaded<
-    Math::Vector<typename FormLanguage::Traits<FES>::NumberType>,
-    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::NumberType>>>
+    Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>,
+    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
   ::tl_lfi;
 }
 

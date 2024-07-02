@@ -20,43 +20,43 @@ namespace Rodin::Math
   /**
    * @brief Dense vector type.
    */
-  template <class NumberType>
-  using Vector = Eigen::VectorX<NumberType>;
+  template <class ScalarType>
+  using Vector = Eigen::VectorX<ScalarType>;
 
   using ComplexVector = Vector<Complex>;
 
-  template <class NumberType>
+  template <class ScalarType>
   using SpatialVector =
-    Eigen::Matrix<NumberType, Eigen::Dynamic, 1, 0, RODIN_MAXIMAL_SPACE_DIMENSION, 1>;
+    Eigen::Matrix<ScalarType, Eigen::Dynamic, 1, 0, RODIN_MAXIMAL_SPACE_DIMENSION, 1>;
 
   using PointVector = SpatialVector<Real>;
 
-  template <class NumberType, size_t Size>
-  using FixedSizeVector = Eigen::Vector<NumberType, Size>;
+  template <class ScalarType, size_t Size>
+  using FixedSizeVector = Eigen::Vector<ScalarType, Size>;
 
-  template <class NumberType>
-  using Vector2 = FixedSizeVector<NumberType, 2>;
+  template <class ScalarType>
+  using Vector2 = FixedSizeVector<ScalarType, 2>;
 
-  template <class NumberType>
-  using Vector3 = FixedSizeVector<NumberType, 3>;
+  template <class ScalarType>
+  using Vector3 = FixedSizeVector<ScalarType, 3>;
 
-  template <class NumberType>
-  using Vector4 = FixedSizeVector<NumberType, 4>;
+  template <class ScalarType>
+  using Vector4 = FixedSizeVector<ScalarType, 4>;
 
-  template <class NumberType>
-  using Vector8 = FixedSizeVector<NumberType, 8>;
+  template <class ScalarType>
+  using Vector8 = FixedSizeVector<ScalarType, 8>;
 
-  template <class NumberType>
-  using Vector16 = FixedSizeVector<NumberType, 16>;
+  template <class ScalarType>
+  using Vector16 = FixedSizeVector<ScalarType, 16>;
 
-  template <class NumberType>
-  using Vector32 = FixedSizeVector<NumberType, 32>;
+  template <class ScalarType>
+  using Vector32 = FixedSizeVector<ScalarType, 32>;
 
-  template <class NumberType>
-  using Vector64 = FixedSizeVector<NumberType, 64>;
+  template <class ScalarType>
+  using Vector64 = FixedSizeVector<ScalarType, 64>;
 
-  template <class NumberType>
-  using Vector128 = FixedSizeVector<NumberType, 128>;
+  template <class ScalarType>
+  using Vector128 = FixedSizeVector<ScalarType, 128>;
 }
 
 namespace Rodin::FormLanguage
@@ -64,19 +64,19 @@ namespace Rodin::FormLanguage
   template <class Number>
   struct Traits<Math::Vector<Number>>
   {
-    using NumberType = Number;
+    using ScalarType = Number;
   };
 
   template <class Number>
   struct Traits<Math::SpatialVector<Number>>
   {
-    using NumberType = Number;
+    using ScalarType = Number;
   };
 
   template <class Number, size_t S>
   struct Traits<Math::FixedSizeVector<Number, S>>
   {
-    using NumberType = Number;
+    using ScalarType = Number;
     static constexpr size_t Size = S;
   };
 }

@@ -53,9 +53,9 @@ namespace Rodin::Variational
 
       using OperatorType = Operator;
 
-      using VectorNumberType = typename FormLanguage::Traits<Vector>::NumberType;
+      using VectorScalarType = typename FormLanguage::Traits<Vector>::ScalarType;
 
-      using OperatorNumberType = typename FormLanguage::Traits<Operator>::NumberType;
+      using OperatorScalarType = typename FormLanguage::Traits<Operator>::ScalarType;
 
       ProblemBase() = default;
 
@@ -113,35 +113,35 @@ namespace Rodin::Variational
     TrialFES, TestFES,
     Math::SparseMatrix<
       decltype(
-        std::declval<typename FormLanguage::Traits<TrialFES>::NumberType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::NumberType>())>,
-    Math::Vector<typename FormLanguage::Traits<TestFES>::NumberType>>
+        std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
+    Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
     : public ProblemBase<
         Math::SparseMatrix<
           decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::NumberType>() *
-              std::declval<typename FormLanguage::Traits<TestFES>::NumberType>())>,
-        Math::Vector<typename FormLanguage::Traits<TestFES>::NumberType>>
+            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+              std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
+        Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
   {
     public:
-      using TrialFESNumberType =
-        typename FormLanguage::Traits<TrialFES>::NumberType;
+      using TrialFESScalarType =
+        typename FormLanguage::Traits<TrialFES>::ScalarType;
 
-      using TestFESNumberType =
-        typename FormLanguage::Traits<TestFES>::NumberType;
+      using TestFESScalarType =
+        typename FormLanguage::Traits<TestFES>::ScalarType;
 
-      using OperatorNumberType =
-        decltype(std::declval<TrialFESNumberType>() * std::declval<TestFESNumberType>());
+      using OperatorScalarType =
+        decltype(std::declval<TrialFESScalarType>() * std::declval<TestFESScalarType>());
 
-      using VectorNumberType = TestFESNumberType;
+      using VectorScalarType = TestFESScalarType;
 
       using ContextType = Context::Sequential;
 
-      using OperatorType = Math::SparseMatrix<OperatorNumberType>;
+      using OperatorType = Math::SparseMatrix<OperatorScalarType>;
 
-      using VectorType = Math::Vector<TestFESNumberType>;
+      using VectorType = Math::Vector<TestFESScalarType>;
 
-      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESNumberType>;
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESScalarType>;
 
       using Parent = ProblemBase<OperatorType, VectorType>;
 
@@ -261,7 +261,7 @@ namespace Rodin::Variational
               // Eliminate the parent column, adding it to the child columns
               for (size_t i = 0; i < count; i++)
               {
-                const OperatorNumberType coeff = coeffs.coeff(i);
+                const OperatorScalarType coeff = coeffs.coeff(i);
                 const Index child = children.coeff(i);
                 m_stiffness.col(child) += coeff * m_stiffness.col(parent);
               }
@@ -271,8 +271,8 @@ namespace Rodin::Variational
                 it.valueRef() = 0;
 
               // Eliminate the parent row, adding it to the child rows
-              IndexMap<OperatorNumberType> parentLookup;
-              std::vector<IndexMap<OperatorNumberType>> childrenLookup(children.size());
+              IndexMap<OperatorScalarType> parentLookup;
+              std::vector<IndexMap<OperatorScalarType>> childrenLookup(children.size());
               for (size_t col = 0; col < static_cast<size_t>(m_stiffness.cols()); col++)
               {
                 bool parentFound = false;
@@ -312,7 +312,7 @@ namespace Rodin::Variational
               {
                 for (size_t i = 0; i < count; i++)
                 {
-                  const OperatorNumberType coeff = coeffs.coeff(i);
+                  const OperatorScalarType coeff = coeffs.coeff(i);
                   childrenLookup[i][col] += coeff * value;
                 }
               }
@@ -327,7 +327,7 @@ namespace Rodin::Variational
               // Eliminate the parent entry, adding it to the child entries
               for (size_t i = 0; i < count; i++)
               {
-                const OperatorNumberType coeff = coeffs.coeff(i);
+                const OperatorScalarType coeff = coeffs.coeff(i);
                 const Index child = children.coeff(i);
                 m_mass.coeffRef(child) += coeff * m_mass.coeff(parent);
               }
@@ -341,7 +341,7 @@ namespace Rodin::Variational
               assert(children.size() >= 0);
               for (size_t i = 0; i < static_cast<size_t>(children.size()); i++)
               {
-                const OperatorNumberType coeff = coeffs.coeff(i);
+                const OperatorScalarType coeff = coeffs.coeff(i);
                 const Index child = children.coeff(i);
                 m_stiffness.coeffRef(parent, child) = -coeff;
               }
@@ -503,13 +503,13 @@ namespace Rodin::Variational
     static_assert(Utility::ParameterPack<U1, U2, Us...>::template All<IsTrialOrTestFunction>::Value);
 
     public:
-      using NumberType = Real;
+      using ScalarType = Real;
 
       using ContextType = Context::Sequential;
 
-      using OperatorType = Math::SparseMatrix<NumberType>;
+      using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using VectorType = Math::Vector<NumberType>;
+      using VectorType = Math::Vector<ScalarType>;
 
       using Parent = ProblemBase<OperatorType, VectorType>;
 

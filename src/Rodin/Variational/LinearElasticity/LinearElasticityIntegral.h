@@ -12,27 +12,27 @@ namespace Rodin::Variational
 {
   template <class FES, class LambdaDerived, class MuDerived>
   class LinearElasticityIntegrator final
-    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<FES>::NumberType>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
       using FESType = FES;
 
-      using NumberType = typename FormLanguage::Traits<FES>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
 
       using Mu = FunctionBase<MuDerived>;
 
       using Lambda = FunctionBase<LambdaDerived>;
 
-      using Parent = LocalBilinearFormIntegratorBase<NumberType>;
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
     private:
         using MuRangeType = typename FormLanguage::Traits<Mu>::RangeType;
 
         using LambdaRangeType = typename FormLanguage::Traits<Lambda>::RangeType;
 
-        static_assert(std::is_same_v<MuRangeType, NumberType>);
+        static_assert(std::is_same_v<MuRangeType, ScalarType>);
 
-        static_assert(std::is_same_v<LambdaRangeType, NumberType>);
+        static_assert(std::is_same_v<LambdaRangeType, ScalarType>);
 
     public:
       LinearElasticityIntegrator(
@@ -68,7 +68,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      virtual NumberType integrate(size_t tr, size_t te) override
+      virtual ScalarType integrate(size_t tr, size_t te) override
       {
         assert(false);
         return 0;

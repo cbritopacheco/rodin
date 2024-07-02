@@ -92,11 +92,11 @@ namespace Rodin::Variational
 
       using VectorType = Vector;
 
-      using NumberType = typename FormLanguage::Traits<FESType>::NumberType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
 
-      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<NumberType>;
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<ScalarType>;
 
       using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
 
@@ -147,7 +147,7 @@ namespace Rodin::Variational
        * @returns The value which the linear form takes at @f$ u @f$.
        */
       constexpr
-      NumberType operator()(const GridFunction<FES>& u) const
+      ScalarType operator()(const GridFunction<FES>& u) const
       {
         const auto& weights = u.getWeights();
         if (!weights.has_value())
@@ -283,7 +283,7 @@ namespace Rodin::Variational
 
   template <class FES>
   LinearForm(TestFunction<FES>&)
-    -> LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::NumberType>>;
+    -> LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
 }
 
 #include "LinearForm.hpp"

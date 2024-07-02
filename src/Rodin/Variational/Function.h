@@ -35,7 +35,7 @@ namespace Rodin::FormLanguage
 
     using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
 
-    using NumberType = typename FormLanguage::Traits<RangeType>::NumberType;
+    using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 }
 

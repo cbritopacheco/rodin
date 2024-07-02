@@ -44,9 +44,9 @@ namespace Rodin::Variational
     : public DivBase<Div<GridFunction<P1<Math::Vector<Number>, Mesh>>>, GridFunction<P1<Math::Vector<Number>, Mesh>>>
   {
     public:
-      using NumberType = Number;
+      using ScalarType = Number;
 
-      using FESType = Variational::P1<Math::Vector<NumberType>, Mesh>;
+      using FESType = Variational::P1<Math::Vector<ScalarType>, Mesh>;
 
       /// Operand type
       using OperandType = GridFunction<FESType>;
