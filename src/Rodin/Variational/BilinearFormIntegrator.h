@@ -18,11 +18,12 @@ namespace Rodin::Variational
    * This class provides the base functionality for bilinear form integrator
    * objects.
    */
-  template <class Derived>
+  template <class Number, class Derived>
   class BilinearFormIntegratorBase : public Integrator
   {
     public:
-      /// Parent class
+      using NumberType = Number;
+
       using Parent = Integrator;
 
       /**
@@ -56,8 +57,7 @@ namespace Rodin::Variational
        */
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
         : Parent(other),
-          m_u(other.m_u->copy()), m_v(other.m_v->copy()),
-          m_matrix(other.m_matrix)
+          m_u(other.m_u->copy()), m_v(other.m_v->copy())
       {}
 
       /**
@@ -65,8 +65,7 @@ namespace Rodin::Variational
        */
       BilinearFormIntegratorBase(BilinearFormIntegratorBase&& other)
         : Parent(std::move(other)),
-          m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
-          m_matrix(std::move(other.m_matrix))
+          m_u(std::move(other.m_u)), m_v(std::move(other.m_v))
       {}
 
       virtual
@@ -98,37 +97,23 @@ namespace Rodin::Variational
         return *m_v;
       }
 
-      inline
-      const Math::Matrix<Scalar>& getMatrix() const
-      {
-        return m_matrix;
-      }
-
-      /**
-       * @returns The element matrix of size of @f$ m \times n @f$ where @f$ n
-       * @f$ (resp. @f$ m @f$) denotes the number of degrees of freedom on the
-       * polytope for the test (resp. trial) space.
-       */
-      inline
-      Math::Matrix<Scalar>& getMatrix()
-      {
-        return m_matrix;
-      }
-
       virtual
       BilinearFormIntegratorBase* copy() const noexcept override = 0;
 
     private:
       std::unique_ptr<FormLanguage::Base> m_u;
       std::unique_ptr<FormLanguage::Base> m_v;
-      Math::Matrix<Scalar> m_matrix;
   };
 
+  template <class Number>
   class LocalBilinearFormIntegratorBase
-    : public BilinearFormIntegratorBase<LocalBilinearFormIntegratorBase>
+    : public BilinearFormIntegratorBase<Number, LocalBilinearFormIntegratorBase<Number>>
   {
     public:
-      using Parent = BilinearFormIntegratorBase<LocalBilinearFormIntegratorBase>;
+      using NumberType = Number;
+
+      using Parent = BilinearFormIntegratorBase<NumberType, LocalBilinearFormIntegratorBase>;
+
       using Parent::Parent;
 
       /**
@@ -191,17 +176,13 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /**
-       * @brief Performs the assembly of the element matrix for the given
-       * element.
-       *
-       * Assembles the stiffness matrix of the given element.
-       *
-       */
-      virtual
-      void assemble(const Geometry::Polytope& polytope) = 0;
+      virtual const Geometry::Polytope& getPolytope() const = 0;
 
-      virtual Region getRegion() const = 0;
+      virtual LocalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
+
+      virtual NumberType integrate(size_t tr, size_t te) = 0;
+
+      virtual Integrator::Region getRegion() const = 0;
 
       virtual
       LocalBilinearFormIntegratorBase* copy() const noexcept override = 0;
@@ -210,12 +191,15 @@ namespace Rodin::Variational
       FlatSet<Geometry::Attribute> m_attrs;
   };
 
+  template <class Number>
   class GlobalBilinearFormIntegratorBase
-    : public BilinearFormIntegratorBase<GlobalBilinearFormIntegratorBase>
+    : public BilinearFormIntegratorBase<Number, GlobalBilinearFormIntegratorBase<Number>>
   {
     public:
-      /// Parent class
-      using Parent = BilinearFormIntegratorBase;
+      using NumberType = Number;
+
+      using Parent = BilinearFormIntegratorBase<NumberType, GlobalBilinearFormIntegratorBase<NumberType>>;
+
       using Parent::Parent;
 
       /**
@@ -267,11 +251,13 @@ namespace Rodin::Variational
       }
 
       virtual
-      void assemble(const Geometry::Polytope& tau, const Geometry::Polytope& t) = 0;
+      GlobalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& tau, const Geometry::Polytope& t) = 0;
 
-      virtual Region getTrialRegion() const = 0;
+      virtual NumberType integrate(size_t tr, size_t te) = 0;
 
-      virtual Region getTestRegion() const = 0;
+      virtual Integrator::Region getTrialRegion() const = 0;
+
+      virtual Integrator::Region getTestRegion() const = 0;
 
       virtual
       GlobalBilinearFormIntegratorBase* copy() const noexcept override = 0;

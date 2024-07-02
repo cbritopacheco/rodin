@@ -356,42 +356,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      Problem& operator+=(const LocalBilinearFormIntegratorBase& rhs)
-      {
-        m_bilinearForm.add(rhs);
-        return *this;
-      }
-
-      Problem& operator-=(const LocalBilinearFormIntegratorBase& rhs)
-      {
-        m_bilinearForm.add(UnaryMinus(rhs));
-        return *this;
-      }
-
-      Problem& operator+=(const LinearFormIntegratorBaseType& rhs)
-      {
-        m_linearForm.add(rhs);
-        return *this;
-      }
-
-      Problem& operator-=(const LinearFormIntegratorBaseType& rhs)
-      {
-        m_linearForm.add(UnaryMinus(rhs));
-        return *this;
-      }
-
-      Problem& operator+=(const DirichletBCBase& dbc)
-      {
-        m_dbcs.add(dbc);
-        return *this;
-      }
-
-      Problem& operator+=(const PeriodicBCBase& pbc)
-      {
-        m_pbcs.add(pbc);
-        return *this;
-      }
-
       const LinearForm<TestFES, VectorType>& getLinearForm() const
       {
         return m_linearForm;

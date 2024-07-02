@@ -95,15 +95,28 @@ namespace Rodin::Variational
   class BilinearForm final
     : public BilinearFormBase<Operator>
   {
-    using TrialFESNumberType  = typename FormLanguage::Traits<TrialFES>::NumberType;
-    using TestFESNumberType   = typename FormLanguage::Traits<TestFES>::NumberType;
-
     public:
+      using TrialFESNumberType  = typename FormLanguage::Traits<TrialFES>::NumberType;
+
+      using TestFESNumberType   = typename FormLanguage::Traits<TestFES>::NumberType;
+
       using NumberType = decltype(
           std::declval<TrialFESNumberType>() * std::declval<TestFESNumberType>());
 
       /// Type of operator associated to the bilinear form
       using OperatorType = Operator;
+
+      using LocalBilinearFormIntegratorBaseType =
+        LocalBilinearFormIntegratorBase<NumberType>;
+
+      using GlobalBilinearFormIntegratorBaseType =
+        GlobalBilinearFormIntegratorBase<NumberType>;
+
+      using LocalBilinearFormIntegratorBaseListType
+        = FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
+
+      using GlobalBilinearFormIntegratorBaseListType
+        = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
       /// Parent class
       using Parent = BilinearFormBase<OperatorType>;
@@ -212,7 +225,7 @@ namespace Rodin::Variational
         return m_v.get();
       }
 
-      BilinearForm& operator=(const LocalBilinearFormIntegratorBase& bfi)
+      BilinearForm& operator=(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         this->from(bfi).assemble();
         return *this;
@@ -222,13 +235,13 @@ namespace Rodin::Variational
        * @todo
        */
       BilinearForm& operator=(
-          const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis)
+          const FormLanguage::List<LocalBilinearFormIntegratorBaseType>& bfis)
       {
         this->from(bfis).assemble();
         return *this;
       }
 
-      BilinearForm& operator=(const GlobalBilinearFormIntegratorBase& bfi)
+      BilinearForm& operator=(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
         this->from(bfi).assemble();
         return *this;
@@ -238,32 +251,32 @@ namespace Rodin::Variational
        * @todo
        */
       BilinearForm& operator=(
-          const FormLanguage::List<GlobalBilinearFormIntegratorBase>& bfis)
+          const FormLanguage::List<GlobalBilinearFormIntegratorBaseType>& bfis)
       {
         this->from(bfis).assemble();
         return *this;
       }
 
       constexpr
-      FormLanguage::List<LocalBilinearFormIntegratorBase>& getLocalIntegrators()
+      LocalBilinearFormIntegratorBaseListType& getLocalIntegrators()
       {
         return m_lbfis;
       }
 
       constexpr
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& getLocalIntegrators() const
+      const LocalBilinearFormIntegratorBaseListType& getLocalIntegrators() const
       {
         return m_lbfis;
       }
 
       constexpr
-      FormLanguage::List<GlobalBilinearFormIntegratorBase>& getGlobalIntegrators()
+      GlobalBilinearFormIntegratorBaseListType& getGlobalIntegrators()
       {
         return m_gbfis;
       }
 
       constexpr
-      const FormLanguage::List<GlobalBilinearFormIntegratorBase>& getGlobalIntegrators() const
+      const GlobalBilinearFormIntegratorBaseListType& getGlobalIntegrators() const
       {
         return m_gbfis;
       }
@@ -305,15 +318,14 @@ namespace Rodin::Variational
        * build the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      virtual BilinearForm& from(const LocalBilinearFormIntegratorBase& bfi)
+      virtual BilinearForm& from(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         m_lbfis.clear();
         add(bfi).assemble();
         return *this;
       }
 
-      virtual BilinearForm& from(
-          const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfi)
+      virtual BilinearForm& from(const LocalBilinearFormIntegratorBaseListType& bfi)
       {
         m_lbfis.clear();
         add(bfi).assemble();
@@ -324,7 +336,7 @@ namespace Rodin::Variational
        * @brief Adds a bilinear integrator to the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      virtual BilinearForm& add(const LocalBilinearFormIntegratorBase& bfi)
+      virtual BilinearForm& add(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
           TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
@@ -334,7 +346,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      virtual BilinearForm& add(const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis)
+      virtual BilinearForm& add(const LocalBilinearFormIntegratorBaseListType& bfis)
       {
         m_lbfis.add(bfis);
         return *this;
@@ -346,15 +358,14 @@ namespace Rodin::Variational
        * build the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      virtual BilinearForm& from(const GlobalBilinearFormIntegratorBase& bfi)
+      virtual BilinearForm& from(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
         m_gbfis.clear();
         add(bfi).assemble();
         return *this;
       }
 
-      virtual BilinearForm& from(
-          const FormLanguage::List<GlobalBilinearFormIntegratorBase>& bfi)
+      virtual BilinearForm& from(const GlobalBilinearFormIntegratorBaseListType& bfi)
       {
         m_gbfis.clear();
         add(bfi).assemble();
@@ -365,7 +376,7 @@ namespace Rodin::Variational
        * @brief Adds a bilinear integrator to the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      virtual BilinearForm& add(const GlobalBilinearFormIntegratorBase& bfi)
+      virtual BilinearForm& add(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
         if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
           TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
@@ -375,7 +386,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      virtual BilinearForm& add(const FormLanguage::List<GlobalBilinearFormIntegratorBase>& bfis)
+      virtual BilinearForm& add(const GlobalBilinearFormIntegratorBaseListType& bfis)
       {
         m_gbfis.add(bfis);
         return *this;
@@ -390,8 +401,8 @@ namespace Rodin::Variational
       std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
       std::reference_wrapper<const TestFunction<TestFES>>   m_v;
       std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
-      FormLanguage::List<LocalBilinearFormIntegratorBase>        m_lbfis;
-      FormLanguage::List<GlobalBilinearFormIntegratorBase>       m_gbfis;
+      LocalBilinearFormIntegratorBaseListType               m_lbfis;
+      GlobalBilinearFormIntegratorBaseListType              m_gbfis;
       OperatorType m_operator;
   };
 

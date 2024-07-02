@@ -296,12 +296,18 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      Sum& setPoint(const Geometry::Point& p)
       {
-        const auto& lhs = this->object(getLHS().getTensorBasis(p));
-        const auto& rhs = this->object(getRHS().getTensorBasis(p));
-        return lhs + rhs;
+        m_lhs->setPoint(p);
+        m_rhs->setPoint(p);
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        return this->object(getLHS().getBasis(local)) + this->object(getRHS().getBasis(local));
       }
 
       inline
@@ -369,6 +375,10 @@ namespace Rodin::Variational
   };
 
   template <class LHSNumber, class RHSNumber>
+  Sum(const LinearFormIntegratorBase<LHSNumber>&, const LinearFormIntegratorBase<RHSNumber>&)
+    -> Sum<LinearFormIntegratorBase<LHSNumber>, LinearFormIntegratorBase<RHSNumber>>;
+
+  template <class LHSNumber, class RHSNumber>
   inline
   constexpr
   auto
@@ -411,6 +421,10 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
   };
+
+  template <class LHSNumber, class RHSNumber>
+  Sum(const LinearFormIntegratorBase<LHSNumber>&, const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>&>)
+    -> Sum<LinearFormIntegratorBase<LHSNumber>, FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
   inline
@@ -456,6 +470,11 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
   };
+
+  template <class LHSNumber, class RHSNumber>
+  Sum(const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& lhs,
+      const LinearFormIntegratorBase<LHSNumber>& rhs)
+    -> Sum<FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>, LinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
   inline
@@ -504,47 +523,266 @@ namespace Rodin::Variational
   };
 
   template <class LHSNumber, class RHSNumber>
+  Sum(const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>&,
+      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>&)
+    -> Sum<
+        FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>,
+        FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
+
+  template <class LHSNumber, class RHSNumber>
   inline
   constexpr
   auto
   operator+(
       const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& lhs,
-      const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& rhs)
+      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& rhs)
   {
     return Sum(lhs, rhs);
   }
 
-  template <class OperatorType>
-  FormLanguage::List<BilinearFormBase<OperatorType>>
-  operator+(
-      const BilinearFormBase<OperatorType>& lhs,
-      const BilinearFormBase<OperatorType>& rhs)
+  template <class LHSNumber, class RHSNumber>
+  class Sum<LocalBilinearFormIntegratorBase<LHSNumber>, LocalBilinearFormIntegratorBase<RHSNumber>>
+    : public FormLanguage::List<
+              LocalBilinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
   {
-    FormLanguage::List<BilinearFormBase<OperatorType>> res;
-    res.add(lhs);
-    res.add(rhs);
-    return res;
+    public:
+      using LHSNumberType = LHSNumber;
+
+      using RHSNumberType = RHSNumber;
+
+      using LHSType = LocalBilinearFormIntegratorBase<LHSNumberType>;
+
+      using RHSType = LocalBilinearFormIntegratorBase<RHSNumberType>;
+
+      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+
+      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<NumberType>>;
+
+      Sum(const LHSType& lhs, const RHSType& rhs)
+      {
+        this->add(lhs);
+        this->add(rhs);
+      }
+
+      Sum(const Sum& other)
+        : Parent(other)
+      {}
+
+      Sum(Sum&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  template <class LHSNumber, class RHSNumber>
+  Sum(const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
+      const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
+    -> Sum<LocalBilinearFormIntegratorBase<LHSNumber>, LocalBilinearFormIntegratorBase<RHSNumber>>;
+
+  template <class LHSNumber, class RHSNumber>
+  inline
+  constexpr
+  auto
+  operator+(
+    const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
+    const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
+  {
+    return Sum(lhs, rhs);
   }
 
-  FormLanguage::List<LocalBilinearFormIntegratorBase>
-  operator+(
-      const LocalBilinearFormIntegratorBase& lhs,
-      const LocalBilinearFormIntegratorBase& rhs);
+  template <class LHSNumber, class RHSNumber>
+  class Sum<LocalBilinearFormIntegratorBase<LHSNumber>, FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>
+    : public FormLanguage::List<
+              LocalBilinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
+  {
+    public:
+      using LHSNumberType = LHSNumber;
 
-  FormLanguage::List<LocalBilinearFormIntegratorBase>
-  operator+(
-      const LocalBilinearFormIntegratorBase& lhs,
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& rhs);
+      using RHSNumberType = RHSNumber;
 
-  FormLanguage::List<LocalBilinearFormIntegratorBase>
-  operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& lhs,
-      const LocalBilinearFormIntegratorBase& rhs);
+      using LHSType = LocalBilinearFormIntegratorBase<LHSNumberType>;
 
-  FormLanguage::List<LocalBilinearFormIntegratorBase>
+      using RHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>;
+
+      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+
+      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<NumberType>>;
+
+      Sum(const LHSType& lhs, const RHSType& rhs)
+      {
+        this->add(lhs);
+        this->add(rhs);
+      }
+
+      Sum(const Sum& other)
+        : Parent(other)
+      {}
+
+      Sum(Sum&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  template <class LHSNumber, class RHSNumber>
+  Sum(const LocalBilinearFormIntegratorBase<LHSNumber>&,
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>&)
+    -> Sum<
+        LocalBilinearFormIntegratorBase<LHSNumber>,
+        FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>;
+
+  template <class LHSNumber, class RHSNumber>
+  inline
+  constexpr
+  auto
   operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& lhs,
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& rhs);
+      const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
+  {
+    return Sum(lhs, rhs);
+  }
+
+  template <class LHSNumber, class RHSNumber>
+  class Sum<
+    FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>, LocalBilinearFormIntegratorBase<RHSNumber>>
+    : public FormLanguage::List<
+              LocalBilinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
+  {
+    public:
+      using LHSNumberType = LHSNumber;
+
+      using RHSNumberType = RHSNumber;
+
+      using LHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>;
+
+      using RHSType = LocalBilinearFormIntegratorBase<RHSNumberType>;
+
+      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+
+      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<NumberType>>;
+
+      Sum(const LHSType& lhs, const RHSType& rhs)
+      {
+        this->add(lhs);
+        this->add(rhs);
+      }
+
+      Sum(const Sum& other)
+        : Parent(other)
+      {}
+
+      Sum(Sum&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  template <class LHSNumber, class RHSNumber>
+  Sum(const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>&,
+      const LocalBilinearFormIntegratorBase<RHSNumber>&)
+    -> Sum<
+        FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,
+        LocalBilinearFormIntegratorBase<RHSNumber>>;
+
+  template <class LHSNumber, class RHSNumber>
+  inline
+  constexpr
+  auto
+  operator+(
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
+      const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
+  {
+    return Sum(lhs, rhs);
+  }
+
+  template <class LHSNumber, class RHSNumber>
+  class Sum<
+    FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,
+    FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>
+      : public FormLanguage::List<
+          LocalBilinearFormIntegratorBase<decltype(std::declval<LHSNumber>() + std::declval<RHSNumber>())>>
+  {
+    public:
+      using LHSNumberType = LHSNumber;
+
+      using RHSNumberType = RHSNumber;
+
+      using LHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>;
+
+      using RHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>;
+
+      using NumberType = decltype(std::declval<LHSNumberType>() + std::declval<RHSNumberType>());
+
+      using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<NumberType>>;
+
+      Sum(const LHSType& lhs, const RHSType& rhs)
+      {
+        this->add(lhs);
+        this->add(rhs);
+      }
+
+      Sum(const Sum& other)
+        : Parent(other)
+      {}
+
+      Sum(Sum&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  template <class LHSNumber, class RHSNumber>
+  Sum(const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>&,
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>&)
+    -> Sum<
+        FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,
+        FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>;
+
+  template <class LHSNumber, class RHSNumber>
+  inline
+  constexpr
+  auto
+  operator+(
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
+  {
+    return Sum(lhs, rhs);
+  }
+
+  template <class Operator>
+  class Sum<BilinearFormBase<Operator>, BilinearFormBase<Operator>>
+    : public FormLanguage::List<BilinearFormBase<Operator>>
+  {
+    public:
+      using LHSType = BilinearFormBase<Operator>;
+
+      using RHSType = BilinearFormBase<Operator>;
+
+      using Parent = FormLanguage::List<BilinearFormBase<Operator>>;
+
+      Sum(const LHSType& lhs, const RHSType& rhs)
+      {
+        this->add(lhs);
+        this->add(rhs);
+      }
+
+      Sum(const Sum& other)
+        : Parent(other)
+      {}
+
+      Sum(Sum&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  template <class Operator>
+  Sum(const BilinearFormBase<Operator>& lhs, const BilinearFormBase<Operator>& rhs)
+    -> Sum<BilinearFormBase<Operator>, BilinearFormBase<Operator>>;
+
+  template <class Operator>
+  inline
+  constexpr
+  auto
+  operator+(const BilinearFormBase<Operator>& lhs, const BilinearFormBase<Operator>& rhs)
+  {
+    return Sum(lhs, rhs);
+  }
 }
 
 #endif

@@ -28,7 +28,6 @@ set(RodinVariational_HEADERS
   ScalarFunction.h
   Trace.h
   Transpose.h
-  TensorBasis.h
   Restriction.h
   VectorFunction.h
   Minus.h

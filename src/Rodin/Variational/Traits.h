@@ -153,8 +153,7 @@ namespace Rodin::FormLanguage
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
-    using Type =
-      std::invoke_result_t<Variational::ShapeFunctionBase<Derived, FES, Space>, const Geometry::Point&>;
+    using Type = std::invoke_result_t<Variational::ShapeFunctionBase<Derived, FES, Space>, size_t>;
   };
 
   template <class T>
@@ -178,15 +177,13 @@ namespace Rodin::FormLanguage
   struct RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
     using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
-    static_assert(Utility::IsSpecialization<ResultType, Variational::TensorBasis>::Value);
-    using BasisType = typename Traits<ResultType>::BasisType;
     using Type =
       typename Internal::RangeOfSAT<
-        IsBooleanRange<BasisType>::Value,
-        IsIntegerRange<BasisType>::Value,
-        IsScalarRange<BasisType>::Value,
-        IsVectorRange<BasisType>::Value,
-        IsMatrixRange<BasisType>::Value>
+        IsBooleanRange<ResultType>::Value,
+        IsIntegerRange<ResultType>::Value,
+        IsScalarRange<ResultType>::Value,
+        IsVectorRange<ResultType>::Value,
+        IsMatrixRange<ResultType>::Value>
       ::Type;
   };
 }

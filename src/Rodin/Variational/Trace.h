@@ -113,28 +113,28 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<Trace<OperandType>>;
 
       constexpr
-      Trace(const OperandType& op)
-        : Parent(op.getFiniteElementSpace()),
-          m_op(op.copy())
+      Trace(const OperandType& operand)
+        : Parent(operand.getFiniteElementSpace()),
+          m_operand(operand.copy())
       {}
 
       constexpr
       Trace(const Trace& other)
         : Parent(other),
-          m_op(other.m_op->copy())
+          m_operand(other.m_operand->copy())
       {}
 
       constexpr
       Trace(Trace&& other)
         : Parent(std::move(other)),
-          m_op(std::move(other.m_op))
+          m_operand(std::move(other.m_operand))
       {}
 
       inline
       constexpr
       const OperandType& getOperand() const
       {
-        return *m_op;
+        return *m_operand;
       }
 
       inline
@@ -159,15 +159,23 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      const Geometry::Point& getPoint() const
       {
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
-        const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        const auto& tb = m_op->getTensorBasis(p);
-        return TensorBasis(fe.getCount(),
-            [&](size_t local) { return this->object(tb(local)).transpose(); } );
+        return m_operand->getPoint();
+      }
+
+      inline
+      Trace& setPoint(const Geometry::Point& p)
+      {
+        m_operand->setPoint(p);
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        return this->object(getOperand().getBasis(local)).transpose();
       }
 
       const FES& getFiniteElementSpace() const
@@ -180,7 +188,7 @@ namespace Rodin::Variational
         return new Trace(*this);
       }
     private:
-      std::unique_ptr<OperandType> m_op;
+      std::unique_ptr<OperandType> m_operand;
   };
 
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>

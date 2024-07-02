@@ -83,17 +83,19 @@ namespace Rodin::Variational
   /**
    * @brief Base class for bilinear form integrators.
    */
-  template <class Derived>
+  template <class Number, class Derived>
   class BilinearFormIntegratorBase;
 
+  template <class Number>
   class LocalBilinearFormIntegratorBase;
 
+  template <class Number>
   class GlobalBilinearFormIntegratorBase;
 
   template <class Derived>
   class FiniteElementBase;
 
-  template <class FES>
+  template <class FESType>
   class FiniteElement;
 
   class FiniteElementCollectionBase;
@@ -182,9 +184,6 @@ namespace Rodin::Variational
    * @brief Shorthand variable for ShapeFunctionSpaceType::Test.
    */
   static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
-
-  template <class Value>
-  class TensorBasis;
 
   /**
    * @brief Base class for shape function objects.

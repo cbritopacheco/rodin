@@ -226,16 +226,27 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      const Geometry::Point& getPoint() const
       {
+        return m_p.value().get();
+      }
+
+      Jacobian& setPoint(const Geometry::Point& p)
+      {
+        m_p = p;
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        const auto& p = m_p.value().get();
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
         const Math::Vector<Scalar>& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return TensorBasis(fe.getCount(),
-            [&](size_t local)
-            { return this->object(fe.getJacobian(local)(rc)) * p.getJacobianInverse(); });
+        return this->object(fe.getJacobian(local)(rc)) * p.getJacobianInverse();
       }
 
       inline Jacobian* copy() const noexcept override
@@ -245,6 +256,8 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
+
+      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
   };
 
   template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>

@@ -162,15 +162,23 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      const Geometry::Point& getPoint() const
       {
-        using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
-        static_assert(
-            std::is_same_v<OperandRangeType, Math::Vector<Scalar>> ||
-            std::is_same_v<OperandRangeType, Math::Matrix<Scalar>>);
-        const auto& op = this->object(getOperand().getTensorBasis(p));
-        return TensorBasis(op.getDOFs(), [&](size_t i){ return op(i).transpose(); });
+        return m_operand->getPoint();
+      }
+
+      inline
+      Transpose& setPoint(const Geometry::Point& p)
+      {
+        m_operand->setPoint(p);
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        return this->object(getOperand().getBasis(local)).transpose();
       }
 
       inline

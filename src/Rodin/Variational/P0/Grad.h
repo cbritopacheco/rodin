@@ -235,20 +235,30 @@ namespace Rodin::Variational
       }
 
       inline
-      auto getTensorBasis(const Geometry::Point& p) const
+      const Geometry::Point& getPoint() const
       {
+        assert(m_p.has_value());
+        return m_p.value().get();
+      }
+
+      inline
+      Grad& setPoint(const Geometry::Point& p)
+      {
+        m_p = p;
+        return *this;
+      }
+
+      inline
+      auto getBasis(size_t local) const
+      {
+        const auto& p = m_p.value().get();
         assert(p.getPolytope().isCell());
         const size_t d = p.getPolytope().getDimension();
         const auto& fes = this->getFiniteElementSpace();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
-        const size_t dofs = fe.getCount();
         const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        s_gradient.resize(dofs);
-        for (size_t local = 0; local < dofs; local++)
-          s_gradient[local] = fe.getGradient(local)(rc);
-        return TensorBasis(dofs,
-            [&](size_t local) { return p.getJacobianInverse().transpose() * s_gradient[local]; });
+        return p.getJacobianInverse().transpose() * this->object(fe.getGradient(local)(rc));
       }
 
       inline Grad* copy() const noexcept override
@@ -257,14 +267,10 @@ namespace Rodin::Variational
       }
 
     private:
-      thread_local static std::vector<Math::SpatialVector<Range>> s_gradient;
       std::reference_wrapper<const OperandType> m_u;
-  };
 
-  template <class NestedDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>
-  thread_local
-  std::vector<Math::SpatialVector<Range>>
-  Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>>::s_gradient;
+      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
+  };
 
   template <class NestedDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>
   Grad(const ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>&)
