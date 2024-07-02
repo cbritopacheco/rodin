@@ -25,11 +25,11 @@ namespace Rodin::Models::Distance
       auto operator()(const Variational::GridFunction<FES>& gf)
       {
         Variational::GridFunction dist(gf.getFiniteElementSpace());
-        Math::SpatialVector<Scalar> gu;
+        Math::SpatialVector<Real> gu;
         dist =
           [&](const Geometry::Point& p)
           {
-            const Scalar u = gf(p);
+            const Real u = gf(p);
             Variational::Grad grad(gf);
             grad.getValue(gu, p);
             return u / Math::sqrt(u * u + gu.squaredNorm());

@@ -43,9 +43,9 @@ namespace Rodin::Variational
         return m_dimension;
       }
 
-      Math::SpatialVector<Scalar> getValue(const Geometry::Point& p) const
+      Math::SpatialVector<Real> getValue(const Geometry::Point& p) const
       {
-        Math::SpatialVector<Scalar> res;
+        Math::SpatialVector<Real> res;
         // this->getValue(res, p);
         return res;
       }

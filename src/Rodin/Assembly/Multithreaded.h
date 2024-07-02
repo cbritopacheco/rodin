@@ -52,21 +52,26 @@ namespace Rodin::Assembly
 
   template <class TrialFES, class TestFES>
   class Multithreaded<
-    std::vector<Eigen::Triplet<Scalar>>,
-    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
+    std::vector<Eigen::Triplet<Real>>,
+    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>
     : public AssemblyBase<
-        std::vector<Eigen::Triplet<Scalar>>,
-        Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
+        std::vector<Eigen::Triplet<Real>>,
+        Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>
   {
     public:
-      using Parent =
-        AssemblyBase<
-          std::vector<Eigen::Triplet<Scalar>>,
-          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>;
+      using NumberType = Real;
+
+      using OperatorType = std::vector<Eigen::Triplet<NumberType>>;
+
+      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+
+      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<NumberType>;
+
+      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<NumberType>;
+
+      using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
       using InputType = typename Parent::InputType;
-
-      using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
 
 #ifdef RODIN_MULTITHREADED
       Multithreaded()
@@ -114,7 +119,7 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const InputType& input) const override
       {
-        using TripletVector = std::vector<Eigen::Triplet<Scalar>>;
+        using TripletVector = std::vector<Eigen::Triplet<NumberType>>;
         const size_t capacity = input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
         TripletVector res;
         res.clear();
@@ -138,10 +143,18 @@ namespace Rodin::Assembly
                   if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
-                    const auto& trialDOFs = input.getTrialFES().getDOFs(d, i);
-                    const auto& testDOFs = input.getTestFES().getDOFs(d, i);
-                    tl_lbfi->assemble(*it);
-                    Math::Kernels::add(tl_triplets, tl_lbfi->getMatrix(), testDOFs, trialDOFs);
+                    tl_lbfi->setPolytope(*it);
+                    const auto& rows = input.getTestFES().getDOFs(d, i);
+                    const auto& cols = input.getTrialFES().getDOFs(d, i);
+                    for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+                    {
+                      for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
+                      {
+                        const NumberType s = tl_lbfi->integrate(m, l);
+                        if (s != NumberType(0))
+                          tl_triplets.emplace_back(rows(l), cols(m), s);
+                      }
+                    }
                   }
                 }
               }
@@ -189,10 +202,18 @@ namespace Rodin::Assembly
                     {
                       if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                       {
-                        const auto& trialDOFs = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
-                        const auto& testDOFs = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
-                        tl_gbfi->assemble(*trIt, *teIt);
-                        Math::Kernels::add(tl_triplets, tl_gbfi->getMatrix(), testDOFs, trialDOFs);
+                        tl_gbfi->setPolytope(*trIt, *teIt);
+                        const auto& rows = input.getTestFES().getDOFs(d, i);
+                        const auto& cols = input.getTrialFES().getDOFs(d, i);
+                        for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+                        {
+                          for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
+                          {
+                            const NumberType s = tl_gbfi->integrate(m, l);
+                            if (s != NumberType(0))
+                              tl_triplets.emplace_back(rows(l), cols(m), s);
+                          }
+                        }
                       }
                     }
                   }
@@ -236,9 +257,9 @@ namespace Rodin::Assembly
       }
 
     private:
-      static thread_local std::vector<Eigen::Triplet<Scalar>> tl_triplets;
-      static thread_local std::unique_ptr<Variational::LocalBilinearFormIntegratorBase> tl_lbfi;
-      static thread_local std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase> tl_gbfi;
+      static thread_local OperatorType tl_triplets;
+      static thread_local std::unique_ptr<LocalBilinearFormIntegratorBaseType>  tl_lbfi;
+      static thread_local std::unique_ptr<GlobalBilinearFormIntegratorBaseType> tl_gbfi;
 
       mutable Threads::Mutex m_mutex;
       mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
@@ -246,45 +267,47 @@ namespace Rodin::Assembly
 
   template <class TrialFES, class TestFES>
   thread_local
-  std::vector<Eigen::Triplet<Scalar>>
+  std::vector<Eigen::Triplet<Real>>
   Multithreaded<
-    std::vector<Eigen::Triplet<Scalar>>,
-    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>::tl_triplets;
+    std::vector<Eigen::Triplet<Real>>,
+    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>::tl_triplets;
 
   template <class TrialFES, class TestFES>
   thread_local
-  std::unique_ptr<Variational::LocalBilinearFormIntegratorBase>
+  std::unique_ptr<Variational::LocalBilinearFormIntegratorBase<Real>>
   Multithreaded<
-    std::vector<Eigen::Triplet<Scalar>>,
-    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>::tl_lbfi;
+    std::vector<Eigen::Triplet<Real>>,
+    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>::tl_lbfi;
 
   template <class TrialFES, class TestFES>
   thread_local
-  std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase>
+  std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase<Real>>
   Multithreaded<
-    std::vector<Eigen::Triplet<Scalar>>,
-    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>::tl_gbfi;
+    std::vector<Eigen::Triplet<Real>>,
+    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>::tl_gbfi;
 
   /**
-   * @brief Multithreaded assembly of the Math::SparseMatrix<Scalar> associated to a
+   * @brief Multithreaded assembly of the Math::SparseMatrix<Real> associated to a
    * BilinearFormBase object.
    */
   template <class TrialFES, class TestFES>
   class Multithreaded<
-    Math::SparseMatrix<Scalar>,
-    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
+    Math::SparseMatrix<Real>,
+    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>>
     : public AssemblyBase<
-        Math::SparseMatrix<Scalar>,
-        Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
+        Math::SparseMatrix<Real>,
+        Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>>
   {
     public:
-      using Parent =
-        AssemblyBase<
-          Math::SparseMatrix<Scalar>,
-          Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Scalar>>>;
+      using NumberType = Real;
+
+      using OperatorType = Math::SparseMatrix<NumberType>;
+
+      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+
+      using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
       using InputType = typename Parent::InputType;
-      using OperatorType = Math::SparseMatrix<Scalar>;
 
 #ifdef RODIN_MULTITHREADED
       Multithreaded()
@@ -336,26 +359,31 @@ namespace Rodin::Assembly
       }
 
     private:
-      Multithreaded<
-        std::vector<Eigen::Triplet<Scalar>>,
-        Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>> m_assembly;
+      Multithreaded<OperatorType, BilinearFormType> m_assembly;
   };
 
   template <class TrialFES, class TestFES>
   class Multithreaded<
-    Math::Matrix<Scalar>,
-    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>
+    Math::Matrix<Real>,
+    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Real>>>
     : public AssemblyBase<
-        Math::Matrix<Scalar>,
-        Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>
+        Math::Matrix<Real>,
+        Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Real>>>
   {
     public:
-      using Parent =
-        AssemblyBase<
-          Math::Matrix<Scalar>,
-          Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>;
+      using NumberType = Real;
+
+      using OperatorType = Math::Matrix<NumberType>;
+
+      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<NumberType>;
+
+      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<NumberType>;
+
+      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+
+      using Parent = AssemblyBase<OperatorType, BilinearFormType>;
+
       using InputType = typename Parent::InputType;
-      using OperatorType = Math::Matrix<Scalar>;
 
 #ifdef RODIN_MULTITHREADED
       Multithreaded()
@@ -403,7 +431,7 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const InputType& input) const override
       {
-        Math::Matrix<Scalar> res(input.getTestFES().getSize(), input.getTrialFES().getSize());
+        OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
         auto& threadPool = getThreadPool();
         const auto& mesh = input.getTestFES().getMesh();
@@ -425,10 +453,12 @@ namespace Rodin::Assembly
                   if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
-                    const auto& trialDOFs = input.getTrialFES().getDOFs(d, i);
-                    const auto& testDOFs = input.getTestFES().getDOFs(d, i);
-                    tl_lbfi->assemble(*it);
-                    Math::Kernels::add(tl_res, tl_lbfi->getMatrix(), testDOFs, trialDOFs);
+                    tl_lbfi->setPolytope(*it);
+                    const auto& rows = input.getTestFES().getDOFs(d, i);
+                    const auto& cols = input.getTrialFES().getDOFs(d, i);
+                    for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+                      for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
+                        tl_res(rows(l), cols(m)) += tl_lbfi->integrate(m, l);
                   }
                 }
               }
@@ -474,10 +504,12 @@ namespace Rodin::Assembly
                     {
                       if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                       {
-                        const auto& trialDOFs = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
-                        const auto& testDOFs = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
-                        tl_gbfi->assemble(*trIt, *teIt);
-                        Math::Kernels::add(tl_res, tl_gbfi->getMatrix(), testDOFs, trialDOFs);
+                        tl_gbfi->setPolytope(*trIt, *teIt);
+                        const auto& rows = input.getTestFES().getDOFs(d, i);
+                        const auto& cols = input.getTrialFES().getDOFs(d, i);
+                        for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+                          for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
+                            tl_res(rows(l), cols(m)) += tl_gbfi->integrate(m, l);
                       }
                     }
                   }
@@ -518,9 +550,9 @@ namespace Rodin::Assembly
       }
 
     private:
-      static thread_local Math::Matrix<Scalar> tl_res;
-      static thread_local std::unique_ptr<Variational::LocalBilinearFormIntegratorBase> tl_lbfi;
-      static thread_local std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase> tl_gbfi;
+      static thread_local OperatorType tl_res;
+      static thread_local std::unique_ptr<LocalBilinearFormIntegratorBaseType> tl_lbfi;
+      static thread_local std::unique_ptr<GlobalBilinearFormIntegratorBaseType> tl_gbfi;
 
       mutable Threads::Mutex m_mutex;
       mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
@@ -528,18 +560,18 @@ namespace Rodin::Assembly
 
    template <class TrialFES, class TestFES>
    thread_local
-   Math::Matrix<Scalar>
-   Multithreaded<Math::Matrix<Scalar>, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>::tl_res;
+   Math::Matrix<Real>
+   Multithreaded<Math::Matrix<Real>, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Real>>>::tl_res;
 
    template <class TrialFES, class TestFES>
    thread_local
-   std::unique_ptr<Variational::LocalBilinearFormIntegratorBase>
-   Multithreaded<Math::Matrix<Scalar>, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>::tl_lbfi;
+   std::unique_ptr<Variational::LocalBilinearFormIntegratorBase<Real>>
+   Multithreaded<Math::Matrix<Real>, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Real>>>::tl_lbfi;
 
    template <class TrialFES, class TestFES>
    thread_local
-   std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase>
-   Multithreaded<Math::Matrix<Scalar>, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Scalar>>>::tl_gbfi;
+   std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase<Real>>
+   Multithreaded<Math::Matrix<Real>, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Real>>>::tl_gbfi;
 
   /**
    * @brief %Multithreaded assembly of the Math::Vector associated to a
@@ -633,9 +665,10 @@ namespace Rodin::Assembly
                   if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
+                    tl_lfi->setPolytope(*it);
                     const auto& dofs = input.getFES().getDOFs(d, i);
-                    tl_lfi->assemble(*it);
-                    Math::Kernels::add(tl_res, tl_lfi->getVector(), dofs);
+                    for (size_t l = 0; l < static_cast<size_t>(dofs.size()); l++)
+                      tl_res(dofs(l)) += tl_lfi->integrate(l);
                   }
                 }
               }

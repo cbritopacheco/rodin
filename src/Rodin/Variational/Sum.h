@@ -155,7 +155,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector<Scalar>& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
         static_assert(FormLanguage::IsVectorRange<LHSRangeType>::Value);
         getLHS().getValue(res, p);
@@ -164,7 +164,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix<Scalar>& res, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
       {
         static_assert(FormLanguage::IsMatrixRange<LHSRangeType>::Value);
         getLHS().getValue(res, p);
@@ -200,7 +200,7 @@ namespace Rodin::Variational
   auto
   operator+(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
-    return Sum(lhs, ScalarFunction(rhs));
+    return Sum(lhs, RealFunction(rhs));
   }
 
   template <class Number, class RHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
@@ -209,7 +209,7 @@ namespace Rodin::Variational
   auto
   operator+(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return Sum(ScalarFunction(lhs), rhs);
+    return Sum(RealFunction(lhs), rhs);
   }
 
   /**

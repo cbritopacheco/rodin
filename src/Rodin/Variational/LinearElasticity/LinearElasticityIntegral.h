@@ -136,7 +136,7 @@ namespace Rodin::Variational
       operator()(const L& lambda, const M& mu) const
       {
         return LinearElasticityIntegrator(m_u.get(), m_v.get(),
-            ScalarFunction<L>(lambda), ScalarFunction<M>(mu));
+            RealFunction<L>(lambda), RealFunction<M>(mu));
       }
 
       template <class LambdaDerived, class MuDerived>

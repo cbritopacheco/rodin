@@ -15,7 +15,7 @@
 
 #include "RangeShape.h"
 #include "Function.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 #include "VectorFunction.h"
 
 namespace Rodin::Variational
@@ -28,11 +28,11 @@ namespace Rodin::Variational
 
   template <>
   class Zero<void> final
-    : public ScalarFunctionBase<Zero<void>>
+    : public RealFunctionBase<Zero<void>>
   {
     public:
       /// Parent class
-      using Parent = ScalarFunctionBase<Zero<void>>;
+      using Parent = RealFunctionBase<Zero<void>>;
 
       Zero() {}
 
@@ -55,7 +55,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point&) const
       {
-        return Scalar(0);
+        return Real(0);
       }
 
       inline Zero* copy() const noexcept override
@@ -101,11 +101,11 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point&) const
       {
-        return Math::Vector<Scalar>::Zero(m_d);
+        return Math::Vector<Real>::Zero(m_d);
       }
 
       inline
-      void getValue(Math::Vector<Scalar>& out, const Geometry::Point&) const
+      void getValue(Math::Vector<Real>& out, const Geometry::Point&) const
       {
         out.resize(m_d);
         out.setZero();

@@ -42,10 +42,10 @@ namespace Rodin::External::MMG
    * @f]
    */
   template <>
-    class Distancer<typename FormLanguage::Traits<ScalarGridFunction>::FESType>
+    class Distancer<typename FormLanguage::Traits<RealGridFunction>::FESType>
     {
       public:
-        using FESType = typename FormLanguage::Traits<ScalarGridFunction>::FESType;
+        using FESType = typename FormLanguage::Traits<RealGridFunction>::FESType;
 
         /**
          * @brief Creates a Distancer2D object with default values.
@@ -142,7 +142,7 @@ namespace Rodin::External::MMG
          * @param[in] box Bounding box @f$ D @f$ containing @f$ \Omega @f$.
          * @returns Signed distance function representing @f$ \Omega @f$.
          */
-        ScalarGridFunction distance(const Geometry::Mesh<Context::Sequential>& box)
+        RealGridFunction distance(const Geometry::Mesh<Context::Sequential>& box)
         {
           if (box != m_fes.get().getMesh())
           {
@@ -202,7 +202,7 @@ namespace Rodin::External::MMG
                   );
             }
           }
-          ScalarGridFunction res(m_fes.get());
+          RealGridFunction res(m_fes.get());
           if (retcode != 0)
             Alert::MemberFunctionException(*this, __func__) << "ISCD::Mshdist invocation failed." << Alert::Raise;
           else
@@ -225,7 +225,7 @@ namespace Rodin::External::MMG
          * @note The contour mesh is allowed to contain a volume part, in which
          * case only the edge (S) or triangle (3D) information will be retained.
          */
-        ScalarGridFunction distance(
+        RealGridFunction distance(
             const Geometry::Mesh<Context::Sequential>& box,
             const Geometry::Mesh<Context::Sequential>& contour)
         {
@@ -279,8 +279,8 @@ namespace Rodin::External::MMG
         std::optional<FlatSet<Geometry::Attribute>> m_interiorDomains;
     };
 
-  Distancer(const typename FormLanguage::Traits<ScalarGridFunction>::FESType&)
-    -> Distancer<typename FormLanguage::Traits<ScalarGridFunction>::FESType>;
+  Distancer(const typename FormLanguage::Traits<RealGridFunction>::FESType&)
+    -> Distancer<typename FormLanguage::Traits<RealGridFunction>::FESType>;
 
   /**
    * @brief Distancer specialization for redistancing a level set function.
@@ -305,7 +305,7 @@ namespace Rodin::External::MMG
      *
      * @param[in,out] sol Level set function
      */
-     void redistance(ScalarGridFunction& sol)
+     void redistance(RealGridFunction& sol)
      {
        auto meshp = m_mshdist.tmpnam(".mesh", "RodinMMG");
        sol.getFiniteElementSpace().getMesh().save(meshp, IO::FileFormat::MEDIT);

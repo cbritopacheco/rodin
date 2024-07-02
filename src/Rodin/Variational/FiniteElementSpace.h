@@ -180,7 +180,7 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in Derived class.
        */
       inline
-      auto operator()(const Math::SpatialVector<Scalar>& r) const
+      auto operator()(const Math::SpatialVector<Real>& r) const
       {
         return static_cast<const Derived&>(*this).operator()(r);
       }

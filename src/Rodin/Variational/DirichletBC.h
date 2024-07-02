@@ -41,7 +41,7 @@ namespace Rodin::Variational
   class DirichletBCBase : public FormLanguage::Base
   {
     public:
-      using DOFs = IndexMap<Scalar>;
+      using DOFs = IndexMap<Real>;
 
       /**
        * @brief Assembles the Dirichlet boundary condition.
@@ -227,7 +227,7 @@ namespace Rodin::Variational
               if (find == m_dofs.end())
               {
                 const auto& lf = fe.getLinearForm(local);
-                const Scalar s = lf(mapping);
+                const Real s = lf(mapping);
                 m_dofs.insert(find, std::pair{ global, s });
               }
             }
@@ -270,7 +270,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const OperandType> m_u;
       std::unique_ptr<ValueType> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
-      IndexMap<Scalar> m_dofs;
+      IndexMap<Real> m_dofs;
   };
 
   /**

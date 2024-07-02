@@ -7,7 +7,7 @@
 #include "GridFunction.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -29,7 +29,7 @@ namespace Rodin::Variational
    */
   template <class Derived, class FES>
   class DivBase<Derived, GridFunction<FES>>
-    : public ScalarFunctionBase<DivBase<Derived, GridFunction<FES>>>
+    : public RealFunctionBase<DivBase<Derived, GridFunction<FES>>>
   {
     public:
       using FESType = FES;
@@ -37,7 +37,7 @@ namespace Rodin::Variational
       using OperandType = GridFunction<FES>;
 
       /// Parent class
-      using Parent = ScalarFunctionBase<DivBase<Derived, OperandType>>;
+      using Parent = RealFunctionBase<DivBase<Derived, OperandType>>;
 
       /**
        * @brief Constructs the Div of a @f$ \mathbb{P}_1 @f$ function @f$ u
@@ -65,9 +65,9 @@ namespace Rodin::Variational
       {}
 
       inline
-      Scalar getValue(const Geometry::Point& p) const
+      Real getValue(const Geometry::Point& p) const
       {
-        Scalar out;
+        Real out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -107,7 +107,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto interpolate(Scalar& out, const Geometry::Point& p) const
+      auto interpolate(Real& out, const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).interpolate(out, p);
       }

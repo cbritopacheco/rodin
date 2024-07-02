@@ -35,9 +35,9 @@ namespace Rodin::FormLanguage
   };
 
   template <>
-  struct Traits<Scalar>
+  struct Traits<Real>
   {
-    using NumberType = Scalar;
+    using NumberType = Real;
   };
 
   template <>

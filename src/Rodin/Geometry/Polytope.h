@@ -176,7 +176,7 @@ namespace Rodin::Geometry
        *
        * @return The measure of the polytope.
        */
-      Scalar getMeasure() const;
+      Real getMeasure() const;
 
       const PolytopeTransformation& getTransformation() const;
 
@@ -279,7 +279,7 @@ namespace Rodin::Geometry
        * @brief Acess the 1st-coordinate of the vertex.
        */
       inline
-      Scalar x() const
+      Real x() const
       {
         return operator()(0);
       }
@@ -288,7 +288,7 @@ namespace Rodin::Geometry
        * @brief Acess the 2nd-coordinate of the vertex.
        */
       inline
-      Scalar y() const
+      Real y() const
       {
         return operator()(1);
       }
@@ -297,7 +297,7 @@ namespace Rodin::Geometry
        * @brief Acess the 3rd-coordinate of the vertex.
        */
       inline
-      Scalar z() const
+      Real z() const
       {
         return operator()(2);
       }
@@ -306,12 +306,12 @@ namespace Rodin::Geometry
        * @brief Acess the ith-coordinate of the vertex.
        */
       inline
-      Scalar operator()(size_t i) const
+      Real operator()(size_t i) const
       {
         return getCoordinates()(i);
       }
 
-      Eigen::Map<const Math::SpatialVector<Scalar>> getCoordinates() const;
+      Eigen::Map<const Math::SpatialVector<Real>> getCoordinates() const;
 
       inline
       constexpr

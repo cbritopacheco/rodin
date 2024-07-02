@@ -34,8 +34,8 @@ namespace Rodin::Variational
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
       static_assert(
-          std::is_same_v<OperandRangeType, Math::Vector<Scalar>>
-          || std::is_same_v<OperandRangeType, Math::Matrix<Scalar>>);
+          std::is_same_v<OperandRangeType, Math::Vector<Real>>
+          || std::is_same_v<OperandRangeType, Math::Matrix<Real>>);
 
       /**
        * @brief Constructs the Transpose matrix of the given matrix.
@@ -81,7 +81,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix<Scalar>& out, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Real>& out, const Geometry::Point& p) const
       {
         getOperand().getValue(out, p);
         out.transposeInPlace();

@@ -2,8 +2,8 @@
 
 namespace Rodin::Variational
 {
-  const Geometry::GeometryIndexed<std::vector<ScalarP1Element::LinearForm>>
-  ScalarP1Element::s_ls =
+  const Geometry::GeometryIndexed<std::vector<RealP1Element::LinearForm>>
+  RealP1Element::s_ls =
   {
     { Geometry::Polytope::Type::Point,
       {
@@ -41,8 +41,8 @@ namespace Rodin::Variational
     }
   };
 
-  const Geometry::GeometryIndexed<std::vector<ScalarP1Element::BasisFunction>>
-  ScalarP1Element::s_basis =
+  const Geometry::GeometryIndexed<std::vector<RealP1Element::BasisFunction>>
+  RealP1Element::s_basis =
   {
     { Geometry::Polytope::Type::Point,
       {
@@ -80,8 +80,8 @@ namespace Rodin::Variational
     }
   };
 
-  const Geometry::GeometryIndexed<std::vector<ScalarP1Element::GradientFunction>>
-  ScalarP1Element::s_gradient =
+  const Geometry::GeometryIndexed<std::vector<RealP1Element::GradientFunction>>
+  RealP1Element::s_gradient =
   {
     { Geometry::Polytope::Type::Point,
       {
@@ -119,7 +119,7 @@ namespace Rodin::Variational
     }
   };
 
-  const Geometry::GeometryIndexed<Math::PointMatrix> ScalarP1Element::s_nodes =
+  const Geometry::GeometryIndexed<Math::PointMatrix> RealP1Element::s_nodes =
   {
     { Geometry::Polytope::Type::Point,
       Math::PointMatrix{{0}} },
@@ -186,7 +186,7 @@ namespace Rodin::Variational
             }
             default:
             {
-              auto sfe = ScalarP1Element(g);
+              auto sfe = RealP1Element(g);
               const size_t n = Geometry::Polytope::getVertexCount(g);
               const size_t d = Geometry::Polytope::getGeometryDimension(g);
               res[vdim][g].resize(d, n * vdim);
@@ -256,7 +256,7 @@ namespace Rodin::Variational
 
 namespace Rodin::Variational
 {
-  Scalar ScalarP1Element::BasisFunction::operator()(const Math::SpatialVector<Scalar>& r) const
+  Real RealP1Element::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
   {
     switch (m_g)
     {
@@ -312,8 +312,8 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            const Scalar x = r.x();
-            const Scalar y = r.y();
+            const Real x = r.x();
+            const Real y = r.y();
             return x * y - x - y + 1;
           }
           case 1:
@@ -368,7 +368,7 @@ namespace Rodin::Variational
   }
 
   void
-  ScalarP1Element::GradientFunction::operator()(Math::SpatialVector<Scalar>& out, const Math::SpatialVector<Scalar>& r) const
+  RealP1Element::GradientFunction::operator()(Math::SpatialVector<Real>& out, const Math::SpatialVector<Real>& r) const
   {
     switch (m_g)
     {
@@ -512,7 +512,7 @@ namespace Rodin::Variational
     out.setConstant(NAN);
   }
 
-  Complex ComplexP1Element::BasisFunction::operator()(const Math::SpatialVector<Scalar>& r) const
+  Complex ComplexP1Element::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
   {
     using namespace std::complex_literals;
     switch (m_g)
@@ -592,14 +592,14 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            const Scalar x = r.x();
-            const Scalar y = r.y();
+            const Real x = r.x();
+            const Real y = r.y();
             return x * y - x - y + 1;
           }
           case 1:
           {
-            const Scalar x = r.x();
-            const Scalar y = r.y();
+            const Real x = r.x();
+            const Real y = r.y();
             return Complex(0, x * y - x - y + 1);
           }
           case 2:
@@ -674,7 +674,7 @@ namespace Rodin::Variational
   }
 
   void
-  ComplexP1Element::GradientFunction::operator()(Math::SpatialVector<Complex>& out, const Math::SpatialVector<Scalar>& r) const
+  ComplexP1Element::GradientFunction::operator()(Math::SpatialVector<Complex>& out, const Math::SpatialVector<Real>& r) const
   {
     using namespace std::complex_literals;
     switch (m_g)
@@ -896,9 +896,9 @@ namespace Rodin::Variational
     out.setConstant(NAN);
   }
 
-  void VectorP1Element::BasisFunction::operator()(Math::Vector<Scalar>& out, const Math::SpatialVector<Scalar>& r) const
+  void VectorP1Element::BasisFunction::operator()(Math::Vector<Real>& out, const Math::SpatialVector<Real>& r) const
   {
-    out = Math::Vector<Scalar>::Zero(m_vdim);
+    out = Math::Vector<Real>::Zero(m_vdim);
     const size_t i = m_i % m_vdim;
     const size_t k = m_i / m_vdim;
     assert(k < Geometry::Polytope::getVertexCount(m_g));
@@ -1027,9 +1027,9 @@ namespace Rodin::Variational
     out.setConstant(NAN);
   }
 
-  void VectorP1Element::JacobianFunction::operator()(Math::SpatialMatrix<Scalar>& out, const Math::SpatialVector<Scalar>& rc) const
+  void VectorP1Element::JacobianFunction::operator()(Math::SpatialMatrix<Real>& out, const Math::SpatialVector<Real>& rc) const
   {
-    out = Math::SpatialMatrix<Scalar>::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
+    out = Math::SpatialMatrix<Real>::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
     const size_t i = m_i % m_vdim;
     const size_t k = m_i / m_vdim;
     assert(k < Geometry::Polytope::getVertexCount(m_g));

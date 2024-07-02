@@ -31,7 +31,7 @@ namespace Rodin::Variational
 {
   template <class TrialFES, class TestFES>
   DenseProblem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> DenseProblem<TrialFES, TestFES, Math::Matrix<Scalar>, Math::Vector<Scalar>>;
+    -> DenseProblem<TrialFES, TestFES, Math::Matrix<Real>, Math::Vector<Real>>;
 
   /**
    * @defgroup DenseProblemSpecializations DenseProblem Template Specializations
@@ -41,8 +41,8 @@ namespace Rodin::Variational
 
   /**
    * @ingroup DenseProblemSpecializations
-   * @brief General class to assemble linear systems with `Math::Matrix<Scalar>`
-   * and `Math::Vector<Scalar>` types in a serial context.
+   * @brief General class to assemble linear systems with `Math::Matrix<Real>`
+   * and `Math::Vector<Real>` types in a serial context.
    */
   template <class TrialFES, class TestFES>
   class DenseProblem<
@@ -67,13 +67,13 @@ namespace Rodin::Variational
 
       using ContextType = Context::Sequential;
 
-      using OperatorType = Math::Matrix<Scalar>;
+      using OperatorType = Math::Matrix<Real>;
 
-      using VectorType = Math::Vector<Scalar>;
+      using VectorType = Math::Vector<Real>;
 
       using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESNumberType>;
 
-      using Parent = ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
+      using Parent = ProblemBase<Math::Matrix<Real>, Math::Vector<Real>>;
 
       /**
        * @brief Constructs an empty DenseProblem involving the trial function @f$ u @f$
@@ -191,7 +191,7 @@ namespace Rodin::Variational
               // Eliminate the parent column, adding it to the child columns
               for (size_t i = 0; i < count; i++)
               {
-                const Scalar coeff = coeffs.coeff(i);
+                const Real coeff = coeffs.coeff(i);
                 const Index child = children.coeff(i);
                 m_stiffness.col(child) += coeff * m_stiffness.col(parent);
               }
@@ -199,13 +199,13 @@ namespace Rodin::Variational
               m_stiffness.col(parent).setZero();
 
               // Eliminate the parent row, adding it to the child rows
-              IndexMap<Scalar> parentLookup;
-              std::vector<IndexMap<Scalar>> childrenLookup(children.size());
+              IndexMap<Real> parentLookup;
+              std::vector<IndexMap<Real>> childrenLookup(children.size());
               for (size_t col = 0; col < static_cast<size_t>(m_stiffness.cols()); col++)
               {
                 bool parentFound = false;
                 size_t childrenFound = 0;
-                for (Math::Matrix<Scalar>::InnerIterator it(m_stiffness, col); it; ++it)
+                for (Math::Matrix<Real>::InnerIterator it(m_stiffness, col); it; ++it)
                 {
                   if (parentFound && childrenFound == count)
                   {
@@ -240,7 +240,7 @@ namespace Rodin::Variational
               {
                 for (size_t i = 0; i < count; i++)
                 {
-                  const Scalar coeff = coeffs.coeff(i);
+                  const Real coeff = coeffs.coeff(i);
                   childrenLookup[i][col] += coeff * value;
                 }
               }
@@ -255,7 +255,7 @@ namespace Rodin::Variational
               // Eliminate the parent entry, adding it to the child entries
               for (size_t i = 0; i < count; i++)
               {
-                const Scalar coeff = coeffs.coeff(i);
+                const Real coeff = coeffs.coeff(i);
                 const Index child = children.coeff(i);
                 m_mass.coeffRef(child) += coeff * m_mass.coeff(parent);
               }
@@ -269,7 +269,7 @@ namespace Rodin::Variational
               assert(children.size() >= 0);
               for (size_t i = 0; i < static_cast<size_t>(children.size()); i++)
               {
-                const Scalar coeff = coeffs.coeff(i);
+                const Real coeff = coeffs.coeff(i);
                 const Index child = children.coeff(i);
                 m_stiffness.coeffRef(parent, child) = -coeff;
               }

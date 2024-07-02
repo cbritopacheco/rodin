@@ -103,7 +103,7 @@ namespace Rodin::Variational
   auto
   operator<(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return LT(ScalarFunction(lhs), rhs);
+    return LT(RealFunction(lhs), rhs);
   }
 
   template <class LHSDerived, class Number,
@@ -113,7 +113,7 @@ namespace Rodin::Variational
   auto
   operator<(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
-    return LT(lhs, ScalarFunction(rhs));
+    return LT(lhs, RealFunction(rhs));
   }
 }
 

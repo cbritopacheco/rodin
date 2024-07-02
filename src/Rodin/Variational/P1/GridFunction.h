@@ -98,9 +98,9 @@ namespace Rodin::Variational
 
       GridFunction& operator=(const GridFunction&)  = delete;
 
-      Scalar interpolate(const Geometry::Point& p) const
+      Real interpolate(const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>);
+        static_assert(std::is_same_v<RangeType, Real>);
         const auto& fes = this->getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
         const auto& polytope = p.getPolytope();
@@ -109,7 +109,7 @@ namespace Rodin::Variational
         const Index i = polytope.getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
         const auto& r = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        Scalar res = 0;
+        Real res = 0;
         for (Index local = 0; local < fe.getCount(); local++)
         {
           const auto& basis = fe.getBasis(local);
@@ -118,9 +118,9 @@ namespace Rodin::Variational
         return res;
       }
 
-      void interpolate(Math::Vector<Scalar>& res, const Geometry::Point& p) const
+      void interpolate(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
         const auto& fes = this->getFiniteElementSpace();
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
@@ -142,12 +142,12 @@ namespace Rodin::Variational
       {
         auto& data = this->getData();
         auto& weights = this->getWeights().emplace(this->getFiniteElementSpace().getSize());
-        if constexpr (std::is_same_v<RangeType, Scalar>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(data.rows() == 1);
           std::copy(data.data(), data.data() + data.size(), weights.data());
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
           const auto& fes = this->getFiniteElementSpace();
           const size_t vdim = fes.getVectorDimension();
@@ -169,12 +169,12 @@ namespace Rodin::Variational
         assert(static_cast<size_t>(weights.size()) == this->getFiniteElementSpace().getSize());
         auto& data = this->getData();
         const auto& w = this->getWeights().emplace(std::forward<Vector>(weights));
-        if constexpr (std::is_same_v<RangeType, Scalar>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(data.rows() == 1);
           std::copy(w.data(), w.data() + w.size(), data.data());
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
           const size_t sz = w.size();
           const auto& fes = this->getFiniteElementSpace();

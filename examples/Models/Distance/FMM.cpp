@@ -33,9 +33,9 @@ int main(int, char**)
     GridFunction dist(vh);
     dist = [&](const Point& p)
     {
-      Scalar d = (p - Math::SpatialVector<Scalar>{{0.75, 0.25}}).norm() - 0.05;
-      d = std::min(d, (p - Math::SpatialVector<Scalar>{{0.25, 0.25}}).norm() - 0.25);
-      d = std::min(d, (p - Math::SpatialVector<Scalar>{{0.75, 0.75}}).norm() - 0.1);
+      Real d = (p - Math::SpatialVector<Real>{{0.75, 0.25}}).norm() - 0.05;
+      d = std::min(d, (p - Math::SpatialVector<Real>{{0.25, 0.25}}).norm() - 0.25);
+      d = std::min(d, (p - Math::SpatialVector<Real>{{0.75, 0.75}}).norm() - 0.1);
       return d;
     };
 

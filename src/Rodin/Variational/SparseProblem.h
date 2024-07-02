@@ -12,7 +12,7 @@
 namespace Rodin::Variational
 {
   template <class TrialFES, class TestFES>
-  using SparseProblem = Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
+  using SparseProblem = Problem<TrialFES, TestFES, Math::SparseMatrix<Real>, Math::Vector<Real>>;
 }
 
 #endif

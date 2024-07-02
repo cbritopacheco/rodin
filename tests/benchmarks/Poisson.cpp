@@ -23,7 +23,7 @@ namespace RodinBenchmark
   {
     public:
       using MeshType = Mesh<Context::Sequential>;
-      using FESType = P1<Scalar, MeshType>;
+      using FESType = P1<Real, MeshType>;
 
       static constexpr const Geometry::Attribute dirichletAttr = 1;
 
@@ -49,8 +49,8 @@ namespace RodinBenchmark
     const auto& vh = *vhPtr;
     TrialFunction u(vh);
     TestFunction  v(vh);
-    ScalarFunction f(1.0);
-    ScalarFunction zero(0.0);
+    RealFunction f(1.0);
+    RealFunction zero(0.0);
     Problem poisson(u, v);
     poisson = Integral(Grad(u), Grad(v))
             - Integral(f, v)

@@ -486,12 +486,12 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> Problem<TrialFES, TestFES, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
+    -> Problem<TrialFES, TestFES, Math::SparseMatrix<Real>, Math::Vector<Real>>;
 
   template <class U1, class U2, class ... Us>
   class Problem<
-      Tuple<U1, U2, Us...>, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
-    : public ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+      Tuple<U1, U2, Us...>, Math::SparseMatrix<Real>, Math::Vector<Real>>
+    : public ProblemBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
   {
 
     template <class T>
@@ -503,7 +503,7 @@ namespace Rodin::Variational
     static_assert(Utility::ParameterPack<U1, U2, Us...>::template All<IsTrialOrTestFunction>::Value);
 
     public:
-      using NumberType = Scalar;
+      using NumberType = Real;
 
       using ContextType = Context::Sequential;
 
@@ -859,7 +859,7 @@ namespace Rodin::Variational
 
   template <class U1, class U2, class ... Us>
   Problem(U1& u1, U2& u2, Us&... us)
-    -> Problem<Tuple<U1, U2, Us...>, Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
+    -> Problem<Tuple<U1, U2, Us...>, Math::SparseMatrix<Real>, Math::Vector<Real>>;
 }
 
 #include "Problem.hpp"

@@ -34,7 +34,7 @@ namespace Rodin::Variational
    */
   template <class OperandDerived>
   class Component<FunctionBase<OperandDerived>, size_t> final
-    : public ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>
+    : public RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>
   {
     public:
       using OperandType = FunctionBase<OperandDerived>;
@@ -45,7 +45,7 @@ namespace Rodin::Variational
 
       using RangeType = NumberType;
 
-      using Parent = ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>;
+      using Parent = RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>;
 
 
       constexpr
@@ -104,7 +104,7 @@ namespace Rodin::Variational
 
   template <class OperandDerived>
   class Component<FunctionBase<OperandDerived>, size_t, size_t> final
-    : public ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>
+    : public RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>
   {
     public:
       using OperandType = FunctionBase<OperandDerived>;
@@ -115,7 +115,7 @@ namespace Rodin::Variational
 
       using RangeType = NumberType;
 
-      using Parent = ScalarFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>;
+      using Parent = RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>;
 
       constexpr
       Component(const OperandType& fn, size_t i, size_t j)
@@ -174,7 +174,7 @@ namespace Rodin::Variational
    */
   template <class FES>
   class Component<GridFunction<FES>> final
-    : public ScalarFunctionBase<Component<GridFunction<FES>>>
+    : public RealFunctionBase<Component<GridFunction<FES>>>
   {
     public:
       using OperandType = GridFunction<FES>;
@@ -185,7 +185,7 @@ namespace Rodin::Variational
 
       using RangeType = NumberType;
 
-      using Parent = ScalarFunctionBase<Component<OperandType>>;
+      using Parent = RealFunctionBase<Component<OperandType>>;
 
       /**
        * @brief Constructs the component object from a GridFunction and its

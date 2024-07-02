@@ -35,23 +35,23 @@ static constexpr Attribute Air = 2;
 
 static constexpr size_t maxIt = 2000;
 
-static constexpr Scalar epsilon = 1e-6;
-static constexpr Scalar ellP = 0;
-static constexpr Scalar tgv = std::numeric_limits<float>::max();
-static constexpr Scalar alpha = 2;
-static constexpr Scalar angle = 0;
-static constexpr Scalar waveLength = 1;
-static constexpr Scalar resolution = waveLength / 16;
-static constexpr Scalar waveNumber = 2 * Math::Constants::pi() / waveLength;
+static constexpr Real epsilon = 1e-6;
+static constexpr Real ellP = 0;
+static constexpr Real tgv = std::numeric_limits<float>::max();
+static constexpr Real alpha = 2;
+static constexpr Real angle = 0;
+static constexpr Real waveLength = 1;
+static constexpr Real resolution = waveLength / 16;
+static constexpr Real waveNumber = 2 * Math::Constants::pi() / waveLength;
 
-static Scalar bA = epsilon;
-static Scalar bTarget = 1.0;
-static Scalar ellA = 0;
-static Scalar targetArea = NAN;
+static Real bA = epsilon;
+static Real bTarget = 1.0;
+static Real ellA = 0;
+static Real targetArea = NAN;
 
-using ScalarFES = P1<Scalar>;
-using VectorFES = P1<Math::Vector<Scalar>>;
-using ScalarGridFunction = GridFunction<ScalarFES>;
+using RealFES = P1<Real>;
+using VectorFES = P1<Math::Vector<Real>>;
+using RealGridFunction = GridFunction<RealFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
 
@@ -59,26 +59,26 @@ int main(int, char**)
 {
   Eigen::initParallel();
   Eigen::setNbThreads(8);
-  Threads::getGlobalThreadPool().reset(6);
+  // Threads::getGlobalThreadPool().reset(6);
 
   std::cout << Eigen::nbThreads() << std::endl;
   MMG::Mesh mesh;
   mesh.load("../resources/mmg/PlaneBox.medit.mesh", IO::FileFormat::MEDIT);
 
-  Scalar hmax = resolution * waveLength;
-  Scalar hmin = hmax / 50.0;
-  Scalar hausd = hmin;
-  Scalar hgrad = 1.2;
+  Real hmax = resolution * waveLength;
+  Real hmin = hmax / 50.0;
+  Real hausd = hmin;
+  Real hgrad = 1.2;
 
   mesh.save("Omega0.mesh", IO::FileFormat::MEDIT);
 
   std::ofstream fObj("obj.txt");
   size_t i = 0;
   size_t regionCount;
-  Scalar augmented = 0, oldAugmented = 1e+5;
-  Scalar objective = 0, oldObjective = 1e+5;
+  Real augmented = 0, oldAugmented = 1e+5;
+  Real objective = 0, oldObjective = 1e+5;
 
-  Scalar constraint = 0, oldConstraint = 1e+5;
+  Real constraint = 0, oldConstraint = 1e+5;
   while (i < maxIt)
   {
     // bool topologicalStep = (i < 10);// || (i < 200  && i % 20 == 0);
@@ -89,9 +89,9 @@ int main(int, char**)
     hausd = hmin;
     hgrad = 1.2;
 
-    const Scalar k = 0.5 * (hmax + hmin);
-    const Scalar dt = alpha * hmin;
-    const Scalar radius = 0.5 * k;
+    const Real k = 0.5 * (hmax + hmin);
+    const Real dt = alpha * hmin;
+    const Real radius = 0.5 * k;
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
                   << "HMax:      " << Alert::Notation(hmax)     << Alert::NewLine
                   << "HMin:      " << Alert::Notation(hmin)     << Alert::NewLine
@@ -147,10 +147,10 @@ int main(int, char**)
     dPerturbed.save("dOmega.mesh", IO::FileFormat::MEDIT);
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
-    ScalarFES sfes(mesh);
-    ScalarFES spfes(perturbed);
+    RealFES sfes(mesh);
+    RealFES spfes(perturbed);
     VectorFES vpfes(perturbed, perturbed.getSpaceDimension());
-    ScalarFES dsfes(dPerturbed);
+    RealFES dsfes(dPerturbed);
     VectorFES dvfes(dPerturbed, dPerturbed.getSpaceDimension());
 
     Alert::Info() << "Distancing absorbing domain..." << Alert::Raise;
@@ -164,7 +164,7 @@ int main(int, char**)
 
     // Parameters
     VectorFunction xi = { 0, 0, 1 };
-    ScalarFunction phi =
+    RealFunction phi =
       [&](const Point& p)
       { return cos(waveNumber * p.getCoordinates().dot(xi(p))); };
 
@@ -173,10 +173,10 @@ int main(int, char**)
     mesh.save("Wave.mesh");
     wave.save("Wave.gf");
 
-    ScalarFunction gamma = 1;
+    RealFunction gamma = 1;
 
     // Bump function
-    auto h = [](Scalar r)
+    auto h = [](Real r)
     {
       if (r < -1.0)
         return 1.0;
@@ -186,7 +186,7 @@ int main(int, char**)
         return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
     };
 
-    ScalarFunction he =
+    RealFunction he =
       [&](const Geometry::Point& p) { return h(dist(p) / epsilon) / epsilon; };
 
     Alert::Info() << "Solving reference equation..." << Alert::Raise;
@@ -246,9 +246,9 @@ int main(int, char**)
       oldConstraint = constraint;
     }
 
-    const Scalar J = Integral(diff).compute();
-    const Scalar area = mesh.getArea(Absorbing);
-    const Scalar perimeter = dPerturbed.getMeasure(1, dAbsorbing);
+    const Real J = Integral(diff).compute();
+    const Real area = mesh.getArea(Absorbing);
+    const Real perimeter = dPerturbed.getMeasure(1, dAbsorbing);
     objective = J;
     constraint = (area / targetArea - 1);
     augmented = objective;// + ellA * constraint + 0.5 * bA * constraint * constraint;
@@ -283,13 +283,13 @@ int main(int, char**)
       dsfes.getMesh().save("Raw.mesh");
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
-      const Scalar tc = s.getSolution().max();
+      const Real tc = s.getSolution().max();
       std::vector<Point> cs;
       for (auto it = dPerturbed.getVertex(); !it.end(); ++it)
       {
         const Point p(*it, it->getTransformation(),
             Polytope::getVertex(0, Polytope::Type::Point), it->getCoordinates());
-        const Scalar tp = s.getSolution()(p);
+        const Real tp = s.getSolution()(p);
         if (tp > 1e-6 && abs(tp / tc) > (1 - 1e-12))
         {
           cs.emplace_back(std::move(p));

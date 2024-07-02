@@ -105,7 +105,7 @@ int main(int argc, char** argv)
   std::vector<double> obj;
   for (size_t i = 0; i < maxIt; i++)
   {
-   // Scalar field finite element space over the whole domain
+   // Real field finite element space over the whole domain
    H1<Context::Serial> Vh(Omega);
 
    // Trim the exterior part of the mesh to solve the elasticity system

@@ -161,7 +161,7 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
     dist =
       [&](const Point& p)
       {
-        const Scalar d = p.norm() - experiment.azimuth;
+        const Real d = p.norm() - experiment.azimuth;
         return d;
       };
     th = MMG::ImplicitDomainMesher().setAngleDetection(true)
@@ -221,7 +221,7 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
       t += std::min(dt, experiment.T - t);
     }
 
-    auto phit = ScalarFunction(
+    auto phit = RealFunction(
         [&](const Point& p) { return phi(t, p, experiment.azimuth); });
 
     // Compute L2 error

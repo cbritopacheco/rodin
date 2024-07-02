@@ -14,7 +14,7 @@ using namespace Rodin::Variational;
 
 static constexpr Geometry::Attribute Boundary = 2;
 
-static constexpr Scalar m = 1;
+static constexpr Real m = 1;
 
 int main(int, char**)
 {
@@ -40,19 +40,19 @@ int main(int, char**)
   TestFunction  v(vh);
 
   // Define problem
-  ScalarFunction gamma =
+  RealFunction gamma =
     [](const Point& p)
     {
       return 2 + sin(2 * M_PI * m * p.x()) * cos(2 * M_PI * m * p.y());
     };
 
-  ScalarFunction dxgamma =
+  RealFunction dxgamma =
     [](const Point& p)
     {
       return 2 * M_PI * m * cos(2 * M_PI * m * p.x()) * cos(2 * M_PI * m * p.y());
     };
 
-  ScalarFunction dygamma =
+  RealFunction dygamma =
     [](const Point& p)
     {
       return -2 * M_PI * m * sin(2 * M_PI * m * p.x()) * sin(2 * M_PI * m * p.y());
@@ -64,7 +64,7 @@ int main(int, char**)
 
   Alert::Info() << "Saved conductivity coefficient to Conductivity.gf" << Alert::Raise;
 
-  ScalarFunction g = 0.0;
+  RealFunction g = 0.0;
 
   IndexMap<IndexSet> dofs;
   for (Index i = 0; i < vh.getSize(); i += n)

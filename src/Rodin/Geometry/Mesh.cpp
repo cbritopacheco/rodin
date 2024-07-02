@@ -247,7 +247,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Sequential>& Mesh<Context::Sequential>::scale(Scalar c)
+  Mesh<Context::Sequential>& Mesh<Context::Sequential>::scale(Real c)
   {
     m_vertices *= c;
     flush();
@@ -255,20 +255,20 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>&
-  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, const Math::SpatialVector<Scalar>& coords)
+  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords)
   {
     m_vertices.col(idx) = coords;
     return *this;
   }
 
   Mesh<Context::Sequential>&
-  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, Scalar xi, size_t i)
+  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, Real xi, size_t i)
   {
     m_vertices.col(idx).coeffRef(i) = xi;
     return *this;
   }
 
-  Eigen::Map<const Math::SpatialVector<Scalar>> Mesh<Context::Sequential>::getVertexCoordinates(Index idx) const
+  Eigen::Map<const Math::SpatialVector<Real>> Mesh<Context::Sequential>::getVertexCoordinates(Index idx) const
   {
     const auto size = static_cast<Eigen::Index>(getSpaceDimension());
     return { getVertices().data() + getSpaceDimension() * idx, size };
@@ -301,7 +301,7 @@ namespace Rodin::Geometry
   {
     if (dimension == 0)
     {
-      Variational::ScalarP1Element fe(Polytope::Type::Point);
+      Variational::RealP1Element fe(Polytope::Type::Point);
       const size_t sdim = getSpaceDimension();
       Math::PointMatrix pm(sdim, 1);
       pm.col(0) = getVertexCoordinates(idx);
@@ -320,7 +320,7 @@ namespace Rodin::Geometry
         assert(sdim == static_cast<size_t>(getVertexCoordinates(v.value()).size()));
         pm.col(v.index()) = getVertexCoordinates(v.value());
       }
-      Variational::ScalarP1Element fe(g);
+      Variational::RealP1Element fe(g);
       return new IsoparametricTransformation(std::move(pm), std::move(fe));
     }
   }
@@ -350,17 +350,17 @@ namespace Rodin::Geometry
     }
   }
 
-  Scalar MeshBase::getVolume() const
+  Real MeshBase::getVolume() const
   {
-    Scalar totalVolume = 0;
+    Real totalVolume = 0;
     for (auto it = getCell(); !it.end(); ++it)
       totalVolume += it->getMeasure();
     return totalVolume;
   }
 
-  Scalar MeshBase::getVolume(Attribute attr) const
+  Real MeshBase::getVolume(Attribute attr) const
   {
-    Scalar totalVolume = 0;
+    Real totalVolume = 0;
     for (auto it = getCell(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
@@ -369,9 +369,9 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Scalar MeshBase::getVolume(const FlatSet<Attribute>& attrs) const
+  Real MeshBase::getVolume(const FlatSet<Attribute>& attrs) const
   {
-    Scalar totalVolume = 0;
+    Real totalVolume = 0;
     for (auto it = getCell(); !it.end(); ++it)
     {
       if (attrs.contains(it->getAttribute()))
@@ -380,17 +380,17 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Scalar MeshBase::getPerimeter() const
+  Real MeshBase::getPerimeter() const
   {
-    Scalar totalPerimeter = 0;
+    Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
       totalPerimeter += it->getMeasure();
     return totalPerimeter;
   }
 
-  Scalar MeshBase::getPerimeter(Attribute attr) const
+  Real MeshBase::getPerimeter(Attribute attr) const
   {
-    Scalar totalPerimeter = 0;
+    Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
@@ -399,9 +399,9 @@ namespace Rodin::Geometry
     return totalPerimeter;
   }
 
-  Scalar MeshBase::getPerimeter(const FlatSet<Attribute>& attrs) const
+  Real MeshBase::getPerimeter(const FlatSet<Attribute>& attrs) const
   {
-    Scalar totalPerimeter = 0;
+    Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
     {
       if (attrs.contains(it->getAttribute()))
@@ -410,17 +410,17 @@ namespace Rodin::Geometry
     return totalPerimeter;
   }
 
-  Scalar MeshBase::getArea() const
+  Real MeshBase::getArea() const
   {
-    Scalar totalArea = 0;
+    Real totalArea = 0;
     for (auto it = getFace(); !it.end(); ++it)
       totalArea += it->getMeasure();
     return totalArea;
   }
 
-  Scalar MeshBase::getArea(Attribute attr) const
+  Real MeshBase::getArea(Attribute attr) const
   {
-    Scalar totalArea = 0;
+    Real totalArea = 0;
     for (auto it = getFace(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
@@ -429,9 +429,9 @@ namespace Rodin::Geometry
     return totalArea;
   }
 
-  Scalar MeshBase::getArea(const FlatSet<Attribute>& attrs) const
+  Real MeshBase::getArea(const FlatSet<Attribute>& attrs) const
   {
-    Scalar totalArea = 0;
+    Real totalArea = 0;
     for (auto it = getFace(); !it.end(); ++it)
     {
       if (attrs.contains(it->getAttribute()))
@@ -440,17 +440,17 @@ namespace Rodin::Geometry
     return totalArea;
   }
 
-  Scalar MeshBase::getMeasure(size_t d) const
+  Real MeshBase::getMeasure(size_t d) const
   {
-    Scalar totalVolume = 0;
+    Real totalVolume = 0;
     for (auto it = getPolytope(d); !it.end(); ++it)
       totalVolume += it->getMeasure();
     return totalVolume;
   }
 
-  Scalar MeshBase::getMeasure(size_t d, Attribute attr) const
+  Real MeshBase::getMeasure(size_t d, Attribute attr) const
   {
-    Scalar totalVolume = 0;
+    Real totalVolume = 0;
     for (auto it = getPolytope(d); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
@@ -459,9 +459,9 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Scalar MeshBase::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
+  Real MeshBase::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
   {
-    Scalar totalMeasure = 0;
+    Real totalMeasure = 0;
     for (auto it = getPolytope(d); !it.end(); ++it)
     {
       if (attrs.contains(it->getAttribute()))
@@ -659,7 +659,7 @@ namespace Rodin::Geometry
         for (size_t j = 0; j < h; j++)
         {
           for (size_t i = 0; i < w; i++)
-            build.vertex({ static_cast<Scalar>(i), static_cast<Scalar>(j) });
+            build.vertex({ static_cast<Real>(i), static_cast<Real>(j) });
         }
 
         build.reserve(dim, 2 * (h - 1) * (w - 1));
@@ -691,9 +691,9 @@ namespace Rodin::Geometry
             for (size_t i = 0; i < width; ++i)
             {
               build.vertex({
-                  static_cast<Scalar>(i),
-                  static_cast<Scalar>(j),
-                  static_cast<Scalar>(k) });
+                  static_cast<Real>(i),
+                  static_cast<Real>(j),
+                  static_cast<Real>(k) });
             }
           }
         }
@@ -705,9 +705,9 @@ namespace Rodin::Geometry
             for (size_t i = 0; i < width - 1; ++i)
             {
               build.vertex({
-                  static_cast<Scalar>(i) + 0.5,
-                  static_cast<Scalar>(j) + 0.5,
-                  static_cast<Scalar>(k) + 0.5 });
+                  static_cast<Real>(i) + 0.5,
+                  static_cast<Real>(j) + 0.5,
+                  static_cast<Real>(k) + 0.5 });
             }
           }
         }

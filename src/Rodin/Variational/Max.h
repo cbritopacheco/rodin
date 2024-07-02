@@ -11,7 +11,7 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -26,14 +26,14 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived>
   class Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
-    : public ScalarFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
+    : public RealFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
       using LHSType = FunctionBase<LHSDerived>;
 
       using RHSType = FunctionBase<RHSDerived>;
 
-      using Parent = ScalarFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+      using Parent = RealFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
       Max(const LHSType& a, const RHSType& b)
         : m_lhs(a.copy()), m_rhs(b.copy())
@@ -60,7 +60,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Scalar getValue(const Geometry::Point& p) const
+      Real getValue(const Geometry::Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
@@ -102,15 +102,15 @@ namespace Rodin::Variational
    * @ingroup MaxSpecializations
    */
   template <class NestedDerived>
-  class Max<FunctionBase<NestedDerived>, Scalar>
-    : public ScalarFunctionBase<Max<FunctionBase<NestedDerived>, Scalar>>
+  class Max<FunctionBase<NestedDerived>, Real>
+    : public RealFunctionBase<Max<FunctionBase<NestedDerived>, Real>>
   {
     public:
       using LHSType = FunctionBase<NestedDerived>;
 
-      using RHSType = Scalar;
+      using RHSType = Real;
 
-      using Parent = ScalarFunctionBase<Max<FunctionBase<NestedDerived>, RHSType>>;
+      using Parent = RealFunctionBase<Max<FunctionBase<NestedDerived>, RHSType>>;
 
       constexpr
       Max(const LHSType& a, const RHSType& b)
@@ -139,7 +139,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Scalar getValue(const Geometry::Point& p) const
+      Real getValue(const Geometry::Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto& rhs = getRHS();
@@ -173,18 +173,18 @@ namespace Rodin::Variational
   };
 
   template <class NestedDerived>
-  Max(const FunctionBase<NestedDerived>&, Scalar) -> Max<FunctionBase<NestedDerived>, Scalar>;
+  Max(const FunctionBase<NestedDerived>&, Real) -> Max<FunctionBase<NestedDerived>, Real>;
 
   template <class NestedDerived>
-  class Max<Scalar, FunctionBase<NestedDerived>>
-    : public Max<FunctionBase<NestedDerived>, Scalar>
+  class Max<Real, FunctionBase<NestedDerived>>
+    : public Max<FunctionBase<NestedDerived>, Real>
   {
     public:
-      using LHSType = Scalar;
+      using LHSType = Real;
 
       using RHSType = FunctionBase<NestedDerived>;
 
-      using Parent = Max<FunctionBase<NestedDerived>, Scalar>;
+      using Parent = Max<FunctionBase<NestedDerived>, Real>;
 
       constexpr
       Max(const LHSType& a, const RHSType& b)
@@ -208,7 +208,7 @@ namespace Rodin::Variational
   };
 
   template <class NestedDerived>
-  Max(Scalar, const FunctionBase<NestedDerived>&) -> Max<Scalar, FunctionBase<NestedDerived>>;
+  Max(Real, const FunctionBase<NestedDerived>&) -> Max<Real, FunctionBase<NestedDerived>>;
 }
 
 #endif

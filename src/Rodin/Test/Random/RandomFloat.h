@@ -53,7 +53,7 @@ namespace Rodin::Test::Random
     unsigned int m_seed;
   };
 
-  using RandomScalar = RandomFloat<Scalar>;
+  using RandomReal = RandomFloat<Real>;
 }
 
 #endif

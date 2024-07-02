@@ -17,7 +17,7 @@
 
 #include "Function.h"
 #include "ShapeFunction.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::FormLanguage
 {
@@ -110,7 +110,7 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived>
   class Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
-    : public ScalarFunctionBase<Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
+    : public RealFunctionBase<Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
       using LHSType = FunctionBase<LHSDerived>;
@@ -130,7 +130,7 @@ namespace Rodin::Variational
 
       using RangeType = NumberType;
 
-      using Parent = ScalarFunctionBase<Dot<LHSType, RHSType>>;
+      using Parent = RealFunctionBase<Dot<LHSType, RHSType>>;
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
@@ -182,14 +182,14 @@ namespace Rodin::Variational
         assert(getLHS().getRangeShape() == getRHS().getRangeShape());
         const auto& lhs = this->object(getLHS().getValue(p));
         const auto& rhs = this->object(getRHS().getValue(p));
-        if constexpr (std::is_same_v<LHSRangeType, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, Real>)
         {
           return lhs * rhs;
-        } else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Scalar>>)
+        } else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Real>>)
         {
           return lhs.dot(rhs);
         }
-        else if constexpr (std::is_same_v<RHSRangeType, Math::Matrix<Scalar>>)
+        else if constexpr (std::is_same_v<RHSRangeType, Math::Matrix<Real>>)
         {
           return (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
         }

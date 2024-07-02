@@ -10,7 +10,7 @@
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -25,12 +25,12 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class Cos<FunctionBase<NestedDerived>> final
-    : public ScalarFunctionBase<Cos<FunctionBase<NestedDerived>>>
+    : public RealFunctionBase<Cos<FunctionBase<NestedDerived>>>
   {
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
-      using Parent = ScalarFunctionBase<Cos<FunctionBase<NestedDerived>>>;
+      using Parent = RealFunctionBase<Cos<FunctionBase<NestedDerived>>>;
 
       Cos(const OperandType& v)
         : m_v(v.copy())
@@ -57,7 +57,7 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point& p) const
       {
-        return std::cos(static_cast<Scalar>(getOperand().getValue(p)));
+        return std::cos(static_cast<Real>(getOperand().getValue(p)));
       }
 
       inline

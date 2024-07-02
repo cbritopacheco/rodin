@@ -33,17 +33,17 @@ static constexpr Geometry::Attribute dCathode = 2;
 
 static constexpr size_t maxIt = 10000;
 
-static constexpr Scalar epsilon = 0.001;
-static constexpr Scalar ellAnode = 1e-4;
-static constexpr Scalar ellCathode = 1e-4;
-static constexpr Scalar lambdaAnode = 1e-5;
-static constexpr Scalar lambdaCathode = 1e-5;
-static constexpr Scalar tgv = std::numeric_limits<float>::max();
-static const Scalar alpha = 4;
+static constexpr Real epsilon = 0.001;
+static constexpr Real ellAnode = 1e-4;
+static constexpr Real ellCathode = 1e-4;
+static constexpr Real lambdaAnode = 1e-5;
+static constexpr Real lambdaCathode = 1e-5;
+static constexpr Real tgv = std::numeric_limits<float>::max();
+static const Real alpha = 4;
 
-using ScalarFES = P1<Scalar>;
-using VectorFES = P1<Math::Vector<Scalar>>;
-using ScalarGridFunction = GridFunction<ScalarFES>;
+using RealFES = P1<Real>;
+using VectorFES = P1<Math::Vector<Real>>;
+using RealGridFunction = GridFunction<RealFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
 
@@ -54,7 +54,7 @@ int main(int, char**)
   // mesh.save("Omega0.mesh");
   mesh.load("Omega.mesh", IO::FileFormat::MEDIT);
 
-  Scalar hmax = 0.5;
+  Real hmax = 0.5;
 
   // Alert::Info() << "Initializing anode region..." << Alert::Raise;
   // {
@@ -105,12 +105,12 @@ int main(int, char**)
   size_t regionCount;
   while (i < maxIt)
   {
-    const Scalar hmin = hmax / 10.0;
-    const Scalar hausd = 0.5 * hmin;
-    const Scalar hgrad = 1.2;
-    const Scalar k = 0.5 * (hmax + hmin);
-    const Scalar dt = 2 * k;
-    const Scalar radius = k;
+    const Real hmin = hmax / 10.0;
+    const Real hausd = 0.5 * hmin;
+    const Real hgrad = 1.2;
+    const Real k = 0.5 * (hmax + hmin);
+    const Real dt = 2 * k;
+    const Real radius = k;
 
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
                   << "HMax:      " << Alert::Notation(hmax)     << Alert::NewLine
@@ -153,9 +153,9 @@ int main(int, char**)
     dOmega.save("dOmega.mesh", IO::FileFormat::MEDIT);
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
-    ScalarFES sfes(mesh);
+    RealFES sfes(mesh);
     VectorFES vfes(mesh, mesh.getSpaceDimension());
-    ScalarFES dsfes(dOmega);
+    RealFES dsfes(dOmega);
     VectorFES dvfes(dOmega, dOmega.getSpaceDimension());
 
     Alert::Info() << "Distancing cathode and anode domains..." << Alert::Raise;
@@ -175,10 +175,10 @@ int main(int, char**)
     Solver::CG cg;
 
     // Parameters
-    ScalarFunction uIn = 1.0;
-    ScalarFunction gamma = 1.0;
+    RealFunction uIn = 1.0;
+    RealFunction gamma = 1.0;
 
-    auto h = [](Scalar r)
+    auto h = [](Real r)
     {
       if (r < -1.0)
         return 1.0;
@@ -188,9 +188,9 @@ int main(int, char**)
         return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
     };
 
-    ScalarFunction heAnode =
+    RealFunction heAnode =
       [&](const Geometry::Point& p) { return h(distAnode(p) / epsilon) / epsilon; };
-    ScalarFunction heCathode =
+    RealFunction heCathode =
       [&](const Geometry::Point& p) { return h(distCathode(p) / epsilon) / epsilon; };
 
     TrialFunction u(sfes);
@@ -238,8 +238,8 @@ int main(int, char**)
     j.setWeights();
     mesh.save("j.mesh");
     j.save("j.gf");
-    const Scalar Ij = Integral(j).compute();
-    const Scalar objective =
+    const Real Ij = Integral(j).compute();
+    const Real objective =
       Ij - ellAnode * mesh.getPerimeter(Anode) - ellCathode * mesh.getPerimeter(Cathode);
     Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::NewLine
                   << "Norm: " << Alert::Notation(Ij)
@@ -315,13 +315,13 @@ int main(int, char**)
       // dsfes.getMesh().save("out/Topo." + std::to_string(i) + ".mesh");
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
-      const Scalar tc = s.getSolution().max();
+      const Real tc = s.getSolution().max();
       std::vector<Point> cs;
       for (auto it = dOmega.getVertex(); !it.end(); ++it)
       {
         const Point p(*it, it->getTransformation(),
             Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
-        const Scalar tp = s.getSolution()(p);
+        const Real tp = s.getSolution()(p);
         if (tp > 0 && (tp / tc) > (1 - 1e-12))
         {
           cs.emplace_back(std::move(p));
@@ -338,10 +338,10 @@ int main(int, char**)
           auto holes =
             [&](const Point& v)
             {
-              Scalar d = distAnode(v);
+              Real d = distAnode(v);
               for (const auto& c : cs)
               {
-                const Scalar dd = (v - c).norm() - radius;
+                const Real dd = (v - c).norm() - radius;
                 d = std::min(d, dd);
               }
               return d;
@@ -353,10 +353,10 @@ int main(int, char**)
           auto holes =
             [&](const Point& v)
             {
-              Scalar d = distCathode(v);
+              Real d = distCathode(v);
               for (const auto& c : cs)
               {
-                const Scalar dd = (v - c).norm() - radius;
+                const Real dd = (v - c).norm() - radius;
                 d = std::min(d, dd);
               }
               return d;

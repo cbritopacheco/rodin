@@ -92,10 +92,10 @@
 //         const size_t dofs = fe.getCount();
 //         const QF::QF1P1 qf(polytope.getGeometry());
 //         assert(qf.getSize() == 1);
-//         const Scalar w = qf.getWeight(0);
+//         const Real w = qf.getWeight(0);
 //         const auto& rc = qf.getPoint(0);
 //         const Geometry::Point p(polytope, trans, std::cref(rc));
-//         const Scalar distortion = p.getDistortion();
+//         const Real distortion = p.getDistortion();
 //         auto& res = this->getVector();
 //         res.resize(dofs);
 //         res.setZero();
@@ -218,10 +218,10 @@
 //         const size_t dofs = fe.getCount();
 //         const QF::QF1P1 qf(polytope.getGeometry());
 //         assert(qf.getSize() == 1);
-//         const Scalar w = qf.getWeight(0);
+//         const Real w = qf.getWeight(0);
 //         const auto& rc = qf.getPoint(0);
 //         const Geometry::Point p(polytope, trans, std::cref(rc));
-//         const Scalar distortion = p.getDistortion();
+//         const Real distortion = p.getDistortion();
 //         auto& res = this->getVector();
 //         res.resize(dofs);
 //         res.setZero();
@@ -390,7 +390,7 @@
 //         const size_t dofs = fe.getCount();
 //         const QF::QF1P1 qf(polytope.getGeometry());
 //         assert(qf.getSize() == 1);
-//         const Scalar w = qf.getWeight(0);
+//         const Real w = qf.getWeight(0);
 //         const auto& rc = qf.getPoint(0);
 //         auto& res = getMatrix();
 //         res.resize(dofs, dofs);
@@ -401,8 +401,8 @@
 //           if constexpr (std::is_same_v<MultiplicandRangeType, NumberType>)
 //           {
 //             const Geometry::Point p(polytope, trans, std::cref(rc));
-//             const Scalar distortion = p.getDistortion();
-//             const Scalar c = coeff.getValue(p);
+//             const Real distortion = p.getDistortion();
+//             const Real c = coeff.getValue(p);
 //             for (size_t i = 0; i < dofs; i++)
 //             {
 //               const NumberType basis = fe.getBasis(i)(rc);
@@ -554,10 +554,10 @@
 //         assert(dofs == trial.getDOFs(polytope));
 //         const QF::QF1P1 qf(polytope.getGeometry());
 //         assert(qf.getSize() == 1);
-//         const Scalar w = qf.getWeight(0);
+//         const Real w = qf.getWeight(0);
 //         const auto& rc = qf.getPoint(0);
 //         const Geometry::Point p(polytope, trans, std::cref(rc));
-//         const Scalar distortion = p.getDistortion();
+//         const Real distortion = p.getDistortion();
 //         const auto jacInvT = p.getJacobianInverse().transpose();
 //         auto& res = getMatrix();
 //         res.resize(dofs, dofs);
@@ -695,10 +695,10 @@
 //         assert(dofs == trial.getDOFs(polytope));
 //         const QF::QF1P1 qf(polytope.getGeometry());
 //         assert(qf.getSize() == 1);
-//         const Scalar w = qf.getWeight(0);
+//         const Real w = qf.getWeight(0);
 //         const auto& rc = qf.getPoint(0);
 //         const Geometry::Point p(polytope, trans, std::cref(rc));
-//         const Scalar distortion = p.getDistortion();
+//         const Real distortion = p.getDistortion();
 //         const auto jacInvT = p.getJacobianInverse().transpose();
 //         auto& res = getMatrix();
 //         res.resize(dofs, dofs);
@@ -844,10 +844,10 @@
 //         assert(dofs == trial.getDOFs(polytope));
 //         const QF::QF1P1 qf(polytope.getGeometry());
 //         assert(qf.getSize() == 1);
-//         const Scalar w = qf.getWeight(0);
+//         const Real w = qf.getWeight(0);
 //         const auto& rc = qf.getPoint(0);
 //         const Geometry::Point p(polytope, trans, std::cref(rc));
-//         const Scalar distortion = p.getDistortion();
+//         const Real distortion = p.getDistortion();
 //         auto& res = getMatrix();
 //         res.resize(dofs, dofs);
 //         res.setZero();
@@ -921,17 +921,17 @@
 //       Mult<
 //         FunctionBase<LHSFunctionDerived>,
 //         ShapeFunctionBase<
-//           Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Mesh>, TrialSpace>>,
-//         P1<Math::Vector<Scalar>, Mesh>, TrialSpace>>,
-//       P1<Math::Vector<Scalar>, Mesh>, TrialSpace>,
+//           Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, Mesh>, TrialSpace>>,
+//         P1<Math::Vector<Real>, Mesh>, TrialSpace>>,
+//       P1<Math::Vector<Real>, Mesh>, TrialSpace>,
 //     ShapeFunctionBase<
-//       Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Mesh>, TestSpace>>,
-//     P1<Math::Vector<Scalar>, Mesh>, TestSpace>>>
+//       Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, Mesh>, TestSpace>>,
+//     P1<Math::Vector<Real>, Mesh>, TestSpace>>>
 //     : public LocalBilinearFormIntegratorBase
 //   {
 //     public:
 //       /// Type of finite element space
-//       using FESType = P1<Math::Vector<Scalar>, Mesh>;
+//       using FESType = P1<Math::Vector<Real>, Mesh>;
 // 
 //       /// Type of left hand side
 //       using LHSType =
@@ -1002,12 +1002,12 @@
 //         assert(dofs == trial.getDOFs(polytope));
 //         const QF::QF1P1 qf(polytope.getGeometry());
 //         assert(qf.getSize() == 1);
-//         const Scalar w = qf.getWeight(0);
+//         const Real w = qf.getWeight(0);
 //         const auto& rc = qf.getPoint(0);
 //         const Geometry::Point p(polytope, trans, std::cref(rc));
-//         const Scalar distortion = p.getDistortion();
+//         const Real distortion = p.getDistortion();
 //         auto& res = getMatrix();
-//         res = Math::Matrix<Scalar>::Zero(dofs, dofs);
+//         res = Math::Matrix<Real>::Zero(dofs, dofs);
 //         m_rjac.resize(dofs);
 //         m_pjac.resize(dofs);
 //         for (size_t local = 0; local < dofs; local++)
@@ -1043,8 +1043,8 @@
 //     private:
 //       std::unique_ptr<IntegrandType> m_integrand;
 // 
-//       std::vector<Math::SpatialMatrix<Scalar>> m_rjac;
-//       std::vector<Math::SpatialMatrix<Scalar>> m_pjac;
+//       std::vector<Math::SpatialMatrix<Real>> m_rjac;
+//       std::vector<Math::SpatialMatrix<Real>> m_pjac;
 //   };
 // 
 //   /**
@@ -1056,9 +1056,9 @@
 //       ShapeFunctionBase<
 //         Mult<
 //           FunctionBase<LHSFunctionDerived>,
-//           ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Mesh>, TrialSpace>>>>>,
+//           ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, Mesh>, TrialSpace>>>>>,
 //       ShapeFunctionBase<
-//         Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Mesh>, TestSpace>>>>&)
+//         Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, Mesh>, TestSpace>>>>&)
 //   ->
 //   QuadratureRule<
 //     Dot<
@@ -1066,9 +1066,9 @@
 //         Mult<
 //           FunctionBase<LHSFunctionDerived>,
 //           ShapeFunctionBase<
-//             Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Scalar>, Mesh>, TrialSpace>>>>>,
+//             Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, Mesh>, TrialSpace>>>>>,
 //       ShapeFunctionBase<
-//         Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Scalar>, Mesh>, TestSpace>>>>>;
+//         Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, Mesh>, TestSpace>>>>>;
 // }
 
 #endif

@@ -167,15 +167,15 @@ namespace Rodin::Variational
         {
           return RangeType::Integer;
         }
-        else if constexpr (std::is_same_v<R, Scalar>)
+        else if constexpr (std::is_same_v<R, Real>)
         {
-          return RangeType::Scalar;
+          return RangeType::Real;
         }
-        else if constexpr (std::is_same_v<R, Math::Vector<Scalar>>)
+        else if constexpr (std::is_same_v<R, Math::Vector<Real>>)
         {
           return RangeType::Vector;
         }
-        else if constexpr (std::is_same_v<R, Math::Matrix<Scalar>>)
+        else if constexpr (std::is_same_v<R, Math::Matrix<Real>>)
         {
           return RangeType::Matrix;
         }
@@ -390,11 +390,11 @@ namespace Rodin::Variational
         const Index i = p.getPolytope().getIndex();
         const auto& fes = this->getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
-        if constexpr (std::is_same_v<RangeType, Scalar>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
           return fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
           return this->object(fes.getInverseMapping({ d, i }, fe.getBasis(local))(p));
         }

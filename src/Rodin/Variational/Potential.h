@@ -29,7 +29,7 @@ namespace Rodin::FormLanguage
   template <class LHS, class RHSDerived>
   struct Traits<Variational::Potential<LHS, Variational::FunctionBase<RHSDerived>>>
   {
-    using NumberType = Scalar;
+    using NumberType = Real;
 
     using LHSType = LHS;
 
@@ -70,7 +70,7 @@ namespace Rodin::FormLanguage
       LHS,
       Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>>>>
   {
-    using NumberType = Scalar;
+    using NumberType = Real;
 
     using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
@@ -121,7 +121,7 @@ namespace Rodin::Variational
     : public FunctionBase<Potential<LHS, FunctionBase<RHSDerived>>>
   {
     public:
-      using NumberType = Scalar;
+      using NumberType = Real;
 
       using LHSType = LHS;
 
@@ -361,7 +361,7 @@ namespace Rodin::Variational
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      using NumberType = Scalar;
+      using NumberType = Real;
 
       using LHSType = LHS;
 
@@ -463,10 +463,10 @@ namespace Rodin::Variational
     Dot<
       Potential<Kernel, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-        : public GlobalBilinearFormIntegratorBase<Scalar>
+        : public GlobalBilinearFormIntegratorBase<Real>
   {
     public:
-      using NumberType = Scalar;
+      using NumberType = Real;
 
       using KernelType = Kernel;
 
@@ -749,7 +749,7 @@ namespace Rodin::Variational
             {
               const auto& y = m_y[i];
 
-              Scalar d;
+              Real d;
               if constexpr (std::is_same_v<LHSRangeType, NumberType>)
               {
                 d = kernel(x, y) * x.getDistortion() * y.getDistortion();
@@ -764,7 +764,7 @@ namespace Rodin::Variational
                 d = NAN;
               }
 
-              const Scalar w = qfte.getWeight(i) * qftr.getWeight(j);
+              const Real w = qfte.getWeight(i) * qftr.getWeight(j);
               for (size_t l = 0; l < testfe.getCount(); l++)
               {
                 const auto& teb = testfe.getBasis(l);

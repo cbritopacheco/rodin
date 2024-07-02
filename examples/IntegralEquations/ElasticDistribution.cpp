@@ -13,28 +13,28 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-const Scalar E = 100;
-const Scalar nu = 0.48;
-const Scalar lambda = (E * nu) / ((1.0 + nu) * (1.0 - 2 * nu));
-const Scalar mu = E / (1.0 + nu);
+const Real E = 100;
+const Real nu = 0.48;
+const Real lambda = (E * nu) / ((1.0 + nu) * (1.0 - 2 * nu));
+const Real mu = E / (1.0 + nu);
 
 inline
-void K(Math::Matrix<Scalar>& res, const Point& x, const Point& y)
+void K(Math::Matrix<Real>& res, const Point& x, const Point& y)
 {
   const auto norm = (x - y).norm();
   res.resize(3, 3);
-  const Scalar L00 = (1 - nu) / (2 * M_PI * mu * norm) + nu * (x(0) - y(0)) * (x(0) - y(0)) / (2 * M_PI * mu * norm * norm * norm);
-  const Scalar L01 = nu * (x(0) - y(0)) * (x(1) - y(1)) / (2 * M_PI * mu * norm * norm * norm);
+  const Real L00 = (1 - nu) / (2 * M_PI * mu * norm) + nu * (x(0) - y(0)) * (x(0) - y(0)) / (2 * M_PI * mu * norm * norm * norm);
+  const Real L01 = nu * (x(0) - y(0)) * (x(1) - y(1)) / (2 * M_PI * mu * norm * norm * norm);
 
-  const Scalar L10 = nu * (x(1) - y(1)) * (x(0) - y(0)) / (2 * M_PI * mu * norm * norm * norm);
-  const Scalar L11 = (1 - nu) / (2 * M_PI * mu * norm) + nu * (x(1) - y(1)) * (x(1) - y(1)) / (2 * M_PI * mu * norm * norm * norm);
+  const Real L10 = nu * (x(1) - y(1)) * (x(0) - y(0)) / (2 * M_PI * mu * norm * norm * norm);
+  const Real L11 = (1 - nu) / (2 * M_PI * mu * norm) + nu * (x(1) - y(1)) * (x(1) - y(1)) / (2 * M_PI * mu * norm * norm * norm);
 
-  const Scalar L20 = -(1 - 2 * nu) * (x(0) - y(0)) / (4 * M_PI * mu * norm * norm);
-  const Scalar L21 = -(1 - 2 * nu) * (x(1) - y(1)) / (4 * M_PI * mu * norm * norm);
-  const Scalar L22 = (1 - nu) / (2 * M_PI * mu * norm);
+  const Real L20 = -(1 - 2 * nu) * (x(0) - y(0)) / (4 * M_PI * mu * norm * norm);
+  const Real L21 = -(1 - 2 * nu) * (x(1) - y(1)) / (4 * M_PI * mu * norm * norm);
+  const Real L22 = (1 - nu) / (2 * M_PI * mu * norm);
 
-  const Scalar L02 = -L20;
-  const Scalar L12 = -L21;
+  const Real L02 = -L20;
+  const Real L12 = -L21;
 
   res << L00, L01, L02,
          L10, L11, L12,
@@ -70,7 +70,7 @@ int main(int, char**)
   // file.close();
 
   std::cout << "resolution\n";
-  Solver::CG<Math::Matrix<Scalar>, Math::Vector<Scalar>> cg;
+  Solver::CG<Math::Matrix<Real>, Math::Vector<Real>> cg;
   eq.solve(cg);
 
   u.getSolution().save("u.gf");

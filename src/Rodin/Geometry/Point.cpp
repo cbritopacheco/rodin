@@ -14,7 +14,7 @@ namespace Rodin::Geometry
 {
   // ---- Point --------------------------------------------------------------
   PointBase::PointBase(std::reference_wrapper<const Polytope> polytope, std::reference_wrapper<const PolytopeTransformation> trans,
-      const Math::SpatialVector<Scalar>& pc)
+      const Math::SpatialVector<Real>& pc)
     : m_polytopeStorage(PolytopeStorage::Reference),
       m_polytope(polytope), m_trans(trans), m_pc(pc)
   {}
@@ -25,7 +25,7 @@ namespace Rodin::Geometry
   {}
 
   PointBase::PointBase(Polytope&& polytope, std::reference_wrapper<const PolytopeTransformation> trans,
-      const Math::SpatialVector<Scalar>& pc)
+      const Math::SpatialVector<Real>& pc)
     : m_polytopeStorage(PolytopeStorage::Value),
       m_polytope(std::move(polytope)), m_trans(trans), m_pc(pc)
   {}
@@ -85,7 +85,7 @@ namespace Rodin::Geometry
     }
   }
 
-  const Math::SpatialVector<Scalar>& PointBase::getCoordinates(Coordinates coords) const
+  const Math::SpatialVector<Real>& PointBase::getCoordinates(Coordinates coords) const
   {
     if (coords == Coordinates::Physical)
     {
@@ -98,7 +98,7 @@ namespace Rodin::Geometry
     }
   }
 
-  const Math::SpatialVector<Scalar>& PointBase::getPhysicalCoordinates() const
+  const Math::SpatialVector<Real>& PointBase::getPhysicalCoordinates() const
   {
     if (!m_pc.read().has_value())
     {
@@ -112,7 +112,7 @@ namespace Rodin::Geometry
     return m_pc.read().value();
   }
 
-  const Math::SpatialMatrix<Scalar>& PointBase::getJacobian() const
+  const Math::SpatialMatrix<Real>& PointBase::getJacobian() const
   {
     if (!m_jacobian.read().has_value())
     {
@@ -126,7 +126,7 @@ namespace Rodin::Geometry
     return m_jacobian.read().value();
   }
 
-  const Math::SpatialMatrix<Scalar>& PointBase::getJacobianInverse() const
+  const Math::SpatialMatrix<Real>& PointBase::getJacobianInverse() const
   {
     if (!m_jacobianInverse.read().has_value())
     {
@@ -140,7 +140,7 @@ namespace Rodin::Geometry
         {
           case 1:
           {
-            Math::SpatialMatrix<Scalar> inv(1, 1);
+            Math::SpatialMatrix<Real> inv(1, 1);
             inv.coeffRef(0, 0) = 1 / getJacobian().coeff(0, 0);
             m_jacobianDeterminant.write(
                 [&](auto& obj)
@@ -159,11 +159,11 @@ namespace Rodin::Geometry
           case 2:
           {
             const auto& jac = getJacobian();
-            const Scalar a = jac.coeff(0, 0);
-            const Scalar b = jac.coeff(0, 1);
-            const Scalar c = jac.coeff(1, 0);
-            const Scalar d = jac.coeff(1, 1);
-            const Scalar det = a * d - b * c;
+            const Real a = jac.coeff(0, 0);
+            const Real b = jac.coeff(0, 1);
+            const Real c = jac.coeff(1, 0);
+            const Real d = jac.coeff(1, 1);
+            const Real det = a * d - b * c;
             assert(det != 0);
             m_jacobianDeterminant.write(
                 [&](auto& obj)
@@ -171,7 +171,7 @@ namespace Rodin::Geometry
                   obj.emplace(det);
                 });
             assert(m_jacobianDeterminant.read().has_value());
-            Math::SpatialMatrix<Scalar> inv(2, 2);
+            Math::SpatialMatrix<Real> inv(2, 2);
             inv.coeffRef(0, 0) = d / det;
             inv.coeffRef(0, 1) = -b / det;
             inv.coeffRef(1, 0) = -c / det;
@@ -187,26 +187,26 @@ namespace Rodin::Geometry
           case 3:
           {
             const auto& jac = getJacobian();
-            const Scalar a = jac.coeff(0, 0);
-            const Scalar b = jac.coeff(0, 1);
-            const Scalar c = jac.coeff(0, 2);
-            const Scalar d = jac.coeff(1, 0);
-            const Scalar e = jac.coeff(1, 1);
-            const Scalar f = jac.coeff(1, 2);
-            const Scalar g = jac.coeff(2, 0);
-            const Scalar h = jac.coeff(2, 1);
-            const Scalar i = jac.coeff(2, 2);
-            const Scalar A = e * i - f * h;
-            const Scalar B = -(d * i - f * g);
-            const Scalar C = d * h - e * g;
-            const Scalar D = -(b * i - c * h);
-            const Scalar E = a * i - c * g;
-            const Scalar F = -(a * h - b * g);
-            const Scalar G = b * f - c * e;
-            const Scalar H = - (a * f  - c * d);
-            const Scalar I = a * e - b * d;
+            const Real a = jac.coeff(0, 0);
+            const Real b = jac.coeff(0, 1);
+            const Real c = jac.coeff(0, 2);
+            const Real d = jac.coeff(1, 0);
+            const Real e = jac.coeff(1, 1);
+            const Real f = jac.coeff(1, 2);
+            const Real g = jac.coeff(2, 0);
+            const Real h = jac.coeff(2, 1);
+            const Real i = jac.coeff(2, 2);
+            const Real A = e * i - f * h;
+            const Real B = -(d * i - f * g);
+            const Real C = d * h - e * g;
+            const Real D = -(b * i - c * h);
+            const Real E = a * i - c * g;
+            const Real F = -(a * h - b * g);
+            const Real G = b * f - c * e;
+            const Real H = - (a * f  - c * d);
+            const Real I = a * e - b * d;
 
-            const Scalar det = a * A + b * B + c * C;
+            const Real det = a * A + b * B + c * C;
             m_jacobianDeterminant.write(
                 [&](auto& obj)
                 {
@@ -214,7 +214,7 @@ namespace Rodin::Geometry
                 });
             assert(m_jacobianDeterminant.read().has_value());
             assert(det != 0);
-            Math::SpatialMatrix<Scalar> inv(3, 3);
+            Math::SpatialMatrix<Real> inv(3, 3);
             inv.coeffRef(0, 0) = A / det;
             inv.coeffRef(0, 1) = D / det;
             inv.coeffRef(0, 2) = G / det;
@@ -259,7 +259,7 @@ namespace Rodin::Geometry
     return m_jacobianInverse.read().value();
   }
 
-  Scalar PointBase::getJacobianDeterminant() const
+  Real PointBase::getJacobianDeterminant() const
   {
     if (!m_jacobianDeterminant.read().has_value())
     {
@@ -282,10 +282,10 @@ namespace Rodin::Geometry
           }
           case 2:
           {
-            const Scalar a = jac.coeff(0, 0);
-            const Scalar b = jac.coeff(0, 1);
-            const Scalar c = jac.coeff(1, 0);
-            const Scalar d = jac.coeff(1, 1);
+            const Real a = jac.coeff(0, 0);
+            const Real b = jac.coeff(0, 1);
+            const Real c = jac.coeff(1, 0);
+            const Real d = jac.coeff(1, 1);
             m_jacobianDeterminant.write(
                 [&](auto& obj)
                 {
@@ -296,18 +296,18 @@ namespace Rodin::Geometry
           }
           case 3:
           {
-            const Scalar a = jac.coeff(0, 0);
-            const Scalar b = jac.coeff(0, 1);
-            const Scalar c = jac.coeff(0, 2);
-            const Scalar d = jac.coeff(1, 0);
-            const Scalar e = jac.coeff(1, 1);
-            const Scalar f = jac.coeff(1, 2);
-            const Scalar g = jac.coeff(2, 0);
-            const Scalar h = jac.coeff(2, 1);
-            const Scalar i = jac.coeff(2, 2);
-            const Scalar A = e * i - f * h;
-            const Scalar B = -(d * i - f * g);
-            const Scalar C = d * h - e * g;
+            const Real a = jac.coeff(0, 0);
+            const Real b = jac.coeff(0, 1);
+            const Real c = jac.coeff(0, 2);
+            const Real d = jac.coeff(1, 0);
+            const Real e = jac.coeff(1, 1);
+            const Real f = jac.coeff(1, 2);
+            const Real g = jac.coeff(2, 0);
+            const Real h = jac.coeff(2, 1);
+            const Real i = jac.coeff(2, 2);
+            const Real A = e * i - f * h;
+            const Real B = -(d * i - f * g);
+            const Real C = d * h - e * g;
             m_jacobianDeterminant.write(
                 [&](auto& obj)
                 {
@@ -343,7 +343,7 @@ namespace Rodin::Geometry
     return m_jacobianDeterminant.read().value();
   }
 
-  Scalar PointBase::getDistortion() const
+  Real PointBase::getDistortion() const
   {
     if (!m_distortion.read().has_value())
     {
@@ -408,60 +408,60 @@ namespace Rodin::Geometry
   Point::Point(
       std::reference_wrapper<const Polytope> polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      std::reference_wrapper<const Math::SpatialVector<Scalar>> rc,
-      const Math::SpatialVector<Scalar>& pc)
+      std::reference_wrapper<const Math::SpatialVector<Real>> rc,
+      const Math::SpatialVector<Real>& pc)
     : PointBase(polytope, trans, pc), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
   Point::Point(
       std::reference_wrapper<const Polytope> polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      Math::SpatialVector<Scalar>&& rc,
-      const Math::SpatialVector<Scalar>& pc)
+      Math::SpatialVector<Real>&& rc,
+      const Math::SpatialVector<Real>& pc)
     : PointBase(polytope, trans, pc), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
   Point::Point(
       std::reference_wrapper<const Polytope> polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      std::reference_wrapper<const Math::SpatialVector<Scalar>> rc)
+      std::reference_wrapper<const Math::SpatialVector<Real>> rc)
     : PointBase(polytope, trans), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
   Point::Point(
       std::reference_wrapper<const Polytope> polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      Math::SpatialVector<Scalar>&& rc)
+      Math::SpatialVector<Real>&& rc)
     : PointBase(polytope, trans), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
   Point::Point(
       Polytope&& polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      std::reference_wrapper<const Math::SpatialVector<Scalar>> rc,
-      const Math::SpatialVector<Scalar>& pc)
+      std::reference_wrapper<const Math::SpatialVector<Real>> rc,
+      const Math::SpatialVector<Real>& pc)
     : PointBase(std::move(polytope), trans, pc), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
   Point::Point(
       Polytope&& polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      Math::SpatialVector<Scalar>&& rc,
-      const Math::SpatialVector<Scalar>& pc)
+      Math::SpatialVector<Real>&& rc,
+      const Math::SpatialVector<Real>& pc)
     : PointBase(std::move(polytope), trans, pc), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
   Point::Point(
       Polytope&& polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      std::reference_wrapper<const Math::SpatialVector<Scalar>> rc)
+      std::reference_wrapper<const Math::SpatialVector<Real>> rc)
     : PointBase(std::move(polytope), trans), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
   Point::Point(
       Polytope&& polytope,
       std::reference_wrapper<const PolytopeTransformation> trans,
-      Math::SpatialVector<Scalar>&& rc)
+      Math::SpatialVector<Real>&& rc)
     : PointBase(std::move(polytope), trans), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
@@ -477,16 +477,16 @@ namespace Rodin::Geometry
       m_rc(std::move(other.m_rc))
   {}
 
-  const Math::SpatialVector<Scalar>& Point::getReferenceCoordinates() const
+  const Math::SpatialVector<Real>& Point::getReferenceCoordinates() const
   {
     if (m_rcStorage == RCStorage::Value)
     {
-      return std::get<const Math::SpatialVector<Scalar>>(m_rc);
+      return std::get<const Math::SpatialVector<Real>>(m_rc);
     }
     else
     {
       assert(m_rcStorage == RCStorage::Reference);
-      return std::get<std::reference_wrapper<const Math::SpatialVector<Scalar>>>(m_rc);
+      return std::get<std::reference_wrapper<const Math::SpatialVector<Real>>>(m_rc);
     }
   }
 }

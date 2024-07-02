@@ -19,10 +19,10 @@ namespace Rodin::External::MMG
         Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>;
 
   /// Type alias for a GridFunction with scalar range.
-  using ScalarGridFunction = GridFunction<Scalar>;
+  using RealGridFunction = GridFunction<Real>;
 
   /// Type alias for a GridFunction with vector range.
-  using VectorGridFunction = GridFunction<Math::Vector<Scalar>>;
+  using VectorGridFunction = GridFunction<Math::Vector<Real>>;
 }
 
 #endif

@@ -16,22 +16,22 @@ using namespace Rodin::External;
 
 static const char* meshfile =
   "../resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh";
-static const Scalar hmax = 400;
-static Scalar hmin = 0.01 * hmax;
-static const Scalar hausdorff = 20;
-// static const Scalar hmax = 600;
-// static const Scalar hmin = 100;
+static const Real hmax = 400;
+static Real hmin = 0.01 * hmax;
+static const Real hausdorff = 20;
+// static const Real hmax = 600;
+// static const Real hmin = 100;
 
 class Environment
 {
   public:
     using Context = Context::Sequential;
-    using ScalarFES = P1<Scalar>;
-    using VectorFES = P1<Math::Vector<Scalar>>;
+    using RealFES = P1<Real>;
+    using VectorFES = P1<Math::Vector<Real>>;
 
     struct Plane
     {
-      Scalar a, b, c, d;
+      Real a, b, c, d;
     };
 
     enum Terrain
@@ -46,56 +46,56 @@ class Environment
     {
       // Energy ratio between incident radiant energy and ignition energy of
       // dry fuel
-      Scalar A0;
+      Real A0;
 
       // Vertical velocity
-      Scalar u00;
+      Real u00;
 
       // Energy ratio between incident radiant energy emitted from the flame
       // base and ignition energy of dry fuel
-      Scalar R00;
+      Real R00;
 
       // Moisture factor
-      Scalar a;
+      Real a;
 
       // Rate of spread for no slope and no wind (m/s)
-      std::function<Scalar(const Point&)> R0;
+      std::function<Real(const Point&)> R0;
 
       // Buoyancy velocity component for a zero slope (m/s)
-      std::function<Scalar(const Point&)> u0;
+      std::function<Real(const Point&)> u0;
 
       // Energy ratio between incident radiant energy and ignition energy of wet fuel
-      std::function<Scalar(const Point&)> A;
+      std::function<Real(const Point&)> A;
 
       // ROS coefficient (m/s)
-      std::function<Scalar(const Point&)> v0;
+      std::function<Real(const Point&)> v0;
 
       // Moisture content (%)
-      std::function<Scalar(const Point&)> m;
+      std::function<Real(const Point&)> m;
 
       // Thickness of the vegetal stratum (m)
-      std::function<Scalar(const Point&)> e;
+      std::function<Real(const Point&)> e;
 
       // Surface density of vegetal fuel, (kg/m^2)
-      std::function<Scalar(const Point&)> sigma;
+      std::function<Real(const Point&)> sigma;
 
       // Residence time (s)
-      std::function<Scalar(const Point&)> tau;
+      std::function<Real(const Point&)> tau;
 
       // Vegetal fuel surface to volume ratio (1/m)
-      std::function<Scalar(const Point&)> sv;
+      std::function<Real(const Point&)> sv;
 
       // Gas flame density (kg/m^3)
-      std::function<Scalar(const Point&)> pv;
+      std::function<Real(const Point&)> pv;
 
       // Absorption coefficient
-      std::function<Scalar(const Point&)> v;
+      std::function<Real(const Point&)> v;
 
       // Flame gas temperature (K)
-      std::function<Scalar(const Point&)> T;
+      std::function<Real(const Point&)> T;
 
       // Air temperature (K)
-      std::function<Scalar(const Point&)> Ta;
+      std::function<Real(const Point&)> Ta;
     };
 
     class Flame
@@ -105,7 +105,7 @@ class Environment
           : m_env(env), m_direction(env.m_vfes)
         {}
 
-        Flame& step(Scalar dt)
+        Flame& step(Real dt)
         {
           assert(dt > 0);
           const auto& env = m_env.get();
@@ -118,9 +118,9 @@ class Environment
           auto alpha =
             [&](const Point& v)
             {
-              Scalar angle = std::acos(p.z()(v) / Frobenius(p)(v));
+              Real angle = std::acos(p.z()(v) / Frobenius(p)(v));
               assert(angle >= 0);
-              // assert(angle <= Math::Constants::pi<Scalar>() / 2.0);
+              // assert(angle <= Math::Constants::pi<Real>() / 2.0);
               return Math::Constants::pi() / 2.0 - angle;
             };
 
@@ -131,9 +131,9 @@ class Environment
 
           // Angle between slope and conormal
           auto phi =
-            [&](const Point& v) -> Scalar
+            [&](const Point& v) -> Real
             {
-              Scalar fv = p(v).dot(conormal(v)) / p(v).norm();
+              Real fv = p(v).dot(conormal(v)) / p(v).norm();
               if (std::isfinite(fv))
                 return std::acos(fv);
               else
@@ -142,9 +142,9 @@ class Environment
 
           // Angle between wind and conormal
           auto psi =
-            [&](const Point& v) -> Scalar
+            [&](const Point& v) -> Real
             {
-              Scalar fv =
+              Real fv =
                 env.m_wind(v).dot(conormal(v)) / env.m_wind(v).norm();
               if (std::isfinite(fv))
                 return std::acos(fv);
@@ -154,9 +154,9 @@ class Environment
 
           // Compute the tilt angle
           auto gamma =
-            [&](const Point& v) -> Scalar
+            [&](const Point& v) -> Real
             {
-              Scalar rhs =
+              Real rhs =
                 std::tan(alpha(v)) * std::cos(phi(v)
                     ) + env.m_wind(v).norm() * std::cos(psi(v));
               return std::atan(rhs);
@@ -164,15 +164,15 @@ class Environment
 
           // Compute rate of spread
           auto R =
-            [&](const Point& v) -> Scalar
+            [&](const Point& v) -> Real
             {
-              const Scalar g = gamma(v);
+              const Real g = gamma(v);
               if (g > 0)
               {
-                const Scalar R0 = env.m_vegetalStratum.R0(v);
-                const Scalar v0 = env.m_vegetalStratum.v0(v);
-                const Scalar A = env.m_vegetalStratum.A(v);
-                const Scalar Ra = R0 + A * v0 * (
+                const Real R0 = env.m_vegetalStratum.R0(v);
+                const Real v0 = env.m_vegetalStratum.v0(v);
+                const Real A = env.m_vegetalStratum.A(v);
+                const Real Ra = R0 + A * v0 * (
                     1 + std::sin(g) - std::cos(g)) / std::cos(g) - v0 / std::cos(g);
                 return 0.5 * (Ra + std::sqrt(Ra * Ra + (4 * v0 * R0) / std::cos(g)));
               }
@@ -183,7 +183,7 @@ class Environment
             };
 
           m_direction = GridFunction(env.m_vfes);
-          m_direction = dt * ScalarFunction(R) * conormal;
+          m_direction = dt * RealFunction(R) * conormal;
 
           return *this;
         }
@@ -213,7 +213,7 @@ class Environment
         m_terrainHeight = [](const Point& v) { return v.z(); };
       }
 
-    Environment& step(Scalar dt)
+    Environment& step(Real dt)
     {
       std::cout << "wind\n";
       // auto wind = VectorFunction{0, 0, 0};
@@ -256,7 +256,7 @@ class Environment
 
 
       // Rebuild finite element spaces with new topography
-      m_sfes = ScalarFES(m_topography);
+      m_sfes = RealFES(m_topography);
       m_vfes = VectorFES(m_topography, m_topography.getSpaceDimension());
 
       std::cout << "terrain\n";
@@ -285,7 +285,7 @@ class Environment
       return m_topography;
     }
 
-    Scalar getGravity() const
+    Real getGravity() const
     {
       return m_gravity;
     }
@@ -293,22 +293,22 @@ class Environment
   private:
     MMG::Mesh& m_topography;
 
-    ScalarFES m_sfes;
+    RealFES m_sfes;
     VectorFES m_vfes;
 
     GridFunction<VectorFES> m_wind;
 
-    GridFunction<ScalarFES> m_terrainHeight;
+    GridFunction<RealFES> m_terrainHeight;
 
     VegetalStratum m_vegetalStratum;
 
     Flame m_flame;
 
-    const Scalar m_gravity;
+    const Real m_gravity;
 
-    GridFunction<ScalarFES> m_fireDist;
+    GridFunction<RealFES> m_fireDist;
 
-    Scalar m_elapsedTime;
+    Real m_elapsedTime;
 };
 
 
@@ -322,7 +322,7 @@ int main()
 
   for (auto it = topography.getVertex(); !it.end(); ++it)
   {
-    // Scalar avgHeight = 0;
+    // Real avgHeight = 0;
     // for (auto vit = it->getVertex(); !vit.end(); ++vit)
     //   avgHeight += vit->z();
     // avgHeight /= 2;
@@ -351,10 +351,10 @@ int main()
     GridFunction phi(fes);
     phi = [](const Point& p)
     {
-      const Scalar r = 1000;
-      Scalar rr = 0;
+      const Real r = 1000;
+      Real rr = 0;
 
-      Math::FixedSizeVector<Scalar,  3> c0;
+      Math::FixedSizeVector<Real,  3> c0;
       c0 << 19500, 19500, p.z();
       rr = (p.getCoordinates() - c0).norm() - r;
 
@@ -396,30 +396,30 @@ int main()
   stratum.tau = [](const Point&) { return 20; };
   stratum.e = [](const Point&) { return 4.0; };
   stratum.v =
-    [&](const Point& v) -> Scalar
+    [&](const Point& v) -> Real
     {
-      Scalar pv = stratum.pv(v);
+      Real pv = stratum.pv(v);
       assert(pv > 0);
       return std::min(1.0, stratum.sv(v) * stratum.sigma(v) / (4.0 * pv));
     };
   stratum.A =
-    [&](const Point& v) -> Scalar
+    [&](const Point& v) -> Real
     {
-      Scalar absorption = stratum.v(v);
+      Real absorption = stratum.v(v);
       return absorption * (stratum.A0 / (1 + stratum.a * stratum.m(v)));
     };
   stratum.R0 =
-    [&](const Point& v) -> Scalar
+    [&](const Point& v) -> Real
     {
       return stratum.e(v) / stratum.sigma(v) * stratum.R00 / (1 + stratum.a * stratum.m(v));
     };
   stratum.u0 =
-    [&](const Point& v) -> Scalar
+    [&](const Point& v) -> Real
     {
       return stratum.u00 * stratum.sigma(v) / stratum.tau(v);
     };
   stratum.v0 =
-    [&](const Point& v) -> Scalar
+    [&](const Point& v) -> Real
     {
       return 12 * stratum.R0(v);
     };
@@ -427,8 +427,8 @@ int main()
   // Define environment and step through it
   Alert::Info() << "Starting simulation..." << Alert::Raise;
   Environment environment(topography, stratum);
-  const Scalar dt = 1200;
-  Scalar t = 0;
+  const Real dt = 1200;
+  Real t = 0;
   for (int i = 0; i < std::numeric_limits<int>::max(); i++)
   {
     topography.save("FirePropagation.mfem.mesh");

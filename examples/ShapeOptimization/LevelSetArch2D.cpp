@@ -114,7 +114,7 @@ int main(int, char**)
    // Advect the level set function
    Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
    GridFunction gNorm(Dh);
-   gNorm = ScalarFunction(
+   gNorm = RealFunction(
       [&](const Point& v) -> double
       {
        Math::Vector val = g.getSolution()(v);

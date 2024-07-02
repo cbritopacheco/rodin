@@ -110,13 +110,13 @@ namespace Rodin::Variational
    * @ingroup MatrixFunctionSpecializations
    */
   template <>
-  class MatrixFunction<Math::Matrix<Scalar>> final
-    : public MatrixFunctionBase<MatrixFunction<Math::Matrix<Scalar>>>
+  class MatrixFunction<Math::Matrix<Real>> final
+    : public MatrixFunctionBase<MatrixFunction<Math::Matrix<Real>>>
   {
     public:
-      using Parent = MatrixFunctionBase<MatrixFunction<Math::Matrix<Scalar>>>;
+      using Parent = MatrixFunctionBase<MatrixFunction<Math::Matrix<Real>>>;
 
-      MatrixFunction(std::reference_wrapper<const Math::Matrix<Scalar>> matrix)
+      MatrixFunction(std::reference_wrapper<const Math::Matrix<Real>> matrix)
         : m_matrix(matrix)
       {}
 
@@ -131,7 +131,7 @@ namespace Rodin::Variational
       {}
 
       inline
-      const Math::Matrix<Scalar>& getValue(const Geometry::Point&) const
+      const Math::Matrix<Real>& getValue(const Geometry::Point&) const
       {
         return m_matrix.get();
       }
@@ -174,11 +174,11 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Math::Matrix<Scalar>> m_matrix;
+      std::reference_wrapper<const Math::Matrix<Real>> m_matrix;
   };
 
-  MatrixFunction(std::reference_wrapper<const Math::Matrix<Scalar>>)
-    -> MatrixFunction<Math::Matrix<Scalar>>;
+  MatrixFunction(std::reference_wrapper<const Math::Matrix<Real>>)
+    -> MatrixFunction<Math::Matrix<Real>>;
 }
 
 #endif

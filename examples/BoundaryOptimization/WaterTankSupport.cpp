@@ -28,19 +28,19 @@ static constexpr Geometry::Attribute dSupport = 111;
 
 static constexpr size_t maxIt = 2000;
 
-static constexpr Scalar epsilon = 1e-6;
-static constexpr Scalar ellP = 0;
-static constexpr Scalar tgv = std::numeric_limits<float>::max();
-static constexpr Scalar alpha = 2;
+static constexpr Real epsilon = 1e-6;
+static constexpr Real ellP = 0;
+static constexpr Real tgv = std::numeric_limits<float>::max();
+static constexpr Real alpha = 2;
 
-static Scalar bA = epsilon;
-static Scalar bTarget = 1.0 / epsilon;
-static Scalar ellA = 0;
-static Scalar targetArea = NAN;
+static Real bA = epsilon;
+static Real bTarget = 1.0 / epsilon;
+static Real ellA = 0;
+static Real targetArea = NAN;
 
-using ScalarFES = P1<Scalar>;
-using VectorFES = P1<Math::Vector<Scalar>>;
-using ScalarGridFunction = GridFunction<ScalarFES>;
+using RealFES = P1<Real>;
+using VectorFES = P1<Math::Vector<Real>>;
+using RealGridFunction = GridFunction<RealFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
 
@@ -68,7 +68,7 @@ int main(int, char**)
   phi2.load("Phi_2.gf");
   phi3.load("Phi_3.gf");
 
-  Math::Matrix<Scalar> aniso(3, 3);
+  Math::Matrix<Real> aniso(3, 3);
   {
     P1 h1d1s(D1);
     GridFunction integ(h1d1s);
@@ -116,12 +116,12 @@ int main(int, char**)
   D1.save("miaow.mesh", IO::FileFormat::MEDIT);
   phi1.save("miaow.sol", IO::FileFormat::MEDIT);
 
-  Threads::getGlobalThreadPool().reset(6);
+  // Threads::getGlobalThreadPool().reset(6);
 
-  Scalar hmax = 0.4;
-  Scalar hmin = hmax / 10.0;
-  Scalar hausd = 0.5 * hmin;
-  Scalar hgrad = 1.2;
+  Real hmax = 0.4;
+  Real hmin = hmax / 10.0;
+  Real hausd = 0.5 * hmin;
+  Real hgrad = 1.2;
 
   Alert::Info() << "Initializing unsupported region..." << Alert::Raise;
   {
@@ -130,7 +130,7 @@ int main(int, char**)
     GridFunction dist(vh);
     dist = [&](const Point& p)
     {
-      Math::SpatialVector<Scalar> c(3);
+      Math::SpatialVector<Real> c(3);
       c << 0, 0, 5;
       // return (p - c).norm() - (6 + 0.622876);
       return (p - c).norm() - 6.5;
@@ -173,7 +173,7 @@ int main(int, char**)
       //   d = std::min(d, (p - cs[i]).norm() - sqrt(2) / 2.0);
       // }
       // return d;
-      Math::SpatialVector<Scalar> c(3);
+      Math::SpatialVector<Real> c(3);
       c << 0, 0, -5.86;
       return (p - c).norm() - 0.5 * alpha * (hmax + hmin);
     };
@@ -196,9 +196,9 @@ int main(int, char**)
   std::ofstream fObj("obj.txt");
   size_t i = 0;
   size_t regionCount;
-  Scalar augmented = 0, oldAugmented = 1e+5;
-  Scalar objective = 0, oldObjective = 1e+5;
-  Scalar constraint = 0, oldConstraint = 1e+5;
+  Real augmented = 0, oldAugmented = 1e+5;
+  Real objective = 0, oldObjective = 1e+5;
+  Real constraint = 0, oldConstraint = 1e+5;
   while (i < maxIt)
   {
     bool topologicalStep = (i < 20) || (i < 200  && i % 10 == 0);
@@ -208,9 +208,9 @@ int main(int, char**)
     hausd = hmin;
     hgrad = 1.2;
 
-    const Scalar k = 0.5 * (hmax + hmin);
-    const Scalar dt = k;
-    const Scalar radius = k;
+    const Real k = 0.5 * (hmax + hmin);
+    const Real dt = k;
+    const Real radius = k;
 
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
                   << "HMax:      " << Alert::Notation(hmax)     << Alert::NewLine
@@ -264,9 +264,9 @@ int main(int, char**)
     dOmega.save("dOmega.mesh", IO::FileFormat::MEDIT);
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
-    ScalarFES sfes(mesh);
+    RealFES sfes(mesh);
     VectorFES vfes(mesh, mesh.getSpaceDimension());
-    ScalarFES dsfes(dOmega);
+    RealFES dsfes(dOmega);
     VectorFES dvfes(dOmega, dOmega.getSpaceDimension());
 
 
@@ -277,12 +277,12 @@ int main(int, char**)
     Solver::CG cg;
 
     // Parameters
-    const Scalar lambda = 0.5769, mu = 0.3846;
+    const Real lambda = 0.5769, mu = 0.3846;
 
     VectorFunction g{0, 0, -0.01};
 
     // Bump function
-    auto h = [](Scalar r)
+    auto h = [](Real r)
     {
       if (r < -1.0)
         return 1.0;
@@ -292,7 +292,7 @@ int main(int, char**)
         return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
     };
 
-    ScalarFunction he =
+    RealFunction he =
       [&](const Geometry::Point& p) { return h(dist(p) / epsilon) / epsilon; };
 
     Alert::Info() << "Solving state equation..." << Alert::Raise;
@@ -321,7 +321,7 @@ int main(int, char**)
     mesh.save("p.mesh");
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
-    ScalarGridFunction j(sfes);
+    RealGridFunction j(sfes);
     j = Frobenius(u.getSolution()) / mesh.getVolume();
     j.setWeights();
     if (i > 0)
@@ -331,9 +331,9 @@ int main(int, char**)
       oldConstraint = constraint;
     }
 
-    const Scalar J = Integral(j).compute();
-    const Scalar area = mesh.getPerimeter(Support);
-    const Scalar perimeter = dOmega.getMeasure(1, dSupport);
+    const Real J = Integral(j).compute();
+    const Real area = mesh.getPerimeter(Support);
+    const Real perimeter = dOmega.getMeasure(1, dSupport);
     objective = J;
     constraint = (area / targetArea - 1);
     augmented =
@@ -369,13 +369,13 @@ int main(int, char**)
       dsfes.getMesh().save("Raw.mesh");
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
-      const Scalar tc = s.getSolution().max();
+      const Real tc = s.getSolution().max();
       std::vector<Point> cs;
       for (auto it = dOmega.getVertex(); !it.end(); ++it)
       {
         const Point p(*it, it->getTransformation(),
             Polytope::getVertex(0, Polytope::Type::Point), it->getCoordinates());
-        const Scalar tp = s.getSolution()(p);
+        const Real tp = s.getSolution()(p);
         if (tp > 0 && (tp / tc) > (1 - 1e-12))
         {
           cs.emplace_back(std::move(p));

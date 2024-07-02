@@ -102,7 +102,7 @@ namespace Rodin::Variational
   auto
   operator>=(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return GEQ(ScalarFunction(lhs), rhs);
+    return GEQ(RealFunction(lhs), rhs);
   }
 
   template <class LHSDerived, class Number,
@@ -112,7 +112,7 @@ namespace Rodin::Variational
   auto
   operator>=(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
-    return GEQ(lhs, ScalarFunction(rhs));
+    return GEQ(lhs, RealFunction(rhs));
   }
 }
 

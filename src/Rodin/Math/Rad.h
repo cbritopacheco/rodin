@@ -9,10 +9,10 @@ namespace Rodin::Math
   /**
    * @brief Represents an angle in radians.
    */
-  class Rad : public Unit<Rad, Scalar>
+  class Rad : public Unit<Rad, Real>
   {
     public:
-      using Parent = Unit<Rad, Scalar>;
+      using Parent = Unit<Rad, Real>;
       using Parent::Parent;
   };
 }

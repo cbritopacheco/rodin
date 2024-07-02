@@ -17,10 +17,10 @@ static constexpr Attribute interior = 1;
 static constexpr Attribute exterior = 2;
 static constexpr Attribute ball = 3;
 
-static constexpr Scalar hmax = 0.01;
-static constexpr Scalar hmin = 0.01 * hmax;
+static constexpr Real hmax = 0.01;
+static constexpr Real hmin = 0.01 * hmax;
 
-static const Math::Vector<Scalar> x0{{0.5, 0.5}}; // Center of domain
+static const Math::Vector<Real> x0{{0.5, 0.5}}; // Center of domain
 
 int main(int, char**)
 {
@@ -60,10 +60,10 @@ int main(int, char**)
   // // Refine around the interior corner
   // {
   //   P1 fes(mesh);
-  //   MMG::ScalarGridFunction sizeMap(fes);
+  //   MMG::RealGridFunction sizeMap(fes);
   //   sizeMap = [](const Geometry::Point& p)
   //   {
-  //     const Scalar s = std::abs(std::sqrt((p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5)));
+  //     const Real s = std::abs(std::sqrt((p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5)));
   //     if (s == 0)
   //       return hmin;
   //     else
@@ -81,11 +81,11 @@ int main(int, char**)
   // // Refine mesh
   // {
   //   P1 fes(mesh);
-  //   MMG::ScalarGridFunction sizeMap(fes);
+  //   MMG::RealGridFunction sizeMap(fes);
   //   sizeMap =
   //     [&](const Geometry::Point& p)
   //     {
-  //       const Scalar r = (p.getCoordinates() - x0).norm();
+  //       const Real r = (p.getCoordinates() - x0).norm();
   //       return r;
   //     };
   //   sizeMap *= (hmax - hmin);

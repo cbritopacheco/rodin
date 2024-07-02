@@ -236,16 +236,16 @@ namespace Rodin::Variational
    * @brief Base class for scalar-valued functions defined on a mesh.
    */
   template <class Derived>
-  class ScalarFunctionBase;
+  class RealFunctionBase;
 
   /**
    * @note For an overview of all the possible specializations of the
-   * ScalarFunction class, please see @ref ScalarFunctionSpecializations.
+   * RealFunction class, please see @ref RealFunctionSpecializations.
    *
-   * @see ScalarFunctionSpecializations
+   * @see RealFunctionSpecializations
    */
   template <class ... Values>
-  class ScalarFunction;
+  class RealFunction;
 
   template <class Range>
   class Zero;
@@ -505,11 +505,11 @@ namespace Rodin::Variational
    * ---------------------
    *  The rules for deducing the range of a Mult object, denoted @f$
    *  \texttt{Range}[\text{LHS} * \text{RHS}]@f$, are the following:
-   *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Scalar} @f$
+   *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Real} @f$
    *    1.  @f[
    *          \dfrac
-   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Scalar}}
-   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Scalar}}
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Real}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Real}}
    *        @f]
    *    2.  @f[
    *          \dfrac
@@ -524,7 +524,7 @@ namespace Rodin::Variational
    *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Vector} @f$
    *    1.  @f[
    *          \dfrac
-   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Scalar}}
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Real}}
    *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Vector}}\\
    *        @f]
    *    2.  @f[
@@ -540,7 +540,7 @@ namespace Rodin::Variational
    *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Matrix} @f$
    *    1.  @f[
    *          \dfrac
-   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Scalar}}
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Real}}
    *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Matrix}}\\
    *        @f]
    *    2.  @f[

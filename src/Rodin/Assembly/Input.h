@@ -23,10 +23,33 @@ namespace Rodin::Assembly
   class BilinearFormAssemblyInput
   {
     public:
+      using TrialFESType = TrialFES;
+
+      using TestFESType = TestFES;
+
+      using TrialFESNumberType  = typename FormLanguage::Traits<TrialFESType>::NumberType;
+
+      using TestFESNumberType   = typename FormLanguage::Traits<TestFESType>::NumberType;
+
+      using NumberType = decltype(
+          std::declval<TrialFESNumberType>() * std::declval<TestFESNumberType>());
+
+      using LocalBilinearFormIntegratorBaseType =
+        Variational::LocalBilinearFormIntegratorBase<NumberType>;
+
+      using LocalBilinearFormIntegratorBaseListType =
+        FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
+
+      using GlobalBilinearFormIntegratorBaseType =
+        Variational::GlobalBilinearFormIntegratorBase<NumberType>;
+
+      using GlobalBilinearFormIntegratorBaseListType =
+        FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
+
       BilinearFormAssemblyInput(
           const TrialFES& trialFES, const TestFES& testFES,
-          FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>& lbfis,
-          FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>& gbfis)
+          LocalBilinearFormIntegratorBaseListType& lbfis,
+          GlobalBilinearFormIntegratorBaseListType& gbfis)
         : m_trialFES(trialFES), m_testFES(testFES), m_lbfis(lbfis), m_gbfis(gbfis)
       {}
 
@@ -40,28 +63,36 @@ namespace Rodin::Assembly
         return m_testFES.get();
       }
 
-      FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>& getLocalBFIs() const
+      LocalBilinearFormIntegratorBaseListType& getLocalBFIs() const
       {
         return m_lbfis.get();
       }
 
-      FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>& getGlobalBFIs() const
+      GlobalBilinearFormIntegratorBaseListType& getGlobalBFIs() const
       {
         return m_gbfis.get();
       }
 
     private:
-      std::reference_wrapper<const TrialFES> m_trialFES;
-      std::reference_wrapper<const TestFES> m_testFES;
-      std::reference_wrapper<FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>> m_lbfis;
-      std::reference_wrapper<FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>> m_gbfis;
+      std::reference_wrapper<const TrialFES>  m_trialFES;
+      std::reference_wrapper<const TestFES>   m_testFES;
+      std::reference_wrapper<LocalBilinearFormIntegratorBaseListType>   m_lbfis;
+      std::reference_wrapper<GlobalBilinearFormIntegratorBaseListType>  m_gbfis;
   };
 
   template <class TrialFES, class TestFES>
   BilinearFormAssemblyInput(
       const TrialFES&, const TestFES&,
-      FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>&,
-      FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>&)
+      FormLanguage::List<
+        Variational::LocalBilinearFormIntegratorBase<
+          decltype(
+            std::declval<typename FormLanguage::Traits<TrialFES>::NumberType>() *
+            std::declval<typename FormLanguage::Traits<TestFES>::NumberType>())>>&,
+      FormLanguage::List<
+        Variational::GlobalBilinearFormIntegratorBase<
+          decltype(
+            std::declval<typename FormLanguage::Traits<TrialFES>::NumberType>() *
+            std::declval<typename FormLanguage::Traits<TestFES>::NumberType>())>>&)
     -> BilinearFormAssemblyInput<TrialFES, TestFES>;
 
   template <class FES>

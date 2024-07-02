@@ -65,14 +65,14 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::SpatialVector<Scalar> getValue(const Geometry::Point& p) const
+      Math::SpatialVector<Real> getValue(const Geometry::Point& p) const
       {
-        Math::SpatialVector<Scalar> res;
+        Math::SpatialVector<Real> res;
         getValue(res, p);
         return res;
       }
 
-      void interpolate(Math::SpatialVector<Scalar>& res, const Geometry::Point& p) const
+      void interpolate(Math::SpatialVector<Real>& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -90,7 +90,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim - 1, *inc.begin());
-            const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
+            const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(res, np);
             return;
@@ -115,7 +115,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim - 1, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector<Scalar> rc = tracePolytope->getTransformation().inverse(pc);
+                  const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(res, np);
                   return;
@@ -167,7 +167,7 @@ namespace Rodin::Variational
         }
       }
 
-      void getValue(Math::SpatialVector<Scalar>& out, const Geometry::Point& p) const
+      void getValue(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
       {
         out.setConstant(NAN);
         const auto& polytope = p.getPolytope();

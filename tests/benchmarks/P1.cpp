@@ -102,32 +102,32 @@ namespace RodinBenchmark
     }
   }
 
-  BENCHMARK_F(P1Benchmark, 2D_Square_GridFunction_Projection_Scalar_SumOfComponents)
+  BENCHMARK_F(P1Benchmark, 2D_Square_GridFunction_Projection_Real_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(square2d);
     GridFunction gf(fes);
-    ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     for (auto _ : st)
       gf.project(c);
   }
 
-  BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Scalar_SumOfComponents)
+  BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Real_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(uniformTriangularMesh16);
     GridFunction gf(fes);
-    ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     for (auto _ : st)
       gf.project(c);
   }
 
-  BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Scalar_SumOfComponents)
+  BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Real_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(uniformTriangularMesh32);
     GridFunction gf(fes);
-    ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     for (auto _ : st)
       gf.project(c);
   }

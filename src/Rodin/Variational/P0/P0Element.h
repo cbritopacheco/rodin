@@ -57,16 +57,16 @@ namespace Rodin::Variational
    * @see @m_defelement{Lagrange,https://defelement.com/elements/lagrange.html}
    */
   template <>
-  class P0Element<Scalar> final : public FiniteElementBase<P0Element<Scalar>>
+  class P0Element<Real> final : public FiniteElementBase<P0Element<Real>>
   {
     using G = Geometry::Polytope::Type;
 
     public:
       /// Parent class
-      using Parent = FiniteElementBase<P0Element<Scalar>>;
+      using Parent = FiniteElementBase<P0Element<Real>>;
 
       /// Type of range
-      using RangeType = Scalar;
+      using RangeType = Real;
 
       /**
        * @brief Represents a linear form of a P0 scalar element.
@@ -114,7 +114,7 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
-          using ReturnType = Scalar;
+          using ReturnType = Real;
 
           constexpr
           BasisFunction()
@@ -135,7 +135,7 @@ namespace Rodin::Variational
 
           inline
           constexpr
-          Scalar operator()(const Math::SpatialVector<Scalar>& r) const
+          Real operator()(const Math::SpatialVector<Real>& r) const
           {
             return 1;
           }
@@ -167,13 +167,13 @@ namespace Rodin::Variational
           GradientFunction& operator=(GradientFunction&&) = default;
 
           inline
-          auto operator()(const Math::SpatialVector<Scalar>& r) const
+          auto operator()(const Math::SpatialVector<Real>& r) const
           {
-            return Math::SpatialVector<Scalar>::Zero(Geometry::Polytope::getGeometryDimension(m_g));
+            return Math::SpatialVector<Real>::Zero(Geometry::Polytope::getGeometryDimension(m_g));
           }
 
           inline
-          void operator()(Math::SpatialVector<Scalar>& out, const Math::SpatialVector<Scalar>& r) const
+          void operator()(Math::SpatialVector<Real>& out, const Math::SpatialVector<Real>& r) const
           {
             assert(static_cast<size_t>(r.size()) == Geometry::Polytope::getGeometryDimension(m_g));
             out.resize(Geometry::Polytope::getGeometryDimension(m_g));

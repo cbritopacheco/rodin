@@ -15,7 +15,7 @@
 
 #include "RangeShape.h"
 #include "Function.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -38,7 +38,7 @@ namespace Rodin::Variational
    */
   template <class BaseDerived, class Number>
   class Pow<FunctionBase<BaseDerived>, Number> final
-    : public ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>
+    : public RealFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>
   {
     static_assert(std::is_arithmetic_v<Number>);
     public:
@@ -49,7 +49,7 @@ namespace Rodin::Variational
       using ExponentType = Number;
 
       /// Parent class
-      using Parent = ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>;
+      using Parent = RealFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>;
 
       /**
        * @brief Constructs the power object

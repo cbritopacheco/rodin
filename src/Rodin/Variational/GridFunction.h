@@ -32,7 +32,7 @@
 #include "Component.h"
 #include "Restriction.h"
 #include "LazyEvaluator.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 #include "VectorFunction.h"
 #include "MatrixFunction.h"
 #include "FiniteElementSpace.h"
@@ -70,12 +70,12 @@ namespace Rodin::Variational
    * @section gridfunction-data-layout Data layout
    *
    * The data of the GridFunctionBase object can be accessed via a call to @ref
-   * getData(). The i-th column of the returned Math::Matrix<Scalar> object corresponds
+   * getData(). The i-th column of the returned Math::Matrix<Real> object corresponds
    * to the value of the grid function at the global i-th degree of freedom in
    * the finite element space. Furthermore, the following conditions are
    * satisfied:
    * ```
-   *  const Math::Matrix<Scalar>& data = gf.getData();
+   *  const Math::Matrix<Real>& data = gf.getData();
    *  assert(data.rows() == gf.getFiniteElementSpace().getVectorDimension());
    *  assert(data.cols() == gf.getFiniteElementSpace().getSize());
    * ```
@@ -104,8 +104,8 @@ namespace Rodin::Variational
       using Parent = LazyEvaluator<GridFunctionBase<Derived, FES>>;
 
       static_assert(
-          std::is_same_v<RangeType, Scalar> ||
-          std::is_same_v<RangeType, Math::Vector<Scalar>>);
+          std::is_same_v<RangeType, Real> ||
+          std::is_same_v<RangeType, Math::Vector<Real>>);
 
       GridFunctionBase(const FES& fes)
         : Parent(std::cref(*this)),
@@ -152,18 +152,18 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      Scalar max() const
+      Real max() const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>,
+        static_assert(std::is_same_v<RangeType, Real>,
             "GridFunction must be scalar valued.");
         return m_data.maxCoeff();
       }
 
       inline
       constexpr
-      Scalar max(Index& idx) const
+      Real max(Index& idx) const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>,
+        static_assert(std::is_same_v<RangeType, Real>,
             "GridFunction must be scalar valued.");
         return m_data.maxCoeff(&idx);
       }
@@ -181,18 +181,18 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      Scalar min() const
+      Real min() const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>,
+        static_assert(std::is_same_v<RangeType, Real>,
             "GridFunction must be scalar valued.");
         return m_data.minCoeff();
       }
 
       inline
       constexpr
-      Scalar min(Index& idx) const
+      Real min(Index& idx) const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>,
+        static_assert(std::is_same_v<RangeType, Real>,
             "GridFunction must be scalar valued.");
         return m_data.minCoeff(&idx);
       }
@@ -201,7 +201,7 @@ namespace Rodin::Variational
       constexpr
       Index argmax() const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>,
+        static_assert(std::is_same_v<RangeType, Real>,
             "GridFunction must be scalar valued.");
         Index idx = 0;
         m_data.maxCoeff(&idx);
@@ -212,7 +212,7 @@ namespace Rodin::Variational
       constexpr
       Index argmin() const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>,
+        static_assert(std::is_same_v<RangeType, Real>,
             "GridFunction must be scalar valued.");
         Index idx = 0;
         m_data.minCoeff(&idx);
@@ -222,7 +222,7 @@ namespace Rodin::Variational
       inline
       Derived& normalize()
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>,
+        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>,
             "GridFunction must be vector valued.");
         for (size_t i = 0; i < getSize(); i++)
           getData().col(i).normalize();
@@ -232,7 +232,7 @@ namespace Rodin::Variational
       inline
       Derived& stableNormalize()
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>,
+        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>,
             "GridFunction must be vector valued.");
         for (size_t i = 0; i < getSize(); i++)
           getData().col(i).stableNormalize();
@@ -250,7 +250,7 @@ namespace Rodin::Variational
       constexpr
       auto x() const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
         assert(getFiniteElementSpace().getVectorDimension() >= 1);
         return Component(*this, 0);
       }
@@ -259,7 +259,7 @@ namespace Rodin::Variational
       constexpr
       auto y() const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
         assert(getFiniteElementSpace().getVectorDimension() >= 2);
         return Component(*this, 1);
       }
@@ -268,7 +268,7 @@ namespace Rodin::Variational
       constexpr
       auto z() const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
         assert(getFiniteElementSpace().getVectorDimension() >= 3);
         return Component(*this, 2);
       }
@@ -294,18 +294,18 @@ namespace Rodin::Variational
        * @brief Bulk assigns the value to the whole data array.
        */
       inline
-      Derived& operator=(Scalar v)
+      Derived& operator=(Real v)
       {
-        static_assert(std::is_same_v<RangeType, Scalar>);
+        static_assert(std::is_same_v<RangeType, Real>);
         m_data.setConstant(v);
         return static_cast<Derived&>(*this);
       }
 
       inline
-      Derived& operator=(const Math::Vector<Scalar>& v)
+      Derived& operator=(const Math::Vector<Real>& v)
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
-        Math::Matrix<Scalar>& data = m_data;
+        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
+        Math::Matrix<Real>& data = m_data;
         assert(data.cols() >= 0);
         for (size_t i = 0; i < static_cast<size_t>(data.cols()); i++)
           data.col(i) = v;
@@ -315,12 +315,12 @@ namespace Rodin::Variational
       inline
       Derived& operator=(std::function<RangeType(const Geometry::Point&)> fn)
       {
-        if constexpr (std::is_same_v<RangeType, Scalar>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return project(ScalarFunction(fn));
+          return project(RealFunction(fn));
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
           return project(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
         }
@@ -345,9 +345,9 @@ namespace Rodin::Variational
        * @brief Addition of a scalar value.
        */
       inline
-      Derived& operator+=(Scalar rhs)
+      Derived& operator+=(Real rhs)
       {
-        static_assert(std::is_same_v<RangeType, Scalar>);
+        static_assert(std::is_same_v<RangeType, Real>);
         m_data = m_data.array() + rhs;
         return static_cast<Derived&>(*this);
       }
@@ -356,9 +356,9 @@ namespace Rodin::Variational
        * @brief Substraction of a scalar value.
        */
       inline
-      Derived& operator-=(Scalar rhs)
+      Derived& operator-=(Real rhs)
       {
-        static_assert(std::is_same_v<RangeType, Scalar>);
+        static_assert(std::is_same_v<RangeType, Real>);
         m_data = m_data.array() - rhs;
         return static_cast<Derived&>(*this);
       }
@@ -367,7 +367,7 @@ namespace Rodin::Variational
        * @brief Multiplication by a scalar value.
        */
       inline
-      Derived& operator*=(Scalar rhs)
+      Derived& operator*=(Real rhs)
       {
         m_data = m_data.array() * rhs;
         return static_cast<Derived&>(*this);
@@ -377,7 +377,7 @@ namespace Rodin::Variational
        * @brief Division by a scalar value.
        */
       inline
-      Derived& operator/=(Scalar rhs)
+      Derived& operator/=(Real rhs)
       {
         m_data = m_data.array() / rhs;
         return static_cast<Derived&>(*this);
@@ -388,7 +388,7 @@ namespace Rodin::Variational
       {
         if (this == &rhs)
         {
-          operator*=(Scalar(2));
+          operator*=(Real(2));
         }
         else
         {
@@ -403,7 +403,7 @@ namespace Rodin::Variational
       {
         if (this == &rhs)
         {
-          operator=(Scalar(0));
+          operator=(Real(0));
         }
         else
         {
@@ -433,7 +433,7 @@ namespace Rodin::Variational
       {
         if (this == &rhs)
         {
-          operator=(Scalar(1));
+          operator=(Real(1));
         }
         else
         {
@@ -446,11 +446,11 @@ namespace Rodin::Variational
       /**
        * @brief Projects a scalar valued function on the region of the mesh
        * with the given attribute.
-       * @param[in] fn Scalar valued function
+       * @param[in] fn Real valued function
        * @param[in] attr Attribute
        */
       inline
-      auto& project(std::function<Scalar(const Geometry::Point&)> fn, Geometry::Attribute attr)
+      auto& project(std::function<Real(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return project(fn, FlatSet<Geometry::Attribute>{attr});
       }
@@ -458,13 +458,13 @@ namespace Rodin::Variational
       /**
        * @brief Projects a scalar valued function on the region of the mesh
        * with the given attributes.
-       * @param[in] fn Scalar valued function
+       * @param[in] fn Real valued function
        * @param[in] attrs Set of attributes
        */
       inline
-      auto& project(std::function<Scalar(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
+      auto& project(std::function<Real(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
-        return project(ScalarFunction(fn), attrs);
+        return project(RealFunction(fn), attrs);
       }
 
       template <class NestedDerived>
@@ -508,7 +508,7 @@ namespace Rodin::Variational
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension();
         std::vector<size_t> ns(fes.getSize(), 0);
-        if constexpr (std::is_same_v<RangeType, Scalar>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
 #ifdef RODIN_MULTITHREADED
           auto& threadPool = Threads::getGlobalThreadPool();
@@ -518,7 +518,7 @@ namespace Rodin::Variational
               const size_t capacity = fes.getSize() / threadPool.getThreadCount();
               std::vector<Index> is;
               is.reserve(capacity);
-              std::vector<Scalar> vs;
+              std::vector<Real> vs;
               vs.reserve(capacity);
               std::unique_ptr<FunctionBase<NestedDerived>> fnt(fn.copy());
               for (Index i = start; i < end; ++i)
@@ -574,9 +574,9 @@ namespace Rodin::Variational
           }
 #endif
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
-          Math::Vector<Scalar> value;
+          Math::Vector<Real> value;
           for (auto it = mesh.getCell(); !it.end(); ++it)
           {
             const auto& polytope = *it;
@@ -605,15 +605,15 @@ namespace Rodin::Variational
       }
 
       inline
-      auto& projectOnBoundary(std::function<Scalar(const Geometry::Point&)> fn, Geometry::Attribute attr)
+      auto& projectOnBoundary(std::function<Real(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       inline
-      auto& projectOnBoundary(std::function<Scalar(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
+      auto& projectOnBoundary(std::function<Real(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
-        return projectOnBoundary(ScalarFunction(fn), attrs);
+        return projectOnBoundary(RealFunction(fn), attrs);
       }
 
       template <class NestedDerived>
@@ -652,13 +652,13 @@ namespace Rodin::Variational
             {
               const Geometry::Point p(polytope, trans, fe.getNode(local));
               const Index global = fes.getGlobalIndex({ d, i }, local);
-              if constexpr (std::is_same_v<RangeType, Scalar>)
+              if constexpr (std::is_same_v<RangeType, Real>)
               {
                 assert(m_data.rows() == 1);
                 m_data(global) =
                   (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1.0);
               }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+              else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
               {
                 m_data.col(global) =
                   (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1.0);
@@ -675,15 +675,15 @@ namespace Rodin::Variational
       }
 
       inline
-      auto& projectOnFaces(std::function<Scalar(const Geometry::Point&)> fn, Geometry::Attribute attr)
+      auto& projectOnFaces(std::function<Real(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       inline
-      auto& projectOnFaces(std::function<Scalar(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
+      auto& projectOnFaces(std::function<Real(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
-        return projectOnFaces(ScalarFunction(fn), attrs);
+        return projectOnFaces(RealFunction(fn), attrs);
       }
 
       template <class NestedDerived>
@@ -722,13 +722,13 @@ namespace Rodin::Variational
             {
               const Geometry::Point p(polytope, trans, fe.getNode(local));
               const Index global = fes.getGlobalIndex({ d, i }, local);
-              if constexpr (std::is_same_v<RangeType, Scalar>)
+              if constexpr (std::is_same_v<RangeType, Real>)
               {
                 assert(m_data.rows() == 1);
                 m_data(global) =
                   (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1.0);
               }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+              else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
               {
                 m_data.col(global) =
                   (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1.0);
@@ -745,15 +745,15 @@ namespace Rodin::Variational
       }
 
       inline
-      auto& projectOnInterfaces(std::function<Scalar(const Geometry::Point&)> fn, Geometry::Attribute attr)
+      auto& projectOnInterfaces(std::function<Real(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       inline
-      auto& projectOnInterfaces(std::function<Scalar(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
+      auto& projectOnInterfaces(std::function<Real(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
-        return projectOnInterfaces(ScalarFunction(fn), attrs);
+        return projectOnInterfaces(RealFunction(fn), attrs);
       }
 
       template <class NestedDerived>
@@ -790,12 +790,12 @@ namespace Rodin::Variational
             for (size_t local = 0; local < fe.getCount(); local++)
             {
               const Geometry::Point p(polytope, trans, fe.getNode(local));
-              if constexpr (std::is_same_v<RangeType, Scalar>)
+              if constexpr (std::is_same_v<RangeType, Real>)
               {
                 assert(m_data.rows() == 1);
                 m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
               }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+              else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
               {
                 m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
               }
@@ -905,7 +905,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      Math::Matrix<Scalar>& getData()
+      Math::Matrix<Real>& getData()
       {
         return m_data;
       }
@@ -915,21 +915,21 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      const Math::Matrix<Scalar>& getData() const
+      const Math::Matrix<Real>& getData() const
       {
         return m_data;
       }
 
       inline
       constexpr
-      std::optional<Math::Vector<Scalar>>& getWeights()
+      std::optional<Math::Vector<Real>>& getWeights()
       {
         return m_weights;
       }
 
       inline
       constexpr
-      const std::optional<Math::Vector<Scalar>>& getWeights() const
+      const std::optional<Math::Vector<Real>>& getWeights() const
       {
         return m_weights;
       }
@@ -987,13 +987,13 @@ namespace Rodin::Variational
       inline
       Derived& setValue(Index global, Value&& v)
       {
-        if constexpr (std::is_same_v<RangeType, Scalar>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(m_data.size() >= 0);
           assert(global < static_cast<size_t>(m_data.size()));
           m_data.coeffRef(global) = std::forward<Value>(v);
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
           assert(m_data.cols() >= 0);
           assert(global < static_cast<size_t>(m_data.cols()));
@@ -1024,13 +1024,13 @@ namespace Rodin::Variational
       inline
       auto getValue(Index global) const
       {
-        if constexpr (std::is_same_v<RangeType, Scalar>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(m_data.size() >= 0);
           assert(global < static_cast<size_t>(m_data.size()));
           return m_data.coeff(global);
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
           assert(m_data.cols() >= 0);
           assert(global < static_cast<size_t>(m_data.cols()));
@@ -1050,9 +1050,9 @@ namespace Rodin::Variational
       RangeType getValue(const Geometry::Point& p) const
       {
         RangeType out;
-        if constexpr (std::is_same_v<RangeType, Scalar>)
+        if constexpr (std::is_same_v<RangeType, Real>)
           out = NAN;
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Scalar>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
           out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
@@ -1064,7 +1064,7 @@ namespace Rodin::Variational
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          if constexpr (std::is_same_v<RangeType, Scalar>)
+          if constexpr (std::is_same_v<RangeType, Real>)
             out = interpolate(*inclusion);
           else
             interpolate(out, *inclusion);
@@ -1075,7 +1075,7 @@ namespace Rodin::Variational
           const auto restriction = submesh.restriction(p);
           if (restriction)
           {
-            if constexpr (std::is_same_v<RangeType, Scalar>)
+            if constexpr (std::is_same_v<RangeType, Real>)
               out = interpolate(*restriction);
             else
               interpolate(out, *restriction);
@@ -1095,9 +1095,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector<Scalar>& out, const Geometry::Point& p) const
+      void getValue(Math::Vector<Real>& out, const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
         out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
@@ -1129,9 +1129,9 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      Scalar interpolate(const Geometry::Point& p) const
+      Real interpolate(const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>);
+        static_assert(std::is_same_v<RangeType, Real>);
         return static_cast<const Derived&>(*this).interpolate(p);
       }
 
@@ -1141,9 +1141,9 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      void interpolate(Math::Vector<Scalar>& res, const Geometry::Point& p) const
+      void interpolate(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Scalar>>);
+        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
         static_cast<const Derived&>(*this).interpolate(res, p);
       }
 
@@ -1152,17 +1152,17 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      void getValue(Math::Matrix<Scalar>& res, const Geometry::Point& p) const = delete;
+      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const = delete;
 
     private:
-      void interpolate(Scalar& res, const Geometry::Point& p) const
+      void interpolate(Real& res, const Geometry::Point& p) const
       {
         res = interpolate(p);
       }
 
       std::reference_wrapper<const FES> m_fes;
-      Math::Matrix<Scalar> m_data;
-      std::optional<Math::Vector<Scalar>> m_weights;
+      Math::Matrix<Real> m_data;
+      std::optional<Math::Vector<Real>> m_weights;
       mutable Threads::Mutex m_mutex;
   };
 }

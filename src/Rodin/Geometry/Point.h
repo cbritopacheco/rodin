@@ -65,7 +65,7 @@ namespace Rodin::Geometry
       PointBase(
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          const Math::SpatialVector<Scalar>& pc);
+          const Math::SpatialVector<Real>& pc);
 
       explicit
       PointBase(
@@ -76,7 +76,7 @@ namespace Rodin::Geometry
       PointBase(
           Polytope&& polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          const Math::SpatialVector<Scalar>& pc);
+          const Math::SpatialVector<Real>& pc);
 
       explicit
       PointBase(
@@ -104,7 +104,7 @@ namespace Rodin::Geometry
        * @returns Physical i-th coordinate.
        */
       inline
-      Scalar operator()(size_t i, Coordinates coords = Coordinates::Physical) const
+      Real operator()(size_t i, Coordinates coords = Coordinates::Physical) const
       {
         switch (coords)
         {
@@ -132,7 +132,7 @@ namespace Rodin::Geometry
        * @returns @f$ x @f$ coordinate of the point.
        */
       inline
-      Scalar x(Coordinates coords = Coordinates::Physical) const
+      Real x(Coordinates coords = Coordinates::Physical) const
       {
         return operator()(0, coords);
       }
@@ -142,7 +142,7 @@ namespace Rodin::Geometry
        * @returns @f$ y @f$ coordinate of the point.
        */
       inline
-      Scalar y(Coordinates coords = Coordinates::Physical) const
+      Real y(Coordinates coords = Coordinates::Physical) const
       {
         return operator()(1, coords);
       }
@@ -152,38 +152,38 @@ namespace Rodin::Geometry
        * @returns @f$ z @f$ coordinate of the point.
        */
       inline
-      Scalar z(Coordinates coords = Coordinates::Physical) const
+      Real z(Coordinates coords = Coordinates::Physical) const
       {
         return operator()(2, coords);
       }
 
       inline
-      Scalar norm() const
+      Real norm() const
       {
         return asVector().norm();
       }
 
       inline
-      Scalar stableNorm() const
+      Real stableNorm() const
       {
         return asVector().stableNorm();
       }
 
       inline
-      Scalar blueNorm() const
+      Real blueNorm() const
       {
         return asVector().blueNorm();
       }
 
       template <size_t p>
       inline
-      Scalar lpNorm() const
+      Real lpNorm() const
       {
         return asVector().lpNorm<p>();
       }
 
       inline
-      Scalar squaredNorm() const
+      Real squaredNorm() const
       {
         return asVector().squaredNorm();
       }
@@ -201,42 +201,42 @@ namespace Rodin::Geometry
         return m_trans.get();
       }
 
-      const Math::SpatialVector<Scalar>& getPhysicalCoordinates() const;
+      const Math::SpatialVector<Real>& getPhysicalCoordinates() const;
 
-      const Math::SpatialVector<Scalar>& getCoordinates(Coordinates coords = Coordinates::Physical) const;
+      const Math::SpatialVector<Real>& getCoordinates(Coordinates coords = Coordinates::Physical) const;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation at the
        * point.
        */
-      virtual const Math::SpatialMatrix<Scalar>& getJacobian() const;
+      virtual const Math::SpatialMatrix<Real>& getJacobian() const;
 
-      Scalar getJacobianDeterminant() const;
+      Real getJacobianDeterminant() const;
 
       /**
        * @brief Computes the inverse of the Jacobian matrix of the
        * transformation at the point.
        */
-      const Math::SpatialMatrix<Scalar>& getJacobianInverse() const;
+      const Math::SpatialMatrix<Real>& getJacobianInverse() const;
 
       /**
        * @brief Computes the distortion of space of the transformation at the
        * point.
        */
-      Scalar getDistortion() const;
+      Real getDistortion() const;
 
-      virtual const Math::SpatialVector<Scalar>& getReferenceCoordinates() const = 0;
+      virtual const Math::SpatialVector<Real>& getReferenceCoordinates() const = 0;
 
     private:
       PolytopeStorage m_polytopeStorage;
       std::variant<const Polytope, std::reference_wrapper<const Polytope>> m_polytope;
       std::reference_wrapper<const PolytopeTransformation> m_trans;
 
-      mutable Threads::Mutable<std::optional<const Math::SpatialVector<Scalar>>> m_pc;
-      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix<Scalar>>> m_jacobian;
-      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix<Scalar>>> m_jacobianInverse;
-      mutable Threads::Mutable<std::optional<const Scalar>>              m_jacobianDeterminant;
-      mutable Threads::Mutable<std::optional<const Scalar>>              m_distortion;
+      mutable Threads::Mutable<std::optional<const Math::SpatialVector<Real>>> m_pc;
+      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix<Real>>> m_jacobian;
+      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix<Real>>> m_jacobianInverse;
+      mutable Threads::Mutable<std::optional<const Real>>              m_jacobianDeterminant;
+      mutable Threads::Mutable<std::optional<const Real>>              m_distortion;
   };
 
   /**
@@ -272,8 +272,8 @@ namespace Rodin::Geometry
       explicit
       Point(
           std::reference_wrapper<const Polytope> polytope,
-          std::reference_wrapper<const Math::SpatialVector<Scalar>> rc,
-          const Math::SpatialVector<Scalar>& pc)
+          std::reference_wrapper<const Math::SpatialVector<Real>> rc,
+          const Math::SpatialVector<Real>& pc)
         : Point(polytope, std::cref(polytope.get().getTransformation()), rc, pc)
       {}
 
@@ -281,63 +281,63 @@ namespace Rodin::Geometry
       Point(
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector<Scalar>> rc,
-          const Math::SpatialVector<Scalar>& pc);
+          std::reference_wrapper<const Math::SpatialVector<Real>> rc,
+          const Math::SpatialVector<Real>& pc);
 
       explicit
       Point(
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector<Scalar>&& rc,
-          const Math::SpatialVector<Scalar>& pc);
+          Math::SpatialVector<Real>&& rc,
+          const Math::SpatialVector<Real>& pc);
 
       explicit
       Point(
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector<Scalar>> rc);
+          std::reference_wrapper<const Math::SpatialVector<Real>> rc);
 
       explicit
       Point(
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector<Scalar>&& rc);
+          Math::SpatialVector<Real>&& rc);
 
       explicit
       Point(
           Polytope&& polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector<Scalar>> rc,
-          const Math::SpatialVector<Scalar>& pc);
+          std::reference_wrapper<const Math::SpatialVector<Real>> rc,
+          const Math::SpatialVector<Real>& pc);
 
       explicit
       Point(
           Polytope&& polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector<Scalar>&& rc,
-          const Math::SpatialVector<Scalar>& pc);
+          Math::SpatialVector<Real>&& rc,
+          const Math::SpatialVector<Real>& pc);
 
       explicit
       Point(
           Polytope&& polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector<Scalar>> rc);
+          std::reference_wrapper<const Math::SpatialVector<Real>> rc);
 
       explicit
       Point(
           Polytope&& polytope,
           std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector<Scalar>&& rc);
+          Math::SpatialVector<Real>&& rc);
 
       Point(const Point& other);
 
       Point(Point&& other);
 
-      const Math::SpatialVector<Scalar>& getReferenceCoordinates() const override;
+      const Math::SpatialVector<Real>& getReferenceCoordinates() const override;
 
     private:
       const RCStorage m_rcStorage;
-      std::variant<const Math::SpatialVector<Scalar>, std::reference_wrapper<const Math::SpatialVector<Scalar>>> m_rc;
+      std::variant<const Math::SpatialVector<Real>, std::reference_wrapper<const Math::SpatialVector<Real>>> m_rc;
   };
 
   inline
@@ -422,14 +422,14 @@ namespace Rodin::Geometry
 
   inline
   auto
-  operator*(Scalar s, const Geometry::Point& p)
+  operator*(Real s, const Geometry::Point& p)
   {
     return s * p.asVector();
   }
 
   inline
   auto
-  operator*(const Geometry::Point& p, Scalar s)
+  operator*(const Geometry::Point& p, Real s)
   {
     return p.asVector() * s;
   }

@@ -47,14 +47,14 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::SpatialVector<Scalar> getValue(const Geometry::Point& p) const
+      Math::SpatialVector<Real> getValue(const Geometry::Point& p) const
       {
-        Math::SpatialVector<Scalar> res;
+        Math::SpatialVector<Real> res;
         getValue(res, p);
         return res;
       }
 
-      void getValue(Math::SpatialVector<Scalar>& res, const Geometry::Point& p) const
+      void getValue(Math::SpatialVector<Real>& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& vs = p.getPolytope().getVertices();
@@ -74,9 +74,9 @@ namespace Rodin::Variational
           {
             const Index v1 = vs[0];
             const Index v2 = vs[1];
-            Eigen::Vector3<Scalar> a =
+            Eigen::Vector3<Real> a =
               mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
-            Eigen::Vector3<Scalar> n;
+            Eigen::Vector3<Real> n;
             n << jacobian(1, 0), -jacobian(0, 0), jacobian(2, 0);
             n = n.cross(a);
             n.stableNormalize();

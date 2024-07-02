@@ -28,14 +28,14 @@ static constexpr Geometry::Attribute SigmaN = 2;
 
 static constexpr size_t maxIt = 10000;
 
-static constexpr Scalar epsilon = 0.001;
-static constexpr Scalar ell = 1;
-static constexpr Scalar radius = 0.02;
-static constexpr Scalar tgv = std::numeric_limits<float>::max();
+static constexpr Real epsilon = 0.001;
+static constexpr Real ell = 1;
+static constexpr Real radius = 0.02;
+static constexpr Real tgv = std::numeric_limits<float>::max();
 
-using ScalarFES = P1<Scalar>;
-using VectorFES = P1<Math::Vector<Scalar>>;
-using ScalarGridFunction = GridFunction<ScalarFES>;
+using RealFES = P1<Real>;
+using VectorFES = P1<Math::Vector<Real>>;
+using RealGridFunction = GridFunction<RealFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
 
@@ -45,8 +45,8 @@ int main(int, char**)
   //const char* meshFile = "Omega.mesh";
 
   // Load and build finite element spaces on the volumetric domain
-  Scalar dc = 1;
-  Scalar hmax = 0.05;
+  Real dc = 1;
+  Real hmax = 0.05;
   size_t regionCount;
   MMG::Mesh Omega;
   Omega.load(meshFile, IO::FileFormat::MEDIT);
@@ -56,7 +56,7 @@ int main(int, char**)
     GridFunction dist(vh);
     dist = [&](const Point& p)
       {
-        Math::Vector<Scalar> c1(3);
+        Math::Vector<Real> c1(3);
         c1(0) = 4.3 - p.x();
         c1(1) = 3.8 - p.y();
         c1(2) = 1.0 - p.z();
@@ -76,7 +76,7 @@ int main(int, char**)
                                        .discretize(dist);
   }
 
-  auto J = [&](const ScalarGridFunction& u)
+  auto J = [&](const RealGridFunction& u)
   {
     return Integral(u).compute() + ell * Omega.getPerimeter(GammaD);
   };
@@ -86,11 +86,11 @@ int main(int, char**)
   size_t prevRegionCount = 0;
   while (i < maxIt)
   {
-    const Scalar hmin = hmax / 5.0;
-    const Scalar hausd = hmax / 10.0;
-    const Scalar hgrad = 1.2;
-    const Scalar k = 0.5 * (hmax + hmin);
-    const Scalar dt = dc * k;
+    const Real hmin = hmax / 5.0;
+    const Real hausd = hmax / 10.0;
+    const Real hgrad = 1.2;
+    const Real k = 0.5 * (hmax + hmin);
+    const Real dt = dc * k;
 
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
                   << "HMax:      " << Alert::Notation(hmax)     << Alert::NewLine
@@ -133,9 +133,9 @@ int main(int, char**)
     dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
-    ScalarFES sfes(Omega);
+    RealFES sfes(Omega);
     VectorFES vfes(Omega, Omega.getSpaceDimension());
-    ScalarFES dsfes(dOmega);
+    RealFES dsfes(dOmega);
     VectorFES dvfes(dOmega, dOmega.getSpaceDimension());
 
     Alert::Info() << "Distancing domain..." << Alert::Raise;
@@ -145,10 +145,10 @@ int main(int, char**)
     // Parameters
     Solver::CG cg;
 
-    ScalarFunction f = 1;
-    ScalarFunction g = -1.0;
+    RealFunction f = 1;
+    RealFunction g = -1.0;
 
-    auto h = [](Scalar r)
+    auto h = [](Real r)
     {
       if (r < -1.0)
         return 1.0;
@@ -158,7 +158,7 @@ int main(int, char**)
         return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
     };
 
-    ScalarFunction he =
+    RealFunction he =
       [&](const Geometry::Point& p) { return h(dist(p) / epsilon) / epsilon; };
 
     Alert::Info() << "Solving state equation..." << Alert::Raise;
@@ -181,7 +181,7 @@ int main(int, char**)
     adjoint.solve(cg);
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
-    const Scalar objective = J(u.getSolution());
+    const Real objective = J(u.getSolution());
     Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::Raise;
     fObj << objective << "\n";
     fObj.flush();
@@ -223,13 +223,13 @@ int main(int, char**)
       topo = u.getSolution() * p.getSolution();
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
-      const Scalar tc = topo.min();
+      const Real tc = topo.min();
       std::vector<Point> cs;
       for (auto it = dOmega.getVertex(); !it.end(); ++it)
       {
         const Point p(*it, it->getTransformation(),
             Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
-        const Scalar tp = topo(p);
+        const Real tp = topo(p);
         if (Math::abs(1 - tc / tp) < 1e-5)
           cs.emplace_back(std::move(p));
       }
@@ -241,10 +241,10 @@ int main(int, char**)
         auto holes =
           [&](const Point& v)
           {
-            Scalar d = dist(v);
+            Real d = dist(v);
             for (const auto& c : cs)
             {
-              const Scalar dd = (v - c).norm() - radius;
+              const Real dd = (v - c).norm() - radius;
               d = std::min(d, dd);
             }
             return d;
