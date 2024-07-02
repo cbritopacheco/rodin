@@ -94,12 +94,12 @@
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
@@ -125,7 +125,7 @@
             </dt>
             <dd>Gets the number of degrees of freedom for the given polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a35f1f20b2826ace7527909b619cbc9fa" class="m-doc">getTensorBasis</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f47a104973d43f1c328e9c411af0286" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets an expression which yields the shape function basis at the given point.</dd>
             <dt>
@@ -186,25 +186,14 @@
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a35f1f20b2826ace7527909b619cbc9fa"><div>
+          <section class="m-doc-details" id="a4f47a104973d43f1c328e9c411af0286"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Derived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35f1f20b2826ace7527909b619cbc9fa" class="m-doc-self">getTensorBasis</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f47a104973d43f1c328e9c411af0286" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets an expression which yields the shape function basis at the given point.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Point where the shape function basis will be calculated</td>
-                </tr>
-              </tbody>
-            </table>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a86b3f2feaa6730900f76484cf10397f8"><div>
@@ -216,7 +205,7 @@
               <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a86b3f2feaa6730900f76484cf10397f8" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Call operator to get an expression which yields the shape function basis at the given point.</p>
-<p>Synonym to <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a35f1f20b2826ace7527909b619cbc9fa" class="m-doc">getTensorBasis()</a>.</p>
+<p>Synonym to <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a4f47a104973d43f1c328e9c411af0286" class="m-doc">getBasis()</a>.</p>
           </div></section>
           <section class="m-doc-details" id="ab30b4537f0c6967919c0811f5c83e212"><div>
             <h3>
