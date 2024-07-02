@@ -23,34 +23,34 @@
 namespace Rodin::Variational
 {
   /**
-   * @defgroup NumberFunctionSpecializations NumberFunction Template Specializations
-   * @brief Template specializations of the NumberFunction class.
-   * @see NumberFunction
+   * @defgroup ScalarFunctionSpecializations ScalarFunction Template Specializations
+   * @brief Template specializations of the ScalarFunction class.
+   * @see ScalarFunction
    */
 
   template <class Number, class Derived>
-  class NumberFunctionBase : public FunctionBase<NumberFunctionBase<Number, Derived>>
+  class ScalarFunctionBase : public FunctionBase<ScalarFunctionBase<Number, Derived>>
   {
     public:
       using ScalarType = Number;
 
       using RangeType = ScalarType;
 
-      using Parent = FunctionBase<NumberFunctionBase<ScalarType, Derived>>;
+      using Parent = FunctionBase<ScalarFunctionBase<ScalarType, Derived>>;
 
       using Parent::traceOf;
 
-      NumberFunctionBase() = default;
+      ScalarFunctionBase() = default;
 
-      NumberFunctionBase(const NumberFunctionBase& other)
+      ScalarFunctionBase(const ScalarFunctionBase& other)
         : Parent(other)
       {}
 
-      NumberFunctionBase(NumberFunctionBase&& other)
+      ScalarFunctionBase(ScalarFunctionBase&& other)
         : Parent(std::move(other))
       {}
 
-      virtual ~NumberFunctionBase() = default;
+      virtual ~ScalarFunctionBase() = default;
 
       inline
       const Derived& getDerived() const
@@ -80,7 +80,7 @@ namespace Rodin::Variational
         return { 1, 1 };
       }
 
-      virtual NumberFunctionBase* copy() const noexcept override
+      virtual ScalarFunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
       }

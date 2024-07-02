@@ -19,7 +19,7 @@
 
 #include "RangeShape.h"
 
-#include "NumberFunction.h"
+#include "ScalarFunction.h"
 
 
 namespace Rodin::Variational
@@ -31,12 +31,12 @@ namespace Rodin::Variational
    */
 
   template <class Derived>
-  class RealFunctionBase : public NumberFunctionBase<Real, RealFunctionBase<Derived>>
+  class RealFunctionBase : public ScalarFunctionBase<Real, RealFunctionBase<Derived>>
   {
     public:
       using ScalarType = Real;
 
-      using Parent = NumberFunctionBase<ScalarType, RealFunctionBase<Derived>>;
+      using Parent = ScalarFunctionBase<ScalarType, RealFunctionBase<Derived>>;
 
       using Parent::traceOf;
 

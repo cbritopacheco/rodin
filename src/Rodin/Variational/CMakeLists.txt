@@ -25,7 +25,7 @@ set(RodinVariational_HEADERS
   MatrixFunction.h
   Problem.h
   ProblemBody.h
-  ScalarFunction.h
+  RealFunction.h
   Trace.h
   Transpose.h
   Restriction.h
@@ -58,7 +58,6 @@ set(RodinVariational_SRCS
   MatrixFunction.cpp
   Trace.cpp
   VectorFunction.cpp
-  ScalarFunction.cpp
   Restriction.cpp
   Sum.cpp
   UnaryMinus.cpp
