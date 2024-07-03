@@ -72,6 +72,8 @@ namespace Rodin::Variational
         }
         const auto& trans = polytope.getTransformation();
         const auto& qf = m_qf.value().get();
+        m_ps.clear();
+        m_ps.reserve(qf.getSize());
         for (size_t i = 0; i < qf.getSize(); i++)
           m_ps.emplace_back(polytope, trans, std::cref(qf.getPoint(i)));
         return *this;

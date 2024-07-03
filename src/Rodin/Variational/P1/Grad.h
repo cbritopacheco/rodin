@@ -20,7 +20,12 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::Grad<Variational::GridFunction<Variational::P1<Range, Mesh>>>>
   {
     using FESType = Variational::P1<Range, Mesh>;
+
     using OperandType = Variational::GridFunction<FESType>;
+
+    using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
+
+    using RangeType = Math::Vector<ScalarType>;
   };
 
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -30,7 +35,12 @@ namespace Rodin::FormLanguage
   {
     using FESType = Variational::P1<Range, Mesh>;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
     using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
+
+    using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
+
+    using RangeType = Math::Vector<ScalarType>;
   };
 }
 
