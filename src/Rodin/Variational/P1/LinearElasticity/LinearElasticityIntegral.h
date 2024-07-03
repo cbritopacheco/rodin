@@ -29,8 +29,11 @@ namespace Rodin::Variational
 
         using LambdaRangeType = typename FormLanguage::Traits<LambdaType>::RangeType;
 
-        static_assert(std::is_same_v<MuRangeType, Real>);
-        static_assert(std::is_same_v<LambdaRangeType, Real>);
+        static_assert(std::is_same_v<Range, Math::Vector<ScalarType>>);
+
+        static_assert(std::is_same_v<MuRangeType, ScalarType>);
+
+        static_assert(std::is_same_v<LambdaRangeType, ScalarType>);
 
     public:
       LinearElasticityIntegrator(
@@ -55,85 +58,60 @@ namespace Rodin::Variational
           m_fes(std::move(other.m_fes))
       {}
 
-      const Geometry::Polytope& getPolytope() const override
+      inline
+      const Geometry::Polytope& getPolytope() const final override
       {
         return m_polytope.value().get();
       }
 
-      LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) override
+      LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
-        // m_d = polytope.getDimension();
-        // m_i = polytope.getIndex();
-        // const auto& trans = polytope.getTransformation();
-        // m_qf.reset(new QF::GenericPolytopeQuadrature(polytope.getGeometry()));
-        // const auto& qf = *m_qf;
-        // m_ps.reserve(qf.getSize());
-        // for (size_t k = 0; k < qf.getSize(); k++)
-        //   m_ps.emplace_back(polytope, trans, std::cref(qf.getPoint(k)));
+        const auto& trans = polytope.getTransformation();
+        m_qf.emplace(polytope.getGeometry());
+        assert(m_qf->getSize() == 1);
+        m_p.emplace(polytope, trans, std::cref(m_qf->getPoint(0)));
         return *this;
       }
 
       ScalarType integrate(size_t tr, size_t te) override
       {
-        assert(false);
-        // const size_t d = polytope.getDimension();
-        // const Index idx = polytope.getIndex();
-        // const auto& trans = polytope.getTransformation();
-        // const auto& fe = m_fes.get().getFiniteElement(d, idx);
-        // const size_t dofs = fe.getCount();
-        // const QF::QF1P1 qf(polytope.getGeometry());
-        // assert(qf.getSize() == 1);
-        // const Real w = qf.getWeight(0);
-        // const auto& rc = qf.getPoint(0);
-        // const Geometry::Point p(polytope, trans, std::cref(rc));
-        // const Real distortion = p.getDistortion();
-        // const Real mu = getMu().getValue(p);
-        // const Real lambda = getLambda().getValue(p);
-        // auto& res = getMatrix();
-        // res = Math::Matrix<Real>::Zero(dofs, dofs);
-        // m_rjac.resize(dofs);
-        // m_pjac.resize(dofs);
-        // m_psym.resize(dofs);
-        // m_pdiv.resize(dofs);
-        // for (size_t local = 0; local < dofs; local++)
-        // {
-        //   fe.getJacobian(local)(m_rjac[local], rc);
-        //   m_pjac[local] = m_rjac[local] * p.getJacobianInverse();
-        //   m_psym[local] = m_pjac[local] + m_pjac[local].transpose();
-        //   m_pdiv[local] = m_pjac[local].trace();
-        // }
-        // for (size_t i = 0; i < dofs; i++)
-        // {
-        //   const Real lhs = lambda * m_pdiv[i];
-        //   const Real rhs = m_pdiv[i];
-        //   res(i, i) += w * distortion * lhs * rhs;
-        // }
-        // for (size_t i = 0; i < dofs; i++)
-        // {
-        //   const auto lhs = mu * m_psym[i];
-        //   const auto rhs = 0.5 * m_psym[i];
-        //   res(i, i) += w * distortion * (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
-        // }
-        // for (size_t i = 0; i < dofs; i++)
-        // {
-        //   const Real lhs = lambda * m_pdiv[i];
-        //   for (size_t j = 0; j < i; j++)
-        //   {
-        //     const Real rhs = m_pdiv[j];P1<Range, Mesh>
-        //     res(i, j) += w * distortion * lhs * rhs;
-        //   }
-        // }
-        // for (size_t i = 0; i < dofs; i++)
-        // {
-        //   const auto lhs = mu * m_psym[i];
-        //   for (size_t j = 0; j < i; j++)
-        //   {
-        //     const auto rhs = 0.5 * m_psym[j];
-        //     res(i, j) += w * distortion * (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
-        //   }
-        // }
-        // res.template triangularView<Eigen::Upper>() = res.transpose();
+        const auto& polytope = getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+        const auto& fes = getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, idx);
+        const auto& qf = *m_qf;
+        assert(qf.getSize() == 1);
+        const auto& p = m_p.value();
+        const auto& w = qf.getWeight(0);
+        const auto& rc = qf.getPoint(0);
+        const ScalarType mu = getMu().getValue(p);
+        const ScalarType lambda = getLambda().getValue(p);
+        if (tr == te)
+        {
+          fe.getJacobian(tr)(m_jac1, rc);
+          const auto jac = m_jac1 * p.getJacobianInverse();
+          const auto sym = jac + jac.transpose();
+          const ScalarType div = jac.trace();
+          return w * p.getDistortion() * (
+              getLambda().getValue(p) * div * div + 0.5 * mu * sym.squaredNorm());
+        }
+        else
+        {
+          fe.getJacobian(tr)(m_jac1, rc);
+          const auto jac1 = m_jac1 * p.getJacobianInverse();
+          const auto sym1 = jac1 + jac1.transpose();
+          const ScalarType div1 = jac1.trace();
+
+          fe.getJacobian(te)(m_jac2, rc);
+          const auto jac2 = m_jac2 * p.getJacobianInverse();
+          const auto sym2 = jac2 + jac2.transpose();
+          const ScalarType div2 = jac2.trace();
+          return w * p.getDistortion() * (
+              getLambda().getValue(p) * div1 * div2 + (
+                (mu * sym2).array() * (0.5 * sym1).array()).rowwise().sum().colwise().sum().value());
+        }
       }
 
       inline
@@ -174,17 +152,11 @@ namespace Rodin::Variational
       std::unique_ptr<MuType> m_mu;
       std::reference_wrapper<const FESType> m_fes;
 
-      std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
-      std::vector<Geometry::Point> m_ps;
-      size_t m_d;
-      size_t m_i;
-
-      std::vector<Math::SpatialMatrix<Real>> m_rjac;
-      std::vector<Math::SpatialMatrix<Real>> m_pjac;
-      std::vector<Math::SpatialMatrix<Real>> m_psym;
-      Math::Vector<Real> m_pdiv;
-
       std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      std::optional<QF::QF1P1> m_qf;
+      std::optional<Geometry::Point> m_p;
+
+      Math::SpatialMatrix<Real> m_jac1, m_jac2;
   };
 }
 #endif
