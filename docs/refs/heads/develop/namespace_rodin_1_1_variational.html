@@ -815,6 +815,41 @@ $ u $
             </dt>
             <dd>Degree 1 vector Lagrange element.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Range, class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_shape_function_base_3_01_shape_function_3_0ddaec66567cbc01663be4fbbe90dccbb.html" class="m-doc">QuadratureRule&lt;ShapeFunctionBase&lt;ShapeFunction&lt;NestedDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;</a>
+            </dt>
+            <dd>Integration of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class Range, class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_shape_function_base_3_01_dot_3_01_function_fe1b0c2b6da59302f10601487a38dde8.html" class="m-doc">QuadratureRule&lt;ShapeFunctionBase&lt;Dot&lt;FunctionBase&lt;LHSDerived&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;</a>
+            </dt>
+            <dd>Integration of the <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product of some coefficient function and a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_mult_3_01ebcf8c80347e3f06ff86c1cabb7cc03e.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Integration of the anisotropic <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product of two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_grad_3_01be6e8091331e38400fe956c17a58325d.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Integration of the isotropic <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product of two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_mult_3_01d5ccc63f1de4b44e6734960642c285f6.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Integration of the anisotropic <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product of two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_jacobian_e1380b4c01da2ad1244627d3e4d9971d.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Integration of the isotropic <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a> inner product two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_mult_3_01d326a36961f4b3297fd56929cd2fbaaf.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Integration of the anisotropic <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a> inner product two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dt>
               class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>
             </dt>
             <dd>Abstract base class for a periodic boundary condition.</dd>
