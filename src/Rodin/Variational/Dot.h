@@ -465,7 +465,6 @@ namespace Rodin::Variational
        */
       ScalarType operator()(size_t tr, size_t te)
       {
-        const auto& p = getPoint();
         if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
         {
           return getRHS().getBasis(te) * getLHS().getBasis(tr);
@@ -476,7 +475,7 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
         {
-          return (getRHS().getBasis(te).array() * getLHS().getBasis(te).array()).rowwise().sum().colwise().sum().value();
+          return (getRHS().getBasis(te).array() * getLHS().getBasis(tr).array()).rowwise().sum().colwise().sum().value();
         }
         else
         {
