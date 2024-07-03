@@ -243,6 +243,7 @@ namespace Rodin::Variational
         const auto& fe = fes.getFiniteElement(d, idx);
         const auto& qf = *m_qf;
         assert(qf.getSize() == 1);
+        assert(m_p.has_value());
         const auto& p = m_p.value();
         const auto& w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
@@ -256,8 +257,8 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<Math::Matrix<ScalarType>, LHSRangeType>)
         {
-          return w * p.getDistortion() * (f(p).array() *
-              fe.getBasis(local)(rc).array()).rowwise().sum().colwise().sum().value();
+          return w * p.getDistortion() * (f(p).array() * fe.getBasis(local)(rc).array()
+              ).rowwise().sum().colwise().sum().value();
         }
         else
         {
@@ -699,7 +700,6 @@ namespace Rodin::Variational
         Mult<
           FunctionBase<CoefficientDerived>,
           ShapeFunctionBase<
-
             Grad<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>, P1<LHSRange, LHSMesh>, TrialSpace>>,
           P1<LHSRange, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
@@ -818,19 +818,43 @@ namespace Rodin::Variational
         const auto& p = m_p.value();
         const auto& w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
-        const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe = testfes.getFiniteElement(d, idx);
         if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
         {
           const ScalarType s = coeff.getValue(p);
-          trialfe.getGradient(tr)(m_grad1, rc);
-          testfe.getGradient(te)(m_grad2, rc);
-          return w * p.getDistortion() * s * (
-              p.getJacobianInverse().transpose() * m_grad2).dot(
+          if (trialfes == testfes)
+          {
+            const auto& fes = trialfes;
+            const auto& fe = fes.getFiniteElement(d, idx);
+            if (tr == te)
+            {
+              fe.getGradient(tr)(m_grad1, rc);
+              return w * p.getDistortion() * s * (
+                  p.getJacobianInverse().transpose() * m_grad1).squaredNorm();
+            }
+            else
+            {
+              fe.getGradient(tr)(m_grad1, rc);
+              fe.getGradient(te)(m_grad2, rc);
+              return w * p.getDistortion() * s * (
+                  p.getJacobianInverse().transpose() * m_grad2).dot(
+                  p.getJacobianInverse().transpose() * m_grad1);
+            }
+          }
+          else
+          {
+            const auto& trialfe = trialfes.getFiniteElement(d, idx);
+            const auto& testfe = testfes.getFiniteElement(d, idx);
+            trialfe.getGradient(tr)(m_grad1, rc);
+            testfe.getGradient(te)(m_grad2, rc);
+            return w * p.getDistortion() * s * (
+                p.getJacobianInverse().transpose() * m_grad2).dot(
                 p.getJacobianInverse().transpose() * m_grad1);
+          }
         }
         else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
         {
+          const auto& trialfe = trialfes.getFiniteElement(d, idx);
+          const auto& testfe = testfes.getFiniteElement(d, idx);
           coeff.getValue(m_mv, p);
           trialfe.getGradient(tr)(m_grad1, rc);
           testfe.getGradient(te)(m_grad2, rc);

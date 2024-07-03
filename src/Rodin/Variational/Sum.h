@@ -296,6 +296,12 @@ namespace Rodin::Variational
       }
 
       inline
+      const Geometry::Point& getPoint() const
+      {
+        return m_lhs->getPoint();
+      }
+
+      inline
       Sum& setPoint(const Geometry::Point& p)
       {
         m_lhs->setPoint(p);
