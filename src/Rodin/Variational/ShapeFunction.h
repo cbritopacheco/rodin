@@ -22,8 +22,9 @@ namespace Rodin::FormLanguage
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
-    using FESType = FES;
+    using DerivedType = Derived;
 
+    using FESType = FES;
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     using ResultType =
@@ -33,14 +34,27 @@ namespace Rodin::FormLanguage
       typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
-
   };
 
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::ShapeFunction<Derived, FES, Space>>
   {
+    using DerivedType = Derived;
+
     using FESType = FES;
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    using ResultType =
+      typename ResultOf<
+        Variational::ShapeFunctionBase<
+          Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+
+    using RangeType =
+      typename RangeOf<
+        Variational::ShapeFunctionBase<
+          Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 }
 
@@ -51,21 +65,6 @@ namespace Rodin::Variational
   * @brief Template specializations of the ShapeFunction class.
   * @see ShapeFunction
   */
-
-  template <ShapeFunctionSpaceType Space>
-  struct DualSpaceType;
-
-  template <>
-  struct DualSpaceType<TrialSpace>
-  {
-    static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Test;
-  };
-
-  template <>
-  struct DualSpaceType<TestSpace>
-  {
-    static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Trial;
-  };
 
   template <class T>
   struct IsTrialFunction

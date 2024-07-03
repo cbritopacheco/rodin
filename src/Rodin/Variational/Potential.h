@@ -574,7 +574,6 @@ namespace Rodin::Variational
       {
         const auto& trp = m_trp.value().get();
         const auto& tep = m_trp.value().get();
-        const auto& trptrans = trp.getTransformation();
         const auto& teptrans = tep.getTransformation();
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();

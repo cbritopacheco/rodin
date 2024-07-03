@@ -14,6 +14,9 @@
 #include "TrialFunction.h"
 #include "VectorFunction.h"
 
+namespace Rodin::FormLanguage
+{}
+
 namespace Rodin::Variational
 {
   /**
