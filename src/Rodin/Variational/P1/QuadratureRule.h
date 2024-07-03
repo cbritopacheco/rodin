@@ -423,13 +423,15 @@ namespace Rodin::Variational
         const auto& coeff = lhs.getLHS();
         const auto& multiplicand = lhs.getRHS();
         const auto& rhs = integrand.getRHS();
-        const auto& trialfe = multiplicand.getFiniteElementSpace().getFiniteElement(d, idx);
-        const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
+        const auto& trialfes = multiplicand.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
         const auto& qf = *m_qf;
         assert(qf.getSize() == 1);
         const auto& p = m_p.value();
         const auto& w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
+        const auto& trialfe = trialfes.getFiniteElement(d, idx);
+        const auto& testfe = testfes.getFiniteElement(d, idx);
         if constexpr (std::is_same_v<MultiplicandRangeType, ScalarType>)
         {
           if constexpr (std::is_same_v<RHSType, ScalarType>)
@@ -606,17 +608,38 @@ namespace Rodin::Variational
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
-        const auto& trialfe = lhs.getFiniteElementSpace().getFiniteElement(d, idx);
-        const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
         const auto& qf = *m_qf;
-        assert(qf.getSize() == 1);
         const auto& p = m_p.value();
         const auto& w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
-        trialfe.getGradient(tr)(m_grad1, rc);
-        testfe.getGradient(te)(m_grad2, rc);
-        return w * p.getDistortion() * (
-            p.getJacobianInverse().transpose() * m_grad2).dot(p.getJacobianInverse().transpose() * m_grad1);
+        if (trialfes == testfes)
+        {
+          const auto& fe = trialfes.getFiniteElement(d, idx);
+          if (tr == te)
+          {
+            fe.getGradient(tr)(m_grad1, rc);
+            return w * p.getDistortion() * (p.getJacobianInverse().transpose() * m_grad1).squaredNorm();
+          }
+          else
+          {
+            fe.getGradient(tr)(m_grad1, rc);
+            fe.getGradient(te)(m_grad2, rc);
+            return w * p.getDistortion() * (
+                p.getJacobianInverse().transpose() * m_grad2).dot(p.getJacobianInverse().transpose() * m_grad1);
+          }
+        }
+        else
+        {
+          const auto& trialfe = lhs.getFiniteElementSpace().getFiniteElement(d, idx);
+          const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
+          assert(qf.getSize() == 1);
+          trialfe.getGradient(tr)(m_grad1, rc);
+          testfe.getGradient(te)(m_grad2, rc);
+          return w * p.getDistortion() * (
+              p.getJacobianInverse().transpose() * m_grad2).dot(p.getJacobianInverse().transpose() * m_grad1);
+        }
       }
 
       virtual Integrator::Region getRegion() const override = 0;
@@ -788,13 +811,15 @@ namespace Rodin::Variational
         const auto& coeff = lhs.getLHS();
         const auto& multiplicand = lhs.getRHS();
         const auto& rhs = integrand.getRHS();
-        const auto& trialfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
-        const auto& testfe = multiplicand.getFiniteElementSpace().getFiniteElement(d, idx);
+        const auto& trialfes = rhs.getFiniteElementSpace();
+        const auto& testfes = multiplicand.getFiniteElementSpace();
         const auto& qf = *m_qf;
         assert(qf.getSize() == 1);
         const auto& p = m_p.value();
         const auto& w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
+        const auto& trialfe = trialfes.getFiniteElement(d, idx);
+        const auto& testfe = testfes.getFiniteElement(d, idx);
         if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
         {
           const ScalarType s = coeff.getValue(p);
@@ -983,18 +1008,39 @@ namespace Rodin::Variational
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
-        const auto& trialfe = lhs.getFiniteElementSpace().getFiniteElement(d, idx);
-        const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
         const auto& qf = *m_qf;
-        assert(qf.getSize() == 1);
         const auto& p = m_p.value();
         const auto& w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
-        trialfe.getJacobian(tr)(m_jac1, rc);
-        testfe.getJacobian(te)(m_jac2, rc);
-        return w * p.getDistortion() * (
-            (m_jac2 * p.getJacobianInverse()).array() * (
-              m_jac1 * p.getJacobianInverse()).array()).rowwise().sum().colwise().sum().value();
+        if (trialfes == testfes)
+        {
+          const auto& fe = trialfes.getFiniteElement(d, idx);
+          if (tr == te)
+          {
+            fe.getJacobian(tr)(m_jac1, rc);
+            return w * p.getDistortion() * (m_jac1 * p.getJacobianInverse()).squaredNorm();
+          }
+          else
+          {
+            fe.getJacobian(tr)(m_jac1, rc);
+            fe.getJacobian(te)(m_jac2, rc);
+            return w * p.getDistortion() * (
+                (m_jac2 * p.getJacobianInverse()).array() * (
+                  m_jac1 * p.getJacobianInverse()).array()).rowwise().sum().colwise().sum().value();
+          }
+        }
+        else
+        {
+          const auto& trialfe = trialfes.getFiniteElement(d, idx);
+          const auto& testfe = testfes.getFiniteElement(d, idx);
+          trialfe.getJacobian(tr)(m_jac1, rc);
+          testfe.getJacobian(te)(m_jac2, rc);
+          return w * p.getDistortion() * (
+              (m_jac2 * p.getJacobianInverse()).array() * (
+                m_jac1 * p.getJacobianInverse()).array()).rowwise().sum().colwise().sum().value();
+        }
       }
 
       virtual Integrator::Region getRegion() const override = 0;
@@ -1180,14 +1226,15 @@ namespace Rodin::Variational
         const auto& coeff = lhs.getLHS();
         const auto& multiplicand = lhs.getRHS();
         const auto& rhs = integrand.getRHS();
-        const auto& trialfe = multiplicand.getFiniteElementSpace().getFiniteElement(d, idx);
-        const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
+        const auto& trialfes = multiplicand.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
         const auto& qf = *m_qf;
         assert(qf.getSize() == 1);
         const auto& p = m_p.value();
         const auto& w = qf.getWeight(0);
         const auto& rc = qf.getPoint(0);
-
+        const auto& trialfe = trialfes.getFiniteElement(d, idx);
+        const auto& testfe = testfes.getFiniteElement(d, idx);
         if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
         {
           const ScalarType s = coeff.getValue(p);

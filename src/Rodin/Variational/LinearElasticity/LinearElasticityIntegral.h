@@ -65,13 +65,62 @@ namespace Rodin::Variational
       virtual LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_polytope = polytope;
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+        const auto& trans = polytope.getTransformation();
+        const auto& fes = getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, idx);
+        const size_t order = fe.getOrder();
+        m_qf.reset(new QF::GenericPolytopeQuadrature(order, polytope.getGeometry()));
+        m_ps.clear();
+        m_ps.reserve(m_qf->getSize());
+        for (size_t i = 0; i < m_qf->getSize(); i++)
+          m_ps.emplace_back(polytope, trans, std::cref(m_qf->getPoint(i)));
         return *this;
       }
 
       virtual ScalarType integrate(size_t tr, size_t te) override
       {
-        assert(false);
-        return 0;
+        const auto& polytope = getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+        const auto& fes = getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, idx);
+        const auto& qf = *m_qf;
+        ScalarType res = 0;
+        for (size_t i = 0; i < m_qf->getSize(); i++)
+        {
+          const auto& p = m_ps[i];
+          const auto& w = qf.getWeight(i);
+          const auto& rc = qf.getPoint(i);
+          const ScalarType mu = getMu().getValue(p);
+          const ScalarType lambda = getLambda().getValue(p);
+          if (tr == te)
+          {
+            fe.getJacobian(tr)(m_jac1, rc);
+            const auto jac = m_jac1 * p.getJacobianInverse();
+            const auto sym = jac + jac.transpose();
+            const ScalarType div = jac.trace();
+            res += w * p.getDistortion() * (
+                getLambda().getValue(p) * div * div + 0.5 * mu * sym.squaredNorm());
+          }
+          else
+          {
+            fe.getJacobian(tr)(m_jac1, rc);
+            const auto jac1 = m_jac1 * p.getJacobianInverse();
+            const auto sym1 = jac1 + jac1.transpose();
+            const ScalarType div1 = jac1.trace();
+
+            fe.getJacobian(te)(m_jac2, rc);
+            const auto jac2 = m_jac2 * p.getJacobianInverse();
+            const auto sym2 = jac2 + jac2.transpose();
+            const ScalarType div2 = jac2.trace();
+            res += w * p.getDistortion() * (
+                getLambda().getValue(p) * div1 * div2 + (
+                  (mu * sym2).array() * (0.5 * sym1).array()).rowwise().sum().colwise().sum().value());
+          }
+        }
+        return res;
       }
 
       inline
@@ -113,6 +162,10 @@ namespace Rodin::Variational
       std::reference_wrapper<const FES> m_fes;
 
       std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
+      std::vector<Geometry::Point> m_ps;
+
+      Math::SpatialMatrix<Real> m_jac1, m_jac2;
   };
 
   template <class FES, class LambdaDerived, class MuDerived>
