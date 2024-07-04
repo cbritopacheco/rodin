@@ -42,7 +42,7 @@ namespace RodinBenchmark
       std::unique_ptr<FESType> vhPtr;
   };
 
-  BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_ConstantCoefficient_ConstantSource)
+  BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_NoCoefficient_ConstantSource)
   (benchmark::State& st)
   {
     assert(vhPtr);
@@ -53,6 +53,25 @@ namespace RodinBenchmark
     RealFunction zero(0.0);
     Problem poisson(u, v);
     poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, zero).on(dirichletAttr);
+
+    for (auto _ : st)
+      poisson.assemble();
+  }
+
+  BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_ConstantCoefficient_ConstantSource)
+  (benchmark::State& st)
+  {
+    assert(vhPtr);
+    const auto& vh = *vhPtr;
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+    RealFunction gamma(1.0);
+    RealFunction f(1.0);
+    RealFunction zero(0.0);
+    Problem poisson(u, v);
+    poisson = Integral(gamma * Grad(u), Grad(v))
             - Integral(f, v)
             + DirichletBC(u, zero).on(dirichletAttr);
 

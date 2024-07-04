@@ -94,6 +94,7 @@ namespace Rodin::Variational
         m_qf.emplace(polytope.getGeometry());
         assert(m_qf->getSize() == 1);
         m_p.emplace(polytope, trans, std::cref(m_qf->getPoint(0)));
+        m_distortion = m_p->getDistortion();
         return *this;
       }
 
@@ -106,9 +107,10 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
         const auto& qf = *m_qf;
+        const auto& w = qf.getWeight(0);
+        const auto& rc = qf.getPoint(0);
         assert(qf.getSize() == 1);
-        const auto& p = m_p.value();
-        return qf.getWeight(0) * p.getDistortion() * fe.getBasis(local)(qf.getPoint(0));
+        return w * m_distortion * fe.getBasis(local)(rc);
       }
 
       virtual Integrator::Region getRegion() const override = 0;
@@ -121,6 +123,8 @@ namespace Rodin::Variational
       std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       std::optional<QF::QF1P1> m_qf;
       std::optional<Geometry::Point> m_p;
+
+      Real m_distortion;
   };
 
   /**
@@ -229,6 +233,7 @@ namespace Rodin::Variational
         m_qf.emplace(polytope.getGeometry());
         assert(m_qf->getSize() == 1);
         m_p.emplace(polytope, trans, std::cref(m_qf->getPoint(0)));
+        m_distortion = m_p->getDistortion();
         return *this;
       }
 
@@ -249,15 +254,15 @@ namespace Rodin::Variational
         const auto& rc = qf.getPoint(0);
         if constexpr (std::is_same_v<ScalarType, LHSRangeType>)
         {
-          return w * p.getDistortion() * f(p) * fe.getBasis(local)(rc);
+          return w * m_distortion * f(p) * fe.getBasis(local)(rc);
         }
         else if constexpr (std::is_same_v<Math::Vector<ScalarType>, LHSRangeType>)
         {
-          return w * p.getDistortion() * f(p).dot(fe.getBasis(local)(rc));
+          return w * m_distortion * f(p).dot(fe.getBasis(local)(rc));
         }
         else if constexpr (std::is_same_v<Math::Matrix<ScalarType>, LHSRangeType>)
         {
-          return w * p.getDistortion() * (f(p).array() * fe.getBasis(local)(rc).array()
+          return w * m_distortion * (f(p).array() * fe.getBasis(local)(rc).array()
               ).rowwise().sum().colwise().sum().value();
         }
         else
@@ -279,6 +284,7 @@ namespace Rodin::Variational
       std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       std::optional<QF::QF1P1> m_qf;
       std::optional<Geometry::Point> m_p;
+      Real m_distortion;
   };
 
   /**
@@ -411,6 +417,7 @@ namespace Rodin::Variational
         m_qf.emplace(polytope.getGeometry());
         assert(m_qf->getSize() == 1);
         m_p.emplace(polytope, trans, std::cref(m_qf->getPoint(0)));
+        m_distortion = m_p->getDistortion();
         return *this;
       }
 
@@ -438,8 +445,7 @@ namespace Rodin::Variational
           if constexpr (std::is_same_v<RHSType, ScalarType>)
           {
             static_assert(std::is_same_v<CoefficientType, ScalarType>);
-            const ScalarType s = coeff.getValue(p);
-            return w * p.getDistortion() * s * testfe.getBasis(te)(rc) * trialfe.getBasis(tr)(rc);
+            return w * m_distortion * coeff(p) * testfe.getBasis(te)(rc) * trialfe.getBasis(tr)(rc);
           }
           else
           {
@@ -464,6 +470,8 @@ namespace Rodin::Variational
       std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       std::optional<QF::QF1P1> m_qf;
       std::optional<Geometry::Point> m_p;
+
+      Real m_distortion;
   };
 
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number, class Mesh>
@@ -598,6 +606,7 @@ namespace Rodin::Variational
         m_qf.emplace(polytope.getGeometry());
         assert(m_qf->getSize() == 1);
         m_p.emplace(polytope, trans, std::cref(m_qf->getPoint(0)));
+        m_distortion = m_p->getDistortion();
         return *this;
       }
 
@@ -621,14 +630,15 @@ namespace Rodin::Variational
           if (tr == te)
           {
             fe.getGradient(tr)(m_grad1, rc);
-            return w * p.getDistortion() * (p.getJacobianInverse().transpose() * m_grad1).squaredNorm();
+            return w * m_distortion * (p.getJacobianInverse().transpose() * m_grad1).squaredNorm();
           }
           else
           {
             fe.getGradient(tr)(m_grad1, rc);
             fe.getGradient(te)(m_grad2, rc);
-            return w * p.getDistortion() * (
-                p.getJacobianInverse().transpose() * m_grad2).dot(p.getJacobianInverse().transpose() * m_grad1);
+            return w * m_distortion * (
+                p.getJacobianInverse().transpose() * m_grad2).dot(
+                p.getJacobianInverse().transpose() * m_grad1);
           }
         }
         else
@@ -638,7 +648,7 @@ namespace Rodin::Variational
           assert(qf.getSize() == 1);
           trialfe.getGradient(tr)(m_grad1, rc);
           testfe.getGradient(te)(m_grad2, rc);
-          return w * p.getDistortion() * (
+          return w * m_distortion * (
               p.getJacobianInverse().transpose() * m_grad2).dot(p.getJacobianInverse().transpose() * m_grad1);
         }
       }
@@ -654,6 +664,7 @@ namespace Rodin::Variational
       std::optional<QF::QF1P1> m_qf;
       std::optional<Geometry::Point> m_p;
 
+      Real m_distortion;
       Math::SpatialVector<ScalarType> m_grad1, m_grad2;
   };
 
@@ -798,6 +809,7 @@ namespace Rodin::Variational
         m_qf.emplace(polytope.getGeometry());
         assert(m_qf->getSize() == 1);
         m_p.emplace(polytope, trans, std::cref(m_qf->getPoint(0)));
+        m_distortion = m_p->getDistortion();
         return *this;
       }
 
@@ -828,14 +840,14 @@ namespace Rodin::Variational
             if (tr == te)
             {
               fe.getGradient(tr)(m_grad1, rc);
-              return w * p.getDistortion() * s * (
+              return w * m_distortion * s * (
                   p.getJacobianInverse().transpose() * m_grad1).squaredNorm();
             }
             else
             {
               fe.getGradient(tr)(m_grad1, rc);
               fe.getGradient(te)(m_grad2, rc);
-              return w * p.getDistortion() * s * (
+              return w * m_distortion * s * (
                   p.getJacobianInverse().transpose() * m_grad2).dot(
                   p.getJacobianInverse().transpose() * m_grad1);
             }
@@ -846,7 +858,7 @@ namespace Rodin::Variational
             const auto& testfe = testfes.getFiniteElement(d, idx);
             trialfe.getGradient(tr)(m_grad1, rc);
             testfe.getGradient(te)(m_grad2, rc);
-            return w * p.getDistortion() * s * (
+            return w * m_distortion * s * (
                 p.getJacobianInverse().transpose() * m_grad2).dot(
                 p.getJacobianInverse().transpose() * m_grad1);
           }
@@ -858,7 +870,7 @@ namespace Rodin::Variational
           coeff.getValue(m_mv, p);
           trialfe.getGradient(tr)(m_grad1, rc);
           testfe.getGradient(te)(m_grad2, rc);
-          return w * p.getDistortion() * (
+          return w * m_distortion * (
               p.getJacobianInverse().transpose() * m_grad2).dot(
                 m_mv * p.getJacobianInverse().transpose() * m_grad1);
         }
@@ -880,6 +892,7 @@ namespace Rodin::Variational
       std::optional<QF::QF1P1> m_qf;
       std::optional<Geometry::Point> m_p;
 
+      Real m_distortion;
       Math::Matrix<ScalarType> m_mv;
       Math::SpatialVector<ScalarType> m_grad1, m_grad2;
   };
@@ -1021,6 +1034,7 @@ namespace Rodin::Variational
         m_qf.emplace(polytope.getGeometry());
         assert(m_qf->getSize() == 1);
         m_p.emplace(polytope, trans, std::cref(m_qf->getPoint(0)));
+        m_distortion = m_p->getDistortion();
         return *this;
       }
 
@@ -1044,13 +1058,13 @@ namespace Rodin::Variational
           if (tr == te)
           {
             fe.getJacobian(tr)(m_jac1, rc);
-            return w * p.getDistortion() * (m_jac1 * p.getJacobianInverse()).squaredNorm();
+            return w * m_distortion * (m_jac1 * p.getJacobianInverse()).squaredNorm();
           }
           else
           {
             fe.getJacobian(tr)(m_jac1, rc);
             fe.getJacobian(te)(m_jac2, rc);
-            return w * p.getDistortion() * (
+            return w * m_distortion * (
                 (m_jac2 * p.getJacobianInverse()).array() * (
                   m_jac1 * p.getJacobianInverse()).array()).rowwise().sum().colwise().sum().value();
           }
@@ -1061,7 +1075,7 @@ namespace Rodin::Variational
           const auto& testfe = testfes.getFiniteElement(d, idx);
           trialfe.getJacobian(tr)(m_jac1, rc);
           testfe.getJacobian(te)(m_jac2, rc);
-          return w * p.getDistortion() * (
+          return w * m_distortion * (
               (m_jac2 * p.getJacobianInverse()).array() * (
                 m_jac1 * p.getJacobianInverse()).array()).rowwise().sum().colwise().sum().value();
         }
@@ -1078,6 +1092,7 @@ namespace Rodin::Variational
       std::optional<QF::QF1P1> m_qf;
       std::optional<Geometry::Point> m_p;
 
+      Real m_distortion;
       Math::SpatialMatrix<ScalarType> m_jac1, m_jac2;
   };
 
@@ -1237,6 +1252,7 @@ namespace Rodin::Variational
         m_qf.emplace(polytope.getGeometry());
         assert(m_qf->getSize() == 1);
         m_p.emplace(polytope, trans, std::cref(m_qf->getPoint(0)));
+        m_distortion = m_p->getDistortion();
         return *this;
       }
 
@@ -1264,7 +1280,7 @@ namespace Rodin::Variational
           const ScalarType s = coeff.getValue(p);
           trialfe.getJacobian(tr)(m_jac1, rc);
           testfe.getJacobian(te)(m_jac2, rc);
-          return w * p.getDistortion() * s * (
+          return w * m_distortion * s * (
               (m_jac2 * p.getJacobianInverse()).array() * (
                 m_jac1 * p.getJacobianInverse()).array()).rowwise().sum().colwise().sum().value();
         }
@@ -1273,7 +1289,7 @@ namespace Rodin::Variational
           coeff.getValue(m_mv, p);
           trialfe.getJacobian(tr)(m_jac1, rc);
           testfe.getJacobian(te)(m_jac2, rc);
-          return w * p.getDistortion() * (
+          return w * m_distortion * (
               (m_jac2 * p.getJacobianInverse()).array() * (
                 m_mv * m_jac1 * p.getJacobianInverse()).array()).rowwise().sum().colwise().sum().value();
         }
@@ -1295,6 +1311,7 @@ namespace Rodin::Variational
       std::optional<QF::QF1P1> m_qf;
       std::optional<Geometry::Point> m_p;
 
+      Real m_distortion;
       Math::SpatialMatrix<ScalarType> m_jac1, m_jac2;
       Math::Matrix<ScalarType> m_mv;
   };
