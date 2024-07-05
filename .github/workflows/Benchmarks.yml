@@ -8,7 +8,7 @@ on:
 concurrency:
   group: Benchmarks-${{ github.ref }}
   cancel-in-progress: true
-  
+
 permissions:
   deployments: write
   contents: write
