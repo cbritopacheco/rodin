@@ -31,12 +31,13 @@ int main(int, char**)
           - Integral(v)
           + DirichletBC(u, Zero());
 
-  Solver::CG solver;
-  poisson.solve(solver);
+  poisson.assemble();
+  // Solver::CG solver;
+  // poisson.solve(solver);
 
-  // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  // // Save solution
+  // u.getSolution().save("Poisson.gf");
+  // mesh.save("Poisson.mesh");
 
   return 0;
 }

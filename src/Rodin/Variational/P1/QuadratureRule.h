@@ -1372,7 +1372,7 @@ namespace Rodin::Variational
           {
             const ScalarType csv = coeff.getValue(p);
             for (size_t i = 0; i < fe.getCount(); i++)
-              m_matrix(i, i) = csv * (p.getJacobianInverse().transpose() * m_jac1[i]).squaredNorm();
+              m_matrix(i, i) = csv * (m_jac1[i] * p.getJacobianInverse()).squaredNorm();
             for (size_t i = 0; i < fe.getCount(); i++)
             {
               for (size_t j = 0; j < i; j++)
