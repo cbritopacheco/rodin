@@ -99,8 +99,8 @@
               class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">Builder</a>
             </dt>
             <dd>Class used to build <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> instances.</dd>
-            <dt id="acf3305dd739a0e24375fefe305560980">
-              using <a href="#acf3305dd739a0e24375fefe305560980" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;
+            <dt id="a92ae4efa3934f07204c080fd78005372">
+              using <a href="#a92ae4efa3934f07204c080fd78005372" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Rodin::<wbr />Context::<wbr />Sequential</a>&gt;
             </dt>
             <dd>Parent class.</dd>
             <dt id="a748c4cb7eb953682ee130a23771ad367">
@@ -154,8 +154,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aab9ef675634a1eb941561a46056947d9" class="m-doc-self">setCorner</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Adds the vertex to the corner index.</dd>
-            <dt id="a36486520ad9e99573fcb4ffedcd01b67">
-              <span class="m-doc-wrap-bumper">auto <a href="#a36486520ad9e99573fcb4ffedcd01b67" class="m-doc-self">setRidge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a36486520ad9e99573fcb4ffedcd01b67" class="m-doc">setRidge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Adds the edge to the ridge index.</dd>
             <dt id="a769e0cf52094a92fd6135646fc680772">
@@ -189,6 +189,13 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a36486520ad9e99573fcb4ffedcd01b67"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36486520ad9e99573fcb4ffedcd01b67" class="m-doc-self">setRidge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx)</span></span>
+            </h3>
+            <p>Adds the edge to the ridge index.</p>
+<p>m_cornerIndex = std::move(other.m_cornerIndex);</p>
+          </div></section>
           <section class="m-doc-details" id="acb8e6d12922ae66d122b5caf3aba7e9d"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acb8e6d12922ae66d122b5caf3aba7e9d" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,

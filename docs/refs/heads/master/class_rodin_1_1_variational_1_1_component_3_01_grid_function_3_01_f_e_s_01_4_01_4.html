@@ -76,6 +76,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -85,7 +86,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase&lt;Component&lt;GridFunction&lt;FES&gt;&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;Component&lt;GridFunction&lt;FES&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for scalar-valued functions defined on a mesh.</dd>
           </dl>
@@ -93,12 +94,42 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ae8b7ea08193c8a0b07679174b4cb409b">
-              <span class="m-doc-wrap-bumper"><a href="#ae8b7ea08193c8a0b07679174b4cb409b" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u,
+            <dt id="ab5e5c97f2f7bbfddbce82130d3d89a08">
+              <span class="m-doc-wrap-bumper"><a href="#ab5e5c97f2f7bbfddbce82130d3d89a08" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">OperandType</a>&amp; u,
               size_t component) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the component object from a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> and its component index.</dd>
           </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a79319622685353a9e794bf60dc480be4" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a79319622685353a9e794bf60dc480be4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>* Rodin::<wbr />Variational::<wbr />Component&lt;GridFunction&lt;FES&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a79319622685353a9e794bf60dc480be4" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Non-owning pointer to the copied object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+          </div></section>
         </section>
       </div>
     </div>

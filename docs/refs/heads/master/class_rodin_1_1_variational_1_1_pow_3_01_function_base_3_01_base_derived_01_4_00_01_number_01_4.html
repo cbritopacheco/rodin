@@ -152,7 +152,7 @@ $ f(x) = x^p \ . $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase&lt;Pow&lt;FunctionBase&lt;BaseDerived&gt;, Number&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;Pow&lt;FunctionBase&lt;BaseDerived&gt;, Number&gt;&gt;</a>
             </dt>
             <dd>Base class for scalar-valued functions defined on a mesh.</dd>
           </dl>
@@ -160,16 +160,16 @@ $ f(x) = x^p \ . $
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="adef65f48f071c815ccf24ec904a5f1f1">
-              using <a href="#adef65f48f071c815ccf24ec904a5f1f1" class="m-doc-self">Base</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;BaseDerived&gt;
+            <dt id="a1d47c4f7731287aacf2f44c3eba18790">
+              using <a href="#a1d47c4f7731287aacf2f44c3eba18790" class="m-doc-self">BaseType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;BaseDerived&gt;
             </dt>
             <dd>Type of base.</dd>
-            <dt id="aaf650251304aef4de0a0d660ae27c394">
-              using <a href="#aaf650251304aef4de0a0d660ae27c394" class="m-doc-self">Exponent</a> = Number
+            <dt id="ad30dda3a109288e1c7269f76ed919890">
+              using <a href="#ad30dda3a109288e1c7269f76ed919890" class="m-doc-self">ExponentType</a> = Number
             </dt>
             <dd>Type of exponent.</dd>
-            <dt id="af547b08e65d7046293849aab8e61cfb1">
-              using <a href="#af547b08e65d7046293849aab8e61cfb1" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;BaseDerived&gt;, Number&gt;&gt;
+            <dt id="a1f2270a772c04ac55fce6143cf4c863f">
+              using <a href="#a1f2270a772c04ac55fce6143cf4c863f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;BaseDerived&gt;, Number&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -178,8 +178,8 @@ $ f(x) = x^p \ . $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1d36713661d03662418c0472ddb118c0" class="m-doc">Pow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html#adef65f48f071c815ccf24ec904a5f1f1" class="m-doc">Base</a>&amp; s,
-              <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html#aaf650251304aef4de0a0d660ae27c394" class="m-doc">Exponent</a> p) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d48f81a2a26754479872dd1d1e3993d" class="m-doc">Pow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html#a1d47c4f7731287aacf2f44c3eba18790" class="m-doc">BaseType</a>&amp; s,
+              <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html#ad30dda3a109288e1c7269f76ed919890" class="m-doc">ExponentType</a> p) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the power object.</dd>
           </dl>
@@ -195,13 +195,13 @@ $ f(x) = x^p \ . $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a1d36713661d03662418c0472ddb118c0"><div>
+          <section class="m-doc-details" id="a5d48f81a2a26754479872dd1d1e3993d"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class BaseDerived, class Number&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Pow&lt;FunctionBase&lt;BaseDerived&gt;, Number&gt;&lt;BaseDerived, Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d36713661d03662418c0472ddb118c0" class="m-doc-self">Pow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html#adef65f48f071c815ccf24ec904a5f1f1" class="m-doc">Base</a>&amp; s,
-              <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html#aaf650251304aef4de0a0d660ae27c394" class="m-doc">Exponent</a> p) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Pow&lt;FunctionBase&lt;BaseDerived&gt;, Number&gt;&lt;BaseDerived, Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d48f81a2a26754479872dd1d1e3993d" class="m-doc-self">Pow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html#a1d47c4f7731287aacf2f44c3eba18790" class="m-doc">BaseType</a>&amp; s,
+              <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html#ad30dda3a109288e1c7269f76ed919890" class="m-doc">ExponentType</a> p) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs the power object.</p>
             <table class="m-table m-fullwidth m-flat">
