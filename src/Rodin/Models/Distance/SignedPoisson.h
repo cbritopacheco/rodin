@@ -33,7 +33,7 @@ namespace Rodin::Models::Distance
         Solver::CG cg;
         Variational::TrialFunction u(fes);
         Variational::TestFunction  v(fes);
-        Variational::ScalarFunction zero(0);
+        Variational::RealFunction zero(0);
         Variational::Problem sp(u, v);
         sp = Variational::Integral(Variational::Grad(u), Variational::Grad(v))
            + Variational::Integral(v)
@@ -62,7 +62,7 @@ namespace Rodin::Models::Distance
         Solver::CG cg;
         Variational::TrialFunction u(fes);
         Variational::TestFunction  v(fes);
-        Variational::ScalarFunction zero = 0;
+        Variational::RealFunction zero = 0;
         Variational::Problem sp(u, v);
         sp = Variational::Integral(Variational::Grad(u), Variational::Grad(v))
            + Variational::Integral(2 * v).over(region)

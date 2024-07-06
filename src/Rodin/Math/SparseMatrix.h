@@ -18,7 +18,17 @@ namespace Rodin::Math
   /**
    * @brief Sparse matrix type
    */
-  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+  template <class ScalarType>
+  using SparseMatrix = Eigen::SparseMatrix<ScalarType>;
+}
+
+namespace Rodin::FormLanguage
+{
+  template <class Number>
+  struct Traits<Math::SparseMatrix<Number>>
+  {
+    using ScalarType = Number;
+  };
 }
 
 #endif

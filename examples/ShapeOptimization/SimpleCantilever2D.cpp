@@ -15,7 +15,7 @@ using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-using FES = VectorP1<Context::Sequential>;
+using FES = VectorP1<Mesh<Context::Sequential>>;
 
 // Define boundary attributes
 static constexpr Geometry::Attribute Gamma0 = 1; // Traction free boundary
@@ -23,19 +23,19 @@ static constexpr Geometry::Attribute GammaD = 2; // Homogenous Dirichlet boundar
 static constexpr Geometry::Attribute GammaN = 3; // Inhomogenous Neumann boundary
 
 // Lamé coefficients
-static constexpr Scalar mu    = 0.3846;
-static constexpr Scalar lambda = 0.5769;
+static constexpr Real mu    = 0.3846;
+static constexpr Real lambda = 0.5769;
 
 // Optimization parameters
 static constexpr size_t maxIt = 50;
-static constexpr Scalar hmax  = 0.1;
-static constexpr Scalar hmin  = 0.1 * hmax;
-static constexpr Scalar ell  = 5.0;
-static constexpr Scalar alpha = 4 * hmax;
+static constexpr Real hmax  = 0.1;
+static constexpr Real hmin  = 0.1 * hmax;
+static constexpr Real ell  = 5.0;
+static constexpr Real alpha = 4 * hmax;
 
 
 // Compliance
-inline Scalar compliance(const GridFunction<FES>& w)
+inline Real compliance(const GridFunction<FES>& w)
 {
   auto& vh = w.getFiniteElementSpace();
   TrialFunction u(vh);
@@ -98,7 +98,7 @@ int main(int, char**)
     const auto& dJ = g.getSolution();
 
     // Update objective
-    const Scalar objective = compliance(u.getSolution()) + ell * Omega.getVolume();
+    const Real objective = compliance(u.getSolution()) + ell * Omega.getVolume();
     Alert::Info() << "   | Objective: " << objective << Alert::Raise;
 
     // Make the displacement

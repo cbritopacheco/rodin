@@ -28,6 +28,8 @@ namespace Rodin::External::MMG
 
       void printCorners(std::ostream& os);
       void printRidges(std::ostream& os);
+      void printRequiredVertices(std::ostream& os);
+      void printRequiredEdges(std::ostream& os);
 
       const MMG::Mesh& getObject() const override
       {

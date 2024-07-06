@@ -14,18 +14,18 @@ using namespace Rodin::Variational;
 
 static constexpr Attribute interior = 1;
 static constexpr Attribute exterior = 2;
-static constexpr Scalar hmax = 0.1;
-static constexpr Scalar radius = 0.1;
+static constexpr Real hmax = 0.1;
+static constexpr Real radius = 0.1;
 
 int main(int, char**)
 {
   const size_t n = 16;
   MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.scale(1. / (n - 1));
 
   P1 fes(mesh);
-  MMG::ScalarGridFunction gf(fes);
+  MMG::RealGridFunction gf(fes);
   gf = [](const Geometry::Point& p)
        {
          return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - radius;

@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2024.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_SHAPEFUNCTION_H
 
@@ -9,31 +15,46 @@
 
 #include "RangeType.h"
 #include "RangeShape.h"
-#include "TensorBasis.h"
 #include "FiniteElementSpace.h"
 
 namespace Rodin::FormLanguage
 {
-  template <class Derived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
-  struct Traits<Variational::ShapeFunctionBase<Derived, FESType, SpaceType>>
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
-    using FES = FESType;
+    using DerivedType = Derived;
 
-    static constexpr const Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = FES;
+    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     using ResultType =
       typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     using RangeType =
-      typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
+      typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
+    using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 
-  template <class Derived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
-  struct Traits<Variational::ShapeFunction<Derived, FESType, SpaceType>>
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::ShapeFunction<Derived, FES, Space>>
   {
-    using FES = FESType;
-    static constexpr const Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using DerivedType = Derived;
+
+    using FESType = FES;
+    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    using ResultType =
+      typename ResultOf<
+        Variational::ShapeFunctionBase<
+          Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+
+    using RangeType =
+      typename RangeOf<
+        Variational::ShapeFunctionBase<
+          Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 }
 
@@ -45,29 +66,38 @@ namespace Rodin::Variational
   * @see ShapeFunction
   */
 
-  template <ShapeFunctionSpaceType Space>
-  struct DualSpaceType;
-
-  template <>
-  struct DualSpaceType<TrialSpace>
+  template <class T>
+  struct IsTrialFunction
   {
-    static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Test;
+    static constexpr Boolean Value = false;
   };
 
-  template <>
-  struct DualSpaceType<TestSpace>
+  template <class FES>
+  struct IsTrialFunction<TrialFunction<FES>>
   {
-    static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Trial;
+    static constexpr Boolean Value = true;
+  };
+
+  template <class T>
+  struct IsTestFunction
+  {
+    static constexpr Boolean Value = false;
+  };
+
+  template <class FES>
+  struct IsTestFunction<TestFunction<FES>>
+  {
+    static constexpr Boolean Value = true;
   };
 
   template <
     class Derived,
-    class FESType = typename FormLanguage::Traits<Derived>::FES,
-    ShapeFunctionSpaceType SpaceType = FormLanguage::Traits<Derived>::Space>
+    class FES = typename FormLanguage::Traits<Derived>::FESType,
+    ShapeFunctionSpaceType SpaceType = FormLanguage::Traits<Derived>::SpaceType>
   class ShapeFunctionBase : public FormLanguage::Base
   {
     public:
-      using FES = FESType;
+      using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       using Parent = FormLanguage::Base;
@@ -136,15 +166,15 @@ namespace Rodin::Variational
         {
           return RangeType::Integer;
         }
-        else if constexpr (std::is_same_v<R, Scalar>)
+        else if constexpr (std::is_same_v<R, Real>)
         {
-          return RangeType::Scalar;
+          return RangeType::Real;
         }
-        else if constexpr (std::is_same_v<R, Math::Vector>)
+        else if constexpr (std::is_same_v<R, Math::Vector<Real>>)
         {
           return RangeType::Vector;
         }
-        else if constexpr (std::is_same_v<R, Math::Matrix>)
+        else if constexpr (std::is_same_v<R, Math::Matrix<Real>>)
         {
           return RangeType::Matrix;
         }
@@ -153,6 +183,24 @@ namespace Rodin::Variational
           assert(false);
           static_assert(Utility::DependentFalse<R>::Value);
         }
+      }
+
+      inline
+      auto x() const
+      {
+        return Component(*this, 0);
+      }
+
+      inline
+      auto y() const
+      {
+        return Component(*this, 1);
+      }
+
+      inline
+      auto z() const
+      {
+        return Component(*this, 2);
       }
 
       inline
@@ -185,6 +233,19 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getDOFs(polytope);
       }
 
+      inline
+      const Geometry::Point& getPoint() const
+      {
+        return static_cast<const Derived&>(*this).getPoint();
+      }
+
+      inline
+      constexpr
+      Derived& setPoint(const Geometry::Point& p)
+      {
+        return static_cast<Derived&>(*this).setPoint(p);
+      }
+
       /**
        * @brief Gets an expression which yields the shape function basis at the
        * given point.
@@ -193,23 +254,23 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      auto getBasis(size_t local) const
       {
-        return static_cast<const Derived&>(*this).getTensorBasis(p);
+        return static_cast<const Derived&>(*this).getBasis(local);
       }
 
       /**
        * @brief Call operator to get an expression which yields the shape
        * function basis at the given point.
        *
-       * Synonym to getTensorBasis().
+       * Synonym to getBasis().
        */
       template <class ... Args>
       inline
       constexpr
       auto operator()(Args&&... args) const
       {
-        return this->getTensorBasis(std::forward<Args>(args)...);
+        return this->getBasis(std::forward<Args>(args)...);
       }
 
       /**
@@ -236,34 +297,33 @@ namespace Rodin::Variational
   * @ingroup ShapeFunctionSpecializations
   * @brief ShapeFunction
   */
-  template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
   class ShapeFunction
-    : public ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>
+    : public ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>
   {
     public:
-      using FES = FESType;
+      using FESType = FES;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
-      using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>;
+      using Parent = ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>;
 
       ShapeFunction() = delete;
 
       constexpr
-      ShapeFunction(const FES& fes)
+      ShapeFunction(const FESType& fes)
         : Parent(fes)
       {}
 
       constexpr
       ShapeFunction(const ShapeFunction& other)
-        : Parent(other),
-          m_gf(other.m_gf)
+        : Parent(other)
       {}
 
       constexpr
       ShapeFunction(ShapeFunction&& other)
-        : Parent(std::move(other)),
-          m_gf(std::move(other.m_gf))
+        : Parent(std::move(other))
       {}
 
       inline
@@ -283,18 +343,18 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto& getSolution()
+      GridFunction<FES>& getSolution()
       {
-        assert(m_gf);
-        return *m_gf;
+        assert(m_gf.has_value());
+        return m_gf.value();
       }
 
       inline
       constexpr
-      const auto& getSolution() const
+      const GridFunction<FES>& getSolution() const
       {
-        assert(m_gf);
-        return *m_gf;
+        assert(m_gf.has_value());
+        return m_gf.value();
       }
 
       inline
@@ -307,29 +367,35 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      const Geometry::Point& getPoint() const
       {
-        using RangeType = typename FES::RangeType;
+        assert(m_p.has_value());
+        return m_p.value().get();
+      }
+
+      inline
+      ShapeFunction& setPoint(const Geometry::Point& p)
+      {
+        m_p = p;
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        const auto& p = m_p.value().get();
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fes = this->getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
-        if constexpr (std::is_same_v<RangeType, Scalar>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
-          return TensorBasis(fe.getCount(),
-              [&](size_t local)
-              {
-                return fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
-              });
+          return fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
-          return TensorBasis(fe.getCount(),
-              [&](size_t local)
-              {
-                return this->object(fes.getInverseMapping({ d, i }, fe.getBasis(local))(p));
-              });
+          return this->object(fes.getInverseMapping({ d, i }, fe.getBasis(local))(p));
         }
         else
         {
@@ -352,6 +418,8 @@ namespace Rodin::Variational
 
     private:
       std::optional<GridFunction<FES>> m_gf;
+
+      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
   };
 }
 

@@ -1,13 +1,17 @@
 #ifndef RODIN_TYPES_H
 #define RODIN_TYPES_H
 
+#include <stack>
 #include <cstddef>
+#include <complex>
 
 #include <boost/unordered_map.hpp>
 #include <boost/container/map.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
+#include <boost/container/deque.hpp>
+#include <boost/container/list.hpp>
 
 #include <Eigen/Core>
 
@@ -27,11 +31,23 @@ namespace Rodin
   /// Standard type for representing double precision (64 bit) floating-point values.
   using Double = double;
 
-  /// Standard type for representing scalar values.
-  using Scalar = Double;
-
   /// Standard type for representing indices.
   using Index = std::size_t;
+
+  /// Standard type for representing scalar values.
+  using Real = Double;
+
+  /// Standard type for representing complex values.
+  using Complex = std::complex<Real>;
+
+  template <class T>
+  using List = boost::container::list<T>;
+
+  template <class T>
+  using Deque = boost::container::deque<T>;
+
+  template <class T, class Container = Deque<T>>
+  using Stack = std::stack<T, Container>;
 
   /// Standard flat set type.
   template <class T>

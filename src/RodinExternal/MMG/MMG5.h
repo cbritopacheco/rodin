@@ -106,23 +106,23 @@ namespace Rodin::External::MMG
       static void copySolution(const MMG5_pSol src, MMG::GridFunction<Range>& dst)
       {
         assert(src);
-        if constexpr (std::is_same_v<Scalar, Range>)
+        if constexpr (std::is_same_v<Real, Range>)
         {
           assert(src->type == MMG5_Scalar);
           assert(dst.getFiniteElementSpace().getVectorDimension() == 1);
-          Math::Matrix& data = dst.getData();
+          Math::Matrix<Real>& data = dst.getData();
           assert(data.rows() == 1);
           data.resize(1, src->np);
           // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m
           // + np + 1.
           std::copy(src->m + 1, src->m + src->np + 1, data.data());
         }
-        else if constexpr (std::is_same_v<Math::Vector, Range>)
+        else if constexpr (std::is_same_v<Math::Vector<Real>, Range>)
         {
           const size_t vdim = src->size;
           assert(src->type == MMG5_Vector);
           assert(vdim == dst.getFiniteElementSpace().getVectorDimension());
-          Math::Matrix& data = dst.getData();
+          Math::Matrix<Real>& data = dst.getData();
           assert(data.rows() >= 0);
           assert(static_cast<size_t>(data.rows()) == vdim);
           data.resize(vdim, src->np);
@@ -145,11 +145,11 @@ namespace Rodin::External::MMG
       static void copySolution(const MMG::GridFunction<Range>& src, MMG5_pSol dst)
       {
         assert(dst);
-        if constexpr (std::is_same_v<Scalar, Range>)
+        if constexpr (std::is_same_v<Real, Range>)
         {
           assert(dst->type == MMG5_Scalar);
           assert(src.getFiniteElementSpace().getVectorDimension() == 1);
-          const Math::Matrix& data = src.getData();
+          const Math::Matrix<Real>& data = src.getData();
           assert(data.rows() == 1);
           assert(dst->size == 1);
           const size_t n = data.size();
@@ -163,7 +163,7 @@ namespace Rodin::External::MMG
             if (!dst->m)
             {
               // So 2 * (dst->np + 1) seems to work for most applications
-              MMG5_SAFE_CALLOC(dst->m, 2 * (dst->npmax + 1), Scalar,
+              MMG5_SAFE_CALLOC(dst->m, 2 * (dst->npmax + 1), Real,
                 Alert::Exception() << "Failed to allocate memory for MMG5_pSol->m." << Alert::Raise);
             }
             std::copy(data.data(), data.data() + n, dst->m + 1);
@@ -175,13 +175,13 @@ namespace Rodin::External::MMG
             dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
           }
         }
-        else if constexpr (std::is_same_v<Math::Vector, Range>)
+        else if constexpr (std::is_same_v<Math::Vector<Real>, Range>)
         {
           assert(dst->type == MMG5_Vector);
           const size_t vdim = src.getFiniteElementSpace().getVectorDimension();
           assert(dst->size >= 0);
           assert(vdim == static_cast<size_t>(dst->size));
-          const Math::Matrix& data = src.getData();
+          const Math::Matrix<Real>& data = src.getData();
           assert(dst->size == data.rows());
           const size_t n = data.cols();
           assert(n > 0);
@@ -195,7 +195,7 @@ namespace Rodin::External::MMG
             {
               // So (dst->size + 1) * (dst->np + 1) seems to work for most
               // applications
-              MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->npmax + 1), Scalar,
+              MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->npmax + 1), Real,
                 Alert::Exception() << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
             }
             std::copy(data.data(), data.data() + data.size(), dst->m + dst->size);
@@ -255,9 +255,9 @@ namespace Rodin::External::MMG
        * - With metric, the minimal edge size is set to 0.1 of the
        * smallest prescribed size.
        *
-       * @see setHMax(Scalar)
+       * @see setHMax(Real)
        */
-      MMG5& setHMin(Scalar hmin)
+      MMG5& setHMin(Real hmin)
       {
         m_hmin = hmin;
         return *this;
@@ -282,9 +282,9 @@ namespace Rodin::External::MMG
        * - With metric, the maximal one is set to 10 times the maximal
        *  prescribed size.
        *
-       * @see setHMin(Scalar)
+       * @see setHMin(Real)
        */
-      MMG5& setHMax(Scalar hmax)
+      MMG5& setHMax(Real hmax)
       {
         m_hmax = hmax;
         return *this;
@@ -309,7 +309,7 @@ namespace Rodin::External::MMG
        * Hausdorff parameter.
        *
        */
-      MMG5& setHausdorff(Scalar hausd)
+      MMG5& setHausdorff(Real hausd)
       {
         m_hausd = hausd;
         return *this;
@@ -334,7 +334,7 @@ namespace Rodin::External::MMG
        * By default, the gradation value is 1.3.
        *
        */
-      MMG5& setGradation(Scalar hgrad)
+      MMG5& setGradation(Real hgrad)
       {
         m_hgrad = hgrad;
         return *this;
@@ -344,7 +344,7 @@ namespace Rodin::External::MMG
       MMG5& setParameters(MMG5_pMesh mesh);
 
     private:
-      std::optional<Scalar> m_hmin, m_hmax, m_hausd, m_hgrad;
+      std::optional<Real> m_hmin, m_hmax, m_hausd, m_hgrad;
       bool m_ridgeDetection;
   };
 }

@@ -7,7 +7,7 @@
 #include "ForwardDecls.h"
 #include "FiniteElementSpace.h"
 #include "GridFunction.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -24,11 +24,11 @@ namespace Rodin::Variational
    */
   // template <class ... Ts>
   // class Derivative<GridFunction<H1<Ts...>>> final
-  //   : public ScalarFunctionBase<Derivative<GridFunction<H1<Ts...>>>>
+  //   : public RealFunctionBase<Derivative<GridFunction<H1<Ts...>>>>
   // {
   //   public:
-  //     using Operand = GridFunction<H1<Ts...>>;
-  //     using Parent = ScalarFunctionBase<Derivative<Operand>>;
+  //     using OperandType = GridFunction<H1<Ts...>>;
+  //     using Parent = RealFunctionBase<Derivative<Operand>>;
 
   //     /**
   //      * @brief Constructs the derivative in the i-th direction of the j-th
@@ -59,10 +59,10 @@ namespace Rodin::Variational
 
   //     inline
   //     constexpr
-  //     Scalar getValue(const Geometry::Point&) const
+  //     Real getValue(const Geometry::Point&) const
   //     {
   //       assert(false);
-  //       return Scalar(NAN);
+  //       return Real(NAN);
   //     }
 
   //   private:
@@ -84,7 +84,7 @@ namespace Rodin::Variational
   template <class FES>
   auto Dx(GridFunction<FES>& u)
   {
-    assert(u.getRangeType() == RangeType::Scalar);
+    assert(u.getRangeType() == RangeType::Real);
     return Derivative(0, 0, u);
   }
 
@@ -101,7 +101,7 @@ namespace Rodin::Variational
   template <class FES>
   auto Dy(GridFunction<FES>& u)
   {
-    assert(u.getRangeType() == RangeType::Scalar);
+    assert(u.getRangeType() == RangeType::Real);
     return Derivative(1, 0, u);
   }
 
@@ -118,7 +118,7 @@ namespace Rodin::Variational
   template <class FES>
   auto Dz(GridFunction<FES>& u)
   {
-    assert(u.getRangeType() == RangeType::Scalar);
+    assert(u.getRangeType() == RangeType::Real);
     return Derivative(2, 0, u);
   }
 }

@@ -10,8 +10,6 @@
 #include <cmath>
 #include <type_traits>
 
-#include <boost/multi_array.hpp>
-
 #include "Rodin/Types.h"
 
 namespace Rodin::Math
@@ -159,6 +157,14 @@ namespace Rodin::Math
     for (T i = 0; i < k; i++)
         res *= (n - i);
     return res;
+  }
+
+  template <class T>
+  constexpr
+  inline
+  auto nan()
+  {
+    return std::numeric_limits<T>::quiet_NaN();
   }
 }
 

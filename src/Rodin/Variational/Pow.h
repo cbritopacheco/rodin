@@ -15,7 +15,7 @@
 
 #include "RangeShape.h"
 #include "Function.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -38,18 +38,18 @@ namespace Rodin::Variational
    */
   template <class BaseDerived, class Number>
   class Pow<FunctionBase<BaseDerived>, Number> final
-    : public ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>
+    : public RealFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>
   {
     static_assert(std::is_arithmetic_v<Number>);
     public:
       /// Type of base
-      using Base = FunctionBase<BaseDerived>;
+      using BaseType = FunctionBase<BaseDerived>;
 
       /// Type of exponent
-      using Exponent = Number;
+      using ExponentType = Number;
 
       /// Parent class
-      using Parent = ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>;
+      using Parent = RealFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>;
 
       /**
        * @brief Constructs the power object
@@ -57,7 +57,7 @@ namespace Rodin::Variational
        * @param[in] p Power
        */
       constexpr
-      Pow(const Base& s, Exponent p)
+      Pow(const BaseType& s, ExponentType p)
         : m_s(s.copy()), m_p(p)
       {}
 
@@ -76,7 +76,16 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Pow& traceOf(Geometry::Attribute attrs)
+      Pow& traceOf(Geometry::Attribute attr)
+      {
+        assert(m_s);
+        m_s->traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      Pow& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         assert(m_s);
         m_s->traceOf(attrs);
@@ -97,8 +106,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Base> m_s;
-      const Exponent m_p;
+      std::unique_ptr<BaseType> m_s;
+      const ExponentType m_p;
   };
 
   /**

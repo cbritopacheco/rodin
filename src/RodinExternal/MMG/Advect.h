@@ -38,7 +38,7 @@ namespace Rodin::External::MMG
   class Advect
   {
     public:
-      using LevelSetFunction = ScalarGridFunction;
+      using LevelSetFunction = RealGridFunction;
       using VectorField = VectorGridFunction;
 
       /**

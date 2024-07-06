@@ -87,13 +87,13 @@ namespace Rodin::Geometry
     {
       case IO::FileFormat::MFEM:
       {
-        IO::MeshLoader<IO::FileFormat::MFEM, Context::Sequential> loader(*this);
+        IO::MeshLoader<IO::FileFormat::MFEM, Context> loader(*this);
         loader.load(input);
         break;
       }
       case IO::FileFormat::MEDIT:
       {
-        IO::MeshLoader<IO::FileFormat::MEDIT, Context::Sequential> loader(*this);
+        IO::MeshLoader<IO::FileFormat::MEDIT, Context> loader(*this);
         loader.load(input);
         break;
       }
@@ -124,13 +124,13 @@ namespace Rodin::Geometry
     {
       case IO::FileFormat::MFEM:
       {
-        IO::MeshPrinter<IO::FileFormat::MFEM, Context::Sequential> printer(*this);
+        IO::MeshPrinter<IO::FileFormat::MFEM, Context> printer(*this);
         printer.print(ofs);
         break;
       }
       case IO::FileFormat::MEDIT:
       {
-        IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Sequential> printer(*this);
+        IO::MeshPrinter<IO::FileFormat::MEDIT, Context> printer(*this);
         printer.print(ofs);
         break;
       }
@@ -152,7 +152,7 @@ namespace Rodin::Geometry
   SubMesh<Context::Sequential> Mesh<Context::Sequential>::keep(const FlatSet<Attribute>& attrs) const
   {
     const size_t D = getDimension();
-    SubMesh<Context::Sequential>::Builder build;
+    SubMesh<Context>::Builder build;
     build.initialize(*this);
     for (Index i = 0; i < getCellCount(); i++)
     {
@@ -174,7 +174,7 @@ namespace Rodin::Geometry
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
-    SubMesh<Context::Sequential>::Builder build;
+    SubMesh<Context>::Builder build;
     build.initialize(*this);
     for (auto it = getBoundary(); !it.end(); ++it)
     {
@@ -198,7 +198,7 @@ namespace Rodin::Geometry
   SubMesh<Context::Sequential> Mesh<Context::Sequential>::trim(const FlatSet<Attribute>& attrs) const
   {
     const size_t D = getDimension();
-    SubMesh<Context::Sequential>::Builder build;
+    SubMesh<Context>::Builder build;
     build.initialize(*this);
     for (Index i = 0; i < getCellCount(); i++)
     {
@@ -247,7 +247,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Sequential>& Mesh<Context::Sequential>::scale(Scalar c)
+  Mesh<Context::Sequential>& Mesh<Context::Sequential>::scale(Real c)
   {
     m_vertices *= c;
     flush();
@@ -255,20 +255,20 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>&
-  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, const Math::SpatialVector& coords)
+  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords)
   {
     m_vertices.col(idx) = coords;
     return *this;
   }
 
   Mesh<Context::Sequential>&
-  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, Scalar xi, size_t i)
+  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, Real xi, size_t i)
   {
     m_vertices.col(idx).coeffRef(i) = xi;
     return *this;
   }
 
-  Eigen::Map<const Math::SpatialVector> Mesh<Context::Sequential>::getVertexCoordinates(Index idx) const
+  Eigen::Map<const Math::SpatialVector<Real>> Mesh<Context::Sequential>::getVertexCoordinates(Index idx) const
   {
     const auto size = static_cast<Eigen::Index>(getSpaceDimension());
     return { getVertices().data() + getSpaceDimension() * idx, size };
@@ -301,7 +301,7 @@ namespace Rodin::Geometry
   {
     if (dimension == 0)
     {
-      Variational::ScalarP1Element fe(Polytope::Type::Point);
+      Variational::RealP1Element fe(Polytope::Type::Point);
       const size_t sdim = getSpaceDimension();
       Math::PointMatrix pm(sdim, 1);
       pm.col(0) = getVertexCoordinates(idx);
@@ -320,7 +320,7 @@ namespace Rodin::Geometry
         assert(sdim == static_cast<size_t>(getVertexCoordinates(v.value()).size()));
         pm.col(v.index()) = getVertexCoordinates(v.value());
       }
-      Variational::ScalarP1Element fe(g);
+      Variational::RealP1Element fe(g);
       return new IsoparametricTransformation(std::move(pm), std::move(fe));
     }
   }
@@ -350,17 +350,17 @@ namespace Rodin::Geometry
     }
   }
 
-  Scalar MeshBase::getVolume()
+  Real MeshBase::getVolume() const
   {
-    Scalar totalVolume = 0;
+    Real totalVolume = 0;
     for (auto it = getCell(); !it.end(); ++it)
       totalVolume += it->getMeasure();
     return totalVolume;
   }
 
-  Scalar MeshBase::getVolume(Attribute attr)
+  Real MeshBase::getVolume(Attribute attr) const
   {
-    Scalar totalVolume = 0;
+    Real totalVolume = 0;
     for (auto it = getCell(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
@@ -369,23 +369,105 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Scalar MeshBase::getPerimeter()
+  Real MeshBase::getVolume(const FlatSet<Attribute>& attrs) const
   {
-    Scalar totalVolume = 0;
+    Real totalVolume = 0;
+    for (auto it = getCell(); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+        totalVolume += it->getMeasure();
+    }
+    return totalVolume;
+  }
+
+  Real MeshBase::getPerimeter() const
+  {
+    Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
+      totalPerimeter += it->getMeasure();
+    return totalPerimeter;
+  }
+
+  Real MeshBase::getPerimeter(Attribute attr) const
+  {
+    Real totalPerimeter = 0;
+    for (auto it = getBoundary(); !it.end(); ++it)
+    {
+      if (it->getAttribute() == attr)
+        totalPerimeter += it->getMeasure();
+    }
+    return totalPerimeter;
+  }
+
+  Real MeshBase::getPerimeter(const FlatSet<Attribute>& attrs) const
+  {
+    Real totalPerimeter = 0;
+    for (auto it = getBoundary(); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+        totalPerimeter += it->getMeasure();
+    }
+    return totalPerimeter;
+  }
+
+  Real MeshBase::getArea() const
+  {
+    Real totalArea = 0;
+    for (auto it = getFace(); !it.end(); ++it)
+      totalArea += it->getMeasure();
+    return totalArea;
+  }
+
+  Real MeshBase::getArea(Attribute attr) const
+  {
+    Real totalArea = 0;
+    for (auto it = getFace(); !it.end(); ++it)
+    {
+      if (it->getAttribute() == attr)
+        totalArea += it->getMeasure();
+    }
+    return totalArea;
+  }
+
+  Real MeshBase::getArea(const FlatSet<Attribute>& attrs) const
+  {
+    Real totalArea = 0;
+    for (auto it = getFace(); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+        totalArea += it->getMeasure();
+    }
+    return totalArea;
+  }
+
+  Real MeshBase::getMeasure(size_t d) const
+  {
+    Real totalVolume = 0;
+    for (auto it = getPolytope(d); !it.end(); ++it)
       totalVolume += it->getMeasure();
     return totalVolume;
   }
 
-  Scalar MeshBase::getPerimeter(Attribute attr)
+  Real MeshBase::getMeasure(size_t d, Attribute attr) const
   {
-    Scalar totalVolume = 0;
-    for (auto it = getBoundary(); !it.end(); ++it)
+    Real totalVolume = 0;
+    for (auto it = getPolytope(d); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
         totalVolume += it->getMeasure();
     }
     return totalVolume;
+  }
+
+  Real MeshBase::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
+  {
+    Real totalMeasure = 0;
+    for (auto it = getPolytope(d); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+        totalMeasure += it->getMeasure();
+    }
+    return totalMeasure;
   }
 
   CCL MeshBase::ccl(
@@ -547,21 +629,20 @@ namespace Rodin::Geometry
   {
     assert(isSubMesh());
     RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH();
-    return static_cast<SubMesh<Context::Sequential>&>(*this);
+    return static_cast<SubMesh<Context>&>(*this);
   }
 
   const SubMeshBase& Mesh<Context::Sequential>::asSubMesh() const
   {
     assert(isSubMesh());
     RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH();
-    return static_cast<const SubMesh<Context::Sequential>&>(*this);
+    return static_cast<const SubMesh<Context>&>(*this);
   }
 
-  Mesh<Context::Sequential> Mesh<Context::Sequential>::UniformGrid(Polytope::Type g, size_t h, size_t w)
+  Mesh<Context::Sequential> Mesh<Context::Sequential>::UniformGrid(Polytope::Type g, const Array<size_t>& dimensions)
   {
     Builder build;
     const size_t dim = Polytope::getGeometryDimension(g);
-    build.initialize(dim).nodes(h * w);
     switch (g)
     {
       case Polytope::Type::Point:
@@ -570,20 +651,129 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Triangle:
       {
-        assert(h * w >= 4);
-        for (size_t i = 0; i < h; i++)
+        assert(dimensions.size() == 2);
+        const size_t w = dimensions.coeff(0);
+        const size_t h = dimensions.coeff(1);
+        build.initialize(dim).nodes(w * h);
+        assert(w * h >= 4);
+        for (size_t j = 0; j < h; j++)
         {
-          for (size_t j = 0; j < w; j++)
-            build.vertex({ static_cast<Scalar>(j), static_cast<Scalar>(i) });
+          for (size_t i = 0; i < w; i++)
+            build.vertex({ static_cast<Real>(i), static_cast<Real>(j) });
         }
 
         build.reserve(dim, 2 * (h - 1) * (w - 1));
-        for (size_t i = 0; i < h - 1; i++)
+        for (size_t i = 0; i < w - 1; i++)
         {
-          for (size_t j = 0; j < w - 1; j++)
+          for (size_t j = 0; j < h - 1; j++)
           {
-            build.polytope(g, { i * w + j, i * w + j + 1, (i + 1) * w + j })
-                 .polytope(g, { i * w + j + 1, (i + 1) * w + j + 1, (i + 1) * w + j });
+            build.polytope(g, { i + j * w, (i + 1) + j * w , i + (j + 1) * w })
+                 .polytope(g, { (i + 1) + j * w, (i + 1) + (j + 1) * w, i + (j + 1) * w });
+          }
+        }
+        return build.finalize();
+      }
+      case Polytope::Type::Tetrahedron:
+      {
+        assert(dimensions.size() == 3);
+        const size_t width = dimensions.coeff(0);
+        const size_t height = dimensions.coeff(1);
+        const size_t depth = dimensions.coeff(2);
+        assert(width * height * depth >= 8);
+        build.initialize(dim)
+             .nodes(width * height * depth + (width - 1) * (height - 1) * (depth - 1))
+             .reserve(dim, 10 * (width - 1) * (height - 1) * (depth - 1));
+
+        for (size_t k = 0; k < depth; ++k)
+        {
+          for (size_t j = 0; j < height; ++j)
+          {
+            for (size_t i = 0; i < width; ++i)
+            {
+              build.vertex({
+                  static_cast<Real>(i),
+                  static_cast<Real>(j),
+                  static_cast<Real>(k) });
+            }
+          }
+        }
+
+        for (size_t k = 0; k < depth - 1; ++k)
+        {
+          for (size_t j = 0; j < height - 1; ++j)
+          {
+            for (size_t i = 0; i < width - 1; ++i)
+            {
+              build.vertex({
+                  static_cast<Real>(i) + 0.5,
+                  static_cast<Real>(j) + 0.5,
+                  static_cast<Real>(k) + 0.5 });
+            }
+          }
+        }
+
+        for (size_t i = 0; i < width - 1; ++i)
+        {
+          for (size_t j = 0; j < height - 1; ++j)
+          {
+            for (size_t k = 0; k < depth - 1; ++k)
+            {
+              const Index c =
+                  i + (width - 1) * j + (width - 1) * (height - 1) * k
+                    + (width - 1) + width * (height - 1) + width * height * (depth - 1) + 1;
+              build.polytope(g, // Front-left
+                       { i + width * j + width * height * k,
+                        (i + 1) + width * j + width * height * k,
+                         i + width * (j + 1) + width * height * k,
+                         i + width * j + width * height * (k + 1) })
+                   .polytope(g, // Front-right
+                       { (i + 1) + width * j + width * height * (k + 1),
+                          i + width * j + width * height * (k + 1),
+                          c,
+                          (i + 1) + width * j + width * height * k })
+                   .polytope(g, // Left-top
+                       { i + width * (j + 1) + width * height * (k + 1),
+                         c,
+                         i + width * j + width * height * (k + 1),
+                         i + width * (j + 1) + width * height * k })
+                   .polytope(g, // Top-left
+                       { i + width * j + width * height * (k + 1),
+                        (i + 1) + width * j + width * height * (k + 1),
+                         i + width * (j + 1) + width * height * (k + 1),
+                         c })
+                   .polytope(g, // Right-bottom
+                       { c,
+                        (i + 1) + width * j + width * height * k,
+                         (i + 1) + width * (j + 1) + width * height * k,
+                         (i + 1) + width * j + width * height * (k + 1) })
+                   .polytope(g, // Bottom-right
+                       { (i + 1) + width * j + width * height * k,
+                         i + width * (j + 1) + width * height * k,
+                         (i + 1) + width * (j + 1) + width * height * k,
+                          c
+                         })
+                   .polytope(g, // Back-left
+                       {  i + width * (j + 1) + width * height * k,
+                          (i + 1) + width * (j + 1) + width * height * k,
+                          c,
+                          i + width * (j + 1) + width * height * (k + 1) })
+                   .polytope(g, // Back-right
+                        { (i + 1) + width * (j + 1) + width * height * (k + 1),
+                           i + width * (j + 1) + width * height * (k + 1),
+                           (i + 1) + width * j + width * height * (k + 1),
+                          (i + 1) + width * (j + 1) + width * height * k })
+                   .polytope(g, // Front fill
+                       { (i + 1) + width * j + width * height * k,
+                          i + width * (j + 1) + width * height * k,
+                          c,
+                          i + width * j + width * height * (k + 1) })
+                   .polytope(g, // Back fill
+                       { (i + 1) + width * j + width * height * (k + 1),
+                          (i + 1) + width * (j + 1) + width * height * k,
+                          c,
+                          i + width * (j + 1) + width * height * (k + 1) })
+                   ;
+            }
           }
         }
         return build.finalize();
@@ -594,6 +784,50 @@ namespace Rodin::Geometry
         return build.nodes(0).finalize();
       }
     };
+  }
+
+  std::optional<Point> Mesh<Context::Sequential>::inclusion(const Point& p) const
+  {
+    const auto& polytope = p.getPolytope();
+    if (!polytope.getMesh().isSubMesh())
+    {
+      return {};
+    }
+    const auto& submesh = polytope.getMesh().asSubMesh();
+    const auto& ancestors = submesh.getAncestors();
+    const size_t d = polytope.getDimension();
+    Index i = polytope.getIndex();
+    i = submesh.getPolytopeMap(d).left.at(i);
+    auto it = ancestors.begin();
+    while (it != ancestors.end())
+    {
+      if (it->get() == *this)
+      {
+        auto pit = this->getPolytope(d, i);
+        std::unique_ptr<Polytope> parentPolytope(pit.release());
+        return Point(
+            std::move(*parentPolytope),
+            this->getPolytopeTransformation(d, i),
+            std::cref(p.getReferenceCoordinates()),
+            p.getPhysicalCoordinates());
+      }
+      else if (it->get().isSubMesh())
+      {
+        const auto& parentMesh = it->get().asSubMesh();
+        i = parentMesh.getPolytopeMap(d).left.at(i);
+      }
+      else
+      {
+        // Invalid inclusion.
+        // The SubMesh where the Point belongs to is not a descendant of this Mesh.
+        return {};
+      }
+      ++it;
+    }
+    // Invalid inclusion.
+    // The SubMesh where the Point belongs to is not a descendant of this Mesh.
+    Alert::Exception() << "miaow" << Alert::Raise;
+    return {};
   }
 }
 

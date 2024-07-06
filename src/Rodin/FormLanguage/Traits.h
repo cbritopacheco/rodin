@@ -22,32 +22,28 @@ namespace Rodin::FormLanguage
   template <class ... Args>
   struct Traits;
 
-  template <typename ...>
-  struct IsOneOf
+  template <>
+  struct Traits<Boolean>
   {
-    static constexpr bool Value = false;
+    using ScalarType = Boolean;
   };
 
-  template <typename F, typename S, typename ... T>
-  struct IsOneOf<F, S, T...> {
-    static constexpr bool Value =
-      std::is_same<F, S>::Value || IsOneOf<F, T...>::Value;
+  template <>
+  struct Traits<Integer>
+  {
+    using ScalarType = Integer;
   };
 
-  template <class T>
-  struct IsPlainObject;
-
-  template <class EigenDerived>
-  struct IsPlainObject
+  template <>
+  struct Traits<Real>
   {
-    static constexpr const bool Value =
-      std::is_base_of_v<Eigen::PlainObjectBase<std::decay_t<EigenDerived>>, std::decay_t<EigenDerived>>;
+    using ScalarType = Real;
   };
 
-  template <class EigenDerived>
-  struct IsPlainObject<Variational::TensorBasis<EigenDerived>>
+  template <>
+  struct Traits<Complex>
   {
-    static constexpr const bool Value = IsPlainObject<EigenDerived>::Value;
+    using ScalarType = Complex;
   };
 }
 

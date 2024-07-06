@@ -16,28 +16,28 @@ using namespace Rodin::Math;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-static constexpr Scalar hmax = 0.005; // Maximal size of a triangle's edge
-static constexpr Scalar hmin = 0.1 * hmax;
+static constexpr Real hmax = 0.005; // Maximal size of a triangle's edge
+static constexpr Real hmin = 0.1 * hmax;
 
 static constexpr Attribute dQ = 2; // Attribute of box boundary
 static constexpr Attribute dCurrent = 4; // Attribute of box boundary
 static constexpr Attribute dGround = 5; // Attribute of box boundary
 
-static const Math::Vector x0{{0.5, 0.5}}; // Center of domain
+static const Math::Vector<Real> x0{{0.5, 0.5}}; // Center of domain
 
-static constexpr Scalar pi = Math::Constants::pi();
+static constexpr Real pi = Math::Constants::pi();
 
-static constexpr Scalar R0 = 0.2; // Radius of B_R(x_0)
-static constexpr Scalar R1 = R0 + 10 * hmax; // Radius of B_R(x_0)
+static constexpr Real R0 = 0.2; // Radius of B_R(x_0)
+static constexpr Real R1 = R0 + 10 * hmax; // Radius of B_R(x_0)
 
 static std::mutex mutex_io;
 
 struct Data
 {
-  const Scalar screen;
-  const Scalar epsilon;
-  const Scalar waveNumber;
-  const Scalar conductivity;
+  const Real screen;
+  const Real epsilon;
+  const Real waveNumber;
+  const Real conductivity;
 };
 
 template <class T>
@@ -63,17 +63,17 @@ void run(int i, const std::vector<Data>& grid);
 int main(int, char**)
 {
   // Define evaluation grid
-  Math::Vector epsilon_r = Math::Vector::LinSpaced(1.0 / hmax, hmax, 0.2);
-  Math::Vector waveNumber_r = Math::Vector::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
-  Math::Vector screen_r{{ 2.0 }};
-  Math::Vector conductivity_r{{ 2.0 }};
+  Math::Vector<Real> epsilon_r = Math::Vector<Real>::LinSpaced(1.0 / hmax, hmax, 0.2);
+  Math::Vector<Real> waveNumber_r = Math::Vector<Real>::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
+  Math::Vector<Real> screen_r{{ 2.0 }};
+  Math::Vector<Real> conductivity_r{{ 2.0 }};
 
   std::vector<Data> grid;
   grid.reserve(epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());
-  for (const Scalar screen : screen_r)
-    for (const Scalar epsilon : epsilon_r)
-      for (const Scalar waveNumber : waveNumber_r)
-        for (const Scalar g : conductivity_r)
+  for (const Real screen : screen_r)
+    for (const Real epsilon : epsilon_r)
+      for (const Real waveNumber : waveNumber_r)
+        for (const Real g : conductivity_r)
           grid.push_back({ screen, epsilon, waveNumber, g });
 
   const size_t hwc = std::thread::hardware_concurrency();
@@ -134,7 +134,7 @@ void run(int id, const std::vector<Data>& grid)
                     << "----------------------------------"
                     << Alert::NewLine
                     << i << " / " << grid.size() << " ---- "
-                    << (100 * Scalar(i) / Scalar(grid.size())) << "%"
+                    << (100 * Real(i) / Real(grid.size())) << "%"
                     << Alert::NewLine
                     << "Total elapsed time: " << delta.count() << "s"
                     << Alert::Raise;
@@ -158,22 +158,22 @@ void run(int id, const std::vector<Data>& grid)
     P1 vh(mesh);
 
     // Define conductivity
-    ScalarFunction gamma = 1;
+    RealFunction gamma = 1;
 
-    ScalarFunction gamma_e =
+    RealFunction gamma_e =
       [&](const Point& p)
       {
-        const Scalar r = (p.getCoordinates() - x0).norm();
+        const Real r = (p.getCoordinates() - x0).norm();
         if (r > data.epsilon)
           return gamma(p);
         else
           return data.conductivity;
       };
 
-    ScalarFunction h = data.screen;
+    RealFunction h = data.screen;
 
     // Define boundary data
-    ScalarFunction phi = 1;
+    RealFunction phi = 1;
 
     // Define variational problems
     TrialFunction u(vh);
@@ -183,13 +183,13 @@ void run(int id, const std::vector<Data>& grid)
     helmholtz = Integral(Grad(u), Grad(v))
               - Integral(data.waveNumber * data.waveNumber * h * u, v)
               + DirichletBC(u, phi).on(dCurrent)
-              + DirichletBC(u, ScalarFunction(0)).on(dGround);
+              + DirichletBC(u, RealFunction(0)).on(dGround);
 
     Problem perturbed(u, v);
     perturbed = Integral(gamma_e * Grad(u), Grad(v))
               - Integral(data.waveNumber * data.waveNumber * h * u, v)
               + DirichletBC(u, phi).on(dCurrent)
-              + DirichletBC(u, ScalarFunction(0)).on(dGround);
+              + DirichletBC(u, RealFunction(0)).on(dGround);
 
     // Solve the background problem
     // Alert::Info() << "Solving background equation." << Alert::Raise;
@@ -202,16 +202,16 @@ void run(int id, const std::vector<Data>& grid)
     const auto ue = std::move(u.getSolution());
     // Alert::Success() << "Done." << Alert::Raise;
 
-    ScalarFunction chi_e =
+    RealFunction chi_e =
       [](const Point& p)
       {
-        return (p.getCoordinates() - Math::Vector{{0.5, 0.5}}).norm() > 0.25;
+        return (p.getCoordinates() - Math::Vector<Real>{{0.5, 0.5}}).norm() > 0.25;
       };
 
     GridFunction diff(vh);
     diff = chi_e * Pow(u0 - ue, 2);
     diff.setWeights();
-    const Scalar error = Integral(diff);
+    const Real error = Integral(diff);
 
     // Alert::Success() << "L2 Error: " << error
     //                  << Alert::NewLine

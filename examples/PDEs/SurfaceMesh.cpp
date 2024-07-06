@@ -20,7 +20,7 @@ int main(int, char**)
   TestFunction  v(Vh);
 
   // Right hand side
-  auto f = ScalarFunction(
+  auto f = RealFunction(
     [](const Point& x)
     {
       double l2 = x(0) * x(0) + x(1) * x(1) + x(2) * x(2);

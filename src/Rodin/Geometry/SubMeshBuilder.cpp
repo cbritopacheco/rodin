@@ -9,7 +9,7 @@
 namespace Rodin::Geometry
 {
   SubMesh<Context::Sequential>::Builder&
-  SubMesh<Context::Sequential>::Builder::initialize(const Mesh<Context::Sequential>& parent)
+  SubMesh<Context::Sequential>::Builder::initialize(const Mesh<Context>& parent)
   {
     const size_t dim = parent.getDimension();
     const size_t sdim = parent.getSpaceDimension();

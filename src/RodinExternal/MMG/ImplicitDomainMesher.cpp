@@ -10,13 +10,13 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::setLevelSet(Scalar ls)
+  ImplicitDomainMesher& ImplicitDomainMesher::setLevelSet(Real ls)
   {
     m_ls = ls;
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::setRMC(Scalar rmc)
+  ImplicitDomainMesher& ImplicitDomainMesher::setRMC(Real rmc)
   {
     m_rmc = rmc;
     return *this;
@@ -129,7 +129,7 @@ namespace Rodin::External::MMG
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_isoref, *m_isoref);
     if (getSplitMap().size() > 0)
     {
-      mesh->memMax *= 2.0; // Scalar allowed memory because of bug
+      mesh->memMax *= 2.0; // Real allowed memory because of bug
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_numberOfMat, m_uniqueSplit.size());
       for (const auto& v : m_uniqueSplit)
       {
@@ -310,7 +310,7 @@ namespace Rodin::External::MMG
     }
   }
 
-  MMG::Mesh ImplicitDomainMesher::discretize(const MMG::ScalarGridFunction& ls)
+  MMG::Mesh ImplicitDomainMesher::discretize(const MMG::RealGridFunction& ls)
   {
     const auto& fes = ls.getFiniteElementSpace();
     const auto& mesh = fes.getMesh();
@@ -325,24 +325,20 @@ namespace Rodin::External::MMG
     copySolution(ls, sol);
     MMG5::setParameters(mmgMesh);
     const bool isSurface = ls.getFiniteElementSpace().getMesh().isSurface();
+    const size_t meshDim = mesh.getDimension();
+    const auto& attributeIndex = mesh.getAttributeIndex();
+    FlatSet<Geometry::Attribute> attrs;
     if (m_meshTheSurface)
     {
-      const size_t meshDim = mesh.getDimension();
-      const auto& attributeIndex = mesh.getAttributeIndex();
-      FlatSet<Geometry::Attribute> attrs;
       for (auto it = attributeIndex.begin(meshDim - 1); it != attributeIndex.end(meshDim - 1); ++it)
         attrs.insert(it->second);
-      generateUniqueSplit(attrs);
     }
     else
     {
-      const size_t meshDim = mesh.getDimension();
-      const auto& attributeIndex = mesh.getAttributeIndex();
-      FlatSet<Geometry::Attribute> attrs;
       for (auto it = attributeIndex.begin(meshDim); it != attributeIndex.end(meshDim); ++it)
         attrs.insert(it->second);
-      generateUniqueSplit(attrs);
     }
+    generateUniqueSplit(attrs);
 
     ReturnCode retcode = MMG5_STRONGFAILURE;
     switch (mmgMesh->dim)

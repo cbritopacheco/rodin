@@ -31,7 +31,7 @@ namespace Rodin::Models::Hilbert
   class H1a
   {
     using FESRange = typename FormLanguage::Traits<FES>::RangeType;
-    static_assert(std::is_same_v<FESRange, Scalar> || std::is_same_v<FESRange, Math::Vector>);
+    static_assert(std::is_same_v<FESRange, Real> || std::is_same_v<FESRange, Math::Vector<Real>>);
 
     public:
       H1a(const FES& fes)
@@ -41,7 +41,7 @@ namespace Rodin::Models::Hilbert
           m_alpha(1)
       {}
 
-      H1a& setAlpha(Scalar alpha)
+      H1a& setAlpha(Real alpha)
       {
         m_alpha = alpha;
         return *this;
@@ -51,7 +51,7 @@ namespace Rodin::Models::Hilbert
       auto operator()(const Differential& lf) const
       {
         const auto& fes = getFiniteElementSpace();
-        if constexpr (std::is_same_v<FESRange, Scalar>)
+        if constexpr (std::is_same_v<FESRange, Real>)
         {
           Variational::TrialFunction g(fes);
           Variational::TestFunction  w(fes);
@@ -62,7 +62,7 @@ namespace Rodin::Models::Hilbert
           hilbert.solve(m_cg);
           return g.getSolution();
         }
-        else if constexpr (std::is_same_v<FESRange, Math::Vector>)
+        else if constexpr (std::is_same_v<FESRange, Math::Vector<Real>>)
         {
           Variational::TrialFunction g(fes);
           Variational::TestFunction  w(fes);
@@ -121,9 +121,9 @@ namespace Rodin::Models::Hilbert
       std::reference_wrapper<const FES>   m_fes;
       Variational::TrialFunction<FES>     m_trial;
       Variational::TestFunction<FES>      m_test;
-      Variational::Problem<FES, FES, Context::Sequential, Math::SparseMatrix, Math::Vector> m_pb;
-      Scalar m_alpha;
-      Solver::CG<Math::SparseMatrix, Math::Vector> m_cg;
+      Variational::Problem<FES, FES, Context::Sequential, Math::SparseMatrix<Real>, Math::Vector<Real>> m_pb;
+      Real m_alpha;
+      Solver::CG<Math::SparseMatrix<Real>, Math::Vector<Real>> m_cg;
   };
 }
 

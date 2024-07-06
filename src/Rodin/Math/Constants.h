@@ -19,51 +19,51 @@ namespace Rodin::Math::Constants
    */
   inline
   constexpr
-  Scalar pi()
+  Real pi()
   {
     return M_PI;
   }
 
   inline
   constexpr
-  Scalar nan()
+  Real nan()
   {
     return NAN;
   }
 
   inline
   constexpr
-  Scalar epsilon()
+  Real epsilon()
   {
-    return std::numeric_limits<Scalar>::epsilon();
+    return std::numeric_limits<Real>::epsilon();
   }
 
   inline
   constexpr
-  Scalar zero()
+  Real zero()
   {
-    return Scalar(0);
+    return Real(0);
   }
 
   inline
   constexpr
-  Boolean isZero(Scalar x)
+  Boolean isZero(Real x)
   {
-    return x == Scalar(0);
+    return x == Real(0);
   }
 
   inline
   constexpr
-  Scalar one()
+  Real one()
   {
-    return Scalar(1);
+    return Real(1);
   }
 
   inline
   constexpr
-  Boolean isOne(Scalar x)
+  Boolean isOne(Real x)
   {
-    return x == Scalar(1);
+    return x == Real(1);
   }
 }
 

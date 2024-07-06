@@ -2,7 +2,7 @@
 
 namespace Rodin::External::MMG
 {
-  void Adapt::adapt(MMG::Mesh& mesh, const ScalarGridFunction& sizeMap)
+  void Adapt::adapt(MMG::Mesh& mesh, const RealGridFunction& sizeMap)
   {
     MMG5_pMesh mmgMesh = rodinToMesh(mesh);
     MMG5_pSol mmgSol = createSolution(mmgMesh, 1);

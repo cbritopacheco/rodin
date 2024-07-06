@@ -16,7 +16,7 @@ namespace Rodin::Variational
   {
     Boolean,
     Integer,
-    Scalar,
+    Real,
     Vector,
     Matrix
   };

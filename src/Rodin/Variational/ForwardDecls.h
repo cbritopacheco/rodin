@@ -45,6 +45,7 @@ namespace Rodin::Variational
    * An instance of LinearFormIntegratorBase performs the assembly of the
    * element vector for each finite element.
    */
+  template <class ScalarType>
   class LinearFormIntegratorBase;
 
   /**
@@ -82,17 +83,19 @@ namespace Rodin::Variational
   /**
    * @brief Base class for bilinear form integrators.
    */
-  template <class Derived>
+  template <class Number, class Derived>
   class BilinearFormIntegratorBase;
 
+  template <class Number>
   class LocalBilinearFormIntegratorBase;
 
+  template <class Number>
   class GlobalBilinearFormIntegratorBase;
 
   template <class Derived>
   class FiniteElementBase;
 
-  template <class FES>
+  template <class FESType>
   class FiniteElement;
 
   class FiniteElementCollectionBase;
@@ -116,25 +119,6 @@ namespace Rodin::Variational
    */
   template <class Range, class Context>
   class L2;
-
-  /**
-   * @brief Arbitrary order @f$ H^1(\Omega)^d @f$ continuous finite element
-   * space.
-   * @tparam Context Type of context for the finite element space
-   *
-   * Given some triangulation @f$ \mathcal{T}_h @f$ of @f$ \Omega @f$,
-   * instances of this class will represent the finite element space:
-   * @f[
-   *   V_h := \left\{ v : \overline{\Omega} \rightarrow \mathbb{R}^d \mid
-   *   \forall \tau \in \mathcal{T}_h , \ v|_\tau \in \mathcal{P}_\tau
-   *   \right\}
-   * @f]
-   * where @f$ \mathcal{P}_\tau \subset H^1(\tau)^d @f$ such that @f$ V_h \subset
-   * C^0(\Omega)^d @f$.
-   *
-   */
-  template <class Range, class Context>
-  class H1;
 
   /**
    * @brief Represents the lazy evaluation of a mesh function.
@@ -201,9 +185,6 @@ namespace Rodin::Variational
    */
   static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
 
-  template <class Value>
-  class TensorBasis;
-
   /**
    * @brief Base class for shape function objects.
    * @tparam Space Type of shape function space (Trial or Test)
@@ -255,16 +236,19 @@ namespace Rodin::Variational
    * @brief Base class for scalar-valued functions defined on a mesh.
    */
   template <class Derived>
-  class ScalarFunctionBase;
+  class RealFunctionBase;
 
   /**
    * @note For an overview of all the possible specializations of the
-   * ScalarFunction class, please see @ref ScalarFunctionSpecializations.
+   * RealFunction class, please see @ref RealFunctionSpecializations.
    *
-   * @see ScalarFunctionSpecializations
+   * @see RealFunctionSpecializations
    */
   template <class ... Values>
-  class ScalarFunction;
+  class RealFunction;
+
+  template <class Range>
+  class Zero;
 
   /**
    * @brief Base class for vector-valued functions defined on a mesh.
@@ -296,6 +280,7 @@ namespace Rodin::Variational
    *
    * @see MatrixFunctionSpecializations
    */
+  template <class T>
   class MatrixFunction;
 
   /**
@@ -316,7 +301,7 @@ namespace Rodin::Variational
   template <class Operand>
   class Jump;
 
-  template <class ... Args>
+  template <class Operand>
   class Average;
 
   /**
@@ -340,7 +325,10 @@ namespace Rodin::Variational
   template <class Base, class Exponent>
   class Pow;
 
-  template <class T>
+  template <class Operand>
+  class Sqrt;
+
+  template <class ... Args>
   class Component;
 
   /**
@@ -517,11 +505,11 @@ namespace Rodin::Variational
    * ---------------------
    *  The rules for deducing the range of a Mult object, denoted @f$
    *  \texttt{Range}[\text{LHS} * \text{RHS}]@f$, are the following:
-   *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Scalar} @f$
+   *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Real} @f$
    *    1.  @f[
    *          \dfrac
-   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Scalar}}
-   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Scalar}}
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Real}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Real}}
    *        @f]
    *    2.  @f[
    *          \dfrac
@@ -536,7 +524,7 @@ namespace Rodin::Variational
    *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Vector} @f$
    *    1.  @f[
    *          \dfrac
-   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Scalar}}
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Real}}
    *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Vector}}\\
    *        @f]
    *    2.  @f[
@@ -552,7 +540,7 @@ namespace Rodin::Variational
    *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Matrix} @f$
    *    1.  @f[
    *          \dfrac
-   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Scalar}}
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Real}}
    *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Matrix}}\\
    *        @f]
    *    2.  @f[
@@ -1025,13 +1013,13 @@ namespace Rodin::Variational
   template <class Operand, class ... Parameters>
   class PeriodicBC;
 
-  template <class OperatorType, class VectorType>
+  template <class Operator, class Vector>
   class ProblemBody;
 
   /**
    * @brief Base class for variational problem objects.
    */
-  template <class OperatorType, class VectorType>
+  template <class Operator, class Vector>
   class ProblemBase;
 
   /**

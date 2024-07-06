@@ -9,16 +9,16 @@
 
 #include "ForwardDecls.h"
 
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
 {
-  template <class NestedDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
-  struct Traits<Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FESType, SpaceType>>>
+  template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-    using FES = FESType;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = FES;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -36,18 +36,19 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class Trace<FunctionBase<NestedDerived>> final
-    : public ScalarFunctionBase<Trace<FunctionBase<NestedDerived>>>
+    : public RealFunctionBase<Trace<FunctionBase<NestedDerived>>>
   {
     public:
-      using Operand = FunctionBase<NestedDerived>;
-      using Parent = ScalarFunctionBase<Trace<Operand>>;
+      using OperandType = FunctionBase<NestedDerived>;
+
+      using Parent = RealFunctionBase<Trace<OperandType>>;
 
       /**
        * @brief Constructs the Trace of the given matrix
        * @param[in] m Square matrix
        */
       constexpr
-      Trace(const Operand& m)
+      Trace(const OperandType& m)
         : m_operand(m.copy())
       {}
 
@@ -67,14 +68,14 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
-        static_assert(std::is_same_v<OperandRange, Math::Matrix>);
+        using OperandRange = typename FormLanguage::Traits<OperandType>::RangeType;
+        static_assert(std::is_same_v<OperandRange, Math::Matrix<Real>>);
         return getOperand().getValue(p).trace();
       }
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
@@ -93,46 +94,47 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_operand;
+      std::unique_ptr<OperandType> m_operand;
   };
 
   template <class NestedDerived>
   Trace(const FunctionBase<NestedDerived>&) -> Trace<FunctionBase<NestedDerived>>;
 
-  template <class NestedDerived, class FESType, ShapeFunctionSpaceType SpaceType>
-  class Trace<ShapeFunctionBase<NestedDerived, FESType, SpaceType>> final
-    : public ShapeFunctionBase<Trace<ShapeFunctionBase<NestedDerived, FESType, SpaceType>>>
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  class Trace<ShapeFunctionBase<NestedDerived, FES, Space>> final
+    : public ShapeFunctionBase<Trace<ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
     public:
-      using FES = FESType;
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using FESType = FES;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using Operand = ShapeFunctionBase<NestedDerived, FES, Space>;
-      using Parent = ShapeFunctionBase<Trace<Operand>>;
+      using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
+
+      using Parent = ShapeFunctionBase<Trace<OperandType>>;
 
       constexpr
-      Trace(const Operand& op)
-        : Parent(op.getFiniteElementSpace()),
-          m_op(op.copy())
+      Trace(const OperandType& operand)
+        : Parent(operand.getFiniteElementSpace()),
+          m_operand(operand.copy())
       {}
 
       constexpr
       Trace(const Trace& other)
         : Parent(other),
-          m_op(other.m_op->copy())
+          m_operand(other.m_operand->copy())
       {}
 
       constexpr
       Trace(Trace&& other)
         : Parent(std::move(other)),
-          m_op(std::move(other.m_op))
+          m_operand(std::move(other.m_operand))
       {}
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
-        return *m_op;
+        return *m_operand;
       }
 
       inline
@@ -157,15 +159,23 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      const Geometry::Point& getPoint() const
       {
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
-        const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        const auto& tb = m_op->getTensorBasis(p);
-        return TensorBasis(fe.getCount(),
-            [&](size_t local) { return this->object(tb(local)).transpose(); } );
+        return m_operand->getPoint();
+      }
+
+      inline
+      Trace& setPoint(const Geometry::Point& p)
+      {
+        m_operand->setPoint(p);
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        return this->object(getOperand().getBasis(local)).transpose();
       }
 
       const FES& getFiniteElementSpace() const
@@ -178,7 +188,7 @@ namespace Rodin::Variational
         return new Trace(*this);
       }
     private:
-      std::unique_ptr<Operand> m_op;
+      std::unique_ptr<OperandType> m_operand;
   };
 
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>

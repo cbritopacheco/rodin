@@ -104,11 +104,9 @@ configure_file(Configure.h.in Configure.h @ONLY)
 target_include_directories(RodinExternalMMG
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-  ${Boost_INCLUDE_DIRS}
   PUBLIC
   ${PROJECT_SOURCE_DIR}/third-party/mmg/src
-  ${PROJECT_SOURCE_DIR}/third-party/mmg/include
-  )
+  ${PROJECT_SOURCE_DIR}/third-party/mmg/include)
 target_link_libraries(RodinExternalMMG
   PUBLIC
   Mmg::libmmg_a
@@ -118,6 +116,6 @@ target_link_libraries(RodinExternalMMG
   Rodin::Alert
   Rodin::Geometry
   Rodin::Variational
-  ${Boost_LIBRARIES}
+  Boost::filesystem
   ${CMAKE_THREAD_LIBS_INIT})
 

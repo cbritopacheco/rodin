@@ -23,7 +23,7 @@
 
 namespace Rodin::Solver
 {
-  UMFPack() -> UMFPack<Math::SparseMatrix, Math::Vector>;
+  UMFPack() -> UMFPack<Math::SparseMatrix<Real>, Math::Vector<Real>>;
 
   /**
    * @defgroup UMFPackSpecializations UMFPack Template Specializations
@@ -33,15 +33,15 @@ namespace Rodin::Solver
 
   /**
    * @ingroup UMFPackSpecializations
-   * @brief UMFPack for use with `Math::SparseMatrix` and `Math::Vector`.
+   * @brief UMFPack for use with `Math::SparseMatrix<Real>` and `Math::Vector<Real>`.
    */
   template <>
-  class UMFPack<Math::SparseMatrix, Math::Vector>
-    : public SolverBase<Math::SparseMatrix, Math::Vector>
+  class UMFPack<Math::SparseMatrix<Real>, Math::Vector<Real>>
+    : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
   {
     public:
-      using OperatorType = Math::SparseMatrix;
-      using VectorType = Math::Vector;
+      using OperatorType = Math::SparseMatrix<Real>;
+      using VectorType = Math::Vector<Real>;
 
       /**
        * @brief Constructs the UMFPack object with default parameters.
@@ -66,7 +66,7 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::UmfPackLU<Math::SparseMatrix> m_solver;
+      Eigen::UmfPackLU<Math::SparseMatrix<Real>> m_solver;
   };
 }
 

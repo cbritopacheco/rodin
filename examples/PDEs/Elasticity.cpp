@@ -30,7 +30,7 @@ int main(int argc, char** argv)
   P1 fes(mesh, d);
 
   // Lamé coefficients
-  const Scalar lambda = 0.5769, mu = 0.3846;
+  const Real lambda = 0.5769, mu = 0.3846;
 
   // Pull force
   VectorFunction f{0, -1};
@@ -40,9 +40,7 @@ int main(int argc, char** argv)
   TestFunction  v(fes);
 
   Problem elasticity(u, v);
-  elasticity = Integral(lambda * Div(u), Div(v))
-             + Integral(
-                 mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
+  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 

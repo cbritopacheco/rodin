@@ -20,7 +20,7 @@ namespace Rodin::External::MMG
     public:
       Adapt() = default;
 
-      void adapt(MMG::Mesh& mesh, const ScalarGridFunction& sizeMap);
+      void adapt(MMG::Mesh& mesh, const RealGridFunction& sizeMap);
 
       Adapt& setAngleDetection(bool b = true)
       {

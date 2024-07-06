@@ -21,3 +21,19 @@ target_link_libraries(Periodic
   Rodin::Solver
   Rodin::Variational
   )
+
+add_executable(Darcy Darcy.cpp)
+target_link_libraries(Darcy
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  )
+
+add_executable(Helmholtz Helmholtz.cpp)
+target_link_libraries(Helmholtz
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  )

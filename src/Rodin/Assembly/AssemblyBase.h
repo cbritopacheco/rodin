@@ -7,29 +7,20 @@
 #ifndef RODIN_ASSEMBLY_ASSEMBLYBASE_H
 #define RODIN_ASSEMBLY_ASSEMBLYBASE_H
 
-#include "Rodin/FormLanguage/List.h"
-
 #include "Rodin/Math.h"
+#include "Rodin/Tuple.h"
 
-#include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Variational/ForwardDecls.h"
 #include "ForwardDecls.h"
+#include "Input.h"
 
 namespace Rodin::Assembly
 {
-  template <class TrialFES, class TestFES, class OperatorType>
+  template <class OperatorType, class TrialFES, class TestFES>
   class AssemblyBase<OperatorType, Variational::BilinearForm<TrialFES, TestFES, OperatorType>>
     : public FormLanguage::Base
   {
     public:
-      struct Input
-      {
-        const Geometry::MeshBase& mesh;
-        const TrialFES& trialFES;
-        const TestFES& testFES;
-        FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>& lbfis;
-        FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>& gbfis;
-      };
+      using InputType = BilinearFormAssemblyInput<TrialFES, TestFES>;
 
       AssemblyBase() = default;
 
@@ -37,22 +28,20 @@ namespace Rodin::Assembly
 
       AssemblyBase(AssemblyBase&&) = default;
 
-      virtual OperatorType execute(const Input& data) const = 0;
+      virtual ~AssemblyBase() = default;
+
+      virtual OperatorType execute(const InputType& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class FES, class VectorType>
-  class AssemblyBase<VectorType, Variational::LinearForm<FES, VectorType>>
-    : public FormLanguage::Base
+  template <class OperatorType, class ... TrialFES, class ... TestFES>
+  class AssemblyBase<OperatorType, Tuple<Variational::BilinearForm<TrialFES, TestFES, OperatorType>...>>
   {
     public:
-      struct Input
-      {
-        const Geometry::MeshBase& mesh;
-        const Variational::FiniteElementSpaceBase& fes;
-        FormLanguage::List<Variational::LinearFormIntegratorBase>& lfis;
-      };
+      static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
+      using InputType =
+        BilinearFormTupleAssemblyInput<BilinearFormAssemblyInput<TrialFES, TestFES>...>;
 
       AssemblyBase() = default;
 
@@ -60,7 +49,50 @@ namespace Rodin::Assembly
 
       AssemblyBase(AssemblyBase&&) = default;
 
-      virtual VectorType execute(const Input& data) const = 0;
+      virtual ~AssemblyBase() = default;
+
+      virtual OperatorType execute(const InputType& data) const = 0;
+
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
+
+  template <class VectorType, class FES>
+  class AssemblyBase<VectorType, Variational::LinearForm<FES, VectorType>>
+    : public FormLanguage::Base
+  {
+    public:
+      using InputType = LinearFormAssemblyInput<FES>;
+
+      AssemblyBase() = default;
+
+      AssemblyBase(const AssemblyBase&) = default;
+
+      AssemblyBase(AssemblyBase&&) = default;
+
+      virtual ~AssemblyBase() = default;
+
+      virtual VectorType execute(const InputType& data) const = 0;
+
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
+
+  template <class VectorType, class ... FES>
+  class AssemblyBase<VectorType, Tuple<Variational::LinearForm<FES, VectorType>...>>
+  {
+    public:
+      static_assert(sizeof...(FES) == sizeof...(FES));
+      using InputType =
+        LinearFormTupleAssemblyInput<LinearFormAssemblyInput<FES>...>;
+
+      AssemblyBase() = default;
+
+      AssemblyBase(const AssemblyBase&) = default;
+
+      AssemblyBase(AssemblyBase&&) = default;
+
+      virtual ~AssemblyBase() = default;
+
+      virtual VectorType execute(const InputType& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };

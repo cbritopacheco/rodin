@@ -12,6 +12,8 @@
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Variational/BilinearForm.h"
 
+#include "Rodin/Utility/Repeat.h"
+
 #include "ForwardDecls.h"
 #include "AssemblyBase.h"
 
@@ -34,19 +36,26 @@ namespace Rodin::Assembly
 {
   template <class TrialFES, class TestFES>
   class Sequential<
-    std::vector<Eigen::Triplet<Scalar>>,
-    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
+    std::vector<Eigen::Triplet<Real>>,
+    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>> final
     : public AssemblyBase<
-        std::vector<Eigen::Triplet<Scalar>>,
-        Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
+        std::vector<Eigen::Triplet<Real>>,
+        Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>
   {
     public:
-      using Parent =
-        AssemblyBase<
-          std::vector<Eigen::Triplet<Scalar>>,
-          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>;
-      using Input = typename Parent::Input;
-      using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
+      using ScalarType = Real;
+
+      using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
+
+      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+
+      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
+      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
+
+      using Parent = AssemblyBase<OperatorType, BilinearFormType>;
+
+      using InputType = typename Parent::InputType;
 
       Sequential() = default;
 
@@ -62,45 +71,60 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const Input& input) const override
+      OperatorType execute(const InputType& input) const override
       {
-        std::vector<Eigen::Triplet<Scalar>> res;
-        res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
-        for (auto& bfi : input.lbfis)
+        OperatorType res;
+        const auto& mesh = input.getTrialFES().getMesh();
+        res.reserve(input.getTestFES().getSize() * std::log(input.getTrialFES().getSize()));
+        for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::SequentialIteration seq(input.mesh, bfi.getRegion());
+          Internal::SequentialIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
-              const size_t d = it.getDimension();
-              const size_t i = it->getIndex();
-              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-              const auto& testDOFs = input.testFES.getDOFs(d, i);
-              bfi.assemble(*it);
-              Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+              bfi.setPolytope(*it);
+              const auto& rows = input.getTestFES().getDOFs(it.getDimension(), it->getIndex());
+              const auto& cols = input.getTrialFES().getDOFs(it.getDimension(), it->getIndex());
+              for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+              {
+                for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
+                {
+                  const ScalarType s = bfi.integrate(m, l);
+                  if (s != ScalarType(0))
+                    res.emplace_back(rows(l), cols(m), s);
+                }
+              }
             }
           }
         }
-        for (auto& bfi : input.gbfis)
+        for (auto& bfi : input.getGlobalBFIs())
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::SequentialIteration testseq(input.mesh, bfi.getTestRegion());
+          Internal::SequentialIteration testseq(mesh, bfi.getTestRegion());
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
             if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
             {
-              Internal::SequentialIteration trialseq(input.mesh, bfi.getTrialRegion());
+              Internal::SequentialIteration trialseq(mesh, bfi.getTrialRegion());
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
                 if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                 {
-                  const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
-                  const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
-                  bfi.assemble(*trIt, *teIt);
-                  Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  bfi.setPolytope(*trIt, *teIt);
+                  const auto& rows = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
+                  const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
+                  for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+                  {
+                    for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
+                    {
+                      const ScalarType s = bfi.integrate(m, l);
+                      if (s != ScalarType(0))
+                        res.emplace_back(rows(l), cols(m), s);
+                    }
+                  }
                 }
               }
             }
@@ -109,6 +133,7 @@ namespace Rodin::Assembly
         return res;
       }
 
+      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -116,24 +141,27 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @brief Sequential assembly of the Math::SparseMatrix associated to a
+   * @brief Sequential assembly of the Math::SparseMatrix<Real> associated to a
    * BilinearFormBase object.
    */
   template <class TrialFES, class TestFES>
   class Sequential<
-    Math::SparseMatrix,
-    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
+    Math::SparseMatrix<Real>,
+    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>> final
     : public AssemblyBase<
-        Math::SparseMatrix,
-        Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
+        Math::SparseMatrix<Real>,
+        Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>>
   {
     public:
-      using Parent =
-        AssemblyBase<
-          Math::SparseMatrix,
-          Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>;
-      using Input = typename Parent::Input;
-      using OperatorType = Math::SparseMatrix;
+      using ScalarType = Real;
+
+      using OperatorType = Math::SparseMatrix<ScalarType>;
+
+      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+
+      using Parent = AssemblyBase<OperatorType, BilinearFormType>;
+
+      using InputType = typename Parent::InputType;
 
       Sequential() = default;
 
@@ -149,21 +177,21 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const Input& input) const override
+      OperatorType execute(const InputType& input) const override
       {
         Sequential<
-          std::vector<Eigen::Triplet<Scalar>>,
-          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>> assembly;
+          std::vector<Eigen::Triplet<Real>>,
+          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>> assembly;
         const auto triplets =
           assembly.execute({
-            input.mesh,
-            input.trialFES, input.testFES,
-            input.lbfis, input.gbfis });
-        OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
+            input.getTrialFES(), input.getTestFES(),
+            input.getLocalBFIs(), input.getGlobalBFIs() });
+        OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
         return res;
       }
 
+      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -171,24 +199,31 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @brief Sequential assembly of the Math::SparseMatrix associated to a
+   * @brief Sequential assembly of the Math::SparseMatrix<Real> associated to a
    * BilinearFormBase object.
    */
   template <class TrialFES, class TestFES>
   class Sequential<
-    Math::Matrix,
-    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
+    Math::Matrix<Real>,
+    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Real>>> final
     : public AssemblyBase<
-        Math::Matrix,
-        Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
+        Math::Matrix<Real>,
+        Variational::BilinearForm<TrialFES, TestFES, Math::Matrix<Real>>>
   {
     public:
-      using Parent =
-        AssemblyBase<
-          Math::Matrix,
-          Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>;
-      using Input = typename Parent::Input;
-      using OperatorType = Math::Matrix;
+      using ScalarType = Real;
+
+      using OperatorType = Math::Matrix<ScalarType>;
+
+      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
+      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
+
+      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+
+      using Parent = AssemblyBase<OperatorType, BilinearFormType>;
+
+      using InputType = typename Parent::InputType;
 
       Sequential() = default;
 
@@ -204,33 +239,34 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const Input& input) const override
+      OperatorType execute(const InputType& input) const override
       {
-        Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());
+        OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
-        for (auto& bfi : input.lbfis)
+        const auto& mesh = input.getTrialFES().getMesh();
+        for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::SequentialIteration seq(input.mesh, bfi.getRegion());
+          Internal::SequentialIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
-              const size_t d = it.getDimension();
-              const size_t i = it->getIndex();
-              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-              const auto& testDOFs = input.testFES.getDOFs(d, i);
-              bfi.assemble(*it);
-              Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+              bfi.setPolytope(*it);
+              const auto& rows = input.getTestFES().getDOFs(it.getDimension(), it->getIndex());
+              const auto& cols = input.getTrialFES().getDOFs(it.getDimension(), it->getIndex());
+              for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+                for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
+                  res(rows(l), cols(m)) += bfi.integrate(m, l);
             }
           }
         }
-        for (auto& bfi : input.gbfis)
+        for (auto& bfi : input.getGlobalBFIs())
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::SequentialIteration trialseq(input.mesh, bfi.getTrialRegion());
-          Internal::SequentialIteration testseq(input.mesh, bfi.getTestRegion());
+          Internal::SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+          Internal::SequentialIteration testseq(mesh, bfi.getTestRegion());
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
             if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
@@ -239,10 +275,12 @@ namespace Rodin::Assembly
               {
                 if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                 {
-                  const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
-                  const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
-                  bfi.assemble(*trIt, *teIt);
-                  Math::Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  bfi.setPolytope(*trIt, *teIt);
+                  const auto& rows = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
+                  const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
+                  for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+                    for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
+                      res(rows(l), cols(m)) += bfi.integrate(m, l);
                 }
               }
             }
@@ -251,24 +289,217 @@ namespace Rodin::Assembly
         return res;
       }
 
+      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
       }
   };
 
+  template <class ... TrialFES, class ... TestFES>
+  class Sequential<
+    std::vector<Eigen::Triplet<Real>>,
+    Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>> final
+      : public AssemblyBase<
+          std::vector<Eigen::Triplet<Real>>,
+          Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>>
+  {
+    public:
+      using ScalarType = Real;
+
+      using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
+
+      using TupleType =
+        Tuple<Variational::BilinearForm<TrialFES, TestFES, OperatorType>...>;
+
+      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
+      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
+
+      using Parent = AssemblyBase<OperatorType, TupleType>;
+
+      using InputType = typename Parent::InputType;
+
+      using Offsets = typename InputType::Offsets;
+
+      Sequential() = default;
+
+      Sequential(const Sequential& other)
+        : Parent(other)
+      {}
+
+      Sequential(Sequential&& other)
+        : Parent(std::move(other))
+      {}
+
+      OperatorType execute(const InputType& input) const override
+      {
+        using AssemblyTuple =
+          Tuple<Sequential<std::vector<Eigen::Triplet<Real>>,
+          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>...>;
+
+        AssemblyTuple assembly;
+
+        const auto& t = input.getTuple();
+
+        // Compute each block of triplets
+        std::array<std::vector<Eigen::Triplet<Real>>, AssemblyTuple::Size> ts;
+        assembly.zip(t)
+                .map([](const auto& p)
+                     { return p.first().execute(p.second()); })
+                .iapply([&](const Index i, auto& v)
+                        { ts[i] = std::move(v); });
+
+        // Add the triplets with the offsets
+        std::vector<Eigen::Triplet<Real>> res;
+        size_t capacity = 0;
+        for (const auto& v : ts)
+          capacity += v.size();
+        res.reserve(capacity);
+
+        const Offsets& offsets = input.getOffsets();
+        for (size_t i = 0; i < ts.size(); i++)
+        {
+          for (const Eigen::Triplet<Real>& t : ts[i])
+          {
+            res.emplace_back(
+                t.row() + offsets[i].second(), t.col() + offsets[i].first(), t.value());
+          }
+        }
+        return res;
+      }
+
+      inline
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+  };
+
+  template <class ... TrialFES, class ... TestFES>
+  class Sequential<
+    Math::SparseMatrix<Real>,
+    Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>...>> final
+      : public AssemblyBase<
+          Math::SparseMatrix<Real>,
+          Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>...>>
+    {
+      public:
+        using Parent =
+          AssemblyBase<
+            Math::SparseMatrix<Real>,
+            Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>...>>;
+
+        using InputType = typename Parent::InputType;
+
+        using OperatorType = Math::SparseMatrix<Real>;
+
+        Sequential() = default;
+
+        Sequential(const Sequential& other)
+          : Parent(other)
+        {}
+
+        Sequential(Sequential&& other)
+          : Parent(std::move(other))
+        {}
+
+        OperatorType execute(const InputType& input) const override
+        {
+          Sequential<
+            std::vector<Eigen::Triplet<Real>>,
+            Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>> assembly;
+          OperatorType res(input.getRows(), input.getColumns());
+          const auto triplets = assembly.execute(input);
+          res.setFromTriplets(triplets.begin(), triplets.end());
+          return res;
+        }
+
+        inline
+        Sequential* copy() const noexcept override
+        {
+          return new Sequential(*this);
+        }
+    };
+
+  template <class ... FES>
+  class Sequential<
+    Math::Vector<Real>,
+    Tuple<Variational::LinearForm<FES, Math::Vector<Real>>...>> final
+      : public AssemblyBase<
+          Math::Vector<Real>,
+          Tuple<Variational::LinearForm<FES, Math::Vector<Real>>...>>
+    {
+      public:
+        using Parent =
+          AssemblyBase<
+            Math::Vector<Real>,
+            Tuple<Variational::LinearForm<FES, Math::Vector<Real>>...>>;
+
+        using InputType = typename Parent::InputType;
+
+        using VectorType = Math::Vector<Real>;
+
+        Sequential() = default;
+
+        Sequential(const Sequential& other)
+          : Parent(other)
+        {}
+
+        Sequential(Sequential&& other)
+          : Parent(std::move(other))
+        {}
+
+        VectorType execute(const InputType& input) const override
+        {
+          using AssemblyTuple =
+            Tuple<Sequential<Math::Vector<Real>, Variational::LinearForm<FES, Math::Vector<Real>>>...>;
+
+          AssemblyTuple assembly;
+
+          const auto& t = input.getTuple();
+
+          // Compute each block of triplets
+          auto vs = assembly.zip(t)
+                            .map([](const auto& p) { return p.first().execute(p.second()); });
+
+          Math::Vector<Real> res = Math::Vector<Real>::Zero(input.getSize());
+          const auto& offsets = input.getOffsets();
+          vs.iapply(
+              [&](size_t i, const auto& v)
+              {
+                res.segment(offsets[i], v.size()) = v;
+              });
+          return res;
+        }
+
+        inline
+        Sequential* copy() const noexcept override
+        {
+          return new Sequential(*this);
+        }
+    };
+
   /**
-   * @brief %Sequential assembly of the Math::Vector associated to a LinearFormBase
+   * @brief %Sequential assembly of the Math::Vector<Real> associated to a LinearFormBase
    * object.
    */
   template <class FES>
-  class Sequential<Math::Vector, Variational::LinearForm<FES, Math::Vector>>
-    : public AssemblyBase<Math::Vector, Variational::LinearForm<FES, Math::Vector>>
+  class Sequential<Math::Vector<Real>, Variational::LinearForm<FES, Math::Vector<Real>>> final
+    : public AssemblyBase<Math::Vector<Real>, Variational::LinearForm<FES, Math::Vector<Real>>>
   {
     public:
-      using Parent = AssemblyBase<Math::Vector, Variational::LinearForm<FES, Math::Vector>>;
-      using Input = typename Parent::Input;
-      using VectorType = Math::Vector;
+      using FESType = FES;
+
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using VectorType = Math::Vector<ScalarType>;
+
+      using LinearFormType = Variational::LinearForm<FES, VectorType>;
+
+      using Parent = AssemblyBase<VectorType, LinearFormType>;
+
+      using InputType = typename Parent::InputType;
 
       Sequential() = default;
 
@@ -284,29 +515,32 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the vector associated to the
        * linear form.
        */
-      VectorType execute(const Input& input) const override
+      VectorType execute(const InputType& input) const override
       {
-        VectorType res(input.fes.getSize());
+        VectorType res(input.getFES().getSize());
         res.setZero();
-        for (auto& lfi : input.lfis)
+        const auto& mesh = input.getFES().getMesh();
+        for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::SequentialIteration seq(input.mesh, lfi.getRegion());
+          Internal::SequentialIteration seq(mesh, lfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
+              lfi.setPolytope(*it);
               const size_t d = it.getDimension();
               const size_t i = it->getIndex();
-              const auto& dofs = input.fes.getDOFs(d, i);
-              lfi.assemble(*it);
-              Math::Kernels::add(res, lfi.getVector(), dofs);
+              const auto& dofs = input.getFES().getDOFs(d, i);
+              for (size_t l = 0; l < static_cast<size_t>(dofs.size()); l++)
+                res(dofs(l)) += lfi.integrate(l);
             }
           }
         }
         return res;
       }
 
+      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);

@@ -21,18 +21,13 @@ if (${CMAKE_VERSION} VERSION_LESS 3.13)
     )
 endif()
 
-add_library(RodinMath ${RodinMath_SRCS} ${RodinMath_HEADERS})
+# add_library(RodinMath ${RodinMath_SRCS} ${RodinMath_HEADERS})
+add_library(RodinMath INTERFACE)
 add_library(Rodin::Math ALIAS RodinMath)
 
 # ---- Link targets ----------------------------------------------------------
-if (RODIN_USE_OPENMP)
-  find_package(OpenMP REQUIRED)
-  target_link_libraries(RodinMath PUBLIC OpenMP::OpenMP_CXX)
-endif()
-
 target_link_libraries(RodinMath
-  PUBLIC
-  Rodin
+  INTERFACE
   Eigen3::Eigen)
 
 target_include_directories(RodinMath

@@ -4,7 +4,6 @@ set(RodinAssembly_HEADERS
   Multithreaded.h)
 
 set(RodinAssembly_SRCS
-  AssemblyBase.cpp
   Sequential.cpp
   Multithreaded.cpp)
 

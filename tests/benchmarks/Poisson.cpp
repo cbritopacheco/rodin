@@ -22,22 +22,43 @@ namespace RodinBenchmark
   struct Poisson_UniformGrid_16x16 : public benchmark::Fixture
   {
     public:
+      using MeshType = Mesh<Context::Sequential>;
+      using FESType = P1<Real, MeshType>;
+
       static constexpr const Geometry::Attribute dirichletAttr = 1;
 
       void SetUp(const benchmark::State&)
       {
-        mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
+        mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
         mesh.getConnectivity().compute(1, 2);
-        vhPtr.reset(new P1<Scalar, Context::Sequential>(mesh));
+        vhPtr.reset(new FESType(mesh));
       }
 
       void TearDown(const benchmark::State&)
       {}
 
       boost::filesystem::path meshfile;
-      Mesh<Context::Sequential> mesh;
-      std::unique_ptr<P1<Scalar, Context::Sequential>> vhPtr;
+      MeshType mesh;
+      std::unique_ptr<FESType> vhPtr;
   };
+
+  BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_NoCoefficient_ConstantSource)
+  (benchmark::State& st)
+  {
+    assert(vhPtr);
+    const auto& vh = *vhPtr;
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+    RealFunction f(1.0);
+    RealFunction zero(0.0);
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, zero).on(dirichletAttr);
+
+    for (auto _ : st)
+      poisson.assemble();
+  }
 
   BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_ConstantCoefficient_ConstantSource)
   (benchmark::State& st)
@@ -46,10 +67,11 @@ namespace RodinBenchmark
     const auto& vh = *vhPtr;
     TrialFunction u(vh);
     TestFunction  v(vh);
-    ScalarFunction f(1.0);
-    ScalarFunction zero(0.0);
+    RealFunction gamma(1.0);
+    RealFunction f(1.0);
+    RealFunction zero(0.0);
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
+    poisson = Integral(gamma * Grad(u), Grad(v))
             - Integral(f, v)
             + DirichletBC(u, zero).on(dirichletAttr);
 

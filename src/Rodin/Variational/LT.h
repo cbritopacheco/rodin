@@ -27,11 +27,13 @@ namespace Rodin::Variational
     : public BooleanFunctionBase<LT<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using Parent = BooleanFunctionBase<LT<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
-      using LHS = FunctionBase<LHSDerived>;
-      using RHS = FunctionBase<RHSDerived>;
+      using LHSType = FunctionBase<LHSDerived>;
 
-      LT(const LHS& lhs, const RHS& rhs)
+      using RHSType = FunctionBase<RHSDerived>;
+
+      using Parent = BooleanFunctionBase<LT<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+
+      LT(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
@@ -74,8 +76,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   /**
@@ -101,7 +103,7 @@ namespace Rodin::Variational
   auto
   operator<(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return LT(ScalarFunction(lhs), rhs);
+    return LT(RealFunction(lhs), rhs);
   }
 
   template <class LHSDerived, class Number,
@@ -111,7 +113,7 @@ namespace Rodin::Variational
   auto
   operator<(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
-    return LT(lhs, ScalarFunction(rhs));
+    return LT(lhs, RealFunction(rhs));
   }
 }
 

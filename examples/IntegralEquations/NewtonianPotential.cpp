@@ -13,13 +13,13 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
 inline
-Scalar K(const Point& x, const Point& y)
+Real K(const Point& x, const Point& y)
 {
   return 1. / (4 * M_PI * ((x - y).norm()));
 }
 
 inline
-Scalar exact(const Point& x)
+Real exact(const Point& x)
 {
   if (abs(1 - x.squaredNorm()) < 0.00001)
     return 4. / (M_PI * std::sqrt(abs(0.00001)));
@@ -30,7 +30,7 @@ Scalar exact(const Point& x)
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("D1.mesh");
+  mesh.load("D1.o.mesh", IO::FileFormat::MEDIT);
   // mesh.load("miaow.medit.o.mesh", IO::FileFormat::MEDIT);
   mesh.getConnectivity().compute(1, 2);
 
@@ -39,7 +39,7 @@ int main(int, char**)
   TestFunction  v(fes);
 
   DenseProblem eq(u, v);
-  eq = Integral(0.00001 * Grad(u), Grad(v))
+  eq = Integral(0.001 * Grad(u), Grad(v))
      + Integral(Potential(K, u), v)
      - Integral(v)
      ;
@@ -65,7 +65,7 @@ int main(int, char**)
   std::cout << Integral(u.getSolution()) << std::endl;
 
   GridFunction one(fes);
-  one = ScalarFunction(1);
+  one = RealFunction(1);
 
   std::cout << "phi\n";
   GridFunction phi(fes);

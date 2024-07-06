@@ -16,7 +16,7 @@ int main(int, char**)
 {
   constexpr size_t n = 16;
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.scale(1.0 / (n - 1));
   mesh.save("Square.mesh");
 

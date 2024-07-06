@@ -14,6 +14,7 @@
 #include "Rodin/Types.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Context.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Types.h"
 
 #include "ForwardDecls.h"
@@ -26,7 +27,7 @@ namespace Rodin::IO::MEDIT
 {
   enum SolutionType
   {
-    Scalar = 1,
+    Real = 1,
     Vector = 2,
     Tensor = 3
   };
@@ -50,6 +51,7 @@ namespace Rodin::IO::MEDIT
     SolAtPentahedra,
     SolAtHexahedra,
     RequiredVertices,
+    RequiredEdges,
     Normals,
     NormalAtVertices,
     Tangents,
@@ -97,6 +99,8 @@ namespace Rodin::IO::MEDIT
         return "SolAtHexahedra";
       case Keyword::RequiredVertices:
         return "RequiredVertices";
+      case Keyword::RequiredEdges:
+        return "RequiredEdges";
       case Keyword::Normals:
         return "Normals";
       case Keyword::NormalAtVertices:
@@ -106,6 +110,7 @@ namespace Rodin::IO::MEDIT
       case Keyword::TangentAtVertices:
         return "TangentAtVertices";
       case Keyword::End:
+#include "Rodin/Math/Vector.h"
         return "End";
     }
     return nullptr;
@@ -204,6 +209,8 @@ namespace Rodin::IO::MEDIT
       res = Keyword::SolAtHexahedra;
     else if (str == Keyword::RequiredVertices)
       res = Keyword::RequiredVertices;
+    else if (str == Keyword::RequiredEdges)
+      res = Keyword::RequiredEdges;
     else if (str == Keyword::Normals)
       res = Keyword::Normals;
     else if (str == Keyword::NormalAtVertices)
@@ -213,6 +220,7 @@ namespace Rodin::IO::MEDIT
     else if (str == Keyword::TangentAtVertices)
       res = Keyword::TangentAtVertices;
     else if (str == Keyword::End)
+#include "Rodin/Math/Vector.h"
       res = Keyword::End;
     else
       return {};
@@ -265,7 +273,7 @@ namespace Rodin::IO::MEDIT
     public:
       struct Data
       {
-        Math::Vector vertex;
+        Math::Vector<Rodin::Real> vertex;
         Geometry::Attribute attribute;
       };
 
@@ -284,7 +292,7 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         size_t i = 0;
-        Data res{ Math::Vector(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
+        Data res{ Math::Vector<Rodin::Real>(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
         const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
         const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
         const auto p = double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];
@@ -514,10 +522,12 @@ namespace Rodin::IO
     : public MeshLoaderBase<Context::Sequential>
   {
     public:
-      using Object = Rodin::Geometry::Mesh<Context::Sequential>;
+      using ObjectType = Rodin::Geometry::Mesh<Context::Sequential>;
 
-      MeshLoader(Object& mesh)
-        : MeshLoaderBase<Context::Sequential>(mesh),
+      using Parent = MeshLoaderBase<Context::Sequential>;
+
+      MeshLoader(ObjectType& mesh)
+        : Parent(mesh),
           m_currentLineNumber(0)
       {}
 
@@ -565,7 +575,13 @@ namespace Rodin::IO
     : public MeshPrinterBase<Context::Sequential>
   {
     public:
-      MeshPrinter(const Rodin::Geometry::Mesh<Context::Sequential>& mesh)
+      using ContextType = Context::Sequential;
+
+      using ObjectType = Geometry::Mesh<ContextType>;
+
+      using Parent = MeshPrinterBase<ContextType>;
+
+      MeshPrinter(const ObjectType& mesh)
         : MeshPrinterBase(mesh)
       {}
 
@@ -584,16 +600,19 @@ namespace Rodin::IO
 
   template <class Range>
   class GridFunctionLoader<FileFormat::MEDIT,
-        Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+        Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
     : public GridFunctionLoaderBase<
-        Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+        Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
   {
     public:
-      /// Type of finite element space
-      using FES = Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>;
+      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Sequential>>;
 
-      GridFunctionLoader(Variational::GridFunction<FES>& gf)
-        : GridFunctionLoaderBase<FES>(gf),
+      using ObjectType = Variational::GridFunction<FESType>;
+
+      using Parent = GridFunctionLoaderBase<FESType>;
+
+      GridFunctionLoader(ObjectType& gf)
+        : Parent(gf),
           m_currentLineNumber(0)
       {}
 
@@ -617,8 +636,14 @@ namespace Rodin::IO
     : public GridFunctionPrinterBase<FES>
   {
     public:
-      GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
-        : GridFunctionPrinterBase<FES>(gf)
+      using FESType = FES;
+
+      using ObjectType = Variational::GridFunction<FESType>;
+
+      using Parent = GridFunctionPrinterBase<FESType>;
+
+      GridFunctionPrinter(const ObjectType& gf)
+        : Parent(gf)
       {}
 
       void print(std::ostream& os) override
@@ -651,7 +676,7 @@ namespace Rodin::IO
         os << MEDIT::Keyword::SolAtVertices << '\n'
            << mesh.getVertexCount() << '\n'
            << 1 // Only one solution
-           << " " << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Scalar)
+           << " " << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Real)
            << '\n';
 
         if constexpr (Utility::IsSpecialization<FES, Variational::P1>::Value)

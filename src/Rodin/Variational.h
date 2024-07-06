@@ -17,6 +17,7 @@
 #include "Variational/GridFunction.h"
 #include "Variational/FiniteElementSpace.h"
 
+#include "Variational/ShapeFunction.h"
 #include "Variational/TrialFunction.h"
 #include "Variational/TestFunction.h"
 
@@ -26,9 +27,11 @@
 #include "Variational/LinearForm.h"
 #include "Variational/BilinearForm.h"
 
+#include "Variational/Zero.h"
 #include "Variational/Abs.h"
 #include "Variational/Dot.h"
 #include "Variational/Pow.h"
+#include "Variational/Sqrt.h"
 #include "Variational/Sum.h"
 #include "Variational/Mult.h"
 #include "Variational/Minus.h"
@@ -73,7 +76,7 @@
 #include "Variational/Problem.h"
 #include "Variational/DenseProblem.h"
 
-#include "Variational/ScalarFunction.h"
+#include "Variational/RealFunction.h"
 #include "Variational/VectorFunction.h"
 #include "Variational/MatrixFunction.h"
 #include "Variational/BooleanFunction.h"

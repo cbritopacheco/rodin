@@ -26,6 +26,7 @@
 
 #include "ForwardDecls.h"
 #include "Connectivity.h"
+#include "Point.h"
 #include "Polytope.h"
 #include "PolytopeCount.h"
 #include "PolytopeIndexed.h"
@@ -90,6 +91,15 @@
       << ". Downcasting to SubMesh is ill-defined." \
       << Rodin::Alert::Raise; \
   }
+
+namespace Rodin::FormLanguage
+{
+  template <class Context>
+  struct Traits<Geometry::Mesh<Context>>
+  {
+    using ContextType = Context;
+  };
+}
 
 namespace Rodin::Geometry
 {
@@ -206,7 +216,9 @@ namespace Rodin::Geometry
           size_t d,
           const FlatSet<Attribute>& attrs) const;
 
-      virtual MeshBase& scale(Scalar c) = 0;
+      virtual std::optional<Point> inclusion(const Point& p) const = 0;
+
+      virtual MeshBase& scale(Real c) = 0;
 
       virtual MeshBase& load(
         const boost::filesystem::path& filename,
@@ -325,7 +337,7 @@ namespace Rodin::Geometry
        * @brief Gets the total volume of the mesh.
        * @returns Sum of all cell volumes.
        */
-      Scalar getVolume();
+      Real getVolume() const;
 
       /**
        * @brief Gets the sum of the volumes of the cells given by the
@@ -335,13 +347,15 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the volume.
        */
-      Scalar getVolume(Attribute attr);
+      Real getVolume(Attribute attr) const;
+
+      Real getVolume(const FlatSet<Attribute>& attr) const;
 
       /**
        * @brief Gets the total perimeter of the mesh.
        * @returns Sum of all element perimeters.
        */
-      Scalar getPerimeter();
+      Real getPerimeter() const;
 
       /**
        * @brief Gets the sum of the perimeters of the cells given by the
@@ -351,7 +365,21 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the perimeter.
        */
-      Scalar getPerimeter(Attribute attr);
+      Real getPerimeter(Attribute attr) const;
+
+      Real getPerimeter(const FlatSet<Attribute>& attr) const;
+
+      Real getArea() const;
+
+      Real getArea(Attribute attr) const;
+
+      Real getArea(const FlatSet<Attribute>& attr) const;
+
+      Real getMeasure(size_t d) const;
+
+      Real getMeasure(size_t d, Attribute attr) const;
+
+      Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const;
 
       /**
        * @brief Gets the labels of the domain cells in the mesh.
@@ -447,7 +475,7 @@ namespace Rodin::Geometry
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
        */
-      virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const = 0;
+      virtual Eigen::Map<const Math::SpatialVector<Real>> getVertexCoordinates(Index idx) const = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -467,7 +495,7 @@ namespace Rodin::Geometry
        *   mesh.setVertexCoordinates(0, 10.0, 2);
        * @endcode
        */
-      virtual MeshBase& setVertexCoordinates(Index idx, Scalar s, size_t i) = 0;
+      virtual MeshBase& setVertexCoordinates(Index idx, Real s, size_t i) = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -475,7 +503,7 @@ namespace Rodin::Geometry
        * @param[in] idx Vertex index
        * @param[in] coords New coordinates
        */
-      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector& coords) = 0;
+      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords) = 0;
 
       virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
@@ -507,6 +535,7 @@ namespace Rodin::Geometry
   {
     public:
       using Parent = MeshBase;
+      using Context = Context::Sequential;
 
       /**
        * @brief Class used to build Mesh<Context::Sequential> instances.
@@ -564,7 +593,7 @@ namespace Rodin::Geometry
            */
           template <size_t Size>
           inline
-          Builder& vertex(const Scalar (&data)[Size])
+          Builder& vertex(const Real (&data)[Size])
           {
             assert(Size == m_sdim);
             m_vertices.col(m_nodes++) = data;
@@ -576,35 +605,35 @@ namespace Rodin::Geometry
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(std::initializer_list<Scalar> l);
+          Builder& vertex(std::initializer_list<Real> l);
 
           /**
            * @brief Adds vertex with coordinates given by the array pointer.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const Scalar* data);
+          Builder& vertex(const Real* data);
 
           /**
            * @brief Adds vertex with coordinates given by the mapped memory.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const Eigen::Map<const Math::Vector>& x);
+          Builder& vertex(const Eigen::Map<const Math::Vector<Real>>& x);
 
           /**
            * @brief Adds vertex with coordinates given by the vector.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(Math::Vector&& x);
+          Builder& vertex(Math::Vector<Real>&& x);
 
           /**
            * @brief Adds vertex with coordinates given by the vector.
            *
            * This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const Math::Vector& x);
+          Builder& vertex(const Math::Vector<Real>& x);
 
           /**
            * @brief Sets the attribute of the given polytope.
@@ -634,22 +663,22 @@ namespace Rodin::Geometry
            */
           Mesh finalize();
 
-          Builder& setVertices(Math::Matrix&& connectivity);
+          Builder& setVertices(Math::Matrix<Real>&& connectivity);
 
-          Builder& setConnectivity(Connectivity<Context::Sequential>&& connectivity);
+          Builder& setConnectivity(Connectivity<Context>&& connectivity);
 
           Builder& setAttributeIndex(AttributeIndex&& connectivity);
 
           Builder& setTransformationIndex(TransformationIndex&& connectivity);
 
           inline
-          Connectivity<Context::Sequential>& getConnectivity()
+          Connectivity<Context>& getConnectivity()
           {
             return m_connectivity;
           }
 
           inline
-          const Connectivity<Context::Sequential>& getConnectivity() const
+          const Connectivity<Context>& getConnectivity() const
           {
             return m_connectivity;
           }
@@ -659,7 +688,7 @@ namespace Rodin::Geometry
           size_t m_nodes;
 
           Math::PointMatrix m_vertices;
-          Connectivity<Context::Sequential> m_connectivity;
+          Connectivity<Context> m_connectivity;
 
           AttributeIndex m_attributeIndex;
           TransformationIndex m_transformationIndex;
@@ -676,10 +705,18 @@ namespace Rodin::Geometry
         return Builder();
       }
 
+      inline
+      static Mesh UniformGrid(Polytope::Type g, std::initializer_list<size_t> l)
+      {
+        Array<size_t> shape(l.size());
+        std::copy(l.begin(), l.end(), shape.begin());
+        return UniformGrid(g, shape);
+      }
+
       /**
        * @brief Generates a uniform grid for a given geometry.
        */
-      static Mesh UniformGrid(Polytope::Type g, size_t h, size_t w);
+      static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
       /**
       * @brief Constructs an empty mesh with no cells.
@@ -740,6 +777,7 @@ namespace Rodin::Geometry
         return *this;
       }
 
+
       virtual void flush() override
       {
         for (auto& mt : m_transformationIndex)
@@ -758,7 +796,7 @@ namespace Rodin::Geometry
       * @f$ are included if the connectivity @f$ (D - 1) \longrightarrow d @f$
       * is already computed in the mesh.
       */
-      virtual SubMesh<Context::Sequential> skin() const;
+      virtual SubMesh<Context> skin() const;
 
       /**
       * @brief Trims the cells with the given attribute.
@@ -768,7 +806,7 @@ namespace Rodin::Geometry
       * Convenience function to call trim(const std::FlatSet<Attribute>&) with
       * only one attribute.
       */
-      virtual SubMesh<Context::Sequential> trim(Attribute attr) const;
+      virtual SubMesh<Context> trim(Attribute attr) const;
 
       /**
       * @brief Trims the cells with the given attribute.
@@ -785,7 +823,7 @@ namespace Rodin::Geometry
       * @returns A SubMesh object consisting of cells that have attributes
       * not in the given set.
       */
-      virtual SubMesh<Context::Sequential> trim(const FlatSet<Attribute>& attrs) const;
+      virtual SubMesh<Context> trim(const FlatSet<Attribute>& attrs) const;
 
       /**
       * @brief Keeps the cells with the given attribute.
@@ -795,7 +833,7 @@ namespace Rodin::Geometry
       * Convenience function to call keep(const std::FlatSet<Attribute>&) with
       * only one attribute.
       */
-      virtual SubMesh<Context::Sequential> keep(Attribute attr) const;
+      virtual SubMesh<Context> keep(Attribute attr) const;
 
       /**
       * @brief Trims the cells with the given attributes.
@@ -812,7 +850,7 @@ namespace Rodin::Geometry
       * @returns A SubMesh object consisting of cells that have attributes
       * not in the given set.
       */
-      virtual SubMesh<Context::Sequential> keep(const FlatSet<Attribute>& attrs) const;
+      virtual SubMesh<Context> keep(const FlatSet<Attribute>& attrs) const;
 
       inline
       Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap)
@@ -827,6 +865,8 @@ namespace Rodin::Geometry
       }
 
       virtual Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
+
+      virtual std::optional<Point> inclusion(const Point& p) const override;
 
       SubMeshBase& asSubMesh() override;
 
@@ -852,7 +892,7 @@ namespace Rodin::Geometry
         const boost::filesystem::path& filename,
         IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
 
-      virtual Mesh& scale(Scalar c) override;
+      virtual Mesh& scale(Real c) override;
 
       const AttributeIndex& getAttributeIndex() const
       {
@@ -871,7 +911,7 @@ namespace Rodin::Geometry
       }
 
       inline
-      const Context::Sequential& getContext() const override
+      const Context& getContext() const override
       {
         return m_context;
       }
@@ -909,25 +949,25 @@ namespace Rodin::Geometry
 
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
 
-      virtual Connectivity<Context::Sequential>& getConnectivity() override
+      virtual Connectivity<Context>& getConnectivity() override
       {
         return m_connectivity;
       }
 
-      virtual const Connectivity<Context::Sequential>& getConnectivity() const override
+      virtual const Connectivity<Context>& getConnectivity() const override
       {
         return m_connectivity;
       }
 
-      virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const override;
+      virtual Eigen::Map<const Math::SpatialVector<Real>> getVertexCoordinates(Index idx) const override;
 
       virtual const FlatSet<Attribute>& getAttributes(size_t d) const override;
 
       virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 
-      virtual Mesh& setVertexCoordinates(Index idx, Scalar xi, size_t i) override;
+      virtual Mesh& setVertexCoordinates(Index idx, Real xi, size_t i) override;
 
-      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector& coords) override;
+      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords) override;
 
       virtual Mesh& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
@@ -942,14 +982,14 @@ namespace Rodin::Geometry
       size_t m_sdim;
 
       Math::PointMatrix m_vertices;
-      Connectivity<Context::Sequential> m_connectivity;
+      Connectivity<Context> m_connectivity;
 
       AttributeIndex m_attributeIndex;
       mutable TransformationIndex m_transformationIndex;
 
       std::vector<FlatSet<Attribute>> m_attributes;
 
-      Context::Sequential m_context;
+      Context m_context;
   };
 }
 

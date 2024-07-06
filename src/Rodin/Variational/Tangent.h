@@ -10,7 +10,7 @@
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -25,14 +25,15 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class Tan<FunctionBase<NestedDerived>>
-    : public ScalarFunctionBase<Tan<FunctionBase<NestedDerived>>>
+    : public RealFunctionBase<Tan<FunctionBase<NestedDerived>>>
   {
     public:
-      using Operand = FunctionBase<NestedDerived>;
-      using Parent = ScalarFunctionBase<Tan<FunctionBase<NestedDerived>>>;
+      using OperandType = FunctionBase<NestedDerived>;
+
+      using Parent = RealFunctionBase<Tan<FunctionBase<NestedDerived>>>;
 
       constexpr
-      Tan(const Operand& v)
+      Tan(const OperandType& v)
         : m_v(v)
       {}
 
@@ -57,9 +58,9 @@ namespace Rodin::Variational
       }
 
       inline
-      Scalar getValue(const Geometry::Point& p) const
+      Real getValue(const Geometry::Point& p) const
       {
-        return std::tan(Scalar(m_v.getValue(p)));
+        return std::tan(Real(m_v.getValue(p)));
       }
 
       inline
@@ -70,7 +71,7 @@ namespace Rodin::Variational
       }
 
     private:
-      Operand m_v;
+      OperandType m_v;
   };
 
   template <class NestedDerived>

@@ -94,7 +94,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      MatrixFunctionBase& traceOf(const std::set<Geometry::Attribute>& attrs)
+      MatrixFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         Parent::traceOf(attrs);
         return *this;
@@ -105,6 +105,80 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).copy();
       }
   };
+
+  /**
+   * @ingroup MatrixFunctionSpecializations
+   */
+  template <>
+  class MatrixFunction<Math::Matrix<Real>> final
+    : public MatrixFunctionBase<MatrixFunction<Math::Matrix<Real>>>
+  {
+    public:
+      using Parent = MatrixFunctionBase<MatrixFunction<Math::Matrix<Real>>>;
+
+      MatrixFunction(std::reference_wrapper<const Math::Matrix<Real>> matrix)
+        : m_matrix(matrix)
+      {}
+
+      MatrixFunction(const MatrixFunction& other)
+        : Parent(other),
+          m_matrix(other.m_matrix)
+      {}
+
+      MatrixFunction(MatrixFunction&& other)
+        : Parent(std::move(other)),
+          m_matrix(std::move(other.m_matrix))
+      {}
+
+      inline
+      const Math::Matrix<Real>& getValue(const Geometry::Point&) const
+      {
+        return m_matrix.get();
+      }
+
+      inline
+      constexpr
+      MatrixFunction& traceOf(Geometry::Attribute)
+      {
+        return *this;
+      }
+
+      inline
+      constexpr
+      MatrixFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
+      {
+        return *this;
+      }
+
+      inline
+      constexpr
+      size_t getRows() const
+      {
+        return m_matrix.get().rows();
+      }
+
+      /**
+       * @brief Gets the number of columns in the matrix
+       * @returns Number of columns
+       */
+      inline
+      constexpr
+      size_t getColumns() const
+      {
+        return m_matrix.get().cols();
+      }
+
+      inline MatrixFunction* copy() const noexcept override
+      {
+        return new MatrixFunction(*this);
+      }
+
+    private:
+      std::reference_wrapper<const Math::Matrix<Real>> m_matrix;
+  };
+
+  MatrixFunction(std::reference_wrapper<const Math::Matrix<Real>>)
+    -> MatrixFunction<Math::Matrix<Real>>;
 }
 
 #endif

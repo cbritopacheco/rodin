@@ -17,24 +17,24 @@ using namespace Rodin::Variational;
 
 using namespace Rodin::External;
 
-static constexpr Scalar hmax = 0.01; // Maximal size of a triangle's edge
-static constexpr Scalar hmin = 0.1 * hmax;
+static constexpr Real hmax = 0.01; // Maximal size of a triangle's edge
+static constexpr Real hmin = 0.1 * hmax;
 
 static constexpr Attribute dQ = 2; // Attribute of box boundary
 static constexpr Attribute dCurrent = 4; // Attribute of box boundary
 static constexpr Attribute dGround = 5; // Attribute of box boundary
 
-static const Math::Vector x0{{0.5, 0.5}}; // Center of domain
-static constexpr Scalar epsilon = 0.05; // Radius of B_e(x_0)
+static const Math::Vector<Real> x0{{0.5, 0.5}}; // Center of domain
+static constexpr Real epsilon = 0.05; // Radius of B_e(x_0)
 static_assert(epsilon > 0);
 
-static constexpr Scalar pi = Math::Constants::pi();
+static constexpr Real pi = Math::Constants::pi();
 
-const constexpr Scalar m = 50;
-static constexpr Scalar gamma_ek = 1e+12;
+const constexpr Real m = 50;
+static constexpr Real gamma_ek = 1e+12;
 
-static constexpr Scalar R0 = 0.2; // Radius of B_R(x_0)
-static constexpr Scalar R1 = R0 + 10 * hmax; // Radius of B_R(x_0)
+static constexpr Real R0 = 0.2; // Radius of B_R(x_0)
+static constexpr Real R1 = R0 + 10 * hmax; // Radius of B_R(x_0)
 
 static Solver::SparseLU solver;
 
@@ -57,16 +57,16 @@ int main(int, char**)
   P1 gh(mesh, mesh.getSpaceDimension());
 
   // Define conductivity
-  ScalarFunction gamma =
+  RealFunction gamma =
     [&](const Point& p)
     {
       return 2 + sin(pi * m * p.x()) * cos(pi * m * p.y());
     };
 
-  ScalarFunction gamma_e =
+  RealFunction gamma_e =
     [&](const Point& p)
     {
-      const Scalar r = (p.getCoordinates() - x0).norm();
+      const Real r = (p.getCoordinates() - x0).norm();
       if (r > epsilon)
         return gamma(p);
       else
@@ -80,7 +80,7 @@ int main(int, char**)
   conductivity = gamma_e;
   conductivity.save("Conductivity_E.gf");
 
-  ScalarFunction phi = 1;
+  RealFunction phi = 1;
 
   // Define variational problems
   TrialFunction u(vh);
@@ -89,12 +89,12 @@ int main(int, char**)
   Problem poisson(u, v);
   poisson = Integral(gamma * Grad(u), Grad(v))
           + DirichletBC(u, phi).on(dCurrent)
-          + DirichletBC(u, ScalarFunction(0)).on(dGround);
+          + DirichletBC(u, RealFunction(0)).on(dGround);
 
   Problem perturbed(u, v);
   perturbed = Integral(gamma_e * Grad(u), Grad(v))
             + DirichletBC(u, phi).on(dCurrent)
-            + DirichletBC(u, ScalarFunction(0)).on(dGround);
+            + DirichletBC(u, RealFunction(0)).on(dGround);
 
   // Solve the background problem
   Alert::Info() << "Solving background equation." << Alert::Raise;

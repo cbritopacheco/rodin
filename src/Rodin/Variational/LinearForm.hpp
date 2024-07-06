@@ -7,24 +7,7 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORM_HPP
 #define RODIN_VARIATIONAL_LINEARFORM_HPP
 
-#include "Rodin/Alert.h"
-#include "Rodin/Assembly/AssemblyBase.h"
-
-#include "LinearForm.h"
-#include "LinearFormIntegrator.h"
-#include "FiniteElementSpace.h"
-
-
 namespace Rodin::Variational
-{
-   template <class FES>
-   void
-   LinearForm<FES, Math::Vector>::assemble()
-   {
-      const auto& fes = getTestFunction().getFiniteElementSpace();
-      const auto& mesh = getTestFunction().getFiniteElementSpace().getMesh();
-      m_vector = getAssembly().execute({ mesh, fes, getIntegrators() });
-   }
-}
+{}
 
 #endif

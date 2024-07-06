@@ -22,18 +22,24 @@ namespace Rodin::IO
   class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES>>
   {
     public:
-      GridFunctionLoaderBase(Variational::GridFunction<FES>& gf)
+      using FESType = FES;
+
+      using ObjectType = Variational::GridFunction<FESType>;
+
+      using Parent = IO::Loader<ObjectType>;
+
+      GridFunctionLoaderBase(ObjectType& gf)
         : m_gf(gf)
       {}
 
     protected:
-      Variational::GridFunction<FES>& getObject() override
+      ObjectType& getObject() override
       {
-        return m_gf;
+        return m_gf.get();
       }
 
     private:
-      Variational::GridFunction<FES>& m_gf;
+      std::reference_wrapper<ObjectType> m_gf;
   };
 }
 

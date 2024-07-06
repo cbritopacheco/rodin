@@ -9,6 +9,7 @@
 
 #include <set>
 
+#include "Rodin/Cast.h"
 #include "Rodin/Math/Vector.h"
 
 #include "ForwardDecls.h"
@@ -17,14 +18,17 @@
 
 namespace Rodin::Variational
 {
+  template <class Number>
   class LinearFormIntegratorBase : public Integrator
   {
     public:
+      using ScalarType = Number;
+
       using Parent = Integrator;
 
-      template <class Derived, class FES, ShapeFunctionSpaceType Space>
-      LinearFormIntegratorBase(const ShapeFunction<Derived, FES, Space>& v)
-        : m_v(v)
+      template <class FES>
+      LinearFormIntegratorBase(const TestFunction<FES>& v)
+        : m_v(v.copy())
       {}
 
       template <class FES>
@@ -32,7 +36,7 @@ namespace Rodin::Variational
 
       LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
         : Parent(other),
-          m_v(other.m_v),
+          m_v(other.m_v->copy()),
           m_attrs(other.m_attrs)
       {}
 
@@ -47,7 +51,8 @@ namespace Rodin::Variational
       inline
       const FormLanguage::Base& getTestFunction() const
       {
-        return m_v.get();
+        assert(m_v);
+        return *m_v;
       }
 
       /**
@@ -72,6 +77,13 @@ namespace Rodin::Variational
         return over(FlatSet<Geometry::Attribute>{attr});
       }
 
+      template <class A1, class A2, class ... As>
+      inline
+      LinearFormIntegratorBase& over(A1 a1, A2 a2, As... attrs)
+      {
+        return over(FlatSet<Geometry::Attribute>{a1, a2, attrs...});
+      }
+
       /**
        * @brief Specifies the material references over which to integrate.
        * @returns Reference to self (for method chaining)
@@ -88,30 +100,16 @@ namespace Rodin::Variational
       }
 
       inline
-      Integrator::Type getType() const
-      final override
+      Integrator::Type getType() const final override
       {
         return Integrator::Type::Linear;
       }
 
-      inline
-      const Math::Vector getVector() const
-      {
-        return m_vector;
-      }
+      virtual const Geometry::Polytope& getPolytope() const = 0;
 
-      inline
-      Math::Vector& getVector()
-      {
-        return m_vector;
-      }
+      virtual LinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
-      /**
-       * @brief Performs the assembly of the element vector for the given
-       * element.
-       */
-      virtual
-      void assemble(const Geometry::Polytope& element) = 0;
+      virtual ScalarType integrate(size_t local) = 0;
 
       virtual
       LinearFormIntegratorBase* copy() const noexcept override = 0;
@@ -119,9 +117,8 @@ namespace Rodin::Variational
       virtual Region getRegion() const = 0;
 
     private:
-      std::reference_wrapper<const FormLanguage::Base> m_v;
+      std::unique_ptr<FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;
-      Math::Vector m_vector;
   };
 }
 

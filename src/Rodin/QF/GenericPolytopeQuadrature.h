@@ -54,13 +54,13 @@ namespace Rodin::QF
       }
 
       inline
-      Scalar getWeight(size_t i) const override
+      Real getWeight(size_t i) const override
       {
         return m_qf->getWeight(i);
       }
 
       inline
-      const Math::SpatialVector& getPoint(size_t i) const override
+      const Math::SpatialVector<Real>& getPoint(size_t i) const override
       {
         return m_qf->getPoint(i);
       }

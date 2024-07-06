@@ -22,6 +22,7 @@
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "Traits.h"
+#include "IsPlaneObject.h"
 
 namespace Rodin::FormLanguage
 {
@@ -91,27 +92,36 @@ namespace Rodin::FormLanguage
        */
       virtual const char* getName() const
       {
-        return "Rodin::FormLanguage::Base";
+        return nullptr;
       }
 
       /**
        * @brief Keeps the passed object in memory for later use.
        */
-      template <class T, typename = std::enable_if_t<FormLanguage::IsPlainObject<T>::Value>>
+      template <class T, typename =
+        std::enable_if_t<FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value>>
       inline
       constexpr
       const T& object(T&& obj) const noexcept
       {
-        using R = typename std::remove_reference_t<T>;
-        const R* res = new R(std::forward<T>(obj));
-        m_objs.write([&](auto& obj){ obj.emplace_back(res); });;
-        return *res;
+        if constexpr (std::is_lvalue_reference_v<T>)
+        {
+          return obj;
+        }
+        else
+        {
+          using R = typename std::remove_reference_t<T>;
+          const R* res = new R(std::forward<T>(obj));
+          m_objs.write([&](auto& obj){ obj.emplace_back(res); });;
+          return *res;
+        }
       }
 
       /**
        * @brief Returns the same object.
        */
-      template <class T, typename = std::enable_if_t<!FormLanguage::IsPlainObject<T>::Value>>
+      template <class T, typename =
+        std::enable_if_t<!FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value>>
       inline
       constexpr
       T object(T&& obj) const noexcept

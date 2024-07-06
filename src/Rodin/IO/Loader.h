@@ -21,6 +21,8 @@ namespace Rodin::IO
   class Loader
   {
     public:
+      using ObjectType = T;
+
       virtual void load(std::istream& is) = 0;
 
       virtual void load(const boost::filesystem::path& is)
@@ -30,7 +32,7 @@ namespace Rodin::IO
       }
 
     protected:
-      virtual T& getObject() = 0;
+      virtual ObjectType& getObject() = 0;
   };
 }
 

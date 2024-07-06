@@ -15,7 +15,7 @@ namespace Rodin::IO
 {
   template <class Range>
   void GridFunctionLoader<FileFormat::MEDIT,
-    Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+    Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
   ::load(std::istream& is)
   {
     readVersion(is);
@@ -25,7 +25,7 @@ namespace Rodin::IO
 
   template <class Range>
   std::istream& GridFunctionLoader<FileFormat::MEDIT,
-    Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+    Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
   ::getline(std::istream& is, std::string& line)
   {
     m_currentLineNumber++;
@@ -34,7 +34,7 @@ namespace Rodin::IO
 
   template <class Range>
   std::string GridFunctionLoader<FileFormat::MEDIT,
-    Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+    Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
   ::skipEmptyLines(std::istream& is)
   {
     std::string line;
@@ -48,7 +48,7 @@ namespace Rodin::IO
 
   template <class Range>
   void GridFunctionLoader<FileFormat::MEDIT,
-    Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+    Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
   ::readVersion(std::istream& is)
   {
     auto line = skipEmptyLines(is);
@@ -70,7 +70,7 @@ namespace Rodin::IO
 
   template <class Range>
   void GridFunctionLoader<FileFormat::MEDIT,
-    Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+    Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
   ::readDimension(std::istream& is)
   {
     auto line = skipEmptyLines(is);
@@ -90,7 +90,7 @@ namespace Rodin::IO
 
   template <class Range>
   void GridFunctionLoader<FileFormat::MEDIT,
-    Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
+    Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
   ::readData(std::istream& is)
   {
     auto& gf = this->getObject();

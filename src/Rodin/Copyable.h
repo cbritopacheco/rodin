@@ -6,6 +6,7 @@ namespace Rodin
   class Copyable
   {
     public:
+      virtual ~Copyable() = default;
       virtual Copyable* copy() const noexcept = 0;
   };
 }

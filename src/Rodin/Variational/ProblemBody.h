@@ -31,33 +31,50 @@ namespace Rodin::Variational
   class ProblemBodyBase : public FormLanguage::Base
   {
     public:
+      using ScalarType = Real;
+
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<ScalarType>;
+
+      using LocalBilinearFormIntegratorBaseType = LocalBilinearFormIntegratorBase<ScalarType>;
+
+      using GlobalBilinearFormIntegratorBaseType = GlobalBilinearFormIntegratorBase<ScalarType>;
+
+      using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
+
+      using LocalBilinearFormIntegratorBaseListType = FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
+
+      using GlobalBilinearFormIntegratorBaseListType = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
+
       using Parent = FormLanguage::Base;
 
       ProblemBodyBase() = default;
 
       ProblemBodyBase(const ProblemBodyBase& other)
         : Parent(other),
+          m_lfis(other.m_lfis),
           m_lbfis(other.m_lbfis),
           m_gbfis(other.m_gbfis),
-          m_lfis(other.m_lfis),
-          m_essBdr(other.m_essBdr)
+          m_essBdr(other.m_essBdr),
+          m_periodicBdr(other.m_periodicBdr)
       {}
 
       ProblemBodyBase(ProblemBodyBase&& other)
         : Parent(std::move(other)),
+          m_lfis(std::move(other.m_lfis)),
           m_lbfis(std::move(other.m_lbfis)),
           m_gbfis(std::move(other.m_gbfis)),
-          m_lfis(std::move(other.m_lfis)),
-          m_essBdr(std::move(other.m_essBdr))
+          m_essBdr(std::move(other.m_essBdr)),
+          m_periodicBdr(std::move(other.m_periodicBdr))
       {}
 
       inline
       ProblemBodyBase& operator=(ProblemBodyBase&& other)
       {
+        m_lfis = std::move(other.m_lfis);
         m_lbfis = std::move(other.m_lbfis);
         m_gbfis = std::move(other.m_gbfis);
-        m_lfis = std::move(other.m_lfis);
         m_essBdr = std::move(other.m_essBdr);
+        m_periodicBdr = std::move(other.m_periodicBdr);
         return *this;
       }
 
@@ -71,17 +88,17 @@ namespace Rodin::Variational
         return m_essBdr;
       }
 
-      FormLanguage::List<LocalBilinearFormIntegratorBase>& getLocalBFIs()
+      LocalBilinearFormIntegratorBaseListType& getLocalBFIs()
       {
         return m_lbfis;
       }
 
-      FormLanguage::List<GlobalBilinearFormIntegratorBase>& getGlobalBFIs()
+      GlobalBilinearFormIntegratorBaseListType& getGlobalBFIs()
       {
         return m_gbfis;
       }
 
-      FormLanguage::List<LinearFormIntegratorBase>& getLFIs()
+      LinearFormIntegratorBaseListType& getLFIs()
       {
         return m_lfis;
       }
@@ -96,19 +113,19 @@ namespace Rodin::Variational
         return m_essBdr;
       }
 
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& getLocalBFIs() const
+      const LinearFormIntegratorBaseListType& getLFIs() const
+      {
+        return m_lfis;
+      }
+
+      const LocalBilinearFormIntegratorBaseListType& getLocalBFIs() const
       {
         return m_lbfis;
       }
 
-      const FormLanguage::List<GlobalBilinearFormIntegratorBase>& getGlobalBFIs() const
+      const GlobalBilinearFormIntegratorBaseListType& getGlobalBFIs() const
       {
         return m_gbfis;
-      }
-
-      const FormLanguage::List<LinearFormIntegratorBase>& getLFIs() const
-      {
-        return m_lfis;
       }
 
       virtual ProblemBodyBase* copy() const noexcept override
@@ -117,15 +134,17 @@ namespace Rodin::Variational
       }
 
     private:
-      FormLanguage::List<LocalBilinearFormIntegratorBase> m_lbfis;
-      FormLanguage::List<GlobalBilinearFormIntegratorBase> m_gbfis;
-      FormLanguage::List<LinearFormIntegratorBase> m_lfis;
+      LinearFormIntegratorBaseListType m_lfis;
+      LocalBilinearFormIntegratorBaseListType m_lbfis;
+      GlobalBilinearFormIntegratorBaseListType m_gbfis;
+
       EssentialBoundary m_essBdr;
       PeriodicBoundary  m_periodicBdr;
   };
 
   template <>
-  class ProblemBody<void, void> : public ProblemBodyBase
+  class ProblemBody<void, void>
+    : public ProblemBodyBase
   {
     public:
       using Parent = ProblemBodyBase;
@@ -146,10 +165,18 @@ namespace Rodin::Variational
       }
   };
 
-  template <class OperatorType>
-  class ProblemBody<OperatorType, void> : public ProblemBodyBase
+  template <class Operator>
+  class ProblemBody<Operator, void> : public ProblemBodyBase
   {
     public:
+      using OperatorType = Operator;
+
+      using ScalarType = typename FormLanguage::Traits<OperatorType>::ScalarType;
+
+      using BilinearFormBaseType = BilinearFormBase<OperatorType>;
+
+      using BilinearFormBaseListType = FormLanguage::List<BilinearFormBaseType>;
+
       using Parent = ProblemBodyBase;
 
       ProblemBody() = default;
@@ -164,12 +191,12 @@ namespace Rodin::Variational
           m_bfs(std::move(other.m_bfs))
       {}
 
-      FormLanguage::List<BilinearFormBase<OperatorType>>& getBFs()
+      BilinearFormBaseListType& getBFs()
       {
         return m_bfs;
       }
 
-      const FormLanguage::List<BilinearFormBase<OperatorType>>& getBFs() const
+      const BilinearFormBaseListType& getBFs() const
       {
         return m_bfs;
       }
@@ -180,13 +207,19 @@ namespace Rodin::Variational
       }
 
     private:
-      FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
+      BilinearFormBaseListType m_bfs;
   };
 
-  template <class VectorType>
-  class ProblemBody<void, VectorType> : public ProblemBodyBase
+  template <class Vector>
+  class ProblemBody<void, Vector> : public ProblemBodyBase
   {
     public:
+      using VectorType = Vector;
+
+      using LinearFormBaseType = LinearFormBase<VectorType>;
+
+      using LinearFormBaseListType = FormLanguage::List<LinearFormBaseType>;
+
       using Parent = ProblemBodyBase;
 
       ProblemBody() = default;
@@ -202,13 +235,13 @@ namespace Rodin::Variational
       {}
 
       inline
-      FormLanguage::List<LinearFormBase<VectorType>>& getLFs()
+      LinearFormBaseListType& getLFs()
       {
         return m_lfs;
       }
 
       inline
-      const FormLanguage::List<LinearFormBase<VectorType>>& getLFs() const
+      const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
       }
@@ -219,24 +252,61 @@ namespace Rodin::Variational
       }
 
     private:
-      FormLanguage::List<LinearFormBase<VectorType>> m_lfs;
+      LinearFormBaseListType m_lfs;
   };
 
-  template <class OperatorType, class VectorType>
-  class ProblemBody
-    : public ProblemBodyBase
+  template <class Operator, class Vector>
+  class ProblemBody : public ProblemBodyBase
   {
     public:
+      using VectorType = Vector;
+
+      using OperatorType = Operator;
+
+      using VectorScalarType = typename FormLanguage::Traits<VectorType>::ScalarType;
+
+      using OperatorScalarType = typename FormLanguage::Traits<OperatorType>::ScalarType;
+
+      using LinearFormBaseType = LinearFormBase<VectorType>;
+
+      using BilinearFormBaseType = BilinearFormBase<OperatorType>;
+
+      using LinearFormBaseListType = FormLanguage::List<LinearFormBaseType>;
+
+      using BilinearFormBaseListType = FormLanguage::List<BilinearFormBaseType>;
+
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<VectorScalarType>;
+
+      using LocalBilinearFormIntegratorBaseType = LocalBilinearFormIntegratorBase<OperatorScalarType>;
+
+      using GlobalBilinearFormIntegratorBaseType = GlobalBilinearFormIntegratorBase<OperatorScalarType>;
+
+      using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
+
+      using LocalBilinearFormIntegratorBaseListType = FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
+
+      using GlobalBilinearFormIntegratorBaseListType = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
+
       using Parent = ProblemBodyBase;
 
-      ProblemBody(const LocalBilinearFormIntegratorBase& bfi)
+      ProblemBody(const LocalBilinearFormIntegratorBaseType& bfi)
       {
-        getLocalBFIs().add(bfi);
+        this->getLocalBFIs().add(bfi);
       }
 
-      ProblemBody(const GlobalBilinearFormIntegratorBase& bfi)
+      ProblemBody(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
-        getGlobalBFIs().add(bfi);
+        this->getGlobalBFIs().add(bfi);
+      }
+
+      ProblemBody(const LocalBilinearFormIntegratorBaseListType& bfis)
+      {
+        this->getLocalBFIs().add(bfis);
+      }
+
+      ProblemBody(const GlobalBilinearFormIntegratorBaseListType& bfis)
+      {
+        this->getGlobalBFIs().add(bfis);
       }
 
       ProblemBody(const ProblemBody<OperatorType, void>& pbo)
@@ -268,25 +338,25 @@ namespace Rodin::Variational
       {}
 
       inline
-      FormLanguage::List<LinearFormBase<VectorType>>& getLFs()
+      LinearFormBaseListType& getLFs()
       {
         return m_lfs;
       }
 
       inline
-      FormLanguage::List<BilinearFormBase<OperatorType>>& getBFs()
+      BilinearFormBaseListType& getBFs()
       {
         return m_bfs;
       }
 
       inline
-      const FormLanguage::List<LinearFormBase<VectorType>>& getLFs() const
+      const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
       }
 
       inline
-      const FormLanguage::List<BilinearFormBase<OperatorType>>& getBFs() const
+      const BilinearFormBaseListType& getBFs() const
       {
         return m_bfs;
       }
@@ -297,16 +367,17 @@ namespace Rodin::Variational
       }
 
     private:
-      FormLanguage::List<LinearFormBase<VectorType>> m_lfs;
-      FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
+      LinearFormBaseListType m_lfs;
+      BilinearFormBaseListType m_bfs;
   };
 
-  ProblemBody(const LocalBilinearFormIntegratorBase&)
+  ProblemBody(const LocalBilinearFormIntegratorBase<Real>&)
     -> ProblemBody<void, void>;
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi)
+      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const LinearFormIntegratorBase<RHSNumber>& lfi)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfi);
@@ -314,9 +385,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const LinearFormIntegratorBase& lfi, const LocalBilinearFormIntegratorBase& bfi)
+      const LinearFormIntegratorBase<LHSNumber>& lfi, const LocalBilinearFormIntegratorBase<RHSNumber>& bfi)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfi);
@@ -324,9 +396,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator-(
-      const LocalBilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi)
+      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const LinearFormIntegratorBase<RHSNumber>& lfi)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfi);
@@ -334,9 +407,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator-(
-      const GlobalBilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi)
+      const GlobalBilinearFormIntegratorBase<LHSNumber>& bfi, const LinearFormIntegratorBase<RHSNumber>& lfi)
   {
     ProblemBody<void, void> res;
     res.getGlobalBFIs().add(bfi);
@@ -344,10 +418,11 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator-(
-      const GlobalBilinearFormIntegratorBase& bfi,
-      const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+      const GlobalBilinearFormIntegratorBase<LHSNumber>& bfi,
+      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& lfis)
   {
     ProblemBody<void, void> res;
     res.getGlobalBFIs().add(bfi);
@@ -355,9 +430,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator-(
-      const LinearFormIntegratorBase& lfi, const LocalBilinearFormIntegratorBase& bfi)
+      const LinearFormIntegratorBase<LHSNumber>& lfi, const LocalBilinearFormIntegratorBase<RHSNumber>& bfi)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(UnaryMinus(bfi));
@@ -365,10 +441,11 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis,
-      const LinearFormIntegratorBase& lfi)
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis,
+      const LinearFormIntegratorBase<RHSNumber>& lfi)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfis);
@@ -376,10 +453,11 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& lbfis,
-      const GlobalBilinearFormIntegratorBase& gbfi)
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lbfis,
+      const GlobalBilinearFormIntegratorBase<RHSNumber>& gbfi)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(lbfis);
@@ -387,10 +465,11 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& lbfis,
-      const FormLanguage::List<GlobalBilinearFormIntegratorBase>& gbfis)
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lbfis,
+      const FormLanguage::List<GlobalBilinearFormIntegratorBase<RHSNumber>>& gbfis)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(lbfis);
@@ -398,10 +477,11 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase& lbfi,
-      const FormLanguage::List<GlobalBilinearFormIntegratorBase>& gbfis)
+      const LocalBilinearFormIntegratorBase<LHSNumber>& lbfi,
+      const FormLanguage::List<GlobalBilinearFormIntegratorBase<RHSNumber>>& gbfis)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(lbfi);
@@ -409,10 +489,11 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase& lbfi,
-      const GlobalBilinearFormIntegratorBase& gbfi)
+      const LocalBilinearFormIntegratorBase<LHSNumber>& lbfi,
+      const GlobalBilinearFormIntegratorBase<RHSNumber>& gbfi)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(lbfi);
@@ -420,10 +501,11 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator-(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis,
-      const LinearFormIntegratorBase& lfi)
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis,
+      const LinearFormIntegratorBase<RHSNumber>& lfi)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfis);
@@ -431,9 +513,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase& bfi, const DirichletBCBase& dbc)
+      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const DirichletBCBase& dbc)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfi);
@@ -441,9 +524,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase& bfi, const FormLanguage::List<DirichletBCBase>& dbcs)
+      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const FormLanguage::List<DirichletBCBase>& dbcs)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfi);
@@ -451,9 +535,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber, class RHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase& bfi, const PeriodicBCBase& pbc)
+      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const PeriodicBCBase& pbc)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfi);
@@ -461,9 +546,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase& bfi, const FormLanguage::List<PeriodicBCBase>& pbcs)
+      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const FormLanguage::List<PeriodicBCBase>& pbcs)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfi);
@@ -471,10 +557,10 @@ namespace Rodin::Variational
     return res;
   }
 
-
+  template <class LHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis, const DirichletBCBase& dbc)
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis, const DirichletBCBase& dbc)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfis);
@@ -482,9 +568,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis, const FormLanguage::List<DirichletBCBase>& dbcs)
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis, const FormLanguage::List<DirichletBCBase>& dbcs)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfis);
@@ -492,9 +579,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis, const PeriodicBCBase& pbc)
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis, const PeriodicBCBase& pbc)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfis);
@@ -502,9 +590,10 @@ namespace Rodin::Variational
     return res;
   }
 
+  template <class LHSNumber>
   inline
   ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis, const FormLanguage::List<PeriodicBCBase>& pbcs)
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis, const FormLanguage::List<PeriodicBCBase>& pbcs)
   {
     ProblemBody<void, void> res;
     res.getLocalBFIs().add(bfis);
@@ -512,40 +601,84 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class OperatorType, class VectorType>
+  template <class RHSNumber>
+  inline
+  ProblemBody<void, void> operator+(
+      const ProblemBody<void, void>& pb,
+      const LinearFormIntegratorBase<RHSNumber>& lfi)
+  {
+    ProblemBody<void, void> res(pb);
+    res.getLFIs().add(lfi);
+    return res;
+  }
+
+  template <class RHSNumber>
+  inline
+  ProblemBody<void, void> operator+(
+      const ProblemBody<void, void>& pb,
+      const LocalBilinearFormIntegratorBase<RHSNumber>& lbfi)
+  {
+    ProblemBody<void, void> res(pb);
+    res.getLocalBFIs().add(lbfi);
+    return res;
+  }
+
+  template <class RHSNumber>
+  inline
+  ProblemBody<void, void> operator-(
+      const ProblemBody<void, void>& pb,
+      const LocalBilinearFormIntegratorBase<RHSNumber>& lbfi)
+  {
+    ProblemBody<void, void> res(pb);
+    res.getLocalBFIs().add(UnaryMinus(lbfi));
+    return res;
+  }
+
+  template <class RHSNumber>
+  inline
+  ProblemBody<void, void> operator+(
+      const ProblemBody<void, void>& pb,
+      const GlobalBilinearFormIntegratorBase<RHSNumber>& gbfi)
+  {
+    ProblemBody<void, void> res(pb);
+    res.getGlobalBFIs().add(gbfi);
+    return res;
+  }
+
+  template <class OperatorType, class VectorType, class RHSNumber>
   ProblemBody<OperatorType, VectorType> operator+(
       const ProblemBody<OperatorType, VectorType>& pb,
-      const LinearFormIntegratorBase& lfi)
+      const LinearFormIntegratorBase<RHSNumber>& lfi)
   {
     ProblemBody<OperatorType, VectorType> res(pb);
     res.getLFIs().add(lfi);
     return res;
   }
 
-  template <class OperatorType, class VectorType>
+  template <class OperatorType, class VectorType, class RHSNumber>
   ProblemBody<OperatorType, VectorType> operator+(
       const ProblemBody<OperatorType, VectorType>& pb,
-      const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& lfis)
   {
     ProblemBody<OperatorType, VectorType> res(pb);
     res.getLFIs().add(lfis);
     return res;
   }
 
-  template <class OperatorType, class VectorType>
+  template <class OperatorType, class VectorType, class RHSNumber>
   ProblemBody<OperatorType, VectorType> operator-(
       const ProblemBody<OperatorType, VectorType>& pb,
-      const LinearFormIntegratorBase& lfi)
+      const LinearFormIntegratorBase<RHSNumber>& lfi)
   {
     ProblemBody<OperatorType, VectorType> res(pb);
     res.getLFIs().add(UnaryMinus(lfi));
     return res;
   }
 
-  template <class OperatorType, class VectorType>
+  template <class OperatorType, class VectorType, class RHSNumber>
   ProblemBody<OperatorType, VectorType> operator-(
       const ProblemBody<OperatorType, VectorType>& pb,
-      const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& lfis)
   {
     ProblemBody<OperatorType, VectorType> res(pb);
     res.getLFIs().add(UnaryMinus(lfis));
@@ -598,9 +731,9 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class OperatorType>
+  template <class LHSNumber, class OperatorType>
   ProblemBody<OperatorType, void> operator+(
-      const LocalBilinearFormIntegratorBase& bfi, const BilinearFormBase<OperatorType>& bf)
+      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const BilinearFormBase<OperatorType>& bf)
   {
     ProblemBody<OperatorType, void> res;
     res.getLocalBFIs().add(bfi);
@@ -608,9 +741,9 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class OperatorType>
+  template <class OperatorType, class Number>
   ProblemBody<OperatorType, void> operator-(
-      const BilinearFormBase<OperatorType>& bf, const LinearFormIntegratorBase& lfi)
+      const BilinearFormBase<OperatorType>& bf, const LinearFormIntegratorBase<Number>& lfi)
   {
     ProblemBody<OperatorType, void> res;
     res.getBFs().add(bf);
@@ -618,10 +751,10 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class OperatorType>
+  template <class OperatorType, class Number>
   ProblemBody<OperatorType, void> operator-(
       const FormLanguage::List<BilinearFormBase<OperatorType>>& bfs,
-      const LinearFormIntegratorBase& lfi)
+      const LinearFormIntegratorBase<Number>& lfi)
   {
     ProblemBody<OperatorType, void> res;
     res.getBFs().add(bfs);
@@ -629,9 +762,9 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class OperatorType>
+  template <class LHSNumber, class OperatorType>
   ProblemBody<OperatorType, void> operator+(
-      const LocalBilinearFormIntegratorBase& bfi,
+      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi,
       const FormLanguage::List<BilinearFormBase<OperatorType>>& bfs)
   {
     ProblemBody<OperatorType, void> res;

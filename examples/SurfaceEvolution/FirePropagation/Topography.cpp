@@ -15,14 +15,14 @@ const char* meshfile = "../resources/examples/SurfaceEvolution/FirePropagation/G
 
 struct Octave
 {
-  Scalar elevation;
-  Scalar period;
+  Real elevation;
+  Real period;
 };
 
 int main(int, char**)
 {
   // constexpr int width = 5e4, height = 5e4; // meters
-  constexpr Scalar flatness = 4.0;
+  constexpr Real flatness = 4.0;
 
   std::vector<Octave> octaves = {
    {500.0, 500},
@@ -39,33 +39,33 @@ int main(int, char**)
   FastNoiseLite gen(rand());
   gen.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
 
-  auto noise = [&](Scalar x, Scalar y) { return gen.GetNoise(x, y) / 2.0 + 0.5; };
+  auto noise = [&](Real x, Real y) { return gen.GetNoise(x, y) / 2.0 + 0.5; };
 
-  Scalar avgElementVolume = 0;
+  Real avgElementVolume = 0;
   for (size_t i = 0; i < topography.getCellCount(); i++)
     avgElementVolume += topography.getCell(i)->getMeasure();
   avgElementVolume /= topography.getCellCount();
 
-  Scalar maxElevation =
+  Real maxElevation =
     std::max_element(octaves.begin(), octaves.end(),
         [](auto&& lhs, auto& rhs) { return lhs.elevation < rhs.elevation; })->elevation;
 
-  Scalar totalElevation = 0.0;
+  Real totalElevation = 0.0;
   for (const auto& octave : octaves)
    totalElevation += octave.elevation;
 
   auto elevation =
     [&](const Point& p)
     {
-      Scalar nx = p.x(), ny = p.y();
-      Scalar e = 0.0;
+      Real nx = p.x(), ny = p.y();
+      Real e = 0.0;
       for (const auto& octave : octaves)
       {
-       Scalar f = avgElementVolume / (octave.period * octave.period);
+       Real f = avgElementVolume / (octave.period * octave.period);
        e += octave.elevation * noise(f * nx, f * ny);
       }
       e /= totalElevation;
-      assert(e < 1.0 + std::numeric_limits<Scalar>::epsilon());
+      assert(e < 1.0 + std::numeric_limits<Real>::epsilon());
       return maxElevation * std::pow(e, flatness);
     };
 

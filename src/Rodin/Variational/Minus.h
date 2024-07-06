@@ -17,7 +17,7 @@ namespace Rodin::Variational
   auto
   operator-(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
-    return Sum(lhs, UnaryMinus(ScalarFunction(rhs)));
+    return Sum(lhs, UnaryMinus(RealFunction(rhs)));
   }
 
   template <class Number, class RHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
@@ -26,7 +26,7 @@ namespace Rodin::Variational
   auto
   operator-(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return Sum(UnaryMinus(ScalarFunction(lhs)), rhs);
+    return Sum(RealFunction(lhs), UnaryMinus(rhs));
   }
 
   template <class LHSDerived, class RHSDerived>
@@ -47,25 +47,49 @@ namespace Rodin::Variational
     return Sum(lhs, UnaryMinus(rhs));
   }
 
-  FormLanguage::List<LocalBilinearFormIntegratorBase>
+  template <class LHSNumber, class RHSNumber>
+  inline
+  constexpr
+  auto
   operator-(
-      const LocalBilinearFormIntegratorBase& lhs,
-      const LocalBilinearFormIntegratorBase& rhs);
+      const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
+      const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
+  {
+    return Sum(lhs, UnaryMinus(rhs));
+  }
 
-  FormLanguage::List<LocalBilinearFormIntegratorBase>
+  template <class LHSNumber, class RHSNumber>
+  inline
+  constexpr
+  auto
   operator-(
-      const LocalBilinearFormIntegratorBase& lhs,
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& rhs);
+      const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
+  {
+    return Sum(lhs, UnaryMinus(rhs));
+  }
 
-  FormLanguage::List<LocalBilinearFormIntegratorBase>
+  template <class LHSNumber, class RHSNumber>
+  inline
+  constexpr
+  auto
   operator-(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& lhs,
-      const LocalBilinearFormIntegratorBase& rhs);
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
+      const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
+  {
+    return Sum(lhs, UnaryMinus(rhs));
+  }
 
-  FormLanguage::List<LocalBilinearFormIntegratorBase>
+  template <class LHSNumber, class RHSNumber>
+  inline
+  constexpr
+  auto
   operator-(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& lhs,
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& rhs);
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
+  {
+    return Sum(lhs, UnaryMinus(rhs));
+  }
 }
 
 #endif
