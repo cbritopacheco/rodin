@@ -2,15 +2,15 @@
 
 namespace Rodin::Variational
 {
-  const Geometry::GeometryIndexed<Math::PointMatrix> ScalarP0Element::s_nodes =
+  const Geometry::GeometryIndexed<Math::PointMatrix> RealP0Element::s_nodes =
   {
     { Geometry::Polytope::Type::Point,
       Math::PointMatrix{{0}} },
     { Geometry::Polytope::Type::Segment,
       Math::PointMatrix{{0.5}} },
     { Geometry::Polytope::Type::Triangle,
-      Math::PointMatrix{{ Scalar(1) / Scalar(3) },
-                        { Scalar(1) / Scalar(3) }}},
+      Math::PointMatrix{{ Real(1) / Real(3) },
+                        { Real(1) / Real(3) }}},
     { Geometry::Polytope::Type::Quadrilateral,
       Math::PointMatrix{{ 0.5 },
                         { 0.5 }} },
@@ -20,8 +20,8 @@ namespace Rodin::Variational
                         { 0.25 }} }
   };
 
-  const Geometry::GeometryIndexed<ScalarP0Element::BasisFunction>
-  ScalarP0Element::s_basis =
+  const Geometry::GeometryIndexed<RealP0Element::BasisFunction>
+  RealP0Element::s_basis =
   {
     { Geometry::Polytope::Type::Point, Geometry::Polytope::Type::Point },
     { Geometry::Polytope::Type::Segment, Geometry::Polytope::Type::Segment },
@@ -30,8 +30,8 @@ namespace Rodin::Variational
     { Geometry::Polytope::Type::Tetrahedron, Geometry::Polytope::Type::Tetrahedron }
   };
 
-  const Geometry::GeometryIndexed<ScalarP0Element::LinearForm>
-  ScalarP0Element::s_ls =
+  const Geometry::GeometryIndexed<RealP0Element::LinearForm>
+  RealP0Element::s_ls =
   {
     { Geometry::Polytope::Type::Point, Geometry::Polytope::Type::Point },
     { Geometry::Polytope::Type::Segment, Geometry::Polytope::Type::Segment },
@@ -40,8 +40,8 @@ namespace Rodin::Variational
     { Geometry::Polytope::Type::Tetrahedron, Geometry::Polytope::Type::Tetrahedron }
   };
 
-  const Geometry::GeometryIndexed<ScalarP0Element::GradientFunction>
-  ScalarP0Element::s_gradient =
+  const Geometry::GeometryIndexed<RealP0Element::GradientFunction>
+  RealP0Element::s_gradient =
   {
     { Geometry::Polytope::Type::Point, Geometry::Polytope::Type::Point },
     { Geometry::Polytope::Type::Segment, Geometry::Polytope::Type::Segment },
@@ -67,12 +67,12 @@ namespace Rodin::Variational
   //         {
   //           case Geometry::Polytope::Type::Point:
   //           {
-  //             res[vdim][g] = Math::SpatialMatrix::Zero(1, vdim);
+  //             res[vdim][g] = Math::SpatialMatrix<Real>::Zero(1, vdim);
   //             break;
   //           }
   //           default:
   //           {
-  //             auto sfe = ScalarP0Element(g);
+  //             auto sfe = RealP0Element(g);
   //             const size_t n = Geometry::Polytope::getVertexCount(g);
   //             const size_t d = Geometry::Polytope::getGeometryDimension(g);
   //             res[vdim][g].resize(d, n * vdim);

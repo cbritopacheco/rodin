@@ -66,6 +66,10 @@ namespace Rodin::Geometry
         return m_pdim;
       }
 
+      virtual size_t getOrder() const = 0;
+
+      virtual size_t getJacobianOrder() const = 0;
+
       /**
        * @brief Computes the physical coordinates of the given reference point.
        *
@@ -79,14 +83,14 @@ namespace Rodin::Geometry
        * @returns A vector of size @f$ s @f$ where @f$ s @f$ represents the
        * physical dimension.
        */
-      Math::SpatialVector transform(const Math::SpatialVector& rc) const
+      Math::SpatialVector<Real> transform(const Math::SpatialVector<Real>& rc) const
       {
-        Math::SpatialVector res;
+        Math::SpatialVector<Real> res;
         transform(rc, res);
         return res;
       }
 
-      virtual void transform(const Math::SpatialVector& rc, Math::SpatialVector&) const = 0;
+      virtual void transform(const Math::SpatialVector<Real>& rc, Math::SpatialVector<Real>&) const = 0;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation.
@@ -105,14 +109,14 @@ namespace Rodin::Geometry
        * represents the reference dimension and @f$ s @f$ represents the
        * physical dimension.
        */
-      Math::SpatialMatrix jacobian(const Math::SpatialVector& rc) const
+      Math::SpatialMatrix<Real> jacobian(const Math::SpatialVector<Real>& rc) const
       {
-        Math::SpatialMatrix res;
+        Math::SpatialMatrix<Real> res;
         jacobian(rc, res);
         return res;
       }
 
-      virtual void jacobian(const Math::SpatialVector& rc, Math::SpatialMatrix& jacobian) const = 0;
+      virtual void jacobian(const Math::SpatialVector<Real>& rc, Math::SpatialMatrix<Real>& jacobian) const = 0;
 
       /**
        * @brief Computes the reference coordinates of the given physical point.
@@ -125,14 +129,14 @@ namespace Rodin::Geometry
        *
        * @param[in] pc Physical coordinates of the point.
        */
-      Math::SpatialVector inverse(const Math::SpatialVector& pc) const
+      Math::SpatialVector<Real> inverse(const Math::SpatialVector<Real>& pc) const
       {
-        Math::SpatialVector res;
+        Math::SpatialVector<Real> res;
         inverse(pc, res);
         return res;
       }
 
-      virtual void inverse(const Math::SpatialVector& pc, Math::SpatialVector& rc) const;
+      virtual void inverse(const Math::SpatialVector<Real>& pc, Math::SpatialVector<Real>& rc) const;
 
     private:
       const size_t m_rdim;

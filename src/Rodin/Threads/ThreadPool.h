@@ -14,9 +14,15 @@ namespace Rodin::Threads
       template <class T>
       using MultiFuture = BS::multi_future<T>;
 
-      ThreadPool(size_t numThreads)
-        : m_pool(numThreads)
+      ThreadPool(size_t threadCount)
+        : m_pool(threadCount)
       {}
+
+      ThreadPool& reset(size_t threadCount)
+      {
+        m_pool.reset(threadCount);
+        return *this;
+      }
 
       template <class ... Args>
       auto submit(Args... args)

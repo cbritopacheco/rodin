@@ -14,11 +14,11 @@ using namespace Rodin::Variational;
 int main(int, char**)
 {
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
 
   P1 fes(mesh, 2);
   GridFunction gf(fes);
-  gf = [](const Geometry::Point& p) { return Math::Vector{{p.x(), p.y()}}; };
+  gf = [](const Geometry::Point& p) { return Math::Vector<Real>{{p.x(), p.y()}}; };
 
   mesh.save("function.mesh");
   gf.save("function.gf");

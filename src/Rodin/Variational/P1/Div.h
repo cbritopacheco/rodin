@@ -14,13 +14,22 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class NestedDerived, class ... Ps, Variational::ShapeFunctionSpaceType SpaceType>
+  template <class Number, class Mesh>
+  struct Traits<Variational::Div<Variational::GridFunction<Variational::P1<Math::Vector<Number>, Mesh>>>>
+  {
+    using FESType = Variational::P1<Math::Vector<Number>, Mesh>;
+    using OperandType = Variational::GridFunction<Variational::P1<Math::Vector<Number>, Mesh>>;
+  };
+
+  template <class NestedDerived, class Number, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Div<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector, Ps...>, SpaceType>>>
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Number>, Mesh>, Space>>>
   {
-    using FES = Variational::P1<Math::Vector, Ps...>;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using FESType = Variational::P1<Math::Vector<Number>, Mesh>;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    using OperandType =
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Number>, Mesh>, Space>;
   };
 }
 
@@ -30,25 +39,27 @@ namespace Rodin::Variational
    * @ingroup DivSpecializations
    * @brief Divient of a P1 GridFunction
    */
-  template <class Context, class Mesh>
-  class Div<GridFunction<P1<Math::Vector, Context, Mesh>>> final
-    : public DivBase<Div<GridFunction<P1<Math::Vector, Context, Mesh>>>, GridFunction<P1<Math::Vector, Context, Mesh>>>
+  template <class Number, class Mesh>
+  class Div<GridFunction<P1<Math::Vector<Number>, Mesh>>> final
+    : public DivBase<Div<GridFunction<P1<Math::Vector<Number>, Mesh>>>, GridFunction<P1<Math::Vector<Number>, Mesh>>>
   {
     public:
-      using FES = P1<Math::Vector, Context, Mesh>;
+      using ScalarType = Number;
+
+      using FESType = Variational::P1<Math::Vector<ScalarType>, Mesh>;
 
       /// Operand type
-      using Operand = GridFunction<FES>;
+      using OperandType = GridFunction<FESType>;
 
       /// Parent class
-      using Parent = DivBase<Div<Operand>, Operand>;
+      using Parent = DivBase<Div<OperandType>, OperandType>;
 
       /**
        * @brief Constructs the Divient of an @f$ \mathbb{P}^1 @f$ function
        * @f$ u @f$.
        * @param[in] u P1 GridFunction
        */
-      Div(const Operand& u)
+      Div(const OperandType& u)
         : Parent(u)
       {}
 
@@ -66,14 +77,14 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::Vector& out, const Geometry::Point& p) const
+      void interpolate(Math::Vector<Real>& out, const Geometry::Point& p) const
       {
-        Math::SpatialVector tmp;
+        Math::SpatialVector<Real> tmp;
         interpolate(tmp, p);
         out = std::move(tmp);
       }
 
-      void interpolate(Scalar& out, const Geometry::Point& p) const
+      void interpolate(Real& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -89,7 +100,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+            const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -114,7 +125,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+                  const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;
@@ -134,7 +145,7 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialMatrix jacobian(vdim, d);
+          Math::SpatialMatrix<Real> jacobian(vdim, d);
           out = 0;
           for (size_t local = 0; local < fe.getCount(); local++)
           {
@@ -160,22 +171,23 @@ namespace Rodin::Variational
   /**
    * @ingroup DivSpecializations
    */
-  template <class NestedDerived, ShapeFunctionSpaceType SpaceType, class ... Ts>
-  class Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, SpaceType>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, SpaceType>>>
+  template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
+  class Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>> final
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Real>, Mesh>, Space>>>
   {
     public:
-      using FES = P1<Math::Vector, Ts...>;
-      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+      using FESType = P1<Math::Vector<Real>, Mesh>;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using Operand = ShapeFunction<NestedDerived, FES, Space>;
-      using Parent = ShapeFunctionBase<Div<ShapeFunction<NestedDerived, FES, Space>>, FES, Space>;
+      using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
+
+      using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
 
       /**
        * @brief Constructs Div object
        * @param[in] u ShapeFunction to be differentiated
        */
-      Div(const Operand& u)
+      Div(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u)
       {}
@@ -192,7 +204,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -219,16 +231,27 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      const Geometry::Point& getPoint() const
       {
+        return m_p.value().get();
+      }
+
+      Div& setPoint(const Geometry::Point& p)
+      {
+        m_p = p;
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        const auto& p = m_p.value().get();
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return TensorBasis(fe.getCount(),
-            [&](size_t local) -> Scalar
-            { return (fe.getJacobian(local)(rc) * p.getJacobianInverse()).trace(); });
+        const auto& rc = p.getReferenceCoordinates();
+        return (fe.getJacobian(local)(rc) * p.getJacobianInverse()).trace();
       }
 
       inline
@@ -244,12 +267,14 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Operand> m_u;
+      std::reference_wrapper<const OperandType> m_u;
+
+      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
   };
 
-  template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  Div(const ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, Space>&)
-    -> Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, Space>>;
+  template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
+  Div(const ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>&)
+    -> Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>>;
 }
 
 #endif

@@ -13,8 +13,6 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
 
-#include "TensorBasis.h"
-
 #include "ForwardDecls.h"
 
 namespace Rodin::Variational

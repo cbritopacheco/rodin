@@ -1,6 +1,8 @@
 #ifndef RODIN_VARIATIONAL_FACENORMAL_H
 #define RODIN_VARIATIONAL_FACENORMAL_H
 
+#include <Eigen/Geometry>
+
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
@@ -45,16 +47,17 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::SpatialVector getValue(const Geometry::Point& p) const
+      Math::SpatialVector<Real> getValue(const Geometry::Point& p) const
       {
-        Math::SpatialVector res;
+        Math::SpatialVector<Real> res;
         getValue(res, p);
         return res;
       }
 
-      void getValue(Math::SpatialVector& res, const Geometry::Point& p) const
+      void getValue(Math::SpatialVector<Real>& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
+        const auto& vs = p.getPolytope().getVertices();
         const auto& d = polytope.getDimension();
         const auto& i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
@@ -67,10 +70,26 @@ namespace Rodin::Variational
         }
         else if (jacobian.rows() == 3)
         {
-          res <<
-            jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1),
-            jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1),
-            jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
+          if (jacobian.cols() == 1)
+          {
+            const Index v1 = vs[0];
+            const Index v2 = vs[1];
+            Eigen::Vector3<Real> a =
+              mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
+            Eigen::Vector3<Real> n;
+            n << jacobian(1, 0), -jacobian(0, 0), jacobian(2, 0);
+            n = n.cross(a);
+            n.stableNormalize();
+            res = n.cross(a) + n * (n.dot(a));
+            return;
+          }
+          else if (jacobian.cols() == 2)
+          {
+            res <<
+              jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1),
+              jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1),
+              jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
+          }
         }
         else
         {

@@ -32,7 +32,10 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::FunctionBase<Derived>>
   {
     using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
+
     using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
+
+    using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 }
 
@@ -56,7 +59,7 @@ namespace Rodin::Variational
     template <typename T, typename... Args>
     struct HasGetValueMethod<T, Args&...>
     {
-      template <typename U, typename = decltype(std::declval<U>().myMethodRef(std::declval<Args&>()...))>
+      template <typename U, typename = decltype(std::declval<U>().getValue(std::declval<Args&>()...))>
       static std::true_type Test(int);
 
       template <typename U>
@@ -64,6 +67,20 @@ namespace Rodin::Variational
 
       using Type = decltype(Test<T>(0));
       static constexpr bool Value = Type::value;
+    };
+
+    template <typename T, class... Args>
+    struct HasGetValueMethodR
+    {
+        template<typename U, typename = decltype(std::declval<U>().getValue(std::declval<Args>()...))>
+        static auto Test(int) ->
+          decltype(std::is_same<typename std::invoke_result<decltype(&U::getValue)(U, Args...)>::type, T>::value, std::true_type{});
+
+        template<typename U>
+        static std::false_type Test(...);
+
+        using Type = decltype(Test<T>(0));
+        static constexpr bool Value = Type::value;
     };
   }
 
@@ -154,15 +171,15 @@ namespace Rodin::Variational
         {
           return RangeType::Integer;
         }
-        else if constexpr (std::is_same_v<R, Scalar>)
+        else if constexpr (std::is_same_v<R, Real>)
         {
-          return RangeType::Scalar;
+          return RangeType::Real;
         }
-        else if constexpr (std::is_same_v<R, Math::Vector>)
+        else if constexpr (std::is_same_v<R, Math::Vector<Real>>)
         {
           return RangeType::Vector;
         }
-        else if constexpr (std::is_same_v<R, Math::Matrix>)
+        else if constexpr (std::is_same_v<R, Math::Matrix<Real>>)
         {
           return RangeType::Matrix;
         }
@@ -186,9 +203,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector&>::Value)
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector<Real>&, const Geometry::Point&>::Value)
         {
           return static_cast<const Derived&>(*this).getValue(res, p);
         }
@@ -200,9 +217,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix& res, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
       {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix&>::Value)
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix<Real>&, const Geometry::Point&>::Value)
         {
           return static_cast<const Derived&>(*this).getValue(res, p);
         }
@@ -213,13 +230,25 @@ namespace Rodin::Variational
       }
 
       inline
-      void operator()(Math::Vector& res, const Geometry::Point& p) const
+      auto coeff(size_t i, size_t j) const
+      {
+        return Component(*this, i, j);
+      }
+
+      inline
+      auto coeff(size_t i) const
+      {
+        return Component(*this, i);
+      }
+
+      inline
+      void operator()(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
         return getValue(res, p);
       }
 
       inline
-      void operator()(Math::Matrix& res, const Geometry::Point& p) const
+      void operator()(Math::Matrix<Real>& res, const Geometry::Point& p) const
       {
         return getValue(res, p);
       }
@@ -249,8 +278,15 @@ namespace Rodin::Variational
       constexpr
       Derived& traceOf(Geometry::Attribute attr)
       {
-        m_traceDomain = FlatSet<Geometry::Attribute>{attr};
-        return static_cast<Derived&>(*this);
+        return traceOf(FlatSet<Geometry::Attribute>{ attr });
+      }
+
+      template <class A1, class A2, class ... As>
+      inline
+      constexpr
+      Derived& traceOf(A1 a1, A2 a2, As ... as)
+      {
+        return traceOf(FlatSet<Geometry::Attribute>{ a1, a2, as... });
       }
 
       inline

@@ -34,17 +34,17 @@ namespace Rodin::Plot::Backend::Bases
 
       BaseAxes(
           Artist::Figure& fig,
-          const Magnum::Math::Vector2<Integer>& bottomLeft,
-          const Magnum::Math::Vector2<Integer>& size,
+          const Magnum::Math::Vector<Real>2<Integer>& bottomLeft,
+          const Magnum::Math::Vector<Real>2<Integer>& size,
           Boolean frameEnabled);
 
       virtual ~BaseAxes() = default;
 
       virtual void drawContent() = 0;
 
-      const Magnum::Math::Vector2<Integer>& getSize() const;
+      const Magnum::Math::Vector<Real>2<Integer>& getSize() const;
 
-      const Magnum::Math::Vector2<Integer>& getBottomLeft() const;
+      const Magnum::Math::Vector<Real>2<Integer>& getBottomLeft() const;
 
       Artist::Figure& getFigure();
       const Artist::Figure& getFigure() const;
@@ -69,8 +69,8 @@ namespace Rodin::Plot::Backend::Bases
     private:
       Artist::Figure&     m_figure;
 
-      Magnum::Math::Vector2<Integer> m_bottomLeft;
-      Magnum::Math::Vector2<Integer> m_size;
+      Magnum::Math::Vector<Real>2<Integer> m_bottomLeft;
+      Magnum::Math::Vector<Real>2<Integer> m_size;
 
       Boolean     m_frameEnabled;
       XLimits     m_xlim;

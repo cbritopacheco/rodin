@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 3.16)
+
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0076 NEW)
 
@@ -34,6 +35,7 @@ option(RODIN_LTO                    "Compile with link time optimization"       
 option(RODIN_FEATURE_SUMMARY        "Print Rodin feature summary"               ON)
 option(RODIN_THREAD_SAFE            "Enforces thread-safety."                   OFF)
 option(RODIN_MULTITHREADED          "Utilizes multithreading capabalities."     OFF)
+option(BUILD_SHARED_LIBS            "Build using shared libraries"              OFF)
 
 if (RODIN_MULTITHREADED)
   set(RODIN_THREAD_SAFE ON CACHE BOOL "" FORCE)
@@ -54,7 +56,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -72,6 +74,11 @@ set(RODIN_INSTALL_INCLUDE_PATH include)
 # ---- Set compile options for all the submodules ----------------------------
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
+rodin_add_compile_options(LANG CXX C OPTIONS -Wno-error=old-style-cast -Wno-error=double-promotion)
+
+add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
+add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)
+
 
 if (RODIN_LTO)
   rodin_add_compile_options(LANG CXX C OPTIONS -flto)
@@ -96,15 +103,15 @@ if (RODIN_BUILD_SRC)
   endif()
 
   # ---- Boost ----
+  add_compile_definitions(PRIVATE BOOST_ASIO_HAS_STD_INVOKE_RESULT=1)
   # set(Boost_USE_STATIC_LIBS        OFF)
   # set(Boost_USE_STATIC_RUNTIME     OFF)
 
   if (RODIN_USE_MPI)
-    find_package(MPI REQUIRED)
-    find_package(Boost 1.65 REQUIRED COMPONENTS mpi serialization)
+    find_package(Boost 1.74 REQUIRED COMPONENTS mpi serialization)
   endif()
 
-  find_package(Boost 1.65 REQUIRED
+  find_package(Boost 1.74 REQUIRED
     COMPONENTS
     system
     filesystem)
@@ -127,6 +134,9 @@ if (RODIN_BUILD_SRC)
     HINTS
     "${PROJECT_BINARY_DIR}/third-party/eigen"
     "${PROJECT_BINARY_DIR}/third-party/eigen/cmake")
+
+  # ---- Basix ------
+  add_subdirectory(third-party/basix/cpp EXCLUDE_FROM_ALL)
 
   # ---- Spectra ----
   message(STATUS "Configuring Spectra...")

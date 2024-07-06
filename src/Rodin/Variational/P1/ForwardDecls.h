@@ -13,7 +13,6 @@
 
 namespace Rodin::Variational
 {
-
   /**
    * @brief Degree 1 Lagrange element
    * @tparam Range Range value type
@@ -44,25 +43,27 @@ namespace Rodin::Variational
    *
    * @see P1Specializations
    */
-  template <class Range, class Context, class Mesh>
+  template <class Range, class Mesh>
   class P1;
 
   /**
    * @ingroup GridFunctionSpecializations
    * @brief GridFunction on the P1 finite element space.
    */
-  template <class ... Ts>
-  class GridFunction<P1<Ts...>>;
+  template <class Range, class Mesh>
+  class GridFunction<P1<Range, Mesh>>;
 
   /**
-   * @brief Alias for P1Element<Scalar>
+   * @brief Alias for P1Element<Real>
    */
-  using ScalarP1Element = P1Element<Scalar>;
+  using RealP1Element = P1Element<Real>;
+
+  using ComplexP1Element = P1Element<Complex>;
 
   /**
-   * @brief Alias for P1Element<Math::Vector>
+   * @brief Alias for P1Element<Math::Vector<Real>>
    */
-  using VectorP1Element = P1Element<Math::Vector>;
+  using VectorP1Element = P1Element<Math::Vector<Real>>;
 }
 
 #endif

@@ -21,7 +21,7 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD for SimplicialLLT
    */
-  SimplicialLLT() -> SimplicialLLT<Math::SparseMatrix, Math::Vector>;
+  SimplicialLLT() -> SimplicialLLT<Math::SparseMatrix<Real>, Math::Vector<Real>>;
 
   /**
    * @defgroup SimplicialLLTSpecializations SimplicialLLT Template Specializations
@@ -32,18 +32,18 @@ namespace Rodin::Solver
   /**
    * @ingroup SimplicialLLTSpecializations
    * @brief A direct sparse LLT Cholesky factorizations for use with
-   * Math::SparseMatrix and Math::Vector.
+   * Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
   template <>
-  class SimplicialLLT<Math::SparseMatrix, Math::Vector> final
-    : public SolverBase<Math::SparseMatrix, Math::Vector>
+  class SimplicialLLT<Math::SparseMatrix<Real>, Math::Vector<Real>> final
+    : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::SparseMatrix;
+      using OperatorType = Math::SparseMatrix<Real>;
 
       /// Type of vector
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Real>;
 
       /**
        * @brief Constructs the SimplicialLLT object with default parameters.
@@ -65,7 +65,7 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::SimplicialLLT<Math::SparseMatrix> m_solver;
+      Eigen::SimplicialLLT<Math::SparseMatrix<Real>> m_solver;
   };
 
 }

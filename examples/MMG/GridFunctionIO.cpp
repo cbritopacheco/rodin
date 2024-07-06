@@ -18,11 +18,11 @@ int main(int, char**)
 {
   const size_t n = 16;
   MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
 
   P1 fes(mesh, 2);
   GridFunction gf(fes);
-  gf = [](const Geometry::Point& p) { return Math::Vector{{p.x(), p.y()}}; };
+  gf = [](const Geometry::Point& p) { return Math::Vector<Real>{{p.x(), p.y()}}; };
 
   gf.save("MMG.medit.sol", IO::FileFormat::MEDIT);
   mesh.save("MMG.medit.mesh", IO::FileFormat::MEDIT);

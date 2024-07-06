@@ -75,11 +75,11 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector&, const Geometry::Point&) const = delete;
+      void getValue(Math::Vector<Real>&, const Geometry::Point&) const = delete;
 
       inline
       constexpr
-      void getValue(Math::Matrix&, const Geometry::Point&) const = delete;
+      void getValue(Math::Matrix<Real>&, const Geometry::Point&) const = delete;
 
       inline
       constexpr

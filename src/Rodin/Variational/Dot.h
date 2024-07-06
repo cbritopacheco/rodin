@@ -17,18 +17,83 @@
 
 #include "Function.h"
 #include "ShapeFunction.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::FormLanguage
 {
-  template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  template <class LHSDerived, class RHSDerived>
   struct Traits<
     Variational::Dot<
       Variational::FunctionBase<LHSDerived>,
-      Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
+      Variational::FunctionBase<RHSDerived>>>
   {
-    using FES = FESType;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    using LHSType = Variational::FunctionBase<LHSDerived>;
+
+    using RHSType = Variational::FunctionBase<RHSDerived>;
+
+    using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+
+    using ScalarType =
+      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+
+    using RangeType = ScalarType;
+  };
+
+  template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<
+    Variational::Dot<
+      Variational::FunctionBase<LHSDerived>,
+      Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
+  {
+    using FESType = FES;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    using LHSType = Variational::FunctionBase<LHSDerived>;
+
+    using RHSType = Variational::ShapeFunctionBase<RHSDerived, FESType, Space>;
+
+    using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+
+    using ScalarType =
+      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+
+    using RangeType = ScalarType;
+  };
+
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  struct Traits<
+    Variational::Dot<
+      Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>,
+      Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>>>
+  {
+    using LHSType = Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>;
+
+    using RHSType = Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>;
+
+    using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+
+    using ScalarType =
+      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+
+    using RangeType = ScalarType;
   };
 }
 
@@ -45,14 +110,31 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived>
   class Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
-    : public ScalarFunctionBase<Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
+    : public RealFunctionBase<Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using LHS = FunctionBase<LHSDerived>;
-      using RHS = FunctionBase<RHSDerived>;
-      using Parent = ScalarFunctionBase<Dot<LHS, RHS>>;
+      using LHSType = FunctionBase<LHSDerived>;
 
-      Dot(const LHS& lhs, const RHS& rhs)
+      using RHSType = FunctionBase<RHSDerived>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+
+      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+
+      using ScalarType =
+        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+
+      using RangeType = ScalarType;
+
+      using Parent = RealFunctionBase<Dot<LHSType, RHSType>>;
+
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
+
+      Dot(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
         assert(lhs.getRangeShape() == rhs.getRangeShape());
@@ -79,7 +161,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const LHS& getLHS() const
+      const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -87,7 +169,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const RHS& getRHS() const
+      const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -98,19 +180,16 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         assert(getLHS().getRangeShape() == getRHS().getRangeShape());
-        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
-        static_assert(std::is_same_v<LHSRange, RHSRange>);
         const auto& lhs = this->object(getLHS().getValue(p));
         const auto& rhs = this->object(getRHS().getValue(p));
-        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, Real>)
         {
           return lhs * rhs;
-        } else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+        } else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Real>>)
         {
           return lhs.dot(rhs);
         }
-        else if constexpr (std::is_same_v<RHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<RHSRangeType, Math::Matrix<Real>>)
         {
           return (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
         }
@@ -151,14 +230,32 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES, Space>
   {
     public:
-      using LHS = FunctionBase<LHSDerived>;
+      using FESType = FES;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-      using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
+      using LHSType = FunctionBase<LHSDerived>;
 
-      using Parent = ShapeFunctionBase<Dot<LHS, RHS>, FES, Space>;
+      using RHSType = ShapeFunctionBase<RHSDerived, FESType, Space>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+
+      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+
+      using ScalarType =
+        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+
+      using RangeType = ScalarType;
+
+      using Parent = ShapeFunctionBase<Dot<LHSType, RHSType>, FESType, Space>;
+
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       constexpr
-      Dot(const LHS& lhs, const RHS& rhs)
+      Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
@@ -179,7 +276,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const LHS& getLHS() const
+      const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -187,7 +284,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const RHS& getRHS() const
+      const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -213,29 +310,42 @@ namespace Rodin::Variational
         return getRHS().getDOFs(element);
       }
 
+      const FESType& getFiniteElementSpace() const
+      {
+        return getRHS().getFiniteElementSpace();
+      }
+
+      inline
+      const Geometry::Point& getPoint() const
+      {
+        return getRHS().getPoint();
+      }
+
+      Dot& setPoint(const Geometry::Point& p)
+      {
+        m_rhs->setPoint(p);
+        return *this;
+      }
+
       inline
       constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      auto getBasis(size_t local) const
       {
         assert(m_lhs->getRangeShape() == m_rhs->getRangeShape());
-        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
-        static_assert(std::is_same_v<LHSRange, RHSRange>);
+        const auto& p = getRHS().getPoint();
         const auto& lhs = this->object(getLHS().getValue(p));
-        const auto rhs = getRHS().getTensorBasis(p);
-        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        const auto& rhs = this->object(getRHS().getBasis(local));
+        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
         {
           return lhs * rhs;
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
         {
-          return TensorBasis(rhs.getDOFs(),
-              [&](size_t i){ return lhs.dot(rhs(i)); });
+          return lhs.dot(rhs);
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
         {
-          return TensorBasis(rhs.getDOFs(),
-              [&](size_t i){ return (lhs(i).array() * rhs(i).array()).rowwise().sum().colwise().sum().value(); });
+          return (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
         }
         else
         {
@@ -251,8 +361,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
@@ -269,16 +379,35 @@ namespace Rodin::Variational
    * @f]
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  class Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>> final
+  class Dot<
+    ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>> final
     : public FormLanguage::Base
   {
     public:
-      using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
-      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+      using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+
+      using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+
+      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+
+      using ScalarType =
+        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+
+      using RangeType = ScalarType;
+
       using Parent = FormLanguage::Base;
 
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
+
       constexpr
-      Dot(const LHS& lhs, const RHS& rhs)
+      Dot(const LHSType& lhs, const RHSType& rhs)
         : m_trial(lhs.copy()), m_test(rhs.copy())
       {
         assert(lhs.getRangeShape() == rhs.getRangeShape());
@@ -298,7 +427,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const LHS& getLHS() const
+      const LHSType& getLHS() const
       {
         assert(m_trial);
         return *m_trial;
@@ -306,10 +435,22 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const RHS& getRHS() const
+      const RHSType& getRHS() const
       {
         assert(m_test);
         return *m_test;
+      }
+
+      const Geometry::Point& getPoint() const
+      {
+        return m_trial->getPoint();
+      }
+
+      Dot& setPoint(const Geometry::Point& p)
+      {
+        m_trial->setPoint(p);
+        m_test->setPoint(p);
+        return *this;
       }
 
       /**
@@ -322,43 +463,25 @@ namespace Rodin::Variational
        * where @f$ n @f$ is the number of trial degrees of freedom, and @f$ m
        * @f$ is the number of test degrees of freedom.
        */
-      void assemble(const Geometry::Point& p)
+      ScalarType operator()(size_t tr, size_t te)
       {
-        assert(getLHS().getRangeShape() == getRHS().getRangeShape());
-        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
-        static_assert(std::is_same_v<LHSRange, RHSRange>);
-        const auto& trial = getLHS().getTensorBasis(p);
-        const auto& test = getRHS().getTensorBasis(p);
-        m_matrix.resize(test.getDOFs(), trial.getDOFs());
-        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
         {
-          for (size_t i = 0; i < test.getDOFs(); i++)
-            for (size_t j = 0; j < trial.getDOFs(); j++)
-              m_matrix(i, j) = test(i) * trial(j);
+          return getRHS().getBasis(te) * getLHS().getBasis(tr);
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
         {
-          for (size_t i = 0; i < test.getDOFs(); i++)
-            for (size_t j = 0; j < trial.getDOFs(); j++)
-              m_matrix(i, j) = test(i).dot(trial(j));
+          return getRHS().getBasis(te).dot(getLHS().getBasis(tr));
         }
-        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
         {
-          for (size_t i = 0; i < test.getDOFs(); i++)
-            for (size_t j = 0; j < trial.getDOFs(); j++)
-              m_matrix(i, j) = (test(i).array() * trial(j).array()).rowwise().sum().colwise().sum().value();
+          return (getRHS().getBasis(te).array() * getLHS().getBasis(tr).array()).rowwise().sum().colwise().sum().value();
         }
         else
         {
           assert(false);
-          m_matrix.setConstant(NAN);
+          return NAN;
         }
-      }
-
-      const Math::Matrix& getMatrix() const
-      {
-        return m_matrix;
       }
 
       inline Dot* copy() const noexcept final override
@@ -367,10 +490,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_trial;
-      std::unique_ptr<RHS> m_test;
-
-      Math::Matrix m_matrix;
+      std::unique_ptr<LHSType> m_trial;
+      std::unique_ptr<RHSType> m_test;
   };
 
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -382,17 +503,17 @@ namespace Rodin::Variational
   class Dot<
       Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>
-        : public FormLanguage::Base
+    : public FormLanguage::Base
   {
     public:
-      using LHS = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
+      using LHSType = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
 
-      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+      using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
 
       using Parent = FormLanguage::Base;
 
       constexpr
-      Dot(const LHS& lhs, const RHS& rhs)
+      Dot(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
         assert(lhs.getRangeShape() == rhs.getRangeShape());
@@ -412,7 +533,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const LHS& getLHS() const
+      const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -420,7 +541,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const RHS& getRHS() const
+      const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -433,8 +554,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>

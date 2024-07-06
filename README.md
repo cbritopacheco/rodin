@@ -46,7 +46,7 @@ Rodin comes with documentation that is built automatically on each merge, hence 
 
 ### Embedded form language for FEM modelling
 
-Rodin comes with a native C++17 form language for assembling
+Rodin comes with a native C++20 form language for assembling
 and solving variational formulations.
 
 For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, the Poisson problem:
@@ -74,8 +74,6 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-const Geometry::Attribute Gamma = 1;
-
 int main(int, char**)
 {
   Mesh Omega;
@@ -87,15 +85,12 @@ int main(int, char**)
   TrialFunction u(Vh);
   TestFunction v(Vh);
 
-  ScalarFunction f(1.0);
-  ScalarFunction g(0.0);
-
   Solver::SparseLU solver;
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, g).on(Gamma);
+          - Integral(v)
+          + DirichletBC(u, Zero());
   poisson.solve(solver);
 
   return 0;
@@ -234,11 +229,19 @@ Rodin supports different kinds of quadrature.
 List of features and modules that are in the works:
   - Discontinuous Galerkin methods
   - `Rodin::Plot` module
+  - H1
+  - L2
+  - HDiv
+  - HCurl
+  - P2
+  - P0
+  - PETSc
+  - METIS
 
 ## Requirements
 
 - [CMake 3.16.0+](https://cmake.org/)
-- [Boost 1.65+](https://www.boost.org/)
+- [Boost 1.74+](https://www.boost.org/)
 
 Any of these should be available for quick install from your standard package
 manager.

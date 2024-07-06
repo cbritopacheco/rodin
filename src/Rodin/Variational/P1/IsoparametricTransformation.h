@@ -22,13 +22,13 @@
 //    * @brief Polytope isoparametric transformation.
 //    */
 //   template <>
-//   class IsoparametricTransformation<Variational::ScalarP1Element> final
+//   class IsoparametricTransformation<Variational::RealP1Element> final
 //     : public PolytopeTransformation
 //   {
 //     public:
 //       using Parent = PolytopeTransformation;
 // 
-//       IsoparametricTransformation(Math::PointMatrix&& pm, Variational::ScalarP1Element&& fe)
+//       IsoparametricTransformation(Math::PointMatrix&& pm, Variational::RealP1Element&& fe)
 //         : m_pm(std::move(pm)),
 //           m_sdim(m_pm.rows()),
 //           m_fe(std::move(fe)),
@@ -41,7 +41,7 @@
 //       /**
 //        * pm : sdim x dof
 //        */
-//       IsoparametricTransformation(const Math::Matrix& pm, const Variational::ScalarP1Element& fe)
+//       IsoparametricTransformation(const Math::Matrix<Real>& pm, const Variational::RealP1Element& fe)
 //         : m_pm(pm),
 //           m_sdim(m_pm.rows()),
 //           m_fe(fe),
@@ -51,7 +51,7 @@
 //         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
 //       }
 // 
-//       IsoparametricTransformation(Math::Matrix&& pm, const Variational::ScalarP1Element& fe)
+//       IsoparametricTransformation(Math::Matrix<Real>&& pm, const Variational::RealP1Element& fe)
 //         : m_pm(std::move(pm)),
 //           m_sdim(m_pm.rows()),
 //           m_fe(fe),
@@ -61,7 +61,7 @@
 //         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
 //       }
 // 
-//       IsoparametricTransformation(const Math::Matrix& pm, Variational::ScalarP1Element&& fe)
+//       IsoparametricTransformation(const Math::Matrix<Real>& pm, Variational::RealP1Element&& fe)
 //         : m_pm(pm),
 //           m_sdim(m_pm.rows()),
 //           m_fe(std::move(fe)),
@@ -94,9 +94,9 @@
 //       }
 // 
 //       inline
-//       Math::SpatialVector transform(const Math::SpatialVector& rc) const override
+//       Math::SpatialVector<Real> transform(const Math::SpatialVector<Real>& rc) const override
 //       {
-//         Math::Vector res = Math::Vector::Zero(m_sdim);
+//         Math::Vector<Real> res = Math::Vector<Real>::Zero(m_sdim);
 //         for (size_t local = 0; local < m_fe.getCount(); local++)
 //         {
 //           assert(res.size() == m_pm.col(local).size());
@@ -106,10 +106,10 @@
 //       }
 // 
 //       inline
-//       void jacobian(const Math::SpatialVector& rc, Math::SpatialMatrix& res) override
+//       void jacobian(const Math::SpatialVector<Real>& rc, Math::SpatialMatrix<Real>& res) override
 //       {
-//         res = Math::SpatialMatrix::Zero(m_sdim, m_rdim);
-//         Math::SpatialVector gradient;
+//         res = Math::SpatialMatrix<Real>::Zero(m_sdim, m_rdim);
+//         Math::SpatialVector<Real> gradient;
 //         for (size_t local = 0; local < m_fe.getCount(); local++)
 //         {
 //           m_fe.getGradient(local)(gradient, rc);
@@ -131,7 +131,7 @@
 //     private:
 //       Math::PointMatrix m_pm;
 //       const size_t m_sdim;
-//       Variational::ScalarP1Element m_fe;
+//       Variational::RealP1Element m_fe;
 //       const size_t m_rdim;
 //   };
 // }

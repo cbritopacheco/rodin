@@ -9,12 +9,14 @@ set(RodinGeometry_HEADERS
 
 set(RodinGeometry_SRCS
   Mesh.cpp
+  Point.cpp
   Polytope.cpp
   PolytopeIterator.cpp
   PolytopeTransformation.cpp
   Connectivity.cpp
   SubMesh.cpp
   MeshBuilder.cpp
+  DdMeshRefinement.cpp
   SubMeshBuilder.cpp
   )
 add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})

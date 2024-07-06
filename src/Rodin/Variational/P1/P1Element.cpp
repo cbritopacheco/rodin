@@ -2,8 +2,8 @@
 
 namespace Rodin::Variational
 {
-  const Geometry::GeometryIndexed<std::vector<ScalarP1Element::LinearForm>>
-  ScalarP1Element::s_ls =
+  const Geometry::GeometryIndexed<std::vector<RealP1Element::LinearForm>>
+  RealP1Element::s_ls =
   {
     { Geometry::Polytope::Type::Point,
       {
@@ -41,8 +41,8 @@ namespace Rodin::Variational
     }
   };
 
-  const Geometry::GeometryIndexed<std::vector<ScalarP1Element::BasisFunction>>
-  ScalarP1Element::s_basis =
+  const Geometry::GeometryIndexed<std::vector<RealP1Element::BasisFunction>>
+  RealP1Element::s_basis =
   {
     { Geometry::Polytope::Type::Point,
       {
@@ -80,8 +80,8 @@ namespace Rodin::Variational
     }
   };
 
-  const Geometry::GeometryIndexed<std::vector<ScalarP1Element::GradientFunction>>
-  ScalarP1Element::s_gradient =
+  const Geometry::GeometryIndexed<std::vector<RealP1Element::GradientFunction>>
+  RealP1Element::s_gradient =
   {
     { Geometry::Polytope::Type::Point,
       {
@@ -119,7 +119,7 @@ namespace Rodin::Variational
     }
   };
 
-  const Geometry::GeometryIndexed<Math::PointMatrix> ScalarP1Element::s_nodes =
+  const Geometry::GeometryIndexed<Math::PointMatrix> RealP1Element::s_nodes =
   {
     { Geometry::Polytope::Type::Point,
       Math::PointMatrix{{0}} },
@@ -135,6 +135,24 @@ namespace Rodin::Variational
       Math::PointMatrix{{0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} },
+  };
+
+  const Geometry::GeometryIndexed<Math::PointMatrix> ComplexP1Element::s_nodes =
+  {
+    { Geometry::Polytope::Type::Point,
+      Math::PointMatrix{{0, 0}} },
+    { Geometry::Polytope::Type::Segment,
+      Math::PointMatrix{{0, 0, 1, 1}} },
+    { Geometry::Polytope::Type::Triangle,
+      Math::PointMatrix{{0, 0, 1, 1, 0, 0},
+                        {0, 0, 0, 0, 1, 1}} },
+    { Geometry::Polytope::Type::Quadrilateral,
+      Math::PointMatrix{{0, 0, 1, 1, 0, 0, 1, 1},
+                        {0, 0, 0, 0, 1, 1, 1, 1}} },
+    { Geometry::Polytope::Type::Tetrahedron,
+      Math::PointMatrix{{0, 0, 1, 1, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 1, 1, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 1, 1}} },
   };
 
   const std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
@@ -168,7 +186,7 @@ namespace Rodin::Variational
             }
             default:
             {
-              auto sfe = ScalarP1Element(g);
+              auto sfe = RealP1Element(g);
               const size_t n = Geometry::Polytope::getVertexCount(g);
               const size_t d = Geometry::Polytope::getGeometryDimension(g);
               res[vdim][g].resize(d, n * vdim);
@@ -238,7 +256,7 @@ namespace Rodin::Variational
 
 namespace Rodin::Variational
 {
-  Scalar ScalarP1Element::BasisFunction::operator()(const Math::SpatialVector& r) const
+  Real RealP1Element::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
   {
     switch (m_g)
     {
@@ -294,8 +312,8 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            auto x = r.x();
-            auto y = r.y();
+            const Real x = r.x();
+            const Real y = r.y();
             return x * y - x - y + 1;
           }
           case 1:
@@ -350,7 +368,7 @@ namespace Rodin::Variational
   }
 
   void
-  ScalarP1Element::GradientFunction::operator()(Math::SpatialVector& out, const Math::SpatialVector& r) const
+  RealP1Element::GradientFunction::operator()(Math::SpatialVector<Real>& out, const Math::SpatialVector<Real>& r) const
   {
     switch (m_g)
     {
@@ -427,13 +445,13 @@ namespace Rodin::Variational
           case 1:
           {
             out.coeffRef(0) = 1 - r.y();
-            out.coeffRef(1) = -r.y();
+            out.coeffRef(1) = -r.x();
             return;
           }
           case 2:
           {
-            out.coeffRef(0) = 1 - r.x();
-            out.coeffRef(1) = -r.x();
+            out.coeffRef(0) = -r.y();
+            out.coeffRef(1) = 1 - r.x();
             return;
           }
           case 3:
@@ -494,9 +512,393 @@ namespace Rodin::Variational
     out.setConstant(NAN);
   }
 
-  void VectorP1Element::BasisFunction::operator()(Math::Vector& out, const Math::SpatialVector& r) const
+  Complex ComplexP1Element::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
   {
-    out = Math::Vector::Zero(m_vdim);
+    using namespace std::complex_literals;
+    switch (m_g)
+    {
+      case Geometry::Polytope::Type::Point:
+      {
+        if (m_i % 2 == 0)
+          return 1;
+        else
+          return 1i;
+      }
+      case Geometry::Polytope::Type::Segment:
+      {
+        switch (m_i)
+        {
+          case 0:
+          {
+            return 1 - r.x();
+          }
+          case 1:
+          {
+            return Complex(0, 1 - r.x());
+          }
+          case 2:
+          {
+            return r.x();
+          }
+          case 3:
+          {
+            return Complex(0, r.x());
+          }
+          default:
+          {
+            assert(false);
+            return NAN;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::Triangle:
+      {
+        switch (m_i)
+        {
+          case 0:
+          {
+            return -r.x() - r.y() + 1;
+          }
+          case 1:
+          {
+            return Complex(0, -r.x() - r.y() + 1);
+          }
+          case 2:
+          {
+            return r.x();
+          }
+          case 3:
+          {
+            return Complex(0, r.x());
+          }
+          case 4:
+          {
+            return r.y();
+          }
+          case 5:
+          {
+            return Complex(0, r.y());
+          }
+          default:
+          {
+            assert(false);
+            return NAN;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::Quadrilateral:
+      {
+        switch (m_i)
+        {
+          case 0:
+          {
+            const Real x = r.x();
+            const Real y = r.y();
+            return x * y - x - y + 1;
+          }
+          case 1:
+          {
+            const Real x = r.x();
+            const Real y = r.y();
+            return Complex(0, x * y - x - y + 1);
+          }
+          case 2:
+          {
+            return r.x() * (1 - r.y());
+          }
+          case 3:
+          {
+            return Complex(0, r.y() * (1 - r.x()));
+          }
+          case 4:
+          {
+            return r.x() * r.y();
+          }
+          case 5:
+          {
+            return Complex(0, r.x() * r.y());
+          }
+          default:
+          {
+            assert(false);
+            return NAN;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::Tetrahedron:
+      {
+        switch (m_i)
+        {
+          case 0:
+          {
+            return -r.x() - r.y() - r.z() + 1;
+          }
+          case 1:
+          {
+            return Complex(0, - r.x() - r.y() - r.z() + 1);
+          }
+          case 2:
+          {
+            return r.x();
+          }
+          case 3:
+          {
+            return Complex(0, r.x());
+          }
+          case 4:
+          {
+            return r.y();
+          }
+          case 5:
+          {
+            return Complex(0, r.y());
+          }
+          case 6:
+          {
+            return r.z();
+          }
+          case 7:
+          {
+            return Complex(0, r.z());
+          }
+          default:
+          {
+            assert(false);
+            return NAN;
+          }
+        }
+      }
+    }
+    assert(false);
+    return NAN;
+  }
+
+  void
+  ComplexP1Element::GradientFunction::operator()(Math::SpatialVector<Complex>& out, const Math::SpatialVector<Real>& r) const
+  {
+    using namespace std::complex_literals;
+    switch (m_g)
+    {
+      case Geometry::Polytope::Type::Point:
+      {
+        out.resize(1);
+        out.coeffRef(0) = Complex(0, 0);
+        return;
+      }
+      case Geometry::Polytope::Type::Segment:
+      {
+        out.resize(1);
+        switch (m_i)
+        {
+          case 0:
+          {
+            out.coeffRef(0) = -1;
+            return;
+          }
+          case 1:
+          {
+            out.coeffRef(0) = -1i;
+            return;
+          }
+          case 2:
+          {
+            out.coeffRef(0) = 1;
+            return;
+          }
+          case 3:
+          {
+            out.coeffRef(0) = 1i;
+            return;
+          }
+          default:
+          {
+            assert(false);
+            out.setConstant(NAN);
+            return;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::Triangle:
+      {
+        out.resize(2);
+        switch (m_i)
+        {
+          case 0:
+          {
+            out.setConstant(-1);
+            return;
+          }
+          case 1:
+          {
+            out.setConstant(-1i);
+            return;
+          }
+          case 2:
+          {
+            out.coeffRef(0) = 1;
+            out.coeffRef(1) = 0;
+            return;
+          }
+          case 3:
+          {
+            out.coeffRef(0) = 1i;
+            out.coeffRef(1) = 0;
+            return;
+          }
+          case 4:
+          {
+            out.coeffRef(0) = 0;
+            out.coeffRef(1) = 1;
+            return;
+          }
+          case 5:
+          {
+            out.coeffRef(0) = 0;
+            out.coeffRef(1) = 1i;
+            return;
+          }
+          default:
+          {
+            assert(false);
+            out.setConstant(NAN);
+            return;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::Quadrilateral:
+      {
+        out.resize(2);
+        switch (m_i)
+        {
+          case 0:
+          {
+            out.coeffRef(0) = r.y() - 1;
+            out.coeffRef(1) = r.x() - 1;
+            return;
+          }
+          case 1:
+          {
+            out.coeffRef(0) = Complex(0, r.y() - 1);
+            out.coeffRef(1) = Complex(0, r.x() - 1);
+            return;
+          }
+          case 2:
+          {
+            out.coeffRef(0) = 1 - r.y();
+            out.coeffRef(1) = -r.x();
+            return;
+          }
+          case 3:
+          {
+            out.coeffRef(0) = Complex(0, 1 - r.y());
+            out.coeffRef(1) = Complex(0, -r.x());
+            return;
+          }
+          case 4:
+          {
+            out.coeffRef(0) = -r.y();
+            out.coeffRef(1) = 1 - r.x();
+            return;
+          }
+          case 5:
+          {
+            out.coeffRef(0) = Complex(0, -r.y());
+            out.coeffRef(1) = Complex(0, 1 - r.x());
+            return;
+          }
+          case 6:
+          {
+            out.coeffRef(0) = r.y();
+            out.coeffRef(1) = r.x();
+            return;
+          }
+          case 7:
+          {
+            out.coeffRef(0) = Complex(0, r.y());
+            out.coeffRef(1) = Complex(0, r.x());
+            return;
+          }
+          default:
+          {
+            assert(false);
+            out.setConstant(NAN);
+            return;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::Tetrahedron:
+      {
+        out.resize(3);
+        switch (m_i)
+        {
+          case 0:
+          {
+            out.setConstant(-1);
+            return;
+          }
+          case 1:
+          {
+            out.setConstant(-1i);
+            return;
+          }
+          case 2:
+          {
+            out.coeffRef(0) = 1;
+            out.coeffRef(1) = 0;
+            out.coeffRef(2) = 0;
+            return;
+          }
+          case 3:
+          {
+            out.coeffRef(0) = 1i;
+            out.coeffRef(1) = 0;
+            out.coeffRef(2) = 0;
+            return;
+          }
+          case 4:
+          {
+            out.coeffRef(0) = 0;
+            out.coeffRef(1) = 1i;
+            out.coeffRef(2) = 0;
+            return;
+          }
+          case 5:
+          {
+            out.coeffRef(0) = 0;
+            out.coeffRef(1) = 1i;
+            out.coeffRef(2) = 0;
+            return;
+          }
+          case 6:
+          {
+            out.coeffRef(0) = 0;
+            out.coeffRef(1) = 0;
+            out.coeffRef(2) = 1i;
+            return;
+          }
+          case 7:
+          {
+            out.coeffRef(0) = 0;
+            out.coeffRef(1) = 0;
+            out.coeffRef(2) = 1i;
+            return;
+          }
+          default:
+          {
+            assert(false);
+            out.setConstant(NAN);
+            return;
+          }
+        }
+      }
+    }
+    assert(false);
+    out.setConstant(NAN);
+  }
+
+  void VectorP1Element::BasisFunction::operator()(Math::Vector<Real>& out, const Math::SpatialVector<Real>& r) const
+  {
+    out = Math::Vector<Real>::Zero(m_vdim);
     const size_t i = m_i % m_vdim;
     const size_t k = m_i / m_vdim;
     assert(k < Geometry::Polytope::getVertexCount(m_g));
@@ -625,9 +1027,9 @@ namespace Rodin::Variational
     out.setConstant(NAN);
   }
 
-  void VectorP1Element::JacobianFunction::operator()(Math::SpatialMatrix& out, const Math::SpatialVector& rc) const
+  void VectorP1Element::JacobianFunction::operator()(Math::SpatialMatrix<Real>& out, const Math::SpatialVector<Real>& rc) const
   {
-    out = Math::SpatialMatrix::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
+    out = Math::SpatialMatrix<Real>::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
     const size_t i = m_i % m_vdim;
     const size_t k = m_i / m_vdim;
     assert(k < Geometry::Polytope::getVertexCount(m_g));

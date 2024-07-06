@@ -28,11 +28,13 @@ namespace Rodin::Variational
     : public FunctionBase<EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using LHS = FunctionBase<LHSDerived>;
-      using RHS = FunctionBase<RHSDerived>;
-      using Parent = FunctionBase<EQ<LHS, RHS>>;
+      using LHSType = FunctionBase<LHSDerived>;
 
-      EQ(const LHS& lhs, const RHS& rhs)
+      using RHSType = FunctionBase<RHSDerived>;
+
+      using Parent = FunctionBase<EQ<LHSType, RHSType>>;
+
+      EQ(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
@@ -74,8 +76,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived>

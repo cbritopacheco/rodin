@@ -60,16 +60,16 @@ namespace Rodin::Variational
   {
     public:
       /// Type of the left operand of the dot product
-      using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+      using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
 
       /// Type of the right operand of the dot product
-      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+      using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
 
       /// Type of the integrand
-      using Integrand = Dot<LHS, RHS>;
+      using IntegrandType = Dot<LHSType, RHSType>;
 
       /// Parent class
-      using Parent = QuadratureRule<Integrand>;
+      using Parent = QuadratureRule<IntegrandType>;
 
       /**
        * @brief Integral of the dot product of trial and test operators
@@ -82,7 +82,7 @@ namespace Rodin::Variational
        * @param[in] lhs Trial operator @f$ A(u) @f$
        * @param[in] rhs Test operator @f$ B(v) @f$
        */
-      Integral(const LHS& lhs, const RHS& rhs)
+      Integral(const LHSType& lhs, const RHSType& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
@@ -96,7 +96,7 @@ namespace Rodin::Variational
        *
        * @param[in] prod Dot product instance
        */
-      Integral(const Integrand& prod)
+      Integral(const IntegrandType& prod)
         : Parent(prod)
       {}
 
@@ -145,16 +145,16 @@ namespace Rodin::Variational
     : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
     public:
-      using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
+      using IntegrandType = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
 
-      using Parent = QuadratureRule<Integrand>;
+      using Parent = QuadratureRule<IntegrandType>;
 
       template <class LHSDerived, class RHSDerived>
       Integral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
-      Integral(const Integrand& integrand)
+      Integral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
@@ -195,15 +195,15 @@ namespace Rodin::Variational
   {
     public:
       /// Type of integrand
-      using Integrand = GridFunction<FES>;
+      using IntegrandType = GridFunction<FES>;
 
       /// Parent class
-      using Parent = QuadratureRule<Integrand>;
+      using Parent = QuadratureRule<IntegrandType>;
 
       /**
        * @brief Constructs the integral object
        */
-      Integral(const Integrand& u)
+      Integral(const IntegrandType& u)
         : Parent(u)
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);

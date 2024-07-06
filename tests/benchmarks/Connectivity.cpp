@@ -40,19 +40,19 @@ namespace RodinBenchmark
 
   BENCHMARK_F(Connectivity, Triangular_16x16)(benchmark::State& st)
   {
-    auto mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
+    auto mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
     test(mesh, st);
   }
 
   BENCHMARK_F(Connectivity, Triangular_32x32)(benchmark::State& st)
   {
-    auto mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
+    auto mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 32, 32 });
     test(mesh, st);
   }
 
   BENCHMARK_F(Connectivity, Triangular_64x64)(benchmark::State& st)
   {
-    auto mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 64, 64);
+    auto mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 64, 64 });
     test(mesh, st);
   }
 }

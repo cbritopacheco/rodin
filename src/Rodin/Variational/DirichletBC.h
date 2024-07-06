@@ -17,6 +17,7 @@
 
 #include "Function.h"
 #include "ShapeFunction.h"
+#include "VectorFunction.h"
 
 namespace Rodin::Variational
 {
@@ -40,7 +41,7 @@ namespace Rodin::Variational
   class DirichletBCBase : public FormLanguage::Base
   {
     public:
-      using DOFs = IndexMap<Scalar>;
+      using DOFs = IndexMap<Real>;
 
       /**
        * @brief Assembles the Dirichlet boundary condition.
@@ -61,6 +62,8 @@ namespace Rodin::Variational
        * @brief Gets the global degree of freedom map.
        */
       virtual const DOFs& getDOFs() const = 0;
+
+      virtual bool isComponent() const = 0;
 
       /**
        * @brief Gets the associated operand.
@@ -98,10 +101,10 @@ namespace Rodin::Variational
   {
     public:
       /// Operand type
-      using Operand = TrialFunction<FES>;
+      using OperandType = TrialFunction<FES>;
 
       /// Value type
-      using Value = FunctionBase<ValueDerived>;
+      using ValueType = FunctionBase<ValueDerived>;
 
       /// Parent class
       using Parent = DirichletBCBase;
@@ -111,7 +114,7 @@ namespace Rodin::Variational
        * @param[in] u ShapeFunction object
        * @param[in] v Value object
        */
-      DirichletBC(const Operand& u, const Value& v)
+      DirichletBC(const OperandType& u, const ValueType& v)
         : m_u(u), m_value(v.copy())
       {}
 
@@ -147,6 +150,14 @@ namespace Rodin::Variational
       DirichletBC& on(Geometry::Attribute bdrAtr)
       {
         return on(FlatSet<Geometry::Attribute>{bdrAtr});
+      }
+
+      template <class A1, class A2, class ... As>
+      inline
+      constexpr
+      DirichletBC& on(A1 a1, A2 a2, As... as)
+      {
+        return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
       }
 
       /**
@@ -216,7 +227,7 @@ namespace Rodin::Variational
               if (find == m_dofs.end())
               {
                 const auto& lf = fe.getLinearForm(local);
-                const Scalar s = lf(mapping);
+                const Real s = lf(mapping);
                 m_dofs.insert(find, std::pair{ global, s });
               }
             }
@@ -225,13 +236,19 @@ namespace Rodin::Variational
       }
 
       inline
-      const Operand& getOperand() const override
+      bool isComponent() const override
+      {
+        return false;
+      }
+
+      inline
+      const OperandType& getOperand() const override
       {
         return m_u;
       }
 
       inline
-      const Value& getValue() const override
+      const ValueType& getValue() const override
       {
         assert(m_value);
         return *m_value;
@@ -250,10 +267,10 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Operand> m_u;
-      std::unique_ptr<Value> m_value;
+      std::reference_wrapper<const OperandType> m_u;
+      std::unique_ptr<ValueType> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
-      IndexMap<Scalar> m_dofs;
+      IndexMap<Real> m_dofs;
   };
 
   /**

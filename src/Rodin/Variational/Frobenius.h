@@ -9,7 +9,7 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -24,13 +24,14 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class Frobenius<FunctionBase<NestedDerived>>
-    : public ScalarFunctionBase<Frobenius<FunctionBase<NestedDerived>>>
+    : public RealFunctionBase<Frobenius<FunctionBase<NestedDerived>>>
   {
     public:
-      using Operand = FunctionBase<NestedDerived>;
-      using Parent = ScalarFunctionBase<Frobenius<Operand>>;
+      using OperandType = FunctionBase<NestedDerived>;
 
-      Frobenius(const Operand& v)
+      using Parent = RealFunctionBase<Frobenius<OperandType>>;
+
+      Frobenius(const OperandType& v)
         : m_v(v.copy())
       {}
 
@@ -48,8 +49,8 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
-        if constexpr (std::is_same_v<OperandRange, Scalar>)
+        using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+        if constexpr (std::is_same_v<OperandRangeType, Real>)
         {
           return std::abs(getOperand().getValue(p));
         }
@@ -59,7 +60,7 @@ namespace Rodin::Variational
         }
       }
 
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_v);
         return *m_v;
@@ -71,7 +72,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_v;
+      std::unique_ptr<OperandType> m_v;
   };
 
   template <class NestedDerived>

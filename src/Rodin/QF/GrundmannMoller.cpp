@@ -22,17 +22,17 @@ namespace Rodin::QF
   /**
    * @internal
    */
-  boost::multi_array<Math::Vector, 2> GrundmannMoller::initWeights()
+  boost::multi_array<Math::Vector<Real>, 2> GrundmannMoller::initWeights()
   {
     const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1][RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
-    boost::multi_array<Math::Vector, 2> res(extents);
+    boost::multi_array<Math::Vector<Real>, 2> res(extents);
     for (size_t n = 0; n <= RODIN_MAXIMAL_SPACE_DIMENSION; n++)
     {
       // Handle case n == 0
       if (n == 0)
       {
         for (size_t s = 0; s <= RODIN_QF_GRUNDMANNMOLLER_MAX_S; s++)
-          res[0][s] = Math::Vector{{1}};
+          res[0][s] = Math::Vector<Real>{{1}};
         continue;
       }
 
@@ -46,7 +46,7 @@ namespace Rodin::QF
         size_t pt = 0;
         for (size_t i = 0; i <= s; i++)
         {
-          Scalar w = Math::pow(2, -2 * Integer(s));
+          Real w = Math::pow(2, -2 * Integer(s));
           w *= Math::pow(Integer(d + n - 2 * i), Integer(d));
           w /= Math::factorial(i) * Math::factorial(d + n - i);
           if (i % 2)
@@ -82,17 +82,17 @@ namespace Rodin::QF
     return res;
   }
 
-  boost::multi_array<std::vector<Math::SpatialVector>, 2> GrundmannMoller::initPoints()
+  boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> GrundmannMoller::initPoints()
   {
     const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1][RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
-    boost::multi_array<std::vector<Math::SpatialVector>, 2> res(extents);
+    boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> res(extents);
     for (size_t n = 0; n <= RODIN_MAXIMAL_SPACE_DIMENSION; n++)
     {
       // Handle case n == 0
       if (n == 0)
       {
         for (size_t s = 0; s <= RODIN_QF_GRUNDMANNMOLLER_MAX_S; s++)
-          res[0][s] = { Math::SpatialVector{{0}} };
+          res[0][s] = { Math::SpatialVector<Real>{{0}} };
         continue;
       }
 
@@ -111,7 +111,7 @@ namespace Rodin::QF
           bool doneBeta = false;
           while (true)
           {
-            ps[pt++] = (2 * beta + 1).cast<Scalar>() / (d + n - 2 * i);
+            ps[pt++] = (2 * beta + 1).cast<Real>() / (d + n - 2 * i);
             int j = 0;
             while (sums[j] == k)
             {
@@ -138,9 +138,9 @@ namespace Rodin::QF
 
   boost::multi_array<size_t, 2> GrundmannMoller::s_sizes = GrundmannMoller::initSizes();
 
-  boost::multi_array<Math::Vector, 2> GrundmannMoller::s_weights = GrundmannMoller::initWeights();
+  boost::multi_array<Math::Vector<Real>, 2> GrundmannMoller::s_weights = GrundmannMoller::initWeights();
 
-  boost::multi_array<std::vector<Math::SpatialVector>, 2> GrundmannMoller::s_points = GrundmannMoller::initPoints();
+  boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> GrundmannMoller::s_points = GrundmannMoller::initPoints();
 
   GrundmannMoller::GrundmannMoller(size_t s, Geometry::Polytope::Type geom)
     : Parent(geom),
@@ -163,12 +163,12 @@ namespace Rodin::QF
     return s_sizes[m_n][m_s];
   }
 
-  Scalar GrundmannMoller::getWeight(size_t i) const
+  Real GrundmannMoller::getWeight(size_t i) const
   {
     return s_weights[m_n][m_s].coeff(i);
   }
 
-  const Math::SpatialVector& GrundmannMoller::getPoint(size_t i) const
+  const Math::SpatialVector<Real>& GrundmannMoller::getPoint(size_t i) const
   {
     return s_points[m_n][m_s][i];
   }

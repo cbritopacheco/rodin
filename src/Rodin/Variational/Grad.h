@@ -14,6 +14,9 @@
 #include "TrialFunction.h"
 #include "VectorFunction.h"
 
+namespace Rodin::FormLanguage
+{}
+
 namespace Rodin::Variational
 {
   /**
@@ -32,24 +35,24 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P1 GridFunction
    */
-  template <class Derived, class FESType>
-  class GradBase<Derived, GridFunction<FESType>>
-    : public VectorFunctionBase<GradBase<Derived, GridFunction<FESType>>>
+  template <class Derived, class FES>
+  class GradBase<Derived, GridFunction<FES>>
+    : public VectorFunctionBase<GradBase<Derived, GridFunction<FES>>>
   {
     public:
-      using FES = FESType;
+      using FESType = FES;
 
-      using Operand = GridFunction<FES>;
+      using OperandType = GridFunction<FESType>;
 
       /// Parent class
-      using Parent = VectorFunctionBase<GradBase<Derived, Operand>>;
+      using Parent = VectorFunctionBase<GradBase<Derived, OperandType>>;
 
       /**
        * @brief Constructs the gradient of a @f$ \mathbb{P}_1 @f$ function @f$
        * u @f$.
        * @param[in] u P1 GridFunction
        */
-      GradBase(const Operand& u)
+      GradBase(const OperandType& u)
         : m_u(u)
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
@@ -79,72 +82,40 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::SpatialVector getValue(const Geometry::Point& p) const
+      Math::SpatialVector<Real> getValue(const Geometry::Point& p) const
       {
-        Math::SpatialVector out;
-        const auto& polytope = p.getPolytope();
-        const auto& polytopeMesh = polytope.getMesh();
-        const auto& gf = m_u.get();
-        const auto& fes = gf.getFiniteElementSpace();
-        const auto& fesMesh = fes.getMesh();
-        if (polytope.getMesh() == fes.getMesh())
-        {
-          interpolate(out, p);
-        }
-        else
-        {
-          if (polytopeMesh.isSubMesh())
-          {
-            const auto& submesh = polytopeMesh.asSubMesh();
-            assert(submesh.getParent() == fes.getMesh());
-            interpolate(out, submesh.inclusion(p));
-          }
-          else if (fesMesh.isSubMesh())
-          {
-            const auto& submesh = fesMesh.asSubMesh();
-            assert(submesh.getParent() == polytopeMesh);
-            interpolate(out, submesh.restriction(p));
-          }
-          else
-          {
-            assert(false);
-            out.setConstant(NAN);
-          }
-        }
+        Math::SpatialVector<Real> out;
+        getValue(out, p);
         return out;
       }
 
       inline
-      void getValue(Math::Vector& out, const Geometry::Point& p) const
+      void getValue(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
       {
-        Math::SpatialVector tmp;
-        interpolate(tmp, p);
-        out = std::move(tmp);
-      }
-
-      inline
-      void getValue(Math::SpatialVector& out, const Geometry::Point& p) const
-      {
-        interpolate(out, p);
-      }
-
-      inline
-      constexpr
-      const Operand& getOperand() const
-      {
-        return m_u.get();
-      }
-
-      /**
-       * @brief Interpolation function to be overriden in Derived type.
-       */
-      inline
-      constexpr
-      auto interpolate(Math::Vector& out, const Geometry::Point& p) const
-      {
-        Math::SpatialVector tmp;
-        interpolate(tmp, p);
-        out = std::move(tmp);
+        out.setConstant(NAN);
+        const auto& polytope = p.getPolytope();
+        const auto& polytopeMesh = polytope.getMesh();
+        const auto& gf = getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fesMesh = fes.getMesh();
+        if (polytopeMesh == fesMesh)
+        {
+          interpolate(out, p);
+        }
+        else if (const auto inclusion = fesMesh.inclusion(p))
+        {
+          interpolate(out, *inclusion);
+        }
+        else if (fesMesh.isSubMesh())
+        {
+          const auto& submesh = fesMesh.asSubMesh();
+          const auto restriction = submesh.restriction(p);
+          interpolate(out, *restriction);
+        }
+        else
+        {
+          assert(false);
+        }
       }
 
       /**
@@ -152,9 +123,16 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto interpolate(Math::SpatialVector& out, const Geometry::Point& p) const
+      auto interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).interpolate(out, p);
+      }
+
+      inline
+      constexpr
+      const OperandType& getOperand() const
+      {
+        return m_u.get();
       }
 
       /**
@@ -167,7 +145,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Operand> m_u;
+      std::reference_wrapper<const OperandType> m_u;
   };
 }
 

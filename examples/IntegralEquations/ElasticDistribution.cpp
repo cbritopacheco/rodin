@@ -6,31 +6,35 @@
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Math.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-const Scalar lambda = 0.5769, mu = 0.3846;
-const Scalar nu = lambda / (2 * (lambda + mu));
+const Real E = 100;
+const Real nu = 0.48;
+const Real lambda = (E * nu) / ((1.0 + nu) * (1.0 - 2 * nu));
+const Real mu = E / (1.0 + nu);
 
 inline
-void K(Math::Matrix& res, const Point& x, const Point& y)
+void K(Math::Matrix<Real>& res, const Point& x, const Point& y)
 {
   const auto norm = (x - y).norm();
   res.resize(3, 3);
-  const Scalar L00 = (1 - nu) / (2 * M_PI * mu * norm) + nu * (x(0) - y(0)) * (x(0) - y(0)) / (2 * M_PI * mu * norm * norm * norm);
-  const Scalar L01 = nu * (x(0) - y(0)) * (x(1) - y(1)) / (2 * M_PI * mu * norm * norm * norm);
-  const Scalar L02 = nu * (x(0) - y(0)) * (x(2) - y(2)) / (2 * M_PI * mu * norm * norm * norm);
+  const Real L00 = (1 - nu) / (2 * M_PI * mu * norm) + nu * (x(0) - y(0)) * (x(0) - y(0)) / (2 * M_PI * mu * norm * norm * norm);
+  const Real L01 = nu * (x(0) - y(0)) * (x(1) - y(1)) / (2 * M_PI * mu * norm * norm * norm);
 
-  const Scalar L10 = nu * (x(1) - y(1)) * (x(0) - y(0)) / (2 * M_PI * mu * norm * norm * norm);
-  const Scalar L11 = (1 - nu) / (2 * M_PI * mu * norm) + nu * (x(1) - y(1)) * (x(1) - y(1)) / (2 * M_PI * mu * norm * norm * norm);
-  const Scalar L12 = nu * (x(1) - y(1)) * (x(2) - y(2)) / (2 * M_PI * mu * norm * norm * norm);
+  const Real L10 = nu * (x(1) - y(1)) * (x(0) - y(0)) / (2 * M_PI * mu * norm * norm * norm);
+  const Real L11 = (1 - nu) / (2 * M_PI * mu * norm) + nu * (x(1) - y(1)) * (x(1) - y(1)) / (2 * M_PI * mu * norm * norm * norm);
 
-  const Scalar L20 = (1 - 2 * nu) * (x(0) - y(0)) / (4 * M_PI * mu * norm * norm);
-  const Scalar L21 = (1 - 2 * nu) * (x(1) - y(1)) / (4 * M_PI * mu * norm * norm);
-  const Scalar L22 = (1 - nu) / (2 * M_PI * mu * norm);
+  const Real L20 = -(1 - 2 * nu) * (x(0) - y(0)) / (4 * M_PI * mu * norm * norm);
+  const Real L21 = -(1 - 2 * nu) * (x(1) - y(1)) / (4 * M_PI * mu * norm * norm);
+  const Real L22 = (1 - nu) / (2 * M_PI * mu * norm);
+
+  const Real L02 = -L20;
+  const Real L12 = -L21;
 
   res << L00, L01, L02,
          L10, L11, L12,
@@ -39,13 +43,15 @@ void K(Math::Matrix& res, const Point& x, const Point& y)
 
 int main(int, char**)
 {
+  // Threads::getGlobalThreadPool().reset(6);
   Mesh mesh;
-  mesh.load("../build/D1.mesh");
+  mesh.load("D1.o.mesh", IO::FileFormat::MEDIT);
+  mesh.save("D1.mfem.mesh");
   mesh.getConnectivity().compute(1, 2);
 
   P1 fes(mesh, 3);
 
-  VectorFunction e1{0, 0, 1};
+  VectorFunction e1{1, 1, 0};
 
   TrialFunction u(fes);
   TestFunction  v(fes);
@@ -64,7 +70,7 @@ int main(int, char**)
   // file.close();
 
   std::cout << "resolution\n";
-  Solver::CG<Math::Matrix, Math::Vector> cg;
+  Solver::CG<Math::Matrix<Real>, Math::Vector<Real>> cg;
   eq.solve(cg);
 
   u.getSolution().save("u.gf");
@@ -78,6 +84,7 @@ int main(int, char**)
   GridFunction phi(fes);
   phi = Potential(K, u.getSolution());
   phi.save("phi.gf");
+  mesh.save("phi.mesh");
 
   // std::cout << "potential\n";
   // phi.setWeights();

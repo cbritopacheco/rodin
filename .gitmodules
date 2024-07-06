@@ -37,3 +37,6 @@
 [submodule "third-party/termcolor"]
 	path = third-party/termcolor
 	url = https://github.com/ikalnytskyi/termcolor
+[submodule "third-party/basix"]
+	path = third-party/basix
+	url = https://github.com/FEniCS/basix

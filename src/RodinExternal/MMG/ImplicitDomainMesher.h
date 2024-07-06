@@ -51,13 +51,13 @@ namespace Rodin::External::MMG
        *
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& setLevelSet(Scalar ls);
+      ImplicitDomainMesher& setLevelSet(Real ls);
 
       /**
        * @brief Specifies the removal of small parasitic components.
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& setRMC(Scalar rmc = 1e-5);
+      ImplicitDomainMesher& setRMC(Real rmc = 1e-5);
 
       ImplicitDomainMesher& setBaseReferences(Geometry::Attribute ref)
       {
@@ -113,7 +113,7 @@ namespace Rodin::External::MMG
        *
        * The material reference of the level set (edge) boundary will be 10.
        */
-      MMG::Mesh discretize(const MMG::ScalarGridFunction& ls);
+      MMG::Mesh discretize(const MMG::RealGridFunction& ls);
 
       ImplicitDomainMesher& setAngleDetection(bool enable = true)
       {
@@ -121,25 +121,25 @@ namespace Rodin::External::MMG
         return *this;
       }
 
-      ImplicitDomainMesher& setHMin(Scalar hmin)
+      ImplicitDomainMesher& setHMin(Real hmin)
       {
         MMG5::setHMin(hmin);
         return *this;
       }
 
-      ImplicitDomainMesher& setHMax(Scalar hmax)
+      ImplicitDomainMesher& setHMax(Real hmax)
       {
         MMG5::setHMax(hmax);
         return *this;
       }
 
-      ImplicitDomainMesher& setHausdorff(Scalar hausd)
+      ImplicitDomainMesher& setHausdorff(Real hausd)
       {
         MMG5::setHausdorff(hausd);
         return *this;
       }
 
-      ImplicitDomainMesher& setGradation(Scalar hgrad)
+      ImplicitDomainMesher& setGradation(Real hgrad)
       {
         MMG5::setGradation(hgrad);
         return *this;
@@ -159,10 +159,10 @@ namespace Rodin::External::MMG
 
       void deleteBoundaryRef(MMG5_pMesh mesh, Geometry::Attribute ref);
 
-      Scalar m_ls;
+      Real m_ls;
       SplitMap m_split;
       bool m_meshTheSurface;
-      std::optional<Scalar> m_rmc;
+      std::optional<Real> m_rmc;
       FlatSet<Geometry::Attribute> m_lsBaseReferences;
       std::optional<Geometry::Attribute> m_isoref;
 

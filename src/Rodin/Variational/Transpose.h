@@ -27,17 +27,21 @@ namespace Rodin::Variational
     : public FunctionBase<Transpose<FunctionBase<NestedDerived>>>
   {
     public:
-      using Operand = FunctionBase<NestedDerived>;
-      using Parent = FunctionBase<Transpose<Operand>>;
+      using OperandType = FunctionBase<NestedDerived>;
 
-      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
-      static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
+      using Parent = FunctionBase<Transpose<OperandType>>;
+
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
+      static_assert(
+          std::is_same_v<OperandRangeType, Math::Vector<Real>>
+          || std::is_same_v<OperandRangeType, Math::Matrix<Real>>);
 
       /**
        * @brief Constructs the Transpose matrix of the given matrix.
        */
       constexpr
-      Transpose(const Operand& m)
+      Transpose(const OperandType& m)
         : m_operand(m.copy())
       {}
 
@@ -62,7 +66,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
@@ -77,17 +81,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValueByReference(Math::Matrix& out, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Real>& out, const Geometry::Point& p) const
       {
-        out = getOperand().getValue(p);
-        out.transposeInPlace();
-      }
-
-      inline
-      constexpr
-      void getValueByReference(Math::Vector& out, const Geometry::Point& p) const
-      {
-        out = getOperand().getValue(p);
+        getOperand().getValue(out, p);
         out.transposeInPlace();
       }
 
@@ -97,7 +93,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_operand;
+      std::unique_ptr<OperandType> m_operand;
   };
 
   template <class NestedDerived>
@@ -112,11 +108,14 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
   {
     public:
-      using Operand = ShapeFunctionBase<NestedDerived, FES, Space>;
-      using Parent = ShapeFunctionBase<Transpose<Operand>, FES, Space>;
+      using FESType = FES;
+
+      using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
+
+      using Parent = ShapeFunctionBase<Transpose<OperandType>, FES, Space>;
 
       constexpr
-      Transpose(const Operand& op)
+      Transpose(const OperandType& op)
         : Parent(op.getFiniteElementSpace()),
           m_operand(op.copy())
       {}
@@ -156,20 +155,30 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
       inline
-      constexpr
-      auto getTensorBasis(const Geometry::Point& p) const
+      const Geometry::Point& getPoint() const
       {
-        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
-        static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
-        const auto& op = this->object(getOperand().getTensorBasis(p));
-        return TensorBasis(op.getDOFs(), [&](size_t i){ return op(i).transpose(); });
+        return m_operand->getPoint();
+      }
+
+      inline
+      Transpose& setPoint(const Geometry::Point& p)
+      {
+        m_operand->setPoint(p);
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getBasis(size_t local) const
+      {
+        return this->object(getOperand().getBasis(local)).transpose();
       }
 
       inline
@@ -185,7 +194,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<Operand> m_operand;
+      std::unique_ptr<OperandType> m_operand;
   };
 
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>

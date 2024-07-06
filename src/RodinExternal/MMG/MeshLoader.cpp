@@ -49,6 +49,28 @@ namespace Rodin::External::MMG
         mesh.setRidge(std::stoul(line) - 1);
       }
     }
+
+    find = pos.find(IO::MEDIT::Keyword::RequiredEdges);
+    if (find != pos.end())
+    {
+      is.seekg(find->second);
+      for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::RequiredEdges); i++)
+      {
+        std::getline(is, line);
+        mesh.setRequiredEdge(std::stoul(line) - 1);
+      }
+    }
+
+    find = pos.find(IO::MEDIT::Keyword::RequiredVertices);
+    if (find != pos.end())
+    {
+      is.seekg(find->second);
+      for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::RequiredVertices); i++)
+      {
+        std::getline(is, line);
+        mesh.setRequiredVertex(std::stoul(line) - 1);
+      }
+    }
   }
 }
 

@@ -12,20 +12,22 @@ using namespace Geometry;
 
 int main(int, char**)
 {
-  const size_t dim = 2;
-
   Mesh mesh;
   mesh.load("../resources/mfem/StarSquare.mfem.mesh", IO::FileFormat::MFEM);
-  // mesh.initialize(dim, dim)
-  //     .vertex({0, 0})
-  //     .vertex({1, 0})
-  //     .vertex({0, 1})
-  //     .vertex({1, 1})
-  //     .element(Geometry::Type::Triangle, {0, 1, 2})
-  //     .element(Geometry::Type::Triangle, {2, 1, 3})
-  //     .finalize();
+  // mesh = mesh.Build().initialize(2).nodes(4)
+  //                    .vertex({ 0, 0 }).vertex({ 1, 0 }).vertex({ 0, 1 }).vertex({ 1, 1 })
+  //                    .polytope(Polytope::Type::Quadrilateral, { 0, 1, 2, 3 }).finalize();
 
-  mesh.save("miaow.mesh", IO::FileFormat::MEDIT);
+  mesh.getConnectivity().compute(1, 2);
+  // const auto& inc = mesh.getConnectivity().getIncidence(1, 0);
+  // for (auto& c : inc)
+  // {
+  //   for (auto& v : c)
+  //     std::cout << v << ",";
+  //   std::cout << std::endl;
+  // }
+
+  mesh.save("miaow.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

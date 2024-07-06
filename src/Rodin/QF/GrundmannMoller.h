@@ -78,9 +78,9 @@ namespace Rodin::QF
 
       size_t getSize() const override;
 
-      Scalar getWeight(size_t i) const override;
+      Real getWeight(size_t i) const override;
 
-      const Math::SpatialVector& getPoint(size_t i) const override;
+      const Math::SpatialVector<Real>& getPoint(size_t i) const override;
 
       inline
       GrundmannMoller* copy() const noexcept override
@@ -89,13 +89,13 @@ namespace Rodin::QF
       }
 
       static boost::multi_array<size_t, 2> initSizes();
-      static boost::multi_array<Math::Vector, 2> initWeights();
-      static boost::multi_array<std::vector<Math::SpatialVector>, 2> initPoints();
+      static boost::multi_array<Math::Vector<Real>, 2> initWeights();
+      static boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> initPoints();
     private:
 
       static boost::multi_array<size_t, 2> s_sizes;
-      static boost::multi_array<Math::Vector, 2> s_weights;
-      static boost::multi_array<std::vector<Math::SpatialVector>, 2> s_points;
+      static boost::multi_array<Math::Vector<Real>, 2> s_weights;
+      static boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> s_points;
 
       const size_t m_s;
       const size_t m_n;

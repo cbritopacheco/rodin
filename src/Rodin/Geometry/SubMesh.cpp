@@ -6,20 +6,29 @@
 
 namespace Rodin::Geometry
 {
-  SubMesh<Context::Sequential>::SubMesh(std::reference_wrapper<const Mesh<Context::Sequential>> parent)
+  SubMesh<Context::Sequential>::SubMesh(std::reference_wrapper<const Mesh<Context>> parent)
     : m_parent(parent)
-  {}
+  {
+    if (parent.get().isSubMesh())
+    {
+      const auto& submesh = parent.get().asSubMesh();
+      m_ancestors = submesh.getAncestors();
+    }
+    m_ancestors.push_front(parent.get());
+  }
 
   SubMesh<Context::Sequential>::SubMesh(const SubMesh& other)
     : Parent(other),
       m_parent(other.m_parent),
-      m_s2ps(other.m_s2ps)
+      m_s2ps(other.m_s2ps),
+      m_ancestors(other.m_ancestors)
   {}
 
   SubMesh<Context::Sequential>::SubMesh(SubMesh&& other)
     : Parent(std::move(other)),
       m_parent(std::move(other.m_parent)),
-      m_s2ps(std::move(other.m_s2ps))
+      m_s2ps(std::move(other.m_s2ps)),
+      m_ancestors(std::move(other.m_ancestors))
   {}
 
   const Mesh<Context::Sequential>& SubMesh<Context::Sequential>::getParent() const
@@ -27,44 +36,47 @@ namespace Rodin::Geometry
     return m_parent.get();
   }
 
-  Point SubMesh<Context::Sequential>::inclusion(const Point& p) const
+  std::optional<Point> SubMesh<Context::Sequential>::restriction(const Point& p) const
   {
-    const auto& parent = getParent();
     const auto& polytope = p.getPolytope();
-    assert(*this == polytope.getMesh());
     const size_t d = polytope.getDimension();
-    const Index i = polytope.getIndex();
-    const Index pi = getPolytopeMap(d).left.at(i);
-    auto it = parent.getPolytope(d, pi);
-    std::unique_ptr<Polytope> parentPolytope(it.release());
-    return Point(
-        std::move(*parentPolytope),
-        parent.getPolytopeTransformation(d, pi),
-        std::cref(p.getReferenceCoordinates()), p.getPhysicalCoordinates());
-  }
-
-  Point SubMesh<Context::Sequential>::restriction(const Point& p) const
-  {
-    const auto& child = *this;
-    const auto& polytope = p.getPolytope();
-    assert(getParent() == polytope.getMesh());
-    const size_t d = polytope.getDimension();
-    const Index i = polytope.getIndex();
-    const auto& pmap = getPolytopeMap(d);
-    const auto find = pmap.right.find(i);
-    if (find == pmap.right.end())
+    Index i = polytope.getIndex();
+    const auto& ancestors = getAncestors();
+    Deque<std::reference_wrapper<const SubMeshBase>> descendants;
+    descendants.push_front(*this);
+    for (auto it = ancestors.begin(); it != ancestors.end(); ++it)
     {
-      Alert::MemberFunctionException(*this, __func__)
-        << "Invalid restriction. Could not find " << Alert::Notation::Polytope(d, i)
-        << " in the SubMesh to parent Mesh map."
-        << Alert::Raise;
+      if (it->get() == polytope.getMesh())
+      {
+        break;
+      }
+      else if (!it->get().isSubMesh())
+      {
+        // Invalid restriction.
+        // The SubMesh is not a descendant of the Mesh to which the Point belongs to.
+        return {};
+      }
+      else
+      {
+        descendants.push_front(it->get().asSubMesh());
+      }
     }
-    const Index ci = find->get_left();
-    auto it = child.getPolytope(d, ci);
-    std::unique_ptr<Polytope> childPolytope(it.release());
+    for (auto it = descendants.begin(); it != descendants.end(); ++it)
+    {
+      const auto& polytopeMap = it->get().getPolytopeMap(d);
+      auto find = polytopeMap.right.find(i);
+      if (find == polytopeMap.right.end())
+      {
+        // Invalid restriction.
+        // Could not find Polytope(d, i) in the SubMesh to parent Mesh map.
+        return {};
+      }
+      i = find->get_left();
+    }
+    std::unique_ptr<Polytope> childPolytope(getPolytope(d, i).release());
     return Point(
         std::move(*childPolytope),
-        child.getPolytopeTransformation(d, ci),
+        getPolytopeTransformation(d, i),
         std::cref(p.getReferenceCoordinates()), p.getPhysicalCoordinates());
   }
 }

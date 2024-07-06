@@ -48,16 +48,19 @@ namespace Rodin::Variational
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
-      using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
-      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
-      using Integrand = Dot<LHS, RHS>;
-      using Parent = QuadratureRule<Integrand>;
+      using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
 
-      InterfaceIntegral(const LHS& lhs, const RHS& rhs)
+      using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
+      using IntegrandType = Dot<LHSType, RHSType>;
+
+      using Parent = QuadratureRule<IntegrandType>;
+
+      InterfaceIntegral(const LHSType& lhs, const RHSType& rhs)
         : InterfaceIntegral(Dot(lhs, rhs))
       {}
 
-      InterfaceIntegral(const Integrand& prod)
+      InterfaceIntegral(const IntegrandType& prod)
         : Parent(prod)
       {}
 
@@ -106,8 +109,9 @@ namespace Rodin::Variational
     : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
     public:
-      using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
-      using Parent = QuadratureRule<Integrand>;
+      using IntegrandType = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
+
+      using Parent = QuadratureRule<IntegrandType>;
 
       template <class LHSDerived, class RHSDerived>
       constexpr
@@ -118,7 +122,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      InterfaceIntegral(const Integrand& integrand)
+      InterfaceIntegral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 

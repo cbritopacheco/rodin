@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_SCALARFUNCTION_H
-#define RODIN_VARIATIONAL_SCALARFUNCTION_H
+#ifndef RODIN_VARIATIONAL_NUMBERFUNCTION_H
+#define RODIN_VARIATIONAL_NUMBERFUNCTION_H
 
 #include <map>
 #include <set>
@@ -28,11 +28,17 @@ namespace Rodin::Variational
    * @see ScalarFunction
    */
 
-  template <class Derived>
-  class ScalarFunctionBase : public FunctionBase<ScalarFunctionBase<Derived>>
+  template <class Number, class Derived>
+  class ScalarFunctionBase : public FunctionBase<ScalarFunctionBase<Number, Derived>>
   {
     public:
-      using Parent = FunctionBase<ScalarFunctionBase<Derived>>;
+      using ScalarType = Number;
+
+      using RangeType = ScalarType;
+
+      using Parent = FunctionBase<ScalarFunctionBase<ScalarType, Derived>>;
+
+      using Parent::traceOf;
 
       ScalarFunctionBase() = default;
 
@@ -45,22 +51,6 @@ namespace Rodin::Variational
       {}
 
       virtual ~ScalarFunctionBase() = default;
-
-      inline
-      constexpr
-      ScalarFunctionBase& traceOf(Geometry::Attribute attr)
-      {
-        Parent::traceOf(attr);
-        return *this;
-      }
-
-      inline
-      constexpr
-      ScalarFunctionBase& traceOf(const std::set<Geometry::Attribute>& attrs)
-      {
-        Parent::traceOf(attrs);
-        return *this;
-      }
 
       inline
       const Derived& getDerived() const
@@ -77,11 +67,11 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector&, const Geometry::Point&) const = delete;
+      void getValue(Math::Vector<Number>&, const Geometry::Point&) const = delete;
 
       inline
       constexpr
-      void getValue(Math::Matrix&, const Geometry::Point&) const = delete;
+      void getValue(Math::Matrix<Number>&, const Geometry::Point&) const = delete;
 
       inline
       constexpr
@@ -95,246 +85,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).copy();
       }
   };
-
-  /**
-   * @ingroup ScalarFunctionSpecializations
-   */
-  template <class NestedDerived>
-  class ScalarFunction<FunctionBase<NestedDerived>> final
-    : public ScalarFunctionBase<ScalarFunction<NestedDerived>>
-  {
-    public:
-      using Parent = ScalarFunctionBase<ScalarFunction<NestedDerived>>;
-      using NestedRangeType = typename FormLanguage::Traits<FunctionBase<NestedDerived>>::RangeType;
-
-      static_assert(std::is_same_v<NestedRangeType, Scalar>);
-
-      ScalarFunction(const FunctionBase<NestedDerived>& nested)
-        : m_nested(nested.copy())
-      {}
-
-      ScalarFunction(const ScalarFunction& other)
-        : Parent(other),
-          m_nested(other.m_nested->copy())
-      {}
-
-      ScalarFunction(ScalarFunction&& other)
-        : Parent(std::move(other)),
-          m_nested(std::move(other.m_nested))
-      {}
-
-      inline
-      constexpr
-      auto getValue(const Geometry::Point& v) const
-      {
-        return m_nested->getValue(v);
-      }
-
-      inline
-      constexpr
-      ScalarFunction& traceOf(Geometry::Attribute attrs)
-      {
-        m_nested->traceOf(attrs);
-        return *this;
-      }
-
-      inline ScalarFunction* copy() const noexcept override
-      {
-        return new ScalarFunction(*this);
-      }
-
-    private:
-      std::unique_ptr<FunctionBase<NestedDerived>> m_nested;
-  };
-
-  /**
-   * @brief CTAD for ScalarFunction.
-   */
-  template <class Derived>
-  ScalarFunction(const FunctionBase<Derived>&) -> ScalarFunction<FunctionBase<Derived>>;
-
-  /**
-   * @ingroup ScalarFunctionSpecializations
-   * @brief Represents a constant scalar function with type Scalar.
-   */
-  template <>
-  class ScalarFunction<Scalar> final
-    : public ScalarFunctionBase<ScalarFunction<Scalar>>
-  {
-    public:
-      using Parent = ScalarFunctionBase<ScalarFunction<Scalar>>;
-
-      /**
-       * @brief Constructs a ScalarFunction from a constant scalar value.
-       * @param[in] x Constant scalar value
-       */
-      ScalarFunction(Scalar x)
-        : m_x(x)
-      {}
-
-      ScalarFunction(const ScalarFunction& other)
-        : Parent(other),
-          m_x(other.m_x)
-      {}
-
-      ScalarFunction(ScalarFunction&& other)
-        : Parent(std::move(other)),
-          m_x(other.m_x)
-      {}
-
-      inline
-      constexpr
-      ScalarFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
-
-      inline
-      constexpr
-      Scalar getValue() const
-      {
-        return m_x;
-      }
-
-      inline
-      constexpr
-      Scalar getValue(const Geometry::Point&) const
-      {
-        return m_x;
-      }
-
-      inline ScalarFunction* copy() const noexcept override
-      {
-        return new ScalarFunction(*this);
-      }
-
-    private:
-      const Scalar m_x;
-  };
-
-  /**
-   * @brief CTAD for ScalarFunction.
-   */
-  ScalarFunction(Scalar) -> ScalarFunction<Scalar>;
-
-  /**
-   * @ingroup ScalarFunctionSpecializations
-   * @brief Represents a constant scalar function with type Integer.
-   */
-  template <>
-  class ScalarFunction<Integer> final
-    : public ScalarFunctionBase<ScalarFunction<Integer>>
-  {
-    public:
-      using Parent = ScalarFunctionBase<ScalarFunction<Integer>>;
-
-      /**
-       * @brief Constructs a ScalarFunction from an integer value.
-       * @param[in] x Constant integer value
-       */
-      ScalarFunction(Integer x)
-        : m_x(x)
-      {}
-
-      ScalarFunction(const ScalarFunction& other)
-        : Parent(other),
-          m_x(other.m_x)
-      {}
-
-      ScalarFunction(ScalarFunction&& other)
-        : Parent(std::move(other)),
-          m_x(other.m_x)
-      {}
-
-      inline
-      constexpr
-      ScalarFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
-
-      inline
-      constexpr
-      Scalar getValue() const
-      {
-        return m_x;
-      }
-
-      inline
-      constexpr
-      Scalar getValue(const Geometry::Point&) const
-      {
-        return static_cast<Scalar>(m_x);
-      }
-
-      inline ScalarFunction* copy() const noexcept override
-      {
-        return new ScalarFunction(*this);
-      }
-
-    private:
-      const Integer m_x;
-  };
-
-  /**
-   * @brief CTAD for ScalarFunction.
-   */
-  ScalarFunction(Integer) -> ScalarFunction<Integer>;
-
-  /**
-   * @ingroup ScalarFunctionSpecializations
-   * @brief Represents a scalar function given by an arbitrary scalar function.
-   */
-  template <class F>
-  class ScalarFunction<F> final : public ScalarFunctionBase<ScalarFunction<F>>
-  {
-    static_assert(std::is_invocable_r_v<Scalar, F, const Geometry::Point&>);
-
-    public:
-      using Parent = ScalarFunctionBase<ScalarFunction<F>>;
-
-      ScalarFunction(F f)
-        : m_f(f)
-      {}
-
-      ScalarFunction(const ScalarFunction& other)
-        : Parent(other),
-          m_f(other.m_f)
-      {}
-
-      ScalarFunction(ScalarFunction&& other)
-        : Parent(std::move(other)),
-          m_f(std::move(other.m_f))
-      {}
-
-      inline
-      constexpr
-      ScalarFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
-
-      inline
-      constexpr
-      Scalar getValue(const Geometry::Point& v) const
-      {
-        return m_f(v);
-      }
-
-      inline ScalarFunction* copy() const noexcept override
-      {
-        return new ScalarFunction(*this);
-      }
-
-    private:
-      const F m_f;
-  };
-
-  /**
-   * @brief CTAD for ScalarFunction.
-   */
-  template <class F, typename = std::enable_if_t<std::is_invocable_r_v<Scalar, F, const Geometry::Point&>>>
-  ScalarFunction(F) -> ScalarFunction<F>;
 }
 
 #endif
+

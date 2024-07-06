@@ -10,7 +10,7 @@
 #include <functional>
 
 #include "ForwardDecls.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {

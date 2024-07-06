@@ -7,7 +7,7 @@
 #include "GridFunction.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -27,24 +27,24 @@ namespace Rodin::Variational
    * @ingroup DivSpecializations
    * @brief Divergence of a P1 GridFunction
    */
-  template <class Derived, class FESType>
-  class DivBase<Derived, GridFunction<FESType>>
-    : public ScalarFunctionBase<DivBase<Derived, GridFunction<FESType>>>
+  template <class Derived, class FES>
+  class DivBase<Derived, GridFunction<FES>>
+    : public RealFunctionBase<DivBase<Derived, GridFunction<FES>>>
   {
     public:
-      using FES = FESType;
+      using FESType = FES;
 
-      using Operand = GridFunction<FES>;
+      using OperandType = GridFunction<FES>;
 
       /// Parent class
-      using Parent = ScalarFunctionBase<DivBase<Derived, Operand>>;
+      using Parent = RealFunctionBase<DivBase<Derived, OperandType>>;
 
       /**
        * @brief Constructs the Div of a @f$ \mathbb{P}_1 @f$ function @f$ u
        * @f$.
        * @param[in] u P1 GridFunction
        */
-      DivBase(const Operand& u)
+      DivBase(const OperandType& u)
         : m_u(u)
       {}
 
@@ -65,44 +65,39 @@ namespace Rodin::Variational
       {}
 
       inline
-      Scalar getValue(const Geometry::Point& p) const
+      Real getValue(const Geometry::Point& p) const
       {
-        Scalar out;
+        Real out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
-        const auto& gf = m_u.get();
+        const auto& gf = getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
-        if (polytope.getMesh() == fes.getMesh())
+        if (polytopeMesh == fesMesh)
         {
           interpolate(out, p);
         }
+        else if (const auto inclusion = fesMesh.inclusion(p))
+        {
+          interpolate(out, *inclusion);
+        }
+        else if (fesMesh.isSubMesh())
+        {
+          const auto& submesh = fesMesh.asSubMesh();
+          const auto restriction = submesh.restriction(p);
+          interpolate(out, *restriction);
+        }
         else
         {
-          if (polytopeMesh.isSubMesh())
-          {
-            const auto& submesh = polytopeMesh.asSubMesh();
-            assert(submesh.getParent() == fes.getMesh());
-            interpolate(out, submesh.inclusion(p));
-          }
-          else if (fesMesh.isSubMesh())
-          {
-            const auto& submesh = fesMesh.asSubMesh();
-            assert(submesh.getParent() == polytopeMesh);
-            interpolate(out, submesh.restriction(p));
-          }
-          else
-          {
-            assert(false);
-            out = NAN;
-          }
+          assert(false);
+          out = NAN;
         }
         return out;
       }
 
       inline
       constexpr
-      const Operand& getOperand() const
+      const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -112,7 +107,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto interpolate(Scalar& out, const Geometry::Point& p) const
+      auto interpolate(Real& out, const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).interpolate(out, p);
       }
@@ -127,7 +122,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Operand> m_u;
+      std::reference_wrapper<const OperandType> m_u;
   };
 }
 

@@ -20,7 +20,7 @@ namespace Rodin::Math
   /**
    * @brief Sparse matrix type
    */
-  // using BlockSparseMatrix = Eigen::BlockSparseMatrix<Scalar>;
+  // using BlockSparseMatrix = Eigen::BlockSparseMatrix<Real>;
 }
 
 #endif

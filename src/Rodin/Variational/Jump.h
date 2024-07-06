@@ -12,126 +12,122 @@
 
 namespace Rodin::Variational
 {
-  // template <ShapeFunctionSpaceType Space>
-  // class Jump<ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>
+  // template <class Derived, class FES, ShapeFunctionSpaceType Space>
+  // class Jump<ShapeFunctionBase<Derived, FES, Space>> final
+  //   : public ShapeFunctionBase<Jump<ShapeFunctionBase<Derived, FES, Space>>>
   // {
-  //  public:
-  //   using Parent = ShapeFunctionBase<Space>;
+  //   public:
+  //     using FESType = FES;
+  //     static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-  //   constexpr
-  //   Jump(ShapeFunctionBase<Space>& u)
-  //     : m_u(u)
-  //   {}
+  //     using OperandType = ShapeFunctionBase<Derived, FESType, SpaceType>;
 
-  //   constexpr
-  //   Jump(const Jump& other)
-  //     :  Parent(other),
-  //      m_u(other.m_u)
-  //   {}
+  //     using RangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-  //   constexpr
-  //   Jump(Jump&& other)
-  //     :  Parent(std::move(other)),
-  //      m_u(std::move(other.m_u))
-  //   {}
+  //     using Parent = ShapeFunctionBase<Jump<ShapeFunctionBase<Derived, FESType, SpaceType>>>;
 
-  //   const ShapeFunctionBase<Space>& getLeaf() const override
-  //   {
-  //     return m_u.get().getLeaf();
-  //   }
+  //     constexpr
+  //     Jump(const OperandType& op)
+  //       : Parent(op.getFiniteElementSpace()),
+  //         m_operand(op.copy())
+  //     {}
 
-  //   int getRows() const override
-  //   {
-  //     return m_u.get().getRows();
-  //   }
+  //     constexpr
+  //     Jump(const Jump& other)
+  //       : Parent(other),
+  //         m_operand(other.m_operand->copy())
+  //     {}
 
-  //   int getDOFs(const Geometry::Simplex& element) const override
-  //   {
-  //     assert(false);
-  //     return 0;
-  //     // assert(dynamic_cast<const Geometry::Interface*>(&element));
-  //     // const auto& incident =
-  //     //  static_cast<const Geometry::Interface&>(element).getElements();
-  //     // assert(incident.size() == 2);
-  //     // auto first = incident.begin();
-  //     // auto second = std::next(first);
-  //     // return m_u.get().getDOFs(*first) + m_u.get().getDOFs(*second);
-  //   }
+  //     constexpr
+  //     Jump(Jump&& other)
+  //       : Parent(std::move(other)),
+  //         m_operand(std::move(other.m_operand))
+  //     {}
 
-  //   int getColumns() const override
-  //   {
-  //     return m_u.get().getColumns();
-  //   }
+  //     inline
+  //     constexpr
+  //     const OperandType& getOperand() const
+  //     {
+  //       assert(m_operand);
+  //       return *m_operand;
+  //     }
 
-  //   void getOperator(
-  //      TensorBasis& op,
-  //      ShapeComputator& compute,
-  //      const Geometry::Point& simplex) override
-  //   {
-  //     assert(false);
-  //     // assert(simplex.getDimension() == simplex.getMesh().getDimension() - 1);
-  //     // switch (element.getRegion())
-  //     // {
-  //     //  case Geometry::Region::Interface:
-  //     //  {
-  //     //    assert(dynamic_cast<const Geometry::Interface*>(&element));
-  //     //    const auto& incident = static_cast<const Geometry::Interface&>(element).getElements();
-  //     //    assert(incident.size() == 2);
-  //     //    auto first = incident.begin();
-  //     //    auto second = std::next(first);
+  //     inline
+  //     constexpr
+  //     const auto& getLeaf() const
+  //     {
+  //       return getOperand().getLeaf();
+  //     }
 
-  //     //    first->getTransformation().SetIntPoint(&element.getTransformation().GetIntPoint());
-  //     //    second->getTransformation().SetIntPoint(&element.getTransformation().GetIntPoint());
+  //     inline
+  //     constexpr
+  //     RangeShape getRangeShape() const
+  //     {
+  //       return getOperand().getRangeShape();
+  //     }
 
-  //     //    const int ndofs1 = m_u.get().getDOFs(*first);
-  //     //    const int ndofs2 = m_u.get().getDOFs(*second);
+  //     inline
+  //     constexpr
+  //     size_t getDOFs(const Geometry::Polytope& element) const
+  //     {
+  //       return getOperand().getDOFs(element);
+  //     }
 
-  //     //    DenseBasisOperator op1;
-  //     //    m_u.get().getOperator(op1, compute, first);
+  //     inline
+  //     const Geometry::Point& getPoint() const
+  //     {
+  //       return m_operanderand->getPoint();
+  //     }
 
-  //     //    DenseBasisOperator op2;
-  //     //    m_u.get().getOperator(op2, compute, second);
-  //     //    op2 *= -1.0;
+  //     inline
+  //     Transpose& setPoint(const Geometry::Point& p)
+  //     {
+  //       m_operanderand->setPoint(p);
+  //       return *this;
+  //     }
 
-  //     //    DenseBasisOperator res;
-  //     //    res.setSize(getRows(), getColumns(), ndofs1 + ndofs2);
-  //     //    res = 0.0;
+  //     inline
+  //     auto getBasis(size_t local) const
+  //     {
+  //       assert(p.getPolytope().isFace());
+  //       const auto& face = p.getPolytope();
+  //       const size_t d = face.getDimension();
+  //       const auto& mesh = face.getMesh();
+  //       const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex() );
+  //       assert(inc.size() == 2);
+  //       const Index idx1 = *inc.begin();
+  //       const Index idx2 = *std::next(inc.begin());
+  //       const auto it1 = mesh.getPolytope(d + 1, idx1);
+  //       const auto it2 = mesh.getPolytope(d + 1, idx2);
+  //       const auto& pc = p.getPhysicalCoordinates();
+  //       const Math::SpatialVector<Real> rc1 = it1->getTransformation().inverse(pc);
+  //       const Math::SpatialVector<Real> rc2 = it2->getTransformation().inverse(pc);
+  //       const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
+  //       const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
+  //       const auto& lhs = this->object(getOperand().getBasis(p1));
+  //       const auto& rhs = this->object(getOperand().getBasis(p2));
+  //       return lhs - rhs;
+  //     }
 
-  //     //    for (int i = 0; i < ndofs1; i++)
-  //     //     res(i) = std::move(op1(i));
+  //     inline
+  //     constexpr
+  //     const auto& getFiniteElementSpace() const
+  //     {
+  //       return getOperand().getFiniteElementSpace();
+  //     }
 
-  //     //    for (int i = 0; i < ndofs2; i++)
-  //     //     res(i + ndofs1) = std::move(op2(i));
+  //     inline Jump* copy() const noexcept override
+  //     {
+  //       return new Jump(*this);
+  //     }
 
-  //     //    break;
-  //     //  }
-  //     //  default:
-  //     //  {
-  //     //    assert(false);
-  //     //    break;
-  //     //  }
-  //     // }
-  //   }
-
-  //   FiniteElementSpaceBase& getFiniteElementSpace() override
-  //   {
-  //     return m_u.get().getFiniteElementSpace();
-  //   }
-
-  //   const FiniteElementSpaceBase& getFiniteElementSpace() const override
-  //   {
-  //     return m_u.get().getFiniteElementSpace();
-  //   }
-
-  //   Jump* copy() const noexcept override
-  //   {
-  //     return new Jump(*this);
-  //   }
-
-  //  private:
-  //   std::reference_wrapper<ShapeFunctionBase<Space>> m_u;
+  //   private:
+  //     std::unique_ptr<OperandType> m_operand;
   // };
+
+  // template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
+  // Jump(const ShapeFunctionBase<Derived, FESType, SpaceType>&)
+  //   -> Jump<ShapeFunctionBase<Derived, FESType, SpaceType>>;
 }
 
 #endif
-

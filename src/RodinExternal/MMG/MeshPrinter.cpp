@@ -17,6 +17,8 @@ namespace Rodin::External::MMG
     m_printer.print(os, false);
     printCorners(os);
     printRidges(os);
+    printRequiredVertices(os);
+    printRequiredEdges(os);
     m_printer.printEnd(os);
   }
 
@@ -40,6 +42,30 @@ namespace Rodin::External::MMG
        << mesh.getRidges().size()
        << '\n';
     for (const auto& r : mesh.getRidges())
+      os << r + 1 << '\n';
+    os << '\n';
+  }
+
+  void MeshPrinter::printRequiredVertices(std::ostream& os)
+  {
+    const auto& mesh = getObject();
+    os << IO::MEDIT::Keyword::RequiredVertices
+       << '\n'
+       << mesh.getRequiredVertices().size()
+       << '\n';
+    for (const auto& r : mesh.getRequiredVertices())
+      os << r + 1 << '\n';
+    os << '\n';
+  }
+
+  void MeshPrinter::printRequiredEdges(std::ostream& os)
+  {
+    const auto& mesh = getObject();
+    os << IO::MEDIT::Keyword::RequiredEdges
+       << '\n'
+       << mesh.getRequiredEdges().size()
+       << '\n';
+    for (const auto& r : mesh.getRequiredEdges())
       os << r + 1 << '\n';
     os << '\n';
   }

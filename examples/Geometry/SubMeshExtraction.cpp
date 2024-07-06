@@ -16,7 +16,7 @@ int main(int, char**)
 {
   size_t n = 6;
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.getConnectivity().compute(2, 1);
   mesh.getConnectivity().compute(1, 2);
   for (auto it = mesh.getCell(); !it.end(); ++it)

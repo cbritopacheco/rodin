@@ -9,7 +9,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::Test::Random;
 
-TEST(Rodin_Variational_Scalar_P1, SanityTest_2D_Square_Build)
+TEST(Rodin_Variational_Real_P1, SanityTest_2D_Square_Build)
 {
   constexpr size_t vdim = 1;
   constexpr size_t sdim = 2;
@@ -23,8 +23,8 @@ TEST(Rodin_Variational_Scalar_P1, SanityTest_2D_Square_Build)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Type::Triangle, {0, 1, 2})
-    .polytope(Polytope::Type::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+    .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
     .finalize();
 
   EXPECT_EQ(mesh.getDimension(), mdim);
@@ -40,7 +40,7 @@ TEST(Rodin_Variational_Scalar_P1, SanityTest_2D_Square_Build)
   EXPECT_EQ(fes.getFiniteElement(mdim, 1).getGeometry(), Polytope::Type::Triangle);
 }
 
-TEST(Rodin_Variational_Scalar_P1_GridFunction, SanityTest_2D_Square_Project_Sum)
+TEST(Rodin_Variational_Real_P1_GridFunction, SanityTest_2D_Square_Project_Sum)
 {
   constexpr size_t mdim = 2;
 
@@ -52,14 +52,14 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, SanityTest_2D_Square_Project_Sum)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Type::Triangle, {0, 1, 2})
-    .polytope(Polytope::Type::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+    .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
     .finalize();
 
   P1 fes(mesh);
   GridFunction gf(fes);
 
-  ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+  RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
   gf.project(c);
 
   EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
@@ -70,41 +70,41 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, SanityTest_2D_Square_Project_Sum)
   EXPECT_NEAR(gf.getValue(3), 2, RODIN_FUZZY_CONSTANT);
 }
 
-TEST(Rodin_Variational_Scalar_P1_GridFunction_FuzzyTest, TriangularUniformGrid16_ProjectOnBoundary_Constant)
+TEST(Rodin_Variational_Real_P1_GridFunction_FuzzyTest, TriangularUniformGrid16_ProjectOnBoundary_Constant)
 {
   constexpr size_t mdim = 2;
 
-  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
+  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
 
   mesh.getConnectivity().compute(mdim - 1, mdim);
 
   P1 fes(mesh);
   GridFunction gf(fes);
 
-  ScalarFunction c = 1.0;
+  RealFunction c = 1.0;
   gf.projectOnBoundary(c);
 
   EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
 }
 
-TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_TriangularUniformGrid16_ProjectOnBoundary_Sum)
+TEST(Rodin_Variational_Real_P1_GridFunction, FuzzyTest_TriangularUniformGrid16_ProjectOnBoundary_Sum)
 {
   constexpr size_t mdim = 2;
 
-  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
+  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
 
   mesh.getConnectivity().compute(mdim - 1, mdim);
 
   P1 fes(mesh);
   GridFunction gf(fes);
 
-  ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+  RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
   gf.projectOnBoundary(c);
 
   EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
 }
 
-TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_LinearFunction)
+TEST(Rodin_Variational_Real_P1_GridFunction, FuzzyTest_2D_Square_Project_LinearFunction)
 {
   constexpr size_t mdim = 2;
 
@@ -116,14 +116,14 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Type::Triangle, {0, 1, 2})
-    .polytope(Polytope::Type::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+    .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
     .finalize();
 
   P1 fes(mesh);
   GridFunction gf1(fes);
 
-  ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+  RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
   gf1.project(c);
 
   EXPECT_EQ(gf1.getRangeShape(), RangeShape(1, 1));
@@ -137,11 +137,11 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
 
     for (size_t i = 0; i < 25; i++)
     {
-      const Scalar x = gen();
-      const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
-      const Point p(polytope, trans, Math::Vector{{x, y}});
+      const Real x = gen();
+      const Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      const Math::Vector<Real> pc = trans.transform(rc);
+      const Point p(polytope, trans, Math::Vector<Real>{{x, y}});
       EXPECT_NEAR(gf1.getValue(p), pc.x() + pc.y(), RODIN_FUZZY_CONSTANT);
     }
   }
@@ -154,10 +154,10 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
 
     for (size_t i = 0; i < 25; i++)
     {
-      const Scalar x = gen();
-      const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Real x = gen();
+      const Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      const Math::Vector<Real> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
       EXPECT_NEAR(gf1.getValue(p), pc.x() + pc.y(), RODIN_FUZZY_CONSTANT);
     }
@@ -175,10 +175,10 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
 
     for (size_t i = 0; i < 25; i++)
     {
-      const Scalar x = gen();
-      const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Real x = gen();
+      const Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      const Math::Vector<Real> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
       EXPECT_NEAR(gf2.getValue(p), 5 * pc.x() + 100 * pc.y(), RODIN_FUZZY_CONSTANT);
     }
@@ -196,10 +196,10 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
 
     for (size_t i = 0; i < 25; i++)
     {
-      const Scalar x = gen();
-      const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Real x = gen();
+      const Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      const Math::Vector<Real> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
       EXPECT_NEAR(gf3.getValue(p), pc.x() - pc.y(), RODIN_FUZZY_CONSTANT);
     }
@@ -217,10 +217,10 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
 
     for (size_t i = 0; i < 25; i++)
     {
-      const Scalar x = gen();
-      const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Real x = gen();
+      const Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      const Math::Vector<Real> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
       EXPECT_NEAR(gf4.getValue(p), 666 * pc.x() - 999 * pc.y(), RODIN_FUZZY_CONSTANT);
     }
@@ -241,8 +241,8 @@ TEST(Rodin_Variational_Vector_P1, SanityTest_2D_Square_Build)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Type::Triangle, {0, 1, 2})
-    .polytope(Polytope::Type::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+    .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
     .finalize();
 
   EXPECT_EQ(mesh.getDimension(), mdim);
@@ -268,8 +268,8 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Type::Triangle, {0, 1, 2})
-    .polytope(Polytope::Type::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+    .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
     .finalize();
 
   P1 fes(mesh, mdim);
@@ -293,12 +293,12 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
 
     for (size_t i = 0; i < 25; i++)
     {
-      const Scalar x = gen();
-      const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Real x = gen();
+      const Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      const Math::Vector<Real> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
-      EXPECT_NEAR((gf1.getValue(p) - Math::Vector{{pc.x(), pc.y()}}).norm(), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR((gf1.getValue(p) - Math::Vector<Real>{{pc.x(), pc.y()}}).norm(), 0, RODIN_FUZZY_CONSTANT);
       break;
     }
   }
@@ -321,12 +321,12 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
 
     for (size_t i = 0; i < 25; i++)
     {
-      const Scalar x = gen();
-      const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Real x = gen();
+      const Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      const Math::Vector<Real> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
-      EXPECT_NEAR((gf2.getValue(p) - Math::Vector{{pc.y(), pc.x()}}).norm(), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR((gf2.getValue(p) - Math::Vector<Real>{{pc.y(), pc.x()}}).norm(), 0, RODIN_FUZZY_CONSTANT);
     }
   }
 
@@ -345,12 +345,12 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
 
     for (size_t i = 0; i < 25; i++)
     {
-      const Scalar x = gen();
-      const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Real x = gen();
+      const Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      const Math::Vector<Real> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
-      EXPECT_NEAR((gf3.getValue(p) - Math::Vector{{pc.x() + pc.y(), 0}}).norm(), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR((gf3.getValue(p) - Math::Vector<Real>{{pc.x() + pc.y(), 0}}).norm(), 0, RODIN_FUZZY_CONSTANT);
     }
   }
 
@@ -372,29 +372,29 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
 
     for (size_t i = 0; i < 25; i++)
     {
-      const Scalar x = gen();
-      const Scalar y = gen();
-      const Math::Vector rc{{x, y}};
-      const Math::Vector pc = trans.transform(rc);
+      const Real x = gen();
+      const Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      const Math::Vector<Real> pc = trans.transform(rc);
       const Point p(polytope, trans, rc);
-      const Math::Vector actual{{999 * p.x() - 100 * p.y(), -5 * p.x() + 666 * p.y()}};
+      const Math::Vector<Real> actual{{999 * p.x() - 100 * p.y(), -5 * p.x() + 666 * p.y()}};
       EXPECT_NEAR((gf4.getValue(p) - actual).norm(), 0, RODIN_FUZZY_CONSTANT);
     }
   }
 }
 
-TEST(Rodin_Variational_Scalar_P1_TrialFunction, FuzzyTest_UniformGrid_4x4)
+TEST(Rodin_Variational_Real_P1_TrialFunction, FuzzyTest_UniformGrid_4x4)
 {
-  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
+  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
   P1 fes(mesh);
   TrialFunction u(fes);
 
   EXPECT_EQ(u.getRangeShape(), RangeShape(1, 1));
 }
 
-TEST(Rodin_Variational_Scalar_P1_TestFunction, FuzzyTest_UniformGrid_4x4)
+TEST(Rodin_Variational_Real_P1_TestFunction, FuzzyTest_UniformGrid_4x4)
 {
-  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
+  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
   P1 fes(mesh);
   TrialFunction v(fes);
 
@@ -402,9 +402,9 @@ TEST(Rodin_Variational_Scalar_P1_TestFunction, FuzzyTest_UniformGrid_4x4)
 }
 
 
-TEST(Rodin_Variational_Scalar_P1_LinearForm, FuzzyTest_UniformGrid_4x4)
+TEST(Rodin_Variational_Real_P1_LinearForm, FuzzyTest_UniformGrid_4x4)
 {
-  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
+  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
   P1 fes(mesh);
   TestFunction v(fes);
   LinearForm lf(v);

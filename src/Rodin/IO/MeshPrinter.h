@@ -16,21 +16,25 @@
 
 namespace Rodin::IO
 {
-  template <class Trait>
-  class MeshPrinterBase : public IO::Printer<Rodin::Geometry::Mesh<Trait>>
+  template <class Context>
+  class MeshPrinterBase : public IO::Printer<Geometry::Mesh<Context>>
   {
     public:
-      MeshPrinterBase(const Geometry::Mesh<Context::Sequential>& mesh)
+      using ContextType = Context;
+
+      using ObjectType = Geometry::Mesh<ContextType>;
+
+      MeshPrinterBase(const ObjectType& mesh)
         : m_mesh(mesh)
       {}
 
-      const Rodin::Geometry::Mesh<Context::Sequential>& getObject() const override
+      const ObjectType& getObject() const override
       {
-        return m_mesh;
+        return m_mesh.get();
       }
 
     private:
-      const Rodin::Geometry::Mesh<Context::Sequential>& m_mesh;
+      std::reference_wrapper<const ObjectType> m_mesh;
   };
 }
 

@@ -25,10 +25,9 @@ set(RodinVariational_HEADERS
   MatrixFunction.h
   Problem.h
   ProblemBody.h
-  ScalarFunction.h
+  RealFunction.h
   Trace.h
   Transpose.h
-  TensorBasis.h
   Restriction.h
   VectorFunction.h
   Minus.h
@@ -59,7 +58,6 @@ set(RodinVariational_SRCS
   MatrixFunction.cpp
   Trace.cpp
   VectorFunction.cpp
-  ScalarFunction.cpp
   Restriction.cpp
   Sum.cpp
   UnaryMinus.cpp
@@ -105,4 +103,6 @@ target_link_libraries(RodinVariational
   Rodin::Utility
   Rodin::Geometry
   Rodin::Assembly
-  Rodin::FormLanguage)
+  Rodin::FormLanguage
+  PRIVATE
+  basix)

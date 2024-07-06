@@ -17,7 +17,7 @@
 #include "Rodin/Utility/ForConstexpr.h"
 
 #include "Function.h"
-#include "ScalarFunction.h"
+#include "RealFunction.h"
 
 namespace Rodin::Variational
 {
@@ -45,6 +45,22 @@ namespace Rodin::Variational
       VectorFunctionBase(VectorFunctionBase&& other)
         : Parent(std::move(other))
       {}
+
+      inline
+      constexpr
+      VectorFunctionBase& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      VectorFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
 
       /**
        * @brief Convenience function to access the 1st component of the
@@ -123,9 +139,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector&>::Value)
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector<Real>&>::Value)
         {
           return static_cast<const Derived&>(*this).getValue(res, p);
         }
@@ -137,7 +153,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Matrix& res, const Geometry::Point& p) const = delete;
+      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const = delete;
 
       /**
        * @brief Gets the dimension of the vector object.
@@ -156,12 +172,71 @@ namespace Rodin::Variational
       }
   };
 
+  template <>
+  class VectorFunction<Math::Vector<Real>> final
+    : public VectorFunctionBase<VectorFunction<Math::Vector<Real>>>
+  {
+    public:
+      using Parent = VectorFunctionBase<VectorFunction<Math::Vector<Real>>>;
+
+      /**
+       * @brief Constructs a vector with the given values.
+       * @param[in] values Parameter pack of values
+       *
+       * Each value passed must be convertible to any specialization of
+       * RealFunction.
+       */
+      VectorFunction(const Math::Vector<Real>& v)
+        : m_value(v)
+      {}
+
+      VectorFunction(const VectorFunction& other)
+        : Parent(other),
+          m_value(other.m_value)
+      {}
+
+      VectorFunction(VectorFunction&& other)
+        : Parent(std::move(other)),
+          m_value(std::move(other.m_value))
+      {}
+
+      inline
+      const Math::Vector<Real>& getValue(const Geometry::Point& p) const
+      {
+        return m_value.get();
+      }
+
+      inline
+      constexpr
+      size_t getDimension() const
+      {
+        return m_value.get().size();
+      }
+
+      inline
+      constexpr
+      VectorFunction& traceOf(Geometry::Attribute attr)
+      {
+        return *this;
+      }
+
+      inline VectorFunction* copy() const noexcept override
+      {
+        return new VectorFunction(*this);
+      }
+
+    private:
+      std::reference_wrapper<const Math::Vector<Real>> m_value;
+  };
+
+  VectorFunction(const Math::Vector<Real>&) -> VectorFunction<Math::Vector<Real>>;
+
   /**
    * @ingroup VectorFunctionSpecializations
    * @tparam V Type of first value
    * @tparam Values Parameter pack of remaining values
    * @brief Represents a vector function which may be constructed from values
-   * which can be converted to objects of type ScalarFunction.
+   * which can be converted to objects of type RealFunction.
    *
    * In general one may construct any VectorFunction by specifying its values
    * in a uniform initialization manner. For example, to construct a
@@ -170,9 +245,9 @@ namespace Rodin::Variational
    * auto v = VectorFunction{1, 2, 3};
    * @endcode
    * Alternatively, we may construct instances of VectorFunction from any type
-   * which is convertible to specializations of ScalarFunction:
+   * which is convertible to specializations of RealFunction:
    * @code{.cpp}
-   * auto s = ScalarFunction(3.1416);
+   * auto s = RealFunction(3.1416);
    * auto v = VectorFunction{Dx(s), 42, s};
    * @endcode
    */
@@ -187,10 +262,10 @@ namespace Rodin::Variational
        * @param[in] values Parameter pack of values
        *
        * Each value passed must be convertible to any specialization of
-       * ScalarFunction.
+       * RealFunction.
        */
-      VectorFunction(const V v, const Values... values)
-        : m_fs(ScalarFunction(v), ScalarFunction(values)...)
+      VectorFunction(const V& v, const Values&... values)
+        : m_fs(RealFunction(v), RealFunction(values)...)
       {}
 
       VectorFunction(const VectorFunction& other)
@@ -206,14 +281,14 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point& p) const
       {
-        Math::FixedSizeVector<1 + sizeof...(Values)> res;
+        Math::FixedSizeVector<Real, 1 + sizeof...(Values)> res;
         Utility::ForIndex<1 + sizeof...(Values)>(
             [&](auto i){ res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
         return res;
       }
 
       inline
-      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
         res.resize(1 + sizeof...(Values));
         Utility::ForIndex<1 + sizeof...(Values)>(
@@ -241,16 +316,18 @@ namespace Rodin::Variational
       }
 
     private:
-      std::tuple<ScalarFunction<V>, ScalarFunction<Values>...> m_fs;
+      std::tuple<RealFunction<V>, RealFunction<Values>...> m_fs;
   };
 
   template <class V, class ... Values>
-  VectorFunction(V, Values...) -> VectorFunction<V, Values...>;
+  VectorFunction(const V&, const Values&...) -> VectorFunction<V, Values...>;
 
   template <class F>
   class VectorFunction<F> final : public VectorFunctionBase<VectorFunction<F>>
   {
-    static_assert(std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>);
+    static_assert(
+        std::is_invocable_r_v<Math::Vector<Real>, F, const Geometry::Point&>
+        || std::is_invocable_v<F, Math::Vector<Real>&, const Geometry::Point&>);
 
     public:
       using Parent = VectorFunctionBase<VectorFunction<F>>;
@@ -279,9 +356,43 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::Vector getValue(const Geometry::Point& v) const
+      Math::Vector<Real> getValue(const Geometry::Point& p) const
       {
-        return m_f(v);
+        if constexpr (std::is_invocable_r_v<Math::Vector<Real>, F, const Geometry::Point&>)
+        {
+          return m_f(p);
+        }
+        else if constexpr (std::is_invocable_r_v<void, F, Math::Vector<Real>&, const Geometry::Point&>)
+        {
+          Math::Vector<Real> res;
+          m_f(res, p);
+          return res;
+        }
+        else
+        {
+          assert(false);
+          Math::Vector<Real> res;
+          res.setConstant(NAN);
+        }
+      }
+
+      inline
+      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
+      {
+        if constexpr (std::is_invocable_r_v<Math::Vector<Real>, F, const Geometry::Point&>)
+        {
+          res = m_f(p);
+        }
+        else if constexpr (std::is_invocable_v<F, Math::Vector<Real>&, const Geometry::Point&>)
+        {
+          m_f(res, p);
+        }
+        else
+        {
+          assert(false);
+          Math::Vector<Real> res;
+          res.setConstant(NAN);
+        }
       }
 
       inline VectorFunction* copy() const noexcept override
@@ -294,7 +405,9 @@ namespace Rodin::Variational
       const F m_f;
   };
 
-  template <class F, typename = std::enable_if_t<std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>>>
+  template <class F, typename = std::enable_if_t<
+    std::is_invocable_r_v<Math::Vector<Real>, F, const Geometry::Point&>
+    || std::is_invocable_v<F, Math::Vector<Real>&, const Geometry::Point&>>>
   VectorFunction(size_t, F) -> VectorFunction<F>;
 }
 

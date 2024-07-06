@@ -14,7 +14,7 @@ using namespace Rodin::Variational;
 
 static constexpr Geometry::Attribute Boundary = 2;
 
-static constexpr Scalar m = 1;
+static constexpr Real m = 1;
 
 int main(int, char**)
 {
@@ -22,7 +22,7 @@ int main(int, char**)
 
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.getConnectivity().compute(1, 2);
   mesh.scale(1.0 / (n - 1));
   mesh.scale(2 * M_PI);
@@ -34,13 +34,13 @@ int main(int, char**)
   TestFunction  v(vh);
 
   // Define problem
-  ScalarFunction f =
+  RealFunction f =
     [](const Point& p)
     {
       return sin(p.x() + M_PI / 4) * cos(p.y() + M_PI / 4);
     };
 
-  ScalarFunction g = 0.0;
+  RealFunction g = 0.0;
 
   IndexMap<IndexSet> dofs;
   for (Index i = 0; i < vh.getSize(); i += n)

@@ -17,14 +17,14 @@ namespace Rodin::FormLanguage
   /**
    * @ingroup TraitsSpecializations
    */
-  template <class Range, class ContextType, class MeshType>
-  struct Traits<Variational::GridFunction<Variational::P0<Range, ContextType, MeshType>>>
+  template <class Range, class Mesh>
+  struct Traits<Variational::GridFunction<Variational::P0<Range, Mesh>>>
   {
-    using RangeType = Range;
-    using FES = Variational::P0<RangeType, ContextType, MeshType>;
-    using Context = typename FormLanguage::Traits<FES>::Context;
-    using Mesh = typename FormLanguage::Traits<FES>::Mesh;
-    using Element = typename FormLanguage::Traits<FES>::Element;
+    using FESType = Variational::P0<Range, Mesh>;
+    using MeshType = typename FormLanguage::Traits<FESType>::MeshType;
+    using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+    using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+    using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
   };
 }
 
@@ -34,22 +34,23 @@ namespace Rodin::Variational
    * @ingroup GridFunctionSpecializations
    * @brief P0 GridFunction
    */
-  template <class Range, class Context, class Mesh>
-  class GridFunction<P0<Range, Context, Mesh>> final
-    : public GridFunctionBase<GridFunction<P0<Range, Context, Mesh>>>
+  template <class Number, class Mesh>
+  class GridFunction<P0<Number, Mesh>> final
+    : public GridFunctionBase<GridFunction<P0<Number, Mesh>>>
   {
     public:
-      /// Type of finite element space to which the GridFunction belongs to
-      using FES = P0<Range, Context, Mesh>;
+      using FESType = P0<Number, Mesh>;
 
-      /// Type of finite element
-      using Element = typename FES::Element;
+      using MeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
-      /// Range type of value
-      using RangeType = typename FES::RangeType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
+      using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+
+      using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
 
       /// Parent class
-      using Parent = GridFunctionBase<GridFunction<FES>>;
+      using Parent = GridFunctionBase<GridFunction<FESType>>;
 
       using Parent::getValue;
       using Parent::operator=;
@@ -63,7 +64,7 @@ namespace Rodin::Variational
        * @param[in] fes Finite element space to which the function belongs
        * to.
        */
-      GridFunction(const FES& fes)
+      GridFunction(const FESType& fes)
         : Parent(fes)
       {}
 
@@ -96,9 +97,9 @@ namespace Rodin::Variational
 
       GridFunction& operator=(const GridFunction&)  = delete;
 
-      Scalar interpolate(const Geometry::Point& p) const
+      Real interpolate(const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>);
+        static_assert(std::is_same_v<RangeType, Real>);
         const auto& fes = this->getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
         const auto& polytope = p.getPolytope();
@@ -110,9 +111,9 @@ namespace Rodin::Variational
         return getValue({d, i}, 0);
       }
 
-      // void interpolate(Math::Vector& res, const Geometry::Point& p) const
+      // void interpolate(Math::Vector<Real>& res, const Geometry::Point& p) const
       // {
-      //   static_assert(std::is_same_v<RangeType, Math::Vector>);
+      //   static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
       //   const auto& fes = this->getFiniteElementSpace();
       //   const auto& polytope = p.getPolytope();
       //   const size_t d = polytope.getDimension();
@@ -136,12 +137,12 @@ namespace Rodin::Variational
         if (!this->getWeights().has_value())
         {
           auto& weights = this->getWeights().emplace(this->getFiniteElementSpace().getSize());
-          if constexpr (std::is_same_v<RangeType, Scalar>)
+          if constexpr (std::is_same_v<RangeType, Real>)
           {
             assert(data.rows() == 1);
             std::copy(data.data(), data.data() + data.size(), weights.data());
           }
-          else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+          else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
           {
             const auto& fes = this->getFiniteElementSpace();
             const size_t vdim = fes.getVectorDimension();
@@ -164,12 +165,12 @@ namespace Rodin::Variational
         assert(static_cast<size_t>(weights.size()) == this->getFiniteElementSpace().getSize());
         auto& data = this->getData();
         const auto& w = this->getWeights().emplace(std::forward<Vector>(weights));
-        if constexpr (std::is_same_v<RangeType, Scalar>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(data.rows() == 1);
           std::copy(w.data(), w.data() + w.size(), data.data());
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
           const size_t sz = w.size();
           const auto& fes = this->getFiniteElementSpace();
@@ -191,8 +192,8 @@ namespace Rodin::Variational
 
   };
 
-  template <class ... Ts>
-  GridFunction(const P0<Ts...>&) -> GridFunction<P0<Ts...>>;
+  template <class Number, class Mesh>
+  GridFunction(const P0<Number, Mesh>&) -> GridFunction<P0<Number, Mesh>>;
 }
 
 #endif

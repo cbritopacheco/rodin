@@ -28,11 +28,13 @@ namespace Rodin::Variational
     : public BooleanFunctionBase<AND<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>>
   {
     public:
-      using LHS = BooleanFunctionBase<LHSDerived>;
-      using RHS = BooleanFunctionBase<RHSDerived>;
-      using Parent = BooleanFunctionBase<AND<LHS, RHS>>;
+      using LHSType = BooleanFunctionBase<LHSDerived>;
 
-      AND(const LHS& lhs, const RHS& rhs)
+      using RHSType = BooleanFunctionBase<RHSDerived>;
+
+      using Parent = BooleanFunctionBase<AND<LHSType, RHSType>>;
+
+      AND(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
@@ -74,8 +76,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<LHS> m_lhs;
-      std::unique_ptr<RHS> m_rhs;
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived>

@@ -297,7 +297,7 @@ namespace Rodin::External::MMG
     {
       // So (res->size + 1) * (res->np + 1) seems to work for most
       // applications
-      MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->npmax + 1), Scalar,
+      MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->npmax + 1), Real,
         MMG5Exception(__func__) << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
     }
     else
@@ -521,6 +521,22 @@ namespace Rodin::External::MMG
         assert(r <= res->na);
         res->edge[r + 1].tag |= MG_GEO;
       }
+
+      // Tag required vertices
+      for (const auto& c : ptr->getRequiredVertices())
+      {
+        assert(c >= 0);
+        assert(c <= res->na);
+        res->point[c + 1].tag |= MG_REQ;
+      }
+
+      // Tag required edges
+      for (const auto& r : ptr->getRequiredEdges())
+      {
+        assert(r >= 0);
+        assert(r <= res->na);
+        res->edge[r + 1].tag |= MG_REQ;
+      }
     }
 
     return res;
@@ -586,6 +602,7 @@ namespace Rodin::External::MMG
       build.attribute({ 1, i - 1 }, src->edge[i].ref );
       if (src->edge[i].tag & MG_GEO)
         build.ridge(i - 1);
+      // if (src->edge[i].tag & MG_REQ)
     }
     // Add triangles
     build.reserve(2, src->nt);
@@ -628,7 +645,7 @@ namespace Rodin::External::MMG
 
     if (dst->np)
     {
-      MMG5_SAFE_CALLOC(dst->m, dst->size * (dst->npmax + 1), Scalar,
+      MMG5_SAFE_CALLOC(dst->m, dst->size * (dst->npmax + 1), Real,
         MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->m." << Alert::Raise);
       std::copy(src->m, src->m + dst->size * (dst->np + 1), dst->m);
     }

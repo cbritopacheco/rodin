@@ -14,7 +14,7 @@ using namespace Rodin::Variational;
 using namespace Rodin::External;
 
 inline
-Scalar K(const Point& x, const Point& y)
+Real K(const Point& x, const Point& y)
 {
   return 1. / (4 * M_PI * ((x.asVector() - y.asVector()).stableNorm()));
 }
@@ -23,17 +23,17 @@ int main(int, char**)
 {
   size_t n = 32;
   MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.scale(2. / (n - 1));
   mesh.displace(VectorFunction{-1, -1});
 
   for (auto it = mesh.getVertex(); it; ++it)
   {
     const auto& coords = it->getCoordinates();
-    const Scalar x = coords.x();
-    const Scalar y = coords.y();
-    const Scalar u = x * sqrt(x * x + y * y - x * x * y * y) / sqrt(x * x + y * y);
-    const Scalar v = y * sqrt(x * x + y * y - x * x * y * y) / sqrt(x * x + y * y);
+    const Real x = coords.x();
+    const Real y = coords.y();
+    const Real u = x * sqrt(x * x + y * y - x * x * y * y) / sqrt(x * x + y * y);
+    const Real v = y * sqrt(x * x + y * y - x * x * y * y) / sqrt(x * x + y * y);
     mesh.setVertexCoordinates(it->getIndex(), u, 0);
     mesh.setVertexCoordinates(it->getIndex(), v, 1);
   }
@@ -49,7 +49,7 @@ int main(int, char**)
 
   P1 fes(mesh);
   // GridFunction f(fes);
-  ScalarFunction f =
+  RealFunction f =
     [](const Geometry::Point& p)
     {
       return 4.0 / (M_PI * std::sqrt(std::abs(1 - p.asVector().squaredNorm())));

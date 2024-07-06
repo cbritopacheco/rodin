@@ -23,7 +23,7 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD for CG
    */
-  CG() -> CG<Math::SparseMatrix, Math::Vector>;
+  CG() -> CG<Math::SparseMatrix<Real>, Math::Vector<Real>>;
 
   /**
    * @defgroup CGSpecializations CG Template Specializations
@@ -34,18 +34,18 @@ namespace Rodin::Solver
   /**
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * Math::SparseMatrix and Math::Vector.
+   * Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
   template <>
-  class CG<Math::SparseMatrix, Math::Vector> final
-    : public SolverBase<Math::SparseMatrix, Math::Vector>
+  class CG<Math::SparseMatrix<Real>, Math::Vector<Real>> final
+    : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::SparseMatrix;
+      using OperatorType = Math::SparseMatrix<Real>;
 
       /// Type of vector
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Real>;
 
       /**
        * @brief Constructs the CG object with default parameters.
@@ -75,6 +75,12 @@ namespace Rodin::Solver
       }
 
       inline
+      bool success() const
+      {
+        return m_solver.info() == Eigen::Success;
+      }
+
+      inline
       CG* copy() const noexcept override
       {
         return new CG(*this);
@@ -82,24 +88,24 @@ namespace Rodin::Solver
 
     private:
       Eigen::ConjugateGradient<
-        Math::SparseMatrix, Eigen::Lower | Eigen::Upper> m_solver;
+        Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper> m_solver;
   };
 
   /**
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * Math::Matrix and Math::Vector.
+   * Math::Matrix<Real> and Math::Vector<Real>.
    */
   template <>
-  class CG<Math::Matrix, Math::Vector> final
-    : public SolverBase<Math::Matrix, Math::Vector>
+  class CG<Math::Matrix<Real>, Math::Vector<Real>> final
+    : public SolverBase<Math::Matrix<Real>, Math::Vector<Real>>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::Matrix;
+      using OperatorType = Math::Matrix<Real>;
 
       /// Type of vector
-      using VectorType = Math::Vector;
+      using VectorType = Math::Vector<Real>;
 
       /**
        * @brief Constructs the CG object with default parameters.
@@ -129,6 +135,12 @@ namespace Rodin::Solver
       }
 
       inline
+      bool success() const
+      {
+        return m_solver.info() == Eigen::Success;
+      }
+
+      inline
       CG* copy() const noexcept override
       {
         return new CG(*this);
@@ -136,7 +148,7 @@ namespace Rodin::Solver
 
     private:
       Eigen::ConjugateGradient<
-        Math::Matrix, Eigen::Lower | Eigen::Upper> m_solver;
+        Math::Matrix<Real>, Eigen::Lower | Eigen::Upper> m_solver;
   };
 
 }

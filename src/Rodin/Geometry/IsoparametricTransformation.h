@@ -23,7 +23,7 @@ namespace Rodin::Geometry
   template <class FE>
   class IsoparametricTransformation final : public PolytopeTransformation
   {
-    static_assert(std::is_same_v<typename FE::RangeType, Scalar>,
+    static_assert(std::is_same_v<typename FE::RangeType, Real>,
         "Type of finite element must be scalar valued.");
 
     public:
@@ -90,7 +90,19 @@ namespace Rodin::Geometry
       }
 
       inline
-      void transform(const Math::SpatialVector& rc, Math::SpatialVector& pc) const override
+      size_t getOrder() const override
+      {
+        return m_fe.getOrder();
+      }
+
+      inline
+      size_t getJacobianOrder() const override
+      {
+        return m_fe.getOrder();
+      }
+
+      inline
+      void transform(const Math::SpatialVector<Real>& rc, Math::SpatialVector<Real>& pc) const override
       {
         const size_t pdim = getPhysicalDimension();
         assert(rc.size() >= 0);
@@ -105,7 +117,7 @@ namespace Rodin::Geometry
       }
 
       inline
-      void jacobian(const Math::SpatialVector& rc, Math::SpatialMatrix& res) const override
+      void jacobian(const Math::SpatialVector<Real>& rc, Math::SpatialMatrix<Real>& res) const override
       {
         const size_t rdim = getReferenceDimension();
         assert(rc.size() >= 0);
@@ -113,7 +125,7 @@ namespace Rodin::Geometry
         const size_t pdim = getPhysicalDimension();
         res.resize(pdim, rdim);
         res.setZero();
-        Math::SpatialVector gradient;
+        Math::SpatialVector<Real> gradient;
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
           m_fe.getGradient(local)(gradient, rc);

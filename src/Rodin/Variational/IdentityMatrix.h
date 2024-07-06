@@ -51,12 +51,12 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point&) const
       {
-        return Math::Matrix::Identity(m_n, m_n);
+        return Math::Matrix<Real>::Identity(m_n, m_n);
       }
 
       inline
       constexpr
-      IdentityMatrix& traceOf(const std::set<Geometry::Attribute>&)
+      IdentityMatrix& traceOf(const FlatSet<Geometry::Attribute>&)
       {
         return *this;
       }

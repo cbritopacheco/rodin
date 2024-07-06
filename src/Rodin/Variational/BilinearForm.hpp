@@ -7,31 +7,7 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_HPP
 #define RODIN_VARIATIONAL_BILINEARFORM_HPP
 
-#include <cassert>
-
-#include "Rodin/Alert.h"
-#include "Rodin/Assembly/AssemblyBase.h"
-
-#include "BilinearForm.h"
-#include "BilinearFormIntegrator.h"
-#include "FiniteElementSpace.h"
-
-
 namespace Rodin::Variational
-{
-  template <class TrialFES, class TestFES, class MatrixType>
-  void
-  BilinearForm<TrialFES, TestFES, MatrixType>::assemble()
-  {
-     const auto& trialFES = getTrialFunction().getFiniteElementSpace();
-     const auto& testFES = getTestFunction().getFiniteElementSpace();
-     const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();
-     m_operator =
-       this->getAssembly().execute({
-         mesh,
-         trialFES, testFES,
-         this->getLocalIntegrators(), this->getGlobalIntegrators() });
-  }
-}
+{}
 
 #endif

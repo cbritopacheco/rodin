@@ -45,6 +45,8 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      virtual ~Integrator() = default;
+
       virtual Type getType() const = 0;
 
       virtual Integrator* copy() const noexcept override = 0;

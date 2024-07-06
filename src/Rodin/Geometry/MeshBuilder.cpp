@@ -36,7 +36,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::vertex(std::initializer_list<Scalar> l)
+  Mesh<Context::Sequential>::Builder::vertex(std::initializer_list<Real> l)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -46,15 +46,15 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::vertex(const Scalar* data)
+  Mesh<Context::Sequential>::Builder::vertex(const Real* data)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
-    return vertex(Eigen::Map<const Math::Vector>(data, m_sdim));
+    return vertex(Eigen::Map<const Math::Vector<Real>>(data, m_sdim));
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::vertex(const Eigen::Map<const Math::Vector>& x)
+  Mesh<Context::Sequential>::Builder::vertex(const Eigen::Map<const Math::Vector<Real>>& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -65,7 +65,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::vertex(Math::Vector&& x)
+  Mesh<Context::Sequential>::Builder::vertex(Math::Vector<Real>&& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -76,7 +76,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::vertex(const Math::Vector& x)
+  Mesh<Context::Sequential>::Builder::vertex(const Math::Vector<Real>& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -132,15 +132,14 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::setConnectivity(
-      Connectivity<Context::Sequential>&& connectivity)
+  Mesh<Context::Sequential>::Builder::setConnectivity(Connectivity<Context>&& connectivity)
   {
     m_connectivity = std::move(connectivity);
     return *this;
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::setVertices(Math::Matrix&& vertices)
+  Mesh<Context::Sequential>::Builder::setVertices(Math::Matrix<Real>&& vertices)
   {
     m_vertices = std::move(vertices);
     return *this;

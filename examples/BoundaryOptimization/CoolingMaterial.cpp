@@ -9,12 +9,14 @@
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
 
-#include <Rodin/Models/Hilbert/H1a.h>
+#include "Tools.h"
 
 using namespace Rodin;
 using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+
+using namespace Rodin::Examples::BoundaryOptimization;
 
 // Parameters
 static constexpr Geometry::Attribute Gamma = 6;
@@ -26,46 +28,16 @@ static constexpr Geometry::Attribute SigmaN = 2;
 
 static constexpr size_t maxIt = 10000;
 
-static constexpr Scalar epsilon = 0.001;
-static constexpr Scalar ell = 1;
-static constexpr Scalar radius = 0.02;
-static constexpr Scalar tgv = std::numeric_limits<float>::max();
+static constexpr Real epsilon = 0.001;
+static constexpr Real ell = 1;
+static constexpr Real radius = 0.02;
+static constexpr Real tgv = std::numeric_limits<float>::max();
 
-using ScalarFES = P1<Scalar, Context::Sequential>;
-using VectorFES = P1<Math::Vector, Context::Sequential>;
-using ScalarGridFunction = GridFunction<ScalarFES>;
+using RealFES = P1<Real>;
+using VectorFES = P1<Math::Vector<Real>>;
+using RealGridFunction = GridFunction<RealFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
-
-inline
-size_t rmc(MeshBase& mesh)
-{
-  const size_t per = mesh.getPerimeter();
-  const size_t D = mesh.getDimension();
-  auto ccl = mesh.ccl(
-      [](const Polytope& p1, const Polytope& p2)
-      {
-        return p1.getAttribute() == p2.getAttribute();
-      }, D - 1, GammaD);
-  size_t ccs = ccl.getCount();
-
-  for (const auto& cc : ccl)
-  {
-    Scalar area = 0;
-    for (const Index i : cc)
-      area += mesh.getFace(i)->getMeasure();
-    if ((area / per) < 1e-5)
-    {
-      for (const Index i : cc)
-      {
-        if (mesh.getFace(i)->getAttribute() == GammaD)
-          mesh.setAttribute({ D - 1, i }, Gamma);
-      }
-      ccs--;
-    }
-  }
-  return ccs;
-}
 
 int main(int, char**)
 {
@@ -73,8 +45,8 @@ int main(int, char**)
   //const char* meshFile = "Omega.mesh";
 
   // Load and build finite element spaces on the volumetric domain
-  Scalar dc = 1;
-  Scalar hmax = 0.05;
+  Real dc = 1;
+  Real hmax = 0.05;
   size_t regionCount;
   MMG::Mesh Omega;
   Omega.load(meshFile, IO::FileFormat::MEDIT);
@@ -84,7 +56,7 @@ int main(int, char**)
     GridFunction dist(vh);
     dist = [&](const Point& p)
       {
-        Math::Vector c1(3);
+        Math::Vector<Real> c1(3);
         c1(0) = 4.3 - p.x();
         c1(1) = 3.8 - p.y();
         c1(2) = 1.0 - p.z();
@@ -104,7 +76,7 @@ int main(int, char**)
                                        .discretize(dist);
   }
 
-  auto J = [&](const ScalarGridFunction& u)
+  auto J = [&](const RealGridFunction& u)
   {
     return Integral(u).compute() + ell * Omega.getPerimeter(GammaD);
   };
@@ -114,11 +86,11 @@ int main(int, char**)
   size_t prevRegionCount = 0;
   while (i < maxIt)
   {
-    const Scalar hmin = hmax / 5.0;
-    const Scalar hausd = hmax / 10.0;
-    const Scalar hgrad = 1.2;
-    const Scalar k = 0.5 * (hmax + hmin);
-    const Scalar dt = dc * k;
+    const Real hmin = hmax / 5.0;
+    const Real hausd = hmax / 10.0;
+    const Real hgrad = 1.2;
+    const Real k = 0.5 * (hmax + hmin);
+    const Real dt = dc * k;
 
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
                   << "HMax:      " << Alert::Notation(hmax)     << Alert::NewLine
@@ -151,7 +123,7 @@ int main(int, char**)
 
     Alert::Info() << "RMC..." << Alert::Raise;
     prevRegionCount = regionCount;
-    regionCount = rmc(Omega);
+    regionCount = rmc(Omega, { GammaD }, Gamma);
 
     Alert::Info() << "Found " << Alert::Notation(regionCount) << " regions."
       << Alert::Raise;
@@ -161,9 +133,9 @@ int main(int, char**)
     dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
-    ScalarFES sfes(Omega);
+    RealFES sfes(Omega);
     VectorFES vfes(Omega, Omega.getSpaceDimension());
-    ScalarFES dsfes(dOmega);
+    RealFES dsfes(dOmega);
     VectorFES dvfes(dOmega, dOmega.getSpaceDimension());
 
     Alert::Info() << "Distancing domain..." << Alert::Raise;
@@ -173,10 +145,10 @@ int main(int, char**)
     // Parameters
     Solver::CG cg;
 
-    ScalarFunction f = 1;
-    ScalarFunction g = -1.0;
+    RealFunction f = 1;
+    RealFunction g = -1.0;
 
-    auto h = [](Scalar r)
+    auto h = [](Real r)
     {
       if (r < -1.0)
         return 1.0;
@@ -186,7 +158,7 @@ int main(int, char**)
         return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
     };
 
-    ScalarFunction he =
+    RealFunction he =
       [&](const Geometry::Point& p) { return h(dist(p) / epsilon) / epsilon; };
 
     Alert::Info() << "Solving state equation..." << Alert::Raise;
@@ -197,8 +169,6 @@ int main(int, char**)
           + FaceIntegral(he * u, v).over({Gamma, GammaD})
           - Integral(f, v);
     state.solve(cg);
-    u.getSolution().save("u.gf");
-    Omega.save("miaow.mesh");
 
     auto dj = -1.0 / Omega.getVolume();
     Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
@@ -211,7 +181,7 @@ int main(int, char**)
     adjoint.solve(cg);
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
-    const Scalar objective = J(u.getSolution());
+    const Real objective = J(u.getSolution());
     Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::Raise;
     fObj << objective << "\n";
     fObj.flush();
@@ -222,7 +192,7 @@ int main(int, char**)
     conormal.stableNormalize();
 
     Alert::Info() << "Computing shape gradient..." << Alert::Raise;
-    auto hadamard = 1. / (epsilon * epsilon) * u.getSolution() * p.getSolution() + ell;
+    auto hadamard = 1. / epsilon * u.getSolution() * p.getSolution() + ell;
     TrialFunction theta(dsfes);
     TestFunction  w(dsfes);
     Problem hilbert(theta, w);
@@ -240,21 +210,26 @@ int main(int, char**)
 
     Alert::Info() << "Advecting the distance function." << Alert::Raise;
     MMG::Advect(dist, grad).step(dt);
+    dOmega.save("miaow.mesh", IO::FileFormat::MEDIT);
+    dist.save("miaow.sol", IO::FileFormat::MEDIT);
+    MMG::Distancer().redistance(dist);
+    dOmega.save("woof.mesh", IO::FileFormat::MEDIT);
+    dist.save("woof.sol", IO::FileFormat::MEDIT);
 
-    if (true)
+    if (i % 5 == 0 && i < 50)
     {
       Alert::Info() << "Computing topological sensitivity..." << Alert::Raise;
       GridFunction topo(dsfes);
       topo = u.getSolution() * p.getSolution();
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
-      const Scalar tc = topo.min();
+      const Real tc = topo.min();
       std::vector<Point> cs;
       for (auto it = dOmega.getVertex(); !it.end(); ++it)
       {
         const Point p(*it, it->getTransformation(),
             Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
-        const Scalar tp = topo(p);
+        const Real tp = topo(p);
         if (Math::abs(1 - tc / tp) < 1e-5)
           cs.emplace_back(std::move(p));
       }
@@ -266,10 +241,10 @@ int main(int, char**)
         auto holes =
           [&](const Point& v)
           {
-            Scalar d = dist(v);
+            Real d = dist(v);
             for (const auto& c : cs)
             {
-              const Scalar dd = (v - c).norm() - radius;
+              const Real dd = (v - c).norm() - radius;
               d = std::min(d, dd);
             }
             return d;

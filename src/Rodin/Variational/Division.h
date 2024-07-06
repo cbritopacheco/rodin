@@ -27,13 +27,18 @@ namespace Rodin::Variational
     : public FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using Parent = FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
-      using LHS = FunctionBase<LHSDerived>;
-      using RHS = FunctionBase<RHSDerived>;
-      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      using LHSType = FunctionBase<LHSDerived>;
 
-      static_assert(FormLanguage::IsScalarRange<RHSRange>::Value);
+      using RHSType = FunctionBase<RHSDerived>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+      using Parent =
+        FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+
+      static_assert(std::is_same_v<RHSRangeType, Real>);
 
       Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
@@ -67,7 +72,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const LHS& getLHS() const
+      const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -75,14 +80,13 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const RHS& getRHS() const
+      const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
       inline
-      constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return this->object(getLHS().getValue(p)) / this->object(getRHS().getValue(p));
@@ -90,18 +94,16 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
+      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
-        static_assert(FormLanguage::IsVectorRange<LHSRange>::Value);
         getLHS().getValue(res, p);
         res /= getRHS().getValue(p);
       }
 
       inline
       constexpr
-      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const
+      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
       {
-        static_assert(FormLanguage::IsMatrixRange<LHSRange>::Value);
         getLHS().getValue(res, p);
         res /= getRHS().getValue(p);
       }
@@ -130,22 +132,22 @@ namespace Rodin::Variational
 
   template <class LHSDerived, class Number,
     typename = std::enable_if_t<
-      std::is_arithmetic_v<Number>, Division<LHSDerived, ScalarFunction<Number>>>>
+      std::is_arithmetic_v<Number>, Division<LHSDerived, RealFunction<Number>>>>
   inline
   auto
   operator/(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
-    return Division(lhs, ScalarFunction(rhs));
+    return Division(lhs, RealFunction(rhs));
   }
 
   template <class Number, class RHSDerived,
     typename = std::enable_if_t<
-      std::is_arithmetic_v<Number>, Division<RHSDerived, ScalarFunction<Number>>>>
+      std::is_arithmetic_v<Number>, Division<RHSDerived, RealFunction<Number>>>>
   inline
   auto
   operator/(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return Division(ScalarFunction(lhs), rhs);
+    return Division(RealFunction(lhs), rhs);
   }
 }
 #endif

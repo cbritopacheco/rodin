@@ -24,6 +24,18 @@ namespace Rodin::External::MMG
     return *this;
   }
 
+  Mesh& Mesh::setRequiredEdge(Index edgeIdx)
+  {
+    m_requiredEdgeIndex.insert(edgeIdx);
+    return *this;
+  }
+
+  Mesh& Mesh::setRequiredVertex(Index vertexIdx)
+  {
+    m_requiredVertexIndex.insert(vertexIdx);
+    return *this;
+  }
+
   void Mesh::save(
      const boost::filesystem::path& filename, IO::FileFormat fmt, size_t precison) const
   {
