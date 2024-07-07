@@ -64,7 +64,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Derived&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>VectorFunctionBase <span class="m-thin">class</span>
         </h1>
         <p>Base class for vector-valued functions defined on a mesh.</p>
@@ -86,7 +86,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;VectorFunctionBase&lt;Derived&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;VectorFunctionBase&lt;Scalar, Derived&gt;&gt;</a>
             </dt>
             <dd>Base class for function objects which can be evaluated over a mesh.</dd>
           </dl>
@@ -121,9 +121,9 @@
           <section class="m-doc-details" id="a35432dd5e47b1994ae143fff0e770739"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Derived&gt;
+                template&lt;class Scalar, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35432dd5e47b1994ae143fff0e770739" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35432dd5e47b1994ae143fff0e770739" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Access the ith component of the vector function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -138,9 +138,9 @@
           <section class="m-doc-details" id="aad8f738241426a32d95c3696395698d3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Derived&gt;
+                template&lt;class Scalar, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the dimension of the vector object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -155,9 +155,9 @@
           <section class="m-doc-details" id="aa7cb74ac380964c69a4b16c2bf61ec16"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Derived&gt;
+                template&lt;class Scalar, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>* Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa7cb74ac380964c69a4b16c2bf61ec16" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>* Rodin::<wbr />Variational::<wbr />VectorFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa7cb74ac380964c69a4b16c2bf61ec16" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">

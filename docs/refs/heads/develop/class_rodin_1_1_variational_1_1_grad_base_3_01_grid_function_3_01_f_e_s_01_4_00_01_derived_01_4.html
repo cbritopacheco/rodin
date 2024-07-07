@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Grad&lt;GridFunction&lt;P1&lt;Real, Mesh&gt;&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::GradBase&lt;GridFunction&lt;FES&gt;, Derived&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,8 +64,8 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Mesh&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Grad&lt;GridFunction&lt;P1&lt;Real, Mesh&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <div class="m-doc-template">template&lt;class FES, class Derived&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GradBase&lt;GridFunction&lt;FES&gt;, Derived&gt; <span class="m-thin">class</span>
         </h1>
         <p>Gradient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
         <nav class="m-block m-default">
@@ -75,8 +75,8 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -85,34 +85,21 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class Operand&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase&lt;Grad&lt;GridFunction&lt;P1&lt;Real, Mesh&gt;&gt;&gt;, GridFunction&lt;P1&lt;Real, Mesh&gt;&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;FormLanguage::Traits&lt;FES&gt;::ScalarType, GradBase&lt;GridFunction&lt;FES&gt;, Derived&gt;&gt;</a>
             </dt>
-            <dd>Base class for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> classes.</dd>
-          </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt id="ad329584fb74737ff6c1eb53a09d1492e">
-              using <a href="#ad329584fb74737ff6c1eb53a09d1492e" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">FESType</a>&gt;
-            </dt>
-            <dd>Operand type.</dd>
-            <dt id="a81ac8e2406286b72fb116da7a62fd201">
-              using <a href="#a81ac8e2406286b72fb116da7a62fd201" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&lt;<a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p1_3_01_real_00_01_mesh_01_4_01_4_01_4.html#ad329584fb74737ff6c1eb53a09d1492e" class="m-doc">OperandType</a>&gt;, <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p1_3_01_real_00_01_mesh_01_4_01_4_01_4.html#ad329584fb74737ff6c1eb53a09d1492e" class="m-doc">OperandType</a>&gt;
-            </dt>
-            <dd>Parent class.</dd>
+            <dd>Base class for vector-valued functions defined on a mesh.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p1_3_01_real_00_01_mesh_01_4_01_4_01_4.html#ad329584fb74737ff6c1eb53a09d1492e" class="m-doc">OperandType</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a7cf7b0c71702a67dc64cebf6d848787e" class="m-doc">GradBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
-            <dd>Constructs the gradient of an <svg class="m-math" style="width: 1.202em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 11.540137 9.474739">
+            <dd>Constructs the gradient of a <svg class="m-math" style="width: 1.202em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 11.540137 10.029041">
 <title>
-$ \mathbb{P}^1 $
+$ \mathbb{P}_1 $
 </title>
 <defs>
 <path id='eq1-g1-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
@@ -120,7 +107,7 @@ $ \mathbb{P}^1 $
 </defs>
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-80'/>
-<use x='7.305954' y='-4.338437' xlink:href='#eq1-g1-49'/>
+<use x='7.305954' y='1.793263' xlink:href='#eq1-g1-49'/>
 </g>
 </svg> function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -133,28 +120,42 @@ $ u $
 <use x='0' y='0' xlink:href='#eq2-g0-117'/>
 </g>
 </svg>.</dd>
-            <dt id="ab709e7e5fc05ea0621ef821468875e5f">
-              <span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp; other)</span>
+            <dt id="a71792a7e938a0aaeb329c790c4fcc78e">
+              <span class="m-doc-wrap-bumper"><a href="#a71792a7e938a0aaeb329c790c4fcc78e" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="af13a14eb0844906b4cc9ff4b46525521">
-              <span class="m-doc-wrap-bumper"><a href="#af13a14eb0844906b4cc9ff4b46525521" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp;&amp; other)</span>
+            <dt id="aebe31933f205e813f0c27741c4ffd8cd">
+              <span class="m-doc-wrap-bumper"><a href="#aebe31933f205e813f0c27741c4ffd8cd" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
         </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ad4b6235a13e726103b3c26cb53e5f8da">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad4b6235a13e726103b3c26cb53e5f8da" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap">Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Interpolation function to be overriden in Derived type.</dd>
+            <dt id="aab3cbd16cf98f13e90123411950bcf48">
+              <span class="m-doc-wrap-bumper">auto <a href="#aab3cbd16cf98f13e90123411950bcf48" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copy function to be overriden in Derived type.</dd>
+          </dl>
+        </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a1a8a11e3409fa2de35f7f2d9cfee664e"><div>
+          <section class="m-doc-details" id="a7cf7b0c71702a67dc64cebf6d848787e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Mesh&gt;
+                template&lt;class FES, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P1&lt;Real, Mesh&gt;&gt;&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p1_3_01_real_00_01_mesh_01_4_01_4_01_4.html#ad329584fb74737ff6c1eb53a09d1492e" class="m-doc">OperandType</a>&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES&gt;, Derived&gt;&lt;FES, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cf7b0c71702a67dc64cebf6d848787e" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">OperandType</a>&amp; u)</span></span>
             </h3>
-            <p>Constructs the gradient of an <svg class="m-math" style="width: 1.202em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 11.540137 9.474739">
+            <p>Constructs the gradient of a <svg class="m-math" style="width: 1.202em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 11.540137 10.029041">
 <title>
-$ \mathbb{P}^1 $
+$ \mathbb{P}_1 $
 </title>
 <defs>
 <path id='eq1-g1-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
@@ -162,7 +163,7 @@ $ \mathbb{P}^1 $
 </defs>
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-80'/>
-<use x='7.305954' y='-4.338437' xlink:href='#eq1-g1-49'/>
+<use x='7.305954' y='1.793263' xlink:href='#eq1-g1-49'/>
 </g>
 </svg> function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
