@@ -158,37 +158,37 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getRangeShape();
       }
 
-      inline
-      constexpr
-      RangeType getRangeType() const
-      {
-        using R = typename FormLanguage::Traits<FunctionBase<Derived>>::RangeType;
-        if constexpr (std::is_same_v<R, Boolean>)
-        {
-          return RangeType::Boolean;
-        }
-        else if constexpr (std::is_same_v<R, Integer>)
-        {
-          return RangeType::Integer;
-        }
-        else if constexpr (std::is_same_v<R, Real>)
-        {
-          return RangeType::Real;
-        }
-        else if constexpr (std::is_same_v<R, Math::Vector<Real>>)
-        {
-          return RangeType::Vector;
-        }
-        else if constexpr (std::is_same_v<R, Math::Matrix<Real>>)
-        {
-          return RangeType::Matrix;
-        }
-        else
-        {
-          assert(false);
-          static_assert(Utility::DependentFalse<R>::Value);
-        }
-      }
+      // inline
+      // constexpr
+      // RangeType getRangeType() const
+      // {
+      //   using R = typename FormLanguage::Traits<FunctionBase<Derived>>::RangeType;
+      //   if constexpr (std::is_same_v<R, Boolean>)
+      //   {
+      //     return RangeType::Boolean;
+      //   }
+      //   else if constexpr (std::is_same_v<R, Integer>)
+      //   {
+      //     return RangeType::Integer;
+      //   }
+      //   else if constexpr (std::is_same_v<R, Real>)
+      //   {
+      //     return RangeType::Real;
+      //   }
+      //   else if constexpr (Utility::IsSpecialization<R, >)
+      //   {
+      //     return RangeType::Vector;
+      //   }
+      //   else if constexpr (std::is_same_v<R, Math::Matrix<Real>>)
+      //   {
+      //     return RangeType::Matrix;
+      //   }
+      //   else
+      //   {
+      //     assert(false);
+      //     static_assert(Utility::DependentFalse<R>::Value);
+      //   }
+      // }
 
       /**
        * @brief Evaluates the function on a Point belonging to the mesh.
@@ -201,33 +201,33 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      inline
-      constexpr
-      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
-      {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector<Real>&, const Geometry::Point&>::Value)
-        {
-          return static_cast<const Derived&>(*this).getValue(res, p);
-        }
-        else
-        {
-          res = getValue(p);
-        }
-      }
+      // inline
+      // constexpr
+      // void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
+      // {
+      //   if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector<Real>&, const Geometry::Point&>::Value)
+      //   {
+      //     return static_cast<const Derived&>(*this).getValue(res, p);
+      //   }
+      //   else
+      //   {
+      //     res = getValue(p);
+      //   }
+      // }
 
-      inline
-      constexpr
-      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
-      {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix<Real>&, const Geometry::Point&>::Value)
-        {
-          return static_cast<const Derived&>(*this).getValue(res, p);
-        }
-        else
-        {
-          res = getValue(p);
-        }
-      }
+      // inline
+      // constexpr
+      // void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
+      // {
+      //   if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix<Real>&, const Geometry::Point&>::Value)
+      //   {
+      //     return static_cast<const Derived&>(*this).getValue(res, p);
+      //   }
+      //   else
+      //   {
+      //     res = getValue(p);
+      //   }
+      // }
 
       inline
       auto coeff(size_t i, size_t j) const
@@ -241,17 +241,17 @@ namespace Rodin::Variational
         return Component(*this, i);
       }
 
-      inline
-      void operator()(Math::Vector<Real>& res, const Geometry::Point& p) const
-      {
-        return getValue(res, p);
-      }
+      // inline
+      // void operator()(Math::Vector<Real>& res, const Geometry::Point& p) const
+      // {
+      //   return getValue(res, p);
+      // }
 
-      inline
-      void operator()(Math::Matrix<Real>& res, const Geometry::Point& p) const
-      {
-        return getValue(res, p);
-      }
+      // inline
+      // void operator()(Math::Matrix<Real>& res, const Geometry::Point& p) const
+      // {
+      //   return getValue(res, p);
+      // }
 
       /**
        * @brief Evaluates the function on a Point belonging to the mesh.

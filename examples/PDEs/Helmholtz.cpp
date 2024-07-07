@@ -21,12 +21,11 @@ int main(int, char**)
 
   // Functions
   P1<Complex> vh(mesh);
+  GridFunction gf(vh);
 
   Math::Vector<Complex> m(2);
-  m <<  Complex(3, 1), Complex(2, 9);
-
-  std::cout << m << std::endl;
-  std::cout << m.dot(m) << std::endl;
+  // m << Complex(3, 1), Complex(2, 9);
+  m.setOnes();
 
   // TrialFunction uRe(vh), uIm(vh);
   // TestFunction  vRe(vh), vIm(vh);

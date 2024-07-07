@@ -24,24 +24,27 @@ namespace Rodin::Variational
   /**
    * @brief Base class for Jacobian classes.
    */
-  template <class Derived, class Operand>
+  template <class Operand, class Derived>
   class JacobianBase;
 
   /**
    * @ingroup JacobianSpecializations
    * @brief Jacobian of a P1 GridFunction
    */
-  template <class Derived, class FES>
-  class JacobianBase<Derived, GridFunction<FES>>
-    : public MatrixFunctionBase<JacobianBase<Derived, GridFunction<FES>>>
+  template <class FES, class Derived>
+  class JacobianBase<GridFunction<FES>, Derived>
+    : public MatrixFunctionBase<
+        typename FormLanguage::Traits<FES>::ScalarType, JacobianBase<GridFunction<FES>, Derived>>
   {
     public:
       using FESType = FES;
 
-      using OperandType = GridFunction<FES>;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      /// Parent class
-      using Parent = MatrixFunctionBase<JacobianBase<Derived, OperandType>>;
+      using OperandType = GridFunction<FESType>;
+
+      using Parent =
+        MatrixFunctionBase<ScalarType, JacobianBase<OperandType, Derived>>;
 
       /**
        * @brief Constructs the Jacobianient of a @f$ \mathbb{P}_1 @f$ function

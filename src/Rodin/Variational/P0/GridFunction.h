@@ -36,7 +36,7 @@ namespace Rodin::Variational
    */
   template <class Number, class Mesh>
   class GridFunction<P0<Number, Mesh>> final
-    : public GridFunctionBase<GridFunction<P0<Number, Mesh>>>
+    : public GridFunctionBase<P0<Number, Mesh>, GridFunction<P0<Number, Mesh>>>
   {
     public:
       using FESType = P0<Number, Mesh>;
@@ -49,8 +49,7 @@ namespace Rodin::Variational
 
       using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
 
-      /// Parent class
-      using Parent = GridFunctionBase<GridFunction<FESType>>;
+      using Parent = GridFunctionBase<FESType, GridFunction<FESType>>;
 
       using Parent::getValue;
       using Parent::operator=;
@@ -97,7 +96,7 @@ namespace Rodin::Variational
 
       GridFunction& operator=(const GridFunction&)  = delete;
 
-      Real interpolate(const Geometry::Point& p) const
+      void interpolate(Real& res, const Geometry::Point& p) const
       {
         static_assert(std::is_same_v<RangeType, Real>);
         const auto& fes = this->getFiniteElementSpace();
@@ -108,7 +107,7 @@ namespace Rodin::Variational
         assert(d == polytope.getDimension());
         const Index i = polytope.getIndex();
         assert(fes.getFiniteElement(d, i).getCount() == 1);
-        return getValue({d, i}, 0);
+        res = getValue({ d, i }, 0);
       }
 
       // void interpolate(Math::Vector<Real>& res, const Geometry::Point& p) const

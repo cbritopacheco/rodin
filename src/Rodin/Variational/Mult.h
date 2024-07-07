@@ -224,12 +224,12 @@ namespace Rodin::Variational
       {
         if constexpr (std::is_same_v<LHSRangeType, Real> && std::is_same_v<RHSRangeType, Math::Vector<Real>>)
         {
-          getRHS().getValue(out, p);
+          getRHS().getDerived().getValue(out, p);
           out *= getLHS().getValue(p);
         }
         else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Real>> && std::is_same_v<RHSRangeType, Real>)
         {
-          getLHS().getValue(out, p);
+          getLHS().getDerived().getValue(out, p);
           out *= getRHS().getValue(p);
         }
         else

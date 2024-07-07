@@ -16,6 +16,16 @@
 #include "Function.h"
 #include "RangeShape.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class Scalar, class Derived>
+  struct Traits<Variational::MatrixFunctionBase<Scalar, Derived>>
+  {
+    using ScalarType = Scalar;
+    using DerivedType = Derived;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -24,11 +34,15 @@ namespace Rodin::Variational
    * @see MatrixFunction
    */
 
-  template <class Derived>
-  class MatrixFunctionBase : public FunctionBase<MatrixFunctionBase<Derived>>
+  template <class Scalar, class Derived>
+  class MatrixFunctionBase : public FunctionBase<MatrixFunctionBase<Scalar, Derived>>
   {
     public:
-      using Parent = FunctionBase<MatrixFunctionBase<Derived>>;
+      using ScalarType = Scalar;
+
+      using MatrixType = Math::Matrix<ScalarType>;
+
+      using Parent = FunctionBase<MatrixFunctionBase<ScalarType, Derived>>;
 
       MatrixFunctionBase() = default;
 
@@ -53,6 +67,13 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      inline
+      constexpr
+      void getValue(MatrixType& res, const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValue(res, p);
       }
 
       inline
@@ -109,14 +130,18 @@ namespace Rodin::Variational
   /**
    * @ingroup MatrixFunctionSpecializations
    */
-  template <>
-  class MatrixFunction<Math::Matrix<Real>> final
-    : public MatrixFunctionBase<MatrixFunction<Math::Matrix<Real>>>
+  template <class Scalar>
+  class MatrixFunction<Math::Matrix<Scalar>> final
+    : public MatrixFunctionBase<Scalar, MatrixFunction<Math::Matrix<Scalar>>>
   {
     public:
-      using Parent = MatrixFunctionBase<MatrixFunction<Math::Matrix<Real>>>;
+      using ScalarType = Scalar;
 
-      MatrixFunction(std::reference_wrapper<const Math::Matrix<Real>> matrix)
+      using MatrixType = Math::Matrix<ScalarType>;
+
+      using Parent = MatrixFunctionBase<Scalar, MatrixFunction<MatrixType>>;
+
+      MatrixFunction(const MatrixType& matrix)
         : m_matrix(matrix)
       {}
 
@@ -131,9 +156,17 @@ namespace Rodin::Variational
       {}
 
       inline
-      const Math::Matrix<Real>& getValue(const Geometry::Point&) const
+      constexpr
+      const MatrixType& getValue(const Geometry::Point&) const
       {
         return m_matrix.get();
+      }
+
+      inline
+      constexpr
+      void getValue(MatrixType& res, const Geometry::Point&) const
+      {
+        res = m_matrix.get();
       }
 
       inline
@@ -174,7 +207,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Math::Matrix<Real>> m_matrix;
+      std::reference_wrapper<const MatrixType> m_matrix;
   };
 
   MatrixFunction(std::reference_wrapper<const Math::Matrix<Real>>)

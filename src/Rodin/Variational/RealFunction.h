@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_SCALARFUNCTION_H
-#define RODIN_VARIATIONAL_SCALARFUNCTION_H
+#ifndef RODIN_VARIATIONAL_REALFUNCTION_H
+#define RODIN_VARIATIONAL_REALFUNCTION_H
 
 #include <map>
 #include <set>
@@ -21,6 +21,15 @@
 
 #include "ScalarFunction.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class Derived>
+  struct Traits<Variational::RealFunctionBase<Derived>>
+  {
+    using ScalarType = Real;
+    using DerivedType = Derived;
+  };
+}
 
 namespace Rodin::Variational
 {
@@ -72,17 +81,13 @@ namespace Rodin::Variational
    * @ingroup RealFunctionSpecializations
    */
   template <class NestedDerived>
-  class RealFunction<FunctionBase<NestedDerived>> final
-    : public RealFunctionBase<RealFunction<NestedDerived>>
+  class RealFunction<RealFunctionBase<NestedDerived>> final
+    : public RealFunctionBase<RealFunctionBase<NestedDerived>>
   {
     public:
-      using Parent = RealFunctionBase<RealFunction<NestedDerived>>;
+      using Parent = RealFunctionBase<RealFunctionBase<NestedDerived>>;
 
-      using NestedRangeType = typename FormLanguage::Traits<FunctionBase<NestedDerived>>::RangeType;
-
-      static_assert(std::is_same_v<NestedRangeType, Real>);
-
-      RealFunction(const FunctionBase<NestedDerived>& nested)
+      RealFunction(const RealFunctionBase<NestedDerived>& nested)
         : m_nested(nested.copy())
       {}
 
@@ -117,14 +122,14 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<FunctionBase<NestedDerived>> m_nested;
+      std::unique_ptr<RealFunctionBase<NestedDerived>> m_nested;
   };
 
   /**
    * @brief CTAD for RealFunction.
    */
   template <class Derived>
-  RealFunction(const FunctionBase<Derived>&) -> RealFunction<FunctionBase<Derived>>;
+  RealFunction(const RealFunctionBase<Derived>&) -> RealFunction<FunctionBase<Derived>>;
 
   /**
    * @ingroup RealFunctionSpecializations

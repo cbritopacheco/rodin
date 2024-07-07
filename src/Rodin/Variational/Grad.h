@@ -28,24 +28,28 @@ namespace Rodin::Variational
   /**
    * @brief Base class for Grad classes.
    */
-  template <class Derived, class Operand>
+  template <class Operand, class Derived>
   class GradBase;
 
   /**
    * @ingroup GradSpecializations
    * @brief Gradient of a P1 GridFunction
    */
-  template <class Derived, class FES>
-  class GradBase<Derived, GridFunction<FES>>
-    : public VectorFunctionBase<GradBase<Derived, GridFunction<FES>>>
+  template <class FES, class Derived>
+  class GradBase<GridFunction<FES>, Derived>
+    : public VectorFunctionBase<
+        typename FormLanguage::Traits<FES>::ScalarType, GradBase<GridFunction<FES>, Derived>>
   {
     public:
       using FESType = FES;
 
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using VectorType = Math::SpatialVector<ScalarType>;
+
       using OperandType = GridFunction<FESType>;
 
-      /// Parent class
-      using Parent = VectorFunctionBase<GradBase<Derived, OperandType>>;
+      using Parent = VectorFunctionBase<ScalarType, GradBase<OperandType, Derived>>;
 
       /**
        * @brief Constructs the gradient of a @f$ \mathbb{P}_1 @f$ function @f$

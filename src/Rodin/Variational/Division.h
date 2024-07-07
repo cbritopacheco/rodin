@@ -96,7 +96,7 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
       {
-        getLHS().getValue(res, p);
+        getLHS().getDerived().getValue(res, p);
         res /= getRHS().getValue(p);
       }
 
