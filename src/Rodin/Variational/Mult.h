@@ -34,6 +34,8 @@ namespace Rodin::FormLanguage
     using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
     using LHSType =
       Variational::FunctionBase<LHSDerived>;
 
@@ -49,32 +51,32 @@ namespace Rodin::FormLanguage
     using RangeType =
       std::conditional_t<
         // If
-        std::is_same_v<LHSRangeType, Real>,
-        // Then <----------------------------------------------- LHS is Real
+        std::is_same_v<LHSRangeType, ScalarType>,
+        // Then <----------------------------------------------- LHS is Scalar
         RHSRangeType,
         // -------------------------------------------------------------------
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<LHSRangeType, Math::Vector<Real>>,
+          std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>,
           // Then <--------------------------------------------- LHS is Vector
           std::conditional_t<
             // If
-            std::is_same_v<RHSRangeType, Real>,
+            std::is_same_v<RHSRangeType, ScalarType>,
             // Then
-            Math::Vector<Real>,
+            Math::Vector<ScalarType>,
             // Else
             std::conditional_t<
               // If
-              std::is_same_v<RHSRangeType, Math::Vector<Real>>,
+              std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
               // Then
               void,
               // Else
               std::conditional_t<
                 // If
-                std::is_same_v<RHSRangeType, Math::Matrix<Real>>,
+                std::is_same_v<RHSRangeType, Math::Matrix<ScalarType>>,
                 // Then
-                Math::Matrix<Real>,
+                Math::Matrix<ScalarType>,
                 // Else
                 void
               >
@@ -84,17 +86,17 @@ namespace Rodin::FormLanguage
           // Else
           std::conditional_t<
             // If
-            std::is_same_v<LHSRangeType, Math::Matrix<Real>>,
+            std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>,
             // Then <------------------------------------------- LHS is Matrix
             std::conditional_t<
-              std::is_same_v<RHSRangeType, Real>,
-              Math::Matrix<Real>,
+              std::is_same_v<RHSRangeType, ScalarType>,
+              Math::Matrix<ScalarType>,
               std::conditional_t<
-                std::is_same_v<RHSRangeType, Math::Vector<Real>>,
-                Math::Vector<Real>,
+                std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+                Math::Vector<ScalarType>,
                 std::conditional_t<
-                  std::is_same_v<RHSRangeType, Math::Matrix<Real>>,
-                    Math::Matrix<Real>,
+                  std::is_same_v<RHSRangeType, Math::Matrix<ScalarType>>,
+                    Math::Matrix<ScalarType>,
                     void
                   >
                 >
@@ -147,11 +149,7 @@ namespace Rodin::Variational
 
       Mult(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        assert(lhs.getRangeType() == RangeType::Real
-            || rhs.getRangeType() == RangeType::Real
-            || lhs.getRangeShape().width() == rhs.getRangeShape().height());
-      }
+      {}
 
       Mult(const Mult& other)
         : Parent(other),

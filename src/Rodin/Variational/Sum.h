@@ -14,6 +14,9 @@
 #include "Function.h"
 #include "ShapeFunction.h"
 
+#include "RealFunction.h"
+#include "ComplexFunction.h"
+
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -153,20 +156,11 @@ namespace Rodin::Variational
         return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
       }
 
+      template <class T>
       inline
       constexpr
-      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
+      void getValue(T& res, const Geometry::Point& p) const
       {
-        static_assert(FormLanguage::IsVectorRange<LHSRangeType>::Value);
-        getLHS().getValue(res, p);
-        res += getRHS().getValue(p);
-      }
-
-      inline
-      constexpr
-      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
-      {
-        static_assert(FormLanguage::IsMatrixRange<LHSRangeType>::Value);
         getLHS().getValue(res, p);
         res += getRHS().getValue(p);
       }
@@ -194,22 +188,40 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
-  template <class LHSDerived, class Number, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  template <class LHSDerived>
   inline
   constexpr
   auto
-  operator+(const FunctionBase<LHSDerived>& lhs, Number rhs)
+  operator+(const FunctionBase<LHSDerived>& lhs, Real rhs)
   {
     return Sum(lhs, RealFunction(rhs));
   }
 
-  template <class Number, class RHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  template <class RHSDerived>
   inline
   constexpr
   auto
-  operator+(Number lhs, const FunctionBase<RHSDerived>& rhs)
+  operator+(Real lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return Sum(RealFunction(lhs), rhs);
+  }
+
+  template <class LHSDerived>
+  inline
+  constexpr
+  auto
+  operator+(const FunctionBase<LHSDerived>& lhs, Complex rhs)
+  {
+    return Sum(lhs, ComplexFunction(rhs));
+  }
+
+  template <class RHSDerived>
+  inline
+  constexpr
+  auto
+  operator+(Complex lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return Sum(ComplexFunction(lhs), rhs);
   }
 
   /**
@@ -241,7 +253,6 @@ namespace Rodin::Variational
       {
         assert(lhs.getRangeShape() == rhs.getRangeShape());
         assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
-        assert(lhs.getFiniteElementSpace() == rhs.getFiniteElementSpace());
       }
 
       constexpr

@@ -63,6 +63,13 @@ namespace Rodin::Variational
       virtual ~ScalarFunctionBase() = default;
 
       inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { 1, 1 };
+      }
+
+      inline
       const Derived& getDerived() const
       {
         return static_cast<const Derived&>(*this);

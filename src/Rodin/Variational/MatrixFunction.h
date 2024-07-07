@@ -73,7 +73,14 @@ namespace Rodin::Variational
       constexpr
       void getValue(MatrixType& res, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).getValue(res, p);
+        if constexpr (Internal::HasGetValueMethod<Derived, MatrixType&, const Geometry::Point&>::Value)
+        {
+          return static_cast<const Derived&>(*this).getValue(res, p);
+        }
+        else
+        {
+          res = getValue(p);
+        }
       }
 
       inline
