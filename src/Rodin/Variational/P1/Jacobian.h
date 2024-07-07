@@ -45,14 +45,19 @@ namespace Rodin::Variational
   template <class Number, class Mesh>
   class Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>> final
     : public JacobianBase<
-        Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>>, GridFunction<P1<Math::Vector<Number>, Mesh>>>
+        GridFunction<P1<Math::Vector<Number>, Mesh>>,
+        Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>>>
   {
     public:
       using FESType = P1<Math::Vector<Number>, Mesh>;
 
+      using ScalarType = typename FormLanguage::Traits<FESType>;
+
+      using MatrixType = Math::SpatialMatrix<ScalarType>;
+
       using OperandType = GridFunction<FESType>;
 
-      using Parent = JacobianBase<Jacobian<OperandType>, OperandType>;
+      using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
       /**
        * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function

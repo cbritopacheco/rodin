@@ -279,7 +279,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Real>();
           }
         }
       }
@@ -302,7 +302,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Real>();
           }
         }
       }
@@ -331,7 +331,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Real>();
           }
         }
       }
@@ -358,13 +358,13 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Real>();
           }
         }
       }
     }
     assert(false);
-    return NAN;
+    return Math::nan<Real>();
   }
 
   void
@@ -396,7 +396,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -426,7 +426,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -463,7 +463,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -502,14 +502,14 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
       }
     }
     assert(false);
-    out.setConstant(NAN);
+    out.setConstant(Math::nan<Real>());
   }
 
   Complex ComplexP1Element::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
@@ -519,10 +519,22 @@ namespace Rodin::Variational
     {
       case Geometry::Polytope::Type::Point:
       {
-        if (m_i % 2 == 0)
-          return 1;
-        else
-          return 1i;
+        switch (m_i)
+        {
+          case 0:
+          {
+            return 1;
+          }
+          case 1:
+          {
+            return 1i;
+          }
+          default:
+          {
+            assert(false);
+            return Math::nan<Complex>();
+          }
+        }
       }
       case Geometry::Polytope::Type::Segment:
       {
@@ -547,7 +559,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Complex>();
           }
         }
       }
@@ -582,7 +594,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Complex>();
           }
         }
       }
@@ -621,7 +633,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Complex>();
           }
         }
       }
@@ -664,13 +676,13 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Complex>();
           }
         }
       }
     }
     assert(false);
-    return NAN;
+    return Math::nan<Complex>();
   }
 
   void
@@ -713,7 +725,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Complex>());
             return;
           }
         }
@@ -760,7 +772,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Complex>());
             return;
           }
         }
@@ -821,7 +833,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Complex>());
             return;
           }
         }
@@ -886,7 +898,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Complex>());
             return;
           }
         }
@@ -953,7 +965,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -985,7 +997,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1017,7 +1029,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1056,7 +1068,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1083,7 +1095,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1115,7 +1127,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1147,13 +1159,13 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
       }
     }
     assert(false);
-    out.setConstant(NAN);
+    out.setConstant(Math::nan<Real>());
   }
 }

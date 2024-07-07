@@ -20,16 +20,16 @@ namespace Rodin::Variational
   /**
    * @brief Base class for Div classes.
    */
-  template <class Derived, class Operand>
+  template <class Operand, class Derived>
   class DivBase;
 
   /**
    * @ingroup DivSpecializations
    * @brief Divergence of a P1 GridFunction
    */
-  template <class Derived, class FES>
-  class DivBase<Derived, GridFunction<FES>>
-    : public RealFunctionBase<DivBase<Derived, GridFunction<FES>>>
+  template <class FES, class Derived>
+  class DivBase<GridFunction<FES>, Derived>
+    : public RealFunctionBase<DivBase<GridFunction<FES>, Derived>>
   {
     public:
       using FESType = FES;
@@ -37,7 +37,7 @@ namespace Rodin::Variational
       using OperandType = GridFunction<FES>;
 
       /// Parent class
-      using Parent = RealFunctionBase<DivBase<Derived, OperandType>>;
+      using Parent = RealFunctionBase<DivBase<OperandType, Derived>>;
 
       /**
        * @brief Constructs the Div of a @f$ \mathbb{P}_1 @f$ function @f$ u

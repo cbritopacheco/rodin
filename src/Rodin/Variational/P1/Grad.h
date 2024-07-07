@@ -50,18 +50,20 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P1 GridFunction
    */
-  template <class Mesh>
-  class Grad<GridFunction<P1<Real, Mesh>>> final
-    : public GradBase<Grad<GridFunction<P1<Real, Mesh>>>, GridFunction<P1<Real, Mesh>>>
+  template <class Range, class Mesh>
+  class Grad<GridFunction<P1<Range, Mesh>>> final
+    : public GradBase<GridFunction<P1<Range, Mesh>>, Grad<GridFunction<P1<Range, Mesh>>>>
   {
     public:
-      using FESType = P1<Real, Mesh>;
+      using FESType = P1<Range, Mesh>;
 
-      /// Operand type
+      using RangeType = Range;
+
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       using OperandType = GridFunction<FESType>;
 
-      /// Parent class
-      using Parent = GradBase<Grad<OperandType>, OperandType>;
+      using Parent = GradBase<OperandType, Grad<OperandType>>;
 
       /**
        * @brief Constructs the gradient of an @f$ \mathbb{P}^1 @f$ function

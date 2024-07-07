@@ -15,9 +15,13 @@ namespace Rodin::Variational
    *   F(x) = I_n
    * @f$
    */
-  class IdentityMatrix : public MatrixFunctionBase<IdentityMatrix>
+  class IdentityMatrix : public MatrixFunctionBase<Real, IdentityMatrix>
   {
     public:
+      using ScalarType = Real;
+
+      using Parent = MatrixFunctionBase<ScalarType, IdentityMatrix>;
+
       /**
        * @brief Constructs the identity matrix function.
        * @param[in] n Dimension of identity matrix

@@ -14,10 +14,14 @@ namespace Rodin::Variational
   /**
    * @brief Outward unit normal.
    */
-  class BoundaryNormal final : public VectorFunctionBase<BoundaryNormal>
+  class BoundaryNormal final : public VectorFunctionBase<Real, BoundaryNormal>
   {
     public:
-      using Parent = VectorFunctionBase<BoundaryNormal>;
+      using ScalarType = Real;
+
+      using VectorType = Math::SpatialVector<ScalarType>;
+
+      using Parent = VectorFunctionBase<ScalarType, BoundaryNormal>;
 
       /**
        * @brief Constructs the outward unit normal.
@@ -65,14 +69,14 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::SpatialVector<Real> getValue(const Geometry::Point& p) const
+      VectorType getValue(const Geometry::Point& p) const
       {
-        Math::SpatialVector<Real> res;
+        VectorType res;
         getValue(res, p);
         return res;
       }
 
-      void interpolate(Math::SpatialVector<Real>& res, const Geometry::Point& p) const
+      void interpolate(VectorType& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -90,7 +94,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim - 1, *inc.begin());
-            const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
+            const VectorType rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(res, np);
             return;
@@ -115,7 +119,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim - 1, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
+                  const VectorType rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(res, np);
                   return;
@@ -167,7 +171,7 @@ namespace Rodin::Variational
         }
       }
 
-      void getValue(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
+      void getValue(VectorType& out, const Geometry::Point& p) const
       {
         out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
