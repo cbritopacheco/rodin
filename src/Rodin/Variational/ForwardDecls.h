@@ -1050,13 +1050,16 @@ namespace Rodin::Variational
   template <class Operand, class ... Parameters>
   class PeriodicBC;
 
-  template <class Operator, class Vector>
+  template <class Scalar>
+  class ProblemBodyBase;
+
+  template <class Operator, class Vector, class Scalar>
   class ProblemBody;
 
   /**
    * @brief Base class for variational problem objects.
    */
-  template <class Operator, class Vector>
+  template <class Operator, class Vector, class Scalar>
   class ProblemBase;
 
   /**

@@ -23,9 +23,10 @@ int main(int, char**)
   P1<Complex> vh(mesh);
   GridFunction gf(vh);
 
-  Math::Vector<Complex> m(2);
-  // m << Complex(3, 1), Complex(2, 9);
-  m.setOnes();
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+
+  Problem helmholtz(u, v);
 
   // TrialFunction uRe(vh), uIm(vh);
   // TestFunction  vRe(vh), vIm(vh);

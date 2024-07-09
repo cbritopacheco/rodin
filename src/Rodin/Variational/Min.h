@@ -27,14 +27,14 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived>
   class Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
-    : public RealFunctionBase<Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
+    : public FunctionBase<Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
       using LHSType = FunctionBase<LHSDerived>;
 
       using RHSType = FunctionBase<RHSDerived>;
 
-      using Parent = RealFunctionBase<Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+      using Parent = FunctionBase<Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
       Min(const LHSType& a, const RHSType& b)
         : m_lhs(a.copy()), m_rhs(b.copy())
@@ -61,7 +61,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Real getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
@@ -106,7 +106,9 @@ namespace Rodin::Variational
     public:
       using LHSType = FunctionBase<NestedDerived>;
 
-      using RHSType = Real;
+      using ScalarType = Real;
+
+      using RHSType = ScalarType;
 
       using Parent = RealFunctionBase<Min<FunctionBase<NestedDerived>, RHSType>>;
 
@@ -137,7 +139,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Real getValue(const Geometry::Point& p) const
+      ScalarType getValue(const Geometry::Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto& rhs = getRHS();

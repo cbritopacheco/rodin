@@ -46,8 +46,6 @@ namespace Rodin::Variational
     public:
       using ScalarType = Scalar;
 
-      using VectorType = Math::Vector<ScalarType>;
-
       using Parent = FunctionBase<VectorFunctionBase<Scalar, Derived>>;
 
       VectorFunctionBase() = default;
@@ -151,6 +149,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      template <class VectorType>
       inline
       constexpr
       void getValue(VectorType& res, const Geometry::Point& p) const

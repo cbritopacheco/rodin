@@ -41,6 +41,8 @@ namespace Rodin::Variational
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
+
       using OperandType = GridFunction<FESType>;
 
       using Parent =
@@ -86,17 +88,16 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::SpatialMatrix<Real> getValue(const Geometry::Point& p) const
+      SpatialMatrixType getValue(const Geometry::Point& p) const
       {
-        Math::SpatialMatrix<Real> out;
+        SpatialMatrixType out;
         getValue(out, p);
         return out;
       }
 
       inline
-      void getValue(Math::SpatialMatrix<Real>& out, const Geometry::Point& p) const
+      void getValue(SpatialMatrixType& out, const Geometry::Point& p) const
       {
-        out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -134,9 +135,9 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto interpolate(Math::SpatialMatrix<Real>& out, const Geometry::Point& p) const
+      void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).interpolate(out, p);
+        static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
       /**

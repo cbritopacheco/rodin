@@ -30,37 +30,54 @@ namespace Rodin::Variational
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
+      using ScalarType = Real;
+
       using Parent = RealFunctionBase<Tan<FunctionBase<NestedDerived>>>;
 
       constexpr
       Tan(const OperandType& v)
-        : m_v(v)
+        : m_operand(v.copy())
       {}
 
       constexpr
       Tan(const Tan& other)
         : Parent(other),
-          m_v(other.m_v)
+          m_operand(other.m_v->copy())
       {}
 
       constexpr
       Tan(Tan&& other)
         : Parent(std::move(other)),
-          m_v(std::move(other.m_v))
+          m_operand(std::move(other.m_v))
       {}
 
       inline
       constexpr
-      Tan& traceOf(Geometry::Attribute attrs)
+      Tan& traceOf(Geometry::Attribute attr)
       {
-        m_v.traceOf(attrs);
+        m_operand->traceOf(attr);
         return *this;
       }
 
       inline
-      Real getValue(const Geometry::Point& p) const
+      constexpr
+      Tan& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
-        return std::tan(Real(m_v.getValue(p)));
+        m_operand->traceOf(attrs);
+        return *this;
+      }
+
+      inline
+      ScalarType getValue(const Geometry::Point& p) const
+      {
+        return Math::tan(Real(getOperand().getValue(p)));
+      }
+
+      inline
+      const OperandType& getOperand() const
+      {
+        assert(m_operand);
+        return *m_operand;
       }
 
       inline
@@ -71,7 +88,7 @@ namespace Rodin::Variational
       }
 
     private:
-      OperandType m_v;
+      std::unique_ptr<OperandType> m_operand;
   };
 
   template <class NestedDerived>

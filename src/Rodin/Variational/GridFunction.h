@@ -524,13 +524,13 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& project(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        using FunctionType = FunctionBase<NestedDerived>;
-        using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
-        static_assert(std::is_same_v<RangeType, FunctionRangeType>);
+        // using FunctionType = FunctionBase<NestedDerived>;
+        // using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
+        // static_assert(std::is_same_v<RangeType, FunctionRangeType>);
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension();
-        std::vector<size_t> ns(fes.getSize(), 0);
+        std::vector<Real> ns(fes.getSize(), 0);
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
 #ifdef RODIN_MULTITHREADED
@@ -568,7 +568,7 @@ namespace Rodin::Variational
               {
                 const Index global = is[i];
                 m_data(global) =
-                  (vs[i] + ns[global] * m_data(global)) / (ns[global] + 1.0);
+                  (vs[i] + ns[global] * m_data(global)) / (ns[global] + 1);
                 ns[global] += 1;
               }
               m_mutex.unlock();
@@ -590,7 +590,7 @@ namespace Rodin::Variational
                 const Index global = fes.getGlobalIndex({ d, i }, local);
                 assert(m_data.rows() == 1);
                 m_data(global) =
-                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1.0);
+                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1);
                 ns[global] += 1;
               }
             }
@@ -614,7 +614,7 @@ namespace Rodin::Variational
                 const Index global = fes.getGlobalIndex({ d, i }, local);
                 fn.getDerived().getValue(value, p);
                 m_data.col(global) =
-                  (value + ns[global] * m_data.col(global)) / (ns[global] + 1.0);
+                  (value + ns[global] * m_data.col(global)) / (ns[global] + 1);
                 ns[global] += 1;
               }
             }
@@ -700,13 +700,13 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        using FunctionType = FunctionBase<NestedDerived>;
-        using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
-        static_assert(std::is_same_v<RangeType, FunctionRangeType>);
+        // using FunctionType = FunctionBase<NestedDerived>;
+        // using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
+        // static_assert(std::is_same_v<RangeType, FunctionRangeType>);
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension() - 1;
-        std::vector<size_t> ns(fes.getSize(), 0);
+        std::vector<Real> ns(fes.getSize(), 0);
         for (auto it = mesh.getBoundary(); !it.end(); ++it)
         {
           const auto& polytope = *it;
@@ -723,12 +723,12 @@ namespace Rodin::Variational
               {
                 assert(m_data.rows() == 1);
                 m_data(global) =
-                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1.0);
+                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1);
               }
               else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
               {
                 m_data.col(global) =
-                  (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1.0);
+                  (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1);
               }
               else
               {
@@ -812,13 +812,13 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        using FunctionType = FunctionBase<NestedDerived>;
-        using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
-        static_assert(std::is_same_v<RangeType, FunctionRangeType>);
+        // using FunctionType = FunctionBase<NestedDerived>;
+        // using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
+        // static_assert(std::is_same_v<RangeType, FunctionRangeType>);
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension() - 1;
-        std::vector<size_t> ns(fes.getSize(), 0);
+        std::vector<Real> ns(fes.getSize(), 0);
         for (auto it = mesh.getFace(); !it.end(); ++it)
         {
           const auto& polytope = *it;
@@ -835,12 +835,12 @@ namespace Rodin::Variational
               {
                 assert(m_data.rows() == 1);
                 m_data(global) =
-                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1.0);
+                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1);
               }
               else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
               {
                 m_data.col(global) =
-                  (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1.0);
+                  (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1);
               }
               else
               {
@@ -925,9 +925,9 @@ namespace Rodin::Variational
       Derived& projectOnInterfaces(
           const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        using FunctionType = FunctionBase<NestedDerived>;
-        using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
-        static_assert(std::is_same_v<RangeType, FunctionRangeType>);
+        // using FunctionType = FunctionBase<NestedDerived>;
+        // using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
+        // static_assert(std::is_same_v<RangeType, FunctionRangeType>);
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension() - 1;
@@ -1239,19 +1239,6 @@ namespace Rodin::Variational
         {
           assert(false);
         }
-      }
-
-      /**
-       * @brief Interpolates the GridFunction at the given point.
-       * @note CRTP function to be overriden in Derived class.
-       */
-      inline
-      constexpr
-      RangeType interpolate(const Geometry::Point& p) const
-      {
-        RangeType res;
-        res = static_cast<const Derived&>(*this).interpolate(res, p);
-        return res;
       }
 
       /**

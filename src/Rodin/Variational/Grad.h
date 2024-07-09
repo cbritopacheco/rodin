@@ -127,9 +127,9 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
+      void interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).interpolate(out, p);
+        static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
       inline

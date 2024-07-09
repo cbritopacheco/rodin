@@ -34,6 +34,8 @@ namespace Rodin::Variational
     public:
       using FESType = FES;
 
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       using OperandType = GridFunction<FES>;
 
       /// Parent class
@@ -65,9 +67,9 @@ namespace Rodin::Variational
       {}
 
       inline
-      Real getValue(const Geometry::Point& p) const
+      ScalarType getValue(const Geometry::Point& p) const
       {
-        Real out;
+        ScalarType out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -90,7 +92,6 @@ namespace Rodin::Variational
         else
         {
           assert(false);
-          out = NAN;
         }
         return out;
       }
@@ -107,9 +108,9 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto interpolate(Real& out, const Geometry::Point& p) const
+      void interpolate(Real& out, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).interpolate(out, p);
+        static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
       /**
