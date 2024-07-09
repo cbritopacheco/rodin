@@ -64,21 +64,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class OperatorType&gt;</div>
+          <div class="m-doc-template">template&lt;class Operator&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>BilinearFormBase <span class="m-thin">class</span>
         </h1>
         <p>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">OperatorType</td>
-              <td>Type of operator which will be assembled</td>
-            </tr>
-          </tbody>
-        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -159,6 +148,11 @@ $ U_h $
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>Speciallization of <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> for a matrix type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class TrialFES, class TestFES, class Operator&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> <span class="m-label m-flat m-warning">final</span>
+            </dt>
+            <dd>Speciallization of <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> for a matrix type.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -195,9 +189,9 @@ $ U_h $
           <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class OperatorType&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Assembles the bilinear form.</p>
 <p>This method will assemble the underlying sparse matrix associated the bilinear form.</p><aside class="m-note m-default"><h4>See also</h4><p>getMatrix()</p></aside>
@@ -205,9 +199,9 @@ $ U_h $
           <section class="m-doc-details" id="a31089d52f407b3bc83921c1cd7fb4a40"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class OperatorType&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31089d52f407b3bc83921c1cd7fb4a40" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31089d52f407b3bc83921c1cd7fb4a40" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the reference to the associated <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -222,9 +216,9 @@ $ U_h $
           <section class="m-doc-details" id="a64fa430dc89a2c082bd9ac8d603da4d2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class OperatorType&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64fa430dc89a2c082bd9ac8d603da4d2" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64fa430dc89a2c082bd9ac8d603da4d2" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the reference to the associated <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a> object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -239,9 +233,9 @@ $ U_h $
           <section class="m-doc-details" id="aa462bb06b42fd1c70574cbfbad8e6c72"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class OperatorType&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>* Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa462bb06b42fd1c70574cbfbad8e6c72" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>* Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa462bb06b42fd1c70574cbfbad8e6c72" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">

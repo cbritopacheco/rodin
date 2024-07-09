@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Assembly::Sequential&lt;Math::SparseMatrix&lt;Real&gt;, Variational::BilinearForm&lt;TrialFES, TestFES, Math::SparseMatrix&lt;Real&gt;&gt;&gt; class | Rodin</title>
+  <title>ComplexFunction Template Specializations module | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,28 +64,33 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>Sequential&lt;Math::SparseMatrix&lt;Real&gt;, Variational::BilinearForm&lt;TrialFES, TestFES, Math::SparseMatrix&lt;Real&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> assembly of the <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix&lt;Real&gt;</a> associated to a BilinearFormBase object.</p>
+          ComplexFunction Template Specializations <span class="m-thin">module</span></h1>
+        <p>Template specializations of the <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a> class.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a></p></aside>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
-            <dt id="a4f5f5ad636939fa5b651448b3ab2bafd">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f5f5ad636939fa5b651448b3ab2bafd" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap">const InputType&amp; input) const -&gt; OperatorType <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_complex_function_3_01_complex_01_4.html" class="m-doc">Rodin::Variational::ComplexFunction&lt;Complex&gt;</a>
             </dt>
-            <dd>Executes the assembly and returns the linear operator associated to the bilinear form.</dd>
+            <dd>Represents a constant scalar function with type Complex.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class F&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_complex_function_3_01_f_01_4.html" class="m-doc">Rodin::Variational::ComplexFunction&lt;F&gt;</a>
+            </dt>
+            <dd>Represents a scalar function given by an arbitrary scalar function.</dd>
           </dl>
         </section>
       </div>

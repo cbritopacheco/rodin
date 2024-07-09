@@ -180,7 +180,7 @@ $ \mathbf{A} $
             </dt>
             <dd>Logical <a href="class_rodin_1_1_variational_1_1_a_n_d.html" class="m-doc">AND</a> operator between two instances of <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class OperatorType&gt;</div>
+              <div class="m-doc-template">template&lt;class Operator&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>
             </dt>
             <dd>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>.</dd>
@@ -245,9 +245,9 @@ $ \mathbf{A} $
             <dd>Represents the component (or entry) of a vectorial <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_dense_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_math_1_1_m1580b3da5fb7f0bb416b1000c6c2db85.html" class="m-doc">DenseProblem&lt;TrialFES, TestFES, Math::Matrix&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_dense_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_math_1_1_m31accb12205bd15c9145eabd3a1c7e07.html" class="m-doc">DenseProblem&lt;TrialFES, TestFES, Math::Matrix&lt;typename FormLanguage::Mult&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;&gt;</a>
             </dt>
-            <dd>General class to assemble linear systems with <code><a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;Real&gt;</code> and <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Real&gt;</code> types in a serial context.</dd>
+            <dd>General class to assemble linear systems with <code><a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a></code> and <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a></code> types in a serial context.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>
             </dt>
@@ -411,7 +411,7 @@ $ \mathbf{A} $
             </dt>
             <dd>Represents a grid function belonging to some finite element space.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class VectorType&gt;</div>
+              <div class="m-doc-template">template&lt;class Vector&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>
             </dt>
             <dd>Base class for linear form objects.</dd>
@@ -662,7 +662,12 @@ $ u $
             </dt>
             <dd></dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Operator, class Vector&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_body_base.html" class="m-doc">ProblemBodyBase</a>
+            </dt>
+            <dd>Represents the body of a variational problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Operator, class Vector, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>
             </dt>
             <dd>Base class for variational problem objects.</dd>
@@ -821,8 +826,13 @@ $ u $
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of an <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Number&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_number_00_01_geometry_1_1_mesh_3_01_context_1_1_sequential_01_4_01_4.html" class="m-doc">P1&lt;Number, Geometry::Mesh&lt;Context::Sequential&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_real_00_01_geometry_1_1_mesh_3_01_context_1_1_sequential_01_4_01_4.html" class="m-doc">P1&lt;Real, Geometry::Mesh&lt;Context::Sequential&gt;&gt;</a>
+            </dt>
+            <dd>Real valued Lagrange finite element space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_complex_00_01_geometry_1_1_mesh_3_01_context_1_1_sequential_01_4_01_4.html" class="m-doc">P1&lt;Complex, Geometry::Mesh&lt;Context::Sequential&gt;&gt;</a>
             </dt>
             <dd>Real valued Lagrange finite element space.</dd>
             <dt>
@@ -896,13 +906,9 @@ $ u $
             <dd>Represents the power function.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_math_1_1_sparse_59cf603d25d609010079e4810cf17e67.html" class="m-doc">Problem&lt;TrialFES, TestFES, Math::SparseMatrix&lt;decltype(std::declval&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType&gt;()*std::declval&lt;typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;())&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_math_1_1_sparse_48e2bba977c672a27555a6a12ec638c4.html" class="m-doc">Problem&lt;TrialFES, TestFES, Math::SparseMatrix&lt;typename FormLanguage::Mult&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType&gt; ::Type&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;&gt;</a>
             </dt>
             <dd>General class to assemble linear systems with <code><a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a></code> and <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a></code> types in a sequential context.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_problem_body_base.html" class="m-doc">ProblemBodyBase</a>
-            </dt>
-            <dd>Represents the body of a variational problem.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_function_base_3_01_function_derived_01_4_01_4.html" class="m-doc">QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;</a>
@@ -996,6 +1002,10 @@ $ u $
               using <a href="#a69e6ba579db6ad5e2d0c043a14f363aa" class="m-doc-self">RealP0Element</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
             <dd>Alias for <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_real_01_4.html" class="m-doc">P0Element&lt;Real&gt;</a></dd>
+            <dt id="a0ad9f41fd8c43be6c80e8fad07f8f88b">
+              using <a href="#a0ad9f41fd8c43be6c80e8fad07f8f88b" class="m-doc-self">ComplexP0Element</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;
+            </dt>
+            <dd>Alias for P0Element&lt;Complex&gt;</dd>
             <dt id="a348f7862cc2884bddd599f7b26feae14">
               using <a href="#a348f7862cc2884bddd599f7b26feae14" class="m-doc-self">VectorP0Element</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </dt>
@@ -1027,18 +1037,30 @@ $ u $
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
+            <dt id="a35ac3dbcc80525b85af8626925951b16">
+              <span class="m-doc-wrap-bumper"><a href="#a35ac3dbcc80525b85af8626925951b16" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&amp;) -&gt; ComplexFunction&lt; Complex &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>.</dd>
             <dt id="a4c0ef37abd7730b4ba2ed5f651fb6bcc">
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#a4c0ef37abd7730b4ba2ed5f651fb6bcc" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;Derived&gt;&amp;) -&gt; ComplexFunction&lt; FunctionBase&lt; Derived &gt;&gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>.</dd>
-            <dt id="a4fba951b3b358f1e333ad05e875fa290">
-              <span class="m-doc-wrap-bumper"><a href="#a4fba951b3b358f1e333ad05e875fa290" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>) -&gt; ComplexFunction&lt; Complex &gt;</span>
+            <dt id="ab813c466853aab218c7ed0bb3b701043">
+              <div class="m-doc-template">template&lt;class RealNestedDerived, class ImagNestedDerived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ab813c466853aab218c7ed0bb3b701043" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RealNestedDerived&gt;&amp;,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;ImagNestedDerived&gt;&amp;) -&gt; ComplexFunction&lt; FunctionBase&lt; RealNestedDerived &gt;, FunctionBase&lt; ImagNestedDerived &gt;&gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>.</dd>
-            <dt id="a7f03c90c6b9af9f5c542efcb1f33a707">
+            <dt id="a7ed00f7d512ed2930a369de6127bed20">
               <div class="m-doc-template">template&lt;class F, typename = std::enable_if_t&lt;std::is_invocable_r_v&lt;Complex, F, const Geometry::Point&amp;&gt;&gt;&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a7f03c90c6b9af9f5c542efcb1f33a707" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">F) -&gt; ComplexFunction&lt; F &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a7ed00f7d512ed2930a369de6127bed20" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const F&amp;) -&gt; ComplexFunction&lt; F &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>.</dd>
+            <dt id="a05d6560fc498d8818ad903000846c53e">
+              <div class="m-doc-template">template&lt;class FReal, class FImag, typename = std::enable_if_t&lt;     std::is_invocable_v&lt;FReal, const Geometry::Point&amp;&gt;&amp;&amp; std::is_invocable_v&lt;FImag, const Geometry::Point&amp;&gt;&gt;&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a05d6560fc498d8818ad903000846c53e" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const FReal&amp;,
+              const FImag&amp;) -&gt; ComplexFunction&lt; FReal, FImag &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>.</dd>
             <dt id="a15c6540a38442208218f05d9eae7c223">
@@ -1158,17 +1180,17 @@ $ \partial_z u $
               <span class="m-doc-wrap-bumper"><a href="#a092260a7b9f7b530c5a505aaee89e8ac" class="m-doc-self">RealFunction</a>(</span><span class="m-doc-wrap">F) -&gt; RealFunction&lt; F &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>.</dd>
-            <dt id="a81963b7ad35cb07e64b3a68a25befd07">
-              <div class="m-doc-template">template&lt;class Scalar, class NestedDerived&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a81963b7ad35cb07e64b3a68a25befd07" class="m-doc-self">ScalarFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;Scalar, NestedDerived&gt;&amp;) -&gt; ScalarFunction&lt; ScalarFunctionBase&lt; Scalar, NestedDerived &gt;&gt;</span>
-            </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</dd>
             <dt id="ac7fd33508c6280a1270390adc44c8e94">
               <span class="m-doc-wrap-bumper"><a href="#ac7fd33508c6280a1270390adc44c8e94" class="m-doc-self">ScalarFunction</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp;) -&gt; ScalarFunction&lt; Real &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</dd>
             <dt id="af528cdf37b9399d50a99eb218787beb8">
               <span class="m-doc-wrap-bumper"><a href="#af528cdf37b9399d50a99eb218787beb8" class="m-doc-self">ScalarFunction</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&amp;) -&gt; ScalarFunction&lt; Complex &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</dd>
+            <dt id="a81963b7ad35cb07e64b3a68a25befd07">
+              <div class="m-doc-template">template&lt;class Scalar, class NestedDerived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a81963b7ad35cb07e64b3a68a25befd07" class="m-doc-self">ScalarFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;Scalar, NestedDerived&gt;&amp;) -&gt; ScalarFunction&lt; ScalarFunctionBase&lt; Scalar, NestedDerived &gt;&gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</dd>
             <dt id="a753711ae25c8156ce98450199fbc2d8e">
