@@ -102,6 +102,15 @@ namespace Rodin::Math
   template <class T>
   constexpr
   inline
+  std::enable_if_t<!std::is_void_v<decltype(std::sin(std::declval<T>()))>, bool>
+  sin(const T& x)
+  {
+    return std::sin(x);
+  }
+
+  template <class T>
+  constexpr
+  inline
   std::enable_if_t<!std::is_void_v<decltype(std::tan(std::declval<T>()))>, bool>
   tan(const T& x)
   {

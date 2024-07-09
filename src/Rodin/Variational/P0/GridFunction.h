@@ -41,6 +41,8 @@ namespace Rodin::Variational
     public:
       using FESType = P0<Number, Mesh>;
 
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       using MeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
@@ -96,7 +98,7 @@ namespace Rodin::Variational
 
       GridFunction& operator=(const GridFunction&)  = delete;
 
-      void interpolate(Real& res, const Geometry::Point& p) const
+      void interpolate(RangeType& res, const Geometry::Point& p) const
       {
         static_assert(std::is_same_v<RangeType, Real>);
         const auto& fes = this->getFiniteElementSpace();
@@ -107,28 +109,19 @@ namespace Rodin::Variational
         assert(d == polytope.getDimension());
         const Index i = polytope.getIndex();
         assert(fes.getFiniteElement(d, i).getCount() == 1);
-        res = getValue({ d, i }, 0);
+        if constexpr (std::is_same_v<RangeType, ScalarType>)
+        {
+          res = getValue({ d, i }, 0);
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
+        {
+          assert(false);
+        }
+        else
+        {
+          assert(false);
+        }
       }
-
-      // void interpolate(Math::Vector<Real>& res, const Geometry::Point& p) const
-      // {
-      //   static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
-      //   const auto& fes = this->getFiniteElementSpace();
-      //   const auto& polytope = p.getPolytope();
-      //   const size_t d = polytope.getDimension();
-      //   const Index i = polytope.getIndex();
-      //   const auto& fe = fes.getFiniteElement(d, i);
-      //   const auto& r = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-      //   const size_t vdim = fes.getVectorDimension();
-      //   const size_t dofs = fe.getCount();
-      //   res.resize(vdim);
-      //   res.setZero();
-      //   for (Index local = 0; local < dofs; local++)
-      //   {
-      //     const auto& basis = fe.getBasis(local);
-      //     res += getValue({d, i}, local).coeff(local % vdim) * basis(r);
-      //   }
-      // }
 
       GridFunction& setWeights()
       {

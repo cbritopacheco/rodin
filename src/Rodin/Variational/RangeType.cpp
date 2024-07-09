@@ -19,12 +19,17 @@ namespace Rodin::Variational
       }
       case RangeType::Integer:
       {
-        os << "Boolean";
+        os << "Integer";
         break;
       }
       case RangeType::Real:
       {
         os << "Real";
+        break;
+      }
+      case RangeType::Complex:
+      {
+        os << "Complex";
         break;
       }
       case RangeType::Vector:

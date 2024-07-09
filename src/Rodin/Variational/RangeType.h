@@ -17,6 +17,7 @@ namespace Rodin::Variational
     Boolean,
     Integer,
     Real,
+    Complex,
     Vector,
     Matrix
   };

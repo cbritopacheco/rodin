@@ -23,6 +23,15 @@
 #include "TestFunction.h"
 #include "BilinearFormIntegrator.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class Operator>
+  struct Traits<Variational::BilinearFormBase<Operator>>
+  {
+    using ScalarType = typename FormLanguage::Traits<Operator>::ScalarType;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -31,10 +40,12 @@ namespace Rodin::Variational
    * @see BilinearForm
    */
 
-  template <class OperatorType>
+  template <class Operator>
   class BilinearFormBase : public FormLanguage::Base
   {
     public:
+      using OperatorType = Operator;
+
       BilinearFormBase()
       {}
 
@@ -100,8 +111,7 @@ namespace Rodin::Variational
 
       using TestFESScalarType   = typename FormLanguage::Traits<TestFES>::ScalarType;
 
-      using ScalarType = decltype(
-          std::declval<TrialFESScalarType>() * std::declval<TestFESScalarType>());
+      using ScalarType = typename FormLanguage::Mult<TrialFESScalarType, TestFESScalarType>::Type;
 
       /// Type of operator associated to the bilinear form
       using OperatorType = Operator;
@@ -112,11 +122,11 @@ namespace Rodin::Variational
       using GlobalBilinearFormIntegratorBaseType =
         GlobalBilinearFormIntegratorBase<ScalarType>;
 
-      using LocalBilinearFormIntegratorBaseListType
-        = FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
+      using LocalBilinearFormIntegratorBaseListType =
+        FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
 
-      using GlobalBilinearFormIntegratorBaseListType
-        = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
+      using GlobalBilinearFormIntegratorBaseListType =
+        FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
       /// Parent class
       using Parent = BilinearFormBase<OperatorType>;
@@ -408,10 +418,12 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> BilinearForm<TrialFES, TestFES, Math::SparseMatrix<
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-              std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>;
+    -> BilinearForm<TrialFES, TestFES,
+        Math::SparseMatrix<
+          typename FormLanguage::Mult<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TestFES>::ScalarType>
+          ::Type>>;
 }
 
 #include "BilinearForm.hpp"

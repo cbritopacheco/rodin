@@ -28,10 +28,11 @@ namespace Rodin::Variational
   /**
    * @brief Represents the body of a variational problem.
    */
+  template <class Scalar>
   class ProblemBodyBase : public FormLanguage::Base
   {
     public:
-      using ScalarType = Real;
+      using ScalarType = Scalar;
 
       using LinearFormIntegratorBaseType = LinearFormIntegratorBase<ScalarType>;
 
@@ -67,7 +68,6 @@ namespace Rodin::Variational
           m_periodicBdr(std::move(other.m_periodicBdr))
       {}
 
-      inline
       ProblemBodyBase& operator=(ProblemBodyBase&& other)
       {
         m_lfis = std::move(other.m_lfis);
@@ -142,12 +142,12 @@ namespace Rodin::Variational
       PeriodicBoundary  m_periodicBdr;
   };
 
-  template <>
-  class ProblemBody<void, void>
-    : public ProblemBodyBase
+  template <class Scalar>
+  class ProblemBody<void, void, Scalar>
+    : public ProblemBodyBase<Scalar>
   {
     public:
-      using Parent = ProblemBodyBase;
+      using Parent = ProblemBodyBase<Scalar>;
 
       ProblemBody() = default;
 
@@ -165,8 +165,9 @@ namespace Rodin::Variational
       }
   };
 
-  template <class Operator>
-  class ProblemBody<Operator, void> : public ProblemBodyBase
+  template <class Operator, class Scalar>
+  class ProblemBody<Operator, void, Scalar>
+    : public ProblemBodyBase<Scalar>
   {
     public:
       using OperatorType = Operator;
@@ -177,7 +178,7 @@ namespace Rodin::Variational
 
       using BilinearFormBaseListType = FormLanguage::List<BilinearFormBaseType>;
 
-      using Parent = ProblemBodyBase;
+      using Parent = ProblemBodyBase<Scalar>;
 
       ProblemBody() = default;
 
@@ -210,8 +211,8 @@ namespace Rodin::Variational
       BilinearFormBaseListType m_bfs;
   };
 
-  template <class Vector>
-  class ProblemBody<void, Vector> : public ProblemBodyBase
+  template <class Vector, class Scalar>
+  class ProblemBody<void, Vector, Scalar> : public ProblemBodyBase<Scalar>
   {
     public:
       using VectorType = Vector;
@@ -220,7 +221,7 @@ namespace Rodin::Variational
 
       using LinearFormBaseListType = FormLanguage::List<LinearFormBaseType>;
 
-      using Parent = ProblemBodyBase;
+      using Parent = ProblemBodyBase<Scalar>;
 
       ProblemBody() = default;
 
@@ -234,13 +235,11 @@ namespace Rodin::Variational
           m_lfs(std::move(other.m_lfs))
       {}
 
-      inline
       LinearFormBaseListType& getLFs()
       {
         return m_lfs;
       }
 
-      inline
       const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
@@ -255,8 +254,8 @@ namespace Rodin::Variational
       LinearFormBaseListType m_lfs;
   };
 
-  template <class Operator, class Vector>
-  class ProblemBody : public ProblemBodyBase
+  template <class Operator, class Vector, class Scalar>
+  class ProblemBody : public ProblemBodyBase<Scalar>
   {
     public:
       using VectorType = Vector;
@@ -287,7 +286,7 @@ namespace Rodin::Variational
 
       using GlobalBilinearFormIntegratorBaseListType = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
-      using Parent = ProblemBodyBase;
+      using Parent = ProblemBodyBase<Scalar>;
 
       ProblemBody(const LocalBilinearFormIntegratorBaseType& bfi)
       {
@@ -309,19 +308,19 @@ namespace Rodin::Variational
         this->getGlobalBFIs().add(bfis);
       }
 
-      ProblemBody(const ProblemBody<OperatorType, void>& pbo)
+      ProblemBody(const ProblemBody<OperatorType, void, Scalar>& pbo)
         : Parent(pbo)
       {
         m_bfs.add(pbo.getBFs());
       }
 
-      ProblemBody(const ProblemBody<void, VectorType>& pbv)
+      ProblemBody(const ProblemBody<void, VectorType, Scalar>& pbv)
         : Parent(pbv)
       {
         m_lfs.add(pbv.getLFs());
       }
 
-      ProblemBody(const ProblemBody<void, void>& parent)
+      ProblemBody(const ProblemBody<void, void, Scalar>& parent)
         : Parent(parent)
       {}
 
@@ -337,25 +336,21 @@ namespace Rodin::Variational
           m_bfs(std::move(other.m_bfs))
       {}
 
-      inline
       LinearFormBaseListType& getLFs()
       {
         return m_lfs;
       }
 
-      inline
       BilinearFormBaseListType& getBFs()
       {
         return m_bfs;
       }
 
-      inline
       const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
       }
 
-      inline
       const BilinearFormBaseListType& getBFs() const
       {
         return m_bfs;
@@ -371,403 +366,430 @@ namespace Rodin::Variational
       BilinearFormBaseListType m_bfs;
   };
 
-  ProblemBody(const LocalBilinearFormIntegratorBase<Real>&)
-    -> ProblemBody<void, void>;
+  template <class Scalar>
+  ProblemBody(const LocalBilinearFormIntegratorBase<Scalar>&)
+    -> ProblemBody<void, void, Scalar>;
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const LinearFormIntegratorBase<RHSNumber>& lfi)
+  template <class LHSScalar, class RHSScalar>
+  auto
+  operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
     res.getLFIs().add(lfi);
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const LinearFormIntegratorBase<LHSNumber>& lfi, const LocalBilinearFormIntegratorBase<RHSNumber>& bfi)
+  template <class LHSScalar, class RHSScalar>
+  auto
+  operator+(const LinearFormIntegratorBase<LHSScalar>& lfi, const LocalBilinearFormIntegratorBase<RHSScalar>& bfi)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
     res.getLFIs().add(lfi);
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator-(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const LinearFormIntegratorBase<RHSNumber>& lfi)
+  template <class LHSScalar, class RHSScalar>
+  auto
+  operator-(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
     res.getLFIs().add(UnaryMinus(lfi));
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator-(
-      const GlobalBilinearFormIntegratorBase<LHSNumber>& bfi, const LinearFormIntegratorBase<RHSNumber>& lfi)
+  template <class LHSScalar, class RHSScalar>
+  auto
+  operator-(const GlobalBilinearFormIntegratorBase<LHSScalar>& bfi, const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getGlobalBFIs().add(bfi);
     res.getLFIs().add(UnaryMinus(lfi));
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator-(
-      const GlobalBilinearFormIntegratorBase<LHSNumber>& bfi,
-      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& lfis)
+  template <class LHSScalar, class RHSScalar>
+  auto
+  operator-(
+      const GlobalBilinearFormIntegratorBase<LHSScalar>& bfi,
+      const FormLanguage::List<LinearFormIntegratorBase<RHSScalar>>& lfis)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getGlobalBFIs().add(bfi);
     res.getLFIs().add(UnaryMinus(lfis));
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator-(
-      const LinearFormIntegratorBase<LHSNumber>& lfi, const LocalBilinearFormIntegratorBase<RHSNumber>& bfi)
+  template <class LHSScalar, class RHSScalar>
+  auto operator-(
+    const LinearFormIntegratorBase<LHSScalar>& lfi, const LocalBilinearFormIntegratorBase<RHSScalar>& bfi)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(UnaryMinus(bfi));
     res.getLFIs().add(lfi);
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis,
-      const LinearFormIntegratorBase<RHSNumber>& lfi)
+  template <class LHSScalar, class RHSScalar>
+  auto operator+(
+    const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis,
+    const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfis);
     res.getLFIs().add(lfi);
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lbfis,
-      const GlobalBilinearFormIntegratorBase<RHSNumber>& gbfi)
+  template <class LHSScalar, class RHSScalar>
+  auto operator+(
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& lbfis,
+      const GlobalBilinearFormIntegratorBase<RHSScalar>& gbfi)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(lbfis);
     res.getGlobalBFIs().add(gbfi);
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lbfis,
-      const FormLanguage::List<GlobalBilinearFormIntegratorBase<RHSNumber>>& gbfis)
+  template <class LHSScalar, class RHSScalar>
+  auto operator+(
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& lbfis,
+      const FormLanguage::List<GlobalBilinearFormIntegratorBase<RHSScalar>>& gbfis)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(lbfis);
     res.getGlobalBFIs().add(gbfis);
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& lbfi,
-      const FormLanguage::List<GlobalBilinearFormIntegratorBase<RHSNumber>>& gbfis)
+  template <class LHSScalar, class RHSScalar>
+  auto operator+(
+      const LocalBilinearFormIntegratorBase<LHSScalar>& lbfi,
+      const FormLanguage::List<GlobalBilinearFormIntegratorBase<RHSScalar>>& gbfis)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(lbfi);
     res.getGlobalBFIs().add(gbfis);
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& lbfi,
-      const GlobalBilinearFormIntegratorBase<RHSNumber>& gbfi)
+  template <class LHSScalar, class RHSScalar>
+  auto operator+(
+      const LocalBilinearFormIntegratorBase<LHSScalar>& lbfi,
+      const GlobalBilinearFormIntegratorBase<RHSScalar>& gbfi)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(lbfi);
     res.getGlobalBFIs().add(gbfi);
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator-(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis,
-      const LinearFormIntegratorBase<RHSNumber>& lfi)
+  template <class LHSScalar, class RHSScalar>
+  auto operator-(
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis,
+      const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    ProblemBody<void, void> res;
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfis);
     res.getLFIs().add(UnaryMinus(lfi));
     return res;
   }
 
-  template <class LHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const DirichletBCBase& dbc)
+  template <class LHSScalar>
+  auto
+  operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const DirichletBCBase& dbc)
   {
-    ProblemBody<void, void> res;
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
     res.getDBCs().add(dbc);
     return res;
   }
 
-  template <class LHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const FormLanguage::List<DirichletBCBase>& dbcs)
+  template <class LHSScalar>
+  auto
+  operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const FormLanguage::List<DirichletBCBase>& dbcs)
   {
-    ProblemBody<void, void> res;
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
     res.getDBCs().add(dbcs);
     return res;
   }
 
-  template <class LHSNumber, class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const PeriodicBCBase& pbc)
+  template <class LHSScalar>
+  auto operator+(
+      const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const PeriodicBCBase& pbc)
   {
-    ProblemBody<void, void> res;
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
     res.getPBCs().add(pbc);
     return res;
   }
 
-  template <class LHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const FormLanguage::List<PeriodicBCBase>& pbcs)
+  template <class LHSScalar>
+  auto
+  operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const FormLanguage::List<PeriodicBCBase>& pbcs)
   {
-    ProblemBody<void, void> res;
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
     res.getPBCs().add(pbcs);
     return res;
   }
 
-  template <class LHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis, const DirichletBCBase& dbc)
+  template <class LHSScalar>
+  auto operator+(
+    const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis, const DirichletBCBase& dbc)
   {
-    ProblemBody<void, void> res;
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfis);
     res.getDBCs().add(dbc);
     return res;
   }
 
-  template <class LHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis, const FormLanguage::List<DirichletBCBase>& dbcs)
+  template <class LHSScalar>
+  auto
+  operator+(
+    const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis,
+    const FormLanguage::List<DirichletBCBase>& dbcs)
   {
-    ProblemBody<void, void> res;
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfis);
     res.getDBCs().add(dbcs);
     return res;
   }
 
-  template <class LHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis, const PeriodicBCBase& pbc)
+  template <class LHSScalar>
+  auto operator+(
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis,
+      const FormLanguage::List<PeriodicBCBase>& pbcs)
   {
-    ProblemBody<void, void> res;
-    res.getLocalBFIs().add(bfis);
-    res.getPBCs().add(pbc);
-    return res;
-  }
-
-  template <class LHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& bfis, const FormLanguage::List<PeriodicBCBase>& pbcs)
-  {
-    ProblemBody<void, void> res;
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfis);
     res.getPBCs().add(pbcs);
     return res;
   }
 
-  template <class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const ProblemBody<void, void>& pb,
-      const LinearFormIntegratorBase<RHSNumber>& lfi)
+  template <class Operator, class Vector, class LHSScalar, class RHSScalar>
+  auto operator+(
+      const ProblemBody<Operator, Vector, LHSScalar>& pb,
+      const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    ProblemBody<void, void> res(pb);
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<Operator, Vector, ScalarType> res(pb);
     res.getLFIs().add(lfi);
     return res;
   }
 
-  template <class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const ProblemBody<void, void>& pb,
-      const LocalBilinearFormIntegratorBase<RHSNumber>& lbfi)
+  template <class Operator, class Vector, class LHSScalar, class RHSScalar>
+  auto operator+(
+      const ProblemBody<Operator, Vector, LHSScalar>& pb,
+      const LocalBilinearFormIntegratorBase<RHSScalar>& lbfi)
   {
-    ProblemBody<void, void> res(pb);
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<Operator, Vector, ScalarType> res(pb);
     res.getLocalBFIs().add(lbfi);
     return res;
   }
 
-  template <class RHSNumber>
-  inline
-  ProblemBody<void, void> operator-(
-      const ProblemBody<void, void>& pb,
-      const LocalBilinearFormIntegratorBase<RHSNumber>& lbfi)
+  template <class Operator, class Vector, class LHSScalar, class RHSScalar>
+  auto operator-(
+      const ProblemBody<Operator, Vector, LHSScalar>& pb,
+      const LocalBilinearFormIntegratorBase<RHSScalar>& lbfi)
   {
-    ProblemBody<void, void> res(pb);
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<Operator, Vector, ScalarType> res(pb);
     res.getLocalBFIs().add(UnaryMinus(lbfi));
     return res;
   }
 
-  template <class RHSNumber>
-  inline
-  ProblemBody<void, void> operator+(
-      const ProblemBody<void, void>& pb,
-      const GlobalBilinearFormIntegratorBase<RHSNumber>& gbfi)
+  template <class Operator, class Vector, class LHSScalar, class RHSScalar>
+  auto
+  operator+(
+      const ProblemBody<Operator, Vector, LHSScalar>& pb,
+      const GlobalBilinearFormIntegratorBase<RHSScalar>& gbfi)
   {
-    ProblemBody<void, void> res(pb);
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<Operator, Vector, ScalarType> res(pb);
     res.getGlobalBFIs().add(gbfi);
     return res;
   }
 
-  template <class OperatorType, class VectorType, class RHSNumber>
-  ProblemBody<OperatorType, VectorType> operator+(
-      const ProblemBody<OperatorType, VectorType>& pb,
-      const LinearFormIntegratorBase<RHSNumber>& lfi)
+  template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
+  auto
+  operator+(
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
+      const FormLanguage::List<LinearFormIntegratorBase<RHSScalar>>& lfis)
   {
-    ProblemBody<OperatorType, VectorType> res(pb);
-    res.getLFIs().add(lfi);
-    return res;
-  }
-
-  template <class OperatorType, class VectorType, class RHSNumber>
-  ProblemBody<OperatorType, VectorType> operator+(
-      const ProblemBody<OperatorType, VectorType>& pb,
-      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& lfis)
-  {
-    ProblemBody<OperatorType, VectorType> res(pb);
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getLFIs().add(lfis);
     return res;
   }
 
-  template <class OperatorType, class VectorType, class RHSNumber>
-  ProblemBody<OperatorType, VectorType> operator-(
-      const ProblemBody<OperatorType, VectorType>& pb,
-      const LinearFormIntegratorBase<RHSNumber>& lfi)
+  template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
+  auto
+  operator-(
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
+      const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    ProblemBody<OperatorType, VectorType> res(pb);
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getLFIs().add(UnaryMinus(lfi));
     return res;
   }
 
-  template <class OperatorType, class VectorType, class RHSNumber>
-  ProblemBody<OperatorType, VectorType> operator-(
-      const ProblemBody<OperatorType, VectorType>& pb,
-      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& lfis)
+  template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
+  auto
+  operator-(
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
+      const FormLanguage::List<LinearFormIntegratorBase<RHSScalar>>& lfis)
   {
-    ProblemBody<OperatorType, VectorType> res(pb);
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getLFIs().add(UnaryMinus(lfis));
     return res;
   }
 
-  template <class OperatorType, class VectorType>
-  ProblemBody<OperatorType, VectorType> operator+(
-      const ProblemBody<OperatorType, VectorType>& pb, const DirichletBCBase& dbc)
+  template <class OperatorType, class VectorType, class LHSScalar>
+  auto
+  operator+(
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb, const DirichletBCBase& dbc)
   {
-    ProblemBody<OperatorType, VectorType> res(pb);
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getDBCs().add(dbc);
     return res;
   }
 
-  template <class OperatorType, class VectorType>
-  ProblemBody<OperatorType, VectorType> operator+(
-      const ProblemBody<OperatorType, VectorType>& pb, const FormLanguage::List<DirichletBCBase>& dbcs)
+  template <class OperatorType, class VectorType, class LHSScalar>
+  auto
+  operator+(
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb, const FormLanguage::List<DirichletBCBase>& dbcs)
   {
-    ProblemBody<OperatorType, VectorType> res(pb);
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getEssentialBoundary().add(dbcs);
     return res;
   }
 
-  template <class OperatorType, class VectorType>
-  ProblemBody<OperatorType, VectorType> operator+(
-      const ProblemBody<OperatorType, VectorType>& pb, const PeriodicBCBase& pbc)
+  template <class OperatorType, class VectorType, class LHSScalar>
+  auto
+  operator+(
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
+      const PeriodicBCBase& pbc)
   {
-    ProblemBody<OperatorType, VectorType> res(pb);
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getPBCs().add(pbc);
     return res;
   }
 
-  template <class OperatorType, class VectorType>
-  ProblemBody<OperatorType, VectorType> operator+(
-      const ProblemBody<OperatorType, VectorType>& pb,
+  template <class OperatorType, class VectorType, class LHSScalar>
+  auto
+  operator+(
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
       const BilinearFormBase<OperatorType>& bf)
   {
-    ProblemBody<OperatorType, VectorType> res(pb);
+    using RHSScalar = typename FormLanguage::Traits<BilinearFormBase<OperatorType>>::ScalarType;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getBFs().add(bf);
     return res;
   }
 
-  template <class OperatorType, class VectorType>
-  ProblemBody<OperatorType, VectorType> operator+(
-      const ProblemBody<OperatorType, VectorType>& pb, const FormLanguage::List<PeriodicBCBase>& pbcs)
+  template <class OperatorType, class VectorType, class LHSScalar>
+  auto
+  operator+(
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
+      const FormLanguage::List<PeriodicBCBase>& pbcs)
   {
-    ProblemBody<OperatorType, VectorType> res(pb);
+    using RHSScalar = Real;
+    using ScalarType = RHSScalar;
+    ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getPBCs().add(pbcs);
     return res;
   }
 
-  template <class LHSNumber, class OperatorType>
-  ProblemBody<OperatorType, void> operator+(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi, const BilinearFormBase<OperatorType>& bf)
+  template <class OperatorType, class LHSScalar>
+  auto
+  operator+(
+      const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const BilinearFormBase<OperatorType>& bf)
   {
-    ProblemBody<OperatorType, void> res;
+    using RHSScalar = typename FormLanguage::Traits<BilinearFormBase<OperatorType>>::ScalarType;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
     res.getBFs().add(bf);
     return res;
   }
 
-  template <class OperatorType, class Number>
-  ProblemBody<OperatorType, void> operator-(
-      const BilinearFormBase<OperatorType>& bf, const LinearFormIntegratorBase<Number>& lfi)
+  template <class OperatorType, class RHSScalar>
+  auto
+  operator-(
+      const BilinearFormBase<OperatorType>& bf, const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    ProblemBody<OperatorType, void> res;
+    using LHSScalar = typename FormLanguage::Traits<BilinearFormBase<OperatorType>>::ScalarType;
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, void, ScalarType> res;
     res.getBFs().add(bf);
     res.getLFIs().add(UnaryMinus(lfi));
     return res;
   }
 
-  template <class OperatorType, class Number>
-  ProblemBody<OperatorType, void> operator-(
+  template <class OperatorType, class RHSScalar>
+  auto
+  operator-(
       const FormLanguage::List<BilinearFormBase<OperatorType>>& bfs,
-      const LinearFormIntegratorBase<Number>& lfi)
+      const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    ProblemBody<OperatorType, void> res;
+    using LHSScalar = typename FormLanguage::Traits<BilinearFormBase<OperatorType>>::ScalarType;
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, void, ScalarType> res;
     res.getBFs().add(bfs);
     res.getLFIs().add(UnaryMinus(lfi));
     return res;
   }
 
-  template <class LHSNumber, class OperatorType>
-  ProblemBody<OperatorType, void> operator+(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& bfi,
+  template <class LHSScalar, class OperatorType>
+  auto
+  operator+(
+      const LocalBilinearFormIntegratorBase<LHSScalar>& bfi,
       const FormLanguage::List<BilinearFormBase<OperatorType>>& bfs)
   {
-    ProblemBody<OperatorType, void> res;
+    using RHSScalar = typename FormLanguage::Traits<BilinearFormBase<OperatorType>>::ScalarType;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
     res.getBFs().add(bfs);
     return res;

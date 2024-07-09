@@ -45,6 +45,36 @@ namespace Rodin::FormLanguage
   {
     using ScalarType = Complex;
   };
+
+  template <class LHS, class RHS>
+  struct Sum
+  {
+    using Type = decltype(std::declval<LHS>() + std::declval<RHS>());
+  };
+
+  template <class LHS, class RHS>
+  struct Minus
+  {
+    using Type = decltype(std::declval<LHS>() - std::declval<RHS>());
+  };
+
+  template <class Operand>
+  struct UnaryMinus
+  {
+    using Type = decltype(-std::declval<Operand>());
+  };
+
+  template <class LHS, class RHS>
+  struct Division
+  {
+    using Type = decltype(std::declval<LHS>() / std::declval<RHS>());
+  };
+
+  template <class LHS, class RHS>
+  struct Mult
+  {
+    using Type = decltype(std::declval<LHS>() * std::declval<RHS>());
+  };
 }
 
 #endif

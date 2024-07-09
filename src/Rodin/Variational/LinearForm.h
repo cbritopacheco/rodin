@@ -23,10 +23,12 @@
 
 namespace Rodin::Variational
 {
-  template <class VectorType>
+  template <class Vector>
   class LinearFormBase : public FormLanguage::Base
   {
     public:
+      using VectorType = Vector;
+
       LinearFormBase() = default;
 
       LinearFormBase(const LinearFormBase& other)

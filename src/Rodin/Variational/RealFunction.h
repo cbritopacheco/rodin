@@ -81,11 +81,13 @@ namespace Rodin::Variational
    * @ingroup RealFunctionSpecializations
    */
   template <class NestedDerived>
-  class RealFunction<RealFunctionBase<NestedDerived>> final
-    : public RealFunctionBase<RealFunctionBase<NestedDerived>>
+  class RealFunction<FunctionBase<NestedDerived>> final
+    : public RealFunctionBase<FunctionBase<NestedDerived>>
   {
     public:
-      using Parent = RealFunctionBase<RealFunctionBase<NestedDerived>>;
+      using ScalarType = Real;
+
+      using Parent = RealFunctionBase<FunctionBase<NestedDerived>>;
 
       RealFunction(const RealFunctionBase<NestedDerived>& nested)
         : m_nested(nested.copy())
@@ -103,7 +105,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto getValue(const Geometry::Point& v) const
+      ScalarType getValue(const Geometry::Point& v) const
       {
         return m_nested->getValue(v);
       }
@@ -122,7 +124,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<RealFunctionBase<NestedDerived>> m_nested;
+      std::unique_ptr<FunctionBase<NestedDerived>> m_nested;
   };
 
   /**
@@ -140,13 +142,15 @@ namespace Rodin::Variational
     : public RealFunctionBase<RealFunction<Real>>
   {
     public:
+      using ScalarType = Real;
+
       using Parent = RealFunctionBase<RealFunction<Real>>;
 
       /**
        * @brief Constructs a RealFunction from a constant scalar value.
        * @param[in] x Constant scalar value
        */
-      RealFunction(Real x)
+      RealFunction(const Real& x)
         : m_x(x)
       {}
 
@@ -169,14 +173,14 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Real getValue() const
+      const Real& getValue() const
       {
         return m_x;
       }
 
       inline
       constexpr
-      Real getValue(const Geometry::Point&) const
+      ScalarType getValue(const Geometry::Point&) const
       {
         return m_x;
       }
@@ -200,6 +204,8 @@ namespace Rodin::Variational
     : public RealFunctionBase<RealFunction<Integer>>
   {
     public:
+      using ScalarType = Real;
+
       using Parent = RealFunctionBase<RealFunction<Integer>>;
 
       /**
@@ -229,16 +235,16 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Real getValue() const
+      const Integer& getValue() const
       {
         return m_x;
       }
 
       inline
       constexpr
-      Real getValue(const Geometry::Point&) const
+      ScalarType getValue(const Geometry::Point&) const
       {
-        return static_cast<Real>(m_x);
+        return m_x;
       }
 
       inline RealFunction* copy() const noexcept override
@@ -262,6 +268,8 @@ namespace Rodin::Variational
     static_assert(std::is_invocable_r_v<Real, F, const Geometry::Point&>);
 
     public:
+      using ScalarType = Real;
+
       using Parent = RealFunctionBase<RealFunction<F>>;
 
       RealFunction(F f)
@@ -287,7 +295,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Real getValue(const Geometry::Point& v) const
+      ScalarType getValue(const Geometry::Point& v) const
       {
         return m_f(v);
       }

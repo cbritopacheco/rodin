@@ -48,9 +48,11 @@ namespace Rodin::Variational
         Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>>>>
   {
     public:
-      using ScalarType = Scalar;
+      using FESType = Variational::P1<Math::Vector<Scalar>, Mesh>;
 
-      using FESType = Variational::P1<Math::Vector<ScalarType>, Mesh>;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       /// Operand type
       using OperandType = GridFunction<FESType>;
@@ -97,7 +99,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Math::SpatialVector<ScalarType> rc = tracePolytope->getTransformation().inverse(pc);
+            const auto rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -122,7 +124,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector<ScalarType> rc = tracePolytope->getTransformation().inverse(pc);
+                  const auto rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;
@@ -142,7 +144,7 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialMatrix<ScalarType> jacobian(vdim, d);
+          SpatialMatrixType jacobian(vdim, d);
           out = 0;
           for (size_t local = 0; local < fe.getCount(); local++)
           {

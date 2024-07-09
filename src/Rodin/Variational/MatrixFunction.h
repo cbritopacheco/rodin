@@ -40,8 +40,6 @@ namespace Rodin::Variational
     public:
       using ScalarType = Scalar;
 
-      using MatrixType = Math::Matrix<ScalarType>;
-
       using Parent = FunctionBase<MatrixFunctionBase<ScalarType, Derived>>;
 
       MatrixFunctionBase() = default;
@@ -69,6 +67,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      template <class MatrixType>
       inline
       constexpr
       void getValue(MatrixType& res, const Geometry::Point& p) const

@@ -27,54 +27,47 @@ namespace Rodin::FormLanguage
 {
   namespace Internal
   {
-    template <bool B, bool I, bool S, bool V, bool M>
+    template <bool B, bool I, bool S, bool C, bool V, bool M>
     struct RangeOfSAT
     {};
 
     template <>
-    struct RangeOfSAT<true, false, false, false, false>
+    struct RangeOfSAT<true, false, false, false, false, false>
     {
       using Type = Boolean;
       Variational::RangeType Value = Variational::RangeType::Boolean;
     };
 
     template <>
-    struct RangeOfSAT<true, false, true, false, false>
-    {
-      using Type = Real;
-      Variational::RangeType Value = Variational::RangeType::Real;
-    };
-
-    template <>
-    struct RangeOfSAT<false, true, false, false, false>
+    struct RangeOfSAT<false, true, false, false, false, false>
     {
       using Type = Integer;
       Variational::RangeType Value = Variational::RangeType::Integer;
     };
 
     template <>
-    struct RangeOfSAT<false, true, true, false, false>
+    struct RangeOfSAT<false, false, true, false, false, false>
     {
       using Type = Real;
       Variational::RangeType Value = Variational::RangeType::Real;
     };
 
     template <>
-    struct RangeOfSAT<false, false, true, false, false>
+    struct RangeOfSAT<false, false, false, true, false, false>
     {
-      using Type = Real;
-      Variational::RangeType Value = Variational::RangeType::Real;
+      using Type = Complex;
+      Variational::RangeType Value = Variational::RangeType::Complex;
     };
 
     template <>
-    struct RangeOfSAT<false, false, false, true, false>
+    struct RangeOfSAT<false, false, false, false, true, false>
     {
       using Type = Math::Vector<Real>;
       Variational::RangeType Value = Variational::RangeType::Vector;
     };
 
     template <>
-    struct RangeOfSAT<false, false, false, false, true>
+    struct RangeOfSAT<false, false, false, false, false, true>
     {
       using Type = Math::Matrix<Real>;
       Variational::RangeType Value = Variational::RangeType::Matrix;
@@ -105,18 +98,16 @@ namespace Rodin::FormLanguage
     static constexpr const bool Value = std::is_same_v<T, Integer>;
   };
 
-  template <class T, typename = void, typename = void>
-  struct IsMatrixRange
+  template <class T>
+  struct IsRealRange
   {
-    static constexpr const bool Value = false;
+    static constexpr const bool Value = std::is_same_v<T, Real>;
   };
 
   template <class T>
-  struct IsMatrixRange<T, std::void_t<decltype(T::RowsAtCompileTime)>, std::void_t<decltype(T::ColsAtCompileTime)>>
+  struct IsComplexRange
   {
-    static constexpr const bool Value =
-      (T::ColsAtCompileTime == Eigen::Dynamic) ||
-      (T::ColsAtCompileTime > 1);
+    static constexpr const bool Value = std::is_same_v<T, Complex>;
   };
 
   template <class T, typename = void, typename = void>
@@ -131,13 +122,18 @@ namespace Rodin::FormLanguage
     static constexpr const bool Value = T::ColsAtCompileTime == 1;
   };
 
+  template <class T, typename = void, typename = void>
+  struct IsMatrixRange
+  {
+    static constexpr const bool Value = false;
+  };
+
   template <class T>
-  struct IsRealRange
+  struct IsMatrixRange<T, std::void_t<decltype(T::RowsAtCompileTime)>, std::void_t<decltype(T::ColsAtCompileTime)>>
   {
     static constexpr const bool Value =
-      std::is_convertible_v<T, Real> &&
-      !IsVectorRange<T>::Value &&
-      !IsMatrixRange<T>::Value;
+      (T::ColsAtCompileTime == Eigen::Dynamic) ||
+      (T::ColsAtCompileTime > 1);
   };
 
   template <class T>
@@ -168,6 +164,7 @@ namespace Rodin::FormLanguage
         IsBooleanRange<ResultType>::Value,
         IsIntegerRange<ResultType>::Value,
         IsRealRange<ResultType>::Value,
+        IsComplexRange<ResultType>::Value,
         IsVectorRange<ResultType>::Value,
         IsMatrixRange<ResultType>::Value>
       ::Type;
@@ -182,6 +179,7 @@ namespace Rodin::FormLanguage
         IsBooleanRange<ResultType>::Value,
         IsIntegerRange<ResultType>::Value,
         IsRealRange<ResultType>::Value,
+        IsComplexRange<ResultType>::Value,
         IsVectorRange<ResultType>::Value,
         IsMatrixRange<ResultType>::Value>
       ::Type;

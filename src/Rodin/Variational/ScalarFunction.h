@@ -86,11 +86,150 @@ namespace Rodin::Variational
       constexpr
       void getValue(ScalarType& res, const Geometry::Point& p) const
       {
-        res = this->getValue(p);
+        if constexpr (Internal::HasGetValueMethod<Derived, ScalarType&, const Geometry::Point&>::Value)
+        {
+          return static_cast<const Derived&>(*this).getValue(res, p);
+        }
+        else
+        {
+          res = getValue(p);
+        }
       }
 
       virtual ScalarFunctionBase* copy() const noexcept override = 0;
   };
+
+  /**
+   * @ingroup ScalarFunctionSpecializations
+   * @brief Represents a constant scalar function with type Real.
+   */
+  template <>
+  class ScalarFunction<Real> final
+    : public ScalarFunctionBase<Real, ScalarFunction<Real>>
+  {
+    public:
+      using ScalarType = Real;
+
+      using Parent = ScalarFunctionBase<Real, ScalarFunction<Real>>;
+
+      /**
+       * @brief Constructs a ScalarFunction from a constant scalar value.
+       * @param[in] x Constant scalar value
+       */
+      ScalarFunction(const ScalarType& x)
+        : m_x(x)
+      {}
+
+      ScalarFunction(const ScalarFunction& other)
+        : Parent(other),
+          m_x(other.m_x)
+      {}
+
+      ScalarFunction(ScalarFunction&& other)
+        : Parent(std::move(other)),
+          m_x(other.m_x)
+      {}
+
+      inline
+      constexpr
+      ScalarFunction& traceOf(Geometry::Attribute)
+      {
+        return *this;
+      }
+
+      inline
+      constexpr
+      const Real& getValue() const
+      {
+        return m_x;
+      }
+
+      inline
+      constexpr
+      ScalarType getValue(const Geometry::Point&) const
+      {
+        return m_x;
+      }
+
+      inline ScalarFunction* copy() const noexcept override
+      {
+        return new ScalarFunction(*this);
+      }
+
+    private:
+      const Real m_x;
+  };
+
+  /**
+   * @brief CTAD for ScalarFunction.
+   */
+  ScalarFunction(const Real&) -> ScalarFunction<Real>;
+
+  /**
+   * @ingroup ScalarFunctionSpecializations
+   * @brief Represents a constant scalar function with type Complex.
+   */
+  template <>
+  class ScalarFunction<Complex> final
+    : public ScalarFunctionBase<Complex, ScalarFunction<Complex>>
+  {
+    public:
+      using ScalarType = Complex;
+
+      using Parent = ScalarFunctionBase<Complex, ScalarFunction<Complex>>;
+
+      /**
+       * @brief Constructs a ScalarFunction from a constant scalar value.
+       * @param[in] x Constant scalar value
+       */
+      ScalarFunction(const ScalarType& x)
+        : m_x(x)
+      {}
+
+      ScalarFunction(const ScalarFunction& other)
+        : Parent(other),
+          m_x(other.m_x)
+      {}
+
+      ScalarFunction(ScalarFunction&& other)
+        : Parent(std::move(other)),
+          m_x(other.m_x)
+      {}
+
+      inline
+      constexpr
+      ScalarFunction& traceOf(Geometry::Attribute)
+      {
+        return *this;
+      }
+
+      inline
+      constexpr
+      const Complex& getValue() const
+      {
+        return m_x;
+      }
+
+      inline
+      constexpr
+      ScalarType getValue(const Geometry::Point&) const
+      {
+        return m_x;
+      }
+
+      inline ScalarFunction* copy() const noexcept override
+      {
+        return new ScalarFunction(*this);
+      }
+
+    private:
+      const Complex m_x;
+  };
+
+  /**
+   * @brief CTAD for ScalarFunction.
+   */
+  ScalarFunction(const Complex&) -> ScalarFunction<Complex>;
 
   /**
    * @ingroup ScalarFunctionSpecializations
@@ -149,138 +288,6 @@ namespace Rodin::Variational
   template <class Scalar, class NestedDerived>
   ScalarFunction(const ScalarFunctionBase<Scalar, NestedDerived>&)
     -> ScalarFunction<ScalarFunctionBase<Scalar, NestedDerived>>;
-
-  /**
-   * @ingroup ScalarFunctionSpecializations
-   * @brief Represents a constant scalar function with type Real.
-   */
-  template <>
-  class ScalarFunction<Real> final
-    : public ScalarFunctionBase<Real, ScalarFunction<Real>>
-  {
-    public:
-      using ScalarType = Real;
-
-      using Parent = ScalarFunctionBase<Real, ScalarFunction<Real>>;
-
-      /**
-       * @brief Constructs a ScalarFunction from a constant scalar value.
-       * @param[in] x Constant scalar value
-       */
-      ScalarFunction(const ScalarType& x)
-        : m_x(x)
-      {}
-
-      ScalarFunction(const ScalarFunction& other)
-        : Parent(other),
-          m_x(other.m_x)
-      {}
-
-      ScalarFunction(ScalarFunction&& other)
-        : Parent(std::move(other)),
-          m_x(other.m_x)
-      {}
-
-      inline
-      constexpr
-      ScalarFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
-
-      inline
-      constexpr
-      ScalarType getValue() const
-      {
-        return m_x;
-      }
-
-      inline
-      constexpr
-      ScalarType getValue(const Geometry::Point&) const
-      {
-        return m_x;
-      }
-
-      inline ScalarFunction* copy() const noexcept override
-      {
-        return new ScalarFunction(*this);
-      }
-
-    private:
-      const ScalarType m_x;
-  };
-
-  /**
-   * @brief CTAD for ScalarFunction.
-   */
-  ScalarFunction(const Real&) -> ScalarFunction<Real>;
-
-  /**
-   * @ingroup ScalarFunctionSpecializations
-   * @brief Represents a constant scalar function with type Complex.
-   */
-  template <>
-  class ScalarFunction<Complex> final
-    : public ScalarFunctionBase<Complex, ScalarFunction<Complex>>
-  {
-    public:
-      using ScalarType = Complex;
-
-      using Parent = ScalarFunctionBase<Complex, ScalarFunction<Complex>>;
-
-      /**
-       * @brief Constructs a ScalarFunction from a constant scalar value.
-       * @param[in] x Constant scalar value
-       */
-      ScalarFunction(const ScalarType& x)
-        : m_x(x)
-      {}
-
-      ScalarFunction(const ScalarFunction& other)
-        : Parent(other),
-          m_x(other.m_x)
-      {}
-
-      ScalarFunction(ScalarFunction&& other)
-        : Parent(std::move(other)),
-          m_x(other.m_x)
-      {}
-
-      inline
-      constexpr
-      ScalarFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
-
-      inline
-      constexpr
-      ScalarType getValue() const
-      {
-        return m_x;
-      }
-
-      inline
-      constexpr
-      ScalarType getValue(const Geometry::Point&) const
-      {
-        return m_x;
-      }
-
-      inline ScalarFunction* copy() const noexcept override
-      {
-        return new ScalarFunction(*this);
-      }
-
-    private:
-      const ScalarType m_x;
-  };
-
-  /**
-   * @brief CTAD for ScalarFunction.
-   */
-  ScalarFunction(const Complex&) -> ScalarFunction<Complex>;
 
   /**
    * @ingroup ScalarFunctionSpecializations

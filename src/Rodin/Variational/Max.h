@@ -26,14 +26,14 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived>
   class Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
-    : public RealFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
+    : public FunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
       using LHSType = FunctionBase<LHSDerived>;
 
       using RHSType = FunctionBase<RHSDerived>;
 
-      using Parent = RealFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+      using Parent = FunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
       Max(const LHSType& a, const RHSType& b)
         : m_lhs(a.copy()), m_rhs(b.copy())
@@ -60,7 +60,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Real getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);

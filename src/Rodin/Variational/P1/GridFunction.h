@@ -42,6 +42,8 @@ namespace Rodin::Variational
       /// Type of finite element space to which the GridFunction belongs to
       using FESType = P1<Range, Mesh>;
 
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       using MeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
@@ -98,9 +100,8 @@ namespace Rodin::Variational
 
       GridFunction& operator=(const GridFunction&)  = delete;
 
-      void interpolate(Real& res, const Geometry::Point& p) const
+      void interpolate(RangeType& res, const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Real>);
         const auto& fes = this->getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
         const auto& polytope = p.getPolytope();
@@ -109,31 +110,37 @@ namespace Rodin::Variational
         const Index i = polytope.getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
         const auto& r = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        res = 0;
-        for (Index local = 0; local < fe.getCount(); local++)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
-          const auto& basis = fe.getBasis(local);
-          res += getValue({d, i}, local) * basis(r);
+          res = Real(0);
+          for (Index local = 0; local < fe.getCount(); local++)
+            res += getValue({d, i}, local) * fe.getBasis(local)(r);
         }
-      }
-
-      void interpolate(Math::Vector<Real>& res, const Geometry::Point& p) const
-      {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& r = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        const size_t vdim = fes.getVectorDimension();
-        const size_t dofs = fe.getCount();
-        res.resize(vdim);
-        res.setZero();
-        for (Index local = 0; local < dofs; local++)
+        else if constexpr (std::is_same_v<RangeType, Complex>)
         {
-          const auto& basis = fe.getBasis(local);
-          res += getValue({d, i}, local).coeff(local % vdim) * basis(r);
+          res = Complex(0, 0);
+          for (Index local = 0; local < fe.getCount(); local++)
+          {
+            if (local % 2 == 0)
+              res += getValue({d, i}, local).real() * fe.getBasis(local)(r);
+            else
+              res += getValue({d, i}, local).imag() * fe.getBasis(local)(r);
+          }
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
+        {
+          const size_t vdim = fes.getVectorDimension();
+          res.resize(vdim);
+          res.setZero();
+          for (Index local = 0; local < fe.getCount(); local++)
+          {
+            const auto& basis = fe.getBasis(local);
+            res += getValue({d, i}, local).coeff(local % vdim) * basis(r);
+          }
+        }
+        else
+        {
+          assert(false);
         }
       }
 

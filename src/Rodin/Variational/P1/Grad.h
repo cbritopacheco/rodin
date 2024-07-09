@@ -61,6 +61,8 @@ namespace Rodin::Variational
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
+
       using OperandType = GridFunction<FESType>;
 
       using Parent = GradBase<OperandType, Grad<OperandType>>;
@@ -88,14 +90,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::Vector<Real>& out, const Geometry::Point& p) const
-      {
-        Math::SpatialVector<Real> tmp;
-        interpolate(tmp, p);
-        out = std::move(tmp);
-      }
-
-      void interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
+      void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -111,7 +106,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
+            const auto rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -136,7 +131,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
+                  const auto rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;
@@ -155,8 +150,8 @@ namespace Rodin::Variational
           const auto& fes = gf.getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialVector<Real> grad(d);
-          Math::SpatialVector<Real> res(d);
+          SpatialVectorType grad(d);
+          SpatialVectorType res(d);
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
