@@ -54,13 +54,11 @@ namespace Rodin::Variational
 
       virtual ~MatrixFunctionBase() = default;
 
-      inline
       const Derived& getDerived() const
       {
         return static_cast<const Derived&>(*this);
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -68,7 +66,6 @@ namespace Rodin::Variational
       }
 
       template <class MatrixType>
-      inline
       constexpr
       void getValue(MatrixType& res, const Geometry::Point& p) const
       {
@@ -82,7 +79,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
@@ -93,7 +89,6 @@ namespace Rodin::Variational
        * @brief Gets the number of rows in the matrix
        * @returns Number of rows
        */
-      inline
       constexpr
       size_t getRows() const
       {
@@ -104,14 +99,12 @@ namespace Rodin::Variational
        * @brief Gets the number of columns in the matrix
        * @returns Number of columns
        */
-      inline
       constexpr
       size_t getColumns() const
       {
         return static_cast<const Derived&>(*this).getColumns();
       }
 
-      inline
       constexpr
       MatrixFunctionBase& traceOf(Geometry::Attribute attr)
       {
@@ -119,7 +112,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       MatrixFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -127,7 +119,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      virtual inline MatrixFunctionBase* copy() const noexcept override
+      virtual MatrixFunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
       }
@@ -161,35 +153,30 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      inline
       constexpr
       const MatrixType& getValue(const Geometry::Point&) const
       {
         return m_matrix.get();
       }
 
-      inline
       constexpr
       void getValue(MatrixType& res, const Geometry::Point&) const
       {
         res = m_matrix.get();
       }
 
-      inline
       constexpr
       MatrixFunction& traceOf(Geometry::Attribute)
       {
         return *this;
       }
 
-      inline
       constexpr
       MatrixFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         return *this;
       }
 
-      inline
       constexpr
       size_t getRows() const
       {
@@ -200,14 +187,13 @@ namespace Rodin::Variational
        * @brief Gets the number of columns in the matrix
        * @returns Number of columns
        */
-      inline
       constexpr
       size_t getColumns() const
       {
         return m_matrix.get().cols();
       }
 
-      inline MatrixFunction* copy() const noexcept override
+      MatrixFunction* copy() const noexcept override
       {
         return new MatrixFunction(*this);
       }
@@ -216,8 +202,9 @@ namespace Rodin::Variational
       std::reference_wrapper<const MatrixType> m_matrix;
   };
 
-  MatrixFunction(std::reference_wrapper<const Math::Matrix<Real>>)
-    -> MatrixFunction<Math::Matrix<Real>>;
+  template <class Scalar>
+  MatrixFunction(std::reference_wrapper<const Math::Matrix<Scalar>>)
+    -> MatrixFunction<Math::Matrix<Scalar>>;
 }
 
 #endif

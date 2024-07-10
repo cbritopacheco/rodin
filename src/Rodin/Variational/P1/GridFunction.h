@@ -132,10 +132,11 @@ namespace Rodin::Variational
           const size_t vdim = fes.getVectorDimension();
           res.resize(vdim);
           res.setZero();
+          Math::Vector<Real> basis;
           for (Index local = 0; local < fe.getCount(); local++)
           {
-            const auto& basis = fe.getBasis(local);
-            res += getValue({d, i}, local).coeff(local % vdim) * basis(r);
+            fe.getBasis(local)(basis, r);
+            res += getValue({d, i}, local).coeff(local % vdim) * basis;
           }
         }
         else
@@ -148,12 +149,12 @@ namespace Rodin::Variational
       {
         auto& data = this->getData();
         auto& weights = this->getWeights().emplace(this->getFiniteElementSpace().getSize());
-        if constexpr (std::is_same_v<RangeType, Real>)
+        if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
           assert(data.rows() == 1);
           std::copy(data.data(), data.data() + data.size(), weights.data());
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
           const auto& fes = this->getFiniteElementSpace();
           const size_t vdim = fes.getVectorDimension();
@@ -175,12 +176,12 @@ namespace Rodin::Variational
         assert(static_cast<size_t>(weights.size()) == this->getFiniteElementSpace().getSize());
         auto& data = this->getData();
         const auto& w = this->getWeights().emplace(std::forward<Vector>(weights));
-        if constexpr (std::is_same_v<RangeType, Real>)
+        if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
           assert(data.rows() == 1);
           std::copy(w.data(), w.data() + w.size(), data.data());
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
           const size_t sz = w.size();
           const auto& fes = this->getFiniteElementSpace();

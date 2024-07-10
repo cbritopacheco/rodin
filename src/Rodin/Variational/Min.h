@@ -129,7 +129,6 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       Min& traceOf(Geometry::Attribute attrs)
       {
@@ -137,7 +136,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       ScalarType getValue(const Geometry::Point& p) const
       {
@@ -149,14 +147,12 @@ namespace Rodin::Variational
           return rhs;
       }
 
-      inline
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      inline
       const auto& getRHS() const
       {
         return m_rhs;

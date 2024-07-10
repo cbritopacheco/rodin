@@ -172,10 +172,10 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
   class Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Real>, Mesh>, Space>>>
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>>>
   {
     public:
-      using FESType = P1<Math::Vector<Real>, Mesh>;
+      using FESType = P1<Math::Vector<Number>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;

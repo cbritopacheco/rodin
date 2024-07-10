@@ -30,8 +30,6 @@ namespace Rodin::Variational
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
-      using ScalarType = Real;
-
       using Parent = RealFunctionBase<Tan<FunctionBase<NestedDerived>>>;
 
       constexpr
@@ -51,7 +49,6 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_v))
       {}
 
-      inline
       constexpr
       Tan& traceOf(Geometry::Attribute attr)
       {
@@ -59,7 +56,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       Tan& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -67,20 +63,17 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
-      ScalarType getValue(const Geometry::Point& p) const
+      Real getValue(const Geometry::Point& p) const
       {
-        return Math::tan(Real(getOperand().getValue(p)));
+        return Math::tan(getOperand().getValue(p));
       }
 
-      inline
       const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
-      inline
       Tan* copy() const noexcept
       override
       {
