@@ -74,7 +74,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -82,21 +81,11 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;DivBase&lt;GridFunction&lt;FES&gt;, Derived&gt;&gt;</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-          </dl>
-        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a79fa082522d4bcdecd0556f21cd074f0">
-              using <a href="#a79fa082522d4bcdecd0556f21cd074f0" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">OperandType</a>, Derived&gt;&gt;
+            <dt id="a4082062979c8203e126ac17b9a4eae1e">
+              using <a href="#a4082062979c8203e126ac17b9a4eae1e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;ScalarType, <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">OperandType</a>, Derived&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -143,8 +132,8 @@ $ u $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a28ab000f67fa11d58309629b9749dedc">
-              <span class="m-doc-wrap-bumper">void <a href="#a28ab000f67fa11d58309629b9749dedc" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; out,
+            <dt id="a92ad7a7f61e005db52349e38bf84f97c">
+              <span class="m-doc-wrap-bumper">void <a href="#a92ad7a7f61e005db52349e38bf84f97c" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap">ScalarType&amp; out,
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Interpolation function to be overriden in Derived type.</dd>
