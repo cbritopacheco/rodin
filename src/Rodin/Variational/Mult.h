@@ -505,7 +505,7 @@ namespace Rodin::Variational
 
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using ScalarType = decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
@@ -642,16 +642,16 @@ namespace Rodin::Variational
     return Mult(lhs, RealFunction(rhs));
   }
 
-  template <class LHS, class Number>
-  class Mult<LHS, LocalBilinearFormIntegratorBase<Number>>
-    : public LocalBilinearFormIntegratorBase<decltype(std::declval<LHS>() * std::declval<Number>())>
+  template <class LHS, class RHSNumber>
+  class Mult<LHS, LocalBilinearFormIntegratorBase<RHSNumber>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Mult<LHS, RHSNumber>::Type>
   {
     public:
       using LHSType = LHS;
 
-      using RHSType = LocalBilinearFormIntegratorBase<Number>;
+      using RHSType = LocalBilinearFormIntegratorBase<RHSNumber>;
 
-      using ScalarType = decltype(std::declval<LHS>() * std::declval<Number>());
+      using ScalarType = typename FormLanguage::Mult<LHS, RHSNumber>::Type;
 
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -725,16 +725,16 @@ namespace Rodin::Variational
     return Mult(lhs, rhs);
   }
 
-  template <class LHS, class Number>
-  class Mult<LHS, LinearFormIntegratorBase<Number>>
-    : public LinearFormIntegratorBase<decltype(std::declval<LHS>() * std::declval<Number>())>
+  template <class LHS, class RHSNumber>
+  class Mult<LHS, LinearFormIntegratorBase<RHSNumber>>
+    : public LinearFormIntegratorBase<typename FormLanguage::Mult<LHS, RHSNumber>::Type>
   {
     public:
       using LHSType = LHS;
 
-      using RHSType = LinearFormIntegratorBase<Number>;
+      using RHSType = LinearFormIntegratorBase<RHSNumber>;
 
-      using ScalarType = decltype(std::declval<LHS>() * std::declval<Number>());
+      using ScalarType = typename FormLanguage::Mult<LHS, RHSNumber>::Type;
 
       using Parent = LinearFormIntegratorBase<ScalarType>;
 

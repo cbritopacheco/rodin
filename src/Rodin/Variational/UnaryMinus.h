@@ -13,7 +13,6 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "ShapeFunction.h"
-#include "RealFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -66,14 +65,12 @@ namespace Rodin::Variational
           m_op(std::move(other.m_op))
       {}
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return getOperand().getRangeShape();
       }
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
@@ -81,31 +78,19 @@ namespace Rodin::Variational
         return *m_op;
       }
 
-      inline
       auto getValue(const Geometry::Point& p) const
       {
         return -this->object(getOperand().getValue(p));
       }
 
-      inline
+      template <class T>
       constexpr
-      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
+      void getValue(T& res, const Geometry::Point& p) const
       {
-        static_assert(FormLanguage::IsVectorRange<OperandRangeType>::Value);
         getOperand().getValue(res, p);
         res *= -1;
       }
 
-      inline
-      constexpr
-      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
-      {
-        static_assert(FormLanguage::IsMatrixRange<OperandRangeType>::Value);
-        getOperand().getValue(res, p);
-        res *= -1;
-      }
-
-      inline
       constexpr
       UnaryMinus& traceOf(Geometry::Attribute attr)
       {
@@ -114,7 +99,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       UnaryMinus& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -123,7 +107,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline UnaryMinus* copy() const noexcept override
+      UnaryMinus* copy() const noexcept override
       {
         return new UnaryMinus(*this);
       }

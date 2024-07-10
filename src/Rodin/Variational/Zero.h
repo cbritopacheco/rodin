@@ -56,7 +56,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point&) const
       {
-        return Real(0);
+        return ScalarType(0);
       }
 
       inline Zero* copy() const noexcept override

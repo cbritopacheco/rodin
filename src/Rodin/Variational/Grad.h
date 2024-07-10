@@ -45,7 +45,7 @@ namespace Rodin::Variational
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using VectorType = Math::SpatialVector<ScalarType>;
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       using OperandType = GridFunction<FESType>;
 
@@ -86,17 +86,16 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::SpatialVector<Real> getValue(const Geometry::Point& p) const
+      SpatialVectorType getValue(const Geometry::Point& p) const
       {
-        Math::SpatialVector<Real> out;
+        SpatialVectorType out;
         getValue(out, p);
         return out;
       }
 
       inline
-      void getValue(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
+      void getValue(SpatialVectorType& out, const Geometry::Point& p) const
       {
-        out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -127,7 +126,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      void interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
+      void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
         static_cast<const Derived&>(*this).interpolate(out, p);
       }

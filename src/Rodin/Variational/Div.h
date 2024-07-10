@@ -29,7 +29,7 @@ namespace Rodin::Variational
    */
   template <class FES, class Derived>
   class DivBase<GridFunction<FES>, Derived>
-    : public RealFunctionBase<DivBase<GridFunction<FES>, Derived>>
+    : public ScalarFunctionBase<typename FormLanguage::Traits<FES>::ScalarType, DivBase<GridFunction<FES>, Derived>>
   {
     public:
       using FESType = FES;
@@ -39,7 +39,7 @@ namespace Rodin::Variational
       using OperandType = GridFunction<FES>;
 
       /// Parent class
-      using Parent = RealFunctionBase<DivBase<OperandType, Derived>>;
+      using Parent = ScalarFunctionBase<ScalarType, DivBase<OperandType, Derived>>;
 
       /**
        * @brief Constructs the Div of a @f$ \mathbb{P}_1 @f$ function @f$ u
@@ -108,7 +108,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      void interpolate(Real& out, const Geometry::Point& p) const
+      void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         static_cast<const Derived&>(*this).interpolate(out, p);
       }

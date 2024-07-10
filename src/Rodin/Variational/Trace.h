@@ -9,7 +9,6 @@
 
 #include "ForwardDecls.h"
 
-#include "RealFunction.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
@@ -36,12 +35,12 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class Trace<FunctionBase<NestedDerived>> final
-    : public RealFunctionBase<Trace<FunctionBase<NestedDerived>>>
+    : public FunctionBase<Trace<FunctionBase<NestedDerived>>>
   {
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
-      using Parent = RealFunctionBase<Trace<OperandType>>;
+      using Parent = FunctionBase<Trace<OperandType>>;
 
       /**
        * @brief Constructs the Trace of the given matrix
@@ -64,16 +63,12 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_operand))
       {}
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        using OperandRange = typename FormLanguage::Traits<OperandType>::RangeType;
-        static_assert(std::is_same_v<OperandRange, Math::Matrix<Real>>);
         return getOperand().getValue(p).trace();
       }
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
@@ -81,14 +76,13 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      inline
       Trace& traceOf(Geometry::Attribute attrs)
       {
         m_operand.traceOf(attrs);
         return *this;
       }
 
-      inline Trace* copy() const noexcept override
+      Trace* copy() const noexcept override
       {
         return new Trace(*this);
       }
@@ -130,48 +124,41 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_operand))
       {}
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
         return *m_operand;
       }
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return { 1, 1 };
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return m_operand->getPoint();
       }
 
-      inline
       Trace& setPoint(const Geometry::Point& p)
       {
         m_operand->setPoint(p);
         return *this;
       }
 
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
@@ -183,7 +170,7 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace();
       }
 
-      inline Trace* copy() const noexcept override
+      Trace* copy() const noexcept override
       {
         return new Trace(*this);
       }

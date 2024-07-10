@@ -30,8 +30,6 @@ namespace Rodin::Variational
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
-      using ScalarType = Real;
-
       using Parent = RealFunctionBase<Cos<FunctionBase<NestedDerived>>>;
 
       Cos(const OperandType& v)
@@ -65,7 +63,7 @@ namespace Rodin::Variational
       }
 
       inline
-      ScalarType getValue(const Geometry::Point& p) const
+      Real getValue(const Geometry::Point& p) const
       {
         return Math::cos(getOperand().getValue(p));
       }

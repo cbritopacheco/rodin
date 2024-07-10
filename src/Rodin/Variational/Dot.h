@@ -39,8 +39,7 @@ namespace Rodin::FormLanguage
 
     using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    using ScalarType =
-      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
     using RangeType = ScalarType;
   };
@@ -66,8 +65,7 @@ namespace Rodin::FormLanguage
 
     using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    using ScalarType =
-      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
     using RangeType = ScalarType;
   };
@@ -90,8 +88,7 @@ namespace Rodin::FormLanguage
 
     using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    using ScalarType =
-      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
     using RangeType = ScalarType;
   };
@@ -125,8 +122,7 @@ namespace Rodin::Variational
 
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using ScalarType =
-        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
       using RangeType = ScalarType;
 
@@ -245,8 +241,7 @@ namespace Rodin::Variational
 
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using ScalarType =
-        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
       using RangeType = ScalarType;
 
@@ -397,8 +392,7 @@ namespace Rodin::Variational
 
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using ScalarType =
-        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
       using RangeType = ScalarType;
 

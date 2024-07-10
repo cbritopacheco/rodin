@@ -15,8 +15,6 @@ namespace Rodin::Variational
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
-      using ScalarType = Real;
-
       using Parent = RealFunctionBase<Im<FunctionBase<NestedDerived>>>;
 
       Im(const OperandType& f)
@@ -41,7 +39,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      ScalarType getValue(const Geometry::Point& p) const
+      Real getValue(const Geometry::Point& p) const
       {
         return getOperand().getValue(p).imag();
       }

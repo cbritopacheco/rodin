@@ -33,10 +33,6 @@ namespace Rodin::Variational
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-      static_assert(
-          std::is_same_v<OperandRangeType, Math::Vector<Real>>
-          || std::is_same_v<OperandRangeType, Math::Matrix<Real>>);
-
       /**
        * @brief Constructs the Transpose matrix of the given matrix.
        */
@@ -57,14 +53,12 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_operand))
       {}
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return m_operand->getRangeShape().transpose();
       }
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
@@ -72,22 +66,21 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return this->object(getOperand().getValue(p)).transpose();
       }
 
-      inline
+      template <class T>
       constexpr
-      void getValue(Math::Matrix<Real>& out, const Geometry::Point& p) const
+      void getValue(T& out, const Geometry::Point& p) const
       {
         getOperand().getValue(out, p);
         out.transposeInPlace();
       }
 
-      inline Transpose* copy() const noexcept override
+      Transpose* copy() const noexcept override
       {
         return new Transpose(*this);
       }
@@ -132,28 +125,24 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_operand))
       {}
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return getOperand().getRangeShape().transpose();
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& simplex) const
       {
         return getOperand().getDOFs(simplex);
       }
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
@@ -161,34 +150,30 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return m_operand->getPoint();
       }
 
-      inline
       Transpose& setPoint(const Geometry::Point& p)
       {
         m_operand->setPoint(p);
         return *this;
       }
 
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
         return this->object(getOperand().getBasis(local)).transpose();
       }
 
-      inline
       constexpr
       const FES& getFiniteElementSpace() const
       {
         return m_operand.getFiniteElementSpace();
       }
 
-      inline Transpose* copy() const noexcept override
+      Transpose* copy() const noexcept override
       {
         return new Transpose(*this);
       }
