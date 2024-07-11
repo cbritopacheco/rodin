@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Solver::SolverBase class | Rodin</title>
+  <title>Rodin::Solver::LeastSquaresCG&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,25 +64,97 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Operator, class Vector, class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>SolverBase <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>LeastSquaresCG&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Abstract base class for linear algebra solvers.</p>
+        <p>Conjugate gradient solver for self-adjoint problems, for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix&lt;Real&gt;</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector&lt;Real&gt;</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Represents an object which can solve sysystems of the type:</p><div class="m-math"><svg style="width: 4.381em; height: 1.107em;" viewBox="173.241914 -10.626787 42.059174 10.626798">
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Operator, class Vector, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;, Scalar&gt;</a>
+            </dt>
+            <dd>Abstract base class for linear algebra solvers.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a7182aa32062b9b891caa98a604ed2e39">
+              using <a href="#a7182aa32062b9b891caa98a604ed2e39" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;
+            </dt>
+            <dd>Type of vector.</dd>
+            <dt id="a6a3e2ebad8b3214b9c17e01f1e06562f">
+              using <a href="#a6a3e2ebad8b3214b9c17e01f1e06562f" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;Scalar&gt;
+            </dt>
+            <dd>Type of linear operator.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a5342e2f2fd2ce06a1602148b2cf0d97b" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a6a3e2ebad8b3214b9c17e01f1e06562f" class="m-doc">OperatorType</a>&amp; A,
+              <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a7182aa32062b9b891caa98a604ed2e39" class="m-doc">VectorType</a>&amp; x,
+              <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a7182aa32062b9b891caa98a604ed2e39" class="m-doc">VectorType</a>&amp; b) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Solves the linear algebra system.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a5f32017a07965c67d35bbd0b25e80f80" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a6a3e2ebad8b3214b9c17e01f1e06562f" class="m-doc">OperatorType</a>&amp; A,
+              <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a7182aa32062b9b891caa98a604ed2e39" class="m-doc">VectorType</a>&amp; x,
+              <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a7182aa32062b9b891caa98a604ed2e39" class="m-doc">VectorType</a>&amp; b) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Solves the linear algebra system.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a5342e2f2fd2ce06a1602148b2cf0d97b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5342e2f2fd2ce06a1602148b2cf0d97b" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a6a3e2ebad8b3214b9c17e01f1e06562f" class="m-doc">OperatorType</a>&amp; A,
+              <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a7182aa32062b9b891caa98a604ed2e39" class="m-doc">VectorType</a>&amp; x,
+              <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a7182aa32062b9b891caa98a604ed2e39" class="m-doc">VectorType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Solves the linear algebra system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">A&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Left hand side operator</td>
+                </tr>
+                <tr>
+                  <td>x&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Input for the initial guess, and output for the solution</td>
+                </tr>
+                <tr>
+                  <td>b&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Right hand side vector</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Solves the following system:</p><div class="m-math"><svg style="width: 4.104em; height: 1.107em;" viewBox="174.570246 -10.626787 39.402511 10.626798">
 <title>
-\[ Ax = b \: , \]
+\[ Ax = b , \]
 </title>
 <defs>
 <path id='eq1-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
@@ -92,11 +164,11 @@
 <path id='eq1-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
 </defs>
 <g id='eq1-page1'>
-<use x='173.241914' y='-2.324596' xlink:href='#eq1-g0-65'/>
-<use x='182.017261' y='-2.324596' xlink:href='#eq1-g0-120'/>
-<use x='191.990177' y='-2.324596' xlink:href='#eq1-g1-61'/>
-<use x='204.415658' y='-2.324596' xlink:href='#eq1-g0-98'/>
-<use x='212.049427' y='-2.324596' xlink:href='#eq1-g0-59'/>
+<use x='174.570246' y='-2.324596' xlink:href='#eq1-g0-65'/>
+<use x='183.345592' y='-2.324596' xlink:href='#eq1-g0-120'/>
+<use x='193.318509' y='-2.324596' xlink:href='#eq1-g1-61'/>
+<use x='205.74399' y='-2.324596' xlink:href='#eq1-g0-98'/>
+<use x='210.721095' y='-2.324596' xlink:href='#eq1-g0-59'/>
 </g>
 </svg></div><p>where <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
@@ -212,36 +284,15 @@ $ \text{VectorType} $
 <use x='49.578075' y='0' xlink:href='#eq7-g0-101'/>
 </g>
 </svg>.</p>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt id="af4f9e0e5f980c9e75a456d8251fc5a83">
-              <span class="m-doc-wrap-bumper"><a href="#af4f9e0e5f980c9e75a456d8251fc5a83" class="m-doc-self">~SolverBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Default virtual destructor.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a5f32017a07965c67d35bbd0b25e80f80" class="m-doc">solve</a>(</span><span class="m-doc-wrap">OperatorType&amp; A,
-              VectorType&amp; x,
-              VectorType&amp; b) <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Solves the linear algebra system.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
+          </div></section>
           <section class="m-doc-details" id="a5f32017a07965c67d35bbd0b25e80f80"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Operator, class Vector, class Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SolverBase&lt;Operator, Vector, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f32017a07965c67d35bbd0b25e80f80" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">OperatorType&amp; A,
-              VectorType&amp; x,
-              VectorType&amp; b) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f32017a07965c67d35bbd0b25e80f80" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a6a3e2ebad8b3214b9c17e01f1e06562f" class="m-doc">OperatorType</a>&amp; A,
+              <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a7182aa32062b9b891caa98a604ed2e39" class="m-doc">VectorType</a>&amp; x,
+              <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html#a7182aa32062b9b891caa98a604ed2e39" class="m-doc">VectorType</a>&amp; b) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Solves the linear algebra system.</p>
             <table class="m-table m-fullwidth m-flat">

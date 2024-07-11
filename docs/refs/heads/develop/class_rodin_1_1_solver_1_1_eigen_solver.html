@@ -64,85 +64,30 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class EigenSolverType, class Operator, class Vector&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>EigenSolver <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <div class="m-doc-template">template&lt;class EigenSolverType, class OperatorType, class VectorType&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>EigenSolver <span class="m-thin">class</span>
         </h1>
         <p>Wrapper class for any Eigen sparse solver.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="group___eigen_solver_specializations.html" class="m-doc">EigenSolver Template Specializations</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;Operator, Vector&gt;</a>
-            </dt>
-            <dd>Abstract base class for linear algebra solvers.</dd>
-          </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt id="a87b353c8b857eb96ad6f07a3c63bceb9">
-              using <a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc-self">OperatorType</a> = Operator
-            </dt>
-            <dd>Type of linear operator.</dd>
-            <dt id="a88ac812816e59f801e2b761a9868266a">
-              using <a href="#a88ac812816e59f801e2b761a9868266a" class="m-doc-self">VectorType</a> = Vector
-            </dt>
-            <dd>Type of vector.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt id="acc802dd962ec544a4bfe1caeaa947c8d">
-              <span class="m-doc-wrap-bumper">auto <a href="#acc802dd962ec544a4bfe1caeaa947c8d" class="m-doc-self">getSolver</a>(</span><span class="m-doc-wrap">) -&gt; EigenSolverType&amp;</span>
-            </dt>
-            <dd>Gets the reference to the underlying solver instance.</dd>
-            <dt id="a81dfe37ba337de1b7f6d50d668bbcdef">
-              <span class="m-doc-wrap-bumper">auto <a href="#a81dfe37ba337de1b7f6d50d668bbcdef" class="m-doc-self">getSolver</a>(</span><span class="m-doc-wrap">) const -&gt; const EigenSolverType&amp;</span>
-            </dt>
-            <dd>Gets the constant reference to underlying solver instance.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a5342e2f2fd2ce06a1602148b2cf0d97b" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_eigen_solver.html#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&amp; A,
-              <a href="class_rodin_1_1_solver_1_1_eigen_solver.html#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&amp; x,
-              <a href="class_rodin_1_1_solver_1_1_eigen_solver.html#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&amp; b) <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Solves the linear algebra system.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a5342e2f2fd2ce06a1602148b2cf0d97b"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class EigenSolverType, class Operator, class Vector&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />EigenSolver&lt;EigenSolverType, Operator, Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5342e2f2fd2ce06a1602148b2cf0d97b" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_eigen_solver.html#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&amp; A,
-              <a href="class_rodin_1_1_solver_1_1_eigen_solver.html#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&amp; x,
-              <a href="class_rodin_1_1_solver_1_1_eigen_solver.html#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Solves the linear algebra system.</p>
-<p>This method has the following definition:</p><pre class="m-code"><span class="kr">inline</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="n">OperatorType</span><span class="o">&amp;</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">VectorType</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">VectorType</span><span class="o">&amp;</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="k">override</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_solver</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="n">A</span><span class="p">).</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
-<span class="p">}</span></pre>
-          </div></section>
-        </section>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">EigenSolverType</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>OperatorType</td>
+              <td>Type of operator for the left hand side</td>
+            </tr>
+            <tr>
+              <td>VectorType</td>
+              <td>Type of vector for the right hand side</td>
+            </tr>
+          </tbody>
+        </table>
+<aside class="m-note m-default"><h4>See also</h4><p>EigenSolverSpecializations</p></aside>
       </div>
     </div>
   </div>

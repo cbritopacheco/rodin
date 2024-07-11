@@ -142,7 +142,8 @@ $ \Gamma_D \subset \mathcal{B}_h $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase&lt;FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;</a>
             </dt>
             <dd>Abstract base class for a Dirichlet boundary condition.</dd>
           </dl>
@@ -150,16 +151,20 @@ $ \Gamma_D \subset \mathcal{B}_h $
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="af7ff699343e5c796e4098d135363f817">
-              using <a href="#af7ff699343e5c796e4098d135363f817" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;FES&gt;
+            <dt id="ad8d200256e20ba7329934bd5b9fcc5ee">
+              using <a href="#ad8d200256e20ba7329934bd5b9fcc5ee" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;FESType&gt;
             </dt>
             <dd>Operand type.</dd>
+            <dt id="acdf431ab4381f783f82b9086cc8b6752">
+              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;FESType&gt;::<a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>
+            </dt>
+            <dd>Scalar type.</dd>
             <dt id="ac440d7e3be7b7703431f153a20a293c4">
               using <a href="#ac440d7e3be7b7703431f153a20a293c4" class="m-doc-self">ValueType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;ValueDerived&gt;
             </dt>
             <dd>Value type.</dd>
-            <dt id="accec3d22618b9ba75dcea0ddd9ab54bf">
-              using <a href="#accec3d22618b9ba75dcea0ddd9ab54bf" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>
+            <dt id="ac06581e89a1f65a3e1c263c3f4ae1a2a">
+              using <a href="#ac06581e89a1f65a3e1c263c3f4ae1a2a" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -168,7 +173,7 @@ $ \Gamma_D \subset \mathcal{B}_h $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1ae3455a726a98546c9368add5bf8569" class="m-doc">DirichletBC</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html#af7ff699343e5c796e4098d135363f817" class="m-doc">OperandType</a>&amp; u,
+              <span class="m-doc-wrap-bumper"><a href="#a1ae3455a726a98546c9368add5bf8569" class="m-doc">DirichletBC</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html#ad8d200256e20ba7329934bd5b9fcc5ee" class="m-doc">OperandType</a>&amp; u,
               const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html#ac440d7e3be7b7703431f153a20a293c4" class="m-doc">ValueType</a>&amp; v)</span>
             </dt>
             <dd>Constructs the object given the Operand and Value.</dd>
@@ -202,7 +207,7 @@ $ \Gamma_D \subset \mathcal{B}_h $
             </dt>
             <dd>Computes the indices of the degrees of freedoms associated to the boundary region.</dd>
             <dt id="a8dc9ff267e8f66c708b1e68ea217387e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8dc9ff267e8f66c708b1e68ea217387e" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html#af7ff699343e5c796e4098d135363f817" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8dc9ff267e8f66c708b1e68ea217387e" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html#ad8d200256e20ba7329934bd5b9fcc5ee" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the associated operand.</dd>
             <dt id="a3f3fa6b41f7d8fd409fe3c77d50f79fc">
@@ -226,7 +231,7 @@ $ \Gamma_D \subset \mathcal{B}_h $
               <div class="m-doc-template">
                 template&lt;class FES, class ValueDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;FES&gt;, FunctionBase&lt;ValueDerived&gt;&gt;&lt;FES, ValueDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ae3455a726a98546c9368add5bf8569" class="m-doc-self">DirichletBC</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html#af7ff699343e5c796e4098d135363f817" class="m-doc">OperandType</a>&amp; u,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;FES&gt;, FunctionBase&lt;ValueDerived&gt;&gt;&lt;FES, ValueDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ae3455a726a98546c9368add5bf8569" class="m-doc-self">DirichletBC</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html#ad8d200256e20ba7329934bd5b9fcc5ee" class="m-doc">OperandType</a>&amp; u,
               const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html#ac440d7e3be7b7703431f153a20a293c4" class="m-doc">ValueType</a>&amp; v)</span></span>
             </h3>
             <p>Constructs the object given the Operand and Value.</p>
