@@ -11,6 +11,7 @@
 #include <variant>
 #include <type_traits>
 
+#include "Rodin/Cast.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
 
@@ -113,16 +114,6 @@ namespace Rodin::Variational
       {
         m_traceDomain = std::move(other.m_traceDomain);
         return *this;
-      }
-
-      Derived& getDerived()
-      {
-        return static_cast<Derived&>(*this);
-      }
-
-      const Derived& getDerived() const
-      {
-        return static_cast<const Derived&>(*this);
       }
 
       /**
@@ -233,6 +224,23 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
+      Derived& getDerived()
+      {
+        return static_cast<Derived&>(*this);
+      }
+
+      const Derived& getDerived() const
+      {
+        return static_cast<const Derived&>(*this);
+      }
+
+      template <class ToRange>
+      constexpr
+      auto cast() const
+      {
+        return Cast<FunctionBase, ToRange>(*this);
+      }
+
       virtual FunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
@@ -240,6 +248,54 @@ namespace Rodin::Variational
 
     private:
       FlatSet<Geometry::Attribute> m_traceDomain;
+  };
+}
+
+namespace Rodin
+{
+  template <class FromDerived, class ToRange>
+  class Cast<Variational::FunctionBase<FromDerived>, ToRange> final
+    : public Variational::FunctionBase<Cast<Variational::FunctionBase<FromDerived>, ToRange>>
+  {
+    public:
+      using FromType = Variational::FunctionBase<FromDerived>;
+
+      using FromRangeType = typename FormLanguage::Traits<FromType>::RangeType;
+
+      using ToRangeType = ToRange;
+
+      using TraceDomain = FlatSet<Geometry::Attribute>;
+
+      using Parent = Variational::FunctionBase<Cast<Variational::FunctionBase<FromDerived>, ToRange>>;
+
+
+      Cast(const FromType& from)
+        : m_from(from.copy())
+      {}
+
+      Cast(const Cast& other)
+        : Parent(other),
+          m_from(other.m_from->copy())
+      {}
+
+      Cast(Cast&& other)
+        : Parent(std::move(other)),
+          m_from(std::move(other.m_from))
+      {}
+
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return static_cast<ToRangeType>(m_from->getValue(p));
+      }
+
+      Cast* copy() const noexcept override
+      {
+        return new Cast(*this);
+      }
+
+    private:
+      std::unique_ptr<FromType> m_from;
   };
 }
 

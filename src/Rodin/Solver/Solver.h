@@ -11,18 +11,47 @@
 #include "Rodin/Copyable.h"
 #include "Rodin/Math.h"
 
+#include "Rodin/Variational/ForwardDecls.h"
+
 #include "ForwardDecls.h"
 
 namespace Rodin::Solver
 {
-  template <class OperatorType, class VectorType>
+  template <class Operator, class Vector, class Scalar>
   class SolverBase : public Copyable
   {
     public:
+      using ScalarType = Scalar;
+
+      using VectorType = Vector;
+
+      using OperatorType = Operator;
+
+      using Parent = Copyable;
+
       /**
        * @brief Default virtual destructor.
        */
       virtual ~SolverBase() = default;
+
+      SolverBase(Variational::ProblemBase<OperatorType, VectorType, ScalarType>& pb)
+        : m_pb(pb)
+      {}
+
+      SolverBase(const SolverBase& other)
+        : Parent(other),
+          m_pb(other.m_pb)
+      {}
+
+      SolverBase(SolverBase&& other)
+        : Parent(other),
+          m_pb(std::move(other.m_pb))
+      {}
+
+      void solve()
+      {
+        m_pb.get().solve(*this);
+      }
 
       /**
        * @brief Solves the linear algebra system.
@@ -41,13 +70,10 @@ namespace Rodin::Solver
        * @param[in,out] b Right hand side vector
        */
       virtual void solve(OperatorType& A, VectorType& x, VectorType& b) = 0;
+
+    private:
+      std::reference_wrapper<Variational::ProblemBase<OperatorType, VectorType, ScalarType>> m_pb;
   };
-
-  class SparseSolver : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
-  {};
-
-  class DenseSolver : public SolverBase<Math::Matrix<Real>, Math::Vector<Real>>
-  {};
 }
 
 #endif

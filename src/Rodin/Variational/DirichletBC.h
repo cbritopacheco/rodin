@@ -38,10 +38,13 @@ namespace Rodin::Variational
    *
    * @see DirichletBC
    */
+  template <class Scalar>
   class DirichletBCBase : public FormLanguage::Base
   {
     public:
-      using DOFs = IndexMap<Real>;
+      using ScalarType = Scalar;
+
+      using DOFs = IndexMap<ScalarType>;
 
       /**
        * @brief Assembles the Dirichlet boundary condition.
@@ -79,7 +82,8 @@ namespace Rodin::Variational
   };
 
   /// Alias for a list of Dirichlet boundary conditions
-  using EssentialBoundary = FormLanguage::List<DirichletBCBase>;
+  template <class Scalar>
+  using EssentialBoundary = FormLanguage::List<DirichletBCBase<Scalar>>;
 
   /**
    * @ingroup DirichletBCSpecializations
@@ -97,17 +101,26 @@ namespace Rodin::Variational
    */
   template <class FES, class ValueDerived>
   class DirichletBC<TrialFunction<FES>, FunctionBase<ValueDerived>> final
-    : public DirichletBCBase
+    : public DirichletBCBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
+      using FESType = FES;
+
       /// Operand type
-      using OperandType = TrialFunction<FES>;
+      using OperandType = TrialFunction<FESType>;
+
+      /// Scalar type
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using DOFs = IndexMap<ScalarType>;
 
       /// Value type
       using ValueType = FunctionBase<ValueDerived>;
 
+      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
       /// Parent class
-      using Parent = DirichletBCBase;
+      using Parent = DirichletBCBase<ScalarType>;
 
       /**
        * @brief Constructs the object given the Operand and Value.
@@ -219,7 +232,7 @@ namespace Rodin::Variational
             const size_t d = polytope.getDimension();
             const size_t i = polytope.getIndex();
             const auto& fe = fes.getFiniteElement(d, i);
-            const auto& mapping = fes.getMapping({ d, i }, getValue());
+            const auto& mapping = fes.getMapping({ d, i }, getValue().template cast<FESRangeType>());
             for (Index local = 0; local < fe.getCount(); local++)
             {
               const Index global = fes.getGlobalIndex({ d, i }, local);
@@ -227,7 +240,7 @@ namespace Rodin::Variational
               if (find == m_dofs.end())
               {
                 const auto& lf = fe.getLinearForm(local);
-                const Real s = lf(mapping);
+                const ScalarType s = lf(mapping);
                 m_dofs.insert(find, std::pair{ global, s });
               }
             }
@@ -270,7 +283,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const OperandType> m_u;
       std::unique_ptr<ValueType> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
-      IndexMap<Real> m_dofs;
+      IndexMap<ScalarType> m_dofs;
   };
 
   /**

@@ -110,14 +110,6 @@ namespace Rodin::Variational
         return m_nested->getValue(v);
       }
 
-      inline
-      constexpr
-      RealFunction& traceOf(Geometry::Attribute attrs)
-      {
-        m_nested->traceOf(attrs);
-        return *this;
-      }
-
       inline RealFunction* copy() const noexcept override
       {
         return new RealFunction(*this);
@@ -164,21 +156,12 @@ namespace Rodin::Variational
           m_x(other.m_x)
       {}
 
-      inline
-      constexpr
-      RealFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
-
-      inline
       constexpr
       const Real& getValue() const
       {
         return m_x;
       }
 
-      inline
       constexpr
       ScalarType getValue(const Geometry::Point&) const
       {
@@ -226,23 +209,14 @@ namespace Rodin::Variational
           m_x(other.m_x)
       {}
 
-      inline
-      constexpr
-      RealFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
-
-      inline
       constexpr
       const Integer& getValue() const
       {
         return m_x;
       }
 
-      inline
       constexpr
-      ScalarType getValue(const Geometry::Point&) const
+      Real getValue(const Geometry::Point&) const
       {
         return m_x;
       }
@@ -285,13 +259,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_f(std::move(other.m_f))
       {}
-
-      inline
-      constexpr
-      RealFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
 
       inline
       constexpr

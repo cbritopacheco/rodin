@@ -24,6 +24,4 @@
 // SuiteSparse solvers
 #include "Solver/UMFPack.h"
 
-#include "Solver/EigenSolver.h"
-
 #endif

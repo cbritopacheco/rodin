@@ -83,16 +83,13 @@ int main(int, char**)
            + Integral(dygamma, v)
            + PeriodicBC(psi2, dofs);
 
-  // Solve the problem
-  Solver::SparseLU solver;
-
   Alert::Info() << "Solving for first component..." << Alert::Raise;
-  poisson1.solve(solver);
+  Solver::SparseLU(poisson1).solve();
   psi1.getSolution().save("CellFunction1.gf");
   Alert::Success() << "Done! Saved to CellFunction1.gf" << Alert::Raise;
 
   Alert::Info() << "Solving for second component..." << Alert::Raise;
-  poisson2.solve(solver);
+  Solver::SparseLU(poisson2).solve();
   psi2.getSolution().save("CellFunction2.gf");
   Alert::Success() << "Done! Saved to CellFunction2.gf" << Alert::Raise;
 

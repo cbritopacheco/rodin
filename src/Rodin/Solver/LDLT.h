@@ -18,12 +18,6 @@
 namespace Rodin::Solver
 {
   /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for LDLT
-   */
-  LDLT() -> LDLT<Math::Matrix<Real>, Math::Vector<Real>>;
-
-  /**
    * @defgroup LDLTSpecializations LDLT Template Specializations
    * @brief Template specializations of the LDLT class.
    * @see LDLT
@@ -34,23 +28,33 @@ namespace Rodin::Solver
    * @brief A direct sparse LDLT Cholesky factorizations without square root
    * for use with Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
-  template <>
-  class LDLT<Math::Matrix<Real>, Math::Vector<Real>> final
-    : public SolverBase<Math::Matrix<Real>, Math::Vector<Real>>
+  template <class Scalar>
+  class LDLT<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
-      /// Type of linear operator
-      using OperatorType = Math::Matrix<Real>;
+      using ScalarType = Scalar;
 
-      /// Type of vector
-      using VectorType = Math::Vector<Real>;
+      using VectorType = Math::Vector<ScalarType>;
 
-      /**
-       * @brief Constructs the LDLT object with default parameters.
-       */
-      LDLT() = default;
+      using OperatorType = Math::Matrix<ScalarType>;
+
+      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent::solve;
+
+      LDLT(ProblemType& pb)
+        : Parent(pb)
+      {}
 
       LDLT(const LDLT& other)
+        : Parent(other)
+      {}
+
+      LDLT(LDLT&& other)
+        : Parent(std::move(other))
       {}
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
@@ -65,9 +69,16 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::LDLT<Math::Matrix<Real>> m_solver;
+      Eigen::LDLT<OperatorType> m_solver;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for LDLT
+   */
+  template <class Scalar>
+  LDLT(Variational::ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> LDLT<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

@@ -52,15 +52,13 @@ int main(int, char**)
     // Poisson problem
     RealFunction f(1.0);
 
-    Solver::SparseLU solver;
-
     TrialFunction u(vh);
     TestFunction  v(vh);
     Problem poisson(u, v);
     poisson = Integral((gmin + (gmax - gmin) * Pow(gamma, 3)) * Grad(u), Grad(v))
             - Integral(f * v)
             + DirichletBC(u, RealFunction(0.0)).on(GammaD);
-    poisson.solve(solver);
+    Solver::SparseLU(poisson).solve();
 
     // Adjoint problem
     TrialFunction p(vh);
@@ -69,7 +67,7 @@ int main(int, char**)
     adjoint = Integral((gmin + (gmax - gmin) * Pow(gamma, 3)) * Grad(p), Grad(q))
             + Integral(RealFunction(1.0 / vol), q)
             + DirichletBC(p, RealFunction(0.0)).on(GammaD);
-    adjoint.solve(solver);
+    Solver::SparseLU(adjoint).solve();
 
     // Hilbert extension-regularization
     TrialFunction g(vh);
@@ -81,7 +79,7 @@ int main(int, char**)
                 ell + 3 * (gmax - gmin) * Pow(gamma, 2) *
                 Dot(Grad(u.getSolution()), Grad(p.getSolution())), w)
             + DirichletBC(g, RealFunction(0.0)).on(GammaD);
-    hilbert.solve(solver);
+    Solver::SparseLU(hilbert).solve();
 
     GridFunction step(ph);
     step = mu * g.getSolution();

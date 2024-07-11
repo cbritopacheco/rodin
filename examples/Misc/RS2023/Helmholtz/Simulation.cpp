@@ -115,8 +115,6 @@ void run(int id, const std::vector<Data>& grid)
   mesh.getConnectivity().compute(1, 2);
   // mesh.save("out/Q.mesh");
 
-  Solver::SparseLU solver;
-
   // Math::Vector m_r{{  }};
   // Math::Vector epsilon_r{{ 0.1 }};
   // Math::Vector waveNumber_r{{ 5 }};
@@ -208,12 +206,12 @@ void run(int id, const std::vector<Data>& grid)
 
     // Solve the background problem
     // Alert::Info() << "Solving background equation." << Alert::Raise;
-    helmholtz.solve(solver);
+    Solver::SparseLU(helmholtz).solve();
     const auto u0 = std::move(u.getSolution());
     // Alert::Success() << "Done." << Alert::Raise;
 
     // Alert::Info() << "Solving perturbed equation." << Alert::Raise;
-    perturbed.solve(solver);
+    Solver::SparseLU(perturbed).solve();
     const auto ue = std::move(u.getSolution());
     // Alert::Success() << "Done." << Alert::Raise;
 

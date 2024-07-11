@@ -108,14 +108,19 @@ namespace Rodin::Variational
 
           Mapping(const Mapping&) = default;
 
-          inline
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, m_trans.get(), r);
             return getFunction()(p);
           }
 
-          inline
+          template <class T>
+          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            return getFunction()(res, p);
+          }
+
           constexpr
           const FunctionType& getFunction() const
           {
@@ -154,6 +159,12 @@ namespace Rodin::Variational
           auto operator()(const Geometry::Point& p) const
           {
             return getFunction()(p.getReferenceCoordinates());
+          }
+
+          template <class T>
+          auto operator()(T& res, const Geometry::Point& p) const
+          {
+            return getFunction()(res, p.getReferenceCoordinates());
           }
 
           inline
@@ -339,14 +350,19 @@ namespace Rodin::Variational
 
           Mapping(const Mapping&) = default;
 
-          inline
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, m_trans.get(), r);
             return getFunction()(p);
           }
 
-          inline
+          template <class T>
+          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            return getFunction()(res, p);
+          }
+
           constexpr
           const FunctionType& getFunction() const
           {
@@ -380,14 +396,18 @@ namespace Rodin::Variational
 
           InverseMapping(const InverseMapping&) = default;
 
-          inline
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return getFunction()(p.getReferenceCoordinates());
           }
 
-          inline
+          template <class T>
+          auto operator()(T& res, const Geometry::Point& p) const
+          {
+            return getFunction()(p.getReferenceCoordinates());
+          }
+
           constexpr
           const FunctionType& getFunction() const
           {
@@ -565,14 +585,19 @@ namespace Rodin::Variational
 
           Mapping(const Mapping&) = default;
 
-          inline
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, m_trans.get(), r);
             return getFunction()(p);
           }
 
-          inline
+          template <class T>
+          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            return getFunction()(res, p);
+          }
+
           constexpr
           const FunctionType& getFunction() const
           {
@@ -603,14 +628,18 @@ namespace Rodin::Variational
 
           InverseMapping(const InverseMapping&) = default;
 
-          inline
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return getFunction()(p.getReferenceCoordinates());
           }
 
-          inline
+          template <class T>
+          auto operator()(T& res, const Geometry::Point& p) const
+          {
+            return getFunction()(res, p.getReferenceCoordinates());
+          }
+
           constexpr
           const FunctionType& getFunction() const
           {

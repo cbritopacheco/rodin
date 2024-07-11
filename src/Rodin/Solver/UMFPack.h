@@ -23,8 +23,6 @@
 
 namespace Rodin::Solver
 {
-  UMFPack() -> UMFPack<Math::SparseMatrix<Real>, Math::Vector<Real>>;
-
   /**
    * @defgroup UMFPackSpecializations UMFPack Template Specializations
    * @brief Template specializations of the UMFPack class.
@@ -33,22 +31,35 @@ namespace Rodin::Solver
 
   /**
    * @ingroup UMFPackSpecializations
-   * @brief UMFPack for use with `Math::SparseMatrix<Real>` and `Math::Vector<Real>`.
+   * @brief UMFPack for use with Math::SparseMatrix and Math::Vector.
    */
-  template <>
-  class UMFPack<Math::SparseMatrix<Real>, Math::Vector<Real>>
-    : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
+  template <class Scalar>
+  class UMFPack<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
-      using OperatorType = Math::SparseMatrix<Real>;
-      using VectorType = Math::Vector<Real>;
+      using ScalarType = Scalar;
 
-      /**
-       * @brief Constructs the UMFPack object with default parameters.
-       */
-      UMFPack() = default;
+      using VectorType = Math::Vector<ScalarType>;
+
+      using OperatorType = Math::SparseMatrix<ScalarType>;
+
+      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent::solve;
+
+      UMFPack(ProblemType& pb)
+        : Parent(pb)
+      {}
 
       UMFPack(const UMFPack& other)
+        : Parent(other)
+      {}
+
+      UMFPack(UMFPack&& other)
+        : Parent(std::move(other))
       {}
 
       ~UMFPack() = default;
@@ -59,15 +70,22 @@ namespace Rodin::Solver
         x = m_solver.solve(b);
       }
 
-      inline
       UMFPack* copy() const noexcept override
       {
         return new UMFPack(*this);
       }
 
     private:
-      Eigen::UmfPackLU<Math::SparseMatrix<Real>> m_solver;
+      Eigen::UmfPackLU<OperatorType> m_solver;
   };
+
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for UMFPack
+   */
+  template <class Scalar>
+  UMFPack(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> UMFPack<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif // #ifdef RODIN_USE_UMFPACK

@@ -31,10 +31,13 @@ namespace Rodin::Variational
    *
    * @see PeriodicBC
    */
+  template <class Scalar>
   class PeriodicBCBase : public FormLanguage::Base
   {
     public:
-      using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<Real>>>;
+      using ScalarType = Scalar;
+
+      using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
 
       /**
        * @brief Assembles the Peridodic boundary condition.
@@ -56,7 +59,8 @@ namespace Rodin::Variational
   };
 
   /// Alias for a list of peridodic boundary conditions
-  using PeriodicBoundary = FormLanguage::List<PeriodicBCBase>;
+  template <class Scalar>
+  using PeriodicBoundary = FormLanguage::List<PeriodicBCBase<Scalar>>;
 
   /**
    * @ingroup PeridodicBCSpecializations
@@ -67,14 +71,21 @@ namespace Rodin::Variational
    *
    */
   template <class FES>
-  class PeriodicBC<TrialFunction<FES>, IndexMap<IndexSet>> final : public PeriodicBCBase
+  class PeriodicBC<TrialFunction<FES>, IndexMap<IndexSet>> final
+    : public PeriodicBCBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
+      using FESType = FES;
+
       /// Operand type
-      using OperandType = TrialFunction<FES>;
+      using OperandType = TrialFunction<FESType>;
+
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
 
       /// Parent class
-      using Parent = PeriodicBCBase;
+      using Parent = PeriodicBCBase<ScalarType>;
 
       PeriodicBC(const OperandType& u, const IndexMap<IndexSet>& adjacency)
         : m_u(u),
@@ -119,8 +130,8 @@ namespace Rodin::Variational
           size_t i = 0;
           for (const auto& child : v)
             dofs.coeffRef(i++) = child;
-          Math::Vector<Real> coeffs(v.size());
-          coeffs.array() = 1 / Real(v.size());
+          Math::Vector<ScalarType> coeffs(v.size());
+          coeffs.array() /= v.size();
           m_dofs.emplace(k, std::pair{ std::move(dofs), std::move(coeffs) });
         }
       }

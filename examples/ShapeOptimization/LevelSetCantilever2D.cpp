@@ -60,11 +60,8 @@ int main(int, char**)
   th.save("Omega0.mesh", IO::FileFormat::MEDIT);
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
-  // Solver
-  Solver::CG solver;
-
   // Optimization loop
- std::vector<double> obj;
+  std::vector<double> obj;
   std::ofstream fObj("obj.txt");
   for (size_t i = 0; i < maxIt; i++)
   {
@@ -94,7 +91,7 @@ int main(int, char**)
     elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-    elasticity.solve(solver);
+    Solver::CG(elasticity).solve();
 
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
@@ -112,7 +109,7 @@ int main(int, char**)
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
-    hilbert.solve(solver);
+    Solver::CG(hilbert).solve();
     auto& dJ = g.getSolution();
     dJ.save("dJ.gf");
     vh.getMesh().save("dJ.mesh");
