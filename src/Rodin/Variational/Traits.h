@@ -25,121 +25,6 @@
 
 namespace Rodin::FormLanguage
 {
-  namespace Internal
-  {
-    template <bool B, bool I, bool S, bool V, bool M>
-    struct RangeOfSAT
-    {};
-
-    template <>
-    struct RangeOfSAT<true, false, false, false, false>
-    {
-      using Type = Boolean;
-      Variational::RangeType Value = Variational::RangeType::Boolean;
-    };
-
-    template <>
-    struct RangeOfSAT<true, false, true, false, false>
-    {
-      using Type = Real;
-      Variational::RangeType Value = Variational::RangeType::Real;
-    };
-
-    template <>
-    struct RangeOfSAT<false, true, false, false, false>
-    {
-      using Type = Integer;
-      Variational::RangeType Value = Variational::RangeType::Integer;
-    };
-
-    template <>
-    struct RangeOfSAT<false, true, true, false, false>
-    {
-      using Type = Real;
-      Variational::RangeType Value = Variational::RangeType::Real;
-    };
-
-    template <>
-    struct RangeOfSAT<false, false, true, false, false>
-    {
-      using Type = Real;
-      Variational::RangeType Value = Variational::RangeType::Real;
-    };
-
-    template <>
-    struct RangeOfSAT<false, false, false, true, false>
-    {
-      using Type = Math::Vector<Real>;
-      Variational::RangeType Value = Variational::RangeType::Vector;
-    };
-
-    template <>
-    struct RangeOfSAT<false, false, false, false, true>
-    {
-      using Type = Math::Matrix<Real>;
-      Variational::RangeType Value = Variational::RangeType::Matrix;
-    };
-  }
-
-  template <typename T, typename = void, typename = void>
-  struct IsVectorAtCompileTime
-  {
-    static constexpr const bool Value = false;
-  };
-
-  template <class T>
-  struct IsVectorAtCompileTime<T, std::void_t<typename T::IsVectorAtCompileTime>>
-  {
-    static constexpr const bool Value = T::IsVectorAtCompileTime;
-  };
-
-  template <class T>
-  struct IsBooleanRange
-  {
-    static constexpr const bool Value = std::is_same_v<T, Boolean>;
-  };
-
-  template <class T>
-  struct IsIntegerRange
-  {
-    static constexpr const bool Value = std::is_same_v<T, Integer>;
-  };
-
-  template <class T, typename = void, typename = void>
-  struct IsMatrixRange
-  {
-    static constexpr const bool Value = false;
-  };
-
-  template <class T>
-  struct IsMatrixRange<T, std::void_t<decltype(T::RowsAtCompileTime)>, std::void_t<decltype(T::ColsAtCompileTime)>>
-  {
-    static constexpr const bool Value =
-      (T::ColsAtCompileTime == Eigen::Dynamic) ||
-      (T::ColsAtCompileTime > 1);
-  };
-
-  template <class T, typename = void, typename = void>
-  struct IsVectorRange
-  {
-    static constexpr const bool Value = false;
-  };
-
-  template <class T>
-  struct IsVectorRange<T, std::void_t<decltype(T::RowsAtCompileTime)>, std::void_t<decltype(T::ColsAtCompileTime)>>
-  {
-    static constexpr const bool Value = T::ColsAtCompileTime == 1;
-  };
-
-  template <class T>
-  struct IsRealRange
-  {
-    static constexpr const bool Value =
-      std::is_convertible_v<T, Real> &&
-      !IsVectorRange<T>::Value &&
-      !IsMatrixRange<T>::Value;
-  };
-
   template <class T>
   struct ResultOf;
 
@@ -159,32 +44,67 @@ namespace Rodin::FormLanguage
   template <class T>
   struct RangeOf;
 
+  template <>
+  struct RangeOf<Boolean>
+  {
+    using Type = Boolean;
+  };
+
+  template <>
+  struct RangeOf<Integer>
+  {
+    using Type = Integer;
+  };
+
+  template <>
+  struct RangeOf<Real>
+  {
+    using Type = Real;
+  };
+
+  template <>
+  struct RangeOf<Complex>
+  {
+    using Type = Complex;
+  };
+
+  template <class Scalar, int Rows, int Options, int MaxRows, int MaxCols>
+  struct RangeOf<Eigen::Matrix<Scalar, Rows, 1, Options, MaxRows, MaxCols>>
+  {
+    using Type = Math::Vector<Scalar>;
+  };
+
+  template <class Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
+  struct RangeOf<Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>>
+  {
+    using Type = Math::Matrix<Scalar>;
+  };
+
+  template <class MatrixXpr>
+  struct RangeOf
+  {
+    using Type =
+      std::conditional_t<
+        MatrixXpr::IsVectorAtCompileTime, Math::Vector<typename MatrixXpr::Scalar>,
+        std::conditional_t<
+          MatrixXpr::ColsAtCompileTime == 1, Math::Vector<typename MatrixXpr::Scalar>,
+          Math::Matrix<typename MatrixXpr::Scalar>
+        >
+      >;
+  };
+
   template <class Derived>
   struct RangeOf<Variational::FunctionBase<Derived>>
   {
     using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
-    using Type =
-      typename Internal::RangeOfSAT<
-        IsBooleanRange<ResultType>::Value,
-        IsIntegerRange<ResultType>::Value,
-        IsRealRange<ResultType>::Value,
-        IsVectorRange<ResultType>::Value,
-        IsMatrixRange<ResultType>::Value>
-      ::Type;
+    using Type = typename RangeOf<ResultType>::Type;
   };
 
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
     using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
-    using Type =
-      typename Internal::RangeOfSAT<
-        IsBooleanRange<ResultType>::Value,
-        IsIntegerRange<ResultType>::Value,
-        IsRealRange<ResultType>::Value,
-        IsVectorRange<ResultType>::Value,
-        IsMatrixRange<ResultType>::Value>
-      ::Type;
+    using Type = typename RangeOf<ResultType>::Type;
   };
 }
 

@@ -292,7 +292,7 @@ namespace Rodin::Variational
           LinearForm(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {
-            assert(i < Geometry::Polytope::getVertexCount(g));
+            assert(i < 2 * Geometry::Polytope::getVertexCount(g));
           }
 
           constexpr
@@ -312,7 +312,10 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const T& v) const
           {
-            return v(s_nodes[m_g].col(m_i));
+            if (m_i % 2 == 0)
+              return v(s_nodes[m_g].col(m_i)).real();
+            else
+              return v(s_nodes[m_g].col(m_i)).imag();
           }
 
         private:
@@ -332,7 +335,7 @@ namespace Rodin::Variational
           BasisFunction(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {
-            assert(i < Geometry::Polytope::getVertexCount(g));
+            assert(i < 2 * Geometry::Polytope::getVertexCount(g));
           }
 
           constexpr
@@ -363,7 +366,7 @@ namespace Rodin::Variational
           GradientFunction(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {
-            assert(i < Geometry::Polytope::getVertexCount(g));
+            assert(i < 2 * Geometry::Polytope::getVertexCount(g));
           }
 
           constexpr

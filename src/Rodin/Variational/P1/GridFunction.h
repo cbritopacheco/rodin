@@ -36,11 +36,13 @@ namespace Rodin::Variational
    */
   template <class Range, class Mesh>
   class GridFunction<P1<Range, Mesh>> final
-    : public GridFunctionBase<GridFunction<P1<Range, Mesh>>>
+    : public GridFunctionBase<P1<Range, Mesh>, GridFunction<P1<Range, Mesh>>>
   {
     public:
       /// Type of finite element space to which the GridFunction belongs to
       using FESType = P1<Range, Mesh>;
+
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using MeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
@@ -51,7 +53,7 @@ namespace Rodin::Variational
       using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
 
       /// Parent class
-      using Parent = GridFunctionBase<GridFunction<FESType>>;
+      using Parent = GridFunctionBase<FESType, GridFunction<FESType>>;
 
       using Parent::getValue;
       using Parent::operator=;
@@ -98,9 +100,8 @@ namespace Rodin::Variational
 
       GridFunction& operator=(const GridFunction&)  = delete;
 
-      Real interpolate(const Geometry::Point& p) const
+      void interpolate(RangeType& res, const Geometry::Point& p) const
       {
-        static_assert(std::is_same_v<RangeType, Real>);
         const auto& fes = this->getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
         const auto& polytope = p.getPolytope();
@@ -109,32 +110,38 @@ namespace Rodin::Variational
         const Index i = polytope.getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
         const auto& r = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        Real res = 0;
-        for (Index local = 0; local < fe.getCount(); local++)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
-          const auto& basis = fe.getBasis(local);
-          res += getValue({d, i}, local) * basis(r);
+          res = Real(0);
+          for (Index local = 0; local < fe.getCount(); local++)
+            res += getValue({d, i}, local) * fe.getBasis(local)(r);
         }
-        return res;
-      }
-
-      void interpolate(Math::Vector<Real>& res, const Geometry::Point& p) const
-      {
-        static_assert(std::is_same_v<RangeType, Math::Vector<Real>>);
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& r = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        const size_t vdim = fes.getVectorDimension();
-        const size_t dofs = fe.getCount();
-        res.resize(vdim);
-        res.setZero();
-        for (Index local = 0; local < dofs; local++)
+        else if constexpr (std::is_same_v<RangeType, Complex>)
         {
-          const auto& basis = fe.getBasis(local);
-          res += getValue({d, i}, local).coeff(local % vdim) * basis(r);
+          res = Complex(0, 0);
+          for (Index local = 0; local < fe.getCount(); local++)
+          {
+            if (local % 2 == 0)
+              res += getValue({d, i}, local).real() * fe.getBasis(local)(r);
+            else
+              res += getValue({d, i}, local).imag() * fe.getBasis(local)(r);
+          }
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
+        {
+          const size_t vdim = fes.getVectorDimension();
+          res.resize(vdim);
+          res.setZero();
+          Math::Vector<Real> basis;
+          for (Index local = 0; local < fe.getCount(); local++)
+          {
+            fe.getBasis(local)(basis, r);
+            res += getValue({d, i}, local).coeff(local % vdim) * basis;
+          }
+        }
+        else
+        {
+          assert(false);
         }
       }
 
@@ -142,12 +149,12 @@ namespace Rodin::Variational
       {
         auto& data = this->getData();
         auto& weights = this->getWeights().emplace(this->getFiniteElementSpace().getSize());
-        if constexpr (std::is_same_v<RangeType, Real>)
+        if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
           assert(data.rows() == 1);
           std::copy(data.data(), data.data() + data.size(), weights.data());
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
           const auto& fes = this->getFiniteElementSpace();
           const size_t vdim = fes.getVectorDimension();
@@ -169,12 +176,12 @@ namespace Rodin::Variational
         assert(static_cast<size_t>(weights.size()) == this->getFiniteElementSpace().getSize());
         auto& data = this->getData();
         const auto& w = this->getWeights().emplace(std::forward<Vector>(weights));
-        if constexpr (std::is_same_v<RangeType, Real>)
+        if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
           assert(data.rows() == 1);
           std::copy(w.data(), w.data() + w.size(), data.data());
         }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
           const size_t sz = w.size();
           const auto& fes = this->getFiniteElementSpace();

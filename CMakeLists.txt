@@ -79,7 +79,6 @@ rodin_add_compile_options(LANG CXX C OPTIONS -Wno-error=old-style-cast -Wno-erro
 add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
 add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)
 
-
 if (RODIN_LTO)
   rodin_add_compile_options(LANG CXX C OPTIONS -flto)
 endif()

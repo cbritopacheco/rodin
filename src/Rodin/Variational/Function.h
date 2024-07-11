@@ -109,20 +109,17 @@ namespace Rodin::Variational
 
       virtual ~FunctionBase() = default;
 
-      inline
       FunctionBase& operator=(FunctionBase&& other)
       {
         m_traceDomain = std::move(other.m_traceDomain);
         return *this;
       }
 
-      inline
       Derived& getDerived()
       {
         return static_cast<Derived&>(*this);
       }
 
-      inline
       const Derived& getDerived() const
       {
         return static_cast<const Derived&>(*this);
@@ -137,120 +134,46 @@ namespace Rodin::Variational
        * boundaries. If the trace domain is empty, then this has the
        * semantic value that it has not been specified yet.
        */
-      inline
       constexpr
       const TraceDomain& getTraceDomain() const
       {
         return m_traceDomain;
       }
 
-      inline
       constexpr
       Transpose<FunctionBase> T() const
       {
         return Transpose<FunctionBase>(*this);
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return static_cast<const Derived&>(*this).getRangeShape();
       }
 
-      inline
-      constexpr
-      RangeType getRangeType() const
-      {
-        using R = typename FormLanguage::Traits<FunctionBase<Derived>>::RangeType;
-        if constexpr (std::is_same_v<R, Boolean>)
-        {
-          return RangeType::Boolean;
-        }
-        else if constexpr (std::is_same_v<R, Integer>)
-        {
-          return RangeType::Integer;
-        }
-        else if constexpr (std::is_same_v<R, Real>)
-        {
-          return RangeType::Real;
-        }
-        else if constexpr (std::is_same_v<R, Math::Vector<Real>>)
-        {
-          return RangeType::Vector;
-        }
-        else if constexpr (std::is_same_v<R, Math::Matrix<Real>>)
-        {
-          return RangeType::Matrix;
-        }
-        else
-        {
-          assert(false);
-          static_assert(Utility::DependentFalse<R>::Value);
-        }
-      }
-
       /**
        * @brief Evaluates the function on a Point belonging to the mesh.
        * @note CRTP function to be overriden in Derived class.
        */
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      inline
+      template <class T>
       constexpr
-      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
+      void getValue(T& res, const Geometry::Point& p) const
       {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector<Real>&, const Geometry::Point&>::Value)
+        if constexpr (Internal::HasGetValueMethod<Derived, T&, const Geometry::Point&>::Value)
         {
-          return static_cast<const Derived&>(*this).getValue(res, p);
+          static_cast<const Derived&>(*this).getValue(res, p);
         }
         else
         {
           res = getValue(p);
         }
-      }
-
-      inline
-      constexpr
-      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
-      {
-        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix<Real>&, const Geometry::Point&>::Value)
-        {
-          return static_cast<const Derived&>(*this).getValue(res, p);
-        }
-        else
-        {
-          res = getValue(p);
-        }
-      }
-
-      inline
-      auto coeff(size_t i, size_t j) const
-      {
-        return Component(*this, i, j);
-      }
-
-      inline
-      auto coeff(size_t i) const
-      {
-        return Component(*this, i);
-      }
-
-      inline
-      void operator()(Math::Vector<Real>& res, const Geometry::Point& p) const
-      {
-        return getValue(res, p);
-      }
-
-      inline
-      void operator()(Math::Matrix<Real>& res, const Geometry::Point& p) const
-      {
-        return getValue(res, p);
       }
 
       /**
@@ -258,11 +181,27 @@ namespace Rodin::Variational
        *
        * This calls the function get getValue(const Geometry::Point&).
        */
-      inline
       constexpr
       auto operator()(const Geometry::Point& p) const
       {
         return getValue(p);
+      }
+
+      template <class T>
+      constexpr
+      void operator()(T& res, const Geometry::Point& p) const
+      {
+        getValue(res, p);
+      }
+
+      auto coeff(size_t i, size_t j) const
+      {
+        return Component(*this, i, j);
+      }
+
+      auto coeff(size_t i) const
+      {
+        return Component(*this, i);
       }
 
       /**
@@ -274,7 +213,6 @@ namespace Rodin::Variational
        *
        * @returns Reference to self (for method chaining)
        */
-      inline
       constexpr
       Derived& traceOf(Geometry::Attribute attr)
       {
@@ -282,14 +220,12 @@ namespace Rodin::Variational
       }
 
       template <class A1, class A2, class ... As>
-      inline
       constexpr
       Derived& traceOf(A1 a1, A2 a2, As ... as)
       {
         return traceOf(FlatSet<Geometry::Attribute>{ a1, a2, as... });
       }
 
-      inline
       constexpr
       Derived& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {

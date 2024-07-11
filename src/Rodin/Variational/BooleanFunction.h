@@ -75,14 +75,6 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      void getValue(Math::Vector<Real>&, const Geometry::Point&) const = delete;
-
-      inline
-      constexpr
-      void getValue(Math::Matrix<Real>&, const Geometry::Point&) const = delete;
-
-      inline
-      constexpr
       RangeShape getRangeShape() const
       {
         return { 1, 1 };

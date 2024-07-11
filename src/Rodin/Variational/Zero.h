@@ -26,13 +26,14 @@ namespace Rodin::Variational
    * @see Zero
    */
 
-  template <>
-  class Zero<void> final
-    : public RealFunctionBase<Zero<void>>
+  template <class Scalar>
+  class Zero<Scalar> final
+    : public ScalarFunctionBase<Scalar, Zero<Scalar>>
   {
     public:
-      /// Parent class
-      using Parent = RealFunctionBase<Zero<void>>;
+      using ScalarType = Scalar;
+
+      using Parent = ScalarFunctionBase<Scalar, Zero<Scalar>>;
 
       Zero() {}
 
@@ -55,7 +56,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point&) const
       {
-        return Real(0);
+        return ScalarType(0);
       }
 
       inline Zero* copy() const noexcept override
@@ -67,15 +68,16 @@ namespace Rodin::Variational
   /**
    * @brief CTAD for Zero.
    */
-  Zero() -> Zero<void>;
+  Zero() -> Zero<Real>;
 
-  template <>
-  class Zero<size_t> final
-    : public VectorFunctionBase<Zero<size_t>>
+  template <class Scalar>
+  class Zero<Math::Vector<Scalar>> final
+    : public VectorFunctionBase<Scalar, Zero<Math::Vector<Scalar>>>
   {
     public:
-      /// Parent class
-      using Parent = VectorFunctionBase<Zero<size_t>>;
+      using VectorType = Math::Vector<Scalar>;
+
+      using Parent = VectorFunctionBase<Scalar, Zero<VectorType>>;
 
       Zero(size_t d)
         : m_d(d)
@@ -101,11 +103,11 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point&) const
       {
-        return Math::Vector<Real>::Zero(m_d);
+        return VectorType::Zero(m_d);
       }
 
       inline
-      void getValue(Math::Vector<Real>& out, const Geometry::Point&) const
+      void getValue(VectorType& out, const Geometry::Point&) const
       {
         out.resize(m_d);
         out.setZero();
@@ -120,9 +122,10 @@ namespace Rodin::Variational
       const size_t m_d;
   };
 
-  Zero(size_t) -> Zero<size_t>;
+  Zero(size_t) -> Zero<Math::Vector<Real>>;
 
-  using VectorZero = Zero<size_t>;
+  template <class Scalar>
+  using VectorZero = Zero<Math::Vector<Scalar>>;
 }
 
 #endif

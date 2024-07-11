@@ -20,6 +20,207 @@ namespace Rodin::Variational
   enum class RangeType;
 
   /**
+   * @brief Enumeration class to indicate whether a derived instance of
+   * ShapeFunctionBase belongs to either a trial or test space.
+   */
+  enum class ShapeFunctionSpaceType
+  {
+    Trial, ///< Indicates that the shape function belongs to a trial space.
+    Test ///< Indicates that the shape function belongs to a test space.
+  };
+
+  /**
+   * @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
+   */
+  static constexpr auto TrialSpace = ShapeFunctionSpaceType::Trial;
+
+  /**
+   * @brief Shorthand variable for ShapeFunctionSpaceType::Test.
+   */
+  static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
+
+  /**
+   * @brief Base class for shape function objects.
+   * @tparam Space Type of shape function space (Trial or Test)
+   */
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+  class ShapeFunctionBase;
+
+  /**
+   * @tparam FES Type of finite element space
+   * @tparam Space Type of shape function space (@ref
+   * ShapeFunctionSpaceType::Trial "Trial" or @ref
+   * ShapeFunctionSpaceType::Test "Test")
+   *
+   * @note For an overview of all the possible specializations of the
+   * ShapeFunction class, please see @ref ShapeFunctionSpecializations.
+   *
+   * @see ShapeFunctionSpecializations
+   */
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+  class ShapeFunction;
+
+  /**
+   * @brief Represents a function which belongs to a trial space
+   * @tparam FES Type of finite element space
+   */
+  template <class FES>
+  class TrialFunction;
+
+  /**
+   * @brief Represents a function which belongs to a test space
+   * @tparam FES Type of finite element space
+   */
+  template <class FES>
+  class TestFunction;
+
+  /**
+   * @brief Base class for function objects which can be evaluated over a
+   * mesh.
+   *
+   * Instances of FunctionBase will always have the getValue() method defined,
+   * which enables the evaluation of any function on some mesh element.
+   */
+  template <class Derived>
+  class FunctionBase;
+
+  class Function;
+
+  /**
+   * @brief Base class for objects representing boolean functions.
+   */
+  template <class Derived>
+  class BooleanFunctionBase;
+
+  /**
+   * @note For an overview of all the possible specializations of the
+   * BooleanFunction class, please see @ref BooleanFunctionSpecializations.
+   *
+   * @see BooleanFunctionSpecializations
+   */
+  template <class T>
+  class BooleanFunction;
+
+  /**
+   * @brief Base class for objects representing integer functions.
+   */
+  template <class Derived>
+  class IntegerFunctionBase;
+
+  /**
+   * @note For an overview of all the possible specializations of the
+   * IntegerFunction class, please see @ref IntegerFunctionSpecializations.
+   *
+   * @see IntegerFunctionSpecializations
+   */
+  template <class T>
+  class IntegerFunction;
+
+  template <class Scalar, class Derived>
+  class ScalarFunctionBase;
+
+  template <class ... Values>
+  class ScalarFunction;
+
+  /**
+   * @brief Base class for real-valued functions defined on a mesh.
+   */
+  template <class Derived>
+  class RealFunctionBase;
+
+  /**
+   * @note For an overview of all the possible specializations of the
+   * RealFunction class, please see @ref RealFunctionSpecializations.
+   *
+   * @see RealFunctionSpecializations
+   */
+  template <class ... Values>
+  class RealFunction;
+
+  /**
+   * @brief Base class for scalar-valued functions defined on a mesh.
+   */
+  template <class Derived>
+  class ComplexFunctionBase;
+
+  /**
+   * @note For an overview of all the possible specializations of the
+   * ComplexFunction class, please see @ref ComplexFunctionSpecializations.
+   *
+   * @see ComplexFunctionSpecializations
+   */
+  template <class ... Values>
+  class ComplexFunction;
+
+  /**
+   * @brief Base class for vector-valued functions defined on a mesh.
+   *
+   * @note Vectors are zero indexed. This means that the 0-index corresponds
+   * to the 1st entry of the vector.
+   */
+  template <class Scalar, class Derived>
+  class VectorFunctionBase;
+
+  /**
+   * @note For an overview of all the possible specializations of the
+   * VectorFunction class, please see @ref VectorFunctionSpecializations.
+   *
+   * @see VectorFunctionSpecializations
+   */
+  template <class ... Values>
+  class VectorFunction;
+
+  /**
+   * @brief Base class for matrix-valued functions defined on a mesh.
+   */
+  template <class Scalar, class Derived>
+  class MatrixFunctionBase;
+
+  /**
+   * @note For an overview of all the possible specializations of the
+   * MatrixFunction class, please see @ref MatrixFunctionSpecializations.
+   *
+   * @see MatrixFunctionSpecializations
+   */
+  template <class T>
+  class MatrixFunction;
+
+  /**
+   * @brief Base class for grid function objects.
+   */
+  template <class FES, class Derived>
+  class GridFunctionBase;
+
+  /**
+   * @brief Represents a grid function belonging to some finite element space.
+   * @tparam FES Type of finite element space
+   *
+   * A GridFunction object represents a function whose values are known at the
+   * "grid points". These grid points are the node coordinates of the global
+   * degrees of freedom in the finite element space.
+   *
+   * @section gridfunction-interpolation Interpolation
+   *
+   * In general, the GridFunction class represents the global interpolation
+   * operator on the @f$ \mathcal{T}_h @f$-based family of finite elements
+   * @f$ \{ K, P_K, \Sigma_K  \}_{K \in \mathcal{T}_h } @f$. More precisely, it
+   * defines the global interpolation operator @f$ \mathcal{I}_h :
+   * D(\mathcal{I}_h) \rightarrow V_h @f$, where:
+   * @f[
+   *  D(\mathcal{I}_h) := \{ v \in V(\mathcal{T}_h) : \forall K \in
+   *  \mathcal{T}_h, \: v|_K \in V(K) \} \: .
+   * @f]
+   *
+   * @note For an overview of all the possible specializations of the
+   * GridFunction class, please see @ref GridFunctionSpecializations.
+   *
+   * @see GridFunctionBase
+   * @see GridFunctionSpecializations
+   */
+  template <class FES>
+  class GridFunction;
+
+  /**
    * @brief Base class for linear form objects.
    * @tparam VectorType Type of vector which will be assembled
    */
@@ -98,8 +299,6 @@ namespace Rodin::Variational
   template <class FESType>
   class FiniteElement;
 
-  class FiniteElementCollectionBase;
-
   /**
    * @brief Base class for finite element spaces.
    */
@@ -130,173 +329,8 @@ namespace Rodin::Variational
   template <class StrictType>
   class LazyEvaluator;
 
-  /**
-   * @brief Base class for grid function objects.
-   */
-  template <class Derived, class FES>
-  class GridFunctionBase;
-
-  /**
-   * @brief Represents a grid function belonging to some finite element space.
-   * @tparam FES Type of finite element space
-   *
-   * A GridFunction object represents a function whose values are known at the
-   * "grid points". These grid points are the node coordinates of the global
-   * degrees of freedom in the finite element space.
-   *
-   * @section gridfunction-interpolation Interpolation
-   *
-   * In general, the GridFunction class represents the global interpolation
-   * operator on the @f$ \mathcal{T}_h @f$-based family of finite elements
-   * @f$ \{ K, P_K, \Sigma_K  \}_{K \in \mathcal{T}_h } @f$. More precisely, it
-   * defines the global interpolation operator @f$ \mathcal{I}_h :
-   * D(\mathcal{I}_h) \rightarrow V_h @f$, where:
-   * @f[
-   *  D(\mathcal{I}_h) := \{ v \in V(\mathcal{T}_h) : \forall K \in
-   *  \mathcal{T}_h, \: v|_K \in V(K) \} \: .
-   * @f]
-   *
-   * @note For an overview of all the possible specializations of the
-   * GridFunction class, please see @ref GridFunctionSpecializations.
-   *
-   * @see GridFunctionBase
-   * @see GridFunctionSpecializations
-   */
-  template <class FES>
-  class GridFunction;
-
-  /**
-   * @brief Enumeration class to indicate whether a derived instance of
-   * ShapeFunctionBase belongs to either a trial or test space.
-   */
-  enum class ShapeFunctionSpaceType
-  {
-    Trial, ///< Indicates that the shape function belongs to a trial space.
-    Test ///< Indicates that the shape function belongs to a test space.
-  };
-
-  /**
-   * @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
-   */
-  static constexpr auto TrialSpace = ShapeFunctionSpaceType::Trial;
-
-  /**
-   * @brief Shorthand variable for ShapeFunctionSpaceType::Test.
-   */
-  static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
-
-  /**
-   * @brief Base class for shape function objects.
-   * @tparam Space Type of shape function space (Trial or Test)
-   */
-  template <class Derived, class FES, ShapeFunctionSpaceType Space>
-  class ShapeFunctionBase;
-
-  /**
-   * @tparam FES Type of finite element space
-   * @tparam Space Type of shape function space (@ref
-   * ShapeFunctionSpaceType::Trial "Trial" or @ref
-   * ShapeFunctionSpaceType::Test "Test")
-   *
-   * @note For an overview of all the possible specializations of the
-   * ShapeFunction class, please see @ref ShapeFunctionSpecializations.
-   *
-   * @see ShapeFunctionSpecializations
-   */
-  template <class Derived, class FES, ShapeFunctionSpaceType Space>
-  class ShapeFunction;
-
-  /**
-   * @brief Represents a function which belongs to a trial space
-   * @tparam FES Type of finite element space
-   */
-  template <class FES>
-  class TrialFunction;
-
-  /**
-   * @brief Represents a function which belongs to a test space
-   * @tparam FES Type of finite element space
-   */
-  template <class FES>
-  class TestFunction;
-
-  /**
-   * @brief Base class for function objects which can be evaluated over a
-   * mesh.
-   *
-   * Instances of FunctionBase will always have the getValue() method defined,
-   * which enables the evaluation of any function on some mesh element.
-   */
-  template <class Derived>
-  class FunctionBase;
-
-  class Function;
-
-  /**
-   * @brief Base class for scalar-valued functions defined on a mesh.
-   */
-  template <class Derived>
-  class RealFunctionBase;
-
-  /**
-   * @note For an overview of all the possible specializations of the
-   * RealFunction class, please see @ref RealFunctionSpecializations.
-   *
-   * @see RealFunctionSpecializations
-   */
-  template <class ... Values>
-  class RealFunction;
-
-  template <class Range>
+  template <class ... Args>
   class Zero;
-
-  /**
-   * @brief Base class for vector-valued functions defined on a mesh.
-   *
-   * @note Vectors are zero indexed. This means that the 0-index corresponds
-   * to the 1st entry of the vector.
-   */
-  template <class Derived>
-  class VectorFunctionBase;
-
-  /**
-   * @note For an overview of all the possible specializations of the
-   * VectorFunction class, please see @ref VectorFunctionSpecializations.
-   *
-   * @see VectorFunctionSpecializations
-   */
-  template <class ... Values>
-  class VectorFunction;
-
-  /**
-   * @brief Base class for matrix-valued functions defined on a mesh.
-   */
-  template <class Derived>
-  class MatrixFunctionBase;
-
-  /**
-   * @note For an overview of all the possible specializations of the
-   * MatrixFunction class, please see @ref MatrixFunctionSpecializations.
-   *
-   * @see MatrixFunctionSpecializations
-   */
-  template <class T>
-  class MatrixFunction;
-
-  /**
-   * @brief Base class for objects representing boolean functions.
-   */
-  template <class Derived>
-  class BooleanFunctionBase;
-
-  /**
-   * @note For an overview of all the possible specializations of the
-   * BooleanFunction class, please see @ref BooleanFunctionSpecializations.
-   *
-   * @see BooleanFunctionSpecializations
-   */
-  template <class T>
-  class BooleanFunction;
 
   template <class Operand>
   class Jump;
@@ -716,6 +750,9 @@ namespace Rodin::Variational
   template <class Operand>
   class TraceOperator;
 
+  template <class Kernel, class Operand>
+  class Potential;
+
   template <class ... Args>
   class Max;
 
@@ -1013,13 +1050,16 @@ namespace Rodin::Variational
   template <class Operand, class ... Parameters>
   class PeriodicBC;
 
-  template <class Operator, class Vector>
+  template <class Scalar>
+  class ProblemBodyBase;
+
+  template <class Operator, class Vector, class Scalar>
   class ProblemBody;
 
   /**
    * @brief Base class for variational problem objects.
    */
-  template <class Operator, class Vector>
+  template <class Operator, class Vector, class Scalar>
   class ProblemBase;
 
   /**
@@ -1036,9 +1076,6 @@ namespace Rodin::Variational
 
   template <class ... Parameters>
   class DenseProblem;
-
-  template <class Kernel, class Operand>
-  class Potential;
 }
 
 #endif

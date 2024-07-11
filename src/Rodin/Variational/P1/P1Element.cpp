@@ -2,43 +2,22 @@
 
 namespace Rodin::Variational
 {
-  const Geometry::GeometryIndexed<std::vector<RealP1Element::LinearForm>>
-  RealP1Element::s_ls =
+  const Geometry::GeometryIndexed<Math::PointMatrix> RealP1Element::s_nodes =
   {
     { Geometry::Polytope::Type::Point,
-      {
-        { 0, Geometry::Polytope::Type::Point }
-      }
-    },
+      Math::PointMatrix{{0}} },
     { Geometry::Polytope::Type::Segment,
-      {
-        { 0, Geometry::Polytope::Type::Segment },
-        { 1, Geometry::Polytope::Type::Segment }
-      }
-    },
+      Math::PointMatrix{{0, 1}} },
     { Geometry::Polytope::Type::Triangle,
-      {
-        { 0, Geometry::Polytope::Type::Triangle },
-        { 1, Geometry::Polytope::Type::Triangle },
-        { 2, Geometry::Polytope::Type::Triangle }
-      }
-    },
+      Math::PointMatrix{{0, 1, 0},
+                        {0, 0, 1}} },
     { Geometry::Polytope::Type::Quadrilateral,
-      {
-        { 0, Geometry::Polytope::Type::Quadrilateral },
-        { 1, Geometry::Polytope::Type::Quadrilateral },
-        { 2, Geometry::Polytope::Type::Quadrilateral },
-        { 3, Geometry::Polytope::Type::Quadrilateral }
-      }
-    },
+      Math::PointMatrix{{0, 1, 0, 1},
+                        {0, 0, 1, 1}} },
     { Geometry::Polytope::Type::Tetrahedron,
-      {
-        { 0, Geometry::Polytope::Type::Tetrahedron },
-        { 1, Geometry::Polytope::Type::Tetrahedron },
-        { 2, Geometry::Polytope::Type::Tetrahedron },
-        { 3, Geometry::Polytope::Type::Tetrahedron }
-      }
-    }
+      Math::PointMatrix{{0, 1, 0, 0},
+                        {0, 0, 1, 0},
+                        {0, 0, 0, 1}} },
   };
 
   const Geometry::GeometryIndexed<std::vector<RealP1Element::BasisFunction>>
@@ -119,22 +98,43 @@ namespace Rodin::Variational
     }
   };
 
-  const Geometry::GeometryIndexed<Math::PointMatrix> RealP1Element::s_nodes =
+  const Geometry::GeometryIndexed<std::vector<RealP1Element::LinearForm>>
+  RealP1Element::s_ls =
   {
     { Geometry::Polytope::Type::Point,
-      Math::PointMatrix{{0}} },
+      {
+        { 0, Geometry::Polytope::Type::Point }
+      }
+    },
     { Geometry::Polytope::Type::Segment,
-      Math::PointMatrix{{0, 1}} },
+      {
+        { 0, Geometry::Polytope::Type::Segment },
+        { 1, Geometry::Polytope::Type::Segment }
+      }
+    },
     { Geometry::Polytope::Type::Triangle,
-      Math::PointMatrix{{0, 1, 0},
-                        {0, 0, 1}} },
+      {
+        { 0, Geometry::Polytope::Type::Triangle },
+        { 1, Geometry::Polytope::Type::Triangle },
+        { 2, Geometry::Polytope::Type::Triangle }
+      }
+    },
     { Geometry::Polytope::Type::Quadrilateral,
-      Math::PointMatrix{{0, 1, 0, 1},
-                        {0, 0, 1, 1}} },
+      {
+        { 0, Geometry::Polytope::Type::Quadrilateral },
+        { 1, Geometry::Polytope::Type::Quadrilateral },
+        { 2, Geometry::Polytope::Type::Quadrilateral },
+        { 3, Geometry::Polytope::Type::Quadrilateral }
+      }
+    },
     { Geometry::Polytope::Type::Tetrahedron,
-      Math::PointMatrix{{0, 1, 0, 0},
-                        {0, 0, 1, 0},
-                        {0, 0, 0, 1}} },
+      {
+        { 0, Geometry::Polytope::Type::Tetrahedron },
+        { 1, Geometry::Polytope::Type::Tetrahedron },
+        { 2, Geometry::Polytope::Type::Tetrahedron },
+        { 3, Geometry::Polytope::Type::Tetrahedron }
+      }
+    }
   };
 
   const Geometry::GeometryIndexed<Math::PointMatrix> ComplexP1Element::s_nodes =
@@ -153,6 +153,165 @@ namespace Rodin::Variational
       Math::PointMatrix{{0, 0, 1, 1, 0, 0, 0, 0},
                         {0, 0, 0, 0, 1, 1, 0, 0},
                         {0, 0, 0, 0, 0, 0, 1, 1}} },
+  };
+
+  const Geometry::GeometryIndexed<std::vector<ComplexP1Element::BasisFunction>>
+  ComplexP1Element::s_basis =
+  {
+    { Geometry::Polytope::Type::Point,
+      {
+        { 0, Geometry::Polytope::Type::Point },
+        { 1, Geometry::Polytope::Type::Point }
+      }
+    },
+    { Geometry::Polytope::Type::Segment,
+      {
+        { 0, Geometry::Polytope::Type::Segment },
+        { 1, Geometry::Polytope::Type::Segment },
+        { 2, Geometry::Polytope::Type::Segment },
+        { 3, Geometry::Polytope::Type::Segment }
+      }
+    },
+    { Geometry::Polytope::Type::Triangle,
+      {
+        { 0, Geometry::Polytope::Type::Triangle },
+        { 1, Geometry::Polytope::Type::Triangle },
+        { 2, Geometry::Polytope::Type::Triangle },
+        { 3, Geometry::Polytope::Type::Triangle },
+        { 4, Geometry::Polytope::Type::Triangle },
+        { 5, Geometry::Polytope::Type::Triangle }
+      }
+    },
+    { Geometry::Polytope::Type::Quadrilateral,
+      {
+        { 0, Geometry::Polytope::Type::Quadrilateral },
+        { 1, Geometry::Polytope::Type::Quadrilateral },
+        { 2, Geometry::Polytope::Type::Quadrilateral },
+        { 3, Geometry::Polytope::Type::Quadrilateral },
+        { 4, Geometry::Polytope::Type::Quadrilateral },
+        { 5, Geometry::Polytope::Type::Quadrilateral },
+        { 6, Geometry::Polytope::Type::Quadrilateral },
+        { 7, Geometry::Polytope::Type::Quadrilateral }
+      }
+    },
+    { Geometry::Polytope::Type::Tetrahedron,
+      {
+        { 0, Geometry::Polytope::Type::Tetrahedron },
+        { 1, Geometry::Polytope::Type::Tetrahedron },
+        { 2, Geometry::Polytope::Type::Tetrahedron },
+        { 3, Geometry::Polytope::Type::Tetrahedron },
+        { 4, Geometry::Polytope::Type::Tetrahedron },
+        { 5, Geometry::Polytope::Type::Tetrahedron },
+        { 6, Geometry::Polytope::Type::Tetrahedron },
+        { 7, Geometry::Polytope::Type::Tetrahedron }
+      }
+    }
+  };
+
+  const Geometry::GeometryIndexed<std::vector<ComplexP1Element::GradientFunction>>
+  ComplexP1Element::s_gradient =
+  {
+    { Geometry::Polytope::Type::Point,
+      {
+        { 0, Geometry::Polytope::Type::Point },
+        { 1, Geometry::Polytope::Type::Point }
+      }
+    },
+    { Geometry::Polytope::Type::Segment,
+      {
+        { 0, Geometry::Polytope::Type::Segment },
+        { 1, Geometry::Polytope::Type::Segment },
+        { 2, Geometry::Polytope::Type::Segment },
+        { 3, Geometry::Polytope::Type::Segment }
+      }
+    },
+    { Geometry::Polytope::Type::Triangle,
+      {
+        { 0, Geometry::Polytope::Type::Triangle },
+        { 1, Geometry::Polytope::Type::Triangle },
+        { 2, Geometry::Polytope::Type::Triangle },
+        { 3, Geometry::Polytope::Type::Triangle },
+        { 4, Geometry::Polytope::Type::Triangle },
+        { 5, Geometry::Polytope::Type::Triangle }
+      }
+    },
+    { Geometry::Polytope::Type::Quadrilateral,
+      {
+        { 0, Geometry::Polytope::Type::Quadrilateral },
+        { 1, Geometry::Polytope::Type::Quadrilateral },
+        { 2, Geometry::Polytope::Type::Quadrilateral },
+        { 3, Geometry::Polytope::Type::Quadrilateral },
+        { 4, Geometry::Polytope::Type::Quadrilateral },
+        { 5, Geometry::Polytope::Type::Quadrilateral },
+        { 6, Geometry::Polytope::Type::Quadrilateral },
+        { 7, Geometry::Polytope::Type::Quadrilateral }
+      }
+    },
+    { Geometry::Polytope::Type::Tetrahedron,
+      {
+        { 0, Geometry::Polytope::Type::Tetrahedron },
+        { 1, Geometry::Polytope::Type::Tetrahedron },
+        { 2, Geometry::Polytope::Type::Tetrahedron },
+        { 3, Geometry::Polytope::Type::Tetrahedron },
+        { 4, Geometry::Polytope::Type::Tetrahedron },
+        { 5, Geometry::Polytope::Type::Tetrahedron },
+        { 6, Geometry::Polytope::Type::Tetrahedron },
+        { 7, Geometry::Polytope::Type::Tetrahedron }
+      }
+    }
+  };
+
+  const Geometry::GeometryIndexed<std::vector<ComplexP1Element::LinearForm>>
+  ComplexP1Element::s_ls =
+  {
+    { Geometry::Polytope::Type::Point,
+      {
+        { 0, Geometry::Polytope::Type::Point },
+        { 1, Geometry::Polytope::Type::Point }
+      }
+    },
+    { Geometry::Polytope::Type::Segment,
+      {
+        { 0, Geometry::Polytope::Type::Segment },
+        { 1, Geometry::Polytope::Type::Segment },
+        { 2, Geometry::Polytope::Type::Segment },
+        { 3, Geometry::Polytope::Type::Segment }
+      }
+    },
+    { Geometry::Polytope::Type::Triangle,
+      {
+        { 0, Geometry::Polytope::Type::Triangle },
+        { 1, Geometry::Polytope::Type::Triangle },
+        { 2, Geometry::Polytope::Type::Triangle },
+        { 3, Geometry::Polytope::Type::Triangle },
+        { 4, Geometry::Polytope::Type::Triangle },
+        { 5, Geometry::Polytope::Type::Triangle }
+      }
+    },
+    { Geometry::Polytope::Type::Quadrilateral,
+      {
+        { 0, Geometry::Polytope::Type::Quadrilateral },
+        { 1, Geometry::Polytope::Type::Quadrilateral },
+        { 2, Geometry::Polytope::Type::Quadrilateral },
+        { 3, Geometry::Polytope::Type::Quadrilateral },
+        { 4, Geometry::Polytope::Type::Quadrilateral },
+        { 5, Geometry::Polytope::Type::Quadrilateral },
+        { 6, Geometry::Polytope::Type::Quadrilateral },
+        { 7, Geometry::Polytope::Type::Quadrilateral }
+      }
+    },
+    { Geometry::Polytope::Type::Tetrahedron,
+      {
+        { 0, Geometry::Polytope::Type::Tetrahedron },
+        { 1, Geometry::Polytope::Type::Tetrahedron },
+        { 2, Geometry::Polytope::Type::Tetrahedron },
+        { 3, Geometry::Polytope::Type::Tetrahedron },
+        { 4, Geometry::Polytope::Type::Tetrahedron },
+        { 5, Geometry::Polytope::Type::Tetrahedron },
+        { 6, Geometry::Polytope::Type::Tetrahedron },
+        { 7, Geometry::Polytope::Type::Tetrahedron }
+      }
+    }
   };
 
   const std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
@@ -279,7 +438,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Real>();
           }
         }
       }
@@ -302,7 +461,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Real>();
           }
         }
       }
@@ -331,7 +490,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Real>();
           }
         }
       }
@@ -358,13 +517,13 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Real>();
           }
         }
       }
     }
     assert(false);
-    return NAN;
+    return Math::nan<Real>();
   }
 
   void
@@ -396,7 +555,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -426,7 +585,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -463,7 +622,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -502,14 +661,14 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
       }
     }
     assert(false);
-    out.setConstant(NAN);
+    out.setConstant(Math::nan<Real>());
   }
 
   Complex ComplexP1Element::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
@@ -519,10 +678,22 @@ namespace Rodin::Variational
     {
       case Geometry::Polytope::Type::Point:
       {
-        if (m_i % 2 == 0)
-          return 1;
-        else
-          return 1i;
+        switch (m_i)
+        {
+          case 0:
+          {
+            return 1;
+          }
+          case 1:
+          {
+            return 1i;
+          }
+          default:
+          {
+            assert(false);
+            return Math::nan<Complex>();
+          }
+        }
       }
       case Geometry::Polytope::Type::Segment:
       {
@@ -547,7 +718,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Complex>();
           }
         }
       }
@@ -582,7 +753,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Complex>();
           }
         }
       }
@@ -621,7 +792,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Complex>();
           }
         }
       }
@@ -664,13 +835,13 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            return NAN;
+            return Math::nan<Complex>();
           }
         }
       }
     }
     assert(false);
-    return NAN;
+    return Math::nan<Complex>();
   }
 
   void
@@ -713,7 +884,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Complex>());
             return;
           }
         }
@@ -760,7 +931,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Complex>());
             return;
           }
         }
@@ -821,7 +992,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Complex>());
             return;
           }
         }
@@ -886,7 +1057,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Complex>());
             return;
           }
         }
@@ -953,7 +1124,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -985,7 +1156,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1017,7 +1188,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1056,7 +1227,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1083,7 +1254,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1115,7 +1286,7 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1147,13 +1318,13 @@ namespace Rodin::Variational
           default:
           {
             assert(false);
-            out.setConstant(NAN);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
       }
     }
     assert(false);
-    out.setConstant(NAN);
+    out.setConstant(Math::nan<Real>());
   }
 }

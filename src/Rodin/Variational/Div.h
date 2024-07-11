@@ -20,24 +20,26 @@ namespace Rodin::Variational
   /**
    * @brief Base class for Div classes.
    */
-  template <class Derived, class Operand>
+  template <class Operand, class Derived>
   class DivBase;
 
   /**
    * @ingroup DivSpecializations
    * @brief Divergence of a P1 GridFunction
    */
-  template <class Derived, class FES>
-  class DivBase<Derived, GridFunction<FES>>
-    : public RealFunctionBase<DivBase<Derived, GridFunction<FES>>>
+  template <class FES, class Derived>
+  class DivBase<GridFunction<FES>, Derived>
+    : public ScalarFunctionBase<typename FormLanguage::Traits<FES>::ScalarType, DivBase<GridFunction<FES>, Derived>>
   {
     public:
       using FESType = FES;
 
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       using OperandType = GridFunction<FES>;
 
       /// Parent class
-      using Parent = RealFunctionBase<DivBase<Derived, OperandType>>;
+      using Parent = ScalarFunctionBase<ScalarType, DivBase<OperandType, Derived>>;
 
       /**
        * @brief Constructs the Div of a @f$ \mathbb{P}_1 @f$ function @f$ u
@@ -65,9 +67,9 @@ namespace Rodin::Variational
       {}
 
       inline
-      Real getValue(const Geometry::Point& p) const
+      ScalarType getValue(const Geometry::Point& p) const
       {
-        Real out;
+        ScalarType out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -90,7 +92,6 @@ namespace Rodin::Variational
         else
         {
           assert(false);
-          out = NAN;
         }
         return out;
       }
@@ -107,9 +108,9 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto interpolate(Real& out, const Geometry::Point& p) const
+      void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).interpolate(out, p);
+        static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
       /**

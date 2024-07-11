@@ -55,9 +55,9 @@ namespace Rodin::Variational
       }
 
       inline
-      auto getValue(const Geometry::Point& p) const
+      Real getValue(const Geometry::Point& p) const
       {
-        return std::sqrt(static_cast<Real>(getOperand().getValue(p)));
+        return Math::sqrt(getOperand().getValue(p));
       }
 
       inline

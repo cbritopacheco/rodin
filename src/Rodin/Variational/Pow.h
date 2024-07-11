@@ -96,8 +96,17 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        assert(m_s);
-        return Math::pow(m_s->getValue(p), m_p);
+        return Math::pow(getBase().getValue(p), getExponent());
+      }
+
+      const BaseType& getBase() const
+      {
+        return *m_s;
+      }
+
+      const ExponentType& getExponent() const
+      {
+        return m_p;
       }
 
       inline Pow* copy() const noexcept override

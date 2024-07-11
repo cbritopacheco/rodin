@@ -271,7 +271,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const GridFunction<FES>>   m_u;
       TestFunction<FES>                                 m_v;
 
-      FlatSet<Geometry::Attribute>      m_attrs;
+      FlatSet<Geometry::Attribute>                  m_attrs;
       LinearForm<FES, Math::Vector<ScalarType>>     m_lf;
 
       std::optional<ScalarType> m_value;
