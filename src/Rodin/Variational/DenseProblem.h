@@ -142,13 +142,13 @@ namespace Rodin::Variational
       }
 
       constexpr
-      const PeriodicBoundary& getPeriodicBoundary() const
+      const PeriodicBoundary<ScalarType>& getPeriodicBoundary() const
       {
         return m_pbcs;
       }
 
       constexpr
-      const EssentialBoundary& getEssentialBoundary() const
+      const EssentialBoundary<ScalarType>& getEssentialBoundary() const
       {
         return m_dbcs;
       }
@@ -362,7 +362,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override
+      void solve(Solver::SolverBase<OperatorType, VectorType, ScalarType>& solver) override
       {
          // Assemble the system
          if (!m_assembled)
@@ -428,8 +428,8 @@ namespace Rodin::Variational
 
       FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
 
-      EssentialBoundary m_dbcs;
-      PeriodicBoundary  m_pbcs;
+      EssentialBoundary<ScalarType> m_dbcs;
+      PeriodicBoundary<ScalarType>  m_pbcs;
 
       bool m_assembled;
       VectorType      m_mass;

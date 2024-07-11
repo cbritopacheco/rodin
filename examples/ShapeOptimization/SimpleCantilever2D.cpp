@@ -56,9 +56,6 @@ int main(int, char**)
 
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
-  //Utilize SparseLU for solver
-  Solver::SparseLU solver;
-
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
   {
@@ -80,7 +77,7 @@ int main(int, char**)
     elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-    elasticity.solve(solver);
+    Solver::SparseLU(elasticity).solve();
 
     // Hilbert extension-regularization procedure
     TrialFunction g(vh);
@@ -94,7 +91,7 @@ int main(int, char**)
             + Integral(g, w)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(BoundaryNormal(Omega), w)).over(Gamma0)
             + DirichletBC(g, VectorFunction{0, 0}).on({GammaD, GammaN});
-    hilbert.solve(solver);
+    Solver::SparseLU(hilbert).solve();
     const auto& dJ = g.getSolution();
 
     // Update objective

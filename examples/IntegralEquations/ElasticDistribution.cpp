@@ -70,8 +70,7 @@ int main(int, char**)
   // file.close();
 
   std::cout << "resolution\n";
-  Solver::CG<Math::Matrix<Real>, Math::Vector<Real>> cg;
-  eq.solve(cg);
+  Solver::CG(eq).solve();
 
   u.getSolution().save("u.gf");
   mesh.save("u.mesh");

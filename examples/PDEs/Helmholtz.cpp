@@ -9,6 +9,7 @@
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
+using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
@@ -27,17 +28,11 @@ int main(int, char**)
   TestFunction  v(vh);
 
   Problem helmholtz(u, v);
+  helmholtz = Integral(Grad(u), Grad(v))
+            - Integral(u, v)
+            + DirichletBC(u, Zero());
 
-  // TrialFunction uRe(vh), uIm(vh);
-  // TestFunction  vRe(vh), vIm(vh);
-
-  // // Define problem
-  // Problem helmholtz(uRe, uIm, vRe, vIm);
-  // helmholtz = Integral(Grad(u), Grad(v))
-  //           - Integral(v)
-  //           + DirichletBC(u, Zero());
-
-  // Solver::CG solver;
+  CG(helmholtz).solve();
   // poisson.solve(solver);
 
   // Save solution

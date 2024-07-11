@@ -143,8 +143,6 @@ int main(int, char**)
                                      .distance(dOmega);
 
     // Parameters
-    Solver::CG cg;
-
     RealFunction f = 1;
     RealFunction g = -1.0;
 
@@ -168,7 +166,7 @@ int main(int, char**)
     state = Integral(Grad(u), Grad(v))
           + FaceIntegral(he * u, v).over({Gamma, GammaD})
           - Integral(f, v);
-    state.solve(cg);
+    Solver::CG(state).solve();
 
     auto dj = -1.0 / Omega.getVolume();
     Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
@@ -178,7 +176,7 @@ int main(int, char**)
     adjoint = Integral(Grad(p), Grad(q))
             + BoundaryIntegral(he * p, q).over({Gamma, GammaD})
             - Integral(dj * q);
-    adjoint.solve(cg);
+    Solver::CG(adjoint).solve();
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
     const Real objective = J(u.getSolution());
@@ -200,7 +198,7 @@ int main(int, char**)
             + Integral(theta, w)
             + Integral(tgv * g, w).over(GammaN)
             - FaceIntegral(hadamard, w).over(SigmaD);
-    hilbert.solve(cg);
+    Solver::CG(hilbert).solve();
     GridFunction grad(dvfes);
     grad = theta.getSolution() * conormal;
     grad *= -1.0;
