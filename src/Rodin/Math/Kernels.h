@@ -12,20 +12,20 @@
 
 namespace Rodin::Math::Kernels
 {
-  inline
+  template <class MatrixScalar, class VectorScalar, class DOFScalar>
   static void eliminate(
-      SparseMatrix<Real>& stiffness, Vector<Real>& mass,
-      const IndexMap<Real>& dofs, size_t offset = 0)
+      SparseMatrix<MatrixScalar>& stiffness, Vector<VectorScalar>& mass,
+      const IndexMap<DOFScalar>& dofs, size_t offset = 0)
   {
-    Real* const valuePtr = stiffness.valuePtr();
-    SparseMatrix<Real>::StorageIndex* const outerPtr = stiffness.outerIndexPtr();
-    SparseMatrix<Real>::StorageIndex* const innerPtr = stiffness.innerIndexPtr();
+    auto* const valuePtr = stiffness.valuePtr();
+    auto* const outerPtr = stiffness.outerIndexPtr();
+    auto* const innerPtr = stiffness.innerIndexPtr();
     // Move essential degrees of freedom in the LHS to the RHS
     for (const auto& kv : dofs)
     {
       const Index& global = kv.first + offset;
       const auto& dof = kv.second;
-      for (SparseMatrix<Real>::InnerIterator it(stiffness, global); it; ++it)
+      for (typename SparseMatrix<MatrixScalar>::InnerIterator it(stiffness, global); it; ++it)
          mass.coeffRef(it.row()) -= it.value() * dof;
     }
     for (const auto& [global, dof] : dofs)
@@ -39,7 +39,7 @@ namespace Rodin::Math::Kernels
         assert(innerPtr[i] >= 0);
         // Assumes CCS format
         const Index row = innerPtr[i];
-        valuePtr[i] = Real(row == global + offset);
+        valuePtr[i] = (row == global + offset);
         if (row != global + offset)
         {
           for (auto k = outerPtr[row]; 1; k++)
@@ -55,9 +55,11 @@ namespace Rodin::Math::Kernels
     }
   }
 
-  inline
-  static void replace(const Vector<Real>& row, SparseMatrix<Real>& stiffness, Vector<Real>& mass,
-      const IndexMap<Real>& dofs, size_t offset = 0)
+  template <class Scalar>
+  static void replace(
+      const Vector<Scalar>& row,
+      SparseMatrix<Scalar>& stiffness, Vector<Scalar>& mass,
+      const IndexMap<Scalar>& dofs, size_t offset = 0)
   {
     for (const auto& kv : dofs)
     {

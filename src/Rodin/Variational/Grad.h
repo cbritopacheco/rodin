@@ -28,24 +28,28 @@ namespace Rodin::Variational
   /**
    * @brief Base class for Grad classes.
    */
-  template <class Derived, class Operand>
+  template <class Operand, class Derived>
   class GradBase;
 
   /**
    * @ingroup GradSpecializations
    * @brief Gradient of a P1 GridFunction
    */
-  template <class Derived, class FES>
-  class GradBase<Derived, GridFunction<FES>>
-    : public VectorFunctionBase<GradBase<Derived, GridFunction<FES>>>
+  template <class FES, class Derived>
+  class GradBase<GridFunction<FES>, Derived>
+    : public VectorFunctionBase<
+        typename FormLanguage::Traits<FES>::ScalarType, GradBase<GridFunction<FES>, Derived>>
   {
     public:
       using FESType = FES;
 
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
+
       using OperandType = GridFunction<FESType>;
 
-      /// Parent class
-      using Parent = VectorFunctionBase<GradBase<Derived, OperandType>>;
+      using Parent = VectorFunctionBase<ScalarType, GradBase<OperandType, Derived>>;
 
       /**
        * @brief Constructs the gradient of a @f$ \mathbb{P}_1 @f$ function @f$
@@ -82,17 +86,16 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::SpatialVector<Real> getValue(const Geometry::Point& p) const
+      SpatialVectorType getValue(const Geometry::Point& p) const
       {
-        Math::SpatialVector<Real> out;
+        SpatialVectorType out;
         getValue(out, p);
         return out;
       }
 
       inline
-      void getValue(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
+      void getValue(SpatialVectorType& out, const Geometry::Point& p) const
       {
-        out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -123,9 +126,9 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
+      void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).interpolate(out, p);
+        static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
       inline

@@ -60,6 +60,49 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
+  namespace Internal
+  {
+    template <typename T, class ... Args>
+    struct HasGetBasisMethod
+    {
+      template<typename U, typename = decltype(std::declval<U>().getBasis(std::declval<Args>()...))>
+      static std::true_type Test(int);
+
+      template<typename U>
+      static std::false_type Test(...);
+
+      using Type = decltype(Test<T>(0));
+      static constexpr bool Value = Type::value;
+    };
+
+    template <typename T, typename... Args>
+    struct HasGetBasisMethod<T, Args&...>
+    {
+      template <typename U, typename = decltype(std::declval<U>().getBasis(std::declval<Args&>()...))>
+      static std::true_type Test(int);
+
+      template <typename U>
+      static std::false_type Test(...);
+
+      using Type = decltype(Test<T>(0));
+      static constexpr bool Value = Type::value;
+    };
+
+    template <typename T, class... Args>
+    struct HasGetBasisMethodR
+    {
+        template<typename U, typename = decltype(std::declval<U>().getBasis(std::declval<Args>()...))>
+        static auto Test(int) ->
+          decltype(std::is_same<typename std::invoke_result<decltype(&U::getBasis)(U, Args...)>::type, T>::value, std::true_type{});
+
+        template<typename U>
+        static std::false_type Test(...);
+
+        using Type = decltype(Test<T>(0));
+        static constexpr bool Value = Type::value;
+    };
+  }
+
   /**
   * @defgroup ShapeFunctionSpecializations ShapeFunction Template Specializations
   * @brief Template specializations of the ShapeFunction class.
@@ -119,13 +162,11 @@ namespace Rodin::Variational
           m_fes(std::move(other.m_fes))
       {}
 
-      inline
       Derived& getDerived()
       {
         return static_cast<Derived&>(*this);
       }
 
-      inline
       const Derived& getDerived() const
       {
         return static_cast<const Derived&>(*this);
@@ -135,7 +176,6 @@ namespace Rodin::Variational
        * @brief Indicates whether the shape function is part of a %Trial or %Test
        * function expression.
        */
-      inline
       constexpr
       ShapeFunctionSpaceType getSpaceType() const
       {
@@ -146,64 +186,27 @@ namespace Rodin::Variational
        * @brief Gets the shape of the range space.
        * @note CRTP function to be overriden in the Derived class.
        */
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return static_cast<const Derived&>(*this).getRangeShape();
       }
 
-      inline
-      constexpr
-      RangeType getRangeType() const
-      {
-        using R = typename FormLanguage::Traits<ShapeFunctionBase<Derived, FES, Space>>::RangeType;
-        if constexpr (std::is_same_v<R, Boolean>)
-        {
-          return RangeType::Boolean;
-        }
-        else if constexpr (std::is_same_v<R, Integer>)
-        {
-          return RangeType::Integer;
-        }
-        else if constexpr (std::is_same_v<R, Real>)
-        {
-          return RangeType::Real;
-        }
-        else if constexpr (std::is_same_v<R, Math::Vector<Real>>)
-        {
-          return RangeType::Vector;
-        }
-        else if constexpr (std::is_same_v<R, Math::Matrix<Real>>)
-        {
-          return RangeType::Matrix;
-        }
-        else
-        {
-          assert(false);
-          static_assert(Utility::DependentFalse<R>::Value);
-        }
-      }
-
-      inline
       auto x() const
       {
         return Component(*this, 0);
       }
 
-      inline
       auto y() const
       {
         return Component(*this, 1);
       }
 
-      inline
       auto z() const
       {
         return Component(*this, 2);
       }
 
-      inline
       constexpr
       auto T() const
       {
@@ -214,7 +217,6 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @note CRTP function to be overriden in the Derived class.
        */
-      inline
       constexpr
       const auto& getLeaf() const
       {
@@ -226,20 +228,17 @@ namespace Rodin::Variational
        * @param[in] polytope Polytope
        * @note CRTP function to be overriden in the Derived class.
        */
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         return static_cast<const Derived&>(*this).getDOFs(polytope);
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return static_cast<const Derived&>(*this).getPoint();
       }
 
-      inline
       constexpr
       Derived& setPoint(const Geometry::Point& p)
       {
@@ -252,32 +251,49 @@ namespace Rodin::Variational
        * @param[in] p Point where the shape function basis will be calculated
        * @note CRTP function to be overriden in the Derived class.
        */
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
         return static_cast<const Derived&>(*this).getBasis(local);
       }
 
+      template <class T>
+      constexpr
+      void getBasis(T& basis, size_t local) const
+      {
+        if constexpr (Internal::HasGetBasisMethod<Derived, T&, size_t>::Value)
+        {
+          static_cast<const Derived&>(*this).getBasis(basis, local);
+        }
+        else
+        {
+          basis = getBasis(local);
+        }
+      }
+
       /**
        * @brief Call operator to get an expression which yields the shape
        * function basis at the given point.
        *
-       * Synonym to getBasis().
+       * Synonym to getBasis(size_t).
        */
-      template <class ... Args>
-      inline
       constexpr
-      auto operator()(Args&&... args) const
+      auto operator()(size_t local) const
       {
-        return this->getBasis(std::forward<Args>(args)...);
+        return getBasis(local);
+      }
+
+      template <class T>
+      constexpr
+      void operator()(T& res, size_t local) const
+      {
+        getBasis(res, local);
       }
 
       /**
        * @brief Gets the finite element space to which the shape function
        * belongs to.
        */
-      inline
       constexpr
       const FES& getFiniteElementSpace() const
       {
@@ -305,6 +321,8 @@ namespace Rodin::Variational
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
       using Parent = ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>;
@@ -326,7 +344,6 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline
       constexpr
       auto& emplace()
       {
@@ -334,14 +351,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return { this->getFiniteElementSpace().getVectorDimension(), 1 };
       }
 
-      inline
       constexpr
       GridFunction<FES>& getSolution()
       {
@@ -349,7 +364,6 @@ namespace Rodin::Variational
         return m_gf.value();
       }
 
-      inline
       constexpr
       const GridFunction<FES>& getSolution() const
       {
@@ -357,7 +371,6 @@ namespace Rodin::Variational
         return m_gf.value();
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
@@ -366,21 +379,18 @@ namespace Rodin::Variational
         return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         assert(m_p.has_value());
         return m_p.value().get();
       }
 
-      inline
       ShapeFunction& setPoint(const Geometry::Point& p)
       {
         m_p = p;
         return *this;
       }
 
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
@@ -389,22 +399,9 @@ namespace Rodin::Variational
         const Index i = p.getPolytope().getIndex();
         const auto& fes = this->getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
-        if constexpr (std::is_same_v<RangeType, Real>)
-        {
-          return fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
-        {
-          return this->object(fes.getInverseMapping({ d, i }, fe.getBasis(local))(p));
-        }
-        else
-        {
-          assert(false);
-          return void();
-        }
+        return this->object(fes.getInverseMapping({ d, i }, fe.getBasis(local))(p));
       }
 
-      inline
       constexpr
       const auto& getLeaf() const
       {

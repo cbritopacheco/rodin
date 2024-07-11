@@ -77,6 +77,14 @@ namespace Rodin::Variational
         return m_ref.get().getValue(p);
       }
 
+      template <class T>
+      inline
+      constexpr
+      void getValue(T& res, const Geometry::Point& p) const
+      {
+        m_ref.get().getValue(res, p);
+      }
+
       inline LazyEvaluator* copy() const noexcept final override
       {
         return new LazyEvaluator(*this);

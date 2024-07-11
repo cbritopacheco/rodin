@@ -26,14 +26,14 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived>
   class Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
-    : public RealFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
+    : public FunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
       using LHSType = FunctionBase<LHSDerived>;
 
       using RHSType = FunctionBase<RHSDerived>;
 
-      using Parent = RealFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+      using Parent = FunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
       Max(const LHSType& a, const RHSType& b)
         : m_lhs(a.copy()), m_rhs(b.copy())
@@ -49,7 +49,6 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       Max& traceOf(Geometry::Attribute attrs)
       {
@@ -58,9 +57,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
-      Real getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
@@ -70,14 +68,12 @@ namespace Rodin::Variational
           return lhs;
       }
 
-      inline
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      inline
       const auto& getRHS() const
       {
         assert(m_rhs);
@@ -129,7 +125,6 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       Max& traceOf(Geometry::Attribute attrs)
       {
@@ -137,7 +132,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       Real getValue(const Geometry::Point& p) const
       {
@@ -149,14 +143,12 @@ namespace Rodin::Variational
           return lhs;
       }
 
-      inline
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      inline
       const auto& getRHS() const
       {
         return m_rhs;

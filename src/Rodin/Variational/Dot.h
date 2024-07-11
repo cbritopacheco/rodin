@@ -39,8 +39,7 @@ namespace Rodin::FormLanguage
 
     using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    using ScalarType =
-      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
     using RangeType = ScalarType;
   };
@@ -66,8 +65,7 @@ namespace Rodin::FormLanguage
 
     using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    using ScalarType =
-      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
     using RangeType = ScalarType;
   };
@@ -90,8 +88,7 @@ namespace Rodin::FormLanguage
 
     using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    using ScalarType =
-      decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
     using RangeType = ScalarType;
   };
@@ -125,8 +122,7 @@ namespace Rodin::Variational
 
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using ScalarType =
-        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
       using RangeType = ScalarType;
 
@@ -182,14 +178,14 @@ namespace Rodin::Variational
         assert(getLHS().getRangeShape() == getRHS().getRangeShape());
         const auto& lhs = this->object(getLHS().getValue(p));
         const auto& rhs = this->object(getRHS().getValue(p));
-        if constexpr (std::is_same_v<LHSRangeType, Real>)
+        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
         {
           return lhs * rhs;
-        } else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Real>>)
+        } else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
         {
           return lhs.dot(rhs);
         }
-        else if constexpr (std::is_same_v<RHSRangeType, Math::Matrix<Real>>)
+        else if constexpr (std::is_same_v<RHSRangeType, Math::Matrix<ScalarType>>)
         {
           return (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
         }
@@ -245,8 +241,7 @@ namespace Rodin::Variational
 
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using ScalarType =
-        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
       using RangeType = ScalarType;
 
@@ -397,8 +392,7 @@ namespace Rodin::Variational
 
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using ScalarType =
-        decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
       using RangeType = ScalarType;
 

@@ -45,7 +45,7 @@ namespace Rodin::Variational
   /**
    * @brief Abstract base class for variational problems.
    */
-  template <class Operator, class Vector>
+  template <class Operator, class Vector, class Scalar>
   class ProblemBase : public FormLanguage::Base
   {
     public:
@@ -57,13 +57,15 @@ namespace Rodin::Variational
 
       using OperatorScalarType = typename FormLanguage::Traits<Operator>::ScalarType;
 
+      using ScalarType = Scalar;
+
       ProblemBase() = default;
 
       ProblemBase(ProblemBase&& other) = default;
 
       ProblemBase(const ProblemBase& other) = default;
 
-      virtual ProblemBase& operator=(const ProblemBody<OperatorType, VectorType>& rhs) = 0;
+      virtual ProblemBase& operator=(const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) = 0;
 
       virtual void solve(Solver::SolverBase<OperatorType, VectorType>& solver) = 0;
 
@@ -112,16 +114,22 @@ namespace Rodin::Variational
   class Problem<
     TrialFES, TestFES,
     Math::SparseMatrix<
-      decltype(
-        std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
+      typename FormLanguage::Mult<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TrialFES>::ScalarType>
+      ::Type>,
     Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
     : public ProblemBase<
         Math::SparseMatrix<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-              std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
-        Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
+          typename FormLanguage::Mult<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TrialFES>::ScalarType>
+          ::Type>,
+        Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>,
+          typename FormLanguage::Mult<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TrialFES>::ScalarType>
+          ::Type>
   {
     public:
       using TrialFESScalarType =
@@ -131,9 +139,11 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<TestFES>::ScalarType;
 
       using OperatorScalarType =
-        decltype(std::declval<TrialFESScalarType>() * std::declval<TestFESScalarType>());
+        typename FormLanguage::Mult<TrialFESScalarType, TestFESScalarType>::Type;
 
       using VectorScalarType = TestFESScalarType;
+
+      using ScalarType = OperatorScalarType;
 
       using ContextType = Context::Sequential;
 
@@ -143,7 +153,7 @@ namespace Rodin::Variational
 
       using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESScalarType>;
 
-      using Parent = ProblemBase<OperatorType, VectorType>;
+      using Parent = ProblemBase<OperatorType, VectorType, ScalarType>;
 
       /**
        * @brief Constructs an empty problem involving the trial function @f$ u @f$
@@ -420,7 +430,7 @@ namespace Rodin::Variational
          getTrialFunction().getSolution().setWeights(std::move(m_guess));
       }
 
-      Problem& operator=(const ProblemBody<OperatorType, VectorType>& rhs) override
+      Problem& operator=(const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) override
       {
         for (auto& bfi : rhs.getLocalBFIs())
           m_bilinearForm.add(bfi);
@@ -483,15 +493,20 @@ namespace Rodin::Variational
       OperatorType    m_stiffness;
   };
 
-
   template <class TrialFES, class TestFES>
   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> Problem<TrialFES, TestFES, Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    -> Problem<TrialFES, TestFES,
+        Math::SparseMatrix<
+          typename FormLanguage::Mult<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+        Math::Vector<
+          typename FormLanguage::Traits<TestFES>::ScalarType>>;
 
   template <class U1, class U2, class ... Us>
   class Problem<
       Tuple<U1, U2, Us...>, Math::SparseMatrix<Real>, Math::Vector<Real>>
-    : public ProblemBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
+    : public ProblemBase<Math::SparseMatrix<Real>, Math::Vector<Real>, Real>
   {
 
     template <class T>
@@ -511,7 +526,7 @@ namespace Rodin::Variational
 
       using VectorType = Math::Vector<ScalarType>;
 
-      using Parent = ProblemBase<OperatorType, VectorType>;
+      using Parent = ProblemBase<OperatorType, VectorType, Real>;
 
     private:
       template <class T>
@@ -750,7 +765,7 @@ namespace Rodin::Variational
              });
       }
 
-      Problem& operator=(const ProblemBody<OperatorType, VectorType>& rhs) override
+      Problem& operator=(const ProblemBody<OperatorType, VectorType, Real>& rhs) override
       {
         for (auto& bfi : rhs.getLocalBFIs())
         {

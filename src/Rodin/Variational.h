@@ -48,7 +48,6 @@
 
 #include "Variational/Div.h"
 #include "Variational/Grad.h"
-#include "Variational/Normal.h"
 #include "Variational/FaceNormal.h"
 #include "Variational/BoundaryNormal.h"
 #include "Variational/Jacobian.h"
@@ -62,6 +61,9 @@
 
 #include "Variational/Max.h"
 #include "Variational/Min.h"
+
+#include "Variational/Re.h"
+#include "Variational/Im.h"
 
 #include "Variational/Sine.h"
 #include "Variational/Cosine.h"

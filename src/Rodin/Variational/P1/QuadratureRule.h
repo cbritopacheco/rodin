@@ -250,7 +250,7 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<Math::Vector<ScalarType>, LHSRangeType>)
         {
-          f.getValue(m_vv, p);
+          f.getDerived().getValue(m_vv, p);
           for (size_t i = 0; i < fe.getCount(); i++)
           {
             fe.getBasis(i)(m_vb, rc);

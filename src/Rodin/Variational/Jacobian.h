@@ -24,24 +24,29 @@ namespace Rodin::Variational
   /**
    * @brief Base class for Jacobian classes.
    */
-  template <class Derived, class Operand>
+  template <class Operand, class Derived>
   class JacobianBase;
 
   /**
    * @ingroup JacobianSpecializations
    * @brief Jacobian of a P1 GridFunction
    */
-  template <class Derived, class FES>
-  class JacobianBase<Derived, GridFunction<FES>>
-    : public MatrixFunctionBase<JacobianBase<Derived, GridFunction<FES>>>
+  template <class FES, class Derived>
+  class JacobianBase<GridFunction<FES>, Derived>
+    : public MatrixFunctionBase<
+        typename FormLanguage::Traits<FES>::ScalarType, JacobianBase<GridFunction<FES>, Derived>>
   {
     public:
       using FESType = FES;
 
-      using OperandType = GridFunction<FES>;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      /// Parent class
-      using Parent = MatrixFunctionBase<JacobianBase<Derived, OperandType>>;
+      using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
+
+      using OperandType = GridFunction<FESType>;
+
+      using Parent =
+        MatrixFunctionBase<ScalarType, JacobianBase<OperandType, Derived>>;
 
       /**
        * @brief Constructs the Jacobianient of a @f$ \mathbb{P}_1 @f$ function
@@ -83,17 +88,16 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::SpatialMatrix<Real> getValue(const Geometry::Point& p) const
+      SpatialMatrixType getValue(const Geometry::Point& p) const
       {
-        Math::SpatialMatrix<Real> out;
+        SpatialMatrixType out;
         getValue(out, p);
         return out;
       }
 
       inline
-      void getValue(Math::SpatialMatrix<Real>& out, const Geometry::Point& p) const
+      void getValue(SpatialMatrixType& out, const Geometry::Point& p) const
       {
-        out.setConstant(NAN);
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -131,9 +135,9 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto interpolate(Math::SpatialMatrix<Real>& out, const Geometry::Point& p) const
+      void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).interpolate(out, p);
+        static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
       /**

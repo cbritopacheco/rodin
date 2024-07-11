@@ -45,14 +45,19 @@ namespace Rodin::Variational
   template <class Number, class Mesh>
   class Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>> final
     : public JacobianBase<
-        Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>>, GridFunction<P1<Math::Vector<Number>, Mesh>>>
+        GridFunction<P1<Math::Vector<Number>, Mesh>>,
+        Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>>>
   {
     public:
       using FESType = P1<Math::Vector<Number>, Mesh>;
 
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
+
       using OperandType = GridFunction<FESType>;
 
-      using Parent = JacobianBase<Jacobian<OperandType>, OperandType>;
+      using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
       /**
        * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function
@@ -71,7 +76,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::SpatialMatrix<Real>& out, const Geometry::Point& p) const
+      void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -87,7 +92,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
+            const auto rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -112,7 +117,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
+                  const auto rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;
@@ -132,8 +137,8 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialMatrix<Real> jacobian(vdim, d);
-          Math::SpatialMatrix<Real> res(vdim, d);
+          SpatialMatrixType jacobian(vdim, d);
+          SpatialMatrixType res(vdim, d);
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {

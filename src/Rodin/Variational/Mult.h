@@ -34,6 +34,8 @@ namespace Rodin::FormLanguage
     using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
     using LHSType =
       Variational::FunctionBase<LHSDerived>;
 
@@ -49,32 +51,32 @@ namespace Rodin::FormLanguage
     using RangeType =
       std::conditional_t<
         // If
-        std::is_same_v<LHSRangeType, Real>,
-        // Then <----------------------------------------------- LHS is Real
+        std::is_same_v<LHSRangeType, ScalarType>,
+        // Then <----------------------------------------------- LHS is Scalar
         RHSRangeType,
         // -------------------------------------------------------------------
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<LHSRangeType, Math::Vector<Real>>,
+          std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>,
           // Then <--------------------------------------------- LHS is Vector
           std::conditional_t<
             // If
-            std::is_same_v<RHSRangeType, Real>,
+            std::is_same_v<RHSRangeType, ScalarType>,
             // Then
-            Math::Vector<Real>,
+            Math::Vector<ScalarType>,
             // Else
             std::conditional_t<
               // If
-              std::is_same_v<RHSRangeType, Math::Vector<Real>>,
+              std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
               // Then
               void,
               // Else
               std::conditional_t<
                 // If
-                std::is_same_v<RHSRangeType, Math::Matrix<Real>>,
+                std::is_same_v<RHSRangeType, Math::Matrix<ScalarType>>,
                 // Then
-                Math::Matrix<Real>,
+                Math::Matrix<ScalarType>,
                 // Else
                 void
               >
@@ -84,17 +86,17 @@ namespace Rodin::FormLanguage
           // Else
           std::conditional_t<
             // If
-            std::is_same_v<LHSRangeType, Math::Matrix<Real>>,
+            std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>,
             // Then <------------------------------------------- LHS is Matrix
             std::conditional_t<
-              std::is_same_v<RHSRangeType, Real>,
-              Math::Matrix<Real>,
+              std::is_same_v<RHSRangeType, ScalarType>,
+              Math::Matrix<ScalarType>,
               std::conditional_t<
-                std::is_same_v<RHSRangeType, Math::Vector<Real>>,
-                Math::Vector<Real>,
+                std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+                Math::Vector<ScalarType>,
                 std::conditional_t<
-                  std::is_same_v<RHSRangeType, Math::Matrix<Real>>,
-                    Math::Matrix<Real>,
+                  std::is_same_v<RHSRangeType, Math::Matrix<ScalarType>>,
+                    Math::Matrix<ScalarType>,
                     void
                   >
                 >
@@ -147,11 +149,7 @@ namespace Rodin::Variational
 
       Mult(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        assert(lhs.getRangeType() == RangeType::Real
-            || rhs.getRangeType() == RangeType::Real
-            || lhs.getRangeShape().width() == rhs.getRangeShape().height());
-      }
+      {}
 
       Mult(const Mult& other)
         : Parent(other),
@@ -224,12 +222,12 @@ namespace Rodin::Variational
       {
         if constexpr (std::is_same_v<LHSRangeType, Real> && std::is_same_v<RHSRangeType, Math::Vector<Real>>)
         {
-          getRHS().getValue(out, p);
+          getRHS().getDerived().getValue(out, p);
           out *= getLHS().getValue(p);
         }
         else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Real>> && std::is_same_v<RHSRangeType, Real>)
         {
-          getLHS().getValue(out, p);
+          getLHS().getDerived().getValue(out, p);
           out *= getRHS().getValue(p);
         }
         else
@@ -507,7 +505,7 @@ namespace Rodin::Variational
 
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      using ScalarType = decltype(std::declval<LHSScalarType>() * std::declval<RHSScalarType>());
+      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
@@ -644,16 +642,16 @@ namespace Rodin::Variational
     return Mult(lhs, RealFunction(rhs));
   }
 
-  template <class LHS, class Number>
-  class Mult<LHS, LocalBilinearFormIntegratorBase<Number>>
-    : public LocalBilinearFormIntegratorBase<decltype(std::declval<LHS>() * std::declval<Number>())>
+  template <class LHS, class RHSNumber>
+  class Mult<LHS, LocalBilinearFormIntegratorBase<RHSNumber>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Mult<LHS, RHSNumber>::Type>
   {
     public:
       using LHSType = LHS;
 
-      using RHSType = LocalBilinearFormIntegratorBase<Number>;
+      using RHSType = LocalBilinearFormIntegratorBase<RHSNumber>;
 
-      using ScalarType = decltype(std::declval<LHS>() * std::declval<Number>());
+      using ScalarType = typename FormLanguage::Mult<LHS, RHSNumber>::Type;
 
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -727,16 +725,16 @@ namespace Rodin::Variational
     return Mult(lhs, rhs);
   }
 
-  template <class LHS, class Number>
-  class Mult<LHS, LinearFormIntegratorBase<Number>>
-    : public LinearFormIntegratorBase<decltype(std::declval<LHS>() * std::declval<Number>())>
+  template <class LHS, class RHSNumber>
+  class Mult<LHS, LinearFormIntegratorBase<RHSNumber>>
+    : public LinearFormIntegratorBase<typename FormLanguage::Mult<LHS, RHSNumber>::Type>
   {
     public:
       using LHSType = LHS;
 
-      using RHSType = LinearFormIntegratorBase<Number>;
+      using RHSType = LinearFormIntegratorBase<RHSNumber>;
 
-      using ScalarType = decltype(std::declval<LHS>() * std::declval<Number>());
+      using ScalarType = typename FormLanguage::Mult<LHS, RHSNumber>::Type;
 
       using Parent = LinearFormIntegratorBase<ScalarType>;
 

@@ -28,7 +28,7 @@ namespace Rodin::Variational
 
   /**
    * @brief Degree 0 Lagrange finite element space
-   * @tparam Range Range value type. Either Rodin::Real or Math::Vector<Real>.
+   * @tparam Range Range value type
    * @tparam Context Context type
    * @tparam Args Additional arguments
    *
@@ -59,6 +59,9 @@ namespace Rodin::Variational
    */
   using RealP0Element = P0Element<Real>;
 
+  /**
+   * @brief Alias for P0Element<Complex>
+   */
   using ComplexP0Element = P0Element<Complex>;
 
   /**

@@ -8,6 +8,26 @@
 
 namespace Rodin::Variational
 {
+  const Geometry::GeometryIndexed<P1Element<Real>>
+  P1<Real, Geometry::Mesh<Context::Sequential>>::s_elements =
+  {
+    { Geometry::Polytope::Type::Point, P1Element<Real>(Geometry::Polytope::Type::Point) },
+    { Geometry::Polytope::Type::Segment, P1Element<Real>(Geometry::Polytope::Type::Segment) },
+    { Geometry::Polytope::Type::Triangle, P1Element<Real>(Geometry::Polytope::Type::Triangle) },
+    { Geometry::Polytope::Type::Quadrilateral, P1Element<Real>(Geometry::Polytope::Type::Quadrilateral) },
+    { Geometry::Polytope::Type::Tetrahedron, P1Element<Real>(Geometry::Polytope::Type::Tetrahedron) }
+  };
+
+  const Geometry::GeometryIndexed<P1Element<Complex>>
+  P1<Complex, Geometry::Mesh<Context::Sequential>>::s_elements =
+  {
+    { Geometry::Polytope::Type::Point, P1Element<Complex>(Geometry::Polytope::Type::Point) },
+    { Geometry::Polytope::Type::Segment, P1Element<Complex>(Geometry::Polytope::Type::Segment) },
+    { Geometry::Polytope::Type::Triangle, P1Element<Complex>(Geometry::Polytope::Type::Triangle) },
+    { Geometry::Polytope::Type::Quadrilateral, P1Element<Complex>(Geometry::Polytope::Type::Quadrilateral) },
+    { Geometry::Polytope::Type::Tetrahedron, P1Element<Complex>(Geometry::Polytope::Type::Tetrahedron) }
+  };
+
   P1<Math::Vector<Real>, Geometry::Mesh<Context::Sequential>>
   ::P1(const MeshType& mesh, size_t vdim)
     : m_mesh(mesh), m_vdim(vdim)

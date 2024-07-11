@@ -38,11 +38,10 @@ namespace Rodin::Variational
       using Parent =
         FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
-      static_assert(std::is_same_v<RHSRangeType, Real>);
-
       Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
+
 
       Division(const Division& other)
         : Parent(other),
@@ -54,14 +53,12 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return getLHS().getRangeShape();
       }
 
-      inline
       constexpr
       Division& traceOf(Geometry::Attribute attr)
       {
@@ -70,7 +67,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       const LHSType& getLHS() const
       {
@@ -78,7 +74,6 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
-      inline
       constexpr
       const RHSType& getRHS() const
       {
@@ -86,25 +81,17 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      inline
+      constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return this->object(getLHS().getValue(p)) / this->object(getRHS().getValue(p));
       }
 
-      inline
+      template <class T>
       constexpr
-      void getValue(Math::Vector<Real>& res, const Geometry::Point& p) const
+      void getValue(T& res, const Geometry::Point& p) const
       {
-        getLHS().getValue(res, p);
-        res /= getRHS().getValue(p);
-      }
-
-      inline
-      constexpr
-      void getValue(Math::Matrix<Real>& res, const Geometry::Point& p) const
-      {
-        getLHS().getValue(res, p);
+        getLHS().getDerived().getValue(res, p);
         res /= getRHS().getValue(p);
       }
 
