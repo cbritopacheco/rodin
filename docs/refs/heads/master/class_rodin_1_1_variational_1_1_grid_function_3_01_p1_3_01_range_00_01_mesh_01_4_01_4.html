@@ -86,8 +86,8 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FESType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase&lt;GridFunction&lt;P1&lt;Range, Mesh&gt;&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class FES, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase&lt;P1&lt;Range, Mesh&gt;, GridFunction&lt;P1&lt;Range, Mesh&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for grid function objects.</dd>
           </dl>
@@ -99,8 +99,8 @@
               using <a href="#a21e3a3ac37400a5757c9cad815fc250a" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;Range, Mesh&gt;
             </dt>
             <dd>Type of finite element space to which the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> belongs to.</dd>
-            <dt id="a0f804559391ddf46688b5ca70d74ca36">
-              using <a href="#a0f804559391ddf46688b5ca70d74ca36" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function_3_01_p1_3_01_range_00_01_mesh_01_4_01_4.html#a21e3a3ac37400a5757c9cad815fc250a" class="m-doc">FESType</a>&gt;&gt;
+            <dt id="a76e2dde448d14560f69520214e7d9c42">
+              using <a href="#a76e2dde448d14560f69520214e7d9c42" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function_3_01_p1_3_01_range_00_01_mesh_01_4_01_4.html#a21e3a3ac37400a5757c9cad815fc250a" class="m-doc">FESType</a>, <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function_3_01_p1_3_01_range_00_01_mesh_01_4_01_4.html#a21e3a3ac37400a5757c9cad815fc250a" class="m-doc">FESType</a>&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>

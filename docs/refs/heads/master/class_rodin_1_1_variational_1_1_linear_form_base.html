@@ -64,21 +64,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class VectorType&gt;</div>
+          <div class="m-doc-template">template&lt;class Vector&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearFormBase <span class="m-thin">class</span>
         </h1>
         <p>Base class for linear form objects.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">VectorType</td>
-              <td>Type of vector which will be assembled</td>
-            </tr>
-          </tbody>
-        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -104,6 +93,11 @@
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Vector&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>
+            </dt>
+            <dd>Represents a linear form on some finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Vector&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>
@@ -146,9 +140,9 @@
           <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class VectorType&gt;
+                template&lt;class Vector&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Assembles the linear form.</p>
 <p>This method will assemble the underlying vector associated the linear form.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_linear_form_base.html#a786a316661c285f049fa3ba6f75a8d7a" class="m-doc">getVector()</a></p></aside>
@@ -156,9 +150,9 @@
           <section class="m-doc-details" id="aba542269ae62d46e38681b2d80bbaa9b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class VectorType&gt;
+                template&lt;class Vector&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>* Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba542269ae62d46e38681b2d80bbaa9b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>* Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba542269ae62d46e38681b2d80bbaa9b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">
