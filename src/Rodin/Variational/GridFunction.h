@@ -524,9 +524,6 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& project(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        // using FunctionType = FunctionBase<NestedDerived>;
-        // using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
-        // static_assert(std::is_same_v<RangeType, FunctionRangeType>);
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension();
@@ -809,9 +806,6 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        // using FunctionType = FunctionBase<NestedDerived>;
-        // using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
-        // static_assert(std::is_same_v<RangeType, FunctionRangeType>);
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension() - 1;
@@ -922,9 +916,6 @@ namespace Rodin::Variational
       Derived& projectOnInterfaces(
           const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        // using FunctionType = FunctionBase<NestedDerived>;
-        // using FunctionRangeType = typename FormLanguage::Traits<FunctionType>::RangeType;
-        // static_assert(std::is_same_v<RangeType, FunctionRangeType>);
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension() - 1;

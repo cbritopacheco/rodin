@@ -649,7 +649,7 @@ namespace Rodin::Variational
 
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
-      Mult(LHSType lhs, const RHSType& rhs)
+      Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs),
           m_lhs(lhs), m_rhs(rhs.copy())
       {}
@@ -706,14 +706,13 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  template <class LHS, class Number>
-  Mult(LHS, const LocalBilinearFormIntegratorBase<Number>&)
-    -> Mult<LHS, LocalBilinearFormIntegratorBase<Number>>;
+  template <class Number, class RHSScalar>
+  Mult(const Number&, const LocalBilinearFormIntegratorBase<RHSScalar>&)
+    -> Mult<Number, LocalBilinearFormIntegratorBase<RHSScalar>>;
 
-  template <class LHS, class Number>
+  template <class Number, class RHSScalar>
   constexpr
-  auto
-  operator*(LHS lhs, const LocalBilinearFormIntegratorBase<Number>& rhs)
+  auto operator*(const Number& lhs, const LocalBilinearFormIntegratorBase<RHSScalar>& rhs)
   {
     return Mult(lhs, rhs);
   }
@@ -731,7 +730,7 @@ namespace Rodin::Variational
 
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
-      Mult(ScalarType lhs, const RHSType& rhs)
+      Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs),
           m_lhs(lhs), m_rhs(rhs.copy())
       {}
@@ -788,14 +787,13 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  template <class LHS, class Number>
-  Mult(LHS, const LinearFormIntegratorBase<Number>&)
-    -> Mult<LHS, LinearFormIntegratorBase<Number>>;
+  template <class Number, class RHSScalar>
+  Mult(const Number&, const LinearFormIntegratorBase<RHSScalar>&)
+    -> Mult<Number, LinearFormIntegratorBase<RHSScalar>>;
 
-  template <class Number>
+  template <class Number, class RHSScalar>
   constexpr
-  auto
-  operator*(Number lhs, const LinearFormIntegratorBase<Number>& rhs)
+  auto operator*(const Number& lhs, const LinearFormIntegratorBase<RHSScalar>& rhs)
   {
     return Mult(lhs, rhs);
   }
