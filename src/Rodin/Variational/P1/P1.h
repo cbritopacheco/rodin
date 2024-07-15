@@ -154,7 +154,6 @@ namespace Rodin::Variational
 
           InverseMapping(const InverseMapping&) = default;
 
-          inline
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
@@ -167,7 +166,6 @@ namespace Rodin::Variational
             return getFunction()(res, p.getReferenceCoordinates());
           }
 
-          inline
           constexpr
           const FunctionType& getFunction() const
           {
@@ -194,37 +192,31 @@ namespace Rodin::Variational
 
       P1& operator=(P1&& other) = default;
 
-      inline
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return s_elements[getMesh().getGeometry(d, i)];
       }
 
-      inline
       size_t getSize() const override
       {
         return m_mesh.get().getVertexCount();
       }
 
-      inline
       size_t getVectorDimension() const override
       {
         return 1;
       }
 
-      inline
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
 
-      inline
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         return getMesh().getConnectivity().getPolytope(d, i);
       }
 
-      inline
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto [d, i] = idx;
@@ -248,7 +240,6 @@ namespace Rodin::Variational
        * \tau @f$ element @f$ R @f$.
        */
       template <class FunctionDerived>
-      inline
       auto getMapping(const std::pair<size_t, Index>& idx, const FunctionBase<FunctionDerived>& v) const
       {
         const auto [d, i] = idx;
@@ -257,7 +248,6 @@ namespace Rodin::Variational
       }
 
       template <class FunctionDerived>
-      inline
       auto getMapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v) const
       {
         return Mapping<FunctionDerived>(polytope, v);
@@ -270,14 +260,12 @@ namespace Rodin::Variational
        * @param[in] v Callable type
        */
       template <class CallableType>
-      inline
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
         return InverseMapping<CallableType>(v);
       }
 
       template <class CallableType>
-      inline
       auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
       {
         return InverseMapping<CallableType>(v);
@@ -418,53 +406,53 @@ namespace Rodin::Variational
           std::reference_wrapper<const FunctionType> m_v;
       };
 
-      P1(const MeshType& mesh);
+      P1(const MeshType& mesh)
+        : m_mesh(mesh)
+      {}
 
-      P1(const P1& other);
+      P1(const P1& other)
+        : Parent(other),
+          m_mesh(other.m_mesh)
+      {}
 
-      P1(P1&& other);
+      P1(P1&& other)
+        : Parent(std::move(other)),
+          m_mesh(other.m_mesh)
+      {}
 
       P1& operator=(P1&& other) = default;
 
-      inline
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return s_elements[getMesh().getGeometry(d, i)];
       }
 
-      inline
       size_t getSize() const override
       {
-        return 2 * m_mesh.get().getVertexCount();
+        return m_mesh.get().getVertexCount();
       }
 
-      inline
       size_t getVectorDimension() const override
       {
         return 1;
       }
 
-      inline
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
 
-      inline
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
-        return m_dofs[d][i];
+        return getMesh().getConnectivity().getPolytope(d, i);
       }
 
-      inline
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto [d, i] = idx;
         const auto& p = getMesh().getConnectivity().getPolytope(d, i);
-        const size_t q = local / 2;
-        const size_t r = local % 2;
-        assert(q < static_cast<size_t>(p.size()));
-        return p(q) + r * m_mesh.get().getVertexCount();
+        assert(local < static_cast<size_t>(p.size()));
+        return p(local);
       }
 
       /**
@@ -482,7 +470,6 @@ namespace Rodin::Variational
        * \tau @f$ element @f$ R @f$.
        */
       template <class FunctionDerived>
-      inline
       auto getMapping(const std::pair<size_t, Index>& idx, const FunctionBase<FunctionDerived>& v) const
       {
         const auto [d, i] = idx;
@@ -491,7 +478,6 @@ namespace Rodin::Variational
       }
 
       template <class FunctionDerived>
-      inline
       auto getMapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v) const
       {
         return Mapping<FunctionDerived>(polytope, v);
@@ -504,14 +490,12 @@ namespace Rodin::Variational
        * @param[in] v Callable type
        */
       template <class CallableType>
-      inline
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
         return InverseMapping<CallableType>(v);
       }
 
       template <class CallableType>
-      inline
       auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
       {
         return InverseMapping<CallableType>(v);
@@ -651,37 +635,31 @@ namespace Rodin::Variational
 
       P1& operator=(P1&& other) = default;
 
-      inline
       const VectorP1Element& getFiniteElement(size_t d, Index i) const
       {
         return s_elements[m_vdim][getMesh().getGeometry(d, i)];
       }
 
-      inline
       size_t getSize() const override
       {
         return m_mesh.get().getVertexCount() * m_vdim;
       }
 
-      inline
       size_t getVectorDimension() const override
       {
         return m_vdim;
       }
 
-      inline
       const Geometry::Mesh<ContextType>& getMesh() const override
       {
         return m_mesh.get();
       }
 
-      inline
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         return m_dofs[d][i];
       }
 
-      inline
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto [d, i] = idx;
@@ -693,7 +671,6 @@ namespace Rodin::Variational
       }
 
       template <class FunctionDerived>
-      inline
       auto getMapping(const std::pair<size_t, Index>& idx, const FunctionBase<FunctionDerived>& v) const
       {
         const auto [d, i] = idx;
@@ -702,14 +679,12 @@ namespace Rodin::Variational
       }
 
       template <class CallableType>
-      inline
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
         return InverseMapping(v);
       }
 
       template <class CallableType>
-      inline
       auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
       {
         return InverseMapping(v);

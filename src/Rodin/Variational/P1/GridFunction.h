@@ -109,12 +109,18 @@ namespace Rodin::Variational
         const size_t d = polytope.getDimension();
         const Index i = polytope.getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
-        const auto& r = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
+        const auto& r = p.getReferenceCoordinates();
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
           res = Real(0);
           for (Index local = 0; local < fe.getCount(); local++)
-            res += Math::conj(getValue({d, i}, local)) * fe.getBasis(local)(r);
+            res += getValue({d, i}, local) * fe.getBasis(local)(r);
+        }
+        else if constexpr (std::is_same_v<RangeType, Complex>)
+        {
+          res = Complex(0, 0);
+          for (Index local = 0; local < fe.getCount(); local++)
+            res += 0.5 * getValue({d, i}, local) * Complex(1, 1) * fe.getBasis(local)(r);
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
@@ -125,7 +131,7 @@ namespace Rodin::Variational
           for (Index local = 0; local < fe.getCount(); local++)
           {
             fe.getBasis(local)(basis, r);
-            res += Math::conj(getValue({d, i}, local).coeff(local % vdim)) * basis;
+            res += getValue({d, i}, local).coeff(local % vdim) * basis;
           }
         }
         else
@@ -138,10 +144,15 @@ namespace Rodin::Variational
       {
         auto& data = this->getData();
         auto& w = this->getWeights().emplace(this->getFiniteElementSpace().getSize());
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(data.rows() == 1);
           w = data.transpose();
+        }
+        else if constexpr (std::is_same_v<RangeType, Complex>)
+        {
+          assert(data.rows() == 1);
+          w = data.adjoint() / Complex(1, -1);
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
@@ -164,10 +175,15 @@ namespace Rodin::Variational
         assert(static_cast<size_t>(weights.size()) == this->getFiniteElementSpace().getSize());
         auto& data = this->getData();
         const auto& w = this->getWeights().emplace(std::forward<Vector>(weights));
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(data.rows() == 1);
           data = w.transpose();
+        }
+        else if constexpr (std::is_same_v<RangeType, Complex>)
+        {
+          assert(data.rows() == 1);
+          data = w.adjoint() * Complex(1, -1);
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {

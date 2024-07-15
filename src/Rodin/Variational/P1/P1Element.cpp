@@ -140,19 +140,19 @@ namespace Rodin::Variational
   const Geometry::GeometryIndexed<Math::PointMatrix> ComplexP1Element::s_nodes =
   {
     { Geometry::Polytope::Type::Point,
-      Math::PointMatrix{{0, 0}} },
+      Math::PointMatrix{{0}} },
     { Geometry::Polytope::Type::Segment,
-      Math::PointMatrix{{0, 0, 1, 1}} },
+      Math::PointMatrix{{0, 1}} },
     { Geometry::Polytope::Type::Triangle,
-      Math::PointMatrix{{0, 0, 1, 1, 0, 0},
-                        {0, 0, 0, 0, 1, 1}} },
+      Math::PointMatrix{{0, 1, 0},
+                        {0, 0, 1}} },
     { Geometry::Polytope::Type::Quadrilateral,
-      Math::PointMatrix{{0, 0, 1, 1, 0, 0, 1, 1},
-                        {0, 0, 0, 0, 1, 1, 1, 1}} },
+      Math::PointMatrix{{0, 1, 0, 1},
+                        {0, 0, 1, 1}} },
     { Geometry::Polytope::Type::Tetrahedron,
-      Math::PointMatrix{{0, 0, 1, 1, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 1, 1, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 1, 1}} },
+      Math::PointMatrix{{0, 1, 0, 0},
+                        {0, 0, 1, 0},
+                        {0, 0, 0, 1}} },
   };
 
   const Geometry::GeometryIndexed<std::vector<ComplexP1Element::BasisFunction>>
@@ -160,26 +160,20 @@ namespace Rodin::Variational
   {
     { Geometry::Polytope::Type::Point,
       {
-        { 0, Geometry::Polytope::Type::Point },
-        { 1, Geometry::Polytope::Type::Point }
+        { 0, Geometry::Polytope::Type::Point }
       }
     },
     { Geometry::Polytope::Type::Segment,
       {
         { 0, Geometry::Polytope::Type::Segment },
-        { 1, Geometry::Polytope::Type::Segment },
-        { 2, Geometry::Polytope::Type::Segment },
-        { 3, Geometry::Polytope::Type::Segment }
+        { 1, Geometry::Polytope::Type::Segment }
       }
     },
     { Geometry::Polytope::Type::Triangle,
       {
         { 0, Geometry::Polytope::Type::Triangle },
         { 1, Geometry::Polytope::Type::Triangle },
-        { 2, Geometry::Polytope::Type::Triangle },
-        { 3, Geometry::Polytope::Type::Triangle },
-        { 4, Geometry::Polytope::Type::Triangle },
-        { 5, Geometry::Polytope::Type::Triangle }
+        { 2, Geometry::Polytope::Type::Triangle }
       }
     },
     { Geometry::Polytope::Type::Quadrilateral,
@@ -187,11 +181,7 @@ namespace Rodin::Variational
         { 0, Geometry::Polytope::Type::Quadrilateral },
         { 1, Geometry::Polytope::Type::Quadrilateral },
         { 2, Geometry::Polytope::Type::Quadrilateral },
-        { 3, Geometry::Polytope::Type::Quadrilateral },
-        { 4, Geometry::Polytope::Type::Quadrilateral },
-        { 5, Geometry::Polytope::Type::Quadrilateral },
-        { 6, Geometry::Polytope::Type::Quadrilateral },
-        { 7, Geometry::Polytope::Type::Quadrilateral }
+        { 3, Geometry::Polytope::Type::Quadrilateral }
       }
     },
     { Geometry::Polytope::Type::Tetrahedron,
@@ -199,11 +189,7 @@ namespace Rodin::Variational
         { 0, Geometry::Polytope::Type::Tetrahedron },
         { 1, Geometry::Polytope::Type::Tetrahedron },
         { 2, Geometry::Polytope::Type::Tetrahedron },
-        { 3, Geometry::Polytope::Type::Tetrahedron },
-        { 4, Geometry::Polytope::Type::Tetrahedron },
-        { 5, Geometry::Polytope::Type::Tetrahedron },
-        { 6, Geometry::Polytope::Type::Tetrahedron },
-        { 7, Geometry::Polytope::Type::Tetrahedron }
+        { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     }
   };
@@ -213,26 +199,20 @@ namespace Rodin::Variational
   {
     { Geometry::Polytope::Type::Point,
       {
-        { 0, Geometry::Polytope::Type::Point },
-        { 1, Geometry::Polytope::Type::Point }
+        { 0, Geometry::Polytope::Type::Point }
       }
     },
     { Geometry::Polytope::Type::Segment,
       {
         { 0, Geometry::Polytope::Type::Segment },
-        { 1, Geometry::Polytope::Type::Segment },
-        { 2, Geometry::Polytope::Type::Segment },
-        { 3, Geometry::Polytope::Type::Segment }
+        { 1, Geometry::Polytope::Type::Segment }
       }
     },
     { Geometry::Polytope::Type::Triangle,
       {
         { 0, Geometry::Polytope::Type::Triangle },
         { 1, Geometry::Polytope::Type::Triangle },
-        { 2, Geometry::Polytope::Type::Triangle },
-        { 3, Geometry::Polytope::Type::Triangle },
-        { 4, Geometry::Polytope::Type::Triangle },
-        { 5, Geometry::Polytope::Type::Triangle }
+        { 2, Geometry::Polytope::Type::Triangle }
       }
     },
     { Geometry::Polytope::Type::Quadrilateral,
@@ -240,11 +220,7 @@ namespace Rodin::Variational
         { 0, Geometry::Polytope::Type::Quadrilateral },
         { 1, Geometry::Polytope::Type::Quadrilateral },
         { 2, Geometry::Polytope::Type::Quadrilateral },
-        { 3, Geometry::Polytope::Type::Quadrilateral },
-        { 4, Geometry::Polytope::Type::Quadrilateral },
-        { 5, Geometry::Polytope::Type::Quadrilateral },
-        { 6, Geometry::Polytope::Type::Quadrilateral },
-        { 7, Geometry::Polytope::Type::Quadrilateral }
+        { 3, Geometry::Polytope::Type::Quadrilateral }
       }
     },
     { Geometry::Polytope::Type::Tetrahedron,
@@ -252,11 +228,7 @@ namespace Rodin::Variational
         { 0, Geometry::Polytope::Type::Tetrahedron },
         { 1, Geometry::Polytope::Type::Tetrahedron },
         { 2, Geometry::Polytope::Type::Tetrahedron },
-        { 3, Geometry::Polytope::Type::Tetrahedron },
-        { 4, Geometry::Polytope::Type::Tetrahedron },
-        { 5, Geometry::Polytope::Type::Tetrahedron },
-        { 6, Geometry::Polytope::Type::Tetrahedron },
-        { 7, Geometry::Polytope::Type::Tetrahedron }
+        { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     }
   };
@@ -266,26 +238,20 @@ namespace Rodin::Variational
   {
     { Geometry::Polytope::Type::Point,
       {
-        { 0, Geometry::Polytope::Type::Point },
-        { 1, Geometry::Polytope::Type::Point }
+        { 0, Geometry::Polytope::Type::Point }
       }
     },
     { Geometry::Polytope::Type::Segment,
       {
         { 0, Geometry::Polytope::Type::Segment },
-        { 1, Geometry::Polytope::Type::Segment },
-        { 2, Geometry::Polytope::Type::Segment },
-        { 3, Geometry::Polytope::Type::Segment }
+        { 1, Geometry::Polytope::Type::Segment }
       }
     },
     { Geometry::Polytope::Type::Triangle,
       {
         { 0, Geometry::Polytope::Type::Triangle },
         { 1, Geometry::Polytope::Type::Triangle },
-        { 2, Geometry::Polytope::Type::Triangle },
-        { 3, Geometry::Polytope::Type::Triangle },
-        { 4, Geometry::Polytope::Type::Triangle },
-        { 5, Geometry::Polytope::Type::Triangle }
+        { 2, Geometry::Polytope::Type::Triangle }
       }
     },
     { Geometry::Polytope::Type::Quadrilateral,
@@ -293,11 +259,7 @@ namespace Rodin::Variational
         { 0, Geometry::Polytope::Type::Quadrilateral },
         { 1, Geometry::Polytope::Type::Quadrilateral },
         { 2, Geometry::Polytope::Type::Quadrilateral },
-        { 3, Geometry::Polytope::Type::Quadrilateral },
-        { 4, Geometry::Polytope::Type::Quadrilateral },
-        { 5, Geometry::Polytope::Type::Quadrilateral },
-        { 6, Geometry::Polytope::Type::Quadrilateral },
-        { 7, Geometry::Polytope::Type::Quadrilateral }
+        { 3, Geometry::Polytope::Type::Quadrilateral }
       }
     },
     { Geometry::Polytope::Type::Tetrahedron,
@@ -305,11 +267,7 @@ namespace Rodin::Variational
         { 0, Geometry::Polytope::Type::Tetrahedron },
         { 1, Geometry::Polytope::Type::Tetrahedron },
         { 2, Geometry::Polytope::Type::Tetrahedron },
-        { 3, Geometry::Polytope::Type::Tetrahedron },
-        { 4, Geometry::Polytope::Type::Tetrahedron },
-        { 5, Geometry::Polytope::Type::Tetrahedron },
-        { 6, Geometry::Polytope::Type::Tetrahedron },
-        { 7, Geometry::Polytope::Type::Tetrahedron }
+        { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     }
   };
@@ -682,11 +640,7 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return 1;
-          }
-          case 1:
-          {
-            return 1i;
+            return Complex(1, -1);
           }
           default:
           {
@@ -701,19 +655,11 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return 1 - r.x();
+            return (1 - r.x()) * Complex(1, -1);
           }
           case 1:
           {
-            return Complex(0, 1 - r.x());
-          }
-          case 2:
-          {
-            return r.x();
-          }
-          case 3:
-          {
-            return Complex(0, r.x());
+            return r.x() * Complex(1, -1);
           }
           default:
           {
@@ -728,27 +674,15 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return -r.x() - r.y() + 1;
+            return (-r.x() - r.y() + 1) * Complex(1, -1);
           }
           case 1:
           {
-            return Complex(0, -r.x() - r.y() + 1);
+            return r.x() * Complex(1, -1);
           }
           case 2:
           {
-            return r.x();
-          }
-          case 3:
-          {
-            return Complex(0, r.x());
-          }
-          case 4:
-          {
-            return r.y();
-          }
-          case 5:
-          {
-            return Complex(0, r.y());
+            return r.y() * Complex(1, -1);
           }
           default:
           {
@@ -763,31 +697,21 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            const Real x = r.x();
-            const Real y = r.y();
-            return x * y - x - y + 1;
+            const auto x = r.x();
+            const auto y = r.y();
+            return (x * y - x - y + 1) * Complex(1, -1);
           }
           case 1:
           {
-            const Real x = r.x();
-            const Real y = r.y();
-            return Complex(0, x * y - x - y + 1);
+            return r.x() * (1 - r.y()) * Complex(1, -1);
           }
           case 2:
           {
-            return r.x() * (1 - r.y());
+            return r.y() * (1 - r.x()) * Complex(1, -1);
           }
           case 3:
           {
-            return Complex(0, r.y() * (1 - r.x()));
-          }
-          case 4:
-          {
-            return r.x() * r.y();
-          }
-          case 5:
-          {
-            return Complex(0, r.x() * r.y());
+            return r.x() * r.y() * Complex(1, -1);
           }
           default:
           {
@@ -802,35 +726,19 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return -r.x() - r.y() - r.z() + 1;
+            return (-r.x() - r.y() - r.z() + 1) * Complex(1, -1);
           }
           case 1:
           {
-            return Complex(0, - r.x() - r.y() - r.z() + 1);
+            return r.x() * Complex(1, -1);
           }
           case 2:
           {
-            return r.x();
+            return r.y() * Complex(1, -1);
           }
           case 3:
           {
-            return Complex(0, r.x());
-          }
-          case 4:
-          {
-            return r.y();
-          }
-          case 5:
-          {
-            return Complex(0, r.y());
-          }
-          case 6:
-          {
-            return r.z();
-          }
-          case 7:
-          {
-            return Complex(0, r.z());
+            return r.z() * Complex(1, -1);
           }
           default:
           {
@@ -847,7 +755,6 @@ namespace Rodin::Variational
   void
   ComplexP1Element::GradientFunction::operator()(Math::SpatialVector<Complex>& out, const Math::SpatialVector<Real>& r) const
   {
-    using namespace std::complex_literals;
     switch (m_g)
     {
       case Geometry::Polytope::Type::Point:
@@ -863,28 +770,18 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            out.coeffRef(0) = -1;
+            out.coeffRef(0) = Complex(-1, 1);
             return;
           }
           case 1:
           {
-            out.coeffRef(0) = -1i;
-            return;
-          }
-          case 2:
-          {
-            out.coeffRef(0) = 1;
-            return;
-          }
-          case 3:
-          {
-            out.coeffRef(0) = 1i;
+            out.coeffRef(0) = Complex(1, -1);
             return;
           }
           default:
           {
             assert(false);
-            out.setConstant(Math::nan<Complex>());
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -896,42 +793,25 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            out.setConstant(-1);
+            out.setConstant(Complex(-1, 1));
             return;
           }
           case 1:
           {
-            out.setConstant(-1i);
+            out.coeffRef(0) = Complex(1, -1);
+            out.coeffRef(1) = Complex(0, 0);
             return;
           }
           case 2:
           {
-            out.coeffRef(0) = 1;
-            out.coeffRef(1) = 0;
-            return;
-          }
-          case 3:
-          {
-            out.coeffRef(0) = 1i;
-            out.coeffRef(1) = 0;
-            return;
-          }
-          case 4:
-          {
-            out.coeffRef(0) = 0;
-            out.coeffRef(1) = 1;
-            return;
-          }
-          case 5:
-          {
-            out.coeffRef(0) = 0;
-            out.coeffRef(1) = 1i;
+            out.coeffRef(0) = Complex(0, 0);
+            out.coeffRef(1) = Complex(1, -1);
             return;
           }
           default:
           {
             assert(false);
-            out.setConstant(Math::nan<Complex>());
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -943,56 +823,40 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            out.coeffRef(0) = r.y() - 1;
-            out.coeffRef(1) = r.x() - 1;
+            const auto dx = r.y() - 1;
+            const auto dy = r.x() - 1;
+            out.coeffRef(0) = Complex(dx, -dx);
+            out.coeffRef(1) = Complex(dy, -dy);
             return;
           }
           case 1:
           {
-            out.coeffRef(0) = Complex(0, r.y() - 1);
-            out.coeffRef(1) = Complex(0, r.x() - 1);
+            const auto dx = 1 - r.y();
+            const auto dy = -r.x();
+            out.coeffRef(0) = Complex(dx, -dx);
+            out.coeffRef(1) = Complex(dy, -dy);
             return;
           }
           case 2:
           {
-            out.coeffRef(0) = 1 - r.y();
-            out.coeffRef(1) = -r.x();
+            const auto dx = -r.y();
+            const auto dy = 1 - r.x();
+            out.coeffRef(0) = Complex(dx, -dx);
+            out.coeffRef(1) = Complex(dy, -dy);
             return;
           }
           case 3:
           {
-            out.coeffRef(0) = Complex(0, 1 - r.y());
-            out.coeffRef(1) = Complex(0, -r.x());
-            return;
-          }
-          case 4:
-          {
-            out.coeffRef(0) = -r.y();
-            out.coeffRef(1) = 1 - r.x();
-            return;
-          }
-          case 5:
-          {
-            out.coeffRef(0) = Complex(0, -r.y());
-            out.coeffRef(1) = Complex(0, 1 - r.x());
-            return;
-          }
-          case 6:
-          {
-            out.coeffRef(0) = r.y();
-            out.coeffRef(1) = r.x();
-            return;
-          }
-          case 7:
-          {
-            out.coeffRef(0) = Complex(0, r.y());
-            out.coeffRef(1) = Complex(0, r.x());
+            const auto dx = r.y();
+            const auto dy = r.x();
+            out.coeffRef(0) = Complex(dx, -dx);
+            out.coeffRef(1) = Complex(dy, -dy);
             return;
           }
           default:
           {
             assert(false);
-            out.setConstant(Math::nan<Complex>());
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
@@ -1004,67 +868,41 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            out.setConstant(-1);
+            out.setConstant(Complex(-1, 1));
             return;
           }
           case 1:
           {
-            out.setConstant(-1i);
+            out.coeffRef(0) = Complex(1, -1);
+            out.coeffRef(1) = Complex(0, 0);
+            out.coeffRef(2) = Complex(0, 0);
             return;
           }
           case 2:
           {
-            out.coeffRef(0) = 1;
-            out.coeffRef(1) = 0;
-            out.coeffRef(2) = 0;
+            out.coeffRef(0) = Complex(0, 0);
+            out.coeffRef(1) = Complex(1, -1);
+            out.coeffRef(2) = Complex(0, 0);
             return;
           }
           case 3:
           {
-            out.coeffRef(0) = 1i;
-            out.coeffRef(1) = 0;
-            out.coeffRef(2) = 0;
-            return;
-          }
-          case 4:
-          {
-            out.coeffRef(0) = 0;
-            out.coeffRef(1) = 1;
-            out.coeffRef(2) = 0;
-            return;
-          }
-          case 5:
-          {
-            out.coeffRef(0) = 0;
-            out.coeffRef(1) = 1i;
-            out.coeffRef(2) = 0;
-            return;
-          }
-          case 6:
-          {
-            out.coeffRef(0) = 0;
-            out.coeffRef(1) = 0;
-            out.coeffRef(2) = 1;
-            return;
-          }
-          case 7:
-          {
-            out.coeffRef(0) = 0;
-            out.coeffRef(1) = 0;
-            out.coeffRef(2) = 1i;
+            out.coeffRef(0) = Complex(0, 0);
+            out.coeffRef(1) = Complex(0, 0);
+            out.coeffRef(2) = Complex(1, -1);
             return;
           }
           default:
           {
             assert(false);
-            out.setConstant(Math::nan<Complex>());
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
       }
     }
     assert(false);
-    out.setConstant(NAN);
+    out.setConstant(Math::nan<Real>());
   }
 
   void VectorP1Element::BasisFunction::operator()(Math::Vector<Real>& out, const Math::SpatialVector<Real>& r) const

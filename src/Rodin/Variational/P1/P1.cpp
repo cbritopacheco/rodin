@@ -8,46 +8,6 @@
 
 namespace Rodin::Variational
 {
-  P1<Complex, Geometry::Mesh<Context::Sequential>>
-  ::P1(const MeshType& mesh)
-    : m_mesh(mesh)
-  {
-    const size_t vn = mesh.getVertexCount();
-    m_dofs.resize(mesh.getDimension() + 1);
-    for (size_t d = 0; d <= mesh.getDimension(); d++)
-    {
-      const size_t n = mesh.getConnectivity().getCount(d);
-      m_dofs[d].reserve(n);
-      for (size_t i = 0; i < n; i++)
-      {
-        const auto& polytope = mesh.getConnectivity().getPolytope(d, i);
-        const size_t count = polytope.size();
-        auto& dofs = m_dofs[d].emplace_back(2 * count);
-        for (size_t local = 0; local < 2 * count; local++)
-        {
-          const size_t q = local / 2;
-          const size_t r = local % 2;
-          assert(q < count);
-          dofs.coeffRef(local) = polytope(q) + r * vn;
-        }
-      }
-    }
-  }
-
-  P1<Complex, Geometry::Mesh<Context::Sequential>>
-  ::P1(const P1& other)
-    : Parent(other),
-      m_mesh(other.m_mesh),
-      m_dofs(other.m_dofs)
-  {}
-
-  P1<Complex, Geometry::Mesh<Context::Sequential>>
-  ::P1(P1&& other)
-    : Parent(std::move(other)),
-      m_mesh(other.m_mesh),
-      m_dofs(other.m_dofs)
-  {}
-
   P1<Math::Vector<Real>, Geometry::Mesh<Context::Sequential>>
   ::P1(const MeshType& mesh, size_t vdim)
     : m_mesh(mesh), m_vdim(vdim)

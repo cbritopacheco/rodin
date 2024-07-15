@@ -31,10 +31,14 @@ namespace Rodin::Variational
         : m_v(v.copy())
       {}
 
-      template <class FES>
-      LinearFormIntegratorBase(TestFunction<FES>&& v) = delete;
-
       LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
+        : Parent(other),
+          m_v(other.m_v->copy()),
+          m_attrs(other.m_attrs)
+      {}
+
+      template <class OtherNumber>
+      LinearFormIntegratorBase(const LinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
           m_v(other.m_v->copy()),
           m_attrs(other.m_attrs)
@@ -46,9 +50,15 @@ namespace Rodin::Variational
           m_attrs(std::move(other.m_attrs))
       {}
 
+      template <class OtherNumber>
+      LinearFormIntegratorBase(LinearFormIntegratorBase<OtherNumber>&& other)
+        : Parent(std::move(other)),
+          m_v(std::move(other.m_v)),
+          m_attrs(std::move(other.m_attrs))
+      {}
+
       virtual ~LinearFormIntegratorBase() = default;
 
-      inline
       const FormLanguage::Base& getTestFunction() const
       {
         assert(m_v);
@@ -58,7 +68,6 @@ namespace Rodin::Variational
       /**
        * @brief Gets the attributes of the elements being integrated.
        */
-      inline
       const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_attrs;
@@ -71,14 +80,12 @@ namespace Rodin::Variational
        * Specifies the material reference over which the integration should
        * take place.
        */
-      inline
       LinearFormIntegratorBase& over(Geometry::Attribute attr)
       {
         return over(FlatSet<Geometry::Attribute>{attr});
       }
 
       template <class A1, class A2, class ... As>
-      inline
       LinearFormIntegratorBase& over(A1 a1, A2 a2, As... attrs)
       {
         return over(FlatSet<Geometry::Attribute>{a1, a2, attrs...});
@@ -91,7 +98,6 @@ namespace Rodin::Variational
        * Specifies the material references over which the integration should
        * take place.
        */
-      inline
       LinearFormIntegratorBase& over(const FlatSet<Geometry::Attribute>& attrs)
       {
         assert(attrs.size() > 0);
@@ -99,7 +105,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       Integrator::Type getType() const final override
       {
         return Integrator::Type::Linear;
