@@ -466,6 +466,9 @@ namespace Rodin::Variational
   template <class Operand>
   class Restriction;
 
+  template <class Operand>
+  class Conjugate;
+
   /**
    * @brief Represent the negation of an operand.
    * @tparam Operand Type of operand

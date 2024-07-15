@@ -1029,7 +1029,7 @@ namespace Rodin::Variational
           case 4:
           {
             out.coeffRef(0) = 0;
-            out.coeffRef(1) = 1i;
+            out.coeffRef(1) = 1;
             out.coeffRef(2) = 0;
             return;
           }
@@ -1044,7 +1044,7 @@ namespace Rodin::Variational
           {
             out.coeffRef(0) = 0;
             out.coeffRef(1) = 0;
-            out.coeffRef(2) = 1i;
+            out.coeffRef(2) = 1;
             return;
           }
           case 7:

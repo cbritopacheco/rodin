@@ -17,7 +17,6 @@
 #include "Rodin/Types.h"
 #include "Rodin/Copyable.h"
 #include "Rodin/Threads/Unsafe.h"
-#include "Rodin/Utility/DependentFalse.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 

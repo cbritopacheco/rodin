@@ -232,7 +232,8 @@ namespace Rodin::Variational
             const size_t d = polytope.getDimension();
             const size_t i = polytope.getIndex();
             const auto& fe = fes.getFiniteElement(d, i);
-            const auto& mapping = fes.getMapping({ d, i }, getValue().template cast<FESRangeType>());
+            const auto& mapping =
+              fes.getMapping({ d, i }, getValue().template cast<FESRangeType>());
             for (Index local = 0; local < fe.getCount(); local++)
             {
               const Index global = fes.getGlobalIndex({ d, i }, local);
@@ -240,7 +241,7 @@ namespace Rodin::Variational
               if (find == m_dofs.end())
               {
                 const auto& lf = fe.getLinearForm(local);
-                const ScalarType s = lf(mapping);
+                const auto s = lf(mapping);
                 m_dofs.insert(find, std::pair{ global, s });
               }
             }

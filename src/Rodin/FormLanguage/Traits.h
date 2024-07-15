@@ -21,60 +21,6 @@ namespace Rodin::FormLanguage
 
   template <class ... Args>
   struct Traits;
-
-  template <>
-  struct Traits<Boolean>
-  {
-    using ScalarType = Boolean;
-  };
-
-  template <>
-  struct Traits<Integer>
-  {
-    using ScalarType = Integer;
-  };
-
-  template <>
-  struct Traits<Real>
-  {
-    using ScalarType = Real;
-  };
-
-  template <>
-  struct Traits<Complex>
-  {
-    using ScalarType = Complex;
-  };
-
-  template <class LHS, class RHS>
-  struct Sum
-  {
-    using Type = decltype(std::declval<LHS>() + std::declval<RHS>());
-  };
-
-  template <class LHS, class RHS>
-  struct Minus
-  {
-    using Type = decltype(std::declval<LHS>() - std::declval<RHS>());
-  };
-
-  template <class Operand>
-  struct UnaryMinus
-  {
-    using Type = decltype(-std::declval<Operand>());
-  };
-
-  template <class LHS, class RHS>
-  struct Division
-  {
-    using Type = decltype(std::declval<LHS>() / std::declval<RHS>());
-  };
-
-  template <class LHS, class RHS>
-  struct Mult
-  {
-    using Type = decltype(std::declval<LHS>() * std::declval<RHS>());
-  };
 }
 
 #endif

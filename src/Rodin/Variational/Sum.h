@@ -106,7 +106,6 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
@@ -114,7 +113,6 @@ namespace Rodin::Variational
         return getLHS().getRangeShape();
       }
 
-      inline
       constexpr
       const auto& getLHS() const
       {
@@ -122,7 +120,6 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
-      inline
       constexpr
       const auto& getRHS() const
       {
@@ -130,7 +127,6 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      inline
       constexpr
       Sum& traceOf(Geometry::Attribute attr)
       {
@@ -140,7 +136,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       Sum& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -150,7 +145,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -158,7 +152,6 @@ namespace Rodin::Variational
       }
 
       template <class T>
-      inline
       constexpr
       void getValue(T& res, const Geometry::Point& p) const
       {
@@ -166,7 +159,7 @@ namespace Rodin::Variational
         res += getRHS().getValue(p);
       }
 
-      inline Sum* copy() const noexcept override
+      Sum* copy() const noexcept override
       {
         return new Sum(*this);
       }
@@ -181,7 +174,6 @@ namespace Rodin::Variational
     -> Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  inline
   constexpr
   auto
   operator+(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
@@ -190,7 +182,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSDerived>
-  inline
   constexpr
   auto
   operator+(const FunctionBase<LHSDerived>& lhs, Real rhs)
@@ -199,7 +190,6 @@ namespace Rodin::Variational
   }
 
   template <class RHSDerived>
-  inline
   constexpr
   auto
   operator+(Real lhs, const FunctionBase<RHSDerived>& rhs)
@@ -208,7 +198,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSDerived>
-  inline
   constexpr
   auto
   operator+(const FunctionBase<LHSDerived>& lhs, Complex rhs)
@@ -217,7 +206,6 @@ namespace Rodin::Variational
   }
 
   template <class RHSDerived>
-  inline
   constexpr
   auto
   operator+(Complex lhs, const FunctionBase<RHSDerived>& rhs)
@@ -268,7 +256,6 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       const LHSType& getLHS() const
       {
@@ -276,7 +263,6 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
-      inline
       constexpr
       const RHSType& getRHS() const
       {
@@ -284,14 +270,12 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
@@ -299,7 +283,6 @@ namespace Rodin::Variational
         return getLHS().getRangeShape();
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
@@ -307,13 +290,11 @@ namespace Rodin::Variational
         return getLHS().getDOFs(element);
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return m_lhs->getPoint();
       }
 
-      inline
       Sum& setPoint(const Geometry::Point& p)
       {
         m_lhs->setPoint(p);
@@ -321,21 +302,19 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
         return this->object(getLHS().getBasis(local)) + this->object(getRHS().getBasis(local));
       }
 
-      inline
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
-      inline Sum* copy() const noexcept override
+      Sum* copy() const noexcept override
       {
         return new Sum(*this);
       }
@@ -350,7 +329,6 @@ namespace Rodin::Variational
     -> Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  inline
   constexpr
   auto
   operator+(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
@@ -397,7 +375,6 @@ namespace Rodin::Variational
     -> Sum<LinearFormIntegratorBase<LHSNumber>, LinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator+(
@@ -445,7 +422,6 @@ namespace Rodin::Variational
     -> Sum<LinearFormIntegratorBase<LHSNumber>, FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator+(
@@ -495,7 +471,6 @@ namespace Rodin::Variational
     -> Sum<FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>, LinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator+(
@@ -548,7 +523,6 @@ namespace Rodin::Variational
         FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator+(
@@ -597,7 +571,6 @@ namespace Rodin::Variational
     -> Sum<LocalBilinearFormIntegratorBase<LHSNumber>, LocalBilinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator+(
@@ -648,7 +621,6 @@ namespace Rodin::Variational
         FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator+(
@@ -700,7 +672,6 @@ namespace Rodin::Variational
         LocalBilinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator+(
@@ -753,7 +724,6 @@ namespace Rodin::Variational
         FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator+(
@@ -794,7 +764,6 @@ namespace Rodin::Variational
     -> Sum<BilinearFormBase<Operator>, BilinearFormBase<Operator>>;
 
   template <class Operator>
-  inline
   constexpr
   auto
   operator+(const BilinearFormBase<Operator>& lhs, const BilinearFormBase<Operator>& rhs)

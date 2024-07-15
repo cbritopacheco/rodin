@@ -312,10 +312,11 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const T& v) const
           {
+            using namespace std::complex_literals;
             if (m_i % 2 == 0)
-              return v(s_nodes[m_g].col(m_i)).real();
+              return Math::conj(v(s_nodes[m_g].col(m_i)));
             else
-              return v(s_nodes[m_g].col(m_i)).imag();
+              return Math::conj(v(s_nodes[m_g].col(m_i))) * 1i;
           }
 
         private:

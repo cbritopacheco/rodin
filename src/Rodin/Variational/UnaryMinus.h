@@ -18,11 +18,11 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType SpaceType>
-  struct Traits<Variational::UnaryMinus<Variational::ShapeFunctionBase<NestedDerived, FES, SpaceType>>>
+  template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::UnaryMinus<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
     using FESType = FES;
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -120,7 +120,6 @@ namespace Rodin::Variational
   UnaryMinus(const FunctionBase<NestedDerived>&) -> UnaryMinus<FunctionBase<NestedDerived>>;
 
   template <class NestedDerived>
-  inline
   constexpr
   auto operator-(const FunctionBase<NestedDerived>& op)
   {
@@ -157,35 +156,30 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_operand))
       {}
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
         return *m_operand;
       }
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return getOperand().getRangeShape();
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
-      inline
       constexpr
       UnaryMinus& setPoint(const Geometry::Point& p)
       {
@@ -193,13 +187,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return m_operand->getPoint();
       }
 
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
@@ -211,7 +203,7 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace();
       }
 
-      inline UnaryMinus* copy() const noexcept override
+      UnaryMinus* copy() const noexcept override
       {
         return new UnaryMinus(*this);
       }
@@ -225,7 +217,6 @@ namespace Rodin::Variational
 
 
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  inline
   constexpr
   auto operator-(const ShapeFunctionBase<NestedDerived, FES, Space>& op)
   {
@@ -258,7 +249,6 @@ namespace Rodin::Variational
           m_op(std::move(other.m_op))
       {}
 
-      inline
       const OperandType& getOperand() const
       {
         assert(m_op);
@@ -375,7 +365,6 @@ namespace Rodin::Variational
           m_op(std::move(other.m_op))
       {}
 
-      inline
       const OperandType& getOperand() const
       {
         assert(m_op);
@@ -417,7 +406,6 @@ namespace Rodin::Variational
     -> UnaryMinus<LocalBilinearFormIntegratorBase<Number>>;
 
   template <class Number>
-  inline
   constexpr
   auto
   operator-(const LocalBilinearFormIntegratorBase<Number>& op)
@@ -466,7 +454,6 @@ namespace Rodin::Variational
     -> UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>>;
 
   template <class Number>
-  inline
   constexpr
   auto
   operator-(const FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>& op)

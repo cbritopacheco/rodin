@@ -246,7 +246,7 @@ namespace Rodin::Variational
         {
           const ScalarType sv = f.getValue(p);
           for (size_t i = 0; i < fe.getCount(); i++)
-            m_basis[i] = sv * fe.getBasis(i)(rc);
+            m_basis[i] = Math::dot(sv, fe.getBasis(i)(rc));
         }
         else if constexpr (std::is_same_v<Math::Vector<ScalarType>, LHSRangeType>)
         {
@@ -254,7 +254,7 @@ namespace Rodin::Variational
           for (size_t i = 0; i < fe.getCount(); i++)
           {
             fe.getBasis(i)(m_vb, rc);
-            m_basis[i] = m_vv.dot(m_vb);
+            m_basis[i] = Math::dot(m_vv, m_vb);
           }
         }
         else if constexpr (std::is_same_v<Math::Matrix<ScalarType>, LHSRangeType>)
@@ -263,14 +263,12 @@ namespace Rodin::Variational
           for (size_t i = 0; i < fe.getCount(); i++)
           {
             fe.getBasis(i)(m_mb, rc);
-            m_basis[i] =
-              (m_mv.array() * m_mb.array()).rowwise().sum().colwise().sum().value();
+            m_basis[i] = Math::dot(m_mv, m_mb);
           }
         }
         else
         {
           assert(false);
-          return NAN;
         }
 
         return *this;
@@ -461,16 +459,15 @@ namespace Rodin::Variational
                 m_sb1[i] = fe.getBasis(i)(rc);
               static_assert(std::is_same_v<RHSRangeType, ScalarType>);
               for (size_t i = 0; i < fe.getCount(); i++)
-                  m_matrix(i, i) = csv * m_sb1[i] * m_sb1[i];
+                  m_matrix(i, i) = Math::dot(csv * m_sb1[i], m_sb1[i]);
               for (size_t i = 0; i < fe.getCount(); i++)
                 for (size_t j = 0; j < i; j++)
-                  m_matrix(i, j) = csv * m_sb1[j] * m_sb1[i];
-              m_matrix.template triangularView<Eigen::Upper>() = m_matrix.transpose();
+                  m_matrix(i, j) = Math::dot(csv * m_sb1[j], m_sb1[i]);
+              m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
             }
             else
             {
               assert(false);
-              m_matrix.setConstant(NAN);
             }
           }
           else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
@@ -482,16 +479,15 @@ namespace Rodin::Variational
             for (size_t i = 0; i < fe.getCount(); i++)
               fe.getBasis(m_vb1[i], rc);
             for (size_t i = 0; i < fe.getCount(); i++)
-                m_matrix(i, i) = m_vb1[i].dot(m_cmv * m_vb1[i]);
+                m_matrix(i, i) = Math::dot(m_cmv * m_vb1[i], m_vb1[i]);
             for (size_t i = 0; i < fe.getCount(); i++)
               for (size_t j = 0; j < i; j++)
-                m_matrix(i, j) = m_vb1[i].dot(m_cmv * m_vb1[j]);
-            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.transpose();
+                m_matrix(i, j) = Math::dot(m_cmv * m_vb1[j], m_vb1[i]);
+            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
           }
           else
           {
             assert(false);
-            m_matrix.setConstant(NAN);
           }
         }
         else
@@ -562,7 +558,6 @@ namespace Rodin::Variational
    * @f[
    * \int \nabla u \cdot \nabla v \ dx \: ,
    * @f]
-              m_matrix.template triangularView<Eigen::Upper>() = m_matrix.transpose();
    * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in \mathbb{P}_1 @f$, and @f$ A
    * @f$ is a coefficient function.
    *
@@ -691,11 +686,12 @@ namespace Rodin::Variational
           {
             for (size_t j = 0; j < i; j++)
             {
-              m_matrix(i, j) =
-                (p.getJacobianInverse().transpose() * m_grad1[i]).dot(p.getJacobianInverse().transpose() * m_grad1[j]);
+              m_matrix(i, j) = Math::dot(
+                  p.getJacobianInverse().transpose() * m_grad1[j],
+                  p.getJacobianInverse().transpose() * m_grad1[i]);
             }
           }
-          m_matrix.template triangularView<Eigen::Upper>() = m_matrix.transpose();
+          m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
         }
         else
         {
@@ -713,8 +709,9 @@ namespace Rodin::Variational
           {
             for (size_t j = 0; j < trialfe.getCount(); j++)
             {
-              m_matrix(i, j) =
-                (p.getJacobianInverse().transpose() * m_grad2[i]).dot(p.getJacobianInverse().transpose() * m_grad1[j]);
+              m_matrix(i, j) = Math::dot(
+                  p.getJacobianInverse().transpose() * m_grad1[j],
+                  p.getJacobianInverse().transpose() * m_grad2[i]);
             }
           }
         }
@@ -907,36 +904,40 @@ namespace Rodin::Variational
           {
             const ScalarType csv = coeff.getValue(p);
             for (size_t i = 0; i < fe.getCount(); i++)
-              m_matrix(i, i) = csv * (p.getJacobianInverse().transpose() * m_grad1[i]).squaredNorm();
+            {
+              m_matrix(i, i) =
+                Math::conj(csv) * (p.getJacobianInverse().transpose() * m_grad1[i]).squaredNorm();
+            }
             for (size_t i = 0; i < fe.getCount(); i++)
             {
               for (size_t j = 0; j < i; j++)
               {
-                m_matrix(i, j) = csv * (
-                    p.getJacobianInverse().transpose() * m_grad1[i]).dot(
-                    p.getJacobianInverse().transpose() * m_grad1[j]);
+                m_matrix(i, j) = Math::dot(
+                    csv * p.getJacobianInverse().transpose() * m_grad1[j],
+                    p.getJacobianInverse().transpose() * m_grad1[i]);
               }
             }
-            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.transpose();
+            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
           }
           else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
           {
             coeff.getValue(m_cmv, p);
             for (size_t i = 0; i < fe.getCount(); i++)
             {
-              m_matrix(i, i) = (p.getJacobianInverse().transpose() * m_grad1[i]).dot(
-                  m_cmv * p.getJacobianInverse().transpose() * m_grad1[i]);
+              m_matrix(i, i) = Math::dot(
+                  m_cmv * p.getJacobianInverse().transpose() * m_grad1[i],
+                  p.getJacobianInverse().transpose() * m_grad1[i]);
             }
             for (size_t i = 0; i < fe.getCount(); i++)
             {
               for (size_t j = 0; j < i; j++)
               {
-                m_matrix(i, j) =
-                  (p.getJacobianInverse().transpose() * m_grad1[i]).dot(
-                      m_cmv * p.getJacobianInverse().transpose() * m_grad1[j]);
+                m_matrix(i, j) = Math::dot(
+                    m_cmv * p.getJacobianInverse().transpose() * m_grad1[j],
+                    p.getJacobianInverse().transpose() * m_grad1[i]);
               }
             }
-            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.transpose();
+            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
           }
           else
           {
@@ -1138,12 +1139,11 @@ namespace Rodin::Variational
           {
             for (size_t j = 0; j < fe.getCount(); j++)
             {
-              m_matrix(i, j) =
-                ((m_jac1[i] * p.getJacobianInverse()).array() * (
-                    m_jac1[j] * p.getJacobianInverse()).array()).rowwise().sum().colwise().sum().value();
+              m_matrix(i, j) = Math::dot(
+                  m_jac1[j] * p.getJacobianInverse(), m_jac1[i] * p.getJacobianInverse());
             }
           }
-          m_matrix.template triangularView<Eigen::Upper>() = m_matrix.transpose();
+          m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
         }
         else
         {
@@ -1161,9 +1161,8 @@ namespace Rodin::Variational
           {
             for (size_t j = 0; j < trialfe.getCount(); j++)
             {
-              m_matrix(i, j) =
-                ((m_jac2[i] * p.getJacobianInverse()).array() * (
-                  m_jac1[j] * p.getJacobianInverse()).array()).rowwise().sum().colwise().sum().value();
+              m_matrix(i, j) = Math::dot(
+                  m_jac1[j] * p.getJacobianInverse(), m_jac2[i] * p.getJacobianInverse());
             }
           }
         }
@@ -1372,37 +1371,37 @@ namespace Rodin::Variational
           {
             const ScalarType csv = coeff.getValue(p);
             for (size_t i = 0; i < fe.getCount(); i++)
-              m_matrix(i, i) = csv * (m_jac1[i] * p.getJacobianInverse()).squaredNorm();
+              m_matrix(i, i) = Math::conj(csv) * (m_jac1[i] * p.getJacobianInverse()).squaredNorm();
             for (size_t i = 0; i < fe.getCount(); i++)
             {
               for (size_t j = 0; j < i; j++)
               {
-                m_matrix(i, j) = csv * (
-                    (m_jac1[i] * p.getJacobianInverse()).array() * (
-                      m_jac1[j] * p.getJacobianInverse()).array()).rowwise().sum().colwise().sum().value();
+                m_matrix(i, j) = Math::dot(
+                    csv * m_jac1[j] * p.getJacobianInverse(),
+                    m_jac1[i] * p.getJacobianInverse());
               }
             }
-            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.transpose();
+            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
           }
           else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
           {
             coeff.getValue(m_cmv, p);
             for (size_t i = 0; i < fe.getCount(); i++)
             {
-              m_matrix(i, i) = (
-                  (m_jac2[i] * p.getJacobianInverse()).array() * (
-                    m_cmv * (m_jac1[i] * p.getJacobianInverse())).array()).rowwise().sum().colwise().sum().value();
+              m_matrix(i, i) = Math::dot(
+                  m_cmv * m_jac1[i] * p.getJacobianInverse(),
+                  m_jac2[i] * p.getJacobianInverse());
             }
             for (size_t i = 0; i < fe.getCount(); i++)
             {
               for (size_t j = 0; j < i; j++)
               {
-                m_matrix(i, j) = (
-                    (m_jac2[i] * p.getJacobianInverse()).array() * (
-                      m_cmv * (m_jac1[j] * p.getJacobianInverse())).array()).rowwise().sum().colwise().sum().value();
+                m_matrix(i, j) = Math::dot(
+                    m_cmv * m_jac1[j] * p.getJacobianInverse(),
+                    m_jac2[i] * p.getJacobianInverse());
               }
             }
-            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.transpose();
+            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
           }
           else
           {

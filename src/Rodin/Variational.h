@@ -28,7 +28,6 @@
 #include "Variational/BilinearForm.h"
 
 #include "Variational/Zero.h"
-#include "Variational/Abs.h"
 #include "Variational/Dot.h"
 #include "Variational/Pow.h"
 #include "Variational/Sqrt.h"
@@ -37,6 +36,9 @@
 #include "Variational/Minus.h"
 #include "Variational/Division.h"
 #include "Variational/UnaryMinus.h"
+
+#include "Variational/Abs.h"
+#include "Variational/Conjugate.h"
 
 #include "Variational/EQ.h"
 #include "Variational/GT.h"
