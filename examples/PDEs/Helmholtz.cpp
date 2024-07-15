@@ -13,6 +13,9 @@ using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+static constexpr Real waveLength = 8;
+const Real waveNumber = 2 * Math::Constants::pi() / waveLength;
+
 int main(int, char**)
 {
   // Build a mesh
@@ -22,22 +25,31 @@ int main(int, char**)
 
   // Functions
   P1<Complex> vh(mesh);
-  GridFunction gf(vh);
 
   TrialFunction u(vh);
   TestFunction  v(vh);
 
+  ComplexFunction f = [](const Point& p) { return Complex(1, 1); };
   Problem helmholtz(u, v);
   helmholtz = Integral(Grad(u), Grad(v))
-            - Integral(u, v)
+            - Integral(f, v)
             + DirichletBC(u, Zero());
 
+  helmholtz.assemble();
+
   CG(helmholtz).solve();
-  // poisson.solve(solver);
+
+  P1<Real> rh(mesh);
+  GridFunction uRe(rh);
+  GridFunction uIm(rh);
+
+  uRe = Re(u.getSolution());
+  uIm = Im(u.getSolution());
 
   // Save solution
-  // u.getSolution().save("Poisson.gf");
-  // mesh.save("Poisson.mesh");
+  uRe.save("uRe.gf");
+  uIm.save("uIm.gf");
+  mesh.save("Grid.mesh");
 
   return 0;
 }

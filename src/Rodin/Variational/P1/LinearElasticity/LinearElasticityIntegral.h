@@ -97,26 +97,25 @@ namespace Rodin::Variational
           for (size_t i = 0; i < fe.getCount(); i++)
           {
             const auto jac = m_jac1[i] * p.getJacobianInverse();
-            const auto sym = jac + jac.transpose();
+            const auto sym = jac + jac.adjoint();
             const ScalarType div = jac.trace();
-            m_matrix(i, i) = lambda * div * div + 0.5 * mu * sym.squaredNorm();
+            m_matrix(i, i) = Math::dot(lambda * div, div) + 0.5 * Math::conj(mu) * sym.squaredNorm();
           }
 
           for (size_t i = 0; i < fe.getCount(); i++)
           {
             const auto jac2 = m_jac1[i] * p.getJacobianInverse();
-            const auto sym2 = jac2 + jac2.transpose();
+            const auto sym2 = jac2 + jac2.adjoint();
             const ScalarType div2 = jac2.trace();
             for (size_t j = 0; j < i; j++)
             {
               const auto jac1 = m_jac1[j] * p.getJacobianInverse();
-              const auto sym1 = jac1 + jac1.transpose();
+              const auto sym1 = jac1 + jac1.adjoint();
               const ScalarType div1 = jac1.trace();
-              m_matrix(i, j) =
-                lambda * div1 * div2 + ((mu * sym2).array() * (0.5 * sym1).array()).rowwise().sum().colwise().sum().value();
+              m_matrix(i, j) = Math::dot(lambda * div1, div2) + 0.5 * Math::dot(mu * sym1, sym2);
             }
           }
-          m_matrix.template triangularView<Eigen::Upper>() = m_matrix.transpose();
+          m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
         }
         else
         {

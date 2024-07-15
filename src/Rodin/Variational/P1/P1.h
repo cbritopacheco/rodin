@@ -418,19 +418,11 @@ namespace Rodin::Variational
           std::reference_wrapper<const FunctionType> m_v;
       };
 
-      P1(const MeshType& mesh)
-        : m_mesh(mesh)
-      {}
+      P1(const MeshType& mesh);
 
-      P1(const P1& other)
-        : Parent(other),
-          m_mesh(other.m_mesh)
-      {}
+      P1(const P1& other);
 
-      P1(P1&& other)
-        : Parent(std::move(other)),
-          m_mesh(other.m_mesh)
-      {}
+      P1(P1&& other);
 
       P1& operator=(P1&& other) = default;
 
@@ -461,7 +453,7 @@ namespace Rodin::Variational
       inline
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
-        return getMesh().getConnectivity().getPolytope(d, i);
+        return m_dofs[d][i];
       }
 
       inline
@@ -529,6 +521,7 @@ namespace Rodin::Variational
       static const Geometry::GeometryIndexed<P1Element<RangeType>> s_elements;
 
       std::reference_wrapper<const MeshType> m_mesh;
+      std::vector<std::vector<IndexArray>> m_dofs;
   };
 
   template <class Mesh>

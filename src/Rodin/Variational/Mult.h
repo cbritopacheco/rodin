@@ -161,19 +161,30 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRangeType, Real>)
+        if constexpr (std::is_same_v<LHSRangeType, Boolean>)
         {
           return getRHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<RHSRangeType, Real>)
+        else if constexpr (std::is_same_v<LHSRangeType, Integer>)
         {
-          return getLHS().getRangeShape();
+          return getRHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Real>> || std::is_same_v<LHSRangeType, Math::Matrix<Real>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Real>)
+        {
+          return getRHS().getRangeShape();
+        }
+        else if constexpr (std::is_same_v<LHSRangeType, Complex>)
+        {
+          return getRHS().getRangeShape();
+        }
+        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Vector>::Value)
+        {
+          return getLHS().getRangeShape().product(getRHS().getRangeShape());
+        }
+        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Matrix>::Value)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }
@@ -184,7 +195,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       constexpr
       Mult& traceOf(Geometry::Attribute attr)
       {
@@ -193,7 +203,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       const LHSType& getLHS() const
       {
@@ -201,7 +210,6 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
-      inline
       constexpr
       const RHSType& getRHS() const
       {
@@ -209,14 +217,12 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return this->object(getLHS().getValue(p)) * this->object(getRHS().getValue(p));
       }
 
-      inline
       constexpr
       void getValue(Math::Vector<Real>& out, const Geometry::Point& p) const
       {
@@ -236,7 +242,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       constexpr
       void getValue(Math::Matrix<Real>& out, const Geometry::Point& p) const
       {
@@ -256,7 +261,7 @@ namespace Rodin::Variational
         }
       }
 
-      inline Mult* copy() const noexcept override
+      Mult* copy() const noexcept override
       {
         return new Mult(*this);
       }
@@ -271,7 +276,6 @@ namespace Rodin::Variational
     -> Mult<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  inline
   constexpr
   auto
   operator*(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
@@ -280,7 +284,6 @@ namespace Rodin::Variational
   }
 
   template <class Number, class RHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  inline
   constexpr
   auto
   operator*(Number lhs, const FunctionBase<RHSDerived>& rhs)
@@ -289,7 +292,6 @@ namespace Rodin::Variational
   }
 
   template <class Number, class LHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  inline
   constexpr
   auto
   operator*(const FunctionBase<LHSDerived>& lhs, Number rhs)
@@ -298,7 +300,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSDerived>
-  inline
   auto
   operator*(const FunctionBase<LHSDerived>& lhs, std::reference_wrapper<const Math::Matrix<Real>> rhs)
   {
@@ -306,7 +307,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSDerived>
-  inline
   auto
   operator*(std::reference_wrapper<const Math::Matrix<Real>> lhs, const FunctionBase<LHSDerived>& rhs)
   {
@@ -360,28 +360,36 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
-        if constexpr (std::is_same_v<LHSRangeType, Real>)
+        if constexpr (std::is_same_v<LHSRangeType, Boolean>)
         {
           return getRHS().getRangeShape();
         }
-        else if constexpr (std::is_same_v<RHSRangeType, Real>)
+        else if constexpr (std::is_same_v<LHSRangeType, Integer>)
         {
-          return getLHS().getRangeShape();
+          return getRHS().getRangeShape();
         }
-        else if constexpr (
-            std::is_same_v<LHSRangeType, Math::Vector<Real>> ||
-            std::is_same_v<LHSRangeType, Math::Matrix<Real>>)
+        else if constexpr (std::is_same_v<LHSRangeType, Real>)
+        {
+          return getRHS().getRangeShape();
+        }
+        else if constexpr (std::is_same_v<LHSRangeType, Complex>)
+        {
+          return getRHS().getRangeShape();
+        }
+        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Vector>::Value)
+        {
+          return getLHS().getRangeShape().product(getRHS().getRangeShape());
+        }
+        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Matrix>::Value)
         {
           return getLHS().getRangeShape().product(getRHS().getRangeShape());
         }
@@ -392,29 +400,24 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
       }
 
-      inline
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return getRHS().getFiniteElementSpace();
       }
 
-      inline
-      constexpr
-      const LHSType& getLHS() const
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      inline
       constexpr
       const RHSType& getRHS() const
       {
@@ -422,7 +425,6 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return m_rhs->getPoint();
@@ -434,7 +436,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
@@ -442,7 +443,7 @@ namespace Rodin::Variational
         return this->object(getLHS().getValue(p)) * this->object(getRHS().getBasis(local));
       }
 
-      inline Mult* copy() const noexcept override
+      Mult* copy() const noexcept override
       {
         return new Mult(*this);
       }
@@ -457,7 +458,6 @@ namespace Rodin::Variational
     -> Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  inline
   constexpr
   auto
   operator*(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
@@ -466,12 +466,14 @@ namespace Rodin::Variational
   }
 
   template <class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  inline
   constexpr
   auto
-  operator*(Real lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  operator*(
+      const typename FormLanguage::Traits<FES>::ScalarType& lhs,
+      const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
-    return Mult(RealFunction(lhs), rhs);
+    using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+    return Mult(ScalarFunction<ScalarType>(lhs), rhs);
   }
 
   /**
@@ -527,14 +529,12 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getLHS().getLeaf();
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
@@ -559,21 +559,18 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
       }
 
-      inline
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
-      inline
       constexpr
       const LHSType& getLHS() const
       {
@@ -581,7 +578,6 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
-      inline
       constexpr
       const RHSType& getRHS() const
       {
@@ -589,20 +585,17 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return m_lhs->getPoint();
       }
 
-      inline
       Mult& setPoint(const Geometry::Point& p)
       {
         m_lhs->setPoint(p);
         return *this;
       }
 
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
@@ -610,7 +603,7 @@ namespace Rodin::Variational
         return this->object(getLHS().getBasis(local)) * this->object(getRHS().getValue(p));
       }
 
-      inline Mult* copy() const noexcept override
+      Mult* copy() const noexcept override
       {
         return new Mult(*this);
       }
@@ -625,7 +618,6 @@ namespace Rodin::Variational
     -> Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  inline
   constexpr
   auto
   operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const FunctionBase<RHSDerived>& rhs)
@@ -634,12 +626,14 @@ namespace Rodin::Variational
   }
 
   template <class LHSDerived, class FES, ShapeFunctionSpaceType Space>
-  inline
   constexpr
   auto
-  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, Real rhs)
+  operator*(
+      const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+      const typename FormLanguage::Traits<FES>::ScalarType& rhs)
   {
-    return Mult(lhs, RealFunction(rhs));
+    using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+    return Mult(lhs, ScalarFunction<ScalarType>(rhs));
   }
 
   template <class LHS, class RHSNumber>
@@ -717,7 +711,6 @@ namespace Rodin::Variational
     -> Mult<LHS, LocalBilinearFormIntegratorBase<Number>>;
 
   template <class LHS, class Number>
-  inline
   constexpr
   auto
   operator*(LHS lhs, const LocalBilinearFormIntegratorBase<Number>& rhs)
@@ -800,7 +793,6 @@ namespace Rodin::Variational
     -> Mult<LHS, LinearFormIntegratorBase<Number>>;
 
   template <class Number>
-  inline
   constexpr
   auto
   operator*(Number lhs, const LinearFormIntegratorBase<Number>& rhs)

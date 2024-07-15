@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include "Rodin/Types.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 namespace Rodin::Math
 {
@@ -22,16 +23,25 @@ namespace Rodin::Math
   */
   template <class T>
   constexpr
-  inline
-  std::enable_if_t<!std::is_void_v<decltype(std::abs(std::declval<T>()))>, T>
-  abs(const T& x)
+  auto abs(const T& x)
   {
     return std::abs(x);
   }
 
+  constexpr
+  Complex conj(const Complex& x)
+  {
+    return std::conj(x);
+  }
+
+  constexpr
+  Real conj(const Real& x)
+  {
+    return x;
+  }
+
   template <class Base, class Exponent>
   constexpr
-  inline
   auto pow2(const Base& base)
   {
     return base * base;
@@ -39,7 +49,6 @@ namespace Rodin::Math
 
   template <class Base, class Exponent>
   constexpr
-  inline
   auto pow(const Base& base, const Exponent& exponent)
   {
     return std::pow(base, exponent);
@@ -53,9 +62,7 @@ namespace Rodin::Math
   */
   template <class T>
   constexpr
-  inline
-  std::enable_if_t<!std::is_void_v<decltype(std::sqrt(std::declval<T>()))>, T>
-  sqrt(const T& x)
+  auto sqrt(const T& x)
   {
     return std::sqrt(x);
   }
@@ -68,9 +75,7 @@ namespace Rodin::Math
   */
   template <class T>
   constexpr
-  inline
-  std::enable_if_t<!std::is_void_v<decltype(std::isnan(std::declval<T>()))>, bool>
-  isNaN(const T& x)
+  Boolean isNaN(const T& x)
   {
     return std::isnan(x);
   }
@@ -83,43 +88,34 @@ namespace Rodin::Math
   */
   template <class T>
   constexpr
-  inline
-  std::enable_if_t<!std::is_void_v<decltype(std::isinf(std::declval<T>()))>, bool>
-  isInf(const T& x)
+  Boolean isInf(const T& x)
   {
     return std::isinf(x);
   }
 
   template <class T>
   constexpr
-  inline
-  std::enable_if_t<!std::is_void_v<decltype(std::cos(std::declval<T>()))>, bool>
-  cos(const T& x)
+  auto cos(const T& x)
   {
     return std::cos(x);
   }
 
   template <class T>
   constexpr
-  inline
-  std::enable_if_t<!std::is_void_v<decltype(std::sin(std::declval<T>()))>, bool>
-  sin(const T& x)
+  auto sin(const T& x)
   {
     return std::sin(x);
   }
 
   template <class T>
   constexpr
-  inline
-  std::enable_if_t<!std::is_void_v<decltype(std::tan(std::declval<T>()))>, bool>
-  tan(const T& x)
+  auto tan(const T& x)
   {
    return std::tan(x);
   }
 
   template <typename T>
   constexpr
-  inline
   T sgn(const T& x)
   {
     return (T(0) < x) - (x < T(0));
@@ -127,7 +123,6 @@ namespace Rodin::Math
 
   template <class T>
   constexpr
-  inline
   T binom(const T& n, const T& k)
   {
     assert(T(0) <= n);
@@ -144,7 +139,6 @@ namespace Rodin::Math
 
   template <class T>
   constexpr
-  inline
   T factorial(const T& n)
   {
     assert(T(0) <= n);
@@ -156,7 +150,6 @@ namespace Rodin::Math
 
   template <class T>
   constexpr
-  inline
   T permutation(const T& n, const T& k)
   {
     assert(T(0) <= n);
@@ -170,11 +163,125 @@ namespace Rodin::Math
 
   template <class T>
   constexpr
-  inline
   auto nan()
   {
     return std::numeric_limits<T>::quiet_NaN();
   }
+
+  template <class LHS, class RHS>
+  constexpr
+  auto sum(const LHS& lhs, const RHS& rhs)
+  {
+    return lhs + rhs;
+  }
+
+  template <class Operand>
+  constexpr
+  auto minus(const Operand& op)
+  {
+    return -op;
+  }
+
+  template <class LHS, class RHS>
+  constexpr
+  auto minus(const LHS& lhs, const RHS& rhs)
+  {
+    return lhs - rhs;
+  }
+
+  template <class LHS, class RHS>
+  constexpr
+  auto mult(const LHS& lhs, const RHS& rhs)
+  {
+    return lhs * rhs;
+  }
+
+  template <class LHS, class RHS>
+  constexpr
+  auto division(const LHS& lhs, const RHS& rhs)
+  {
+    return lhs / rhs;
+  }
+
+  constexpr
+  Real dot(const Real& lhs, const Real& rhs)
+  {
+    return lhs * rhs;
+  }
+
+  constexpr
+  Complex dot(const Complex& lhs, const Complex& rhs)
+  {
+    return conj(lhs) * rhs;
+  }
+
+  template <class LHSDerived, class RHSDerived>
+  constexpr
+  auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
+  {
+    using LHS = Eigen::MatrixBase<LHSDerived>;
+    using RHS = Eigen::MatrixBase<RHSDerived>;
+    if constexpr (LHS::IsVectorAtCompileTime)
+    {
+      static_assert(RHS::IsVectorAtCompileTime);
+      return lhs.dot(rhs);
+    }
+    else
+    {
+      return (lhs.conjugate().array() * rhs.array()).rowwise().sum().colwise().sum().value();
+    }
+  }
+}
+
+namespace Rodin::FormLanguage
+{
+  template <>
+  struct Traits<Real>
+  {
+    using ScalarType = Real;
+  };
+
+  template <>
+  struct Traits<Complex>
+  {
+    using ScalarType = Complex;
+  };
+
+  template <class LHS, class RHS>
+  struct Sum
+  {
+    using Type = decltype(Math::sum(std::declval<LHS>(), std::declval<RHS>()));
+  };
+
+  template <class LHS, class RHS>
+  struct Minus
+  {
+    using Type = decltype(Math::minus(std::declval<LHS>(), std::declval<RHS>()));
+  };
+
+  template <class Operand>
+  struct UnaryMinus
+  {
+    using Type = decltype(Math::minus(std::declval<Operand>()));
+  };
+
+  template <class LHS, class RHS>
+  struct Mult
+  {
+    using Type = decltype(Math::mult(std::declval<LHS>(), std::declval<RHS>()));
+  };
+
+  template <class LHS, class RHS>
+  struct Division
+  {
+    using Type = decltype(Math::division(std::declval<LHS>(), std::declval<RHS>()));
+  };
+
+  template <class LHS, class RHS>
+  struct Dot
+  {
+    using Type = decltype(Math::dot(std::declval<LHS>(), std::declval<RHS>()));
+  };
 }
 
 #endif
