@@ -64,6 +64,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>DirichletBCBase <span class="m-thin">class</span>
         </h1>
         <p>Abstract base class for a Dirichlet boundary condition.</p>
@@ -74,7 +75,6 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -148,16 +148,6 @@ $ \Gamma_D \subset \mathcal{B}_h $
             <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all classes which are part of <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
           </dl>
         </section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class FES, class ValueDerived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_f_e_s_01_4_00_01_function1c7f1ee11f63b430d644f40657aea941.html" class="m-doc">DirichletBC&lt;TrialFunction&lt;FES&gt;, FunctionBase&lt;ValueDerived&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span>
-            </dt>
-            <dd>Represents a Dirichlet boundary condition on a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</dd>
-          </dl>
-        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -187,7 +177,10 @@ $ \Gamma_D \subset \mathcal{B}_h $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />DirichletBCBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Assembles the Dirichlet boundary condition.</p>
 <p>This method computes the global degree of freedom map associated to the Dirichlet boundary. In other words, it computes the IndexMap which has a keys the global indices of the DOFs, and as values <svg class="m-math" style="width: 0.812em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 7.795246 10.095454">
@@ -260,7 +253,10 @@ $ \ell_i $
           </div></section>
           <section class="m-doc-details" id="a9023772ea883afaa761bbc353cb77351"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>* Rodin::<wbr />Variational::<wbr />DirichletBCBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9023772ea883afaa761bbc353cb77351" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>* Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9023772ea883afaa761bbc353cb77351" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">

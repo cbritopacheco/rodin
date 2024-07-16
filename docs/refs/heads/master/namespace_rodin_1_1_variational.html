@@ -249,6 +249,7 @@ $ \mathbf{A} $
             </dt>
             <dd>General class to assemble linear systems with <code><a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a></code> and <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a></code> types in a serial context.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>
             </dt>
             <dd>Abstract base class for a Dirichlet boundary condition.</dd>
@@ -886,6 +887,7 @@ $ u $
             </dt>
             <dd>Integration of the anisotropic <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a> inner product two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>
             </dt>
             <dd>Abstract base class for a periodic boundary condition.</dd>
@@ -994,8 +996,9 @@ $ u $
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
-            <dt id="a2bc88bd3f6730c56a37f516d1ad10209">
-              using <a href="#a2bc88bd3f6730c56a37f516d1ad10209" class="m-doc-self">EssentialBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>&gt;
+            <dt id="ab9a83f620bec3f8ed0a69e776fc4f9e4">
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              using <a href="#ab9a83f620bec3f8ed0a69e776fc4f9e4" class="m-doc-self">EssentialBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>&lt;Scalar&gt;&gt;
             </dt>
             <dd>Alias for a list of Dirichlet boundary conditions.</dd>
             <dt id="a69e6ba579db6ad5e2d0c043a14f363aa">
@@ -1028,8 +1031,9 @@ $ u $
               using <a href="#ae9ec1baacbe2036909104ac060530e65" class="m-doc-self">VectorP1</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, Mesh&gt;
             </dt>
             <dd>Alias for a vector valued <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> finite element space.</dd>
-            <dt id="a813018bfa62fa4e5d03959d1b224e830">
-              using <a href="#a813018bfa62fa4e5d03959d1b224e830" class="m-doc-self">PeriodicBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>&gt;
+            <dt id="ae96ff4011e48301bbd1da1a6f9b08c36">
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              using <a href="#ae96ff4011e48301bbd1da1a6f9b08c36" class="m-doc-self">PeriodicBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>&lt;Scalar&gt;&gt;
             </dt>
             <dd>Alias for a list of peridodic boundary conditions.</dd>
           </dl>
