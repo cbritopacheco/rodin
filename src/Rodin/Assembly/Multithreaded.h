@@ -54,30 +54,30 @@ namespace Rodin::Assembly
   template <class TrialFES, class TestFES>
   class Multithreaded<
     std::vector<Eigen::Triplet<
-      decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>,
+      typename FormLanguage::Dot<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
     Variational::BilinearForm<TrialFES, TestFES,
       std::vector<Eigen::Triplet<
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>>> final
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>> final
     : public AssemblyBase<
         std::vector<Eigen::Triplet<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>,
+          typename FormLanguage::Dot<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
         Variational::BilinearForm<TrialFES, TestFES,
           std::vector<Eigen::Triplet<
-            decltype(
-              std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-              std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>>>
+            typename FormLanguage::Dot<
+              typename FormLanguage::Traits<TrialFES>::ScalarType,
+              typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>
   {
     public:
       using ScalarType =
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>());
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
@@ -290,60 +290,60 @@ namespace Rodin::Assembly
   thread_local
   std::vector<
     Eigen::Triplet<
-      decltype(
-        std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>
+      typename FormLanguage::Dot<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>
   Multithreaded<
     std::vector<
       Eigen::Triplet<
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>,
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
     Variational::BilinearForm<TrialFES, TestFES,
       std::vector<
         Eigen::Triplet<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>>>::tl_triplets;
+          typename FormLanguage::Dot<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>::tl_triplets;
 
   template <class TrialFES, class TestFES>
   thread_local
   std::unique_ptr<
     Variational::LocalBilinearFormIntegratorBase<
-      decltype(
-        std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>
+      typename FormLanguage::Dot<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>
   Multithreaded<
     std::vector<
       Eigen::Triplet<
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>,
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
     Variational::BilinearForm<TrialFES, TestFES,
       std::vector<
         Eigen::Triplet<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>>>::tl_lbfi;
+          typename FormLanguage::Dot<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>::tl_lbfi;
 
   template <class TrialFES, class TestFES>
   thread_local
   std::unique_ptr<
     Variational::GlobalBilinearFormIntegratorBase<
-      decltype(
-        std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>
+      typename FormLanguage::Dot<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>
   Multithreaded<
     std::vector<
       Eigen::Triplet<
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>,
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
     Variational::BilinearForm<TrialFES, TestFES,
       std::vector<Eigen::Triplet<
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>>>::tl_gbfi;
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>::tl_gbfi;
 
   /**
    * @brief Multithreaded assembly of the Math::SparseMatrix associated to a
@@ -352,32 +352,32 @@ namespace Rodin::Assembly
   template <class TrialFES, class TestFES>
   class Multithreaded<
     Math::SparseMatrix<
-      decltype(
-        std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
+      typename FormLanguage::Dot<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Variational::BilinearForm<
       TrialFES, TestFES,
       Math::SparseMatrix<
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>> final
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>> final
     : public AssemblyBase<
         Math::SparseMatrix<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
+          typename FormLanguage::Dot<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
         Variational::BilinearForm<
           TrialFES, TestFES,
           Math::SparseMatrix<
-            decltype(
-              std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-              std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>>
+            typename FormLanguage::Dot<
+              typename FormLanguage::Traits<TrialFES>::ScalarType,
+              typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
   {
     public:
       using ScalarType =
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>());
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
@@ -445,31 +445,31 @@ namespace Rodin::Assembly
   template <class TrialFES, class TestFES>
   class Multithreaded<
     Math::Matrix<
-      decltype(
-        std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
+      typename FormLanguage::Dot<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Variational::BilinearForm<
       TrialFES, TestFES,
       Math::Matrix<
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>> final
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>> final
     : public AssemblyBase<
         Math::Matrix<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
+          typename FormLanguage::Dot<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
         Variational::BilinearForm<TrialFES, TestFES,
           Math::Matrix<
-            decltype(
-              std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-              std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>>
+            typename FormLanguage::Dot<
+              typename FormLanguage::Traits<TrialFES>::ScalarType,
+              typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
   {
     public:
       using ScalarType =
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>());
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
       using OperatorType = Math::Matrix<ScalarType>;
 
@@ -659,54 +659,55 @@ namespace Rodin::Assembly
   template <class TrialFES, class TestFES>
   thread_local
   Math::Matrix<
-   decltype(
-     std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-     std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>
+    typename FormLanguage::Dot<
+      typename FormLanguage::Traits<TrialFES>::ScalarType,
+      typename FormLanguage::Traits<TestFES>::ScalarType>::Type>
   Multithreaded<
    Math::Matrix<
-     decltype(
-       std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-       std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
+    typename FormLanguage::Dot<
+      typename FormLanguage::Traits<TrialFES>::ScalarType,
+      typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Variational::BilinearForm<TrialFES, TestFES,
-     Math::Matrix<
-       decltype(
-         std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-         std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>>::tl_res;
+      Math::Matrix<
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>::tl_res;
 
   template <class TrialFES, class TestFES>
   thread_local
   std::unique_ptr<
-   Variational::LocalBilinearFormIntegratorBase<
-     decltype(
-       std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-       std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>
+    Variational::LocalBilinearFormIntegratorBase<
+      typename FormLanguage::Dot<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>
   Multithreaded<
-   Math::Matrix<
-     decltype(
-       std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-       std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
-   Variational::BilinearForm<TrialFES, TestFES,
-     Math::Matrix<decltype(
-       std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-       std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>>::tl_lbfi;
+    Math::Matrix<
+      typename FormLanguage::Dot<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+    Variational::BilinearForm<TrialFES, TestFES,
+      Math::Matrix<
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>::tl_lbfi;
 
   template <class TrialFES, class TestFES>
   thread_local
   std::unique_ptr<
     Variational::GlobalBilinearFormIntegratorBase<
-      decltype(
-        std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>
+      typename FormLanguage::Dot<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>
   Multithreaded<
     Math::Matrix<
-      decltype(
-        std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>,
+      typename FormLanguage::Dot<
+        typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Variational::BilinearForm<TrialFES, TestFES,
       Math::Matrix<
-        decltype(
-          std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-          std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>>::tl_gbfi;
+        typename FormLanguage::Dot<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>::tl_gbfi;
 
   /**
    * @brief %Multithreaded assembly of the Math::Vector associated to a

@@ -20,12 +20,6 @@
 namespace Rodin::Solver
 {
   /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for CG
-   */
-  CG() -> CG<Math::SparseMatrix<Real>, Math::Vector<Real>>;
-
-  /**
    * @defgroup CGSpecializations CG Template Specializations
    * @brief Template specializations of the CG class.
    * @see CG
@@ -34,25 +28,38 @@ namespace Rodin::Solver
   /**
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * Math::SparseMatrix<Real> and Math::Vector<Real>.
+   * Math::SparseMatrix and Math::Vector.
    */
-  template <>
-  class CG<Math::SparseMatrix<Real>, Math::Vector<Real>> final
-    : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
+  template <class Scalar>
+  class CG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
-      /// Type of linear operator
-      using OperatorType = Math::SparseMatrix<Real>;
+      using ScalarType = Scalar;
 
-      /// Type of vector
-      using VectorType = Math::Vector<Real>;
+      using VectorType = Math::Vector<ScalarType>;
+
+      using OperatorType = Math::SparseMatrix<ScalarType>;
+
+      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent::solve;
 
       /**
        * @brief Constructs the CG object with default parameters.
        */
-      CG() = default;
+      CG(ProblemType& pb)
+        : Parent(pb)
+      {}
 
       CG(const CG& other)
+        : Parent(other)
+      {}
+
+      CG(CG&& other)
+        : Parent(std::move(other))
       {}
 
       ~CG() = default;
@@ -87,32 +94,45 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::ConjugateGradient<
-        Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper> m_solver;
+      Eigen::ConjugateGradient<OperatorType, Eigen::Lower | Eigen::Upper> m_solver;
   };
+
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for CG
+   */
+  template <class Scalar>
+  CG(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> CG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 
   /**
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * Math::Matrix<Real> and Math::Vector<Real>.
+   * Math::Matrix and Math::Vector.
    */
-  template <>
-  class CG<Math::Matrix<Real>, Math::Vector<Real>> final
-    : public SolverBase<Math::Matrix<Real>, Math::Vector<Real>>
+  template <class Scalar>
+  class CG<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
-      /// Type of linear operator
-      using OperatorType = Math::Matrix<Real>;
+      using ScalarType = Scalar;
 
-      /// Type of vector
-      using VectorType = Math::Vector<Real>;
+      using VectorType = Math::Vector<ScalarType>;
 
-      /**
-       * @brief Constructs the CG object with default parameters.
-       */
-      CG() = default;
+      using OperatorType = Math::Matrix<ScalarType>;
+
+      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent::solve;
+
+      CG(ProblemType& pb)
+        : Parent(pb)
+      {}
 
       CG(const CG& other)
+        : Parent(other)
       {}
 
       ~CG() = default;
@@ -147,10 +167,16 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::ConjugateGradient<
-        Math::Matrix<Real>, Eigen::Lower | Eigen::Upper> m_solver;
+      Eigen::ConjugateGradient<OperatorType, Eigen::Lower | Eigen::Upper> m_solver;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for CG
+   */
+  template <class Scalar>
+  CG(Variational::ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> CG<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

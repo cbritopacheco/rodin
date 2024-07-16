@@ -18,12 +18,6 @@
 namespace Rodin::Solver
 {
   /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for HouseholderQR
-   */
-  HouseholderQR() -> HouseholderQR<Math::Matrix<Real>, Math::Vector<Real>>;
-
-  /**
    * @defgroup HouseholderQRSpecializations HouseholderQR Template Specializations
    * @brief Template specializations of the HouseholderQR class.
    * @see HouseholderQR
@@ -32,25 +26,35 @@ namespace Rodin::Solver
   /**
    * @ingroup HouseholderQRSpecializations
    * @brief A direct sparse HouseholderQR Cholesky factorizations without square root
-   * for use with Math::SparseMatrix<Real> and Math::Vector<Real>.
+   * for use with Math::SparseMatrix and Math::Vector.
    */
-  template <>
-  class HouseholderQR<Math::Matrix<Real>, Math::Vector<Real>> final
-    : public SolverBase<Math::Matrix<Real>, Math::Vector<Real>>
+  template <class Scalar>
+  class HouseholderQR<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
-      /// Type of linear operator
-      using OperatorType = Math::Matrix<Real>;
+      using ScalarType = Scalar;
 
-      /// Type of vector
-      using VectorType = Math::Vector<Real>;
+      using VectorType = Math::Vector<ScalarType>;
 
-      /**
-       * @brief Constructs the HouseholderQR object with default parameters.
-       */
-      HouseholderQR() = default;
+      using OperatorType = Math::Matrix<ScalarType>;
+
+      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent::solve;
+
+      HouseholderQR(ProblemType& pb)
+        : Parent(pb)
+      {}
 
       HouseholderQR(const HouseholderQR& other)
+        : Parent(other)
+      {}
+
+      HouseholderQR(HouseholderQR&& other)
+        : Parent(std::move(other))
       {}
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
@@ -65,9 +69,16 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::HouseholderQR<Math::Matrix<Real>> m_solver;
+      Eigen::HouseholderQR<OperatorType> m_solver;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for HouseholderQR
+   */
+  template <class Scalar>
+  HouseholderQR(Variational::ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> HouseholderQR<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

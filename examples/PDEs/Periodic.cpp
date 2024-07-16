@@ -56,8 +56,7 @@ int main(int, char**)
   poisson.assemble();
 
   // Solve the problem
-  Solver::SparseLU solver;
-  poisson.solve(solver);
+  Solver::SparseLU(poisson).solve();
 
   // Save solution
   u.getSolution().save("Periodic.gf");

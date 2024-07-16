@@ -10,7 +10,7 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::TestFunction<FESType>>
   {
     using FES = FESType;
-    static constexpr Variational::ShapeFunctionSpaceType Space = Variational::TestSpace;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TestSpace;
   };
 }
 

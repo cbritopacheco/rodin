@@ -94,7 +94,6 @@ namespace Rodin::Variational
           LinearForm& operator=(LinearForm&&) = default;
 
           template <class T>
-          inline
           constexpr
           auto operator()(const T& v) const
           {
@@ -209,42 +208,36 @@ namespace Rodin::Variational
        * @brief Gets the number of degrees of freedom in the finite element.
        * @returns Number of degrees of freedom
        */
-      inline
       constexpr
       size_t getCount() const
       {
         return Geometry::Polytope::getVertexCount(getGeometry());
       }
 
-      inline
       constexpr
       const Math::PointMatrix& getNodes() const
       {
         return s_nodes[getGeometry()];
       }
 
-      inline
       const auto& getLinearForm(size_t i) const
       {
         assert(i < getCount());
         return s_ls[getGeometry()][i];
       }
 
-      inline
       const auto& getBasis(size_t i) const
       {
         assert(i < getCount());
         return s_basis[getGeometry()][i];
       }
 
-      inline
       const auto& getGradient(size_t i) const
       {
         assert(i < getCount());
         return s_gradient[getGeometry()][i];
       }
 
-      inline
       constexpr
       size_t getOrder() const
       {
@@ -292,7 +285,7 @@ namespace Rodin::Variational
           LinearForm(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {
-            assert(i < 2 * Geometry::Polytope::getVertexCount(g));
+            assert(i < Geometry::Polytope::getVertexCount(g));
           }
 
           constexpr
@@ -308,14 +301,10 @@ namespace Rodin::Variational
           LinearForm& operator=(LinearForm&&) = default;
 
           template <class T>
-          inline
           constexpr
           auto operator()(const T& v) const
           {
-            if (m_i % 2 == 0)
-              return v(s_nodes[m_g].col(m_i)).real();
-            else
-              return v(s_nodes[m_g].col(m_i)).imag();
+            return 0.5 * Math::conj(v(s_nodes[m_g].col(m_i))) * Complex(1, -1);
           }
 
         private:
@@ -335,7 +324,7 @@ namespace Rodin::Variational
           BasisFunction(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {
-            assert(i < 2 * Geometry::Polytope::getVertexCount(g));
+            assert(i < Geometry::Polytope::getVertexCount(g));
           }
 
           constexpr
@@ -366,7 +355,7 @@ namespace Rodin::Variational
           GradientFunction(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {
-            assert(i < 2 * Geometry::Polytope::getVertexCount(g));
+            assert(i < Geometry::Polytope::getVertexCount(g));
           }
 
           constexpr
@@ -428,42 +417,36 @@ namespace Rodin::Variational
        * @brief Gets the number of degrees of freedom in the finite element.
        * @returns Number of degrees of freedom
        */
-      inline
       constexpr
       size_t getCount() const
       {
-        return 2 * Geometry::Polytope::getVertexCount(getGeometry());
+        return Geometry::Polytope::getVertexCount(getGeometry());
       }
 
-      inline
       constexpr
       const Math::PointMatrix& getNodes() const
       {
         return s_nodes[getGeometry()];
       }
 
-      inline
       const auto& getLinearForm(size_t i) const
       {
         assert(i < getCount());
         return s_ls[getGeometry()][i];
       }
 
-      inline
       const auto& getBasis(size_t i) const
       {
         assert(i < getCount());
         return s_basis[getGeometry()][i];
       }
 
-      inline
       const auto& getGradient(size_t i) const
       {
         assert(i < getCount());
         return s_gradient[getGeometry()][i];
       }
 
-      inline
       constexpr
       size_t getOrder() const
       {
@@ -536,7 +519,6 @@ namespace Rodin::Variational
           LinearForm& operator=(LinearForm&&) = default;
 
           template <class T>
-          inline
           constexpr
           auto operator()(const T& v) const
           {
@@ -673,42 +655,36 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       size_t getCount() const
       {
         return Geometry::Polytope::getVertexCount(getGeometry()) * m_vdim;
       }
 
-      inline
       constexpr
       const Math::PointMatrix& getNodes() const
       {
         return s_nodes[m_vdim][getGeometry()];
       }
 
-      inline
       const auto& getLinearForm(size_t i) const
       {
         assert(i < getCount());
         return s_ls[m_vdim][getGeometry()][i];
       }
 
-      inline
       const auto& getBasis(size_t i) const
       {
         assert(i < getCount());
         return s_basis[m_vdim][getGeometry()][i];
       }
 
-      inline
       const auto& getJacobian(size_t i) const
       {
         assert(i < getCount());
         return s_jacobian[m_vdim][getGeometry()][i];
       }
 
-      inline
       constexpr
       size_t getOrder() const
       {

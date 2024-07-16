@@ -30,7 +30,6 @@ namespace Rodin::Models::Distance
         const auto& mesh = fes.getMesh();
         const auto& mdim = mesh.getDimension();
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, mdim - 1, mdim);
-        Solver::CG cg;
         Variational::TrialFunction u(fes);
         Variational::TestFunction  v(fes);
         Variational::RealFunction zero(0);
@@ -38,7 +37,7 @@ namespace Rodin::Models::Distance
         sp = Variational::Integral(Variational::Grad(u), Variational::Grad(v))
            - Variational::Integral(v)
            + Variational::DirichletBC(u, zero);
-        sp.solve(cg);
+        Solver::CG(sp).solve();
         return u.getSolution();
       }
   };

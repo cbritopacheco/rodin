@@ -46,7 +46,7 @@ namespace Rodin::Math::Kernels
           {
             if (static_cast<Index>(innerPtr[k]) == global + offset)
             {
-               valuePtr[k] = 0.0;
+               valuePtr[k] = 0;
                break;
             }
           }

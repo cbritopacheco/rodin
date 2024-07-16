@@ -274,8 +274,6 @@ int main(int, char**)
     auto dist = MMG::Distancer(dsfes).setInteriorDomain(Support)
                                      .distance(dOmega);
 
-    Solver::CG cg;
-
     // Parameters
     const Real lambda = 0.5769, mu = 0.3846;
 
@@ -303,7 +301,7 @@ int main(int, char**)
           - Integral(g, v)
           + FaceIntegral(he * u, v).over(Support);
           ;
-    state.solve(cg);
+    Solver::CG(state).solve();
 
     u.getSolution().save("u.gf");
     mesh.save("u.mesh");
@@ -315,7 +313,7 @@ int main(int, char**)
     adjoint = LinearElasticityIntegral(p, q)(lambda, mu)
             + Integral(u.getSolution() / mesh.getVolume(), q)
             + FaceIntegral(he * p, q).over(Support);
-    adjoint.solve(cg);
+    Solver::CG(adjoint).solve();
 
     p.getSolution().save("p.gf");
     mesh.save("p.mesh");
@@ -358,7 +356,7 @@ int main(int, char**)
            + Integral(s, t)
            + Integral((u.getSolution().T() * aniso * p.getSolution()).coeff(0, 0), t)
            + tgv * Integral(s, t).over(Support, Unsupported);
-      topo.solve(cg);
+      Solver::CG(topo).solve();
 
       s.getSolution().save("Topo.gf");
       dsfes.getMesh().save("Topo.mesh");
@@ -413,7 +411,7 @@ int main(int, char**)
               // + ellP * FaceIntegral(Div(conormal).traceOf(Support) * conormal, w).over(dSupport)
               // + tgv * Integral(theta, w).over(Unsupported)
               ;
-      hilbert.solve(cg);
+      Solver::CG(hilbert).solve();
 
       GridFunction norm(dsfes);
       norm = Frobenius(theta.getSolution());

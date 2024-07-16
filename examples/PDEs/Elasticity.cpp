@@ -44,9 +44,7 @@ int main(int argc, char** argv)
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 
-  // Solver object
-  Solver::CG solver;
-  elasticity.solve(solver);
+  Solver::CG(elasticity).solve();
 
   // Save solution
   u.getSolution().save("Elasticity.gf");

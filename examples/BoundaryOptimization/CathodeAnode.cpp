@@ -172,8 +172,6 @@ int main(int, char**)
     // dOmega.save("out/Anode." + std::to_string(i) + ".mesh");
     // distAnode.save("out/Anode." + std::to_string(i) + ".gf");
 
-    Solver::CG cg;
-
     // Parameters
     RealFunction uIn = 1.0;
     RealFunction gamma = 1.0;
@@ -201,7 +199,7 @@ int main(int, char**)
           - BoundaryIntegral(heAnode * uIn, v)
           ;
     Alert::Info() << "Solving state equation..." << Alert::Raise;
-    state.solve(cg);
+    Solver::CG(state).solve();
     u.getSolution().save("U.gf");
     mesh.save("Omega.mfem.mesh");
 
@@ -212,7 +210,7 @@ int main(int, char**)
               + Integral(gtr, gte)
               - Integral(0.5 * Grad(u.getSolution()) / mesh.getVolume(), gte)
               ;
-    potential.solve(cg);
+    Solver::CG(potential).solve();
 
     Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
     TrialFunction p(sfes);
@@ -221,7 +219,7 @@ int main(int, char**)
     adjoint = Integral(gamma * Grad(p), Grad(q))
             + BoundaryIntegral((heAnode + heCathode) * p, q)
             - Integral(gtr.getSolution(), Grad(q));
-    adjoint.solve(cg);
+    Solver::CG(adjoint).solve();
     p.getSolution().save("P.gf");
 
     GridFunction sC(sfes);
@@ -273,7 +271,7 @@ int main(int, char**)
             + lambdaCathode * FaceIntegral(
                 Div(conormalCathode).traceOf(Cathode) * conormalCathode, w).over(dCathode)
             + tgv * Integral(theta, w).over(Inlet, FixedAnode, FixedCathode);
-    hilbert.solve(cg);
+    Solver::CG(hilbert).solve();
 
     GridFunction norm(dsfes);
     norm = Frobenius(theta.getSolution());
@@ -306,7 +304,7 @@ int main(int, char**)
              + Integral((u.getSolution()) * p.getSolution(), t)
              + tgv * Integral(s, t).over(Inlet, Cathode, Anode, FixedAnode, FixedCathode);
       }
-      topo.solve(cg);
+      Solver::CG(topo).solve();
 
       s.getSolution().save("Topo.sol", IO::FileFormat::MEDIT);
       dsfes.getMesh().save("Topo.mesh", IO::FileFormat::MEDIT);

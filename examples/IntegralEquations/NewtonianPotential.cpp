@@ -54,8 +54,7 @@ int main(int, char**)
   file.close();
 
   std::cout << "resolution\n";
-  Solver::LDLT solver;
-  eq.solve(solver);
+  Solver::LDLT(eq).solve();
 
   u.getSolution().save("u.gf");
   mesh.save("u.mesh");

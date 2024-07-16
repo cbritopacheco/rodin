@@ -18,12 +18,6 @@
 namespace Rodin::Solver
 {
   /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for SparseQR
-   */
-  SparseQR() -> SparseQR<Math::SparseMatrix<Real>, Math::Vector<Real>>;
-
-  /**
    * @defgroup SparseQRSpecializations SparseQR Template Specializations
    * @brief Template specializations of the SparseQR class.
    * @see SparseQR
@@ -32,26 +26,35 @@ namespace Rodin::Solver
   /**
    * @ingroup SparseQRSpecializations
    * @brief Sparse left-looking QR factorization with numerical column pivoting
-   * for use with Math::SparseMatrix<Real> and
-   * Math::Vector<Real>.
+   * for use with Math::SparseMatrix and Math::Vector.
    */
-  template <>
-  class SparseQR<Math::SparseMatrix<Real>, Math::Vector<Real>> final
-    : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
+  template <class Scalar>
+  class SparseQR<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
-      /// Type of linear operator
-      using OperatorType = Math::SparseMatrix<Real>;
+      using ScalarType = Scalar;
 
-      /// Type of vector
-      using VectorType = Math::Vector<Real>;
+      using VectorType = Math::Vector<ScalarType>;
 
-      /**
-       * @brief Constructs the SparseQR object with default parameters.
-       */
-      SparseQR() = default;
+      using OperatorType = Math::SparseMatrix<ScalarType>;
+
+      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent::solve;
+
+      SparseQR(ProblemType& pb)
+        : Parent(pb)
+      {}
 
       SparseQR(const SparseQR& other)
+        : Parent(other)
+      {}
+
+      SparseQR(SparseQR&& other)
+        : Parent(std::move(other))
       {}
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
@@ -67,9 +70,16 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::SparseQR<Math::SparseMatrix<Real>, Eigen::COLAMDOrdering<int>> m_solver;
+      Eigen::SparseQR<OperatorType, Eigen::COLAMDOrdering<int>> m_solver;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for SparseQR
+   */
+  template <class Scalar>
+  SparseQR(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> SparseQR<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif
