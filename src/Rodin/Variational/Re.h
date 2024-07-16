@@ -37,14 +37,13 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      inline
       constexpr
       Real getValue(const Geometry::Point& p) const
       {
         return getOperand().getValue(p).real();
       }
 
-      inline Re* copy() const noexcept override
+      Re* copy() const noexcept override
       {
         return new Re(*this);
       }

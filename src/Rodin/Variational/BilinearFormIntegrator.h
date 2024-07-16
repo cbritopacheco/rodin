@@ -35,27 +35,18 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief Deleted constructor.
+       * @brief Copy constructor.
        */
-      template <class TrialFES, class TestFES>
-      BilinearFormIntegratorBase(TrialFunction<TrialFES>&& u, const TestFunction<TestFES>& v) = delete;
-
-      /**
-       * @brief Deleted constructor.
-       */
-      template <class TrialFES, class TestFES>
-      BilinearFormIntegratorBase(const TrialFunction<TrialFES>& u, TestFunction<TestFES>&& v) = delete;
-
-      /**
-       * @brief Deleted constructor.
-       */
-      template <class TrialFES, class TestFES>
-      BilinearFormIntegratorBase(TrialFunction<TrialFES>&& u, TestFunction<TestFES>&& v) = delete;
+      BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
+        : Parent(other),
+          m_u(other.m_u->copy()), m_v(other.m_v->copy())
+      {}
 
       /**
        * @brief Copy constructor.
        */
-      BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
+      template <class OtherNumber, class OtherDerived>
+      BilinearFormIntegratorBase(const BilinearFormIntegratorBase<OtherNumber, OtherDerived>& other)
         : Parent(other),
           m_u(other.m_u->copy()), m_v(other.m_v->copy())
       {}
@@ -68,10 +59,18 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v))
       {}
 
+      /**
+       * @brief Move constructor.
+       */
+      template <class OtherNumber, class OtherDerived>
+      BilinearFormIntegratorBase(BilinearFormIntegratorBase<OtherNumber, OtherDerived>&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)), m_v(std::move(other.m_v))
+      {}
+
       virtual
       ~BilinearFormIntegratorBase() = default;
 
-      inline
       Integrator::Type getType() const final override
       {
         return Integrator::Type::Bilinear;
@@ -80,7 +79,6 @@ namespace Rodin::Variational
       /**
        * @brief Gets a constant reference to trial function object.
        */
-      inline
       const FormLanguage::Base& getTrialFunction() const
       {
         assert(m_u);
@@ -90,7 +88,6 @@ namespace Rodin::Variational
       /**
        * @brief Gets a constant reference to test function object.
        */
-      inline
       const FormLanguage::Base& getTestFunction() const
       {
         assert(m_v);
@@ -119,7 +116,8 @@ namespace Rodin::Variational
       /**
        * @brief Copy constructor.
        */
-      LocalBilinearFormIntegratorBase(const LocalBilinearFormIntegratorBase& other)
+      template <class OtherNumber>
+      LocalBilinearFormIntegratorBase(const LocalBilinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
           m_attrs(other.m_attrs)
       {}
@@ -127,7 +125,8 @@ namespace Rodin::Variational
       /**
        * @brief Move constructor.
        */
-      LocalBilinearFormIntegratorBase(LocalBilinearFormIntegratorBase&& other)
+      template <class OtherNumber>
+      LocalBilinearFormIntegratorBase(LocalBilinearFormIntegratorBase<OtherNumber>&& other)
         : Parent(std::move(other)),
           m_attrs(std::move(other.m_attrs))
       {}
@@ -135,7 +134,6 @@ namespace Rodin::Variational
       /**
        * @brief Gets the attributes of the elements being integrated.
        */
-      inline
       const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_attrs;
@@ -148,14 +146,12 @@ namespace Rodin::Variational
        * Specifies the material reference over which the integration should
        * take place.
        */
-      inline
       LocalBilinearFormIntegratorBase& over(Geometry::Attribute attr)
       {
         return over(FlatSet<Geometry::Attribute>{attr});
       }
 
       template <class A1, class A2, class ... As>
-      inline
       LocalBilinearFormIntegratorBase& over(A1 a1, A2 a2, As... attrs)
       {
         return over(FlatSet<Geometry::Attribute>{a1, a2, attrs...});
@@ -168,7 +164,6 @@ namespace Rodin::Variational
        * Specifies the material references over which the integration should
        * take place.
        */
-      inline
       LocalBilinearFormIntegratorBase& over(const FlatSet<Geometry::Attribute>& attrs)
       {
         assert(attrs.size() > 0);
@@ -205,7 +200,6 @@ namespace Rodin::Variational
       /**
        * @brief Gets the attributes of the elements being integrated.
        */
-      inline
       const FlatSet<Geometry::Attribute>& getTrialAttributes() const
       {
         return m_trialAttrs;
@@ -214,7 +208,6 @@ namespace Rodin::Variational
       /**
        * @brief Gets the attributes of the elements being integrated.
        */
-      inline
       const FlatSet<Geometry::Attribute>& getTestAttributes() const
       {
         return m_testAttrs;
@@ -227,7 +220,6 @@ namespace Rodin::Variational
        * Specifies the material reference over which the integration should
        * take place.
        */
-      inline
       GlobalBilinearFormIntegratorBase& setTrialAttributes(
           const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -242,7 +234,6 @@ namespace Rodin::Variational
        * Specifies the material reference over which the integration should
        * take place.
        */
-      inline
       GlobalBilinearFormIntegratorBase& setTestAttributes(
           const FlatSet<Geometry::Attribute>& attrs)
       {

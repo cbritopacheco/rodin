@@ -20,27 +20,23 @@ namespace Rodin::QF
         : Parent(g)
       {}
 
-      inline
       size_t getSize() const override
       {
         return 1;
       }
 
-      inline
       const Math::SpatialVector<Real>& getPoint(size_t i) const override
       {
         assert(i == 0);
         return s_points[getGeometry()];
       }
 
-      inline
       Real getWeight(size_t i) const override
       {
         assert(i == 0);
         return s_weights[getGeometry()];
       }
 
-      inline
       QF1P1* copy() const noexcept override
       {
         return new QF1P1(*this);

@@ -12,6 +12,7 @@
 
 using namespace Rodin;
 using namespace Rodin::Math;
+using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
@@ -35,8 +36,6 @@ static constexpr Real gamma_ek = 1e+12;
 
 static constexpr Real R0 = 0.2; // Radius of B_R(x_0)
 static constexpr Real R1 = R0 + 10 * hmax; // Radius of B_R(x_0)
-
-static Solver::SparseLU solver;
 
 int main(int, char**)
 {
@@ -98,7 +97,7 @@ int main(int, char**)
 
   // Solve the background problem
   Alert::Info() << "Solving background equation." << Alert::Raise;
-  poisson.solve(solver);
+  SparseLU(poisson).solve();
   const auto u0 = u.getSolution();
 
   u0.save("Background.gf");
@@ -111,7 +110,7 @@ int main(int, char**)
   // Solve the perturbed problem
   Alert::Info() << "Solving perturbed equation." << Alert::Raise;
 
-  perturbed.solve(solver);
+  SparseLU(perturbed).solve();
   const auto u_e = u.getSolution();
   GridFunction g_e(gh);
   u_e.save("Perturbed.gf");

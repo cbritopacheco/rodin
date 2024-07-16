@@ -20,12 +20,6 @@
 namespace Rodin::Solver
 {
   /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for LeastSquaresCG
-   */
-  LeastSquaresCG() -> LeastSquaresCG<Math::SparseMatrix<Real>, Math::Vector<Real>>;
-
-  /**
    * @defgroup LeastSquaresCGSpecializations LeastSquaresCG Template Specializations
    * @brief Template specializations of the LeastSquaresCG class.
    * @see LeastSquaresCG
@@ -34,25 +28,35 @@ namespace Rodin::Solver
   /**
    * @ingroup LeastSquaresCGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * Math::SparseMatrix<Real> and Math::Vector<Real>.
+   * Math::SparseMatrix and Math::Vector.
    */
-  template <>
-  class LeastSquaresCG<Math::SparseMatrix<Real>, Math::Vector<Real>> final
-    : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
+  template <class Scalar>
+  class LeastSquaresCG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
-      /// Type of linear operator
-      using OperatorType = Math::SparseMatrix<Real>;
+      using ScalarType = Scalar;
 
-      /// Type of vector
-      using VectorType = Math::Vector<Real>;
+      using VectorType = Math::Vector<ScalarType>;
 
-      /**
-       * @brief Constructs the LeastSquaresCG object with default parameters.
-       */
-      LeastSquaresCG() = default;
+      using OperatorType = Math::SparseMatrix<ScalarType>;
+
+      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent::solve;
+
+      LeastSquaresCG(ProblemType& pb)
+        : Parent(pb)
+      {}
 
       LeastSquaresCG(const LeastSquaresCG& other)
+        : Parent(other)
+      {}
+
+      LeastSquaresCG(LeastSquaresCG&& other)
+        : Parent(std::move(other))
       {}
 
       ~LeastSquaresCG() = default;
@@ -81,8 +85,12 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::LeastSquaresConjugateGradient<Math::SparseMatrix<Real>> m_solver;
+      Eigen::LeastSquaresConjugateGradient<OperatorType> m_solver;
   };
+
+  template <class Scalar>
+  LeastSquaresCG(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> LeastSquaresCG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 
   /**
    * @defgroup LeastSquaresCGSpecializations LeastSquaresCG Template Specializations
@@ -95,23 +103,35 @@ namespace Rodin::Solver
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
    * Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
-  template <>
-  class LeastSquaresCG<Math::Matrix<Real>, Math::Vector<Real>> final
-    : public SolverBase<Math::Matrix<Real>, Math::Vector<Real>>
+  template <class Scalar>
+  class LeastSquaresCG<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
+    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
-      /// Type of linear operator
-      using OperatorType = Math::Matrix<Real>;
+      using ScalarType = Scalar;
 
       /// Type of vector
-      using VectorType = Math::Vector<Real>;
+      using VectorType = Math::Vector<Scalar>;
 
-      /**
-       * @brief Constructs the LeastSquaresCG object with default parameters.
-       */
-      LeastSquaresCG() = default;
+      /// Type of linear operator
+      using OperatorType = Math::Matrix<Scalar>;
+
+      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+
+      using Parent::solve;
+
+      LeastSquaresCG(ProblemType& pb)
+        : Parent(pb)
+      {}
 
       LeastSquaresCG(const LeastSquaresCG& other)
+        : Parent(other)
+      {}
+
+      LeastSquaresCG(LeastSquaresCG&& other)
+        : Parent(std::move(other))
       {}
 
       ~LeastSquaresCG() = default;
@@ -141,8 +161,12 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::LeastSquaresConjugateGradient<Math::Matrix<Real>> m_solver;
+      Eigen::LeastSquaresConjugateGradient<OperatorType> m_solver;
   };
+
+  template <class Scalar>
+  LeastSquaresCG(Variational::ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> LeastSquaresCG<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

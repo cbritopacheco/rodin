@@ -27,8 +27,6 @@ static const Math::Vector<Real> x0{{0.5, 0.5}}; // Center of domain
 static constexpr Real pi = Math::Constants::pi();
 static constexpr Real gamma_ek = 1.93559;
 
-static Solver::SparseLU solver;
-
 struct Data
 {
   Real m;
@@ -140,7 +138,7 @@ int main(int, char**)
 
       // Solve the background problem
       Alert::Info() << "Solving background equation." << Alert::Raise;
-      poisson.assemble().solve(solver);
+      Solver::SparseLU(poisson).solve();
       const auto u0 = u.getSolution();
 
       // u0.save("Background.gf");
@@ -153,7 +151,7 @@ int main(int, char**)
       // Solve the perturbed problem
       Alert::Info() << "Solving perturbed equation." << Alert::Raise;
 
-      perturbed.assemble().solve(solver);
+      Solver::SparseLU(perturbed).solve();
       const auto u_e = u.getSolution();
       // GridFunction g_e(gh);
       // // u_e.save("Perturbed.gf");

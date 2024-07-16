@@ -160,8 +160,6 @@ int main(int, char**)
     dist.save("Dist.gf");
     dist.getFiniteElementSpace().getMesh().save("Dist.mesh");
 
-    Solver::CG cg;
-
     // Parameters
     VectorFunction xi = { 0, 0, 1 };
     RealFunction phi =
@@ -197,7 +195,7 @@ int main(int, char**)
                 - Integral(waveNumber * waveNumber * gamma * u0, v0)
                 + DirichletBC(u0, phi).on(PlaneWave, Dirichlet);
                 //+ DirichletBC(u0, Zero()).on(Dirichlet);
-    unperturbed.solve(cg);
+    Solver::CG(unperturbed).solve();
 
     u0.getSolution().save("U0.gf");
     u0.getSolution().getFiniteElementSpace().getMesh().save("U0.mesh");
@@ -211,7 +209,7 @@ int main(int, char**)
           + FaceIntegral(he * u, v).over({ Absorbing, Reflecting, Window })
           + DirichletBC(u, phi).on(PlaneWave, Dirichlet);
           //+ DirichletBC(u, Zero()).on(Dirichlet);
-    state.solve(cg);
+    Solver::CG(state).solve();
 
     u.getSolution().save("State.gf");
     u.getSolution().getFiniteElementSpace().getMesh().save("State.mesh");
@@ -232,7 +230,7 @@ int main(int, char**)
             + FaceIntegral(he * p, q).over({ Absorbing, Reflecting, Window })
             + DirichletBC(u, Zero()).on({ Dirichlet, PlaneWave });
             ;
-    adjoint.solve(cg);
+    Solver::CG(adjoint).solve();
 
     p.getSolution().save("Adjoint.gf");
     p.getSolution().getFiniteElementSpace().getMesh().save("Adjoint.mesh");
@@ -272,7 +270,7 @@ int main(int, char**)
            + Integral(s, t)
            + Integral(u.getSolution() * p.getSolution(), t)
            + tgv * Integral(s, t).over(Absorbing, Window, Dirichlet, PlaneWave);
-      topo.solve(cg);
+      Solver::CG(topo).solve();
 
       s.getSolution().save("Topo.gf");
       dsfes.getMesh().save("Topo.mesh");
@@ -335,7 +333,7 @@ int main(int, char**)
               + 0.5 * 2 * bA * constraint * FaceIntegral(conormal, w).over(dAbsorbing)
               + tgv * Integral(theta, w).over(Dirichlet, PlaneWave, Window)
               ;
-      hilbert.solve(cg);
+      Solver::CG(hilbert).solve();
 
       GridFunction norm(dsfes);
       norm = Frobenius(theta.getSolution());

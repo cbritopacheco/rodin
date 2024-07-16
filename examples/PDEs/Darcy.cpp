@@ -12,6 +12,7 @@
 #include <Rodin/Assembly/Sequential.h>
 
 using namespace Rodin;
+using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
@@ -34,8 +35,6 @@ int main(int argc, char** argv)
   TrialFunction p(ph);
   TestFunction  q(ph);
 
-  Solver::CG cg;
-
   RealFunction f = [](const Geometry::Point& p) { return -exp(p.x()) * sin(p.y()); };
 
   auto n = BoundaryNormal(mesh);
@@ -45,7 +44,7 @@ int main(int argc, char** argv)
         - Integral(p, Div(v))
         - Integral(Div(u), q)
         - BoundaryIntegral(f, Dot(n, v));
-  darcy.solve(cg);
+  CG(darcy).solve();
 
   u.getSolution().save("u.gf");
   mesh.save("u.mesh");

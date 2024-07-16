@@ -82,8 +82,6 @@ void run(int id, const std::vector<Data>& grid)
   mesh.load("Q1.medit.mesh", IO::FileFormat::MEDIT);
   mesh.save("out/Q.mesh");
 
-  Solver::SparseLU solver;
-
   Alert::Info() << "Grid size: " << grid.size() << Alert::Raise;
 
   size_t i = 0;
@@ -155,12 +153,12 @@ void run(int id, const std::vector<Data>& grid)
 
     // Solve the background problem
     Alert::Info() << "Solving background equation." << Alert::Raise;
-    helmholtz.solve(solver);
+    Solver::SparseLU(helmholtz).solve();
     const auto u0 = std::move(u.getSolution());
     Alert::Success() << "Done." << Alert::Raise;
 
     Alert::Info() << "Solving perturbed equation." << Alert::Raise;
-    perturbed.solve(solver);
+    Solver::SparseLU(perturbed).solve();
     const auto ue = std::move(u.getSolution());
     Alert::Success() << "Done." << Alert::Raise;
 

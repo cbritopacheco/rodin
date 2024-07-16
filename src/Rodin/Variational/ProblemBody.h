@@ -46,6 +46,10 @@ namespace Rodin::Variational
 
       using GlobalBilinearFormIntegratorBaseListType = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
+      using EssentialBoundaryType = EssentialBoundary<ScalarType>;
+
+      using PeriodicBoundaryType = PeriodicBoundary<ScalarType>;
+
       using Parent = FormLanguage::Base;
 
       ProblemBodyBase() = default;
@@ -78,12 +82,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      PeriodicBoundary& getPBCs()
+      PeriodicBoundaryType& getPBCs()
       {
         return m_periodicBdr;
       }
 
-      EssentialBoundary& getDBCs()
+      EssentialBoundaryType& getDBCs()
       {
         return m_essBdr;
       }
@@ -103,12 +107,12 @@ namespace Rodin::Variational
         return m_lfis;
       }
 
-      const PeriodicBoundary& getPBCs() const
+      const PeriodicBoundaryType& getPBCs() const
       {
         return m_periodicBdr;
       }
 
-      const EssentialBoundary& getDBCs() const
+      const EssentialBoundaryType& getDBCs() const
       {
         return m_essBdr;
       }
@@ -138,8 +142,8 @@ namespace Rodin::Variational
       LocalBilinearFormIntegratorBaseListType m_lbfis;
       GlobalBilinearFormIntegratorBaseListType m_gbfis;
 
-      EssentialBoundary m_essBdr;
-      PeriodicBoundary  m_periodicBdr;
+      EssentialBoundaryType m_essBdr;
+      PeriodicBoundaryType  m_periodicBdr;
   };
 
   template <class Scalar>
@@ -510,11 +514,10 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class LHSScalar>
+  template <class LHSScalar, class RHSScalar>
   auto
-  operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const DirichletBCBase& dbc)
+  operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const DirichletBCBase<RHSScalar>& dbc)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
@@ -522,11 +525,10 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class LHSScalar>
+  template <class LHSScalar, class RHSScalar>
   auto
-  operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const FormLanguage::List<DirichletBCBase>& dbcs)
+  operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const FormLanguage::List<DirichletBCBase<RHSScalar>>& dbcs)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
@@ -534,11 +536,10 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class LHSScalar>
+  template <class LHSScalar, class RHSScalar>
   auto operator+(
-      const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const PeriodicBCBase& pbc)
+      const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const PeriodicBCBase<RHSScalar>& pbc)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
@@ -546,11 +547,10 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class LHSScalar>
+  template <class LHSScalar, class RHSScalar>
   auto
-  operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const FormLanguage::List<PeriodicBCBase>& pbcs)
+  operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const FormLanguage::List<PeriodicBCBase<RHSScalar>>& pbcs)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
@@ -558,11 +558,10 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class LHSScalar>
+  template <class LHSScalar, class RHSScalar>
   auto operator+(
-    const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis, const DirichletBCBase& dbc)
+    const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis, const DirichletBCBase<RHSScalar>& dbc)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfis);
@@ -570,13 +569,12 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class LHSScalar>
+  template <class LHSScalar, class RHSScalar>
   auto
   operator+(
     const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis,
-    const FormLanguage::List<DirichletBCBase>& dbcs)
+    const FormLanguage::List<DirichletBCBase<RHSScalar>>& dbcs)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfis);
@@ -584,12 +582,11 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class LHSScalar>
+  template <class LHSScalar, class RHSScalar>
   auto operator+(
       const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis,
-      const FormLanguage::List<PeriodicBCBase>& pbcs)
+      const FormLanguage::List<PeriodicBCBase<RHSScalar>>& pbcs)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<void, void, ScalarType> res;
     res.getLocalBFIs().add(bfis);
@@ -678,37 +675,34 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class OperatorType, class VectorType, class LHSScalar>
+  template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator+(
-      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb, const DirichletBCBase& dbc)
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb, const DirichletBCBase<RHSScalar>& dbc)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getDBCs().add(dbc);
     return res;
   }
 
-  template <class OperatorType, class VectorType, class LHSScalar>
+  template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator+(
-      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb, const FormLanguage::List<DirichletBCBase>& dbcs)
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb, const FormLanguage::List<DirichletBCBase<RHSScalar>>& dbcs)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getEssentialBoundary().add(dbcs);
     return res;
   }
 
-  template <class OperatorType, class VectorType, class LHSScalar>
+  template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator+(
       const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
-      const PeriodicBCBase& pbc)
+      const PeriodicBCBase<RHSScalar>& pbc)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getPBCs().add(pbc);
@@ -728,13 +722,12 @@ namespace Rodin::Variational
     return res;
   }
 
-  template <class OperatorType, class VectorType, class LHSScalar>
+  template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator+(
       const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
-      const FormLanguage::List<PeriodicBCBase>& pbcs)
+      const FormLanguage::List<PeriodicBCBase<RHSScalar>>& pbcs)
   {
-    using RHSScalar = Real;
     using ScalarType = RHSScalar;
     ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getPBCs().add(pbcs);

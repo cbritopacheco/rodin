@@ -146,7 +146,6 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       Dot& traceOf(Geometry::Attribute attrs)
       {
@@ -155,7 +154,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       const LHSType& getLHS() const
       {
@@ -163,7 +161,6 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
-      inline
       constexpr
       const RHSType& getRHS() const
       {
@@ -171,32 +168,16 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         assert(getLHS().getRangeShape() == getRHS().getRangeShape());
         const auto& lhs = this->object(getLHS().getValue(p));
         const auto& rhs = this->object(getRHS().getValue(p));
-        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
-        {
-          return lhs * rhs;
-        } else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
-        {
-          return lhs.dot(rhs);
-        }
-        else if constexpr (std::is_same_v<RHSRangeType, Math::Matrix<ScalarType>>)
-        {
-          return (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
-        }
-        else
-        {
-          assert(false);
-          return void();
-        }
+        return Math::dot(lhs, rhs);
       }
 
-      inline Dot* copy() const noexcept override
+      Dot* copy() const noexcept override
       {
         return new Dot(*this);
       }
@@ -269,7 +250,6 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       const LHSType& getLHS() const
       {
@@ -277,7 +257,6 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
-      inline
       constexpr
       const RHSType& getRHS() const
       {
@@ -285,21 +264,18 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return { 1, 1 };
       }
 
-      inline
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
@@ -310,7 +286,6 @@ namespace Rodin::Variational
         return getRHS().getFiniteElementSpace();
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return getRHS().getPoint();
@@ -322,7 +297,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
@@ -330,26 +304,9 @@ namespace Rodin::Variational
         const auto& p = getRHS().getPoint();
         const auto& lhs = this->object(getLHS().getValue(p));
         const auto& rhs = this->object(getRHS().getBasis(local));
-        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
-        {
-          return lhs * rhs;
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
-        {
-          return lhs.dot(rhs);
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
-        {
-          return (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
-        }
-        else
-        {
-          assert(false);
-          return void();
-        }
+        return Math::dot(lhs, rhs);
       }
 
-      inline
       Dot* copy() const noexcept final override
       {
         return new Dot(*this);
@@ -419,7 +376,6 @@ namespace Rodin::Variational
           m_trial(std::move(other.m_trial)), m_test(std::move(other.m_test))
       {}
 
-      inline
       constexpr
       const LHSType& getLHS() const
       {
@@ -427,7 +383,6 @@ namespace Rodin::Variational
         return *m_trial;
       }
 
-      inline
       constexpr
       const RHSType& getRHS() const
       {
@@ -447,38 +402,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /**
-       * @brief Gets the element matrix at a point.
-       *
-       * Computes the @f$ m \times n @f$ element matrix @f$ M @f$ defined by:
-       * @f[
-       *    M = V U^T
-       * @f]
-       * where @f$ n @f$ is the number of trial degrees of freedom, and @f$ m
-       * @f$ is the number of test degrees of freedom.
-       */
       ScalarType operator()(size_t tr, size_t te)
       {
-        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
-        {
-          return getRHS().getBasis(te) * getLHS().getBasis(tr);
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
-        {
-          return getRHS().getBasis(te).dot(getLHS().getBasis(tr));
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
-        {
-          return (getRHS().getBasis(te).array() * getLHS().getBasis(tr).array()).rowwise().sum().colwise().sum().value();
-        }
-        else
-        {
-          assert(false);
-          return NAN;
-        }
+        return Math::dot(getLHS().getBasis(tr), getRHS().getBasis(te));
       }
 
-      inline Dot* copy() const noexcept final override
+      Dot* copy() const noexcept final override
       {
         return new Dot(*this);
       }
@@ -525,7 +454,6 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       const LHSType& getLHS() const
       {
@@ -533,7 +461,6 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
-      inline
       constexpr
       const RHSType& getRHS() const
       {
@@ -541,7 +468,6 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      inline
       Dot* copy() const noexcept final override
       {
         return new Dot(*this);

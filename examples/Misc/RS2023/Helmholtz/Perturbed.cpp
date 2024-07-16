@@ -34,8 +34,6 @@ static constexpr Real gamma_ek = 2;
 static constexpr Real R0 = 0.2; // Radius of B_R(x_0)
 static constexpr Real R1 = R0 + 10 * hmax; // Radius of B_R(x_0)
 
-static Solver::SparseLU solver;
-
 int main(int, char**)
 {
   Alert::Info() << "Epsilon: " << epsilon
@@ -113,7 +111,7 @@ int main(int, char**)
 
   // Solve the background problem
   Alert::Info() << "Solving background equation." << Alert::Raise;
-  helmholtz.solve(solver);
+  Solver::SparseLU(helmholtz).solve();
   const auto u0 = u.getSolution();
 
   u0.save("Background.gf");
@@ -126,7 +124,7 @@ int main(int, char**)
   // Solve the perturbed problem
   Alert::Info() << "Solving perturbed equation." << Alert::Raise;
 
-  perturbed.solve(solver);
+  Solver::SparseLU(perturbed).solve();
   const auto u_e = u.getSolution();
   GridFunction g_e(gh);
   u_e.save("Perturbed.gf");

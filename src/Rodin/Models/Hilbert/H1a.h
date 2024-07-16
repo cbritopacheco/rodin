@@ -30,6 +30,7 @@ namespace Rodin::Models::Hilbert
   template <class FES>
   class H1a
   {
+    using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
     using FESRange = typename FormLanguage::Traits<FES>::RangeType;
     static_assert(std::is_same_v<FESRange, Real> || std::is_same_v<FESRange, Math::Vector<Real>>);
 
@@ -81,7 +82,7 @@ namespace Rodin::Models::Hilbert
       }
 
       inline
-      H1a& operator+=(const Variational::DirichletBCBase& dbc)
+      H1a& operator+=(const Variational::DirichletBCBase<ScalarType>& dbc)
       {
         m_pb += dbc;
         return *this;

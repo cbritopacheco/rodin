@@ -22,7 +22,7 @@ namespace Rodin::Solver
    * has type @f$ \text{VectorType} @f$, and the right hand side @f$ b @f$ has
    * type @f$ \text{VectorType} @f$.
    */
-  template <class OperatorType, class VectorType>
+  template <class OperatorType, class VectorType, class Scalar>
   class SolverBase;
 
   /**

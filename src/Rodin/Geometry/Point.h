@@ -103,25 +103,11 @@ namespace Rodin::Geometry
        * @brief Gets the i-th physical coordinate.
        * @returns Physical i-th coordinate.
        */
-      inline
-      Real operator()(size_t i, Coordinates coords = Coordinates::Physical) const
+      Real operator()(size_t i) const
       {
-        switch (coords)
-        {
-          case Coordinates::Physical:
-          {
-            return getPhysicalCoordinates()(i);
-          }
-          case Coordinates::Reference:
-          {
-            return getReferenceCoordinates()(i);
-          }
-        }
-        assert(false);
-        return NAN;
+        return getPhysicalCoordinates()(i);
       }
 
-      inline
       const auto& asVector() const
       {
         return getPhysicalCoordinates();
@@ -131,58 +117,50 @@ namespace Rodin::Geometry
        * @brief Gets the @f$ x @f$ coordinate.
        * @returns @f$ x @f$ coordinate of the point.
        */
-      inline
-      Real x(Coordinates coords = Coordinates::Physical) const
+      Real x() const
       {
-        return operator()(0, coords);
+        return operator()(0);
       }
 
       /**
        * @brief Gets the @f$ y @f$ coordinate.
        * @returns @f$ y @f$ coordinate of the point.
        */
-      inline
-      Real y(Coordinates coords = Coordinates::Physical) const
+      Real y() const
       {
-        return operator()(1, coords);
+        return operator()(1);
       }
 
       /**
        * @brief Gets the @f$ z @f$ coordinate.
        * @returns @f$ z @f$ coordinate of the point.
        */
-      inline
-      Real z(Coordinates coords = Coordinates::Physical) const
+      Real z() const
       {
-        return operator()(2, coords);
+        return operator()(2);
       }
 
-      inline
       Real norm() const
       {
         return asVector().norm();
       }
 
-      inline
       Real stableNorm() const
       {
         return asVector().stableNorm();
       }
 
-      inline
       Real blueNorm() const
       {
         return asVector().blueNorm();
       }
 
       template <size_t p>
-      inline
       Real lpNorm() const
       {
         return asVector().lpNorm<p>();
       }
 
-      inline
       Real squaredNorm() const
       {
         return asVector().squaredNorm();
@@ -195,7 +173,6 @@ namespace Rodin::Geometry
 
       const Polytope& getPolytope() const;
 
-      inline
       const PolytopeTransformation& getTransformation() const
       {
         return m_trans.get();
@@ -340,38 +317,34 @@ namespace Rodin::Geometry
       std::variant<const Math::SpatialVector<Real>, std::reference_wrapper<const Math::SpatialVector<Real>>> m_rc;
   };
 
-  inline
-  std::ostream& operator<<(std::ostream& os, Polytope::Type g)
+  std::ostream& operator<<(std::ostream& os, Polytope::Type g);
+
+  template <class EigenDerived>
+  auto
+  operator+(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
   {
-    switch (g)
-    {
-      case Polytope::Type::Point:
-      {
-        os << "Point";
-        break;
-      }
-      case Polytope::Type::Segment:
-      {
-        os << "Segment";
-        break;
-      }
-      case Polytope::Type::Triangle:
-      {
-        os << "Triangle";
-        break;
-      }
-      case Polytope::Type::Quadrilateral:
-      {
-        os << "Quadrilateral";
-        break;
-      }
-      case Polytope::Type::Tetrahedron:
-      {
-        os << "Tetrahedron";
-        break;
-      }
-    }
-    return os;
+    return p.asVector() + q;
+  }
+
+  template <class EigenDerived>
+  auto
+  operator+(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
+  {
+    return p + q.asVector();
+  }
+
+  template <class EigenDerived>
+  auto
+  operator-(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
+  {
+    return p.asVector() - q;
+  }
+
+  template <class EigenDerived>
+  auto
+  operator-(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
+  {
+    return p - q.asVector();
   }
 
   inline
@@ -386,38 +359,6 @@ namespace Rodin::Geometry
   operator-(const Geometry::Point& p, const Geometry::Point& q)
   {
     return p.asVector() - q.asVector();
-  }
-
-  template <class EigenDerived>
-  inline
-  auto
-  operator+(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
-  {
-    return p.asVector() + q;
-  }
-
-  template <class EigenDerived>
-  inline
-  auto
-  operator+(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
-  {
-    return p + q.asVector();
-  }
-
-  template <class EigenDerived>
-  inline
-  auto
-  operator-(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
-  {
-    return p.asVector() - q;
-  }
-
-  template <class EigenDerived>
-  inline
-  auto
-  operator-(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
-  {
-    return p - q.asVector();
   }
 
   inline
