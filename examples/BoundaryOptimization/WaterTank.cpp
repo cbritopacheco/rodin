@@ -178,7 +178,7 @@ int main(int, char**)
       return (p - c).norm() - 0.5 * alpha * (hmax + hmin);
     };
 
-    // dist *= -1.0;
+    dist *= -1.0;
 
     mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                       .split(Gamma, { Support, Gamma })
@@ -191,6 +191,7 @@ int main(int, char**)
                                       .discretize(dist);
   }
 
+  mesh.save("Omega0.mfem.mesh", IO::FileFormat::MFEM);
   mesh.save("Omega0.mesh", IO::FileFormat::MEDIT);
 
   std::ofstream fObj("obj.txt");
@@ -201,7 +202,7 @@ int main(int, char**)
   Real constraint = 0, oldConstraint = 1e+5;
   while (i < maxIt)
   {
-    bool topologicalStep = (i < 20) || (i < 200  && i % 10 == 0);
+    bool topologicalStep = (i > 20) && (i < 200  && i % 10 == 0);
     bool geometricStep = !topologicalStep;
 
     hmin = hmax / 10.0;
@@ -262,6 +263,7 @@ int main(int, char**)
         });
 
     dOmega.save("dOmega.mesh", IO::FileFormat::MEDIT);
+    dOmega.save("dOmega.mfem.mesh");
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
     RealFES sfes(mesh);

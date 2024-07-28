@@ -64,6 +64,11 @@ int main(int, char**)
   std::cout << Eigen::nbThreads() << std::endl;
   MMG::Mesh mesh;
   mesh.load("../resources/mmg/PlaneBox.medit.mesh", IO::FileFormat::MEDIT);
+  mesh.getConnectivity().compute(2, 3);
+  auto miaow = mesh.trim(2);
+  auto miaow2 = miaow.skin();
+  miaow2.save("miaow.mesh");
+  std::exit(1);
 
   Real hmax = resolution * waveLength;
   Real hmin = hmax / 50.0;

@@ -457,12 +457,35 @@ namespace Rodin::Variational
               m_sb1.resize(fe.getCount());
               for (size_t i = 0; i < fe.getCount(); i++)
                 m_sb1[i] = fe.getBasis(i)(rc);
-              static_assert(std::is_same_v<RHSRangeType, ScalarType>);
               for (size_t i = 0; i < fe.getCount(); i++)
                   m_matrix(i, i) = Math::dot(csv * m_sb1[i], m_sb1[i]);
               for (size_t i = 0; i < fe.getCount(); i++)
                 for (size_t j = 0; j < i; j++)
                   m_matrix(i, j) = Math::dot(csv * m_sb1[j], m_sb1[i]);
+              m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
+            }
+            else if constexpr (std::is_same_v<MultiplicandRangeType, Math::Vector<ScalarType>>)
+            {
+              m_vb1.resize(fe.getCount());
+              for (size_t i = 0; i < fe.getCount(); i++)
+                fe.getBasis(i)(m_vb1[i], rc);
+              for (size_t i = 0; i < fe.getCount(); i++)
+                  m_matrix(i, i) = Math::dot(csv * m_vb1[i], m_vb1[i]);
+              for (size_t i = 0; i < fe.getCount(); i++)
+                for (size_t j = 0; j < i; j++)
+                  m_matrix(i, j) = Math::dot(csv * m_vb1[j], m_vb1[i]);
+              m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
+            }
+            else if constexpr (std::is_same_v<MultiplicandRangeType, Math::Matrix<ScalarType>>)
+            {
+              m_mb1.resize(fe.getCount());
+              for (size_t i = 0; i < fe.getCount(); i++)
+                fe.getBasis(i)(m_mb1[i], rc);
+              for (size_t i = 0; i < fe.getCount(); i++)
+                  m_matrix(i, i) = Math::dot(csv * m_mb1[i], m_mb1[i]);
+              for (size_t i = 0; i < fe.getCount(); i++)
+                for (size_t j = 0; j < i; j++)
+                  m_matrix(i, j) = Math::dot(csv * m_mb1[j], m_mb1[i]);
               m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
             }
             else
@@ -474,7 +497,6 @@ namespace Rodin::Variational
           {
             coeff.getValue(m_cmv, p);
             static_assert(std::is_same_v<MultiplicandRangeType, Math::Vector<ScalarType>>);
-            static_assert(std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>);
             m_vb1.resize(fe.getCount());
             for (size_t i = 0; i < fe.getCount(); i++)
               fe.getBasis(m_vb1[i], rc);

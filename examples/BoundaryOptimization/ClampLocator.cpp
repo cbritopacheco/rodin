@@ -52,7 +52,9 @@ int main(int, char**)
   std::cout << Eigen::nbThreads() << std::endl;
   MMG::Mesh mesh;
   // mesh.load("Omega0.o.mesh", IO::FileFormat::MEDIT);
-  mesh.load("Mechanical.mesh", IO::FileFormat::MEDIT);
+  mesh.load("Part1.o.mesh", IO::FileFormat::MEDIT);
+  mesh.save("Part1.o.mesh", IO::FileFormat::MEDIT);
+  std::exit(1);
   // mesh.load("MechanicalNoMat.mesh", IO::FileFormat::MEDIT);
 
   MMG::Mesh D1;
