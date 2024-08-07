@@ -197,6 +197,23 @@ namespace Rodin::Variational
 
       using Parent::Parent;
 
+      template <class OtherNumber>
+      GlobalBilinearFormIntegratorBase(const GlobalBilinearFormIntegratorBase<OtherNumber>& other)
+        : Parent(other),
+          m_trialAttrs(other.m_trialAttrs),
+          m_testAttrs(other.m_testAttrs)
+      {}
+
+      /**
+       * @brief Move constructor.
+       */
+      template <class OtherNumber>
+      GlobalBilinearFormIntegratorBase(GlobalBilinearFormIntegratorBase<OtherNumber>&& other)
+        : Parent(std::move(other)),
+          m_trialAttrs(std::move(other.m_trialAttrs)),
+          m_testAttrs(std::move(other.m_testAttrs))
+      {}
+
       /**
        * @brief Gets the attributes of the elements being integrated.
        */
