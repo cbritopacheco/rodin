@@ -47,12 +47,6 @@ int main(int, char**)
   std::cout << "assemblage\n";
   eq.assemble();
 
-  std::cout << "save\n";
-  std::ofstream file("matrix.csv");
-  file << eq.getStiffnessOperator().format(
-      Eigen::IOFormat(Eigen::StreamPrecision, 0, ", ", "\n"));
-  file.close();
-
   std::cout << "resolution\n";
   Solver::LDLT(eq).solve();
 
