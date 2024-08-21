@@ -38,14 +38,12 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_operand))
       {}
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return getOperand().getRangeShape();
       }
 
-      inline
       constexpr
       const auto& getOperand() const
       {
@@ -53,21 +51,41 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      inline
       constexpr
       Average& traceOf(Geometry::Attribute attr)
       {
         return *this;
       }
 
-      inline
       constexpr
       Average& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         return *this;
       }
 
-      inline
+      template <class T>
+      void getValue(T& res, const Geometry::Point& p) const
+      {
+        assert(p.getPolytope().isFace());
+        const auto& face = p.getPolytope();
+        const size_t d = face.getDimension();
+        const auto& mesh = face.getMesh();
+        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex() );
+        assert(inc.size() == 2);
+        const Index idx1 = *inc.begin();
+        const Index idx2 = *std::next(inc.begin());
+        const auto it1 = mesh.getPolytope(d + 1, idx1);
+        const auto it2 = mesh.getPolytope(d + 1, idx2);
+        const auto& pc = p.getPhysicalCoordinates();
+        const Math::SpatialVector<Real> rc1 = it1->getTransformation().inverse(pc);
+        const Math::SpatialVector<Real> rc2 = it2->getTransformation().inverse(pc);
+        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
+        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
+        getOperand().getValue(res, p1);
+        res += getOperand().getValue(p2);
+        res *= 0.5;
+      }
+
       auto getValue(const Geometry::Point& p) const
       {
         assert(p.getPolytope().isFace());
@@ -90,7 +108,7 @@ namespace Rodin::Variational
         return 0.5 * (lhs + rhs);
       }
 
-      inline Average* copy() const noexcept override
+      Average* copy() const noexcept override
       {
         return new Average(*this);
       }

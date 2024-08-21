@@ -1715,9 +1715,9 @@ namespace Rodin::Variational
         else
         {
           m_qftr.emplace(trp.getGeometry());
-          assert(m_qftr.getSize() == 1);
+          assert(m_qftr->getSize() == 1);
           m_qfte.emplace(tep.getGeometry());
-          assert(m_qfte.getSize() == 1);
+          assert(m_qfte->getSize() == 1);
           const auto& trptrans = trp.getTransformation();
           const auto& teptrans = tep.getTransformation();
           const auto& rx = m_qftr->getPoint(0);

@@ -198,8 +198,8 @@ namespace Rodin::Variational
       constexpr
       Mult& traceOf(Geometry::Attribute attr)
       {
-        getLHS().traceOf(attr);
-        getRHS().traceOf(attr);
+        m_lhs->traceOf(attr);
+        m_rhs->traceOf(attr);
         return *this;
       }
 

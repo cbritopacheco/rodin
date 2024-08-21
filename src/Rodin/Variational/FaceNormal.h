@@ -50,7 +50,6 @@ namespace Rodin::Variational
         return m_sdim;
       }
 
-      inline
       VectorType getValue(const Geometry::Point& p) const
       {
         VectorType res;
