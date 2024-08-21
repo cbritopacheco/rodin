@@ -64,15 +64,9 @@ int main(int, char**)
   std::cout << Eigen::nbThreads() << std::endl;
   MMG::Mesh mesh;
   mesh.load("../resources/mmg/AircraftPML.medit.mesh", IO::FileFormat::MEDIT);
-  for (auto it = mesh.getFace(); it; ++it)
-  {
-    if (it->getAttribute() < 100)
-      mesh.setAttribute({it->getDimension(), it->getIndex()}, 1);
-    else
-      mesh.setAttribute({it->getDimension(), it->getIndex()}, 50);
-  }
   mesh.getConnectivity().compute(2, 3);
-  mesh.save("miaow.mesh");
+  auto submesh = mesh.trim({4, 5});
+  submesh.save("miaow.mesh");
   std::exit(1);
 
   // Real hmax = resolution * waveLength;

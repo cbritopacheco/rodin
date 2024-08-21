@@ -33,12 +33,12 @@ static constexpr Geometry::Attribute dCathode = 2;
 
 static constexpr size_t maxIt = 10000;
 
-static constexpr Real epsilon = 0.001;
-static constexpr Real ellAnode = 1e-4;
-static constexpr Real ellCathode = 1e-4;
-static constexpr Real lambdaAnode = 1e-5;
-static constexpr Real lambdaCathode = 1e-5;
-static constexpr Real tgv = std::numeric_limits<float>::max();
+static constexpr Real epsilon = 1e-3;
+static constexpr Real ellAnode = 1e-3;
+static constexpr Real ellCathode = 1e-3;
+static constexpr Real lambdaAnode = 1e-3;
+static constexpr Real lambdaCathode = 1e-3;
+static constexpr Real tgv = 1e+12;
 static const Real alpha = 4;
 
 using RealFES = P1<Real>;
@@ -50,58 +50,15 @@ using ShapeGradient = VectorGridFunction;
 int main(int, char**)
 {
   MMG::Mesh mesh;
-  // mesh.load("Unnamed1-Fusion001.o.mesh", IO::FileFormat::MEDIT);
-  // mesh.save("Omega0.mesh");
-  mesh.load("Omega.mesh", IO::FileFormat::MEDIT);
+  mesh.load("../resources/examples/BoundaryOptimization/EMM.medit.mesh", IO::FileFormat::MEDIT);
+  // mesh.load("Omega.mesh", IO::FileFormat::MEDIT);
+  Threads::getGlobalThreadPool().reset(8);
 
-  Real hmax = 0.5;
-
-  // Alert::Info() << "Initializing anode region..." << Alert::Raise;
-  // {
-  //   P1 vh(mesh);
-
-  //   GridFunction distAnode(vh);
-  //   distAnode = [&](const Point& p)
-  //   {
-  //     Math::SpatialVector c(3);
-  //     c << 2.5, 35, 7;
-  //     return (p - c).norm() - 1;
-  //   };
-
-  //   mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
-  //                                     .split(Anode, { Anode, Gamma })
-  //                                     .split(Gamma, { Anode, Gamma })
-  //                                     .noSplit(Cathode)
-  //                                     .noSplit(Inlet)
-  //                                     .setHMax(hmax)
-  //                                     .surface()
-  //                                     .discretize(distAnode);
-  // }
-
-  // Alert::Info() << "Initializing cathode region..." << Alert::Raise;
-  // {
-  //   P1 vh(mesh);
-
-  //   GridFunction distCathode(vh);
-  //   distCathode = [&](const Point& p)
-  //   {
-  //     Math::SpatialVector c(3);
-  //     c << 2.5, 15, -2.5;
-  //     return (p - c).norm() - 1;
-  //   };
-
-  //   mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
-  //                                     .split(Cathode, { Cathode, Gamma })
-  //                                     .split(Gamma, { Cathode, Gamma })
-  //                                     .noSplit(Anode)
-  //                                     .noSplit(Inlet)
-  //                                     .setHMax(hmax)
-  //                                     .surface()
-  //                                     .discretize(distCathode);
-  // }
+  Real hmax0 = 0.7;
+  Real hmax = hmax0;
 
   std::ofstream fObj("obj.txt");
-  size_t i = 208;
+  size_t i = 0;
   size_t regionCount;
   while (i < maxIt)
   {
@@ -111,6 +68,11 @@ int main(int, char**)
     const Real k = 0.5 * (hmax + hmin);
     const Real dt = 2 * k;
     const Real radius = k;
+
+    bool topologicalStepAnode = (i == 0) || (i >= 10 && i < 100 && i % 10 == 0);
+    bool topologicalStepCathode = (i == 1) || (i >= 11 && i < 101 && (i - 1) % 10 == 0);
+    bool geometricStepAnode = !topologicalStepAnode && (i % 2 == 0) && i > 0;
+    bool geometricStepCathode = !topologicalStepCathode && (i - 1) % 2 == 0 && i > 1;
 
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
                   << "HMax:      " << Alert::Notation(hmax)     << Alert::NewLine
@@ -141,6 +103,8 @@ int main(int, char**)
     mesh.getConnectivity().compute(2, 2);
     mesh.getConnectivity().compute(1, 2);
 
+    mesh.save("Omega.mfem.mesh");
+
     Alert::Info() << "RMC..." << Alert::Raise;
     regionCount = rmc(mesh, { Cathode, Anode }, Gamma);
 
@@ -149,7 +113,8 @@ int main(int, char**)
 
     Alert::Info() << "Skinning mesh..." << Alert::Raise;
     auto dOmega = mesh.skin();
-    dOmega.trace({{{Anode, Gamma}, dAnode}, {{Cathode, Gamma}, dCathode}});
+    dOmega.trace({
+        {{Anode, Gamma}, dAnode}, {{Cathode, Gamma}, dCathode}});
     dOmega.save("dOmega.mesh", IO::FileFormat::MEDIT);
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
@@ -198,182 +163,150 @@ int main(int, char**)
           + BoundaryIntegral((heAnode + heCathode) * u, v)
           - BoundaryIntegral(heAnode * uIn, v)
           ;
+
     Alert::Info() << "Solving state equation..." << Alert::Raise;
     Solver::CG(state).solve();
     u.getSolution().save("U.gf");
-    mesh.save("Omega.mfem.mesh");
 
     TrialFunction gtr(vfes);
     TestFunction gte(vfes);
     Problem potential(gtr, gte);
     potential = Integral(alpha * alpha * Jacobian(gtr), Jacobian(gte))
               + Integral(gtr, gte)
-              - Integral(0.5 * Grad(u.getSolution()) / mesh.getVolume(), gte)
+              - Integral(Grad(u.getSolution()), gte)
               ;
     Solver::CG(potential).solve();
 
-    Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
+    gtr.getSolution().save("miaow.gf");
+
     TrialFunction p(sfes);
     TestFunction  q(sfes);
     Problem adjoint(p, q);
     adjoint = Integral(gamma * Grad(p), Grad(q))
             + BoundaryIntegral((heAnode + heCathode) * p, q)
-            - Integral(gtr.getSolution(), Grad(q));
+            + Integral(0.5 * gtr.getSolution(), Grad(q));
+
+    Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
     Solver::CG(adjoint).solve();
     p.getSolution().save("P.gf");
 
-    GridFunction sC(sfes);
-    sC = u.getSolution() * p.getSolution();
-    sC.save("sC.gf");
-
-    GridFunction sA(sfes);
-    sA = (uIn - u.getSolution()) * p.getSolution();
-    sA.save("sA.gf");
-
     Alert::Info() << "Computing objective..." << Alert::Raise;
     GridFunction j(sfes);
-    j = 0.5 * Frobenius(Grad(u.getSolution()));
+    j = 0.5 * Pow(Frobenius(Grad(u.getSolution())), 2);
     j.setWeights();
-    mesh.save("j.mesh");
-    j.save("j.gf");
-    const Real Ij = Integral(j).compute();
+
+    const Real J = Integral(j).compute();
     const Real objective =
-      Ij - ellAnode * mesh.getPerimeter(Anode) - ellCathode * mesh.getPerimeter(Cathode);
+      J - ellAnode * mesh.getPerimeter(Anode) - ellCathode * mesh.getPerimeter(Cathode)
+      - lambdaAnode * mesh.getMeasure(1, Anode) - lambdaCathode * mesh.getMeasure(1, Cathode)
+      ;
     Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::NewLine
-                  << "Norm: " << Alert::Notation(Ij)
+                  << "J: " << Alert::Notation(J)
                   << Alert::Raise;
     fObj << objective << "\n";
     fObj.flush();
 
-    Alert::Info() << "Computing conormal..." << Alert::Raise;
-    GridFunction conormalCathode(dvfes);
-    conormalCathode = Grad(distCathode);
-    conormalCathode.stableNormalize();
-
-    GridFunction conormalAnode(dvfes);
-    conormalAnode = Grad(distAnode);
-    conormalAnode.stableNormalize();
-
-    Alert::Info() << "Computing shape gradient..." << Alert::Raise;
-    TrialFunction theta(dvfes);
-    TestFunction  w(dvfes);
-    Problem hilbert(theta, w);
-    hilbert = Integral(alpha * alpha * Jacobian(theta), Jacobian(w))
-            + Integral(theta, w)
-            - 1.0 / epsilon * FaceIntegral(
-                u.getSolution() * p.getSolution(), Dot(conormalAnode, w)).over(dAnode)
-            + 1.0 / epsilon * FaceIntegral(
-                (uIn - u.getSolution()) * p.getSolution(), Dot(conormalCathode, w)).over(dCathode)
-            + ellAnode * FaceIntegral(conormalAnode, w).over(dAnode)
-            + ellCathode * FaceIntegral(conormalCathode, w).over(dCathode)
-            + lambdaAnode * FaceIntegral(
-                Div(conormalAnode).traceOf(Anode) * conormalAnode, w).over(dAnode)
-            + lambdaCathode * FaceIntegral(
-                Div(conormalCathode).traceOf(Cathode) * conormalCathode, w).over(dCathode)
-            + tgv * Integral(theta, w).over(Inlet, FixedAnode, FixedCathode);
-    Solver::CG(hilbert).solve();
-
-    GridFunction norm(dsfes);
-    norm = Frobenius(theta.getSolution());
-    theta.getSolution() /= norm.max();
-
-    dOmega.save("Theta.mesh");
-    theta.getSolution().save("Theta.gf");
-
-    // dOmega.save("out/Theta." + std::to_string(i) + ".mesh");
-    // theta.getSolution().save("out/Theta." + std::to_string(i) + ".gf");
-
-    // if (true)
-    if (((i % 10 == 0) || ((i - 1) % 10 == 0)) && i < 100)
+    if (topologicalStepAnode)
     {
-      Alert::Info() << "Computing topological sensitivity..." << Alert::Raise;
+      Alert::Info() << "Computing topological sensitivity for the anode..." << Alert::Raise;
       TrialFunction s(dsfes);
       TestFunction  t(dsfes);
       Problem topo(s, t);
-      if (i % 10 == 0)
+      topo = Integral(alpha * alpha * Grad(s), Grad(t))
+           + Integral(s, t)
+           + Integral((uIn - u.getSolution()) * p.getSolution(), t)
+           + tgv * Integral(s, t).over(Inlet, Cathode, Anode, FixedAnode, FixedCathode);
+      Solver::CG(topo).solve();
+
+      dOmega.save("sA.mesh");
+      s.getSolution().save("sA.gf");
+
+      Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
+      auto cs = locations(s.getSolution());
+
+      Alert::Info() << "Nucleating " << Alert::Notation(cs.size()) << " holes." << Alert::Raise;
+      holes(radius, distAnode, cs);
+    }
+    else if (topologicalStepCathode)
+    {
+      Alert::Info() << "Computing topological sensitivity for the cathode..." << Alert::Raise;
+      TrialFunction s(dsfes);
+      TestFunction  t(dsfes);
+      Problem topo(s, t);
+      topo = Integral(alpha * alpha * Grad(s), Grad(t))
+           + Integral(s, t)
+           - Integral((u.getSolution()) * p.getSolution(), t)
+           + tgv * Integral(s, t).over(Inlet, Cathode, Anode, FixedAnode, FixedCathode);
+      Solver::CG(topo).solve();
+
+      dOmega.save("sC.mesh");
+      s.getSolution().save("sC.gf");
+
+      Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
+      auto cs = locations(s.getSolution());
+
+      Alert::Info() << "Nucleating " << Alert::Notation(cs.size()) << " holes." << Alert::Raise;
+      holes(radius, distCathode, cs);
+    }
+    else if (geometricStepAnode || geometricStepCathode)
+    {
+      Alert::Info() << "Computing conormal..." << Alert::Raise;
+      GridFunction conormalCathode(dvfes);
+      conormalCathode = Grad(distCathode);
+      conormalCathode.stableNormalize();
+
+      GridFunction conormalAnode(dvfes);
+      conormalAnode = Grad(distAnode);
+      conormalAnode.stableNormalize();
+
+      Alert::Info() << "Computing shape gradient..." << Alert::Raise;
+      TrialFunction theta(dvfes);
+      TestFunction  w(dvfes);
+      Problem hilbert(theta, w);
+      hilbert = Integral(alpha * alpha * Jacobian(theta), Jacobian(w))
+              + Integral(theta, w)
+              + 1.0 / epsilon * FaceIntegral(
+                  (uIn - u.getSolution()) * p.getSolution(), Dot(conormalAnode, w)).over(dAnode)
+              - 1.0 / epsilon * FaceIntegral(
+                  u.getSolution() * p.getSolution(), Dot(conormalCathode, w)).over(dCathode)
+              + ellAnode * FaceIntegral(conormalAnode, w).over(dAnode)
+              + ellCathode * FaceIntegral(conormalCathode, w).over(dCathode)
+              + lambdaAnode * FaceIntegral(
+                  Div(conormalAnode).traceOf(Anode) * conormalAnode, w).over(dAnode)
+              + lambdaCathode * FaceIntegral(
+                  Div(conormalCathode).traceOf(Cathode) * conormalCathode, w).over(dCathode)
+              + tgv * Integral(theta, w).over(Inlet, FixedAnode, FixedCathode);
+      Solver::CG(hilbert).solve();
+
+      GridFunction norm(dsfes);
+      norm = Frobenius(theta.getSolution());
+      theta.getSolution() /= norm.max();
+
+      dOmega.save("Theta.mesh");
+      theta.getSolution().save("Theta.gf");
+
+      if (geometricStepAnode)
       {
-        topo = Integral(alpha * alpha * Grad(s), Grad(t))
-             + Integral(s, t)
-             - Integral((uIn - u.getSolution()) * p.getSolution(), t)
-             + tgv * Integral(s, t).over(Inlet, Cathode, Anode, FixedAnode, FixedCathode);
+        Alert::Info() << "Advecting anode..." << Alert::Raise;
+        MMG::Advect(distAnode, theta.getSolution()).step(dt);
+      }
+      else if (geometricStepCathode)
+      {
+        Alert::Info() << "Advecting cathode..." << Alert::Raise;
+        MMG::Advect(distCathode, theta.getSolution()).step(dt);
       }
       else
       {
-        topo = Integral(alpha * alpha * Grad(s), Grad(t))
-             + Integral(s, t)
-             + Integral((u.getSolution()) * p.getSolution(), t)
-             + tgv * Integral(s, t).over(Inlet, Cathode, Anode, FixedAnode, FixedCathode);
-      }
-      Solver::CG(topo).solve();
-
-      s.getSolution().save("Topo.sol", IO::FileFormat::MEDIT);
-      dsfes.getMesh().save("Topo.mesh", IO::FileFormat::MEDIT);
-
-      // s.getSolution().save("out/Topo." + std::to_string(i) + ".gf");
-      // dsfes.getMesh().save("out/Topo." + std::to_string(i) + ".mesh");
-
-      Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
-      const Real tc = s.getSolution().max();
-      std::vector<Point> cs;
-      for (auto it = dOmega.getVertex(); !it.end(); ++it)
-      {
-        const Point p(*it, it->getTransformation(),
-            Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
-        const Real tp = s.getSolution()(p);
-        if (tp > 0 && (tp / tc) > (1 - 1e-12))
-        {
-          cs.emplace_back(std::move(p));
-          break;
-        }
-      }
-
-      Alert::Info() << "Nucleating " << Alert::Notation(cs.size()) << " holes..."
-                    << Alert::Raise;
-      if (cs.size())
-      {
-        if (i % 10 == 0)
-        {
-          auto holes =
-            [&](const Point& v)
-            {
-              Real d = distAnode(v);
-              for (const auto& c : cs)
-              {
-                const Real dd = (v - c).norm() - radius;
-                d = std::min(d, dd);
-              }
-              return d;
-            };
-          distAnode = holes;
-        }
-        else
-        {
-          auto holes =
-            [&](const Point& v)
-            {
-              Real d = distCathode(v);
-              for (const auto& c : cs)
-              {
-                const Real dd = (v - c).norm() - radius;
-                d = std::min(d, dd);
-              }
-              return d;
-            };
-          distCathode = holes;
-        }
+        Alert::Exception() << "Unhandled case." << Alert::Raise;
       }
     }
-
-    if (i % 2 == 0)
+    else
     {
-      Alert::Info() << "Advecting anode..." << Alert::Raise;
+      Alert::Exception() << "Unhandled case." << Alert::Raise;
+    }
 
-      if (i > 1)
-        MMG::Advect(distAnode, theta.getSolution()).step(dt);
-
-      // dOmega.save("out/AdvectedAnode." + std::to_string(i) + ".mesh");
-      // distAnode.save("out/AdvectedAnode." + std::to_string(i) + ".gf");
-
+    if (geometricStepAnode || topologicalStepAnode)
+    {
       Alert::Info() << "Meshing the anode..." << Alert::Raise;
       try
       {
@@ -392,7 +325,7 @@ int main(int, char**)
                                           .setHausdorff(hausd)
                                           .surface()
                                           .discretize(workaround);
-        hmax = 1.1 * hmax > 0.5 ? 0.5 : hmax * 1.1;
+        hmax = 1.1 * hmax > hmax0 ? hmax0 : hmax * 1.1;
       }
       catch (Alert::Exception& e)
       {
@@ -401,15 +334,8 @@ int main(int, char**)
         continue;
       }
     }
-    else
+    else if (geometricStepCathode || topologicalStepCathode)
     {
-      Alert::Info() << "Advecting cathode..." << Alert::Raise;
-      if (i > 1)
-        MMG::Advect(distCathode, theta.getSolution()).step(dt);
-
-      // dOmega.save("out/AdvectedCathode." + std::to_string(i) + ".mesh");
-      // distCathode.save("out/AdvectedCathode." + std::to_string(i) + ".gf");
-
       Alert::Info() << "Meshing the cathode..." << Alert::Raise;
       try
       {
@@ -428,7 +354,7 @@ int main(int, char**)
                                           .setHausdorff(hausd)
                                           .surface()
                                           .discretize(workaround);
-        hmax = 1.1 * hmax > 0.5 ? 0.5 : hmax * 1.1;
+        hmax = 1.1 * hmax > hmax0 ? hmax0 : hmax * 1.1;
       }
       catch (Alert::Exception& e)
       {
@@ -436,6 +362,10 @@ int main(int, char**)
         hmax = 0.9 * hmax < 0.1 ? 0.1 : hmax * 0.9;
         continue;
       }
+    }
+    else
+    {
+      Alert::Exception() << "Unhandled case." << Alert::Raise;
     }
 
     Alert::Info() << "Saving files..." << Alert::Raise;
