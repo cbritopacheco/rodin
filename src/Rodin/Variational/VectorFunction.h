@@ -58,7 +58,6 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline
       constexpr
       VectorFunctionBase& traceOf(Geometry::Attribute attr)
       {
@@ -66,7 +65,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       VectorFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -78,7 +76,6 @@ namespace Rodin::Variational
        * @brief Convenience function to access the 1st component of the
        * vector.
        */
-      inline
       constexpr
       auto x() const
       {
@@ -90,7 +87,6 @@ namespace Rodin::Variational
        * @brief Convenience function to access the 2nd component of the
        * vector.
        */
-      inline
       constexpr
       auto y() const
       {
@@ -98,7 +94,6 @@ namespace Rodin::Variational
         return operator()(1);
       }
 
-      inline
       constexpr
       auto z() const
       {
@@ -106,7 +101,6 @@ namespace Rodin::Variational
         return operator()(2);
       }
 
-      inline
       constexpr
       auto operator()(const Geometry::Point& p) const
       {
@@ -118,7 +112,6 @@ namespace Rodin::Variational
        * @returns Object of type Component<VectorFunctionBase> representing
        * the ith component of the VectorFunction.
        */
-      inline
       constexpr
       auto operator()(size_t i) const
       {
@@ -129,20 +122,17 @@ namespace Rodin::Variational
 
       virtual ~VectorFunctionBase() = default;
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return { getDimension(), 1 };
       }
 
-      inline
       const Derived& getDerived() const
       {
         return static_cast<const Derived&>(*this);
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -150,7 +140,6 @@ namespace Rodin::Variational
       }
 
       template <class VectorType>
-      inline
       constexpr
       void getValue(VectorType& res, const Geometry::Point& p) const
       {
@@ -168,7 +157,6 @@ namespace Rodin::Variational
        * @brief Gets the dimension of the vector object.
        * @returns Dimension of vector.
        */
-      inline
       constexpr
       size_t getDimension() const
       {
@@ -213,34 +201,30 @@ namespace Rodin::Variational
           m_vector(std::move(other.m_vector))
       {}
 
-      inline
       const VectorType& getValue(const Geometry::Point& p) const
       {
         return m_vector.get();
       }
 
-      inline
       constexpr
       void getValue(VectorType& res, const Geometry::Point&) const
       {
         res = m_vector.get();
       }
 
-      inline
       constexpr
       size_t getDimension() const
       {
         return m_vector.get().size();
       }
 
-      inline
       constexpr
       VectorFunction& traceOf(Geometry::Attribute attr)
       {
         return *this;
       }
 
-      inline VectorFunction* copy() const noexcept override
+      VectorFunction* copy() const noexcept override
       {
         return new VectorFunction(*this);
       }
@@ -305,7 +289,6 @@ namespace Rodin::Variational
           m_fs(std::move(other.m_fs))
       {}
 
-      inline
       auto getValue(const Geometry::Point& p) const
       {
         Math::FixedSizeVector<ScalarType, 1 + sizeof...(Values)> res;
@@ -314,7 +297,6 @@ namespace Rodin::Variational
         return res;
       }
 
-      inline
       void getValue(VectorType& res, const Geometry::Point& p) const
       {
         res.resize(1 + sizeof...(Values));
@@ -322,21 +304,18 @@ namespace Rodin::Variational
             [&](auto i){ res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
       }
 
-      inline
       void getValue(FixedSizeVectorType& res, const Geometry::Point& p) const
       {
         Utility::ForIndex<1 + sizeof...(Values)>(
             [&](auto i){ res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
       }
 
-      inline
       constexpr
       size_t getDimension() const
       {
         return 1 + sizeof...(Values);
       }
 
-      inline
       constexpr
       VectorFunction& traceOf(Geometry::Attribute attrs)
       {
@@ -344,7 +323,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline VectorFunction* copy() const noexcept override
+      VectorFunction* copy() const noexcept override
       {
         return new VectorFunction(*this);
       }
@@ -382,14 +361,12 @@ namespace Rodin::Variational
           m_f(std::move(other.m_f))
       {}
 
-      inline
       constexpr
       VectorFunction& traceOf(Geometry::Attribute)
       {
         return *this;
       }
 
-      inline
       VectorType getValue(const Geometry::Point& p) const
       {
         if constexpr (std::is_invocable_r_v<VectorType, F, const Geometry::Point&>)
@@ -410,7 +387,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       void getValue(VectorType& res, const Geometry::Point& p) const
       {
         if constexpr (std::is_invocable_r_v<VectorType, F, const Geometry::Point&>)
@@ -429,7 +405,7 @@ namespace Rodin::Variational
         }
       }
 
-      inline VectorFunction* copy() const noexcept override
+      VectorFunction* copy() const noexcept override
       {
         return new VectorFunction(*this);
       }

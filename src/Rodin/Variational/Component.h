@@ -67,14 +67,12 @@ namespace Rodin::Variational
           m_idx(std::move(other.m_idx))
       {}
 
-      inline
       constexpr
       size_t getIndex() const
       {
         return m_idx;
       }
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
@@ -82,14 +80,13 @@ namespace Rodin::Variational
         return *m_fn;
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return getOperand().getValue(p).coeff(m_idx);
       }
 
-      inline Component* copy() const noexcept override
+      Component* copy() const noexcept override
       {
         return new Component(*this);
       }
@@ -138,7 +135,6 @@ namespace Rodin::Variational
           m_j(std::move(other.m_j))
       {}
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
@@ -146,7 +142,6 @@ namespace Rodin::Variational
         return *m_fn;
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -154,7 +149,7 @@ namespace Rodin::Variational
       }
 
 
-      inline Component* copy() const noexcept override
+      Component* copy() const noexcept override
       {
         return new Component(*this);
       }
@@ -208,28 +203,25 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      inline
       constexpr
       OperandType& getGridFunction()
       {
         return m_u.get();
       }
 
-      inline
       constexpr
       const GridFunction<FES>& getGridFunction() const
       {
         return m_u.get();
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return m_u.get().getValue(p).coeff(m_idx);
       }
 
-      inline Component* copy() const noexcept override
+      Component* copy() const noexcept override
       {
         return new Component(*this);
       }
@@ -287,14 +279,12 @@ namespace Rodin::Variational
           m_idx(std::move(other.m_idx))
       {}
 
-      inline
       constexpr
       size_t getIndex() const
       {
         return m_idx;
       }
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
@@ -302,14 +292,12 @@ namespace Rodin::Variational
         return *m_u;
       }
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
@@ -318,27 +306,23 @@ namespace Rodin::Variational
         return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return m_u->getPoint();
       }
 
-      inline
       Component& setPoint(const Geometry::Point& p)
       {
         m_u->setPoint(p);
         return *this;
       }
 
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
-        return this->object(getOperand().getBasis(local)).coeff(m_idx);
+        return getOperand().getBasis(local).coeff(m_idx);
       }
 
-      inline
       Component* copy() const noexcept override
       {
         return new Component(*this);

@@ -103,9 +103,7 @@ namespace Rodin::Variational
         const Math::SpatialVector<Real> rc2 = it2->getTransformation().inverse(pc);
         const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
-        const auto& lhs = this->object(getOperand().getValue(p1));
-        const auto& rhs = this->object(getOperand().getValue(p2));
-        return 0.5 * (lhs + rhs);
+        return 0.5 * (getOperand().getValue(p1) + getOperand().getValue(p2));
       }
 
       Average* copy() const noexcept override

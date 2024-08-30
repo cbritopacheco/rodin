@@ -162,7 +162,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return this->object(getOperand().getBasis(local)).transpose();
+        return getOperand().getBasis(local).transpose();
       }
 
       const FES& getFiniteElementSpace() const

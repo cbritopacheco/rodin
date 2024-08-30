@@ -70,6 +70,21 @@ namespace Rodin::Solver
         x = m_solver.solve(b);
       }
 
+      void printControl()
+      {
+        m_solver.printUmfpackControl();
+      }
+
+      void printInfo()
+      {
+        m_solver.printUmfpackInfo();
+      }
+
+      void printStatus()
+      {
+        m_solver.printUmfpackStatus();
+      }
+
       UMFPack* copy() const noexcept override
       {
         return new UMFPack(*this);

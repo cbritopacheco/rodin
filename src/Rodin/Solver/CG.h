@@ -81,13 +81,11 @@ namespace Rodin::Solver
         x = m_solver.compute(A).solve(b);
       }
 
-      inline
       bool success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
-      inline
       CG* copy() const noexcept override
       {
         return new CG(*this);
@@ -154,13 +152,11 @@ namespace Rodin::Solver
         x = m_solver.compute(A).solve(b);
       }
 
-      inline
       bool success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
-      inline
       CG* copy() const noexcept override
       {
         return new CG(*this);

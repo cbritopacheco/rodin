@@ -93,6 +93,8 @@ int main(int, char**)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     Solver::CG(elasticity).solve();
 
+    trimmed.save("u.mesh");
+
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
     jac.traceOf(Interior);
@@ -100,6 +102,10 @@ int main(int, char**)
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = FaceNormal(th);
     n.traceOf(Interior);
+
+    GridFunction miaow(shInt);
+    miaow = Dot(Ae, e);
+    miaow.save("u.gf");
 
     // Hilbert extension-regularization procedure
     TrialFunction g(vh);

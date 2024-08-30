@@ -366,11 +366,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      const LinearForm<TestFES, VectorType>& getLinearForm() const
-      {
-        return m_linearForm;
-      }
-
       Problem& assemble() override
       {
         auto& trial = getTrialFunction();

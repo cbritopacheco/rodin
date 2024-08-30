@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <type_traits>
+#include <Eigen/Core>
 
 #include "Rodin/Types.h"
 #include "Rodin/FormLanguage/Traits.h"
@@ -32,6 +33,13 @@ namespace Rodin::Math
   Complex conj(const Complex& x)
   {
     return std::conj(x);
+  }
+
+  template <class T>
+  constexpr
+  auto conj(const Eigen::MatrixBase<T>& x)
+  {
+    return x.conjugate();
   }
 
   constexpr

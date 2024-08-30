@@ -86,6 +86,20 @@
 
 /**
  * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with SuiteSparse support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifndef RODIN_USE_CHOLMOD
+ * // Code depending on CHOLMOD
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_CHOLMOD
+
+/**
+ * @ingroup RodinDirectives
  * @brief Indicates if Rodin warnings are silenced.
  */
 #cmakedefine RODIN_SILENCE_WARNINGS

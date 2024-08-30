@@ -149,7 +149,7 @@ namespace Rodin::Variational
         }
       }
 
-      inline Jacobian* copy() const noexcept override
+      Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
       }
@@ -194,28 +194,24 @@ namespace Rodin::Variational
           m_u(other.m_u)
       {}
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      inline
       constexpr
       const FESType& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
@@ -223,14 +219,12 @@ namespace Rodin::Variational
                  getOperand().getFiniteElementSpace().getVectorDimension() };
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return m_p.value().get();
@@ -242,7 +236,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       auto getBasis(size_t local) const
       {
@@ -251,10 +244,10 @@ namespace Rodin::Variational
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
         const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return this->object(fe.getJacobian(local)(rc)) * p.getJacobianInverse();
+        return fe.getJacobian(local)(rc) * p.getJacobianInverse();
       }
 
-      inline Jacobian* copy() const noexcept override
+      Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
       }
