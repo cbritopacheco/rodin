@@ -101,6 +101,10 @@
             </dt>
             <dd>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> is built with SuiteSparse support.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">#define <a href="#ga4bd3e8b54b4a173e1c8136658a1093ad" class="m-doc">RODIN_USE_CHOLMOD</a></span>
+            </dt>
+            <dd>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> is built with SuiteSparse support.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">#define <a href="#gac2d7048be589fb1bea193dfd6679cd13" class="m-doc">RODIN_SILENCE_WARNINGS</a></span>
             </dt>
             <dd>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> warnings are silenced.</dd>
@@ -231,6 +235,16 @@ $ s \geq 0 $
 <span class="c1">// Code depending on UMFPACK</span>
 <span class="cp">#endif</span></pre>
           </div></section>
+          <section class="m-doc-details" id="ga4bd3e8b54b4a173e1c8136658a1093ad"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a href="#ga4bd3e8b54b4a173e1c8136658a1093ad" class="m-doc-self">RODIN_USE_CHOLMOD</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_configure_8h_8in.html">&lt;Rodin/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> is built with SuiteSparse support.</p>
+<h4 id="autotoc_md4">Utilization</h4><pre class="m-code"><span class="cp">#ifndef RODIN_USE_CHOLMOD</span>
+<span class="c1">// Code depending on CHOLMOD</span>
+<span class="cp">#endif</span></pre>
+          </div></section>
           <section class="m-doc-details" id="gac2d7048be589fb1bea193dfd6679cd13"><div>
             <h3>
               <span class="m-doc-wrap-bumper">#define <a href="#gac2d7048be589fb1bea193dfd6679cd13" class="m-doc-self">RODIN_SILENCE_WARNINGS</a></span>
@@ -252,7 +266,7 @@ $ s \geq 0 $
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_configure_8h_8in.html">&lt;Rodin/Configure.h.in&gt;</a></div>
             </h3>
             <p>Indicates the <a href="namespace_rodin.html" class="m-doc">Rodin</a> resources directory.</p>
-<h4 id="autotoc_md4">Utilization</h4><pre class="m-code"><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">RODIN_RESOURCES_DIR</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre>
+<h4 id="autotoc_md5">Utilization</h4><pre class="m-code"><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">RODIN_RESOURCES_DIR</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre>
           </div></section>
           <section class="m-doc-details" id="gaaad26963ee56fef661d8d9e025018c4c"><div>
             <h3>
@@ -260,7 +274,7 @@ $ s \geq 0 $
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_configure_8h_8in.html">&lt;Rodin/Configure.h.in&gt;</a></div>
             </h3>
             <p>Indicates the <a href="namespace_rodin.html" class="m-doc">Rodin</a> third-party source directory.</p>
-<h4 id="autotoc_md5">Utilization</h4><pre class="m-code"><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">RODIN_THIRD_PARTY_DIR</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre>
+<h4 id="autotoc_md6">Utilization</h4><pre class="m-code"><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">RODIN_THIRD_PARTY_DIR</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre>
           </div></section>
           <section class="m-doc-details" id="ga0b42798412414673b17869482dbfc80e"><div>
             <h3>
