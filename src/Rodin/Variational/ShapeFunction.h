@@ -399,7 +399,7 @@ namespace Rodin::Variational
         const Index i = p.getPolytope().getIndex();
         const auto& fes = this->getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
-        return this->object(fes.getInverseMapping({ d, i }, fe.getBasis(local))(p));
+        return fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
       }
 
       constexpr

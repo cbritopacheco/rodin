@@ -8,10 +8,12 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Math.h>
 #include <Rodin/Variational.h>
+#include <RodinExternal/MMG.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+using namespace Rodin::External;
 
 const Real E = 100;
 const Real nu = 0.48;
@@ -43,51 +45,85 @@ void K(Math::Matrix<Real>& res, const Point& x, const Point& y)
 
 int main(int, char**)
 {
-  // Threads::getGlobalThreadPool().reset(6);
-  Mesh mesh;
+  Eigen::initParallel();
+  Eigen::setNbThreads(8);
+  Threads::getGlobalThreadPool().reset(8);
+
+  std::cout << "lambda: " << lambda << std::endl;
+  std::cout << "mu: " << mu << std::endl;
+
+  MMG::Mesh mesh;
   mesh.load("D1.o.mesh", IO::FileFormat::MEDIT);
   mesh.save("D1.mfem.mesh");
-  mesh.getConnectivity().compute(1, 2);
 
-  P1 fes(mesh, 3);
+  VectorFunction e1{1, 0, 0};
+  VectorFunction e2{0, 1, 0};
+  VectorFunction e3{0, 0, 1};
 
-  VectorFunction e1{1, 1, 0};
+  std::ofstream data("e1.txt");
+  data << "eps,hmax,err\n";
+  Real eps0 = 1e-5, eps1 = 0.1;
+  Real hmax0 = 0.5, hmax1 = 1;
+  size_t n = 50;
+  for (double eps = eps0; eps < eps1; eps += (eps1 - eps0) / n)
+  {
+    for (double hmax = hmax0; hmax < hmax1; hmax += (hmax1 - hmax0) / n)
+    {
+      Alert::Info() << "eps: " << eps << Alert::NewLine
+                    << "hmax: " << hmax << Alert::Raise;
 
-  TrialFunction u(fes);
-  TestFunction  v(fes);
-  DenseProblem eq(u, v);
-  eq = 0.001 * LinearElasticityIntegral(u, v)(lambda, mu)
-     + Integral(Potential(K, u), v)
-     - Integral(e1, v);
+      Alert::Info() << "Optimizing." << Alert::Raise;
 
-  std::cout << "assemblage\n";
-  eq.assemble();
+      double hmin = hmax / 10;
 
-  // std::cout << "save\n";
-  // std::ofstream file("matrix.csv");
-  // file << eq.getStiffnessOperator().format(
-  //     Eigen::IOFormat(Eigen::StreamPrecision, 0, ", ", "\n"));
-  // file.close();
+      MMG::Optimizer().setHMax(hmax)
+                      .setHMin(hmin)
+                      .setHausdorff(hmax / 20)
+                      .optimize(mesh);
 
-  std::cout << "resolution\n";
-  Solver::CG(eq).solve();
+      Alert::Info() << "Connectivity." << Alert::Raise;
+      mesh.getConnectivity().compute(1, 2);
 
-  u.getSolution().save("u.gf");
-  mesh.save("u.mesh");
+      P1 vfes(mesh, 3);
+      P1 sfes(mesh);
+      TrialFunction u(vfes);
+      TestFunction  v(vfes);
 
-  // std::cout << "average:\n";
-  // u.getSolution().setWeights();
-  // std::cout << Integral(u.getSolution()) << std::endl;
+      DenseProblem eq(u, v);
+      eq = eps * LinearElasticityIntegral(u, v)(lambda, mu)
+         + Integral(Potential(K, u), v)
+         - Integral(e1, v);
 
-  std::cout << "phi\n";
-  GridFunction phi(fes);
-  phi = Potential(K, u.getSolution());
-  phi.save("phi.gf");
-  mesh.save("phi.mesh");
+      Alert::Info() << "Assembling." << Alert::Raise;
+      eq.assemble();
 
-  // std::cout << "potential\n";
-  // phi.setWeights();
-  // std::cout << Integral(phi).compute() / M_PI << std::endl;
+      Alert::Info() << "Solving." << Alert::Raise;
+      Solver::CG(eq).solve();
+
+      mesh.save("u.mesh");
+      u.getSolution().save("u.gf");
+
+      GridFunction frob(sfes);
+      frob = Frobenius(u.getSolution());
+      u.getSolution() /= 10 * frob.max();
+
+      mesh.save("scaled.mesh");
+      u.getSolution().save("scaled.gf");
+      std::exit(1);
+
+      u.getSolution().setWeights();
+
+      Alert::Info() << "Getting data." << Alert::Raise;
+      GridFunction phi(sfes);
+      phi = Pow(Frobenius(e1 - Potential(K, u.getSolution())), 2);
+      phi.setWeights();
+
+      Real err = Integral(phi).compute();
+
+      data << eps << "," << hmax << "," << err << '\n';
+      data.flush();
+    }
+  }
 
   return 0;
 }

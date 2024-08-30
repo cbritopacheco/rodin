@@ -1745,11 +1745,11 @@ namespace Rodin::Variational
             kernel(m_mk, x, y);
             for (size_t l = 0; l < testfe.getCount(); l++)
             {
-              const auto teb = testfe.getBasis(l)(ry);
+              testfe.getBasis(l)(m_tev, ry);
               for (size_t m = 0; m < trialfe.getCount(); m++)
               {
-                const auto trb = trialfe.getBasis(m)(rx);
-                m_matrix(l, m) = (m_mk * trb).dot(teb);
+                trialfe.getBasis(m)(m_trv, rx);
+                m_matrix(l, m) = (m_mk * m_trv).dot(m_tev);
               }
             }
           }

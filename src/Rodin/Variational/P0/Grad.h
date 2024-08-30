@@ -258,7 +258,7 @@ namespace Rodin::Variational
         const Index i = p.getPolytope().getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
         const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return p.getJacobianInverse().transpose() * this->object(fe.getGradient(local)(rc));
+        return p.getJacobianInverse().transpose() * fe.getGradient(local)(rc);
       }
 
       inline Grad* copy() const noexcept override

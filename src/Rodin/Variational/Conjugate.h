@@ -161,15 +161,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto& v = this->object(getOperand().getBasis(local));
-        if constexpr (FormLanguage::IsEigenObject<decltype(v)>::Value)
-        {
-          return v.conjugate();
-        }
-        else
-        {
-          return Math::conj(v);
-        }
+        return Math::conj(getOperand().getBasis(local));
       }
 
       const FES& getFiniteElementSpace() const

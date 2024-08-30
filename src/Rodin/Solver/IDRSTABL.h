@@ -4,15 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_UMFPACK_H
-#define RODIN_SOLVER_UMFPACK_H
-
-#ifdef RODIN_USE_UMFPACK
+#ifndef RODIN_SOLVER_IDRSTABL_H
+#define RODIN_SOLVER_IDRSTABL_H
 
 #include <optional>
 #include <functional>
 
-#include <Eigen/UmfPackSupport>
+#include <unsupported/Eigen/IterativeSolvers>
 
 #include "Rodin/Configure.h"
 #include "Rodin/Math/Vector.h"
@@ -24,17 +22,17 @@
 namespace Rodin::Solver
 {
   /**
-   * @defgroup UMFPackSpecializations UMFPack Template Specializations
-   * @brief Template specializations of the UMFPack class.
-   * @see UMFPack
+   * @defgroup IDRSTABLSpecializations IDRSTABL Template Specializations
+   * @brief Template specializations of the IDRSTABL class.
+   * @see IDRSTABL
    */
 
   /**
-   * @ingroup UMFPackSpecializations
-   * @brief UMFPack for use with Math::SparseMatrix and Math::Vector.
+   * @ingroup IDRSTABLSpecializations
+   * @brief IDRSTABL for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class UMFPack<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  class IDRSTABL<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
     : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
@@ -50,19 +48,19 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      UMFPack(ProblemType& pb)
+      IDRSTABL(ProblemType& pb)
         : Parent(pb)
       {}
 
-      UMFPack(const UMFPack& other)
+      IDRSTABL(const IDRSTABL& other)
         : Parent(other)
       {}
 
-      UMFPack(UMFPack&& other)
+      IDRSTABL(IDRSTABL&& other)
         : Parent(std::move(other))
       {}
 
-      ~UMFPack() = default;
+      ~IDRSTABL() = default;
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
@@ -70,40 +68,43 @@ namespace Rodin::Solver
         x = m_solver.solve(b);
       }
 
-      void printControl()
+      IDRSTABL& setMaxIterations(size_t it)
       {
-        m_solver.printUmfpackControl();
+        m_solver.setMaxIterations(it);
+        return *this;
       }
 
-      void printInfo()
+      IDRSTABL& setTolerance(Real tol)
       {
-        m_solver.printUmfpackInfo();
+        m_solver.setTolerance(tol);
+        return *this;
       }
 
-      void printStatus()
+      bool success() const
       {
-        m_solver.printUmfpackStatus();
+        return m_solver.info() == Eigen::Success;
       }
 
-      UMFPack* copy() const noexcept override
+      IDRSTABL* copy() const noexcept override
       {
-        return new UMFPack(*this);
+        return new IDRSTABL(*this);
       }
 
     private:
-      Eigen::UmfPackLU<OperatorType> m_solver;
+      Eigen::IDRSTABL<OperatorType> m_solver;
   };
 
   /**
    * @ingroup RodinCTAD
-   * @brief CTAD for UMFPack
+   * @brief CTAD for IDRSTABL
    */
   template <class Scalar>
-  UMFPack(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> UMFPack<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
+  IDRSTABL(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> IDRSTABL<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
-#endif // #ifdef RODIN_USE_UMFPACK
 #endif
+
+
 
 

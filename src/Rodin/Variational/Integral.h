@@ -108,12 +108,12 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline Integrator::Region getRegion() const override
+      Integrator::Region getRegion() const override
       {
         return Integrator::Region::Cells;
       }
 
-      inline Integral* copy() const noexcept override
+      Integral* copy() const noexcept override
       {
         return new Integral(*this);
       }
@@ -166,12 +166,12 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline Integrator::Region getRegion() const override
+      Integrator::Region getRegion() const override
       {
         return Integrator::Region::Cells;
       }
 
-      inline Integral* copy() const noexcept override
+      Integral* copy() const noexcept override
       {
         return new Integral(*this);
       }
@@ -217,13 +217,12 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline
       Integrator::Region getRegion() const override
       {
         return Integrator::Region::Cells;
       }
 
-      inline Integral* copy() const noexcept override
+      Integral* copy() const noexcept override
       {
         return new Integral(*this);
       }

@@ -4,15 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_UMFPACK_H
-#define RODIN_SOLVER_UMFPACK_H
-
-#ifdef RODIN_USE_UMFPACK
+#ifndef RODIN_SOLVER_GMRES_H
+#define RODIN_SOLVER_GMRES_H
 
 #include <optional>
 #include <functional>
 
-#include <Eigen/UmfPackSupport>
+#include <unsupported/Eigen/IterativeSolvers>
 
 #include "Rodin/Configure.h"
 #include "Rodin/Math/Vector.h"
@@ -24,17 +22,17 @@
 namespace Rodin::Solver
 {
   /**
-   * @defgroup UMFPackSpecializations UMFPack Template Specializations
-   * @brief Template specializations of the UMFPack class.
-   * @see UMFPack
+   * @defgroup GMRESSpecializations GMRES Template Specializations
+   * @brief Template specializations of the GMRES class.
+   * @see GMRES
    */
 
   /**
-   * @ingroup UMFPackSpecializations
-   * @brief UMFPack for use with Math::SparseMatrix and Math::Vector.
+   * @ingroup GMRESSpecializations
+   * @brief GMRES for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class UMFPack<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  class GMRES<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
     : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
@@ -50,19 +48,19 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      UMFPack(ProblemType& pb)
+      GMRES(ProblemType& pb)
         : Parent(pb)
       {}
 
-      UMFPack(const UMFPack& other)
+      GMRES(const GMRES& other)
         : Parent(other)
       {}
 
-      UMFPack(UMFPack&& other)
+      GMRES(GMRES&& other)
         : Parent(std::move(other))
       {}
 
-      ~UMFPack() = default;
+      ~GMRES() = default;
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
@@ -70,40 +68,37 @@ namespace Rodin::Solver
         x = m_solver.solve(b);
       }
 
-      void printControl()
+      GMRES& setTolerance(Real tol)
       {
-        m_solver.printUmfpackControl();
+        m_solver.setTolerance(tol);
+        return *this;
       }
 
-      void printInfo()
+      GMRES& setMaxIterations(size_t maxIt)
       {
-        m_solver.printUmfpackInfo();
+        m_solver.setMaxIterations(maxIt);
+        return *this;
       }
 
-      void printStatus()
+      GMRES* copy() const noexcept override
       {
-        m_solver.printUmfpackStatus();
-      }
-
-      UMFPack* copy() const noexcept override
-      {
-        return new UMFPack(*this);
+        return new GMRES(*this);
       }
 
     private:
-      Eigen::UmfPackLU<OperatorType> m_solver;
+      Eigen::GMRES<OperatorType> m_solver;
   };
 
   /**
    * @ingroup RodinCTAD
-   * @brief CTAD for UMFPack
+   * @brief CTAD for GMRES
    */
   template <class Scalar>
-  UMFPack(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> UMFPack<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
+  GMRES(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> GMRES<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
-#endif // #ifdef RODIN_USE_UMFPACK
 #endif
+
 
 

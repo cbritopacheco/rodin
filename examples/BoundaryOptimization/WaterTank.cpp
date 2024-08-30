@@ -26,7 +26,7 @@ static constexpr Geometry::Attribute dUnsupported = 4;
 static constexpr Geometry::Attribute Support = 11;
 static constexpr Geometry::Attribute dSupport = 111;
 
-static constexpr size_t maxIt = 10000;
+static constexpr size_t maxIt = 246;
 
 static constexpr Real epsilon = 1e-6;
 static constexpr Real ellP = 1e-5;
@@ -34,9 +34,7 @@ static constexpr Real tgv = 1e+12;
 static constexpr Real alpha = 4;
 
 static Real bA = epsilon;
-static Real bTarget = 1.0 / epsilon;
 static Real ellA = 1e-5;
-static Real targetArea = NAN;
 
 using RealFES = P1<Real>;
 using VectorFES = P1<Math::Vector<Real>>;
@@ -215,10 +213,6 @@ int main(int, char**)
     mesh.getConnectivity().compute(2, 2);
     mesh.getConnectivity().compute(1, 2);
     mesh.getConnectivity().compute(1, 0);
-
-    targetArea = 0.2 * mesh.getPerimeter();
-
-    Alert::Info() << "Target area: " << Alert::Notation(targetArea) << Alert::Raise;
 
     Alert::Info() << "RMC..." << Alert::Raise;
     regionCount = rmc(mesh, { Support }, Gamma);

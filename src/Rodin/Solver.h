@@ -19,9 +19,14 @@
 
 // Built-in iteratives solvers
 #include "Solver/CG.h"
+#include "Solver/BiCGSTAB.h"
 #include "Solver/LeastSquaresCG.h"
+#include "Solver/GMRES.h"
+#include "Solver/IDRSTABL.h"
 
 // SuiteSparse solvers
 #include "Solver/UMFPack.h"
+#include "Solver/CHOLMOD.h"
+
 
 #endif

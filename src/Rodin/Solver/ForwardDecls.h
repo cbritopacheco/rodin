@@ -96,18 +96,23 @@ namespace Rodin::Solver
   template <class OperatorType, class VectorType>
   class BiCGSTAB;
 
-#ifdef RODIN_USE_UMFPACK
+  template <class OperatorType, class VectorType>
+  class GMRES;
 
   template <class OperatorType, class VectorType>
-  class UMFPack;
+  class IDRSTABL;
 
+#ifdef RODIN_USE_UMFPACK
+  template <class OperatorType, class VectorType>
+  class UMFPack;
 #endif
 
 #ifdef RODIN_USE_CHOLMOD
-
-  template <class OperatorType, class VectorType>
-  class Cholmod;
-
+  namespace CHOLMOD
+  {
+    template <class OperatorType, class VectorType>
+    class SupernodalLLT;
+  }
 #endif
 
 #ifdef RODIN_USE_PASTIX

@@ -705,9 +705,9 @@ namespace Rodin::Geometry
             for (size_t i = 0; i < width - 1; ++i)
             {
               build.vertex({
-                  static_cast<Real>(i) + 0.5,
-                  static_cast<Real>(j) + 0.5,
-                  static_cast<Real>(k) + 0.5 });
+                  static_cast<Real>(i + 0.5),
+                  static_cast<Real>(j + 0.5),
+                  static_cast<Real>(k + 0.5) });
             }
           }
         }
@@ -826,7 +826,6 @@ namespace Rodin::Geometry
     }
     // Invalid inclusion.
     // The SubMesh where the Point belongs to is not a descendant of this Mesh.
-    Alert::Exception() << "miaow" << Alert::Raise;
     return {};
   }
 }
