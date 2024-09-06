@@ -172,7 +172,7 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         assert(getLHS().getRangeShape() == getRHS().getRangeShape());
-        return Math::dot(getLHS().getValue(p), getRHS().getValue(p));
+        return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getValue(p)));
       }
 
       Dot* copy() const noexcept override
@@ -300,7 +300,7 @@ namespace Rodin::Variational
       {
         assert(m_lhs->getRangeShape() == m_rhs->getRangeShape());
         const auto& p = getRHS().getPoint();
-        return Math::dot(getLHS().getValue(p), getRHS().getBasis(local));
+        return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getBasis(local)));
       }
 
       Dot* copy() const noexcept final override

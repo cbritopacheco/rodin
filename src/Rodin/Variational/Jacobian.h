@@ -73,21 +73,18 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      inline
       constexpr
       size_t getRows() const
       {
         return getOperand().getFiniteElementSpace().getVectorDimension();
       }
 
-      inline
       constexpr
       size_t getColumns() const
       {
         return getOperand().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      inline
       SpatialMatrixType getValue(const Geometry::Point& p) const
       {
         SpatialMatrixType out;
@@ -95,7 +92,6 @@ namespace Rodin::Variational
         return out;
       }
 
-      inline
       void getValue(SpatialMatrixType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -123,7 +119,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
@@ -133,7 +128,6 @@ namespace Rodin::Variational
       /**
        * @brief Interpolation function to be overriden in Derived type.
        */
-      inline
       constexpr
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
@@ -143,7 +137,6 @@ namespace Rodin::Variational
       /**
        * @brief Copy function to be overriden in Derived type.
        */
-      inline
       JacobianBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();

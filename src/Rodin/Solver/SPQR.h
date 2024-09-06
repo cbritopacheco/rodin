@@ -4,13 +4,15 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_GMRES_H
-#define RODIN_SOLVER_GMRES_H
+#ifndef RODIN_SOLVER_SPQR_H
+#define RODIN_SOLVER_SPQR_H
+
+#ifdef RODIN_USE_SPQR
 
 #include <optional>
 #include <functional>
 
-#include <unsupported/Eigen/IterativeSolvers>
+#include <Eigen/SPQRSupport>
 
 #include "Rodin/Configure.h"
 #include "Rodin/Math/Vector.h"
@@ -22,17 +24,17 @@
 namespace Rodin::Solver
 {
   /**
-   * @defgroup GMRESSpecializations GMRES Template Specializations
-   * @brief Template specializations of the GMRES class.
-   * @see GMRES
+   * @defgroup SPQRSpecializations SPQR Template Specializations
+   * @brief Template specializations of the SPQR class.
+   * @see SPQR
    */
 
   /**
-   * @ingroup GMRESSpecializations
-   * @brief GMRES for use with Math::SparseMatrix and Math::Vector.
+   * @ingroup SPQRSpecializations
+   * @brief SPQR for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class GMRES<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  class SPQR<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
     : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
@@ -48,19 +50,19 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      GMRES(ProblemType& pb)
+      SPQR(ProblemType& pb)
         : Parent(pb)
       {}
 
-      GMRES(const GMRES& other)
+      SPQR(const SPQR& other)
         : Parent(other)
       {}
 
-      GMRES(GMRES&& other)
+      SPQR(SPQR&& other)
         : Parent(std::move(other))
       {}
 
-      ~GMRES() = default;
+      ~SPQR() = default;
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
@@ -68,43 +70,39 @@ namespace Rodin::Solver
         x = m_solver.solve(b);
       }
 
-      GMRES& setTolerance(Real tol)
+      SPQR& setTolerance(Real tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
-      GMRES& setMaxIterations(size_t maxIt)
+      SPQR& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
 
-      GMRES& setRestart(size_t restart)
+      SPQR* copy() const noexcept override
       {
-        m_solver.set_restart(restart);
-        return *this;
-      }
-
-      GMRES* copy() const noexcept override
-      {
-        return new GMRES(*this);
+        return new SPQR(*this);
       }
 
     private:
-      Eigen::GMRES<OperatorType> m_solver;
+      Eigen::SPQR<OperatorType> m_solver;
   };
 
   /**
    * @ingroup RodinCTAD
-   * @brief CTAD for GMRES
+   * @brief CTAD for SPQR
    */
   template <class Scalar>
-  GMRES(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> GMRES<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
+  SPQR(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> SPQR<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif
+#endif
+
 
 
 

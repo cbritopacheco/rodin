@@ -221,7 +221,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return getLHS().getValue(p) * getRHS().getValue(p);
+        return this->object(getLHS().getValue(p)) * this->object(getRHS().getValue(p));
       }
 
       constexpr
@@ -457,7 +457,7 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = getPoint();
-        return getLHS().getValue(p) * getRHS().getBasis(local);
+        return this->object(getLHS().getValue(p)) * this->object(getRHS().getBasis(local));
       }
 
       Mult* copy() const noexcept override
@@ -617,7 +617,7 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = getPoint();
-        return getLHS().getBasis(local) * getRHS().getValue(p);
+        return this->object(getLHS().getBasis(local)) * this->object(getRHS().getValue(p));
       }
 
       Mult* copy() const noexcept override

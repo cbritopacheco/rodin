@@ -22,27 +22,22 @@ using namespace Rodin::Variational;
 using namespace Rodin::Examples::BoundaryOptimization;
 
 // Parameters
-static constexpr Attribute Aircraft = 3;
-static constexpr Attribute Air = 4;
-static constexpr Attribute ROI = 5;
+const Attribute PML = 6;
+const Attribute SoundHard = 7;
+const Attribute SoundSoft = 8;
+const Attribute dBox = 16;
+const Attribute dSoundSoft = 11;
+const size_t maxIt = 2000;
+const Real epsilon = 1e-6;
+const Real ell = 1e-12;
+const Real tgv = 1e+12;
+const Real alpha = 4;
+const Real waveLength = 50;
+const Real waveNumber = 2 * Math::Constants::pi() / waveLength;
 
-static constexpr Attribute PML = 6;
-static constexpr Attribute SoundHard = 7;
-static constexpr Attribute SoundSoft = 8;
-static constexpr Attribute Window = 9;
-
-static constexpr Attribute dBox = 10;
-static constexpr Attribute dSoundSoft = 11;
-
-static constexpr size_t maxIt = 2000;
-
-static constexpr Real epsilon = 1e-6;
-static constexpr Real ell = 0;
-static constexpr Real tgv = std::numeric_limits<float>::max();
-static constexpr Real alpha = 2;
-static constexpr Real angle = 0;
-static constexpr Real waveLength = 50;
-static constexpr Real waveNumber = 2 * Math::Constants::pi() / waveLength;
+const VectorFunction xi = { 0, 0, 1 };
+const Real impedance = 1.0 / 10;
+const Real R = 50;
 
 using RealFES = P1<Real>;
 using ComplexFES = P1<Complex>;
@@ -50,6 +45,17 @@ using VectorFES = P1<Math::Vector<Real>>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
 
+template <class ProblemType>
+void solve(ProblemType& pb)
+{
+  Solver::UMFPack solver(pb);
+  solver.solve();
+  solver.printStatus();
+  // Solver::GMRES solver(pb);
+  // solver.setMaxIterations(2000);
+  // solver.setTolerance(1e-12);
+  // solver.solve();
+}
 
 int main(int, char**)
 {
@@ -58,31 +64,64 @@ int main(int, char**)
   Threads::getGlobalThreadPool().reset(8);
   std::cout << Eigen::nbThreads() << std::endl;
 
+  Alert::Info() << "Loading mesh..." << Alert::Raise;
   MMG::Mesh mesh;
-  mesh.load("../resources/mmg/AircraftPML.medit.mesh", IO::FileFormat::MEDIT);
+  mesh.load("AcousticCloaking.medit.mesh", IO::FileFormat::MEDIT);
 
   Real hmax = waveLength / 2;
-  Real hmin = waveLength / 8;
-  Real hausd = 0.5 * hmin;
+  Real hmin = waveLength / 32;
+  Real hausd = waveLength / 64;
   Real hgrad = 1.2;
+
+  Alert::Info() << "Initializing sound-soft region..." << Alert::Raise;
+  {
+    P1 vh(mesh);
+
+    GridFunction dist(vh);
+    dist = [&](const Point& p)
+    {
+      Math::SpatialVector<Real> c(3);
+      c << -45.189708, 0, -11.330562;
+      return (p - c).norm() - 2;
+    };
+
+    mesh.save("Dist.mesh", IO::FileFormat::MEDIT);
+    dist.save("Dist.sol", IO::FileFormat::MEDIT);
+
+    mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
+                                      .split(SoundSoft, { SoundSoft, SoundHard })
+                                      .split(SoundHard, { SoundSoft, SoundHard })
+                                      .noSplit(PML)
+                                      .noSplit(dBox)
+                                      .setHMax(hmax)
+                                      .setHMin(hmin)
+                                      .setGradation(hgrad)
+                                      .setHausdorff(hausd)
+                                      .surface()
+                                      .discretize(dist);
+  }
+
+  mesh.save("Omega0.mfem.mesh", IO::FileFormat::MFEM);
+  mesh.save("Omega0.mesh", IO::FileFormat::MEDIT);
 
   std::ofstream fObj("obj.txt");
   size_t i = 0;
   size_t regionCount;
   while (i < maxIt)
   {
-    // bool topologicalStep = (i < 10);// || (i < 200  && i % 20 == 0);
+    //bool topologicalStep = i < 5 || (i < 200  && i % 20 == 0);
     bool topologicalStep = true;
     bool geometricStep = !topologicalStep;
 
     const Real k = 0.5 * (hmax + hmin);
-    const Real dt = alpha * hmin;
-    const Real radius = 0.5 * k;
+    const Real dt = 2 * hmin;
+    const Real radius = 2 * hmin;
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
                   << "HMax:      " << Alert::Notation(hmax)     << Alert::NewLine
                   << "HMin:      " << Alert::Notation(hmin)     << Alert::NewLine
                   << "Hausdorff: " << Alert::Notation(hausd)    << Alert::NewLine
                   << "HGrad:     " << Alert::Notation(hgrad)    << Alert::NewLine
+                  << "ell:     " << Alert::Notation(ell)    << Alert::NewLine
                   << "dt:        " << Alert::Notation(dt)       << Alert::Raise;
 
     Alert::Info() << "Optimizing the domain..." << Alert::Raise;
@@ -100,80 +139,47 @@ int main(int, char**)
     mesh.getConnectivity().compute(1, 0);
 
     Alert::Info() << "RMC..." << Alert::Raise;
-    regionCount = rmc(mesh, { SoundSoft }, SoundHard);
-
-    Alert::Info() << "Found " << Alert::Notation(regionCount) << " regions."
-      << Alert::Raise;
-
-    Alert::Info() << "Trimming mesh..." << Alert::Raise;
-    auto perturbed = mesh.trim(Aircraft);
-    perturbed.save("Perturbed.mesh", IO::FileFormat::MEDIT);
+    // regionCount = rmc(mesh, { SoundSoft }, SoundHard);
 
     Alert::Info() << "Skinning mesh..." << Alert::Raise;
-    auto dPerturbed = perturbed.skin();
+    auto dOmega = mesh.skin();
 
     Alert::Info() << "Tracing mesh..." << Alert::Raise;
-    dPerturbed.trace({ {{ SoundHard, SoundSoft }, dSoundSoft } });
-    dPerturbed.save("dK.mesh", IO::FileFormat::MEDIT);
-
-    // Parameters
-    VectorFunction xi = { 0, 0, 1 };
-    Real impedance = 1;
-    Real R = 50;
+    dOmega.trace({ {{ SoundHard, SoundSoft }, dSoundSoft } });
+    dOmega.save("dK.mesh", IO::FileFormat::MEDIT);
 
     ComplexFunction wave =
       [&](const Point& p)
       {
         const Real d = waveNumber * p.getCoordinates().dot(xi(p));
-        return Complex(cos(d), -sin(d));
+        return Complex(cos(d), sin(d));
       };
 
-    BoundaryNormal normal(perturbed);
-
+    BoundaryNormal normal(mesh);
     ComplexFunction dnWave = waveNumber * Complex(0, 1) * Dot(xi, normal) * wave;
-
-    // Bump function
-    auto h = [](Real r)
-    {
-      if (r < -1.0)
-        return 1.0;
-      else if (r > 1.0)
-        return 0.0;
-      else
-        return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
-    };
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
 
-    ComplexFES cfes(perturbed);
-
-    RealFES rfes(perturbed);
-    RealFES drfes(dPerturbed);
+    ComplexFES cfes(mesh);
+    RealFES rfes(mesh);
+    RealFES drfes(dOmega);
+    VectorFES drvfes(dOmega, mesh.getSpaceDimension());
 
     GridFunction phi(rfes);
     phi.getFiniteElementSpace().getMesh().save("Phi.mesh");
+
     phi = Re(wave);
     phi.save("PhiRe.gf");
+
     phi = Im(wave);
     phi.save("PhiIm.gf");
 
-    GridFunction dnRe(rfes);
-    dnRe.projectOnBoundary(Re(dnWave));
-    dnRe.save("dnWaveRe.gf");
-
-    GridFunction dnIm(rfes);
-    dnIm.projectOnBoundary(Im(dnWave));
-    dnIm.save("dnWaveIm.gf");
-
     Alert::Info() << "Distancing absorbing domain..." << Alert::Raise;
     auto dist = MMG::Distancer(drfes).setInteriorDomain(SoundSoft)
-                                     .distance(dPerturbed);
+                                     .distance(dOmega);
 
     dist.save("Dist.gf");
     dist.getFiniteElementSpace().getMesh().save("Dist.mesh");
-
-    RealFunction he =
-      [&](const Geometry::Point& p) { return h(dist(p) / epsilon) / epsilon; };
 
     Alert::Info() << "Assembling state equation..." << Alert::Raise;
     TrialFunction u(cfes);
@@ -181,232 +187,158 @@ int main(int, char**)
     Problem state(u, v);
     state = Integral(Grad(u), Grad(v))
           - waveNumber * waveNumber * Integral(u, v)
-          - Complex(-1 / R, waveNumber) * FaceIntegral(u, v).over(PML)
-          - BoundaryIntegral(dnWave, v).over(SoundSoft, SoundHard, Window)
-          - Complex(0, waveNumber / impedance) * BoundaryIntegral(u, v).over(SoundSoft)
-          - Complex(0, waveNumber / impedance) * BoundaryIntegral(wave, v).over(SoundSoft);
+          + BoundaryIntegral(dnWave, v).over(SoundSoft, SoundHard)
+          + Complex(0, waveNumber / impedance) * BoundaryIntegral(u, v).over(SoundSoft)
+          + Complex(0, waveNumber / impedance) * BoundaryIntegral(wave, v).over(SoundSoft)
+          + Complex(1 / R, waveNumber) * FaceIntegral(u, v).over(PML)
+          ;
 
     state.assemble();
 
     Alert::Info() << "Solving..." << Alert::Raise;
-    Solver::UMFPack solver(state);
-    solver.solve();
-    solver.printStatus();
+    solve(state);
+
+    GridFunction total(rfes);
+    total = [&](const Point& x) { return std::norm(wave(x) + u.getSolution()(x)); };
+    total.save("Total.gf");
+    rfes.getMesh().save("Total.mesh");
 
     GridFunction pressure(rfes);
-    pressure.getFiniteElementSpace().getMesh().save("Pressure.mesh");
-    pressure = [&](const Point& p) { return std::abs(u.getSolution()(p)); };
+    Math::SpatialVector<Real> c({{-50, 0, 0}});
+    pressure = [&](const Point& p)
+    {
+      if ((p - c).norm() < 75)
+        return std::norm(u.getSolution()(p));
+      else return 0.0;
+    };
     pressure.save("Scattered.gf");
+    rfes.getMesh().save("Scattered.mesh");
 
-    GridFunction uRe(rfes);
-    uRe = Re(u.getSolution());
-    uRe.save("uRe.gf");
+    Alert::Info() << "Computing objective..." << Alert::Raise;
+    pressure.setWeights();
+    const Real J = 0.5 * Integral(pressure).compute();
+    const Real area = mesh.getArea(SoundSoft);
+    const Real objective = J + ell * area;
 
-    GridFunction uIm(rfes);
-    uIm = Im(u.getSolution());
-    uIm.save("uIm.gf");
+    Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::NewLine
+                  << "J: " << Alert::Notation(J) << Alert::NewLine
+                  << "Area: " << Alert::Notation(area) << Alert::NewLine
+                  << Alert::Raise;
+    fObj << objective << "\n";
+    fObj.flush();
 
-    GridFunction total(cfes);
-    total = wave + u.getSolution();
+    Alert::Info() << "Assembling adjoint equation..." << Alert::Raise;
+    TrialFunction p(cfes);
+    TestFunction  q(cfes);
+    Problem adjoint(p, q);
+    adjoint = Integral(Grad(p), Grad(q))
+            - waveNumber * waveNumber * Integral(p, q).over(SoundSoft)
+            + Integral(u.getSolution(), q)
+            + Complex(0, -waveNumber / impedance) * BoundaryIntegral(p, q).over(SoundSoft)
+            + Complex(1 / R, -waveNumber) * FaceIntegral(p, q).over(PML)
+            ;
 
-    pressure = [&](const Point& p) { return std::abs(total(p)); };
-    pressure.save("Total.gf");
+    adjoint.assemble();
 
-    std::exit(1);
+    Alert::Info() << "Solving..." << Alert::Raise;
+    solve(adjoint);
 
-    // Alert::Info() << "Solving state equation..." << Alert::Raise;
-    // TrialFunction u(spfes);
-    // TestFunction  v(spfes);
-    // Problem state(u, v);
-    // state = Integral(Grad(u), Grad(v))
-    //       - Integral(waveNumber * waveNumber * gamma * u, v)
-    //       + FaceIntegral(he * u, v).over({ Absorbing, Reflecting, Window })
-    //       + DirichletBC(u, phi).on(PlaneWave, Dirichlet);
-    //       //+ DirichletBC(u, Zero()).on(Dirichlet);
-    // Solver::CG(state).solve();
+    pressure = [&](const Point& x) { return std::norm(p.getSolution()(x)); };
+    pressure.save("Adjoint.gf");
+    p.getSolution().getFiniteElementSpace().getMesh().save("Adjoint.mesh");
 
-    // u.getSolution().save("State.gf");
-    // u.getSolution().getFiniteElementSpace().getMesh().save("State.mesh");
+    if (topologicalStep)
+    {
+      Alert::Info() << "Topological optimization..." << Alert::Raise;
+      Alert::Info() << "Inserting sound-soft region..." << Alert::Raise;
+      TrialFunction s(drfes);
+      TestFunction  t(drfes);
+      Problem topo(s, t);
+      topo = alpha * alpha * Integral(Grad(s), Grad(t))
+           + Integral(s, t)
+           - Integral(
+               Im(waveNumber / impedance * Conjugate(u.getSolution() + wave) * p.getSolution()), t).over(SoundHard)
+           + tgv * Integral(s, t).over(dBox, SoundSoft);
 
-    // GridFunction diff(spfes);
-    // diff = 0.5 * Pow(u.getSolution() - u0.getSolution(), 2);
-    // diff.save("Diff.gf");
-    // diff.getFiniteElementSpace().getMesh().save("Diff.mesh");
+      topo.assemble();
 
-    // Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
-    // TrialFunction p(spfes);
-    // TestFunction  q(spfes);
+      solve(topo);
 
-    // Problem adjoint(p, q);
-    // adjoint = Integral(Grad(p), Grad(q))
-    //         - Integral(waveNumber * waveNumber * gamma * p, q)
-    //         + Integral(u.getSolution() - u0.getSolution(), q)
-    //         + FaceIntegral(he * p, q).over({ Absorbing, Reflecting, Window })
-    //         + DirichletBC(u, Zero()).on({ Dirichlet, PlaneWave });
-    //         ;
-    // Solver::CG(adjoint).solve();
+      s.getSolution().save("Topo.gf");
+      drfes.getMesh().save("Topo.mesh");
 
-    // p.getSolution().save("Adjoint.gf");
-    // p.getSolution().getFiniteElementSpace().getMesh().save("Adjoint.mesh");
+      Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
+      auto cs = locations(s.getSolution());
 
-    // Alert::Info() << "Computing objective..." << Alert::Raise;
-    // diff.setWeights();
-    // if (i > 0)
-    // {
-    //   oldAugmented = augmented;
-    //   oldObjective = objective;
-    //   oldConstraint = constraint;
-    // }
+      Alert::Info() << "Nucleating " << Alert::Notation(cs.size()) << " holes..."
+                    << Alert::Raise;
+      holes(radius, dist, cs);
+    }
+    else if (geometricStep)
+    {
+      Alert::Info() << "Geometrical optimization..." << Alert::Raise;
 
-    // const Real J = Integral(diff).compute();
-    // const Real area = mesh.getArea(Absorbing);
-    // const Real perimeter = dPerturbed.getMeasure(1, dAbsorbing);
-    // objective = J;
-    // constraint = (area / targetArea - 1);
-    // augmented = objective;// + ellA * constraint + 0.5 * bA * constraint * constraint;
+      Alert::Info() << "Computing conormal..." << Alert::Raise;
+      GridFunction conormal(drvfes);
+      conormal.project(Grad(dist), { SoundSoft, SoundHard });
+      conormal.stableNormalize();
 
-    // Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::NewLine
-    //               << "Augmented: " << Alert::Notation(augmented) << Alert::NewLine
-    //               << "Absorbing Area: " << Alert::Notation(area) << Alert::NewLine
-    //               << "Constraint: " << Alert::Notation(constraint) << Alert::NewLine
-    //               << Alert::Raise;
-    // fObj << augmented << "\n";
-    // fObj.flush();
+      conormal.getFiniteElementSpace().getMesh().save("Conormal.mesh");
+      conormal.save("Conormal.gf");
 
-    // if (topologicalStep)
-    // {
-    //   Alert::Info() << "Topological optimization..." << Alert::Raise;
-    //   Alert::Info() << "Inserting supporting region..." << Alert::Raise;
-    //   TrialFunction s(dsfes);
-    //   TestFunction  t(dsfes);
-    //   Problem topo(s, t);
-    //   topo = alpha * alpha * dt * dt * Integral(Grad(s), Grad(t))
-    //        + Integral(s, t)
-    //        + Integral(u.getSolution() * p.getSolution(), t)
-    //        + tgv * Integral(s, t).over(Absorbing, Window, Dirichlet, PlaneWave);
-    //   Solver::CG(topo).solve();
+      Alert::Info() << "Computing shape gradient..." << Alert::Raise;
 
-    //   s.getSolution().save("Topo.gf");
-    //   dsfes.getMesh().save("Topo.mesh");
+      TrialFunction theta(drvfes);
+      TestFunction  w(drvfes);
+      Problem hilbert(theta, w);
+      hilbert = alpha * alpha * Integral(Jacobian(theta), Jacobian(w))
+              + Integral(theta, w)
+              - FaceIntegral(
+                  Im(waveNumber / impedance * Conjugate(u.getSolution() + wave) * p.getSolution()),
+                  Dot(conormal, w)).over(dSoundSoft)
+              ;
 
-    //   GridFunction raw(dsfes);
-    //   raw = -u.getSolution() * p.getSolution();
-    //   raw.save("Raw.gf");
-    //   dsfes.getMesh().save("Raw.mesh");
+      hilbert.assemble();
 
-    //   Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
-    //   const Real tc = s.getSolution().max();
-    //   std::vector<Point> cs;
-    //   for (auto it = dPerturbed.getVertex(); !it.end(); ++it)
-    //   {
-    //     const Point p(*it, it->getTransformation(),
-    //         Polytope::getVertex(0, Polytope::Type::Point), it->getCoordinates());
-    //     const Real tp = s.getSolution()(p);
-    //     if (tp > 1e-6 && abs(tp / tc) > (1 - 1e-12))
-    //     {
-    //       cs.emplace_back(std::move(p));
-    //       break;
-    //     }
-    //   }
+      solve(hilbert);
 
-    //   if (cs.size() > 0)
-    //   {
+      GridFunction norm(drfes);
+      norm = Frobenius(theta.getSolution());
+      theta.getSolution() /= norm.max();
 
-    //     Alert::Info() << "Nucleating " << Alert::Notation(cs.size()) << " holes..."
-    //                   << Alert::Raise;
-    //     holes(radius, dist, cs);
-    //   }
-    //   else
-    //   {
-    //     Alert::Info() << "No holes to nucleate !" << Alert::Raise;
-    //   }
-    // }
-    // else if (geometricStep)
-    // {
-    //   Alert::Info() << "Geometrical optimization..." << Alert::Raise;
+      theta.getFiniteElementSpace().getMesh().save("Theta.mesh");
+      theta.getSolution().save("Theta.gf");
 
-    //   Alert::Info() << "Computing conormal..." << Alert::Raise;
+      Alert::Info() << "Advecting support..." << Alert::Raise;
+      MMG::Advect(dist, theta.getSolution()).step(dt);
+    }
 
-    //   GridFunction conormal(dvfes);
-    //   conormal.projectOnFaces(Average(Grad(dist)));
-    //   conormal.stableNormalize();
+    dist.save("Dist.gf");
+    dist.getFiniteElementSpace().getMesh().save("Dist.mesh");
 
-    //   conormal.getFiniteElementSpace().getMesh().save("Conormal.mesh");
-    //   conormal.save("Conormal.gf");
+    Alert::Info() << "Meshing the support..." << Alert::Raise;
+    RealFES workaroundfes(mesh);
+    GridFunction workaround(workaroundfes);
+    workaround.projectOnBoundary(dist);
+    mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
+                                      .split(SoundSoft, { SoundSoft, SoundHard })
+                                      .split(SoundHard, { SoundSoft, SoundHard })
+                                      .noSplit(PML)
+                                      .noSplit(dBox)
+                                      .setHMax(hmax)
+                                      .setHMin(hmin)
+                                      .setGradation(hgrad)
+                                      .setHausdorff(hausd)
+                                      .surface()
+                                      .discretize(workaround);
 
-    //   Alert::Info() << "Computing shape gradient..." << Alert::Raise;
+    Alert::Info() << "Saving files..." << Alert::Raise;
+    mesh.save("Omega.mesh", IO::FileFormat::MEDIT);
+    dOmega.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
+    dOmega.save("out/dOmega.mfem." + std::to_string(i) +  ".mesh", IO::FileFormat::MFEM);
 
-    //   TrialFunction theta(dvfes);
-    //   TestFunction  w(dvfes);
-    //   Problem hilbert(theta, w);
-    //   hilbert = alpha * alpha * dt * dt * Integral(Jacobian(theta), Jacobian(w))
-    //           + Integral(theta, w)
-    //           + 1.0 / epsilon * FaceIntegral(
-    //               Dot(u.getSolution(), p.getSolution()), Dot(conormal, w)).over(dAbsorbing)
-    //           + constraint * ellA * FaceIntegral(conormal, w).over(dAbsorbing)
-    //           + 0.5 * 2 * bA * constraint * FaceIntegral(conormal, w).over(dAbsorbing)
-    //           + tgv * Integral(theta, w).over(Dirichlet, PlaneWave, Window)
-    //           ;
-    //   Solver::CG(hilbert).solve();
-
-    //   GridFunction norm(dsfes);
-    //   norm = Frobenius(theta.getSolution());
-    //   theta.getSolution() /= norm.max();
-
-    //   // dPerturbed.save("Theta.mesh");
-    //   // theta.getSolution().save("Theta.gf");
-
-    //   dPerturbed.save("Theta.mesh", IO::FileFormat::MEDIT);
-    //   theta.getSolution().save("Theta.sol", IO::FileFormat::MEDIT);
-
-    //   Alert::Info() << "Advecting support..." << Alert::Raise;
-    //   MMG::Advect(dist, theta.getSolution()).step(dt);
-    // }
-
-    // dist.save("NewDist.gf");
-    // dist.getFiniteElementSpace().getMesh().save("NewDist.mesh");
-
-    // Alert::Info() << "Meshing the support..." << Alert::Raise;
-    // try
-    // {
-    //   GridFunction workaround(sfes);
-    //   workaround.projectOnFaces(dist, { Reflecting, Window, Absorbing, Dirichlet, PlaneWave });
-    //   workaround.save("Workaround.gf");
-    //   workaround.getFiniteElementSpace().getMesh().save("Workaround.mesh");
-    //   mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
-    //                                     .split(Absorbing, { Absorbing, Reflecting })
-    //                                     .split(Reflecting, { Absorbing, Reflecting })
-    //                                     .noSplit(Window)
-    //                                     .noSplit(Dirichlet)
-    //                                     .noSplit(PlaneWave)
-    //                                     .setHMax(hmax)
-    //                                     .setHMin(hmin)
-    //                                     .setGradation(hgrad)
-    //                                     .setHausdorff(hausd)
-    //                                     .surface()
-    //                                     .discretize(workaround);
-    //   hmax = 1.1 * hmax > resolution * waveLength ? resolution * waveLength : hmax * 1.1;
-    // }
-    // catch (Alert::Exception& e)
-    // {
-    //   Alert::Warning() << "Meshing failed. Trying with new parameters." << Alert::Raise;
-    //   hmax = 0.9 * hmax < 0.01 ? 0.01 : hmax * 0.9;
-    //   continue;
-    // }
-
-    // Alert::Info() << "Saving files..." << Alert::Raise;
-    // mesh.save("Omega.mesh", IO::FileFormat::MEDIT);
-    // dPerturbed.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
-    // dPerturbed.save("out/dOmega.mfem." + std::to_string(i) +  ".mesh", IO::FileFormat::MFEM);
-
-    // Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
-
-    // ellA += bA * constraint;
-    // if (i > 0)
-    //   bA *= 1 + alpha * alpha * abs(oldAugmented - augmented);
-    // bA = fmin(bTarget, bA);
-
-    // i++;
+    Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
+    i++;
   }
   return 0;
 }

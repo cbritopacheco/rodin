@@ -148,7 +148,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return getLHS().getValue(p) + getRHS().getValue(p);
+        return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
       }
 
       template <class T>
@@ -305,7 +305,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return getLHS().getBasis(local) + getRHS().getBasis(local);
+        return getLHS().getBasis(local) + this->object(getRHS().getBasis(local));
       }
 
       constexpr

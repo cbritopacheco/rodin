@@ -353,7 +353,7 @@ namespace Rodin::Geometry
   Real MeshBase::getVolume() const
   {
     Real totalVolume = 0;
-    for (auto it = getCell(); !it.end(); ++it)
+    for (auto it = getPolytope(3); !it.end(); ++it)
       totalVolume += it->getMeasure();
     return totalVolume;
   }
@@ -361,7 +361,7 @@ namespace Rodin::Geometry
   Real MeshBase::getVolume(Attribute attr) const
   {
     Real totalVolume = 0;
-    for (auto it = getCell(); !it.end(); ++it)
+    for (auto it = getPolytope(3); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
         totalVolume += it->getMeasure();
@@ -372,7 +372,7 @@ namespace Rodin::Geometry
   Real MeshBase::getVolume(const FlatSet<Attribute>& attrs) const
   {
     Real totalVolume = 0;
-    for (auto it = getCell(); !it.end(); ++it)
+    for (auto it = getPolytope(3); !it.end(); ++it)
     {
       if (attrs.contains(it->getAttribute()))
         totalVolume += it->getMeasure();
@@ -413,7 +413,7 @@ namespace Rodin::Geometry
   Real MeshBase::getArea() const
   {
     Real totalArea = 0;
-    for (auto it = getFace(); !it.end(); ++it)
+    for (auto it = getPolytope(2); !it.end(); ++it)
       totalArea += it->getMeasure();
     return totalArea;
   }
@@ -421,7 +421,7 @@ namespace Rodin::Geometry
   Real MeshBase::getArea(Attribute attr) const
   {
     Real totalArea = 0;
-    for (auto it = getFace(); !it.end(); ++it)
+    for (auto it = getPolytope(2); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
         totalArea += it->getMeasure();
@@ -432,7 +432,7 @@ namespace Rodin::Geometry
   Real MeshBase::getArea(const FlatSet<Attribute>& attrs) const
   {
     Real totalArea = 0;
-    for (auto it = getFace(); !it.end(); ++it)
+    for (auto it = getPolytope(2); !it.end(); ++it)
     {
       if (attrs.contains(it->getAttribute()))
         totalArea += it->getMeasure();
