@@ -157,7 +157,7 @@ namespace Rodin::Variational
         }
       }
 
-      inline Grad* copy() const noexcept override
+      Grad* copy() const noexcept override
       {
         return new Grad(*this);
       }
@@ -206,49 +206,42 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(), 1 };
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         assert(m_p.has_value());
         return m_p.value().get();
       }
 
-      inline
       Grad& setPoint(const Geometry::Point& p)
       {
         m_p = p;
         return *this;
       }
 
-      inline
       auto getBasis(size_t local) const
       {
         const auto& p = m_p.value().get();
@@ -261,7 +254,7 @@ namespace Rodin::Variational
         return p.getJacobianInverse().transpose() * fe.getGradient(local)(rc);
       }
 
-      inline Grad* copy() const noexcept override
+      Grad* copy() const noexcept override
       {
         return new Grad(*this);
       }

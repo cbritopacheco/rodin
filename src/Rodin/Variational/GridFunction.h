@@ -153,14 +153,12 @@ namespace Rodin::Variational
        * The operation is linear in the size of the number of entries in the
        * underlying matrix.
        */
-      inline
       constexpr
       ScalarType max() const
       {
         return m_data.maxCoeff();
       }
 
-      inline
       constexpr
       ScalarType max(Index& idx) const
       {
@@ -178,21 +176,18 @@ namespace Rodin::Variational
        * The operation is linear in the size of the number of entries in the
        * underlying matrix.
        */
-      inline
       constexpr
       ScalarType min() const
       {
         return m_data.minCoeff();
       }
 
-      inline
       constexpr
       ScalarType min(Index& idx) const
       {
         return m_data.minCoeff(&idx);
       }
 
-      inline
       constexpr
       Index argmax() const
       {
@@ -201,7 +196,6 @@ namespace Rodin::Variational
         return idx;
       }
 
-      inline
       constexpr
       Index argmin() const
       {
@@ -210,7 +204,6 @@ namespace Rodin::Variational
         return idx;
       }
 
-      inline
       Derived& normalize()
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>,
@@ -220,7 +213,6 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
-      inline
       Derived& stableNormalize()
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>,
@@ -230,14 +222,12 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
-      inline
       constexpr
       size_t getDimension() const
       {
         return getFiniteElementSpace().getVectorDimension();
       }
 
-      inline
       constexpr
       auto x() const
       {
@@ -246,7 +236,6 @@ namespace Rodin::Variational
         return Component(*this, 0);
       }
 
-      inline
       constexpr
       auto y() const
       {
@@ -255,7 +244,6 @@ namespace Rodin::Variational
         return Component(*this, 1);
       }
 
-      inline
       constexpr
       auto z() const
       {
@@ -264,7 +252,6 @@ namespace Rodin::Variational
         return Component(*this, 2);
       }
 
-      inline
       constexpr
       size_t getSize() const
       {
@@ -272,7 +259,6 @@ namespace Rodin::Variational
       }
 
 
-      inline
       Derived& setZero()
       {
         m_data.setZero();
@@ -284,7 +270,6 @@ namespace Rodin::Variational
       /**
        * @brief Bulk assigns the value to the whole data array.
        */
-      inline
       Derived& operator=(const RangeType& v)
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
@@ -304,13 +289,11 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
-      inline
       Derived& operator=(std::function<RangeType(const Geometry::Point&)> fn)
       {
         return project(fn);
       }
 
-      inline
       Derived& operator=(std::function<void(RangeType&, const Geometry::Point&)> fn)
       {
         return project(fn);
@@ -320,7 +303,6 @@ namespace Rodin::Variational
        * @brief Projection of a function.
        */
       template <class NestedDerived>
-      inline
       Derived& operator=(const FunctionBase<NestedDerived>& fn)
       {
         return project(fn);
@@ -329,7 +311,6 @@ namespace Rodin::Variational
       /**
        * @brief Addition of a scalar value.
        */
-      inline
       Derived& operator+=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
@@ -340,7 +321,6 @@ namespace Rodin::Variational
       /**
        * @brief Substraction of a scalar value.
        */
-      inline
       Derived& operator-=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
@@ -351,7 +331,6 @@ namespace Rodin::Variational
       /**
        * @brief Multiplication by a scalar value.
        */
-      inline
       Derived& operator*=(const ScalarType& rhs)
       {
         m_data = m_data.array() * rhs;
@@ -361,14 +340,12 @@ namespace Rodin::Variational
       /**
        * @brief Division by a scalar value.
        */
-      inline
       Derived& operator/=(const ScalarType& rhs)
       {
         m_data = m_data.array() / rhs;
         return static_cast<Derived&>(*this);
       }
 
-      inline
       Derived& operator+=(const GridFunctionBase& rhs)
       {
         if (this == &rhs)
@@ -383,7 +360,6 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
-      inline
       Derived& operator-=(const GridFunctionBase& rhs)
       {
         if (this == &rhs)
@@ -398,7 +374,6 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
-      inline
       Derived& operator*=(const GridFunctionBase& rhs)
       {
         if (this == &rhs)
@@ -413,7 +388,6 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
-      inline
       Derived& operator/=(const GridFunctionBase& rhs)
       {
         if (this == &rhs)
@@ -434,21 +408,18 @@ namespace Rodin::Variational
        * @param[in] fn Scalar valued function
        * @param[in] attr Attribute
        */
-      inline
       auto& project(
           std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return project(fn, FlatSet<Geometry::Attribute>{ attr });
       }
 
-      inline
       auto& project(
           std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return project(fn, FlatSet<Geometry::Attribute>{ attr });
       }
 
-      inline
       auto& project(
           std::function<RangeType(const Geometry::Point&)> fn,
           const FlatSet<Geometry::Attribute>& attrs = {})
@@ -469,7 +440,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       auto& project(
           std::function<void(RangeType&, const Geometry::Point&)> fn,
           const FlatSet<Geometry::Attribute>& attrs = {})
@@ -491,7 +461,6 @@ namespace Rodin::Variational
       }
 
       template <class NestedDerived>
-      inline
       Derived& project(const FunctionBase<NestedDerived>& fn)
       {
         return project(fn, FlatSet<Geometry::Attribute>{});
@@ -508,7 +477,6 @@ namespace Rodin::Variational
        * attribute.
        */
       template <class NestedDerived>
-      inline
       Derived& project(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
         return project(fn, FlatSet<Geometry::Attribute>{attr});
@@ -624,21 +592,18 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
-      inline
       auto& projectOnBoundary(
           std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
-      inline
       auto& projectOnBoundary(
           std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
-      inline
       auto& projectOnBoundary(
           std::function<RangeType(const Geometry::Point&)> fn,
           const FlatSet<Geometry::Attribute>& attrs = {})
@@ -659,7 +624,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       auto& projectOnBoundary(
           std::function<void(RangeType&, const Geometry::Point&)> fn,
           const FlatSet<Geometry::Attribute>& attrs = {})
@@ -681,14 +645,12 @@ namespace Rodin::Variational
       }
 
       template <class NestedDerived>
-      inline
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn)
       {
         return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{});
       }
 
       template <class NestedDerived>
-      inline
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
         return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
@@ -735,21 +697,18 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
-      inline
       auto& projectOnFaces(
           std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
-      inline
       auto& projectOnFaces(
           std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
-      inline
       auto& projectOnFaces(
           std::function<RangeType(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
@@ -769,7 +728,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       auto& projectOnFaces(
           std::function<void(RangeType&, const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
@@ -790,14 +748,12 @@ namespace Rodin::Variational
       }
 
       template <class NestedDerived>
-      inline
       Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn)
       {
         return static_cast<Derived&>(*this).projectOnFaces(fn, FlatSet<Geometry::Attribute>{});
       }
 
       template <class NestedDerived>
-      inline
       Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
         return projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
@@ -844,21 +800,18 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
-      inline
       auto& projectOnInterfaces(
           std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
-      inline
       auto& projectOnInterfaces(
           std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{ attr });
       }
 
-      inline
       auto& projectOnInterfaces(
           std::function<RangeType(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
@@ -878,7 +831,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       auto& projectOnInterfaces(
           std::function<void(RangeType&, const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
@@ -899,14 +851,12 @@ namespace Rodin::Variational
       }
 
       template <class NestedDerived>
-      inline
       Derived& projectOnInterfaces(const FunctionBase<NestedDerived>& fn)
       {
         return static_cast<Derived&>(*this).projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{});
       }
 
       template <class NestedDerived>
-      inline
       Derived& projectOnInterfaces(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
         return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
@@ -1021,7 +971,6 @@ namespace Rodin::Variational
         output.close();
       }
 
-      inline
       constexpr
       const FES& getFiniteElementSpace() const
       {
@@ -1032,7 +981,6 @@ namespace Rodin::Variational
        * @brief Returns a constant reference to the GridFunction data.
        */
       template <class Matrix>
-      inline
       constexpr
       Derived& setData(Matrix&& data) const
       {
@@ -1043,7 +991,6 @@ namespace Rodin::Variational
       /**
        * @brief Returns a constant reference to the GridFunction data.
        */
-      inline
       constexpr
       auto& getData()
       {
@@ -1053,21 +1000,18 @@ namespace Rodin::Variational
       /**
        * @brief Returns a constant reference to the GridFunction data.
        */
-      inline
       constexpr
       const DataType& getData() const
       {
         return m_data;
       }
 
-      inline
       constexpr
       std::optional<WeightVectorType>& getWeights()
       {
         return m_weights;
       }
 
-      inline
       constexpr
       const std::optional<WeightVectorType>& getWeights() const
       {
@@ -1078,7 +1022,6 @@ namespace Rodin::Variational
        * @brief Computes the weights from the data.
        * @note CRTP function to be overriden in Derived class.
        */
-      inline
       Derived& setWeights()
       {
         return static_cast<Derived&>(*this).setWeights();
@@ -1090,7 +1033,6 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in Derived class.
        */
       template <class Vector>
-      inline
       Derived& setWeights(Vector&& weights)
       {
         return static_cast<Derived&>(*this).setWeights(std::forward<Vector>(weights));
@@ -1101,7 +1043,6 @@ namespace Rodin::Variational
        * computation is performed.
        */
       template <class Vector, class Matrix>
-      inline
       Derived& setWeightsAndData(Vector&& weights, Matrix&& data)
       {
         m_weights = std::forward<Vector>(weights);
@@ -1109,7 +1050,6 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
@@ -1117,14 +1057,12 @@ namespace Rodin::Variational
       }
 
       template <class Value>
-      inline
       Derived& setValue(const std::pair<size_t, Index>& p, size_t local, Value&& v)
       {
         return setValue(getFiniteElementSpace().getGlobalIndex(p, local), std::forward<Value>(v));
       }
 
       template <class Value>
-      inline
       Derived& setValue(Index global, Value&& v)
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
@@ -1150,7 +1088,6 @@ namespace Rodin::Variational
        * @brief Gets the value at the given polytope on the local degree of
        * freedom.
        */
-      inline
       auto getValue(const std::pair<size_t, Index>& p, size_t local) const
       {
         return getValue(getFiniteElementSpace().getGlobalIndex(p, local));
@@ -1161,7 +1098,6 @@ namespace Rodin::Variational
        * @brief Gets the value of the GridFunction at the global degree of
        * freedom index.
        */
-      inline
       auto getValue(Index global) const
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
@@ -1183,7 +1119,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       constexpr
       RangeType getValue(const Geometry::Point& p) const
       {
@@ -1195,7 +1130,6 @@ namespace Rodin::Variational
       /**
        * @brief Gets the interpolated value at the point.
        */
-      inline
       void getValue(RangeType& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -1233,7 +1167,6 @@ namespace Rodin::Variational
        * @brief Interpolates the GridFunction at the given point.
        * @note CRTP function to be overriden in Derived class.
        */
-      inline
       constexpr
       void interpolate(RangeType& res, const Geometry::Point& p) const
       {

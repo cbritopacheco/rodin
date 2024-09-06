@@ -186,6 +186,7 @@ namespace Rodin::Assembly
                   std::make_move_iterator(triplets.begin()),
                   std::make_move_iterator(triplets.end()));
               m_mutex.unlock();
+              triplets.clear();
             };
 
           if (std::holds_alternative<Threads::ThreadPool>(m_pool))
@@ -248,6 +249,7 @@ namespace Rodin::Assembly
                   std::make_move_iterator(triplets.begin()),
                   std::make_move_iterator(triplets.end()));
               m_mutex.unlock();
+              triplets.clear();
             };
 
           if (std::holds_alternative<Threads::ThreadPool>(m_pool))

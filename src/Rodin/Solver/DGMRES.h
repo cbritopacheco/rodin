@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_GMRES_H
-#define RODIN_SOLVER_GMRES_H
+#ifndef RODIN_SOLVER_DGMRES_H
+#define RODIN_SOLVER_DGMRES_H
 
 #include <optional>
 #include <functional>
@@ -22,17 +22,17 @@
 namespace Rodin::Solver
 {
   /**
-   * @defgroup GMRESSpecializations GMRES Template Specializations
-   * @brief Template specializations of the GMRES class.
-   * @see GMRES
+   * @defgroup DGMRESSpecializations DGMRES Template Specializations
+   * @brief Template specializations of the DGMRES class.
+   * @see DGMRES
    */
 
   /**
-   * @ingroup GMRESSpecializations
-   * @brief GMRES for use with Math::SparseMatrix and Math::Vector.
+   * @ingroup DGMRESSpecializations
+   * @brief DGMRES for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class GMRES<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
+  class DGMRES<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
     : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
   {
     public:
@@ -48,19 +48,19 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      GMRES(ProblemType& pb)
+      DGMRES(ProblemType& pb)
         : Parent(pb)
       {}
 
-      GMRES(const GMRES& other)
+      DGMRES(const DGMRES& other)
         : Parent(other)
       {}
 
-      GMRES(GMRES&& other)
+      DGMRES(DGMRES&& other)
         : Parent(std::move(other))
       {}
 
-      ~GMRES() = default;
+      ~DGMRES() = default;
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
@@ -68,43 +68,38 @@ namespace Rodin::Solver
         x = m_solver.solve(b);
       }
 
-      GMRES& setTolerance(Real tol)
+      DGMRES& setTolerance(Real tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
-      GMRES& setMaxIterations(size_t maxIt)
+      DGMRES& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
 
-      GMRES& setRestart(size_t restart)
+      DGMRES* copy() const noexcept override
       {
-        m_solver.set_restart(restart);
-        return *this;
-      }
-
-      GMRES* copy() const noexcept override
-      {
-        return new GMRES(*this);
+        return new DGMRES(*this);
       }
 
     private:
-      Eigen::GMRES<OperatorType> m_solver;
+      Eigen::DGMRES<OperatorType> m_solver;
   };
 
   /**
    * @ingroup RodinCTAD
-   * @brief CTAD for GMRES
+   * @brief CTAD for DGMRES
    */
   template <class Scalar>
-  GMRES(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> GMRES<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
+  DGMRES(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
+    -> DGMRES<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif
+
 
 
 

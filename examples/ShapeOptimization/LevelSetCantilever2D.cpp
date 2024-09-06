@@ -121,7 +121,7 @@ int main(int, char**)
     vh.getMesh().save("dJ.mesh");
 
     // Update objective
-    double objective = compliance(u.getSolution()) + ell * th.getVolume(Interior);
+    double objective = compliance(u.getSolution()) + ell * th.getArea(Interior);
     obj.push_back(objective);
     fObj << objective << "\n";
     fObj.flush();

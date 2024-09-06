@@ -91,6 +91,20 @@
  * # Utilization
  *
  * @code{cpp}
+ * #ifndef RODIN_USE_SPQR
+ * // Code depending on SPQR
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_SPQR
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with SuiteSparse support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
  * #ifndef RODIN_USE_CHOLMOD
  * // Code depending on CHOLMOD
  * #endif

@@ -78,14 +78,12 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      inline
       constexpr
       size_t getDimension() const
       {
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      inline
       SpatialVectorType getValue(const Geometry::Point& p) const
       {
         SpatialVectorType out;
@@ -93,7 +91,6 @@ namespace Rodin::Variational
         return out;
       }
 
-      inline
       void getValue(SpatialVectorType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -124,14 +121,12 @@ namespace Rodin::Variational
       /**
        * @brief Interpolation function to be overriden in Derived type.
        */
-      inline
       constexpr
       void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
@@ -141,7 +136,6 @@ namespace Rodin::Variational
       /**
        * @brief Copy function to be overriden in Derived type.
        */
-      inline
       GradBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();

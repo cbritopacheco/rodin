@@ -81,7 +81,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return -getOperand().getValue(p);
+        return -this->object(getOperand().getValue(p));
       }
 
       template <class T>
@@ -196,7 +196,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return -getOperand().getBasis(local);
+        return -this->object(getOperand().getBasis(local));
       }
 
       const FES& getFiniteElementSpace() const

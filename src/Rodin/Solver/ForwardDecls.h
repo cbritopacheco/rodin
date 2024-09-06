@@ -100,7 +100,15 @@ namespace Rodin::Solver
   class GMRES;
 
   template <class OperatorType, class VectorType>
+  class DGMRES;
+
+  template <class OperatorType, class VectorType>
   class IDRSTABL;
+
+#ifdef RODIN_USE_SPQR
+  template <class OperatorType, class VectorType>
+  class SPQR;
+#endif
 
 #ifdef RODIN_USE_UMFPACK
   template <class OperatorType, class VectorType>

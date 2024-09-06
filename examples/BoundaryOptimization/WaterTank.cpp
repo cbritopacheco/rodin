@@ -26,7 +26,7 @@ static constexpr Geometry::Attribute dUnsupported = 4;
 static constexpr Geometry::Attribute Support = 11;
 static constexpr Geometry::Attribute dSupport = 111;
 
-static constexpr size_t maxIt = 246;
+static constexpr size_t maxIt = 1000;
 
 static constexpr Real epsilon = 1e-6;
 static constexpr Real ellP = 1e-5;
@@ -197,7 +197,7 @@ int main(int, char**)
       MMG::Optimizer().setHMax(hmax)
                       .setHMin(hmin)
                       .setHausdorff(hausd)
-                      // .setGradation(hgrad)
+                      .setGradation(hgrad)
                       .setAngleDetection(false)
                       .optimize(mesh);
     }

@@ -47,7 +47,7 @@ int main(int, char**)
   ComplexFunction f =
     [&](const Point& p)
     {
-      return Complex(1, p.y()) * waveNumber * waveNumber * cos(waveNumber * p.x()
+      return Complex(p.x(), 1) * waveNumber * waveNumber * cos(waveNumber * p.x()
           ) * cos(waveNumber * p.y());
     };
 
@@ -76,10 +76,18 @@ int main(int, char**)
   miaow = [&](const Point& p)
   {
     return
-      (Complex(1, p.y()) * cos(waveNumber * p.x()) * cos(waveNumber * p.y())).imag();
+      (Complex(p.x(), 1) * cos(waveNumber * p.x()) * cos(waveNumber * p.y())).real();
   };
 
-  miaow.save("miaow.gf");
+  miaow.save("exRe.gf");
+
+  miaow = [&](const Point& p)
+  {
+    return
+      (Complex(p.x(), 1) * cos(waveNumber * p.x()) * cos(waveNumber * p.y())).imag();
+  };
+
+  miaow.save("exIm.gf");
 
   mesh.save("Grid.mesh");
 

@@ -44,10 +44,7 @@ namespace Rodin::Variational
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
-      using Parent = RealFunctionBase<Conjugate<OperandType>>;
-
-      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
-      static_assert(std::is_same_v<OperandRangeType, Real>);
+      using Parent = FunctionBase<Conjugate<OperandType>>;
 
       Conjugate(const OperandType& v)
         : m_v(v.copy())
@@ -66,7 +63,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return getOperand().getValue(p).conj();
+        return Math::conj(this->object(getOperand().getValue(p)));
       }
 
       const OperandType& getOperand() const
@@ -161,7 +158,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return Math::conj(getOperand().getBasis(local));
+        return Math::conj(this->object(getOperand().getBasis(local)));
       }
 
       const FES& getFiniteElementSpace() const

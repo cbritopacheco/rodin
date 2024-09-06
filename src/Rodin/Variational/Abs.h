@@ -33,7 +33,6 @@ namespace Rodin::Variational
       using Parent = RealFunctionBase<Abs<OperandType>>;
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
-      static_assert(std::is_same_v<OperandRangeType, Real>);
 
       Abs(const OperandType& v)
         : m_v(v.copy())
@@ -49,11 +48,10 @@ namespace Rodin::Variational
           m_v(std::move(other.m_v))
       {}
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return std::abs(getOperand().getValue(p));
+        return Math::abs(getOperand().getValue(p));
       }
 
       const OperandType& getOperand() const
@@ -62,7 +60,7 @@ namespace Rodin::Variational
         return *m_v;
       }
 
-      inline Abs* copy() const noexcept override
+      Abs* copy() const noexcept override
       {
         return new Abs(*this);
       }
@@ -75,7 +73,6 @@ namespace Rodin::Variational
   Abs(const FunctionBase<NestedDerived>&) -> Abs<FunctionBase<NestedDerived>>;
 
   template <class NestedDerived>
-  inline
   constexpr auto
   abs(const FunctionBase<NestedDerived>& op)
   {
