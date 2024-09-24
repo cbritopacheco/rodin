@@ -15,7 +15,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::External;
 using namespace Rodin::Variational;
 
-using FES = VectorP1<Mesh<Context::Sequential>>;
+using FES = VectorP1<Mesh<Context::Local>>;
 
 // Define interior and exterior for level set discretization
 static constexpr Attribute Interior = 1, Exterior = 2;
@@ -57,7 +57,7 @@ int main(int, char**)
 
   MMG::Optimizer().setHMax(hmax).setHMin(hmin).optimize(th);
 
-  th.save("Omega0.mesh", IO::FileFormat::MEDIT);
+  th.save("Omega0.mesh");
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Optimization loop
@@ -159,6 +159,8 @@ int main(int, char**)
                     .setHausdorff(hausd)
                     .setAngleDetection(false)
                     .optimize(th);
+
+    th.save("out3/Omega." + std::to_string(i) + ".mesh");
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

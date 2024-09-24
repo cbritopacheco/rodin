@@ -12,12 +12,9 @@ using namespace Geometry;
 
 int main(int, char**)
 {
-  constexpr size_t n = 64;
   Mesh mesh;
-  mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { n, n });
-  mesh.save("UniformGrid.mesh");
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+
   return 0;
 }
-
-
 

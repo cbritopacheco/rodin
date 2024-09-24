@@ -445,18 +445,18 @@ namespace Rodin::IO::MFEM
 namespace Rodin::IO
 {
   template <>
-  class MeshLoader<IO::FileFormat::MFEM, Context::Sequential>
-    : public MeshLoaderBase<Context::Sequential>
+  class MeshLoader<IO::FileFormat::MFEM, Context::Local>
+    : public MeshLoaderBase<Context::Local>
   {
     public:
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       using ObjectType = Geometry::Mesh<ContextType>;
 
       using Parent = MeshPrinterBase<ContextType>;
 
       MeshLoader(ObjectType& mesh)
-        : MeshLoaderBase<Context::Sequential>(mesh)
+        : MeshLoaderBase<Context::Local>(mesh)
       {}
 
       void load(std::istream& is) override;
@@ -476,11 +476,11 @@ namespace Rodin::IO
   };
 
   template <>
-  class MeshPrinter<FileFormat::MFEM, Context::Sequential>
-    : public MeshPrinterBase<Context::Sequential>
+  class MeshPrinter<FileFormat::MFEM, Context::Local>
+    : public MeshPrinterBase<Context::Local>
   {
     public:
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       using ObjectType = Geometry::Mesh<ContextType>;
 
@@ -498,11 +498,11 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Context::Sequential>>>
-    : public GridFunctionPrinterBase<Variational::P0<Range, Geometry::Mesh<Context::Sequential>>>
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Context::Local>>>
+    : public GridFunctionPrinterBase<Variational::P0<Range, Geometry::Mesh<Context::Local>>>
   {
     public:
-      using FESType = Variational::P0<Range, Geometry::Mesh<Context::Sequential>>;
+      using FESType = Variational::P0<Range, Geometry::Mesh<Context::Local>>;
 
       using ObjectType = Variational::GridFunction<FESType>;
 
@@ -530,11 +530,11 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionLoader<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
-    : public GridFunctionLoaderBase<Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
+  class GridFunctionLoader<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Local>>>
+    : public GridFunctionLoaderBase<Variational::P1<Range, Geometry::Mesh<Context::Local>>>
   {
     public:
-      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Sequential>>;
+      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
 
       using ObjectType = Variational::GridFunction<FESType>;
 
@@ -553,11 +553,11 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
-    : public GridFunctionPrinterBase<Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Local>>>
+    : public GridFunctionPrinterBase<Variational::P1<Range, Geometry::Mesh<Context::Local>>>
   {
     public:
-      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Sequential>>;
+      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
 
       using ObjectType = Variational::GridFunction<FESType>;
 

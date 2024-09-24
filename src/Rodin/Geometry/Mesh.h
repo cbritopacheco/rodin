@@ -511,8 +511,8 @@ namespace Rodin::Geometry
       virtual const Context::Base& getContext() const = 0;
   };
 
-  /// Type alias for Mesh<Context::Sequential>
-  using SequentialMesh = Mesh<Context::Sequential>;
+  /// Type alias for Mesh<Context::Local>
+  using LocalMesh = Mesh<Context::Local>;
 
   /// Index containing the indices of boundary cells.
   using BoundaryIndex = IndexSet;
@@ -531,14 +531,14 @@ namespace Rodin::Geometry
    * different geometries.
    */
   template <>
-  class Mesh<Context::Sequential> : public MeshBase
+  class Mesh<Context::Local> : public MeshBase
   {
     public:
       using Parent = MeshBase;
-      using Context = Context::Sequential;
+      using Context = Context::Local;
 
       /**
-       * @brief Class used to build Mesh<Context::Sequential> instances.
+       * @brief Class used to build Mesh<Context::Local> instances.
        */
       class Builder
       {
@@ -659,7 +659,7 @@ namespace Rodin::Geometry
           Builder& polytope(Polytope::Type t, IndexArray&& vs);
 
           /**
-           * @brief Finalizes construction of the Mesh<Context::Sequential> object.
+           * @brief Finalizes construction of the Mesh<Context::Local> object.
            */
           Mesh finalize();
 

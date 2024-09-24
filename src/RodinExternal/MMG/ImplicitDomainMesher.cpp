@@ -165,6 +165,7 @@ namespace Rodin::External::MMG
     if (m_meshTheSurface)
     {
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_isosurf, 1);
+      MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_opnbdy, 1);
     }
     else
     {
@@ -317,9 +318,9 @@ namespace Rodin::External::MMG
     MMG5_pMesh mmgMesh = nullptr;
     mmgMesh = rodinToMesh(ls.getFiniteElementSpace().getMesh());
 
-    // // Erase boundary elements which have the isoref
-    // if (m_isoref)
-    //   deleteBoundaryRef(mmgMesh, *m_isoref);
+    // Erase boundary elements which have the isoref
+    if (m_isoref)
+      deleteBoundaryRef(mmgMesh, *m_isoref);
 
     MMG5_pSol sol = createSolution(mmgMesh, ls.getFiniteElementSpace().getVectorDimension());
     copySolution(ls, sol);
@@ -370,6 +371,9 @@ namespace Rodin::External::MMG
         << Alert::Raise;
     }
 
+    // Delete zero ref
+    deleteBoundaryRef(mmgMesh, 0);
+
     auto rodinMesh = meshToRodin(mmgMesh);
     destroySolution(sol);
     destroyMesh(mmgMesh);
@@ -395,6 +399,7 @@ namespace Rodin::External::MMG
           assert(std::holds_alternative<NoSplitT>(m_split.at(attr)));
       }
     }
+
     return rodinMesh;
   }
 }

@@ -19,7 +19,7 @@ namespace Rodin::Examples::BoundaryOptimization
           Geometry::Polytope::getVertices(
             Geometry::Polytope::Type::Point).col(0), it->getCoordinates());
       const Real tp = tf(p);
-      if (tp > 0 && (tp / tc) > (1 - 1e-12))
+      if (tp > 1e-12 && (tp / tc) > (1 - 1e-12))
       {
         cs.emplace_back(std::move(p));
         break;

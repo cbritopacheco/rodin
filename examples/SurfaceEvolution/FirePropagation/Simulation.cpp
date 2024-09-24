@@ -25,7 +25,7 @@ static const Real hausdorff = 20;
 class Environment
 {
   public:
-    using Context = Context::Sequential;
+    using Context = Context::Local;
     using RealFES = P1<Real>;
     using VectorFES = P1<Math::Vector<Real>>;
 

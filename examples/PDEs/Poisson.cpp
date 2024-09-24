@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -17,21 +18,27 @@ int main(int, char**)
   // Build a mesh
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.getConnectivity().compute(1, 2);
 
   // Functions
-  P1 vh(mesh);
+  P1<Complex> vh(mesh);
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
+  GridFunction miaow(vh);
+  miaow = [](const Point& p){ return Complex(0, 1) * Complex(p.x(), 2 * p.y()); };
+  miaow.setWeights();
 
-  // Define problem
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(v)
-          + DirichletBC(u, Zero());
+  Complex s = Integral(miaow).compute();
+  std::cout << s << std::endl;
 
-  poisson.assemble();
+  // TrialFunction u(vh);
+  // TestFunction  v(vh);
+
+  // // Define problem
+  // Problem poisson(u, v);
+  // poisson = Integral(Grad(u), Grad(v))
+  //         - Integral(v)
+  //         + DirichletBC(u, Zero());
+
+  // poisson.assemble();
   // Solver::CG solver;
   // poisson.solve(solver);
 

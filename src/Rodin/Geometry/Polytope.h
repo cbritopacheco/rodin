@@ -46,7 +46,7 @@ namespace Rodin::Geometry
       /**
        * @brief Iterable of possible polytope geometry types.
        */
-      static constexpr std::array Types
+      static constexpr std::array<Type, 5> Types
       {
         Type::Point,
         Type::Segment,
