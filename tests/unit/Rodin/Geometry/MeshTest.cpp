@@ -23,7 +23,7 @@ TEST(Rodin_Geometry_Mesh, 2D_Square_Build)
   // constexpr const size_t mdim = sdim;
 
   Mesh mesh =
-    Mesh<Rodin::Context::Sequential>::Builder()
+    Mesh<Rodin::Context::Local>::Builder()
     .initialize(sdim)
     .nodes(4)
     .vertex({0, 0})
@@ -44,7 +44,7 @@ TEST(Rodin_Geometry_Mesh, 2D_Square_Boundary)
   constexpr const size_t mdim = sdim;
 
   Mesh mesh =
-    Mesh<Rodin::Context::Sequential>::Builder()
+    Mesh<Rodin::Context::Local>::Builder()
     .initialize(sdim)
     .nodes(4)
     .vertex({0, 0})
@@ -77,7 +77,7 @@ TEST(Rodin_Geometry_Mesh, 2D_Square_Interface)
   constexpr const size_t mdim = sdim;
 
   Mesh mesh =
-    Mesh<Rodin::Context::Sequential>::Builder()
+    Mesh<Rodin::Context::Local>::Builder()
     .initialize(sdim)
     .nodes(4)
     .vertex({0, 0})
@@ -111,7 +111,7 @@ TEST(Rodin_Geometry_Mesh_FuzzyTest, 2D_Square_PolytopeTransformation_1)
   constexpr const size_t meshDim = 2;
 
   Mesh mesh =
-    Mesh<Rodin::Context::Sequential>::Builder()
+    Mesh<Rodin::Context::Local>::Builder()
     .initialize(sdim)
     .nodes(4)
     .vertex({0, 0})

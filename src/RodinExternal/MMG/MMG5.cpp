@@ -307,7 +307,7 @@ namespace Rodin::External::MMG
     return res;
   }
 
-  MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::SequentialMesh& src)
+  MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
   {
     bool isSurface = src.isSurface();
     assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
@@ -385,7 +385,7 @@ namespace Rodin::External::MMG
         const auto& coords = vertex.getCoordinates();
         std::copy(coords.begin(), coords.end(), res->point[i].c);
         res->point[i].ref = vertex.getAttribute();
-        res->point[i].tag = MG_NOTAG;
+        res->point[i].tag = MG_NUL;
       }
 
       // Copy edges
@@ -398,39 +398,52 @@ namespace Rodin::External::MMG
         res->edge[i].a = vertices[0] + 1;
         res->edge[i].b = vertices[1] + 1;
         res->edge[i].ref = face.getAttribute();
-        res->edge[i].tag = MG_NOTAG;
+        if (it->getAttribute() != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
+          res->edge[i].tag |= MG_REF + MG_BDY;
       }
 
       // Copy triangles with correct orientation
-      for (auto it = src.getCell(); !it.end(); ++it)
+      if (src.getCellCount() == 0)
       {
-        const auto& cell = *it;
-        const Index i = cell.getIndex() + 1;
-        assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
-        MMG5_pTria pt = &res->tria[i];
-        const auto& vertices = cell.getVertices();
-        pt->v[0] = vertices[0] + 1;
-        pt->v[1] = vertices[1] + 1;
-        pt->v[2] = vertices[2] + 1;
-        pt->ref = cell.getAttribute();
-        pt->edg[0] = 0;
-        pt->edg[1] = 0;
-        pt->edg[2] = 0;
-        auto orientation = MMG2D_quickarea(
-            res->point[pt->v[0]].c,
-            res->point[pt->v[1]].c,
-            res->point[pt->v[2]].c);
-        if(orientation < 0)
+        for (size_t i = 1; i <= res->np; i++)
+          res->point[i].tag &= ~MG_NUL;
+      }
+      else
+      {
+        for (auto it = src.getCell(); !it.end(); ++it)
         {
-          auto tmp = pt->v[2];
-          pt->v[2] = pt->v[1];
-          pt->v[1] = tmp;
+          const auto& cell = *it;
+          const Index i = cell.getIndex() + 1;
+          assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
+          MMG5_pTria pt = &res->tria[i];
+          const auto& vertices = cell.getVertices();
+          pt->v[0] = vertices[0] + 1;
+          pt->v[1] = vertices[1] + 1;
+          pt->v[2] = vertices[2] + 1;
+          pt->ref = cell.getAttribute();
+          res->point[pt->v[0]].tag &= ~MG_NUL;
+          res->point[pt->v[1]].tag &= ~MG_NUL;
+          res->point[pt->v[2]].tag &= ~MG_NUL;
+          pt->edg[0] = 0;
+          pt->edg[1] = 0;
+          pt->edg[2] = 0;
+          auto orientation = MMG2D_quickarea(
+              res->point[pt->v[0]].c,
+              res->point[pt->v[1]].c,
+              res->point[pt->v[2]].c);
+          if(orientation < 0)
+          {
+            auto tmp = pt->v[2];
+            pt->v[2] = pt->v[1];
+            pt->v[1] = tmp;
+          }
         }
       }
     }
     else if (src.getDimension() == 3) // Use MMG3D
     {
       constexpr size_t edgeDim = 1;
+
       res->ne = src.getCellCount();
       res->na = src.getPolytopeCount(edgeDim);
       res->nt = src.getFaceCount();
@@ -448,6 +461,7 @@ namespace Rodin::External::MMG
         const auto& coords = vertex.getCoordinates();
         std::copy(coords.begin(), coords.end(), res->point[i].c);
         res->point[i].ref = vertex.getAttribute();
+        res->point[i].tag = MG_NUL;
       }
 
       // Copy edges
@@ -460,6 +474,9 @@ namespace Rodin::External::MMG
         res->edge[i].a = vertices[0] + 1;
         res->edge[i].b = vertices[1] + 1;
         res->edge[i].ref = segment.getAttribute();
+
+        if (it->getAttribute() != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
+          res->edge[i].tag |= MG_REF;
       }
 
       // Copy triangles
@@ -488,6 +505,12 @@ namespace Rodin::External::MMG
         pt->v[1] = vertices[1] + 1;
         pt->v[2] = vertices[2] + 1;
         pt->v[3] = vertices[3] + 1;
+
+        res->point[pt->v[0]].tag &= ~MG_NUL;
+        res->point[pt->v[1]].tag &= ~MG_NUL;
+        res->point[pt->v[2]].tag &= ~MG_NUL;
+        res->point[pt->v[3]].tag &= ~MG_NUL;
+
         pt->ref = cell.getAttribute();
         if (MMG5_orvol(res->point, pt->v) < 0.0)
         {
@@ -528,6 +551,7 @@ namespace Rodin::External::MMG
         assert(c >= 0);
         assert(c <= res->na);
         res->point[c + 1].tag |= MG_REQ;
+        res->point[c + 1].tag &= ~MG_NUL;
       }
 
       // Tag required edges
@@ -559,6 +583,8 @@ namespace Rodin::External::MMG
           build.attribute({ 0, i - 1 }, src->point[i].ref);
           if (src->point[i].tag & MG_CRN)
             build.corner(i - 1);
+          if (src->point[i].tag & MG_REQ)
+            build.requiredVertex(i - 1);
         }
         break;
       }
@@ -570,6 +596,8 @@ namespace Rodin::External::MMG
           build.attribute({ 0, i - 1 }, src->point[i].ref);
           if (src->point[i].tag & MG_CRN)
             build.corner(i - 1);
+          if (src->point[i].tag & MG_REQ)
+            build.requiredVertex(i - 1);
         }
         break;
       }
@@ -581,6 +609,8 @@ namespace Rodin::External::MMG
           build.attribute({ 0, i - 1 }, src->point[i].ref);
           if (src->point[i].tag & MG_CRN)
             build.corner(i - 1);
+          if (src->point[i].tag & MG_REQ)
+            build.requiredVertex(i - 1);
         }
         break;
       }
@@ -602,7 +632,8 @@ namespace Rodin::External::MMG
       build.attribute({ 1, i - 1 }, src->edge[i].ref );
       if (src->edge[i].tag & MG_GEO)
         build.ridge(i - 1);
-      // if (src->edge[i].tag & MG_REQ)
+      if (src->edge[i].tag & MG_REQ)
+        build.requiredEdge(i);
     }
     // Add triangles
     build.reserve(2, src->nt);

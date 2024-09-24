@@ -116,6 +116,13 @@ int main(int, char**)
   Real hausd = 0.5 * hmin;
   Real hgrad = 1.2;
 
+  MMG::Optimizer().setHMax(hmax)
+                  .setHMin(hmin)
+                  .setHausdorff(hausd)
+                  .setGradation(hgrad)
+                  .setAngleDetection(true)
+                  .optimize(mesh);
+
   Alert::Info() << "Initializing unsupported region..." << Alert::Raise;
   {
     P1 vh(mesh);
@@ -128,7 +135,7 @@ int main(int, char**)
       return (p - c).norm() - 6.5;
     };
 
-    mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
+    mesh = MMG::ImplicitDomainMesher().setAngleDetection(true)
                                       .split(Gamma, { Unsupported, Gamma })
                                       .split(Unsupported, { Unsupported, Gamma })
                                       .setHMax(hmax)
@@ -375,8 +382,8 @@ int main(int, char**)
                                         .split(Gamma, { Support, Gamma })
                                         .noSplit(Unsupported)
                                         .setHMax(hmax)
-                                        // .setHMin(hmin)
-                                        // .setGradation(hgrad)
+                                        .setHMin(hmin)
+                                        .setGradation(hgrad)
                                         .setHausdorff(hausd)
                                         .surface()
                                         .discretize(workaround);

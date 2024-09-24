@@ -81,7 +81,7 @@ namespace Rodin::Variational
 
       using ScalarType = OperatorScalarType;
 
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       using OperatorType = Math::Matrix<OperatorScalarType>;
 

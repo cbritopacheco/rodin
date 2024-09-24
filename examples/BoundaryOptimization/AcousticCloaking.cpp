@@ -29,14 +29,14 @@ const Attribute dBox = 16;
 const Attribute dSoundSoft = 11;
 const size_t maxIt = 2000;
 const Real epsilon = 1e-6;
-const Real ell = 1e-12;
+const Real ell = 1e-7;
 const Real tgv = 1e+12;
 const Real alpha = 4;
-const Real waveLength = 50;
+const Real waveLength = 20;
 const Real waveNumber = 2 * Math::Constants::pi() / waveLength;
 
 const VectorFunction xi = { 0, 0, 1 };
-const Real impedance = 1.0 / 10;
+const Real impedance = 1.0 / 20;
 const Real R = 50;
 
 using RealFES = P1<Real>;
@@ -48,13 +48,13 @@ using ShapeGradient = VectorGridFunction;
 template <class ProblemType>
 void solve(ProblemType& pb)
 {
-  Solver::UMFPack solver(pb);
-  solver.solve();
-  solver.printStatus();
-  // Solver::GMRES solver(pb);
-  // solver.setMaxIterations(2000);
-  // solver.setTolerance(1e-12);
+  // Solver::UMFPack solver(pb);
   // solver.solve();
+  // solver.printStatus();
+  Solver::GMRES solver(pb);
+  solver.setMaxIterations(3000);
+  solver.setTolerance(1e-12);
+  solver.solve();
 }
 
 int main(int, char**)
@@ -64,63 +64,54 @@ int main(int, char**)
   Threads::getGlobalThreadPool().reset(8);
   std::cout << Eigen::nbThreads() << std::endl;
 
+  MMG::Mesh miaow;
+  miaow.load("Scattered.mesh");
+
+
+  P1 fes(miaow);
+  GridFunction gf(fes);
+  gf.load("Scattered.gf");
+
+  GridFunction diff(fes);
+
+  diff = abs(gf - 1);
+  diff.save("Diff.gf");
+
+
+  std::exit(1);
+
   Alert::Info() << "Loading mesh..." << Alert::Raise;
   MMG::Mesh mesh;
   mesh.load("AcousticCloaking.medit.mesh", IO::FileFormat::MEDIT);
 
-  Real hmax = waveLength / 2;
+
+  Real hmax = waveLength / 3;
+  // Real hmin = 0.5;
+  // Real hausd = 0.1;
+
   Real hmin = waveLength / 32;
   Real hausd = waveLength / 64;
-  Real hgrad = 1.2;
-
-  Alert::Info() << "Initializing sound-soft region..." << Alert::Raise;
-  {
-    P1 vh(mesh);
-
-    GridFunction dist(vh);
-    dist = [&](const Point& p)
-    {
-      Math::SpatialVector<Real> c(3);
-      c << -45.189708, 0, -11.330562;
-      return (p - c).norm() - 2;
-    };
-
-    mesh.save("Dist.mesh", IO::FileFormat::MEDIT);
-    dist.save("Dist.sol", IO::FileFormat::MEDIT);
-
-    mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
-                                      .split(SoundSoft, { SoundSoft, SoundHard })
-                                      .split(SoundHard, { SoundSoft, SoundHard })
-                                      .noSplit(PML)
-                                      .noSplit(dBox)
-                                      .setHMax(hmax)
-                                      .setHMin(hmin)
-                                      .setGradation(hgrad)
-                                      .setHausdorff(hausd)
-                                      .surface()
-                                      .discretize(dist);
-  }
 
   mesh.save("Omega0.mfem.mesh", IO::FileFormat::MFEM);
   mesh.save("Omega0.mesh", IO::FileFormat::MEDIT);
 
   std::ofstream fObj("obj.txt");
+  std::ofstream fObjMax("obj_max.txt");
   size_t i = 0;
   size_t regionCount;
   while (i < maxIt)
   {
-    //bool topologicalStep = i < 5 || (i < 200  && i % 20 == 0);
-    bool topologicalStep = true;
+    bool topologicalStep = i < 6 || (i < 50  && i % 10 == 0);
+    // bool topologicalStep = false;
     bool geometricStep = !topologicalStep;
 
     const Real k = 0.5 * (hmax + hmin);
-    const Real dt = 2 * hmin;
-    const Real radius = 2 * hmin;
+    const Real dt = 4 * hmin;
+    const Real radius = 2;
     Alert::Info() << "Iteration: " << i                         << Alert::NewLine
                   << "HMax:      " << Alert::Notation(hmax)     << Alert::NewLine
                   << "HMin:      " << Alert::Notation(hmin)     << Alert::NewLine
                   << "Hausdorff: " << Alert::Notation(hausd)    << Alert::NewLine
-                  << "HGrad:     " << Alert::Notation(hgrad)    << Alert::NewLine
                   << "ell:     " << Alert::Notation(ell)    << Alert::NewLine
                   << "dt:        " << Alert::Notation(dt)       << Alert::Raise;
 
@@ -128,9 +119,11 @@ int main(int, char**)
     MMG::Optimizer().setHMax(hmax)
                     .setHMin(hmin)
                     .setHausdorff(hausd)
-                    .setGradation(hgrad)
                     .setAngleDetection(false)
+                    .setGradation(1.2)
                     .optimize(mesh);
+
+    mesh.save("Optimized.mesh", IO::FileFormat::MEDIT);
 
     Alert::Info() << "Computing required connectivity..." << Alert::Raise;
     mesh.getConnectivity().compute(2, 3); // Computes boundary
@@ -198,34 +191,44 @@ int main(int, char**)
     Alert::Info() << "Solving..." << Alert::Raise;
     solve(state);
 
+    Math::SpatialVector<Real> c{{-50, 0, 0}};
+
     GridFunction total(rfes);
-    total = [&](const Point& x) { return std::norm(wave(x) + u.getSolution()(x)); };
+    total = [&](const Point& x)
+    {
+      return std::norm(wave(x)+ u.getSolution()(x));
+    };
+
     total.save("Total.gf");
     rfes.getMesh().save("Total.mesh");
 
     GridFunction pressure(rfes);
-    Math::SpatialVector<Real> c({{-50, 0, 0}});
-    pressure = [&](const Point& p)
+    pressure = [&](const Point& x)
     {
-      if ((p - c).norm() < 75)
-        return std::norm(u.getSolution()(p));
-      else return 0.0;
+      return std::norm(u.getSolution()(x));
     };
     pressure.save("Scattered.gf");
     rfes.getMesh().save("Scattered.mesh");
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
     pressure.setWeights();
-    const Real J = 0.5 * Integral(pressure).compute();
+    const Real J = 0.5 * Integral(pressure).compute() / mesh.getVolume();
     const Real area = mesh.getArea(SoundSoft);
     const Real objective = J + ell * area;
+
+    const Real objectiveMax = pressure.max() + ell * area;
 
     Alert::Info() << "Objective: " << Alert::Notation(objective) << Alert::NewLine
                   << "J: " << Alert::Notation(J) << Alert::NewLine
                   << "Area: " << Alert::Notation(area) << Alert::NewLine
+                  << "Objective Max: " << Alert::Notation(objectiveMax) << Alert::NewLine
                   << Alert::Raise;
+
     fObj << objective << "\n";
     fObj.flush();
+
+    fObjMax << objectiveMax << "\n";
+    fObjMax.flush();
 
     Alert::Info() << "Assembling adjoint equation..." << Alert::Raise;
     TrialFunction p(cfes);
@@ -233,7 +236,7 @@ int main(int, char**)
     Problem adjoint(p, q);
     adjoint = Integral(Grad(p), Grad(q))
             - waveNumber * waveNumber * Integral(p, q).over(SoundSoft)
-            + Integral(u.getSolution(), q)
+            + Integral(u.getSolution() / mesh.getVolume(), q)
             + Complex(0, -waveNumber / impedance) * BoundaryIntegral(p, q).over(SoundSoft)
             + Complex(1 / R, -waveNumber) * FaceIntegral(p, q).over(PML)
             ;
@@ -256,13 +259,18 @@ int main(int, char**)
       Problem topo(s, t);
       topo = alpha * alpha * Integral(Grad(s), Grad(t))
            + Integral(s, t)
-           - Integral(
-               Im(waveNumber / impedance * Conjugate(u.getSolution() + wave) * p.getSolution()), t).over(SoundHard)
+           + Integral(
+               Im(waveNumber / impedance * Conjugate(u.getSolution() + wave) *
+                   p.getSolution()), t).over(SoundHard)
            + tgv * Integral(s, t).over(dBox, SoundSoft);
 
       topo.assemble();
 
       solve(topo);
+
+      GridFunction norm(drfes);
+      norm = Abs(s.getSolution());
+      s.getSolution() /= norm.max();
 
       s.getSolution().save("Topo.gf");
       drfes.getMesh().save("Topo.mesh");
@@ -296,6 +304,7 @@ int main(int, char**)
               - FaceIntegral(
                   Im(waveNumber / impedance * Conjugate(u.getSolution() + wave) * p.getSolution()),
                   Dot(conormal, w)).over(dSoundSoft)
+              + ell * FaceIntegral(conormal, w).over(dSoundSoft)
               ;
 
       hilbert.assemble();
@@ -327,9 +336,10 @@ int main(int, char**)
                                       .noSplit(dBox)
                                       .setHMax(hmax)
                                       .setHMin(hmin)
-                                      .setGradation(hgrad)
+                                      .setGradation(1.2)
                                       .setHausdorff(hausd)
                                       .surface()
+                                      .setBoundaryReference(10)
                                       .discretize(workaround);
 
     Alert::Info() << "Saving files..." << Alert::Raise;

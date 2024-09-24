@@ -22,10 +22,10 @@ namespace Rodin::Geometry
   class Mesh<Context::MPI> : public MeshBase
   {
     public:
-      class Fragment : public Mesh<Context::Sequential>
+      class Fragment : public Mesh<Context::Local>
       {
         public:
-          using Parent = Mesh<Context::Sequential>;
+          using Parent = Mesh<Context::Local>;
           using Parent::Parent;
       };
 

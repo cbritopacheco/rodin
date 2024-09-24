@@ -39,7 +39,7 @@ const Real k = 1;
 const Real dt = k * (hmax - hmin);
 static double alpha = dt;
 
-using FES = VectorP1<Mesh<Context::Sequential>>;
+using FES = VectorP1<Mesh<Context::Local>>;
 
 // Compliance
 inline Real compliance(const GridFunction<FES>& w)

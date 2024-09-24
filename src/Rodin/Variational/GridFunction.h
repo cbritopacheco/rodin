@@ -92,10 +92,10 @@ namespace Rodin::Variational
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
       /// Type of mesh on which the finite element space is built
-      using MeshType = Geometry::Mesh<Context::Sequential>;
+      using MeshType = Geometry::Mesh<Context::Local>;
 
       /// Represents the Context of the P1 space
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       /// Type of finite element
       using ElementType = typename FormLanguage::Traits<FESType>::ElementType;

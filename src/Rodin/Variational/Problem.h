@@ -145,7 +145,7 @@ namespace Rodin::Variational
 
       using ScalarType = OperatorScalarType;
 
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       using OperatorType = Math::SparseMatrix<OperatorScalarType>;
 
@@ -515,7 +515,7 @@ namespace Rodin::Variational
     public:
       using ScalarType = Real;
 
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 

@@ -47,7 +47,7 @@ int main(int, char**)
   ComplexFunction f =
     [&](const Point& p)
     {
-      return Complex(p.x(), 1) * waveNumber * waveNumber * cos(waveNumber * p.x()
+      return Complex(1, 1) * waveNumber * waveNumber * cos(waveNumber * p.x()
           ) * cos(waveNumber * p.y());
     };
 

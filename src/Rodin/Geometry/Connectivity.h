@@ -37,7 +37,7 @@ namespace Rodin::Geometry
       virtual const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const = 0;
   };
 
-  using SequentialConnectivity = Connectivity<Context::Sequential>;
+  using SequentialConnectivity = Connectivity<Context::Local>;
 
   /**
    * @brief Represents the set of incidence relations of a Mesh.
@@ -51,7 +51,7 @@ namespace Rodin::Geometry
    *
    */
   template <>
-  class Connectivity<Context::Sequential> final : public ConnectivityBase
+  class Connectivity<Context::Local> final : public ConnectivityBase
   {
     public:
       using PolytopeIndex =

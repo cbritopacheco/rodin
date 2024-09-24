@@ -6,7 +6,7 @@
 
 namespace Rodin::Geometry
 {
-  SubMesh<Context::Sequential>::SubMesh(std::reference_wrapper<const Mesh<Context>> parent)
+  SubMesh<Context::Local>::SubMesh(std::reference_wrapper<const Mesh<Context>> parent)
     : m_parent(parent)
   {
     if (parent.get().isSubMesh())
@@ -17,26 +17,26 @@ namespace Rodin::Geometry
     m_ancestors.push_front(parent.get());
   }
 
-  SubMesh<Context::Sequential>::SubMesh(const SubMesh& other)
+  SubMesh<Context::Local>::SubMesh(const SubMesh& other)
     : Parent(other),
       m_parent(other.m_parent),
       m_s2ps(other.m_s2ps),
       m_ancestors(other.m_ancestors)
   {}
 
-  SubMesh<Context::Sequential>::SubMesh(SubMesh&& other)
+  SubMesh<Context::Local>::SubMesh(SubMesh&& other)
     : Parent(std::move(other)),
       m_parent(std::move(other.m_parent)),
       m_s2ps(std::move(other.m_s2ps)),
       m_ancestors(std::move(other.m_ancestors))
   {}
 
-  const Mesh<Context::Sequential>& SubMesh<Context::Sequential>::getParent() const
+  const Mesh<Context::Local>& SubMesh<Context::Local>::getParent() const
   {
     return m_parent.get();
   }
 
-  std::optional<Point> SubMesh<Context::Sequential>::restriction(const Point& p) const
+  std::optional<Point> SubMesh<Context::Local>::restriction(const Point& p) const
   {
     const auto& polytope = p.getPolytope();
     const size_t d = polytope.getDimension();
