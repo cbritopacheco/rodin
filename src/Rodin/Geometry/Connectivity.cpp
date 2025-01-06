@@ -221,31 +221,40 @@ namespace Rodin::Geometry
     assert(!m_dirty[D][0]);
     assert(!m_dirty[D][D]);
     for (Index i = 0; i < m_count[D]; i++)
-    {
-      IndexSet s;
-      std::vector<SubPolytope> subpolytopes;
-      local(subpolytopes, d, i);
-      for (auto& [geometry, vertices] : subpolytopes)
-      {
-        auto insert = m_index[d].left.insert({ std::move(vertices), m_count[d] });
-        const PolytopeIndex::left_iterator it = insert.first;
-        const bool inserted = insert.second;
-        const auto& [v, idx] = *it;
-        if (inserted)
-        {
-          m_geometry[d].push_back(geometry);
-          m_connectivity[d][0].emplace_back().insert_unique(v.begin(), v.end());
-        }
-        m_count[d] += inserted && !(d == D || d == 0);
-        m_gcount[geometry] += inserted && !(d == D || d == 0);
-        s.insert(idx);
-      }
-      m_connectivity[D][d].push_back(std::move(s));
-    }
+      local(i, d);
     m_dirty[D][d] = false;
     m_dirty[d][0] = false;
     return *this;
   }
+
+  Connectivity<Context::Local>&
+  Connectivity<Context::Local>::local(size_t i, size_t d)
+  {
+    const size_t D = getMeshDimension();
+    assert(d > 0);
+    assert(d < D);
+    IndexSet s;
+    std::vector<SubPolytope> subpolytopes;
+    getSubPolytopes(subpolytopes, i, d);
+    for (auto& [geometry, vertices] : subpolytopes)
+    {
+      auto insert = m_index[d].left.insert({ std::move(vertices), m_count[d] });
+      const PolytopeIndex::left_iterator it = insert.first;
+      const bool inserted = insert.second;
+      const auto& [v, idx] = *it;
+      if (inserted)
+      {
+        m_geometry[d].push_back(geometry);
+        m_connectivity[d][0].emplace_back().insert_unique(v.begin(), v.end());
+      }
+      m_count[d] += inserted && !(d == D || d == 0);
+      m_gcount[geometry] += inserted && !(d == D || d == 0);
+      s.insert(idx);
+    }
+    m_connectivity[D][d].push_back(std::move(s));
+    return *this;
+  }
+
 
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::transpose(size_t d, size_t dp)
@@ -292,8 +301,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  void Connectivity<Context::Local>::local(
-      std::vector<Connectivity<Context::Local>::SubPolytope>& out, size_t dim, Index i)
+  void Connectivity<Context::Local>::getSubPolytopes(
+      std::vector<SubPolytope>& out, Index i, size_t dim)
   {
     const size_t D = getMeshDimension();
 

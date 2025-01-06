@@ -9,6 +9,8 @@
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
 
+#include <chrono>
+
 #include <Rodin/Models/Hilbert/H1a.h>
 
 #include "Tools.h"
@@ -54,7 +56,7 @@ int main(int, char**)
   // mesh.load("Omega.mesh", IO::FileFormat::MEDIT);
   Threads::getGlobalThreadPool().reset(8);
 
-  Real hmax0 = 0.7;
+  Real hmax0 = 0.5;
   Real hmax = hmax0;
 
   std::ofstream fObj("obj.txt");
@@ -62,6 +64,9 @@ int main(int, char**)
   size_t regionCount;
   while (i < maxIt)
   {
+    auto t0 = std::chrono::system_clock::now();
+
+    // Convert the current time to time since epoch
     const Real hmin = hmax / 10.0;
     const Real hausd = 0.5 * hmin;
     const Real hgrad = 1.2;
@@ -179,12 +184,15 @@ int main(int, char**)
 
     gtr.getSolution().save("miaow.gf");
 
+    GridFunction miaow(vfes);
+    miaow = VectorFunction{0, 0, 0};
+
     TrialFunction p(sfes);
     TestFunction  q(sfes);
     Problem adjoint(p, q);
     adjoint = Integral(gamma * Grad(p), Grad(q))
             + BoundaryIntegral((heAnode + heCathode) * p, q)
-            + Integral(0.5 * gtr.getSolution(), Grad(q));
+            + Integral(0.5 * miaow, Grad(q));
 
     Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
     Solver::CG(adjoint).solve();
@@ -375,6 +383,11 @@ int main(int, char**)
 
     Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
     i++;
+
+    auto t1 = std::chrono::system_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(t1 -
+        t0).count() << std::endl;
   }
 
   return 0;

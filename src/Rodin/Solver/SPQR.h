@@ -7,6 +7,8 @@
 #ifndef RODIN_SOLVER_SPQR_H
 #define RODIN_SOLVER_SPQR_H
 
+#include "Rodin/Configure.h"
+
 #ifdef RODIN_USE_SPQR
 
 #include <optional>
@@ -14,7 +16,6 @@
 
 #include <Eigen/SPQRSupport>
 
-#include "Rodin/Configure.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 

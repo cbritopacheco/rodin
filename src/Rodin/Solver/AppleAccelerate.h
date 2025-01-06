@@ -7,9 +7,13 @@
 #ifndef RODIN_SOLVER_APPLEACCELERATE_H
 #define RODIN_SOLVER_APPLEACCELERATE_H
 
+#include "Rodin/Configure.h"
+
 #ifdef RODIN_USE_APPLE_ACCELERATE
 
 #include <Eigen/AppleAccelerate>
+
+#include "ForwardDecls.h"
 
 namespace Rodin::Solver
 {

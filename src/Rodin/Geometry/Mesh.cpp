@@ -673,6 +673,31 @@ namespace Rodin::Geometry
         }
         return build.finalize();
       }
+      case Polytope::Type::Quadrilateral:
+      {
+        assert(dimensions.size() == 2);
+        const size_t w = dimensions.coeff(0);
+        const size_t h = dimensions.coeff(1);
+        build.initialize(dim).nodes(w * h);
+        assert(w * h >= 4);
+        for (size_t j = 0; j < h; j++)
+        {
+          for (size_t i = 0; i < w; i++)
+            build.vertex({ static_cast<Real>(i), static_cast<Real>(j) });
+        }
+
+        build.reserve(dim, (h - 1) * (w - 1));
+        for (size_t i = 0; i < w - 1; i++)
+        {
+          for (size_t j = 0; j < h - 1; j++)
+          {
+            build.polytope(g, {
+                i + j * w, (i + 1) + j * w , i + (j + 1) * w,  (i + 1) + (j + 1) * w });
+          }
+        }
+
+        return build.finalize();
+      }
       case Polytope::Type::Tetrahedron:
       {
         assert(dimensions.size() == 3);

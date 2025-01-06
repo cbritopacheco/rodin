@@ -319,6 +319,134 @@ namespace Rodin::Variational
 
   /**
    * @ingroup DotSpecializations
+   * @brief Dot product between a FunctionBase and a ShapeFunctionBase.
+   *
+   * Represents the mathematical expression:
+   * @f[
+   *    A(u) : \Lambda
+   * @f]
+   * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$, @f$ \Lambda \in
+   * \mathbb{R}^{p \times q} @f$.
+   */
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  class Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
+    : public ShapeFunctionBase<Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>, FES, Space>
+  {
+    public:
+      using FESType = FES;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+      using LHSType = ShapeFunctionBase<LHSDerived, FESType, Space>;
+
+      using RHSType = FunctionBase<RHSDerived>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+
+      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+
+      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+
+      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
+
+      using RangeType = ScalarType;
+
+      using Parent = ShapeFunctionBase<Dot<LHSType, RHSType>, FESType, Space>;
+
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
+
+      constexpr
+      Dot(const LHSType& lhs, const RHSType& rhs)
+        : Parent(lhs.getFiniteElementSpace()),
+          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+      {
+        assert(lhs.getRangeShape() == rhs.getRangeShape());
+      }
+
+      constexpr
+      Dot(const Dot& other)
+        : Parent(other),
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+      {}
+
+      constexpr
+      Dot(Dot&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
+
+      constexpr
+      const LHSType& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
+
+      constexpr
+      const RHSType& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getLHS().getLeaf();
+      }
+
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { 1, 1 };
+      }
+
+      size_t getDOFs(const Geometry::Polytope& element) const
+      {
+        return getLHS().getDOFs(element);
+      }
+
+      const FESType& getFiniteElementSpace() const
+      {
+        return getLHS().getFiniteElementSpace();
+      }
+
+      const Geometry::Point& getPoint() const
+      {
+        return getLHS().getPoint();
+      }
+
+      Dot& setPoint(const Geometry::Point& p)
+      {
+        m_lhs->setPoint(p);
+        return *this;
+      }
+
+      constexpr
+      ScalarType getBasis(size_t local) const
+      {
+        assert(m_lhs->getRangeShape() == m_rhs->getRangeShape());
+        const auto& p = getLHS().getPoint();
+        return Math::dot(this->object(getLHS().getBasis(local)), this->object(getRHS().getValue(p)));
+      }
+
+      Dot* copy() const noexcept final override
+      {
+        return new Dot(*this);
+      }
+
+    private:
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
+  };
+
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  Dot(const ShapeFunctionBase<LHSDerived, FES, Space>&, const FunctionBase<RHSDerived>&)
+    -> Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
+
+  /**
+   * @ingroup DotSpecializations
    * @brief Represents the dot product of trial and test operators.
    *
    * Constructs an instance representing the following expression:

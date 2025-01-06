@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from scipy.interpolate import make_interp_spline
+from scipy.interpolate import CubicSpline, PchipInterpolator, Akima1DInterpolator
 plt.style.use('grayscale')
 # plt.style.use('seaborn-paper')
 
@@ -22,7 +23,7 @@ expranges = {
 
 }
 
-meshsizes = np.linspace(0.02, 1.0, 32)
+meshsizes = np.linspace(0.02, 0.95, 30)
 error = np.zeros(320)
 for filename in glob.glob('%s*%s' % (prefix, suffix)):
     expid = int(filename[len(prefix):len(filename) - len(suffix)])
@@ -42,25 +43,28 @@ for filename in glob.glob('%s*%s' % (prefix, suffix)):
 
 for r in expranges:
     print(r)
-    spline = make_interp_spline(meshsizes, error[r[0] - 1:r[1]])
+    # spline = PchipInterpolator(meshsizes, error[r[0] - 1:r[1]])
+    spline = make_interp_spline(meshsizes, error[r[0] - 1:r[1] - 2], bc_type="clamped")
     x = np.linspace(meshsizes.min(), meshsizes.max(), 500)
     y = abs(spline(x))
     plt.plot(x, y, label='$c = %.1f $' % expranges[r], c=cm.RdYlBu_r(expranges[r]))
     # plt.plot(meshsizes, error[r[0] - 1:r[1]], c=cm.RdYlBu_r(expranges[r]))
 
-cmap = plt.get_cmap('RdYlBu_r', 10)
-sm = plt.cm.ScalarMappable(cmap=cmap)
-test = np.mean(error.reshape((10, 32)), axis=0)
-spline = make_interp_spline(meshsizes, test)
-x = np.linspace(meshsizes.min(), meshsizes.max(), 500)
-y = abs(spline(x))
+# cmap = plt.get_cmap('RdYlBu_r', 10)
+# sm = plt.cm.ScalarMappable(cmap=cmap)
+# test = np.mean(error.reshape((10, 32)), axis=0)
+# spline = make_interp_spline(meshsizes, test)
+# x = np.linspace(meshsizes.min(), meshsizes.max(), 500)
+# y = abs(spline(x))
 # cb = plt.colorbar(sm, ticks=np.linspace(0, 1, 10))
 # cb.ax.set_ylabel('$c$')
 # plt.plot(x, y, 'k--', linewidth=2,
 #     label='$\mathbb{E}[\mathcal{E}(t)]$')
 plt.title("$ \\Delta t = c h $")
-plt.ylabel('$\mathcal{E}(T)$', fontsize=14)
-plt.xlabel('$h$', fontsize=14)
+plt.ylabel('$\log(\mathcal{E}(T))$', fontsize=14)
+plt.xscale('log')
+plt.yscale('log')
+plt.xlabel('$\log(h)$', fontsize=14)
 plt.legend(loc='upper left')
 plt.grid(alpha=0.4, aa=True)
 plt.savefig('Error.svg')

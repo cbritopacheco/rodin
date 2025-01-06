@@ -10,6 +10,7 @@
 #include <RodinExternal/MMG.h>
 #include <Rodin/Threads/ThreadPool.h>
 
+#include <chrono>
 #include "Tools.h"
 
 using namespace Rodin;
@@ -48,12 +49,14 @@ int main(int, char**)
 {
   Eigen::initParallel();
   Eigen::setNbThreads(8);
+  Threads::getGlobalThreadPool().reset(8);
+  std::cout << Eigen::nbThreads() << std::endl;
+
   MMG::Mesh mesh;
-  // mesh.load("../resources/mmg/MechanicalPiece_2.mesh", IO::FileFormat::MEDIT);
-  //mesh.scale(1.0 / 10);
-  mesh.load("out/dOmega.245.mesh", IO::FileFormat::MEDIT);
-  mesh.save("miaow.mesh");
-  std::exit(1);
+  mesh.load("../resources/mmg/MechanicalPiece_2.mesh", IO::FileFormat::MEDIT);
+  mesh.scale(1.0 / 10);
+  // mesh.load("out/dOmega.245.mesh", IO::FileFormat::MEDIT);
+  mesh.save("miaow.mesh", IO::FileFormat::MEDIT);
   for (auto it = mesh.getFace(); it; ++it)
   {
     if (it->getAttribute() == 29 || it->getAttribute() == 24 || it->getAttribute() == 25)
@@ -128,6 +131,7 @@ int main(int, char**)
   Real objective = 0;
   while (i < maxIt)
   {
+    auto t0 = std::chrono::system_clock::now();
     const Real hmin = hmax / 10.0;
     const Real hausd = 0.5 * hmin;
     const Real hgrad = 1.2;
@@ -427,6 +431,10 @@ int main(int, char**)
 
     Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
     i++;
+
+    auto t1 = std::chrono::system_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(t1 -
+        t0).count() << std::endl;
   }
   return 0;
 }

@@ -7,6 +7,8 @@
 #ifndef RODIN_SOLVER_CHOLMOD_H
 #define RODIN_SOLVER_CHOLMOD_H
 
+#include "Rodin/Configure.h"
+
 #ifdef RODIN_USE_CHOLMOD
 
 #include <optional>
@@ -14,7 +16,6 @@
 
 #include <Eigen/CholmodSupport>
 
-#include "Rodin/Configure.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 

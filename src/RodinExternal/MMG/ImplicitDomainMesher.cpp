@@ -165,7 +165,7 @@ namespace Rodin::External::MMG
     if (m_meshTheSurface)
     {
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_isosurf, 1);
-      MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_opnbdy, 1);
+      // MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_opnbdy, 1);
     }
     else
     {
@@ -263,7 +263,7 @@ namespace Rodin::External::MMG
 
   void ImplicitDomainMesher::deleteBoundaryRef(MMG5_pMesh mesh, Geometry::Attribute ref)
   {
-    if (m_meshTheSurface || mesh->dim == 2)
+    if (m_meshTheSurface || MMG5::isSurfaceMesh(mesh) || mesh->dim == 2)
     {
       size_t oldna = mesh->na;
       std::vector<size_t> ids;

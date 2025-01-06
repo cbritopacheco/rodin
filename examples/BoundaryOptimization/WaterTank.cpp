@@ -10,6 +10,8 @@
 #include <RodinExternal/MMG.h>
 #include <Rodin/Threads/ThreadPool.h>
 
+#include <chrono>
+
 #include "Tools.h"
 
 using namespace Rodin;
@@ -51,7 +53,7 @@ int main(int, char**)
   MMG::Mesh mesh;
   // mesh.load("Omega0.mesh", IO::FileFormat::MEDIT);
   // mesh.load("Mechanical.mesh", IO::FileFormat::MEDIT);
-  mesh.load("WaterTankVolume.o.mesh", IO::FileFormat::MEDIT);
+  mesh.load("../resources/examples/BoundaryOptimization/WaterTankVolume.medit.mesh", IO::FileFormat::MEDIT);
   // mesh.load("Omega.mesh", IO::FileFormat::MEDIT);
 
   // mesh.load("MechanicalNoMat.mesh", IO::FileFormat::MEDIT);
@@ -178,6 +180,7 @@ int main(int, char**)
   Real objective = 0;
   while (i < maxIt)
   {
+    auto t0 = std::chrono::system_clock::now();
     bool topologicalStep = (i < 5) || (i >= 50 && i < 100 && i % 10 == 0);
     bool geometricStep = !topologicalStep;
 
@@ -407,6 +410,11 @@ int main(int, char**)
     Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
 
     i++;
+
+    auto t1 = std::chrono::system_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(t1 -
+        t0).count() << std::endl;
   }
   return 0;
 }

@@ -16,7 +16,6 @@ set(RodinGeometry_SRCS
   Connectivity.cpp
   SubMesh.cpp
   MeshBuilder.cpp
-  DdMeshRefinement.cpp
   SubMeshBuilder.cpp
   )
 add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})
