@@ -63,14 +63,12 @@ namespace Rodin::Variational
 
       LazyEvaluator& operator=(LazyEvaluator&&) = delete;
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return m_ref.get().getRangeShape();
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -78,14 +76,13 @@ namespace Rodin::Variational
       }
 
       template <class T>
-      inline
       constexpr
       void getValue(T& res, const Geometry::Point& p) const
       {
         m_ref.get().getValue(res, p);
       }
 
-      inline LazyEvaluator* copy() const noexcept final override
+      LazyEvaluator* copy() const noexcept final override
       {
         return new LazyEvaluator(*this);
       }

@@ -116,13 +116,15 @@ namespace Rodin::Geometry
        */
       Connectivity& build(size_t d);
 
+      Connectivity& local(size_t i, size_t d);
+
       Connectivity& compute(size_t d, size_t dp);
 
       Connectivity& transpose(size_t d, size_t dp);
 
       Connectivity& intersection(size_t d, size_t dp, size_t dpp);
 
-      void local(std::vector<SubPolytope>& out, size_t dim, Index i);
+      void getSubPolytopes(std::vector<SubPolytope>& out, Index i, size_t d);
 
       const PolytopeIndex& getIndexMap(size_t dim) const;
 

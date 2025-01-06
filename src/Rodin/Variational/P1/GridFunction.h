@@ -90,7 +90,6 @@ namespace Rodin::Variational
       /**
        * @brief Move assignment operator.
        */
-      inline
       constexpr
       GridFunction& operator=(GridFunction&& other)
       {

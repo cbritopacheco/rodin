@@ -16,7 +16,7 @@ using namespace Rodin::External;
 
 static const char* meshfile =
   "../resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh";
-static const Real hmax = 400;
+static const Real hmax = 1000;
 static Real hmin = 0.01 * hmax;
 static const Real hausdorff = 20;
 // static const Real hmax = 600;
@@ -204,6 +204,7 @@ class Environment
         m_vfes(m_topography, m_topography.getSpaceDimension()),
         m_wind(m_vfes),
         m_terrainHeight(m_sfes),
+        m_curvature(m_sfes),
         m_vegetalStratum(vegetalStratum),
         m_flame(*this),
         m_gravity(-9.8),
@@ -235,6 +236,14 @@ class Environment
       std::cout << "advect: " << dt << "\n";
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
+      m_fireDist.save("dist.gf");
+      m_topography.save("dist.mesh");
+      GridFunction grad(m_vfes);
+      grad = Grad(m_fireDist);
+      m_curvature = Div(grad);
+      m_curvature.save("curvature.gf");
+      m_curvature.getFiniteElementSpace().getMesh().save("curvature.mesh");
+
       std::cout << "mmgls\n";
       m_topography = MMG::ImplicitDomainMesher().setHMax(hmax)
                                                 .setHMin(hmin)
@@ -244,7 +253,7 @@ class Environment
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
                                                 // .split(Terrain::Vegetation,
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
-                                                .setBoundaryReference(Terrain::Fire)
+                                                // .setBoundaryReference(Terrain::Fire)
                                                 .discretize(m_fireDist);
 
       std::cout << "mmgoptim\n";
@@ -299,6 +308,8 @@ class Environment
     GridFunction<VectorFES> m_wind;
 
     GridFunction<RealFES> m_terrainHeight;
+
+    GridFunction<RealFES> m_curvature;
 
     VegetalStratum m_vegetalStratum;
 

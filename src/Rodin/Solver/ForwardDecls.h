@@ -7,6 +7,8 @@
 #ifndef RODIN_SOLVER_FORWARDDECLS_H
 #define RODIN_SOLVER_FORWARDDECLS_H
 
+#include "Rodin/Configure.h"
+
 namespace Rodin::Solver
 {
   /**

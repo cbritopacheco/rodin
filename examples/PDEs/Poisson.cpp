@@ -10,6 +10,7 @@
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
+using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
@@ -17,34 +18,31 @@ int main(int, char**)
 {
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 32, 32 });
+  mesh.scale(1.0 / 31);
+  mesh.getConnectivity().compute(1, 2);
 
   // Functions
-  P1<Complex> vh(mesh);
+  P1 vh(mesh);
 
-  GridFunction miaow(vh);
-  miaow = [](const Point& p){ return Complex(0, 1) * Complex(p.x(), 2 * p.y()); };
-  miaow.setWeights();
+  // auto f = cos(2 * M_PI * F::x) * sin(2 * M_PI * F::y);
+  ScalarFunction f(1.0);
 
-  Complex s = Integral(miaow).compute();
-  std::cout << s << std::endl;
+  TrialFunction u(vh);
+  TestFunction  v(vh);
 
-  // TrialFunction u(vh);
-  // TestFunction  v(vh);
+  // Define problem
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
 
-  // // Define problem
-  // Problem poisson(u, v);
-  // poisson = Integral(Grad(u), Grad(v))
-  //         - Integral(v)
-  //         + DirichletBC(u, Zero());
+  // Solve
+  CG(poisson).solve();
 
-  // poisson.assemble();
-  // Solver::CG solver;
-  // poisson.solve(solver);
-
-  // // Save solution
-  // u.getSolution().save("Poisson.gf");
-  // mesh.save("Poisson.mesh");
+  // Save solution
+  u.getSolution().save("Poisson.gf");
+  mesh.save("Poisson.mesh");
 
   return 0;
 }

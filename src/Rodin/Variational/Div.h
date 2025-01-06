@@ -66,7 +66,6 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      inline
       ScalarType getValue(const Geometry::Point& p) const
       {
         ScalarType out;
@@ -96,7 +95,6 @@ namespace Rodin::Variational
         return out;
       }
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
@@ -106,7 +104,6 @@ namespace Rodin::Variational
       /**
        * @brief Interpolation function to be overriden in Derived type.
        */
-      inline
       constexpr
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
@@ -116,7 +113,6 @@ namespace Rodin::Variational
       /**
        * @brief Copy function to be overriden in Derived type.
        */
-      inline
       DivBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();

@@ -244,7 +244,7 @@ namespace Rodin::Variational
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
         const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return fe.getJacobian(local)(rc) * p.getJacobianInverse();
+        return this->object(fe.getJacobian(local)(rc)) * p.getJacobianInverse();
       }
 
       Jacobian* copy() const noexcept override

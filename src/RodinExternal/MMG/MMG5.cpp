@@ -317,6 +317,7 @@ namespace Rodin::External::MMG
     res->npi = 0;
     res->nai = 0;
     res->nti = 0;
+    res->nei = 0;
     res->xp  = 0;
 
     res->np = src.getVertexCount();
@@ -325,6 +326,10 @@ namespace Rodin::External::MMG
     {
       res->nt = src.getCellCount();
       res->na = src.getFaceCount();
+
+      res->nti = res->nt;
+      res->npi = res->np;
+      res->nquad = 0;
 
       MMGS_Set_commonFunc();
       if (!MMGS_zaldy(res))

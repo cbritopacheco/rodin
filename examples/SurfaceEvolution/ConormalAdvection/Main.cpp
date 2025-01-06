@@ -11,9 +11,9 @@ using namespace Rodin::Variational;
 using namespace Rodin::External;
 
 constexpr Real T = M_PI / 2 - 0.1;
-constexpr Real dt = 1;
-constexpr Real hmax = 1;
+constexpr Real hmax = 0.1;
 constexpr Real hmin = 0.1 * hmax;
+constexpr Real dt = 0.01;
 constexpr size_t maxIt = 100;
 constexpr Geometry::Attribute sphereCap = 3;
 constexpr char meshFile[] =

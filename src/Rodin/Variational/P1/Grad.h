@@ -254,7 +254,7 @@ namespace Rodin::Variational
         const auto& fes = this->getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
         const auto& rc = p.getReferenceCoordinates();
-        return p.getJacobianInverse().transpose() * fe.getGradient(local)(rc);
+        return p.getJacobianInverse().transpose() * this->object(fe.getGradient(local)(rc));
       }
 
       Grad* copy() const noexcept override

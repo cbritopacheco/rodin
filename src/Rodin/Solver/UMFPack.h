@@ -14,12 +14,10 @@
 
 #include <Eigen/UmfPackSupport>
 
-#include "Rodin/Configure.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
-#include "Solver.h"
 
 namespace Rodin::Solver
 {

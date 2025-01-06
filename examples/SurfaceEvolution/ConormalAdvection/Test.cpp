@@ -129,8 +129,10 @@ int main(int argc, char** argv)
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 1.0, M_PI / 2 - 0.1, 0.01});
 
+  //run(20, experiments);
+
   const size_t hwc = std::thread::hardware_concurrency();
-  const size_t n = hwc - 2;
+  const size_t n = hwc - 4;
   ThreadPool threadPool(n);
   for (size_t i = 0; i < experiments.size(); i++)
     threadPool.enqueue([i]{ run(i, experiments); });
@@ -225,7 +227,8 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
                    .setHausdorff(experiment.hausd)
                    .optimize(th);
 
-    // th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh");
+    th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh");
+    th.save("out/SphereCap.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
 
     if (t + std::numeric_limits<double>::epsilon() > experiment.T)
       break;
