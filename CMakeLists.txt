@@ -35,7 +35,7 @@ option(RODIN_CODE_COVERAGE          "Compile with code coverage flags"          
 option(RODIN_LTO                    "Compile with link time optimization"       OFF)
 option(RODIN_FEATURE_SUMMARY        "Print Rodin feature summary"               ON)
 option(RODIN_THREAD_SAFE            "Enforces thread-safety."                   OFF)
-option(RODIN_MULTITHREADED          "Utilizes multithreading capabalities."     OFF)
+option(RODIN_MULTITHREADED          "Utilizes multithreading capabalities."     ON)
 option(BUILD_SHARED_LIBS            "Build using shared libraries"              OFF)
 
 if (RODIN_MULTITHREADED)
