@@ -29,7 +29,7 @@ jobs:
         run: >-
           sudo apt-get update && sudo apt-get install -y
           doxygen
-          libgs-dev
+          dvisvgm
           texlive-base
           texlive-latex-extra
           texlive-fonts-extra
