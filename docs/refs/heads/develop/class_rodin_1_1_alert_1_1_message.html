@@ -64,7 +64,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Prefix&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">Prefix</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Message <span class="m-thin">class</span>
         </h1>
         <p>Base class for objects which represents output messages.</p>
@@ -85,7 +85,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac28205263989800da0204904b9475f31" class="m-doc">Message</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac28205263989800da0204904b9475f31" class="m-doc">Message</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp; other)</span>
             </dt>
             <dd>Performs a copy of the Alert&#x27;s message.</dd>
             <dt>
@@ -102,20 +102,20 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6e01571e6589dc64e08addf4b1148a7a" class="m-doc">what</a>(</span><span class="m-doc-wrap">) const -&gt; const char* <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a576a441c2b1e2f01d271e237b314eac3" class="m-doc">what</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">char</a>* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the description (or reason) for the alert.</dd>
-            <dt id="a64e6a52fb7f79dd96146b0eae6e19ed3">
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a64e6a52fb7f79dd96146b0eae6e19ed3" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">const T&amp; v) -&gt; std::enable_if_t&lt;<a href="class_rodin_1_1_alert_1_1_internal_1_1_can_be_output.html" class="m-doc">Internal::<wbr />CanBeOutput</a>&lt;T&gt;::Value, <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="ae86b1d95969f40504107a97b5af66432">
+              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae86b1d95969f40504107a97b5af66432" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> T&amp; v) -&gt; std::enable_if_t&lt;<a href="class_rodin_1_1_alert_1_1_internal_1_1_can_be_output.html" class="m-doc">Internal::<wbr />CanBeOutput</a>&lt;T&gt;::Value, <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Operator overload to aid in the construction of Alert messages.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ac220a450cbcc48b9e15099e811453c1e" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>&amp;)</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac220a450cbcc48b9e15099e811453c1e" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>&amp;) -&gt; <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">void</a></span>
             </dt>
             <dd>Operator overload to raise the Alert from a stream.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc">raise</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">void</a> <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Raises the Alert to the user.</dd>
           </dl>
@@ -125,9 +125,9 @@
           <section class="m-doc-details" id="ac28205263989800da0204904b9475f31"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Prefix&gt;
+                template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">Prefix</a> _1&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac28205263989800da0204904b9475f31" class="m-doc-self">Message</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac28205263989800da0204904b9475f31" class="m-doc-self">Message</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp; other)</span></span>
             </h3>
             <p>Performs a copy of the Alert&#x27;s message.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -145,9 +145,9 @@
           <section class="m-doc-details" id="aa158e3aa6b68c6ff1cd41aaabb028bdd"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Prefix&gt;
+                template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">Prefix</a> _1&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa158e3aa6b68c6ff1cd41aaabb028bdd" class="m-doc-self">Message</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa158e3aa6b68c6ff1cd41aaabb028bdd" class="m-doc-self">Message</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Performs a move of the Alert&#x27;s message.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -162,12 +162,12 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a6e01571e6589dc64e08addf4b1148a7a"><div>
+          <section class="m-doc-details" id="a576a441c2b1e2f01d271e237b314eac3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Prefix&gt;
+                template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">Prefix</a> _1&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const char* Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e01571e6589dc64e08addf4b1148a7a" class="m-doc-self">what</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">char</a>* Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a576a441c2b1e2f01d271e237b314eac3" class="m-doc-self">what</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the description (or reason) for the alert.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -182,19 +182,19 @@
           <section class="m-doc-details" id="ac220a450cbcc48b9e15099e811453c1e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Prefix&gt;
+                template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">Prefix</a> _1&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac220a450cbcc48b9e15099e811453c1e" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>&amp;)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">void</a> Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac220a450cbcc48b9e15099e811453c1e" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>&amp;)</span></span>
             </h3>
             <p>Operator overload to raise the Alert from a stream.</p>
-<p>This method will call <a href="class_rodin_1_1_alert_1_1_message.html#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc">raise()</a>.</p>
+<p>This method will call <a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc">raise()</a>.</p>
           </div></section>
           <section class="m-doc-details" id="a05fa0dbb9670de92ab00a301d3e676b5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Prefix&gt;
+                template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">Prefix</a> _1&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">void</a> Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Raises the Alert to the user.</p>
 <p>The actual behaviour for raising the Alert is specified in its subclasses by overriding this function.</p>
@@ -244,7 +244,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

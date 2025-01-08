@@ -74,7 +74,6 @@
               Reference
               <ul>
                 <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
@@ -88,10 +87,10 @@
             </dt>
             <dd>Conjugate gradient solver for self-adjoint problems, for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_c_g_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">CG&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>
             </dt>
-            <dd>Conjugate gradient solver for self-adjoint problems, for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
+            <dd>Conjugate gradient solver for self-adjoint problems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">CG&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
@@ -99,59 +98,29 @@
             <dd>Conjugate gradient solver for self-adjoint problems, for use with <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_c_g_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">CG&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Conjugate gradient solver for self-adjoint problems, for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">DGMRES&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Operator, class Vector, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase</a>
-            </dt>
-            <dd>Abstract base class for linear algebra solvers.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class EigenSolverType, class OperatorType, class VectorType&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_eigen_solver.html" class="m-doc">EigenSolver</a>
             </dt>
             <dd>Wrapper class for any Eigen sparse solver.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">GMRES&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
-            <dd>Conjugate gradient solver for self-adjoint problems.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a>
-            </dt>
-            <dd>Direct sparse LLT Cholesky factorizations.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a>
-            </dt>
-            <dd>Direct sparse <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorizations without square root.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a>
-            </dt>
-            <dd>Robust Cholesky decomposition of a dense matrix with pivoting.</dd>
+            <dd><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a>
             </dt>
             <dd>Robust Cholesky decomposition of a dense matrix with pivoting.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a>
-            </dt>
-            <dd>Sparse supernodal LU factorization for general matrices.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a>
-            </dt>
-            <dd>Sparse left-looking QR factorization with numerical column pivoting.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">GMRES&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_householder_q_r_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">HouseholderQR&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
@@ -163,15 +132,15 @@
             </dt>
             <dd><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a> for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a>
+            </dt>
+            <dd>Robust Cholesky decomposition of a dense matrix with pivoting.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_l_d_l_t_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">LDLT&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
             <dd>A direct sparse <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorizations without square root for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix&lt;Real&gt;</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector&lt;Real&gt;</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_01_52eeb502c3b40782d8d9d301a599470e.html" class="m-doc">LeastSquaresCG&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Conjugate gradient solver for self-adjoint problems, for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">LeastSquaresCG&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
@@ -179,59 +148,54 @@
             <dd>Conjugate gradient solver for self-adjoint problems, for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix&lt;Real&gt;</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector&lt;Real&gt;</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_01_52eeb502c3b40782d8d9d301a599470e.html" class="m-doc">LeastSquaresCG&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Conjugate gradient solver for self-adjoint problems, for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a>
+            </dt>
+            <dd>Direct sparse <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorizations without square root.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_0123e6721ce7e4589185879b6f3470799a.html" class="m-doc">SimplicialLDLT&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
             <dd>A direct sparse <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorizations without square root for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix&lt;Real&gt;</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector&lt;Real&gt;</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a>
+            </dt>
+            <dd>Direct sparse LLT Cholesky factorizations.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_01_m24585f1e99a1d25a6b290daaeb8ac5fe.html" class="m-doc">SimplicialLLT&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
             <dd>A direct sparse LLT Cholesky factorizations for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix&lt;Real&gt;</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector&lt;Real&gt;</a>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Operator, class Vector, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase</a>
+            </dt>
+            <dd>Abstract base class for linear algebra solvers.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a>
+            </dt>
+            <dd>Sparse supernodal LU factorization for general matrices.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_sparse_l_u_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">SparseLU&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
             <dd>Sparse supernodal LU factorization for general matrices for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix&lt;Real&gt;</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector&lt;Real&gt;</a>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a>
+            </dt>
+            <dd>Sparse left-looking QR factorization with numerical column pivoting.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_sparse_q_r_3_01_math_1_1_sparse_matrix_3_01_scalar_01_4_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">SparseQR&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
             <dd>Sparse left-looking QR factorization with numerical column pivoting for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
-          </dl>
-        </section>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#gab364c847ed0268acba91f8e471ca0690" class="m-doc">BiCGSTAB</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;, Scalar&gt;&amp;) -&gt; BiCGSTAB&lt; Math::SparseMatrix&lt; Scalar &gt;, Math::Vector&lt; Scalar &gt;&gt;</span>
-            </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#ga5f6c6b54447e33124f3b2521914b741e" class="m-doc">HouseholderQR</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;Scalar&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;, Scalar&gt;&amp;) -&gt; HouseholderQR&lt; Math::Matrix&lt; Scalar &gt;, Math::Vector&lt; Scalar &gt;&gt;</span>
-            </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#ga75dfe827bc32bf0802adbcdc5816ec8d" class="m-doc">SimplicialLDLT</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;, Scalar&gt;&amp;) -&gt; SimplicialLDLT&lt; Math::SparseMatrix&lt; Scalar &gt;, Math::Vector&lt; Scalar &gt;&gt;</span>
-            </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#ga755b5a457a90d359e2a9d91f86c20238" class="m-doc">SimplicialLLT</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;, Scalar&gt;&amp;) -&gt; SimplicialLLT&lt; Math::SparseMatrix&lt; Scalar &gt;, Math::Vector&lt; Scalar &gt;&gt;</span>
-            </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#ga6c6eaa84a8baaa04fd64187922b6b6b2" class="m-doc">SparseLU</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;, Scalar&gt;&amp;) -&gt; SparseLU&lt; Math::SparseMatrix&lt; Scalar &gt;, Math::Vector&lt; Scalar &gt;&gt;</span>
-            </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#ga0c1d302ecdddaced92116f9fccdedee2" class="m-doc">SparseQR</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;, Scalar&gt;&amp;) -&gt; SparseQR&lt; Math::SparseMatrix&lt; Scalar &gt;, Math::Vector&lt; Scalar &gt;&gt;</span>
-            </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a>.</dd>
           </dl>
         </section>
       </div>
@@ -278,7 +242,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

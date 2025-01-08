@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Assembly::Sequential&lt;Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;, Variational::LinearForm&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;&gt; class | Rodin</title>
+  <title>Building the documentation | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,30 +64,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>Sequential&lt;Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;, Variational::LinearForm&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          Building the documentation
         </h1>
-        <p>Sequential assembly of the <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a> associated to a LinearFormBase object.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt id="a41cae5e30b7f04c8a8a169e6389e9746">
-              <span class="m-doc-wrap-bumper">auto <a href="#a41cae5e30b7f04c8a8a169e6389e9746" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap">const InputType&amp; input) const -&gt; VectorType <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Executes the assembly and returns the vector associated to the linear form.</dd>
-          </dl>
-        </section>
+<p><a name="autotoc_md23"></a> <a href="namespace_rodin.html" class="m-doc">Rodin</a> builds the documentation through the <code>RodinDoxygen</code> target. However, there are few options to configure depending on the style of the documentation you want to obtain. In this page we show how to build the documentation and explain some of the options.</p><section id="autotoc_md24"><h2><a href="#autotoc_md24">CMake options</a></h2><table class="m-table"><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td>RODIN_BUILD_DOC</td><td>Build the <a href="namespace_rodin.html" class="m-doc">Rodin</a> documentation</td></tr><tr><td>RODIN_USE_MCSS</td><td>Use m.css style documentation</td></tr></tbody></table></section><section id="autotoc_md25"><h2><a href="#autotoc_md25">Unstyled documentation</a></h2><p>Requirements:</p><ul><li>Doxygen 1.8.15+</li></ul><p>If you want to build the plain old-fashioned documentation you only need to set the <code>RODIN_BUILD_DOC</code> flag to <code>ON</code>.</p><pre class="m-code"><span class="n">cmake</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="o">-</span><span class="n">DRODIN_BUILD_DOC</span><span class="o">=</span><span class="n">ON</span>
+<span class="n">make</span><span class="w"> </span><span class="n">RodinDoxygen</span></pre><p>The generated Doxygen documentation will then be inside the <code>doc/</code> subdirectory.</p></section><section id="autotoc_md26"><h2><a href="#autotoc_md26">Styled documentation</a></h2><p>For the styled documentation we utilize <a href="https://mcss.mosra.cz/">m.css</a>.</p><p>Requirements:</p><ul><li>Doxygen 1.8.2+</li><li>Python 3.6+<ul><li><a href="https://pypi.org/project/Jinja2/">Jinja2</a></li><li><a href="https://pypi.org/project/Pygments/">Pygments</a></li></ul></li><li>LaTeX<ul><li>texlive-base</li><li>texlive-latex-extra</li><li>texlive-fonts-extra</li><li>texlive-fonts-recommended</li></ul></li></ul><pre class="m-code"><span class="n">cmake</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="o">-</span><span class="n">DRODIN_BUILD_DOC</span><span class="o">=</span><span class="n">ON</span><span class="w"> </span><span class="o">-</span><span class="n">DRODIN_USE_MCSS</span><span class="o">=</span><span class="n">ON</span>
+<span class="n">make</span><span class="w"> </span><span class="n">RodinDoxygen</span></pre><p>The generated Doxygen documentation will then be inside the <code>doc/</code> subdirectory.</p></section>
       </div>
     </div>
   </div>
@@ -132,7 +113,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

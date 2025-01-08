@@ -82,7 +82,9 @@
         </nav>
 <p>This class represents the CTAD for the expression:</p><div class="m-math"><svg style="width: 9.997em; height: 2.767em;" viewBox="146.284791 -26.567319 95.973432 26.567327">
 <title>
-\[ \int (A \: \mathbf{J} \: u) : \mathbf{J} \: v \ dx \: , \]
+\[
+\int (A \: \mathbf{J} \: u) : \mathbf{J} \: v \ dx \: ,
+\]
 </title>
 <defs>
 <path id='eq1-g0-74' d='M5.212453-7.687173H6.168867V-8.201245C5.869988-8.177335 4.638605-8.177335 4.25604-8.177335C3.634371-8.177335 2.630137-8.177335 2.044334-8.201245V-7.687173H3.694147V-1.78132C3.694147-.657534 3.144209-.251059 2.52254-.251059C2.438854-.251059 1.888917-.251059 1.422665-.549938C1.853051-.657534 2.056289-1.004234 2.056289-1.362889C2.056289-1.948692 1.590037-2.211706 1.219427-2.211706C.789041-2.211706 .37061-1.912827 .37061-1.362889C.37061-.466252 1.291158 .143462 2.582316 .143462C4.112578 .143462 5.212453-.549938 5.212453-1.78132V-7.687173Z'/>
@@ -129,7 +131,8 @@ $ u \in \mathbb{P}_1 $
 </g>
 </svg> and <svg class="m-math" style="width: 3.358em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 32.240153 10.029041">
 <title>
-$ v \in \mathbb{P}_1 $
+$ v \in
+\mathbb{P}_1 $
 </title>
 <defs>
 <path id='eq3-g3-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
@@ -155,7 +158,12 @@ $ A $
 </g>
 </svg> is a coefficient function.</p><section id="autotoc_md20"><h3><a href="#autotoc_md20">Judgement</a></h3><p>The following judgement specifies that the expression is a well formed type of <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>.</p><div class="m-math"><svg style="width: 20.257em; height: 2.966em;" viewBox="97.036276 -28.471357 194.470561 28.471369">
 <title>
-\[ \dfrac {\vdash \int (A \: \mathbf{J} \: u) : \mathbf{J} \: v \ dx : \texttt{QuadratureRule}} {\vdash u, v : \mathbb{P}_1} \]
+\[
+\dfrac
+{\vdash \int (A \: \mathbf{J} \: u) : \mathbf{J} \: v \ dx :
+\texttt{QuadratureRule}}
+{\vdash u, v : \mathbb{P}_1}
+\]
 </title>
 <defs>
 <path id='eq5-g6-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
@@ -223,24 +231,24 @@ $ A $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="aa7e0882dcfdc739631fcbb8282d26324">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa7e0882dcfdc739631fcbb8282d26324" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">IntegrandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt id="a48340e1460d6b8b6eb354b431923fd3e">
+              <span class="m-doc-wrap-bumper">auto <a href="#a48340e1460d6b8b6eb354b431923fd3e" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">IntegrandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the integrand.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab08a44a51867591cb80af1610ac53c34" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a97e8bbec3df10545ba877130c3be5b93" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ab08a44a51867591cb80af1610ac53c34"><div>
+          <section class="m-doc-details" id="a97e8bbec3df10545ba877130c3be5b93"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt;&lt;CoefficientDerived, LHSDerived, RHSDerived, LHSRange, RHSRange, LHSMesh, RHSMesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab08a44a51867591cb80af1610ac53c34" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt;&lt;CoefficientDerived, LHSDerived, RHSDerived, LHSRange, RHSRange, LHSMesh, RHSMesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97e8bbec3df10545ba877130c3be5b93" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -298,7 +306,7 @@ $ A $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>
