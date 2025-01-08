@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   Build-And-Deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       MAKEFLAGS: "-j2"
     steps:
