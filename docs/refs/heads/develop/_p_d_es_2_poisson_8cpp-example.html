@@ -79,42 +79,64 @@
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Types.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;RodinExternal/MMG.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Solver</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">External</span><span class="p">;</span>
 
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="c1">// Build a mesh</span>
-<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
-<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Quadrilateral</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="w"> </span><span class="p">});</span>
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">31</span><span class="p">);</span>
+<span class="w">  </span><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;oscar.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span>
 <span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// std::set&lt;size_t&gt; attrs;</span>
+<span class="w">  </span><span class="c1">// size_t count54 = 0;</span>
+<span class="w">  </span><span class="c1">// size_t count120 = 0;</span>
+<span class="w">  </span><span class="c1">// for (auto edge = mesh.getFace(); edge; ++edge)</span>
+<span class="w">  </span><span class="c1">// {</span>
+<span class="w">  </span><span class="c1">//   if (edge-&gt;getAttribute() == 54)</span>
+<span class="w">  </span><span class="c1">//     count54++;</span>
+<span class="w">  </span><span class="c1">//   else if (edge-&gt;getAttribute() == 120)</span>
+<span class="w">  </span><span class="c1">//     count120++;</span>
+<span class="w">  </span><span class="c1">// }</span>
+<span class="w">  </span><span class="c1">// std::cout &lt;&lt; count54 &lt;&lt; &quot; &quot; &lt;&lt; count120 &lt;&lt; std::endl;</span>
 
-<span class="w">  </span><span class="c1">// Functions</span>
-<span class="w">  </span><span class="n">P1</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">trace</span><span class="p">({{</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">666</span><span class="p">}});</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">trace</span><span class="p">({{{</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">},</span><span class="w"> </span><span class="mi">666</span><span class="p">}});</span>
 
-<span class="w">  </span><span class="c1">// auto f = cos(2 * M_PI * F::x) * sin(2 * M_PI * F::y);</span>
-<span class="w">  </span><span class="n">ScalarFunction</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;test.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span>
 
-<span class="w">  </span><span class="n">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
-<span class="w">  </span><span class="n">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// // Build a mesh</span>
+<span class="w">  </span><span class="c1">// Mesh mesh;</span>
+<span class="w">  </span><span class="c1">// mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 32, 32 });</span>
+<span class="w">  </span><span class="c1">// mesh.scale(1.0 / 31);</span>
+<span class="w">  </span><span class="c1">// mesh.getConnectivity().compute(1, 2);</span>
 
-<span class="w">  </span><span class="c1">// Define problem</span>
-<span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">          </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
+<span class="w">  </span><span class="c1">// // Functions</span>
+<span class="w">  </span><span class="c1">// P1 vh(mesh);</span>
 
-<span class="w">  </span><span class="c1">// Solve</span>
-<span class="w">  </span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
+<span class="w">  </span><span class="c1">// // auto f = cos(2 * M_PI * F::x) * sin(2 * M_PI * F::y);</span>
+<span class="w">  </span><span class="c1">// ScalarFunction f(1.0);</span>
 
-<span class="w">  </span><span class="c1">// Save solution</span>
-<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Poisson.gf&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Poisson.mesh&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// TrialFunction u(vh);</span>
+<span class="w">  </span><span class="c1">// TestFunction  v(vh);</span>
+
+<span class="w">  </span><span class="c1">// // Define problem</span>
+<span class="w">  </span><span class="c1">// Problem poisson(u, v);</span>
+<span class="w">  </span><span class="c1">// poisson = Integral(Grad(u), Grad(v))</span>
+<span class="w">  </span><span class="c1">//         - Integral(f, v)</span>
+<span class="w">  </span><span class="c1">//         + DirichletBC(u, Zero());</span>
+
+<span class="w">  </span><span class="c1">// // Solve</span>
+<span class="w">  </span><span class="c1">// CG(poisson).solve();</span>
+
+<span class="w">  </span><span class="c1">// // Save solution</span>
+<span class="w">  </span><span class="c1">// u.getSolution().save(&quot;Poisson.gf&quot;);</span>
+<span class="w">  </span><span class="c1">// mesh.save(&quot;Poisson.mesh&quot;);</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></pre>
