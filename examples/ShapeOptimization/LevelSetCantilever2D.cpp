@@ -160,7 +160,7 @@ int main(int, char**)
                     .setAngleDetection(false)
                     .optimize(th);
 
-    th.save("out3/Omega." + std::to_string(i) + ".mesh");
+    th.save("out/Omega." + std::to_string(i) + ".mesh");
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

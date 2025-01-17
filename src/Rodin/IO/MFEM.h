@@ -28,69 +28,6 @@
 
 namespace Rodin::IO::MFEM
 {
-  /**
-   * @internal
-   */
-  std::istream& getline(std::istream& is, std::string& line, size_t& currentLineNumber);
-
-  /**
-   * @internal
-   */
-  std::string skipEmptyLinesAndComments(std::istream& is, size_t& currentLineNumber);
-
-  /**
-   * @internal
-   */
-  enum MeshType
-  {
-    LEGACY,
-    NONCONFORMING,
-    NURBS
-  };
-
-  /**
-   * @internal
-   */
-  enum GeometryType
-  {
-    POINT       = 0,
-    SEGMENT     = 1,
-    TRIANGLE    = 2,
-    SQUARE      = 3,
-    TETRAHEDRON = 4,
-    CUBE        = 5,
-    PRISM       = 6,
-    PYRAMID     = 7
-  };
-
-  struct MeshVersion
-  {
-    size_t major;
-    size_t minor;
-  };
-
-  struct MeshHeader
-  {
-    MeshType type;
-    MeshVersion version;
-  };
-
-  enum Ordering
-  {
-    /// XXX..., YYY..., ZZZ...
-    Nodes = 0,
-
-    /// XYZ, XYZ, ...
-    VectorDimension = 1
-  };
-
-  struct GridFunctionHeader
-  {
-    std::string fec;
-    size_t vdim;
-    Ordering ordering;
-  };
-
   enum class Keyword
   {
     dimension,
@@ -98,61 +35,6 @@ namespace Rodin::IO::MFEM
     boundary,
     vertices
   };
-
-  inline
-  constexpr
-  std::optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
-  {
-    switch (t)
-    {
-      case GeometryType::POINT:
-      {
-        return Rodin::Geometry::Polytope::Type::Point;
-      }
-      case GeometryType::SEGMENT:
-      {
-        return Rodin::Geometry::Polytope::Type::Segment;
-      }
-      case GeometryType::TRIANGLE:
-      {
-        return Rodin::Geometry::Polytope::Type::Triangle;
-      }
-      case GeometryType::TETRAHEDRON:
-      {
-        return Rodin::Geometry::Polytope::Type::Tetrahedron;
-      }
-      case GeometryType::SQUARE:
-      {
-        return Rodin::Geometry::Polytope::Type::Quadrilateral;
-      }
-      default:
-        return {};
-    }
-    return {};
-  }
-
-  inline
-  constexpr
-  std::optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
-  {
-    switch (t)
-    {
-      case Geometry::Polytope::Type::Point:
-        return GeometryType::POINT;
-      case Geometry::Polytope::Type::Segment:
-        return GeometryType::SEGMENT;
-      case Geometry::Polytope::Type::Triangle:
-        return GeometryType::TRIANGLE;
-      case Geometry::Polytope::Type::Quadrilateral:
-        return GeometryType::SQUARE;
-      case Geometry::Polytope::Type::Tetrahedron:
-        return GeometryType::TETRAHEDRON;
-      default:
-        return {};
-    }
-    assert(false);
-    return {};
-  }
 
   inline
   constexpr
@@ -237,6 +119,124 @@ namespace Rodin::IO::MFEM
       return {};
     assert(res == str);
     return res;
+  }
+
+  /**
+   * @internal
+   */
+  std::istream& getline(std::istream& is, std::string& line, size_t& currentLineNumber);
+
+  /**
+   * @internal
+   */
+  std::string skipEmptyLinesAndComments(std::istream& is, size_t& currentLineNumber);
+
+  /**
+   * @internal
+   */
+  enum MeshType
+  {
+    LEGACY,
+    NONCONFORMING,
+    NURBS
+  };
+
+  /**
+   * @internal
+   */
+  enum GeometryType
+  {
+    POINT       = 0,
+    SEGMENT     = 1,
+    TRIANGLE    = 2,
+    SQUARE      = 3,
+    TETRAHEDRON = 4,
+    CUBE        = 5,
+    PRISM       = 6,
+    PYRAMID     = 7
+  };
+
+  struct MeshVersion
+  {
+    size_t major;
+    size_t minor;
+  };
+
+  struct MeshHeader
+  {
+    MeshType type;
+    MeshVersion version;
+  };
+
+  enum Ordering
+  {
+    /// XXX..., YYY..., ZZZ...
+    Nodes = 0,
+
+    /// XYZ, XYZ, ...
+    VectorDimension = 1
+  };
+
+  struct GridFunctionHeader
+  {
+    std::string fec;
+    size_t vdim;
+    Ordering ordering;
+  };
+
+  inline
+  constexpr
+  std::optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
+  {
+    switch (t)
+    {
+      case GeometryType::POINT:
+      {
+        return Rodin::Geometry::Polytope::Type::Point;
+      }
+      case GeometryType::SEGMENT:
+      {
+        return Rodin::Geometry::Polytope::Type::Segment;
+      }
+      case GeometryType::TRIANGLE:
+      {
+        return Rodin::Geometry::Polytope::Type::Triangle;
+      }
+      case GeometryType::TETRAHEDRON:
+      {
+        return Rodin::Geometry::Polytope::Type::Tetrahedron;
+      }
+      case GeometryType::SQUARE:
+      {
+        return Rodin::Geometry::Polytope::Type::Quadrilateral;
+      }
+      default:
+        return {};
+    }
+    return {};
+  }
+
+  inline
+  constexpr
+  std::optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
+  {
+    switch (t)
+    {
+      case Geometry::Polytope::Type::Point:
+        return GeometryType::POINT;
+      case Geometry::Polytope::Type::Segment:
+        return GeometryType::SEGMENT;
+      case Geometry::Polytope::Type::Triangle:
+        return GeometryType::TRIANGLE;
+      case Geometry::Polytope::Type::Quadrilateral:
+        return GeometryType::SQUARE;
+      case Geometry::Polytope::Type::Tetrahedron:
+        return GeometryType::TETRAHEDRON;
+      default:
+        return {};
+    }
+    assert(false);
+    return {};
   }
 
   struct ParseUnsignedInteger

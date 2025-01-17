@@ -25,13 +25,6 @@
 
 namespace Rodin::IO::MEDIT
 {
-  enum SolutionType
-  {
-    Real = 1,
-    Vector = 2,
-    Tensor = 3
-  };
-
   enum class Keyword
   {
     MeshVersionFormatted,
@@ -110,7 +103,6 @@ namespace Rodin::IO::MEDIT
       case Keyword::TangentAtVertices:
         return "TangentAtVertices";
       case Keyword::End:
-#include "Rodin/Math/Vector.h"
         return "End";
     }
     return nullptr;
@@ -220,13 +212,19 @@ namespace Rodin::IO::MEDIT
     else if (str == Keyword::TangentAtVertices)
       res = Keyword::TangentAtVertices;
     else if (str == Keyword::End)
-#include "Rodin/Math/Vector.h"
       res = Keyword::End;
     else
       return {};
     assert(res == str);
     return res;
   }
+
+  enum SolutionType
+  {
+    Real = 1,
+    Vector = 2,
+    Tensor = 3
+  };
 
   class ParseEntity
   {

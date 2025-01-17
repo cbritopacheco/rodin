@@ -216,6 +216,31 @@ namespace Rodin::Geometry
     return build.finalize();
   }
 
+
+  Mesh<Context::Local>& Mesh<Context::Local>::trace(
+      const Map<Attribute, Attribute>& interface, const FlatSet<Attribute>& attrs)
+  {
+    const size_t D = getDimension();
+    RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
+    const auto& conn = getConnectivity();
+    for (auto it = getFace(); it; ++it)
+    {
+      if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+      {
+        assert(it->getDimension() == D - 1);
+        const auto& inc = conn.getIncidence({ D - 1, D }, it->getIndex());
+        if (inc.size() == 1)
+        {
+          auto el = getCell(*inc.begin());
+          auto find = interface.find(el->getAttribute());
+          if (find != interface.end())
+            setAttribute({ D - 1, it->getIndex() }, find->second);
+        }
+      }
+    }
+    return *this;
+  }
+
   Mesh<Context::Local>& Mesh<Context::Local>::trace(
       const Map<std::pair<Attribute, Attribute>, Attribute>& interface, const FlatSet<Attribute>& attrs)
   {
@@ -228,19 +253,21 @@ namespace Rodin::Geometry
       {
         assert(it->getDimension() == D - 1);
         const auto& inc = conn.getIncidence({ D - 1, D }, it->getIndex());
-        assert(inc.size() == 2);
-        auto el1 = getCell(*inc.begin());
-        auto el2 = getCell(*std::next(inc.begin()));
-        auto find = interface.find({ el1->getAttribute(), el2->getAttribute() });
-        if (find != interface.end())
+        if (inc.size() == 2)
         {
-          setAttribute({ D - 1, it->getIndex() }, find->second);
-        }
-        else
-        {
-          find = interface.find({ el2->getAttribute(), el1->getAttribute() });
+          auto el1 = getCell(*inc.begin());
+          auto el2 = getCell(*std::next(inc.begin()));
+          auto find = interface.find({ el1->getAttribute(), el2->getAttribute() });
           if (find != interface.end())
+          {
             setAttribute({ D - 1, it->getIndex() }, find->second);
+          }
+          else
+          {
+            find = interface.find({ el2->getAttribute(), el1->getAttribute() });
+            if (find != interface.end())
+              setAttribute({ D - 1, it->getIndex() }, find->second);
+          }
         }
       }
     }

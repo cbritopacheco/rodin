@@ -4,6 +4,7 @@ target_link_libraries(Poisson
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
+  Rodin::External::MMG
   )
 
 add_executable(Elasticity Elasticity.cpp)
