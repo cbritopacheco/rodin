@@ -28,6 +28,10 @@ if (RODIN_BUILD_UNIT_TESTS)
   add_subdirectory(unit)
 endif()
 
+if (RODIN_BUILD_MANUFACTURED_TESTS)
+  add_subdirectory(manufactured)
+endif()
+
 if (RODIN_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
