@@ -840,6 +840,13 @@ namespace Rodin::Geometry
 
       virtual Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
 
+      Mesh& trace(const Map<Attribute, Attribute>& tmap)
+      {
+        return trace(tmap, FlatSet<Attribute>{});
+      }
+
+      virtual Mesh& trace(const Map<Attribute, Attribute>& tmap, const FlatSet<Attribute>& attrs);
+
       virtual std::optional<Point> inclusion(const Point& p) const override;
 
       SubMeshBase& asSubMesh() override;

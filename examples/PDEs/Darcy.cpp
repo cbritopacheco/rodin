@@ -17,66 +17,136 @@ using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+
+constexpr Real pi = Math::Constants::pi();
+
 int main(int argc, char** argv)
 {
   // Load mesh
   Mesh mesh;
-  mesh.load("Star.mesh");
-  // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  // mesh.scale(1. / (15));
-  // mesh.displace(VectorFunction{-1, -1});
+  // mesh.load("Star.mesh");
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
+  mesh.scale(1. / (31));
   mesh.getConnectivity().compute(1, 2);
 
   // Functions
-  P1 vh(mesh, 2);
-  P1 ph(mesh);
+  P1 vh(mesh);
+  P1 ph(mesh, 2);
 
   TrialFunction u(vh);
-  TestFunction  v(vh);
+  TestFunction  w1(vh);
 
-  TrialFunction p(ph);
-  TestFunction  q(ph);
+  TrialFunction v(ph);
+  TestFunction  w2(ph);
 
-  RealFunction f = [](const Geometry::Point& p) { return exp(p.x()) * sin(p.y()); };
-  VectorFunction g = {
-    [](const Geometry::Point& p) { return exp(p.x()) * cos(p.y()); },
-    [](const Geometry::Point& p) { return exp(p.x()) * sin(p.y()); } };
+  RealFunction f1 =
+    [](const Geometry::Point& p)
+    {
+      return 2 * pi * pi * sin(pi * p.x()) * sin(pi * p.y());
+    };
+
+  VectorFunction f2 = VectorFunction{
+    [](const Geometry::Point& p)
+    {
+      return 2 * pi * (
+          cos(2 * pi * p.x()) * sin(pi * p.y()) * sin(pi * p.y())
+          + cos(2 * pi * p.y()) * sin(pi * p.x()) * sin(pi * p.x()))
+        - 4 * pi * pi * sin(pi * p.x()) * sin(pi * p.x()) * sin(pi * p.y()) * sin(pi * p.y());
+    },
+    [](const Geometry::Point& p)
+    {
+      return -2 * pi * (
+          cos(2 * pi * p.x()) * sin(pi * p.y()) * sin(pi * p.y())
+          + cos(2 * pi * p.y()) * sin(pi * p.x()) * sin(pi * p.x()))
+        + 4 * pi * pi * sin(pi * p.x()) * sin(pi * p.x()) * sin(pi * p.y()) * sin(pi * p.y());
+    }
+  };
+
+  // RealFunction f1 =
+  //   [](const Geometry::Point& p)
+  //   {
+  //     return 2 * pi * pi * sin(pi * p.x()) * sin(pi * p.y())
+  //       + 2 * pi * sin(pi * p.x()) * cos(pi * p.x()) * sin(pi * p.y()) * sin(pi * p.y())
+  //       - 2 * pi * sin(pi * p.y()) * cos(pi * p.y()) * sin(pi * p.x()) * sin(pi * p.x());
+  //   };
+
+  // VectorFunction f2 = VectorFunction{
+  //   [](const Geometry::Point& p)
+  //   {
+  //     return -2 * pi * (
+  //         cos(2 * pi * p.x()) * sin(pi * p.y()) * sin(pi * p.y())
+  //         + cos(2 * pi * p.y()) * sin(pi * p.x()) * sin(pi * p.x()))
+  //       + 4 * pi * pi * sin(pi * p.x()) * sin(pi * p.x()) * sin(pi * p.y()) * sin(pi * p.y())
+  //       + pi * cos(pi * p.x()) * sin(pi * p.y());
+  //   },
+  //   [](const Geometry::Point& p)
+  //   {
+  //     return 2 * pi * (
+  //         cos(2 * pi * p.x()) * sin(pi * p.y()) * sin(pi * p.y())
+  //         + cos(2 * pi * p.y()) * sin(pi * p.x()) * sin(pi * p.x()))
+  //       + 4 * pi * pi * sin(pi * p.x()) * sin(pi * p.x()) * sin(pi * p.y()) * sin(pi * p.y())
+  //       + pi * sin(pi * p.x()) * cos(pi * p.y());
+  //   }
+  // };
 
   auto n = BoundaryNormal(mesh);
 
-  Problem darcy(u, p, v, q);
-  darcy = //Integral(u, v)
-        - Integral(p, Div(v))
-        // + BoundaryIntegral(f, Dot(v, n))
-        - Integral(Div(u), q);
+  Problem darcy(u, v, w1, w2);
+  darcy = Integral(Grad(u), Grad(w1))
+        // - Integral(Div(v), w1)
+        - Integral(f1, w1)
+        + Integral(Jacobian(v), Jacobian(w2))
+        // + Integral(u, Div(w2))
+        - Integral(f2, w2)
+        + DirichletBC(u, Zero())
+        + DirichletBC(v, Zero(2))
+        ;
 
+  UMFPack(darcy).solve();
 
-  // darcy = Integral(Jacobian(u), Jacobian(v))
-  //       - Integral(VectorFunction{1, 0}, v)
-  //       + Integral(Grad(p), Grad(q))
-  //       - Integral(Div(u), q)
-  //       + DirichletBC(u, VectorFunction{2, 0})
-  //       + DirichletBC(p, Zero());
-
-  darcy.assemble();
-
-  //std::cout << darcy.getStiffnessOperator().block(0, 0, vh.getSize(), vh.getSize()) << std::endl;
-  // std::cout << darcy.getStiffnessOperator().block(0, vh.getSize(), vh.getSize(), ph.getSize()) << std::endl;
-  // std::cout << darcy.getStiffnessOperator().block(vh.getSize(), 0, ph.getSize(), vh.getSize()) << std::endl;
-  // auto a = darcy.getStiffnessOperator().block(vh.getSize(), 0, ph.getSize(), vh.getSize()).toDense();
-  // auto b = darcy.getStiffnessOperator().block(vh.getSize(), 0, ph.getSize(), vh.getSize()).toDense();
-  // std::cout << (a - b).norm() << std::endl;
-  std::exit(1);
-
-  std::cout << "miaow\n";
-
-  // UMFPack(darcy).solve();
-
+  mesh.save("th.mesh");
   u.getSolution().save("u.gf");
-  mesh.save("u.mesh");
+  v.getSolution().save("v.gf");
 
-  p.getSolution().save("p.gf");
-  mesh.save("q.mesh");
+  GridFunction uEx(vh);
+  uEx = [](const Geometry::Point& p) { return sin(M_PI * p.x()) * sin(M_PI * p.y()); };
+  uEx.save("uEx.gf");
+
+  GridFunction vEx(ph);
+  vEx = VectorFunction{
+    [](const Geometry::Point& p)
+    {
+      return sin(M_PI * p.x()) * sin(M_PI * p.y());
+    },
+    [](const Geometry::Point& p)
+    {
+      return sin(M_PI * p.x()) * sin(M_PI * p.y());
+    }
+  };
+  vEx.save("vEx.gf");
+
+
+  VectorFunction f3 = VectorFunction{
+    [](const Geometry::Point& p)
+    {
+      return 2 * pi * pi * sin(pi * p.x()) * sin(pi * p.y());
+    },
+    [](const Geometry::Point& p)
+    {
+      return 2 * pi * pi * sin(pi * p.x()) * sin(pi * p.y());
+    }
+  };
+
+  TrialFunction v2(ph);
+  Problem darcy2(v2, w2);
+  darcy2 = Integral(Jacobian(v2), Jacobian(w2))
+         - Integral(f3, w2)
+         + DirichletBC(v2, Zero(2))
+         ;
+
+  UMFPack(darcy2).solve();
+
+  v2.getSolution().save("v2.gf");
 
   return 0;
 }

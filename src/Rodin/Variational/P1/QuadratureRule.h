@@ -1147,46 +1147,51 @@ namespace Rodin::Variational
         const auto& p = *m_p;
         if (trialfes == testfes)
         {
+          Math::SpatialMatrix<ScalarType> jac;
+
           const auto& fe = trialfes.getFiniteElement(d, idx);
           m_matrix.resize(fe.getCount(), fe.getCount());
 
           m_jac1.resize(fe.getCount());
           for (size_t i = 0; i < fe.getCount(); i++)
-            fe.getJacobian(i)(m_jac1[i], rc);
-
-          for (size_t i = 0; i < fe.getCount(); i++)
-            m_matrix(i, i) = (m_jac1[i] * p.getJacobianInverse()).squaredNorm();
-
-          for (size_t i = 0; i < fe.getCount(); i++)
           {
-            for (size_t j = 0; j < fe.getCount(); j++)
-            {
-              m_matrix(i, j) = Math::dot(
-                  m_jac1[j] * p.getJacobianInverse(), m_jac1[i] * p.getJacobianInverse());
-            }
+            fe.getJacobian(i)(jac, rc);
+            m_jac1[i] = jac * p.getJacobianInverse();
           }
+
+          for (size_t i = 0; i < fe.getCount(); i++)
+            m_matrix(i, i) = m_jac1[i].squaredNorm();
+
+          for (size_t i = 0; i < fe.getCount(); i++)
+            for (size_t j = 0; j < i; j++)
+              m_matrix(i, j) = Math::dot(m_jac1[j], m_jac1[i]);
+
           m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
         }
         else
         {
+          Math::SpatialMatrix<ScalarType> jac1;
+          Math::SpatialMatrix<ScalarType> jac2;
+
           const auto& trialfe = lhs.getFiniteElementSpace().getFiniteElement(d, idx);
           m_jac1.resize(trialfe.getCount());
           for (size_t i = 0; i < trialfe.getCount(); i++)
-            trialfe.getJacobian(i)(m_jac1[i], rc);
+          {
+            trialfe.getJacobian(i)(jac1, rc);
+            m_jac1[i] = jac1 * p.getJacobianInverse();
+          }
 
           const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
           m_jac2.resize(testfe.getCount());
           for (size_t i = 0; i < testfe.getCount(); i++)
-            testfe.getJacobian(i)(m_jac2[i], rc);
+          {
+            testfe.getJacobian(i)(jac2, rc);
+            m_jac2[i] = jac2 * p.getJacobianInverse();
+          }
 
           for (size_t i = 0; i < testfe.getCount(); i++)
-          {
             for (size_t j = 0; j < trialfe.getCount(); j++)
-            {
-              m_matrix(i, j) = Math::dot(
-                  m_jac1[j] * p.getJacobianInverse(), m_jac2[i] * p.getJacobianInverse());
-            }
-          }
+              m_matrix(i, j) = Math::dot(m_jac1[j], m_jac2[i]);
         }
         return *this;
       }
