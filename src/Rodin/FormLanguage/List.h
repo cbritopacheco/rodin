@@ -70,6 +70,7 @@ namespace Rodin::FormLanguage
       {
         if (this != &other)
         {
+          m_list.clear();
           m_list.reserve(other.m_list.size());
           for (const auto& p : other.m_list)
             m_list.emplace_back(p->copy());

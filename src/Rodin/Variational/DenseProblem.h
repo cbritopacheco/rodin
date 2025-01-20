@@ -390,6 +390,8 @@ namespace Rodin::Variational
         m_dbcs = rhs.getDBCs();
         m_pbcs = rhs.getPBCs();
 
+        m_assembled = false;
+
         return *this;
       }
 
