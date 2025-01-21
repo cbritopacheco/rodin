@@ -44,7 +44,6 @@ namespace Rodin::Geometry
       constexpr
       GeometryIndexed& operator=(GeometryIndexed&&) = default;
 
-      inline
       constexpr
       T& operator[](Polytope::Type geom)
       {
@@ -53,7 +52,6 @@ namespace Rodin::Geometry
         return m_map[g];
       }
 
-      inline
       constexpr
       const T& operator[](Polytope::Type geom) const
       {
@@ -62,7 +60,6 @@ namespace Rodin::Geometry
         return m_map[g];
       }
 
-      inline
       constexpr
       size_t size() const
       {
