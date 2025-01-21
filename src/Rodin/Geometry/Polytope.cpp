@@ -27,6 +27,10 @@ namespace Rodin::Geometry
       Math::PointMatrix{{0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} },
+    { Polytope::Type::TriangularPrism,
+      Math::PointMatrix{{0, 1, 0, 0, 1, 0},
+                        {0, 0, 1, 0, 0, 1},
+                        {0, 0, 0, 1, 1, 1}} },
   };
 
   bool operator==(const Polytope& lhs, const Polytope& rhs)

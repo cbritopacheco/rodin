@@ -19,40 +19,22 @@ using namespace Rodin::External;
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("atria_fluid2.mesh", IO::FileFormat::MEDIT);
-  mesh.scale(0.95);
-  mesh.save("atria_fluid2_scaled.mesh", IO::FileFormat::MEDIT);
-
-  for (auto it = mesh.getFace(); it; ++it)
-  {
-    if (it->getAttribute() == 1)
-      mesh.setAttribute({2, it->getIndex()}, 111);
-  }
-
+  mesh.load("atria_fluid.mesh", IO::FileFormat::MEDIT);
   mesh.getConnectivity().compute(2, 3);
-
-  for (auto it = mesh.getFace(); it; ++it)
-  {
-    const auto& inc = mesh.getConnectivity().getIncidence({2, 3}, it->getIndex());
-    if (inc.size() == 1)
-    {
-      auto vecino = *std::begin(inc);
-      mesh.setAttribute({3, vecino}, 110);
-    }
-  }
-
-  mesh.save("miaow.mesh", IO::FileFormat::MEDIT);
-
+  auto skin = mesh.skin();
+  skin.save("atria_fluid_skin.mesh", IO::FileFormat::MEDIT);
   std::exit(1);
+
   P1 vh(mesh);
-  RealFunction one = 1000.0;
+  RealFunction center = 0.01;
+  RealFunction one = 1e10;
 
   TrialFunction u(vh);
   TestFunction  v(vh);
   Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(one, v)
-          + DirichletBC(u, Zero());
+  poisson = 0.00001 * Integral(Grad(u), Grad(v))
+          + Integral(one, v)
+          + DirichletBC(u, center);
   CG(poisson).solve();
 
   // u.getSolution().save("atria_fluid2.o.sol", IO::FileFormat::MEDIT);
@@ -71,10 +53,10 @@ int main(int, char**)
   //   return r;
   // };
   Real max = u.getSolution().max(), min = u.getSolution().min();
-  Real hmax = 4, hmin = 0.1;
+  Real hmax = 1, hmin = -1;
   GridFunction newgf(vh);
   newgf = hmin + (u.getSolution() - min) * (hmax - hmin) / (max - min);
-  newgf.save("atria_fluid2.sol", IO::FileFormat::MEDIT);
+  newgf.save("atria_fluid.o.sol", IO::FileFormat::MEDIT);
 
   // mesh.getConnectivity().compute(1, 2);
   // // std::set<size_t> attrs;
