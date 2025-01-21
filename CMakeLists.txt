@@ -173,7 +173,8 @@ if (RODIN_BUILD_SRC)
     add_subdirectory(examples)
   endif()
 
-  if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_BENCHMARKS)
+  if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_BENCHMARKS OR
+      RODIN_BUILD_MANUFACTURED_TESTS)
     # ---- GoogleTest ----
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
