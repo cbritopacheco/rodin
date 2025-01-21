@@ -368,11 +368,6 @@ namespace Rodin::Variational
 
       Problem& assemble() override
       {
-        auto& trial = getTrialFunction();
-
-        // Emplace data
-        trial.emplace();
-
         // Assemble both sides
         m_linearForm.assemble();
         m_mass = std::move(m_linearForm.getVector());
@@ -387,6 +382,7 @@ namespace Rodin::Variational
         }
 
         // Impose Dirichlet boundary conditions
+        auto& trial = getTrialFunction();
         const auto& trialFES = trial.getFiniteElementSpace();
         const auto& test = getTestFunction();
         const auto& testFES = test.getFiniteElementSpace();
@@ -422,11 +418,14 @@ namespace Rodin::Variational
          solver.solve(m_stiffness, m_guess, m_mass);
 
          // Recover solution
-         getTrialFunction().getSolution().setWeights(std::move(m_guess));
+         getTrialFunction().emplace().getSolution().setWeights(std::move(m_guess));
       }
 
       Problem& operator=(const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) override
       {
+        m_bilinearForm.clear();
+        m_linearForm.clear();
+
         for (auto& bfi : rhs.getLocalBFIs())
           m_bilinearForm.add(bfi);
 
@@ -440,6 +439,8 @@ namespace Rodin::Variational
 
         m_dbcs = rhs.getDBCs();
         m_pbcs = rhs.getPBCs();
+
+        m_assembled = false;
 
         return *this;
       }
@@ -632,8 +633,6 @@ namespace Rodin::Variational
 
       Problem& assemble() override
       {
-        m_us.apply([](auto& u) { u.get().emplace(); });
-
         auto bt =
           m_bft.map(
               [](auto& bf)
@@ -757,12 +756,15 @@ namespace Rodin::Variational
              [&](size_t i, auto& u)
              {
               const size_t n = u.get().getFiniteElementSpace().getSize();
-              u.get().getSolution().setWeights(m_guess.segment(m_trialOffsets[i], n));
+              u.get().emplace().getSolution().setWeights(m_guess.segment(m_trialOffsets[i], n));
              });
       }
 
       Problem& operator=(const ProblemBody<OperatorType, VectorType, Real>& rhs) override
       {
+        m_bft.apply([&](auto& bf) { bf.clear(); });
+        m_lft.apply([&](auto& lf) { lf.clear(); });
+
         for (auto& bfi : rhs.getLocalBFIs())
         {
           m_bft.apply(
@@ -802,6 +804,8 @@ namespace Rodin::Variational
         }
 
         m_dbcs = rhs.getDBCs();
+
+        m_assembled = false;
 
         return *this;
       }

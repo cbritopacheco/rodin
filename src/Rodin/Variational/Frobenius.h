@@ -29,6 +29,10 @@ namespace Rodin::Variational
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
+
       using Parent = RealFunctionBase<Frobenius<OperandType>>;
 
       Frobenius(const OperandType& v)
@@ -45,18 +49,17 @@ namespace Rodin::Variational
           m_v(std::move(other.m_v))
       {}
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+        getOperand().getValue(m_cache, p);
         if constexpr (std::is_same_v<OperandRangeType, Real>)
         {
-          return std::abs(getOperand().getValue(p));
+          return Math::abs(m_cache);
         }
         else
         {
-          return getOperand().getValue(p).norm();
+          return m_cache.norm();
         }
       }
 
@@ -66,14 +69,20 @@ namespace Rodin::Variational
         return *m_v;
       }
 
-      inline Frobenius* copy() const noexcept override
+      Frobenius* copy() const noexcept override
       {
         return new Frobenius(*this);
       }
 
     private:
       std::unique_ptr<OperandType> m_v;
+      thread_local static OperandRangeType m_cache;
   };
+
+  template <class NestedDerived>
+  thread_local
+  typename Frobenius<FunctionBase<NestedDerived>>::OperandRangeType
+  Frobenius<FunctionBase<NestedDerived>>::m_cache;
 
   template <class NestedDerived>
   Frobenius(const FunctionBase<NestedDerived>&) -> Frobenius<FunctionBase<NestedDerived>>;

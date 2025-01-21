@@ -158,7 +158,6 @@ namespace Rodin::Variational
        * will be imposed.
        * @param[in] bdrAttr Attribute associated to the boundary region
        */
-      inline
       constexpr
       DirichletBC& on(Geometry::Attribute bdrAtr)
       {
@@ -166,7 +165,6 @@ namespace Rodin::Variational
       }
 
       template <class A1, class A2, class ... As>
-      inline
       constexpr
       DirichletBC& on(A1 a1, A2 a2, As... as)
       {
@@ -178,7 +176,6 @@ namespace Rodin::Variational
        * will be imposed.
        * @param[in] bdrAttrs Attributes associated to the boundary regions
        */
-      inline
       constexpr
       DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
       {
@@ -190,7 +187,6 @@ namespace Rodin::Variational
       /**
        * @returns Attributes over which the boundary condition is imposed.
        */
-      inline
       constexpr
       const FlatSet<Geometry::Attribute>& getAttributes() const
       {
@@ -214,7 +210,6 @@ namespace Rodin::Variational
        * @f]
        * is also required.
        */
-      inline
       void assemble() override
       {
         const auto& fes = m_u.get().getFiniteElementSpace();
@@ -224,6 +219,7 @@ namespace Rodin::Variational
           it = mesh.getFace();
         else
           it = mesh.getBoundary();
+        m_dofs.clear();
         for (; !it.end(); ++it)
         {
           const auto& polytope = *it;
@@ -249,32 +245,27 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       bool isComponent() const override
       {
         return false;
       }
 
-      inline
       const OperandType& getOperand() const override
       {
         return m_u;
       }
 
-      inline
       const ValueType& getValue() const override
       {
         assert(m_value);
         return *m_value;
       }
 
-      inline
       const DOFs& getDOFs() const override
       {
         return m_dofs;
       }
 
-      inline
       DirichletBC* copy() const noexcept override
       {
         return new DirichletBC(*this);
