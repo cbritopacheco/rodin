@@ -18,25 +18,81 @@ using namespace Rodin::External;
 
 int main(int, char**)
 {
-  MMG::Mesh mesh;
-  mesh.load("oscar.mesh", IO::FileFormat::MEDIT);
-  mesh.getConnectivity().compute(1, 2);
-  // std::set<size_t> attrs;
-  // size_t count54 = 0;
-  // size_t count120 = 0;
-  // for (auto edge = mesh.getFace(); edge; ++edge)
+  Mesh mesh;
+  mesh.load("atria_fluid2.mesh", IO::FileFormat::MEDIT);
+  mesh.scale(0.95);
+  mesh.save("atria_fluid2_scaled.mesh", IO::FileFormat::MEDIT);
+
+  for (auto it = mesh.getFace(); it; ++it)
+  {
+    if (it->getAttribute() == 1)
+      mesh.setAttribute({2, it->getIndex()}, 111);
+  }
+
+  mesh.getConnectivity().compute(2, 3);
+
+  for (auto it = mesh.getFace(); it; ++it)
+  {
+    const auto& inc = mesh.getConnectivity().getIncidence({2, 3}, it->getIndex());
+    if (inc.size() == 1)
+    {
+      auto vecino = *std::begin(inc);
+      mesh.setAttribute({3, vecino}, 110);
+    }
+  }
+
+  mesh.save("miaow.mesh", IO::FileFormat::MEDIT);
+
+  std::exit(1);
+  P1 vh(mesh);
+  RealFunction one = 1000.0;
+
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(one, v)
+          + DirichletBC(u, Zero());
+  CG(poisson).solve();
+
+  // u.getSolution().save("atria_fluid2.o.sol", IO::FileFormat::MEDIT);
+
+  // mesh.save("atria_fluid3.mesh");
+  // std::exit(1);
+
+  // P1 vh(mesh);
+  // GridFunction gf(vh);
+  // // gf.load("atria_fluid.o.sol");
+
+  // Math::Vector<Real> c{{43, 1340, -3}};
+  // gf = [&](const Point& p)
   // {
-  //   if (edge->getAttribute() == 54)
-  //     count54++;
-  //   else if (edge->getAttribute() == 120)
-  //     count120++;
-  // }
-  // std::cout << count54 << " " << count120 << std::endl;
+  //   auto r = (p - c).norm();
+  //   return r;
+  // };
+  Real max = u.getSolution().max(), min = u.getSolution().min();
+  Real hmax = 4, hmin = 0.1;
+  GridFunction newgf(vh);
+  newgf = hmin + (u.getSolution() - min) * (hmax - hmin) / (max - min);
+  newgf.save("atria_fluid2.sol", IO::FileFormat::MEDIT);
 
-  mesh.trace({{6, 666}});
-  mesh.trace({{{6, 7}, 666}});
+  // mesh.getConnectivity().compute(1, 2);
+  // // std::set<size_t> attrs;
+  // // size_t count54 = 0;
+  // // size_t count120 = 0;
+  // // for (auto edge = mesh.getFace(); edge; ++edge)
+  // // {
+  // //   if (edge->getAttribute() == 54)
+  // //     count54++;
+  // //   else if (edge->getAttribute() == 120)
+  // //     count120++;
+  // // }
+  // // std::cout << count54 << " " << count120 << std::endl;
 
-  mesh.save("test.mesh", IO::FileFormat::MEDIT);
+  // mesh.trace({{6, 666}});
+  // mesh.trace({{{6, 7}, 666}});
+
+  // mesh.save("test.mesh", IO::FileFormat::MEDIT);
 
   // // Build a mesh
   // Mesh mesh;

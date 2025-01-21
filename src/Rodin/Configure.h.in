@@ -178,6 +178,6 @@
 /**
  * @brief Represents the constant used for fuzzy comparison.
  */
-#define RODIN_FUZZY_CONSTANT 1e-8
+#define RODIN_FUZZY_CONSTANT 1e-3
 
 #endif
