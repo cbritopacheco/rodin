@@ -18,6 +18,10 @@ namespace Rodin::Variational
       Math::PointMatrix{{0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} },
+    { Geometry::Polytope::Type::TriangularPrism,
+      Math::PointMatrix{{0, 1, 0, 0, 1, 0},
+                        {0, 0, 1, 0, 0, 1},
+                        {0, 0, 0, 1, 1, 1}} },
   };
 
   const Geometry::GeometryIndexed<std::vector<RealP1Element::BasisFunction>>
@@ -55,6 +59,14 @@ namespace Rodin::Variational
         { 1, Geometry::Polytope::Type::Tetrahedron },
         { 2, Geometry::Polytope::Type::Tetrahedron },
         { 3, Geometry::Polytope::Type::Tetrahedron }
+      }
+    },
+    { Geometry::Polytope::Type::TriangularPrism,
+      {
+        { 0, Geometry::Polytope::Type::TriangularPrism },
+        { 1, Geometry::Polytope::Type::TriangularPrism },
+        { 2, Geometry::Polytope::Type::TriangularPrism },
+        { 3, Geometry::Polytope::Type::TriangularPrism }
       }
     }
   };
@@ -95,6 +107,16 @@ namespace Rodin::Variational
         { 2, Geometry::Polytope::Type::Tetrahedron },
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
+    },
+    { Geometry::Polytope::Type::TriangularPrism,
+      {
+        { 0, Geometry::Polytope::Type::TriangularPrism },
+        { 1, Geometry::Polytope::Type::TriangularPrism },
+        { 2, Geometry::Polytope::Type::TriangularPrism },
+        { 3, Geometry::Polytope::Type::TriangularPrism },
+        { 4, Geometry::Polytope::Type::TriangularPrism },
+        { 5, Geometry::Polytope::Type::TriangularPrism }
+      }
     }
   };
 
@@ -134,6 +156,16 @@ namespace Rodin::Variational
         { 2, Geometry::Polytope::Type::Tetrahedron },
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
+    },
+    { Geometry::Polytope::Type::TriangularPrism,
+      {
+        { 0, Geometry::Polytope::Type::TriangularPrism },
+        { 1, Geometry::Polytope::Type::TriangularPrism },
+        { 2, Geometry::Polytope::Type::TriangularPrism },
+        { 3, Geometry::Polytope::Type::TriangularPrism },
+        { 4, Geometry::Polytope::Type::TriangularPrism },
+        { 5, Geometry::Polytope::Type::TriangularPrism }
+      }
     }
   };
 
@@ -153,6 +185,10 @@ namespace Rodin::Variational
       Math::PointMatrix{{0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} },
+    { Geometry::Polytope::Type::TriangularPrism,
+      Math::PointMatrix{{0, 1, 0, 0, 1, 0},
+                        {0, 0, 1, 0, 0, 1},
+                        {0, 0, 0, 1, 1, 1}} },
   };
 
   const Geometry::GeometryIndexed<std::vector<ComplexP1Element::BasisFunction>>
@@ -190,6 +226,16 @@ namespace Rodin::Variational
         { 1, Geometry::Polytope::Type::Tetrahedron },
         { 2, Geometry::Polytope::Type::Tetrahedron },
         { 3, Geometry::Polytope::Type::Tetrahedron }
+      }
+    },
+    { Geometry::Polytope::Type::TriangularPrism,
+      {
+        { 0, Geometry::Polytope::Type::TriangularPrism },
+        { 1, Geometry::Polytope::Type::TriangularPrism },
+        { 2, Geometry::Polytope::Type::TriangularPrism },
+        { 3, Geometry::Polytope::Type::TriangularPrism },
+        { 4, Geometry::Polytope::Type::TriangularPrism },
+        { 5, Geometry::Polytope::Type::TriangularPrism }
       }
     }
   };
@@ -230,6 +276,16 @@ namespace Rodin::Variational
         { 2, Geometry::Polytope::Type::Tetrahedron },
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
+    },
+    { Geometry::Polytope::Type::TriangularPrism,
+      {
+        { 0, Geometry::Polytope::Type::TriangularPrism },
+        { 1, Geometry::Polytope::Type::TriangularPrism },
+        { 2, Geometry::Polytope::Type::TriangularPrism },
+        { 3, Geometry::Polytope::Type::TriangularPrism },
+        { 4, Geometry::Polytope::Type::TriangularPrism },
+        { 5, Geometry::Polytope::Type::TriangularPrism }
+      }
     }
   };
 
@@ -268,6 +324,16 @@ namespace Rodin::Variational
         { 1, Geometry::Polytope::Type::Tetrahedron },
         { 2, Geometry::Polytope::Type::Tetrahedron },
         { 3, Geometry::Polytope::Type::Tetrahedron }
+      }
+    },
+    { Geometry::Polytope::Type::TriangularPrism,
+      {
+        { 0, Geometry::Polytope::Type::TriangularPrism },
+        { 1, Geometry::Polytope::Type::TriangularPrism },
+        { 2, Geometry::Polytope::Type::TriangularPrism },
+        { 3, Geometry::Polytope::Type::TriangularPrism },
+        { 4, Geometry::Polytope::Type::TriangularPrism },
+        { 5, Geometry::Polytope::Type::TriangularPrism }
       }
     }
   };
@@ -479,6 +545,41 @@ namespace Rodin::Variational
           }
         }
       }
+      case Geometry::Polytope::Type::TriangularPrism:
+      {
+        switch (m_i)
+        {
+          case 0:
+          {
+            return r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1;
+          }
+          case 1:
+          {
+            return r.x() * (1 - r.z());
+          }
+          case 2:
+          {
+            return r.y() * (1 - r.z());
+          }
+          case 3:
+          {
+            return r.z() * (1 - r.x() - r.y());
+          }
+          case 4:
+          {
+            return r.x() * r.z();
+          }
+          case 5:
+          {
+            return r.y() * r.z();
+          }
+          default:
+          {
+            assert(false);
+            return Math::nan<Real>();
+          }
+        }
+      }
     }
     assert(false);
     return Math::nan<Real>();
@@ -624,6 +725,61 @@ namespace Rodin::Variational
           }
         }
       }
+      case Geometry::Polytope::Type::TriangularPrism:
+      {
+        out.resize(3);
+        switch (m_i)
+        {
+          case 0:
+          {
+            out(0) = r.z() - 1;
+            out(1) = r.z() - 1;
+            out(2) = r.x() + r.y() - 1;
+            return;
+          }
+          case 1:
+          {
+            out(0) = 1 - r.z();
+            out(1) = 0;
+            out(2) = -r.x();
+            return;
+          }
+          case 2:
+          {
+            out(0) = 0;
+            out(1) = 1 - r.z();
+            out(2) = -r.y();
+            return;
+          }
+          case 3:
+          {
+            out(0) = -r.z();
+            out(1) = -r.z();
+            out(2) = 1 - r.x() - r.y();
+            return;
+          }
+          case 4:
+          {
+            out(0) = r.z();
+            out(1) = 0;
+            out(2) = r.x();
+            return;
+          }
+          case 5:
+          {
+            out(0) = 0;
+            out(1) = r.z();
+            out(2) = r.y();
+            return;
+          }
+          default:
+          {
+            assert(false);
+            out.setConstant(Math::nan<Real>());
+            return;
+          }
+        }
+      }
     }
     assert(false);
     out.setConstant(Math::nan<Real>());
@@ -744,6 +900,41 @@ namespace Rodin::Variational
           {
             assert(false);
             return Math::nan<Complex>();
+          }
+        }
+      }
+      case Geometry::Polytope::Type::TriangularPrism:
+      {
+        switch (m_i)
+        {
+          case 0:
+          {
+            return (r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1) * Complex(1, -1);
+          }
+          case 1:
+          {
+            return (r.x() * (1 - r.z())) * Complex(1, -1);
+          }
+          case 2:
+          {
+            return (r.y() * (1 - r.z())) * Complex(1, -1);
+          }
+          case 3:
+          {
+            return (r.z() * (1 - r.x() - r.y())) * Complex(1, -1);
+          }
+          case 4:
+          {
+            return (r.x() * r.z()) * Complex(1, -1);
+          }
+          case 5:
+          {
+            return (r.y() * r.z()) * Complex(1, -1);
+          }
+          default:
+          {
+            assert(false);
+            return Math::nan<Real>();
           }
         }
       }
@@ -900,6 +1091,73 @@ namespace Rodin::Variational
           }
         }
       }
+      case Geometry::Polytope::Type::TriangularPrism:
+      {
+        out.resize(3);
+        switch (m_i)
+        {
+          case 0:
+          {
+            const auto dx = r.z() - 1;
+            const auto dy = r.z() - 1;
+            const auto dz = r.x() + r.y() - 1;
+            out.coeffRef(0) = Complex(dx, -dx);
+            out.coeffRef(1) = Complex(dy, -dy);
+            out.coeffRef(2) = Complex(dz, -dz);
+            return;
+          }
+          case 1:
+          {
+            const auto dx = 1 - r.z();
+            const auto dy = 0;
+            const auto dz = -r.x();
+            out.coeffRef(0) = Complex(dx, -dx);
+            out.coeffRef(1) = Complex(dy, -dy);
+            out.coeffRef(2) = Complex(dz, -dz);
+            return;
+          }
+          case 2:
+          {
+            const auto dx = 0;
+            const auto dy = 1 - r.z();
+            const auto dz = -r.y();
+            out.coeffRef(0) = Complex(dx, -dx);
+            out.coeffRef(1) = Complex(dy, -dy);
+            out.coeffRef(2) = Complex(dz, -dz);
+            return;
+          }
+          case 3:
+          {
+            const auto dx = -r.z();
+            const auto dy = -r.z();
+            const auto dz = 1 - r.x() - r.y();
+            out.coeffRef(0) = Complex(dx, -dx);
+            out.coeffRef(1) = Complex(dy, -dy);
+            out.coeffRef(2) = Complex(dz, -dz);
+            return;
+          }
+          case 4:
+          {
+            const auto dx = r.z();
+            const auto dy = 0;
+            const auto dz = r.x();
+            out.coeffRef(0) = Complex(dx, -dx);
+            out.coeffRef(1) = Complex(dy, -dy);
+            out.coeffRef(2) = Complex(dz, -dz);
+            return;
+          }
+          case 5:
+          {
+            const auto dx = 0;
+            const auto dy = r.z();
+            const auto dz = r.y();
+            out.coeffRef(0) = Complex(dx, -dx);
+            out.coeffRef(1) = Complex(dy, -dy);
+            out.coeffRef(2) = Complex(dz, -dz);
+            return;
+          }
+        }
+      }
     }
     assert(false);
     out.setConstant(Math::nan<Real>());
@@ -1031,6 +1289,48 @@ namespace Rodin::Variational
           }
         }
       }
+      case Geometry::Polytope::Type::TriangularPrism:
+      {
+        switch (k)
+        {
+          case 0:
+          {
+            out.coeffRef(i) = r.x() * r.z() - r.x() + r.y() * r.z() - r.y() - r.z() + 1;
+            return;
+          }
+          case 1:
+          {
+            out.coeffRef(i) = r.x() * (1 - r.z());
+            return;
+          }
+          case 2:
+          {
+            out.coeffRef(i) = r.y() * (1 - r.z());
+            return;
+          }
+          case 3:
+          {
+            out.coeffRef(i) = r.z() * (1 - r.x() - r.y());
+            return;
+          }
+          case 4:
+          {
+            out.coeffRef(i) = r.x() * r.z();
+            return;
+          }
+          case 5:
+          {
+            out.coeffRef(i) = r.y() * r.z();
+            return;
+          }
+          default:
+          {
+            assert(false);
+            out.setConstant(Math::nan<Real>());
+            return;
+          }
+        }
+      }
     }
     assert(false);
     out.setConstant(NAN);
@@ -1151,6 +1451,48 @@ namespace Rodin::Variational
           case 3:
           {
             out.row(i) << 0, 0, 1;
+            return;
+          }
+          default:
+          {
+            assert(false);
+            out.setConstant(Math::nan<Real>());
+            return;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::TriangularPrism:
+      {
+        switch (k)
+        {
+          case 0:
+          {
+            out.row(i) << rc.z() - 1, rc.z() - 1, rc.x() + rc.y() - 1;
+            return;
+          }
+          case 1:
+          {
+            out.row(i) << 1 - rc.z(), 0, -rc.x();
+            return;
+          }
+          case 2:
+          {
+            out.row(i) << 0, 1 - rc.z(), -rc.y();
+            return;
+          }
+          case 3:
+          {
+            out.row(i) << -rc.z(), -rc.z(), 1 - rc.x() - rc.y();
+            return;
+          }
+          case 4:
+          {
+            out.row(i) << rc.z(), 0, rc.x();
+            return;
+          }
+          case 5:
+          {
+            out.row(i) << 0, rc.z(), rc.y();
             return;
           }
           default:

@@ -206,6 +206,10 @@ namespace Rodin::IO::MFEM
       {
         return Rodin::Geometry::Polytope::Type::Tetrahedron;
       }
+      case GeometryType::PRISM:
+      {
+        return Rodin::Geometry::Polytope::Type::TriangularPrism;
+      }
       case GeometryType::SQUARE:
       {
         return Rodin::Geometry::Polytope::Type::Quadrilateral;
@@ -232,6 +236,8 @@ namespace Rodin::IO::MFEM
         return GeometryType::SQUARE;
       case Geometry::Polytope::Type::Tetrahedron:
         return GeometryType::TETRAHEDRON;
+      case Geometry::Polytope::Type::TriangularPrism:
+        return GeometryType::PRISM;
       default:
         return {};
     }

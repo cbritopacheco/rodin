@@ -32,7 +32,25 @@ int main(int, char**)
   Eigen::setNbThreads(8);
   Threads::getGlobalThreadPool().reset(8);
   MMG::Mesh mesh;
-  mesh.load("D1.o.mesh", IO::FileFormat::MEDIT);
+  mesh.load("D1.mesh");
+
+  mesh.getConnectivity().compute(1, 0);
+
+  Real max = -1;
+  Real length = 0;
+  for (auto it = mesh.getFace(); it; ++it)
+  {
+    length += it->getMeasure();
+    if (it->getMeasure() > max)
+      max = it->getMeasure();
+  }
+  Alert::Info() << "Length: " << length / mesh.getFaceCount() << Alert::NewLine << Alert::Raise;
+  std::cout << max << std::endl;
+
+
+
+  std::exit(1);
+
 
   std::ofstream data("data.txt");
   data << "eps,hmax,avg,err\n";

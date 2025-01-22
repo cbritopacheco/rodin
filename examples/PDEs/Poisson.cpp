@@ -19,6 +19,34 @@ using namespace Rodin::External;
 int main(int, char**)
 {
   Mesh mesh;
+  mesh = mesh.Build().initialize(3)
+                     .nodes(9)
+                     .vertex({0, 0, 0})
+                     .vertex({1, 0, 0})
+                     .vertex({0, 1, 0})
+
+                     .vertex({0, 0, 1})
+                     .vertex({1, 0, 1})
+                     .vertex({0, 1, 1})
+
+                     .vertex({0, 0, 2})
+                     .vertex({1, 0, 2})
+                     .vertex({0, 1, 2})
+
+                     .polytope(Polytope::Type::TriangularPrism, { 0, 1, 2, 3, 4, 5 })
+                     .polytope(Polytope::Type::TriangularPrism, { 3, 4, 5, 6, 7, 8 })
+                     .finalize();
+  mesh.getConnectivity().compute(2, 3);
+  for (auto it = mesh.getFace(); it; ++it)
+  {
+    mesh.setAttribute({2, it->getIndex()}, it->getIndex() + 1);
+  }
+  std::cout << mesh.getConnectivity().getIncidence({3, 2}, 0).size() << std::endl;
+  mesh.save("prism.mesh");
+  mesh.load("prism.mesh");
+  mesh.save("prism2.mesh");
+  std::exit(1);
+
   mesh.load("atria_fluid.mesh", IO::FileFormat::MEDIT);
   mesh.getConnectivity().compute(2, 3);
   auto skin = mesh.skin();
