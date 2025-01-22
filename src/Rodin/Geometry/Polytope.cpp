@@ -11,6 +11,44 @@
 
 namespace Rodin::Geometry
 {
+  std::ostream& operator<<(std::ostream& os, const Polytope::Type& p)
+  {
+    switch (p)
+    {
+      case Polytope::Type::Point:
+      {
+        os << "Point";
+        break;
+      }
+      case Polytope::Type::Segment:
+      {
+        os << "Segment";
+        break;
+      }
+      case Polytope::Type::Triangle:
+      {
+        os << "Triangle";
+        break;
+      }
+      case Polytope::Type::Quadrilateral:
+      {
+        os << "Quadrilateral";
+        break;
+      }
+      case Polytope::Type::Tetrahedron:
+      {
+        os << "Tetrahedron";
+        break;
+      }
+      case Polytope::Type::TriangularPrism:
+      {
+        os << "TriangularPrism";
+        break;
+      }
+    }
+    return os;
+  }
+
   const GeometryIndexed<Math::PointMatrix> Polytope::s_vertices =
   {
     { Polytope::Type::Point,

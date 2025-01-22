@@ -308,6 +308,8 @@ namespace Rodin::Geometry
         return Type::Point;
       }
   };
+
+  std::ostream& operator<<(std::ostream& os, const Polytope::Type& p);
 }
 
 #endif

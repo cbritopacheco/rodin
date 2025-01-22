@@ -317,8 +317,6 @@ namespace Rodin::Geometry
       std::variant<const Math::SpatialVector<Real>, std::reference_wrapper<const Math::SpatialVector<Real>>> m_rc;
   };
 
-  std::ostream& operator<<(std::ostream& os, Polytope::Type g);
-
   template <class EigenDerived>
   auto
   operator+(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
