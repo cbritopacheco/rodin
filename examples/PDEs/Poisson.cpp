@@ -20,7 +20,7 @@ int main(int, char**)
 {
   Mesh mesh;
   mesh = mesh.Build().initialize(3)
-                     .nodes(9)
+                     .nodes(6)
                      .vertex({0, 0, 0})
                      .vertex({1, 0, 0})
                      .vertex({0, 1, 0})
@@ -29,14 +29,91 @@ int main(int, char**)
                      .vertex({1, 0, 1})
                      .vertex({0, 1, 1})
 
-                     .vertex({0, 0, 2})
-                     .vertex({1, 0, 2})
-                     .vertex({0, 1, 2})
+                     // .vertex({0, 0, 2})
+                     // .vertex({1, 0, 2})
+                     // .vertex({0, 1, 2})
 
                      .polytope(Polytope::Type::TriangularPrism, { 0, 1, 2, 3, 4, 5 })
-                     .polytope(Polytope::Type::TriangularPrism, { 3, 4, 5, 6, 7, 8 })
+                     // .polytope(Polytope::Type::TriangularPrism, { 3, 4, 5, 6, 7, 8 })
                      .finalize();
   mesh.getConnectivity().compute(2, 3);
+  mesh.save("prism.mesh");
+
+
+  Mesh tet;
+  auto build = tet.Build();
+  build.initialize(3).nodes(mesh.getVertexCount());
+  build.setVertices(mesh.getVertices());
+  build.tetrahedron(IndexArray{{ 1, 2, 5, 3 }});
+  build.tetrahedron(IndexArray{{ 2, 3, 0, 1 }});
+  build.tetrahedron(IndexArray{{ 3, 4, 1, 5  }});
+  // build.tetrahedron(IndexArray{ 0, 2, 5, 3, 1 });
+  tet = build.finalize();
+  tet.save("tet.mesh", IO::FileFormat::MEDIT);
+
+
+
+  std::exit(1);
+
+  const auto& conn = mesh.getConnectivity();
+  std::vector<Connectivity<Context::Local>::SubPolytope> subpolytopes;
+  for (auto it = mesh.getCell(); it; ++it)
+  {
+    conn.getSubPolytopes(subpolytopes, it->getIndex(), 2);
+    const auto& vs = it->getVertices();
+    for (auto& [geometry, svs] : subpolytopes)
+    {
+      // Reorient quad
+      Index idx;
+      svs.minCoeff(&idx);
+      if (geometry == Polytope::Type::Quadrilateral)
+      {
+        if (idx == 0)
+        {
+        }
+        else if (idx == 1)
+        {
+          std::swap(svs(0), svs(1));
+          std::swap(svs(2), svs(3));
+        }
+        else if (idx == 2)
+        {
+          std::swap(svs(0), svs(2));
+          std::swap(svs(1), svs(3));
+        }
+        else if (idx == 3)
+        {
+          std::swap(svs(0), svs(3));
+          std::swap(svs(1), svs(2));
+        }
+        else
+        {
+          std::cout << "miaow\n";
+        }
+      }
+    }
+
+    const auto& f1 = subpolytopes[1].vertices;
+    const auto& f2 = subpolytopes[2].vertices;
+    const auto& f3 = subpolytopes[3].vertices;
+
+    build.polytope(Polytope::Type::Tetrahedron, { vs(0), vs(1), vs(2), vs(3) });
+    build.polytope(Polytope::Type::Tetrahedron, { f2(0), f2(1), f2(2), f1(0) });
+    build.polytope(Polytope::Type::Tetrahedron, { f2(1), f3(2), f3(3), f3(3) });
+  }
+  tet = build.finalize();
+  tet.getConnectivity().compute(2, 3);
+  tet.save("tet.mesh", IO::FileFormat::MEDIT);
+  mesh.getConnectivity().compute(2, 3);
+
+  auto skin2 = mesh.skin();
+  skin2.save("skin.mesh", IO::FileFormat::MEDIT);
+  mesh.save("prism.mesh");
+  std::exit(1);
+
+
+
+
   for (auto it = mesh.getFace(); it; ++it)
   {
     mesh.setAttribute({2, it->getIndex()}, it->getIndex() + 1);

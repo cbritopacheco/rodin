@@ -121,7 +121,7 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             if (g->geometry == Geometry::Polytope::Type::Quadrilateral)
-              std::swap(g->vertices(0), g->vertices(1));
+              std::swap(g->vertices(2), g->vertices(3));
             connectivity.polytope(g->geometry, std::move(g->vertices));
             attrs.track({ m_dimension - 1, i }, g->attribute);
           }
@@ -151,7 +151,7 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             if (g->geometry == Geometry::Polytope::Type::Quadrilateral)
-              std::swap(g->vertices(0), g->vertices(1));
+              std::swap(g->vertices(2), g->vertices(3));
             connectivity.polytope(g->geometry, std::move(g->vertices));
             attrs.track({ m_dimension, i }, g->attribute);
           }
@@ -289,7 +289,7 @@ namespace Rodin::IO
         }
         case Geometry::Polytope::Type::Quadrilateral:
         {
-          os << vertices(1) << ' ' << vertices(0) << ' ' << vertices(2) << ' ' << vertices(3);
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(3) << ' ' << vertices(2);
           break;
         }
         case Geometry::Polytope::Type::Tetrahedron:
@@ -345,7 +345,7 @@ namespace Rodin::IO
         }
         case Geometry::Polytope::Type::Quadrilateral:
         {
-          os << vertices(1) << ' ' << vertices(0) << ' ' << vertices(2) << ' ' << vertices(3);
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(3) << ' ' << vertices(2);
           break;
         }
         case Geometry::Polytope::Type::TriangularPrism:

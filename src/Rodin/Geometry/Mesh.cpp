@@ -880,5 +880,6 @@ namespace Rodin::Geometry
     // The SubMesh where the Point belongs to is not a descendant of this Mesh.
     return {};
   }
+
 }
 

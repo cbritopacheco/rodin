@@ -139,7 +139,14 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::setVertices(Math::Matrix<Real>&& vertices)
+  Mesh<Context::Local>::Builder::setVertices(const Math::PointMatrix& vertices)
+  {
+    m_vertices = vertices;
+    return *this;
+  }
+
+  Mesh<Context::Local>::Builder&
+  Mesh<Context::Local>::Builder::setVertices(Math::PointMatrix&& vertices)
   {
     m_vertices = std::move(vertices);
     return *this;
