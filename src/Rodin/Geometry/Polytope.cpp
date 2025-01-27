@@ -123,13 +123,7 @@ namespace Rodin::Geometry
     const auto& mesh = m_mesh.get();
     const auto& conn = mesh.getConnectivity();
     const auto& inc = conn.getIncidence(d, d);
-    if (inc.size() == 0)
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << Alert::Notation::Incidence(d, d)
-        << " has not been computed and is required to use this function."
-        << Alert::Raise;
-    }
+    RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d);
     const auto& adj = inc.at(getIndex());
     return PolytopeIterator(
         d, getMesh(), IteratorIndexGenerator(adj.begin(), adj.end()));
