@@ -18,10 +18,10 @@ namespace Rodin::Geometry
     m_attributes.resize(m_sdim + 1);
 
     // Emplace empty connectivity objects
-    m_connectivity.initialize(m_sdim + 1);
+    m_connectivity.initialize(m_sdim);
 
     // Set indexes
-    m_attributeIndex.initialize(m_sdim + 1);
+    m_attributeIndex.initialize(m_sdim);
 
     m_transformationIndex.resize(sdim + 1);
     return *this;
