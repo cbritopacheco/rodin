@@ -10,6 +10,8 @@
 #include <RodinExternal/MMG.h>
 #include <Rodin/Variational.h>
 
+#include <Rodin/Geometry/RippleSimplexification.h>
+
 using namespace Rodin;
 using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
@@ -37,6 +39,10 @@ int main(int, char**)
                      // .polytope(Polytope::Type::TriangularPrism, { 3, 4, 5, 6, 7, 8 })
                      .finalize();
   mesh.getConnectivity().compute(2, 3);
+
+  RippleSimplexification(mesh).simplexify();
+  std::exit(1);
+
   mesh.save("prism.mesh");
 
 

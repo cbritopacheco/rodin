@@ -18,6 +18,7 @@ set(RodinGeometry_SRCS
   MeshBuilder.cpp
   SubMeshBuilder.cpp
   Simplexification.cpp
+  RippleSimplexification.cpp
   )
 add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})
 add_library(Rodin::Geometry ALIAS RodinGeometry)
