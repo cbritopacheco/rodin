@@ -16,12 +16,36 @@ namespace Rodin::Geometry
       using MeshType = Mesh<Context::Local>;
       using Parent = Simplexification<MeshType>;
 
+      class Simplexification
+      {
+        public:
+          constexpr
+          Simplexification(Polytope::Type geometry)
+            : m_geometry(geometry)
+          {}
+
+          constexpr
+          size_t getCount() const;
+
+          constexpr
+          size_t getCount(size_t k, size_t d) const;
+
+          constexpr
+          const IndexArray& getSimplex(size_t k, size_t d, size_t i) const;
+
+          constexpr
+          Polytope::Type getGeometry() const;
+
+        private:
+          static GeometryIndexed<std::vector<std::vector<std::vector<IndexArray>>>> s_simplices;
+          Polytope::Type m_geometry;
+      };
+
       RippleSimplexification(const MeshType& mesh);
 
       MeshType simplexify();
 
     private:
-      static GeometryIndexed<std::vector<std::vector<IndexArray>>> s_simplices;
       std::vector<size_t> m_triangulation;
       MeshType::Builder m_build;
   };
