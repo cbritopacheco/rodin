@@ -3,30 +3,213 @@
 
 namespace Rodin::Geometry
 {
-  GeometryIndexed<std::vector<std::vector<IndexArray>>>
-  RippleSimplexification<Mesh<Context::Local>>::s_simplices =
+  GeometryIndexed<std::vector<std::vector<std::vector<IndexArray>>>>
+  RippleSimplexification<Mesh<Context::Local>>::Simplexification::s_simplices =
   {
     {
       Polytope::Type::Triangle,
       {
-        { {{0, 1, 2}} },
+        {
+          {
+            { IndexArray{{0}}, {IndexArray{1}}, IndexArray{{2}} }
+          },
+          {
+            { IndexArray{{0, 1}}, IndexArray{{1, 2}}, IndexArray{{2, 0}} }
+          },
+          {
+            { IndexArray{{0, 1, 2}} }
+          },
+        },
       }
     },
     {
       Polytope::Type::Quadrilateral,
       {
-        { {{0, 1, 2}}, {{1, 2, 3}} },
-        { {{0, 1, 3}}, {{0, 2, 3}} }
+        {
+          {
+            { IndexArray{{0}}, {IndexArray{1}}, IndexArray{{2}}, IndexArray{{3}} }
+          },
+          {
+            {
+              IndexArray{{0, 1}}, IndexArray{{1, 3}}, IndexArray{{0, 3}}, IndexArray{{3, 2}}, IndexArray{{2, 0}},
+            }
+          },
+          {
+            {
+              IndexArray{{0, 1, 3}}, IndexArray{{0, 3, 2}}
+            },
+          },
+        },
+        {
+          {
+            { IndexArray{{0}}, {IndexArray{1}}, IndexArray{{2}}, IndexArray{{3}} }
+          },
+          {
+            {
+              IndexArray{{0, 1}}, IndexArray{{1, 2}}, IndexArray{{2, 0}},
+              IndexArray{{1, 3}}, IndexArray{{3, 2}},
+            }
+          },
+          {
+            {
+              IndexArray{{0, 1, 2}}, IndexArray{{1, 3, 2}}
+            },
+          },
+        },
       }
     },
     {
       Polytope::Type::TriangularPrism,
       {
-        { {{0, 1, 2}}, {{1, 2, 3}} },
-        { {{0, 1, 3}}, {{0, 2, 3}} }
       }
     },
   };
+
+  constexpr
+  size_t RippleSimplexification<Mesh<Context::Local>>::Simplexification::getCount() const
+  {
+    switch (getGeometry())
+    {
+      case Polytope::Type::Point:
+      case Polytope::Type::Segment:
+      case Polytope::Type::Triangle:
+      case Polytope::Type::Tetrahedron:
+        return 1;
+      case Polytope::Type::Quadrilateral:
+        return 2;
+      case Polytope::Type::TriangularPrism:
+        return 6;
+    }
+    assert(false);
+    return 0;
+  }
+
+  constexpr
+  size_t RippleSimplexification<Mesh<Context::Local>>::Simplexification::getCount(size_t, size_t d) const
+  {
+    switch (getGeometry())
+    {
+      case Polytope::Type::Point:
+      {
+        assert(d == 0);
+        return 1;
+      }
+      case Polytope::Type::Segment:
+      {
+        if (d == 0)
+        {
+          return 2;
+        }
+        else if (d == 1)
+        {
+          return 1;
+        }
+        else
+        {
+          assert(false);
+          return 0;
+        }
+      }
+      case Polytope::Type::Triangle:
+      {
+        if (d == 0)
+        {
+          return 3;
+        }
+        else if (d == 1)
+        {
+          return 3;
+        }
+        else if (d == 2)
+        {
+          return 1;
+        }
+        else
+        {
+          assert(false);
+          return 0;
+        }
+      }
+      case Polytope::Type::Tetrahedron:
+      {
+        if (d == 0)
+        {
+          return 4;
+        }
+        else if (d == 1)
+        {
+          return 6;
+        }
+        else if (d == 2)
+        {
+          return 4;
+        }
+        else if (d == 3)
+        {
+          return 1;
+        }
+        else
+        {
+          assert(false);
+          return 0;
+        }
+      }
+      case Polytope::Type::Quadrilateral:
+      {
+        if (d == 0)
+        {
+          return 4;
+        }
+        else if (d == 1)
+        {
+          return 5;
+        }
+        else if (d == 2)
+        {
+          return 2;
+        }
+        else
+        {
+          assert(false);
+          return 0;
+        }
+      }
+      case Polytope::Type::TriangularPrism:
+      {
+        if (d == 0)
+        {
+          return 6;
+        }
+        else if (d == 1)
+        {
+          return 12;
+        }
+        else if (d == 2)
+        {
+          return 8;
+        }
+        else
+        {
+          assert(false);
+          return 0;
+        }
+      }
+    }
+    assert(false);
+    return 0;
+  }
+
+  constexpr
+  const IndexArray& RippleSimplexification<Mesh<Context::Local>>::Simplexification::getSimplex(size_t k, size_t d, size_t i) const
+  {
+    return s_simplices[getGeometry()][k][d][i];
+  }
+
+  constexpr
+  Polytope::Type RippleSimplexification<Mesh<Context::Local>>::Simplexification::getGeometry() const
+  {
+    return m_geometry;
+  }
 
   RippleSimplexification<Mesh<Context::Local>>
   ::RippleSimplexification(const Mesh<Context::Local>& mesh)
