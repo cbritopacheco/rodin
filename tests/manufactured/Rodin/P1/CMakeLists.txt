@@ -1,5 +1,5 @@
-add_executable(Linear Linear.cpp)
-target_link_libraries(Linear
+add_executable(RodinManufacturedPoisson Poisson.cpp)
+target_link_libraries(RodinManufacturedPoisson
   PUBLIC
   GTest::gtest
   GTest::gtest_main
@@ -7,4 +7,4 @@ target_link_libraries(Linear
   Rodin::Variational
   Rodin::Solver
   )
-gtest_discover_tests(Linear)
+gtest_discover_tests(RodinManufacturedPoisson)
