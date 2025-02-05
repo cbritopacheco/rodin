@@ -356,3 +356,43 @@
   @brief MFEM integration with Rodin
  */
 
+/**
+  @namespace Rodin::Tests
+  @brief %Tests of the Rodin library
+ */
+
+/**
+  @dir Rodin/tests
+  @brief Namespace @ref Rodin::Tests
+ */
+
+/**
+  @namespace Rodin::Tests::Unit
+  @brief Unitary tests
+ */
+
+/**
+  @dir Rodin/tests/unit
+  @brief Namespace @ref Rodin::Tests::Unit
+ */
+
+/**
+  @namespace Rodin::Tests::Manufactured
+  @brief %Manufactured solution test cases
+ */
+
+/**
+  @dir Rodin/tests/manufactured
+  @brief Namespace @ref Rodin::Tests::Manufactured
+ */
+
+/**
+  @namespace Rodin::Tests::Benchmarks
+  @brief Performance benchmarks
+ */
+
+/**
+  @dir Rodin/tests/benchmarks
+  @brief Namespace @ref Rodin::Tests::Benchmarks
+ */
+
