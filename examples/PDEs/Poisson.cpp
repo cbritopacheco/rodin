@@ -21,6 +21,11 @@ using namespace Rodin::External;
 int main(int, char**)
 {
   Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3});
+  mesh.save("test.mesh", IO::FileFormat::MEDIT);
+  std::exit(1);
+
+
   mesh = mesh.Build().initialize(3)
                      .nodes(6)
                      .vertex({0, 0, 0})
@@ -38,10 +43,11 @@ int main(int, char**)
                      .polytope(Polytope::Type::TriangularPrism, { 0, 1, 2, 3, 4, 5 })
                      // .polytope(Polytope::Type::TriangularPrism, { 3, 4, 5, 6, 7, 8 })
                      .finalize();
+  mesh.save("prism.mesh");
+  std::exit(1);
   mesh.getConnectivity().compute(2, 3);
 
   RippleSimplexification(mesh).simplexify();
-  std::exit(1);
 
   mesh.save("prism.mesh");
 
