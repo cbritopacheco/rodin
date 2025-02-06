@@ -42,7 +42,8 @@ namespace Rodin::Variational
     { Geometry::Polytope::Type::Segment, P1Element<Real>(Geometry::Polytope::Type::Segment) },
     { Geometry::Polytope::Type::Triangle, P1Element<Real>(Geometry::Polytope::Type::Triangle) },
     { Geometry::Polytope::Type::Quadrilateral, P1Element<Real>(Geometry::Polytope::Type::Quadrilateral) },
-    { Geometry::Polytope::Type::Tetrahedron, P1Element<Real>(Geometry::Polytope::Type::Tetrahedron) }
+    { Geometry::Polytope::Type::Tetrahedron, P1Element<Real>(Geometry::Polytope::Type::Tetrahedron) },
+    { Geometry::Polytope::Type::TriangularPrism, P1Element<Real>(Geometry::Polytope::Type::TriangularPrism) }
   };
 
   const Geometry::GeometryIndexed<P1Element<Complex>>
@@ -52,7 +53,8 @@ namespace Rodin::Variational
     { Geometry::Polytope::Type::Segment, P1Element<Complex>(Geometry::Polytope::Type::Segment) },
     { Geometry::Polytope::Type::Triangle, P1Element<Complex>(Geometry::Polytope::Type::Triangle) },
     { Geometry::Polytope::Type::Quadrilateral, P1Element<Complex>(Geometry::Polytope::Type::Quadrilateral) },
-    { Geometry::Polytope::Type::Tetrahedron, P1Element<Complex>(Geometry::Polytope::Type::Tetrahedron) }
+    { Geometry::Polytope::Type::Tetrahedron, P1Element<Complex>(Geometry::Polytope::Type::Tetrahedron) },
+    { Geometry::Polytope::Type::TriangularPrism, P1Element<Complex>(Geometry::Polytope::Type::TriangularPrism) }
   };
 
   namespace Internal
@@ -69,7 +71,8 @@ namespace Rodin::Variational
           { Geometry::Polytope::Type::Segment, VectorP1Element(i, Geometry::Polytope::Type::Segment) },
           { Geometry::Polytope::Type::Triangle, VectorP1Element(i, Geometry::Polytope::Type::Triangle) },
           { Geometry::Polytope::Type::Quadrilateral, VectorP1Element(i, Geometry::Polytope::Type::Quadrilateral) },
-          { Geometry::Polytope::Type::Tetrahedron, VectorP1Element(i, Geometry::Polytope::Type::Tetrahedron) }
+          { Geometry::Polytope::Type::Tetrahedron, VectorP1Element(i, Geometry::Polytope::Type::Tetrahedron) },
+          { Geometry::Polytope::Type::TriangularPrism, VectorP1Element(i, Geometry::Polytope::Type::TriangularPrism) }
         };
       }
       return res;
