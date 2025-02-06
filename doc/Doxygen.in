@@ -854,8 +854,6 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  =  @CMAKE_SOURCE_DIR@/src/ \
-                          @CMAKE_SOURCE_DIR@/src/Rodin \
-                          @CMAKE_SOURCE_DIR@/src/RodinExternal \
                           @CMAKE_SOURCE_DIR@/tests/ \
                           @CMAKE_SOURCE_DIR@/doc/
 
