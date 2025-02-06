@@ -144,9 +144,6 @@ int main(int argc, char** argv)
          + DirichletBC(v2, Zero(2))
          ;
 
-  UMFPack(darcy2).solve();
-
-  v2.getSolution().save("v2.gf");
 
   return 0;
 }
