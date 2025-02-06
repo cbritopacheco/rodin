@@ -17,7 +17,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-namespace RodinBenchmark
+namespace Rodin::Tests::Benchmarks
 {
   struct Poisson_UniformGrid_16x16 : public benchmark::Fixture
   {

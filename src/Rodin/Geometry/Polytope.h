@@ -40,19 +40,21 @@ namespace Rodin::Geometry
         Segment,
         Triangle,
         Quadrilateral,
-        Tetrahedron
+        Tetrahedron,
+        TriangularPrism
       };
 
       /**
        * @brief Iterable of possible polytope geometry types.
        */
-      static constexpr std::array<Type, 5> Types
+      static constexpr std::array<Type, 6> Types
       {
         Type::Point,
         Type::Segment,
         Type::Triangle,
         Type::Quadrilateral,
-        Type::Tetrahedron
+        Type::Tetrahedron,
+        Type::TriangularPrism
       };
 
       static const Math::PointMatrix& getVertices(Polytope::Type g);
@@ -76,6 +78,8 @@ namespace Rodin::Geometry
           case Type::Quadrilateral:
           case Type::Tetrahedron:
             return 4;
+          case Type::TriangularPrism:
+            return 6;
         }
         assert(false);
         return 0;
@@ -94,6 +98,7 @@ namespace Rodin::Geometry
           case Type::Quadrilateral:
             return 2;
           case Type::Tetrahedron:
+          case Type::TriangularPrism:
             return 3;
         }
         assert(false);
@@ -111,6 +116,7 @@ namespace Rodin::Geometry
           case Type::Tetrahedron:
             return true;
           case Type::Quadrilateral:
+          case Type::TriangularPrism:
             return false;
         }
         assert(false);
@@ -302,6 +308,8 @@ namespace Rodin::Geometry
         return Type::Point;
       }
   };
+
+  std::ostream& operator<<(std::ostream& os, const Polytope::Type& p);
 }
 
 #endif

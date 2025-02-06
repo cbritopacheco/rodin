@@ -638,18 +638,44 @@ namespace Rodin::Geometry
            */
           Builder& polytope(Polytope::Type t, IndexArray&& vs);
 
+          template <class T>
+          Builder& segment(T&& vs)
+          {
+            return polytope(Polytope::Type::Segment, std::forward<T>(vs));
+          }
+
+          template <class T>
+          Builder& quadrilateral(T&& vs)
+          {
+            return polytope(Polytope::Type::Quadrilateral, std::forward<T>(vs));
+          }
+
+          template <class T>
+          Builder& triangle(T&& vs)
+          {
+            return polytope(Polytope::Type::Triangle, std::forward<T>(vs));
+          }
+
+          template <class T>
+          Builder& tetrahedron(T&& vs)
+          {
+            return polytope(Polytope::Type::Tetrahedron, std::forward<T>(vs));
+          }
+
           /**
            * @brief Finalizes construction of the Mesh<Context::Local> object.
            */
           Mesh finalize();
 
-          Builder& setVertices(Math::Matrix<Real>&& connectivity);
+          Builder& setVertices(const Math::PointMatrix& vertices);
+
+          Builder& setVertices(Math::PointMatrix&& vertices);
 
           Builder& setConnectivity(Connectivity<Context>&& connectivity);
 
-          Builder& setAttributeIndex(AttributeIndex&& connectivity);
+          Builder& setAttributeIndex(AttributeIndex&& attrIndex);
 
-          Builder& setTransformationIndex(TransformationIndex&& connectivity);
+          Builder& setTransformationIndex(TransformationIndex&& transIndex);
 
           Connectivity<Context>& getConnectivity()
           {

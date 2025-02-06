@@ -277,14 +277,19 @@ namespace Rodin::IO
           os << vertices(0);
           break;
         }
+        case Geometry::Polytope::Type::Segment:
+        {
+          os << vertices(0) << ' ' << vertices(1);
+          break;
+        }
         case Geometry::Polytope::Type::Triangle:
         {
           os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2);
           break;
         }
-        case Geometry::Polytope::Type::Segment:
+        case Geometry::Polytope::Type::Quadrilateral:
         {
-          os << vertices(0) << ' ' << vertices(1);
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(3) << ' ' << vertices(2);
           break;
         }
         case Geometry::Polytope::Type::Tetrahedron:
@@ -292,9 +297,9 @@ namespace Rodin::IO
           os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
           break;
         }
-        case Geometry::Polytope::Type::Quadrilateral:
+        case Geometry::Polytope::Type::TriangularPrism:
         {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(3) << ' ' << vertices(2);
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5);
           break;
         }
       }
@@ -341,6 +346,11 @@ namespace Rodin::IO
         case Geometry::Polytope::Type::Quadrilateral:
         {
           os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(3) << ' ' << vertices(2);
+          break;
+        }
+        case Geometry::Polytope::Type::TriangularPrism:
+        {
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5);
           break;
         }
       }

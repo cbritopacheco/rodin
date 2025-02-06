@@ -124,7 +124,7 @@ namespace Rodin::Geometry
 
       Connectivity& intersection(size_t d, size_t dp, size_t dpp);
 
-      void getSubPolytopes(std::vector<SubPolytope>& out, Index i, size_t d);
+      void getSubPolytopes(std::vector<SubPolytope>& out, Index i, size_t d) const;
 
       const PolytopeIndex& getIndexMap(size_t dim) const;
 

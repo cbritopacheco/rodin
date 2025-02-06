@@ -17,107 +17,110 @@
 using namespace Rodin::IO;
 using namespace Rodin::Geometry;
 
-TEST(Rodin_IO_MeshLoader, SanityTest_MEDIT_2D_Square)
+namespace Rodin::Tests::Unit
 {
-  static constexpr const char* filename = "mmg/Square.medit.mesh";
-  static constexpr size_t sdim = 2;
-  boost::filesystem::path meshfile;
-  meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
-  meshfile.append(filename);
+  TEST(Rodin_IO_MeshLoader, SanityTest_MEDIT_2D_Square)
+  {
+    static constexpr const char* filename = "mmg/Square.medit.mesh";
+    static constexpr size_t sdim = 2;
+    boost::filesystem::path meshfile;
+    meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
+    meshfile.append(filename);
 
-  boost::filesystem::ifstream in(meshfile);
+    boost::filesystem::ifstream in(meshfile);
 
-  Mesh mesh;
-  MeshLoader<FileFormat::MEDIT, Rodin::Context::Local> loader(mesh);
-  loader.load(in);
+    Mesh mesh;
+    MeshLoader<FileFormat::MEDIT, Rodin::Context::Local> loader(mesh);
+    loader.load(in);
 
-  EXPECT_EQ(mesh.getSpaceDimension(), sdim);
+    EXPECT_EQ(mesh.getSpaceDimension(), sdim);
 
-  size_t d = 0;
-  EXPECT_EQ(mesh.getPolytopeCount(d), 4);
-  EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
-  EXPECT_EQ(mesh.getAttribute(d, 0), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-  EXPECT_EQ(mesh.getAttribute(d, 1), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-  EXPECT_EQ(mesh.getAttribute(d, 2), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-  EXPECT_EQ(mesh.getAttribute(d, 3), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    size_t d = 0;
+    EXPECT_EQ(mesh.getPolytopeCount(d), 4);
+    EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
+    EXPECT_EQ(mesh.getAttribute(d, 0), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    EXPECT_EQ(mesh.getAttribute(d, 1), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    EXPECT_EQ(mesh.getAttribute(d, 2), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    EXPECT_EQ(mesh.getAttribute(d, 3), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
 
-  d = 1;
-  EXPECT_EQ(mesh.getPolytopeCount(d), 5);
-  EXPECT_EQ(mesh.getAttribute(d, 0), 1);
-  EXPECT_EQ(mesh.getAttribute(d, 1), 2);
+    d = 1;
+    EXPECT_EQ(mesh.getPolytopeCount(d), 5);
+    EXPECT_EQ(mesh.getAttribute(d, 0), 1);
+    EXPECT_EQ(mesh.getAttribute(d, 1), 2);
 
-  d = 2;
-  EXPECT_EQ(mesh.getPolytopeCount(d), 2);
-  EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getCellCount());
-  EXPECT_EQ(mesh.getAttribute(d, 0), 1);
-  EXPECT_EQ(mesh.getAttribute(d, 1), 2);
-}
+    d = 2;
+    EXPECT_EQ(mesh.getPolytopeCount(d), 2);
+    EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getCellCount());
+    EXPECT_EQ(mesh.getAttribute(d, 0), 1);
+    EXPECT_EQ(mesh.getAttribute(d, 1), 2);
+  }
 
-TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_Square)
-{
-  static constexpr const char* filename = "mfem/Square.mfem.mesh";
-  boost::filesystem::path meshfile;
-  meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
-  meshfile.append(filename);
+  TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_Square)
+  {
+    static constexpr const char* filename = "mfem/Square.mfem.mesh";
+    boost::filesystem::path meshfile;
+    meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
+    meshfile.append(filename);
 
-  boost::filesystem::ifstream in(meshfile);
+    boost::filesystem::ifstream in(meshfile);
 
-  Mesh mesh;
-  MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
-  loader.load(in);
+    Mesh mesh;
+    MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
+    loader.load(in);
 
-  size_t d = 0;
-  EXPECT_EQ(mesh.getPolytopeCount(d), 4);
-  EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
+    size_t d = 0;
+    EXPECT_EQ(mesh.getPolytopeCount(d), 4);
+    EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
 
-  // MFEM format does not support vertex attributes
-  EXPECT_EQ(mesh.getAttribute(d, 0), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-  EXPECT_EQ(mesh.getAttribute(d, 1), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-  EXPECT_EQ(mesh.getAttribute(d, 2), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-  EXPECT_EQ(mesh.getAttribute(d, 3), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    // MFEM format does not support vertex attributes
+    EXPECT_EQ(mesh.getAttribute(d, 0), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    EXPECT_EQ(mesh.getAttribute(d, 1), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    EXPECT_EQ(mesh.getAttribute(d, 2), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    EXPECT_EQ(mesh.getAttribute(d, 3), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
 
-  d = 1;
-  EXPECT_EQ(mesh.getPolytopeCount(d), 5);
-  EXPECT_EQ(mesh.getAttribute(d, 0), 1);
-  EXPECT_EQ(mesh.getAttribute(d, 1), 2);
+    d = 1;
+    EXPECT_EQ(mesh.getPolytopeCount(d), 5);
+    EXPECT_EQ(mesh.getAttribute(d, 0), 1);
+    EXPECT_EQ(mesh.getAttribute(d, 1), 2);
 
-  d = 2;
-  EXPECT_EQ(mesh.getPolytopeCount(d), 2);
-  EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getCellCount());
-  EXPECT_EQ(mesh.getAttribute(d, 0), 1);
-  EXPECT_EQ(mesh.getAttribute(d, 1), 2);
-}
+    d = 2;
+    EXPECT_EQ(mesh.getPolytopeCount(d), 2);
+    EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getCellCount());
+    EXPECT_EQ(mesh.getAttribute(d, 0), 1);
+    EXPECT_EQ(mesh.getAttribute(d, 1), 2);
+  }
 
-TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_StarSquare)
-{
-  static constexpr const char* filename = "mfem/StarSquare.mfem.mesh";
-  static constexpr size_t vcount = 101;
-  static constexpr size_t ecount = 80;
-  static constexpr size_t sdim = 2;
+  TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_StarSquare)
+  {
+    static constexpr const char* filename = "mfem/StarSquare.mfem.mesh";
+    static constexpr size_t vcount = 101;
+    static constexpr size_t ecount = 80;
+    static constexpr size_t sdim = 2;
 
-  boost::filesystem::path meshfile;
-  meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
-  meshfile.append(filename);
+    boost::filesystem::path meshfile;
+    meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
+    meshfile.append(filename);
 
-  boost::filesystem::ifstream in(meshfile);
+    boost::filesystem::ifstream in(meshfile);
 
-  Mesh mesh;
-  MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
-  loader.load(in);
+    Mesh mesh;
+    MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
+    loader.load(in);
 
-  EXPECT_EQ(mesh.getSpaceDimension(), sdim);
+    EXPECT_EQ(mesh.getSpaceDimension(), sdim);
 
-  size_t d = 0;
-  EXPECT_EQ(mesh.getPolytopeCount(d), vcount);
-  EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
+    size_t d = 0;
+    EXPECT_EQ(mesh.getPolytopeCount(d), vcount);
+    EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
 
-  for (size_t i = 0; i < vcount; i++)
-    EXPECT_EQ(mesh.getAttribute(d, i), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    for (size_t i = 0; i < vcount; i++)
+      EXPECT_EQ(mesh.getAttribute(d, i), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
 
-  d = 2;
-  for (size_t i = 0; i < ecount; i++)
-    EXPECT_EQ(mesh.getAttribute(d, i), 1);
+    d = 2;
+    for (size_t i = 0; i < ecount; i++)
+      EXPECT_EQ(mesh.getAttribute(d, i), 1);
 
-  for (size_t i = 0; i < ecount; i++)
-    EXPECT_EQ(mesh.getGeometry(d, i), Polytope::Type::Quadrilateral);
+    for (size_t i = 0; i < ecount; i++)
+      EXPECT_EQ(mesh.getGeometry(d, i), Polytope::Type::Quadrilateral);
+  }
 }
