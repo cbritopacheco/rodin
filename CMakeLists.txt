@@ -86,17 +86,19 @@ if (RODIN_LTO)
 endif()
 
 if (RODIN_CODE_COVERAGE)
-  include(CodeCoverage)
-  append_coverage_compiler_flags()
+  add_link_options(--coverage)
+  add_compile_options(--coverage)
   rodin_add_compile_options(LANG CXX C
+    -fprofile-args
+    -fprofile-arcs
     -fprofile-abs-path
+    -ftest-coverage
     -fno-inline
     -fno-inline-small-functions
     -fno-default-inline
     -fprofile-instr-generate
     -fcoverage-mapping
-    -fno-elide-constructors
-    )
+    -fno-elide-constructors)
 endif()
 
 if (RODIN_BUILD_SRC)
