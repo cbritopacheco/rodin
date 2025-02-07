@@ -144,9 +144,6 @@ if (RODIN_BUILD_SRC)
     "${PROJECT_BINARY_DIR}/third-party/eigen"
     "${PROJECT_BINARY_DIR}/third-party/eigen/cmake")
 
-  # ---- Basix ------
-  add_subdirectory(third-party/basix/cpp EXCLUDE_FROM_ALL)
-
   # ---- Spectra ----
   message(STATUS "Configuring Spectra...")
   set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
