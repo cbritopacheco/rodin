@@ -90,8 +90,8 @@ if (RODIN_CODE_COVERAGE)
   add_compile_options(--coverage)
   find_program(LCOV lcov REQUIRED)
   add_custom_target(RodinCoverage
-      COMMAND ${LCOV} --capture --directory . --output-file RodinCoverage.base.info
-      COMMAND ${LCOV} --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
+      COMMAND ${LCOV} --ignore-errors version --capture --directory . --output-file RodinCoverage.base.info
+      COMMAND ${LCOV} --ignore-errors version --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
 endif()
