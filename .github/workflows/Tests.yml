@@ -65,6 +65,8 @@ jobs:
         run: cmake --build ${{github.workspace}}/build
       - name: Run tests
         run: ctest --test-dir ${{github.workspace}}/build/tests
+      - name: Make coverage
+        run: make RodinCoverage
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
