@@ -88,9 +88,6 @@ endif()
 if (RODIN_CODE_COVERAGE)
   add_link_options(--coverage)
   add_compile_options(--coverage)
-  rodin_add_compile_options(LANG CXX C
-    -fprofile-instr-generate -fcoverage-mapping
-    -fno-inline -fno-inline-small-functions -fno-default-inline)
   find_program(LCOV lcov REQUIRED)
   find_program(GENHTML genhtml REQUIRED)
   add_custom_target(RodinCoverage
