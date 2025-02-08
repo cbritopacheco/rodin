@@ -88,15 +88,15 @@ endif()
 if (RODIN_CODE_COVERAGE)
   add_link_options(--coverage)
   add_compile_options(--coverage)
-  rodin_add_compile_options(LANG CXX C
-    -fprofile-abs-path
-    -fno-inline
-    -fno-inline-small-functions
-    -fno-default-inline
-    -fprofile-instr-generate
-    -fcoverage-mapping
-    -fno-elide-constructors
-    )
+  rodin_add_compile_options(LANG CXX C -fprofile-instr-generate -fcoverage-mapping)
+  find_program(LCOV lcov REQUIRED)
+  find_program(GENHTML genhtml REQUIRED)
+  add_custom_target(RodinCoverage
+      COMMAND ${LCOV} --capture --directory . --output-file RodinCoverage.base.info
+      COMMAND ${LCOV} --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
+      COMMAND ${GENHTML} RodinCoverage.info --output-directory RodinCoverage
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  )
 endif()
 
 if (RODIN_BUILD_SRC)
