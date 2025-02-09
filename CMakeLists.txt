@@ -98,7 +98,7 @@ if (RODIN_CODE_COVERAGE)
   endif()
 
   add_custom_target(RodinCoverage
-    COMMAND ${LCOV} --gcov-tool ${GCOV} --capture --directory src --directory tests --output-file RodinCoverage.base.info
+    COMMAND ${LCOV} --gcov-tool ${GCOV} --capture --directory src --directory tests --ignore-errors all --output-file RodinCoverage.base.info
     COMMAND ${LCOV} --gcov-tool ${GCOV} --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
