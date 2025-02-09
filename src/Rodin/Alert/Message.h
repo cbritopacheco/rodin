@@ -9,6 +9,10 @@
 
 #include <string>
 #include <sstream>
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
+
 #include <iomanip>
 #include <type_traits>
 
