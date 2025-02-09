@@ -8,6 +8,10 @@
 #define RODIN_ALERT_TEXT_H
 
 #include <string>
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
+
 #include <termcolor/termcolor.hpp>
 
 #include "Rodin/Types.h"
