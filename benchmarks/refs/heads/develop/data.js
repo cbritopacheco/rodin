@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1739134096736,
+  "lastUpdate": 1739138965130,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -23698,6 +23698,162 @@ window.BENCHMARK_DATA = {
             "value": 43.06944838235386,
             "unit": "ns/iter",
             "extra": "iterations: 13028626\ncpu: 43.063126303571806 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito-Pacheco",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "aecc2b793738d2b6ba4f200a94c7af66b7d23016",
+          "message": "Update Tests.yml",
+          "timestamp": "2025-02-09T23:02:12+01:00",
+          "tree_id": "0ececa5bbcb4a43fe4a56e5c460ad25f412d57e7",
+          "url": "https://github.com/cbritopacheco/rodin/commit/aecc2b793738d2b6ba4f200a94c7af66b7d23016"
+        },
+        "date": 1739138960183,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.3003966030000811,
+            "unit": "ns/iter",
+            "extra": "iterations: 1000000000\ncpu: 0.300391191 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.3119987250000804,
+            "unit": "ns/iter",
+            "extra": "iterations: 1000000000\ncpu: 0.311987676 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.3053260379999756,
+            "unit": "ns/iter",
+            "extra": "iterations: 1000000000\ncpu: 0.3053018819999999 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.29928037099989524,
+            "unit": "ns/iter",
+            "extra": "iterations: 1000000000\ncpu: 0.2992722360000002 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 399.1986013263965,
+            "unit": "ns/iter",
+            "extra": "iterations: 1819867\ncpu: 399.1870713629074 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 63383.78478949524,
+            "unit": "ns/iter",
+            "extra": "iterations: 11045\ncpu: 63378.808329560874 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 277261.7476190524,
+            "unit": "ns/iter",
+            "extra": "iterations: 2520\ncpu: 277069.92301587324 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 645.9927162070759,
+            "unit": "ns/iter",
+            "extra": "iterations: 1087071\ncpu: 645.9527160599447 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 132155.62754914485,
+            "unit": "ns/iter",
+            "extra": "iterations: 5394\ncpu: 132150.32072673336 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 552981.009375042,
+            "unit": "ns/iter",
+            "extra": "iterations: 1280\ncpu: 552968.9992187496 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 324880.19496569276,
+            "unit": "ns/iter",
+            "extra": "iterations: 2185\ncpu: 324864.5903890161 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 316262.7755835007,
+            "unit": "ns/iter",
+            "extra": "iterations: 2228\ncpu: 316245.1319569122 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 13257.80976487308,
+            "unit": "ns/iter",
+            "extra": "iterations: 53928\ncpu: 13257.696614003833 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 4786907.095238002,
+            "unit": "ns/iter",
+            "extra": "iterations: 147\ncpu: 4786640.938775509 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 93200.46466186132,
+            "unit": "ns/iter",
+            "extra": "iterations: 7216\ncpu: 93198.45606984479 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 1546331.219512423,
+            "unit": "ns/iter",
+            "extra": "iterations: 451\ncpu: 1546301.1330376933 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 6546303.879629375,
+            "unit": "ns/iter",
+            "extra": "iterations: 108\ncpu: 6546310.925925926 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 33557415.857141376,
+            "unit": "ns/iter",
+            "extra": "iterations: 21\ncpu: 33343811.857142873 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 155471547.75001103,
+            "unit": "ns/iter",
+            "extra": "iterations: 4\ncpu: 155466939.50000012 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_16x16",
+            "value": 39.48334615136965,
+            "unit": "ns/iter",
+            "extra": "iterations: 17726323\ncpu: 39.48302154936472 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_32x32",
+            "value": 39.700397747826315,
+            "unit": "ns/iter",
+            "extra": "iterations: 17717507\ncpu: 39.700154993589074 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_64x64",
+            "value": 40.076522224983655,
+            "unit": "ns/iter",
+            "extra": "iterations: 17278392\ncpu: 40.07429238785647 ns\nthreads: 1"
           }
         ]
       }
