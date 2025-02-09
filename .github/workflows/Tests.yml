@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        compiler: [clang-17]
+        compiler: [gcc-14]
         build_type: ['Debug']
         multithreaded: ['ON', 'OFF']
       fail-fast: false
@@ -41,6 +41,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y
           libgl1-mesa-dev
           lcov
+          gcov
           libsdl2-dev
           libglfw3-dev
           libopenal-dev
