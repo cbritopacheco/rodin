@@ -99,9 +99,10 @@ if (RODIN_CODE_COVERAGE)
   else()
     find_program(GCOV gcov REQUIRED)
   endif()
+  string(REPLACE " " ";" RODIN_LCOV_FLAGS_LIST "${RODIN_LCOV_FLAGS}")
   add_custom_target(RodinCoverage
-    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS} --gcov-tool ${GCOV} --capture --directory src --directory tests --output-file RodinCoverage.base.info
-    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS} --gcov-tool ${GCOV} --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
+    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST} --gcov-tool ${GCOV} --capture --directory src --directory tests --output-file RodinCoverage.base.info
+    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST} --gcov-tool ${GCOV} --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
 endif()
