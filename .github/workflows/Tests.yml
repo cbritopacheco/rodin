@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        compiler: [gcc-14]
+        compiler: [gcc-10]
         build_type: ['Debug']
         multithreaded: ['ON', 'OFF']
       fail-fast: false
@@ -59,7 +59,7 @@ jobs:
           -DRODIN_BUILD_BENCHMARKS=OFF
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_UNIT_TESTS=ON
-          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch"
+          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
           -DRODIN_CODE_COVERAGE=ON
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
       - name: Build
