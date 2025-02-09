@@ -88,6 +88,10 @@ endif()
 if (RODIN_CODE_COVERAGE)
   include(CodeCoverage)
   append_coverage_compiler_flags()
+  rodin_add_compile_options(LANG CXX C OPTIONS
+    -fprofile-update=atomic
+    -fprofile-arcs
+    -ftest-coverage)
   find_program(LCOV lcov REQUIRED)
 
   if(DEFINED ENV{GCOV} AND NOT "$ENV{GCOV}" STREQUAL "")
@@ -98,8 +102,8 @@ if (RODIN_CODE_COVERAGE)
   endif()
 
   add_custom_target(RodinCoverage
-    COMMAND ${LCOV} --gcov-tool ${GCOV} --capture --directory src --directory tests --ignore-errors all --output-file RodinCoverage.base.info
-    COMMAND ${LCOV} --gcov-tool ${GCOV} --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
+    COMMAND ${LCOV} --ignore-errors all --gcov-tool ${GCOV} --capture --directory src --directory tests --output-file RodinCoverage.base.info
+    COMMAND ${LCOV} --ignore-errors all --gcov-tool ${GCOV} --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
 endif()
