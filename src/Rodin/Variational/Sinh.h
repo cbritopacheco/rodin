@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_Cos_H
-#define RODIN_VARIATIONAL_Cos_H
+#ifndef RODIN_VARIATIONAL_SINH_H
+#define RODIN_VARIATIONAL_SINH_H
 
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
@@ -15,46 +15,46 @@
 namespace Rodin::Variational
 {
   /**
-   * @defgroup CosSpecializations Cos Template Specializations
-   * @brief Template specializations of the Cos class.
-   * @see Cos
+   * @defgroup SinhSpecializations Sinh Template Specializations
+   * @brief Template specializations of the Sinh class.
+   * @see Sinh
    */
 
   /**
-   * @ingroup CosSpecializations
+   * @ingroup SinhSpecializations
    */
   template <class NestedDerived>
-  class Cos<FunctionBase<NestedDerived>> final
-    : public RealFunctionBase<Cos<FunctionBase<NestedDerived>>>
+  class Sinh<FunctionBase<NestedDerived>> final
+    : public RealFunctionBase<Sinh<FunctionBase<NestedDerived>>>
   {
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
-      using Parent = RealFunctionBase<Cos<FunctionBase<NestedDerived>>>;
+      using Parent = RealFunctionBase<Sinh<FunctionBase<NestedDerived>>>;
 
-      Cos(const OperandType& v)
+      Sinh(const OperandType& v)
         : m_operand(v.copy())
       {}
 
-      Cos(const Cos& other)
+      Sinh(const Sinh& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
-      Cos(Cos&& other)
+      Sinh(Sinh&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
       constexpr
-      Cos& traceOf(Geometry::Attribute attr)
+      Sinh& traceOf(Geometry::Attribute attr)
       {
         m_operand->traceOf(attr);
         return *this;
       }
 
       constexpr
-      Cos& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      Sinh& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         m_operand->traceOf(attrs);
         return *this;
@@ -62,7 +62,7 @@ namespace Rodin::Variational
 
       Real getValue(const Geometry::Point& p) const
       {
-        return Math::cos(getOperand().getValue(p));
+        return Math::sinh(getOperand().getValue(p));
       }
 
       const OperandType& getOperand() const
@@ -71,9 +71,9 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      Cos* copy() const noexcept override
+      Sinh* copy() const noexcept override
       {
-        return new Cos(*this);
+        return new Sinh(*this);
       }
 
     private:
@@ -81,15 +81,15 @@ namespace Rodin::Variational
   };
 
   template <class NestedDerived>
-  Cos(const FunctionBase<NestedDerived>&) -> Cos<FunctionBase<NestedDerived>>;
+  Sinh(const FunctionBase<NestedDerived>&) -> Sinh<FunctionBase<NestedDerived>>;
 
   /**
-   * @brief Helper function to construct objects of type Cos.
+   * @brief Helper function to construct objects of type Sinh.
    */
   template <class NestedDerived>
-  auto cos(const FunctionBase<NestedDerived>& f)
+  auto sinh(const FunctionBase<NestedDerived>& f)
   {
-    return Cos(f);
+    return Sinh(f);
   }
 }
 

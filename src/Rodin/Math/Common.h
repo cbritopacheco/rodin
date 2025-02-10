@@ -17,16 +17,23 @@
 namespace Rodin::Math
 {
   /**
-  * @brief Computes the absolute value of a value of type T.
-  * @param[in] x Value
-  * @tparam T Type of value
-  * @returns Absolute of value
-  */
+   * @brief Computes the absolute value of a value of type T.
+   * @param[in] x Value
+   * @tparam T Type of value
+   * @returns Absolute of value
+   */
   template <class T>
   constexpr
   auto abs(const T& x)
   {
     return std::abs(x);
+  }
+
+  template <class T>
+  constexpr
+  auto exp(const T& x)
+  {
+    return std::exp(x);
   }
 
   constexpr
@@ -110,9 +117,23 @@ namespace Rodin::Math
 
   template <class T>
   constexpr
+  auto cosh(const T& x)
+  {
+    return std::cosh(x);
+  }
+
+  template <class T>
+  constexpr
   auto sin(const T& x)
   {
     return std::sin(x);
+  }
+
+  template <class T>
+  constexpr
+  auto sinh(const T& x)
+  {
+    return std::sinh(x);
   }
 
   template <class T>
