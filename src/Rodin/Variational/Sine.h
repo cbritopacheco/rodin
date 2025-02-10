@@ -46,7 +46,6 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_operand))
       {}
 
-      inline
       constexpr
       Sin& traceOf(Geometry::Attribute attr)
       {
@@ -54,7 +53,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       Sin& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -62,20 +60,18 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       Real getValue(const Geometry::Point& p) const
       {
         return Math::sin(getOperand().getValue(p));
       }
 
-      inline
       const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
-      inline Sin* copy() const noexcept override
+      Sin* copy() const noexcept override
       {
         return new Sin(*this);
       }
