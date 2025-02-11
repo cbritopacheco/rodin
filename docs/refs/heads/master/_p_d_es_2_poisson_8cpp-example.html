@@ -76,23 +76,31 @@
 <span class="cm"> *       (See accompanying file LICENSE or copy at</span>
 <span class="cm"> *          https://www.boost.org/LICENSE_1_0.txt)</span>
 <span class="cm"> */</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Types.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;RodinExternal/MMG.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Solver</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">External</span><span class="p">;</span>
 
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="c1">// Build a mesh</span>
 <span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
-<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Quadrilateral</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">31</span><span class="p">);</span>
 <span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 
 <span class="w">  </span><span class="c1">// Functions</span>
 <span class="w">  </span><span class="n">P1</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// auto f = cos(2 * M_PI * F::x) * sin(2 * M_PI * F::y);</span>
+<span class="w">  </span><span class="n">ScalarFunction</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span>
 
 <span class="w">  </span><span class="n">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
 <span class="w">  </span><span class="n">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
@@ -100,16 +108,15 @@
 <span class="w">  </span><span class="c1">// Define problem</span>
 <span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
 <span class="w">          </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
 
-<span class="w">  </span><span class="n">poisson</span><span class="p">.</span><span class="n">assemble</span><span class="p">();</span>
-<span class="w">  </span><span class="c1">// Solver::CG solver;</span>
-<span class="w">  </span><span class="c1">// poisson.solve(solver);</span>
+<span class="w">  </span><span class="c1">// Solve</span>
+<span class="w">  </span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
-<span class="w">  </span><span class="c1">// // Save solution</span>
-<span class="w">  </span><span class="c1">// u.getSolution().save(&quot;Poisson.gf&quot;);</span>
-<span class="w">  </span><span class="c1">// mesh.save(&quot;Poisson.mesh&quot;);</span>
+<span class="w">  </span><span class="c1">// Save solution</span>
+<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Poisson.gf&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Poisson.mesh&quot;</span><span class="p">);</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></pre>
@@ -158,7 +165,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

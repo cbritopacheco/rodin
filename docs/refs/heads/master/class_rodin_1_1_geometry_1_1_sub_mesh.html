@@ -71,8 +71,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md6">Mapping between the SubMesh and the parent Mesh</a></li>
-            <li><a href="#autotoc_md7">Downcasting</a></li>
+            <li><a href="#autotoc_md8">Mapping between the SubMesh and the parent Mesh</a></li>
+            <li><a href="#autotoc_md9">Downcasting</a></li>
             <li>
               Reference
               <ul>
@@ -80,7 +80,7 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md6"><h2><a href="#autotoc_md6">Mapping between the SubMesh and the parent Mesh</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object holds a reference to its parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object and includes details about how polytopes and vertices are mapped between the child and parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</p></section><section id="autotoc_md7"><h2><a href="#autotoc_md7">Downcasting</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> that is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> can be downcasted to access the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
+<section id="autotoc_md8"><h2><a href="#autotoc_md8">Mapping between the SubMesh and the parent Mesh</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object holds a reference to its parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object and includes details about how polytopes and vertices are mapped between the child and parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</p></section><section id="autotoc_md9"><h2><a href="#autotoc_md9">Downcasting</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> that is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> can be downcasted to access the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="c1">// The cast is well defined</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
@@ -129,7 +129,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

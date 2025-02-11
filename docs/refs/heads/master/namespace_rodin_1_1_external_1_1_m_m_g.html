@@ -89,14 +89,6 @@
             </dt>
             <dd>Advection of a level set function by a velocity field.</dd>
             <dt>
-              struct <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>
-            </dt>
-            <dd>Empty class tag to specify that a material reference should not be splitted.</dd>
-            <dt>
-              struct <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>
-            </dt>
-            <dd>Class to specify the interior and exterior material references.</dd>
-            <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer_3_01typename_01_form_language_1_1_traits_3_01_r7932c45a2a4c858dd5e1269fbdbc23bb.html" class="m-doc">Distancer&lt;typename FormLanguage::Traits&lt;RealGridFunction&gt;::FESType&gt;</a>
             </dt>
@@ -115,10 +107,6 @@
             </dt>
             <dd><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> class which has support for <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> functionalities.</dd>
             <dt>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>
-            </dt>
-            <dd>Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</dd>
-            <dt>
               class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>
             </dt>
             <dd>Class used to print objects of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</dd>
@@ -126,6 +114,18 @@
               class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
             </dt>
             <dd>Class representing <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> objects utilized in the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> framework.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>
+            </dt>
+            <dd>Empty class tag to specify that a material reference should not be splitted.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>
+            </dt>
+            <dd>Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>
+            </dt>
+            <dd>Class to specify the interior and exterior material references.</dd>
           </dl>
         </section>
         <section id="typedef-members">
@@ -135,17 +135,17 @@
               using <a href="#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc-self">SplitMap</a> = <a href="namespace_rodin.html#a5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>, std::variant&lt;<a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>, <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>&gt;&gt;
             </dt>
             <dd>Map indicating how a material reference should be split into exterior and interior material references.</dd>
-            <dt id="a6d4c2bcc0c323f2240f11e4db4c075cf">
+            <dt id="aa46e3f5b0324f9ab1ac4113705ebfbdf">
               <div class="m-doc-template">template&lt;class Range&gt;</div>
-              using <a href="#a6d4c2bcc0c323f2240f11e4db4c075cf" class="m-doc-self">GridFunction</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;&gt;&gt;
+              using <a href="#aa46e3f5b0324f9ab1ac4113705ebfbdf" class="m-doc-self">GridFunction</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;&gt;
             </dt>
             <dd>GridFunction class for use with the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">Rodin::<wbr />External::<wbr />MMG</a> module.</dd>
             <dt id="a5b080db16bbb2ed744518df89ccd8d06">
-              using <a href="#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc-self">RealGridFunction</a> = <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a6d4c2bcc0c323f2240f11e4db4c075cf" class="m-doc">GridFunction</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+              using <a href="#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc-self">RealGridFunction</a> = <a href="#aa46e3f5b0324f9ab1ac4113705ebfbdf" class="m-doc">GridFunction</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
             <dd>Type alias for a GridFunction with scalar range.</dd>
             <dt id="ae723d68c66bd4bb8392b47a8761e75ad">
-              using <a href="#ae723d68c66bd4bb8392b47a8761e75ad" class="m-doc-self">VectorGridFunction</a> = <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a6d4c2bcc0c323f2240f11e4db4c075cf" class="m-doc">GridFunction</a>&lt;<a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
+              using <a href="#ae723d68c66bd4bb8392b47a8761e75ad" class="m-doc-self">VectorGridFunction</a> = <a href="#aa46e3f5b0324f9ab1ac4113705ebfbdf" class="m-doc">GridFunction</a>&lt;<a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </dt>
             <dd>Type alias for a GridFunction with vector range.</dd>
             <dt id="a2e664251a56ddb6630af9e4586dd47cd">
@@ -244,7 +244,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

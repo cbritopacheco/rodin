@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Geometry::Mesh&lt;Context::Local&gt;::Builder class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh&lt;Context::Local&gt;</a>::<wbr/></span>Builder <span class="m-thin">class</span>
+        </h1>
+        <p>Class used to build <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a> instances.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a127ac7aab5c87bd7df242644885320ac">
+              <span class="m-doc-wrap-bumper"><a href="#a127ac7aab5c87bd7df242644885320ac" class="m-doc-self">Builder</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt id="a8b2459b3217ced071773c95fab6a188d">
+              <span class="m-doc-wrap-bumper"><a href="#a8b2459b3217ced071773c95fab6a188d" class="m-doc-self">Builder</a>(</span><span class="m-doc-wrap">const Builder&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Deleted copy constructor.</dd>
+            <dt id="aa89e2556dcf392a43885841673b07f58">
+              <span class="m-doc-wrap-bumper"><a href="#aa89e2556dcf392a43885841673b07f58" class="m-doc-self">Builder</a>(</span><span class="m-doc-wrap">Builder&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a5f3a24213717786400b32930a217f25f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5f3a24213717786400b32930a217f25f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Builder&amp;) -&gt; Builder&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Deleted copy assignment.</dd>
+            <dt id="ad48edadf7cffdfa00d626f16352a4d1b">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad48edadf7cffdfa00d626f16352a4d1b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">Builder&amp;&amp;) -&gt; Builder&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move assignment.</dd>
+            <dt id="a190243face0fb8e86f922d62370cf91b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a190243face0fb8e86f922d62370cf91b" class="m-doc-self">reserve</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t count) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Reserves memory accross the data structure for the polytopes of the given dimension.</dd>
+            <dt id="a36223286c5983036fa24e9c5a439161f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a36223286c5983036fa24e9c5a439161f" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">size_t sdim) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Initializes construction of the mesh object.</dd>
+            <dt id="a4ec4b610bf121e7015dec0be49bec0b5">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4ec4b610bf121e7015dec0be49bec0b5" class="m-doc-self">nodes</a>(</span><span class="m-doc-wrap">size_t n) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Sets the number of nodes in the mesh.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t Size&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa30b7601b983828b69990ec47f6c9219" class="m-doc">vertex</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(&amp;data)[Size]) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Adds vertex with coordinates given by the fixed size array.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a39b514acfacbac31e69fc056546e3f9d" class="m-doc">vertex</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; l) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Adds vertex with coordinates given by the initializer list.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7b6d49f6475ae5b71092c8b4bc622b21" class="m-doc">vertex</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>* data) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Adds vertex with coordinates given by the array pointer.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a122cc33c3a779591856d33286455ea10" class="m-doc">vertex</a>(</span><span class="m-doc-wrap">const Eigen::Map&lt;const <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;&amp; x) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Adds vertex with coordinates given by the mapped memory.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a749598028c0a9aefb4ea749f8e5f4658" class="m-doc">vertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;&amp; x) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Adds vertex with coordinates given by the vector.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a38ac48b7cbeb79c2c60ef7521f917c1e" class="m-doc">vertex</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; x) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Adds vertex with coordinates given by the vector.</dd>
+            <dt id="a7d0179d62dd83d2ea83b29210f9c9ef2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7d0179d62dd83d2ea83b29210f9c9ef2" class="m-doc-self">attribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Sets the attribute of the given polytope.</dd>
+            <dt id="a7394c7ee627fc54917f8169c3c61aea1">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7394c7ee627fc54917f8169c3c61aea1" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> t,
+              std::initializer_list&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; vs) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Adds polytope defined by the given vertices.</dd>
+            <dt id="a14aa28dd6688fcb3ddb07a9cd2bfbba6">
+              <span class="m-doc-wrap-bumper">auto <a href="#a14aa28dd6688fcb3ddb07a9cd2bfbba6" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> t,
+              const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; vs) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Adds polytope defined by the given vertices.</dd>
+            <dt id="a4847226a0f4fb581c5878dfd1b423c43">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4847226a0f4fb581c5878dfd1b423c43" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> t,
+              <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp;&amp; vs) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Adds polytope defined by the given vertices.</dd>
+            <dt id="a0c2b73326859d6848d8f0af9a814d77d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0c2b73326859d6848d8f0af9a814d77d" class="m-doc-self">finalize</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a></span>
+            </dt>
+            <dd>Finalizes construction of the <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a> object.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa30b7601b983828b69990ec47f6c9219"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+                template&lt;size_t Size&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa30b7601b983828b69990ec47f6c9219" class="m-doc-self">vertex</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(&amp;data)[Size])</span></span>
+            </h3>
+            <p>Adds vertex with coordinates given by the fixed size array.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>This method requires nodes(size_t) to be called beforehand.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a39b514acfacbac31e69fc056546e3f9d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39b514acfacbac31e69fc056546e3f9d" class="m-doc-self">vertex</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; l)</span></span>
+            </h3>
+            <p>Adds vertex with coordinates given by the initializer list.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>This method requires nodes(size_t) to be called beforehand.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a7b6d49f6475ae5b71092c8b4bc622b21"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7b6d49f6475ae5b71092c8b4bc622b21" class="m-doc-self">vertex</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>* data)</span></span>
+            </h3>
+            <p>Adds vertex with coordinates given by the array pointer.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>This method requires nodes(size_t) to be called beforehand.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a122cc33c3a779591856d33286455ea10"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a122cc33c3a779591856d33286455ea10" class="m-doc-self">vertex</a>(</span><span class="m-doc-wrap">const Eigen::Map&lt;const <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;&amp; x)</span></span>
+            </h3>
+            <p>Adds vertex with coordinates given by the mapped memory.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>This method requires nodes(size_t) to be called beforehand.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a749598028c0a9aefb4ea749f8e5f4658"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a749598028c0a9aefb4ea749f8e5f4658" class="m-doc-self">vertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;&amp; x)</span></span>
+            </h3>
+            <p>Adds vertex with coordinates given by the vector.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>This method requires nodes(size_t) to be called beforehand.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a38ac48b7cbeb79c2c60ef7521f917c1e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38ac48b7cbeb79c2c60ef7521f917c1e" class="m-doc-self">vertex</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; x)</span></span>
+            </h3>
+            <p>Adds vertex with coordinates given by the vector.</p>
+<p>This method requires nodes(size_t) to be called beforehand.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

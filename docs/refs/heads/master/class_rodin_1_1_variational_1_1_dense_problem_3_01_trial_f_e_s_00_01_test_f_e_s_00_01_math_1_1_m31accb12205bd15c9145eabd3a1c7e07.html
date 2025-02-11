@@ -132,28 +132,28 @@ $ v $
               <span class="m-doc-wrap-bumper">void <a href="#aa9e3c9f964932266f8340e34a9051e69" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dense_problem.html" class="m-doc">DenseProblem</a>&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Deleted copy assignment operator.</dd>
-            <dt id="a51dd06db0a0b8dff89f3bc81599b6af9">
-              <span class="m-doc-wrap-bumper">auto <a href="#a51dd06db0a0b8dff89f3bc81599b6af9" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_dense_problem.html" class="m-doc">DenseProblem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt id="a8b12ef89ab24a3860e7d5d07a57cc8bf">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8b12ef89ab24a3860e7d5d07a57cc8bf" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_dense_problem.html" class="m-doc">DenseProblem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the underlying linear system to solve.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae4ac4b8475d2c10c15e584dd9ee950fc" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) -&gt; VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a93cf1d02d4eceb0dbaf6ab95fddffd33" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) -&gt; VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad78a22705a3bcc5751d1450752864661" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) const -&gt; const VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa075b941100cbf318795b8c6409a039e" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) const -&gt; const VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab536a0fd8a4c1b4a1dacb50084f90c95" class="m-doc">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) -&gt; OperatorType&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a62490f07de2d3730a2ffc57a7561d742" class="m-doc">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) -&gt; OperatorType&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aceb5587e660e462d282316057c3f625c" class="m-doc">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) const -&gt; const OperatorType&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afde9d0e2befa6e727e36ce283fed6271" class="m-doc">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) const -&gt; const OperatorType&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6f2148f2ee15a1d883a775c53b2cd1ac" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_dense_problem.html" class="m-doc">DenseProblem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af69f8489f64294081e2befbe604efa92" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_dense_problem.html" class="m-doc">DenseProblem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
@@ -205,12 +205,12 @@ $ v $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ae4ac4b8475d2c10c15e584dd9ee950fc"><div>
+          <section class="m-doc-details" id="a93cf1d02d4eceb0dbaf6ab95fddffd33"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">VectorType&amp; Rodin::<wbr />Variational::<wbr />DenseProblem&lt;TrialFES, TestFES, Math::<wbr />Matrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4ac4b8475d2c10c15e584dd9ee950fc" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">VectorType&amp; Rodin::<wbr />Variational::<wbr />DenseProblem&lt;TrialFES, TestFES, Math::<wbr />Matrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93cf1d02d4eceb0dbaf6ab95fddffd33" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -220,14 +220,14 @@ $ v $
                 </tr>
               </tfoot>
             </table>
-<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_dense_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_math_1_1_m31accb12205bd15c9145eabd3a1c7e07.html#a51dd06db0a0b8dff89f3bc81599b6af9" class="m-doc">assemble()</a> has been called.</p>
+<p>This must be called only after <a href="#a8b12ef89ab24a3860e7d5d07a57cc8bf" class="m-doc">assemble()</a> has been called.</p>
           </div></section>
-          <section class="m-doc-details" id="ad78a22705a3bcc5751d1450752864661"><div>
+          <section class="m-doc-details" id="aa075b941100cbf318795b8c6409a039e"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const VectorType&amp; Rodin::<wbr />Variational::<wbr />DenseProblem&lt;TrialFES, TestFES, Math::<wbr />Matrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad78a22705a3bcc5751d1450752864661" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const VectorType&amp; Rodin::<wbr />Variational::<wbr />DenseProblem&lt;TrialFES, TestFES, Math::<wbr />Matrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa075b941100cbf318795b8c6409a039e" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -237,14 +237,14 @@ $ v $
                 </tr>
               </tfoot>
             </table>
-<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_dense_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_math_1_1_m31accb12205bd15c9145eabd3a1c7e07.html#a51dd06db0a0b8dff89f3bc81599b6af9" class="m-doc">assemble()</a> has been called.</p>
+<p>This must be called only after <a href="#a8b12ef89ab24a3860e7d5d07a57cc8bf" class="m-doc">assemble()</a> has been called.</p>
           </div></section>
-          <section class="m-doc-details" id="ab536a0fd8a4c1b4a1dacb50084f90c95"><div>
+          <section class="m-doc-details" id="a62490f07de2d3730a2ffc57a7561d742"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">OperatorType&amp; Rodin::<wbr />Variational::<wbr />DenseProblem&lt;TrialFES, TestFES, Math::<wbr />Matrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab536a0fd8a4c1b4a1dacb50084f90c95" class="m-doc-self">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">OperatorType&amp; Rodin::<wbr />Variational::<wbr />DenseProblem&lt;TrialFES, TestFES, Math::<wbr />Matrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a62490f07de2d3730a2ffc57a7561d742" class="m-doc-self">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -254,14 +254,14 @@ $ v $
                 </tr>
               </tfoot>
             </table>
-<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_dense_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_math_1_1_m31accb12205bd15c9145eabd3a1c7e07.html#a51dd06db0a0b8dff89f3bc81599b6af9" class="m-doc">assemble()</a> has been called.</p>
+<p>This must be called only after <a href="#a8b12ef89ab24a3860e7d5d07a57cc8bf" class="m-doc">assemble()</a> has been called.</p>
           </div></section>
-          <section class="m-doc-details" id="aceb5587e660e462d282316057c3f625c"><div>
+          <section class="m-doc-details" id="afde9d0e2befa6e727e36ce283fed6271"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const OperatorType&amp; Rodin::<wbr />Variational::<wbr />DenseProblem&lt;TrialFES, TestFES, Math::<wbr />Matrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aceb5587e660e462d282316057c3f625c" class="m-doc-self">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const OperatorType&amp; Rodin::<wbr />Variational::<wbr />DenseProblem&lt;TrialFES, TestFES, Math::<wbr />Matrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afde9d0e2befa6e727e36ce283fed6271" class="m-doc-self">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -271,14 +271,14 @@ $ v $
                 </tr>
               </tfoot>
             </table>
-<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_dense_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_math_1_1_m31accb12205bd15c9145eabd3a1c7e07.html#a51dd06db0a0b8dff89f3bc81599b6af9" class="m-doc">assemble()</a> has been called.</p>
+<p>This must be called only after <a href="#a8b12ef89ab24a3860e7d5d07a57cc8bf" class="m-doc">assemble()</a> has been called.</p>
           </div></section>
-          <section class="m-doc-details" id="a6f2148f2ee15a1d883a775c53b2cd1ac"><div>
+          <section class="m-doc-details" id="af69f8489f64294081e2befbe604efa92"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dense_problem.html" class="m-doc">DenseProblem</a>* Rodin::<wbr />Variational::<wbr />DenseProblem&lt;TrialFES, TestFES, Math::<wbr />Matrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f2148f2ee15a1d883a775c53b2cd1ac" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dense_problem.html" class="m-doc">DenseProblem</a>* Rodin::<wbr />Variational::<wbr />DenseProblem&lt;TrialFES, TestFES, Math::<wbr />Matrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af69f8489f64294081e2befbe604efa92" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -336,7 +336,7 @@ $ v $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>
