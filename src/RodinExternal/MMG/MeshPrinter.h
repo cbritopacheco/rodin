@@ -38,7 +38,7 @@ namespace Rodin::External::MMG
 
     private:
       std::reference_wrapper<const MMG::Mesh> m_mesh;
-      IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Sequential> m_printer;
+      IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Local> m_printer;
   };
 }
 

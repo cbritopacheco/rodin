@@ -8,6 +8,26 @@
 
 namespace Rodin::Examples::BoundaryOptimization
 {
+  template <class TopologicalFunction>
+  std::vector<Geometry::Point> locations(const TopologicalFunction& tf)
+  {
+    const Real tc = tf.max();
+    std::vector<Geometry::Point> cs;
+    for (auto it = tf.getFiniteElementSpace().getMesh().getVertex(); !it.end(); ++it)
+    {
+      const Geometry::Point p(*it, it->getTransformation(),
+          Geometry::Polytope::getVertices(
+            Geometry::Polytope::Type::Point).col(0), it->getCoordinates());
+      const Real tp = tf(p);
+      if (tp > 1e-12 && (tp / tc) > (1 - 1e-12))
+      {
+        cs.emplace_back(std::move(p));
+        break;
+      }
+    }
+    return cs;
+  }
+
   template <class DistanceFunction>
   void holes(Real radius, DistanceFunction& dist, const std::vector<Geometry::Point>& cs)
   {

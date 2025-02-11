@@ -42,7 +42,7 @@ int main(int, char**)
   GridFunction gamma(ph);
   gamma = 0.9;
 
-  double vol = Omega.getVolume();
+  double vol = Omega.getMeasure(Omega.getDimension());
 
   // Optimization loop
   for (size_t i = 0; i < maxIterations; i++)

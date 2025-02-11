@@ -58,7 +58,7 @@ namespace Rodin::Geometry
    *
    * @see MeshTypes
    */
-  template <class ContextType = Context::Sequential>
+  template <class ContextType = Context::Local>
   class Mesh;
 
   class SubMeshBase;
@@ -88,7 +88,7 @@ namespace Rodin::Geometry
   class SubMesh;
 
   template <>
-  class SubMesh<Context::Sequential>;
+  class SubMesh<Context::Local>;
 
   template <class Context>
   class SubMeshBuilder;

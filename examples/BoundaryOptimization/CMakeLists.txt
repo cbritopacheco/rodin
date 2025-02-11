@@ -1,5 +1,5 @@
-add_executable(WaveConcealing WaveConcealing.cpp)
-target_link_libraries(WaveConcealing
+add_executable(AcousticCloaking AcousticCloaking.cpp)
+target_link_libraries(AcousticCloaking
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
@@ -7,8 +7,8 @@ target_link_libraries(WaveConcealing
   Rodin::External::MMG
   )
 
-add_executable(WaterTankSupport WaterTankSupport.cpp)
-target_link_libraries(WaterTankSupport
+add_executable(WaterTank WaterTank.cpp)
+target_link_libraries(WaterTank
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
@@ -16,8 +16,8 @@ target_link_libraries(WaterTankSupport
   Rodin::External::MMG
   )
 
-add_executable(ClampingLocator ClampingLocator.cpp)
-target_link_libraries(ClampingLocator
+add_executable(ClampLocator ClampLocator.cpp)
+target_link_libraries(ClampLocator
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
@@ -25,8 +25,8 @@ target_link_libraries(ClampingLocator
   Rodin::External::MMG
   )
 
-add_executable(CathodeAnode CathodeAnode.cpp)
-target_link_libraries(CathodeAnode
+add_executable(EMM EMM.cpp)
+target_link_libraries(EMM
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
@@ -35,8 +35,8 @@ target_link_libraries(CathodeAnode
   )
 
 
-add_executable(CoolingMaterial CoolingMaterial.cpp)
-target_link_libraries(CoolingMaterial
+add_executable(SurfaceCooling SurfaceCooling.cpp)
+target_link_libraries(SurfaceCooling
   PUBLIC
   Rodin::Geometry
   Rodin::Solver

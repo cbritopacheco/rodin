@@ -17,12 +17,12 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-namespace RodinBenchmark
+namespace Rodin::Tests::Benchmarks
 {
   struct Poisson_UniformGrid_16x16 : public benchmark::Fixture
   {
     public:
-      using MeshType = Mesh<Context::Sequential>;
+      using MeshType = Mesh<Context::Local>;
       using FESType = P1<Real, MeshType>;
 
       static constexpr const Geometry::Attribute dirichletAttr = 1;

@@ -86,6 +86,34 @@
 
 /**
  * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with SuiteSparse support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifndef RODIN_USE_SPQR
+ * // Code depending on SPQR
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_SPQR
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with SuiteSparse support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifndef RODIN_USE_CHOLMOD
+ * // Code depending on CHOLMOD
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_CHOLMOD
+
+/**
+ * @ingroup RodinDirectives
  * @brief Indicates if Rodin warnings are silenced.
  */
 #cmakedefine RODIN_SILENCE_WARNINGS
@@ -150,6 +178,6 @@
 /**
  * @brief Represents the constant used for fuzzy comparison.
  */
-#define RODIN_FUZZY_CONSTANT 1e-8
+#define RODIN_FUZZY_CONSTANT 1e-5
 
 #endif

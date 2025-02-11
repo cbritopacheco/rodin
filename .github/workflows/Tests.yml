@@ -59,15 +59,19 @@ jobs:
           -DRODIN_BUILD_BENCHMARKS=OFF
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_UNIT_TESTS=ON
+          -DRODIN_BUILD_MANUFACTURED_TESTS=ON
+          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
           -DRODIN_CODE_COVERAGE=ON
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
       - name: Build
         run: cmake --build ${{github.workspace}}/build
       - name: Run tests
         run: ctest --test-dir ${{github.workspace}}/build/tests
+      - name: Make coverage
+        run: cmake --build ${{github.workspace}}/build --target RodinCoverage
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
-          gcov: true
-          gcov_include: ${{github.workspace}}
+          files: ${{github.workspace}}/build/RodinCoverage.info
+          token: ${{ secrets.CODECOV_TOKEN }}
 

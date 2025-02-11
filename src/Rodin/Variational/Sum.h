@@ -305,7 +305,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return this->object(getLHS().getBasis(local)) + this->object(getRHS().getBasis(local));
+        return getLHS().getBasis(local) + this->object(getRHS().getBasis(local));
       }
 
       constexpr

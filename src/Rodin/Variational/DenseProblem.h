@@ -81,7 +81,7 @@ namespace Rodin::Variational
 
       using ScalarType = OperatorScalarType;
 
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       using OperatorType = Math::Matrix<OperatorScalarType>;
 
@@ -389,6 +389,8 @@ namespace Rodin::Variational
 
         m_dbcs = rhs.getDBCs();
         m_pbcs = rhs.getPBCs();
+
+        m_assembled = false;
 
         return *this;
       }

@@ -28,69 +28,6 @@
 
 namespace Rodin::IO::MFEM
 {
-  /**
-   * @internal
-   */
-  std::istream& getline(std::istream& is, std::string& line, size_t& currentLineNumber);
-
-  /**
-   * @internal
-   */
-  std::string skipEmptyLinesAndComments(std::istream& is, size_t& currentLineNumber);
-
-  /**
-   * @internal
-   */
-  enum MeshType
-  {
-    LEGACY,
-    NONCONFORMING,
-    NURBS
-  };
-
-  /**
-   * @internal
-   */
-  enum GeometryType
-  {
-    POINT       = 0,
-    SEGMENT     = 1,
-    TRIANGLE    = 2,
-    SQUARE      = 3,
-    TETRAHEDRON = 4,
-    CUBE        = 5,
-    PRISM       = 6,
-    PYRAMID     = 7
-  };
-
-  struct MeshVersion
-  {
-    size_t major;
-    size_t minor;
-  };
-
-  struct MeshHeader
-  {
-    MeshType type;
-    MeshVersion version;
-  };
-
-  enum Ordering
-  {
-    /// XXX..., YYY..., ZZZ...
-    Nodes = 0,
-
-    /// XYZ, XYZ, ...
-    VectorDimension = 1
-  };
-
-  struct GridFunctionHeader
-  {
-    std::string fec;
-    size_t vdim;
-    Ordering ordering;
-  };
-
   enum class Keyword
   {
     dimension,
@@ -98,61 +35,6 @@ namespace Rodin::IO::MFEM
     boundary,
     vertices
   };
-
-  inline
-  constexpr
-  std::optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
-  {
-    switch (t)
-    {
-      case GeometryType::POINT:
-      {
-        return Rodin::Geometry::Polytope::Type::Point;
-      }
-      case GeometryType::SEGMENT:
-      {
-        return Rodin::Geometry::Polytope::Type::Segment;
-      }
-      case GeometryType::TRIANGLE:
-      {
-        return Rodin::Geometry::Polytope::Type::Triangle;
-      }
-      case GeometryType::TETRAHEDRON:
-      {
-        return Rodin::Geometry::Polytope::Type::Tetrahedron;
-      }
-      case GeometryType::SQUARE:
-      {
-        return Rodin::Geometry::Polytope::Type::Quadrilateral;
-      }
-      default:
-        return {};
-    }
-    return {};
-  }
-
-  inline
-  constexpr
-  std::optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
-  {
-    switch (t)
-    {
-      case Geometry::Polytope::Type::Point:
-        return GeometryType::POINT;
-      case Geometry::Polytope::Type::Segment:
-        return GeometryType::SEGMENT;
-      case Geometry::Polytope::Type::Triangle:
-        return GeometryType::TRIANGLE;
-      case Geometry::Polytope::Type::Quadrilateral:
-        return GeometryType::SQUARE;
-      case Geometry::Polytope::Type::Tetrahedron:
-        return GeometryType::TETRAHEDRON;
-      default:
-        return {};
-    }
-    assert(false);
-    return {};
-  }
 
   inline
   constexpr
@@ -237,6 +119,130 @@ namespace Rodin::IO::MFEM
       return {};
     assert(res == str);
     return res;
+  }
+
+  /**
+   * @internal
+   */
+  std::istream& getline(std::istream& is, std::string& line, size_t& currentLineNumber);
+
+  /**
+   * @internal
+   */
+  std::string skipEmptyLinesAndComments(std::istream& is, size_t& currentLineNumber);
+
+  /**
+   * @internal
+   */
+  enum MeshType
+  {
+    LEGACY,
+    NONCONFORMING,
+    NURBS
+  };
+
+  /**
+   * @internal
+   */
+  enum GeometryType
+  {
+    POINT       = 0,
+    SEGMENT     = 1,
+    TRIANGLE    = 2,
+    SQUARE      = 3,
+    TETRAHEDRON = 4,
+    CUBE        = 5,
+    PRISM       = 6,
+    PYRAMID     = 7
+  };
+
+  struct MeshVersion
+  {
+    size_t major;
+    size_t minor;
+  };
+
+  struct MeshHeader
+  {
+    MeshType type;
+    MeshVersion version;
+  };
+
+  enum Ordering
+  {
+    /// XXX..., YYY..., ZZZ...
+    Nodes = 0,
+
+    /// XYZ, XYZ, ...
+    VectorDimension = 1
+  };
+
+  struct GridFunctionHeader
+  {
+    std::string fec;
+    size_t vdim;
+    Ordering ordering;
+  };
+
+  inline
+  constexpr
+  std::optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
+  {
+    switch (t)
+    {
+      case GeometryType::POINT:
+      {
+        return Rodin::Geometry::Polytope::Type::Point;
+      }
+      case GeometryType::SEGMENT:
+      {
+        return Rodin::Geometry::Polytope::Type::Segment;
+      }
+      case GeometryType::TRIANGLE:
+      {
+        return Rodin::Geometry::Polytope::Type::Triangle;
+      }
+      case GeometryType::TETRAHEDRON:
+      {
+        return Rodin::Geometry::Polytope::Type::Tetrahedron;
+      }
+      case GeometryType::PRISM:
+      {
+        return Rodin::Geometry::Polytope::Type::TriangularPrism;
+      }
+      case GeometryType::SQUARE:
+      {
+        return Rodin::Geometry::Polytope::Type::Quadrilateral;
+      }
+      default:
+        return {};
+    }
+    return {};
+  }
+
+  inline
+  constexpr
+  std::optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
+  {
+    switch (t)
+    {
+      case Geometry::Polytope::Type::Point:
+        return GeometryType::POINT;
+      case Geometry::Polytope::Type::Segment:
+        return GeometryType::SEGMENT;
+      case Geometry::Polytope::Type::Triangle:
+        return GeometryType::TRIANGLE;
+      case Geometry::Polytope::Type::Quadrilateral:
+        return GeometryType::SQUARE;
+      case Geometry::Polytope::Type::Tetrahedron:
+        return GeometryType::TETRAHEDRON;
+      case Geometry::Polytope::Type::TriangularPrism:
+        return GeometryType::PRISM;
+      default:
+        return {};
+    }
+    assert(false);
+    return {};
   }
 
   struct ParseUnsignedInteger
@@ -445,18 +451,18 @@ namespace Rodin::IO::MFEM
 namespace Rodin::IO
 {
   template <>
-  class MeshLoader<IO::FileFormat::MFEM, Context::Sequential>
-    : public MeshLoaderBase<Context::Sequential>
+  class MeshLoader<IO::FileFormat::MFEM, Context::Local>
+    : public MeshLoaderBase<Context::Local>
   {
     public:
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       using ObjectType = Geometry::Mesh<ContextType>;
 
       using Parent = MeshPrinterBase<ContextType>;
 
       MeshLoader(ObjectType& mesh)
-        : MeshLoaderBase<Context::Sequential>(mesh)
+        : MeshLoaderBase<Context::Local>(mesh)
       {}
 
       void load(std::istream& is) override;
@@ -476,11 +482,11 @@ namespace Rodin::IO
   };
 
   template <>
-  class MeshPrinter<FileFormat::MFEM, Context::Sequential>
-    : public MeshPrinterBase<Context::Sequential>
+  class MeshPrinter<FileFormat::MFEM, Context::Local>
+    : public MeshPrinterBase<Context::Local>
   {
     public:
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       using ObjectType = Geometry::Mesh<ContextType>;
 
@@ -498,11 +504,11 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Context::Sequential>>>
-    : public GridFunctionPrinterBase<Variational::P0<Range, Geometry::Mesh<Context::Sequential>>>
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Context::Local>>>
+    : public GridFunctionPrinterBase<Variational::P0<Range, Geometry::Mesh<Context::Local>>>
   {
     public:
-      using FESType = Variational::P0<Range, Geometry::Mesh<Context::Sequential>>;
+      using FESType = Variational::P0<Range, Geometry::Mesh<Context::Local>>;
 
       using ObjectType = Variational::GridFunction<FESType>;
 
@@ -530,11 +536,11 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionLoader<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
-    : public GridFunctionLoaderBase<Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
+  class GridFunctionLoader<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Local>>>
+    : public GridFunctionLoaderBase<Variational::P1<Range, Geometry::Mesh<Context::Local>>>
   {
     public:
-      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Sequential>>;
+      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
 
       using ObjectType = Variational::GridFunction<FESType>;
 
@@ -553,11 +559,11 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
-    : public GridFunctionPrinterBase<Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Local>>>
+    : public GridFunctionPrinterBase<Variational::P1<Range, Geometry::Mesh<Context::Local>>>
   {
     public:
-      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Sequential>>;
+      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
 
       using ObjectType = Variational::GridFunction<FESType>;
 

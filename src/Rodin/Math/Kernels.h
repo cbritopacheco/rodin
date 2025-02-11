@@ -42,7 +42,7 @@ namespace Rodin::Math::Kernels
         valuePtr[i] = (row == global + offset);
         if (row != global + offset)
         {
-          for (auto k = outerPtr[row]; 1; k++)
+          for (auto k = outerPtr[row]; k < outerPtr[row + 1]; k++)
           {
             if (static_cast<Index>(innerPtr[k]) == global + offset)
             {

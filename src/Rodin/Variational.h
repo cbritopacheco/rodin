@@ -38,6 +38,7 @@
 #include "Variational/UnaryMinus.h"
 
 #include "Variational/Abs.h"
+#include "Variational/Exp.h"
 #include "Variational/Conjugate.h"
 
 #include "Variational/EQ.h"
@@ -69,6 +70,8 @@
 
 #include "Variational/Sine.h"
 #include "Variational/Cosine.h"
+#include "Variational/Sinh.h"
+#include "Variational/Cosh.h"
 #include "Variational/Tangent.h"
 
 #include "Variational/Frobenius.h"

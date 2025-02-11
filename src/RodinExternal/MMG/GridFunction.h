@@ -16,7 +16,7 @@ namespace Rodin::External::MMG
   /// GridFunction class for use with the Rodin::External::MMG module.
   template <class Range>
   using GridFunction = Variational::GridFunction<
-        Variational::P1<Range, Geometry::Mesh<Context::Sequential>>>;
+        Variational::P1<Range, Geometry::Mesh<Context::Local>>>;
 
   /// Type alias for a GridFunction with scalar range.
   using RealGridFunction = GridFunction<Real>;

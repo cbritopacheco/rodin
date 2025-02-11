@@ -58,6 +58,7 @@ jobs:
           -DRODIN_CODE_COVERAGE=OFF
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_BENCHMARKS=ON
+          -DRODIN_MULTITHREADED=NO
       - name: Build
         run: cmake --build ${{github.workspace}}/build
       - name: Run benchmarks

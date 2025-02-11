@@ -154,7 +154,7 @@ namespace Rodin::Variational
         }
       }
 
-      inline Div* copy() const noexcept override
+      Div* copy() const noexcept override
       {
         return new Div(*this);
       }
@@ -182,6 +182,8 @@ namespace Rodin::Variational
 
       using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
 
+      using ScalarType = Number;
+
       /**
        * @brief Constructs Div object
        * @param[in] u ShapeFunction to be differentiated
@@ -201,35 +203,30 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      inline
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      inline
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return { 1, 1 };
       }
 
-      inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         return getOperand().getDOFs(polytope);
       }
 
-      inline
       const Geometry::Point& getPoint() const
       {
         return m_p.value().get();
@@ -241,9 +238,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
-      auto getBasis(size_t local) const
+      ScalarType getBasis(size_t local) const
       {
         const auto& p = m_p.value().get();
         const size_t d = p.getPolytope().getDimension();
@@ -253,14 +249,13 @@ namespace Rodin::Variational
         return (fe.getJacobian(local)(rc) * p.getJacobianInverse()).trace();
       }
 
-      inline
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
 
-      inline Div* copy() const noexcept override
+      Div* copy() const noexcept override
       {
         return new Div(*this);
       }

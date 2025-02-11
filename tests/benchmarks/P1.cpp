@@ -16,12 +16,12 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-namespace RodinBenchmark
+namespace Rodin::Tests::Benchmarks
 {
   struct P1Benchmark : public benchmark::Fixture
   {
     public:
-      using MeshType = SequentialMesh;
+      using MeshType = LocalMesh;
 
       void SetUp(const benchmark::State&)
       {
@@ -37,19 +37,19 @@ namespace RodinBenchmark
         .finalize();
 
         uniformTriangularMesh16 =
-          SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+          LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
 
         uniformTriangularMesh32 =
-          SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 32, 32 });
+          LocalMesh::UniformGrid(Polytope::Type::Triangle, { 32, 32 });
 
         uniformTriangularMesh32 =
-          SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 32, 32 });
+          LocalMesh::UniformGrid(Polytope::Type::Triangle, { 32, 32 });
 
         uniformTriangularMesh64 =
-          SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 64, 64 });
+          LocalMesh::UniformGrid(Polytope::Type::Triangle, { 64, 64 });
 
         uniformTriangularMesh128 =
-          SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 128, 128 });
+          LocalMesh::UniformGrid(Polytope::Type::Triangle, { 128, 128 });
       }
 
       void TearDown(const benchmark::State&)

@@ -653,6 +653,9 @@ namespace Rodin::Variational
   template <class Operand>
   class Abs;
 
+  template <class Operand>
+  class Exp;
+
   /**
    * @brief Represents the Frobenius norm.
    * @tparam Operand Type of operand
@@ -690,6 +693,12 @@ namespace Rodin::Variational
 
   template <class Operand>
   class Sin;
+
+  template <class Operand>
+  class Cosh;
+
+  template <class Operand>
+  class Sinh;
 
   /**
    * @brief Represents the tangent function.

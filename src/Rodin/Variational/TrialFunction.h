@@ -48,7 +48,6 @@ namespace Rodin::Variational
 
       void operator=(TrialFunction&&) = delete;
 
-      inline
       constexpr
       auto x() const
       {
@@ -56,7 +55,6 @@ namespace Rodin::Variational
         return Component(*this, 0);
       }
 
-      inline
       constexpr
       auto y() const
       {
@@ -64,7 +62,6 @@ namespace Rodin::Variational
         return Component(*this, 1);
       }
 
-      inline
       constexpr
       auto z() const
       {
@@ -72,14 +69,12 @@ namespace Rodin::Variational
         return Component(*this, 2);
       }
 
-      inline
       constexpr
       const TrialFunction& getLeaf() const
       {
         return *this;
       }
 
-      inline
       TrialFunction* copy() const noexcept override
       {
         return new TrialFunction(*this);

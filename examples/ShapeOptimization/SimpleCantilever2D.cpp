@@ -15,7 +15,7 @@ using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-using FES = VectorP1<Mesh<Context::Sequential>>;
+using FES = VectorP1<Mesh<Context::Local>>;
 
 // Define boundary attributes
 static constexpr Geometry::Attribute Gamma0 = 1; // Traction free boundary
@@ -92,10 +92,15 @@ int main(int, char**)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(BoundaryNormal(Omega), w)).over(Gamma0)
             + DirichletBC(g, VectorFunction{0, 0}).on({GammaD, GammaN});
     Solver::SparseLU(hilbert).solve();
+
+
+    g.getSolution().save("Theta.gf");
+    Omega.save("Theta.mesh");
+
     const auto& dJ = g.getSolution();
 
     // Update objective
-    const Real objective = compliance(u.getSolution()) + ell * Omega.getVolume();
+    const Real objective = compliance(u.getSolution()) + ell * Omega.getArea();
     Alert::Info() << "   | Objective: " << objective << Alert::Raise;
 
     // Make the displacement

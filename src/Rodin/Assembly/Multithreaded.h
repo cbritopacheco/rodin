@@ -155,8 +155,10 @@ namespace Rodin::Assembly
           auto loop =
             [&](const Index start, const Index end)
             {
-              tl_lbfi.reset(bfi.copy());
-              tl_triplets.reserve(capacity / threadCount);
+              OperatorType triplets;
+              std::unique_ptr<LocalBilinearFormIntegratorBaseType>  lbfi;
+              lbfi.reset(bfi.copy());
+              triplets.reserve(capacity / threadCount);
               for (Index i = start; i < end; ++i)
               {
                 if (seq.filter(i))
@@ -164,16 +166,16 @@ namespace Rodin::Assembly
                   if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
-                    tl_lbfi->setPolytope(*it);
+                    lbfi->setPolytope(*it);
                     const auto& rows = input.getTestFES().getDOFs(d, i);
                     const auto& cols = input.getTrialFES().getDOFs(d, i);
                     for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
                     {
                       for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                       {
-                        const ScalarType s = tl_lbfi->integrate(m, l);
+                        const ScalarType s = lbfi->integrate(m, l);
                         if (s != ScalarType(0))
-                          tl_triplets.emplace_back(rows(l), cols(m), s);
+                          triplets.emplace_back(rows(l), cols(m), s);
                       }
                     }
                   }
@@ -181,10 +183,10 @@ namespace Rodin::Assembly
               }
               m_mutex.lock();
               res.insert(res.end(),
-                  std::make_move_iterator(tl_triplets.begin()),
-                  std::make_move_iterator(tl_triplets.end()));
+                  std::make_move_iterator(triplets.begin()),
+                  std::make_move_iterator(triplets.end()));
               m_mutex.unlock();
-              tl_triplets.clear();
+              triplets.clear();
             };
 
           if (std::holds_alternative<Threads::ThreadPool>(m_pool))
@@ -209,8 +211,10 @@ namespace Rodin::Assembly
           auto loop =
             [&](const Index start, const Index end)
             {
-              tl_gbfi.reset(bfi.copy());
-              tl_triplets.reserve(capacity / threadCount);
+              OperatorType triplets;
+              std::unique_ptr<GlobalBilinearFormIntegratorBaseType> gbfi;
+              gbfi.reset(bfi.copy());
+              triplets.reserve(capacity / threadCount);
               for (Index i = start; i < end; ++i)
               {
                 if (testseq.filter(i))
@@ -218,21 +222,21 @@ namespace Rodin::Assembly
                   if (testAttrs.size() == 0 || testAttrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto teIt = testseq.getIterator(i);
-                    Internal::SequentialIteration trialseq{ mesh, tl_gbfi->getTrialRegion() };
+                    Internal::SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
                     for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                     {
                       if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                       {
-                        tl_gbfi->setPolytope(*trIt, *teIt);
-                        const auto& rows = input.getTestFES().getDOFs(d, i);
-                        const auto& cols = input.getTrialFES().getDOFs(d, i);
+                        gbfi->setPolytope(*trIt, *teIt);
+                        const auto& rows = input.getTestFES().getDOFs(d, teIt->getIndex());
+                        const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
                         for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
                         {
                           for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                           {
-                            const ScalarType s = tl_gbfi->integrate(m, l);
+                            const ScalarType s = gbfi->integrate(m, l);
                             if (s != ScalarType(0))
-                              tl_triplets.emplace_back(rows(l), cols(m), s);
+                              triplets.emplace_back(rows(l), cols(m), s);
                           }
                         }
                       }
@@ -242,10 +246,10 @@ namespace Rodin::Assembly
               }
               m_mutex.lock();
               res.insert(res.end(),
-                  std::make_move_iterator(tl_triplets.begin()),
-                  std::make_move_iterator(tl_triplets.end()));
+                  std::make_move_iterator(triplets.begin()),
+                  std::make_move_iterator(triplets.end()));
               m_mutex.unlock();
-              tl_triplets.clear();
+              triplets.clear();
             };
 
           if (std::holds_alternative<Threads::ThreadPool>(m_pool))
@@ -278,72 +282,9 @@ namespace Rodin::Assembly
       }
 
     private:
-      static thread_local OperatorType tl_triplets;
-      static thread_local std::unique_ptr<LocalBilinearFormIntegratorBaseType>  tl_lbfi;
-      static thread_local std::unique_ptr<GlobalBilinearFormIntegratorBaseType> tl_gbfi;
-
       mutable Threads::Mutex m_mutex;
       mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
   };
-
-  template <class TrialFES, class TestFES>
-  thread_local
-  std::vector<
-    Eigen::Triplet<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>
-  Multithreaded<
-    std::vector<
-      Eigen::Triplet<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
-    Variational::BilinearForm<TrialFES, TestFES,
-      std::vector<
-        Eigen::Triplet<
-          typename FormLanguage::Dot<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>::tl_triplets;
-
-  template <class TrialFES, class TestFES>
-  thread_local
-  std::unique_ptr<
-    Variational::LocalBilinearFormIntegratorBase<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>
-  Multithreaded<
-    std::vector<
-      Eigen::Triplet<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
-    Variational::BilinearForm<TrialFES, TestFES,
-      std::vector<
-        Eigen::Triplet<
-          typename FormLanguage::Dot<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>::tl_lbfi;
-
-  template <class TrialFES, class TestFES>
-  thread_local
-  std::unique_ptr<
-    Variational::GlobalBilinearFormIntegratorBase<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>
-  Multithreaded<
-    std::vector<
-      Eigen::Triplet<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
-    Variational::BilinearForm<TrialFES, TestFES,
-      std::vector<Eigen::Triplet<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>::tl_gbfi;
 
   /**
    * @brief Multithreaded assembly of the Math::SparseMatrix associated to a
@@ -541,9 +482,11 @@ namespace Rodin::Assembly
           auto loop =
             [&](const Index start, const Index end)
             {
-              tl_lbfi.reset(bfi.copy());
-              tl_res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
-              tl_res.setZero();
+              OperatorType pres;
+              std::unique_ptr<LocalBilinearFormIntegratorBaseType> lbfi;
+              lbfi.reset(bfi.copy());
+              pres.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
+              pres.setZero();
               for (Index i = start; i < end; ++i)
               {
                 if (seq.filter(i))
@@ -551,17 +494,17 @@ namespace Rodin::Assembly
                   if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto it = seq.getIterator(i);
-                    tl_lbfi->setPolytope(*it);
+                    lbfi->setPolytope(*it);
                     const auto& rows = input.getTestFES().getDOFs(d, i);
                     const auto& cols = input.getTrialFES().getDOFs(d, i);
                     for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
                       for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
-                        tl_res(rows(l), cols(m)) += tl_lbfi->integrate(m, l);
+                        pres(rows(l), cols(m)) += lbfi->integrate(m, l);
                   }
                 }
               }
               m_mutex.lock();
-              res += tl_res;
+              res += pres;
               m_mutex.unlock();
             };
 
@@ -587,7 +530,9 @@ namespace Rodin::Assembly
           const auto loop =
             [&](const Index start, const Index end)
             {
-              tl_gbfi.reset(bfi.copy());
+              OperatorType tl_res;
+              std::unique_ptr<GlobalBilinearFormIntegratorBaseType> gbfi;
+              gbfi.reset(bfi.copy());
               tl_res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
               tl_res.setZero();
               for (Index i = start; i < end; ++i)
@@ -597,17 +542,17 @@ namespace Rodin::Assembly
                   if (testAttrs.size() == 0 || testAttrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto teIt = testseq.getIterator(i);
-                    Internal::SequentialIteration trialseq{ mesh, tl_gbfi->getTrialRegion() };
+                    Internal::SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
                     for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                     {
                       if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                       {
-                        tl_gbfi->setPolytope(*trIt, *teIt);
-                        const auto& rows = input.getTestFES().getDOFs(d, i);
-                        const auto& cols = input.getTrialFES().getDOFs(d, i);
+                        gbfi->setPolytope(*trIt, *teIt);
+                        const auto& rows = input.getTestFES().getDOFs(d, teIt->getIndex());
+                        const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
                         for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
                           for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
-                            tl_res(rows(l), cols(m)) += tl_gbfi->integrate(m, l);
+                            tl_res(rows(l), cols(m)) += gbfi->integrate(m, l);
                       }
                     }
                   }
@@ -648,66 +593,9 @@ namespace Rodin::Assembly
       }
 
     private:
-      static thread_local OperatorType tl_res;
-      static thread_local std::unique_ptr<LocalBilinearFormIntegratorBaseType> tl_lbfi;
-      static thread_local std::unique_ptr<GlobalBilinearFormIntegratorBaseType> tl_gbfi;
-
       mutable Threads::Mutex m_mutex;
       mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
   };
-
-  template <class TrialFES, class TestFES>
-  thread_local
-  Math::Matrix<
-    typename FormLanguage::Dot<
-      typename FormLanguage::Traits<TrialFES>::ScalarType,
-      typename FormLanguage::Traits<TestFES>::ScalarType>::Type>
-  Multithreaded<
-   Math::Matrix<
-    typename FormLanguage::Dot<
-      typename FormLanguage::Traits<TrialFES>::ScalarType,
-      typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-    Variational::BilinearForm<TrialFES, TestFES,
-      Math::Matrix<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>::tl_res;
-
-  template <class TrialFES, class TestFES>
-  thread_local
-  std::unique_ptr<
-    Variational::LocalBilinearFormIntegratorBase<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>
-  Multithreaded<
-    Math::Matrix<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-    Variational::BilinearForm<TrialFES, TestFES,
-      Math::Matrix<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>::tl_lbfi;
-
-  template <class TrialFES, class TestFES>
-  thread_local
-  std::unique_ptr<
-    Variational::GlobalBilinearFormIntegratorBase<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>
-  Multithreaded<
-    Math::Matrix<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-    Variational::BilinearForm<TrialFES, TestFES,
-      Math::Matrix<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>::tl_gbfi;
 
   /**
    * @brief %Multithreaded assembly of the Math::Vector associated to a
@@ -791,6 +679,8 @@ namespace Rodin::Assembly
           const auto loop =
             [&](const Index start, const Index end)
             {
+              VectorType tl_res;
+              std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>> tl_lfi;
               tl_lfi.reset(lfi.copy());
               tl_res.resize(input.getFES().getSize());
               tl_res.setZero();
@@ -843,28 +733,9 @@ namespace Rodin::Assembly
       }
 
     private:
-      static thread_local VectorType tl_res;
-      static thread_local std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>> tl_lfi;
-
       mutable Threads::Mutex m_mutex;
       mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
   };
-
-  template <class FES>
-  thread_local
-  Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>
-  Multithreaded<
-    Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>,
-    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
-  ::tl_res;
-
-  template <class FES>
-  thread_local
-  std::unique_ptr<Variational::LinearFormIntegratorBase<typename FormLanguage::Traits<FES>::ScalarType>>
-  Multithreaded<
-    Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>,
-    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
-  ::tl_lfi;
 }
 
 #endif

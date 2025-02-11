@@ -98,7 +98,6 @@ namespace Rodin::Assembly
         return res;
       }
 
-      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -215,7 +214,6 @@ namespace Rodin::Assembly
         return res;
       }
 
-      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -292,7 +290,6 @@ namespace Rodin::Assembly
         return res;
       }
 
-      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -415,7 +412,6 @@ namespace Rodin::Assembly
         return res;
       }
 
-      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -495,7 +491,6 @@ namespace Rodin::Assembly
         return res;
       }
 
-      inline
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -541,7 +536,6 @@ namespace Rodin::Assembly
           return res;
         }
 
-        inline
         Sequential* copy() const noexcept override
         {
           return new Sequential(*this);
@@ -585,7 +579,6 @@ namespace Rodin::Assembly
 
           const auto& t = input.getTuple();
 
-          // Compute each block of triplets
           auto vs = assembly.zip(t)
                             .map([](const auto& p) { return p.first().execute(p.second()); });
 
@@ -596,10 +589,10 @@ namespace Rodin::Assembly
               {
                 res.segment(offsets[i], v.size()) = v;
               });
+
           return res;
         }
 
-        inline
         Sequential* copy() const noexcept override
         {
           return new Sequential(*this);

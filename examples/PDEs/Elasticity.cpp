@@ -25,6 +25,9 @@ int main(int argc, char** argv)
   mesh.load(meshFile);
   mesh.getConnectivity().compute(1, 2);
 
+
+  // Load mesh
+
   // Functions
   size_t d = mesh.getSpaceDimension();
   P1 fes(mesh, d);

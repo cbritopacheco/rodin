@@ -9,6 +9,10 @@
 
 #include <string>
 #include <sstream>
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
+
 #include <iomanip>
 #include <type_traits>
 
@@ -123,7 +127,6 @@ namespace Rodin::Alert
        * messages.
        */
       template <class T>
-      inline
       std::enable_if_t<Internal::CanBeOutput<T>::Value, Message&>
       operator<<(const T& v) noexcept
       {
@@ -151,7 +154,6 @@ namespace Rodin::Alert
        *
        * This method will call @ref raise().
        */
-      inline
       void operator<<(const RaiseT&)
       {
         this->raise();
@@ -168,7 +170,6 @@ namespace Rodin::Alert
         m_os.get() << m_styled.rdbuf() << NewLine;
       }
 
-      inline
       void setOutputStream(std::ostream& os)
       {
         m_os = os;

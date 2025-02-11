@@ -40,30 +40,30 @@ namespace Rodin::Geometry
         Segment,
         Triangle,
         Quadrilateral,
-        Tetrahedron
+        Tetrahedron,
+        TriangularPrism
       };
 
       /**
        * @brief Iterable of possible polytope geometry types.
        */
-      static constexpr std::array Types
+      static constexpr std::array<Type, 6> Types
       {
         Type::Point,
         Type::Segment,
         Type::Triangle,
         Type::Quadrilateral,
-        Type::Tetrahedron
+        Type::Tetrahedron,
+        Type::TriangularPrism
       };
 
       static const Math::PointMatrix& getVertices(Polytope::Type g);
 
-      inline
       static auto getVertex(size_t i, Polytope::Type g)
       {
         return getVertices(g).col(i);
       }
 
-      inline
       constexpr
       static size_t getVertexCount(Polytope::Type g)
       {
@@ -78,12 +78,13 @@ namespace Rodin::Geometry
           case Type::Quadrilateral:
           case Type::Tetrahedron:
             return 4;
+          case Type::TriangularPrism:
+            return 6;
         }
         assert(false);
         return 0;
       }
 
-      inline
       constexpr
       static size_t getGeometryDimension(Polytope::Type g)
       {
@@ -97,13 +98,13 @@ namespace Rodin::Geometry
           case Type::Quadrilateral:
             return 2;
           case Type::Tetrahedron:
+          case Type::TriangularPrism:
             return 3;
         }
         assert(false);
         return 0;
       }
 
-      inline
       constexpr
       static bool isSimplex(Polytope::Type g)
       {
@@ -115,6 +116,7 @@ namespace Rodin::Geometry
           case Type::Tetrahedron:
             return true;
           case Type::Quadrilateral:
+          case Type::TriangularPrism:
             return false;
         }
         assert(false);
@@ -136,13 +138,11 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the index of the simplex in the mesh.
        */
-      inline
       Index getIndex() const
       {
         return m_index;
       }
 
-      inline
       size_t getDimension() const
       {
         return m_dimension;
@@ -151,7 +151,6 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the associated mesh to the simplex.
        */
-      inline
       const MeshBase& getMesh() const
       {
         return m_mesh.get();
@@ -194,6 +193,8 @@ namespace Rodin::Geometry
 
       bool isVertex() const;
 
+      Polytope& setAttribute();
+
     private:
       static const GeometryIndexed<Math::PointMatrix> s_vertices;
 
@@ -202,15 +203,7 @@ namespace Rodin::Geometry
       std::reference_wrapper<const MeshBase> m_mesh;
   };
 
-  inline
-  bool operator==(const Polytope& lhs, const Polytope& rhs)
-  {
-    bool res = true;
-    res = res && (&lhs.getMesh() == &rhs.getMesh());
-    res = res && (lhs.getDimension() == rhs.getDimension());
-    res = res && (lhs.getIndex() == rhs.getIndex());
-    return res;
-  }
+  bool operator==(const Polytope& lhs, const Polytope& rhs);
 
   bool operator<(const Polytope& lhs, const Polytope& rhs);
 
@@ -278,7 +271,6 @@ namespace Rodin::Geometry
       /**
        * @brief Acess the 1st-coordinate of the vertex.
        */
-      inline
       Real x() const
       {
         return operator()(0);
@@ -287,7 +279,6 @@ namespace Rodin::Geometry
       /**
        * @brief Acess the 2nd-coordinate of the vertex.
        */
-      inline
       Real y() const
       {
         return operator()(1);
@@ -296,7 +287,6 @@ namespace Rodin::Geometry
       /**
        * @brief Acess the 3rd-coordinate of the vertex.
        */
-      inline
       Real z() const
       {
         return operator()(2);
@@ -305,7 +295,6 @@ namespace Rodin::Geometry
       /**
        * @brief Acess the ith-coordinate of the vertex.
        */
-      inline
       Real operator()(size_t i) const
       {
         return getCoordinates()(i);
@@ -313,13 +302,14 @@ namespace Rodin::Geometry
 
       Eigen::Map<const Math::SpatialVector<Real>> getCoordinates() const;
 
-      inline
       constexpr
       Type getGeometry() const
       {
         return Type::Point;
       }
   };
+
+  std::ostream& operator<<(std::ostream& os, const Polytope::Type& p);
 }
 
 #endif

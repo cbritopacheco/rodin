@@ -13,7 +13,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-namespace RodinBenchmark
+namespace Rodin::Tests::Benchmarks
 {
   struct MeshIO : public benchmark::Fixture
   {
