@@ -39,7 +39,7 @@ const Real k = 1;
 const Real dt = k * (hmax - hmin);
 static double alpha = dt;
 
-using FES = VectorP1<Mesh<Context::Sequential>>;
+using FES = VectorP1<Mesh<Context::Local>>;
 
 // Compliance
 inline Real compliance(const GridFunction<FES>& w)
@@ -54,17 +54,11 @@ inline Real compliance(const GridFunction<FES>& w)
 
 int main(int, char**)
 {
-  const char* meshFile = "step.0.mesh";
+  const char* meshFile = "step.0.o.mesh";
 
   // Load mesh
   MMG::Mesh th;
   th.load(meshFile, IO::FileFormat::MEDIT);
-
-  MMG::Optimizer().setHMax(hmax)
-                  .setHMin(hmin)
-                  .setHausdorff(hausd)
-                  .setAngleDetection(false)
-                  .optimize(th);
 
   th.save("Omega0.mesh");
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
@@ -74,12 +68,21 @@ int main(int, char**)
   std::ofstream fObj("obj.txt");
   for (size_t i = 0; i < maxIt; i++)
   {
-    th.getConnectivity().compute(th.getDimension() - 1, th.getDimension());
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
+
+    Alert::Info() << "Optimizing the domain..." << Alert::Raise;
+    MMG::Optimizer().setHMax(hmax)
+                    .setHMin(hmin)
+                    .setHausdorff(hausd)
+                    .setGradation(1.2)
+                    .setAngleDetection(false)
+                    .optimize(th);
+
+    th.getConnectivity().compute(th.getDimension() - 1, th.getDimension());
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = th.trim(Exterior);
-    trimmed.save("Omega.mesh");
+    trimmed.save("Omega.mesh", IO::FileFormat::MEDIT);
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
     const size_t d = th.getSpaceDimension();
@@ -101,7 +104,7 @@ int main(int, char**)
     // Elasticity equation
     Problem elasticity(u, v);
     elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-               - FaceIntegral(f, v).over(GammaN)
+               - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0, 0}).on(GammaD);
     Solver::CG(elasticity).solve();
 
@@ -148,15 +151,12 @@ int main(int, char**)
                                     .setRMC(1e-5)
                                     .setHMax(hmax)
                                     .setHMin(hmin)
+                                    .setGradation(1.2)
+                                    .setHausdorff(hausd)
                                     .setAngleDetection(false)
                                     .setBoundaryReference(Gamma)
                                     .setBaseReferences(GammaD)
                                     .discretize(dist);
-
-    MMG::Optimizer().setHMax(hmax)
-                    .setHMin(hmin)
-                    .setAngleDetection(false)
-                    .optimize(th);
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

@@ -69,7 +69,7 @@ namespace Rodin::Geometry
    * if (mesh.isSubMesh())
    * {
    *   // Cast is well defined
-   *   auto& submesh = static_cast<SubMesh<Context::Sequential>&>(mesh);
+   *   auto& submesh = static_cast<SubMesh<Context::Local>&>(mesh);
    * }
    * @endcode
    *
@@ -85,14 +85,14 @@ namespace Rodin::Geometry
    *
    */
   template <>
-  class SubMesh<Context::Sequential> final : public SubMeshBase, public Mesh<Context::Sequential>
+  class SubMesh<Context::Local> final : public SubMeshBase, public Mesh<Context::Local>
   {
     public:
-      using Parent = Mesh<Rodin::Context::Sequential>;
+      using Parent = Mesh<Rodin::Context::Local>;
       using Context = typename Parent::Context;
 
       /**
-       * @brief Class used to build SubMesh<Context::Sequential> instances.
+       * @brief Class used to build SubMesh<Context::Local> instances.
        */
       class Builder
       {

@@ -142,7 +142,7 @@ namespace Rodin::External::MMG
          * @param[in] box Bounding box @f$ D @f$ containing @f$ \Omega @f$.
          * @returns Signed distance function representing @f$ \Omega @f$.
          */
-        RealGridFunction distance(const Geometry::Mesh<Context::Sequential>& box)
+        RealGridFunction distance(const Geometry::Mesh<Context::Local>& box)
         {
           if (box != m_fes.get().getMesh())
           {
@@ -226,8 +226,8 @@ namespace Rodin::External::MMG
          * case only the edge (S) or triangle (3D) information will be retained.
          */
         RealGridFunction distance(
-            const Geometry::Mesh<Context::Sequential>& box,
-            const Geometry::Mesh<Context::Sequential>& contour)
+            const Geometry::Mesh<Context::Local>& box,
+            const Geometry::Mesh<Context::Local>& contour)
         {
           auto boxp = m_mshdist.tmpnam(".mesh", "RodinMMG");
           box.save(boxp);

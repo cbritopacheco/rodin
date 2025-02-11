@@ -7,10 +7,12 @@
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <RodinExternal/MMG.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+using namespace Rodin::External;
 
 inline
 Real K(const Point& x, const Point& y)
@@ -21,60 +23,156 @@ Real K(const Point& x, const Point& y)
 inline
 Real exact(const Point& x)
 {
-  if (abs(1 - x.squaredNorm()) < 0.00001)
-    return 4. / (M_PI * std::sqrt(abs(0.00001)));
-  else
-    return 4. / (M_PI * std::sqrt(abs(1 - x.squaredNorm())));
+  return 4. / (M_PI * std::sqrt(abs(1 - x.squaredNorm())));
 }
 
 int main(int, char**)
 {
-  Mesh mesh;
-  mesh.load("D1.o.mesh", IO::FileFormat::MEDIT);
-  // mesh.load("miaow.medit.o.mesh", IO::FileFormat::MEDIT);
-  mesh.getConnectivity().compute(1, 2);
+  Eigen::initParallel();
+  Eigen::setNbThreads(8);
+  Threads::getGlobalThreadPool().reset(8);
+  MMG::Mesh mesh;
+  mesh.load("D1.mesh");
 
-  P1 fes(mesh);
-  TrialFunction u(fes);
-  TestFunction  v(fes);
+  mesh.getConnectivity().compute(1, 0);
 
-  DenseProblem eq(u, v);
-  eq = Integral(0.001 * Grad(u), Grad(v))
-     + Integral(Potential(K, u), v)
-     - Integral(v)
-     ;
+  Real max = -1;
+  Real length = 0;
+  for (auto it = mesh.getFace(); it; ++it)
+  {
+    length += it->getMeasure();
+    if (it->getMeasure() > max)
+      max = it->getMeasure();
+  }
+  Alert::Info() << "Length: " << length / mesh.getFaceCount() << Alert::NewLine << Alert::Raise;
+  std::cout << max << std::endl;
 
-  std::cout << "assemblage\n";
-  eq.assemble();
 
-  std::cout << "save\n";
-  std::ofstream file("matrix.csv");
-  file << eq.getStiffnessOperator().format(
-      Eigen::IOFormat(Eigen::StreamPrecision, 0, ", ", "\n"));
-  file.close();
 
-  std::cout << "resolution\n";
-  Solver::LDLT(eq).solve();
+  std::exit(1);
 
-  u.getSolution().save("u.gf");
-  mesh.save("u.mesh");
 
-  std::cout << "average:\n";
-  u.getSolution().setWeights();
-  std::cout << Integral(u.getSolution()) << std::endl;
+  std::ofstream data("data.txt");
+  data << "eps,hmax,avg,err\n";
+  Real eps0 = 1e-5, eps1 = 0.1;
+  Real hmax0 = 0.1, hmax1 = 1;
+  size_t n = 50;
+  for (double eps = eps0; eps < eps1; eps += (eps1 - eps0) / n)
+  {
+    for (double hmax = hmax0; hmax < hmax1; hmax += (hmax1 - hmax0) / n)
+    {
+      Alert::Info() << "eps: " << eps << Alert::NewLine
+                    << "hmax: " << hmax << Alert::Raise;
 
-  GridFunction one(fes);
-  one = RealFunction(1);
+      Alert::Info() << "Optimizing." << Alert::Raise;
 
-  std::cout << "phi\n";
-  GridFunction phi(fes);
-  phi = Potential(K, u.getSolution());
-  phi.save("phi.gf");
+      double hmin = hmax / 10;
+      MMG::Optimizer().setHMax(hmax)
+                      .setHMin(hmin)
+                      .setHausdorff(hmax / 20)
+                      .optimize(mesh);
 
-  std::cout << "potential\n";
-  phi.setWeights();
-  one.setWeights();
-  std::cout << Integral(phi).compute() / Integral(one) << std::endl;
+      Alert::Info() << "Connectivity." << Alert::Raise;
+      mesh.getConnectivity().compute(1, 2);
+
+      P1 fes(mesh);
+      TrialFunction u(fes);
+      TestFunction  v(fes);
+
+      Problem eq(u, v);
+      eq = Integral(0.0001 * Grad(u), Grad(v))
+         + Integral(Potential(K, u), v)
+         - Integral(v)
+         ;
+      Alert::Info() << "Assembling." << Alert::Raise;
+      eq.assemble();
+
+      Alert::Info() << "Solving." << Alert::Raise;
+      Solver::CG(eq).solve();
+
+      mesh.save("u.mesh");
+      u.getSolution().save("u.gf");
+
+
+      GridFunction trunc(fes);
+      trunc = [&](const Point& p)
+      {
+        if (p.norm() < 0.8)
+          return u.getSolution()(p);
+        else
+          return 0.0;
+      };
+
+      double max = trunc.max();
+
+      trunc = [&](const Point& p)
+      {
+        if (p.norm() < 0.8)
+          return u.getSolution()(p);
+        else
+          return max;
+      };
+
+      trunc.save("trunc.gf");
+      mesh.save("trunc.mesh");
+
+      GridFunction uEx(fes);
+      uEx = [&](const Point& p)
+      {
+        if (p.norm() < 0.8)
+          return exact(p);
+        else
+          return 0.0;
+      };
+
+      uEx = trunc.max();
+
+      uEx = [&](const Point& p)
+      {
+        if (p.norm() < 0.8)
+          return exact(p);
+        else
+          return max;
+      };
+      uEx.save("uEx.gf");
+      mesh.save("uEx.mesh");
+      std::exit(1);
+
+      u.getSolution().setWeights();
+
+      Alert::Info() << "Getting data." << Alert::Raise;
+
+      GridFunction one(fes);
+      one = RealFunction(1);
+      one.setWeights();
+
+      GridFunction phi(fes);
+      phi = Potential(K, u.getSolution());
+      phi.setWeights();
+
+      GridFunction resError(fes);
+      resError = Pow(one - phi, 2);
+      resError.setWeights();
+
+
+      GridFunction err(fes);
+      err = [&](const Point& p)
+      {
+        if (p.norm() < 0.9)
+          return pow(u.getSolution()(p) - exact(p), 2);
+        else
+          return 0.0;
+      };
+      err.setWeights();
+
+      const Real Aerr = pow(Integral(u.getSolution()) - 8, 2);
+      const Real Rerr = Integral(resError);
+      const Real Eerr = Integral(err);
+
+      data << eps << "," << hmax << "," << Aerr << "," << Rerr << "," << Eerr << '\n';
+      data.flush();
+    }
+  }
 
   return 0;
 }

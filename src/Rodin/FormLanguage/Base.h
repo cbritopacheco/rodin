@@ -80,7 +80,6 @@ namespace Rodin::FormLanguage
       /**
        * @brief Gets the unique identifier associated to the instance.
        */
-      inline
       const UUID& getUUID() const
       {
         return m_uuid;
@@ -99,7 +98,6 @@ namespace Rodin::FormLanguage
        */
       template <class T, typename =
         std::enable_if_t<FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value>>
-      inline
       constexpr
       const T& object(T&& obj) const noexcept
       {
@@ -111,7 +109,7 @@ namespace Rodin::FormLanguage
         {
           using R = typename std::remove_reference_t<T>;
           const R* res = new R(std::forward<T>(obj));
-          m_objs.write([&](auto& obj){ obj.emplace_back(res); });;
+          m_objs.write([&](auto& obj){ obj.emplace_back(res); });
           return *res;
         }
       }
@@ -121,7 +119,6 @@ namespace Rodin::FormLanguage
        */
       template <class T, typename =
         std::enable_if_t<!FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value>>
-      inline
       constexpr
       T object(T&& obj) const noexcept
       {

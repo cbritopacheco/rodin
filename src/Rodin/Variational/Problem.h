@@ -145,7 +145,7 @@ namespace Rodin::Variational
 
       using ScalarType = OperatorScalarType;
 
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       using OperatorType = Math::SparseMatrix<OperatorScalarType>;
 
@@ -285,7 +285,7 @@ namespace Rodin::Variational
               std::vector<IndexMap<OperatorScalarType>> childrenLookup(children.size());
               for (size_t col = 0; col < static_cast<size_t>(m_stiffness.cols()); col++)
               {
-                bool parentFound = false;
+                Boolean parentFound = false;
                 size_t childrenFound = 0;
                 for (typename OperatorType::InnerIterator it(m_stiffness, col); it; ++it)
                 {
@@ -366,18 +366,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      const LinearForm<TestFES, VectorType>& getLinearForm() const
-      {
-        return m_linearForm;
-      }
-
       Problem& assemble() override
       {
-        auto& trial = getTrialFunction();
-
-        // Emplace data
-        trial.emplace();
-
         // Assemble both sides
         m_linearForm.assemble();
         m_mass = std::move(m_linearForm.getVector());
@@ -392,6 +382,7 @@ namespace Rodin::Variational
         }
 
         // Impose Dirichlet boundary conditions
+        auto& trial = getTrialFunction();
         const auto& trialFES = trial.getFiniteElementSpace();
         const auto& test = getTestFunction();
         const auto& testFES = test.getFiniteElementSpace();
@@ -427,11 +418,14 @@ namespace Rodin::Variational
          solver.solve(m_stiffness, m_guess, m_mass);
 
          // Recover solution
-         getTrialFunction().getSolution().setWeights(std::move(m_guess));
+         getTrialFunction().emplace().getSolution().setWeights(std::move(m_guess));
       }
 
       Problem& operator=(const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) override
       {
+        m_bilinearForm.clear();
+        m_linearForm.clear();
+
         for (auto& bfi : rhs.getLocalBFIs())
           m_bilinearForm.add(bfi);
 
@@ -445,6 +439,8 @@ namespace Rodin::Variational
 
         m_dbcs = rhs.getDBCs();
         m_pbcs = rhs.getPBCs();
+
+        m_assembled = false;
 
         return *this;
       }
@@ -487,7 +483,7 @@ namespace Rodin::Variational
       EssentialBoundary<ScalarType> m_dbcs;
       PeriodicBoundary<ScalarType>  m_pbcs;
 
-      bool            m_assembled;
+      Boolean         m_assembled;
       VectorType      m_mass;
       VectorType      m_guess;
       OperatorType    m_stiffness;
@@ -512,7 +508,7 @@ namespace Rodin::Variational
     template <class T>
     struct IsTrialOrTestFunction
     {
-      static constexpr bool Value = IsTrialFunction<T>::Value || IsTestFunction<T>::Value;
+      static constexpr Boolean Value = IsTrialFunction<T>::Value || IsTestFunction<T>::Value;
     };
 
     static_assert(Utility::ParameterPack<U1, U2, Us...>::template All<IsTrialOrTestFunction>::Value);
@@ -520,7 +516,7 @@ namespace Rodin::Variational
     public:
       using ScalarType = Real;
 
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
@@ -624,7 +620,8 @@ namespace Rodin::Variational
                           typename std::decay_t<
                           typename Utility::UnwrapRefDecay<decltype(uv.second())>::Type>::FES>(
                               uv.first().get(), uv.second().get());
-                      }))
+                      })),
+          m_assembled(false)
       {
         m_bfa.reset(new BilinearFormTupleSequentialAssembly);
         m_lfa.reset(new LinearFormTupleSequentialAssembly);
@@ -636,8 +633,6 @@ namespace Rodin::Variational
 
       Problem& assemble() override
       {
-        m_us.apply([](auto& u) { u.get().emplace(); });
-
         auto bt =
           m_bft.map(
               [](auto& bf)
@@ -729,7 +724,7 @@ namespace Rodin::Variational
         m_us.apply(
             [&](const auto& u)
             {
-              auto ui = m_trialUUIDMap.left.find(u.get().getUUID());
+              const auto ui = m_trialUUIDMap.left.find(u.get().getUUID());
               size_t offset = m_trialOffsets[ui->second];
               for (auto& dbc : m_dbcs)
               {
@@ -761,12 +756,15 @@ namespace Rodin::Variational
              [&](size_t i, auto& u)
              {
               const size_t n = u.get().getFiniteElementSpace().getSize();
-              u.get().getSolution().setWeights(m_guess.segment(m_trialOffsets[i], n));
+              u.get().emplace().getSolution().setWeights(m_guess.segment(m_trialOffsets[i], n));
              });
       }
 
       Problem& operator=(const ProblemBody<OperatorType, VectorType, Real>& rhs) override
       {
+        m_bft.apply([&](auto& bf) { bf.clear(); });
+        m_lft.apply([&](auto& lf) { lf.clear(); });
+
         for (auto& bfi : rhs.getLocalBFIs())
         {
           m_bft.apply(
@@ -806,6 +804,8 @@ namespace Rodin::Variational
         }
 
         m_dbcs = rhs.getDBCs();
+
+        m_assembled = false;
 
         return *this;
       }
@@ -857,7 +857,7 @@ namespace Rodin::Variational
 
       EssentialBoundary<ScalarType> m_dbcs;
 
-      bool            m_assembled;
+      Boolean         m_assembled;
       VectorType      m_mass;
       VectorType      m_guess;
       OperatorType    m_stiffness;

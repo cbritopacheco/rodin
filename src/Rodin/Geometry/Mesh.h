@@ -112,49 +112,41 @@ namespace Rodin::Geometry
         : m_components(std::move(dq))
       {}
 
-      inline
       const std::deque<Component>& getComponents() const
       {
         return m_components;
       }
 
-      inline
       auto begin()
       {
         return m_components.begin();
       }
 
-      inline
       auto end()
       {
         return m_components.end();
       }
 
-      inline
       auto begin() const
       {
         return m_components.begin();
       }
 
-      inline
       auto end() const
       {
         return m_components.end();
       }
 
-      inline
       auto cbegin() const
       {
         return m_components.cbegin();
       }
 
-      inline
       auto cend() const
       {
         return m_components.cend();
       }
 
-      inline
       size_t getCount() const
       {
         return m_components.size();
@@ -179,33 +171,28 @@ namespace Rodin::Geometry
     public:
       virtual ~MeshBase() = default;
 
-      inline
       constexpr
       bool operator==(const MeshBase& other) const
       {
         return this == &other;
       }
 
-      inline
       constexpr
       bool operator!=(const MeshBase& other) const
       {
         return this != &other;
       }
 
-      inline
       CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p) const
       {
         return ccl(p, getDimension());
       }
 
-      inline
       CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p, size_t d) const
       {
         return ccl(p, d, FlatSet<Attribute>{});
       }
 
-      inline
       CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
           size_t d, Attribute attr) const
       {
@@ -235,7 +222,6 @@ namespace Rodin::Geometry
        *
        * An empty mesh is defined as a mesh with no vertices.
        */
-      inline
       bool isEmpty() const
       {
         return getVertexCount() == 0;
@@ -297,7 +283,6 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the number of vertices in the mesh.
        */
-      inline
       size_t getVertexCount() const
       {
         return getPolytopeCount(0);
@@ -306,7 +291,6 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the number of faces in the mesh.
        */
-      inline
       size_t getFaceCount() const
       {
         return getPolytopeCount(getDimension() - 1);
@@ -315,19 +299,16 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the number of cells in the mesh.
        */
-      inline
       size_t getCellCount() const
       {
         return getPolytopeCount(getDimension());
       }
 
-      inline
       Attribute getFaceAttribute(Index index) const
       {
         return getAttribute(getDimension() - 1, index);
       }
 
-      inline
       Attribute getCellAttribute(Index index) const
       {
         return getAttribute(getDimension(), index);
@@ -511,8 +492,8 @@ namespace Rodin::Geometry
       virtual const Context::Base& getContext() const = 0;
   };
 
-  /// Type alias for Mesh<Context::Sequential>
-  using SequentialMesh = Mesh<Context::Sequential>;
+  /// Type alias for Mesh<Context::Local>
+  using LocalMesh = Mesh<Context::Local>;
 
   /// Index containing the indices of boundary cells.
   using BoundaryIndex = IndexSet;
@@ -531,14 +512,14 @@ namespace Rodin::Geometry
    * different geometries.
    */
   template <>
-  class Mesh<Context::Sequential> : public MeshBase
+  class Mesh<Context::Local> : public MeshBase
   {
     public:
       using Parent = MeshBase;
-      using Context = Context::Sequential;
+      using Context = Context::Local;
 
       /**
-       * @brief Class used to build Mesh<Context::Sequential> instances.
+       * @brief Class used to build Mesh<Context::Local> instances.
        */
       class Builder
       {
@@ -592,7 +573,6 @@ namespace Rodin::Geometry
            * @note This method requires nodes(size_t) to be called beforehand.
            */
           template <size_t Size>
-          inline
           Builder& vertex(const Real (&data)[Size])
           {
             assert(Size == m_sdim);
@@ -658,26 +638,50 @@ namespace Rodin::Geometry
            */
           Builder& polytope(Polytope::Type t, IndexArray&& vs);
 
+          template <class T>
+          Builder& segment(T&& vs)
+          {
+            return polytope(Polytope::Type::Segment, std::forward<T>(vs));
+          }
+
+          template <class T>
+          Builder& quadrilateral(T&& vs)
+          {
+            return polytope(Polytope::Type::Quadrilateral, std::forward<T>(vs));
+          }
+
+          template <class T>
+          Builder& triangle(T&& vs)
+          {
+            return polytope(Polytope::Type::Triangle, std::forward<T>(vs));
+          }
+
+          template <class T>
+          Builder& tetrahedron(T&& vs)
+          {
+            return polytope(Polytope::Type::Tetrahedron, std::forward<T>(vs));
+          }
+
           /**
-           * @brief Finalizes construction of the Mesh<Context::Sequential> object.
+           * @brief Finalizes construction of the Mesh<Context::Local> object.
            */
           Mesh finalize();
 
-          Builder& setVertices(Math::Matrix<Real>&& connectivity);
+          Builder& setVertices(const Math::PointMatrix& vertices);
+
+          Builder& setVertices(Math::PointMatrix&& vertices);
 
           Builder& setConnectivity(Connectivity<Context>&& connectivity);
 
-          Builder& setAttributeIndex(AttributeIndex&& connectivity);
+          Builder& setAttributeIndex(AttributeIndex&& attrIndex);
 
-          Builder& setTransformationIndex(TransformationIndex&& connectivity);
+          Builder& setTransformationIndex(TransformationIndex&& transIndex);
 
-          inline
           Connectivity<Context>& getConnectivity()
           {
             return m_connectivity;
           }
 
-          inline
           const Connectivity<Context>& getConnectivity() const
           {
             return m_connectivity;
@@ -699,13 +703,11 @@ namespace Rodin::Geometry
       /**
        * @brief Generates a Builder instance to build a Mesh object.
        */
-      inline
       static Builder Build()
       {
         return Builder();
       }
 
-      inline
       static Mesh UniformGrid(Polytope::Type g, std::initializer_list<size_t> l)
       {
         Array<size_t> shape(l.size());
@@ -852,19 +854,24 @@ namespace Rodin::Geometry
       */
       virtual SubMesh<Context> keep(const FlatSet<Attribute>& attrs) const;
 
-      inline
       Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap)
       {
         return trace(tmap, FlatSet<Attribute>{});
       }
 
-      inline
       Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, Attribute attr)
       {
         return trace(tmap, FlatSet<Attribute>{ attr });
       }
 
       virtual Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
+
+      Mesh& trace(const Map<Attribute, Attribute>& tmap)
+      {
+        return trace(tmap, FlatSet<Attribute>{});
+      }
+
+      virtual Mesh& trace(const Map<Attribute, Attribute>& tmap, const FlatSet<Attribute>& attrs);
 
       virtual std::optional<Point> inclusion(const Point& p) const override;
 
@@ -904,13 +911,11 @@ namespace Rodin::Geometry
         return m_transformationIndex;
       }
 
-      inline
       const Math::PointMatrix& getVertices() const
       {
         return m_vertices;
       }
 
-      inline
       const Context& getContext() const override
       {
         return m_context;

@@ -402,7 +402,14 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline BilinearForm* copy() const noexcept override
+      virtual BilinearForm& clear()
+      {
+        m_lbfis.clear();
+        m_gbfis.clear();
+        return *this;
+      }
+
+      BilinearForm* copy() const noexcept override
       {
         return new BilinearForm(*this);
       }

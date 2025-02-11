@@ -51,7 +51,7 @@ namespace Rodin::Variational
    * @see P0
    */
 
-  template <class Range, class Mesh = Geometry::Mesh<Context::Sequential>>
+  template <class Range, class Mesh = Geometry::Mesh<Context::Local>>
   class P0;
 
   /**
@@ -68,8 +68,8 @@ namespace Rodin::Variational
    * Rodin::Real type.
    */
   template <class Number>
-  class P0<Number, Geometry::Mesh<Context::Sequential>> final
-    : public FiniteElementSpace<P0<Number, Geometry::Mesh<Context::Sequential>>>
+  class P0<Number, Geometry::Mesh<Context::Local>> final
+    : public FiniteElementSpace<P0<Number, Geometry::Mesh<Context::Local>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -82,7 +82,7 @@ namespace Rodin::Variational
       using RangeType = ScalarType;
 
       /// Represents the Context of the P0 space
-      using ContextType = Context::Sequential;
+      using ContextType = Context::Local;
 
       /// Type of mesh on which the finite element space is built
       using MeshType = Geometry::Mesh<ContextType>;
@@ -305,7 +305,7 @@ namespace Rodin::Variational
 
   template <class ScalarType>
   const Geometry::GeometryIndexed<P0Element<ScalarType>>
-  P0<ScalarType, Geometry::Mesh<Context::Sequential>>::s_elements =
+  P0<ScalarType, Geometry::Mesh<Context::Local>>::s_elements =
   {
     { Geometry::Polytope::Type::Point, P0Element<ScalarType>(Geometry::Polytope::Type::Point) },
     { Geometry::Polytope::Type::Segment, P0Element<ScalarType>(Geometry::Polytope::Type::Segment) },

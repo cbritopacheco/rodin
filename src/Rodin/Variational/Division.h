@@ -95,7 +95,6 @@ namespace Rodin::Variational
         res /= getRHS().getValue(p);
       }
 
-      inline
       Division* copy() const noexcept final override
       {
         return new Division(*this);
@@ -110,7 +109,6 @@ namespace Rodin::Variational
     -> Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  inline
   auto
   operator/(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
@@ -120,7 +118,6 @@ namespace Rodin::Variational
   template <class LHSDerived, class Number,
     typename = std::enable_if_t<
       std::is_arithmetic_v<Number>, Division<LHSDerived, RealFunction<Number>>>>
-  inline
   auto
   operator/(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
@@ -130,7 +127,6 @@ namespace Rodin::Variational
   template <class Number, class RHSDerived,
     typename = std::enable_if_t<
       std::is_arithmetic_v<Number>, Division<RHSDerived, RealFunction<Number>>>>
-  inline
   auto
   operator/(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {

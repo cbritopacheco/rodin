@@ -4,14 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ALERT_NULLSTREAM_H
-#define RODIN_ALERT_NULLSTREAM_H
+#ifndef RODIN_GEOMETRY_EUCLIDEAN_H
+#define RODIN_GEOMETRY_EUCLIDEAN_H
 
-#include <iostream>
-
-namespace Rodin::IO
-{
-}
+#include "Euclidean/Common.h"
 
 #endif
 

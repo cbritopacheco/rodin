@@ -14,12 +14,10 @@
 
 #include <Eigen/UmfPackSupport>
 
-#include "Rodin/Configure.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
-#include "Solver.h"
 
 namespace Rodin::Solver
 {
@@ -68,6 +66,21 @@ namespace Rodin::Solver
       {
         m_solver.compute(A);
         x = m_solver.solve(b);
+      }
+
+      void printControl()
+      {
+        m_solver.printUmfpackControl();
+      }
+
+      void printInfo()
+      {
+        m_solver.printUmfpackInfo();
+      }
+
+      void printStatus()
+      {
+        m_solver.printUmfpackStatus();
       }
 
       UMFPack* copy() const noexcept override

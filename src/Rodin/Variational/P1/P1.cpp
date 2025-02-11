@@ -8,7 +8,7 @@
 
 namespace Rodin::Variational
 {
-  P1<Math::Vector<Real>, Geometry::Mesh<Context::Sequential>>
+  P1<Math::Vector<Real>, Geometry::Mesh<Context::Local>>
   ::P1(const MeshType& mesh, size_t vdim)
     : m_mesh(mesh), m_vdim(vdim)
   {
@@ -36,23 +36,25 @@ namespace Rodin::Variational
   }
 
   const Geometry::GeometryIndexed<P1Element<Real>>
-  P1<Real, Geometry::Mesh<Context::Sequential>>::s_elements =
+  P1<Real, Geometry::Mesh<Context::Local>>::s_elements =
   {
     { Geometry::Polytope::Type::Point, P1Element<Real>(Geometry::Polytope::Type::Point) },
     { Geometry::Polytope::Type::Segment, P1Element<Real>(Geometry::Polytope::Type::Segment) },
     { Geometry::Polytope::Type::Triangle, P1Element<Real>(Geometry::Polytope::Type::Triangle) },
     { Geometry::Polytope::Type::Quadrilateral, P1Element<Real>(Geometry::Polytope::Type::Quadrilateral) },
-    { Geometry::Polytope::Type::Tetrahedron, P1Element<Real>(Geometry::Polytope::Type::Tetrahedron) }
+    { Geometry::Polytope::Type::Tetrahedron, P1Element<Real>(Geometry::Polytope::Type::Tetrahedron) },
+    { Geometry::Polytope::Type::TriangularPrism, P1Element<Real>(Geometry::Polytope::Type::TriangularPrism) }
   };
 
   const Geometry::GeometryIndexed<P1Element<Complex>>
-  P1<Complex, Geometry::Mesh<Context::Sequential>>::s_elements =
+  P1<Complex, Geometry::Mesh<Context::Local>>::s_elements =
   {
     { Geometry::Polytope::Type::Point, P1Element<Complex>(Geometry::Polytope::Type::Point) },
     { Geometry::Polytope::Type::Segment, P1Element<Complex>(Geometry::Polytope::Type::Segment) },
     { Geometry::Polytope::Type::Triangle, P1Element<Complex>(Geometry::Polytope::Type::Triangle) },
     { Geometry::Polytope::Type::Quadrilateral, P1Element<Complex>(Geometry::Polytope::Type::Quadrilateral) },
-    { Geometry::Polytope::Type::Tetrahedron, P1Element<Complex>(Geometry::Polytope::Type::Tetrahedron) }
+    { Geometry::Polytope::Type::Tetrahedron, P1Element<Complex>(Geometry::Polytope::Type::Tetrahedron) },
+    { Geometry::Polytope::Type::TriangularPrism, P1Element<Complex>(Geometry::Polytope::Type::TriangularPrism) }
   };
 
   namespace Internal
@@ -69,7 +71,8 @@ namespace Rodin::Variational
           { Geometry::Polytope::Type::Segment, VectorP1Element(i, Geometry::Polytope::Type::Segment) },
           { Geometry::Polytope::Type::Triangle, VectorP1Element(i, Geometry::Polytope::Type::Triangle) },
           { Geometry::Polytope::Type::Quadrilateral, VectorP1Element(i, Geometry::Polytope::Type::Quadrilateral) },
-          { Geometry::Polytope::Type::Tetrahedron, VectorP1Element(i, Geometry::Polytope::Type::Tetrahedron) }
+          { Geometry::Polytope::Type::Tetrahedron, VectorP1Element(i, Geometry::Polytope::Type::Tetrahedron) },
+          { Geometry::Polytope::Type::TriangularPrism, VectorP1Element(i, Geometry::Polytope::Type::TriangularPrism) }
         };
       }
       return res;
@@ -77,5 +80,5 @@ namespace Rodin::Variational
   }
 
   const std::array<Geometry::GeometryIndexed<VectorP1Element>, RODIN_P1_MAX_VECTOR_DIMENSION>
-  P1<Math::Vector<Real>, Geometry::Mesh<Context::Sequential>>::s_elements = Internal::initVectorP1Elements();
+  P1<Math::Vector<Real>, Geometry::Mesh<Context::Local>>::s_elements = Internal::initVectorP1Elements();
 }

@@ -17,6 +17,7 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RealFunction.h"
+#include "ComplexFunction.h"
 #include "MatrixFunction.h"
 #include "ShapeFunction.h"
 
@@ -198,8 +199,8 @@ namespace Rodin::Variational
       constexpr
       Mult& traceOf(Geometry::Attribute attr)
       {
-        getLHS().traceOf(attr);
-        getRHS().traceOf(attr);
+        m_lhs->traceOf(attr);
+        m_rhs->traceOf(attr);
         return *this;
       }
 
@@ -283,20 +284,36 @@ namespace Rodin::Variational
     return Mult(lhs, rhs);
   }
 
-  template <class Number, class RHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  template <class RHSDerived>
   constexpr
   auto
-  operator*(Number lhs, const FunctionBase<RHSDerived>& rhs)
+  operator*(Real lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return Mult(RealFunction(lhs), rhs);
   }
 
-  template <class Number, class LHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  template <class RHSDerived>
   constexpr
   auto
-  operator*(const FunctionBase<LHSDerived>& lhs, Number rhs)
+  operator*(Complex lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return Mult(ComplexFunction(lhs), rhs);
+  }
+
+  template <class LHSDerived>
+  constexpr
+  auto
+  operator*(const FunctionBase<LHSDerived>& lhs, Real rhs)
   {
     return Mult(lhs, RealFunction(rhs));
+  }
+
+  template <class LHSDerived>
+  constexpr
+  auto
+  operator*(const FunctionBase<LHSDerived>& lhs, Complex rhs)
+  {
+    return Mult(lhs, ComplexFunction(rhs));
   }
 
   template <class LHSDerived>

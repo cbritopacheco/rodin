@@ -12,7 +12,7 @@
 	url = https://github.com/mosra/magnum-integration
 [submodule "third-party/m.css"]
 	path = third-party/m.css
-	url = https://github.com/cbritopacheco/m.css
+	url = https://github.com/mosra/m.css
 [submodule "third-party/Mshdist"]
 	path = third-party/ISCD/Mshdist
 	url = https://github.com/cbritopacheco/Mshdist
@@ -37,6 +37,3 @@
 [submodule "third-party/termcolor"]
 	path = third-party/termcolor
 	url = https://github.com/ikalnytskyi/termcolor
-[submodule "third-party/basix"]
-	path = third-party/basix
-	url = https://github.com/FEniCS/basix

@@ -14,11 +14,11 @@ namespace Rodin::External::MMG
   /**
    * @brief Mesh class which has support for MMG functionalities.
    */
-  class Mesh : public Geometry::Mesh<Context::Sequential>
+  class Mesh : public Geometry::Mesh<Context::Local>
   {
     public:
       /// Parent class
-      using Parent = Geometry::Mesh<Rodin::Context::Sequential>;
+      using Parent = Geometry::Mesh<Rodin::Context::Local>;
 
       using Context = typename Parent::Context;
 
@@ -93,7 +93,6 @@ namespace Rodin::External::MMG
       /**
        * @brief Generates a Builder instance to build an MMG::Mesh object.
        */
-      inline
       static MMG::Mesh::Builder Build()
       {
         return MMG::Mesh::Builder();

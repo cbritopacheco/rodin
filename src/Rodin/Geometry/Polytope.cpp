@@ -11,6 +11,44 @@
 
 namespace Rodin::Geometry
 {
+  std::ostream& operator<<(std::ostream& os, const Polytope::Type& p)
+  {
+    switch (p)
+    {
+      case Polytope::Type::Point:
+      {
+        os << "Point";
+        break;
+      }
+      case Polytope::Type::Segment:
+      {
+        os << "Segment";
+        break;
+      }
+      case Polytope::Type::Triangle:
+      {
+        os << "Triangle";
+        break;
+      }
+      case Polytope::Type::Quadrilateral:
+      {
+        os << "Quadrilateral";
+        break;
+      }
+      case Polytope::Type::Tetrahedron:
+      {
+        os << "Tetrahedron";
+        break;
+      }
+      case Polytope::Type::TriangularPrism:
+      {
+        os << "TriangularPrism";
+        break;
+      }
+    }
+    return os;
+  }
+
   const GeometryIndexed<Math::PointMatrix> Polytope::s_vertices =
   {
     { Polytope::Type::Point,
@@ -27,7 +65,20 @@ namespace Rodin::Geometry
       Math::PointMatrix{{0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} },
+    { Polytope::Type::TriangularPrism,
+      Math::PointMatrix{{0, 1, 0, 0, 1, 0},
+                        {0, 0, 1, 0, 0, 1},
+                        {0, 0, 0, 1, 1, 1}} },
   };
+
+  bool operator==(const Polytope& lhs, const Polytope& rhs)
+  {
+    bool res = true;
+    res = res && (&lhs.getMesh() == &rhs.getMesh());
+    res = res && (lhs.getDimension() == rhs.getDimension());
+    res = res && (lhs.getIndex() == rhs.getIndex());
+    return res;
+  }
 
   bool operator<(const Polytope& lhs, const Polytope& rhs)
   {
@@ -72,13 +123,7 @@ namespace Rodin::Geometry
     const auto& mesh = m_mesh.get();
     const auto& conn = mesh.getConnectivity();
     const auto& inc = conn.getIncidence(d, d);
-    if (inc.size() == 0)
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << Alert::Notation::Incidence(d, d)
-        << " has not been computed and is required to use this function."
-        << Alert::Raise;
-    }
+    RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d);
     const auto& adj = inc.at(getIndex());
     return PolytopeIterator(
         d, getMesh(), IteratorIndexGenerator(adj.begin(), adj.end()));

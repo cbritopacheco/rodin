@@ -30,9 +30,16 @@ namespace Rodin::External::MMG
     MMG5_pSol sol = nullptr;
     MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
        Alert::MemberFunctionException(*this, __func__) << "Could not allocate MMG5_Sol." << Alert::Raise);
-    if (!MMG3D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
-      Alert::MemberFunctionException(*this, __func__) << "Could not set solution size." << Alert::Raise;
+    sol->ver  = mesh->ver;
+    sol->size = 1;
+    sol->type = MMG5_Scalar;
+    sol->dim = mesh->dim;
+    sol->np  = 0;
+    sol->npi = 0;
+    sol->m = nullptr;
     MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_optim, 1);
+    MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_opnbdy, 1);
+    MMG3D_Set_handGivenMesh(mesh);
     const ReturnCode rc = MMG3D_mmg3dlib(mesh, sol);
     if (sol->m)
       MMG5_DEL_MEM(mesh, sol->m);

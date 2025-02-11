@@ -12,9 +12,15 @@
 namespace Rodin::Context
 {
   /**
-   * @brief Represents the native single-threaded sequential context.
+   * @brief Represents a single machine context.
+   *
+   * The Local context refers to an execution model where operations are
+   * confined to a single machine or node, utilizing shared memory without the
+   * need for distributed computing. While operating within a local scope, this
+   * context can leverage multithreading or parallelism, but it does not
+   * involve communication across multiple machines.
    */
-  class Sequential : public Base
+  class Local : public Base
   {};
 }
 

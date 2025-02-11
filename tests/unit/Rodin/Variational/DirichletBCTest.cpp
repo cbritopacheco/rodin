@@ -7,44 +7,47 @@ using namespace Rodin::IO;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-TEST(Rodin_Variational_Real_P1_SanityTest, TriangularUniformGrid2)
+namespace Rodin::Tests::Unit
 {
-  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-  const size_t D = mesh.getDimension();
+  TEST(Rodin_Variational_Real_P1_SanityTest, TriangularUniformGrid2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    const size_t D = mesh.getDimension();
 
-  mesh.getConnectivity().compute(D - 1, D);
+    mesh.getConnectivity().compute(D - 1, D);
 
-  P1 fes(mesh);
+    P1 fes(mesh);
 
-  TrialFunction u(fes);
-  u.emplace();
+    TrialFunction u(fes);
+    u.emplace();
 
-  RealFunction c = 1;
+    RealFunction c = 1;
 
-  DirichletBC dbc(u, c);
-  dbc.assemble();
+    DirichletBC dbc(u, c);
+    dbc.assemble();
 
-  EXPECT_EQ(dbc.getDOFs().size(), 4);
-}
+    EXPECT_EQ(dbc.getDOFs().size(), 4);
+  }
 
-TEST(Rodin_Variational_Real_P1_SanityTest, TriangularUniformGrid16)
-{
-  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  const size_t D = mesh.getDimension();
-  const Attribute attr = RODIN_DEFAULT_POLYTOPE_ATTRIBUTE;
+  TEST(Rodin_Variational_Real_P1_SanityTest, TriangularUniformGrid16)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+    const size_t D = mesh.getDimension();
+    const Attribute attr = RODIN_DEFAULT_POLYTOPE_ATTRIBUTE;
 
-  mesh.getConnectivity().compute(D - 1, D);
+    mesh.getConnectivity().compute(D - 1, D);
 
-  P1 fes(mesh);
+    P1 fes(mesh);
 
-  TrialFunction u(fes);
-  u.emplace();
+    TrialFunction u(fes);
+    u.emplace();
 
-  RealFunction c = 1;
+    RealFunction c = 1;
 
-  DirichletBC dbc(u, c);
-  dbc.on(attr);
-  dbc.assemble();
+    DirichletBC dbc(u, c);
+    dbc.on(attr);
+    dbc.assemble();
 
-  EXPECT_EQ(dbc.getDOFs().size(), 256);
+    EXPECT_EQ(dbc.getDOFs().size(), 256);
+  }
 }

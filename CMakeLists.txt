@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.16)
 
 cmake_policy(SET CMP0054 NEW)
+cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0076 NEW)
 
 # Prohibit in-source builds
@@ -11,31 +12,32 @@ endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 project(Rodin LANGUAGES CXX C)
 
 # ---- Options ---------------------------------------------------------------
-option(RODIN_BUILD_SRC              "Build the Rodin source code"               ON)
-option(RODIN_BUILD_EXAMPLES         "Build the Rodin examples"                  ON)
-option(RODIN_BUILD_UNIT_TESTS       "Build Rodin unit tests"                    OFF)
-option(RODIN_BUILD_BENCHMARKS       "Build Rodin benchmarks"                    OFF)
-option(RODIN_BUILD_DOC              "Build the Rodin documentation"             OFF)
-option(RODIN_WITH_PLOT              "Build the Rodin::Plot module"              OFF)
-option(RODIN_WITH_PY                "Build Python bindings"                     OFF)
-option(RODIN_USE_MCSS               "Build documentation with m.css"            OFF)
-option(RODIN_USE_MPI                "Use Rodin with MPI support"                OFF)
-option(RODIN_USE_OPENMP             "Use Rodin with OpenMP support"             OFF)
-option(RODIN_USE_UMFPACK            "Use Rodin with UMFPACK support"            OFF)
-option(RODIN_USE_PASTIX             "Use Rodin with PaStiX support"             OFF)
-option(RODIN_USE_KLU                "Use Rodin with KLU support"                OFF)
-option(RODIN_USE_SUPERLU            "Use Rodin with SuperLU support"            OFF)
-option(RODIN_USE_SPQR               "Use Rodin with SPQR support"               OFF)
-option(RODIN_USE_PARDISO            "Use Rodin with Pardiso support"            OFF)
-option(RODIN_USE_APPLE_ACCELERATE   "Use Rodin with Apple Accelerate support"   OFF)
-option(RODIN_SILENCE_WARNINGS       "Silence warnings outputted by Rodin"       OFF)
-option(RODIN_SILENCE_EXCEPTIONS     "Silence exceptions thrown by Rodin"        ON)
-option(RODIN_CODE_COVERAGE          "Compile with code coverage flags"          OFF)
-option(RODIN_LTO                    "Compile with link time optimization"       OFF)
-option(RODIN_FEATURE_SUMMARY        "Print Rodin feature summary"               ON)
-option(RODIN_THREAD_SAFE            "Enforces thread-safety."                   OFF)
-option(RODIN_MULTITHREADED          "Utilizes multithreading capabalities."     OFF)
-option(BUILD_SHARED_LIBS            "Build using shared libraries"              OFF)
+option(RODIN_BUILD_SRC                "Build the Rodin source code"               ON)
+option(RODIN_BUILD_EXAMPLES           "Build the Rodin examples"                  ON)
+option(RODIN_BUILD_UNIT_TESTS         "Build Rodin unit tests"                    OFF)
+option(RODIN_BUILD_MANUFACTURED_TESTS "Build Rodin manufactured solution tests"   OFF)
+option(RODIN_BUILD_BENCHMARKS         "Build Rodin benchmarks"                    OFF)
+option(RODIN_BUILD_DOC                "Build the Rodin documentation"             OFF)
+option(RODIN_WITH_PLOT                "Build the Rodin::Plot module"              OFF)
+option(RODIN_WITH_PY                  "Build Python bindings"                     OFF)
+option(RODIN_USE_MCSS                 "Build documentation with m.css"            OFF)
+option(RODIN_USE_MPI                  "Use Rodin with MPI support"                OFF)
+option(RODIN_USE_OPENMP               "Use Rodin with OpenMP support"             OFF)
+option(RODIN_USE_UMFPACK              "Use Rodin with UMFPACK support"            OFF)
+option(RODIN_USE_PASTIX               "Use Rodin with PaStiX support"             OFF)
+option(RODIN_USE_KLU                  "Use Rodin with KLU support"                OFF)
+option(RODIN_USE_SUPERLU              "Use Rodin with SuperLU support"            OFF)
+option(RODIN_USE_SPQR                 "Use Rodin with SPQR support"               OFF)
+option(RODIN_USE_PARDISO              "Use Rodin with Pardiso support"            OFF)
+option(RODIN_USE_APPLE_ACCELERATE     "Use Rodin with Apple Accelerate support"   OFF)
+option(RODIN_SILENCE_WARNINGS         "Silence warnings outputted by Rodin"       OFF)
+option(RODIN_SILENCE_EXCEPTIONS       "Silence exceptions thrown by Rodin"        ON)
+option(RODIN_CODE_COVERAGE            "Compile with code coverage flags"          OFF)
+option(RODIN_LTO                      "Compile with link time optimization"       OFF)
+option(RODIN_FEATURE_SUMMARY          "Print Rodin feature summary"               ON)
+option(RODIN_THREAD_SAFE              "Enforces thread-safety."                   OFF)
+option(RODIN_MULTITHREADED            "Utilizes multithreading capabalities."     ON)
+option(BUILD_SHARED_LIBS              "Build using shared libraries"              OFF)
 
 if (RODIN_MULTITHREADED)
   set(RODIN_THREAD_SAFE ON CACHE BOOL "" FORCE)
@@ -52,7 +54,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(RodinConfig)
 
 # ---- Configure compiler ----------------------
-if(CMAKE_BUILD_TYPE STREQUAL "")
+if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
@@ -84,9 +86,26 @@ if (RODIN_LTO)
 endif()
 
 if (RODIN_CODE_COVERAGE)
-  include(CodeCoverage)
-  append_coverage_compiler_flags()
-  rodin_add_compile_options(LANG CXX C -fprofile-abs-path)
+  add_link_options(--coverage)
+  add_compile_options(--coverage)
+  rodin_add_compile_options(LANG CXX C OPTIONS
+    -fprofile-update=atomic
+    -fprofile-arcs
+    -ftest-coverage)
+  find_program(LCOV lcov REQUIRED)
+  if(DEFINED ENV{GCOV} AND NOT "$ENV{GCOV}" STREQUAL "")
+    # Try finding the tool using the environment variable name
+    find_program(GCOV "$ENV{GCOV}" REQUIRED)
+  else()
+    find_program(GCOV gcov REQUIRED)
+  endif()
+  string(REPLACE " " ";" RODIN_LCOV_FLAGS_LIST "${RODIN_LCOV_FLAGS}")
+  add_custom_target(RodinCoverage
+    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST} --gcov-tool ${GCOV} --capture --directory src --directory tests --output-file RodinCoverage.base.info
+    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST} --gcov-tool ${GCOV} --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
+    COMMAND rm -f RodinCoverage.base.info
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  )
 endif()
 
 if (RODIN_BUILD_SRC)
@@ -134,9 +153,6 @@ if (RODIN_BUILD_SRC)
     "${PROJECT_BINARY_DIR}/third-party/eigen"
     "${PROJECT_BINARY_DIR}/third-party/eigen/cmake")
 
-  # ---- Basix ------
-  add_subdirectory(third-party/basix/cpp EXCLUDE_FROM_ALL)
-
   # ---- Spectra ----
   message(STATUS "Configuring Spectra...")
   set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -171,7 +187,8 @@ if (RODIN_BUILD_SRC)
     add_subdirectory(examples)
   endif()
 
-  if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_BENCHMARKS)
+  if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_BENCHMARKS OR
+      RODIN_BUILD_MANUFACTURED_TESTS)
     # ---- GoogleTest ----
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)

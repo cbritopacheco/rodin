@@ -15,7 +15,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::External;
 using namespace Rodin::Variational;
 
-using FES = VectorP1<Mesh<Context::Sequential>>;
+using FES = VectorP1<Mesh<Context::Local>>;
 
 // Define interior and exterior for level set discretization
 static constexpr Attribute Interior = 1, Exterior = 2;
@@ -57,7 +57,7 @@ int main(int, char**)
 
   MMG::Optimizer().setHMax(hmax).setHMin(hmin).optimize(th);
 
-  th.save("Omega0.mesh", IO::FileFormat::MEDIT);
+  th.save("Omega0.mesh");
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Optimization loop
@@ -93,6 +93,8 @@ int main(int, char**)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     Solver::CG(elasticity).solve();
 
+    trimmed.save("u.mesh");
+
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
     jac.traceOf(Interior);
@@ -100,6 +102,10 @@ int main(int, char**)
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = FaceNormal(th);
     n.traceOf(Interior);
+
+    GridFunction miaow(shInt);
+    miaow = Dot(Ae, e);
+    miaow.save("u.gf");
 
     // Hilbert extension-regularization procedure
     TrialFunction g(vh);
@@ -115,7 +121,7 @@ int main(int, char**)
     vh.getMesh().save("dJ.mesh");
 
     // Update objective
-    double objective = compliance(u.getSolution()) + ell * th.getVolume(Interior);
+    double objective = compliance(u.getSolution()) + ell * th.getArea(Interior);
     obj.push_back(objective);
     fObj << objective << "\n";
     fObj.flush();
@@ -153,6 +159,8 @@ int main(int, char**)
                     .setHausdorff(hausd)
                     .setAngleDetection(false)
                     .optimize(th);
+
+    th.save("out/Omega." + std::to_string(i) + ".mesh");
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

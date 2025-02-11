@@ -52,13 +52,11 @@ namespace Rodin::Variational
 
       virtual ~ComplexFunctionBase() = default;
 
-      inline
       const Derived& getDerived() const
       {
         return static_cast<const Derived&>(*this);
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -93,28 +91,25 @@ namespace Rodin::Variational
           m_x(other.m_x)
       {}
 
-      inline
       constexpr
       ComplexFunction& traceOf(Geometry::Attribute)
       {
         return *this;
       }
 
-      inline
       constexpr
       const Integer& getValue() const
       {
         return m_x;
       }
 
-      inline
       constexpr
       Complex getValue(const Geometry::Point&) const
       {
         return static_cast<Complex>(m_x);
       }
 
-      inline ComplexFunction* copy() const noexcept override
+      ComplexFunction* copy() const noexcept override
       {
         return new ComplexFunction(*this);
       }
@@ -150,28 +145,25 @@ namespace Rodin::Variational
           m_x(other.m_x)
       {}
 
-      inline
       constexpr
       ComplexFunction& traceOf(Geometry::Attribute)
       {
         return *this;
       }
 
-      inline
       constexpr
       const Real& getValue() const
       {
         return m_x;
       }
 
-      inline
       constexpr
       Complex getValue(const Geometry::Point&) const
       {
         return static_cast<Complex>(m_x);
       }
 
-      inline ComplexFunction* copy() const noexcept override
+      ComplexFunction* copy() const noexcept override
       {
         return new ComplexFunction(*this);
       }
@@ -211,28 +203,25 @@ namespace Rodin::Variational
           m_x(other.m_x)
       {}
 
-      inline
       constexpr
       ComplexFunction& traceOf(Geometry::Attribute)
       {
         return *this;
       }
 
-      inline
       constexpr
       const Complex& getValue() const
       {
         return m_x;
       }
 
-      inline
       constexpr
       Complex getValue(const Geometry::Point&) const
       {
         return m_x;
       }
 
-      inline ComplexFunction* copy() const noexcept override
+      ComplexFunction* copy() const noexcept override
       {
         return new ComplexFunction(*this);
       }
@@ -272,14 +261,12 @@ namespace Rodin::Variational
           m_nested(std::move(other.m_nested))
       {}
 
-      inline
       constexpr
       ScalarType getValue(const Geometry::Point& v) const
       {
         return m_nested->getValue(v);
       }
 
-      inline
       constexpr
       ComplexFunction& traceOf(Geometry::Attribute attrs)
       {
@@ -287,7 +274,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline ComplexFunction* copy() const noexcept override
+      ComplexFunction* copy() const noexcept override
       {
         return new ComplexFunction(*this);
       }
@@ -339,14 +326,12 @@ namespace Rodin::Variational
           m_re(std::move(m_re)), m_imag(std::move(m_imag))
       {}
 
-      inline
       constexpr
       Complex getValue(const Geometry::Point& p) const
       {
         return { m_re->getValue(p), m_imag->getValue(p) };
       }
 
-      inline
       constexpr
       ComplexFunction& traceOf(Geometry::Attribute attrs)
       {
@@ -355,7 +340,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline ComplexFunction* copy() const noexcept override
+      ComplexFunction* copy() const noexcept override
       {
         return new ComplexFunction(*this);
       }
@@ -398,21 +383,19 @@ namespace Rodin::Variational
           m_f(std::move(other.m_f))
       {}
 
-      inline
       constexpr
       ComplexFunction& traceOf(Geometry::Attribute)
       {
         return *this;
       }
 
-      inline
       constexpr
       Complex getValue(const Geometry::Point& v) const
       {
         return m_f(v);
       }
 
-      inline ComplexFunction* copy() const noexcept override
+      ComplexFunction* copy() const noexcept override
       {
         return new ComplexFunction(*this);
       }
@@ -452,7 +435,6 @@ namespace Rodin::Variational
           m_re(std::move(other.m_re)), m_imag(std::move(other.m_imag))
       {}
 
-      inline
       constexpr
       ComplexFunction& traceOf(Geometry::Attribute attr)
       {
@@ -461,7 +443,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       ComplexFunction& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -470,14 +451,13 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       Complex getValue(const Geometry::Point& p) const
       {
         return { m_re->getValue(p), m_imag->getValue(p) };
       }
 
-      inline ComplexFunction* copy() const noexcept override
+      ComplexFunction* copy() const noexcept override
       {
         return new ComplexFunction(*this);
       }

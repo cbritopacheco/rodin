@@ -276,6 +276,12 @@ namespace Rodin::Variational
         return new LinearForm(*this);
       }
 
+      virtual LinearForm& clear()
+      {
+        m_lfis.clear();
+        return *this;
+      }
+
     private:
       std::reference_wrapper<const TestFunction<FES>> m_v;
       std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearForm>> m_assembly;

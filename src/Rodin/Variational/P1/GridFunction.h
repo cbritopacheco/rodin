@@ -90,7 +90,6 @@ namespace Rodin::Variational
       /**
        * @brief Move assignment operator.
        */
-      inline
       constexpr
       GridFunction& operator=(GridFunction&& other)
       {
@@ -152,7 +151,7 @@ namespace Rodin::Variational
         else if constexpr (std::is_same_v<RangeType, Complex>)
         {
           assert(data.rows() == 1);
-          w = data.adjoint() / Complex(1, -1);
+          w = data.transpose() / Complex(1, 1);
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {

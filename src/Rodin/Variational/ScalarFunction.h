@@ -62,27 +62,23 @@ namespace Rodin::Variational
 
       virtual ~ScalarFunctionBase() = default;
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return { 1, 1 };
       }
 
-      inline
       const Derived& getDerived() const
       {
         return static_cast<const Derived&>(*this);
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      inline
       constexpr
       void getValue(ScalarType& res, const Geometry::Point& p) const
       {
@@ -130,28 +126,25 @@ namespace Rodin::Variational
           m_x(other.m_x)
       {}
 
-      inline
       constexpr
       ScalarFunction& traceOf(Geometry::Attribute)
       {
         return *this;
       }
 
-      inline
       constexpr
       const Real& getValue() const
       {
         return m_x;
       }
 
-      inline
       constexpr
       ScalarType getValue(const Geometry::Point&) const
       {
         return m_x;
       }
 
-      inline ScalarFunction* copy() const noexcept override
+      ScalarFunction* copy() const noexcept override
       {
         return new ScalarFunction(*this);
       }
@@ -196,28 +189,25 @@ namespace Rodin::Variational
           m_x(other.m_x)
       {}
 
-      inline
       constexpr
       ScalarFunction& traceOf(Geometry::Attribute)
       {
         return *this;
       }
 
-      inline
       constexpr
       const Complex& getValue() const
       {
         return m_x;
       }
 
-      inline
       constexpr
       ScalarType getValue(const Geometry::Point&) const
       {
         return m_x;
       }
 
-      inline ScalarFunction* copy() const noexcept override
+      ScalarFunction* copy() const noexcept override
       {
         return new ScalarFunction(*this);
       }
@@ -258,14 +248,12 @@ namespace Rodin::Variational
           m_nested(std::move(other.m_nested))
       {}
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& v) const
       {
         return m_nested->getValue(v);
       }
 
-      inline
       constexpr
       ScalarFunction& traceOf(Geometry::Attribute attrs)
       {
@@ -273,7 +261,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline ScalarFunction* copy() const noexcept override
+      ScalarFunction* copy() const noexcept override
       {
         return new ScalarFunction(*this);
       }
@@ -319,21 +307,19 @@ namespace Rodin::Variational
           m_f(std::move(other.m_f))
       {}
 
-      inline
       constexpr
       ScalarFunction& traceOf(Geometry::Attribute)
       {
         return *this;
       }
 
-      inline
       constexpr
       ScalarType getValue(const Geometry::Point& v) const
       {
         return m_f(v);
       }
 
-      inline ScalarFunction* copy() const noexcept override
+      ScalarFunction* copy() const noexcept override
       {
         return new ScalarFunction(*this);
       }
