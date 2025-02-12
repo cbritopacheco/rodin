@@ -1160,7 +1160,6 @@ namespace Rodin::Tests::Manufactured::Poisson
    */
   TEST_P(ManufacturedPoissonTest16x16, Poisson_LinearNonhomogeneous)
   {
-    auto pi = Math::Constants::pi();
     Mesh mesh = this->getMesh();
     P1 vh(mesh);
     auto f = Zero();
@@ -1198,7 +1197,6 @@ namespace Rodin::Tests::Manufactured::Poisson
    */
   TEST_P(ManufacturedPoissonTest16x16, Poisson_QuadraticNonhomogeneous)
   {
-    auto pi = Math::Constants::pi();
     Mesh mesh = this->getMesh();
     P1 vh(mesh);
     auto f = RealFunction(4);
@@ -1236,7 +1234,6 @@ namespace Rodin::Tests::Manufactured::Poisson
    */
   TEST_P(ManufacturedPoissonTest16x16, Poisson_CubicPolynomial)
   {
-    auto pi = Math::Constants::pi();
     Mesh mesh = this->getMesh();
     P1 vh(mesh);
     auto A = pow(F::x,2) * pow(1 - F::x,2);

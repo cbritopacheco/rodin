@@ -1,3 +1,11 @@
+add_executable(RodinPairTest PairTest.cpp)
+target_link_libraries(RodinPairTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinPairTest)
+
 add_executable(RodinTupleTest TupleTest.cpp)
 target_link_libraries(RodinTupleTest
   PUBLIC
