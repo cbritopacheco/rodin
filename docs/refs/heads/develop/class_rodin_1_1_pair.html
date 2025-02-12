@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Pair class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-template">template&lt;class L, class R&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Pair <span class="m-thin">class</span>
+        </h1>
+        <p>A <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> class representing a tuple with two elements.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">L</td>
+              <td>Type of the first element.</td>
+            </tr>
+            <tr>
+              <td>R</td>
+              <td>Type of the second element.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> class extends the <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> class for exactly two elements, providing convenient accessors for the first and second elements.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a9c8feeabb5c353647a20235e9bfdfa61">
+              using <a href="#a9c8feeabb5c353647a20235e9bfdfa61" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;L, R&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa0b890091253a0b6f37ade81fb54f18b" class="m-doc">Pair</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae4624bd62a4abd0fbae79ecb8c464e6d" class="m-doc">Pair</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a50627758ba89c8ce3b3c420e1a87da86" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other) -&gt; <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a51a7390cbb9706e85fcc9fefd4d2e781" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7984b30737503c55fc7d645beb2d720f" class="m-doc">first</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp;</span>
+            </dt>
+            <dd>Retrieves the first element of the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a526ed400e6c2b6609bc73fbf5d0151b9" class="m-doc">second</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp;</span>
+            </dt>
+            <dd>Retrieves the second element of the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a88f2165b11e40ac7a269ec5f1b5cf3d1" class="m-doc">first</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            </dt>
+            <dd>Retrieves the first element of the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> (const version).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afb44dd99263d5c5e45bf6d317405a9df" class="m-doc">second</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            </dt>
+            <dd>Retrieves the second element of the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> (const version).</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa0b890091253a0b6f37ade81fb54f18b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class L, class R&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0b890091253a0b6f37ade81fb54f18b" class="m-doc-self">Pair</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>The <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae4624bd62a4abd0fbae79ecb8c464e6d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class L, class R&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4624bd62a4abd0fbae79ecb8c464e6d" class="m-doc-self">Pair</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>The <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a50627758ba89c8ce3b3c420e1a87da86"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class L, class R&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a50627758ba89c8ce3b3c420e1a87da86" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>The <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a51a7390cbb9706e85fcc9fefd4d2e781"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class L, class R&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51a7390cbb9706e85fcc9fefd4d2e781" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>The <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7984b30737503c55fc7d645beb2d720f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class L, class R&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7984b30737503c55fc7d645beb2d720f" class="m-doc-self">first</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Retrieves the first element of the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the first element.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a526ed400e6c2b6609bc73fbf5d0151b9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class L, class R&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a526ed400e6c2b6609bc73fbf5d0151b9" class="m-doc-self">second</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Retrieves the second element of the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the second element.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a88f2165b11e40ac7a269ec5f1b5cf3d1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class L, class R&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88f2165b11e40ac7a269ec5f1b5cf3d1" class="m-doc-self">first</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Retrieves the first element of the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> (const version).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Const reference to the first element.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afb44dd99263d5c5e45bf6d317405a9df"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class L, class R&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb44dd99263d5c5e45bf6d317405a9df" class="m-doc-self">second</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Retrieves the second element of the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> (const version).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Const reference to the second element.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

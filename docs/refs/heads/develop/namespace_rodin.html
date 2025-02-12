@@ -74,7 +74,9 @@
               Reference
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
                 <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
@@ -116,6 +118,26 @@
             <dd>Module containing general purpose and language support utility classes.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a></dt>
             <dd>Module which provides the necessary tools for constructing variational problems.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class L, class R&gt;</div>
+              class <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>
+            </dt>
+            <dd>A <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> class representing a tuple with two elements.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T, class ... Ts&gt;</div>
+              class <a href="class_rodin_1_1_tuple_3_01_t_00_01_ts_8_8_8_01_4.html" class="m-doc">Tuple&lt;T, Ts...&gt;</a>
+            </dt>
+            <dd>A tuple class that extends std::tuple with additional functionality.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_tuple_3_4.html" class="m-doc">Tuple&lt;&gt;</a>
+            </dt>
+            <dd>Specialization of <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> for an empty parameter pack.</dd>
           </dl>
         </section>
         <section id="typedef-members">
@@ -193,6 +215,82 @@
             </dt>
             <dd>Standard map of indices.</dd>
           </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class L, class R&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#aca27e15f10cd90debc45f2ffab02bf45" class="m-doc">Pair</a>(</span><span class="m-doc-wrap">L,
+              R) -&gt; Pair&lt; L, R &gt;</span>
+            </dt>
+            <dd>Deduction guide for the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> class.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;Index First, Index Last&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a74e34a69a39a8bd20e7c0021a10567be" class="m-doc">IndexTuple</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Generates a tuple of indices.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aca27e15f10cd90debc45f2ffab02bf45"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class L, class R&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca27e15f10cd90debc45f2ffab02bf45" class="m-doc-self">Pair</a>(</span><span class="m-doc-wrap">L,
+              R) -&gt; Pair&lt; L, R &gt;</span></span>
+            </h3>
+            <p>Deduction guide for the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> class.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">L</td>
+                  <td>Type of the first element.</td>
+                </tr>
+                <tr>
+                  <td>R</td>
+                  <td>Type of the second element.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This guide allows the compiler to deduce the template arguments for L and R when constructing a <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> object.</p>
+          </div></section>
+          <section class="m-doc-details" id="a74e34a69a39a8bd20e7c0021a10567be"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;Index First, Index Last&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static auto Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74e34a69a39a8bd20e7c0021a10567be" class="m-doc-self">IndexTuple</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Generates a tuple of indices.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">First</td>
+                  <td>The starting index.</td>
+                </tr>
+                <tr>
+                  <td>Last</td>
+                  <td>One past the last index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A tuple containing indices from First to Last-1.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>First must be less than Last.</p></aside>
+          </div></section>
         </section>
       </div>
     </div>
