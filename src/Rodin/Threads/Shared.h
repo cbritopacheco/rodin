@@ -7,40 +7,98 @@
 
 namespace Rodin::Threads
 {
+  /**
+   * @brief A thread-safe wrapper for shared resources.
+   *
+   * The Shared class encapsulates a resource and provides thread-safe read and
+   * write access. When RODIN_THREAD_SAFE is defined, access to the resource is
+   * guarded by a std::shared_mutex. In non-thread-safe builds, the class
+   * provides direct access to the underlying resource.
+   *
+   * @tparam Resource The type of the resource to be encapsulated.
+   */
   template <class Resource>
   class Shared
   {
     public:
+      /**
+       * @brief Default constructor.
+       *
+       * Constructs an empty Shared object.
+       */
       constexpr
       Shared()
       {}
 
+      /**
+       * @brief Constructs a Shared object from a const reference.
+       *
+       * @param resource The resource to encapsulate.
+       */
       constexpr
       Shared(const Resource& resource)
         : m_resource(resource)
       {}
 
+      /**
+       * @brief Constructs a Shared object by moving a resource.
+       *
+       * @param resource The resource to encapsulate.
+       */
       constexpr
       Shared(Resource&& resource)
         : m_resource(std::move(resource))
       {}
 
+      /**
+       * @brief Move constructor.
+       *
+       * Transfers the resource from another Shared object.
+       *
+       * @param other The Shared object to move from.
+       */
       constexpr
       Shared(Shared&& other)
         : m_resource(std::move(other.m_resource))
       {}
 
+      /**
+       * @brief Copy constructor.
+       *
+       * Creates a Shared object by copying the resource from another.
+       *
+       * @param other The Shared object to copy from.
+       */
       constexpr
       Shared(const Shared& other)
         : m_resource(other.m_resource)
       {}
 
+      /**
+       * @brief Copy assignment operator from a Resource.
+       *
+       * This operation is deleted to prevent direct assignment from a resource.
+       */
       constexpr
       Shared& operator=(const Resource&) = delete;
 
+      /**
+       * @brief Move assignment operator from a Resource.
+       *
+       * This operation is deleted to prevent direct move-assignment from a resource.
+       */
       constexpr
       Shared& operator=(Resource&&) = delete;
 
+      /**
+       * @brief Copy assignment operator.
+       *
+       * Assigns the resource from another Shared object.
+       * In thread-safe builds, this operation is protected by locking.
+       *
+       * @param other The Shared object to copy from.
+       * @return A reference to this Shared object.
+       */
       constexpr
       Shared& operator=(const Shared& other)
       {
@@ -57,6 +115,15 @@ namespace Rodin::Threads
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       *
+       * Transfers the resource from another Shared object.
+       * In thread-safe builds, this operation is protected by locking.
+       *
+       * @param other The Shared object to move from.
+       * @return A reference to this Shared object.
+       */
       constexpr
       Shared& operator=(Shared&& other)
       {
@@ -72,22 +139,40 @@ namespace Rodin::Threads
         return *this;
       }
 
-      inline
+      /**
+       * @brief Provides non-const (write) access to the encapsulated resource.
+       *
+       * @return A reference to the encapsulated resource.
+       */
       constexpr
       Resource& write()
       {
         return m_resource;
       }
 
-      inline
+      /**
+       * @brief Provides read-only access to the encapsulated resource.
+       *
+       * @return A const reference to the encapsulated resource.
+       */
       constexpr
       const Resource& read() const
       {
         return m_resource;
       }
 
+      /**
+       * @brief Executes a callable with read-only access to the resource.
+       *
+       * The provided callable is invoked with a const reference to the
+       * resource. In thread-safe builds, the shared lock is acquired during
+       * the execution of the callable.
+       *
+       * @tparam F The type of the callable.
+       * @param f The callable to execute.
+       * @return A const reference to this Shared object.
+       */
       template <class F>
-      inline
       constexpr
       const Shared& read(F&& f) const
       {
@@ -102,8 +187,18 @@ namespace Rodin::Threads
         return *this;
       }
 
+      /**
+       * @brief Executes a callable with write access to the resource.
+       *
+       * The provided callable is invoked with a non-const reference to the
+       * resource. In thread-safe builds, the exclusive lock is acquired during
+       * the execution of the callable.
+       *
+       * @tparam F The type of the callable.
+       * @param f The callable to execute.
+       * @return A reference to this Shared object.
+       */
       template <class F>
-      inline
       constexpr
       Shared& write(F&& f)
       {
@@ -120,14 +215,22 @@ namespace Rodin::Threads
 
 #ifdef RODIN_THREAD_SAFE
     protected:
-      inline
+      /**
+       * @brief Acquires an exclusive lock on the resource.
+       *
+       * This function is used internally to guard write operations.
+       */
       constexpr
       void lock()
       {
         m_lock.lock();
       }
 
-      inline
+      /**
+       * @brief Releases the exclusive lock on the resource.
+       *
+       * This function is used internally after write operations are completed.
+       */
       constexpr
       void unlock()
       {
@@ -137,8 +240,10 @@ namespace Rodin::Threads
 
     private:
 #ifdef RODIN_THREAD_SAFE
+      /// Shared mutex used for thread-safe access.
       mutable std::shared_mutex m_lock;
 #endif
+      /// The encapsulated resource.
       Resource m_resource;
   };
 }
