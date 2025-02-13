@@ -209,6 +209,34 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(hashFunc(a), hashFunc(b));
   }
 
+  // ----- Tests for size 4 -----
+  TEST(IndexArrayHash, Size4EqualHash)
+  {
+    Rodin::IndexArray a(4), b(4);
+    a << 5, 6, 7, 8;
+    b << 5, 6, 7, 8;
+    Rodin::IndexArrayHash hashFunc;
+    EXPECT_EQ(hashFunc(a), hashFunc(b));
+
+    // Change one element and check that the hash changes.
+    a(2) = 9;
+    EXPECT_NE(hashFunc(a), hashFunc(b));
+  }
+
+  // ----- Tests for size 5 -----
+  TEST(IndexArrayHash, Size5EqualHash)
+  {
+    Rodin::IndexArray a(5), b(5);
+    a << 5, 6, 7, 8, 9;
+    b << 5, 6, 7, 8, 9;
+    Rodin::IndexArrayHash hashFunc;
+    EXPECT_EQ(hashFunc(a), hashFunc(b));
+
+    // Change one element and check that the hash changes.
+    a(2) = 9;
+    EXPECT_NE(hashFunc(a), hashFunc(b));
+  }
+
   TEST(IndexArrayHash, Size3DifferentOrderHash)
   {
     Rodin::IndexArray a(3), b(3);
