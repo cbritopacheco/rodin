@@ -27,7 +27,6 @@ int main(int, char**)
   // Functions
   P1 vh(mesh);
 
-  // auto f = cos(2 * M_PI * F::x) * sin(2 * M_PI * F::y);
   ScalarFunction f(1.0);
 
   TrialFunction u(vh);
