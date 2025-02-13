@@ -1,3 +1,4 @@
+#include <random>
 #include <gtest/gtest.h>
 
 #include <Rodin/Array.h>
@@ -252,7 +253,6 @@ namespace Rodin::Tests::Unit
       original(i) = i % 4;  // values will repeat: 0,1,2,3,0,1,...
     }
     Rodin::IndexArraySymmetricHash symHash;
-    size_t originalHash = symHash(original);
 
     // Create a permutation of the original array using std::shuffle.
     std::vector<Rodin::Index> vec(original.data(), original.data() + original.size());
