@@ -151,10 +151,46 @@
  */
 #cmakedefine RODIN_THIRD_PARTY_DIR "@RODIN_THIRD_PARTY_DIR@"
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with thread safety enabled.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifdef RODIN_THREAD_SAFE
+ *   // Code that requires thread safety features.
+ * #endif
+ * @endcode
+ */
 #cmakedefine RODIN_THREAD_SAFE
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin supports multithreading.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifdef RODIN_MULTITHREADED
+ *   // Code that leverages multithreading capabilities.
+ * #endif
+ * @endcode
+ */
 #cmakedefine RODIN_MULTITHREADED
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with Apple Accelerate support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifdef RODIN_USE_APPLE_ACCELERATE
+ *   // Code that uses the Apple Accelerate framework for optimized computations.
+ * #endif
+ * @endcode
+ */
 #cmakedefine RODIN_USE_APPLE_ACCELERATE
 
 /**
