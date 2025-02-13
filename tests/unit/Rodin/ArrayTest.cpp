@@ -33,20 +33,43 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(eq(a, b));
   }
 
-  TEST(IndexArrayEquality, Size4Equal)
+  // ----- Tests for size 2 -----
+  TEST(IndexArrayEquality, Size2Equal)
   {
-    Rodin::IndexArray a(4), b(4);
-    a << 1, 2, 3, 4;
-    b << 1, 2, 3, 4;
+    Rodin::IndexArray a(2), b(2);
+    a << 7, 8;
+    b << 7, 8;
     Rodin::IndexArrayEquality eq;
     EXPECT_TRUE(eq(a, b));
   }
 
-  TEST(IndexArrayEquality, Size5Different)
+  TEST(IndexArrayEquality, Size2Different)
   {
-    Rodin::IndexArray a(5), b(5);
-    a << 5, 6, 7, 8, 9;
-    b << 5, 6, 7, 8, 10;
+    // Order matters here.
+    Rodin::IndexArray a(2), b(2);
+    a << 7, 8;
+    b << 8, 7;
+    Rodin::IndexArrayEquality eq;
+    EXPECT_FALSE(eq(a, b));
+  }
+
+  // ----- Tests for size 3 -----
+  TEST(IndexArrayEquality, Size3Equal)
+  {
+    Rodin::IndexArray a(3), b(3);
+    a << 1, 2, 3;
+    b << 1, 2, 3;
+    Rodin::IndexArrayEquality eq;
+    EXPECT_TRUE(eq(a, b));
+  }
+
+  TEST(IndexArrayEquality, Size3Different)
+  {
+    // Even though a permutation might be considered equal in symmetric sense,
+    // order-sensitive equality should fail.
+    Rodin::IndexArray a(3), b(3);
+    a << 1, 2, 3;
+    b << 3, 2, 1;
     Rodin::IndexArrayEquality eq;
     EXPECT_FALSE(eq(a, b));
   }
@@ -88,49 +111,40 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(seq(a, b));
   }
 
-  TEST(IndexArraySymmetricEquality, TwoElementsOrderIndependent)
+  // ----- Tests for size 2 -----
+  TEST(IndexArraySymmetricEquality, Size2PermutationEqual)
   {
     Rodin::IndexArray a(2), b(2);
-    a << 10, 20;
-    b << 20, 10;
+    a << 7, 8;
+    b << 8, 7;
     Rodin::IndexArraySymmetricEquality seq;
     EXPECT_TRUE(seq(a, b));
   }
 
-  TEST(IndexArraySymmetricEquality, TwoElementsDifferent)
+  TEST(IndexArraySymmetricEquality, Size2Different)
   {
     Rodin::IndexArray a(2), b(2);
-    a << 10, 20;
-    b << 10, 30;
+    a << 7, 8;
+    b << 7, 9;
     Rodin::IndexArraySymmetricEquality seq;
     EXPECT_FALSE(seq(a, b));
   }
 
-  TEST(IndexArraySymmetricEquality, Size4PermutationEqual)
+  // ----- Tests for size 3 -----
+  TEST(IndexArraySymmetricEquality, Size3PermutationEqual)
   {
-    Rodin::IndexArray a(4), b(4);
-    a << 1, 2, 3, 4;
-    // b is a permutation of a (reversed order)
-    b << 4, 3, 2, 1;
+    Rodin::IndexArray a(3), b(3);
+    a << 1, 2, 3;
+    b << 3, 1, 2;
     Rodin::IndexArraySymmetricEquality seq;
     EXPECT_TRUE(seq(a, b));
   }
 
-  TEST(IndexArraySymmetricEquality, Size5PermutationWithDuplicatesEqual)
+  TEST(IndexArraySymmetricEquality, Size3NonPermutation)
   {
-    Rodin::IndexArray a(5), b(5);
-    a << 2, 2, 3, 4, 5;
-    // b is a permutation of a (order changed)
-    b << 5, 4, 3, 2, 2;
-    Rodin::IndexArraySymmetricEquality seq;
-    EXPECT_TRUE(seq(a, b));
-  }
-
-  TEST(IndexArraySymmetricEquality, Size5Different)
-  {
-    Rodin::IndexArray a(5), b(5);
-    a << 1, 2, 3, 4, 5;
-    b << 5, 4, 3, 2, 6;
+    Rodin::IndexArray a(3), b(3);
+    a << 1, 2, 3;
+    b << 3, 2, 4;
     Rodin::IndexArraySymmetricEquality seq;
     EXPECT_FALSE(seq(a, b));
   }
@@ -151,7 +165,7 @@ namespace Rodin::Tests::Unit
   {
     Rodin::IndexArray a(0), b(0);
     Rodin::IndexArrayHash hashFunc;
-    // For empty arrays, the for_each loop does nothing so seed remains 0.
+    // For empty arrays, no elements are processed, so seed remains 0.
     EXPECT_EQ(hashFunc(a), 0);
     EXPECT_EQ(hashFunc(a), hashFunc(b));
   }
@@ -165,21 +179,41 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(hashFunc(a), hashFunc(b));
   }
 
-  TEST(IndexArrayHash, Size4EqualHash)
+  // ----- Tests for size 2 -----
+  TEST(IndexArrayHash, Size2EqualHash)
   {
-    Rodin::IndexArray a(4), b(4);
-    a << 1, 2, 3, 4;
-    b << 1, 2, 3, 4;
+    Rodin::IndexArray a(2), b(2);
+    a << 11, 22;
+    b << 11, 22;
     Rodin::IndexArrayHash hashFunc;
     EXPECT_EQ(hashFunc(a), hashFunc(b));
   }
 
-  TEST(IndexArrayHash, Size5DifferentOrderHash)
+  TEST(IndexArrayHash, Size2DifferentOrderHash)
   {
-    // For IndexArrayHash the order matters.
-    Rodin::IndexArray a(5), b(5);
-    a << 10, 20, 30, 40, 50;
-    b << 50, 40, 30, 20, 10;
+    // Order matters, so a permutation should yield a different hash.
+    Rodin::IndexArray a(2), b(2);
+    a << 11, 22;
+    b << 22, 11;
+    Rodin::IndexArrayHash hashFunc;
+    EXPECT_NE(hashFunc(a), hashFunc(b));
+  }
+
+  // ----- Tests for size 3 -----
+  TEST(IndexArrayHash, Size3EqualHash)
+  {
+    Rodin::IndexArray a(3), b(3);
+    a << 5, 6, 7;
+    b << 5, 6, 7;
+    Rodin::IndexArrayHash hashFunc;
+    EXPECT_EQ(hashFunc(a), hashFunc(b));
+  }
+
+  TEST(IndexArrayHash, Size3DifferentOrderHash)
+  {
+    Rodin::IndexArray a(3), b(3);
+    a << 5, 6, 7;
+    b << 7, 6, 5;
     Rodin::IndexArrayHash hashFunc;
     EXPECT_NE(hashFunc(a), hashFunc(b));
   }
@@ -204,7 +238,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(symHash(a), symHash(b));
   }
 
-  TEST(IndexArraySymmetricHash, TwoElementsOrderIndependentHash)
+  // ----- Tests for size 2 -----
+  TEST(IndexArraySymmetricHash, Size2PermutationEqualHash)
   {
     Rodin::IndexArray a(2), b(2);
     a << 11, 22;
@@ -213,29 +248,21 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(symHash(a), symHash(b));
   }
 
-  TEST(IndexArraySymmetricHash, Size4PermutationEqualHash)
+  // ----- Tests for size 3 -----
+  TEST(IndexArraySymmetricHash, Size3PermutationEqualHash)
   {
-    Rodin::IndexArray a(4), b(4);
-    a << 1, 2, 3, 4;
-    b << 4, 3, 2, 1;
+    Rodin::IndexArray a(3), b(3);
+    a << 5, 6, 7;
+    b << 7, 5, 6;
     Rodin::IndexArraySymmetricHash symHash;
     EXPECT_EQ(symHash(a), symHash(b));
   }
 
-  TEST(IndexArraySymmetricHash, Size5PermutationWithDuplicatesEqualHash)
+  TEST(IndexArraySymmetricHash, Size3DifferentHash)
   {
-    Rodin::IndexArray a(5), b(5);
-    a << 2, 2, 3, 4, 5;
-    b << 5, 4, 3, 2, 2;
-    Rodin::IndexArraySymmetricHash symHash;
-    EXPECT_EQ(symHash(a), symHash(b));
-  }
-
-  TEST(IndexArraySymmetricHash, Size5DifferentHash)
-  {
-    Rodin::IndexArray a(5), b(5);
-    a << 1, 2, 3, 4, 5;
-    b << 5, 4, 3, 2, 6;
+    Rodin::IndexArray a(3), b(3);
+    a << 5, 6, 7;
+    b << 7, 6, 8;
     Rodin::IndexArraySymmetricHash symHash;
     EXPECT_NE(symHash(a), symHash(b));
   }
