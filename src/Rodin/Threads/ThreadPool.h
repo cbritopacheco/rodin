@@ -101,7 +101,6 @@ namespace Rodin::Threads
        *
        * @return The number of threads currently used by the thread pool.
        */
-      constexpr
       auto getThreadCount() const
       {
         return m_pool.get_thread_count();
