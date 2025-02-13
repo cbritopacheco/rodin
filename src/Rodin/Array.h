@@ -25,10 +25,18 @@ namespace Rodin
   {
     bool operator()(const IndexArray& lhs, const IndexArray& rhs) const
     {
-      if (lhs.size() != rhs.size())
+      if (lhs.size() == 0 && rhs.size() == 0)
+      {
+        return true;
+      }
+      else if (lhs.size() != rhs.size())
+      {
         return false;
+      }
       else
+      {
         return (lhs == rhs).all();
+      }
     }
   };
 
@@ -36,9 +44,11 @@ namespace Rodin
   {
     bool operator()(const IndexArray& lhs, const IndexArray& rhs) const
     {
-      assert(lhs.size() > 0);
-      assert(rhs.size() > 0);
-      if (lhs.size() != rhs.size())
+      if (lhs.size() == 0 && rhs.size() == 0)
+      {
+        return true;
+      }
+      else if (lhs.size() != rhs.size())
       {
         return false;
       }
