@@ -23,16 +23,17 @@ namespace Rodin
 
   struct IndexArrayEquality
   {
-    inline
     bool operator()(const IndexArray& lhs, const IndexArray& rhs) const
     {
-      return (lhs == rhs).all();
+      if (lhs.size() != rhs.size())
+        return false;
+      else
+        return (lhs == rhs).all();
     }
   };
 
   struct IndexArraySymmetricEquality
   {
-    inline
     bool operator()(const IndexArray& lhs, const IndexArray& rhs) const
     {
       assert(lhs.size() > 0);
@@ -66,7 +67,6 @@ namespace Rodin
 
   struct IndexArrayHash
   {
-    inline
     size_t operator()(const IndexArray& arr) const
     {
       size_t seed = 0;
@@ -119,7 +119,6 @@ namespace Rodin
 
   struct IndexArraySymmetricHash
   {
-    inline
     size_t operator()(const IndexArray& arr) const
     {
       size_t seed = 0;
