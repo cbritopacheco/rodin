@@ -40,12 +40,15 @@ namespace Rodin
   /// Standard type for representing complex values.
   using Complex = std::complex<Real>;
 
+  /// Standard type for representing lists.
   template <class T>
   using List = boost::container::list<T>;
 
+  /// Standard type for representing deques.
   template <class T>
   using Deque = boost::container::deque<T>;
 
+  /// Standard type for representing stacks.
   template <class T, class Container = Deque<T>>
   using Stack = std::stack<T, Container>;
 
