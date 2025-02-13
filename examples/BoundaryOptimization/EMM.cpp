@@ -54,7 +54,7 @@ int main(int, char**)
   MMG::Mesh mesh;
   mesh.load("../resources/examples/BoundaryOptimization/EMM.medit.mesh", IO::FileFormat::MEDIT);
   // mesh.load("Omega.mesh", IO::FileFormat::MEDIT);
-  Threads::getGlobalThreadPool().reset(8);
+  // Threads::getGlobalThreadPool().reset(8);
 
   Real hmax0 = 0.5;
   Real hmax = hmax0;

@@ -28,9 +28,9 @@ Real exact(const Point& x)
 
 int main(int, char**)
 {
-  Eigen::initParallel();
-  Eigen::setNbThreads(8);
-  Threads::getGlobalThreadPool().reset(8);
+  // Eigen::initParallel();
+  // Eigen::setNbThreads(8);
+  // Threads::getGlobalThreadPool().reset(8);
   MMG::Mesh mesh;
   mesh.load("D1.mesh");
 

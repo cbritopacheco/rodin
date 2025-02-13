@@ -46,9 +46,9 @@ using ShapeGradient = VectorGridFunction;
 
 int main(int, char**)
 {
-  Eigen::initParallel();
-  Eigen::setNbThreads(8);
-  Threads::getGlobalThreadPool().reset(8);
+  // Eigen::initParallel();
+  // Eigen::setNbThreads(8);
+  // Threads::getGlobalThreadPool().reset(8);
   std::cout << Eigen::nbThreads() << std::endl;
   MMG::Mesh mesh;
   // mesh.load("Omega0.mesh", IO::FileFormat::MEDIT);
