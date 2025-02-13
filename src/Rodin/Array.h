@@ -15,8 +15,8 @@
 namespace Rodin
 {
   /// Standard array type
-  template <class Real>
-  using Array = Eigen::ArrayX<Real>;
+  template <class ScalarType>
+  using Array = Eigen::ArrayX<ScalarType>;
 
   /// Standard array of indices.
   using IndexArray = Array<Index>;
