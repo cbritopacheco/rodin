@@ -11,9 +11,22 @@
 
 namespace Rodin
 {
+  /**
+   * @brief Functor for comparing two IndexSet objects for equality.
+   *
+   * This functor defines an operator() that compares two IndexSet objects.
+   * Two sets are considered equal if they have the same size and all corresponding
+   * elements are equal.
+   */
   struct IndexSetEquality
   {
-    inline
+    /**
+     * @brief Compares two IndexSet objects for equality.
+     *
+     * @param lhs The left-hand side IndexSet.
+     * @param rhs The right-hand side IndexSet.
+     * @return true if both IndexSet objects are equal, false otherwise.
+     */
     bool operator()(const IndexSet& lhs, const IndexSet& rhs) const
     {
       if (lhs.size() != rhs.size())
@@ -23,9 +36,20 @@ namespace Rodin
     }
   };
 
+  /**
+   * @brief Functor for computing a hash value for an IndexSet.
+   *
+   * This functor defines an operator() that computes a hash value for an IndexSet
+   * by combining the hash values of its elements.
+   */
   struct IndexSetHash
   {
-    inline
+    /**
+     * @brief Computes the hash value for the given IndexSet.
+     *
+     * @param arr The IndexSet for which to compute the hash.
+     * @return A size_t hash value representing the IndexSet.
+     */
     size_t operator()(const IndexSet& arr) const
     {
       size_t seed = 0;
@@ -34,4 +58,5 @@ namespace Rodin
     }
   };
 }
+
 #endif

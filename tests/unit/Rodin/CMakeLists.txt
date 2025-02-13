@@ -23,5 +23,6 @@ target_link_libraries(RodinArrayTest
 gtest_discover_tests(RodinArrayTest)
 
 add_subdirectory(IO)
+add_subdirectory(Threads)
 add_subdirectory(Geometry)
 add_subdirectory(Variational)
