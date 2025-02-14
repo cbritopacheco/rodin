@@ -458,7 +458,7 @@ namespace Rodin::Variational
               for (size_t i = 0; i < fe.getCount(); i++)
                 m_sb1[i] = fe.getBasis(i)(rc);
               for (size_t i = 0; i < fe.getCount(); i++)
-                  m_matrix(i, i) = Math::conj(csv) * Math::dot(m_sb1[i], m_sb1[i]);
+                m_matrix(i, i) = Math::conj(csv) * Math::dot(m_sb1[i], m_sb1[i]);
               for (size_t i = 0; i < fe.getCount(); i++)
                 for (size_t j = 0; j < i; j++)
                   m_matrix(i, j) = Math::conj(csv) * Math::dot(m_sb1[j], m_sb1[i]);
@@ -470,7 +470,7 @@ namespace Rodin::Variational
               for (size_t i = 0; i < fe.getCount(); i++)
                 fe.getBasis(i)(m_vb1[i], rc);
               for (size_t i = 0; i < fe.getCount(); i++)
-                  m_matrix(i, i) = Math::conj(csv) * Math::dot(m_vb1[i], m_vb1[i]);
+                  m_matrix(i, i) = Math::conj(csv) * m_vb1[i].squaredNorm();
               for (size_t i = 0; i < fe.getCount(); i++)
                 for (size_t j = 0; j < i; j++)
                   m_matrix(i, j) = Math::conj(csv) * Math::dot(m_vb1[j], m_vb1[i]);
@@ -482,7 +482,7 @@ namespace Rodin::Variational
               for (size_t i = 0; i < fe.getCount(); i++)
                 fe.getBasis(i)(m_mb1[i], rc);
               for (size_t i = 0; i < fe.getCount(); i++)
-                  m_matrix(i, i) = Math::conj(csv) * Math::dot(m_mb1[i], m_mb1[i]);
+                m_matrix(i, i) = Math::conj(csv) * Math::dot(m_mb1[i], m_mb1[i]);
               for (size_t i = 0; i < fe.getCount(); i++)
                 for (size_t j = 0; j < i; j++)
                   m_matrix(i, j) = Math::conj(csv) * Math::dot(m_mb1[j], m_mb1[i]);

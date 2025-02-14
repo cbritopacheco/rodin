@@ -1,5 +1,5 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2025.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
@@ -17,6 +17,29 @@ using namespace Rodin::Variational;
 using namespace Rodin::Solver;
 using namespace Rodin::Test::Random;
 
+
+/**
+ * @brief Manufactured solutions for the Poisson problem using P1 spaces.
+ *
+ * The system is given by:
+ * @f[
+ * \left\{
+ * \begin{aligned}
+ *   -\Delta u &= f \quad \text{in } \Omega,\\
+ *  u &= g \quad \text{on } \partial\Omega.
+ * \end{aligned}
+ * \right.
+ * @f]
+ *
+ * The weak formulation is: Find @f$ u \in V @f$ such that
+ * @f[
+ *   \int_\Omega \nabla u \cdot \nabla v \,dx = \int_\Omega f \, v \,dx,
+ * @f]
+ * for all @f$ v \in V @f$, with the essential boundary condition
+ * @f[
+ *   u = g \quad \text{on } \partial\Omega.
+ * @f]
+ */
 namespace Rodin::Tests::Manufactured::Poisson
 {
   template <size_t M>
