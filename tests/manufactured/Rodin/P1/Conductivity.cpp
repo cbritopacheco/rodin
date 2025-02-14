@@ -18,15 +18,26 @@ using namespace Rodin::Solver;
 using namespace Rodin::Test::Random;
 
 /**
- * Contains manufactured solution tests cases for the conductivity equation.
+ * @brief Manufactured solutions for the conductivity problem using P1 spaces.
  *
+ * The system is given by:
  * @f[
  * \left\{
- *   \begin{aligned}
- *     - \nabla \cdot (\gamma \nabla u) &= f && \mathrm{in} \ \Omega, \\
- *     u &= g && \mathrm{on} \ \Gamma.
- *   \end{aligned}
- *  \right.
+ * \begin{aligned}
+ *   -\operatorname{div}( \gamma \nabla u) &= f \quad \text{in } \Omega,\\
+ *  u &= g \quad \text{on } \partial\Omega.
+ * \end{aligned}
+ * \right.
+ * @f]
+ *
+ *
+ * The weak formulation is: Find @f$ u \in V @f$ such that
+ * @f[
+ *   \int_\Omega \gamma \nabla u \cdot \nabla v \,dx = \int_\Omega f \, v \,dx,
+ * @f]
+ * for all @f$ v \in V @f$, with the essential boundary condition
+ * @f[
+ *   u = g \quad \text{on } \partial\Omega.
  * @f]
  */
 namespace Rodin::Tests::Manufactured::Conductivity
@@ -167,7 +178,7 @@ namespace Rodin::Tests::Manufactured::Conductivity
    *  u(x,y)= e^{\phi(x,y)}-1,
    * @f]
    *
-   * so that \(u=0\) on \(\partial\Omega\). With
+   * so that @f$u=0@f$ on @f$\partial\Omega@f$. With
    *
    * @f[
    *  \gamma(x,y)= 1+x^2,
@@ -246,7 +257,7 @@ namespace Rodin::Tests::Manufactured::Conductivity
    *  u_y=(1-2y)x(1-x),\quad u_{yy}=-2x(1-x),
    * @f]
    *
-   * and with \(\gamma_x=1,\;\gamma_y=1\), we have
+   * and with @f$\gamma_x=1,\;\gamma_y=1@f$, we have
    *
    * @f[
    *  f(x,y)=-\Bigl[\gamma_xu_x+\gamma\,u_{xx}+\gamma_yu_y+\gamma\,u_{yy}\Bigr].
@@ -316,7 +327,7 @@ namespace Rodin::Tests::Manufactured::Conductivity
    *  u_{xx}=-\pi^2\sin(\pi x)e^y,\quad u_{yy}=\sin(\pi x)e^y,
    * @f]
    *
-   * with \(\gamma_x=1,\;\gamma_y=0\), the forcing function is given by
+   * with @f$\gamma_x=1,\;\gamma_y=0@f$, the forcing function is given by
    *
    * @f[
    *  f(x,y)=-\Bigl[u_x+(1+x)(u_{xx}+u_{yy})\Bigr].
@@ -390,7 +401,7 @@ namespace Rodin::Tests::Manufactured::Conductivity
    *  u_y=-\pi\cos(\pi x)\sin(\pi y),\quad u_{yy}=-\pi^2\cos(\pi x)\cos(\pi y).
    * @f]
    *
-   * (Note: \(\gamma_x=1,\;\gamma_y=0\).)
+   * @note @f$ \gamma_x=1,\; \gamma_y=0 @f$
    */
   TEST(Rodin_Manufactured_P1, Conductivity_NonhomogeneousDirichlet)
   {

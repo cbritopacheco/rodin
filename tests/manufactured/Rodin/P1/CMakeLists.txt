@@ -19,3 +19,14 @@ target_link_libraries(RodinManufacturedConductivity
   Rodin::Solver
   )
 gtest_discover_tests(RodinManufacturedConductivity)
+
+add_executable(RodinManufacturedReactionDiffusion ReactionDiffusion.cpp)
+target_link_libraries(RodinManufacturedReactionDiffusion
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedReactionDiffusion)
