@@ -8,11 +8,6 @@
 #define RODIN_VARIATIONAL_P1_P1ELEMENT_H
 
 /**
- * @file
- * @brief Header contatining definitions for the class P1Element.
- */
-
-/**
  * @ingroup RodinDirectives
  * @brief Indicates the maximum vector dimension a P1Element
  */
