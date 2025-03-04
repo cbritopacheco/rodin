@@ -12,7 +12,7 @@ int main()
 
   External::Scotch::MeshPartitioner partitioner(mesh);
 
-  partitioner.partition(4);
+  partitioner.partition(16);
 
   for (auto it = mesh.getCell(); it; ++it)
   {

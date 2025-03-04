@@ -830,6 +830,48 @@ namespace Rodin::Geometry
         }
         return build.finalize();
       }
+      case Polytope::Type::TriangularPrism:
+      {
+        assert(dimensions.size() == 3);
+        const size_t w = dimensions.coeff(0);
+        const size_t h = dimensions.coeff(1);
+        const size_t d = dimensions.coeff(2);
+        assert(w >= 2 && h >= 2 && d >= 2);
+        build.initialize(dim).nodes(w * h * d);
+        for (size_t k = 0; k < d; k++)
+        {
+          for (size_t j = 0; j < h; j++)
+          {
+            for (size_t i = 0; i < w; i++)
+            {
+              build.vertex({ static_cast<Real>(i),
+                             static_cast<Real>(j),
+                             static_cast<Real>(k) });
+            }
+          }
+        }
+        build.reserve(dim, 2 * (w - 1) * (h - 1) * (d - 1));
+        for (size_t k = 0; k < d - 1; k++)
+        {
+          for (size_t j = 0; j < h - 1; j++)
+          {
+            for (size_t i = 0; i < w - 1; i++)
+            {
+              const Index v0 = i + j * w + k * (w * h);
+              const Index v1 = (i + 1) + j * w + k * (w * h);
+              const Index v2 = i + (j + 1) * w + k * (w * h);
+              const Index v3 = (i + 1) + (j + 1) * w + k * (w * h);
+              const Index v0p = v0 + w * h;
+              const Index v1p = v1 + w * h;
+              const Index v2p = v2 + w * h;
+              const Index v3p = v3 + w * h;
+              build.polytope(g, { v0, v1, v2, v0p, v1p, v2p });
+              build.polytope(g, { v1, v3, v2, v1p, v3p, v2p });
+            }
+          }
+        }
+        return build.finalize();
+      }
       default:
       {
         assert(false);

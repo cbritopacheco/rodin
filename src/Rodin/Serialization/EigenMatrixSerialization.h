@@ -8,7 +8,6 @@
 namespace boost::serialization
 {
   template <class Archive, typename Derived, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
-  inline
   void serialize(
       Archive & ar,
       Eigen::Matrix<Derived, Rows, Cols, Options, MaxRows, MaxCols>& matrix,
