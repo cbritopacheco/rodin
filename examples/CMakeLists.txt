@@ -22,4 +22,5 @@ if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(SurfaceOptimization)
   add_subdirectory(BoundaryOptimization)
 
+  add_subdirectory(External)
 endif()

@@ -1,10 +1,24 @@
 #include "Exception.h"
 #include "MeshPartitioner.h"
 
-#include <scotch.h>
-
 namespace Rodin::External::Scotch
 {
+  MeshPartitioner::MeshPartitioner(const MeshType& mesh)
+    : m_mesh(mesh)
+  {}
+
+  MeshPartitioner::~MeshPartitioner()
+  {
+    SCOTCH_stratExit(&m_strat.value());
+    SCOTCH_graphExit(&m_graph);
+  }
+
+  MeshPartitioner& MeshPartitioner::setStrategy(const SCOTCH_Strat& strat)
+  {
+    m_strat = strat;
+    return *this;
+  }
+
   const MeshPartitioner::MeshType& MeshPartitioner::getMesh() const
   {
     return m_mesh.get();
@@ -19,26 +33,25 @@ namespace Rodin::External::Scotch
       return;
     RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d)
     const auto& dual = conn.getIncidence(d, d);
-    std::vector<int> verttab(n + 1, 0);
-    std::vector<int> edgetab;
+    std::vector<SCOTCH_Num> verttab(n + 1, 0);
+    std::vector<SCOTCH_Num> edgetab;
     for (size_t i = 0; i < n; i++)
     {
-      std::vector<int> neighbors;
+      std::vector<SCOTCH_Num> neighbors;
       // Each dual[i] is a set-like container of neighboring entity indices.
       for (const auto& nb : dual[i])
       {
         if (nb != i) // Ignore self-links if any
-          neighbors.push_back(static_cast<Integer>(nb));
+          neighbors.push_back(static_cast<SCOTCH_Num>(nb));
       }
-      verttab[i + 1] = verttab[i] + static_cast<int>(neighbors.size());
+      verttab[i + 1] = verttab[i] + static_cast<SCOTCH_Num>(neighbors.size());
       edgetab.insert(edgetab.end(), neighbors.begin(), neighbors.end());
     }
     m_partition.resize(n, -1);
-    SCOTCH_Graph graph;
-    if (SCOTCH_graphInit(&graph) != 0)
+    if (SCOTCH_graphInit(&m_graph) != 0)
       Exception("SCOTCH_graphInit failed", *this, __func__).raise();
-    const int baseval = 0;  // using 0-based indexing
-    if (SCOTCH_graphBuild(&graph,
+    constexpr SCOTCH_Num baseval = 0;  // using 0-based indexing
+    if (SCOTCH_graphBuild(&m_graph,
                           baseval,
                           n,
                           verttab.data(),
@@ -50,21 +63,27 @@ namespace Rodin::External::Scotch
                           nullptr       // edlotab (edge weights, not used)
                           ) != 0)
     {
-      SCOTCH_graphExit(&graph);
+      SCOTCH_graphExit(&m_graph);
       Exception("SCOTCH_graphBuild failed", *this, __func__).raise();
     }
-    // Compute the partitioning (mapping) into numPartitions parts.
-    if (SCOTCH_graphMap(&graph, static_cast<int>(numPartitions), m_partition.data()) != 0)
+
+    if (!m_strat.has_value())
     {
-      SCOTCH_graphExit(&graph);
-      throw std::runtime_error("SCOTCH_graphMap failed");
+      m_strat.emplace();
+      if (SCOTCH_stratInit(&m_strat.value()) != 0)
+      {
+        SCOTCH_graphExit(&m_graph);
+        Exception("SCOTCH_stratInit failed", *this, __func__).raise();
+      }
     }
-    SCOTCH_graphExit(&graph);
-    // Optionally, print partitioning result for debug purposes.
-    std::cout << "Partitioning result (entity dimension " << d << "):\n";
-    for (size_t i = 0; i < n; i++)
+    auto& strat = m_strat.value();
+
+    // Compute the partitioning (mapping) into 'numPartitions' parts.
+    if (SCOTCH_graphPart(&m_graph, numPartitions, &strat, m_partition.data()) != 0)
     {
-      std::cout << "  Entity " << i << " -> partition " << m_partition[i] << "\n";
+      SCOTCH_stratExit(&strat);
+      SCOTCH_graphExit(&m_graph);
+      Exception("SCOTCH_graphMap failed", *this, __func__).raise();
     }
   }
 

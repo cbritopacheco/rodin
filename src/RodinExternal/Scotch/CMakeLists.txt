@@ -21,5 +21,4 @@ target_link_libraries(RodinExternalScotch
   PUBLIC
   Rodin::Geometry
   Rodin::Alert
-  PRIVATE
   scotch)

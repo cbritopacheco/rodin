@@ -8,7 +8,7 @@ namespace Rodin::Geometry
     class MeshPartitioner
     {
     public:
-        MeshPartitioner();
+        MeshPartitioner() = default;
 
         virtual ~MeshPartitioner() = default;
 
