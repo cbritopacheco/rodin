@@ -32,6 +32,14 @@ namespace Rodin
    */
   using IndexArray = Array<Index>;
 
+  struct IndexArrayCompare
+  {
+    bool operator()(const IndexArray& lhs, const IndexArray& rhs) const
+    {
+      return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    }
+  };
+
   /**
    * @brief Functor for comparing two index arrays for equality.
    *

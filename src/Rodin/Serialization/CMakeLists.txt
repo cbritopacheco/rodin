@@ -1,4 +1,4 @@
-set(RodinSerialization_HEADERS EigenMatrixSerialization.h)
+set(RodinSerialization_HEADERS EigenMatrix.h)
 
 set(RodinSerialization_SRCS )
 add_library(RodinSerialization INTERFACE)

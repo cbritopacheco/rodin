@@ -1,0 +1,41 @@
+#ifndef RODIN_GEOMETRY_SHARD_H
+#define RODIN_GEOMETRY_SHARD_H
+
+#include "Rodin/Pair.h"
+
+#include "SubMesh.h"
+
+namespace Rodin::Geometry
+{
+  class Shard : public Mesh<Context::Local>
+  {
+    public:
+      class Builder
+      {
+        public:
+          Builder() = default;
+
+          Builder& initialize(const Mesh<Context>& parent);
+
+          Builder& include(size_t d, Index parentIdx);
+
+          Builder& include(size_t d, const IndexSet& indices);
+
+          Shard finalize();
+
+        private:
+          std::optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
+          Mesh<Context>::Builder m_build;
+          std::vector<Index> m_sidx;
+          std::vector<boost::bimap<Index, Index>> m_s2ps;
+          size_t m_dimension;
+      };
+
+      const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const;
+
+    private:
+      std::vector<boost::bimap<Index, Index>> m_s2ps;
+  };
+}
+
+#endif

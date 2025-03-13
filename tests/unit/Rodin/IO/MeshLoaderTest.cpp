@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <fstream>
+#include <boost/filesystem/fstream.hpp>
 #include <gtest/gtest.h>
 
 #include <Rodin/IO.h>

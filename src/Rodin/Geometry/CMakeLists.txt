@@ -11,6 +11,7 @@ set(RodinGeometry_SRCS
   Mesh.cpp
   Point.cpp
   Polytope.cpp
+  Shard.cpp
   PolytopeIterator.cpp
   PolytopeTransformation.cpp
   Connectivity.cpp
