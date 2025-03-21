@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <boost/bimap.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
+#include <boost/serialization/access.hpp>
 
 #include "Rodin/Array.h"
 #include "Rodin/Context/Sequential.h"
@@ -53,6 +54,8 @@ namespace Rodin::Geometry
   template <>
   class Connectivity<Context::Local> final : public ConnectivityBase
   {
+    friend class boost::serialization::access;
+
     public:
       using PolytopeIndex =
         boost::bimap<
@@ -145,6 +148,18 @@ namespace Rodin::Geometry
       const Incidence& getIncidence(size_t d, size_t dp) const override;
 
       const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const override;
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & m_maximalDimension;
+        ar & m_count;
+        ar & m_gcount;
+        ar & m_index;
+        ar & m_dirty;
+        ar & m_geometry;
+        ar & m_connectivity;
+      }
 
     private:
       size_t m_maximalDimension;

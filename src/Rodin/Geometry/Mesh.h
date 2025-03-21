@@ -12,6 +12,7 @@
 #include <deque>
 
 #include <boost/filesystem.hpp>
+#include <boost/serialization/access.hpp>
 
 #include "Rodin/Math.h"
 #include "Rodin/Types.h"
@@ -20,6 +21,8 @@
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Context/Sequential.h"
 #include "Rodin/Utility/IsSpecialization.h"
+#include "Rodin/Serialization/EigenMatrix.h"
+#include "Rodin/Serialization/Array.h"
 #include "Rodin/Variational/Traits.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/P1/ForwardDecls.h"
@@ -514,6 +517,8 @@ namespace Rodin::Geometry
   template <>
   class Mesh<Context::Local> : public MeshBase
   {
+    friend class boost::serialization::access;
+
     public:
       using Parent = MeshBase;
       using Context = Context::Local;
@@ -979,6 +984,17 @@ namespace Rodin::Geometry
 
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const override;
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & m_sdim;
+        ar & m_vertices;
+        ar & m_attributeIndex;
+        ar & m_attributes;
+        ar & m_transformationIndex;
+        ar & m_context;
+      }
 
     protected:
       PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;

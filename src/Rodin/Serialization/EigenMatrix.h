@@ -10,7 +10,7 @@ namespace boost::serialization
   template <class Archive, typename Derived, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
   void serialize(
       Archive & ar,
-      Eigen::Matrix<Derived, Rows, Cols, Options, MaxRows, MaxCols>& matrix,
+      const Eigen::Matrix<Derived, Rows, Cols, Options, MaxRows, MaxCols>& matrix,
       const unsigned int version)
   {
     const Eigen::Index rows = matrix.rows();

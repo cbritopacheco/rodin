@@ -9,7 +9,7 @@ namespace boost::serialization
 {
   template <class Archive, class ScalarType>
   void serialize(
-      Archive & ar, Rodin::Array<ScalarType>& arr, const unsigned int version)
+      Archive & ar, const Rodin::Array<ScalarType>& arr, const unsigned int version)
   {
     const size_t sz = arr.size();
     ar & sz;

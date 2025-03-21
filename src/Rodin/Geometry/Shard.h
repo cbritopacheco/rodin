@@ -9,6 +9,8 @@ namespace Rodin::Geometry
 {
   class Shard : public Mesh<Context::Local>
   {
+    friend class boost::serialization::access;
+
     public:
       class Builder
       {
@@ -32,6 +34,13 @@ namespace Rodin::Geometry
       };
 
       const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const;
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & boost::serialization::base_object<Mesh<Context>>(*this);
+        ar & m_s2ps;
+      }
 
     private:
       std::vector<boost::bimap<Index, Index>> m_s2ps;
