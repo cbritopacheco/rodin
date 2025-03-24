@@ -126,13 +126,15 @@ if (RODIN_BUILD_SRC)
   # set(Boost_USE_STATIC_RUNTIME     OFF)
 
   if (RODIN_USE_MPI)
-    find_package(Boost 1.74 REQUIRED COMPONENTS mpi serialization)
+    find_package(Boost 1.74 REQUIRED COMPONENTS mpi)
   endif()
 
   find_package(Boost 1.74 REQUIRED
     COMPONENTS
     system
-    filesystem)
+    filesystem
+    serialization
+    )
   include_directories(${Boost_INCLUDE_DIRS})
 
   # ---- Corrade ----

@@ -21,8 +21,13 @@
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Context/Sequential.h"
 #include "Rodin/Utility/IsSpecialization.h"
-#include "Rodin/Serialization/EigenMatrix.h"
+
 #include "Rodin/Serialization/Array.h"
+#include "Rodin/Serialization/Vector.h"
+#include "Rodin/Serialization/FlatSet.h"
+#include "Rodin/Serialization/EigenMatrix.h"
+#include "Rodin/Serialization/UnorderedMap.h"
+
 #include "Rodin/Variational/Traits.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/P1/ForwardDecls.h"

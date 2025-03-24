@@ -1,6 +1,8 @@
 #ifndef RODIN_MUTABLE_H
 #define RODIN_MUTABLE_H
 
+#include <boost/serialization/access.hpp>
+
 #include "Rodin/Configure.h"
 
 #include "Mutex.h"
@@ -20,6 +22,7 @@ namespace Rodin::Threads
   template <class Resource, class Lock = Mutex>
   class Mutable
   {
+    friend class boost::serialization::access;
     public:
       /**
        * @brief Default constructor.
@@ -231,6 +234,12 @@ namespace Rodin::Threads
         f(m_resource);
 #endif
         return *this;
+      }
+
+      template<class Archive>
+      void serialize(Archive & ar, const unsigned int)
+      {
+        ar & m_resource;
       }
 
 #ifdef RODIN_THREAD_SAFE

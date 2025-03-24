@@ -72,7 +72,7 @@ namespace Rodin::Geometry
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive & ar, const unsigned int version)
       {
         ar & boost::serialization::make_array(m_map.data(), m_map.size());
       }

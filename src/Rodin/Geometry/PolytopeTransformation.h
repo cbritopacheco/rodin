@@ -7,6 +7,8 @@
 #ifndef RODIN_GEOMETRY_TRANSFORMATION_H
 #define RODIN_GEOMETRY_TRANSFORMATION_H
 
+#include <boost/serialization/access.hpp>
+
 #include "Rodin/Math.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
@@ -38,6 +40,7 @@ namespace Rodin::Geometry
    */
   class PolytopeTransformation
   {
+    friend class boost::serialization::access;
     public:
       constexpr
       PolytopeTransformation(size_t rdim, size_t pdim)
@@ -52,14 +55,12 @@ namespace Rodin::Geometry
 
       virtual ~PolytopeTransformation() = default;
 
-      inline
       constexpr
       size_t getReferenceDimension() const
       {
         return m_rdim;
       }
 
-      inline
       constexpr
       size_t getPhysicalDimension() const
       {
@@ -137,6 +138,13 @@ namespace Rodin::Geometry
       }
 
       virtual void inverse(const Math::SpatialVector<Real>& pc, Math::SpatialVector<Real>& rc) const;
+
+      template<class Archive>
+      void serialize(Archive & ar, const unsigned int)
+      {
+        ar & m_rdim;
+        ar & m_pdim;
+      }
 
     private:
       const size_t m_rdim;

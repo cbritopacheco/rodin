@@ -10,6 +10,8 @@
 #include <deque>
 #include <vector>
 
+#include <boost/serialization/access.hpp>
+
 #include "Types.h"
 #include "ForwardDecls.h"
 
@@ -18,6 +20,8 @@ namespace Rodin::Geometry
   template <class T>
   class PolytopeIndexed
   {
+    friend class boost::serialization::access;
+
     public:
       PolytopeIndexed() = default;
 
@@ -68,14 +72,12 @@ namespace Rodin::Geometry
         return m_tracked[d].end();
       }
 
-      inline
       PolytopeIndexed& initialize(size_t meshDimension)
       {
         m_tracked.resize(meshDimension + 1);
         return *this;
       }
 
-      inline
       PolytopeIndexed& track(const std::pair<size_t, Index>& p, T&& value)
       {
         const auto [d, i] = p;
@@ -85,7 +87,6 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      inline
       PolytopeIndexed& track(const std::pair<size_t, Index>& p, const T& value)
       {
         const auto [d, i] = p;
@@ -95,7 +96,6 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      inline
       T& at(size_t d, Index i)
       {
         assert(m_tracked.size() > 0);
@@ -103,7 +103,6 @@ namespace Rodin::Geometry
         return m_tracked[d].at(i);
       }
 
-      inline
       const T& at(size_t d, Index i) const
       {
         assert(m_tracked.size() > 0);
@@ -112,14 +111,12 @@ namespace Rodin::Geometry
         return m_tracked[d].at(i);
       }
 
-      inline
       auto find(size_t d, Index i) const
       {
         return m_tracked[d].find(i);
       }
 
       template <class Iterator>
-      inline
       auto insert(Iterator&& it, const std::pair<size_t, Index>& p, const T& value)
       {
         auto [d, i] = p;
@@ -127,14 +124,12 @@ namespace Rodin::Geometry
       }
 
       template <class Iterator>
-      inline
       auto insert(Iterator&& it, const std::pair<size_t, Index>& p, T&& value)
       {
         auto [d, i] = p;
         return m_tracked[d].insert(std::forward<Iterator>(it), { i, std::move(value) });
       }
 
-      inline
       bool isTracked(size_t d, Index i) const
       {
         assert(m_tracked.size() > 0);
@@ -142,7 +137,6 @@ namespace Rodin::Geometry
         return m_tracked[d].count(i) > 0;
       }
 
-      inline
       void reserve(size_t d, size_t count)
       {
         assert(m_tracked.size() > 0);
@@ -150,17 +144,21 @@ namespace Rodin::Geometry
         m_tracked[d].reserve(count);
       }
 
-      inline
       void clear()
       {
         for (auto& m : m_tracked)
           m.clear();
       }
 
-      inline
       void clear(size_t d)
       {
         m_tracked[d].clear();
+      }
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & m_tracked;
       }
 
     private:

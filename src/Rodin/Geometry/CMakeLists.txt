@@ -29,4 +29,5 @@ target_link_libraries(RodinGeometry
   Rodin::Alert
   Rodin::Context
   Rodin::Variational
+  Rodin::Serialization
   Boost::filesystem)
