@@ -7,7 +7,8 @@
 #ifndef RODIN_GEOMETRY_ISOPARAMETRICTRANSFORMATION_H
 #define RODIN_GEOMETRY_ISOPARAMETRICTRANSFORMATION_H
 
-#include <Eigen/QR>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/base_object.hpp>
 
 #include "Rodin/Geometry/Polytope.h"
 
@@ -25,6 +26,8 @@ namespace Rodin::Geometry
   {
     static_assert(std::is_same_v<typename FE::RangeType, Real>,
         "Type of finite element must be scalar valued.");
+
+    friend class boost::serialization::access;
 
     public:
       using Parent = PolytopeTransformation;
@@ -89,19 +92,16 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      inline
       size_t getOrder() const override
       {
         return m_fe.getOrder();
       }
 
-      inline
       size_t getJacobianOrder() const override
       {
         return m_fe.getOrder();
       }
 
-      inline
       void transform(const Math::SpatialVector<Real>& rc, Math::SpatialVector<Real>& pc) const override
       {
         const size_t pdim = getPhysicalDimension();
@@ -116,7 +116,6 @@ namespace Rodin::Geometry
         }
       }
 
-      inline
       void jacobian(const Math::SpatialVector<Real>& rc, Math::SpatialMatrix<Real>& res) const override
       {
         const size_t rdim = getReferenceDimension();
@@ -137,11 +136,17 @@ namespace Rodin::Geometry
         }
       }
 
-
-      inline
       const Math::PointMatrix& getPointMatrix() const
       {
         return m_pm;
+      }
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & boost::serialization::base_object<PolytopeTransformation>(*this);
+        ar & m_pm;
+        ar & m_fe;
       }
 
     private:

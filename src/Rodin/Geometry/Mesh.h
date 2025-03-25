@@ -995,6 +995,7 @@ namespace Rodin::Geometry
       {
         ar & m_sdim;
         ar & m_vertices;
+        ar & m_connectivity;
         ar & m_attributeIndex;
         ar & m_attributes;
         ar & m_transformationIndex;
@@ -1002,7 +1003,7 @@ namespace Rodin::Geometry
       }
 
     protected:
-      PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
+      virtual PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
 
     private:
       size_t m_sdim;

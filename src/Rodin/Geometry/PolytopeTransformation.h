@@ -8,6 +8,8 @@
 #define RODIN_GEOMETRY_TRANSFORMATION_H
 
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/assume_abstract.hpp>
 
 #include "Rodin/Math.h"
 #include "Rodin/Math/Vector.h"
@@ -151,5 +153,7 @@ namespace Rodin::Geometry
       const size_t m_pdim;
   };
 }
+
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(Rodin::Geometry::PolytopeTransformation)
 
 #endif
