@@ -8,27 +8,27 @@
 
 namespace Rodin::External::Scotch
 {
-  class MeshPartitioner : public Geometry::MeshPartitioner
+  class Partitioner : public Geometry::MeshPartitioner
   {
     public:
       using MeshType = Geometry::Mesh<Context::Local>;
 
-      MeshPartitioner(const MeshType& mesh);
+      Partitioner(const MeshType& mesh);
 
-      ~MeshPartitioner() override;
+      ~Partitioner() override;
 
       const MeshType& getMesh() const override;
 
-      void partition(size_t numPartitions)
+      void partition(size_t count)
       {
-        partition(numPartitions, getMesh().getDimension());
+        partition(count, getMesh().getDimension());
       }
 
       void partition(size_t numPartitions, size_t d) override;
 
       size_t getPartition(Index index) const override;
 
-      MeshPartitioner& setStrategy(const SCOTCH_Strat& strat);
+      Partitioner& setStrategy(const SCOTCH_Strat& strat);
 
     private:
       std::reference_wrapper<const MeshType> m_mesh;

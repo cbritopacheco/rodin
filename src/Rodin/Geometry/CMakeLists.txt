@@ -18,6 +18,8 @@ set(RodinGeometry_SRCS
   SubMesh.cpp
   MeshBuilder.cpp
   SubMeshBuilder.cpp
+  GreedyPartitioner.cpp
+  BalancedCompactPartitioner.cpp
   )
 add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})
 add_library(Rodin::Geometry ALIAS RodinGeometry)

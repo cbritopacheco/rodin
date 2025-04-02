@@ -7,15 +7,10 @@ namespace Rodin::Geometry
 {
     class MeshPartitioner
     {
-    public:
+      public:
         MeshPartitioner() = default;
 
         virtual ~MeshPartitioner() = default;
-
-        void partition(size_t count)
-        {
-          partition(count, getMesh().getDimension());
-        }
 
         virtual const MeshBase& getMesh() const = 0;
 

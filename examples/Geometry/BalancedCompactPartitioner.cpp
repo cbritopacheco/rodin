@@ -1,4 +1,4 @@
-#include "RodinExternal/Scotch/MeshPartitioner.h"
+#include "Rodin/Geometry/BalancedCompactPartitioner.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -10,7 +10,7 @@ int main()
 
   mesh.getConnectivity().compute(2, 2);
 
-  External::Scotch::Partitioner partitioner(mesh);
+  BalancedCompactPartitioner partitioner(mesh);
 
   partitioner.partition(16);
 
@@ -18,10 +18,12 @@ int main()
   {
     const auto idx = it->getIndex();
     const auto part = partitioner.getPartition(idx);
-    mesh.setAttribute({2, idx}, part + 1);
+    mesh.setAttribute({ 2, idx }, part + 1);
   }
 
-  mesh.save("Partitioned.mfem");
+  mesh.save("Partitioned.mesh");
 
   return 0;
 }
+
+

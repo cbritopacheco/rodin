@@ -30,6 +30,7 @@ option(RODIN_USE_SUPERLU              "Use Rodin with SuperLU support"          
 option(RODIN_USE_SPQR                 "Use Rodin with SPQR support"               OFF)
 option(RODIN_USE_PARDISO              "Use Rodin with Pardiso support"            OFF)
 option(RODIN_USE_APPLE_ACCELERATE     "Use Rodin with Apple Accelerate support"   OFF)
+option(RODIN_USE_SCOTCH               "Use Rodin with Scotch support"             OFF)
 option(RODIN_SILENCE_WARNINGS         "Silence warnings outputted by Rodin"       OFF)
 option(RODIN_SILENCE_EXCEPTIONS       "Silence exceptions thrown by Rodin"        ON)
 option(RODIN_CODE_COVERAGE            "Compile with code coverage flags"          OFF)

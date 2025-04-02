@@ -53,3 +53,13 @@ add_executable(UniformRefinement UniformRefinement.cpp)
 target_link_libraries(UniformRefinement
   PUBLIC
   Rodin::Geometry)
+
+add_executable(GreedyPartitioner GreedyPartitioner.cpp)
+target_link_libraries(GreedyPartitioner
+  PUBLIC
+  Rodin::Geometry)
+
+add_executable(BalancedCompactPartitioner BalancedCompactPartitioner.cpp)
+target_link_libraries(BalancedCompactPartitioner
+  PUBLIC
+  Rodin::Geometry)

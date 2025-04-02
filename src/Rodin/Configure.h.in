@@ -195,6 +195,20 @@
 
 /**
  * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with Scotch support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifdef RODIN_USE_SCOTCH
+ *   // Code that uses the Scotch library for partioning.
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_SCOTCH
+
+/**
+ * @ingroup RodinDirectives
  * @brief Indicates the maximal space dimension.
  */
 #define RODIN_MAXIMAL_SPACE_DIMENSION 3

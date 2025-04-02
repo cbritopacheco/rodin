@@ -3,28 +3,28 @@
 
 namespace Rodin::External::Scotch
 {
-  MeshPartitioner::MeshPartitioner(const MeshType& mesh)
+  Partitioner::Partitioner(const MeshType& mesh)
     : m_mesh(mesh)
   {}
 
-  MeshPartitioner::~MeshPartitioner()
+  Partitioner::~Partitioner()
   {
     SCOTCH_stratExit(&m_strat.value());
     SCOTCH_graphExit(&m_graph);
   }
 
-  MeshPartitioner& MeshPartitioner::setStrategy(const SCOTCH_Strat& strat)
+  Partitioner& Partitioner::setStrategy(const SCOTCH_Strat& strat)
   {
     m_strat = strat;
     return *this;
   }
 
-  const MeshPartitioner::MeshType& MeshPartitioner::getMesh() const
+  const Partitioner::MeshType& Partitioner::getMesh() const
   {
     return m_mesh.get();
   }
 
-  void MeshPartitioner::partition(size_t numPartitions, size_t d)
+  void Partitioner::partition(size_t numPartitions, size_t d)
   {
     const auto& mesh = getMesh();
     const auto& conn = m_mesh.get().getConnectivity();
@@ -87,7 +87,7 @@ namespace Rodin::External::Scotch
     }
   }
 
-  size_t MeshPartitioner::getPartition(Index index) const
+  size_t Partitioner::getPartition(Index index) const
   {
     return m_partition[index];
   }
