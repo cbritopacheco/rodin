@@ -14,4 +14,9 @@ if (RODIN_USE_MPI)
     PUBLIC
     Rodin::IO
     Rodin::Context)
+
+  add_executable(MPI MPI.cpp)
+  target_link_libraries(MPI
+    PUBLIC
+    Rodin::Context)
 endif()

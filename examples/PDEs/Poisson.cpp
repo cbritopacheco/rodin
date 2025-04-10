@@ -7,14 +7,12 @@
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
-#include <RodinExternal/MMG.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
 using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
-using namespace Rodin::External;
 
 int main(int, char**)
 {

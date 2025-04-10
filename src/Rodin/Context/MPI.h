@@ -18,9 +18,25 @@ namespace Rodin::Context
 {
   class MPI : public Base
   {
+    public:
+      MPI(boost::mpi::environment& env, boost::mpi::communicator& world)
+          : m_env(env),
+            m_world(world)
+      {}
+
+      const boost::mpi::communicator& getWorld() const
+      {
+        return m_world.get();
+      }
+
+      const boost::mpi::environment& getEnvironment() const
+      {
+        return m_env.get();
+      }
 
     private:
-      boost::mpi::communicator comm;
+      std::reference_wrapper<boost::mpi::environment> m_env;
+      std::reference_wrapper<boost::mpi::communicator> m_world;
   };
 }
 

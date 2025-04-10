@@ -17,6 +17,11 @@ namespace Rodin::Geometry
         virtual void partition(size_t numPartitions, size_t d) = 0;
 
         virtual size_t getPartition(Index index) const = 0;
+
+        size_t operator[](Index index) const
+        {
+          return getPartition(index);
+        }
     };
 }
 

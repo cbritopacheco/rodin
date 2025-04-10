@@ -22,22 +22,21 @@ namespace Rodin::Geometry
   class Mesh<Context::MPI> : public MeshBase
   {
     public:
-      class Fragment : public Mesh<Context::Local>
+      class Builder
       {
         public:
-          using Parent = Mesh<Context::Local>;
-          using Parent::Parent;
+          Builder(const Context::MPI& context);
+
+        private:
+          Context::MPI m_context;
       };
+
+      Mesh(const Context::MPI& context);
 
       Index getGlobalIndex(const std::pair<size_t, Index>& p, Index fragmentId);
 
-      const Fragment& getFragment(Index i) const
-      {
-        return m_fragments[i];
-      }
-
     private:
-      std::vector<Fragment> m_fragments;
+      Context::MPI m_context;
   };
 }
 

@@ -33,6 +33,7 @@ namespace Rodin::IO::MEDIT
     Triangles,
     Quadrilaterals,
     Tetrahedra,
+    TriangularPrisms,
     Corners,
     Ridges,
     Edges,
@@ -70,6 +71,8 @@ namespace Rodin::IO::MEDIT
         return "Quadrilaterals";
       case Keyword::Tetrahedra:
         return "Tetrahedra";
+      case Keyword::TriangularPrisms:
+        return "TriangularPrisms";
       case Keyword::Corners:
         return "Corners";
       case Keyword::Ridges:
@@ -179,6 +182,8 @@ namespace Rodin::IO::MEDIT
       res = Keyword::Quadrilaterals;
     else if (str == Keyword::Tetrahedra)
       res = Keyword::Tetrahedra;
+    else if (str == Keyword::TriangularPrisms)
+      res = Keyword::TriangularPrisms;
     else if (str == Keyword::Corners)
       res = Keyword::Corners;
     else if (str == Keyword::Ridges)
