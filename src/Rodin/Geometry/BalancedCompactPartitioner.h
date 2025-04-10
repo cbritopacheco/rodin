@@ -5,7 +5,7 @@
 
 namespace Rodin::Geometry
 {
-  class BalancedCompactPartitioner : public MeshPartitioner
+  class BalancedCompactPartitioner : public Partitioner
   {
     public:
       using MeshType = Mesh<Context::Local>;

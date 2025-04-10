@@ -8,7 +8,7 @@
 
 namespace Rodin::External::Scotch
 {
-  class Partitioner : public Geometry::MeshPartitioner
+  class Partitioner : public Geometry::Partitioner
   {
     public:
       using MeshType = Geometry::Mesh<Context::Local>;

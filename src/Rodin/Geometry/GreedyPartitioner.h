@@ -5,7 +5,7 @@
 
 namespace Rodin::Geometry
 {
-  class GreedyPartitioner : public MeshPartitioner
+  class GreedyPartitioner : public Partitioner
   {
     public:
       using MeshType = Geometry::Mesh<Context::Local>;
