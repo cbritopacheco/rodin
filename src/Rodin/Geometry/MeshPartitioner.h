@@ -12,7 +12,7 @@ namespace Rodin::Geometry
 
       virtual ~Partitioner() = default;
 
-      virtual const MeshBase& getMesh() const = 0;
+      virtual const Mesh<Context::Local>& getMesh() const = 0;
 
       virtual void partition(size_t numPartitions, size_t d) = 0;
 
@@ -22,6 +22,8 @@ namespace Rodin::Geometry
       {
         return getPartition(index);
       }
+
+      virtual size_t getCount() const;
   };
 }
 
