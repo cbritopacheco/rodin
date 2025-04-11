@@ -24,7 +24,7 @@ namespace Rodin::Context
             m_world(world)
       {}
 
-      const boost::mpi::communicator& getWorld() const
+      const boost::mpi::communicator& getCommunicator() const
       {
         return m_world.get();
       }

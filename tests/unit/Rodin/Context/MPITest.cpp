@@ -15,7 +15,7 @@ namespace Rodin::Tests::Unit
 
     const Rodin::Context::MPI context(env, world);
 
-    const boost::mpi::communicator& commFromClass = context.getWorld();
+    const boost::mpi::communicator& commFromClass = context.getCommunicator();
     const boost::mpi::environment& envFromClass = context.getEnvironment();
 
     EXPECT_EQ(commFromClass.rank(), world.rank());
