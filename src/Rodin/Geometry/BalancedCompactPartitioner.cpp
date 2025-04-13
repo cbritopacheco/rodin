@@ -39,7 +39,7 @@ namespace Rodin::Geometry
     : m_mesh(mesh)
   {}
 
-  const MeshBase& BalancedCompactPartitioner::getMesh() const
+  const Mesh<Context::Local>& BalancedCompactPartitioner::getMesh() const
   {
     return m_mesh.get();
   }
@@ -204,5 +204,10 @@ namespace Rodin::Geometry
   size_t BalancedCompactPartitioner::getPartition(Index index) const
   {
     return m_partition[index];
+  }
+
+  size_t BalancedCompactPartitioner::getCount() const
+  {
+    return m_count;
   }
 }

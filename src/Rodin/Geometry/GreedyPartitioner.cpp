@@ -9,7 +9,7 @@ namespace Rodin::Geometry
     : m_mesh(mesh)
   {}
 
-  const MeshBase& GreedyPartitioner::getMesh() const
+  const Mesh<Context::Local>& GreedyPartitioner::getMesh() const
   {
     return m_mesh.get();
   }
@@ -59,5 +59,10 @@ namespace Rodin::Geometry
   size_t GreedyPartitioner::getPartition(Index index) const
   {
     return m_partition[index];
+  }
+
+  size_t GreedyPartitioner::getCount() const
+  {
+    return m_count;
   }
 }

@@ -14,7 +14,7 @@ namespace Rodin::Geometry
 
       virtual ~GreedyPartitioner() = default;
 
-      virtual const MeshBase& getMesh() const override;
+      virtual const MeshType& getMesh() const override;
 
       void partition(size_t count)
       {
@@ -25,7 +25,10 @@ namespace Rodin::Geometry
 
       virtual size_t getPartition(Index index) const override;
 
+      size_t getCount() const override;
+
     private:
+      size_t m_count;
       std::reference_wrapper<const MeshType> m_mesh;
       std::vector<size_t> m_partition;
   };

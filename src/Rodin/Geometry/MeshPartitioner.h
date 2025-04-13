@@ -23,7 +23,7 @@ namespace Rodin::Geometry
         return getPartition(index);
       }
 
-      virtual size_t getCount() const;
+      virtual size_t getCount() const = 0;
   };
 }
 
