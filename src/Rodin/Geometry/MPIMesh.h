@@ -34,7 +34,7 @@ namespace Rodin::Geometry
 
           Builder& initialize(const Context::MPI& context, Shard&& shard);
 
-          // Mesh finalize();
+          Mesh finalize();
 
         private:
           Shard m_shard;
@@ -63,6 +63,10 @@ namespace Rodin::Geometry
       // {
       //   return m_connectivity;
       // }
+
+      const Context::MPI& getContext() const override;
+
+      size_t getPolytopeCount(size_t d) const override;
 
     private:
       Context::MPI m_context;

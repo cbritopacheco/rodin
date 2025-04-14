@@ -48,6 +48,19 @@ namespace Rodin::Geometry
   {
     return m_shard.getSpaceDimension();
   }
+
+  const Context::MPI& MPIMesh::getContext() const
+  {
+    return m_context;
+  }
+
+  size_t MPIMesh::getPolytopeCount(size_t d) const
+  {
+    const auto& comm = m_context.getCommunicator();
+    size_t count = m_shard.getPolytopeCount(d);
+    boost::mpi::all_reduce(comm, count, std::plus<size_t>());
+    return count;
+  }
 }
 
 #endif
