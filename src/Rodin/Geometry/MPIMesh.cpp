@@ -4,22 +4,19 @@
 
 namespace Rodin::Geometry
 {
-  MPIMesh::Builder::Builder(const Context::MPI& context)
-    : m_context(context)
-  {}
-
-  MPIMesh::Mesh(const Context::MPI& context)
-    : m_context(context)
-  {}
-
-  MPIMesh::shard(int rank, Shard&& shard)
+  MPIMesh::Builder& MPIMesh::Builder::initialize(const Context::MPI& context, Shard&& shard)
   {
-    const auto& comm = m_context.getCommunicator();
-    if (comm.rank() == rank)
-      comm.recv(rank, 0, m_shard);
-    else
-      comm.send(rank, 0, shard);
+    m_context = std::move(context);
+    m_shard = std::move(shard);
+    return *this;
   }
+
+  // MPIMesh MPIMesh::Builder::finalize()
+  // {
+  //   MPIMesh mesh(m_context);
+  //   mesh.m_shard = std::move(m_shard);
+  //   return mesh;
+  // }
 
   Index MPIMesh::getGlobalIndex(const std::pair<size_t, Index>& p, Index fragmentId)
   {

@@ -51,6 +51,7 @@ namespace Rodin::Geometry
   // the cluster's current centroid is more than compactFactor times the cluster's radius.
   void BalancedCompactPartitioner::partition(size_t numClusters, size_t d)
   {
+    m_count = numClusters;
     const MeshBase& mesh = getMesh();
     size_t n = mesh.getPolytopeCount(d);
     if (n == 0)

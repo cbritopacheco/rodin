@@ -12,46 +12,62 @@ namespace Rodin::Geometry
   class MPISharder
   {
     public:
-      MPISharder(const Context::MPI& context);
+      MPISharder(const Context::MPI& context)
+        : m_context(context),
+          m_root(0),
+          m_tag(0)
+      {}
 
-      Mesh<Context::MPI> shard(Partitioner& partitioner)
+      void shard(Partitioner& partitioner)
       {
-        const auto& localMesh = partitioner.getMesh();
-        const size_t cellDim = localMesh.getDimension();
+        const auto& comm = m_context.getCommunicator();
+        const auto& mesh = partitioner.getMesh();
+        const size_t cellDim = mesh.getDimension();
         const size_t numShards = partitioner.getCount();
 
         Mesh<Context::MPI>::Builder build;
-        build.initialize(localMesh.getSpaceDimension(), m_context);
-
-        std::vector<Shard::Builder> shards;
-        shards.resize(numShards);
-
-        for (auto& shard : shards)
-          shard.initialize(localMesh);
-
-        for (auto it = localMesh.getCell(); it; ++it)
+        if (comm.rank() == m_root)
         {
-          const size_t partIdx = partitioner.getPartition(it->getIndex());
-          shards[partIdx].include(cellDim, it->getIndex());
+          std::vector<Shard::Builder> sbs(numShards);
+          for (auto& sb : sbs)
+            sb.initialize(mesh);
+
+          for (auto it = mesh.getCell(); it; ++it)
+          {
+            const size_t partIdx = partitioner.getPartition(it->getIndex());
+            sbs[partIdx].include(cellDim, it->getIndex());
+          }
+
+          std::vector<Shard> shards(numShards);
+          std::vector<boost::mpi::request> requests;
+          requests.reserve(numShards - 1);
+          for (size_t i = 0; i < shards.size(); i++)
+          {
+            assert(m_root >= 0);
+            if (i == static_cast<size_t>(m_root))
+              shards[i] = sbs[i].finalize();
+            else
+              requests.push_back(comm.isend(i, m_tag, sbs[i].finalize()));
+          }
+          for (auto& req : requests)
+            req.wait();
+          build.initialize(m_context, std::move(shards[m_root]));
         }
-
-        // for (const auto& shard : shards)
-        // {
-        //   const auto& l = shard.finalize();
-        //   const size_t numCells = localShard.getCellCount();
-        //   for (size_t i = 0; i < numCells; i++)
-        //   {
-        //     const auto& polytope = localShard.getPolytope(cellDim, i);
-        //     const auto& globalIdx = polytope.getGlobalIndex();
-        //     build.polytope(polytope.getGeometryType(), globalIdx);
-        //   }
-        // }
-
+        else
+        {
+          Shard s;
+          boost::mpi::request request = comm.irecv(m_root, m_tag, s);
+          request.wait();
+          Mesh<Context::MPI>::Builder build;
+          build.initialize(m_context, std::move(s));
+        }
+        // return build.finalize();
       }
 
     private:
       Context::MPI m_context;
-      std::reference_wrapper<LocalMesh> m_mesh;
+      int m_root;
+      int m_tag;
   };
 }
 

@@ -1,4 +1,4 @@
-#include "RodinExternal/Scotch/MeshPartitioner.h"
+#include <RodinExternal/Scotch/MeshPartitioner.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;

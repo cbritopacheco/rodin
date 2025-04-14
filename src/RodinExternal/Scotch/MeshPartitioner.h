@@ -30,7 +30,13 @@ namespace Rodin::External::Scotch
 
       Partitioner& setStrategy(const SCOTCH_Strat& strat);
 
+      size_t getCount() const override
+      {
+        return m_numPartitions;
+      }
+
     private:
+      size_t m_numPartitions;
       std::reference_wrapper<const MeshType> m_mesh;
       std::vector<SCOTCH_Num> m_partition;
 

@@ -26,6 +26,7 @@ namespace Rodin::External::Scotch
 
   void Partitioner::partition(size_t numPartitions, size_t d)
   {
+    m_numPartitions = numPartitions;
     const auto& mesh = getMesh();
     const auto& conn = m_mesh.get().getConnectivity();
     const size_t n = conn.getCount(d);

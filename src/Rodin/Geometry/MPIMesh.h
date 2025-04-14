@@ -7,9 +7,10 @@
 #ifndef RODIN_GEOMETRY_MPI_MESH_H
 #define RODIN_GEOMETRY_MPI_MESH_H
 
+#include "Rodin/Configure.h"
+
 #ifdef RODIN_USE_MPI
 
-#include "Rodin/Configure.h"
 #include "Rodin/Context/MPI.h"
 #include "Shard.h"
 
@@ -28,16 +29,18 @@ namespace Rodin::Geometry
         public:
           Builder();
 
-          Builer& initialize(size_t sdim, const Context::MPI& context);
+          Builder& initialize(const Context::MPI& context, Shard&& shard);
 
-          Builder& shard(int rank, Shard&& shard);
+          // Mesh finalize();
 
         private:
-          size_t m_sdim;
+          Shard m_shard;
           Context::MPI m_context;
       };
 
-      Mesh(const Context::MPI& context);
+      Mesh(const Context::MPI& context)
+        : m_context(context)
+      {}
 
       Shard& local();
 
@@ -45,7 +48,6 @@ namespace Rodin::Geometry
 
     private:
       Context::MPI m_context;
-
       Shard m_shard;
   };
 }
