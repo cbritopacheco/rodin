@@ -12,9 +12,12 @@
 #ifdef RODIN_USE_MPI
 
 #include "Rodin/Context/MPI.h"
-#include "Shard.h"
+
+#include "MPIConnectivity.h"
 
 #include "Mesh.h"
+#include "Shard.h"
+
 
 namespace Rodin::Geometry
 {
@@ -46,9 +49,25 @@ namespace Rodin::Geometry
 
       Index getGlobalIndex(const std::pair<size_t, Index>& p, Index fragmentId);
 
+      Mesh& scale(Real c) override;
+
+      void flush() override;
+
+      bool isSubMesh() const override;
+
+      size_t getDimension() const override;
+
+      size_t getSpaceDimension() const override;
+
+      // const Connectivity<Context::MPI>& getConnectivity() const override
+      // {
+      //   return m_connectivity;
+      // }
+
     private:
       Context::MPI m_context;
       Shard m_shard;
+      Connectivity<Context::MPI> m_connectivity;
   };
 }
 

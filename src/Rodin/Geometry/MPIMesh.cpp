@@ -22,6 +22,32 @@ namespace Rodin::Geometry
   {
     return 0;
   }
+
+  MPIMesh& MPIMesh::scale(Real c)
+  {
+    m_shard.scale(c);
+    return *this;
+  }
+
+  void MPIMesh::flush()
+  {
+    m_shard.flush();
+  }
+
+  bool MPIMesh::isSubMesh() const
+  {
+    return false;
+  }
+
+  size_t MPIMesh::getDimension() const
+  {
+    return m_shard.getDimension();
+  }
+
+  size_t MPIMesh::getSpaceDimension() const
+  {
+    return m_shard.getSpaceDimension();
+  }
 }
 
 #endif

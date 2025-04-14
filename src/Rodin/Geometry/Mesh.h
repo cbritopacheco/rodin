@@ -211,7 +211,7 @@ namespace Rodin::Geometry
           size_t d,
           const FlatSet<Attribute>& attrs) const;
 
-      virtual std::optional<Point> inclusion(const Point& p) const = 0;
+      virtual std::optional<Point> inclusion(const Point& p) const;
 
       virtual MeshBase& scale(Real c) = 0;
 
@@ -882,8 +882,6 @@ namespace Rodin::Geometry
       }
 
       virtual Mesh& trace(const Map<Attribute, Attribute>& tmap, const FlatSet<Attribute>& attrs);
-
-      virtual std::optional<Point> inclusion(const Point& p) const override;
 
       SubMeshBase& asSubMesh() override;
 

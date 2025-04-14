@@ -880,7 +880,7 @@ namespace Rodin::Geometry
     };
   }
 
-  std::optional<Point> Mesh<Context::Local>::inclusion(const Point& p) const
+  std::optional<Point> MeshBase::inclusion(const Point& p) const
   {
     const auto& polytope = p.getPolytope();
     if (!polytope.getMesh().isSubMesh())
@@ -922,6 +922,5 @@ namespace Rodin::Geometry
     // The SubMesh where the Point belongs to is not a descendant of this Mesh.
     return {};
   }
-
 }
 

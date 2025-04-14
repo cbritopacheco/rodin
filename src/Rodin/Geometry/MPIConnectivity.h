@@ -9,12 +9,17 @@
 
 #include "Rodin/Context/MPI.h"
 
-#include "ForwardDecls.h"
 #include "Connectivity.h"
+#include "ForwardDecls.h"
 
 namespace Rodin::Geometry
 {
   using MPIConnectivity = Connectivity<Context::MPI>;
+
+  template <>
+  class Connectivity<Context::MPI>
+  {
+  };
 }
 
 #endif

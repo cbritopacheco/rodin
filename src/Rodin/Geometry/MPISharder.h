@@ -18,7 +18,7 @@ namespace Rodin::Geometry
           m_tag(0)
       {}
 
-      void shard(Partitioner& partitioner)
+      void send(Partitioner& partitioner)
       {
         const auto& comm = m_context.getCommunicator();
         const auto& mesh = partitioner.getMesh();
