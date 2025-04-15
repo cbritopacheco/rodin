@@ -55,6 +55,49 @@ namespace Rodin::Geometry
     return *this;
   }
 
+  Shard::Builder& Shard::Builder::ghost(size_t d, Index parentIdx)
+  {
+    auto& build = m_build;
+    assert(m_parent.has_value());
+    const auto& parent = m_parent.value().get();
+    const auto& conn = parent.getConnectivity();
+    const auto& parentPolytope = conn.getPolytope(d, parentIdx);
+    IndexArray childPolytope(parentPolytope.size());
+    assert(childPolytope.size() >= 0);
+    for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
+    {
+      const Index parentVertex = parentPolytope.coeff(i);
+      const Index childVertex = m_sidx[0];
+      const auto [it, inserted] = m_s2ps[0].left.insert({ childVertex, parentVertex });
+      if (inserted) // Vertex was not already in the map
+      {
+        childPolytope.coeffRef(i) = childVertex;
+        m_sidx[0] += 1;
+      }
+      else // Vertex was already in the map
+      {
+        childPolytope.coeffRef(i) = it->get_left();
+      }
+    }
+    // Add polytope with original geometry and new vertex ordering
+    build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
+    const Index childIdx = m_sidx[d];
+    const auto [it, inserted] = m_s2ps[d].left.insert({ childIdx, parentIdx });
+    // Add polytope information
+    if (inserted) // Polytope was already in the map
+    {
+      build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
+      m_sidx[d] += 1;
+      m_ghosts[d].insert(childIdx);
+    }
+    else
+    {
+      build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
+    }
+    m_dimension = std::max(m_dimension, d);
+    return *this;
+  }
+
   Shard::Builder& Shard::Builder::include(size_t d, const IndexSet& indices)
   {
     for (const Index parentIdx : indices)
@@ -66,11 +109,6 @@ namespace Rodin::Geometry
   {
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();
-    const size_t nodes = m_sidx[0];
-    // Build the mesh object.
-    m_build.nodes(nodes);
-    for (auto it = m_s2ps[0].left.begin(); it != m_s2ps[0].left.end(); ++it)
-      m_build.vertex(parent.getVertexCoordinates(it->get_right()));
     auto& conn = m_build.getConnectivity();
     // Build the connectivity for the submesh from the parent mesh.
     for (size_t d = 0; d < m_s2ps.size(); d++)
@@ -92,7 +130,13 @@ namespace Rodin::Geometry
             {
               auto find = m_s2ps[dp].right.find(p);
               if (find != m_s2ps[dp].right.end())
+              {
                 cInc[cIdx].insert_unique(find->get_left());
+              }
+              else
+              {
+                ghost(dp, p);
+              }
             }
           }
           // Manually set the incidence
@@ -100,11 +144,28 @@ namespace Rodin::Geometry
         }
       }
     }
+
+    const size_t nodes = m_sidx[0];
+    // Build the mesh object.
+    m_build.nodes(nodes);
+    for (auto it = m_s2ps[0].left.begin(); it != m_s2ps[0].left.end(); ++it)
+      m_build.vertex(parent.getVertexCoordinates(it->get_right()));
+
     // Finalize construction
     Shard res;
     res.Parent::operator=(m_build.finalize());
     res.m_s2ps = std::move(m_s2ps);
     return res;
+  }
+
+  bool Shard::isGhost(size_t d, Index idx) const
+  {
+    return m_ghosts[d].contains(idx);
+  }
+
+  const boost::bimap<Index, Index>& Shard::getPolytopeMap(size_t d) const
+  {
+    return m_s2ps[d];
   }
 }
 

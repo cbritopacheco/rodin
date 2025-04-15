@@ -17,8 +17,14 @@ namespace Rodin::Geometry
   using MPIConnectivity = Connectivity<Context::MPI>;
 
   template <>
-  class Connectivity<Context::MPI>
+  class Connectivity<Context::MPI> : public ConnectivityBase
   {
+    public:
+      using Context = Context::MPI;
+
+      Connectivity(const Context& context)
+      {}
+
   };
 }
 

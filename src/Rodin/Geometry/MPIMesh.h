@@ -34,7 +34,7 @@ namespace Rodin::Geometry
 
           Builder& initialize(const Context::MPI& context, Shard&& shard);
 
-          Mesh finalize();
+          // Mesh finalize();
 
         private:
           Shard m_shard;
@@ -78,12 +78,6 @@ namespace Rodin::Geometry
        * @param globalIdx The global index (consistent across processes) of the
        * polytope to start iteration from.
        *
-       * This function maps a global polytope index into the local index space
-       * using an exclusive scan on the local polytope count for the given
-       * dimension. Each MPI process computes its own global offset (via an
-       * exclusive scan) so that its local data is numbered within the global
-       * index space.
-       *
        * - If the provided global index is within the range that belongs to
        *   this process, the function constructs a PolytopeIterator that starts
        *   at the corresponding local index.
@@ -96,10 +90,22 @@ namespace Rodin::Geometry
        */
       PolytopeIterator getPolytope(size_t dimension, Index globalIdx) const override;
 
+      CellIterator getCell(Index globalIdx) const override;
+
+      FaceIterator getFace(Index globalIdx) const override;
+
+      VertexIterator getVertex(Index globalIdx) const override;
+
+      std::optional<Index> getLocalIndex(size_t dimension, Index globalIdx) const;
+
+      bool isInterface(Index faceIdx) const override;
+
+      bool isBoundary(Index faceIdx) const override;
+
     private:
       Context::MPI m_context;
       Shard m_shard;
-      Connectivity<Context::MPI> m_connectivity;
+      // Connectivity<Context::MPI> m_connectivity;
   };
 }
 

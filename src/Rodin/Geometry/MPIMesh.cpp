@@ -82,30 +82,96 @@ namespace Rodin::Geometry
 
   PolytopeIterator MPIMesh::getPolytope(size_t dimension, Index globalIdx) const
   {
-    // Get local count from the shard.
-    size_t localCount = m_shard.getPolytopeCount(dimension);
-
-    // Compute inclusive scan of localCount across processes.
-    size_t inclusiveSum = 0;
-    boost::mpi::communicator comm = m_context.getCommunicator();
-    boost::mpi::scan(comm, localCount, inclusiveSum, std::plus<size_t>());
-
-    // Compute exclusive scan by subtracting the local count.
-    size_t globalOffset = inclusiveSum - localCount;
-
-    // Check if the global index belongs to this rank.
-    if (globalIdx < globalOffset || globalIdx >= globalOffset + localCount)
-    {
-      // Not owned by this rank: return an empty iterator.
-      return PolytopeIterator(dimension, m_shard, BoundedIndexGenerator(0, 0));
-    }
+    const auto& shard = getShard();
+    std::optional<Index> localIndex = getLocalIndex(dimension, globalIdx);
+    if (localIndex)
+      return shard.getPolytope(dimension, *localIndex);
     else
+      return PolytopeIterator(dimension, shard, BoundedIndexGenerator(0, 0));
+  }
+
+  CellIterator MPIMesh::getCell(Index globalIdx) const
+  {
+    const auto& shard = getShard();
+    const size_t d = getDimension();
+    std::optional<Index> localIndex = getLocalIndex(d, globalIdx);
+    if (localIndex)
+      return shard.getCell(*localIndex);
+    else
+      return CellIterator(shard, BoundedIndexGenerator(0, 0));
+  }
+
+  FaceIterator MPIMesh::getFace(Index globalIdx) const
+  {
+    const auto& shard = getShard();
+    const size_t d = getDimension() - 1;
+    std::optional<Index> localIndex = getLocalIndex(d, globalIdx);
+    if (localIndex)
+      return shard.getFace(*localIndex);
+    else
+      return FaceIterator(shard, BoundedIndexGenerator(0, 0));
+  }
+
+  VertexIterator MPIMesh::getVertex(Index globalIdx) const
+  {
+    const auto& shard = getShard();
+    const size_t d = getDimension() - 1;
+    std::optional<Index> localIndex = getLocalIndex(d, globalIdx);
+    if (localIndex)
+      return shard.getVertex(*localIndex);
+    else
+      return VertexIterator(shard, BoundedIndexGenerator(0, 0));
+  }
+
+  std::optional<Index> MPIMesh::getLocalIndex(size_t dimension, Index globalIdx) const
+  {
+    const auto& shard = getShard();
+    const auto& polytopeMap = shard.getPolytopeMap(dimension);
+    const auto find = polytopeMap.right.find(globalIdx);
+    if (find == polytopeMap.right.end())
+      return std::nullopt;
+    else
+      return find->get_left();
+  }
+
+  bool MPIMesh::isInterface(Index faceIdx) const
+  {
+    const auto& comm = m_context.getCommunicator();
+    const size_t D = getDimension();
+    const auto& shard = getShard();
+    const auto& conn = shard.getConnectivity();
+    const auto localIndex = getLocalIndex(D - 1, faceIdx);
+    bool result = false;
+    if (localIndex)
     {
-      // Map global index to local index.
-      size_t localIdx = globalIdx - globalOffset;
-      // Create an iterator that starts at this local index up to localCount.
-      return PolytopeIterator(dimension, m_shard, BoundedIndexGenerator(localIdx, localCount));
+      RODIN_GEOMETRY_REQUIRE_INCIDENCE(shard, D - 1, D);
+      assert(conn.getIncidence(D - 1, D).size());
+      const auto& incidence = conn.getIncidence({D - 1, D}, *localIndex);
+      assert(incidence.size() > 0);
+      result = (incidence.size() > 1);
     }
+    boost::mpi::all_reduce(comm, result, std::logical_or<bool>());
+    return result;
+  }
+
+  bool MPIMesh::isBoundary(Index faceIdx) const
+  {
+    const auto& comm = m_context.getCommunicator();
+    const size_t D = getDimension();
+    const auto& shard = getShard();
+    const auto& conn = shard.getConnectivity();
+    const auto localIndex = getLocalIndex(D - 1, faceIdx);
+    bool result = false;
+    if (localIndex)
+    {
+      RODIN_GEOMETRY_REQUIRE_INCIDENCE(shard, D - 1, D);
+      assert(conn.getIncidence(D - 1, D).size());
+      const auto& incidence = conn.getIncidence({D - 1, D}, *localIndex);
+      assert(incidence.size() > 0);
+      result = (incidence.size() == 1);
+    }
+    boost::mpi::all_reduce(comm, result, std::logical_or<bool>());
+    return result;
   }
 }
 

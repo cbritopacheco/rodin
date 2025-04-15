@@ -191,39 +191,7 @@ namespace Rodin::Geometry
         return this != &other;
       }
 
-      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p) const
-      {
-        return ccl(p, getDimension());
-      }
-
-      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p, size_t d) const
-      {
-        return ccl(p, d, FlatSet<Attribute>{});
-      }
-
-      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
-          size_t d, Attribute attr) const
-      {
-        return ccl(p, d, FlatSet<Attribute>{ attr });
-      }
-
-      virtual CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
-          size_t d,
-          const FlatSet<Attribute>& attrs) const;
-
       virtual std::optional<Point> inclusion(const Point& p) const;
-
-      virtual MeshBase& scale(Real c) = 0;
-
-      virtual MeshBase& load(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM) = 0;
-
-      virtual void save(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const = 0;
-
-      virtual void flush() = 0;
 
       /**
        * @brief Indicates if the mesh is empty or not.
@@ -245,6 +213,52 @@ namespace Rodin::Geometry
        * @returns True if mesh is a surface, false otherwise.
        */
       bool isSurface() const;
+
+      /**
+       * @brief Gets the number of vertices in the mesh.
+       */
+      size_t getVertexCount() const
+      {
+        return getPolytopeCount(0);
+      }
+
+      /**
+       * @brief Gets the number of faces in the mesh.
+       */
+      size_t getFaceCount() const
+      {
+        return getPolytopeCount(getDimension() - 1);
+      }
+
+      /**
+       * @brief Gets the number of cells in the mesh.
+       */
+      size_t getCellCount() const
+      {
+        return getPolytopeCount(getDimension());
+      }
+
+      Attribute getFaceAttribute(Index index) const
+      {
+        return getAttribute(getDimension() - 1, index);
+      }
+
+      Attribute getCellAttribute(Index index) const
+      {
+        return getAttribute(getDimension(), index);
+      }
+
+      virtual MeshBase& scale(Real c) = 0;
+
+      virtual MeshBase& load(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM) = 0;
+
+      virtual void save(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const = 0;
+
+      virtual void flush() = 0;
 
       /**
        * @brief Indicates whether the mesh is a submesh or not.
@@ -289,44 +303,10 @@ namespace Rodin::Geometry
       virtual size_t getSpaceDimension() const = 0;
 
       /**
-       * @brief Gets the number of vertices in the mesh.
-       */
-      size_t getVertexCount() const
-      {
-        return getPolytopeCount(0);
-      }
-
-      /**
-       * @brief Gets the number of faces in the mesh.
-       */
-      size_t getFaceCount() const
-      {
-        return getPolytopeCount(getDimension() - 1);
-      }
-
-      /**
-       * @brief Gets the number of cells in the mesh.
-       */
-      size_t getCellCount() const
-      {
-        return getPolytopeCount(getDimension());
-      }
-
-      Attribute getFaceAttribute(Index index) const
-      {
-        return getAttribute(getDimension() - 1, index);
-      }
-
-      Attribute getCellAttribute(Index index) const
-      {
-        return getAttribute(getDimension(), index);
-      }
-
-      /**
        * @brief Gets the total volume of the mesh.
        * @returns Sum of all cell volumes.
        */
-      Real getVolume() const;
+      virtual Real getVolume() const = 0;
 
       /**
        * @brief Gets the sum of the volumes of the cells given by the
@@ -336,15 +316,15 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the volume.
        */
-      Real getVolume(Attribute attr) const;
+      virtual Real getVolume(Attribute attr) const = 0;
 
-      Real getVolume(const FlatSet<Attribute>& attr) const;
+      virtual Real getVolume(const FlatSet<Attribute>& attr) const = 0;
 
       /**
        * @brief Gets the total perimeter of the mesh.
        * @returns Sum of all element perimeters.
        */
-      Real getPerimeter() const;
+      virtual Real getPerimeter() const = 0;
 
       /**
        * @brief Gets the sum of the perimeters of the cells given by the
@@ -354,28 +334,21 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the perimeter.
        */
-      Real getPerimeter(Attribute attr) const;
+      virtual Real getPerimeter(Attribute attr) const = 0;
 
-      Real getPerimeter(const FlatSet<Attribute>& attr) const;
+      virtual Real getPerimeter(const FlatSet<Attribute>& attr) const = 0;
 
-      Real getArea() const;
+      virtual Real getArea() const = 0;
 
-      Real getArea(Attribute attr) const;
+      virtual Real getArea(Attribute attr) const = 0;
 
-      Real getArea(const FlatSet<Attribute>& attr) const;
+      virtual Real getArea(const FlatSet<Attribute>& attr) const = 0;
 
-      Real getMeasure(size_t d) const;
+      virtual Real getMeasure(size_t d) const = 0;
 
-      Real getMeasure(size_t d, Attribute attr) const;
+      virtual Real getMeasure(size_t d, Attribute attr) const = 0;
 
-      Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const;
-
-      /**
-       * @brief Gets the labels of the domain cells in the mesh.
-       * @returns Set of all the attributes in the mesh object.
-       * @see getBoundaryAttributes() const
-       */
-      virtual const FlatSet<Attribute>& getAttributes(size_t d) const = 0;
+      virtual Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const = 0;
 
       /**
        * @brief Gets a FaceIterator for the boundary faces.
@@ -399,27 +372,35 @@ namespace Rodin::Geometry
        */
       virtual size_t getPolytopeCount(Polytope::Type g) const = 0;
 
+      virtual CellIterator getCell() const = 0;
+
+      virtual FaceIterator getFace() const = 0;
+
+      virtual VertexIterator getVertex() const = 0;
+
+      virtual PolytopeIterator getPolytope(size_t dimension) const = 0;
+
       /**
        * @brief Gets an CellIterator to the cells of the mesh.
        */
-      virtual CellIterator getCell(Index idx = 0) const = 0;
+      virtual CellIterator getCell(Index idx) const = 0;
 
       /**
        * @brief Gets a FaceIterator to the faces of the mesh.
        */
-      virtual FaceIterator getFace(Index idx = 0) const = 0;
+      virtual FaceIterator getFace(Index idx) const = 0;
 
       /**
        * @brief Gets a VertexIterator to the vertices of the mesh.
        */
-      virtual VertexIterator getVertex(Index idx = 0) const = 0;
+      virtual VertexIterator getVertex(Index idx) const = 0;
 
       /**
        * @brief Gets a PolytopeIterator to the polytopes of the given dimension
        * of the mesh.
        * @param[in] dimension Polytope dimension
        */
-      virtual PolytopeIterator getPolytope(size_t dimension, Index idx = 0) const = 0;
+      virtual PolytopeIterator getPolytope(size_t dimension, Index idx) const = 0;
 
       /**
        * @brief Gets the PolytopeTransformation associated to the @f$ (d, i)
@@ -797,6 +778,74 @@ namespace Rodin::Geometry
       }
 
       /**
+       * @brief Gets the total volume of the mesh.
+       * @returns Sum of all cell volumes.
+       */
+      Real getVolume() const override;
+
+      /**
+       * @brief Gets the sum of the volumes of the cells given by the
+       * specified attribute.
+       * @param[in] attr Attribute of cells
+       * @returns Sum of element volumes with given attribute
+       * @note If the element attribute does not exist then this function
+       * will return 0 as the volume.
+       */
+      Real getVolume(Attribute attr) const override;
+
+      Real getVolume(const FlatSet<Attribute>& attr) const override;
+
+      /**
+       * @brief Gets the total perimeter of the mesh.
+       * @returns Sum of all element perimeters.
+       */
+      Real getPerimeter() const override;
+
+      /**
+       * @brief Gets the sum of the perimeters of the cells given by the
+       * specified attribute.
+       * @param[in] attr Attribute of cells
+       * @returns Sum of element perimeters with given attribute
+       * @note If the element attribute does not exist then this function
+       * will return 0 as the perimeter.
+       */
+      Real getPerimeter(Attribute attr) const override;
+
+      Real getPerimeter(const FlatSet<Attribute>& attr) const override;
+
+      Real getArea() const override;
+
+      Real getArea(Attribute attr) const override;
+
+      Real getArea(const FlatSet<Attribute>& attr) const override;
+
+      Real getMeasure(size_t d) const override;
+
+      Real getMeasure(size_t d, Attribute attr) const override;
+
+      Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const override;
+
+      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p) const
+      {
+        return ccl(p, getDimension());
+      }
+
+      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p, size_t d) const
+      {
+        return ccl(p, d, FlatSet<Attribute>{});
+      }
+
+      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
+          size_t d, Attribute attr) const
+      {
+        return ccl(p, d, FlatSet<Attribute>{ attr });
+      }
+
+      virtual CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
+          size_t d,
+          const FlatSet<Attribute>& attrs) const;
+
+      /**
       * @brief Skins the mesh to obtain its boundary mesh
       * @returns SubMesh object to the boundary region of the mesh
       *
@@ -933,17 +982,25 @@ namespace Rodin::Geometry
 
       virtual size_t getPolytopeCount(Polytope::Type g) const override;
 
+      virtual CellIterator getCell() const override;
+
+      virtual FaceIterator getFace() const override;
+
+      virtual VertexIterator getVertex() const override;
+
+      virtual PolytopeIterator getPolytope(size_t dimension) const override;
+
       virtual FaceIterator getBoundary() const override;
 
       virtual FaceIterator getInterface() const override;
 
-      virtual CellIterator getCell(Index idx = 0) const override;
+      virtual CellIterator getCell(Index idx) const override;
 
-      virtual FaceIterator getFace(Index idx = 0) const override;
+      virtual FaceIterator getFace(Index idx) const override;
 
-      virtual VertexIterator getVertex(Index idx = 0) const override;
+      virtual VertexIterator getVertex(Index idx) const override;
 
-      virtual PolytopeIterator getPolytope(size_t dimension, Index idx = 0) const override;
+      virtual PolytopeIterator getPolytope(size_t dimension, Index idx) const override;
 
       virtual bool isSubMesh() const override
       {
@@ -974,8 +1031,6 @@ namespace Rodin::Geometry
 
       virtual Eigen::Map<const Math::SpatialVector<Real>> getVertexCoordinates(Index idx) const override;
 
-      virtual const FlatSet<Attribute>& getAttributes(size_t d) const override;
-
       virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 
       virtual Mesh& setVertexCoordinates(Index idx, Real xi, size_t i) override;
@@ -987,6 +1042,8 @@ namespace Rodin::Geometry
 
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const override;
+
+      const FlatSet<Attribute>& getAttributes(size_t d) const;
 
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)

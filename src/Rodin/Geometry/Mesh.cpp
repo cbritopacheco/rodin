@@ -377,7 +377,7 @@ namespace Rodin::Geometry
     }
   }
 
-  Real MeshBase::getVolume() const
+  Real Mesh<Context::Local>::getVolume() const
   {
     Real totalVolume = 0;
     for (auto it = getPolytope(3); !it.end(); ++it)
@@ -385,7 +385,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Real MeshBase::getVolume(Attribute attr) const
+  Real Mesh<Context::Local>::getVolume(Attribute attr) const
   {
     Real totalVolume = 0;
     for (auto it = getPolytope(3); !it.end(); ++it)
@@ -396,7 +396,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Real MeshBase::getVolume(const FlatSet<Attribute>& attrs) const
+  Real Mesh<Context::Local>::getVolume(const FlatSet<Attribute>& attrs) const
   {
     Real totalVolume = 0;
     for (auto it = getPolytope(3); !it.end(); ++it)
@@ -407,7 +407,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Real MeshBase::getPerimeter() const
+  Real Mesh<Context::Local>::getPerimeter() const
   {
     Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
@@ -415,7 +415,7 @@ namespace Rodin::Geometry
     return totalPerimeter;
   }
 
-  Real MeshBase::getPerimeter(Attribute attr) const
+  Real Mesh<Context::Local>::getPerimeter(Attribute attr) const
   {
     Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
@@ -426,7 +426,7 @@ namespace Rodin::Geometry
     return totalPerimeter;
   }
 
-  Real MeshBase::getPerimeter(const FlatSet<Attribute>& attrs) const
+  Real Mesh<Context::Local>::getPerimeter(const FlatSet<Attribute>& attrs) const
   {
     Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
@@ -437,7 +437,7 @@ namespace Rodin::Geometry
     return totalPerimeter;
   }
 
-  Real MeshBase::getArea() const
+  Real Mesh<Context::Local>::getArea() const
   {
     Real totalArea = 0;
     for (auto it = getPolytope(2); !it.end(); ++it)
@@ -445,7 +445,7 @@ namespace Rodin::Geometry
     return totalArea;
   }
 
-  Real MeshBase::getArea(Attribute attr) const
+  Real Mesh<Context::Local>::getArea(Attribute attr) const
   {
     Real totalArea = 0;
     for (auto it = getPolytope(2); !it.end(); ++it)
@@ -456,7 +456,7 @@ namespace Rodin::Geometry
     return totalArea;
   }
 
-  Real MeshBase::getArea(const FlatSet<Attribute>& attrs) const
+  Real Mesh<Context::Local>::getArea(const FlatSet<Attribute>& attrs) const
   {
     Real totalArea = 0;
     for (auto it = getPolytope(2); !it.end(); ++it)
@@ -467,7 +467,7 @@ namespace Rodin::Geometry
     return totalArea;
   }
 
-  Real MeshBase::getMeasure(size_t d) const
+  Real Mesh<Context::Local>::getMeasure(size_t d) const
   {
     Real totalVolume = 0;
     for (auto it = getPolytope(d); !it.end(); ++it)
@@ -475,7 +475,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Real MeshBase::getMeasure(size_t d, Attribute attr) const
+  Real Mesh<Context::Local>::getMeasure(size_t d, Attribute attr) const
   {
     Real totalVolume = 0;
     for (auto it = getPolytope(d); !it.end(); ++it)
@@ -486,7 +486,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Real MeshBase::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
+  Real Mesh<Context::Local>::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
   {
     Real totalMeasure = 0;
     for (auto it = getPolytope(d); !it.end(); ++it)
@@ -497,7 +497,7 @@ namespace Rodin::Geometry
     return totalMeasure;
   }
 
-  CCL MeshBase::ccl(
+  CCL Mesh<Context::Local>::ccl(
       std::function<bool(const Polytope&, const Polytope&)> p,
       size_t d,
       const FlatSet<Attribute>& attrs) const
@@ -585,6 +585,26 @@ namespace Rodin::Geometry
         << "Mesh has an empty interface." << Alert::Raise;
     }
     return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+  }
+
+  CellIterator Mesh<Context::Local>::getCell() const
+  {
+    return getCell(0);
+  }
+
+  FaceIterator Mesh<Context::Local>::getFace() const
+  {
+    return getFace(0);
+  }
+
+  VertexIterator Mesh<Context::Local>::getVertex() const
+  {
+    return getVertex(0);
+  }
+
+  PolytopeIterator Mesh<Context::Local>::getPolytope(size_t dimension) const
+  {
+    return getPolytope(dimension, 0);
   }
 
   CellIterator Mesh<Context::Local>::getCell(Index idx) const

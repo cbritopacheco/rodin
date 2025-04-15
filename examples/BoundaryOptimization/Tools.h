@@ -49,7 +49,7 @@ namespace Rodin::Examples::BoundaryOptimization
   }
 
   inline
-  size_t rmc(Geometry::MeshBase& mesh,
+  size_t rmc(Geometry::Mesh<Context::Local>& mesh,
       const FlatSet<Geometry::Attribute>& attrs, Geometry::Attribute a, Real tol = 1e-5)
   {
     const size_t per = mesh.getPerimeter();

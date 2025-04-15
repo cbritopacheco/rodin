@@ -21,6 +21,8 @@ namespace Rodin::Geometry
 
           Builder& include(size_t d, Index parentIdx);
 
+          Builder& ghost(size_t d, Index parentIdx);
+
           Builder& include(size_t d, const IndexSet& indices);
 
           Shard finalize();
@@ -30,8 +32,11 @@ namespace Rodin::Geometry
           Mesh<Context>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<boost::bimap<Index, Index>> m_s2ps;
+          std::vector<IndexSet> m_ghosts;
           size_t m_dimension;
       };
+
+      bool isGhost(size_t d, Index idx) const;
 
       const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const;
 
@@ -40,10 +45,12 @@ namespace Rodin::Geometry
       {
         ar & boost::serialization::base_object<Mesh<Context>>(*this);
         ar & m_s2ps;
+        ar & m_ghosts;
       }
 
     private:
       std::vector<boost::bimap<Index, Index>> m_s2ps;
+      std::vector<IndexSet> m_ghosts;
   };
 }
 
