@@ -840,17 +840,17 @@ namespace Rodin::Geometry
       /**
       * @brief Keeps the cells with the given attribute.
       * @param[in] attr Attribute to keep
-      * @returns SubMesh of the remaining region mesh
       *
       * Convenience function to call keep(const std::FlatSet<Attribute>&) with
       * only one attribute.
+      *
+      * @returns SubMesh of the remaining region mesh
       */
       virtual SubMesh<Context> keep(Attribute attr) const;
 
       /**
       * @brief Trims the cells with the given attributes.
       * @param[in] attrs Attributes to trim
-      * @returns SubMesh object to the remaining region of the mesh
       *
       * This function will trim keep only the cells that have an attribute
       * in the given set of attributes.
