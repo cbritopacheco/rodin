@@ -12,10 +12,15 @@
  * thread count for the global thread pool, which represents the number of
  * concurrent threads supported by the hardware.
  */
-#define RODIN_THREADPOOL_GLOBALTHREADPOOL_CONCURRENCY std::thread::hardware_concurrency()
+#define RODIN_THREADPOOL_GLOBALTHREADPOOL_CONCURRENCY Rodin::Threads::Private::getRodinNumThreads()
 
 namespace Rodin::Threads
 {
+  namespace Private
+  {
+    size_t getRodinNumThreads();
+  }
+
   /**
    * @brief A thread pool wrapper for managing concurrent tasks.
    *
