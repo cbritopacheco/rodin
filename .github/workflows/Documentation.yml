@@ -16,11 +16,11 @@ jobs:
       MAKEFLAGS: "-j2"
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.12.0
           cache: 'pip'
