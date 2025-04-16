@@ -26,4 +26,12 @@ if (RODIN_BUILD_EXAMPLES)
   if (RODIN_USE_SCOTCH)
     add_subdirectory(Scotch)
   endif()
+
+  if (RODIN_USE_PETSC)
+    add_subdirectory(PETSc)
+  endif()
+
+  if (RODIN_USE_MFEM)
+    add_subdirectory(MFEM)
+  endif()
 endif()

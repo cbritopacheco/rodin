@@ -1,6 +1,9 @@
+#ifndef RODIN_SCOTCH_EXCEPTION_H
+#define RODIN_SCOTCH_EXCEPTION_H
+
 #include "Rodin/Alert/MemberFunctionException.h"
 
-namespace Rodin::External::Scotch
+namespace Rodin::Scotch
 {
   template <class T, class FuncName>
   class Exception : public Alert::MemberFunctionException<T, FuncName>
@@ -30,3 +33,5 @@ namespace Rodin::External::Scotch
       }
   };
 }
+
+#endif

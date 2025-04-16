@@ -41,3 +41,15 @@ if (RODIN_WITH_PLOT)
   add_subdirectory(Plot)
 endif()
 
+if (RODIN_USE_SCOTCH)
+  add_subdirectory(Scotch)
+endif()
+
+if (RODIN_USE_MFEM)
+  add_subdirectory(MFEM)
+endif()
+
+if (RODIN_USE_PETSC)
+  add_subdirectory(PETSc)
+endif()
+

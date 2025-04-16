@@ -55,6 +55,8 @@ namespace Rodin::Variational
        */
       virtual const FormLanguage::Base& getOperand() const = 0;
 
+      virtual Boolean isComponent() const = 0;
+
       virtual PeriodicBCBase* copy() const noexcept override = 0;
   };
 
@@ -119,7 +121,6 @@ namespace Rodin::Variational
        * @brief Computes the indices of the degrees of freedoms associated to
        * the boundary region.
        */
-      inline
       void assemble() override
       {
         const auto& adjacency = getAdjacency();
@@ -136,25 +137,26 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       const IndexMap<IndexSet>& getAdjacency() const
       {
         return m_adjacency;
       }
 
-      inline
       const OperandType& getOperand() const override
       {
         return m_u;
       }
 
-      inline
       const DOFs& getDOFs() const override
       {
         return m_dofs;
       }
 
-      inline
+      Boolean isComponent() const override
+      {
+        return false;
+      }
+
       PeriodicBC* copy() const noexcept override
       {
         return new PeriodicBC(*this);

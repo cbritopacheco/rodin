@@ -1,7 +1,7 @@
 #include "Exception.h"
 #include "MeshPartitioner.h"
 
-namespace Rodin::External::Scotch
+namespace Rodin::Scotch
 {
   Partitioner::Partitioner(const MeshType& mesh)
     : m_mesh(mesh)

@@ -8,7 +8,6 @@
 #define RODIN_ASSEMBLY_SEQUENTIAL_H
 
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Math/Kernels.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Variational/BilinearForm.h"
 

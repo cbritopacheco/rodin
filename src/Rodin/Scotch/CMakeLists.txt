@@ -4,21 +4,21 @@ Distributed under the Boost Software License, Version 1.0.
       (See accompanying file LICENSE or copy at
          https://www.boost.org/LICENSE_1_0.txt)
 ]]
-set(RodinExternalScotch_HEADERS
+set(RodinScotch_HEADERS
   MeshPartitioner.h
   )
 
-set(RodinExternalScotch_SRCS
+set(RodinScotch_SRCS
   MeshPartitioner.cpp
   )
 
-add_library(RodinExternalScotch
-  ${RodinExternalScotch_HEADERS} ${RodinExternalScotch_SRCS})
-add_library(Rodin::External::Scotch ALIAS RodinExternalScotch)
+add_library(RodinScotch
+  ${RodinScotch_HEADERS} ${RodinScotch_SRCS})
+add_library(Rodin::Scotch ALIAS RodinScotch)
 
-find_package(scotch REQUIRED)
-target_link_libraries(RodinExternalScotch
+find_package(Scotch REQUIRED)
+target_link_libraries(RodinScotch
   PUBLIC
   Rodin::Geometry
   Rodin::Alert
-  scotch)
+  Scotch::Scotch)

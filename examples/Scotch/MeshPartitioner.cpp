@@ -1,4 +1,4 @@
-#include <RodinExternal/Scotch/MeshPartitioner.h>
+#include <Rodin/Scotch/MeshPartitioner.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -10,7 +10,7 @@ int main()
 
   mesh.getConnectivity().compute(2, 2);
 
-  External::Scotch::Partitioner partitioner(mesh);
+  Scotch::Partitioner partitioner(mesh);
 
   partitioner.partition(16);
 

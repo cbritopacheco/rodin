@@ -27,6 +27,7 @@
 
 #include "ForwardDecls.h"
 
+#include "Reductions.h"
 #include "ProblemBody.h"
 #include "LinearForm.h"
 #include "BilinearForm.h"
@@ -217,155 +218,6 @@ namespace Rodin::Variational
         return m_dbcs;
       }
 
-      Problem& imposePeriodicBCs()
-      {
-        const auto& trial = getTrialFunction();
-        const auto& trialFES = trial.getFiniteElementSpace();
-
-        const auto& test = getTestFunction();
-        const auto& testFES = test.getFiniteElementSpace();
-
-        if (trialFES == testFES)
-        {
-          for (auto& pbc : m_pbcs)
-          {
-            pbc.assemble();
-            const auto& dofs = pbc.getDOFs();
-
-            std::deque<Index> q;
-            IndexSet dependents;
-            dependents.reserve(dofs.size());
-            for (const auto& [k, v] : dofs)
-              dependents.insert(v.first.begin(), v.first.end());
-
-            for (auto it = dofs.begin(); it != dofs.end(); ++it)
-            {
-              const Index k = it->first;
-              if (!dependents.contains(k))
-                q.push_front(k);
-            }
-
-            // Perform breadth-first traversal
-            while (q.size() > 0)
-            {
-              const Index parent = q.back();
-              assert(m_stiffness.rows() >= 0);
-              assert(m_stiffness.cols() >= 0);
-              assert(parent < static_cast<size_t>(m_stiffness.rows()));
-              assert(parent < static_cast<size_t>(m_stiffness.cols()));
-              q.pop_back();
-
-              auto find = dofs.find(parent);
-              if (find == dofs.end())
-                continue;
-
-              const auto& [children, coeffs] = find->second;
-              assert(children.size() > 0);
-
-              for (const auto& child : children)
-                q.push_front(child);
-
-              assert(children.size() == coeffs.size());
-              const size_t count = children.size();
-
-              // Eliminate the parent column, adding it to the child columns
-              for (size_t i = 0; i < count; i++)
-              {
-                const OperatorScalarType coeff = coeffs.coeff(i);
-                const Index child = children.coeff(i);
-                m_stiffness.col(child) += coeff * m_stiffness.col(parent);
-              }
-
-              // Assumes CCS format
-              for (typename OperatorType::InnerIterator it(m_stiffness, parent); it; ++it)
-                it.valueRef() = 0;
-
-              // Eliminate the parent row, adding it to the child rows
-              IndexMap<OperatorScalarType> parentLookup;
-              std::vector<IndexMap<OperatorScalarType>> childrenLookup(children.size());
-              for (size_t col = 0; col < static_cast<size_t>(m_stiffness.cols()); col++)
-              {
-                Boolean parentFound = false;
-                size_t childrenFound = 0;
-                for (typename OperatorType::InnerIterator it(m_stiffness, col); it; ++it)
-                {
-                  if (parentFound && childrenFound == count)
-                  {
-                    break;
-                  }
-                  else
-                  {
-                    const Index row = it.row();
-                    if (row == parent)
-                    {
-                      parentLookup[col] = it.value();
-                      it.valueRef() = 0;
-                      parentFound = true;
-                    }
-                    else
-                    {
-                      for (size_t i = 0; i < count; i++)
-                      {
-                        const Index child = children.coeff(i);
-                        if (row == child)
-                        {
-                          childrenLookup[i][col] = it.value();
-                          childrenFound += 1;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-
-              for (const auto& [col, value] : parentLookup)
-              {
-                for (size_t i = 0; i < count; i++)
-                {
-                  const OperatorScalarType coeff = coeffs.coeff(i);
-                  childrenLookup[i][col] += coeff * value;
-                }
-              }
-
-              for (size_t i = 0; i < count; i++)
-              {
-                const Index child = children.coeff(i);
-                for (const auto& [col, value] : childrenLookup[i])
-                  m_stiffness.coeffRef(child, col) = value;
-              }
-
-              // Eliminate the parent entry, adding it to the child entries
-              for (size_t i = 0; i < count; i++)
-              {
-                const OperatorScalarType coeff = coeffs.coeff(i);
-                const Index child = children.coeff(i);
-                m_mass.coeffRef(child) += coeff * m_mass.coeff(parent);
-              }
-              m_mass.coeffRef(parent) = 0;
-            }
-
-            for (const auto& [parent, node] : dofs)
-            {
-              m_stiffness.coeffRef(parent, parent) = 1.0;
-              const auto& [children, coeffs] = node;
-              assert(children.size() >= 0);
-              for (size_t i = 0; i < static_cast<size_t>(children.size()); i++)
-              {
-                const OperatorScalarType coeff = coeffs.coeff(i);
-                const Index child = children.coeff(i);
-                m_stiffness.coeffRef(parent, child) = -coeff;
-              }
-            }
-          }
-        }
-        else
-        {
-          assert(false); // Not handled yet
-        }
-
-        return *this;
-      }
-
       Problem& assemble() override
       {
         // Assemble both sides
@@ -396,12 +248,32 @@ namespace Rodin::Variational
           }
           else
           {
-            Math::Kernels::eliminate(m_stiffness, m_mass, dofs);
+            Reductions::eliminate(m_stiffness, m_mass, dofs);
           }
         }
 
         // Impose periodic boundary conditions
-        imposePeriodicBCs();
+        if (trialFES == testFES)
+        {
+          for (auto& pbc : m_pbcs)
+          {
+            pbc.assemble();
+            const auto& dofs = pbc.getDOFs();
+
+            if (pbc.isComponent())
+            {
+              assert(false);
+            }
+            else
+            {
+              Reductions::merge(m_stiffness, m_mass, dofs);
+            }
+          }
+        }
+        else
+        {
+          assert(false); // Not handled yet
+        }
 
         m_assembled = true;
 
@@ -732,7 +604,7 @@ namespace Rodin::Variational
                 {
                   dbc.assemble();
                   const auto& dofs = dbc.getDOFs();
-                  Math::Kernels::eliminate(m_stiffness, m_mass, dofs, offset);
+                  Reductions::eliminate(m_stiffness, m_mass, dofs, offset);
                 }
               }
             });

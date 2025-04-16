@@ -136,10 +136,10 @@ namespace Rodin::Variational
       using MultithreadedAssembly = Assembly::Multithreaded<OperatorType, BilinearForm>;
 
       constexpr
-      BilinearForm(Pair<
-          std::reference_wrapper<const TrialFunction<TrialFES>>,
-          std::reference_wrapper<const TestFunction<TestFES>>> uv)
-        : BilinearForm(uv.first(), uv.second())
+      BilinearForm(
+          const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
+        : BilinearForm(u, v),
+          m_operator(std::move(op))
       {}
 
       /**
@@ -151,8 +151,7 @@ namespace Rodin::Variational
        */
       constexpr
       BilinearForm(
-          std::reference_wrapper<const TrialFunction<TrialFES>> u,
-          std::reference_wrapper<const TestFunction<TestFES>> v)
+          const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
         :  m_u(u), m_v(v)
       {
 #ifdef RODIN_MULTITHREADED
@@ -424,13 +423,17 @@ namespace Rodin::Variational
   };
 
   template <class TrialFES, class TestFES>
-  BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
+  BilinearForm(const TrialFunction<TrialFES>&, const TestFunction<TestFES>&)
     -> BilinearForm<TrialFES, TestFES,
         Math::SparseMatrix<
           typename FormLanguage::Mult<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>
           ::Type>>;
+
+  template <class TrialFES, class TestFES, class Operator>
+  BilinearForm(const TrialFunction<TrialFES>&, const TestFunction<TestFES>&, Operator&&)
+    -> BilinearForm<TrialFES, TestFES, Operator>;
 }
 
 #include "BilinearForm.hpp"

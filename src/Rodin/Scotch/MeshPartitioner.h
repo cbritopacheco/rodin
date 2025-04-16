@@ -1,12 +1,12 @@
-#ifndef RODIN_RODINEXTERNAL_SCOTCH_MESH_PARTITIONER_H
-#define RODIN_RODINEXTERNAL_SCOTCH_MESH_PARTITIONER_H
+#ifndef RODIN_SCOTCH_MESH_PARTITIONER_H
+#define RODIN_SCOTCH_MESH_PARTITIONER_H
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/MeshPartitioner.h"
 
 #include <scotch.h>
 
-namespace Rodin::External::Scotch
+namespace Rodin::Scotch
 {
   class Partitioner : public Geometry::Partitioner
   {

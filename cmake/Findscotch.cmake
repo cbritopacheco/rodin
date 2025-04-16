@@ -1,58 +1,81 @@
-# Findscotch.cmake
+# @file FindScotch.cmake
+# @brief CMake module to locate the Scotch partitioning library.
 #
-# This module locates the Scotch library and its headers, and sets up the imported
-# target "scotch". If a target named "scotch" already exists, its INTERFACE properties
-# are overridden with the values found here.
+# This module finds the Scotch libraries and headers and defines an imported
+# interface target `Scotch::Scotch` for linking against Scotch.
 #
-# Variables set:
-#   SCOTCH_FOUND, SCOTCH_INCLUDE_DIRS, SCOTCH_LIBRARIES
+# Variables defined by this module:
+#
+#   SCOTCH_FOUND           - True if Scotch was found
+#   SCOTCH_INCLUDE_DIRS    - Include directories for Scotch
+#   SCOTCH_LIBRARIES       - Libraries required to link Scotch
+#
+# Imported target:
+#
+#   Scotch::Scotch         - Interface target to link with Scotch
 #
 # Usage:
-#   find_package(scotch REQUIRED)
-#   target_link_libraries(your_target PRIVATE scotch)
+#
+#   find_package(Scotch REQUIRED)
+#   target_link_libraries(MyTarget PRIVATE Scotch::Scotch)
+#
+# The user may set SCOTCH_DIR or the SCOTCH_DIR environment variable
+# to help locate the installation.
+#
 
-# Locate the Scotch header file (e.g., scotch.h)
+include(FindPackageHandleStandardArgs)
+
+# Allow user-supplied hints
+if (DEFINED SCOTCH_DIR)
+  set(_SCOTCH_HINTS "${SCOTCH_DIR}")
+elseif (DEFINED ENV{SCOTCH_DIR})
+  set(_SCOTCH_HINTS "$ENV{SCOTCH_DIR}")
+endif()
+
+# Locate header and libraries
 find_path(SCOTCH_INCLUDE_DIR
   NAMES scotch.h
-  PATH_SUFFIXES scotch
+  HINTS ${_SCOTCH_HINTS}
+  PATH_SUFFIXES include include/scotch
   DOC "Path to Scotch header files"
 )
 
-# Locate the main Scotch library
 find_library(SCOTCH_LIBRARY
   NAMES scotch
-  DOC "Path to Scotch library"
+  HINTS ${_SCOTCH_HINTS}
+  PATH_SUFFIXES lib
+  DOC "Path to Scotch core library"
 )
 
-# Locate the Scotch error library
 find_library(SCOTCHERR_LIBRARY
   NAMES scotcherr
-  DOC "Path to Scotch error library"
+  HINTS ${_SCOTCH_HINTS}
+  PATH_SUFFIXES lib
+  DOC "Path to Scotch error-handling library"
 )
 
-# Check if all required components were found
-if(SCOTCH_INCLUDE_DIR AND SCOTCH_LIBRARY AND SCOTCHERR_LIBRARY)
-  set(SCOTCH_FOUND TRUE)
-  set(SCOTCH_INCLUDE_DIRS ${SCOTCH_INCLUDE_DIR})
-  set(SCOTCH_LIBRARIES ${SCOTCH_LIBRARY} ${SCOTCHERR_LIBRARY})
-else()
-  set(SCOTCH_FOUND FALSE)
+# Final values
+if (SCOTCH_INCLUDE_DIR)
+  set(SCOTCH_INCLUDE_DIRS "${SCOTCH_INCLUDE_DIR}")
 endif()
 
-# Either override or create the target "scotch"
-if(TARGET scotch)
-  # Override the properties of the already defined scotch target
-  message(STATUS "Overriding properties of existing target 'scotch'")
-  target_include_directories(scotch INTERFACE "${SCOTCH_INCLUDE_DIRS}")
-  target_link_libraries(scotch INTERFACE "${SCOTCH_LIBRARY}" "${SCOTCHERR_LIBRARY}" m)
-else()
-  # Create an INTERFACE target named "scotch"
-  add_library(scotch INTERFACE)
-  set_target_properties(scotch PROPERTIES
+if (SCOTCH_LIBRARY AND SCOTCHERR_LIBRARY)
+  set(SCOTCH_LIBRARIES "${SCOTCH_LIBRARY}" "${SCOTCHERR_LIBRARY}")
+endif()
+
+# Detection logic
+find_package_handle_standard_args(Scotch
+  REQUIRED_VARS SCOTCH_INCLUDE_DIRS SCOTCH_LIBRARIES
+)
+
+# Define the target
+if (SCOTCH_FOUND AND NOT TARGET Scotch::Scotch)
+  add_library(Scotch::Scotch IMPORTED INTERFACE)
+  set_target_properties(Scotch::Scotch PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${SCOTCH_INCLUDE_DIRS}"
-    INTERFACE_LINK_LIBRARIES "${SCOTCH_LIBRARY};${SCOTCHERR_LIBRARY};m"
+    INTERFACE_LINK_LIBRARIES "${SCOTCH_LIBRARIES};m"
   )
 endif()
 
-# Mark variables as advanced so they don't show in GUIs by default
+# Hide internals from GUIs
 mark_as_advanced(SCOTCH_INCLUDE_DIR SCOTCH_LIBRARY SCOTCHERR_LIBRARY)
