@@ -97,8 +97,8 @@ namespace Rodin::Variational::Reductions
       const Index parent = q.back();
       assert(stiffness.rows() >= 0);
       assert(stiffness.cols() >= 0);
-      assert(parent < static_cast<size_t>(m_stiffness.rows()));
-      assert(parent < static_cast<size_t>(m_stiffness.cols()));
+      assert(parent < static_cast<size_t>(stiffness.rows()));
+      assert(parent < static_cast<size_t>(stiffness.cols()));
       q.pop_back();
 
       auto find = dofs.find(parent);
