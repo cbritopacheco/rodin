@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <Rodin/Context/MPI.h>
+#include <Rodin/MPI.h>
 
 using namespace Rodin;
 

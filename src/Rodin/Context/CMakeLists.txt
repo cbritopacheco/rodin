@@ -10,8 +10,3 @@ target_include_directories(RodinContext
   INTERFACE
   $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
-if (RODIN_USE_MPI)
-  target_sources(RodinContext PUBLIC MPI.h PRIVATE MPI.cpp)
-  target_link_libraries(RodinContext INTERFACE Boost::mpi MPI::MPI_CXX)
-endif()
-

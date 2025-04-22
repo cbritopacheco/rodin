@@ -25,11 +25,6 @@ set(RodinGeometry_SRCS
 add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})
 add_library(Rodin::Geometry ALIAS RodinGeometry)
 
-if(RODIN_USE_MPI)
-  target_sources(RodinGeometry PUBLIC MPIMesh.h MPIMesh.cpp)
-  target_sources(RodinGeometry PUBLIC MPISharder.h MPISharder.cpp)
-endif()
-
 target_link_libraries(RodinGeometry
   PUBLIC
   Rodin::IO

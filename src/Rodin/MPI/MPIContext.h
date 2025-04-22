@@ -4,19 +4,17 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CONTEXT_MPI_H
-#define RODIN_CONTEXT_MPI_H
+#ifndef RODIN_MPI_CONTEXT_H
+#define RODIN_MPI_CONTEXT_H
 
-#include "Base.h"
-
-#ifdef RODIN_USE_MPI
+#include "Rodin/Context/Base.h"
 
 #include <mpi.h>
 #include <boost/mpi.hpp>
 
 namespace Rodin::Context
 {
-  class MPI : public Base
+  class MPI : public Context::Base
   {
     public:
       MPI(const boost::mpi::environment& env, const boost::mpi::communicator& world)
@@ -40,6 +38,5 @@ namespace Rodin::Context
   };
 }
 
-#endif
 #endif
 

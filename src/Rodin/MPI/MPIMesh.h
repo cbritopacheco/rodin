@@ -9,15 +9,12 @@
 
 #include "Rodin/Configure.h"
 
-#ifdef RODIN_USE_MPI
+#include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Shard.h"
 
-#include "Rodin/Context/MPI.h"
+#include "MPIContext.h"
 
 #include "MPIConnectivity.h"
-
-#include "Mesh.h"
-#include "Shard.h"
-
 
 namespace Rodin::Geometry
 {
@@ -109,5 +106,4 @@ namespace Rodin::Geometry
   };
 }
 
-#endif
 #endif

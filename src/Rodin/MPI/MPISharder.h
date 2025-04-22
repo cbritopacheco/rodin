@@ -3,9 +3,9 @@
 
 #include <boost/mpi/config.hpp>
 
-#include "Mesh.h"
+#include "Rodin/Geometry/MeshPartitioner.h"
+
 #include "MPIMesh.h"
-#include "MeshPartitioner.h"
 
 namespace Rodin::Geometry
 {

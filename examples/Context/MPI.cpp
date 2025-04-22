@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include <Rodin/Context/MPI.h>
+#include <Rodin/MPI.h>
 
 namespace mpi = boost::mpi;
 

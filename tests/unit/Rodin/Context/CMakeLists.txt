@@ -5,6 +5,6 @@ if (RODIN_USE_MPI)
     GTest::gtest
     GTest::gtest_main
     Rodin::Rodin
-    Rodin::Context)
+    Rodin::MPI)
   gtest_discover_tests(RodinMPITest)
 endif()

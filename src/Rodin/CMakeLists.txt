@@ -53,3 +53,7 @@ if (RODIN_USE_PETSC)
   add_subdirectory(PETSc)
 endif()
 
+if (RODIN_USE_MPI)
+  add_subdirectory(MPI)
+endif()
+

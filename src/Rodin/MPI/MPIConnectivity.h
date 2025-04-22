@@ -7,10 +7,9 @@
 #ifndef RODIN_GEOMETRY_MPICONNECTIVITY_H
 #define RODIN_GEOMETRY_MPICONNECTIVITY_H
 
-#include "Rodin/Context/MPI.h"
+#include "Rodin/MPI/MPIContext.h"
 
-#include "Connectivity.h"
-#include "ForwardDecls.h"
+#include "Rodin/Geometry/Connectivity.h"
 
 namespace Rodin::Geometry
 {
