@@ -140,7 +140,13 @@ namespace Rodin::Variational
           const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
         : BilinearForm(u, v),
           m_operator(std::move(op))
-      {}
+      {
+#ifdef RODIN_MULTITHREADED
+        m_assembly.reset(new MultithreadedAssembly);
+#else
+        m_assembly.reset(new SequentialAssembly);
+#endif
+      }
 
       /**
        * @brief Constructs a BilinearForm from a TrialFunction and
@@ -152,14 +158,8 @@ namespace Rodin::Variational
       constexpr
       BilinearForm(
           const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
-        :  m_u(u), m_v(v)
-      {
-#ifdef RODIN_MULTITHREADED
-        m_assembly.reset(new MultithreadedAssembly);
-#else
-        m_assembly.reset(new SequentialAssembly);
-#endif
-      }
+        :  BilinearForm(u, v, Operator())
+      {}
 
       constexpr
       BilinearForm(const BilinearForm& other)
