@@ -32,7 +32,7 @@ jobs:
         with:
           submodules: recursive
       - name: Setup Cpp (C++ / C)
-        uses: aminya/setup-cpp@v0.37.0
+        uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
           cmake: true
