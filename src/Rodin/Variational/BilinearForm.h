@@ -138,7 +138,7 @@ namespace Rodin::Variational
       constexpr
       BilinearForm(
           const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
-        : BilinearForm(u, v),
+        : m_u(u), m_v(v),
           m_operator(std::move(op))
       {
 #ifdef RODIN_MULTITHREADED
