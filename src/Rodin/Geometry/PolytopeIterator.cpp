@@ -11,7 +11,7 @@ namespace Rodin::Geometry
 {
   // ---- PolytopeIterator -------------------------------------------------------
   PolytopeIterator::PolytopeIterator(
-      size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen)
+      size_t dimension, const LocalMeshBase& mesh, IndexGeneratorBase&& gen)
     : Parent(dimension, mesh, std::move(gen))
   {}
 
@@ -45,7 +45,7 @@ namespace Rodin::Geometry
   }
 
   // ---- CellIterator -------------------------------------------------------
-  CellIterator::CellIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
+  CellIterator::CellIterator(const LocalMeshBase& mesh, IndexGeneratorBase&& gen)
     : Parent(mesh.getDimension(), mesh, std::move(gen))
   {}
 
@@ -58,7 +58,7 @@ namespace Rodin::Geometry
   }
 
   // ---- FaceIterator -------------------------------------------------------
-  FaceIterator::FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
+  FaceIterator::FaceIterator(const LocalMeshBase& mesh, IndexGeneratorBase&& gen)
     : Parent(mesh.getDimension() - 1, mesh, std::move(gen))
   {}
 
@@ -71,7 +71,7 @@ namespace Rodin::Geometry
   }
 
   // ---- VertexIterator -----------------------------------------------------
-  VertexIterator::VertexIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
+  VertexIterator::VertexIterator(const LocalMeshBase& mesh, IndexGeneratorBase&& gen)
     : Parent(0, mesh, std::move(gen))
   {}
 

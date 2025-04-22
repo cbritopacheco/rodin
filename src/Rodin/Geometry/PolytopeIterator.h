@@ -25,7 +25,7 @@ namespace Rodin::Geometry
     public:
       PolytopeIteratorBase() = default;
 
-      PolytopeIteratorBase(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen)
+      PolytopeIteratorBase(size_t dimension, const LocalMeshBase& mesh, IndexGeneratorBase&& gen)
         : m_dimension(dimension), m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)
       {}
 
@@ -122,7 +122,7 @@ namespace Rodin::Geometry
       }
 
       inline
-      const MeshBase& getMesh() const
+      const LocalMeshBase& getMesh() const
       {
         assert(m_mesh);
         return m_mesh->get();
@@ -146,7 +146,7 @@ namespace Rodin::Geometry
 
     private:
       size_t m_dimension;
-      std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
+      std::optional<std::reference_wrapper<const LocalMeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable Threads::Unsafe<bool> m_dirty;
       mutable Threads::Unsafe<std::unique_ptr<T>> m_polytope;
@@ -166,7 +166,7 @@ namespace Rodin::Geometry
 
       PolytopeIterator() = default;
 
-      PolytopeIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
+      PolytopeIterator(size_t dimension, const LocalMeshBase& mesh, IndexGeneratorBase&& gen);
 
       PolytopeIterator(const PolytopeIterator&) = delete;
 
@@ -201,7 +201,7 @@ namespace Rodin::Geometry
 
       CellIterator() = default;
 
-      CellIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
+      CellIterator(const LocalMeshBase& mesh, IndexGeneratorBase&& gen);
 
       CellIterator(const CellIterator&) = delete;
 
@@ -225,7 +225,7 @@ namespace Rodin::Geometry
 
       FaceIterator() = default;
 
-      FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
+      FaceIterator(const LocalMeshBase& mesh, IndexGeneratorBase&& gen);
 
       FaceIterator(const FaceIterator&) = delete;
 
@@ -249,7 +249,7 @@ namespace Rodin::Geometry
 
       VertexIterator() = default;
 
-      VertexIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
+      VertexIterator(const LocalMeshBase& mesh, IndexGeneratorBase&& gen);
 
       VertexIterator(const VertexIterator&) = delete;
 

@@ -12,7 +12,7 @@ namespace Rodin::Assembly
 {
   namespace Internal
   {
-    MultithreadedIteration::MultithreadedIteration(const Geometry::MeshBase& mesh, Variational::Integrator::Region region)
+    MultithreadedIteration::MultithreadedIteration(const Geometry::LocalMeshBase& mesh, Variational::Integrator::Region region)
       : m_mesh(mesh), m_region(region)
     {}
 

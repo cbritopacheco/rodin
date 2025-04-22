@@ -26,7 +26,7 @@ namespace Rodin::Geometry
   class SubMeshBase
   {
     public:
-      using Ancestor = std::reference_wrapper<const MeshBase>;
+      using Ancestor = std::reference_wrapper<const LocalMeshBase>;
 
       /**
        * @brief Represents the restriction of a Point of a Mesh @f$ P @f$ into
@@ -37,7 +37,7 @@ namespace Rodin::Geometry
       /**
        * @returns Reference to the parent Mesh object
        */
-      virtual const MeshBase& getParent() const = 0;
+      virtual const LocalMeshBase& getParent() const = 0;
 
       virtual const Deque<Ancestor>& getAncestors() const = 0;
 

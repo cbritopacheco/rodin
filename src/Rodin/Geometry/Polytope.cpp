@@ -86,7 +86,7 @@ namespace Rodin::Geometry
   }
 
   // ---- Polytope -----------------------------------------------------------
-  Polytope::Polytope(size_t dimension, Index index, const MeshBase& mesh)
+  Polytope::Polytope(size_t dimension, Index index, const LocalMeshBase& mesh)
     : m_dimension(dimension), m_index(index), m_mesh(mesh)
   {}
 
@@ -162,12 +162,12 @@ namespace Rodin::Geometry
   }
 
   // ---- Element -----------------------------------------------------------
-  Cell::Cell(Index index, const MeshBase& mesh)
+  Cell::Cell(Index index, const LocalMeshBase& mesh)
     : Polytope(mesh.getDimension(), index, mesh)
   {}
 
   // ---- Face --------------------------------------------------------------
-  Face::Face(Index index, const MeshBase& mesh)
+  Face::Face(Index index, const LocalMeshBase& mesh)
     : Polytope(mesh.getDimension() - 1, index, mesh)
   {}
 
@@ -182,7 +182,7 @@ namespace Rodin::Geometry
   }
 
   // ---- Vertex -------------------------------------------------------------
-  Vertex::Vertex(Index index, const MeshBase& mesh)
+  Vertex::Vertex(Index index, const LocalMeshBase& mesh)
     : Polytope(0, index, mesh)
   {}
 

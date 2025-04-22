@@ -35,7 +35,7 @@ namespace Rodin::Assembly
     class MultithreadedIteration
     {
       public:
-        MultithreadedIteration(const Geometry::MeshBase& mesh, Variational::Integrator::Region);
+        MultithreadedIteration(const Geometry::LocalMeshBase& mesh, Variational::Integrator::Region);
 
         Geometry::PolytopeIterator getIterator(Index i) const;
 
@@ -46,7 +46,7 @@ namespace Rodin::Assembly
         bool filter(Index i) const;
 
       private:
-        std::reference_wrapper<const Geometry::MeshBase> m_mesh;
+        std::reference_wrapper<const Geometry::LocalMeshBase> m_mesh;
         Variational::Integrator::Region m_region;
     };
   }
