@@ -124,6 +124,30 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              struct <a href="struct_rodin_1_1_index_array_equality.html" class="m-doc">IndexArrayEquality</a>
+            </dt>
+            <dd>Functor for comparing two index arrays for equality.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_index_array_hash.html" class="m-doc">IndexArrayHash</a>
+            </dt>
+            <dd>Functor for computing a hash value for an index array.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_index_array_symmetric_equality.html" class="m-doc">IndexArraySymmetricEquality</a>
+            </dt>
+            <dd>Functor for comparing two index arrays for symmetric equality.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_index_array_symmetric_hash.html" class="m-doc">IndexArraySymmetricHash</a>
+            </dt>
+            <dd>Functor for computing a symmetric hash value for an index array.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_index_set_equality.html" class="m-doc">IndexSetEquality</a>
+            </dt>
+            <dd>Functor for comparing two IndexSet objects for equality.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_index_set_hash.html" class="m-doc">IndexSetHash</a>
+            </dt>
+            <dd>Functor for computing a hash value for an IndexSet.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class L, class R&gt;</div>
               class <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>
             </dt>
@@ -143,15 +167,15 @@
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
-            <dt id="a491dcb0a0c175bd83342be6aa21eef56">
-              <div class="m-doc-template">template&lt;class Real&gt;</div>
-              using <a href="#a491dcb0a0c175bd83342be6aa21eef56" class="m-doc-self">Array</a> = Eigen::ArrayX&lt;<a href="#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+            <dt>
+              <div class="m-doc-template">template&lt;class ScalarType&gt;</div>
+              using <a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a> = Eigen::ArrayX&lt;ScalarType&gt;
             </dt>
-            <dd>Standard array type.</dd>
-            <dt id="a3b5d284c6fb7166b753c5664773266cc">
-              using <a href="#a3b5d284c6fb7166b753c5664773266cc" class="m-doc-self">IndexArray</a> = <a href="#a491dcb0a0c175bd83342be6aa21eef56" class="m-doc">Array</a>&lt;<a href="#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
+            <dd>Alias for a dynamically sized array.</dd>
+            <dt>
+              using <a href="#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a> = <a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
             </dt>
-            <dd>Standard array of indices.</dd>
+            <dd>Alias for an index array.</dd>
             <dt id="a1dc165bbe1d2390cd0a21524320cd3eb">
               using <a href="#a1dc165bbe1d2390cd0a21524320cd3eb" class="m-doc-self">Integer</a> = int
             </dt>
@@ -180,6 +204,21 @@
               using <a href="#a12f84f428d2b3ff138c176f003ef716c" class="m-doc-self">Complex</a> = std::complex&lt;<a href="#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
             <dd>Standard type for representing complex values.</dd>
+            <dt id="abab8a7d6e39a9b421ff10d164ffc3302">
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              using <a href="#abab8a7d6e39a9b421ff10d164ffc3302" class="m-doc-self">List</a> = boost::container::list&lt;T&gt;
+            </dt>
+            <dd>Standard type for representing lists.</dd>
+            <dt id="a672da592edc3a0551b41b89d3ac37f50">
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              using <a href="#a672da592edc3a0551b41b89d3ac37f50" class="m-doc-self">Deque</a> = boost::container::deque&lt;T&gt;
+            </dt>
+            <dd>Standard type for representing deques.</dd>
+            <dt id="a2ec70fb46786fa2f27ae0aa32467fc5c">
+              <div class="m-doc-template">template&lt;class T, class Container = Deque&lt;T&gt;&gt;</div>
+              using <a href="#a2ec70fb46786fa2f27ae0aa32467fc5c" class="m-doc-self">Stack</a> = std::stack&lt;T, Container&gt;
+            </dt>
+            <dd>Standard type for representing stacks.</dd>
             <dt id="aaa7028d8cff093953627586709836fcb">
               <div class="m-doc-template">template&lt;class T&gt;</div>
               using <a href="#aaa7028d8cff093953627586709836fcb" class="m-doc-self">FlatSet</a> = boost::container::flat_set&lt;T&gt;
@@ -231,6 +270,37 @@
             </dt>
             <dd>Generates a tuple of indices.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="ad1992f32ef98176d3cac1ed3dd4132be"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              using Rodin::<wbr /><a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc-self">Array</a> = Eigen::ArrayX&lt;ScalarType&gt;
+            </h3>
+            <p>Alias for a dynamically sized array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ScalarType</td>
+                  <td>The scalar type of the array.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This template alias defines a standard array type based on Eigen::ArrayX.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3b5d284c6fb7166b753c5664773266cc"><div>
+            <h3>
+              using Rodin::<wbr /><a href="#a3b5d284c6fb7166b753c5664773266cc" class="m-doc-self">IndexArray</a> = <a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
+            </h3>
+            <p>Alias for an index array.</p>
+<p>This alias defines an index array using the standard array type with a predefined index type.</p>
+          </div></section>
         </section>
         <section>
           <h2>Function documentation</h2>

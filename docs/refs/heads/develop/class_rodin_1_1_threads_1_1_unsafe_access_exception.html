@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Utility namespace | Rodin</title>
+  <title>Rodin::Threads::UnsafeAccessException class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,74 +64,115 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Utility <span class="m-thin">namespace</span>
+          <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_threads.html">Threads</a>::<wbr/></span>UnsafeAccessException <span class="m-thin">class</span>
         </h1>
-        <p>Module containing general purpose and language support utility classes.</p>
+        <p>Exception thrown when unsafe concurrent access is detected.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">T</td>
+              <td>The type of the object (resource) that triggered the exception.</td>
+            </tr>
+            <tr>
+              <td>FuncName</td>
+              <td>The type used for representing the name of the member function.</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#func-members">Functions</a></li>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+<p>This exception is thrown by the <a href="class_rodin_1_1_threads_1_1_unsafe.html" class="m-doc">Unsafe</a> class when multiple threads attempt to write to the encapsulated resource concurrently (in debug mode with thread safety enabled).</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class... Ts&gt;</div>
-              struct <a href="struct_rodin_1_1_utility_1_1_overloaded.html" class="m-doc">Overloaded</a>
+              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> T, <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">FuncName</a>&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">Rodin::Alert::MemberFunctionException&lt;T, FuncName&gt;</a>
             </dt>
-            <dd>Helper type for use with visitor pattern.</dd>
+            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> type for errors occurring in member functions.</dd>
           </dl>
         </section>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a70d53718c88191ddecca0580b2eef9fa">
-              <div class="m-doc-template">template&lt;class F, class... Args&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a70d53718c88191ddecca0580b2eef9fa" class="m-doc-self">For</a>(</span><span class="m-doc-wrap">F&amp;&amp; f,
-              Args &amp;&amp; ... args) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt id="a6a65fb1f60a4a20fd13ee9f1222b9029">
+              using <a href="#a6a65fb1f60a4a20fd13ee9f1222b9029" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">Alert::<wbr />MemberFunctionException</a>&lt;T, FuncName&gt;
             </dt>
-            <dd>Performs the application of the function over all the arguments.</dd>
+            <dd>Alias for the parent exception class.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;size_t N, class F&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#aca33b1bb8b9d6d091e503107e6b712bd" class="m-doc">ForIndex</a>(</span><span class="m-doc-wrap">F&amp;&amp; f) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a6b840111fa8bae83c6ca9908932199a2" class="m-doc">UnsafeAccessException</a>(</span><span class="m-doc-wrap">const T&amp; cls,
+              const FuncName&amp; funcName)</span>
             </dt>
-            <dd>Executes the function N times.</dd>
+            <dd>Constructs an <a href="class_rodin_1_1_threads_1_1_unsafe_access_exception.html" class="m-doc">UnsafeAccessException</a>.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a550d4dd2d9f91cca41b9d5950a25d86d" class="m-doc">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Raises the exception.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aca33b1bb8b9d6d091e503107e6b712bd"><div>
+          <section class="m-doc-details" id="a6b840111fa8bae83c6ca9908932199a2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;size_t N, class F&gt;
+                template&lt;class T, class FuncName&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Utility::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca33b1bb8b9d6d091e503107e6b712bd" class="m-doc-self">ForIndex</a>(</span><span class="m-doc-wrap">F&amp;&amp; f) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Threads::<wbr />UnsafeAccessException&lt;T, FuncName&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b840111fa8bae83c6ca9908932199a2" class="m-doc-self">UnsafeAccessException</a>(</span><span class="m-doc-wrap">const T&amp; cls,
+              const FuncName&amp; funcName)</span></span>
             </h3>
-            <p>Executes the function N times.</p>
+            <p>Constructs an <a href="class_rodin_1_1_threads_1_1_unsafe_access_exception.html" class="m-doc">UnsafeAccessException</a>.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
+                <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">N</td>
-                  <td>Number of times to execute the function</td>
+                  <td style="width: 1%">cls</td>
+                  <td>The object (resource) being accessed unsafely.</td>
                 </tr>
                 <tr>
-                  <td>F</td>
-                  <td>Callable type</td>
+                  <td>funcName</td>
+                  <td>The name of the member function where the unsafe access occurred.</td>
                 </tr>
               </tbody>
             </table>
-<h4 id="autotoc_md14">Utilization</h4><pre class="m-code"><span class="n">Utility</span><span class="o">::</span><span class="n">ForIndex</span><span class="o">&lt;</span><span class="mi">5</span><span class="o">&gt;</span><span class="p">(</span>
-<span class="w">  </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="w"> </span><span class="n">i</span><span class="p">){</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">});</span></pre>
+<p>Initializes the exception with the given object and function name.</p>
+          </div></section>
+          <section class="m-doc-details" id="a550d4dd2d9f91cca41b9d5950a25d86d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class T, class FuncName&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Threads::<wbr />UnsafeAccessException&lt;T, FuncName&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a550d4dd2d9f91cca41b9d5950a25d86d" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Raises the exception.</p>
+<p>Calls the parent exception&#x27;s <a href="#a550d4dd2d9f91cca41b9d5950a25d86d" class="m-doc">raise()</a> method to propagate the exception.</p>
           </div></section>
         </section>
       </div>

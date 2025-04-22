@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::P1Element&lt;Complex&gt;::BasisFunction class | Rodin</title>
+  <title>Rodin::IndexArraySymmetricHash struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,10 +64,56 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p1_element_3_01_complex_01_4.html">P1Element&lt;Complex&gt;</a>::<wbr/></span>BasisFunction <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>IndexArraySymmetricHash <span class="m-thin">struct</span>
         </h1>
-        <p>Represents a basis function of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> scalar element.</p>
+        <p>Functor for computing a symmetric hash value for an index array.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This functor computes a hash value for an index array in a way that is independent of the order of the elements. It does so by summing the hash values of individual elements using boost::hash_value.</p>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac889b826070fea8a5c332f8beb460ab2" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; arr) const -&gt; size_t</span>
+            </dt>
+            <dd>Computes the symmetric hash value for the given index array.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ac889b826070fea8a5c332f8beb460ab2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IndexArraySymmetricHash::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac889b826070fea8a5c332f8beb460ab2" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; arr) const</span></span>
+            </h3>
+            <p>Computes the symmetric hash value for the given index array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">arr</td>
+                  <td>The index array for which to compute the symmetric hash.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A size_t hash value representing the index array independent of element order.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>
