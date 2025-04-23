@@ -34,4 +34,8 @@ if (RODIN_BUILD_EXAMPLES)
   if (RODIN_USE_MFEM)
     add_subdirectory(MFEM)
   endif()
+
+  if (RODIN_USE_MPI)
+    add_subdirectory(MPI)
+  endif()
 endif()

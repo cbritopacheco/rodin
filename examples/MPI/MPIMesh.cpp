@@ -1,13 +1,18 @@
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
-#include <iostream>
+
+#include <Rodin/MPI/MPIMesh.h>
+
 namespace mpi = boost::mpi;
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
   mpi::environment env(argc, argv);
   mpi::communicator world;
+
   std::cout << "I am process " << world.rank() << " of " << world.size()
             << "." << std::endl;
-  return 0;
+
+  Rodin::Context::MPI mpi(env, world);
+  Rodin::Geometry::MPIMesh mesh(mpi);
 }

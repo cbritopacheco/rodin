@@ -9,65 +9,131 @@
 
 namespace Rodin::Geometry
 {
+  /**
+   * @class MPISharder
+   * @brief Utility for distributing a global mesh across MPI ranks by
+   *        splitting into per-rank shards, scattering them from a root,
+   *        and gathering the local mesh on each rank.
+   *
+   * The typical usage is:
+   * @code
+   *   MPISharder sharder(ctx);
+   *   auto mpiMesh = sharder.distribute(partitioner, rootRank);
+   * @endcode
+   */
   class MPISharder
   {
     public:
+      /**
+       * @brief Construct an MPISharder with the given MPI context.
+       * @param context The MPI context (communicator and environment).
+       */
       MPISharder(const Context::MPI& context)
-        : m_context(context),
-          m_root(0),
-          m_tag(0)
+        : m_context(context)
       {}
 
-      void send(Partitioner& partitioner)
+      /**
+       * @brief One-step distribution: shard, scatter, and gather.
+       *
+       * Calls shard(), then scatter() on the root rank, then gather().
+       *
+       * @param p    The mesh partitioner defining per-cell owner ranks.
+       * @param root The rank responsible for scattering shards.
+       * @return The local MPI mesh built from the received shard.
+       */
+      Mesh<Context::MPI> distribute(Partitioner& p, int root)
       {
-        const auto& comm = m_context.getCommunicator();
+        return shard(p).scatter(root).gather(root);
+      }
+
+      /**
+       * @brief Split the global mesh into per-rank shards (ghost layers included).
+       *
+       * Each cell of the global mesh is assigned to a shard builder
+       * based on the partitioner, then each builder is finalized into a Shard.
+       *
+       * @param partitioner The mesh partitioner with `getCount()==comm.size()`.
+       * @return Reference to this object for chaining.
+       */
+      MPISharder& shard(Partitioner& partitioner)
+      {
+        m_shards.clear();
         const auto& mesh = partitioner.getMesh();
         const size_t cellDim = mesh.getDimension();
         const size_t numShards = partitioner.getCount();
+        assert(partitioner.getCount() == m_context.getCommunicator().size());
+        std::vector<Shard::Builder> sbs(numShards);
+        for (auto& sb : sbs)
+          sb.initialize(mesh);
 
-        Mesh<Context::MPI>::Builder build;
-        if (comm.rank() == m_root)
+        for (auto it = mesh.getCell(); it; ++it)
         {
-          std::vector<Shard::Builder> sbs(numShards);
-          for (auto& sb : sbs)
-            sb.initialize(mesh);
+          const size_t partIdx = partitioner.getPartition(it->getIndex());
+          sbs[partIdx].include(cellDim, it->getIndex());
+        }
 
-          for (auto it = mesh.getCell(); it; ++it)
-          {
-            const size_t partIdx = partitioner.getPartition(it->getIndex());
-            sbs[partIdx].include(cellDim, it->getIndex());
-          }
+        m_shards.resize(numShards);
+        for (size_t i = 0; i < numShards; i++)
+          m_shards[i] = sbs[i].finalize();
+        return *this;
+      }
 
-          std::vector<Shard> shards(numShards);
+      /**
+       * @brief Scatter shards from the root rank to all ranks.
+       *
+       * Only the root rank performs non-blocking sends of each shard
+       * to its respective owner rank. Other ranks do nothing.
+       *
+       * @param root The rank that owns the global mesh and performs sends.
+       * @return Reference to this object for chaining.
+       */
+      MPISharder& scatter(int root)
+      {
+        const auto& comm = m_context.getCommunicator();
+        if (comm.rank() == root)
+        {
+          const int tag = m_context.getEnvironment().collectives_tag();
           std::vector<boost::mpi::request> requests;
-          requests.reserve(numShards - 1);
-          for (size_t i = 0; i < shards.size(); i++)
-          {
-            assert(m_root >= 0);
-            if (i == static_cast<size_t>(m_root))
-              shards[i] = sbs[i].finalize();
-            else
-              requests.push_back(comm.isend(i, m_tag, sbs[i].finalize()));
-          }
+          requests.reserve(m_shards.size());
+          for (size_t i = 0; i < m_shards.size(); i++)
+            requests.push_back(comm.isend(i, tag, m_shards[i]));
           for (auto& req : requests)
             req.wait();
-          build.initialize(m_context, std::move(shards[m_root]));
+        }
+        return *this;
+      }
+
+      /**
+       * @brief Gather the local shard on each rank.
+       *
+       * On the root rank, returns its own shard without MPI.
+       * On other ranks, blocks in a matching MPI_Recv from the root.
+       *
+       * @param root The rank that originally scattered the shards.
+       * @return The local MPI mesh built from the received shard.
+       */
+      Mesh<Context::MPI> gather(int root)
+      {
+        const auto& comm = m_context.getCommunicator();
+        const int tag = m_context.getEnvironment().collectives_tag();
+        if (comm.rank() == root)
+        {
+          return Mesh<Context::MPI>::Builder().initialize(m_context, std::move(m_shards[root]))
+                                              .finalize();
         }
         else
         {
           Shard s;
-          boost::mpi::request request = comm.irecv(m_root, m_tag, s);
-          request.wait();
+          comm.recv(root, tag, s);
           Mesh<Context::MPI>::Builder build;
           build.initialize(m_context, std::move(s));
+          return build.finalize();
         }
-        // return build.finalize();
       }
 
     private:
       Context::MPI m_context;
-      int m_root;
-      int m_tag;
+      std::vector<Shard> m_shards;
   };
 }
 

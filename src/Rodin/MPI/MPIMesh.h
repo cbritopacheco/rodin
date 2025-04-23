@@ -31,7 +31,7 @@ namespace Rodin::Geometry
 
           Builder& initialize(const Context::MPI& context, Shard&& shard);
 
-          // Mesh finalize();
+          Mesh finalize();
 
         private:
           Shard m_shard;
@@ -46,8 +46,6 @@ namespace Rodin::Geometry
 
       const Shard& getShard() const;
 
-      Index getGlobalIndex(const std::pair<size_t, Index>& p, Index fragmentId);
-
       Mesh& scale(Real c) override;
 
       void flush() override;
@@ -57,11 +55,6 @@ namespace Rodin::Geometry
       size_t getDimension() const override;
 
       size_t getSpaceDimension() const override;
-
-      // const Connectivity<Context::MPI>& getConnectivity() const override
-      // {
-      //   return m_connectivity;
-      // }
 
       const Context::MPI& getContext() const override;
 
@@ -93,11 +86,99 @@ namespace Rodin::Geometry
 
       VertexIterator getVertex(Index globalIdx) const override;
 
+      PolytopeIterator getPolytope(size_t dimension) const override;
+
+      CellIterator getCell() const override;
+
+      FaceIterator getFace() const override;
+
+      VertexIterator getVertex() const override;
+
+      FaceIterator getBoundary() const override;
+
+      FaceIterator getInterface() const override;
+
       std::optional<Index> getLocalIndex(size_t dimension, Index globalIdx) const;
 
-      bool isInterface(Index faceIdx) const override;
+      bool isInterface(Index globalFaceIdx) const override;
 
-      bool isBoundary(Index faceIdx) const override;
+      bool isBoundary(Index globalFaceIdx) const override;
+
+      Real getVolume() const override;
+
+      Real getVolume(Attribute attr) const override;
+
+      Real getVolume(const FlatSet<Attribute>& attr) const override;
+
+      Real getPerimeter() const override;
+
+      Real getPerimeter(Attribute attr) const override;
+
+      Real getPerimeter(const FlatSet<Attribute>& attr) const override;
+
+      Real getArea() const override;
+
+      Real getArea(Attribute attr) const override;
+
+      Real getArea(const FlatSet<Attribute>& attr) const override;
+
+      Real getMeasure(size_t d) const override;
+
+      Real getMeasure(size_t d, Attribute attr) const override;
+
+      Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const override;
+
+      Polytope::Type getGeometry(size_t dimension, Index globalIdx) const override;
+
+      Attribute getAttribute(size_t dimension, Index globalIdx) const override;
+
+      Mesh& setAttribute(const std::pair<size_t, Index>& p, Attribute attr) override;
+
+      Eigen::Map<const Math::PointVector> getVertexCoordinates(Index globalIdx) const override;
+
+      Mesh& setVertexCoordinates(Index globalIdx, Real s, size_t i) override;
+
+      Mesh& setVertexCoordinates(Index globalIdx, const Math::PointVector& coords) override;
+
+      virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index globalIdx) const override;
+
+      virtual Mesh& setPolytopeTransformation(const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
+
+      Connectivity<Context::MPI>& getConnectivity() override
+      {
+        throw std::runtime_error("getConnectivity() not implemented");
+        // return m_connectivity;
+      }
+
+      const Connectivity<Context::MPI>& getConnectivity() const override
+      {
+        throw std::runtime_error("getConnectivity() not implemented");
+        // return m_connectivity;
+      }
+
+      MeshBase& load(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM) override
+      {
+        throw std::runtime_error("load() not implemented");
+      }
+
+      void save(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override
+      {
+        throw std::runtime_error("save() not implemented");
+      }
+
+      SubMeshBase& asSubMesh() override
+      {
+        throw std::runtime_error("asSubMesh() not implemented");
+      }
+
+      const SubMeshBase& asSubMesh() const override
+      {
+        throw std::runtime_error("asSubMesh() not implemented");
+      }
 
     private:
       Context::MPI m_context;

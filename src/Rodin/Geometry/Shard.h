@@ -48,6 +48,11 @@ namespace Rodin::Geometry
         ar & m_ghosts;
       }
 
+      const auto& getGhosts() const
+      {
+        return m_ghosts;
+      }
+
     private:
       std::vector<boost::bimap<Index, Index>> m_s2ps;
       std::vector<IndexSet> m_ghosts;

@@ -445,7 +445,7 @@ namespace Rodin::Geometry
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
        */
-      virtual Eigen::Map<const Math::SpatialVector<Real>> getVertexCoordinates(Index idx) const = 0;
+      virtual Eigen::Map<const Math::PointVector> getVertexCoordinates(Index idx) const = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -473,7 +473,7 @@ namespace Rodin::Geometry
        * @param[in] idx Vertex index
        * @param[in] coords New coordinates
        */
-      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords) = 0;
+      virtual MeshBase& setVertexCoordinates(Index idx, const Math::PointVector& coords) = 0;
 
       virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
