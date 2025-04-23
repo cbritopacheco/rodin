@@ -27,7 +27,7 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the outward unit on a face.
        */
-      FaceNormal(const Geometry::LocalMeshBase& mesh)
+      FaceNormal(const Geometry::MeshBase& mesh)
         : m_sdim(mesh.getSpaceDimension())
       {
         assert(m_sdim > 0);

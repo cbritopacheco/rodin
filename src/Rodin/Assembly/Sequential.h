@@ -21,12 +21,12 @@ namespace Rodin::Assembly::Internal
   class SequentialIteration
   {
     public:
-      SequentialIteration(const Geometry::LocalMeshBase& mesh, Variational::Integrator::Region);
+      SequentialIteration(const Geometry::MeshBase& mesh, Variational::Integrator::Region);
 
       Geometry::PolytopeIterator getIterator() const;
 
     private:
-      std::reference_wrapper<const Geometry::LocalMeshBase> m_mesh;
+      std::reference_wrapper<const Geometry::MeshBase> m_mesh;
       Variational::Integrator::Region m_region;
   };
 }

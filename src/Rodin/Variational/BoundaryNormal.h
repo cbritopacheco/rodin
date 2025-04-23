@@ -26,7 +26,7 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the outward unit normal.
        */
-      BoundaryNormal(const Geometry::LocalMeshBase& mesh)
+      BoundaryNormal(const Geometry::MeshBase& mesh)
         : m_sdim(mesh.getSpaceDimension()),
           m_mesh(mesh)
       {
@@ -203,7 +203,7 @@ namespace Rodin::Variational
 
     private:
       const size_t m_sdim;
-      std::reference_wrapper<const Geometry::LocalMeshBase> m_mesh;
+      std::reference_wrapper<const Geometry::MeshBase> m_mesh;
   };
 }
 

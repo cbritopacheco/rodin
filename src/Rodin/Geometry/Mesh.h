@@ -171,6 +171,9 @@ namespace Rodin::Geometry
    * @see Mesh
    */
 
+  /**
+  * @brief Abstract base class for Mesh objects.
+  */
   class MeshBase
   {
     public:
@@ -187,6 +190,8 @@ namespace Rodin::Geometry
       {
         return this != &other;
       }
+
+      virtual std::optional<Point> inclusion(const Point& p) const;
 
       /**
        * @brief Indicates if the mesh is empty or not.
@@ -233,6 +238,16 @@ namespace Rodin::Geometry
         return getPolytopeCount(getDimension());
       }
 
+      Attribute getFaceAttribute(Index index) const
+      {
+        return getAttribute(getDimension() - 1, index);
+      }
+
+      Attribute getCellAttribute(Index index) const
+      {
+        return getAttribute(getDimension(), index);
+      }
+
       virtual MeshBase& scale(Real c) = 0;
 
       virtual MeshBase& load(
@@ -261,6 +276,13 @@ namespace Rodin::Geometry
        *
        */
       virtual bool isSubMesh() const = 0;
+
+      virtual bool isInterface(Index faceIdx) const = 0;
+
+      /**
+       * @brief Determines whether a face of the mesh is on the boundary.
+       */
+      virtual bool isBoundary(Index faceIdx) const = 0;
 
       virtual SubMeshBase& asSubMesh() = 0;
 
@@ -329,14 +351,14 @@ namespace Rodin::Geometry
       virtual Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const = 0;
 
       /**
-       * @brief Gets a reference to the mesh connectivity.
+       * @brief Gets a FaceIterator for the boundary faces.
        */
-      virtual ConnectivityBase& getConnectivity() = 0;
+      virtual FaceIterator getBoundary() const = 0;
 
       /**
-       * @brief Gets a constant reference to the mesh connectivity.
+       * @brief Gets a FaceIterator for the interface faces.
        */
-      virtual const ConnectivityBase& getConnectivity() const = 0;
+      virtual FaceIterator getInterface() const = 0;
 
       /**
        * @brief Gets the count of polytope of the given dimension.
@@ -349,46 +371,6 @@ namespace Rodin::Geometry
        * @param[in] dim Polytope type
        */
       virtual size_t getPolytopeCount(Polytope::Type g) const = 0;
-
-      virtual const Context::Base& getContext() const = 0;
-  };
-
-  /**
-  * @brief Abstract base class for Mesh objects.
-  */
-  class LocalMeshBase : public MeshBase
-  {
-    public:
-      virtual ~LocalMeshBase() = default;
-
-      Attribute getFaceAttribute(Index index) const
-      {
-        return getAttribute(getDimension() - 1, index);
-      }
-
-      Attribute getCellAttribute(Index index) const
-      {
-        return getAttribute(getDimension(), index);
-      }
-
-      virtual std::optional<Point> inclusion(const Point& p) const;
-
-      virtual bool isInterface(Index faceIdx) const = 0;
-
-      /**
-       * @brief Determines whether a face of the mesh is on the boundary.
-       */
-      virtual bool isBoundary(Index faceIdx) const = 0;
-
-      /**
-       * @brief Gets a FaceIterator for the boundary faces.
-       */
-      virtual FaceIterator getBoundary() const = 0;
-
-      /**
-       * @brief Gets a FaceIterator for the interface faces.
-       */
-      virtual FaceIterator getInterface() const = 0;
 
       virtual CellIterator getCell() const = 0;
 
@@ -426,8 +408,7 @@ namespace Rodin::Geometry
        * @param[in] d Polytope dimension
        * @param[in] idx Polytope index
        */
-      virtual const PolytopeTransformation& getPolytopeTransformation(
-          size_t dimension, Index idx) const = 0;
+      virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index idx) const = 0;
 
       /**
        * Gets the geometry type of the @f$ (d, i) @f$-polytope.
@@ -448,7 +429,17 @@ namespace Rodin::Geometry
        * @param[in] p Pair indicating polytope dimension and index
        * @param[in] attr Attribute of polytope
        */
-      virtual LocalMeshBase& setAttribute(const std::pair<size_t, Index>& p, Attribute attr) = 0;
+      virtual MeshBase& setAttribute(const std::pair<size_t, Index>& p, Attribute attr) = 0;
+
+      /**
+       * @brief Gets a reference to the mesh connectivity.
+       */
+      virtual ConnectivityBase& getConnectivity() = 0;
+
+      /**
+       * @brief Gets a constant reference to the mesh connectivity.
+       */
+      virtual const ConnectivityBase& getConnectivity() const = 0;
 
       /**
        * @brief Gets the space coordinates of the vertex at the given index.
@@ -474,7 +465,7 @@ namespace Rodin::Geometry
        *   mesh.setVertexCoordinates(0, 10.0, 2);
        * @endcode
        */
-      virtual LocalMeshBase& setVertexCoordinates(Index idx, Real s, size_t i) = 0;
+      virtual MeshBase& setVertexCoordinates(Index idx, Real s, size_t i) = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -482,10 +473,12 @@ namespace Rodin::Geometry
        * @param[in] idx Vertex index
        * @param[in] coords New coordinates
        */
-      virtual LocalMeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords) = 0;
+      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords) = 0;
 
-      virtual LocalMeshBase& setPolytopeTransformation(
+      virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
+
+      virtual const Context::Base& getContext() const = 0;
   };
 
   /// Type alias for Mesh<Context::Local>
@@ -508,12 +501,12 @@ namespace Rodin::Geometry
    * different geometries.
    */
   template <>
-  class Mesh<Context::Local> : public LocalMeshBase
+  class Mesh<Context::Local> : public MeshBase
   {
     friend class boost::serialization::access;
 
     public:
-      using Parent = LocalMeshBase;
+      using Parent = MeshBase;
       using Context = Context::Local;
 
       /**

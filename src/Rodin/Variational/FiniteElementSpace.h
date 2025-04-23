@@ -64,7 +64,7 @@ namespace Rodin::Variational
        * element space is built on.
        * @returns Constant reference to mesh
        */
-      virtual const Geometry::LocalMeshBase& getMesh() const = 0;
+      virtual const Geometry::MeshBase& getMesh() const = 0;
 
       /**
        * @brief Gets a set of global degree of freedom indices associated to

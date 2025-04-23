@@ -45,7 +45,7 @@ namespace Rodin::Geometry
 
   class VertexIterator;
 
-  class LocalMeshBase;
+  class MeshBase;
 
   template <class ContextType>
   class Connectivity;

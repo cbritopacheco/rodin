@@ -127,7 +127,7 @@ namespace Rodin::Geometry
        * @brief Consructs a polytope of dimension @f$ d @f$ and index @f$ i @f$
        * belonging to the given mesh.
        */
-      Polytope(size_t dimension, Index index, const LocalMeshBase& mesh);
+      Polytope(size_t dimension, Index index, const MeshBase& mesh);
 
       Polytope(const Polytope&) = default;
 
@@ -151,7 +151,7 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the associated mesh to the simplex.
        */
-      const LocalMeshBase& getMesh() const
+      const MeshBase& getMesh() const
       {
         return m_mesh.get();
       }
@@ -200,7 +200,7 @@ namespace Rodin::Geometry
 
       const size_t m_dimension;
       const Index m_index;
-      std::reference_wrapper<const LocalMeshBase> m_mesh;
+      std::reference_wrapper<const MeshBase> m_mesh;
   };
 
   bool operator==(const Polytope& lhs, const Polytope& rhs);
@@ -216,7 +216,7 @@ namespace Rodin::Geometry
     public:
       using Parent = Polytope;
 
-      Cell(Index index, const LocalMeshBase& mesh);
+      Cell(Index index, const MeshBase& mesh);
 
       Cell(const Cell& other)
         : Polytope(other)
@@ -239,7 +239,7 @@ namespace Rodin::Geometry
     public:
       using Parent = Polytope;
 
-      Face(Index index, const LocalMeshBase& mesh);
+      Face(Index index, const MeshBase& mesh);
 
       Face(const Face& other)
         : Polytope(other)
@@ -262,7 +262,7 @@ namespace Rodin::Geometry
     public:
       using Parent = Polytope;
 
-      Vertex(Index index, const LocalMeshBase& mesh);
+      Vertex(Index index, const MeshBase& mesh);
 
       Vertex(const Vertex& other)
         : Polytope(other)

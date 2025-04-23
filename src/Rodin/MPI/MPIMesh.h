@@ -69,6 +69,36 @@ namespace Rodin::Geometry
 
       size_t getPolytopeCount(Polytope::Type g) const override;
 
+      /**
+       * @brief Returns a PolytopeIterator for the given global polytope index.
+       * @param dimension The topological dimension of the polytopes to iterate over.
+       * @param globalIdx The global index (consistent across processes) of the
+       * polytope to start iteration from.
+       *
+       * - If the provided global index is within the range that belongs to
+       *   this process, the function constructs a PolytopeIterator that starts
+       *   at the corresponding local index.
+       * - Otherwise, the function returns an "empty" PolytopeIterator,
+       *   indicating that the requested global polytope is not available on
+       *   the calling process.
+       *
+       * @return A PolytopeIterator starting at the appropriate local index if
+       * this process owns that global index; otherwise, an empty iterator.
+       */
+      PolytopeIterator getPolytope(size_t dimension, Index globalIdx) const override;
+
+      CellIterator getCell(Index globalIdx) const override;
+
+      FaceIterator getFace(Index globalIdx) const override;
+
+      VertexIterator getVertex(Index globalIdx) const override;
+
+      std::optional<Index> getLocalIndex(size_t dimension, Index globalIdx) const;
+
+      bool isInterface(Index faceIdx) const override;
+
+      bool isBoundary(Index faceIdx) const override;
+
     private:
       Context::MPI m_context;
       Shard m_shard;

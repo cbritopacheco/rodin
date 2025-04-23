@@ -13,7 +13,7 @@ namespace Rodin::Geometry
 
   // Helper: Compute the centroid of a polytope (cell) of dimension d.
   // The centroid is computed as the average of the vertex coordinates.
-  static Math::SpatialVector<Real> computePolytopeCentroid(const LocalMeshBase& mesh, size_t d, Index polyIndex)
+  static Math::SpatialVector<Real> computePolytopeCentroid(const MeshBase& mesh, size_t d, Index polyIndex)
   {
     auto poly = mesh.getPolytope(d, polyIndex);
     const auto& vertices = poly->getVertices();
@@ -52,7 +52,7 @@ namespace Rodin::Geometry
   void BalancedCompactPartitioner::partition(size_t numClusters, size_t d)
   {
     m_count = numClusters;
-    const LocalMeshBase& mesh = getMesh();
+    const MeshBase& mesh = getMesh();
     size_t n = mesh.getPolytopeCount(d);
     if (n == 0)
       return;
