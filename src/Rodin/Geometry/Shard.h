@@ -12,6 +12,9 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
+      using ContextType = Rodin::Context::Local;
+      using Parent = Mesh<ContextType>;
+
       class Builder
       {
         public:
@@ -36,6 +39,14 @@ namespace Rodin::Geometry
           size_t m_dimension;
       };
 
+      Shard() = default;
+
+      Shard(const Shard& other);
+
+      Shard(Shard&& other);
+
+      Shard& operator=(Shard&& other);
+
       bool isGhost(size_t d, Index idx) const;
 
       const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const;
@@ -52,6 +63,30 @@ namespace Rodin::Geometry
       {
         return m_ghosts;
       }
+
+      Real getVolume() const override;
+
+      Real getVolume(Attribute attr) const override;
+
+      Real getVolume(const FlatSet<Attribute>& attr) const override;
+
+      Real getPerimeter() const override;
+
+      Real getPerimeter(Attribute attr) const override;
+
+      Real getPerimeter(const FlatSet<Attribute>& attr) const override;
+
+      Real getArea() const override;
+
+      Real getArea(Attribute attr) const override;
+
+      Real getArea(const FlatSet<Attribute>& attr) const override;
+
+      Real getMeasure(size_t d) const override;
+
+      Real getMeasure(size_t d, Attribute attr) const override;
+
+      Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const override;
 
     private:
       std::vector<boost::bimap<Index, Index>> m_s2ps;

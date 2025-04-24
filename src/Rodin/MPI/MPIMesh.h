@@ -27,9 +27,9 @@ namespace Rodin::Geometry
       class Builder
       {
         public:
-          Builder();
+          Builder(const Context::MPI& context);
 
-          Builder& initialize(const Context::MPI& context, Shard&& shard);
+          Builder& initialize(Shard&& shard);
 
           Mesh finalize();
 
@@ -134,7 +134,10 @@ namespace Rodin::Geometry
 
       Mesh& setAttribute(const std::pair<size_t, Index>& p, Attribute attr) override;
 
-      Eigen::Map<const Math::PointVector> getVertexCoordinates(Index globalIdx) const override;
+      Eigen::Map<const Math::PointVector> getVertexCoordinates(Index globalIdx) const override
+      {
+        throw std::runtime_error("getVertexCoordinates() not implemented");
+      }
 
       Mesh& setVertexCoordinates(Index globalIdx, Real s, size_t i) override;
 
@@ -183,6 +186,9 @@ namespace Rodin::Geometry
     private:
       Context::MPI m_context;
       Shard m_shard;
+
+      mutable FlatMap<Index, Math::PointVector> m_vertices;
+      mutable TransformationIndex m_transformationIndex;
       // Connectivity<Context::MPI> m_connectivity;
   };
 }

@@ -155,7 +155,28 @@ namespace Rodin::Geometry
     Shard res;
     res.Parent::operator=(m_build.finalize());
     res.m_s2ps = std::move(m_s2ps);
+    res.m_ghosts = std::move(m_ghosts);
     return res;
+  }
+
+  Shard::Shard(const Shard& other)
+    : Parent(other),
+      m_s2ps(other.m_s2ps),
+      m_ghosts(other.m_ghosts)
+  {}
+
+  Shard::Shard(Shard&& other)
+    : Parent(std::move(other)),
+      m_s2ps(std::move(other.m_s2ps)),
+      m_ghosts(std::move(other.m_ghosts))
+  {}
+
+  Shard& Shard::operator=(Shard&& other)
+  {
+    Parent::operator=(std::move(other));
+    m_s2ps = std::move(other.m_s2ps);
+    m_ghosts = std::move(other.m_ghosts);
+    return *this;
   }
 
   bool Shard::isGhost(size_t d, Index idx) const
@@ -166,6 +187,162 @@ namespace Rodin::Geometry
   const boost::bimap<Index, Index>& Shard::getPolytopeMap(size_t d) const
   {
     return m_s2ps[d];
+  }
+
+  Real Shard::getVolume() const
+  {
+    Real totalVolume = 0;
+    for (auto it = getPolytope(3); !it.end(); ++it)
+    {
+      if (!isGhost(3, it->getIndex()))
+        totalVolume += it->getMeasure();
+    }
+    return totalVolume;
+  }
+
+  Real Shard::getVolume(Attribute attr) const
+  {
+    Real totalVolume = 0;
+    for (auto it = getPolytope(3); !it.end(); ++it)
+    {
+      if (it->getAttribute() == attr)
+      {
+        if (!isGhost(3, it->getIndex()))
+          totalVolume += it->getMeasure();
+      }
+    }
+    return totalVolume;
+  }
+
+  Real Shard::getVolume(const FlatSet<Attribute>& attrs) const
+  {
+    Real totalVolume = 0;
+    for (auto it = getPolytope(3); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+      {
+        if (!isGhost(3, it->getIndex()))
+          totalVolume += it->getMeasure();
+      }
+    }
+    return totalVolume;
+  }
+
+  Real Shard::getPerimeter() const
+  {
+    Real totalPerimeter = 0;
+    for (auto it = getBoundary(); !it.end(); ++it)
+    {
+      if (!isGhost(it->getDimension(), it->getIndex()))
+        totalPerimeter += it->getMeasure();
+    }
+    return totalPerimeter;
+  }
+
+  Real Shard::getPerimeter(Attribute attr) const
+  {
+    Real totalPerimeter = 0;
+    for (auto it = getBoundary(); !it.end(); ++it)
+    {
+      if (it->getAttribute() == attr)
+      {
+        if (!isGhost(it->getDimension(), it->getIndex()))
+          totalPerimeter += it->getMeasure();
+      }
+    }
+    return totalPerimeter;
+  }
+
+  Real Shard::getPerimeter(const FlatSet<Attribute>& attrs) const
+  {
+    Real totalPerimeter = 0;
+    for (auto it = getBoundary(); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+      {
+        if (!isGhost(it->getDimension(), it->getIndex()))
+          totalPerimeter += it->getMeasure();
+      }
+    }
+    return totalPerimeter;
+  }
+
+  Real Shard::getArea() const
+  {
+    Real totalArea = 0;
+    for (auto it = getPolytope(2); !it.end(); ++it)
+    {
+      if (!isGhost(2, it->getIndex()))
+        totalArea += it->getMeasure();
+    }
+    return totalArea;
+  }
+
+  Real Shard::getArea(Attribute attr) const
+  {
+    Real totalArea = 0;
+    for (auto it = getPolytope(2); !it.end(); ++it)
+    {
+      if (it->getAttribute() == attr)
+      {
+        if (!isGhost(2, it->getIndex()))
+          totalArea += it->getMeasure();
+      }
+    }
+    return totalArea;
+  }
+
+  Real Shard::getArea(const FlatSet<Attribute>& attrs) const
+  {
+    Real totalArea = 0;
+    for (auto it = getPolytope(2); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+      {
+        if (!isGhost(2, it->getIndex()))
+          totalArea += it->getMeasure();
+      }
+    }
+    return totalArea;
+  }
+
+  Real Shard::getMeasure(size_t d) const
+  {
+    Real totalMeasure = 0;
+    for (auto it = getPolytope(d); !it.end(); ++it)
+    {
+      if (!isGhost(d, it->getIndex()))
+        totalMeasure += it->getMeasure();
+    }
+    return totalMeasure;
+  }
+
+  Real Shard::getMeasure(size_t d, Attribute attr) const
+  {
+    Real totalMeasure = 0;
+    for (auto it = getPolytope(d); !it.end(); ++it)
+    {
+      if (it->getAttribute() == attr)
+      {
+        if (!isGhost(d, it->getIndex()))
+          totalMeasure += it->getMeasure();
+      }
+    }
+    return totalMeasure;
+  }
+
+  Real Shard::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
+  {
+    Real totalMeasure = 0;
+    for (auto it = getPolytope(d); !it.end(); ++it)
+    {
+      if (attrs.contains(it->getAttribute()))
+      {
+        if (!isGhost(d, it->getIndex()))
+          totalMeasure += it->getMeasure();
+      }
+    }
+    return totalMeasure;
   }
 }
 

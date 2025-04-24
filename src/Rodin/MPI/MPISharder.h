@@ -62,16 +62,15 @@ namespace Rodin::Geometry
         const size_t cellDim = mesh.getDimension();
         const size_t numShards = partitioner.getCount();
         assert(partitioner.getCount() == m_context.getCommunicator().size());
+        assert(numShards > 0);
         std::vector<Shard::Builder> sbs(numShards);
         for (auto& sb : sbs)
           sb.initialize(mesh);
-
         for (auto it = mesh.getCell(); it; ++it)
         {
           const size_t partIdx = partitioner.getPartition(it->getIndex());
           sbs[partIdx].include(cellDim, it->getIndex());
         }
-
         m_shards.resize(numShards);
         for (size_t i = 0; i < numShards; i++)
           m_shards[i] = sbs[i].finalize();
@@ -118,17 +117,34 @@ namespace Rodin::Geometry
         const int tag = m_context.getEnvironment().collectives_tag();
         if (comm.rank() == root)
         {
-          return Mesh<Context::MPI>::Builder().initialize(m_context, std::move(m_shards[root]))
-                                              .finalize();
+          return Mesh<Context::MPI>::Builder(m_context).initialize(std::move(m_shards[root]))
+                                                       .finalize();
         }
         else
         {
           Shard s;
           comm.recv(root, tag, s);
-          Mesh<Context::MPI>::Builder build;
-          build.initialize(m_context, std::move(s));
+          Mesh<Context::MPI>::Builder build(m_context);
+          build.initialize(std::move(s));
           return build.finalize();
         }
+      }
+
+      Shard& getShard(size_t i)
+      {
+        assert(i < m_shards.size());
+        return m_shards[i];
+      }
+
+      const Shard& getShard(size_t i) const
+      {
+        assert(i < m_shards.size());
+        return m_shards[i];
+      }
+
+      const Context::MPI& getContext() const
+      {
+        return m_context;
       }
 
     private:
