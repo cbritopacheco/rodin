@@ -9,6 +9,7 @@ namespace Rodin::Geometry
     m_parent = parent;
     m_build.initialize(sdim);
     m_s2ps.resize(dim + 1);
+    m_ghosts.resize(dim + 1);
     m_sidx.resize(dim + 1, 0);
     return *this;
   }
@@ -42,7 +43,7 @@ namespace Rodin::Geometry
     const Index childIdx = m_sidx[d];
     const auto [it, inserted] = m_s2ps[d].left.insert({ childIdx, parentIdx });
     // Add polytope information
-    if (inserted) // Polytope was already in the map
+    if (inserted) // Polytope was not already in the map
     {
       build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
       m_sidx[d] += 1;
@@ -73,6 +74,7 @@ namespace Rodin::Geometry
       {
         childPolytope.coeffRef(i) = childVertex;
         m_sidx[0] += 1;
+        m_ghosts[0].insert(childVertex);
       }
       else // Vertex was already in the map
       {
@@ -84,7 +86,7 @@ namespace Rodin::Geometry
     const Index childIdx = m_sidx[d];
     const auto [it, inserted] = m_s2ps[d].left.insert({ childIdx, parentIdx });
     // Add polytope information
-    if (inserted) // Polytope was already in the map
+    if (inserted) // Polytope was not already in the map
     {
       build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
       m_sidx[d] += 1;
@@ -110,6 +112,34 @@ namespace Rodin::Geometry
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();
     auto& conn = m_build.getConnectivity();
+    std::vector<IndexSet> missing(m_s2ps.size());
+    const size_t cellDim = parent.getDimension();
+
+    for (auto it = m_s2ps[cellDim].left.begin(); it != m_s2ps[cellDim].left.end(); ++it)
+    {
+      const Index pIdx = it->get_right();
+      for (const Index p : parent.getConnectivity().getIncidence(cellDim, cellDim).at(pIdx))
+      {
+        if (m_s2ps[cellDim].right.find(p) == m_s2ps[cellDim].right.end())
+        {
+          missing[cellDim].insert(p);
+          for (size_t d = 1; d <= cellDim - 1; d++)
+          {
+            const auto& pInc = parent.getConnectivity().getIncidence(cellDim, d);
+            for (const Index p : pInc.at(pIdx))
+              missing[d].insert(p);
+          }
+        }
+      }
+    }
+
+    for (size_t d = 0; d <= cellDim; d++)
+    {
+      std::cout << "Missing " << d << ": " << missing[d].size() << std::endl;
+      for (const Index p : missing[d])
+        ghost(d, p);
+    }
+
     // Build the connectivity for the submesh from the parent mesh.
     for (size_t d = 0; d < m_s2ps.size(); d++)
     {
@@ -130,13 +160,7 @@ namespace Rodin::Geometry
             {
               auto find = m_s2ps[dp].right.find(p);
               if (find != m_s2ps[dp].right.end())
-              {
                 cInc[cIdx].insert_unique(find->get_left());
-              }
-              else
-              {
-                ghost(dp, p);
-              }
             }
           }
           // Manually set the incidence

@@ -26,18 +26,94 @@ int main(int argc, char** argv)
     Geometry::LocalMesh mesh;
     mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 32, 32 });
     mesh.getConnectivity().compute(2, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 2);
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
     for (auto it = mesh.getCell(); it; ++it)
     {
       mesh.setAttribute({it->getDimension(), it->getIndex()}, partitioner.getPartition(it->getIndex()) + 1);
     }
-    mesh.save("Global.mesh");
+    mesh.save("Global.mesh", IO::FileFormat::MEDIT);
     std::cout << "Sharding into " << partitioner.getCount() << "...\n";
     sharder.shard(partitioner);
     std::cout << "miaow: " << sharder.getShard(0).getCellCount() << std::endl;
-    sharder.getShard(0).save("Shard.0.mesh");
-    sharder.getShard(1).save("Shard.1.mesh");
+
+    for (auto it = sharder.getShard(0).getCell(); it; ++it)
+    {
+      if (sharder.getShard(0).isGhost(it->getDimension(), it->getIndex()))
+      {
+        sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 1);
+      }
+      else
+      {
+        sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 2);
+      }
+    }
+
+    for (auto it = sharder.getShard(1).getCell(); it; ++it)
+    {
+      if (sharder.getShard(1).isGhost(it->getDimension(), it->getIndex()))
+      {
+        sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 2);
+      }
+      else
+      {
+        sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 1);
+      }
+    }
+
+    for (auto it = sharder.getShard(0).getVertex(); it; ++it)
+    {
+      if (sharder.getShard(0).isGhost(it->getDimension(), it->getIndex()))
+      {
+        sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 5);
+      }
+      else
+      {
+        sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 10);
+      }
+    }
+
+    for (auto it = sharder.getShard(1).getVertex(); it; ++it)
+    {
+      if (sharder.getShard(1).isGhost(it->getDimension(), it->getIndex()))
+      {
+        sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 5);
+      }
+      else
+      {
+        sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 10);
+      }
+    }
+
+    for (auto it = sharder.getShard(0).getFace(); it; ++it)
+    {
+      sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 2);
+      if (sharder.getShard(0).isGhost(it->getDimension(), it->getIndex()))
+      {
+        sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 4);
+      }
+      else
+      {
+        sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 12);
+      }
+    }
+
+    for (auto it = sharder.getShard(1).getFace(); it; ++it)
+    {
+      if (sharder.getShard(1).isGhost(it->getDimension(), it->getIndex()))
+      {
+        sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 4);
+      }
+      else
+      {
+        sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 12);
+      }
+    }
+
+    sharder.getShard(0).save("Shard.0.mesh", IO::FileFormat::MEDIT);
+    sharder.getShard(1).save("Shard.1.mesh", IO::FileFormat::MEDIT);
     std::cout << "Scattering\n";
     // sharder.scatter(0);
   }

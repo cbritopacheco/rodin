@@ -66,10 +66,16 @@ namespace Rodin::Geometry
         std::vector<Shard::Builder> sbs(numShards);
         for (auto& sb : sbs)
           sb.initialize(mesh);
-        for (auto it = mesh.getCell(); it; ++it)
+        for (Index i = 0; i < mesh.getCellCount(); i++)
         {
-          const size_t partIdx = partitioner.getPartition(it->getIndex());
-          sbs[partIdx].include(cellDim, it->getIndex());
+          const size_t partIdx = partitioner.getPartition(i);
+          sbs[partIdx].include(cellDim, i);
+          for (size_t d = 1; d <= cellDim - 1; d++)
+          {
+            const auto& inc = mesh.getConnectivity().getIncidence(cellDim, d);
+            if (inc.size() > 0)
+              sbs[partIdx].include(d, inc.at(i));
+          }
         }
         m_shards.resize(numShards);
         for (size_t i = 0; i < numShards; i++)
