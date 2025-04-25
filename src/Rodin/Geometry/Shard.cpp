@@ -111,74 +111,71 @@ namespace Rodin::Geometry
   {
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();
-    auto& conn = m_build.getConnectivity();
-    std::vector<IndexSet> missing(m_s2ps.size());
+    auto&       conn   = m_build.getConnectivity();
     const size_t cellDim = parent.getDimension();
+    const auto& pconn   = parent.getConnectivity();
 
+    std::vector<Index> originals;
     for (auto it = m_s2ps[cellDim].left.begin(); it != m_s2ps[cellDim].left.end(); ++it)
     {
-      const Index pIdx = it->get_right();
-      for (const Index p : parent.getConnectivity().getIncidence(cellDim, cellDim).at(pIdx))
+      Index cIdx = it->get_left();
+      if (!m_ghosts[cellDim].contains(cIdx))
+        originals.push_back(it->get_right());
+    }
+
+    const auto& nbrs = pconn.getIncidence(cellDim, cellDim);
+    for (Index p : originals)
+    {
+      for (Index nb : nbrs.at(p))
       {
-        if (m_s2ps[cellDim].right.find(p) == m_s2ps[cellDim].right.end())
-        {
-          missing[cellDim].insert(p);
-          for (size_t d = 1; d <= cellDim - 1; d++)
-          {
-            const auto& pInc = parent.getConnectivity().getIncidence(cellDim, d);
-            for (const Index p : pInc.at(pIdx))
-              missing[d].insert(p);
-          }
-        }
+        if (m_s2ps[cellDim].right.find(nb) == m_s2ps[cellDim].right.end())
+          ghost(cellDim, nb);
       }
     }
 
-    for (size_t d = 0; d <= cellDim; d++)
+    for (size_t d = cellDim; d > 0; --d)
     {
-      std::cout << "Missing " << d << ": " << missing[d].size() << std::endl;
-      for (const Index p : missing[d])
-        ghost(d, p);
-    }
-
-    // Build the connectivity for the submesh from the parent mesh.
-    for (size_t d = 0; d < m_s2ps.size(); d++)
-    {
-      for (size_t dp = 0; dp < m_s2ps.size(); dp++)
+      const auto& down = pconn.getIncidence(d, d - 1);
+      for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
       {
-        if (d == m_dimension && dp == 0)
-          continue;
-        const auto& pInc = parent.getConnectivity().getIncidence(d, dp);
-        if (pInc.size() > 0)
-        {
-          Incidence cInc(m_s2ps[d].size());
-          for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
-          {
-            const Index cIdx = it->get_left();
-            const Index pIdx = it->get_right();
-            cInc[cIdx].reserve(pInc[pIdx].size());
-            for (const Index p : pInc[pIdx])
-            {
-              auto find = m_s2ps[dp].right.find(p);
-              if (find != m_s2ps[dp].right.end())
-                cInc[cIdx].insert_unique(find->get_left());
-            }
-          }
-          // Manually set the incidence
-          conn.setIncidence({ d, dp }, std::move(cInc));
-        }
+        Index pParent = it->get_right();
+        for (Index sub : down.at(pParent))
+          if (m_s2ps[d - 1].right.find(sub) == m_s2ps[d - 1].right.end())
+            ghost(d - 1, sub);
       }
     }
 
-    const size_t nodes = m_sidx[0];
-    // Build the mesh object.
-    m_build.nodes(nodes);
+    for (size_t d = 0; d <= cellDim; ++d)
+    {
+      for (size_t dp = 0; dp <= cellDim; ++dp)
+      {
+        const auto& pInc = pconn.getIncidence(d, dp);
+        if (pInc.empty()) continue;
+
+        Incidence cInc(m_s2ps[d].size());
+        for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
+        {
+          Index cIdx = it->get_left();
+          Index pIdx = it->get_right();
+          cInc[cIdx].reserve(pInc.at(pIdx).size());
+          for (Index pNbr : pInc.at(pIdx))
+          {
+            auto found = m_s2ps[dp].right.find(pNbr);
+            if (found != m_s2ps[dp].right.end())
+              cInc[cIdx].insert_unique(found->get_left());
+          }
+        }
+        conn.setIncidence({ d, dp }, std::move(cInc));
+      }
+    }
+
+    m_build.nodes(m_sidx[0]);
     for (auto it = m_s2ps[0].left.begin(); it != m_s2ps[0].left.end(); ++it)
       m_build.vertex(parent.getVertexCoordinates(it->get_right()));
 
-    // Finalize construction
     Shard res;
     res.Parent::operator=(m_build.finalize());
-    res.m_s2ps = std::move(m_s2ps);
+    res.m_s2ps   = std::move(m_s2ps);
     res.m_ghosts = std::move(m_ghosts);
     return res;
   }
