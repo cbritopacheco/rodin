@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Geometry::MPISharder class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>MPISharder <span class="m-thin">class</span>
+        </h1>
+        <p><a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a> for distributing a global mesh across MPI ranks by splitting into per-rank shards, scattering them from a root, and gathering the local mesh on each rank.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The typical usage is:</p><pre class="m-code"><span class="n">MPISharder</span><span class="w"> </span><span class="nf">sharder</span><span class="p">(</span><span class="n">ctx</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">mpiMesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sharder</span><span class="p">.</span><span class="n">distribute</span><span class="p">(</span><span class="n">partitioner</span><span class="p">,</span><span class="w"> </span><span class="n">rootRank</span><span class="p">);</span></pre>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aed86f0645ff9ea2ffa33490f9ef0779a" class="m-doc">MPISharder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&amp; context)</span>
+            </dt>
+            <dd>Construct an <a href="class_rodin_1_1_geometry_1_1_m_p_i_sharder.html" class="m-doc">MPISharder</a> with the given MPI context.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a721d52996b6421ba13440a6b670e69b7" class="m-doc">distribute</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Partitioner</a>&amp; p,
+              int root) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;</span>
+            </dt>
+            <dd>One-step distribution: shard, scatter, and gather.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2f7f1128343c83230c2d5f2082897652" class="m-doc">shard</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Partitioner</a>&amp; partitioner) -&gt; <a href="class_rodin_1_1_geometry_1_1_m_p_i_sharder.html" class="m-doc">MPISharder</a>&amp;</span>
+            </dt>
+            <dd>Split the global mesh into per-rank shards (ghost layers included).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac937aa81e24a0cc197487977703900e0" class="m-doc">scatter</a>(</span><span class="m-doc-wrap">int root) -&gt; <a href="class_rodin_1_1_geometry_1_1_m_p_i_sharder.html" class="m-doc">MPISharder</a>&amp;</span>
+            </dt>
+            <dd>Scatter shards from the root rank to all ranks.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a72c98fb79b56d58b9db66d2eb62e9f46" class="m-doc">gather</a>(</span><span class="m-doc-wrap">int root) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;</span>
+            </dt>
+            <dd>Gather the local shard on each rank.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aed86f0645ff9ea2ffa33490f9ef0779a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />MPISharder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed86f0645ff9ea2ffa33490f9ef0779a" class="m-doc-self">MPISharder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&amp; context)</span></span>
+            </h3>
+            <p>Construct an <a href="class_rodin_1_1_geometry_1_1_m_p_i_sharder.html" class="m-doc">MPISharder</a> with the given MPI context.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">context</td>
+                  <td>The MPI context (communicator and environment).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a721d52996b6421ba13440a6b670e69b7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt; Rodin::<wbr />Geometry::<wbr />MPISharder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a721d52996b6421ba13440a6b670e69b7" class="m-doc-self">distribute</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Partitioner</a>&amp; p,
+              int root)</span></span>
+            </h3>
+            <p>One-step distribution: shard, scatter, and gather.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>The mesh partitioner defining per-cell owner ranks.</td>
+                </tr>
+                <tr>
+                  <td>root</td>
+                  <td>The rank responsible for scattering shards.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The local MPI mesh built from the received shard.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Calls <a href="#a2f7f1128343c83230c2d5f2082897652" class="m-doc">shard()</a>, then <a href="#ac937aa81e24a0cc197487977703900e0" class="m-doc">scatter()</a> on the root rank, then <a href="#a72c98fb79b56d58b9db66d2eb62e9f46" class="m-doc">gather()</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a2f7f1128343c83230c2d5f2082897652"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_m_p_i_sharder.html" class="m-doc">MPISharder</a>&amp; Rodin::<wbr />Geometry::<wbr />MPISharder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f7f1128343c83230c2d5f2082897652" class="m-doc-self">shard</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Partitioner</a>&amp; partitioner)</span></span>
+            </h3>
+            <p>Split the global mesh into per-rank shards (ghost layers included).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">partitioner</td>
+                  <td>The mesh partitioner with <code>getCount()==comm.size()</code>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object for chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Each cell of the global mesh is assigned to a shard builder based on the partitioner, then each builder is finalized into a <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ac937aa81e24a0cc197487977703900e0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_m_p_i_sharder.html" class="m-doc">MPISharder</a>&amp; Rodin::<wbr />Geometry::<wbr />MPISharder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac937aa81e24a0cc197487977703900e0" class="m-doc-self">scatter</a>(</span><span class="m-doc-wrap">int root)</span></span>
+            </h3>
+            <p>Scatter shards from the root rank to all ranks.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">root</td>
+                  <td>The rank that owns the global mesh and performs sends.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object for chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Only the root rank performs non-blocking sends of each shard to its respective owner rank. Other ranks do nothing.</p>
+          </div></section>
+          <section class="m-doc-details" id="a72c98fb79b56d58b9db66d2eb62e9f46"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt; Rodin::<wbr />Geometry::<wbr />MPISharder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a72c98fb79b56d58b9db66d2eb62e9f46" class="m-doc-self">gather</a>(</span><span class="m-doc-wrap">int root)</span></span>
+            </h3>
+            <p>Gather the local shard on each rank.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">root</td>
+                  <td>The rank that originally scattered the shards.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The local MPI mesh built from the received shard.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>On the root rank, returns its own shard without MPI. On other ranks, blocks in a matching MPI_Recv from the root.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

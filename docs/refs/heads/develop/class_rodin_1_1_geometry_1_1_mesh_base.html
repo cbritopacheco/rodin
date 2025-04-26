@@ -225,7 +225,7 @@ $
             </dt>
             <dd>Gets a constant reference to the mesh connectivity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9964e332a29ec79a845bd38ce34d0ccf" class="m-doc">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; Eigen::Map&lt;const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad3864915d0fdbd406ea5efe9967c8d2" class="m-doc">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; Eigen::Map&lt;const Math::PointVector&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the space coordinates of the vertex at the given index.</dd>
             <dt>
@@ -235,8 +235,8 @@ $
             </dt>
             <dd>Sets the space coordinate of the vertex at the given index for the given coordinate index.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0dade2712336a5ebeb35ea0a7845a00f" class="m-doc">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
-              const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; coords) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f0d1f672741dc07564e2b4a8d2d83f9" class="m-doc">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              const Math::PointVector&amp; coords) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Sets the space coordinate of the vertex at the given index for the given coordinate index.</dd>
           </dl>
@@ -575,9 +575,9 @@ $ (d, i) $
 </g>
 </svg>-polytope.</p>
           </div></section>
-          <section class="m-doc-details" id="a9964e332a29ec79a845bd38ce34d0ccf"><div>
+          <section class="m-doc-details" id="aad3864915d0fdbd406ea5efe9967c8d2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">Eigen::Map&lt;const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9964e332a29ec79a845bd38ce34d0ccf" class="m-doc-self">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">Eigen::Map&lt;const Math::PointVector&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad3864915d0fdbd406ea5efe9967c8d2" class="m-doc-self">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the space coordinates of the vertex at the given index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -646,10 +646,10 @@ $ (0, 5, 10) $
 <span class="n">mesh</span><span class="p">.</span><span class="n">setVertexCoordinates</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">setVertexCoordinates</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">10.0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a0dade2712336a5ebeb35ea0a7845a00f"><div>
+          <section class="m-doc-details" id="a3f0d1f672741dc07564e2b4a8d2d83f9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0dade2712336a5ebeb35ea0a7845a00f" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
-              const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; coords) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f0d1f672741dc07564e2b4a8d2d83f9" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              const Math::PointVector&amp; coords) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets the space coordinate of the vertex at the given index for the given coordinate index.</p>
             <table class="m-table m-fullwidth m-flat">
