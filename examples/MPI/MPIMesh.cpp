@@ -24,10 +24,8 @@ int main(int argc, char** argv)
   {
 
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 32, 32 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 64, 64 });
     mesh.getConnectivity().compute(2, 2);
-    mesh.getConnectivity().compute(2, 1);
-    mesh.getConnectivity().compute(1, 2);
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
     for (auto it = mesh.getCell(); it; ++it)
@@ -115,9 +113,13 @@ int main(int argc, char** argv)
     sharder.getShard(0).save("Shard.0.mesh", IO::FileFormat::MEDIT);
     sharder.getShard(1).save("Shard.1.mesh", IO::FileFormat::MEDIT);
     std::cout << "Scattering\n";
-    // sharder.scatter(0);
+    sharder.scatter(0);
   }
 
   std::cout << "Gathering\n";
-  // auto mpiMesh = sharder.gather(0);
+  auto mpiMesh = sharder.gather(0);
+  mpiMesh.getShard().save(
+      "Gathered" + std::to_string(world.rank()) + ".mesh",
+      IO::FileFormat::MEDIT);
+  // mpiMesh.save("Gathered" + std::to_string(world.rank()) + ".mesh", IO::FileFormat::MEDIT);
 }

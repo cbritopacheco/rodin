@@ -136,6 +136,7 @@ namespace Rodin::Geometry
     for (size_t d = cellDim; d > 0; --d)
     {
       const auto& down = pconn.getIncidence(d, d - 1);
+      if (down.size() == 0) continue;
       for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
       {
         Index pParent = it->get_right();

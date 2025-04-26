@@ -95,16 +95,16 @@ namespace Rodin::Geometry
       MPISharder& scatter(int root)
       {
         const auto& comm = m_context.getCommunicator();
-        if (comm.rank() == root)
+        const int tag = m_context.getEnvironment().collectives_tag();
+        std::vector<boost::mpi::request> reqs(m_shards.size());
+        for (size_t i = 0; i < m_shards.size(); i++)
         {
-          const int tag = m_context.getEnvironment().collectives_tag();
-          std::vector<boost::mpi::request> requests;
-          requests.reserve(m_shards.size());
-          for (size_t i = 0; i < m_shards.size(); i++)
-            requests.push_back(comm.isend(i, tag, m_shards[i]));
-          for (auto& req : requests)
-            req.wait();
+          if (i == root)
+            continue;
+          reqs[i] = comm.isend(i, tag, m_shards[i]);
         }
+        for (auto& req : reqs)
+          req.wait();
         return *this;
       }
 
