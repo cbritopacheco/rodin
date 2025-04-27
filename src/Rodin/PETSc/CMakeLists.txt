@@ -6,6 +6,7 @@ Distributed under the Boost Software License, Version 1.0.
 ]]
 set(RodinPETSc_HEADERS
   ForwardDecls.h
+  Assembly/Sequential.h
   )
 
 set(RodinPETSc_SRCS

@@ -69,7 +69,8 @@ namespace Rodin::Variational
    */
   template <>
   class P1<Real, Geometry::Mesh<Context::Local>> final
-    : public FiniteElementSpace<P1<Real, Geometry::Mesh<Context::Local>>>
+    : public FiniteElementSpace<
+        Geometry::Mesh<Context::Local>, P1<Real, Geometry::Mesh<Context::Local>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -91,7 +92,7 @@ namespace Rodin::Variational
       using ElementType = P1Element<RangeType>;
 
       /// Parent class
-      using Parent = FiniteElementSpace<P1<RangeType, MeshType>>;
+      using Parent = FiniteElementSpace<MeshType, P1<RangeType, MeshType>>;
 
       /**
        * @brief Mapping for the scalar/complex P1 space.
@@ -299,7 +300,8 @@ namespace Rodin::Variational
    */
   template <>
   class P1<Complex, Geometry::Mesh<Context::Local>> final
-    : public FiniteElementSpace<P1<Complex, Geometry::Mesh<Context::Local>>>
+    : public FiniteElementSpace<
+        Geometry::Mesh<Context::Local>, P1<Complex, Geometry::Mesh<Context::Local>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -321,7 +323,7 @@ namespace Rodin::Variational
       using ElementType = P1Element<RangeType>;
 
       /// Parent class
-      using Parent = FiniteElementSpace<P1<RangeType, MeshType>>;
+      using Parent = FiniteElementSpace<MeshType, P1<RangeType, MeshType>>;
 
       /**
        * @brief Mapping for the scalar/complex P1 space.
@@ -526,7 +528,9 @@ namespace Rodin::Variational
    */
   template <>
   class P1<Math::Vector<Real>, Geometry::Mesh<Context::Local>> final
-    : public FiniteElementSpace<P1<Math::Vector<Real>, Geometry::Mesh<Context::Local>>>
+    : public FiniteElementSpace<
+        Geometry::Mesh<Context::Local>,
+        P1<Math::Vector<Real>, Geometry::Mesh<Context::Local>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -548,7 +552,7 @@ namespace Rodin::Variational
       using ElementType = P1Element<RangeType>;
 
       /// Parent class
-      using Parent = FiniteElementSpace<P1<RangeType, MeshType>>;
+      using Parent = FiniteElementSpace<MeshType, P1<RangeType, MeshType>>;
 
       template <class FunctionDerived>
       class Mapping
@@ -650,7 +654,7 @@ namespace Rodin::Variational
         return m_vdim;
       }
 
-      const Geometry::Mesh<ContextType>& getMesh() const override
+      const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }

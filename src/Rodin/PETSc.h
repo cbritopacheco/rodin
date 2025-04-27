@@ -4,4 +4,6 @@
 #include "PETSc/ForwardDecls.h"
 #include "PETSc/Reductions.h"
 
+#include "PETSc/Assembly/Sequential.h"
+
 #endif

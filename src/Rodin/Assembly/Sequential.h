@@ -72,9 +72,9 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the vector associated to the
        * linear form.
        */
-      VectorType execute(const InputType& input) const override
+      void execute(VectorType& res, const InputType& input) const override
       {
-        VectorType res(input.getFES().getSize());
+        res.resize(input.getFES().getSize());
         res.setZero();
         const auto& mesh = input.getFES().getMesh();
         for (auto& lfi : input.getLFIs())
@@ -94,7 +94,6 @@ namespace Rodin::Assembly
             }
           }
         }
-        return res;
       }
 
       Sequential* copy() const noexcept override
@@ -163,9 +162,9 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) const override
       {
-        OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
+        res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
         const auto& mesh = input.getTrialFES().getMesh();
         for (auto& bfi : input.getLocalBFIs())
@@ -210,7 +209,6 @@ namespace Rodin::Assembly
             }
           }
         }
-        return res;
       }
 
       Sequential* copy() const noexcept override
@@ -275,18 +273,19 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) const override
       {
+        std::vector<Eigen::Triplet<ScalarType>> triplets;
         Sequential<
           std::vector<Eigen::Triplet<ScalarType>>,
-          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<ScalarType>>>> assembly;
-        const auto triplets =
-          assembly.execute({
-            input.getTrialFES(), input.getTestFES(),
-            input.getLocalBFIs(), input.getGlobalBFIs() });
-        OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
+          Variational::BilinearForm<
+            TrialFES, TestFES,
+            std::vector<Eigen::Triplet<ScalarType>>>> assembly;
+        assembly.execute(triplets, {
+          input.getTrialFES(), input.getTestFES(),
+          input.getLocalBFIs(), input.getGlobalBFIs() });
+        res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
-        return res;
       }
 
       Sequential* copy() const noexcept override
@@ -349,9 +348,8 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) const override
       {
-        OperatorType res;
         const auto& mesh = input.getTrialFES().getMesh();
         res.reserve(input.getTestFES().getSize() * std::log(input.getTrialFES().getSize()));
         for (auto& bfi : input.getLocalBFIs())
@@ -408,7 +406,6 @@ namespace Rodin::Assembly
             }
           }
         }
-        return res;
       }
 
       Sequential* copy() const noexcept override
@@ -453,7 +450,7 @@ namespace Rodin::Assembly
         : Parent(std::move(other))
       {}
 
-      OperatorType execute(const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) const override
       {
         using AssemblyTuple =
           Tuple<Sequential<std::vector<Eigen::Triplet<Real>>,
@@ -465,14 +462,15 @@ namespace Rodin::Assembly
 
         // Compute each block of triplets
         std::array<std::vector<Eigen::Triplet<Real>>, AssemblyTuple::Size> ts;
-        assembly.zip(t)
-                .map([](const auto& p)
-                     { return p.first().execute(p.second()); })
-                .iapply([&](const Index i, auto& v)
-                        { ts[i] = std::move(v); });
+        assembly.zip(t).iapply(
+            [&](const Index i, auto& p)
+            {
+              const auto& as = p.first();
+              const auto& in = p.second();
+              as.execute(ts[i], in);
+            });
 
         // Add the triplets with the offsets
-        std::vector<Eigen::Triplet<Real>> res;
         size_t capacity = 0;
         for (const auto& v : ts)
           capacity += v.size();
@@ -487,7 +485,6 @@ namespace Rodin::Assembly
                 t.row() + offsets[i].second(), t.col() + offsets[i].first(), t.value());
           }
         }
-        return res;
       }
 
       Sequential* copy() const noexcept override
@@ -524,15 +521,17 @@ namespace Rodin::Assembly
           : Parent(std::move(other))
         {}
 
-        OperatorType execute(const InputType& input) const override
+        void execute(OperatorType& res, const InputType& input) const override
         {
           Sequential<
             std::vector<Eigen::Triplet<Real>>,
-            Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>> assembly;
-          OperatorType res(input.getRows(), input.getColumns());
-          const auto triplets = assembly.execute(input);
+            Tuple<
+              Variational::BilinearForm<TrialFES, TestFES,
+              std::vector<Eigen::Triplet<Real>>>...>> assembly;
+          res.resize(input.getRows(), input.getColumns());
+          std::vector<Eigen::Triplet<Real>> triplets;
+          assembly.execute(triplets, input);
           res.setFromTriplets(triplets.begin(), triplets.end());
-          return res;
         }
 
         Sequential* copy() const noexcept override
@@ -569,27 +568,30 @@ namespace Rodin::Assembly
           : Parent(std::move(other))
         {}
 
-        VectorType execute(const InputType& input) const override
+        void execute(VectorType& res, const InputType& input) const override
         {
           using AssemblyTuple =
-            Tuple<Sequential<Math::Vector<Real>, Variational::LinearForm<FES, Math::Vector<Real>>>...>;
-
-          AssemblyTuple assembly;
+            Tuple<
+              Sequential<Math::Vector<Real>,
+              Variational::LinearForm<FES, Math::Vector<Real>>>...>;
 
           const auto& t = input.getTuple();
-
-          auto vs = assembly.zip(t)
-                            .map([](const auto& p) { return p.first().execute(p.second()); });
-
-          Math::Vector<Real> res = Math::Vector<Real>::Zero(input.getSize());
           const auto& offsets = input.getOffsets();
-          vs.iapply(
-              [&](size_t i, const auto& v)
-              {
-                res.segment(offsets[i], v.size()) = v;
-              });
 
-          return res;
+          res.resize(input.getSize());
+          res.setZero();
+
+          AssemblyTuple assembly;
+          VectorType vec;
+
+          assembly.zip(t).iapply(
+              [&](const Index i, const auto& p)
+              {
+                const auto& as = p.first();
+                const auto& in = p.second();
+                as.execute(vec, in);
+                res.segment(offsets[i], vec.size()) = vec;
+              });
         }
 
         Sequential* copy() const noexcept override

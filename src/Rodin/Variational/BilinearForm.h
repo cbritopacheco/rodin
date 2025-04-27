@@ -139,7 +139,7 @@ namespace Rodin::Variational
       BilinearForm(
           const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
         : m_u(u), m_v(v),
-          m_operator(std::move(op))
+          m_operator(std::forward<Operator>(op))
       {
 #ifdef RODIN_MULTITHREADED
         m_assembly.reset(new MultithreadedAssembly);
@@ -167,7 +167,8 @@ namespace Rodin::Variational
           m_u(other.m_u), m_v(other.m_v),
           m_assembly(other.m_assembly->copy()),
           m_lbfis(other.m_lbfis),
-          m_gbfis(other.m_gbfis)
+          m_gbfis(other.m_gbfis),
+          m_operator(other.m_operator)
       {}
 
       constexpr
@@ -177,7 +178,7 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly)),
           m_lbfis(std::move(other.m_lbfis)),
           m_gbfis(std::move(other.m_gbfis)),
-          m_operator(std::move(other.m_operator))
+          m_operator(std::forward<Operator>(other.m_operator))
       {}
 
       /**
@@ -220,7 +221,7 @@ namespace Rodin::Variational
       {
          const auto& trialFES = getTrialFunction().getFiniteElementSpace();
          const auto& testFES = getTestFunction().getFiniteElementSpace();
-         m_operator = getAssembly().execute({
+         getAssembly().execute(m_operator, {
              trialFES, testFES, getLocalIntegrators(), getGlobalIntegrators() });
       }
 

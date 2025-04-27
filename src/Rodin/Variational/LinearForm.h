@@ -114,8 +114,9 @@ namespace Rodin::Variational
        * @param[in] fes Reference to the finite element space
        */
       constexpr
-      LinearForm(std::reference_wrapper<const TestFunction<FES>> v)
-        : m_v(v)
+      LinearForm(const TestFunction<FES>& v, Vector&& vec)
+        : m_v(v),
+          m_vector(std::forward<Vector>(vec))
       {
 #ifdef RODIN_MULTITHREADED
         m_assembly.reset(new MultithreadedAssembly);
@@ -125,11 +126,17 @@ namespace Rodin::Variational
       }
 
       constexpr
+      LinearForm(const TestFunction<FES>& v)
+        : LinearForm(v, Vector())
+      {}
+
+      constexpr
       LinearForm(const LinearForm& other)
         : Parent(other),
           m_v(other.m_v),
           m_assembly(other.m_assembly->copy()),
-          m_lfis(other.m_lfis)
+          m_lfis(other.m_lfis),
+          m_vector(other.m_vector)
       {}
 
       constexpr
@@ -137,7 +144,8 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
           m_assembly(std::move(other.m_assembly)),
-          m_lfis(std::move(other.m_lfis))
+          m_lfis(std::move(other.m_lfis)),
+          m_vector(std::forward<Vector>(other.m_vector))
       {}
 
       /**
@@ -191,14 +199,13 @@ namespace Rodin::Variational
       void assemble() override
       {
         const auto& fes = getTestFunction().getFiniteElementSpace();
-        m_vector = getAssembly().execute({ fes, getIntegrators() });
+        getAssembly().execute(m_vector, { fes, getIntegrators() });
       }
 
       /**
        * @brief Gets the reference to the (local) associated vector
        * to the LinearForm.
        */
-      inline
       VectorType& getVector() override
       {
         return m_vector;
@@ -208,13 +215,11 @@ namespace Rodin::Variational
        * @brief Gets the reference to the (local) associated vector
        * to the LinearForm.
        */
-      inline
       const VectorType& getVector() const override
       {
         return m_vector;
       }
 
-      inline
       const TestFunction<FES>& getTestFunction() const override
       {
         return m_v.get();
@@ -292,6 +297,10 @@ namespace Rodin::Variational
   template <class FES>
   LinearForm(TestFunction<FES>&)
     -> LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
+
+  template <class FES, class Vector>
+  LinearForm(const TestFunction<FES>&, Vector&&)
+    -> LinearForm<FES, Vector>;
 }
 
 #include "LinearForm.hpp"

@@ -585,12 +585,12 @@ namespace Rodin::Variational
             });
 
         // Assemble stiffness operator
-        m_stiffness = m_bfa->execute(
-            Assembly::BilinearFormTupleAssemblyInput(rows, cols, boffsets, bt));
+        m_bfa->execute(m_stiffness,
+          Assembly::BilinearFormTupleAssemblyInput(rows, cols, boffsets, bt));
 
         // Assemble mass vector
-        m_mass = m_lfa->execute(
-            Assembly::LinearFormTupleAssemblyInput(rows, loffsets, lt));
+        m_lfa->execute(m_mass,
+          Assembly::LinearFormTupleAssemblyInput(rows, loffsets, lt));
 
         // Impose Dirichlet boundary conditions
         m_us.apply(

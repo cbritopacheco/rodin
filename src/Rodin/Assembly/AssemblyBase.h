@@ -30,7 +30,7 @@ namespace Rodin::Assembly
 
       virtual ~AssemblyBase() = default;
 
-      virtual OperatorType execute(const InputType& data) const = 0;
+      virtual void execute(OperatorType& out, const InputType& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
@@ -51,7 +51,7 @@ namespace Rodin::Assembly
 
       virtual ~AssemblyBase() = default;
 
-      virtual OperatorType execute(const InputType& data) const = 0;
+      virtual void execute(OperatorType& out, const InputType& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
@@ -71,7 +71,7 @@ namespace Rodin::Assembly
 
       virtual ~AssemblyBase() = default;
 
-      virtual VectorType execute(const InputType& data) const = 0;
+      virtual void execute(VectorType& out, const InputType& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
@@ -92,7 +92,7 @@ namespace Rodin::Assembly
 
       virtual ~AssemblyBase() = default;
 
-      virtual VectorType execute(const InputType& data) const = 0;
+      virtual void execute(VectorType& out, const InputType& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };

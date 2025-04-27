@@ -140,25 +140,21 @@ namespace Rodin::Assembly
         : m_rows(rows), m_cols(cols), m_offsets(offsets), m_ins(ins)
       {}
 
-      inline
       size_t getRows() const
       {
         return m_rows;
       }
 
-      inline
       size_t getColumns() const
       {
         return m_cols;
       }
 
-      inline
       const Offsets& getOffsets() const
       {
         return m_offsets;
       }
 
-      inline
       const Tuple<Ts...>& getTuple() const
       {
         return m_ins;
@@ -183,19 +179,16 @@ namespace Rodin::Assembly
         : m_size(size), m_offsets(offsets), m_ins(ins)
       {}
 
-      inline
       size_t getSize() const
       {
         return m_size;
       }
 
-      inline
       const Offsets& getOffsets() const
       {
         return m_offsets;
       }
 
-      inline
       const Tuple<Ts...>& getTuple() const
       {
         return m_ins;
