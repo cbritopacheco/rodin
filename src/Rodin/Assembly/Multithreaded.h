@@ -140,8 +140,8 @@ namespace Rodin::Assembly
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
-        using TripletVector = std::vector<Eigen::Triplet<ScalarType>>;
-        const size_t capacity = input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
+        const size_t capacity =
+          input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
         res.clear();
         res.reserve(capacity);
         const size_t threadCount = getThreadPool().getThreadCount();

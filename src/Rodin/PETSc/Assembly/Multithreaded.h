@@ -17,11 +17,7 @@
 #include "Rodin/Threads/ThreadPool.h"
 #include "Rodin/Variational/LinearForm.h"
 #include "Rodin/Variational/BilinearForm.h"
-#include "Rodin/Variational/LinearFormIntegratorBase.h"
-#include "Rodin/Variational/LocalBilinearFormIntegratorBase.h"
-#include "Rodin/Variational/GlobalBilinearFormIntegratorBase.h"
 #include "Rodin/Utility/Overloaded.h"
-#include "ForwardDecls.h"
 
 namespace Rodin::Assembly
 {
