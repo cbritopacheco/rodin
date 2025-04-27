@@ -5,5 +5,6 @@
 #include "PETSc/Reductions.h"
 
 #include "PETSc/Assembly/Sequential.h"
+#include "PETSc/Assembly/Multithreaded.h"
 
 #endif

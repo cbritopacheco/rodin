@@ -138,11 +138,10 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) const override
       {
         using TripletVector = std::vector<Eigen::Triplet<ScalarType>>;
         const size_t capacity = input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
-        TripletVector res;
         res.clear();
         res.reserve(capacity);
         const size_t threadCount = getThreadPool().getThreadCount();
@@ -265,7 +264,6 @@ namespace Rodin::Assembly
             threadPool.waitForTasks();
           }
         }
-        return res;
       }
 
       const Threads::ThreadPool& getThreadPool() const
@@ -362,14 +360,14 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) const override
       {
-        const auto triplets = m_assembly.execute({
+        std::vector<Eigen::Triplet<ScalarType>> triplets;
+        m_assembly.execute(triplets, {
             input.getTrialFES(), input.getTestFES(),
             input.getLocalBFIs(), input.getGlobalBFIs() });
-        OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
+        res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
-        return res;
       }
 
       Multithreaded* copy() const noexcept override
@@ -468,9 +466,9 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) const override
       {
-        OperatorType res(input.getTestFES().getSize(), input.getTrialFES().getSize());
+        res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
         auto& threadPool = getThreadPool();
         const auto& mesh = input.getTestFES().getMesh();
@@ -576,7 +574,6 @@ namespace Rodin::Assembly
             threadPool.waitForTasks();
           }
         }
-        return res;
       }
 
       const Threads::ThreadPool& getThreadPool() const
@@ -666,9 +663,9 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the vector associated to the
        * linear form.
        */
-      VectorType execute(const InputType& input) const override
+      void execute(VectorType& res, const InputType& input) const override
       {
-        VectorType res(input.getFES().getSize());
+        res.resize(input.getFES().getSize());
         res.setZero();
         const auto& mesh = input.getFES().getMesh();
         for (auto& lfi : input.getLFIs())
@@ -716,7 +713,6 @@ namespace Rodin::Assembly
             threadPool.waitForTasks();
           }
         }
-        return res;
       }
 
       const Threads::ThreadPool& getThreadPool() const
