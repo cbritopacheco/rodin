@@ -11,6 +11,7 @@
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/assume_abstract.hpp>
 
+#include "Rodin/Copyable.h"
 #include "Rodin/Math.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
@@ -40,9 +41,10 @@ namespace Rodin::Geometry
    *
    * @see @ref Geometry::Point "Point"
    */
-  class PolytopeTransformation
+  class PolytopeTransformation : public Copyable
   {
     friend class boost::serialization::access;
+
     public:
       constexpr
       PolytopeTransformation(size_t rdim, size_t pdim)
@@ -147,6 +149,8 @@ namespace Rodin::Geometry
         ar & m_rdim;
         ar & m_pdim;
       }
+
+      virtual PolytopeTransformation* copy() const noexcept override = 0;
 
     private:
       const size_t m_rdim;

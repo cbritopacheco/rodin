@@ -65,6 +65,21 @@ namespace Rodin::Assembly
         assert(threadCount > 0);
       }
 
+      Multithreaded(const Multithreaded& other)
+        : Parent(other),
+          m_pool(
+            std::visit(
+              [](auto&& arg) -> std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>
+              {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, std::reference_wrapper<Threads::ThreadPool>>)
+                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(arg);
+                else
+                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(
+                      std::in_place_type_t<Threads::ThreadPool>(), arg.getThreadCount());
+              }, other.m_pool))
+      {}
+
       void execute(VectorType& res, const InputType& input) const override
       {
         PetscErrorCode ierr;
@@ -140,16 +155,17 @@ namespace Rodin::Assembly
         return new Multithreaded(*this);
       }
 
+      Threads::ThreadPool& getThreadPool() const
+      {
+        if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+          return std::get<Threads::ThreadPool>(m_pool);
+        else
+          return std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+      }
+
     private:
       mutable Threads::Mutex m_mutex;
       mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
-
-      const Threads::ThreadPool& getThreadPool() const
-      {
-        return std::holds_alternative<Threads::ThreadPool>(m_pool)
-          ? std::get<Threads::ThreadPool>(m_pool)
-          : std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
-      }
   };
 
   /**
@@ -197,6 +213,21 @@ namespace Rodin::Assembly
       {
         assert(threadCount > 0);
       }
+
+      Multithreaded(const Multithreaded& other)
+        : Parent(other),
+          m_pool(
+            std::visit(
+              [](auto&& arg) -> std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>
+              {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, std::reference_wrapper<Threads::ThreadPool>>)
+                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(arg);
+                else
+                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(
+                      std::in_place_type_t<Threads::ThreadPool>(), arg.getThreadCount());
+              }, other.m_pool))
+      {}
 
       void execute(OperatorType& A, const InputType& input) const override
       {
@@ -329,6 +360,21 @@ namespace Rodin::Assembly
         PetscCallAbort(PETSC_COMM_SELF, ierr);
       }
 
+      Threads::ThreadPool& getThreadPool()
+      {
+        if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+          return std::get<Threads::ThreadPool>(m_pool);
+        else
+          return std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+      }
+
+      Threads::ThreadPool& getThreadPool() const
+      {
+        return std::holds_alternative<Threads::ThreadPool>(m_pool)
+          ? std::get<Threads::ThreadPool>(m_pool)
+          : std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+      }
+
       Multithreaded* copy() const noexcept override
       {
         return new Multithreaded(*this);
@@ -337,13 +383,6 @@ namespace Rodin::Assembly
     private:
       mutable Threads::Mutex m_mutex;
       mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
-
-      const Threads::ThreadPool& getThreadPool() const
-      {
-        return std::holds_alternative<Threads::ThreadPool>(m_pool)
-          ? std::get<Threads::ThreadPool>(m_pool)
-          : std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
-      }
   };
 }
 

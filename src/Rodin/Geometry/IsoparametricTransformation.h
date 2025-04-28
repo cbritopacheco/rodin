@@ -76,8 +76,8 @@ namespace Rodin::Geometry
 
       IsoparametricTransformation(const IsoparametricTransformation& other)
         : Parent(other),
-          m_fe(other.m_fe),
-          m_pm(other.m_pm)
+          m_pm(other.m_pm),
+          m_fe(other.m_fe)
       {
         assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
@@ -85,8 +85,8 @@ namespace Rodin::Geometry
 
       IsoparametricTransformation(IsoparametricTransformation&& other)
         : Parent(std::move(other)),
-          m_fe(std::move(other.m_fe)),
-          m_pm(std::move(other.m_pm))
+          m_pm(std::move(other.m_pm)),
+          m_fe(std::move(other.m_fe))
       {
         assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
@@ -147,6 +147,11 @@ namespace Rodin::Geometry
         ar & boost::serialization::base_object<PolytopeTransformation>(*this);
         ar & m_pm;
         ar & m_fe;
+      }
+
+      IsoparametricTransformation* copy() const noexcept override
+      {
+        return new IsoparametricTransformation(*this);
       }
 
     private:

@@ -292,13 +292,24 @@ namespace Rodin::Geometry
 
   const PolytopeTransformation& MPIMesh::getPolytopeTransformation(size_t dimension, Index globalIdx) const
   {
-    throw std::runtime_error("getPolytopeTransformation() not implemented");
-    // auto local = getLocalIndex(dimension, globalIdx);
-    // if (local)
-    // {
-    //   const auto& comm = m_context.getCommunicator();
-    // }
-    // return getShard().getPolytopeTransformation(dimension, *local);
+    auto idx = getLocalIndex(dimension, globalIdx);
+    const auto& comm = m_context.getCommunicator();
+    const auto& shard = getShard();
+    PolytopeTransformation* local;
+    if (idx)
+    {
+      if (!shard.isGhost(dimension, *idx))
+        local = shard.getPolytopeTransformation(dimension, *idx).copy();
+    }
+    auto res = boost::mpi::all_reduce(comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
+    assert(res);
+    m_transformationIndex[dimension].write(
+        [&](auto& obj)
+        {
+          assert(res);
+          obj[globalIdx] = res;
+        });
+    return *res;
   }
 
   Polytope::Type MPIMesh::getGeometry(size_t dimension, Index globalIdx) const
@@ -364,6 +375,53 @@ namespace Rodin::Geometry
     if (local)
       getShard().setPolytopeTransformation({ p.first, *local }, trans);
     return *this;
+  }
+
+  MPIMesh& MPIMesh::load(
+    std::function<boost::filesystem::path(size_t)> filename, IO::FileFormat fmt)
+  {
+    const auto& comm = m_context.getCommunicator();
+    return load(filename(comm.rank()), fmt);
+  }
+
+  MPIMesh& MPIMesh::load(
+    const boost::filesystem::path& filename, IO::FileFormat fmt)
+  {
+    auto& shard = getShard();
+    shard.load(filename, fmt);
+    return *this;
+  }
+
+  void MPIMesh::save(
+    std::function<boost::filesystem::path(size_t)> filename, IO::FileFormat fmt)
+  {
+    const auto& comm = m_context.getCommunicator();
+    save(filename(comm.rank()), fmt);
+  }
+
+  void MPIMesh::save(
+    const boost::filesystem::path& filename, IO::FileFormat fmt, size_t precison) const
+  {
+    const auto& shard = getShard();
+    shard.save(filename, fmt);
+  }
+
+  Eigen::Map<const Math::PointVector> MPIMesh::getVertexCoordinates(Index globalIdx) const
+  {
+    auto idx = getLocalIndex(0, globalIdx);
+    const auto& shard = getShard();
+    const auto& comm = m_context.getCommunicator();
+    Math::PointVector local;
+    if (idx)
+    {
+      if (!shard.isGhost(0, *idx))
+        local = shard.getVertexCoordinates(*idx);
+    }
+    assert(local.size() >= 0);
+    assert(static_cast<size_t>(local.size()) == getSpaceDimension());
+    auto res = boost::mpi::all_reduce(comm, local, [](auto const& a, auto const& b) { return a.size() > 0 ? a : b; });
+    const auto& coords = (m_vertices[globalIdx] = res);
+    return { coords.data(), static_cast<Eigen::Index>(coords.size()) };
   }
 }
 

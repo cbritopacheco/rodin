@@ -134,11 +134,6 @@ namespace Rodin::Geometry
 
       Mesh& setAttribute(const std::pair<size_t, Index>& p, Attribute attr) override;
 
-      Eigen::Map<const Math::PointVector> getVertexCoordinates(Index globalIdx) const override
-      {
-        throw std::runtime_error("getVertexCoordinates() not implemented");
-      }
-
       Mesh& setVertexCoordinates(Index globalIdx, Real s, size_t i) override;
 
       Mesh& setVertexCoordinates(Index globalIdx, const Math::PointVector& coords) override;
@@ -146,6 +141,34 @@ namespace Rodin::Geometry
       virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index globalIdx) const override;
 
       virtual Mesh& setPolytopeTransformation(const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
+
+      MPIMesh& load(
+        std::function<boost::filesystem::path(size_t)> filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM);
+
+      MPIMesh& load(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM) override;
+
+      void save(
+        std::function<boost::filesystem::path(size_t)> filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM);
+
+      void save(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
+
+      Eigen::Map<const Math::PointVector> getVertexCoordinates(Index globalIdx) const override;
+
+      SubMeshBase& asSubMesh() override
+      {
+        throw std::runtime_error("asSubMesh() not implemented");
+      }
+
+      const SubMeshBase& asSubMesh() const override
+      {
+        throw std::runtime_error("asSubMesh() not implemented");
+      }
 
       Connectivity<Context::MPI>& getConnectivity() override
       {
@@ -157,30 +180,6 @@ namespace Rodin::Geometry
       {
         throw std::runtime_error("getConnectivity() not implemented");
         // return m_connectivity;
-      }
-
-      MeshBase& load(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM) override
-      {
-        throw std::runtime_error("load() not implemented");
-      }
-
-      void save(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override
-      {
-        throw std::runtime_error("save() not implemented");
-      }
-
-      SubMeshBase& asSubMesh() override
-      {
-        throw std::runtime_error("asSubMesh() not implemented");
-      }
-
-      const SubMeshBase& asSubMesh() const override
-      {
-        throw std::runtime_error("asSubMesh() not implemented");
       }
 
     private:

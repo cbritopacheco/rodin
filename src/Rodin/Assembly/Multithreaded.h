@@ -266,7 +266,7 @@ namespace Rodin::Assembly
         }
       }
 
-      const Threads::ThreadPool& getThreadPool() const
+      Threads::ThreadPool& getThreadPool() const
       {
         if (std::holds_alternative<Threads::ThreadPool>(m_pool))
           return std::get<Threads::ThreadPool>(m_pool);
@@ -576,7 +576,7 @@ namespace Rodin::Assembly
         }
       }
 
-      const Threads::ThreadPool& getThreadPool() const
+      Threads::ThreadPool& getThreadPool() const
       {
         if (std::holds_alternative<Threads::ThreadPool>(m_pool))
           return std::get<Threads::ThreadPool>(m_pool);
