@@ -28,3 +28,7 @@ add_subdirectory(Threads)
 add_subdirectory(Geometry)
 add_subdirectory(Variational)
 add_subdirectory(Serialization)
+
+if (RODIN_USE_MPI)
+  add_subdirectory(MPI)
+endif()

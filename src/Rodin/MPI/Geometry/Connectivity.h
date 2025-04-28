@@ -7,9 +7,9 @@
 #ifndef RODIN_GEOMETRY_MPICONNECTIVITY_H
 #define RODIN_GEOMETRY_MPICONNECTIVITY_H
 
-#include "Rodin/MPI/MPIContext.h"
-
 #include "Rodin/Geometry/Connectivity.h"
+
+#include "Rodin/MPI/Context/MPI.h"
 
 namespace Rodin::Geometry
 {
@@ -23,7 +23,6 @@ namespace Rodin::Geometry
 
       Connectivity(const Context& context)
       {}
-
   };
 }
 

@@ -1,6 +1,6 @@
 #include <boost/serialization/optional.hpp>
 
-#include "MPIMesh.h"
+#include "Mesh.h"
 
 namespace Rodin::Geometry
 {

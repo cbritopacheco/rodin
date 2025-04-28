@@ -3,12 +3,15 @@
 
 #include <boost/mpi/config.hpp>
 
+#include "Rodin/Geometry/Sharder.h"
 #include "Rodin/Geometry/MeshPartitioner.h"
 
-#include "MPIMesh.h"
+#include "Mesh.h"
 
 namespace Rodin::Geometry
 {
+  using MPISharder = Sharder<Context::MPI>;
+
   /**
    * @class MPISharder
    * @brief Utility for distributing a global mesh across MPI ranks by
@@ -21,14 +24,15 @@ namespace Rodin::Geometry
    *   auto mpiMesh = sharder.distribute(partitioner, rootRank);
    * @endcode
    */
-  class MPISharder
+  template <>
+  class Sharder<Context::MPI>
   {
     public:
       /**
        * @brief Construct an MPISharder with the given MPI context.
        * @param context The MPI context (communicator and environment).
        */
-      MPISharder(const Context::MPI& context)
+      Sharder(const Context::MPI& context)
         : m_context(context)
       {}
 
@@ -55,7 +59,7 @@ namespace Rodin::Geometry
        * @param partitioner The mesh partitioner with `getCount()==comm.size()`.
        * @return Reference to this object for chaining.
        */
-      MPISharder& shard(Partitioner& partitioner)
+      Sharder& shard(Partitioner& partitioner)
       {
         m_shards.clear();
         const auto& mesh = partitioner.getMesh();
@@ -92,7 +96,7 @@ namespace Rodin::Geometry
        * @param root The rank that owns the global mesh and performs sends.
        * @return Reference to this object for chaining.
        */
-      MPISharder& scatter(int root)
+      Sharder& scatter(int root)
       {
         const auto& comm = m_context.getCommunicator();
         const int tag = m_context.getEnvironment().collectives_tag();

@@ -1,8 +1,8 @@
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 
-#include <Rodin/MPI/MPIMesh.h>
-#include <Rodin/MPI/MPISharder.h>
+#include <Rodin/MPI/Geometry/Mesh.h>
+#include <Rodin/MPI/Geometry/Sharder.h>
 
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
 

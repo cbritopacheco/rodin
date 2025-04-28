@@ -1,8 +1,9 @@
 #ifndef RODIN_MPI_ASSEMBLY_MPI_H
 #define RODIN_MPI_ASSEMBLY_MPI_H
 
-#include "Rodin/MPI/MPIMesh.h"
 #include "Rodin/Variational/Integrator.h"
+
+#include "Rodin/MPI/Geometry/Mesh.h"
 
 namespace Rodin::Assembly::Internal
 {
