@@ -177,9 +177,13 @@ namespace Rodin::Geometry
     const auto& comm = m_context.getCommunicator();
     const auto& shard = getShard();
     bool local = false;
-    const auto idx = getLocalIndex(getDimension() - 1, faceIdx);
+    const size_t d = getDimension() - 1;
+    const auto idx = getLocalIndex(d, faceIdx);
     if (idx)
-      local = shard.isInterface(*idx);
+    {
+      if (!shard.isGhost(d, *idx))
+        local = shard.isInterface(*idx);
+    }
     return boost::mpi::all_reduce(comm, local, std::logical_or<bool>());
   }
 
@@ -188,9 +192,13 @@ namespace Rodin::Geometry
     const auto& comm = m_context.getCommunicator();
     const auto& shard = getShard();
     bool local = false;
-    const auto idx = getLocalIndex(getDimension() - 1, faceIdx);
+    const size_t d = getDimension() - 1;
+    const auto idx = getLocalIndex(d, faceIdx);
     if (idx)
-      local = shard.isBoundary(*idx);
+    {
+      if (!shard.isGhost(d, *idx))
+        local = shard.isBoundary(*idx);
+    }
     return boost::mpi::all_reduce(comm, local, std::logical_or<bool>());
   }
 

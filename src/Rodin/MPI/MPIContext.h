@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MPI_CONTEXT_H
-#define RODIN_MPI_CONTEXT_H
+#ifndef RODIN_MPI_MPI_H
+#define RODIN_MPI_MPI_H
 
 #include "Rodin/Context/Base.h"
 

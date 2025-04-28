@@ -16,6 +16,9 @@ add_library(RodinScotch
   ${RodinScotch_HEADERS} ${RodinScotch_SRCS})
 add_library(Rodin::Scotch ALIAS RodinScotch)
 
+target_include_directories(RodinScotch
+  INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
+
 find_package(Scotch REQUIRED)
 target_link_libraries(RodinScotch
   PUBLIC
