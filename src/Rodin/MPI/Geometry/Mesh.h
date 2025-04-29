@@ -46,6 +46,10 @@ namespace Rodin::Geometry
 
       const Shard& getShard() const;
 
+      std::optional<Index> getLocalIndex(size_t dimension, Index globalIdx) const;
+
+      Index getGlobalIndex(size_t dimension, Index localIdx) const;
+
       Mesh& scale(Real c) override;
 
       void flush() override;
@@ -97,8 +101,6 @@ namespace Rodin::Geometry
       FaceIterator getBoundary() const override;
 
       FaceIterator getInterface() const override;
-
-      std::optional<Index> getLocalIndex(size_t dimension, Index globalIdx) const;
 
       bool isInterface(Index globalFaceIdx) const override;
 

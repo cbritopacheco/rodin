@@ -3,7 +3,7 @@
 
 #include "Rodin/Variational/FiniteElementSpace.h"
 
-#include "Rodin/MPI/MPIMesh.h"
+#include "Rodin/MPI/Geometry/Mesh.h"
 
 namespace Rodin::Variational
 {

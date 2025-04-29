@@ -17,6 +17,7 @@
 #include "Rodin/Geometry.h"
 #include "Rodin/Solver/Solver.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/System.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/BlockSparseMatrix.h"
 #include "Rodin/FormLanguage/Base.h"
@@ -27,7 +28,6 @@
 
 #include "ForwardDecls.h"
 
-#include "Reductions.h"
 #include "ProblemBody.h"
 #include "LinearForm.h"
 #include "BilinearForm.h"
@@ -108,31 +108,28 @@ namespace Rodin::Variational
 
   /**
    * @ingroup ProblemSpecializations
-   * @brief General class to assemble linear systems with `Math::SparseMatrix`
-   * and `Math::Vector` types in a sequential context.
+   * @brief General class to assemble linear systems with `Operator`
+   * and `Vector` generic types in a sequential context.
    */
-  template <class TrialFES, class TestFES>
-  class Problem<
-    TrialFES, TestFES,
-    Math::SparseMatrix<
-      typename FormLanguage::Mult<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TrialFES>::ScalarType>
-      ::Type>,
-    Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
-    : public ProblemBase<
-        Math::SparseMatrix<
-          typename FormLanguage::Mult<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TrialFES>::ScalarType>
-          ::Type>,
-        Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>,
-          typename FormLanguage::Mult<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TrialFES>::ScalarType>
-          ::Type>
+  template <class TrialFES, class TestFES, class Operator, class Vector>
+  class Problem<TrialFES, TestFES, Operator, Vector>
+    : public ProblemBase<Operator, Vector,
+        typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType, typename FormLanguage::Traits<TestFES>::ScalarType>::Type>
   {
     public:
+      using TrialFESType = TrialFES;
+
+      using TestFESType = TestFES;
+
+      using OperatorType = Operator;
+
+      using VectorType = Vector;
+
+      using ScalarType =
+        typename FormLanguage::Mult<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
+
       using TrialFESScalarType =
         typename FormLanguage::Traits<TrialFES>::ScalarType;
 
@@ -144,15 +141,9 @@ namespace Rodin::Variational
 
       using VectorScalarType = TestFESScalarType;
 
-      using ScalarType = OperatorScalarType;
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESScalarType>;
 
       using ContextType = Context::Local;
-
-      using OperatorType = Math::SparseMatrix<OperatorScalarType>;
-
-      using VectorType = Math::Vector<TestFESScalarType>;
-
-      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESScalarType>;
 
       using Parent = ProblemBase<OperatorType, VectorType, ScalarType>;
 
@@ -233,6 +224,8 @@ namespace Rodin::Variational
           m_stiffness += bf.getOperator();
         }
 
+        Math::System axb(m_stiffness, m_mass);
+
         // Impose Dirichlet boundary conditions
         auto& trial = getTrialFunction();
         const auto& trialFES = trial.getFiniteElementSpace();
@@ -248,7 +241,7 @@ namespace Rodin::Variational
           }
           else
           {
-            Reductions::eliminate(m_stiffness, m_mass, dofs);
+            axb.eliminate(dofs);
           }
         }
 
@@ -266,7 +259,7 @@ namespace Rodin::Variational
             }
             else
             {
-              Reductions::merge(m_stiffness, m_mass, dofs);
+              axb.merge(dofs);
             }
           }
         }
@@ -371,10 +364,10 @@ namespace Rodin::Variational
         Math::Vector<
           typename FormLanguage::Traits<TestFES>::ScalarType>>;
 
-  template <class U1, class U2, class ... Us>
+  template <class Operator, class Vector, class U1, class U2, class ... Us>
   class Problem<
-      Tuple<U1, U2, Us...>, Math::SparseMatrix<Real>, Math::Vector<Real>>
-    : public ProblemBase<Math::SparseMatrix<Real>, Math::Vector<Real>, Real>
+      Tuple<U1, U2, Us...>, Operator, Vector>
+    : public ProblemBase<Operator, Vector, Real>
   {
 
     template <class T>
@@ -390,9 +383,9 @@ namespace Rodin::Variational
 
       using ContextType = Context::Local;
 
-      using OperatorType = Math::SparseMatrix<ScalarType>;
+      using OperatorType = Operator;
 
-      using VectorType = Math::Vector<ScalarType>;
+      using VectorType = Vector;
 
       using Parent = ProblemBase<OperatorType, VectorType, Real>;
 
@@ -592,6 +585,8 @@ namespace Rodin::Variational
         m_lfa->execute(m_mass,
           Assembly::LinearFormTupleAssemblyInput(rows, loffsets, lt));
 
+        Math::System axb(m_stiffness, m_mass);
+
         // Impose Dirichlet boundary conditions
         m_us.apply(
             [&](const auto& u)
@@ -604,7 +599,7 @@ namespace Rodin::Variational
                 {
                   dbc.assemble();
                   const auto& dofs = dbc.getDOFs();
-                  Reductions::eliminate(m_stiffness, m_mass, dofs, offset);
+                  axb.eliminate(dofs, offset);
                 }
               }
             });

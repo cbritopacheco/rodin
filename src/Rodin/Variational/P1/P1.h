@@ -193,6 +193,11 @@ namespace Rodin::Variational
 
       P1& operator=(P1&& other) = default;
 
+      const auto& getElementIndex()
+      {
+        return s_elements;
+      }
+
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return s_elements[getMesh().getGeometry(d, i)];
@@ -424,6 +429,11 @@ namespace Rodin::Variational
 
       P1& operator=(P1&& other) = default;
 
+      const auto& getElementIndex()
+      {
+        return s_elements;
+      }
+
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return s_elements[getMesh().getGeometry(d, i)];
@@ -638,6 +648,11 @@ namespace Rodin::Variational
       P1(P1&& other) = default;
 
       P1& operator=(P1&& other) = default;
+
+      const auto& getElementIndex()
+      {
+        return s_elements[m_vdim];
+      }
 
       const VectorP1Element& getFiniteElement(size_t d, Index i) const
       {

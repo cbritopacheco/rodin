@@ -98,6 +98,14 @@ namespace Rodin::Geometry
     return it->get_left();
   }
 
+  Index MPIMesh::getGlobalIndex(size_t dimension, Index localIdx) const
+  {
+    const auto& map = getShard().getPolytopeMap(dimension).left;
+    auto it = map.find(localIdx);
+    assert(it != map.end());
+    return it->get_right();
+  }
+
   CellIterator MPIMesh::getCell() const
   {
     return getCell(0);
