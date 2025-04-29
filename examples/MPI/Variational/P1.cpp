@@ -16,5 +16,7 @@ int main(int argc, char** argv)
 
   Mesh<Context::MPI> mesh(mpi);
   P1 fes(mesh);
+  fes.getMesh();
+
 }
 

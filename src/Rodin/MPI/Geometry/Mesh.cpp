@@ -100,10 +100,9 @@ namespace Rodin::Geometry
 
   Index MPIMesh::getGlobalIndex(size_t dimension, Index localIdx) const
   {
-    const auto& map = getShard().getPolytopeMap(dimension).left;
-    auto it = map.find(localIdx);
-    assert(it != map.end());
-    return it->get_right();
+    const auto& shard = getShard();
+    const auto& pm = shard.getPolytopeMap(dimension);
+    return pm.left.at(localIdx).get_right();
   }
 
   CellIterator MPIMesh::getCell() const

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <boost/bimap.hpp>
+#include <boost/bimap/vector_of.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
 #include <boost/serialization/access.hpp>
 
@@ -59,8 +60,8 @@ namespace Rodin::Geometry
     public:
       using PolytopeIndex =
         boost::bimap<
-          boost::bimaps::unordered_set_of<IndexArray, IndexArraySymmetricHash, IndexArraySymmetricEquality>,
-          boost::bimaps::unordered_set_of<Index>
+          boost::bimaps::vector_of<Index>,
+          boost::bimaps::unordered_set_of<IndexArray, IndexArraySymmetricHash, IndexArraySymmetricEquality>
         >;
 
       struct SubPolytope
