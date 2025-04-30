@@ -911,7 +911,7 @@ namespace Rodin::Geometry
     const auto& ancestors = submesh.getAncestors();
     const size_t d = polytope.getDimension();
     Index i = polytope.getIndex();
-    i = submesh.getPolytopeMap(d).left.at(i);
+    i = submesh.getPolytopeMap(d).left.at(i).get_right();
     auto it = ancestors.begin();
     while (it != ancestors.end())
     {
@@ -928,7 +928,7 @@ namespace Rodin::Geometry
       else if (it->get().isSubMesh())
       {
         const auto& parentMesh = it->get().asSubMesh();
-        i = parentMesh.getPolytopeMap(d).left.at(i);
+        i = parentMesh.getPolytopeMap(d).left.at(i).get_right();
       }
       else
       {

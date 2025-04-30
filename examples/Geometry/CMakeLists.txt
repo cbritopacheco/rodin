@@ -14,11 +14,6 @@ target_link_libraries(Displace
   Rodin::Geometry
   Rodin::Variational)
 
-add_executable(SubMeshExtraction SubMeshExtraction.cpp)
-target_link_libraries(SubMeshExtraction
-  PUBLIC
-  Rodin::Geometry)
-
 add_executable(Skin Skin.cpp)
 target_link_libraries(Skin
   PUBLIC

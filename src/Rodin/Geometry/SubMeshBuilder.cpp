@@ -34,7 +34,7 @@ namespace Rodin::Geometry
     {
       const Index parentVertex = parentPolytope.coeff(i);
       const Index childVertex = m_sidx[0];
-      const auto [it, inserted] = m_s2ps[0].left.insert({ childVertex, parentVertex });
+      const auto [it, inserted] = m_s2ps[0].right.insert({ parentVertex, childVertex });
       if (inserted) // Vertex was not already in the map
       {
         childPolytope.coeffRef(i) = childVertex;
@@ -48,7 +48,7 @@ namespace Rodin::Geometry
     // Add polytope with original geometry and new vertex ordering
     build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
     const Index childIdx = m_sidx[d];
-    const auto [it, inserted] = m_s2ps[d].left.insert({ childIdx, parentIdx });
+    const auto [it, inserted] = m_s2ps[d].right.insert({ parentIdx, childIdx });
     // Add polytope information
     if (inserted) // Polytope was already in the map
     {

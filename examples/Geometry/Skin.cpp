@@ -8,39 +8,19 @@
 #include <Rodin/Alert.h>
 
 using namespace Rodin;
-using namespace Geometry;
+using namespace Rodin::Geometry;
 
-const char* meshFile = "../resources/examples/Geometry/Skinning.mesh";
+static constexpr Attribute trimAttribute = 2;
 
 int main(int, char**)
 {
+  size_t n = 8;
   Mesh mesh;
-  mesh.load(meshFile);
-
-  // Needed for computing the boundary
-  mesh.getConnectivity().compute(2, 3);
-
-  // Optional: for computing the edges on the boundary
-  mesh.getConnectivity().compute(2, 1);
-
-  mesh.getConnectivity().compute(1, 1);
-
-  // for (auto it = mesh.getFace(); !it.end(); ++it)
-  //   mesh.setAttribute({ it->getDimension(), it->getIndex() }, it->getIndex() + 1);
-
-  // const size_t edgeDimension = 1;
-  // for (auto it = mesh.getPolytope(edgeDimension); !it.end(); ++it)
-  //   mesh.setAttribute({ it->getDimension(), it->getIndex() }, it->getIndex() + 1);
-
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+  mesh.getConnectivity().compute(1, 0);
+  for (auto it = mesh.getFace(); !it.end(); ++it)
+    mesh.setAttribute({ it->getDimension(), it->getIndex() }, it->getIndex() + 1);
+  mesh.save("Grid.mesh", IO::FileFormat::MEDIT);
   auto skin = mesh.skin();
-  const auto& inc = skin.getConnectivity().getIncidence(1, 1);
-  for (size_t i = 0; i < inc.size(); i++)
-  {
-    std::cout << i << ": ";
-    for (const Index s : inc[i])
-      std::cout << s << " ";
-    std::cout << std::endl;
-  }
-
   skin.save("Skin.mesh", IO::FileFormat::MEDIT);
 }
