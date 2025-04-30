@@ -194,7 +194,7 @@ namespace Rodin::IO
           }
           continue; // Continue the while loop
         }
-        case MEDIT::Keyword::TriangularPrisms:
+        case MEDIT::Keyword::Wedges:
         {
           m_build.reserve(3, *count);
           for (size_t i = 0; i < *count; i++)
@@ -204,13 +204,13 @@ namespace Rodin::IO
             if (!data)
             {
               Alert::MemberFunctionException(*this, __func__)
-                << "Failed to parse TriangularPrism on line "
+                << "Failed to parse Wedge on line "
                 << std::to_string(m_currentLineNumber)
                 << "."
                 << Alert::Raise;
             }
             data->vertices -= 1;
-            m_build.polytope(Geometry::Polytope::Type::TriangularPrism, std::move(data->vertices));
+            m_build.polytope(Geometry::Polytope::Type::Wedge, std::move(data->vertices));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
               m_build.attribute({ 3, i }, data->attribute);
           }
@@ -315,9 +315,9 @@ namespace Rodin::IO
               os << MEDIT::Keyword::Tetrahedra << '\n';
               break;
             }
-            case Geometry::Polytope::Type::TriangularPrism:
+            case Geometry::Polytope::Type::Wedge:
             {
-              os << MEDIT::Keyword::TriangularPrisms << '\n';
+              os << MEDIT::Keyword::Wedges << '\n';
               break;
             }
           }
@@ -359,7 +359,7 @@ namespace Rodin::IO
                        << vertices(3) + 1 << ' ' << vertices(2) + 1;
                     break;
                   }
-                  case Geometry::Polytope::Type::TriangularPrism:
+                  case Geometry::Polytope::Type::Wedge:
                   {
                     os << vertices(0) + 1 << ' ' << vertices(1) + 1 << ' ' << vertices(2) + 1 << ' '
                        << vertices(3) + 1 << ' ' << vertices(4) + 1 << ' ' << vertices(5) + 1;

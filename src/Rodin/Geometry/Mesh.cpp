@@ -14,6 +14,7 @@
 
 #include "Rodin/IO/MFEM.h"
 #include "Rodin/IO/MEDIT.h"
+#include "Rodin/IO/Ensight6.h"
 
 #include "Mesh.h"
 #include "SubMesh.h"
@@ -131,6 +132,12 @@ namespace Rodin::Geometry
       case IO::FileFormat::MEDIT:
       {
         IO::MeshPrinter<IO::FileFormat::MEDIT, Context> printer(*this);
+        printer.print(ofs);
+        break;
+      }
+      case IO::FileFormat::ENSIGHT6:
+      {
+        IO::MeshPrinter<IO::FileFormat::ENSIGHT6, Context> printer(*this);
         printer.print(ofs);
         break;
       }
@@ -850,7 +857,7 @@ namespace Rodin::Geometry
         }
         return build.finalize();
       }
-      case Polytope::Type::TriangularPrism:
+      case Polytope::Type::Wedge:
       {
         assert(dimensions.size() == 3);
         const size_t w = dimensions.coeff(0);

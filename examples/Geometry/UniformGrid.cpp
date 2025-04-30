@@ -13,7 +13,7 @@ using namespace Geometry;
 int main(int, char**)
 {
   constexpr size_t n = 4;
-  constexpr Geometry::Polytope::Type g = Geometry::Polytope::Type::TriangularPrism;
+  constexpr Geometry::Polytope::Type g = Geometry::Polytope::Type::Wedge;
   Mesh mesh;
   mesh = LocalMesh::UniformGrid(g, { n, n, n });
   mesh.getConnectivity().compute(3, 2);

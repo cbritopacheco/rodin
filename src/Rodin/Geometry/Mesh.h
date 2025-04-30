@@ -1052,8 +1052,8 @@ namespace Rodin::Geometry
         ar & m_vertices;
         ar & m_connectivity;
         ar & m_attributeIndex;
-        ar & m_attributes;
         ar & m_transformationIndex;
+        ar & m_attributes;
         ar & m_context;
       }
 

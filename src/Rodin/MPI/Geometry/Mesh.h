@@ -175,13 +175,11 @@ namespace Rodin::Geometry
       Connectivity<Context::MPI>& getConnectivity() override
       {
         throw std::runtime_error("getConnectivity() not implemented");
-        // return m_connectivity;
       }
 
       const Connectivity<Context::MPI>& getConnectivity() const override
       {
         throw std::runtime_error("getConnectivity() not implemented");
-        // return m_connectivity;
       }
 
     private:
@@ -190,7 +188,6 @@ namespace Rodin::Geometry
 
       mutable FlatMap<Index, Math::PointVector> m_vertices;
       mutable TransformationIndex m_transformationIndex;
-      // Connectivity<Context::MPI> m_connectivity;
   };
 }
 

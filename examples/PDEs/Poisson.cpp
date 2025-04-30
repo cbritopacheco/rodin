@@ -21,27 +21,28 @@ int main(int, char**)
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
   mesh.scale(1.0 / 31);
   mesh.getConnectivity().compute(1, 2);
+  mesh.save("Poisson.geo", IO::FileFormat::ENSIGHT6);
 
-  // Functions
-  P1 vh(mesh);
+  // // Functions
+  // P1 vh(mesh);
 
-  ScalarFunction f(1.0);
+  // ScalarFunction f(1.0);
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
+  // TrialFunction u(vh);
+  // TestFunction  v(vh);
 
-  // Define problem
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
+  // // Define problem
+  // Problem poisson(u, v);
+  // poisson = Integral(Grad(u), Grad(v))
+  //         - Integral(f, v)
+  //         + DirichletBC(u, Zero());
 
-  // Solve
-  CG(poisson).solve();
+  // // Solve
+  // CG(poisson).solve();
 
-  // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  // // Save solution
+  // u.getSolution().save("Poisson.gf");
+  // mesh.save("Poisson.mesh");
 
   return 0;
 }

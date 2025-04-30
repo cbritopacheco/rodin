@@ -444,7 +444,7 @@ namespace Rodin::Geometry
         }
         return;
       }
-      case Polytope::Type::TriangularPrism:
+      case Polytope::Type::Wedge:
       {
         assert(dim <= 3);
         assert(p.size() == 6);
@@ -483,7 +483,7 @@ namespace Rodin::Geometry
         else if (dim == 3)
         {
           out.resize(1);
-          out[0] = { Polytope::Type::TriangularPrism, p };
+          out[0] = { Polytope::Type::Wedge, p };
         }
         else
         {

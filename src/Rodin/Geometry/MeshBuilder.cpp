@@ -121,6 +121,12 @@ namespace Rodin::Geometry
 
   Mesh<Context::Local> Mesh<Context::Local>::Builder::finalize()
   {
+    for (auto& attrs : m_attributes)
+    {
+      if (attrs.size() == 0)
+        attrs.insert(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    }
+
     Mesh res;
     res.m_sdim = m_sdim;
     res.m_vertices = std::move(m_vertices);

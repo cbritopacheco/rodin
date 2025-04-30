@@ -40,9 +40,9 @@ namespace Rodin::Geometry
         os << "Tetrahedron";
         break;
       }
-      case Polytope::Type::TriangularPrism:
+      case Polytope::Type::Wedge:
       {
-        os << "TriangularPrism";
+        os << "Wedge";
         break;
       }
     }
@@ -65,7 +65,7 @@ namespace Rodin::Geometry
       Math::PointMatrix{{0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} },
-    { Polytope::Type::TriangularPrism,
+    { Polytope::Type::Wedge,
       Math::PointMatrix{{0, 1, 0, 0, 1, 0},
                         {0, 0, 1, 0, 0, 1},
                         {0, 0, 0, 1, 1, 1}} },

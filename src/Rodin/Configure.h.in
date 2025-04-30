@@ -17,6 +17,16 @@
  * @brief Preprocessor directives defined by Rodin.
  */
 
+#define RODIN_VERSION "@RODIN_VERSION@"
+
+#define RODIN_VERSION_MAJOR @RODIN_VERSION_MAJOR@
+
+#define RODIN_VERSION_MINOR @RODIN_VERSION_MINOR@
+
+#define RODIN_VERSION_PATCH @RODIN_VERSION_PATCH@
+
+#define RODIN_VERSION_CODE @RODIN_VERSION_CODE@
+
 /**
  * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with Python support.

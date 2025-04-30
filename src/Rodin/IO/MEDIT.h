@@ -33,7 +33,7 @@ namespace Rodin::IO::MEDIT
     Triangles,
     Quadrilaterals,
     Tetrahedra,
-    TriangularPrisms,
+    Wedges,
     Corners,
     Ridges,
     Edges,
@@ -71,8 +71,8 @@ namespace Rodin::IO::MEDIT
         return "Quadrilaterals";
       case Keyword::Tetrahedra:
         return "Tetrahedra";
-      case Keyword::TriangularPrisms:
-        return "TriangularPrisms";
+      case Keyword::Wedges:
+        return "Wedges";
       case Keyword::Corners:
         return "Corners";
       case Keyword::Ridges:
@@ -182,8 +182,8 @@ namespace Rodin::IO::MEDIT
       res = Keyword::Quadrilaterals;
     else if (str == Keyword::Tetrahedra)
       res = Keyword::Tetrahedra;
-    else if (str == Keyword::TriangularPrisms)
-      res = Keyword::TriangularPrisms;
+    else if (str == Keyword::Wedges)
+      res = Keyword::Wedges;
     else if (str == Keyword::Corners)
       res = Keyword::Corners;
     else if (str == Keyword::Ridges)
@@ -276,7 +276,7 @@ namespace Rodin::IO::MEDIT
     public:
       struct Data
       {
-        Math::Vector<Rodin::Real> vertex;
+        Math::PointVector vertex;
         Geometry::Attribute attribute;
       };
 
@@ -295,7 +295,7 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         size_t i = 0;
-        Data res{ Math::Vector<Rodin::Real>(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
+        Data res{ Math::PointVector(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
         const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
         const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
         const auto p = double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];

@@ -1,6 +1,7 @@
 set(RodinIO_HEADERS
   MFEM.h
   MEDIT.h
+  EnSight6.h
   Loader.h
   Printer.h
   MeshLoader.h
@@ -11,6 +12,7 @@ set(RodinIO_HEADERS
 set(RodinIO_SRCS
   MFEM.cpp
   MEDIT.cpp
+  EnSight6.cpp
   MeshLoader.cpp
   MeshPrinter.cpp
   GridFunctionLoader.cpp)

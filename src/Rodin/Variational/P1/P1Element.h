@@ -245,7 +245,7 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Tetrahedron:
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
-          case Geometry::Polytope::Type::TriangularPrism:
+          case Geometry::Polytope::Type::Wedge:
             return 2;
         }
         assert(false);
@@ -455,7 +455,7 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Tetrahedron:
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
-          case Geometry::Polytope::Type::TriangularPrism:
+          case Geometry::Polytope::Type::Wedge:
             return 2;
         }
         assert(false);
@@ -694,7 +694,7 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Tetrahedron:
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
-          case Geometry::Polytope::Type::TriangularPrism:
+          case Geometry::Polytope::Type::Wedge:
             return 2;
         }
         assert(false);

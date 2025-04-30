@@ -18,7 +18,7 @@ namespace Rodin::Variational
       Math::PointMatrix{{0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       Math::PointMatrix{{0, 1, 0, 0, 1, 0},
                         {0, 0, 1, 0, 0, 1},
                         {0, 0, 0, 1, 1, 1}} },
@@ -61,12 +61,12 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -108,14 +108,14 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism },
-        { 4, Geometry::Polytope::Type::TriangularPrism },
-        { 5, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge },
+        { 4, Geometry::Polytope::Type::Wedge },
+        { 5, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -157,14 +157,14 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism },
-        { 4, Geometry::Polytope::Type::TriangularPrism },
-        { 5, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge },
+        { 4, Geometry::Polytope::Type::Wedge },
+        { 5, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -185,7 +185,7 @@ namespace Rodin::Variational
       Math::PointMatrix{{0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       Math::PointMatrix{{0, 1, 0, 0, 1, 0},
                         {0, 0, 1, 0, 0, 1},
                         {0, 0, 0, 1, 1, 1}} },
@@ -228,14 +228,14 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism },
-        { 4, Geometry::Polytope::Type::TriangularPrism },
-        { 5, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge },
+        { 4, Geometry::Polytope::Type::Wedge },
+        { 5, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -277,14 +277,14 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism },
-        { 4, Geometry::Polytope::Type::TriangularPrism },
-        { 5, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge },
+        { 4, Geometry::Polytope::Type::Wedge },
+        { 5, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -326,14 +326,14 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism },
-        { 4, Geometry::Polytope::Type::TriangularPrism },
-        { 5, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge },
+        { 4, Geometry::Polytope::Type::Wedge },
+        { 5, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -545,7 +545,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         switch (m_i)
         {
@@ -725,7 +725,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         out.resize(3);
         switch (m_i)
@@ -903,7 +903,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         switch (m_i)
         {
@@ -1091,7 +1091,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         out.resize(3);
         switch (m_i)
@@ -1289,7 +1289,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         switch (k)
         {
@@ -1461,7 +1461,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         switch (k)
         {

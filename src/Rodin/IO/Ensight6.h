@@ -17,7 +17,7 @@
 #include "GridFunctionLoader.h"
 #include "GridFunctionPrinter.h"
 
-namespace Rodin::IO::Ensight6
+namespace Rodin::IO::EnSight6
 {
   enum class Keyword
   {
@@ -30,21 +30,6 @@ namespace Rodin::IO::Ensight6
     element,
     coordinates,
     part,
-    point,
-    bar2,
-    bar3,
-    tria3,
-    tria6,
-    quad4,
-    quad8,
-    tetra4,
-    tetra10,
-    pyramid5,
-    pyramid13,
-    hexa8,
-    hexa20,
-    penta6,
-    penta15,
     block,
     iblanked
   };
@@ -73,36 +58,6 @@ namespace Rodin::IO::Ensight6
         return "coordinates";
       case Keyword::part:
         return "part";
-      case Keyword::point:
-        return "point";
-      case Keyword::bar2:
-        return "bar2";
-      case Keyword::bar3:
-        return "bar3";
-      case Keyword::tria3:
-        return "tria3";
-      case Keyword::tria6:
-        return "tria6";
-      case Keyword::quad4:
-        return "quad4";
-      case Keyword::quad8:
-        return "quad8";
-      case Keyword::tetra4:
-        return "tetra4";
-      case Keyword::tetra10:
-        return "tetra10";
-      case Keyword::pyramid5:
-        return "pyramid5";
-      case Keyword::pyramid13:
-        return "pyramid13";
-      case Keyword::hexa8:
-        return "hexa8";
-      case Keyword::hexa20:
-        return "hexa20";
-      case Keyword::penta6:
-        return "penta6";
-      case Keyword::penta15:
-        return "penta15";
       case Keyword::block:
         return "block";
       case Keyword::iblanked:
@@ -112,115 +67,170 @@ namespace Rodin::IO::Ensight6
   }
 
   inline
-  bool operator==(const std::string& str, Keyword kw)
-  {
-    return str == toCharString(kw);
-  }
-
-  inline
-  bool operator==(Keyword kw, const std::string& str)
-  {
-    return str == toCharString(kw);
-  }
-
-  inline
-  bool operator==(Keyword kw, const char* str)
-  {
-    return strcmp(toCharString(kw), str) == 0;
-  }
-
-  inline
-  bool operator==(const char* str, Keyword kw)
-  {
-    return strcmp(toCharString(kw), str) == 0;
-  }
-
-  inline
-  bool operator!=(const char* str, Keyword kw)
-  {
-    return !operator==(str, kw);
-  }
-
-  inline
-  bool operator!=(const std::string& str, Keyword kw)
-  {
-    return !operator==(str, kw);
-  }
-
-  inline
-  bool operator!=(Keyword kw, const std::string& str)
-  {
-    return !operator==(str, kw);
-  }
-
-  inline
   std::ostream& operator<<(std::ostream& os, Keyword kw)
   {
     os << toCharString(kw);
     return os;
   }
 
-  inline
-  std::optional<Keyword> toKeyword(const char* str)
+  enum class ElementType
   {
-    Keyword res;
-    if (str == Keyword::node)
-      res = Keyword::node;
-    else if (str == Keyword::id)
-      res = Keyword::id;
-    else if (str == Keyword::off)
-      res = Keyword::off;
-    else if (str == Keyword::given)
-      res = Keyword::given;
-    else if (str == Keyword::assign)
-      res = Keyword::assign;
-    else if (str == Keyword::ignore)
-      res = Keyword::ignore;
-    else if (str == Keyword::element)
-      res = Keyword::element;
-    else if (str == Keyword::coordinates)
-      res = Keyword::coordinates;
-    else if (str == Keyword::part)
-      res = Keyword::part;
-    else if (str == Keyword::point)
-      res = Keyword::point;
-    else if (str == Keyword::bar2)
-      res = Keyword::bar2;
-    else if (str == Keyword::bar3)
-      res = Keyword::bar3;
-    else if (str == Keyword::tria3)
-      res = Keyword::tria3;
-    else if (str == Keyword::tria6)
-      res = Keyword::tria6;
-    else if (str == Keyword::quad4)
-      res = Keyword::quad4;
-    else if (str == Keyword::quad8)
-      res = Keyword::quad8;
-    else if (str == Keyword::tetra4)
-      res = Keyword::tetra4;
-    else if (str == Keyword::tetra10)
-      res = Keyword::tetra10;
-    else if (str == Keyword::pyramid5)
-      res = Keyword::pyramid5;
-    else if (str == Keyword::pyramid13)
-      res = Keyword::pyramid13;
-    else if (str == Keyword::hexa8)
-      res = Keyword::hexa8;
-    else if (str == Keyword::hexa20)
-      res = Keyword::hexa20;
-    else if (str == Keyword::penta6)
-      res = Keyword::penta6;
-    else if (str == Keyword::penta15)
-      res = Keyword::penta15;
-    else if (str == Keyword::block)
-      res = Keyword::block;
-    else if (str == Keyword::iblanked)
-      res = Keyword::iblanked;
-    else
-      return {};
-    assert(res == str);
-    return res;
+    point,
+    bar2,
+    bar3,
+    tria3,
+    tria6,
+    quad4,
+    quad8,
+    tetra4,
+    tetra10,
+    pyramid5,
+    pyramid13,
+    hexa8,
+    hexa20,
+    penta6,
+    penta15,
+  };
+
+  inline
+  constexpr
+  const char* toCharString(ElementType kw)
+  {
+    switch (kw)
+    {
+      case ElementType::point:
+        return "point";
+      case ElementType::bar2:
+        return "bar2";
+      case ElementType::bar3:
+        return "bar3";
+      case ElementType::tria3:
+        return "tria3";
+      case ElementType::tria6:
+        return "tria6";
+      case ElementType::quad4:
+        return "quad4";
+      case ElementType::quad8:
+        return "quad8";
+      case ElementType::tetra4:
+        return "tetra4";
+      case ElementType::tetra10:
+        return "tetra10";
+      case ElementType::pyramid5:
+        return "pyramid5";
+      case ElementType::pyramid13:
+        return "pyramid13";
+      case ElementType::hexa8:
+        return "hexa8";
+      case ElementType::hexa20:
+        return "hexa20";
+      case ElementType::penta6:
+        return "penta6";
+      case ElementType::penta15:
+        return "penta15";
+    }
+    return nullptr;
   }
+
+  inline
+  std::ostream& operator<<(std::ostream& os, ElementType kw)
+  {
+    os << toCharString(kw);
+    return os;
+  }
+
+  inline
+  constexpr
+  std::optional<ElementType> getGeometry(Geometry::Polytope::Type t)
+  {
+    switch (t)
+    {
+      case Geometry::Polytope::Type::Point:
+        return ElementType::point;
+      case Geometry::Polytope::Type::Segment:
+        return ElementType::bar2;
+      case Geometry::Polytope::Type::Triangle:
+        return ElementType::tria3;
+      case Geometry::Polytope::Type::Quadrilateral:
+        return ElementType::quad4;
+      case Geometry::Polytope::Type::Tetrahedron:
+        return ElementType::tetra4;
+      case Geometry::Polytope::Type::Wedge:
+        return ElementType::penta6;
+      default:
+        return {};
+    }
+    assert(false);
+    return {};
+  }
+
+  enum VariableType
+  {
+    scalar,
+    vector
+  };
+
+  enum class Location
+  {
+    node,
+    element
+  };
+}
+
+namespace Rodin::IO
+{
+  template <>
+  class MeshPrinter<FileFormat::ENSIGHT6, Context::Local>
+    : public MeshPrinterBase<Context::Local>
+  {
+    public:
+      using ContextType = Context::Local;
+
+      using ObjectType = Geometry::Mesh<ContextType>;
+
+      using Parent = MeshPrinterBase<ContextType>;
+
+      MeshPrinter(const ObjectType& mesh);
+
+      void print(std::ostream& os) override;
+
+      void printHeader(std::ostream& os);
+      void printCoordinates(std::ostream& os);
+      void printParts(std::ostream& os);
+
+    private:
+      std::string m_descriptionLine1;
+      std::string m_descriptionLine2;
+  };
+
+  template <class FES>
+  class GridFunctionPrinter<FileFormat::ENSIGHT6, FES>
+    : public GridFunctionPrinterBase<FES>
+  {
+    public:
+      using FESType = FES;
+
+      using ObjectType = Variational::GridFunction<FESType>;
+
+      using Parent = GridFunctionPrinterBase<FESType>;
+
+      GridFunctionPrinter(const ObjectType& gf)
+        : Parent(gf)
+      {}
+
+      void print(std::ostream& os) override
+      {
+        printHeader(os);
+        printData(os);
+      }
+
+      void printHeader(std::ostream& os)
+      {}
+
+      void printData(std::ostream& os)
+      {}
+  };
+
 }
 
 #endif
