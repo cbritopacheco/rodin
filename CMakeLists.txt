@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.16)
 
+
+cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0076 NEW)
@@ -9,7 +11,30 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are prohibited.")
 endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 
-project(Rodin LANGUAGES CXX C)
+project(Rodin VERSION 0.0.1 LANGUAGES CXX C)
+
+
+# Compute version components
+set(RODIN_VERSION         "${PROJECT_VERSION}")
+set(RODIN_VERSION_MAJOR   "${PROJECT_VERSION_MAJOR}")
+set(RODIN_VERSION_MINOR   "${PROJECT_VERSION_MINOR}")
+set(RODIN_VERSION_PATCH   "${PROJECT_VERSION_PATCH}")
+
+# Compute version code: major * 10000 + minor * 100 + patch
+math(EXPR RODIN_VERSION_CODE "${PROJECT_VERSION_MAJOR} * 10000 + ${PROJECT_VERSION_MINOR} * 100 + ${PROJECT_VERSION_PATCH}")
+# Pad to 6 digits manually
+if(RODIN_VERSION_CODE LESS 10)
+  set(RODIN_VERSION_CODE "00000${RODIN_VERSION_CODE}")
+elseif(RODIN_VERSION_CODE LESS 100)
+  set(RODIN_VERSION_CODE "0000${RODIN_VERSION_CODE}")
+elseif(RODIN_VERSION_CODE LESS 1000)
+  set(RODIN_VERSION_CODE "000${RODIN_VERSION_CODE}")
+elseif(RODIN_VERSION_CODE LESS 10000)
+  set(RODIN_VERSION_CODE "00${RODIN_VERSION_CODE}")
+elseif(RODIN_VERSION_CODE LESS 100000)
+  set(RODIN_VERSION_CODE "0${RODIN_VERSION_CODE}")
+endif()
+
 
 # ---- Options ---------------------------------------------------------------
 option(RODIN_BUILD_SRC                "Build the Rodin source code"               ON)
