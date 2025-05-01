@@ -14,7 +14,7 @@
 
 #include "Rodin/IO/MFEM.h"
 #include "Rodin/IO/MEDIT.h"
-#include "Rodin/IO/Ensight6.h"
+#include "Rodin/IO/EnSight6.h"
 
 #include "Mesh.h"
 #include "SubMesh.h"
