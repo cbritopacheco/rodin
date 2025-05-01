@@ -19,13 +19,18 @@ int main(int, char**)
   // Build a mesh
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
-  mesh.scale(1.0 / 31);
+  // mesh.scale(1.0 / 31);
   mesh.getConnectivity().compute(1, 2);
   mesh.save("Poisson.geo", IO::FileFormat::ENSIGHT6);
+  mesh.save("Poisson.mesh", IO::FileFormat::MFEM);
 
-  // // Functions
-  // P1 vh(mesh);
+  // Functions
+  P1 vh(mesh);
 
+  GridFunction gf(vh);
+  gf = 1;
+  gf.save("Poisson.scl", IO::FileFormat::ENSIGHT6);
+  gf.save("Poisson.gf", IO::FileFormat::MFEM);
   // ScalarFunction f(1.0);
 
   // TrialFunction u(vh);

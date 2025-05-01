@@ -1,6 +1,7 @@
 #ifndef RODIN_IO_ENSIGHT6_H
 #define RODIN_IO_ENSIGHT6_H
 
+#include <cassert>
 #include <iomanip>
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
@@ -10,6 +11,9 @@
 #include "Rodin/Context.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Types.h"
+
+#include "Rodin/Variational/RangeType.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
 #include "MeshLoader.h"
@@ -31,7 +35,8 @@ namespace Rodin::IO::EnSight6
     coordinates,
     part,
     block,
-    iblanked
+    iblanked,
+    per
   };
 
   inline
@@ -62,6 +67,8 @@ namespace Rodin::IO::EnSight6
         return "block";
       case Keyword::iblanked:
         return "iblanked";
+      case Keyword::per:
+        return "per";
     }
     return nullptr;
   }
@@ -164,11 +171,35 @@ namespace Rodin::IO::EnSight6
     return {};
   }
 
-  enum VariableType
+  enum class VariableType
   {
     scalar,
+    complex,
     vector
   };
+
+  inline
+  constexpr
+  const char* toCharString(VariableType kw)
+  {
+    switch (kw)
+    {
+      case VariableType::scalar:
+        return "scalar";
+      case VariableType::complex:
+        return "complex";
+      case VariableType::vector:
+        return "vector";
+    }
+    return nullptr;
+  }
+
+  inline
+  std::ostream& operator<<(std::ostream& os, VariableType kw)
+  {
+    os << toCharString(kw);
+    return os;
+  }
 
   enum class Location
   {
@@ -225,10 +256,116 @@ namespace Rodin::IO
       }
 
       void printHeader(std::ostream& os)
-      {}
+      {
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        switch (gf.getRangeType())
+        {
+          case Variational::RangeType::Real:
+          {
+            os << EnSight6::VariableType::scalar << ' ';
+            break;
+          }
+          case Variational::RangeType::Complex:
+          {
+            os << EnSight6::VariableType::complex << ' '
+               << EnSight6::VariableType::scalar << ' ';
+            break;
+          }
+          case Variational::RangeType::Vector:
+          {
+            using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+            if (std::is_same_v<ScalarType, Real>)
+            {
+              os << EnSight6::VariableType::scalar << ' ';
+            }
+            else if (std::is_same_v<ScalarType, Complex>)
+            {
+              os << EnSight6::VariableType::complex << ' ';
+            }
+            else
+            {
+              assert(false);
+            }
+            os << EnSight6::VariableType::vector << ' ';
+            break;
+          }
+          default:
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "EnSight6 format does not support this type of data range."
+              << Alert::Raise;
+            break;
+          }
+        }
+        os << EnSight6::Keyword::per << ' ' << EnSight6::Keyword::node << '\n';
+      }
 
       void printData(std::ostream& os)
-      {}
+      {
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        os << std::setprecision(5) << std::scientific;
+        size_t count = 0;
+        if constexpr (Utility::IsSpecialization<FES, Variational::P1>::Value)
+        {
+          auto data = gf.getData().reshaped();            // Eigen::VectorXd
+          for (int i = 0; i < data.size(); ++i)
+          {
+            os << std::setw(12) << data[i];
+            if (++count % 6 == 0)
+              os << '\n';
+            else
+              os << ' ';
+          }
+        }
+        else
+        {
+          using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+          RangeType v;
+          for (auto it = mesh.getVertex(); !it.end(); ++it)
+          {
+            const Geometry::Point p(
+              *it,
+              it->getTransformation(),
+              Geometry::Polytope::getVertices(Geometry::Polytope::Type::Point).col(0),
+              it->getCoordinates()
+            );
+
+            gf(v, p);
+
+            if constexpr (std::is_same_v<RangeType, Real>)
+            {
+              os << std::setw(12) << v;
+              if (++count % 6 == 0)
+                os << '\n';
+              else
+                os << ' ';
+            }
+            else if constexpr (Utility::IsSpecialization<RangeType, Math::Vector>::Value)
+            {
+              for (size_t j = 0; j < v.size(); ++j)
+              {
+                os << std::setw(12) << v[j];
+                if (++count % 6 == 0)
+                  os << '\n';
+                else
+                  os << ' ';
+              }
+            }
+            else
+            {
+              assert(false);
+            }
+          }
+        }
+
+        // If we didn’t end exactly on a multiple of 6, finish the last line
+        if (count % 6 != 0)
+          os << '\n';
+      }
   };
 
 }

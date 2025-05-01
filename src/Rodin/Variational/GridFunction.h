@@ -21,14 +21,17 @@
 #include "Rodin/Configure.h"
 #include "Rodin/Math.h"
 #include "Rodin/Alert.h"
-#include "Rodin/Geometry/Point.h"
-#include "Rodin/Geometry/SubMesh.h"
-#include "Rodin/IO/ForwardDecls.h"
-#include "Rodin/IO/MFEM.h"
-#include "Rodin/IO/MEDIT.h"
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
 #include "Rodin/Threads/ThreadPool.h"
+
+#include "Rodin/Geometry/Point.h"
+#include "Rodin/Geometry/SubMesh.h"
+
+#include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/IO/MFEM.h"
+#include "Rodin/IO/MEDIT.h"
+#include "Rodin/IO/EnSight6.h"
 
 #include "ForwardDecls.h"
 
@@ -1016,6 +1019,12 @@ namespace Rodin::Variational
             printer.print(output);
             break;
           }
+          case IO::FileFormat::ENSIGHT6:
+          {
+            IO::GridFunctionPrinter<IO::FileFormat::ENSIGHT6, FES> printer(static_cast<const Derived&>(*this));
+            printer.print(output);
+            break;
+          }
           default:
           {
             Alert::Exception()
@@ -1109,6 +1118,25 @@ namespace Rodin::Variational
       RangeShape getRangeShape() const
       {
         return { getFiniteElementSpace().getVectorDimension(), 1 };
+      }
+
+      constexpr
+      Variational::RangeType getRangeType() const
+      {
+        if (std::is_same_v<RangeType, Boolean>)
+          return Variational::RangeType::Boolean;
+        else if (std::is_same_v<RangeType, Integer>)
+          return Variational::RangeType::Integer;
+        else if (std::is_same_v<RangeType, Real>)
+          return Variational::RangeType::Real;
+        else if (std::is_same_v<RangeType, Complex>)
+          return Variational::RangeType::Complex;
+        else if (Utility::IsSpecialization<RangeType, Math::Vector>::Value)
+          return Variational::RangeType::Vector;
+        else if (Utility::IsSpecialization<RangeType, Math::Matrix>::Value)
+          return Variational::RangeType::Matrix;
+        else
+          assert(false);
       }
 
       template <class Value>

@@ -33,11 +33,21 @@ namespace Rodin::IO
     os << std::setprecision(5) << std::scientific;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
+      // Print the vertex index
       os << it->getIndex() << ' ';
-      const auto& x = it->getCoordinates();
-      for (int i = 0; i < x.size(); i++)
-        os << std::setw(12) << x(i);
-      os << '\n';
+
+      // Retrieve dynamic coordinate vector and default to zero for missing dimensions
+      const auto& coords = it->getCoordinates();
+      Real x0 = 0.0, x1 = 0.0, x2 = 0.0;
+      if (coords.size() > 0) x0 = coords(0);
+      if (coords.size() > 1) x1 = coords(1);
+      if (coords.size() > 2) x2 = coords(2);
+
+      // Always write three components: X, Y, Z
+      os << std::setw(12) << x0
+         << std::setw(12) << x1
+         << std::setw(12) << x2
+         << '\n';
     }
   }
 
@@ -70,39 +80,40 @@ namespace Rodin::IO
           case Geometry::Polytope::Type::Point:
           {
             ess[it->getAttribute()][geometry]
-              << it->getIndex() << ' ' << it->getIndex() << '\n';
+              << it->getIndex()
+              << ' ' << it->getIndex() << '\n';
             break;
           }
           case Geometry::Polytope::Type::Segment:
           {
             ess[it->getAttribute()][geometry]
-              << ' ' << it->getIndex() << ' ' << vertices(0) << ' ' << vertices(1) << '\n';
+              << it->getIndex() << ' ' << vertices(0) << ' ' << vertices(1) << '\n';
             break;
           }
           case Geometry::Polytope::Type::Triangle:
           {
             ess[it->getAttribute()][geometry]
-              << ' ' << it->getIndex() << ' ' << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << '\n';
+              << it->getIndex() << ' ' << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << '\n';
             break;
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
             ess[it->getAttribute()][geometry]
-              << ' ' << it->getIndex() << ' ' << vertices(0) << ' ' << vertices(1) << ' '
+              << it->getIndex() << ' ' << vertices(0) << ' ' << vertices(1) << ' '
               << vertices(3) << ' ' << vertices(2) << '\n';
             break;
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
             ess[it->getAttribute()][geometry]
-              << ' ' << it->getIndex() << ' ' << vertices(0) << ' ' << vertices(1) << ' '
+              << it->getIndex() << ' ' << vertices(0) << ' ' << vertices(1) << ' '
               << vertices(2) << ' ' << vertices(3) << '\n';
             break;
           }
           case Geometry::Polytope::Type::Wedge:
           {
             ess[it->getAttribute()][geometry]
-              << ' ' << it->getIndex() << ' ' << vertices(0) << ' ' << vertices(1) << ' '
+              << it->getIndex() << ' ' << vertices(0) << ' ' << vertices(1) << ' '
               << vertices(2) << ' ' << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5) << '\n';
             break;
           }
@@ -112,7 +123,7 @@ namespace Rodin::IO
 
     for (const auto& attr : attributes)
     {
-      os << EnSight6::Keyword::part << ' ' << attr << '\n' << "Rodin::Geometry::Attribute" << '\n';
+      os << EnSight6::Keyword::part << ' ' << attr << '\n' << "Attribute" << '\n';
       for (const auto& geometry : Geometry::Polytope::Types)
       {
         const size_t count = mesh.getPolytopeCount(geometry);

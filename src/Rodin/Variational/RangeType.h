@@ -8,6 +8,8 @@
 #define RODIN_VARIATIONAL_RANGETYPE_H
 
 #include <iostream>
+
+#include "Rodin/Variational/Traits.h"
 #include "ForwardDecls.h"
 
 namespace Rodin::Variational

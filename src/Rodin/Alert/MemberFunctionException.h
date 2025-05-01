@@ -22,6 +22,11 @@ namespace Rodin::Alert
    * providing context about the class and function in which the exception
    * occurred.
    *
+   * Example usage:
+   * @code{cpp}
+   * MemberFunctionException(*this, __func__) << "Some kind of error." << Raise;
+   * @endcode
+   *
    * @tparam T The type of the class where the member function resides.
    * @tparam FuncName The type used to represent the function name.
    */

@@ -21,7 +21,6 @@
 #include "Rodin/Utility/IsSpecialization.h"
 
 #include "ForwardDecls.h"
-#include "RangeType.h"
 
 namespace Rodin::FormLanguage
 {
