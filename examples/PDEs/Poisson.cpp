@@ -25,11 +25,16 @@ int main(int, char**)
   mesh.save("Poisson.mesh", IO::FileFormat::MFEM);
 
   // Functions
-  P1 vh(mesh);
+  P1 vh(mesh, 2);
 
   GridFunction gf(vh);
-  gf = F::x * F::x * F::y;
-  gf.save("Poisson.scl", IO::FileFormat::ENSIGHT6);
+  gf = [](Math::Vector<Real>& x, const Point& p)
+  {
+    x.resize(2);
+    x[0] = -p.y();
+    x[1] = p.x();
+  };
+  gf.save("Poisson.vct", IO::FileFormat::ENSIGHT6);
   gf.save("Poisson.gf", IO::FileFormat::MFEM);
   // ScalarFunction f(1.0);
 

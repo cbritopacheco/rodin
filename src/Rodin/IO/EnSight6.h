@@ -257,47 +257,32 @@ namespace Rodin::IO
 
       void printHeader(std::ostream& os)
       {
+        using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
         const auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        switch (gf.getRangeType())
+        if constexpr (std::is_same_v<RangeType, Real>)
         {
-          case Variational::RangeType::Real:
-          {
-            os << EnSight6::VariableType::scalar << ' ';
-            break;
-          }
-          case Variational::RangeType::Complex:
-          {
-            os << EnSight6::VariableType::complex << ' '
-               << EnSight6::VariableType::scalar << ' ';
-            break;
-          }
-          case Variational::RangeType::Vector:
-          {
-            using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-            if (std::is_same_v<ScalarType, Real>)
-            {
-              os << EnSight6::VariableType::scalar << ' ';
-            }
-            else if (std::is_same_v<ScalarType, Complex>)
-            {
-              os << EnSight6::VariableType::complex << ' ';
-            }
-            else
-            {
-              assert(false);
-            }
-            os << EnSight6::VariableType::vector << ' ';
-            break;
-          }
-          default:
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "EnSight6 format does not support this type of data range."
-              << Alert::Raise;
-            break;
-          }
+          os << EnSight6::VariableType::scalar << ' ';
+        }
+        else if constexpr (std::is_same_v<RangeType, Complex>)
+        {
+          os << EnSight6::VariableType::complex << ' '
+             << EnSight6::VariableType::scalar << ' ';
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
+        {
+          os << EnSight6::VariableType::vector << ' ';
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector<Complex>>)
+        {
+          os << EnSight6::VariableType::complex << ' ' << EnSight6::VariableType::vector << ' ';
+        }
+        else
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "EnSight6 format does not support this RangeType."
+            << Alert::Raise;
         }
         os << EnSight6::Keyword::per << ' ' << EnSight6::Keyword::node << '\n';
       }
@@ -311,11 +296,23 @@ namespace Rodin::IO
         size_t count = 0;
         if constexpr (Utility::IsSpecialization<FES, Variational::P1>::Value)
         {
-          auto data = gf.getData().reshaped();            // Eigen::VectorXd
-          for (int i = 0; i < data.size(); ++i)
+          auto data = gf.getData();
+          const size_t rows = data.rows();
+          for (int i = 0; i < data.cols(); ++i)
           {
-            os << std::setw(12) << data[i];
-            if (++count % 6 == 0)
+            Real x0 = 0.0, x1 = 0.0, x2 = 0.0;
+            if (rows > 0) x0 = data.col(i)(0);
+            if (rows > 1) x1 = data.col(i)(1);
+            if (rows > 2) x2 = data.col(i)(2);
+
+            // Always write three components: X, Y, Z
+            os << std::setw(12) << x0
+               << std::setw(12) << x1
+               << std::setw(12) << x2;
+
+            count += 3;
+            // os << std::setw(12) << data[i];
+            if (count % 6 == 0)
               os << '\n';
           }
         }

@@ -1120,25 +1120,6 @@ namespace Rodin::Variational
         return { getFiniteElementSpace().getVectorDimension(), 1 };
       }
 
-      constexpr
-      Variational::RangeType getRangeType() const
-      {
-        if (std::is_same_v<RangeType, Boolean>)
-          return Variational::RangeType::Boolean;
-        else if (std::is_same_v<RangeType, Integer>)
-          return Variational::RangeType::Integer;
-        else if (std::is_same_v<RangeType, Real>)
-          return Variational::RangeType::Real;
-        else if (std::is_same_v<RangeType, Complex>)
-          return Variational::RangeType::Complex;
-        else if (Utility::IsSpecialization<RangeType, Math::Vector>::Value)
-          return Variational::RangeType::Vector;
-        else if (Utility::IsSpecialization<RangeType, Math::Matrix>::Value)
-          return Variational::RangeType::Matrix;
-        else
-          assert(false);
-      }
-
       template <class Value>
       Derived& setValue(const std::pair<size_t, Index>& p, size_t local, Value&& v)
       {
