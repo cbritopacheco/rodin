@@ -28,7 +28,7 @@ int main(int, char**)
   P1 vh(mesh);
 
   GridFunction gf(vh);
-  gf = 1;
+  gf = F::x * F::x * F::y;
   gf.save("Poisson.scl", IO::FileFormat::ENSIGHT6);
   gf.save("Poisson.gf", IO::FileFormat::MFEM);
   // ScalarFunction f(1.0);

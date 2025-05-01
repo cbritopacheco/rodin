@@ -317,8 +317,6 @@ namespace Rodin::IO
             os << std::setw(12) << data[i];
             if (++count % 6 == 0)
               os << '\n';
-            else
-              os << ' ';
           }
         }
         else
@@ -341,8 +339,6 @@ namespace Rodin::IO
               os << std::setw(12) << v;
               if (++count % 6 == 0)
                 os << '\n';
-              else
-                os << ' ';
             }
             else if constexpr (Utility::IsSpecialization<RangeType, Math::Vector>::Value)
             {
@@ -351,8 +347,6 @@ namespace Rodin::IO
                 os << std::setw(12) << v[j];
                 if (++count % 6 == 0)
                   os << '\n';
-                else
-                  os << ' ';
               }
             }
             else
