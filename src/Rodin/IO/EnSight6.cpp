@@ -1,4 +1,4 @@
-#include "Ensight6.h"
+#include "EnSight6.h"
 
 #include "Rodin/Configure.h"
 
