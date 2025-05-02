@@ -66,6 +66,7 @@ namespace Rodin::IO
       attributes.insert(as.begin(), as.end());
     }
 
+    FlatMap<Geometry::Attribute, Geometry::GeometryIndexed<size_t>> count;
     FlatMap<Geometry::Attribute, Geometry::GeometryIndexed<std::ostringstream>> ess;
     for (size_t d = 0; d <= mesh.getDimension(); d++)
     {
@@ -118,16 +119,17 @@ namespace Rodin::IO
             break;
           }
         }
+        count[it->getAttribute()][geometry] += 1;
       }
     }
 
     for (const auto& attr : attributes)
     {
-      os << EnSight6::Keyword::part << ' ' << attr << '\n' << "Attribute" << '\n';
+      os << EnSight6::Keyword::part << ' ' << attr << '\n' << "Attribute_" << attr << '\n';
       for (const auto& geometry : Geometry::Polytope::Types)
       {
-        const size_t count = mesh.getPolytopeCount(geometry);
-        if (count == 0)
+        const size_t cnt = count[attr][geometry];
+        if (cnt == 0)
           continue;
         switch (geometry)
         {
@@ -162,7 +164,7 @@ namespace Rodin::IO
             break;
           }
         }
-        os << count << '\n' << ess[attr][geometry].str();
+        os << cnt << '\n' << ess[attr][geometry].str();
       }
     }
   }

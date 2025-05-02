@@ -90,6 +90,7 @@ namespace Rodin::Geometry
   Mesh<Context::Local>::Builder::attribute(const std::pair<size_t, Index>& p, Attribute attr)
   {
     m_attributeIndex.track(p, attr);
+    m_attributes.at(p.first).insert(attr);
     return *this;
   }
 
