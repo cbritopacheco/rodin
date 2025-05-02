@@ -90,24 +90,30 @@
 <span class="p">{</span>
 <span class="w">  </span><span class="c1">// Build a mesh</span>
 <span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
-<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="c1">// mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;SphereTetra.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span>
 <span class="w">  </span><span class="c1">// mesh.scale(1.0 / 31);</span>
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// mesh.getConnectivity().compute(1, 2);</span>
 <span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Poisson.geo&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">ENSIGHT6</span><span class="p">);</span>
 <span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Poisson.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
 
 <span class="w">  </span><span class="c1">// Functions</span>
-<span class="w">  </span><span class="n">P1</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">  </span><span class="n">P1</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
 
 <span class="w">  </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">gf</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
 <span class="w">  </span><span class="n">gf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="n">x</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="w">    </span><span class="n">x</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// x[0] = -p.x() * p.z();</span>
+<span class="w">    </span><span class="c1">// x[1] = -p.y() * p.z();</span>
+<span class="w">    </span><span class="c1">// x[2] = 1 - p.z() * p.z();</span>
 <span class="w">    </span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">();</span>
 <span class="w">    </span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">();</span>
+<span class="w">    </span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
 <span class="w">  </span><span class="p">};</span>
 <span class="w">  </span><span class="n">gf</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Poisson.vct&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">ENSIGHT6</span><span class="p">);</span>
 <span class="w">  </span><span class="n">gf</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Poisson.gf&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+
 <span class="w">  </span><span class="c1">// ScalarFunction f(1.0);</span>
 
 <span class="w">  </span><span class="c1">// TrialFunction u(vh);</span>
