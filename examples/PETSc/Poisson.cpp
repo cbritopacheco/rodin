@@ -33,17 +33,16 @@ int main(int argc, char** argv)
   TrialFunction u(vh);
   TestFunction  v(vh);
 
-  Mat x;
-  BilinearForm bf(u, v, x);
-  bf = Integral(Grad(u), Grad(v));
-  bf.assemble();
-  bf.getOperator();
+  // PETSc::Matrix x;
+  // BilinearForm bf(u, v, std::move(x));
+  // bf = Integral(Grad(u), Grad(v));
+  // bf.assemble();
 
-  Vec b;
-  LinearForm lf(v, b);
-  lf = Integral(f, v);
-  lf.assemble();
-  lf.getVector();
+  // PETSc::Vector b;
+  // LinearForm lf(v, b);
+  // lf = Integral(f, v);
+  // lf.assemble();
+  // lf.getVector();
 
   // // Define problem
   // Problem poisson(u, v);
