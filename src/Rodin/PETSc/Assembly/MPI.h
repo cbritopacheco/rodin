@@ -7,31 +7,31 @@
 #include <boost/mpi/collectives.hpp>
 
 #include "Rodin/Assembly/AssemblyBase.h"
-
+#include "Rodin/Assembly/MPI.h"
 #include "Rodin/Variational/LinearForm.h"
 #include "Rodin/Variational/BilinearForm.h"
-
-#include "Rodin/MPI/Geometry/Mesh.h"
-
-#include "Rodin/PETSc/Matrix.h"
-#include "Rodin/PETSc/Vector.h"
+#include "Rodin/Geometry/MPI/Mesh.h"
 
 namespace Rodin::Assembly
 {
-  template <class LinearAlgebraType, class Operand>
-  class MPI;
-
   // MPI assembly for PETSc Vec (linear form) -- skipping ghosts via Shard + Boost.MPI
   template <class FES>
-  class MPI<PETSc::Vector&, Variational::LinearForm<FES, PETSc::Vector&>> final
-    : public AssemblyBase<PETSc::Vector&, Variational::LinearForm<FES, PETSc::Vector&>>
+  class MPI<
+    ::Vec&,
+    Variational::LinearForm<FES, ::Vec&>
+  > final
+    : public AssemblyBase<
+        ::Vec&,
+        Variational::LinearForm<FES, ::Vec&>
+      >
   {
     public:
-      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      using ScalarType     = typename FormLanguage::Traits<FES>::ScalarType;
       static_assert(
         std::is_same_v<ScalarType, PetscScalar>,
-        "FES::ScalarType must be PetscScalar");
-      using VectorType     = PETSc::Vector&;
+        "FES::ScalarType must be PetscScalar"
+      );
+      using VectorType     = ::Vec&;
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
       using Parent         = AssemblyBase<VectorType, LinearFormType>;
       using InputType      = typename Parent::InputType;
@@ -50,16 +50,13 @@ namespace Rodin::Assembly
         PetscInt globalSize = boost::mpi::all_reduce(comm, localSize, std::plus<PetscInt>());
 
         // Create and initialize Vec with raw MPI_Comm
-        ierr = res.create(comm);
+        ierr = VecCreate(comm, &res);
         PetscCallAbort(comm, ierr);
-
-        ierr = res.setSizes(localSize, globalSize);
+        ierr = VecSetSizes(res, localSize, globalSize);
         PetscCallAbort(comm, ierr);
-
-        ierr = res.setFromOptions();
+        ierr = VecSetFromOptions(res);
         PetscCallAbort(comm, ierr);
-
-        ierr = res.zeroEntries();
+        ierr = VecSet(res, PetscScalar(0));
         PetscCallAbort(comm, ierr);
 
         // Local contributions skipping ghosts
@@ -79,17 +76,17 @@ namespace Rodin::Assembly
               const auto& dofs = fes.getShard().getDOFs(d, i);
               for (PetscInt i = 0; i < PetscInt(dofs.size()); ++i)
               {
-                const PetscScalar v = PetscScalar(lfi.integrate(i));
-                ierr = res.setValue(PetscInt(dofs[i]), v, ADD_VALUES);
+                PetscScalar v = PetscScalar(lfi.integrate(i));
+                ierr = VecSetValue(res, PetscInt(dofs[i]), v, ADD_VALUES);
                 PetscCallAbort(comm, ierr);
               }
             }
           }
         }
 
-        ierr = res.assemblyBegin();
+        ierr = VecAssemblyBegin(res);
         PetscCallAbort(comm, ierr);
-        ierr = res.assemblyEnd();
+        ierr = VecAssemblyEnd(res);
         PetscCallAbort(comm, ierr);
       }
 

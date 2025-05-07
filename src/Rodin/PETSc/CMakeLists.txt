@@ -9,14 +9,10 @@ set(RodinPETSc_HEADERS
   PETSc.h
   Assembly/Sequential.h
   Assembly/MPI.h
-  Matrix.h
-  Vector.h
   )
 
 set(RodinPETSc_SRCS
   PETSc.cpp
-  Matrix.cpp
-  Vector.cpp
   )
 
 add_library(RodinPETSc ${RodinPETSc_HEADERS} ${RodinPETSc_SRCS})
