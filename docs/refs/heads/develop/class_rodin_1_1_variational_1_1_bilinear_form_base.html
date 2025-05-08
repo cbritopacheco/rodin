@@ -76,6 +76,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -150,28 +151,40 @@ $ U_h $
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>Speciallization of <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> for a matrix type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class TrialFES, class TestFES, class Operator&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> <span class="m-label m-flat m-warning">final</span>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a8bd299ff0b90fa43639f4c7a2c4f718a">
+              <span class="m-doc-wrap-bumper"><a href="#a8bd299ff0b90fa43639f4c7a2c4f718a" class="m-doc-self">BilinearFormBase</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Speciallization of <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> for a matrix type.</dd>
+            <dd>Constructs a linear form with a default constructed vector which is owned by the <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a> instance.</dd>
+            <dt id="af7c263d2e6a8eb473b4e02d41b9893ba">
+              <span class="m-doc-wrap-bumper"><a href="#af7c263d2e6a8eb473b4e02d41b9893ba" class="m-doc-self">BilinearFormBase</a>(</span><span class="m-doc-wrap">OperatorType&amp; vec)</span>
+            </dt>
+            <dd>Constructs a linear form with reference to vector which is not owned by the <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a> instance.</dd>
+            <dt id="a04bd0312d4500ff3dc1bca1d2b589660">
+              <span class="m-doc-wrap-bumper"><a href="#a04bd0312d4500ff3dc1bca1d2b589660" class="m-doc-self">BilinearFormBase</a>(</span><span class="m-doc-wrap">OperatorType&amp;&amp; vec)</span>
+            </dt>
+            <dd>Constructs a linear form with a vector which is owned by the <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a> instance.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a1dc110f1f2927d5fbdf9d99adb2eb792">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1dc110f1f2927d5fbdf9d99adb2eb792" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) -&gt; OperatorType&amp;</span>
+            </dt>
+            <dd>Gets the reference to the associated operator of the bilinear form.</dd>
+            <dt id="a55b69002aa80c08349998638bfaf6380">
+              <span class="m-doc-wrap-bumper">auto <a href="#a55b69002aa80c08349998638bfaf6380" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const -&gt; const OperatorType&amp;</span>
+            </dt>
+            <dd>Gets a constant reference to the associated operator of the bilinear form.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Assembles the bilinear form.</dd>
-            <dt id="adba37aefa6b3599b36f6ee13093e4e98">
-              <span class="m-doc-wrap-bumper">auto <a href="#adba37aefa6b3599b36f6ee13093e4e98" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) -&gt; OperatorType&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets the reference to the associated operator of the bilinear form.</dd>
-            <dt id="af207030cc7d8c2fb84fe9deff6cf88b2">
-              <span class="m-doc-wrap-bumper">auto <a href="#af207030cc7d8c2fb84fe9deff6cf88b2" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const -&gt; const OperatorType&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets a constant reference to the associated operator of the bilinear form.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a9ecdec85d47f06f7905e256139d3f72c" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
