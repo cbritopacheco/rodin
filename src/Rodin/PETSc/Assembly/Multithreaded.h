@@ -26,9 +26,7 @@ namespace Rodin::Assembly
    */
   template <class FES>
   class Multithreaded<
-    ::Vec&,
-    Variational::LinearForm<FES, ::Vec&>
-  > final
+    ::Vec&, Variational::LinearForm<FES, ::Vec&>> final
     : public AssemblyBase<
         ::Vec&,
         Variational::LinearForm<FES, ::Vec&>
@@ -84,10 +82,6 @@ namespace Rodin::Assembly
       {
         PetscErrorCode ierr;
         const PetscInt n = PetscInt(input.getFES().getSize());
-
-        // Create and zero the global Vec
-        ierr = VecCreate(PETSC_COMM_SELF, &res);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
 
         ierr = VecSetSizes(res, n, PETSC_DECIDE);
         PetscCallAbort(PETSC_COMM_SELF, ierr);
@@ -173,13 +167,9 @@ namespace Rodin::Assembly
    */
   template <class TrialFES, class TestFES>
   class Multithreaded<
-    ::Mat&,
-    Variational::BilinearForm<TrialFES, TestFES, ::Mat&>
-  > final
+    ::Mat&, Variational::BilinearForm<TrialFES, TestFES, ::Mat&>> final
     : public AssemblyBase<
-        ::Mat&,
-        Variational::BilinearForm<TrialFES, TestFES, ::Mat&>
-      >
+        ::Mat&, Variational::BilinearForm<TrialFES, TestFES, ::Mat&>>
   {
     public:
       using DotType = typename FormLanguage::Dot<
@@ -234,10 +224,6 @@ namespace Rodin::Assembly
         PetscErrorCode ierr;
         const PetscInt m = PetscInt(input.getTestFES().getSize());
         const PetscInt n = PetscInt(input.getTrialFES().getSize());
-
-        // Create and zero the global Mat
-        ierr = MatCreate(PETSC_COMM_SELF, &A);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
 
         ierr = MatSetSizes(A, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
         PetscCallAbort(PETSC_COMM_SELF, ierr);

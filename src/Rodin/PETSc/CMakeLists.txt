@@ -6,13 +6,14 @@ Distributed under the Boost Software License, Version 1.0.
 ]]
 set(RodinPETSc_HEADERS
   ForwardDecls.h
-  PETSc.h
   Assembly/Sequential.h
   Assembly/MPI.h
+  FormLanguage/Traits.h
+  Math/System.h
   )
 
 set(RodinPETSc_SRCS
-  PETSc.cpp
+  Math/System.cpp
   )
 
 add_library(RodinPETSc ${RodinPETSc_HEADERS} ${RodinPETSc_SRCS})

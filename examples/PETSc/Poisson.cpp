@@ -13,6 +13,7 @@
 #include <Rodin/PETSc/Assembly/Sequential.h>
 
 using namespace Rodin;
+using namespace Rodin::Math;
 using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
@@ -33,30 +34,43 @@ int main(int argc, char** argv)
   TrialFunction u(vh);
   TestFunction  v(vh);
 
-  Mat x;
-  BilinearForm bf(u, v, x);
-  bf = Integral(Grad(u), Grad(v));
-  bf.assemble();
-  bf.getOperator();
 
-  Vec b;
-  LinearForm lf(v, b);
-  lf = Integral(f, v);
-  lf.assemble();
-  lf.getVector();
+  // BilinearForm bf(u, v, x);
+  // bf = Integral(Grad(u), Grad(v));
+  // bf.assemble();
+  // bf.getOperator();
+
+  // LinearForm lf(v, b);
+  // lf = Integral(f, v);
+  // lf.assemble();
+
+  // Mat a;
+  // MatCreate(PETSC_COMM_SELF, &a);
+
+  // Vec x;
+  // VecCreate(PETSC_COMM_SELF, &x);
+
+  // Vec b;
+  // VecCreate(PETSC_COMM_SELF, &b);
+
+  // LinearSystem axb(a, x, b);
 
   // // Define problem
-  // Problem poisson(u, v);
+  // Problem poisson(u, v, axb);
   // poisson = Integral(Grad(u), Grad(v))
   //         - Integral(f, v)
   //         + DirichletBC(u, Zero());
 
-  // // Solve
-  // CG(poisson).solve();
+  // // // Solve
+  // // CG(poisson).solve();
 
-  // // Save solution
-  // u.getSolution().save("Poisson.gf");
-  // mesh.save("Poisson.mesh");
+  // // // Save solution
+  // // u.getSolution().save("Poisson.gf");
+  // // mesh.save("Poisson.mesh");
+
+  // MatDestroy(&a);
+  // VecDestroy(&x);
+  // VecDestroy(&b);
 
   PetscFinalize();
   return 0;

@@ -46,12 +46,9 @@ namespace Rodin::Assembly
         const auto& comm  = ctx.getCommunicator();
 
         // Compute local and global sizes via Boost.MPI
-        PetscInt localSize = PetscInt(fes.getSize());
-        PetscInt globalSize = boost::mpi::all_reduce(comm, localSize, std::plus<PetscInt>());
+        const PetscInt localSize = PetscInt(fes.getSize());
+        const PetscInt globalSize = boost::mpi::all_reduce(comm, localSize, std::plus<PetscInt>());
 
-        // Create and initialize Vec with raw MPI_Comm
-        ierr = VecCreate(comm, &res);
-        PetscCallAbort(comm, ierr);
         ierr = VecSetSizes(res, localSize, globalSize);
         PetscCallAbort(comm, ierr);
         ierr = VecSetFromOptions(res);
@@ -76,7 +73,7 @@ namespace Rodin::Assembly
               const auto& dofs = fes.getShard().getDOFs(d, i);
               for (PetscInt i = 0; i < PetscInt(dofs.size()); ++i)
               {
-                PetscScalar v = PetscScalar(lfi.integrate(i));
+                const PetscScalar v = PetscScalar(lfi.integrate(i));
                 ierr = VecSetValue(res, PetscInt(dofs[i]), v, ADD_VALUES);
                 PetscCallAbort(comm, ierr);
               }
@@ -130,29 +127,28 @@ namespace Rodin::Assembly
         const auto& shard    = mesh.getShard();
         const auto& ctx      = mesh.getContext();
         const auto& comm     = ctx.getCommunicator();
-        MPI_Comm rawComm     = comm;
 
         // Compute local/global sizes
-        PetscInt localRows = PetscInt(testFES.getSize());
-        PetscInt localCols = PetscInt(trialFES.getSize());
-        PetscInt globalRows = boost::mpi::all_reduce(comm, localRows, std::plus<PetscInt>());
-        PetscInt globalCols = boost::mpi::all_reduce(comm, localCols, std::plus<PetscInt>());
+        const PetscInt localRows = PetscInt(testFES.getSize());
+        const PetscInt localCols = PetscInt(trialFES.getSize());
+        const PetscInt globalRows = boost::mpi::all_reduce(comm, localRows, std::plus<PetscInt>());
+        const PetscInt globalCols = boost::mpi::all_reduce(comm, localCols, std::plus<PetscInt>());
 
         // Create/init Mat
-        ierr = MatCreate(rawComm, &A);
-        PetscCallAbort(rawComm, ierr);
+        ierr = MatCreate(comm, &A);
+        PetscCallAbort(comm, ierr);
         ierr = MatSetSizes(A, localRows, localCols, globalRows, globalCols);
-        PetscCallAbort(rawComm, ierr);
+        PetscCallAbort(comm, ierr);
         ierr = MatSetFromOptions(A);
-        PetscCallAbort(rawComm, ierr);
+        PetscCallAbort(comm, ierr);
         ierr = MatMPIAIJSetPreallocation(A,
                                          /*d_nz*/PETSC_DECIDE, nullptr,
                                          /*o_nz*/PETSC_DECIDE, nullptr);
-        PetscCallAbort(rawComm, ierr);
+        PetscCallAbort(comm, ierr);
         ierr = MatSetUp(A);
-        PetscCallAbort(rawComm, ierr);
+        PetscCallAbort(comm, ierr);
         ierr = MatZeroEntries(A);
-        PetscCallAbort(rawComm, ierr);
+        PetscCallAbort(comm, ierr);
 
         // Local element contributions skipping ghosts
         for (auto& bfi : input.getLocalBFIs())
@@ -176,7 +172,7 @@ namespace Rodin::Assembly
                 {
                   PetscScalar v = PetscScalar(bfi.integrate(j, i));
                   ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
-                  PetscCallAbort(rawComm, ierr);
+                  PetscCallAbort(comm, ierr);
                 }
             }
           }
@@ -225,9 +221,9 @@ namespace Rodin::Assembly
                   for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
                     for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
                     {
-                      PetscScalar v = PetscScalar(bfi.integrate(j, i));
+                      const PetscScalar v = PetscScalar(bfi.integrate(j, i));
                       ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
-                      PetscCallAbort(rawComm, ierr);
+                      PetscCallAbort(comm, ierr);
                     }
                 }
               }
@@ -236,9 +232,9 @@ namespace Rodin::Assembly
         }
 
         ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-        PetscCallAbort(rawComm, ierr);
+        PetscCallAbort(comm, ierr);
         ierr = MatAssemblyEnd  (A, MAT_FINAL_ASSEMBLY);
-        PetscCallAbort(rawComm, ierr);
+        PetscCallAbort(comm, ierr);
       }
 
       MPI* copy() const noexcept override

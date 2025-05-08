@@ -36,11 +36,7 @@ namespace Rodin::Assembly
       void execute(VectorType& res, const InputType& input) const override
       {
         PetscErrorCode ierr;
-        PetscInt       n = PetscInt(input.getFES().getSize());
-
-        // Create and initialize Vec
-        ierr = VecCreate(PETSC_COMM_SELF, &res);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        const PetscInt n = PetscInt(input.getFES().getSize());
 
         ierr = VecSetSizes(res, n, PETSC_DECIDE);
         PetscCallAbort(PETSC_COMM_SELF, ierr);
@@ -48,7 +44,7 @@ namespace Rodin::Assembly
         ierr = VecSetFromOptions(res);
         PetscCallAbort(PETSC_COMM_SELF, ierr);
 
-        ierr = VecSet(res, PetscScalar(0));
+        ierr = VecZeroEntries(res);
         PetscCallAbort(PETSC_COMM_SELF, ierr);
 
         const auto& mesh = input.getFES().getMesh();
@@ -64,7 +60,7 @@ namespace Rodin::Assembly
               const auto& dofs = input.getFES().getDOFs(it.getDimension(), it->getIndex());
               for (PetscInt l = 0; l < PetscInt(dofs.size()); ++l)
               {
-                PetscScalar v = PetscScalar(lfi.integrate(l));
+                const PetscScalar v = PetscScalar(lfi.integrate(l));
                 ierr = VecSetValue(res, PetscInt(dofs[l]), v, ADD_VALUES);
                 PetscCallAbort(PETSC_COMM_SELF, ierr);
               }
@@ -116,12 +112,8 @@ namespace Rodin::Assembly
       void execute(OperatorType& A, const InputType& input) const override
       {
         PetscErrorCode ierr;
-        PetscInt       m = PetscInt(input.getTestFES().getSize());
-        PetscInt       n = PetscInt(input.getTrialFES().getSize());
-
-        // Create and initialize Mat
-        ierr = MatCreate(PETSC_COMM_SELF, &A);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        const PetscInt m = PetscInt(input.getTestFES().getSize());
+        const PetscInt n = PetscInt(input.getTrialFES().getSize());
 
         ierr = MatSetSizes(A, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
         PetscCallAbort(PETSC_COMM_SELF, ierr);
@@ -151,7 +143,7 @@ namespace Rodin::Assembly
               for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
                 for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
                 {
-                  PetscScalar v = PetscScalar(bfi.integrate(j, i));
+                  const PetscScalar v = PetscScalar(bfi.integrate(j, i));
                   ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
                   PetscCallAbort(PETSC_COMM_SELF, ierr);
                 }
@@ -179,7 +171,7 @@ namespace Rodin::Assembly
                   for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
                     for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
                     {
-                      PetscScalar v = PetscScalar(bfi.integrate(j, i));
+                      const PetscScalar v = PetscScalar(bfi.integrate(j, i));
                       ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
                       PetscCallAbort(PETSC_COMM_SELF, ierr);
                     }

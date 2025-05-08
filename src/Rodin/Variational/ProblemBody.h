@@ -63,6 +63,19 @@ namespace Rodin::Variational
           m_periodicBdr(other.m_periodicBdr)
       {}
 
+      ProblemBodyBase& operator=(const ProblemBodyBase& other)
+      {
+        if (this != &other)
+        {
+          m_lfis = other.m_lfis;
+          m_lbfis = other.m_lbfis;
+          m_gbfis = other.m_gbfis;
+          m_essBdr = other.m_essBdr;
+          m_periodicBdr = other.m_periodicBdr;
+        }
+        return *this;
+      }
+
       ProblemBodyBase(ProblemBodyBase&& other)
         : Parent(std::move(other)),
           m_lfis(std::move(other.m_lfis)),
@@ -163,6 +176,24 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      ProblemBody& operator=(const ProblemBody& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+        }
+        return *this;
+      }
+
+      ProblemBody& operator=(ProblemBody&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+        }
+        return *this;
+      }
+
       virtual ProblemBody* copy() const noexcept override
       {
         return new ProblemBody(*this);
@@ -195,6 +226,26 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_bfs(std::move(other.m_bfs))
       {}
+
+      ProblemBody& operator=(const ProblemBody& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_bfs = other.m_bfs;
+        }
+        return *this;
+      }
+
+      ProblemBody& operator=(ProblemBody&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_bfs = std::move(other.m_bfs);
+        }
+        return *this;
+      }
 
       BilinearFormBaseListType& getBFs()
       {
@@ -239,6 +290,26 @@ namespace Rodin::Variational
           m_lfs(std::move(other.m_lfs))
       {}
 
+      ProblemBody& operator=(const ProblemBody& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_lfs = other.m_lfs;
+        }
+        return *this;
+      }
+
+      ProblemBody& operator=(ProblemBody&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_lfs = std::move(other.m_lfs);
+        }
+        return *this;
+      }
+
       LinearFormBaseListType& getLFs()
       {
         return m_lfs;
@@ -266,9 +337,13 @@ namespace Rodin::Variational
 
       using OperatorType = Operator;
 
-      using VectorScalarType = typename FormLanguage::Traits<VectorType>::ScalarType;
+      using VectorScalarType =
+        typename FormLanguage::Traits<
+          std::remove_reference_t<VectorType>>::ScalarType;
 
-      using OperatorScalarType = typename FormLanguage::Traits<OperatorType>::ScalarType;
+      using OperatorScalarType =
+        typename FormLanguage::Traits<
+          std::remove_reference_t<OperatorType>>::ScalarType;
 
       using LinearFormBaseType = LinearFormBase<VectorType>;
 
@@ -291,6 +366,8 @@ namespace Rodin::Variational
       using GlobalBilinearFormIntegratorBaseListType = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
       using Parent = ProblemBodyBase<Scalar>;
+
+      ProblemBody() = default;
 
       ProblemBody(const LocalBilinearFormIntegratorBaseType& bfi)
       {
@@ -339,6 +416,28 @@ namespace Rodin::Variational
           m_lfs(std::move(other.m_lfs)),
           m_bfs(std::move(other.m_bfs))
       {}
+
+      ProblemBody& operator=(const ProblemBody& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_lfs = other.m_lfs;
+          m_bfs = other.m_bfs;
+        }
+        return *this;
+      }
+
+      ProblemBody& operator=(ProblemBody&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_lfs = std::move(other.m_lfs);
+          m_bfs = std::move(other.m_bfs);
+        }
+        return *this;
+      }
 
       LinearFormBaseListType& getLFs()
       {

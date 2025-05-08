@@ -14,28 +14,144 @@
 
 namespace Rodin::Math
 {
-  template <class Matrix, class Vector>
-  class System;
+  template <class Matrix, class Vector, class Derived>
+  class LinearSystemBase
+  {
+    public:
+      using MatrixType = Matrix;
+
+      using VectorType = Vector;
+
+      LinearSystemBase()
+        : m_stiffness(MatrixType()), m_guess(VectorType()), m_mass(VectorType())
+      {}
+
+      LinearSystemBase(const MatrixType& s, const VectorType& g, const VectorType& m) = delete;
+
+      LinearSystemBase(MatrixType&& stiffness, VectorType&& guess, VectorType&& mass) noexcept
+        : m_stiffness(std::move(stiffness)),
+          m_guess(std::move(guess)),
+          m_mass(std::move(mass))
+      {}
+
+      LinearSystemBase(MatrixType& stiffness, VectorType& guess, VectorType& mass)
+        : m_stiffness(std::ref(stiffness)), m_guess(std::ref(guess)), m_mass(std::ref(mass))
+      {}
+
+      LinearSystemBase(const LinearSystemBase& other)
+        : m_stiffness(other.m_stiffness), m_guess(other.m_guess), m_mass(other.m_mass)
+      {}
+
+      LinearSystemBase(LinearSystemBase&& other) noexcept
+        : m_stiffness(std::move(other.m_stiffness)), m_guess(std::move(other.m_guess)), m_mass(std::move(other.m_mass))
+      {}
+
+      LinearSystemBase& operator=(const LinearSystemBase& other)
+      {
+        if (this != &other)
+        {
+          m_stiffness = other.m_stiffness;
+          m_guess = other.m_guess;
+          m_mass = other.m_mass;
+        }
+        return *this;
+      }
+
+      LinearSystemBase& operator=(LinearSystemBase&& other) noexcept
+      {
+        if (this != &other)
+        {
+          m_stiffness = std::move(other.m_stiffness);
+          m_guess = std::move(other.m_guess);
+          m_mass = std::move(other.m_mass);
+        }
+        return *this;
+      }
+
+      template <class DOFScalar>
+      LinearSystemBase& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
+      {
+        return static_cast<Derived&>(*this).eliminate(dofs, offset);
+      }
+
+      template <class Row, class DOFScalar>
+      LinearSystemBase& replace(const Row& row, const IndexMap<DOFScalar>& dofs, size_t offset = 0)
+      {
+        return static_cast<Derived&>(*this).replace(row, dofs, offset);
+      }
+
+      template <class DOFScalar>
+      LinearSystemBase& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
+      {
+        return static_cast<Derived&>(*this).merge(dofs, offset);
+      }
+
+      MatrixType& getOperator()
+      {
+        auto& ref = std::visit([](auto& m) -> MatrixType& { return m; }, m_stiffness);
+        return ref;
+      }
+
+      const MatrixType& getOperator() const
+      {
+        const auto& ref = std::visit([](const auto& m) -> const MatrixType& { return m; }, m_stiffness);
+        return ref;
+      }
+
+      VectorType& getVector()
+      {
+        auto& ref = std::visit([](auto& m) -> VectorType& { return m; }, m_mass);
+        return ref;
+      }
+
+      const VectorType& getVector() const
+      {
+        const auto& ref = std::visit([](const auto& m) -> const VectorType& { return m; }, m_mass);
+        return ref;
+      }
+
+      VectorType& getGuess()
+      {
+        auto& ref = std::visit([](auto& m) -> VectorType& { return m; }, m_guess);
+        return ref;
+      }
+
+      const VectorType& getGuess() const
+      {
+        const auto& ref = std::visit([](const auto& m) -> const VectorType& { return m; }, m_guess);
+        return ref;
+      }
+
+    private:
+      std::variant<std::reference_wrapper<MatrixType>, MatrixType> m_stiffness;
+      std::variant<std::reference_wrapper<VectorType>, VectorType> m_guess;
+      std::variant<std::reference_wrapper<VectorType>, VectorType> m_mass;
+  };
 
   template <class Matrix, class Vector>
-  System(Matrix&, Vector&) -> System<Matrix, Vector>;
+  class LinearSystem;
+
+  template <class Matrix, class Vector>
+  LinearSystem(Matrix&, Vector&, Vector&) -> LinearSystem<Matrix, Vector>;
 
   template <class MatrixScalar, class VectorScalar>
-  class System<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>>
+  class LinearSystem<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>>
+    : public LinearSystemBase<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>
   {
     public:
       using MatrixType = Math::SparseMatrix<MatrixScalar>;
+
       using VectorType = Math::Vector<VectorScalar>;
 
-      System(MatrixType& stiffness, VectorType& mass)
-        : m_stiffness(stiffness), m_mass(mass)
-      {}
+      using Parent = LinearSystemBase<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>;
+
+      using Parent::Parent;
 
       template <class DOFScalar>
-      System& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
+      LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
-        auto& stiffness = m_stiffness.get();
-        auto& mass = m_mass.get();
+        auto& stiffness = this->getOperator();
+        auto& mass = this->getVector();
 
         auto* const valuePtr = stiffness.valuePtr();
         auto* const outerPtr = stiffness.outerIndexPtr();
@@ -77,10 +193,10 @@ namespace Rodin::Math
       }
 
       template <class Row, class DOFScalar>
-      System& replace(const Row& row, const IndexMap<DOFScalar>& dofs, size_t offset = 0)
+      LinearSystem& replace(const Row& row, const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
-        auto& stiffness = m_stiffness.get();
-        auto& mass = m_mass.get();
+        auto& stiffness = this->getOperator();
+        auto& mass = this->getVector();
         for (const auto& kv : dofs)
         {
           const Index& global = kv.first;
@@ -94,10 +210,10 @@ namespace Rodin::Math
       }
 
       template <class DOFScalar>
-      System& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
+      LinearSystem& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
       {
-        auto& stiffness = m_stiffness.get();
-        auto& mass = m_mass.get();
+        auto& stiffness = this->getOperator();
+        auto& mass = this->getVector();
 
         std::deque<Index> q;
         IndexSet dependents;
@@ -225,29 +341,26 @@ namespace Rodin::Math
         }
         return *this;
       }
-
-    private:
-      std::reference_wrapper<MatrixType> m_stiffness;
-      std::reference_wrapper<VectorType> m_mass;
   };
 
   template <class MatrixScalar, class VectorScalar>
-  class System<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>>
+  class LinearSystem<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>>
+    : public LinearSystemBase<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>
   {
     public:
       using MatrixType = Math::Matrix<MatrixScalar>;
 
       using VectorType = Math::Vector<VectorScalar>;
 
-      System(MatrixType& stiffness, VectorType& mass)
-        : m_stiffness(stiffness), m_mass(mass)
-      {}
+      using Parent = LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixScalar, VectorScalar>>;
+
+      using Parent::Parent;
 
       template <class DOFScalar>
-      System& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
+      LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
-        auto& stiffness = m_stiffness.get();
-        auto& mass = m_mass.get();
+        auto& stiffness = this->getOperator();
+        auto& mass = this->getVector();
 
         // Move essential degrees of freedom in the LHS to the RHS
         for (const auto& kv : dofs)
@@ -297,10 +410,10 @@ namespace Rodin::Math
        * @pre  row.size() == stiffness.cols().
        */
       template <class Row, class DOFScalar>
-      System& replace(const Row& row, const IndexMap<DOFScalar>& dofs, size_t offset = 0)
+      LinearSystem& replace(const Row& row, const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
-        auto& stiffness = m_stiffness.get();
-        auto& mass = m_mass.get();
+        auto& stiffness = this->getOperator();
+        auto& mass = this->getVector();
         for (const auto& kv : dofs)
         {
           const Index& global = kv.first;
@@ -314,10 +427,10 @@ namespace Rodin::Math
       }
 
       template <class DOFScalar>
-      System& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
+      LinearSystem& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
       {
-        auto& stiffness = m_stiffness.get();
-        auto& mass = m_mass.get();
+        auto& stiffness = this->getOperator();
+        auto& mass = this->getVector();
 
         std::deque<Index> q;
         IndexSet dependents;
@@ -443,14 +556,8 @@ namespace Rodin::Math
         }
         return *this;
       }
-
-    private:
-      std::reference_wrapper<MatrixType> m_stiffness;
-      std::reference_wrapper<VectorType> m_mass;
   };
 }
 
 #endif
-
-
 
