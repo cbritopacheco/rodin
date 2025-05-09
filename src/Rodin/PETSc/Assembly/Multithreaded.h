@@ -26,11 +26,8 @@ namespace Rodin::Assembly
    */
   template <class FES>
   class Multithreaded<
-    ::Vec&, Variational::LinearForm<FES, ::Vec&>> final
-    : public AssemblyBase<
-        ::Vec&,
-        Variational::LinearForm<FES, ::Vec&>
-      >
+    ::Vec, Variational::LinearForm<FES, ::Vec>> final
+    : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
@@ -38,7 +35,7 @@ namespace Rodin::Assembly
         std::is_same_v<ScalarType, PetscScalar>,
         "FES::ScalarType must be PetscScalar for PETSc Vec assembly"
       );
-      using VectorType     = ::Vec&;
+      using VectorType     = ::Vec;
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
       using Parent         = AssemblyBase<VectorType, LinearFormType>;
       using InputType      = typename Parent::InputType;
@@ -166,16 +163,14 @@ namespace Rodin::Assembly
    * @brief Multithreaded assembly for PETSc Mat (bilinear form)
    */
   template <class TrialFES, class TestFES>
-  class Multithreaded<
-    ::Mat&, Variational::BilinearForm<TrialFES, TestFES, ::Mat&>> final
-    : public AssemblyBase<
-        ::Mat&, Variational::BilinearForm<TrialFES, TestFES, ::Mat&>>
+  class Multithreaded<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>> final
+    : public AssemblyBase<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>>
   {
     public:
       using DotType = typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
-      using OperatorType    = ::Mat&;
+      using OperatorType    = ::Mat;
       using BilinearFormType= Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
       using Parent          = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType       = typename Parent::InputType;

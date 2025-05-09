@@ -20,6 +20,12 @@ namespace Rodin::Math
    */
   template <class ScalarType>
   using SparseMatrix = Eigen::SparseMatrix<ScalarType>;
+
+  template <class AScalarType, class YScalarType, class XScalarType>
+  void axpy(SparseMatrix<YScalarType>& y, AScalarType alpha, const SparseMatrix<XScalarType>& x)
+  {
+    y += alpha * x;
+  }
 }
 
 namespace Rodin::FormLanguage

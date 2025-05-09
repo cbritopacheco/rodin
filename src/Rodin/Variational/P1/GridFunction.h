@@ -168,12 +168,12 @@ namespace Rodin::Variational
       }
 
       template <class Vector>
-      GridFunction& setWeights(Vector&& weights)
+      GridFunction& setWeights(const Vector& weights)
       {
-        assert(weights.size() >= 0);
-        assert(static_cast<size_t>(weights.size()) == this->getFiniteElementSpace().getSize());
         auto& data = this->getData();
-        const auto& w = this->getWeights().emplace(std::forward<Vector>(weights));
+        auto& w = this->getWeights().emplace();
+        Math::duplicate(weights, w);
+        Math::copy(weights, w);
         if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(data.rows() == 1);

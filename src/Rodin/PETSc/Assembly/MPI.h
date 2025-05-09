@@ -16,22 +16,19 @@ namespace Rodin::Assembly
 {
   // MPI assembly for PETSc Vec (linear form) -- skipping ghosts via Shard + Boost.MPI
   template <class FES>
-  class MPI<
-    ::Vec&,
-    Variational::LinearForm<FES, ::Vec&>
-  > final
+  class MPI<::Vec, Variational::LinearForm<FES, ::Vec>> final
     : public AssemblyBase<
-        ::Vec&,
-        Variational::LinearForm<FES, ::Vec&>
+        ::Vec,
+        Variational::LinearForm<FES, ::Vec>
       >
   {
     public:
-      using ScalarType     = typename FormLanguage::Traits<FES>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
       static_assert(
         std::is_same_v<ScalarType, PetscScalar>,
         "FES::ScalarType must be PetscScalar"
       );
-      using VectorType     = ::Vec&;
+      using VectorType     = ::Vec;
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
       using Parent         = AssemblyBase<VectorType, LinearFormType>;
       using InputType      = typename Parent::InputType;
@@ -95,13 +92,10 @@ namespace Rodin::Assembly
 
   // MPI assembly for PETSc Mat (bilinear form) -- skipping ghosts via Shard + Boost.MPI
   template <class TrialFES, class TestFES>
-  class MPI<
-    ::Mat&,
-    Variational::BilinearForm<TrialFES, TestFES, ::Mat&>
-  > final
+  class MPI<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>> final
     : public AssemblyBase<
-        ::Mat&,
-        Variational::BilinearForm<TrialFES, TestFES, ::Mat&>
+        ::Mat,
+        Variational::BilinearForm<TrialFES, TestFES, ::Mat>
       >
   {
     public:
@@ -113,7 +107,7 @@ namespace Rodin::Assembly
         std::is_same_v<DotType, PetscScalar>,
         "DotType must be PetscScalar"
       );
-      using OperatorType     = ::Mat&;
+      using OperatorType     = ::Mat;
       using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
       using Parent           = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType        = typename Parent::InputType;

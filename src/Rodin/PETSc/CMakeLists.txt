@@ -10,10 +10,13 @@ set(RodinPETSc_HEADERS
   Assembly/MPI.h
   FormLanguage/Traits.h
   Math/System.h
+  Math/Vector.h
+  Math/Matrix.h
   )
 
 set(RodinPETSc_SRCS
   Math/System.cpp
+  Math/Matrix.cpp
   )
 
 add_library(RodinPETSc ${RodinPETSc_HEADERS} ${RodinPETSc_SRCS})
@@ -29,5 +32,9 @@ target_link_libraries(RodinPETSc
   Rodin::Geometry
   Rodin::Alert
   Rodin::MPI
+  Rodin::Math
+  Rodin::Variational
+  Rodin::Assembly
+  Rodin::FormLanguage
   PETSc::PETSc)
 

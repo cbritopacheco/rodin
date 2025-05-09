@@ -7,6 +7,7 @@
 #ifndef RODIN_MATH_H
 #define RODIN_MATH_H
 
+#include "Math/ForwardDecls.h"
 #include "Math/Common.h"
 #include "Math/Vector.h"
 #include "Math/Tensor.h"

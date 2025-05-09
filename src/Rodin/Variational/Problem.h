@@ -16,6 +16,7 @@
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry.h"
 #include "Rodin/Solver/Solver.h"
+#include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/System.h"
 #include "Rodin/Math/SparseMatrix.h"
@@ -216,7 +217,7 @@ namespace Rodin::Variational
         for (auto& bf : bfs)
         {
           bf.assemble();
-          stiffness += bf.getOperator();
+          Math::axpy(stiffness, 1.0, bf.getOperator());
         }
         bf.assemble();
 
@@ -600,7 +601,7 @@ namespace Rodin::Variational
              [&](size_t i, auto& u)
              {
               const size_t n = u.get().getFiniteElementSpace().getSize();
-              u.get().emplace().getSolution().setWeights(m_guess.segment(m_trialOffsets[i], n));
+              u.get().emplace().getSolution().setWeights(m_guess.segment(m_trialOffsets[i], n).eval());
              });
       }
 

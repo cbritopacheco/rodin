@@ -1049,7 +1049,7 @@ namespace Rodin::Variational
       Derived& setData(Matrix&& data) const
       {
         m_data = std::forward<Matrix>(data);
-        return static_cast<Derived&>(*this).setData();
+        return static_cast<Derived&>(*this).setData(data);
       }
 
       /**
@@ -1097,21 +1097,9 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in Derived class.
        */
       template <class Vector>
-      Derived& setWeights(Vector&& weights)
+      Derived& setWeights(const Vector& weights)
       {
-        return static_cast<Derived&>(*this).setWeights(std::forward<Vector>(weights));
-      }
-
-      /**
-       * @brief Sets the weights and data in the GridFunction object. No
-       * computation is performed.
-       */
-      template <class Vector, class Matrix>
-      Derived& setWeightsAndData(Vector&& weights, Matrix&& data)
-      {
-        m_weights = std::forward<Vector>(weights);
-        m_data = std::forward<Matrix>(data);
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).setWeights(weights);
       }
 
       constexpr

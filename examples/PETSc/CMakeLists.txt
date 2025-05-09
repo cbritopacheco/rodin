@@ -4,5 +4,6 @@ target_link_libraries(PETSc_Poisson
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
+  Rodin::Math
   Rodin::PETSc)
 

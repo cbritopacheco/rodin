@@ -11,8 +11,18 @@
 #include "Vector.h"
 #include "Tensor.h"
 
+#include "SparseMatrix.h"
+
 namespace Rodin::Math
 {
+  template <class Src, class Dst>
+  static void copy(const Src& src, Dst& dst);
+
+  template <class Src, class Dst>
+  static void duplicate(const Src& src, Dst& dst);
+
+  template <class Y, class A, class X>
+  static void axpy(Y& y, A a, const X& x);
 }
 
 #endif

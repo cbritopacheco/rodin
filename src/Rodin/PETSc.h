@@ -4,6 +4,8 @@
 #include "PETSc/ForwardDecls.h"
 
 #include "PETSc/Math/System.h"
+#include "PETSc/Math/Vector.h"
+#include "PETSc/Math/Matrix.h"
 
 #include "PETSc/Assembly/Sequential.h"
 #include "PETSc/Assembly/Multithreaded.h"

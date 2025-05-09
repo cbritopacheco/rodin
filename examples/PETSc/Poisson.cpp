@@ -4,13 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+#include <Rodin/PETSc.h>
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
-
-#include <Rodin/PETSc.h>
-#include <Rodin/PETSc/Assembly/Sequential.h>
 
 using namespace Rodin;
 using namespace Rodin::Math;
@@ -34,6 +33,14 @@ int main(int argc, char** argv)
   TrialFunction u(vh);
   TestFunction  v(vh);
 
+  Mat a;
+  MatCreate(PETSC_COMM_SELF, &a);
+
+  Vec x;
+  VecCreate(PETSC_COMM_SELF, &x);
+
+  Vec b;
+  VecCreate(PETSC_COMM_SELF, &b);
 
   // BilinearForm bf(u, v, x);
   // bf = Integral(Grad(u), Grad(v));
@@ -44,35 +51,27 @@ int main(int argc, char** argv)
   // lf = Integral(f, v);
   // lf.assemble();
 
-  // Mat a;
-  // MatCreate(PETSC_COMM_SELF, &a);
+  LinearSystem axb(a, x, b);
 
-  // Vec x;
-  // VecCreate(PETSC_COMM_SELF, &x);
+  // Define problem
+  Problem poisson(u, v, axb);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
 
-  // Vec b;
-  // VecCreate(PETSC_COMM_SELF, &b);
+  // // Solve
+  // CG(poisson).solve();
 
-  // LinearSystem axb(a, x, b);
+  // // Save solution
+  // u.getSolution().save("Poisson.gf");
+  // mesh.save("Poisson.mesh");
 
-  // // Define problem
-  // Problem poisson(u, v, axb);
-  // poisson = Integral(Grad(u), Grad(v))
-  //         - Integral(f, v)
-  //         + DirichletBC(u, Zero());
-
-  // // // Solve
-  // // CG(poisson).solve();
-
-  // // // Save solution
-  // // u.getSolution().save("Poisson.gf");
-  // // mesh.save("Poisson.mesh");
-
-  // MatDestroy(&a);
-  // VecDestroy(&x);
-  // VecDestroy(&b);
+  MatDestroy(&a);
+  VecDestroy(&x);
+  VecDestroy(&b);
 
   PetscFinalize();
+
   return 0;
 }
 
