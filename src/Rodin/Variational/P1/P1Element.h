@@ -300,7 +300,7 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const T& v) const
           {
-            return 0.5 * Math::conj(v(s_nodes[m_g].col(m_i))) * Complex(1, -1);
+            return Math::conj(v(s_nodes[m_g].col(m_i)));
           }
 
         private:
