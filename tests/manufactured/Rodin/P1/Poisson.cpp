@@ -43,7 +43,7 @@ using namespace Rodin::Test::Random;
 namespace Rodin::Tests::Manufactured::Poisson
 {
   template <size_t M>
-  class ManufacturedPoissonTest : public ::testing::TestWithParam<Polytope::Type>
+  class Manufactured_Poisson_Test : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
       Mesh<Context::Local> getMesh()
@@ -56,12 +56,12 @@ namespace Rodin::Tests::Manufactured::Poisson
       }
   };
 
-  using ManufacturedPoissonTest16x16 =
-    Rodin::Tests::Manufactured::Poisson::ManufacturedPoissonTest<16>;
-  using ManufacturedPoissonTest32x32 =
-    Rodin::Tests::Manufactured::Poisson::ManufacturedPoissonTest<32>;
-  using ManufacturedPoissonTest64x64 =
-    Rodin::Tests::Manufactured::Poisson::ManufacturedPoissonTest<64>;
+  using Manufactured_Poisson_Test_16x16 =
+    Rodin::Tests::Manufactured::Poisson::Manufactured_Poisson_Test<16>;
+  using Manufactured_Poisson_Test_32x32 =
+    Rodin::Tests::Manufactured::Poisson::Manufactured_Poisson_Test<32>;
+  using Manufactured_Poisson_Test_64x64 =
+    Rodin::Tests::Manufactured::Poisson::Manufactured_Poisson_Test<64>;
 
   /**
    * @f[
@@ -85,7 +85,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_SimpleSine)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_SimpleSine)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -139,7 +139,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest64x64, Poisson_VariableFrequency)
+  TEST_P(Manufactured_Poisson_Test_64x64, Poisson_VariableFrequency)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -190,7 +190,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_VariableAmplitude)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_VariableAmplitude)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -237,7 +237,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_Polynomial)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_Polynomial)
   {
     Mesh mesh = this->getMesh();
 
@@ -281,7 +281,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_TrigonometricPolynomial)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_TrigonometricPolynomial)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -328,7 +328,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_NonhomogeneousDirichlet)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_NonhomogeneousDirichlet)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -375,7 +375,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_MixedBoundary)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_MixedBoundary)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -424,7 +424,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_Exponential)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_Exponential)
   {
     Mesh mesh = this->getMesh();
 
@@ -478,7 +478,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x, y) = 0
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_Exponential_Revised)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_Exponential_Revised)
   {
     Mesh mesh = this->getMesh();
 
@@ -546,7 +546,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x, y) = u(x, y)
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest64x64, VectorPoisson_MixedTrigonometricExponential)
+  TEST_P(Manufactured_Poisson_Test_64x64, VectorPoisson_MixedTrigonometricExponential)
   {
     auto pi = Math::Constants::pi();
 
@@ -613,7 +613,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest64x64, VectorPoisson_SimpleSine)
+  TEST_P(Manufactured_Poisson_Test_64x64, VectorPoisson_SimpleSine)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -684,7 +684,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest64x64, VectorPoisson_VariableFrequency)
+  TEST_P(Manufactured_Poisson_Test_64x64, VectorPoisson_VariableFrequency)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -759,7 +759,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, VectorPoisson_VariableAmplitude)
+  TEST_P(Manufactured_Poisson_Test_16x16, VectorPoisson_VariableAmplitude)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -822,7 +822,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, VectorPoisson_Polynomial)
+  TEST_P(Manufactured_Poisson_Test_16x16, VectorPoisson_Polynomial)
   {
     Mesh mesh = this->getMesh();
 
@@ -883,7 +883,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, VectorPoisson_TrigonometricPolynomial)
+  TEST_P(Manufactured_Poisson_Test_16x16, VectorPoisson_TrigonometricPolynomial)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -946,7 +946,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest32x32, VectorPoisson_NonhomogeneousDirichlet)
+  TEST_P(Manufactured_Poisson_Test_32x32, VectorPoisson_NonhomogeneousDirichlet)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -1013,7 +1013,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, VectorPoisson_MixedBoundary)
+  TEST_P(Manufactured_Poisson_Test_16x16, VectorPoisson_MixedBoundary)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -1077,7 +1077,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, VectorPoisson_Exponential)
+  TEST_P(Manufactured_Poisson_Test_16x16, VectorPoisson_Exponential)
   {
     Mesh mesh = this->getMesh();
 
@@ -1132,7 +1132,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    * @f]
    *
    */
-  TEST_P(ManufacturedPoissonTest16x16, VectorPoisson_HigherOrder)
+  TEST_P(Manufactured_Poisson_Test_16x16, VectorPoisson_HigherOrder)
   {
     Mesh mesh = this->getMesh();
 
@@ -1181,7 +1181,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x,y) = u(x,y)
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_LinearNonhomogeneous)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_LinearNonhomogeneous)
   {
     Mesh mesh = this->getMesh();
     P1 vh(mesh);
@@ -1218,7 +1218,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x,y) = u(x,y)
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_QuadraticNonhomogeneous)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_QuadraticNonhomogeneous)
   {
     Mesh mesh = this->getMesh();
     P1 vh(mesh);
@@ -1255,7 +1255,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x,y) = u(x,y)
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_CubicPolynomial)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_CubicPolynomial)
   {
     Mesh mesh = this->getMesh();
     P1 vh(mesh);
@@ -1296,7 +1296,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x,y) = u(x,y)
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest64x64, Poisson_Harmonic)
+  TEST_P(Manufactured_Poisson_Test_64x64, Poisson_Harmonic)
   {
     auto pi = Math::Constants::pi();
     Mesh mesh = this->getMesh();
@@ -1334,7 +1334,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x,y) = 0
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest64x64, Poisson_SineDouble)
+  TEST_P(Manufactured_Poisson_Test_64x64, Poisson_SineDouble)
   {
     auto pi = Math::Constants::pi();
     Mesh mesh = this->getMesh();
@@ -1372,7 +1372,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x,y) = u(x,y)
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_SineCosine_Nonhomogeneous)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_SineCosine_Nonhomogeneous)
   {
     auto pi = Math::Constants::pi();
     Mesh mesh = this->getMesh();
@@ -1410,7 +1410,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x,y) = u(x,y)
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest16x16, Poisson_Cosine_Nonhomogeneous)
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_Cosine_Nonhomogeneous)
   {
     auto pi = Math::Constants::pi();
     Mesh mesh = this->getMesh();
@@ -1448,7 +1448,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x,y) = u(x,y)
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest16x16, VectorPoisson_RandomPolynomial)
+  TEST_P(Manufactured_Poisson_Test_16x16, VectorPoisson_RandomPolynomial)
   {
     Mesh mesh = this->getMesh();
     P1 vh(mesh, mesh.getSpaceDimension());
@@ -1489,7 +1489,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x,y) = 0
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest16x16, VectorPoisson_TrigonometricMixed)
+  TEST_P(Manufactured_Poisson_Test_16x16, VectorPoisson_TrigonometricMixed)
   {
     auto pi = Math::Constants::pi();
     Mesh mesh = this->getMesh();
@@ -1530,7 +1530,7 @@ namespace Rodin::Tests::Manufactured::Poisson
    *  g(x,y) = 0
    * @f]
    */
-  TEST_P(ManufacturedPoissonTest32x32, VectorPoisson_Sinusoidal)
+  TEST_P(Manufactured_Poisson_Test_32x32, VectorPoisson_Sinusoidal)
   {
     auto pi = Math::Constants::pi();
     Mesh mesh = this->getMesh();
@@ -1556,19 +1556,283 @@ namespace Rodin::Tests::Manufactured::Poisson
 
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
-    ManufacturedPoissonTest16x16,
+    Manufactured_Poisson_Test_16x16,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_PlaneWave)
+  {
+    Mesh mesh = this->getMesh();
+    P1<Complex> vh(mesh);
+    const Real k = 1;
+    const Real l = 2;
+    const ComplexFunction solution =
+      [&](const Geometry::Point& p)
+      {
+        return Complex(cos(k * p.x() + l * p.y()), sin(k * p.x() + l * p.y()));
+      };
+    auto f = (k * k + l * l) * solution;
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+    CG(poisson).solve();
+
+    P1 sh(mesh);
+    GridFunction diff(sh);
+    {
+      diff = Pow(Re(u.getSolution()) - Re(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+
+    {
+      diff = Pow(Im(u.getSolution()) - Im(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_ComplexPolynomial)
+  {
+    Mesh mesh = this->getMesh();
+    P1<Complex> vh(mesh);
+    const ComplexFunction solution =
+      [&](const Geometry::Point& p)
+      {
+        return Complex(p.x() * (1 - p.x()), p.y() * (1 - p.y()));
+      };
+    ComplexFunction f = Complex(2, 2);
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+    CG(poisson).solve();
+
+    P1 sh(mesh);
+    GridFunction diff(sh);
+    {
+      diff = Pow(Re(u.getSolution()) - Re(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+
+    {
+      diff = Pow(Im(u.getSolution()) - Im(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_ExponentialSineSeparation)
+  {
+    auto pi = Math::Constants::pi();
+    Mesh mesh = this->getMesh();
+    P1<Complex> vh(mesh);
+    const ComplexFunction solution =
+      [&](const Geometry::Point& p)
+      {
+        return sin(pi * p.y()) * Complex(cos(pi * p.x()), sin(pi * p.x()));
+      };
+    ComplexFunction f = 2 * pi * pi * solution;
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+    CG(poisson).solve();
+
+    P1 sh(mesh);
+    GridFunction diff(sh);
+    {
+      diff = Pow(Re(u.getSolution()) - Re(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+
+    {
+      diff = Pow(Im(u.getSolution()) - Im(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_SumIndependentSinusoids)
+  {
+    auto pi = Math::Constants::pi();
+    Mesh mesh = this->getMesh();
+    P1<Complex> vh(mesh);
+
+    const ComplexFunction solution =
+      [&](const Geometry::Point& p)
+      {
+        return Complex(std::sin(pi * p.x()), std::sin(2 * pi * p.y()));
+      };
+
+    const ComplexFunction f =
+      [&](const Geometry::Point& p)
+      {
+        return Complex(pi*pi * std::sin(pi * p.x()),
+                       4 * pi*pi * std::sin(2 * pi * p.y()));
+      };
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+    CG(poisson).solve();
+
+    P1 sh(mesh);
+    GridFunction diff(sh);
+
+    {
+      diff = Pow(Re(u.getSolution()) - Re(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+
+    {
+      diff = Pow(Im(u.getSolution()) - Im(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_MixedExponentialPolynomial)
+  {
+    auto pi = Math::Constants::pi();
+    Mesh mesh = this->getMesh();
+    P1<Complex> vh(mesh);
+
+    const ComplexFunction solution =
+      [&](const Geometry::Point& p)
+      {
+        const Real x = p.x();
+        const Real factor = x * (1 - x);
+        const Real C = std::cos(pi * x);
+        const Real S = std::sin(pi * x);
+        return Complex(factor * C, factor * S);
+      };
+
+    const ComplexFunction f =
+      [&](const Geometry::Point& p)
+      {
+        const Real x = p.x();
+        const Real factor = x * (1 - x);
+        const Real base = 2 + pi*pi * factor;
+        const Real C = std::cos(pi * x);
+        const Real S = std::sin(pi * x);
+        const Real two_pi = 2 * pi;
+        const Real real_part = base * C + two_pi * (1 - 2 * x) * S;
+        const Real imag_part = base * S - two_pi * (1 - 2 * x) * C;
+        return Complex(real_part, imag_part);
+      };
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+    CG(poisson).solve();
+
+    P1 sh(mesh);
+    GridFunction diff(sh);
+
+    {
+      diff = Pow(Re(u.getSolution()) - Re(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+
+    {
+      diff = Pow(Im(u.getSolution()) - Im(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_SineVsPolynomial)
+  {
+    auto pi = Math::Constants::pi();
+    Mesh mesh = this->getMesh();
+    P1<Complex> vh(mesh);
+
+    const ComplexFunction solution =
+      [&](const Geometry::Point& p)
+      {
+        const Real x = p.x();
+        const Real y = p.y();
+        return Complex(
+          std::sin(pi * x) * std::sin(pi * y),
+          x * (1 - x) * y * (1 - y)
+        );
+      };
+
+    const ComplexFunction f =
+      [&](const Geometry::Point& p)
+      {
+        const Real x = p.x();
+        const Real y = p.y();
+        const Real f_re = 2 * pi * pi * std::sin(pi * x) * std::sin(pi * y);
+        const Real f_im = 2 * y * (1 - y) + 2 * x * (1 - x);
+        return Complex(f_re, f_im);
+      };
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+    CG(poisson).solve();
+
+    P1 sh(mesh);
+    GridFunction diff(sh);
+    {
+      diff = Pow(Re(u.getSolution()) - Re(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+
+    {
+      diff = Pow(Im(u.getSolution()) - Im(solution), 2);
+      diff.setWeights();
+      const Real error = Integral(diff).compute();
+      EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
   INSTANTIATE_TEST_SUITE_P(
     MeshParams32x32,
-    ManufacturedPoissonTest32x32,
+    Manufactured_Poisson_Test_32x32,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
   INSTANTIATE_TEST_SUITE_P(
     MeshParams64x64,
-    ManufacturedPoissonTest64x64,
+    Manufactured_Poisson_Test_64x64,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 }
