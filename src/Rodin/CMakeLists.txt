@@ -14,13 +14,22 @@ rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-unused-par
 
 add_library(Rodin INTERFACE)
 add_library(Rodin::Rodin ALIAS Rodin)
-target_sources(Rodin INTERFACE ${Rodin_HEADERS})
+
+foreach(_h IN LISTS Rodin_HEADERS Configure.h)
+  target_sources(Rodin INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${_h}>
+  )
+endforeach()
+
 target_link_libraries(Rodin INTERFACE Eigen3::Eigen)
 
 configure_file(Configure.h.in Configure.h @ONLY)
 
 target_include_directories(Rodin
-  INTERFACE ${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
+  INTERFACE
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
+  $<INSTALL_INTERFACE:${RODIN_INSTALL_INCLUDE_PATH}/Rodin>)
 
 add_subdirectory(QF)
 add_subdirectory(Math)
@@ -57,3 +66,16 @@ if (RODIN_USE_MPI)
   add_subdirectory(MPI)
 endif()
 
+install(TARGETS Rodin
+  EXPORT        RodinTargets
+  INCLUDES      DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin
+)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+  DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin
+  FILES_MATCHING PATTERN "*.h *.hpp"
+ )
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Configure.h"
+  DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin
+)

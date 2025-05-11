@@ -24,6 +24,21 @@ add_library(Rodin::Alert ALIAS RodinAlert)
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinAlert
   PUBLIC
-  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
-  ${PROJECT_SOURCE_DIR}/third-party/termcolor/include)
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third-party/termcolor/include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Alert/termcolor/include>
+  )
 
+target_link_libraries(RodinAlert PUBLIC Rodin::Rodin)
+
+install(TARGETS RodinAlert
+  EXPORT       RodinTargets
+  RUNTIME      DESTINATION ${RODIN_INSTALL_BINARY_PATH}
+  LIBRARY      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  ARCHIVE      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  INCLUDES     DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin/Alert
+)
+
+rodin_install_headers(
+  DIRECTORIES .
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Alert
+)

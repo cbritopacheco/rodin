@@ -2,55 +2,6 @@ include(CheckLinkerFlag)
 include (CheckCCompilerFlag)
 include (CheckCXXCompilerFlag)
 
-
-# @brief Installs the files specified by the FILES keyword argument to the
-# specified destination directory.
-#
-# @param FILES        List of files to be installed. These should be relative paths to
-#                     the source directory.
-# @param DESTINATION  Destination directory where the files will be installed.
-#                     This should be an absolute path.
-#
-# Example usage:
-# ```
-# rodin_install_files(
-#     FILES
-#         file1.txt
-#         file2.txt
-#         subdir/file3.txt
-#     DESTINATION
-#         ${CMAKE_INSTALL_PREFIX}/my_project
-# )
-# ```
-# This will install `file1.txt` and `file2.txt` to `my_project/` and
-# `file3.txt` to `my_project/file3.txt`.
-function(rodin_install_files)
-    set(options)
-    set(oneValueArgs DESTINATION)
-    set(multiValueArgs FILES)
-    cmake_parse_arguments(RODIN_INSTALL "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    if(NOT RODIN_INSTALL_DESTINATION)
-        message(FATAL_ERROR "rodin_install_files: The DESTINATION keyword is required for rodin_install_files function.")
-    endif()
-    foreach(RODIN_INSTALL_FILES_FILE ${RODIN_INSTALL_FILES})
-        set(RODIN_INSTALL_SOURCE_FILE
-          "${CMAKE_CURRENT_SOURCE_DIR}/${RODIN_INSTALL_FILES_FILE}")
-        set(RODIN_INSTALL_DESTINATION_FILE
-          "${RODIN_INSTALL_DESTINATION}/${RODIN_INSTALL_FILES_FILE}")
-        get_filename_component(RODIN_INSTALL_DESTINATION_DIR
-          "${RODIN_INSTALL_DESTINATION_FILE}" DIRECTORY)
-        install(
-          DIRECTORY "${RODIN_INSTALL_DESTINATION_DIR}"
-          DESTINATION "${RODIN_INSTALL_DESTINATION}"
-          COMPONENT Development
-          OPTIONAL)
-        install(
-          FILES "${RODIN_INSTALL_SOURCE_FILE}"
-          DESTINATION "${RODIN_INSTALL_DESTINATION_DIR}"
-          COMPONENT Development)
-    endforeach()
-endfunction()
-
 # @brief Calculate the relative path for a path given a base directory.
 #
 # This function calculates the relative path for a path given a base directory.
@@ -233,4 +184,5 @@ function(rodin_add_link_options)
     endif()
   endforeach()
 endfunction()
+
 

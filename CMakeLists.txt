@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 3.16)
 
-
 cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0074 NEW)
@@ -13,12 +12,27 @@ endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 
 project(Rodin VERSION 0.0.1 LANGUAGES CXX C)
 
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+include(RodinUtilities)
+include(RodinInstall)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 # Compute version components
 set(RODIN_VERSION         "${PROJECT_VERSION}")
 set(RODIN_VERSION_MAJOR   "${PROJECT_VERSION_MAJOR}")
 set(RODIN_VERSION_MINOR   "${PROJECT_VERSION_MINOR}")
 set(RODIN_VERSION_PATCH   "${PROJECT_VERSION_PATCH}")
+
+# ---- Define install paths --------------------------------------------------
+set(RODIN_INSTALL_BINARY_PATH   ${CMAKE_INSTALL_BINDIR}   CACHE PATH
+    "Installation directory for executables")
+set(RODIN_INSTALL_LIBRARY_PATH  ${CMAKE_INSTALL_LIBDIR}   CACHE PATH
+    "Installation directory for libraries")
+set(RODIN_INSTALL_INCLUDE_PATH  ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH
+    "Installation directory for headers")
+set(RODIN_INSTALL_SHARE_PATH    ${CMAKE_INSTALL_DATADIR}  CACHE PATH
+    "Installation directory for read-only architecture-independent data")
 
 # Compute version code: major * 10000 + minor * 100 + patch
 math(EXPR RODIN_VERSION_CODE "${PROJECT_VERSION_MAJOR} * 10000 + ${PROJECT_VERSION_MINOR} * 100 + ${PROJECT_VERSION_PATCH}")
@@ -74,12 +88,6 @@ endif()
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
 set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
 
-# ---- Set the module path ---------------------
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-# ---- CMake Modules ---------------------------
-include(RodinConfig)
-
 # ---- Configure compiler ----------------------
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -93,12 +101,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
-
-# ---- Define install paths --------------------------------------------------
-set(RODIN_INSTALL_BINARY_PATH bin)
-set(RODIN_INSTALL_SHARE_PATH share)
-set(RODIN_INSTALL_LIBRARY_PATH lib)
-set(RODIN_INSTALL_INCLUDE_PATH include)
 
 # ---- Set compile options for all the submodules ----------------------------
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
@@ -254,11 +256,36 @@ if (RODIN_FEATURE_SUMMARY)
   feature_summary(INCLUDE_QUIET_PACKAGES WHAT ALL)
 endif()
 
-rodin_get_files_in_dir(RODIN_RESOURCES PATH ${RODIN_RESOURCES_DIR} GLOB_RECURSE EXCLUDE HIDDEN)
-set(RODIN_RELATIVE_RESOURCES "")
-foreach(RESOURCE_PATH ${RODIN_RESOURCES})
-  rodin_get_relpath(RELATIVE_PATH PATH ${RESOURCE_PATH} DIRECTORY ${PROJECT_SOURCE_DIR})
-  list(APPEND RODIN_RELATIVE_RESOURCES ${RELATIVE_PATH})
-endforeach()
-rodin_install_files(FILES ${RODIN_RELATIVE_RESOURCES} DESTINATION ${RODIN_INSTALL_SHARE_PATH})
+install(
+  EXPORT     RodinTargets
+  NAMESPACE  Rodin::
+  FILE       RodinTargets.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
+)
 
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/RodinConfigVersion.cmake"
+  VERSION       ${PROJECT_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+configure_package_config_file(
+  "${PROJECT_SOURCE_DIR}/cmake/RodinConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/RodinConfig.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/RodinConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/RodinConfigVersion.cmake"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
+)
+
+install(
+  DIRECTORY "${RODIN_RESOURCES_DIR}"
+  DESTINATION "${RODIN_INSTALL_SHARE_PATH}/resources"
+  FILES_MATCHING
+    PATTERN "*"
+    PATTERN ".*"      EXCLUDE
+    PATTERN "*/.*"    EXCLUDE
+)

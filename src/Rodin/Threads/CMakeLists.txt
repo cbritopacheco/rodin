@@ -11,4 +11,15 @@ target_include_directories(RodinThreads
 target_link_libraries(RodinThreads PUBLIC Rodin::Alert)
 target_link_libraries(RodinThreads PUBLIC BS_thread_pool)
 
+install(TARGETS RodinThreads
+  EXPORT       RodinTargets
+  RUNTIME      DESTINATION ${RODIN_INSTALL_BINARY_PATH}
+  LIBRARY      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  ARCHIVE      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  INCLUDES     DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin/Threads
+)
 
+rodin_install_headers(
+  DIRECTORIES .
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Threads
+)
