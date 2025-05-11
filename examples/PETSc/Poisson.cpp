@@ -25,8 +25,9 @@ int main(int argc, char** argv)
   // Build a mesh
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 32, 32 });
+  mesh.getConnectivity().compute(1, 2);
 
-  ScalarFunction f(1.0);
+  ScalarFunction f = Cos(F::x);
 
   P1 vh(mesh);
 
@@ -58,6 +59,25 @@ int main(int argc, char** argv)
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, Zero());
+  poisson.assemble();
+
+  Problem poisson2(u, v);
+  poisson2 = Integral(Grad(u), Grad(v))
+           - Integral(f, v)
+           + DirichletBC(u, Zero());
+  poisson2.assemble();
+  auto& b2 = poisson2.getLinearSystem().getVector();
+
+  Vector<PetscScalar> tmp;
+  Math::duplicate(b, tmp);
+  Math::copy(b, tmp);
+
+  Eigen::SparseMatrix<PetscScalar> tmp2;
+  Math::duplicate(a, tmp2);
+  Math::copy(a, tmp2);
+
+  std::cout << (b2 - tmp).norm() << std::endl;
+
 
   // // Solve
   // CG(poisson).solve();

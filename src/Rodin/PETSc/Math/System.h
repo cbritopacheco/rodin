@@ -28,6 +28,44 @@ namespace Rodin::Math
       template <class DOFScalar>
       LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
+        ::Mat& A = this->getOperator();
+        ::Vec& b = this->getVector();
+
+        std::vector<PetscInt> ids;
+        ids.reserve(dofs.size());
+        for (auto const& kv : dofs)
+          ids.push_back(PetscInt(kv.first) + PetscInt(offset));
+        IS is;
+        ISCreateGeneral(PETSC_COMM_WORLD,
+                        PetscInt(ids.size()), ids.data(),
+                        PETSC_COPY_VALUES, &is);
+
+        Vec x;
+        VecDuplicate(b, &x);
+        VecZeroEntries(x);
+        for (auto const& kv : dofs)
+        {
+          const PetscInt  i   = PetscInt(kv.first) + PetscInt(offset);
+          const PetscReal ui  = PetscReal(kv.second);
+          VecSetValue(x, i, ui, INSERT_VALUES);
+        }
+
+        VecAssemblyBegin(x);
+        VecAssemblyEnd(x);
+        MatZeroRowsColumnsIS(A, is, 1.0, x, b);
+
+        ISDestroy(&is);
+        VecDestroy(&x);
+
+        return *this;
+      }
+
+      template <class DOFScalar>
+      LinearSystemBase& merge(
+          const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
+      {
+        throw "Unimplemented.";
+
         return *this;
       }
   };

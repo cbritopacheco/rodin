@@ -74,12 +74,6 @@ namespace Rodin::Math
         return static_cast<Derived&>(*this).eliminate(dofs, offset);
       }
 
-      template <class Row, class DOFScalar>
-      LinearSystemBase& replace(const Row& row, const IndexMap<DOFScalar>& dofs, size_t offset = 0)
-      {
-        return static_cast<Derived&>(*this).replace(row, dofs, offset);
-      }
-
       template <class DOFScalar>
       LinearSystemBase& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
       {
@@ -188,23 +182,6 @@ namespace Rodin::Math
               }
             }
           }
-        }
-        return *this;
-      }
-
-      template <class Row, class DOFScalar>
-      LinearSystem& replace(const Row& row, const IndexMap<DOFScalar>& dofs, size_t offset = 0)
-      {
-        auto& stiffness = this->getOperator();
-        auto& mass = this->getVector();
-        for (const auto& kv : dofs)
-        {
-          const Index& global = kv.first;
-          const auto& dof = kv.second;
-          mass.coeffRef(global + offset) = dof;
-          assert(row.size() >= 0);
-          for (size_t i = 0; i < static_cast<size_t>(row.size()); i++)
-            stiffness.insert(global + offset, i) = row(i);
         }
         return *this;
       }
@@ -380,49 +357,6 @@ namespace Rodin::Math
           stiffness.coeffRef(global + offset, global + offset) = 1;
         }
 
-        return *this;
-      }
-
-      /**
-       * @brief  Replaces specified rows in a dense stiffness matrix and entries in a mass vector.
-       *
-       * This function writes Dirichlet‐type boundary conditions (or any prescribed values)
-       * into a dense stiffness matrix and a mass vector.  For each degree of freedom (DoF)
-       * listed in @p dofs, it sets the corresponding entry in @p mass to the prescribed
-       * value, and overwrites the entire row in @p stiffness with the values provided in
-       * @p row.
-       *
-       * @tparam Scalar     Numeric scalar type (e.g., double, float).
-       *
-       * @param[in,out] stiffness  Dense stiffness matrix to be modified.  Row @c (global+offset)
-       *                            is overwritten with the contents of @p row.
-       * @param[in,out] mass       Mass (or load) vector to be modified.  Entry
-       *                            @c (global+offset) is set to the prescribed DoF value.
-       * @param[in]     row        Vector of length N containing the new row values for
-       *                            each column 0..N−1 in @p stiffness.
-       * @param[in]     dofs       Mapping from global index to prescribed value:
-       *                            - Key:   global row index (before @p offset)
-       *                            - Value: the value to write into @p mass at that index
-       * @param[in]     offset     Optional row‐index offset to apply to all global indices.
-       *                            Defaults to 0.
-       *
-       * @pre  For every entry in @p dofs, @f$ 0 \leq \text{global} + \text{offset} < stiffness.rows() @f$.
-       * @pre  row.size() == stiffness.cols().
-       */
-      template <class Row, class DOFScalar>
-      LinearSystem& replace(const Row& row, const IndexMap<DOFScalar>& dofs, size_t offset = 0)
-      {
-        auto& stiffness = this->getOperator();
-        auto& mass = this->getVector();
-        for (const auto& kv : dofs)
-        {
-          const Index& global = kv.first;
-          const auto& dof = kv.second;
-          mass(global + offset) = dof;
-          assert(row.size() > 0);
-          for (size_t i = 0; i < static_cast<size_t>(row.size()); ++i)
-            stiffness(global + offset, i) = row(i);
-        }
         return *this;
       }
 

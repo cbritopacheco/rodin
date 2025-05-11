@@ -47,17 +47,32 @@ int main(int, char**)
   ComplexFunction f =
     [&](const Point& p)
     {
-      return Complex(1, 1) * waveNumber * waveNumber * cos(waveNumber * p.x()
+      return Complex(p.x(), 1) * waveNumber * waveNumber * cos(waveNumber * p.x()
           ) * cos(waveNumber * p.y());
     };
 
   TrialFunction u(vh);
   TestFunction  v(vh);
 
+  ComplexFunction u_ex =
+    [&](const Point& p)
+    {
+      auto x = p.x();
+      auto y = p.y();
+      return
+        (Complex(x, 1)
+           * cos(waveNumber * x)
+           * cos(waveNumber * y)
+           - Complex(2.0 / waveNumber, 0.0)
+           * sin(waveNumber * x)
+           * cos(waveNumber * y));
+    };
+
   Problem helmholtz(u, v);
   helmholtz = Integral(Grad(u), Grad(v))
             - waveNumber * waveNumber * Integral(u, v)
             - Integral(f, v)
+            + DirichletBC(u, u_ex)
             ;
 
   CG(helmholtz).solve();
@@ -75,16 +90,30 @@ int main(int, char**)
   GridFunction miaow(rh);
   miaow = [&](const Point& p)
   {
+    auto x = p.x();
+    auto y = p.y();
     return
-      (Complex(p.x(), 1) * cos(waveNumber * p.x()) * cos(waveNumber * p.y())).real();
+      (Complex(x, 1)
+         * cos(waveNumber * x)
+         * cos(waveNumber * y)
+         - Complex(2.0 / waveNumber, 0.0)
+         * sin(waveNumber * x)
+         * cos(waveNumber * y)).real();
   };
 
   miaow.save("exRe.gf");
 
   miaow = [&](const Point& p)
   {
+    auto x = p.x();
+    auto y = p.y();
     return
-      (Complex(p.x(), 1) * cos(waveNumber * p.x()) * cos(waveNumber * p.y())).imag();
+      (Complex(x, 1)
+         * cos(waveNumber * x)
+         * cos(waveNumber * y)
+         - Complex(2.0 / waveNumber, 0.0)
+         * sin(waveNumber * x)
+         * cos(waveNumber * y)).imag();
   };
 
   miaow.save("exIm.gf");
