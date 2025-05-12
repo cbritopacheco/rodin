@@ -256,12 +256,14 @@ if (RODIN_FEATURE_SUMMARY)
   feature_summary(INCLUDE_QUIET_PACKAGES WHAT ALL)
 endif()
 
-install(
-  EXPORT     RodinTargets
-  NAMESPACE  Rodin::
-  FILE       RodinTargets.cmake
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
-)
+if (RODIN_BUILD_SRC)
+  install(
+    EXPORT     RodinTargets
+    NAMESPACE  Rodin::
+    FILE       RodinTargets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
+  )
+endif()
 
 write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}/RodinConfigVersion.cmake"

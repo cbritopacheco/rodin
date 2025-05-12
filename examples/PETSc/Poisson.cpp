@@ -43,15 +43,6 @@ int main(int argc, char** argv)
   Vec b;
   VecCreate(PETSC_COMM_SELF, &b);
 
-  // BilinearForm bf(u, v, x);
-  // bf = Integral(Grad(u), Grad(v));
-  // bf.assemble();
-  // bf.getOperator();
-
-  // LinearForm lf(v, b);
-  // lf = Integral(f, v);
-  // lf.assemble();
-
   LinearSystem axb(a, x, b);
 
   // Define problem
@@ -59,28 +50,8 @@ int main(int argc, char** argv)
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, Zero());
-  poisson.assemble();
 
-  Problem poisson2(u, v);
-  poisson2 = Integral(Grad(u), Grad(v))
-           - Integral(f, v)
-           + DirichletBC(u, Zero());
-  poisson2.assemble();
-  auto& b2 = poisson2.getLinearSystem().getVector();
-
-  Vector<PetscScalar> tmp;
-  Math::duplicate(b, tmp);
-  Math::copy(b, tmp);
-
-  Eigen::SparseMatrix<PetscScalar> tmp2;
-  Math::duplicate(a, tmp2);
-  Math::copy(a, tmp2);
-
-  std::cout << (b2 - tmp).norm() << std::endl;
-
-
-  // // Solve
-  // CG(poisson).solve();
+  CG(poisson).create().solve();
 
   // // Save solution
   // u.getSolution().save("Poisson.gf");

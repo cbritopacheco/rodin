@@ -10,6 +10,8 @@
 #include "PETSc/Assembly/Sequential.h"
 #include "PETSc/Assembly/Multithreaded.h"
 
+#include "PETSc/Solver/CG.h"
+
 #include "PETSc/FormLanguage/Traits.h"
 
 #endif
