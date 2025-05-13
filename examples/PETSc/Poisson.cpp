@@ -50,8 +50,11 @@ int main(int argc, char** argv)
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, Zero());
+  poisson.assemble();
 
-  CG(poisson).create().solve();
+  VecView(b, PETSC_VIEWER_STDOUT_WORLD);
+
+  CG(poisson).solve();
 
   // // Save solution
   // u.getSolution().save("Poisson.gf");

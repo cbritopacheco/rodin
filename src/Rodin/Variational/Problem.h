@@ -13,16 +13,15 @@
 #include <boost/mp11.hpp>
 
 #include "Rodin/Pair.h"
+#include "Rodin/Tuple.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry.h"
 #include "Rodin/Solver/Solver.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Math/System.h"
+#include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Math/SparseMatrix.h"
-#include "Rodin/Math/BlockSparseMatrix.h"
 #include "Rodin/FormLanguage/Base.h"
-#include "Rodin/Tuple.h"
 #include "Rodin/Utility/Extract.h"
 #include "Rodin/Utility/Product.h"
 #include "Rodin/Utility/Wrap.h"

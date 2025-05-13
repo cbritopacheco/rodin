@@ -8,7 +8,7 @@
 #define RODIN_PETSC_MATH_SYSTEM_H
 
 #include <petsc.h>
-#include "Rodin/Math/System.h"
+#include "Rodin/Math/LinearSystem.h"
 
 namespace Rodin::Math
 {

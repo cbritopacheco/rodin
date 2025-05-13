@@ -1,95 +1,85 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2025.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_SOLVER_PETSC_KSP_H
 #define RODIN_SOLVER_PETSC_KSP_H
 
 #include <petscksp.h>
-
-#include "Rodin/Solver/CG.h"
+#include "Rodin/Solver/Solver.h"
+#include "Rodin/PETSc/Object.h"
+#include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::Solver
 {
-  class KSP : public SolverBase<::Mat, ::Vec, PetscScalar>
+  /**
+   * @brief PETSc KSP (Krylov) linear solver wrapper.
+   *
+   * Inherits SolverBase<Mat,Vec,PetscScalar> for the generic interface,
+   * and PETSc::Object for automatic cleanup of any forgotten handles.
+   *
+   * Combines programmatic configuration with command‐line overrides.
+   */
+  class KSP : public SolverBase< ::Mat, ::Vec, PetscScalar>, public PETSc::Object
   {
-    public:
-      using ScalarType = PetscScalar;
-      using VectorType = ::Vec;
-      using OperatorType = ::Mat;
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
-      using Parent::solve;
+  public:
+    using OperatorType = ::Mat;
+    using VectorType   = ::Vec;
+    using ScalarType   = PetscScalar;
+    using Parent       = SolverBase<OperatorType, VectorType, ScalarType>;
+    using ProblemType  = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+    using Parent::solve;
 
-      KSP(ProblemType& pb)
-        : Parent(pb)
-      {}
+    /**
+     * @brief Construct and create the PETSc KSP object.
+     *
+     * Initializes to PETSC defaults.
+     *
+     * @param pb   Variational problem this solver will solve.
+     * @param comm MPI communicator (default PETSC_COMM_WORLD).
+     */
+    explicit KSP(ProblemType& pb);
 
-      KSP(const KSP& other)
-        : Parent(other)
-      {}
+    ~KSP() override;
 
-      KSP(KSP&& other)
-        : Parent(std::move(other))
-      {}
+    ::PetscObject& getHandle() noexcept override;
 
-      ~KSP() = default;
+    /**
+     * @brief Solve @f$ Ax = b @f$, allocating @f$ x @f$ if null.
+     *
+     * If `x == PETSC_NULL`, automatically `VecDuplicate(b, &x)` and zero it.
+     * Otherwise uses `x` contents as initial guess.
+     *
+     * Applies programmatic settings, then SetFromOptions, then KSPSolve.
+     *
+     * @param A Left‐hand side matrix.
+     * @param x Solution vector (initial guess in; may be PETSC_NULL).
+     * @param b Right‐hand side vector.
+     */
+    void solve(OperatorType& A, VectorType& x, VectorType& b) override;
 
-      virtual void solve(OperatorType& A, VectorType& x, VectorType& b) override
-      {
-        KSPSetType(m_ksp, m_type);
-        KSPSetTolerances(m_ksp, m_rtol, m_abstol, m_dtol, m_maxIt);
-        if (m_preconditioner)
-          KSPSetOperators(m_ksp, A, m_preconditioner.value().get());
-        else
-          KSPSetOperators(m_ksp, A, A);
-        KSPSolve(m_ksp, b, x);
-      }
+    KSP& setType(::KSPType type) noexcept;
 
-      KSP& create()
-      {
-        KSPCreate(PETSC_COMM_WORLD, &m_ksp);
-        return *this;
-      }
+    KSP& setTolerances(PetscReal rtol,
+                       PetscReal abstol,
+                       PetscReal dtol,
+                       PetscInt  maxIt) noexcept;
 
-      KSP& setType(::KSPType type)
-      {
-        m_type = type;
-        return *this;
-      }
+    KSP& setOperators(OperatorType A, OperatorType P = nullptr) noexcept;
 
-      KSP& setTolerances(PetscReal rtol, PetscReal abstol, PetscReal dtol, PetscInt maxIt)
-      {
-        m_rtol = rtol;
-        m_abstol = abstol;
-        m_dtol = dtol;
-        m_maxIt = maxIt;
-        return *this;
-      }
-
-      KSP& setPreconditioner(::Mat& preconditioner)
-      {
-        m_preconditioner = preconditioner;
-        return *this;
-      }
-
-      KSP& destroy()
-      {
-        KSPDestroy(&m_ksp);
-        return *this;
-      }
-
-      virtual KSP* copy() const noexcept override
-      {
-        return new KSP(*this);
-      }
-
-    private:
-      ::KSP m_ksp;
-      ::KSPType m_type;
-      PetscReal m_rtol;
-      PetscReal m_abstol;
-      PetscReal m_dtol;
-      PetscInt m_maxIt;
-      std::optional<std::reference_wrapper<::Mat>> m_preconditioner;
+  private:
+    ::KSP       m_ksp{nullptr};
+    ::KSPType   m_type{KSPGMRES};
+    PetscReal   m_rtol   {PETSC_DEFAULT},
+                m_abstol {PETSC_DEFAULT},
+                m_dtol   {PETSC_DEFAULT};
+    PetscInt    m_maxIt  {PETSC_DEFAULT};
+    OperatorType m_A     {nullptr},
+                 m_P     {nullptr};
   };
-}
 
-#endif
+} // namespace Rodin::Solver
 
+#endif // RODIN_SOLVER_PETSC_KSP_H

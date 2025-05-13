@@ -1,9 +1,4 @@
-/*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
- * Distributed under the Boost Software License, Version 1.0.
- *       (See accompanying file LICENSE or copy at
- *          https://www.boost.org/LICENSE_1_0.txt)
- */
+// CG.h
 #ifndef RODIN_SOLVER_PETSC_CG_H
 #define RODIN_SOLVER_PETSC_CG_H
 
@@ -11,50 +6,61 @@
 
 #include "Rodin/Solver/CG.h"
 #include "KSP.h"
+#include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::Solver
 {
   /**
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * ::Mat and Math::Vector.
+   * ::Mat and ::Vec.
    */
   template <>
   class CG<::Mat, ::Vec> final : public KSP
   {
-    public:
-      using ScalarType = PetscScalar;
-      using VectorType = ::Vec;
-      using OperatorType = ::Mat;
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
-      using Parent = KSP;
-      using Parent::solve;
+  public:
+    using OperatorType = ::Mat;
+    using VectorType   = ::Vec;
+    using ScalarType   = PetscScalar;
+    using ProblemType  = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+    using Parent       = KSP;
+    using Parent::solve;
 
-      /**
-       * @brief Constructs the CG object with default parameters.
-       */
-      CG(ProblemType& pb)
-        : Parent(pb)
-      {
-        this->setType(KSPCG);
-      }
+    /**
+     * @brief Construct a CG solver and set the PETSc type to KSPCG.
+     * @param pb The variational problem to solve.
+     */
+    explicit CG(ProblemType& pb);
 
-      CG(const CG& other)
-        : Parent(other)
-      {}
+    /**
+     * @brief Copy constructor.
+     * @param other Another CG instance.
+     */
+    CG(const CG& other);
 
-      CG(CG&& other)
-        : Parent(std::move(other))
-      {}
+    /**
+     * @brief Move constructor.
+     * @param other Moved-from CG instance.
+     */
+    CG(CG&& other);
 
-      ~CG() = default;
+    /**
+     * @brief Destructor.
+     */
+    ~CG() override;
+
+    CG* copy() const noexcept override
+    {
+      return new CG(*this);
+    }
   };
 
   /**
    * @ingroup RodinCTAD
-   * @brief CTAD for CG
+   * @brief Class template argument deduction for CG from ProblemBase.
    */
   CG(Variational::ProblemBase<::Mat, ::Vec, PetscScalar>&) -> CG<::Mat, ::Vec>;
-}
 
-#endif
+} // namespace Rodin::Solver
+
+#endif // RODIN_SOLVER_PETSC_CG_H
