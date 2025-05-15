@@ -46,22 +46,21 @@ namespace Rodin::Solver
   {
     PetscErrorCode ierr;
 
-    throw "Unimplemented KSP::solve(OperatorType&, VectorType&, VectorType&)";
-    // allocate x if needed, zero it
-    if (true)
-    {
-      VecSetFromOptions(x);
-      ierr = VecDuplicate(b, &x);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = VecZeroEntries(x);
-      assert(ierr == PETSC_SUCCESS);
-    }
-    else
+    if (x)
     {
       // use nonzero initial guess
       ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
       assert(ierr == PETSC_SUCCESS);
     }
+    else
+    {
+      ierr = VecDuplicate(b, &x);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecZeroEntries(x);
+      assert(ierr == PETSC_SUCCESS);
+    }
+
+    assert(x);
 
     // configure solver
     ierr = KSPSetType(m_ksp, m_type);
