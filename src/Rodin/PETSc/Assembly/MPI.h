@@ -47,11 +47,11 @@ namespace Rodin::Assembly
         const PetscInt globalSize = boost::mpi::all_reduce(comm, localSize, std::plus<PetscInt>());
 
         ierr = VecSetSizes(res, localSize, globalSize);
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
         ierr = VecSetFromOptions(res);
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
         ierr = VecSet(res, PetscScalar(0));
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         // Local contributions skipping ghosts
         for (auto& lfi : input.getLFIs())
@@ -72,16 +72,16 @@ namespace Rodin::Assembly
               {
                 const PetscScalar v = PetscScalar(lfi.integrate(i));
                 ierr = VecSetValue(res, PetscInt(dofs[i]), v, ADD_VALUES);
-                PetscCallAbort(comm, ierr);
+                assert(ierr == PETSC_SUCCESS);
               }
             }
           }
         }
 
         ierr = VecAssemblyBegin(res);
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
         ierr = VecAssemblyEnd(res);
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
       }
 
       MPI* copy() const noexcept override
@@ -129,26 +129,24 @@ namespace Rodin::Assembly
         const PetscInt globalCols = boost::mpi::all_reduce(comm, localCols, std::plus<PetscInt>());
 
         // Create/init Mat
-        ierr = MatCreate(comm, &A);
-        PetscCallAbort(comm, ierr);
         ierr = MatSetSizes(A, localRows, localCols, globalRows, globalCols);
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
         ierr = MatSetFromOptions(A);
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
         ierr = MatMPIAIJSetPreallocation(A,
                                          /*d_nz*/PETSC_DECIDE, nullptr,
                                          /*o_nz*/PETSC_DECIDE, nullptr);
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
         ierr = MatSetUp(A);
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
         ierr = MatZeroEntries(A);
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         // Local element contributions skipping ghosts
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::SequentialIteration seq(mesh, bfi.getRegion());
+          Internal::MPIIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             auto d = it->getDimension();
@@ -166,7 +164,7 @@ namespace Rodin::Assembly
                 {
                   PetscScalar v = PetscScalar(bfi.integrate(j, i));
                   ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
-                  PetscCallAbort(comm, ierr);
+                  assert(ierr == PETSC_SUCCESS);
                 }
             }
           }
@@ -177,7 +175,7 @@ namespace Rodin::Assembly
         {
           const auto& testAttrs  = bfi.getTestAttributes();
           const auto& trialAttrs = bfi.getTrialAttributes();
-          Internal::SequentialIteration testSeq (mesh, bfi.getTestRegion());
+          Internal::MPIIteration testSeq(mesh, bfi.getTestRegion());
           Internal::SequentialIteration trialSeq(mesh, bfi.getTrialRegion());
           for (auto teIt = testSeq.getIterator(); teIt; ++teIt)
           {
@@ -217,7 +215,7 @@ namespace Rodin::Assembly
                     {
                       const PetscScalar v = PetscScalar(bfi.integrate(j, i));
                       ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
-                      PetscCallAbort(comm, ierr);
+                      assert(ierr == PETSC_SUCCESS);
                     }
                 }
               }
@@ -226,9 +224,9 @@ namespace Rodin::Assembly
         }
 
         ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-        PetscCallAbort(comm, ierr);
-        ierr = MatAssemblyEnd  (A, MAT_FINAL_ASSEMBLY);
-        PetscCallAbort(comm, ierr);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatAssemblyEnd (A, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
       }
 
       MPI* copy() const noexcept override

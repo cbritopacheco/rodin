@@ -27,7 +27,7 @@ int main(int argc, char** argv)
   mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 32, 32 });
   mesh.getConnectivity().compute(1, 2);
 
-  ScalarFunction f = Cos(F::x);
+  ScalarFunction f = 1;
 
   P1 vh(mesh);
 
@@ -37,8 +37,7 @@ int main(int argc, char** argv)
   Mat a;
   MatCreate(PETSC_COMM_SELF, &a);
 
-  Vec x;
-  VecCreate(PETSC_COMM_SELF, &x);
+  Vec x = PETSC_NULLPTR;
 
   Vec b;
   VecCreate(PETSC_COMM_SELF, &b);
@@ -52,13 +51,11 @@ int main(int argc, char** argv)
           + DirichletBC(u, Zero());
   poisson.assemble();
 
-  VecView(b, PETSC_VIEWER_STDOUT_WORLD);
-
   CG(poisson).solve();
 
-  // // Save solution
-  // u.getSolution().save("Poisson.gf");
-  // mesh.save("Poisson.mesh");
+  // Save solution
+  u.getSolution().save("Poisson.gf");
+  mesh.save("Poisson.mesh");
 
   MatDestroy(&a);
   VecDestroy(&x);

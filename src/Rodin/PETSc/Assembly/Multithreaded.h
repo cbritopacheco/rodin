@@ -81,13 +81,13 @@ namespace Rodin::Assembly
         const PetscInt n = PetscInt(input.getFES().getSize());
 
         ierr = VecSetSizes(res, n, PETSC_DECIDE);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = VecSetFromOptions(res);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = VecSet(res, PetscScalar(0));
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         const auto& mesh = input.getFES().getMesh();
 
@@ -121,7 +121,7 @@ namespace Rodin::Assembly
               if (local[idx] != PetscScalar(0))
               {
                 ierr = VecSetValue(res, idx, local[idx], ADD_VALUES);
-                PetscCallAbort(PETSC_COMM_SELF, ierr);
+                assert(ierr == PETSC_SUCCESS);
               }
             }
             m_mutex.unlock();
@@ -135,10 +135,10 @@ namespace Rodin::Assembly
 
         // Finalize assembly
         ierr = VecAssemblyBegin(res);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = VecAssemblyEnd(res);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
       }
 
       Multithreaded* copy() const noexcept override
@@ -221,16 +221,16 @@ namespace Rodin::Assembly
         const PetscInt n = PetscInt(input.getTrialFES().getSize());
 
         ierr = MatSetSizes(A, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = MatSetFromOptions(A);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = MatSetUp(A);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = MatZeroEntries(A);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         const auto& mesh = input.getTestFES().getMesh();
 
@@ -269,7 +269,7 @@ namespace Rodin::Assembly
             for (auto& [i,j,v] : local)
             {
               ierr = MatSetValue(A, i, j, v, ADD_VALUES);
-              PetscCallAbort(PETSC_COMM_SELF, ierr);
+              assert(ierr == PETSC_SUCCESS);
             }
             m_mutex.unlock();
           };
@@ -323,7 +323,7 @@ namespace Rodin::Assembly
             for (auto& [i,j,v] : local)
             {
               ierr = MatSetValue(A, i, j, v, ADD_VALUES);
-              PetscCallAbort(PETSC_COMM_SELF, ierr);
+              assert(ierr == PETSC_SUCCESS);
             }
             m_mutex.unlock();
           };
@@ -335,10 +335,10 @@ namespace Rodin::Assembly
 
         // Finalize assembly
         ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
       }
 
       Threads::ThreadPool& getThreadPool()

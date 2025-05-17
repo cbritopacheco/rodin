@@ -33,13 +33,13 @@ namespace Rodin::Assembly
         const PetscInt n = PetscInt(input.getFES().getSize());
 
         ierr = VecSetSizes(res, n, PETSC_DECIDE);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = VecSetFromOptions(res);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = VecZeroEntries(res);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         const auto& mesh = input.getFES().getMesh();
         for (auto& lfi : input.getLFIs())
@@ -56,17 +56,17 @@ namespace Rodin::Assembly
               {
                 const PetscScalar v = PetscScalar(lfi.integrate(l));
                 ierr = VecSetValue(res, PetscInt(dofs[l]), v, ADD_VALUES);
-                PetscCallAbort(PETSC_COMM_SELF, ierr);
+                assert(ierr == PETSC_SUCCESS);
               }
             }
           }
         }
 
         ierr = VecAssemblyBegin(res);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = VecAssemblyEnd(res);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
       }
 
       Sequential* copy() const noexcept override
@@ -104,16 +104,16 @@ namespace Rodin::Assembly
         const PetscInt n = PetscInt(input.getTrialFES().getSize());
 
         ierr = MatSetSizes(A, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = MatSetFromOptions(A);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = MatSetUp(A);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = MatZeroEntries(A);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         const auto& mesh = input.getTrialFES().getMesh();
         // Local contributions
@@ -133,7 +133,7 @@ namespace Rodin::Assembly
                 {
                   const PetscScalar v = PetscScalar(bfi.integrate(j, i));
                   ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
-                  PetscCallAbort(PETSC_COMM_SELF, ierr);
+                  assert(ierr == PETSC_SUCCESS);
                 }
             }
           }
@@ -161,7 +161,7 @@ namespace Rodin::Assembly
                     {
                       const PetscScalar v = PetscScalar(bfi.integrate(j, i));
                       ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
-                      PetscCallAbort(PETSC_COMM_SELF, ierr);
+                      assert(ierr == PETSC_SUCCESS);
                     }
                 }
               }
@@ -170,10 +170,10 @@ namespace Rodin::Assembly
         }
 
         ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
 
         ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-        PetscCallAbort(PETSC_COMM_SELF, ierr);
+        assert(ierr == PETSC_SUCCESS);
       }
 
       Sequential* copy() const noexcept override
