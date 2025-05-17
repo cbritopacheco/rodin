@@ -14,11 +14,6 @@ target_link_libraries(Displace
   Rodin::Geometry
   Rodin::Variational)
 
-add_executable(SubMeshExtraction SubMeshExtraction.cpp)
-target_link_libraries(SubMeshExtraction
-  PUBLIC
-  Rodin::Geometry)
-
 add_executable(Skin Skin.cpp)
 target_link_libraries(Skin
   PUBLIC
@@ -51,5 +46,15 @@ target_link_libraries(UniformGrid
 
 add_executable(UniformRefinement UniformRefinement.cpp)
 target_link_libraries(UniformRefinement
+  PUBLIC
+  Rodin::Geometry)
+
+add_executable(GreedyPartitioner GreedyPartitioner.cpp)
+target_link_libraries(GreedyPartitioner
+  PUBLIC
+  Rodin::Geometry)
+
+add_executable(BalancedCompactPartitioner BalancedCompactPartitioner.cpp)
+target_link_libraries(BalancedCompactPartitioner
   PUBLIC
   Rodin::Geometry)

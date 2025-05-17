@@ -14,6 +14,7 @@
 
 #include "Rodin/IO/MFEM.h"
 #include "Rodin/IO/MEDIT.h"
+#include "Rodin/IO/EnSight6.h"
 
 #include "Mesh.h"
 #include "SubMesh.h"
@@ -131,6 +132,12 @@ namespace Rodin::Geometry
       case IO::FileFormat::MEDIT:
       {
         IO::MeshPrinter<IO::FileFormat::MEDIT, Context> printer(*this);
+        printer.print(ofs);
+        break;
+      }
+      case IO::FileFormat::ENSIGHT6:
+      {
+        IO::MeshPrinter<IO::FileFormat::ENSIGHT6, Context> printer(*this);
         printer.print(ofs);
         break;
       }
@@ -377,7 +384,7 @@ namespace Rodin::Geometry
     }
   }
 
-  Real MeshBase::getVolume() const
+  Real Mesh<Context::Local>::getVolume() const
   {
     Real totalVolume = 0;
     for (auto it = getPolytope(3); !it.end(); ++it)
@@ -385,7 +392,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Real MeshBase::getVolume(Attribute attr) const
+  Real Mesh<Context::Local>::getVolume(Attribute attr) const
   {
     Real totalVolume = 0;
     for (auto it = getPolytope(3); !it.end(); ++it)
@@ -396,7 +403,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Real MeshBase::getVolume(const FlatSet<Attribute>& attrs) const
+  Real Mesh<Context::Local>::getVolume(const FlatSet<Attribute>& attrs) const
   {
     Real totalVolume = 0;
     for (auto it = getPolytope(3); !it.end(); ++it)
@@ -407,7 +414,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Real MeshBase::getPerimeter() const
+  Real Mesh<Context::Local>::getPerimeter() const
   {
     Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
@@ -415,7 +422,7 @@ namespace Rodin::Geometry
     return totalPerimeter;
   }
 
-  Real MeshBase::getPerimeter(Attribute attr) const
+  Real Mesh<Context::Local>::getPerimeter(Attribute attr) const
   {
     Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
@@ -426,7 +433,7 @@ namespace Rodin::Geometry
     return totalPerimeter;
   }
 
-  Real MeshBase::getPerimeter(const FlatSet<Attribute>& attrs) const
+  Real Mesh<Context::Local>::getPerimeter(const FlatSet<Attribute>& attrs) const
   {
     Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
@@ -437,7 +444,7 @@ namespace Rodin::Geometry
     return totalPerimeter;
   }
 
-  Real MeshBase::getArea() const
+  Real Mesh<Context::Local>::getArea() const
   {
     Real totalArea = 0;
     for (auto it = getPolytope(2); !it.end(); ++it)
@@ -445,7 +452,7 @@ namespace Rodin::Geometry
     return totalArea;
   }
 
-  Real MeshBase::getArea(Attribute attr) const
+  Real Mesh<Context::Local>::getArea(Attribute attr) const
   {
     Real totalArea = 0;
     for (auto it = getPolytope(2); !it.end(); ++it)
@@ -456,7 +463,7 @@ namespace Rodin::Geometry
     return totalArea;
   }
 
-  Real MeshBase::getArea(const FlatSet<Attribute>& attrs) const
+  Real Mesh<Context::Local>::getArea(const FlatSet<Attribute>& attrs) const
   {
     Real totalArea = 0;
     for (auto it = getPolytope(2); !it.end(); ++it)
@@ -467,7 +474,7 @@ namespace Rodin::Geometry
     return totalArea;
   }
 
-  Real MeshBase::getMeasure(size_t d) const
+  Real Mesh<Context::Local>::getMeasure(size_t d) const
   {
     Real totalVolume = 0;
     for (auto it = getPolytope(d); !it.end(); ++it)
@@ -475,7 +482,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Real MeshBase::getMeasure(size_t d, Attribute attr) const
+  Real Mesh<Context::Local>::getMeasure(size_t d, Attribute attr) const
   {
     Real totalVolume = 0;
     for (auto it = getPolytope(d); !it.end(); ++it)
@@ -486,7 +493,7 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  Real MeshBase::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
+  Real Mesh<Context::Local>::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
   {
     Real totalMeasure = 0;
     for (auto it = getPolytope(d); !it.end(); ++it)
@@ -497,7 +504,7 @@ namespace Rodin::Geometry
     return totalMeasure;
   }
 
-  CCL MeshBase::ccl(
+  CCL Mesh<Context::Local>::ccl(
       std::function<bool(const Polytope&, const Polytope&)> p,
       size_t d,
       const FlatSet<Attribute>& attrs) const
@@ -585,6 +592,26 @@ namespace Rodin::Geometry
         << "Mesh has an empty interface." << Alert::Raise;
     }
     return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+  }
+
+  CellIterator Mesh<Context::Local>::getCell() const
+  {
+    return getCell(0);
+  }
+
+  FaceIterator Mesh<Context::Local>::getFace() const
+  {
+    return getFace(0);
+  }
+
+  VertexIterator Mesh<Context::Local>::getVertex() const
+  {
+    return getVertex(0);
+  }
+
+  PolytopeIterator Mesh<Context::Local>::getPolytope(size_t dimension) const
+  {
+    return getPolytope(dimension, 0);
   }
 
   CellIterator Mesh<Context::Local>::getCell(Index idx) const
@@ -830,6 +857,48 @@ namespace Rodin::Geometry
         }
         return build.finalize();
       }
+      case Polytope::Type::Wedge:
+      {
+        assert(dimensions.size() == 3);
+        const size_t w = dimensions.coeff(0);
+        const size_t h = dimensions.coeff(1);
+        const size_t d = dimensions.coeff(2);
+        assert(w >= 2 && h >= 2 && d >= 2);
+        build.initialize(dim).nodes(w * h * d);
+        for (size_t k = 0; k < d; k++)
+        {
+          for (size_t j = 0; j < h; j++)
+          {
+            for (size_t i = 0; i < w; i++)
+            {
+              build.vertex({ static_cast<Real>(i),
+                             static_cast<Real>(j),
+                             static_cast<Real>(k) });
+            }
+          }
+        }
+        build.reserve(dim, 2 * (w - 1) * (h - 1) * (d - 1));
+        for (size_t k = 0; k < d - 1; k++)
+        {
+          for (size_t j = 0; j < h - 1; j++)
+          {
+            for (size_t i = 0; i < w - 1; i++)
+            {
+              const Index v0 = i + j * w + k * (w * h);
+              const Index v1 = (i + 1) + j * w + k * (w * h);
+              const Index v2 = i + (j + 1) * w + k * (w * h);
+              const Index v3 = (i + 1) + (j + 1) * w + k * (w * h);
+              const Index v0p = v0 + w * h;
+              const Index v1p = v1 + w * h;
+              const Index v2p = v2 + w * h;
+              const Index v3p = v3 + w * h;
+              build.polytope(g, { v0, v1, v2, v0p, v1p, v2p });
+              build.polytope(g, { v1, v3, v2, v1p, v3p, v2p });
+            }
+          }
+        }
+        return build.finalize();
+      }
       default:
       {
         assert(false);
@@ -838,7 +907,7 @@ namespace Rodin::Geometry
     };
   }
 
-  std::optional<Point> Mesh<Context::Local>::inclusion(const Point& p) const
+  std::optional<Point> MeshBase::inclusion(const Point& p) const
   {
     const auto& polytope = p.getPolytope();
     if (!polytope.getMesh().isSubMesh())
@@ -849,7 +918,7 @@ namespace Rodin::Geometry
     const auto& ancestors = submesh.getAncestors();
     const size_t d = polytope.getDimension();
     Index i = polytope.getIndex();
-    i = submesh.getPolytopeMap(d).left.at(i);
+    i = submesh.getPolytopeMap(d).left.at(i).get_right();
     auto it = ancestors.begin();
     while (it != ancestors.end())
     {
@@ -866,7 +935,7 @@ namespace Rodin::Geometry
       else if (it->get().isSubMesh())
       {
         const auto& parentMesh = it->get().asSubMesh();
-        i = parentMesh.getPolytopeMap(d).left.at(i);
+        i = parentMesh.getPolytopeMap(d).left.at(i).get_right();
       }
       else
       {
@@ -880,6 +949,5 @@ namespace Rodin::Geometry
     // The SubMesh where the Point belongs to is not a descendant of this Mesh.
     return {};
   }
-
 }
 

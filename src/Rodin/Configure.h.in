@@ -17,6 +17,16 @@
  * @brief Preprocessor directives defined by Rodin.
  */
 
+#define RODIN_VERSION "@RODIN_VERSION@"
+
+#define RODIN_VERSION_MAJOR @RODIN_VERSION_MAJOR@
+
+#define RODIN_VERSION_MINOR @RODIN_VERSION_MINOR@
+
+#define RODIN_VERSION_PATCH @RODIN_VERSION_PATCH@
+
+#define RODIN_VERSION_CODE @RODIN_VERSION_CODE@
+
 /**
  * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with Python support.
@@ -151,11 +161,61 @@
  */
 #cmakedefine RODIN_THIRD_PARTY_DIR "@RODIN_THIRD_PARTY_DIR@"
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with thread safety enabled.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifdef RODIN_THREAD_SAFE
+ *   // Code that requires thread safety features.
+ * #endif
+ * @endcode
+ */
 #cmakedefine RODIN_THREAD_SAFE
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin supports multithreading.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifdef RODIN_MULTITHREADED
+ *   // Code that leverages multithreading capabilities.
+ * #endif
+ * @endcode
+ */
 #cmakedefine RODIN_MULTITHREADED
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with Apple Accelerate support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifdef RODIN_USE_APPLE_ACCELERATE
+ *   // Code that uses the Apple Accelerate framework for optimized computations.
+ * #endif
+ * @endcode
+ */
 #cmakedefine RODIN_USE_APPLE_ACCELERATE
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with Scotch support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifdef RODIN_USE_SCOTCH
+ *   // Code that uses the Scotch library for partioning.
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_SCOTCH
 
 /**
  * @ingroup RodinDirectives

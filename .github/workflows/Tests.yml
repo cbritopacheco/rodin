@@ -28,11 +28,11 @@ jobs:
       CTEST_PARALLEL_LEVEL: 2
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Setup Cpp (C++ / C)
-        uses: aminya/setup-cpp@v0.37.0
+        uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
           cmake: true

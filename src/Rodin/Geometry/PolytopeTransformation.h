@@ -7,6 +7,11 @@
 #ifndef RODIN_GEOMETRY_TRANSFORMATION_H
 #define RODIN_GEOMETRY_TRANSFORMATION_H
 
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/assume_abstract.hpp>
+
+#include "Rodin/Copyable.h"
 #include "Rodin/Math.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
@@ -36,8 +41,10 @@ namespace Rodin::Geometry
    *
    * @see @ref Geometry::Point "Point"
    */
-  class PolytopeTransformation
+  class PolytopeTransformation : public Copyable
   {
+    friend class boost::serialization::access;
+
     public:
       constexpr
       PolytopeTransformation(size_t rdim, size_t pdim)
@@ -52,14 +59,12 @@ namespace Rodin::Geometry
 
       virtual ~PolytopeTransformation() = default;
 
-      inline
       constexpr
       size_t getReferenceDimension() const
       {
         return m_rdim;
       }
 
-      inline
       constexpr
       size_t getPhysicalDimension() const
       {
@@ -138,10 +143,21 @@ namespace Rodin::Geometry
 
       virtual void inverse(const Math::SpatialVector<Real>& pc, Math::SpatialVector<Real>& rc) const;
 
+      template<class Archive>
+      void serialize(Archive & ar, const unsigned int)
+      {
+        ar & m_rdim;
+        ar & m_pdim;
+      }
+
+      virtual PolytopeTransformation* copy() const noexcept override = 0;
+
     private:
       const size_t m_rdim;
       const size_t m_pdim;
   };
 }
+
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(Rodin::Geometry::PolytopeTransformation)
 
 #endif

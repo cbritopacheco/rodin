@@ -22,6 +22,8 @@
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Utility/Overloaded.h"
 
+#include "Rodin/Variational/RangeType.h"
+
 #include "ForwardDecls.h"
 
 #include "RangeType.h"

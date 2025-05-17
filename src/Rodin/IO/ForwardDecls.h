@@ -27,7 +27,8 @@ namespace Rodin::IO
   {
     MFEM, ///< MFEM file format
     GMSH, ///< GMSH file format
-    MEDIT ///< MEDIT file format
+    MEDIT, ///< MEDIT file format
+    ENSIGHT6 ///< EnSight6 file format
   };
 
   template <FileFormat fmt, class Trait>
@@ -54,6 +55,8 @@ namespace Rodin::IO
         return "GMSH";
       case FileFormat::MEDIT:
         return "MEDIT";
+      case FileFormat::ENSIGHT6:
+        return "ENSIGHT6";
     }
     return nullptr;
   }

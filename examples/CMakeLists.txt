@@ -5,6 +5,7 @@ if (RODIN_BUILD_EXAMPLES)
   if (RODIN_WITH_PLOT)
     add_subdirectory(Plot)
   endif()
+
   add_subdirectory(Alert)
   add_subdirectory(Context)
   add_subdirectory(Geometry)
@@ -22,4 +23,19 @@ if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(SurfaceOptimization)
   add_subdirectory(BoundaryOptimization)
 
+  if (RODIN_USE_SCOTCH)
+    add_subdirectory(Scotch)
+  endif()
+
+  if (RODIN_USE_PETSC)
+    add_subdirectory(PETSc)
+  endif()
+
+  if (RODIN_USE_MFEM)
+    add_subdirectory(MFEM)
+  endif()
+
+  if (RODIN_USE_MPI)
+    add_subdirectory(MPI)
+  endif()
 endif()

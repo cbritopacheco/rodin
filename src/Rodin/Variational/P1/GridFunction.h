@@ -119,7 +119,7 @@ namespace Rodin::Variational
         {
           res = Complex(0, 0);
           for (Index local = 0; local < fe.getCount(); local++)
-            res += 0.5 * getValue({d, i}, local) * Complex(1, 1) * fe.getBasis(local)(r);
+            res += getValue({d, i}, local) * fe.getBasis(local)(r);
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
@@ -151,7 +151,7 @@ namespace Rodin::Variational
         else if constexpr (std::is_same_v<RangeType, Complex>)
         {
           assert(data.rows() == 1);
-          w = data.transpose() / Complex(1, 1);
+          w = data.transpose();
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
@@ -168,12 +168,12 @@ namespace Rodin::Variational
       }
 
       template <class Vector>
-      GridFunction& setWeights(Vector&& weights)
+      GridFunction& setWeights(const Vector& weights)
       {
-        assert(weights.size() >= 0);
-        assert(static_cast<size_t>(weights.size()) == this->getFiniteElementSpace().getSize());
         auto& data = this->getData();
-        const auto& w = this->getWeights().emplace(std::forward<Vector>(weights));
+        auto& w = this->getWeights().emplace();
+        Math::duplicate(weights, w);
+        Math::copy(weights, w);
         if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(data.rows() == 1);
@@ -182,7 +182,7 @@ namespace Rodin::Variational
         else if constexpr (std::is_same_v<RangeType, Complex>)
         {
           assert(data.rows() == 1);
-          data = w.adjoint() * Complex(1, -1);
+          data = w.adjoint();
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {

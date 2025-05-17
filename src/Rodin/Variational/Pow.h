@@ -120,7 +120,7 @@ namespace Rodin::Variational
   };
 
   /**
-   * @brief CTAD for Pow.
+   * @ingroup RodinCTAD
    */
   template <class BaseDerived, class Number>
   Pow(const FunctionBase<BaseDerived>&, Number) -> Pow<FunctionBase<BaseDerived>, Number>;

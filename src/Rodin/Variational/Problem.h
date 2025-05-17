@@ -13,14 +13,15 @@
 #include <boost/mp11.hpp>
 
 #include "Rodin/Pair.h"
+#include "Rodin/Tuple.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry.h"
 #include "Rodin/Solver/Solver.h"
+#include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Math/SparseMatrix.h"
-#include "Rodin/Math/BlockSparseMatrix.h"
 #include "Rodin/FormLanguage/Base.h"
-#include "Rodin/Tuple.h"
 #include "Rodin/Utility/Extract.h"
 #include "Rodin/Utility/Product.h"
 #include "Rodin/Utility/Wrap.h"
@@ -53,9 +54,15 @@ namespace Rodin::Variational
 
       using OperatorType = Operator;
 
-      using VectorScalarType = typename FormLanguage::Traits<Vector>::ScalarType;
+      using VectorScalarType =
+        typename FormLanguage::Traits<
+          std::remove_reference_t<Vector>>::ScalarType;
 
-      using OperatorScalarType = typename FormLanguage::Traits<Operator>::ScalarType;
+      using OperatorScalarType =
+        typename FormLanguage::Traits<
+          std::remove_reference_t<Operator>>::ScalarType;
+
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
       using ScalarType = Scalar;
 
@@ -65,73 +72,53 @@ namespace Rodin::Variational
 
       ProblemBase(const ProblemBase& other) = default;
 
-      virtual ProblemBase& operator=(const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) = 0;
+      virtual ProblemBase& operator=(
+          const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) = 0;
 
-      virtual void solve(Solver::SolverBase<OperatorType, VectorType, ScalarType>& solver) = 0;
+      virtual void solve(
+          Solver::SolverBase<OperatorType, VectorType, ScalarType>& solver) = 0;
 
       /**
        * @brief Assembles the underlying linear system to solve.
        */
       virtual ProblemBase& assemble() = 0;
 
-      /**
-       * @returns Reference to the stiffness operator.
-       *
-       * This must be called only after assemble() has been called.
-       */
-      virtual OperatorType& getStiffnessOperator() = 0;
+      virtual LinearSystemType& getLinearSystem() = 0;
 
-      /**
-       * @returns Constant reference to the stiffness operator.
-       *
-       * This must be called only after assemble() has been called.
-       */
-      virtual const OperatorType& getStiffnessOperator() const = 0;
-
-      /**
-       * @returns Reference to the mass vector.
-       *
-       * This must be called only after assemble() has been called.
-       */
-      virtual VectorType& getMassVector() = 0;
-
-      /**
-       * @returns Constant reference to the mass vector.
-       *
-       * This must be called only after assemble() has been called.
-       */
-      virtual const VectorType& getMassVector() const = 0;
+      virtual const LinearSystemType& getLinearSystem() const = 0;
 
       virtual ProblemBase* copy() const noexcept override = 0;
   };
 
+  template <class TrialFES, class TestFES, class Operator, class Vector>
+  class Problem<TrialFES, TestFES, Operator, Vector>;
+
   /**
    * @ingroup ProblemSpecializations
-   * @brief General class to assemble linear systems with `Math::SparseMatrix`
-   * and `Math::Vector` types in a sequential context.
+   * @brief General class to assemble linear systems with `Operator`
+   * and `Vector` generic types in a sequential context.
    */
-  template <class TrialFES, class TestFES>
-  class Problem<
-    TrialFES, TestFES,
-    Math::SparseMatrix<
-      typename FormLanguage::Mult<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TrialFES>::ScalarType>
-      ::Type>,
-    Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
-    : public ProblemBase<
-        Math::SparseMatrix<
-          typename FormLanguage::Mult<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TrialFES>::ScalarType>
-          ::Type>,
-        Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>,
-          typename FormLanguage::Mult<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TrialFES>::ScalarType>
-          ::Type>
+  template <class TrialFES, class TestFES, class Operator, class Vector>
+  class Problem<TrialFES, TestFES, Operator, Vector>
+    : public ProblemBase<Operator, Vector,
+        typename FormLanguage::Mult<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>
   {
     public:
+      using TrialFESType = TrialFES;
+
+      using TestFESType = TestFES;
+
+      using OperatorType = Operator;
+
+      using VectorType = Vector;
+
+      using ScalarType =
+        typename FormLanguage::Mult<
+          typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
+
       using TrialFESScalarType =
         typename FormLanguage::Traits<TrialFES>::ScalarType;
 
@@ -143,17 +130,18 @@ namespace Rodin::Variational
 
       using VectorScalarType = TestFESScalarType;
 
-      using ScalarType = OperatorScalarType;
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESScalarType>;
 
       using ContextType = Context::Local;
 
-      using OperatorType = Math::SparseMatrix<OperatorScalarType>;
-
-      using VectorType = Math::Vector<TestFESScalarType>;
-
-      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
       using Parent = ProblemBase<OperatorType, VectorType, ScalarType>;
+
+      constexpr
+      Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+        : Problem(u, v, LinearSystemType())
+      {}
 
       /**
        * @brief Constructs an empty problem involving the trial function @f$ u @f$
@@ -163,11 +151,9 @@ namespace Rodin::Variational
        * @param[in,out] v %Test function
        */
       constexpr
-      Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
-         :  m_trialFunction(u),
-            m_testFunction(v),
-            m_linearForm(v),
-            m_bilinearForm(u, v),
+      Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, const LinearSystemType& axb)
+         :  m_trialFunction(u), m_testFunction(v),
+            m_axb(axb),
             m_assembled(false)
       {}
 
@@ -205,188 +191,41 @@ namespace Rodin::Variational
         return m_testFunction.get();
       }
 
-      constexpr
-      const PeriodicBoundary<ScalarType>& getPeriodicBoundary() const
-      {
-        return m_pbcs;
-      }
-
-      constexpr
-      const EssentialBoundary<ScalarType>& getEssentialBoundary() const
-      {
-        return m_dbcs;
-      }
-
-      Problem& imposePeriodicBCs()
-      {
-        const auto& trial = getTrialFunction();
-        const auto& trialFES = trial.getFiniteElementSpace();
-
-        const auto& test = getTestFunction();
-        const auto& testFES = test.getFiniteElementSpace();
-
-        if (trialFES == testFES)
-        {
-          for (auto& pbc : m_pbcs)
-          {
-            pbc.assemble();
-            const auto& dofs = pbc.getDOFs();
-
-            std::deque<Index> q;
-            IndexSet dependents;
-            dependents.reserve(dofs.size());
-            for (const auto& [k, v] : dofs)
-              dependents.insert(v.first.begin(), v.first.end());
-
-            for (auto it = dofs.begin(); it != dofs.end(); ++it)
-            {
-              const Index k = it->first;
-              if (!dependents.contains(k))
-                q.push_front(k);
-            }
-
-            // Perform breadth-first traversal
-            while (q.size() > 0)
-            {
-              const Index parent = q.back();
-              assert(m_stiffness.rows() >= 0);
-              assert(m_stiffness.cols() >= 0);
-              assert(parent < static_cast<size_t>(m_stiffness.rows()));
-              assert(parent < static_cast<size_t>(m_stiffness.cols()));
-              q.pop_back();
-
-              auto find = dofs.find(parent);
-              if (find == dofs.end())
-                continue;
-
-              const auto& [children, coeffs] = find->second;
-              assert(children.size() > 0);
-
-              for (const auto& child : children)
-                q.push_front(child);
-
-              assert(children.size() == coeffs.size());
-              const size_t count = children.size();
-
-              // Eliminate the parent column, adding it to the child columns
-              for (size_t i = 0; i < count; i++)
-              {
-                const OperatorScalarType coeff = coeffs.coeff(i);
-                const Index child = children.coeff(i);
-                m_stiffness.col(child) += coeff * m_stiffness.col(parent);
-              }
-
-              // Assumes CCS format
-              for (typename OperatorType::InnerIterator it(m_stiffness, parent); it; ++it)
-                it.valueRef() = 0;
-
-              // Eliminate the parent row, adding it to the child rows
-              IndexMap<OperatorScalarType> parentLookup;
-              std::vector<IndexMap<OperatorScalarType>> childrenLookup(children.size());
-              for (size_t col = 0; col < static_cast<size_t>(m_stiffness.cols()); col++)
-              {
-                Boolean parentFound = false;
-                size_t childrenFound = 0;
-                for (typename OperatorType::InnerIterator it(m_stiffness, col); it; ++it)
-                {
-                  if (parentFound && childrenFound == count)
-                  {
-                    break;
-                  }
-                  else
-                  {
-                    const Index row = it.row();
-                    if (row == parent)
-                    {
-                      parentLookup[col] = it.value();
-                      it.valueRef() = 0;
-                      parentFound = true;
-                    }
-                    else
-                    {
-                      for (size_t i = 0; i < count; i++)
-                      {
-                        const Index child = children.coeff(i);
-                        if (row == child)
-                        {
-                          childrenLookup[i][col] = it.value();
-                          childrenFound += 1;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-
-              for (const auto& [col, value] : parentLookup)
-              {
-                for (size_t i = 0; i < count; i++)
-                {
-                  const OperatorScalarType coeff = coeffs.coeff(i);
-                  childrenLookup[i][col] += coeff * value;
-                }
-              }
-
-              for (size_t i = 0; i < count; i++)
-              {
-                const Index child = children.coeff(i);
-                for (const auto& [col, value] : childrenLookup[i])
-                  m_stiffness.coeffRef(child, col) = value;
-              }
-
-              // Eliminate the parent entry, adding it to the child entries
-              for (size_t i = 0; i < count; i++)
-              {
-                const OperatorScalarType coeff = coeffs.coeff(i);
-                const Index child = children.coeff(i);
-                m_mass.coeffRef(child) += coeff * m_mass.coeff(parent);
-              }
-              m_mass.coeffRef(parent) = 0;
-            }
-
-            for (const auto& [parent, node] : dofs)
-            {
-              m_stiffness.coeffRef(parent, parent) = 1.0;
-              const auto& [children, coeffs] = node;
-              assert(children.size() >= 0);
-              for (size_t i = 0; i < static_cast<size_t>(children.size()); i++)
-              {
-                const OperatorScalarType coeff = coeffs.coeff(i);
-                const Index child = children.coeff(i);
-                m_stiffness.coeffRef(parent, child) = -coeff;
-              }
-            }
-          }
-        }
-        else
-        {
-          assert(false); // Not handled yet
-        }
-
-        return *this;
-      }
-
       Problem& assemble() override
       {
-        // Assemble both sides
-        m_linearForm.assemble();
-        m_mass = std::move(m_linearForm.getVector());
+        auto& pb = m_pb;
+        auto& u = getTrialFunction();
+        auto& v = getTestFunction();
+        auto& axb = getLinearSystem();
+        auto& mass = axb.getVector();
+        auto& stiffness = axb.getOperator();
+        auto& bfs = pb.getBFs();
+        auto& dbcs = pb.getDBCs();
+        auto& pbcs = pb.getPBCs();
 
-        m_bilinearForm.assemble();
-        m_stiffness = std::move(m_bilinearForm.getOperator());
+        LinearForm lf(v, mass);
+        for (auto& lfi : pb.getLFIs())
+          lf.add(UnaryMinus(lfi)); // Negate every linear form integrator
+        lf.assemble();
 
-        for (auto& bf : m_bfs)
+        BilinearForm bf(u, v, stiffness);
+        for (auto& bfi : pb.getLocalBFIs())
+          bf.add(bfi);
+        for (auto& bfi : pb.getGlobalBFIs())
+          bf.add(bfi);
+        for (auto& bf : bfs)
         {
           bf.assemble();
-          m_stiffness += bf.getOperator();
+          Math::axpy(stiffness, 1.0, bf.getOperator());
         }
+        bf.assemble();
 
         // Impose Dirichlet boundary conditions
         auto& trial = getTrialFunction();
         const auto& trialFES = trial.getFiniteElementSpace();
         const auto& test = getTestFunction();
         const auto& testFES = test.getFiniteElementSpace();
-        for (auto& dbc : m_dbcs)
+        for (auto& dbc : dbcs)
         {
           dbc.assemble();
           const auto& dofs = dbc.getDOFs();
@@ -396,76 +235,74 @@ namespace Rodin::Variational
           }
           else
           {
-            Math::Kernels::eliminate(m_stiffness, m_mass, dofs);
+            m_axb.eliminate(dofs);
           }
         }
 
         // Impose periodic boundary conditions
-        imposePeriodicBCs();
+        if (trialFES == testFES)
+        {
+          for (auto& pbc : pbcs)
+          {
+            pbc.assemble();
+            const auto& dofs = pbc.getDOFs();
+
+            if (pbc.isComponent())
+            {
+              assert(false);
+            }
+            else
+            {
+              m_axb.merge(dofs);
+            }
+          }
+        }
+        else
+        {
+          assert(false); // Not handled yet
+        }
 
         m_assembled = true;
 
         return *this;
       }
 
-      void solve(Solver::SolverBase<OperatorType, VectorType, ScalarType>& solver) override
+      void solve(
+          Solver::SolverBase<OperatorType, VectorType, ScalarType>& solver) override
       {
          // Assemble the system
          if (!m_assembled)
             assemble();
 
          // Solve the system AX = B
-         solver.solve(m_stiffness, m_guess, m_mass);
+         auto& axb = getLinearSystem();
+         auto& a = axb.getOperator();
+         auto& x = axb.getGuess();
+         auto& b = axb.getVector();
+         solver.solve(a, x, b);
 
          // Recover solution
-         getTrialFunction().emplace().getSolution().setWeights(std::move(m_guess));
+         getTrialFunction().emplace().getSolution().setWeights(x);
       }
 
       Problem& operator=(const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) override
       {
-        m_bilinearForm.clear();
-        m_linearForm.clear();
-
-        for (auto& bfi : rhs.getLocalBFIs())
-          m_bilinearForm.add(bfi);
-
-        for (auto& bfi : rhs.getGlobalBFIs())
-          m_bilinearForm.add(bfi);
-
-        for (auto& lfi : rhs.getLFIs())
-          m_linearForm.add(UnaryMinus(lfi)); // Negate every linear form
-
-        m_bfs = rhs.getBFs();
-
-        m_dbcs = rhs.getDBCs();
-        m_pbcs = rhs.getPBCs();
-
+        m_pb = rhs;
         m_assembled = false;
-
         return *this;
       }
 
-      virtual VectorType& getMassVector() override
+      LinearSystemType& getLinearSystem() override
       {
-        return m_mass;
+        return m_axb;
       }
 
-      virtual const VectorType& getMassVector() const override
+      const LinearSystemType& getLinearSystem() const override
       {
-        return m_mass;
+        return m_axb;
       }
 
-      virtual OperatorType& getStiffnessOperator() override
-      {
-        return m_stiffness;
-      }
-
-      virtual const OperatorType& getStiffnessOperator() const override
-      {
-        return m_stiffness;
-      }
-
-      virtual Problem* copy() const noexcept override
+      Problem* copy() const noexcept override
       {
         assert(false);
         return nullptr;
@@ -475,23 +312,19 @@ namespace Rodin::Variational
       std::reference_wrapper<TrialFunction<TrialFES>> m_trialFunction;
       std::reference_wrapper<TestFunction<TestFES>>   m_testFunction;
 
-      LinearForm<TestFES, VectorType> m_linearForm;
-      BilinearForm<TrialFES, TestFES, OperatorType> m_bilinearForm;
+      LinearSystemType  m_axb;
+      Boolean           m_assembled;
 
-      FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
-
-      EssentialBoundary<ScalarType> m_dbcs;
-      PeriodicBoundary<ScalarType>  m_pbcs;
-
-      Boolean         m_assembled;
-      VectorType      m_mass;
-      VectorType      m_guess;
-      OperatorType    m_stiffness;
+      ProblemBody<OperatorType, VectorType, ScalarType> m_pb;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   */
   template <class TrialFES, class TestFES>
-  Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> Problem<TrialFES, TestFES,
+  Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+    -> Problem<
+        TrialFES, TestFES,
         Math::SparseMatrix<
           typename FormLanguage::Mult<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -499,10 +332,17 @@ namespace Rodin::Variational
         Math::Vector<
           typename FormLanguage::Traits<TestFES>::ScalarType>>;
 
-  template <class U1, class U2, class ... Us>
+  /**
+   * @ingroup RodinCTAD
+   */
+  template <class TrialFES, class TestFES, class Operator, class Vector>
+  Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, Math::LinearSystem<Operator, Vector>& axb)
+    -> Problem<TrialFES, TestFES, Operator, Vector>;
+
+  template <class Operator, class Vector, class U1, class U2, class ... Us>
   class Problem<
-      Tuple<U1, U2, Us...>, Math::SparseMatrix<Real>, Math::Vector<Real>>
-    : public ProblemBase<Math::SparseMatrix<Real>, Math::Vector<Real>, Real>
+      Tuple<U1, U2, Us...>, Operator, Vector>
+    : public ProblemBase<Operator, Vector, Real>
   {
 
     template <class T>
@@ -518,9 +358,9 @@ namespace Rodin::Variational
 
       using ContextType = Context::Local;
 
-      using OperatorType = Math::SparseMatrix<ScalarType>;
+      using OperatorType = Operator;
 
-      using VectorType = Math::Vector<ScalarType>;
+      using VectorType = Vector;
 
       using Parent = ProblemBase<OperatorType, VectorType, Real>;
 
@@ -597,6 +437,8 @@ namespace Rodin::Variational
       using LinearFormTupleSequentialAssembly =
         Assembly::Sequential<VectorType, LinearFormTuple>;
 
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+
       Problem(U1& u1, U2& u2, Us&... us)
         : m_us(
             Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
@@ -621,7 +463,8 @@ namespace Rodin::Variational
                           typename Utility::UnwrapRefDecay<decltype(uv.second())>::Type>::FES>(
                               uv.first().get(), uv.second().get());
                       })),
-          m_assembled(false)
+          m_assembled(false),
+          m_axb(m_stiffness, m_guess, m_mass)
       {
         m_bfa.reset(new BilinearFormTupleSequentialAssembly);
         m_lfa.reset(new LinearFormTupleSequentialAssembly);
@@ -633,6 +476,7 @@ namespace Rodin::Variational
 
       Problem& assemble() override
       {
+        auto& axb = m_axb;
         auto bt =
           m_bft.map(
               [](auto& bf)
@@ -713,12 +557,12 @@ namespace Rodin::Variational
             });
 
         // Assemble stiffness operator
-        m_stiffness = m_bfa->execute(
-            Assembly::BilinearFormTupleAssemblyInput(rows, cols, boffsets, bt));
+        m_bfa->execute(m_stiffness,
+          Assembly::BilinearFormTupleAssemblyInput(rows, cols, boffsets, bt));
 
         // Assemble mass vector
-        m_mass = m_lfa->execute(
-            Assembly::LinearFormTupleAssemblyInput(rows, loffsets, lt));
+        m_lfa->execute(m_mass,
+          Assembly::LinearFormTupleAssemblyInput(rows, loffsets, lt));
 
         // Impose Dirichlet boundary conditions
         m_us.apply(
@@ -732,7 +576,7 @@ namespace Rodin::Variational
                 {
                   dbc.assemble();
                   const auto& dofs = dbc.getDOFs();
-                  Math::Kernels::eliminate(m_stiffness, m_mass, dofs, offset);
+                  axb.eliminate(dofs, offset);
                 }
               }
             });
@@ -756,7 +600,7 @@ namespace Rodin::Variational
              [&](size_t i, auto& u)
              {
               const size_t n = u.get().getFiniteElementSpace().getSize();
-              u.get().emplace().getSolution().setWeights(m_guess.segment(m_trialOffsets[i], n));
+              u.get().emplace().getSolution().setWeights(m_guess.segment(m_trialOffsets[i], n).eval());
              });
       }
 
@@ -810,39 +654,27 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       const auto& getTrialOffsets() const
       {
         return m_trialOffsets;
       }
 
-      inline
       const auto& getTestOffsets() const
       {
         return m_testOffsets;
       }
 
-      virtual VectorType& getMassVector() override
+      LinearSystemType& getLinearSystem() override
       {
-        return m_mass;
+        return m_axb;
       }
 
-      virtual const VectorType& getMassVector() const override
+      const LinearSystemType& getLinearSystem() const override
       {
-        return m_mass;
+        return m_axb;
       }
 
-      virtual OperatorType& getStiffnessOperator() override
-      {
-        return m_stiffness;
-      }
-
-      virtual const OperatorType& getStiffnessOperator() const override
-      {
-        return m_stiffness;
-      }
-
-      virtual Problem* copy() const noexcept override
+      Problem* copy() const noexcept override
       {
         assert(false);
         return nullptr;
@@ -857,10 +689,11 @@ namespace Rodin::Variational
 
       EssentialBoundary<ScalarType> m_dbcs;
 
-      Boolean         m_assembled;
-      VectorType      m_mass;
-      VectorType      m_guess;
-      OperatorType    m_stiffness;
+      Boolean             m_assembled;
+      VectorType          m_mass;
+      VectorType          m_guess;
+      OperatorType        m_stiffness;
+      LinearSystemType    m_axb;
 
       std::array<size_t, TrialFunctionTuple::Size> m_trialOffsets;
       std::array<size_t, TestFunctionTuple::Size> m_testOffsets;

@@ -208,7 +208,7 @@ namespace Rodin::IO::MFEM
       }
       case GeometryType::PRISM:
       {
-        return Rodin::Geometry::Polytope::Type::TriangularPrism;
+        return Rodin::Geometry::Polytope::Type::Wedge;
       }
       case GeometryType::SQUARE:
       {
@@ -236,7 +236,7 @@ namespace Rodin::IO::MFEM
         return GeometryType::SQUARE;
       case Geometry::Polytope::Type::Tetrahedron:
         return GeometryType::TETRAHEDRON;
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
         return GeometryType::PRISM;
       default:
         return {};
@@ -277,8 +277,7 @@ namespace Rodin::IO::MFEM
       {}
 
       template <class Iterator>
-      inline
-      std::optional<Math::Vector<Real>> operator()(Iterator begin, Iterator end) const
+      std::optional<Math::PointVector> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::blank;
@@ -287,7 +286,7 @@ namespace Rodin::IO::MFEM
         using boost::spirit::x3::_attr;
 
         size_t i = 0;
-        Math::Vector<Real> res(m_sdim);
+        Math::PointVector res(m_sdim);
         const auto get_double = [&](auto& ctx) { assert(i < m_sdim); res(i++) = _attr(ctx); };
         const auto p = repeat(m_sdim)[double_[get_double]];
         const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);

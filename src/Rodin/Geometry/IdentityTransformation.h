@@ -7,9 +7,8 @@
 #ifndef RODIN_GEOMETRY_IDENTITYTRANSFORMATION_H
 #define RODIN_GEOMETRY_IDENTITYTRANSFORMATION_H
 
-#include "Rodin/Geometry/Simplex.h"
 
-#include "SimplexTransformation.h"
+#include "PolytopeTransformation.h"
 
 #include "ForwardDecls.h"
 
@@ -24,33 +23,41 @@ namespace Rodin::Geometry
       using Parent = PolytopeTransformation;
 
       IdentityTransformation(size_t sdim)
-        : m_sdim(sdim)
+        : Parent(sdim, sdim)
       {}
 
       IdentityTransformation(const IdentityTransformation& other)
-        : Parent(other),
-          m_sdim(other.m_sdim)
+        : Parent(other)
       {}
 
       IdentityTransformation(IdentityTransformation&& other)
-        : Parent(std::move(other)),
-          m_sdim(std::move(other.m_sdim))
+        : Parent(std::move(other))
       {}
 
-      inline
-      Math::Vector<Real> transform(const Math::Vector<Real>& rc) const override
+      size_t getOrder() const override
       {
-        return rc;
+        return 1;
       }
 
-      inline
-      Math::Matrix<Real> jacobian(const Math::Vector<Real>& rc) const override
+      size_t getJacobianOrder() const override
       {
-        return Math::Matrix<Real>::Identity(m_sdim == 0 ? 1 : m_sdim, rc.size());
+        return 0;
       }
 
-    private:
-      const size_t m_sdim;
+      void transform(const Math::SpatialVector<Real>& rc, Math::SpatialVector<Real>& pc) const override
+      {
+        pc = rc;
+      }
+
+      void jacobian(const Math::SpatialVector<Real>& rc, Math::SpatialMatrix<Real>& res) const override
+      {
+        res.setIdentity();
+      }
+
+      IdentityTransformation* copy() const noexcept override
+      {
+        return new IdentityTransformation(*this);
+      }
   };
 }
 

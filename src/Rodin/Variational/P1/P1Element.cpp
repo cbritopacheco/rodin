@@ -18,7 +18,7 @@ namespace Rodin::Variational
       Math::PointMatrix{{0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       Math::PointMatrix{{0, 1, 0, 0, 1, 0},
                         {0, 0, 1, 0, 0, 1},
                         {0, 0, 0, 1, 1, 1}} },
@@ -61,12 +61,12 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -108,14 +108,14 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism },
-        { 4, Geometry::Polytope::Type::TriangularPrism },
-        { 5, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge },
+        { 4, Geometry::Polytope::Type::Wedge },
+        { 5, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -157,14 +157,14 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism },
-        { 4, Geometry::Polytope::Type::TriangularPrism },
-        { 5, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge },
+        { 4, Geometry::Polytope::Type::Wedge },
+        { 5, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -185,7 +185,7 @@ namespace Rodin::Variational
       Math::PointMatrix{{0, 1, 0, 0},
                         {0, 0, 1, 0},
                         {0, 0, 0, 1}} },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       Math::PointMatrix{{0, 1, 0, 0, 1, 0},
                         {0, 0, 1, 0, 0, 1},
                         {0, 0, 0, 1, 1, 1}} },
@@ -228,14 +228,14 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism },
-        { 4, Geometry::Polytope::Type::TriangularPrism },
-        { 5, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge },
+        { 4, Geometry::Polytope::Type::Wedge },
+        { 5, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -277,14 +277,14 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism },
-        { 4, Geometry::Polytope::Type::TriangularPrism },
-        { 5, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge },
+        { 4, Geometry::Polytope::Type::Wedge },
+        { 5, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -326,14 +326,14 @@ namespace Rodin::Variational
         { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       {
-        { 0, Geometry::Polytope::Type::TriangularPrism },
-        { 1, Geometry::Polytope::Type::TriangularPrism },
-        { 2, Geometry::Polytope::Type::TriangularPrism },
-        { 3, Geometry::Polytope::Type::TriangularPrism },
-        { 4, Geometry::Polytope::Type::TriangularPrism },
-        { 5, Geometry::Polytope::Type::TriangularPrism }
+        { 0, Geometry::Polytope::Type::Wedge },
+        { 1, Geometry::Polytope::Type::Wedge },
+        { 2, Geometry::Polytope::Type::Wedge },
+        { 3, Geometry::Polytope::Type::Wedge },
+        { 4, Geometry::Polytope::Type::Wedge },
+        { 5, Geometry::Polytope::Type::Wedge }
       }
     }
   };
@@ -545,7 +545,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         switch (m_i)
         {
@@ -725,7 +725,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         out.resize(3);
         switch (m_i)
@@ -796,7 +796,7 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return Complex(1, -1);
+            return Complex(1, 0);
           }
           default:
           {
@@ -811,11 +811,11 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return (1 - r.x()) * Complex(1, -1);
+            return (1 - r.x());
           }
           case 1:
           {
-            return r.x() * Complex(1, -1);
+            return r.x();
           }
           default:
           {
@@ -830,15 +830,15 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return (-r.x() - r.y() + 1) * Complex(1, -1);
+            return (-r.x() - r.y() + 1);
           }
           case 1:
           {
-            return r.x() * Complex(1, -1);
+            return r.x();
           }
           case 2:
           {
-            return r.y() * Complex(1, -1);
+            return r.y();
           }
           default:
           {
@@ -855,19 +855,19 @@ namespace Rodin::Variational
           {
             const auto x = r.x();
             const auto y = r.y();
-            return (x * y - x - y + 1) * Complex(1, -1);
+            return (x * y - x - y + 1);
           }
           case 1:
           {
-            return r.x() * (1 - r.y()) * Complex(1, -1);
+            return r.x() * (1 - r.y());
           }
           case 2:
           {
-            return r.y() * (1 - r.x()) * Complex(1, -1);
+            return r.y() * (1 - r.x());
           }
           case 3:
           {
-            return r.x() * r.y() * Complex(1, -1);
+            return r.x() * r.y();
           }
           default:
           {
@@ -882,19 +882,19 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return (-r.x() - r.y() - r.z() + 1) * Complex(1, -1);
+            return (-r.x() - r.y() - r.z() + 1);
           }
           case 1:
           {
-            return r.x() * Complex(1, -1);
+            return r.x();
           }
           case 2:
           {
-            return r.y() * Complex(1, -1);
+            return r.y();
           }
           case 3:
           {
-            return r.z() * Complex(1, -1);
+            return r.z();
           }
           default:
           {
@@ -903,33 +903,33 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         switch (m_i)
         {
           case 0:
           {
-            return (r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1) * Complex(1, -1);
+            return (r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1);
           }
           case 1:
           {
-            return (r.x() * (1 - r.z())) * Complex(1, -1);
+            return (r.x() * (1 - r.z()));
           }
           case 2:
           {
-            return (r.y() * (1 - r.z())) * Complex(1, -1);
+            return (r.y() * (1 - r.z()));
           }
           case 3:
           {
-            return (r.z() * (1 - r.x() - r.y())) * Complex(1, -1);
+            return (r.z() * (1 - r.x() - r.y()));
           }
           case 4:
           {
-            return (r.x() * r.z()) * Complex(1, -1);
+            return (r.x() * r.z());
           }
           case 5:
           {
-            return (r.y() * r.z()) * Complex(1, -1);
+            return (r.y() * r.z());
           }
           default:
           {
@@ -943,70 +943,61 @@ namespace Rodin::Variational
     return Math::nan<Complex>();
   }
 
-  void
-  ComplexP1Element::GradientFunction::operator()(Math::SpatialVector<Complex>& out, const Math::SpatialVector<Real>& r) const
+  void ComplexP1Element::GradientFunction::operator()
+    (Math::SpatialVector<Complex>& out,
+     const Math::SpatialVector<Real>& r) const
   {
     switch (m_g)
     {
       case Geometry::Polytope::Type::Point:
       {
         out.resize(1);
-        out.coeffRef(0) = Complex(0, 0);
+        out.coeffRef(0) = Real(0);
         return;
       }
+
       case Geometry::Polytope::Type::Segment:
       {
         out.resize(1);
         switch (m_i)
         {
           case 0:
-          {
-            out.coeffRef(0) = Complex(-1, 1);
+            out.coeffRef(0) = Real(-1);
             return;
-          }
           case 1:
-          {
-            out.coeffRef(0) = Complex(1, -1);
+            out.coeffRef(0) = Real( 1);
             return;
-          }
           default:
-          {
             assert(false);
             out.setConstant(Math::nan<Real>());
             return;
-          }
         }
       }
+
       case Geometry::Polytope::Type::Triangle:
       {
         out.resize(2);
         switch (m_i)
         {
           case 0:
-          {
-            out.setConstant(Complex(-1, 1));
+            out.coeffRef(0) = Real(-1);
+            out.coeffRef(1) = Real(-1);
             return;
-          }
           case 1:
-          {
-            out.coeffRef(0) = Complex(1, -1);
-            out.coeffRef(1) = Complex(0, 0);
+            out.coeffRef(0) = Real(1);
+            out.coeffRef(1) = Real(0);
             return;
-          }
           case 2:
-          {
-            out.coeffRef(0) = Complex(0, 0);
-            out.coeffRef(1) = Complex(1, -1);
+            out.coeffRef(0) = Real(0);
+            out.coeffRef(1) = Real(1);
             return;
-          }
           default:
-          {
             assert(false);
             out.setConstant(Math::nan<Real>());
             return;
-          }
         }
       }
+
       case Geometry::Polytope::Type::Quadrilateral:
       {
         out.resize(2);
@@ -1014,34 +1005,34 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            const auto dx = r.y() - 1;
-            const auto dy = r.x() - 1;
-            out.coeffRef(0) = Complex(dx, -dx);
-            out.coeffRef(1) = Complex(dy, -dy);
+            const Real dx = r.y() - 1;
+            const Real dy = r.x() - 1;
+            out.coeffRef(0) = dx;
+            out.coeffRef(1) = dy;
             return;
           }
           case 1:
           {
-            const auto dx = 1 - r.y();
-            const auto dy = -r.x();
-            out.coeffRef(0) = Complex(dx, -dx);
-            out.coeffRef(1) = Complex(dy, -dy);
+            const Real dx = Real(1) - r.y();
+            const Real dy = -r.x();
+            out.coeffRef(0) = dx;
+            out.coeffRef(1) = dy;
             return;
           }
           case 2:
           {
-            const auto dx = -r.y();
-            const auto dy = 1 - r.x();
-            out.coeffRef(0) = Complex(dx, -dx);
-            out.coeffRef(1) = Complex(dy, -dy);
+            const Real dx = -r.y();
+            const Real dy = Real(1) - r.x();
+            out.coeffRef(0) = dx;
+            out.coeffRef(1) = dy;
             return;
           }
           case 3:
           {
-            const auto dx = r.y();
-            const auto dy = r.x();
-            out.coeffRef(0) = Complex(dx, -dx);
-            out.coeffRef(1) = Complex(dy, -dy);
+            const Real dx = r.y();
+            const Real dy = r.x();
+            out.coeffRef(0) = dx;
+            out.coeffRef(1) = dy;
             return;
           }
           default:
@@ -1052,6 +1043,7 @@ namespace Rodin::Variational
           }
         }
       }
+
       case Geometry::Polytope::Type::Tetrahedron:
       {
         out.resize(3);
@@ -1059,28 +1051,30 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            out.setConstant(Complex(-1, 1));
+            out.coeffRef(0) = Real(-1);
+            out.coeffRef(1) = Real(-1);
+            out.coeffRef(2) = Real(-1);
             return;
           }
           case 1:
           {
-            out.coeffRef(0) = Complex(1, -1);
-            out.coeffRef(1) = Complex(0, 0);
-            out.coeffRef(2) = Complex(0, 0);
+            out.coeffRef(0) = Real( 1);
+            out.coeffRef(1) = Real( 0);
+            out.coeffRef(2) = Real( 0);
             return;
           }
           case 2:
           {
-            out.coeffRef(0) = Complex(0, 0);
-            out.coeffRef(1) = Complex(1, -1);
-            out.coeffRef(2) = Complex(0, 0);
+            out.coeffRef(0) = Real( 0);
+            out.coeffRef(1) = Real( 1);
+            out.coeffRef(2) = Real( 0);
             return;
           }
           case 3:
           {
-            out.coeffRef(0) = Complex(0, 0);
-            out.coeffRef(1) = Complex(0, 0);
-            out.coeffRef(2) = Complex(1, -1);
+            out.coeffRef(0) = Real( 0);
+            out.coeffRef(1) = Real( 0);
+            out.coeffRef(2) = Real( 1);
             return;
           }
           default:
@@ -1091,76 +1085,85 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+
+      case Geometry::Polytope::Type::Wedge:
       {
         out.resize(3);
         switch (m_i)
         {
           case 0:
           {
-            const auto dx = r.z() - 1;
-            const auto dy = r.z() - 1;
-            const auto dz = r.x() + r.y() - 1;
-            out.coeffRef(0) = Complex(dx, -dx);
-            out.coeffRef(1) = Complex(dy, -dy);
-            out.coeffRef(2) = Complex(dz, -dz);
+            const Real dx = r.z() - 1;
+            const Real dy = r.z() - 1;
+            const Real dz = r.x() + r.y() - 1;
+            out.coeffRef(0) = dx;
+            out.coeffRef(1) = dy;
+            out.coeffRef(2) = dz;
             return;
           }
           case 1:
           {
-            const auto dx = 1 - r.z();
-            const auto dy = 0;
-            const auto dz = -r.x();
-            out.coeffRef(0) = Complex(dx, -dx);
-            out.coeffRef(1) = Complex(dy, -dy);
-            out.coeffRef(2) = Complex(dz, -dz);
+            const Real dx = Real(1) - r.z();
+            const Real dy = Real(0);
+            const Real dz = -r.x();
+            out.coeffRef(0) = dx;
+            out.coeffRef(1) = dy;
+            out.coeffRef(2) = dz;
             return;
           }
           case 2:
           {
-            const auto dx = 0;
-            const auto dy = 1 - r.z();
-            const auto dz = -r.y();
-            out.coeffRef(0) = Complex(dx, -dx);
-            out.coeffRef(1) = Complex(dy, -dy);
-            out.coeffRef(2) = Complex(dz, -dz);
+            const Real dx = Real(0);
+            const Real dy = Real(1) - r.z();
+            const Real dz = -r.y();
+            out.coeffRef(0) = dx;
+            out.coeffRef(1) = dy;
+            out.coeffRef(2) = dz;
             return;
           }
           case 3:
           {
-            const auto dx = -r.z();
-            const auto dy = -r.z();
-            const auto dz = 1 - r.x() - r.y();
-            out.coeffRef(0) = Complex(dx, -dx);
-            out.coeffRef(1) = Complex(dy, -dy);
-            out.coeffRef(2) = Complex(dz, -dz);
+            const Real dx = -r.z();
+            const Real dy = -r.z();
+            const Real dz = Real(1) - r.x() - r.y();
+            out.coeffRef(0) = dx;
+            out.coeffRef(1) = dy;
+            out.coeffRef(2) = dz;
             return;
           }
           case 4:
           {
-            const auto dx = r.z();
-            const auto dy = 0;
-            const auto dz = r.x();
-            out.coeffRef(0) = Complex(dx, -dx);
-            out.coeffRef(1) = Complex(dy, -dy);
-            out.coeffRef(2) = Complex(dz, -dz);
+            const Real dx = r.z();
+            const Real dy = Real(0);
+            const Real dz = r.x();
+            out.coeffRef(0) = dx;
+            out.coeffRef(1) = dy;
+            out.coeffRef(2) = dz;
             return;
           }
           case 5:
           {
-            const auto dx = 0;
-            const auto dy = r.z();
-            const auto dz = r.y();
-            out.coeffRef(0) = Complex(dx, -dx);
-            out.coeffRef(1) = Complex(dy, -dy);
-            out.coeffRef(2) = Complex(dz, -dz);
+            const Real dx = Real(0);
+            const Real dy = r.z();
+            const Real dz = r.y();
+            out.coeffRef(0) = dx;
+            out.coeffRef(1) = dy;
+            out.coeffRef(2) = dz;
+            return;
+          }
+          default:
+          {
+            assert(false);
+            out.setConstant(Math::nan<Real>());
             return;
           }
         }
       }
+
+      default:
+        assert(false);
+        out.setConstant(Math::nan<Real>());
     }
-    assert(false);
-    out.setConstant(Math::nan<Real>());
   }
 
   void VectorP1Element::BasisFunction::operator()(Math::Vector<Real>& out, const Math::SpatialVector<Real>& r) const
@@ -1289,7 +1292,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         switch (k)
         {
@@ -1461,7 +1464,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Type::TriangularPrism:
+      case Geometry::Polytope::Type::Wedge:
       {
         switch (k)
         {

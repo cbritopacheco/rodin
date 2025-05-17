@@ -11,8 +11,9 @@
 #include "Vector.h"
 #include "Tensor.h"
 
+#include "SparseMatrix.h"
+
 namespace Rodin::Math
-{
-}
+{}
 
 #endif

@@ -69,7 +69,8 @@ namespace Rodin::Variational
    */
   template <class Number>
   class P0<Number, Geometry::Mesh<Context::Local>> final
-    : public FiniteElementSpace<P0<Number, Geometry::Mesh<Context::Local>>>
+    : public FiniteElementSpace<
+        Geometry::Mesh<Context::Local>, P0<Number, Geometry::Mesh<Context::Local>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -91,7 +92,7 @@ namespace Rodin::Variational
       using ElementType = P0Element<RangeType>;
 
       /// Parent class
-      using Parent = FiniteElementSpace<P0<RangeType, MeshType>>;
+      using Parent = FiniteElementSpace<MeshType, P0<RangeType, MeshType>>;
 
       /**
        * @brief Mapping for the scalar P0 space.
@@ -198,38 +199,32 @@ namespace Rodin::Variational
 
       P0& operator=(P0&& other) = default;
 
-      inline
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return s_elements[getMesh().getGeometry(d, i)];
       }
 
-      inline
       size_t getSize() const override
       {
         return m_mesh.get().getCellCount();
       }
 
-      inline
       size_t getVectorDimension() const override
       {
         return 1;
       }
 
-      inline
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
 
-      inline
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         assert(d == getMesh().getDimension());
         return m_dofs.at(i);
       }
 
-      inline
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto [d, i] = idx;
@@ -252,7 +247,6 @@ namespace Rodin::Variational
        * \tau @f$ element @f$ R @f$.
        */
       template <class FunctionDerived>
-      inline
       auto getMapping(const std::pair<size_t, Index>& idx, const FunctionBase<FunctionDerived>& v) const
       {
         const auto [d, i] = idx;
@@ -261,7 +255,6 @@ namespace Rodin::Variational
       }
 
       template <class FunctionDerived>
-      inline
       auto getMapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v) const
       {
         return Mapping<FunctionDerived>(polytope, v);
@@ -274,14 +267,12 @@ namespace Rodin::Variational
        * @param[in] v Callable type
        */
       template <class CallableType>
-      inline
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
         return InverseMapping<CallableType>(v);
       }
 
       template <class CallableType>
-      inline
       auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
       {
         return InverseMapping<CallableType>(v);

@@ -8,6 +8,5 @@
 #define RODIN_CONTEXT_H
 
 #include "Context/Sequential.h"
-#include "Context/MPI.h"
 
 #endif

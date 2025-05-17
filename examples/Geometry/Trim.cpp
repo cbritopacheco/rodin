@@ -44,6 +44,6 @@ int main(int, char**)
 
   // Perform the actual trimming of the attribute
   auto trimmed = mesh.trim(trimAttribute);
-  trimmed.save("Trimmed.mfem.mesh", IO::FileFormat::MFEM);
+  trimmed.save("Trimmed.mesh", IO::FileFormat::MEDIT);
   Alert::Info() << "Saved trimmed mesh to: Trimmed.mfem.mesh" << Alert::Raise;
 }

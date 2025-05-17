@@ -1085,9 +1085,6 @@ namespace Rodin::Variational
    */
   template <class ... Parameters>
   class Problem;
-
-  template <class ... Parameters>
-  class DenseProblem;
 }
 
 #endif

@@ -10,7 +10,6 @@
 namespace Rodin::Geometry::Euclidean
 {
   template <class T>
-  inline
   constexpr
   std::optional<LineSegment2D<T>> Point2D<T>::connect(const Point2D<T>& other) const
   {
@@ -21,7 +20,6 @@ namespace Rodin::Geometry::Euclidean
   }
 
   template <class T>
-  inline
   constexpr
   std::optional<LineSegment2D<T>> Point2D<T>::connect(const Line2D<T>& line) const
   {
@@ -32,10 +30,10 @@ namespace Rodin::Geometry::Euclidean
       return LineSegment2D<T>(
           *this,
           Point2D<T>({
-            line.b() * (line.b() * Magnum::Math::Vector<Real>2<T>::x() - line.a() *
-                Magnum::Math::Vector<Real>2<T>::y()) + line.a() * line.c(),
-            line.a() * (-line.b() * Magnum::Math::Vector<Real>2<T>::x() + line.a() *
-                Magnum::Math::Vector<Real>2<T>::y()) + line.b() * line.c()
+            line.b() * (line.b() * Magnum::Math::Vector2<T>::x() - line.a() *
+                Magnum::Math::Vector2<T>::y()) + line.a() * line.c(),
+            line.a() * (-line.b() * Magnum::Math::Vector2<T>::x() + line.a() *
+                Magnum::Math::Vector2<T>::y()) + line.b() * line.c()
             }) / (line.a() * line.a() + line.b() * line.b()));
     }
     else
@@ -45,7 +43,6 @@ namespace Rodin::Geometry::Euclidean
   }
 
   template <class T>
-  inline
   constexpr
   std::optional<LineSegment2D<T>> Point2D<T>::connect(const Circle<T>& other) const
   {

@@ -45,9 +45,9 @@ void K(Math::Matrix<Real>& res, const Point& x, const Point& y)
 
 int main(int, char**)
 {
-  Eigen::initParallel();
-  Eigen::setNbThreads(8);
-  Threads::getGlobalThreadPool().reset(8);
+  // Eigen::initParallel();
+  // Eigen::setNbThreads(8);
+  // Threads::getGlobalThreadPool().reset(8);
 
   std::cout << "lambda: " << lambda << std::endl;
   std::cout << "mu: " << mu << std::endl;

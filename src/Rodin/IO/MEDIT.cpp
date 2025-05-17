@@ -194,6 +194,28 @@ namespace Rodin::IO
           }
           continue; // Continue the while loop
         }
+        case MEDIT::Keyword::Wedges:
+        {
+          m_build.reserve(3, *count);
+          for (size_t i = 0; i < *count; i++)
+          {
+            getline(is, line);
+            auto data = MEDIT::ParseEntity(6)(line.begin(), line.end());
+            if (!data)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to parse Wedge on line "
+                << std::to_string(m_currentLineNumber)
+                << "."
+                << Alert::Raise;
+            }
+            data->vertices -= 1;
+            m_build.polytope(Geometry::Polytope::Type::Wedge, std::move(data->vertices));
+            if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
+              m_build.attribute({ 3, i }, data->attribute);
+          }
+          continue;
+        }
         case MEDIT::Keyword::Tetrahedra:
         {
           m_build.reserve(3, *count);
@@ -293,6 +315,11 @@ namespace Rodin::IO
               os << MEDIT::Keyword::Tetrahedra << '\n';
               break;
             }
+            case Geometry::Polytope::Type::Wedge:
+            {
+              os << MEDIT::Keyword::Wedges << '\n';
+              break;
+            }
           }
           const size_t d = Geometry::Polytope::getGeometryDimension(g);
           if (d <= mesh.getDimension())
@@ -330,6 +357,12 @@ namespace Rodin::IO
                   {
                     os << vertices(0) + 1 << ' ' << vertices(1) + 1 << ' '
                        << vertices(3) + 1 << ' ' << vertices(2) + 1;
+                    break;
+                  }
+                  case Geometry::Polytope::Type::Wedge:
+                  {
+                    os << vertices(0) + 1 << ' ' << vertices(1) + 1 << ' ' << vertices(2) + 1 << ' '
+                       << vertices(3) + 1 << ' ' << vertices(4) + 1 << ' ' << vertices(5) + 1;
                     break;
                   }
                 }

@@ -12,10 +12,12 @@ using namespace Geometry;
 
 int main(int, char**)
 {
-  constexpr size_t n = 64;
+  constexpr size_t n = 4;
+  constexpr Geometry::Polytope::Type g = Geometry::Polytope::Type::Wedge;
   Mesh mesh;
-  mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { n, n });
-  mesh.save("UniformGrid.mesh");
+  mesh = LocalMesh::UniformGrid(g, { n, n, n });
+  mesh.getConnectivity().compute(3, 2);
+  mesh.save("UniformGrid.mesh", IO::FileFormat::MEDIT);
   return 0;
 }
 

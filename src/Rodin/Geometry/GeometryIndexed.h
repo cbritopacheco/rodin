@@ -7,6 +7,9 @@
 #ifndef RODIN_VARIATIONAL_GEOMETRYINDEXED_H
 #define RODIN_VARIATIONAL_GEOMETRYINDEXED_H
 
+#include <boost/serialization/array.hpp>
+#include <boost/serialization/access.hpp>
+
 #include "Polytope.h"
 
 namespace Rodin::Geometry
@@ -14,6 +17,8 @@ namespace Rodin::Geometry
   template <class T>
   class GeometryIndexed
   {
+    friend class boost::serialization::access;
+
     public:
       constexpr
       GeometryIndexed()
@@ -64,6 +69,12 @@ namespace Rodin::Geometry
       size_t size() const
       {
         return Polytope::Types.size();
+      }
+
+      template<class Archive>
+      void serialize(Archive & ar, const unsigned int version)
+      {
+        ar & boost::serialization::make_array(m_map.data(), m_map.size());
       }
 
     private:

@@ -32,14 +32,12 @@ namespace Rodin::Variational
 
       FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
 
-      inline
       constexpr
       bool operator==(const FiniteElementSpaceBase& other) const
       {
         return this == &other;
       }
 
-      inline
       constexpr
       bool operator!=(const FiniteElementSpaceBase& other) const
       {
@@ -89,17 +87,23 @@ namespace Rodin::Variational
   /**
    * @brief Represernts a finite element space.
    */
-  template <class Derived>
+  template <class Mesh, class Derived>
   class FiniteElementSpace : public FiniteElementSpaceBase
   {
     public:
       /// Parent class
       using Parent = FiniteElementSpaceBase;
 
+      using MeshType = Mesh;
+
+      const Mesh& getMesh() const override
+      {
+        return static_cast<const Derived&>(*this).getMesh();
+      }
+
       /**
        * @note CRTP function to be overriden in Derived class.
        */
-      inline
       const auto& getFiniteElement(size_t d, Index i) const
       {
         return static_cast<const Derived&>(*this).getFiniteElement(d, i);
@@ -140,7 +144,6 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in Derived class.
        */
       template <class CallableType>
-      inline
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
         return static_cast<const Derived&>(*this).geInverseMapping(idx, v);

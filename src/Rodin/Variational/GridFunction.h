@@ -7,6 +7,10 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
+#ifdef RODIN_USE_OPENMP
+#include <omp.h>
+#endif
+
 #include <cmath>
 #include <utility>
 #include <fstream>
@@ -17,14 +21,17 @@
 #include "Rodin/Configure.h"
 #include "Rodin/Math.h"
 #include "Rodin/Alert.h"
-#include "Rodin/Geometry/Point.h"
-#include "Rodin/Geometry/SubMesh.h"
-#include "Rodin/IO/ForwardDecls.h"
-#include "Rodin/IO/MFEM.h"
-#include "Rodin/IO/MEDIT.h"
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
 #include "Rodin/Threads/ThreadPool.h"
+
+#include "Rodin/Geometry/Point.h"
+#include "Rodin/Geometry/SubMesh.h"
+
+#include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/IO/MFEM.h"
+#include "Rodin/IO/MEDIT.h"
+#include "Rodin/IO/EnSight6.h"
 
 #include "ForwardDecls.h"
 
@@ -499,6 +506,55 @@ namespace Rodin::Variational
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
 #ifdef RODIN_MULTITHREADED
+#ifdef RODIN_USE_OPENMP
+          // OpenMP parallel region: each thread gets its own local storage.
+          #pragma omp parallel
+          {
+            // Each thread creates its own copy of the function object.
+            std::unique_ptr<FunctionBase<NestedDerived>> local_fn(fn.copy());
+
+            // Reserve local storage based on an estimate of entries per thread.
+            const size_t capacity = fes.getSize() / omp_get_num_threads();
+            std::vector<Index> local_is;
+            local_is.reserve(capacity);
+            std::vector<ScalarType> local_vs;
+            local_vs.reserve(capacity);
+
+            // Parallelize the loop over the cells.
+            #pragma omp for schedule(dynamic)
+            for (Index i = 0; i < mesh.getCellCount(); ++i)
+            {
+              auto it = mesh.getCell(i);
+              const auto& polytope = *it;
+              if (attrs.empty() || attrs.count(polytope.getAttribute()))
+              {
+                const auto& cellIndex = polytope.getIndex();
+                const auto& fe = fes.getFiniteElement(d, cellIndex);
+                const auto& trans = mesh.getPolytopeTransformation(d, cellIndex);
+                for (size_t local = 0; local < fe.getCount(); ++local)
+                {
+                  // Create the geometry point and compute function value.
+                  const Geometry::Point p(polytope, trans, fe.getNode(local));
+                  local_is.push_back(fes.getGlobalIndex({ d, cellIndex }, local));
+                  local_vs.push_back(local_fn->getValue(p));
+                }
+              }
+            } // End of omp-for
+
+            // In a single (critical) section, update the shared global arrays.
+            #pragma omp critical
+            {
+              for (Index j = 0; j < local_is.size(); ++j)
+              {
+                const Index global = local_is[j];
+                // Update m_data with a new weighted average.
+                m_data(global) = (local_vs[j] + ns[global] * m_data(global)) / (ns[global] + 1);
+                ns[global] += 1;
+              }
+            }
+          }
+#else
+          // Fallback multi-threading implementation using ThreadPool.
           auto& threadPool = Threads::getGlobalThreadPool();
           auto loop =
             [&](const Index start, const Index end)
@@ -540,7 +596,9 @@ namespace Rodin::Variational
             };
           threadPool.pushLoop(0, mesh.getCellCount(), loop);
           threadPool.waitForTasks();
+#endif
 #else
+          // Single-threaded version.
           for (auto it = mesh.getCell(); !it.end(); ++it)
           {
             const auto& polytope = *it;
@@ -961,6 +1019,12 @@ namespace Rodin::Variational
             printer.print(output);
             break;
           }
+          case IO::FileFormat::ENSIGHT6:
+          {
+            IO::GridFunctionPrinter<IO::FileFormat::ENSIGHT6, FES> printer(static_cast<const Derived&>(*this));
+            printer.print(output);
+            break;
+          }
           default:
           {
             Alert::Exception()
@@ -985,7 +1049,7 @@ namespace Rodin::Variational
       Derived& setData(Matrix&& data) const
       {
         m_data = std::forward<Matrix>(data);
-        return static_cast<Derived&>(*this).setData();
+        return static_cast<Derived&>(*this).setData(data);
       }
 
       /**
@@ -1033,21 +1097,9 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in Derived class.
        */
       template <class Vector>
-      Derived& setWeights(Vector&& weights)
+      Derived& setWeights(const Vector& weights)
       {
-        return static_cast<Derived&>(*this).setWeights(std::forward<Vector>(weights));
-      }
-
-      /**
-       * @brief Sets the weights and data in the GridFunction object. No
-       * computation is performed.
-       */
-      template <class Vector, class Matrix>
-      Derived& setWeightsAndData(Vector&& weights, Matrix&& data)
-      {
-        m_weights = std::forward<Vector>(weights);
-        m_data = std::forward<Matrix>(data);
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).setWeights(weights);
       }
 
       constexpr

@@ -41,7 +41,7 @@ namespace Rodin::Geometry
         Triangle,
         Quadrilateral,
         Tetrahedron,
-        TriangularPrism
+        Wedge
       };
 
       /**
@@ -54,7 +54,7 @@ namespace Rodin::Geometry
         Type::Triangle,
         Type::Quadrilateral,
         Type::Tetrahedron,
-        Type::TriangularPrism
+        Type::Wedge
       };
 
       static const Math::PointMatrix& getVertices(Polytope::Type g);
@@ -78,7 +78,7 @@ namespace Rodin::Geometry
           case Type::Quadrilateral:
           case Type::Tetrahedron:
             return 4;
-          case Type::TriangularPrism:
+          case Type::Wedge:
             return 6;
         }
         assert(false);
@@ -98,7 +98,7 @@ namespace Rodin::Geometry
           case Type::Quadrilateral:
             return 2;
           case Type::Tetrahedron:
-          case Type::TriangularPrism:
+          case Type::Wedge:
             return 3;
         }
         assert(false);
@@ -116,7 +116,7 @@ namespace Rodin::Geometry
           case Type::Tetrahedron:
             return true;
           case Type::Quadrilateral:
-          case Type::TriangularPrism:
+          case Type::Wedge:
             return false;
         }
         assert(false);

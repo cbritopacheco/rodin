@@ -43,7 +43,7 @@ namespace Rodin::Variational
     { Geometry::Polytope::Type::Triangle, P1Element<Real>(Geometry::Polytope::Type::Triangle) },
     { Geometry::Polytope::Type::Quadrilateral, P1Element<Real>(Geometry::Polytope::Type::Quadrilateral) },
     { Geometry::Polytope::Type::Tetrahedron, P1Element<Real>(Geometry::Polytope::Type::Tetrahedron) },
-    { Geometry::Polytope::Type::TriangularPrism, P1Element<Real>(Geometry::Polytope::Type::TriangularPrism) }
+    { Geometry::Polytope::Type::Wedge, P1Element<Real>(Geometry::Polytope::Type::Wedge) }
   };
 
   const Geometry::GeometryIndexed<P1Element<Complex>>
@@ -54,7 +54,7 @@ namespace Rodin::Variational
     { Geometry::Polytope::Type::Triangle, P1Element<Complex>(Geometry::Polytope::Type::Triangle) },
     { Geometry::Polytope::Type::Quadrilateral, P1Element<Complex>(Geometry::Polytope::Type::Quadrilateral) },
     { Geometry::Polytope::Type::Tetrahedron, P1Element<Complex>(Geometry::Polytope::Type::Tetrahedron) },
-    { Geometry::Polytope::Type::TriangularPrism, P1Element<Complex>(Geometry::Polytope::Type::TriangularPrism) }
+    { Geometry::Polytope::Type::Wedge, P1Element<Complex>(Geometry::Polytope::Type::Wedge) }
   };
 
   namespace Internal
@@ -72,7 +72,7 @@ namespace Rodin::Variational
           { Geometry::Polytope::Type::Triangle, VectorP1Element(i, Geometry::Polytope::Type::Triangle) },
           { Geometry::Polytope::Type::Quadrilateral, VectorP1Element(i, Geometry::Polytope::Type::Quadrilateral) },
           { Geometry::Polytope::Type::Tetrahedron, VectorP1Element(i, Geometry::Polytope::Type::Tetrahedron) },
-          { Geometry::Polytope::Type::TriangularPrism, VectorP1Element(i, Geometry::Polytope::Type::TriangularPrism) }
+          { Geometry::Polytope::Type::Wedge, VectorP1Element(i, Geometry::Polytope::Type::Wedge) }
         };
       }
       return res;

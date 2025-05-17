@@ -7,12 +7,20 @@
 #ifndef RODIN_CONTEXT_BASE_H
 #define RODIN_CONTEXT_BASE_H
 
+#include <boost/serialization/access.hpp>
+
 #include "Rodin/Configure.h"
 
 namespace Rodin::Context
 {
   class Base
   {
+    friend class boost::serialization::access;
+
+    public:
+      template <class Archive>
+      void serialize(Archive & ar, const unsigned int version)
+      {}
   };
 }
 

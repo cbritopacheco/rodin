@@ -26,6 +26,11 @@ namespace Rodin::Geometry
   class SubMeshBase
   {
     public:
+      using PolytopeMap =
+        boost::bimap<
+          boost::bimaps::vector_of<Index>,
+          boost::bimaps::unordered_set_of<Index>>;
+
       using Ancestor = std::reference_wrapper<const MeshBase>;
 
       /**
@@ -45,7 +50,7 @@ namespace Rodin::Geometry
        * @brief Gets the map of polytope indices from the SubMesh to the parent
        * Mesh.
        */
-      virtual const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const = 0;
+      virtual const PolytopeMap& getPolytopeMap(size_t d) const = 0;
 
       inline
       constexpr
@@ -111,7 +116,7 @@ namespace Rodin::Geometry
           std::optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
           Mesh<Context>::Builder m_build;
           std::vector<Index> m_sidx;
-          std::vector<boost::bimap<Index, Index>> m_s2ps;
+          std::vector<PolytopeMap> m_s2ps;
           size_t m_dimension;
       };
 
@@ -151,8 +156,7 @@ namespace Rodin::Geometry
        * @brief Gets the map of polytope indices from the SubMesh to the parent
        * Mesh.
        */
-      inline
-      const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const override
+      const PolytopeMap& getPolytopeMap(size_t d) const override
       {
         return m_s2ps.at(d);
       }
@@ -164,7 +168,7 @@ namespace Rodin::Geometry
 
     private:
       std::reference_wrapper<const Mesh<Context>> m_parent;
-      std::vector<boost::bimap<Index, Index>> m_s2ps;
+      std::vector<PolytopeMap> m_s2ps;
       Deque<Ancestor> m_ancestors;
   };
 }

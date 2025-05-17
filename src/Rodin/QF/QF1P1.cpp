@@ -16,7 +16,7 @@ namespace Rodin::QF
       Math::SpatialVector<Real>{{ 0.5, 0.5 }} },
     { Geometry::Polytope::Type::Tetrahedron,
       Math::SpatialVector<Real>{{ 0.25, 0.25, 0.25 }} },
-    { Geometry::Polytope::Type::TriangularPrism,
+    { Geometry::Polytope::Type::Wedge,
       Math::SpatialVector<Real>{{ Real(1) / Real(3), Real(1) / Real(3), 0.5 }} }
   };
 
@@ -27,6 +27,6 @@ namespace Rodin::QF
     { Geometry::Polytope::Type::Triangle, 0.5 },
     { Geometry::Polytope::Type::Quadrilateral, 1 },
     { Geometry::Polytope::Type::Tetrahedron, Real(1.0) / Real(6) },
-    { Geometry::Polytope::Type::TriangularPrism, 0.5 }
+    { Geometry::Polytope::Type::Wedge, 0.5 }
   };
 }

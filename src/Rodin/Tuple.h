@@ -18,32 +18,64 @@
 
 namespace Rodin
 {
+  /**
+   * @brief Specialization of Tuple for an empty parameter pack.
+   */
   template <>
   class Tuple<> : public std::tuple<>
   {
     public:
+      /**
+       * @brief Dummy type alias for the empty tuple.
+       *
+       * @tparam Index Unused index parameter.
+       */
       template <std::size_t Index>
       using Type = void;
 
+      /// @brief Parent class type.
       using Parent = std::tuple<>;
 
+      /// @brief The number of elements in the tuple (always 0).
       static constexpr size_t Size = 0;
 
+      /**
+       * @brief Default constructor.
+       */
       constexpr
       Tuple() = default;
 
+      /**
+       * @brief Copy constructor.
+       */
       constexpr
       Tuple(const Tuple&) = default;
 
+      /**
+       * @brief Move constructor.
+       */
       constexpr
       Tuple(Tuple&&) = default;
 
+      /**
+       * @brief Computes the Cartesian product of two empty tuples.
+       *
+       * @param other The other empty tuple.
+       * @return An empty Tuple.
+       */
       constexpr
       Tuple<> product(const Tuple<> other)
       {
         return Tuple<>{};
       }
 
+      /**
+       * @brief Concatenates this empty tuple with another tuple.
+       *
+       * @tparam Gs Types of elements in the other tuple.
+       * @param other The tuple to concatenate.
+       * @return A new tuple containing the elements of the other tuple.
+       */
       template <typename ... Gs>
       constexpr
       Tuple<Gs...> concatenate(const Tuple<Gs...>& other) const
@@ -51,6 +83,12 @@ namespace Rodin
         return other;
       }
 
+      /**
+       * @brief Filters the empty tuple based on a predicate.
+       *
+       * @tparam Predicate A template predicate class.
+       * @return An empty Tuple.
+       */
       template <template <class> class Predicate>
       constexpr
       Tuple<> filter() const
@@ -58,11 +96,22 @@ namespace Rodin
         return Tuple{};
       }
 
+      /**
+       * @brief Applies a function to each element of the tuple.
+       *
+       * @tparam Function The type of the function to apply.
+       * @param func The function to apply.
+       */
       template <typename Function>
       constexpr
       void apply(Function&& func)
       {}
 
+      /**
+       * @brief Returns the size of the tuple.
+       *
+       * @return Always returns 0.
+       */
       constexpr
       size_t size() const
       {
@@ -72,27 +121,56 @@ namespace Rodin
 
   Tuple() -> Tuple<>;
 
+  /**
+   * @brief A tuple class that extends std::tuple with additional functionality.
+   *
+   * @tparam T The type of the first element.
+   * @tparam Ts Types of the remaining elements.
+   */
   template <class T, class ... Ts>
   class Tuple<T, Ts...> : public std::tuple<T, Ts...>
   {
     public:
+      /**
+       * @brief Type alias for the element at a given index.
+       *
+       * @tparam Index The index of the element.
+       */
       template <std::size_t Index>
       using Type = typename Utility::ParameterPack<T, Ts...>::template At<Index>;
 
+      /// @brief Parent class type.
       using Parent = std::tuple<T, Ts...>;
 
       using Parent::Parent;
 
+      /**
+       * @brief Copy constructor.
+       *
+       * @param other The tuple to copy.
+       */
       Tuple(const Tuple& other)
         : Parent(other)
       {}
 
+      /**
+        * @brief Move constructor.
+        *
+        * @param other The tuple to move.
+        */
       Tuple(Tuple&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief The number of elements in the tuple.
       static constexpr size_t Size = sizeof...(Ts) + 1;
 
+      /**
+       * @brief Copy assignment operator.
+       *
+       * @param other The tuple to copy from.
+       * @return Reference to this tuple.
+       */
       constexpr
       Tuple& operator=(const Tuple& other)
       {
@@ -101,6 +179,12 @@ namespace Rodin
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       *
+       * @param other The tuple to move from.
+       * @return Reference to this tuple.
+       */
       constexpr
       Tuple& operator=(Tuple&& other)
       {
@@ -108,12 +192,26 @@ namespace Rodin
         return *this;
       }
 
+      /**
+       * @brief Returns the size of the tuple.
+       *
+       * @return The number of elements in the tuple.
+       */
       constexpr
       size_t size() const
       {
         return sizeof...(Ts) + 1;
       }
 
+      /**
+       * @brief Reduces the tuple elements using a binary function.
+       *
+       * @tparam Function The type of the binary function.
+       * @param func The function to apply.
+       * @return The result of the reduction.
+       *
+       * @note Requires the tuple to have at least two elements.
+       */
       template <class Function>
       constexpr
       auto reduce(Function&& func) const
@@ -122,12 +220,26 @@ namespace Rodin
         return reduceImpl<0>(func);
       }
 
+      /**
+       * @brief Computes the Cartesian product with an empty tuple.
+       *
+       * @param other An empty tuple.
+       * @return An empty Tuple.
+       */
       constexpr
       Tuple<> product(const Tuple<>& other) const
       {
         return Tuple<>{};
       }
 
+      /**
+       * @brief Computes the Cartesian product with another tuple.
+       *
+       * @tparam G Type of the first element of the other tuple.
+       * @tparam Gs Types of the remaining elements of the other tuple.
+       * @param other The other tuple.
+       * @return A tuple representing the Cartesian product.
+       */
       template <class G, class ... Gs>
       constexpr
       auto product(const Tuple<G, Gs...>& other) const
@@ -135,6 +247,16 @@ namespace Rodin
         return product([](const auto& a, const auto& b) { return Pair(a, b); }, other);
       }
 
+      /**
+       * @brief Computes the Cartesian product with another tuple using a custom function.
+       *
+       * @tparam Function The type of the function to combine elements.
+       * @tparam G Type of the first element of the other tuple.
+       * @tparam Gs Types of the remaining elements of the other tuple.
+       * @param func The function to combine elements.
+       * @param other The other tuple.
+       * @return A tuple representing the Cartesian product.
+       */
       template <class Function, class G, class ... Gs>
       constexpr
       auto product(Function&& func, const Tuple<G, Gs...>& other) const
@@ -142,6 +264,13 @@ namespace Rodin
         return productImpl<0, 0, Function, G, Gs...>(std::forward<Function>(func), other);
       }
 
+      /**
+       * @brief Zips this tuple with another tuple using a default pairing function.
+       *
+       * @tparam Gs Types of the elements in the other tuple.
+       * @param other The other tuple.
+       * @return A tuple containing pairs of elements.
+       */
       template <class ... Gs>
       constexpr
       auto zip(const Tuple<Gs...>& other) const
@@ -149,6 +278,17 @@ namespace Rodin
         return zip([](const auto& a, const auto& b) { return Pair(a, b); }, other);
       }
 
+      /**
+       * @brief Zips this tuple with one or more other tuples using a custom function.
+       *
+       * @tparam Function The type of the function to combine elements.
+       * @tparam Gs Types of the elements in the first other tuple.
+       * @tparam Os Types of the elements in the additional tuples.
+       * @param func The function to combine elements.
+       * @param t The first other tuple.
+       * @param other Additional tuples to zip.
+       * @return A tuple containing the zipped result.
+       */
       template <class Function, class ... Gs, class ... Os>
       constexpr
       auto zip(Function&& func, const Tuple<Gs...>& t, const Os&... other) const
@@ -157,6 +297,13 @@ namespace Rodin
             std::forward<Function>(func), t, other...);
       }
 
+      /**
+       * @brief Applies a function to each element of the tuple.
+       *
+       * @tparam Function The type of the function.
+       * @param func The function to apply.
+       * @return Reference to this tuple.
+       */
       template <class Function>
       constexpr
       Tuple& apply(Function&& func)
@@ -165,6 +312,13 @@ namespace Rodin
         return *this;
       }
 
+      /**
+       * @brief Applies a function to each element of the tuple (const version).
+       *
+       * @tparam Function The type of the function.
+       * @param func The function to apply.
+       * @return Const reference to this tuple.
+       */
       template <class Function>
       constexpr
       const Tuple& apply(Function&& func) const
@@ -173,6 +327,13 @@ namespace Rodin
         return *this;
       }
 
+      /**
+       * @brief Applies a function to each element of the tuple along with its index.
+       *
+       * @tparam Function The type of the function.
+       * @param func The function to apply. It receives the index and the element.
+       * @return Reference to this tuple.
+       */
       template <class Function>
       constexpr
       Tuple& iapply(Function&& func)
@@ -181,6 +342,12 @@ namespace Rodin
         return *this;
       }
 
+      /**
+       * @brief Returns a reference to the element at the given index.
+       *
+       * @tparam Index The index of the element.
+       * @return Reference to the element.
+       */
       template <std::size_t Index>
       constexpr
       auto& get()
@@ -188,6 +355,12 @@ namespace Rodin
         return std::get<Index>(*this);
       }
 
+      /**
+       * @brief Returns a const reference to the element at the given index.
+       *
+       * @tparam Index The index of the element.
+       * @return Const reference to the element.
+       */
       template <std::size_t Index>
       constexpr
       const auto& get() const
@@ -195,6 +368,12 @@ namespace Rodin
         return std::get<Index>(*this);
       }
 
+      /**
+       * @brief Filters the tuple based on a predicate.
+       *
+       * @tparam Predicate A template predicate class.
+       * @return A new tuple containing only the elements that satisfy the predicate.
+       */
       template <template <class> class Predicate>
       constexpr
       auto filter() const
@@ -202,6 +381,13 @@ namespace Rodin
         return filterImpl<0, Predicate>();
       }
 
+      /**
+       * @brief Transforms each element of the tuple using a function (const version).
+       *
+       * @tparam Function The type of the function.
+       * @param func The transformation function.
+       * @return A new tuple with transformed elements.
+       */
       template <typename Function>
       constexpr
       auto map(Function&& func) const
@@ -209,6 +395,13 @@ namespace Rodin
         return mapImpl(std::index_sequence_for<T, Ts...>(), std::forward<Function>(func));
       }
 
+      /**
+       * @brief Transforms each element of the tuple using a function.
+       *
+       * @tparam Function The type of the function.
+       * @param func The transformation function.
+       * @return A new tuple with transformed elements.
+       */
       template <typename Function>
       constexpr
       auto map(Function&& func)
@@ -216,12 +409,25 @@ namespace Rodin
         return mapImpl(std::index_sequence_for<T, Ts...>(), std::forward<Function>(func));
       }
 
+      /**
+       * @brief Concatenates this tuple with an empty tuple.
+       *
+       * @param other An empty tuple.
+       * @return A new tuple identical to this tuple.
+       */
       constexpr
       Tuple concatenate(const Tuple<>& other) const
       {
         return *this;
       }
 
+      /**
+       * @brief Concatenates this tuple with another tuple.
+       *
+       * @tparam Gs Types of the elements in the other tuple.
+       * @param other The other tuple.
+       * @return A new tuple containing the elements of this tuple followed by those of the other tuple.
+       */
       template <typename ... Gs>
       constexpr
       Tuple<T, Ts..., Gs...> concatenate(const Tuple<Gs...>& other) const
@@ -380,6 +586,15 @@ namespace Rodin
   template <class ... Params>
   Tuple(Params...) -> Tuple<Params...>;
 
+  /**
+   * @brief Generates a tuple of indices.
+   *
+   * @tparam First The starting index.
+   * @tparam Last One past the last index.
+   * @return A tuple containing indices from First to Last-1.
+   *
+   * @note First must be less than Last.
+   */
   template <Index First, Index Last>
   static constexpr auto IndexTuple()
   {

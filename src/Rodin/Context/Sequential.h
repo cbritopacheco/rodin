@@ -7,6 +7,8 @@
 #ifndef RODIN_CONTEXT_SEQUENTIAL_H
 #define RODIN_CONTEXT_SEQUENTIAL_H
 
+#include <boost/serialization/base_object.hpp>
+
 #include "Base.h"
 
 namespace Rodin::Context
@@ -21,7 +23,16 @@ namespace Rodin::Context
    * involve communication across multiple machines.
    */
   class Local : public Base
-  {};
+  {
+    friend class boost::serialization::access;
+
+    public:
+      template <class Archive>
+      void serialize(Archive & ar, const unsigned int version)
+      {
+        ar & boost::serialization::base_object<Base>(*this);
+      }
+  };
 }
 
 #endif

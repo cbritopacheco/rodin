@@ -57,6 +57,26 @@ namespace Rodin::Math
 
   template <class ScalarType>
   using Vector128 = FixedSizeVector<ScalarType, 128>;
+
+  template <class SourceScalar, int SourceSize, class DestScalar, int DestSize>
+  void duplicate(const Eigen::Vector<SourceScalar, SourceSize>& src, Eigen::Vector<DestScalar, DestSize>& dest)
+  {
+    dest.resize(src.size());
+  }
+
+  template <class SourceScalar, int SourceSize, class DestScalar, int DestSize>
+  void copy(const Eigen::Vector<SourceScalar, SourceSize>& src, Eigen::Vector<DestScalar, DestSize>& dest)
+  {
+    assert(src.size() == dest.size());
+    std::copy(src.data(), src.data() + src.size(), dest.data());
+  }
+
+  template <class Scalar, class SourceScalar, int SourceSize, class DestScalar, int DestSize>
+  void axpy(Eigen::Vector<DestScalar, DestSize>& y, Scalar alpha, const Eigen::Vector<SourceScalar, SourceSize>& x)
+  {
+    assert(x.size() == y.size());
+    y.noalias() += alpha * x;
+  }
 }
 
 namespace Rodin::FormLanguage

@@ -8,7 +8,7 @@
 
 namespace Rodin::Assembly::Internal
 {
-  SequentialIteration::SequentialIteration(const Geometry::MeshBase& mesh, Variational::Integrator::Region region)
+  SequentialIteration::SequentialIteration(const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region region)
     : m_mesh(mesh), m_region(region)
   {}
 

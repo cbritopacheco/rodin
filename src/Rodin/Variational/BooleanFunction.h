@@ -38,7 +38,6 @@ namespace Rodin::Variational
 
       virtual ~BooleanFunctionBase() = default;
 
-      inline
       constexpr
       BooleanFunctionBase& traceOf(Geometry::Attribute attr)
       {
@@ -46,7 +45,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       BooleanFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -57,7 +55,6 @@ namespace Rodin::Variational
       /**
        * @note CRTP function to be overriden in Derived class.
        */
-      inline
       const Derived& getDerived() const
       {
         return static_cast<const Derived&>(*this);
@@ -66,14 +63,12 @@ namespace Rodin::Variational
       /**
        * @note CRTP function to be overriden in Derived class.
        */
-      inline
       constexpr
       Boolean getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      inline
       constexpr
       RangeShape getRangeShape() const
       {
@@ -107,14 +102,13 @@ namespace Rodin::Variational
           m_v(other.m_v)
       {}
 
-      inline
       constexpr
       Boolean getValue(const Geometry::Point&) const
       {
         return m_v;
       }
 
-      inline BooleanFunction* copy() const noexcept final override
+      BooleanFunction* copy() const noexcept final override
       {
         return new BooleanFunction(*this);
       }

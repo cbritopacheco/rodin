@@ -8,11 +8,6 @@
 #define RODIN_VARIATIONAL_P1_P1ELEMENT_H
 
 /**
- * @file
- * @brief Header contatining definitions for the class P1Element.
- */
-
-/**
  * @ingroup RodinDirectives
  * @brief Indicates the maximum vector dimension a P1Element
  */
@@ -250,7 +245,7 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Tetrahedron:
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
-          case Geometry::Polytope::Type::TriangularPrism:
+          case Geometry::Polytope::Type::Wedge:
             return 2;
         }
         assert(false);
@@ -305,7 +300,7 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const T& v) const
           {
-            return 0.5 * Math::conj(v(s_nodes[m_g].col(m_i))) * Complex(1, -1);
+            return Math::conj(v(s_nodes[m_g].col(m_i)));
           }
 
         private:
@@ -460,7 +455,7 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Tetrahedron:
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
-          case Geometry::Polytope::Type::TriangularPrism:
+          case Geometry::Polytope::Type::Wedge:
             return 2;
         }
         assert(false);
@@ -699,7 +694,7 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Tetrahedron:
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
-          case Geometry::Polytope::Type::TriangularPrism:
+          case Geometry::Polytope::Type::Wedge:
             return 2;
         }
         assert(false);
