@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Problem&lt;TrialFES, TestFES, Math::SparseMatrix&lt;typename FormLanguage::Mult&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType&gt; ::Type&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::Problem&lt;TrialFES, TestFES, Operator, Vector&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,10 +64,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem&lt;TrialFES, TestFES, Math::SparseMatrix&lt;typename FormLanguage::Mult&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType&gt; ::Type&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;&gt; <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class TrialFES, class TestFES, class Operator, class Vector&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem&lt;TrialFES, TestFES, Operator, Vector&gt; <span class="m-thin">class</span>
         </h1>
-        <p>General class to assemble linear systems with <code><a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a></code> and <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a></code> types in a sequential context.</p>
+        <p>General class to assemble linear systems with <code>Operator</code> and <code>Vector</code> generic types in a sequential context.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -86,7 +86,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Operator, class Vector, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase&lt;Math::SparseMatrix&lt;FormLanguage::Mult&lt;FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, FormLanguage::Traits&lt;TrialFES&gt;::ScalarType&gt; ::Type&gt;, Math::Vector&lt;FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;, FormLanguage::Mult&lt;FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, FormLanguage::Traits&lt;TrialFES&gt;::ScalarType&gt; ::Type&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase&lt;Operator, Vector, FormLanguage::Mult&lt;FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;</a>
             </dt>
             <dd>Base class for variational problem objects.</dd>
           </dl>
@@ -95,8 +95,9 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a6a0e0edc26e4a42e14684cfc3b72bbbf" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFES&gt;&amp; u,
-              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad6caf25b1d75e0b9584b7a5d9e2d4215" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFES&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v,
+              const <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs an empty problem involving the trial function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -137,36 +138,21 @@ $ v $
             </dt>
             <dd>Assembles the underlying linear system to solve.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a93cf1d02d4eceb0dbaf6ab95fddffd33" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) -&gt; VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa075b941100cbf318795b8c6409a039e" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) const -&gt; const VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a62490f07de2d3730a2ffc57a7561d742" class="m-doc">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) -&gt; OperatorType&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afde9d0e2befa6e727e36ce283fed6271" class="m-doc">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) const -&gt; const OperatorType&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aadf16668cbfe020982aaf1530d49bf5a" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a6a0e0edc26e4a42e14684cfc3b72bbbf"><div>
+          <section class="m-doc-details" id="ad6caf25b1d75e0b9584b7a5d9e2d4215"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
+                template&lt;class TrialFES, class TestFES, class Operator, class Vector&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType&gt; ::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a0e0edc26e4a42e14684cfc3b72bbbf" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFES&gt;&amp; u,
-              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFES, TestFES, Operator, Vector&gt;&lt;TrialFES, TestFES, Operator, Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6caf25b1d75e0b9584b7a5d9e2d4215" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFES&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v,
+              const <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs an empty problem involving the trial function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -202,83 +188,19 @@ $ v $
                   <td>v&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
                   <td>Test function</td>
                 </tr>
+                <tr>
+                  <td>axb</td>
+                  <td></td>
+                </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a93cf1d02d4eceb0dbaf6ab95fddffd33"><div>
+          <section class="m-doc-details" id="ad2429ffd7600bef5051f4fab1a8eb0a5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
+                template&lt;class TrialFES, class TestFES, class Operator, class Vector&gt;
               </div>
-              <span class="m-doc-wrap-bumper">VectorType&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType&gt; ::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93cf1d02d4eceb0dbaf6ab95fddffd33" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Reference to the mass vector.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>This must be called only after <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble()</a> has been called.</p>
-          </div></section>
-          <section class="m-doc-details" id="aa075b941100cbf318795b8c6409a039e"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const VectorType&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType&gt; ::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa075b941100cbf318795b8c6409a039e" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Constant reference to the mass vector.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>This must be called only after <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble()</a> has been called.</p>
-          </div></section>
-          <section class="m-doc-details" id="a62490f07de2d3730a2ffc57a7561d742"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">OperatorType&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType&gt; ::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a62490f07de2d3730a2ffc57a7561d742" class="m-doc-self">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Reference to the stiffness operator.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>This must be called only after <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble()</a> has been called.</p>
-          </div></section>
-          <section class="m-doc-details" id="afde9d0e2befa6e727e36ce283fed6271"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const OperatorType&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType&gt; ::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afde9d0e2befa6e727e36ce283fed6271" class="m-doc-self">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Constant reference to the stiffness operator.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>This must be called only after <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble()</a> has been called.</p>
-          </div></section>
-          <section class="m-doc-details" id="aadf16668cbfe020982aaf1530d49bf5a"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>* Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Mult&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType&gt; ::<wbr />Type&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aadf16668cbfe020982aaf1530d49bf5a" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>* Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFES, TestFES, Operator, Vector&gt;&lt;TrialFES, TestFES, Operator, Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -125,6 +125,22 @@
             </dt>
             <dd>Indicates the <a href="namespace_rodin.html" class="m-doc">Rodin</a> third-party source directory.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">#define <a href="#ga0fe6c09738be7522e7e7af3424dbb10a" class="m-doc">RODIN_THREAD_SAFE</a></span>
+            </dt>
+            <dd>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> is built with thread safety enabled.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a href="#ga5ed30f72ba5c3e021127abca33020f5c" class="m-doc">RODIN_MULTITHREADED</a></span>
+            </dt>
+            <dd>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> supports multithreading.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a href="#ga02e476f33e8d5257e12e4e896f446b02" class="m-doc">RODIN_USE_APPLE_ACCELERATE</a></span>
+            </dt>
+            <dd>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> is built with Apple Accelerate support.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a href="#gae5bb37e09db60bb9bc53013339319bae" class="m-doc">RODIN_USE_SCOTCH</a></span>
+            </dt>
+            <dd>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> is built with Scotch support.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">#define <a href="#ga0b42798412414673b17869482dbfc80e" class="m-doc">RODIN_MAXIMAL_SPACE_DIMENSION</a></span>
             </dt>
             <dd>Indicates the maximal space dimension.</dd>
@@ -181,10 +197,14 @@ $ s \geq 0 $
               <span class="m-doc-wrap-bumper">#define <a href="#ga62fd1c9b95f2f3a6aaaa358a92e17081" class="m-doc">RODIN_P0_MAX_VECTOR_DIMENSION</a></span>
             </dt>
             <dd>Indicates the maximum vector dimension a P0Element.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">#define <a href="#ga91e0c7f2521d66ab0e07afda91ea59fc" class="m-doc">RODIN_P1_MAX_VECTOR_DIMENSION</a></span>
+            <dt id="ga91e0c7f2521d66ab0e07afda91ea59fc">
+              <span class="m-doc-wrap-bumper">#define <a href="#ga91e0c7f2521d66ab0e07afda91ea59fc" class="m-doc-self">RODIN_P1_MAX_VECTOR_DIMENSION</a></span>
             </dt>
             <dd>Indicates the maximum vector dimension a P1Element.</dd>
+            <dt id="gae7d92ff63d536aae73c71b686665868d">
+              <span class="m-doc-wrap-bumper">#define <a href="#gae7d92ff63d536aae73c71b686665868d" class="m-doc-self">RODIN_PK_MAX_VECTOR_DIMENSION</a></span>
+            </dt>
+            <dd>Indicates the maximum vector dimension a PkElement.</dd>
           </dl>
         </section>
         <section>
@@ -289,6 +309,46 @@ $ s \geq 0 $
             </h3>
             <p>Indicates the <a href="namespace_rodin.html" class="m-doc">Rodin</a> third-party source directory.</p>
 <h4 id="autotoc_md7">Utilization</h4><pre class="m-code"><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">RODIN_THIRD_PARTY_DIR</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="ga0fe6c09738be7522e7e7af3424dbb10a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a href="#ga0fe6c09738be7522e7e7af3424dbb10a" class="m-doc-self">RODIN_THREAD_SAFE</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_configure_8h_8in.html">&lt;Rodin/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> is built with thread safety enabled.</p>
+<h4 id="autotoc_md8">Utilization</h4><pre class="m-code"><span class="cp">#ifdef RODIN_THREAD_SAFE</span>
+<span class="w">  </span><span class="c1">// Code that requires thread safety features.</span>
+<span class="cp">#endif</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="ga5ed30f72ba5c3e021127abca33020f5c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a href="#ga5ed30f72ba5c3e021127abca33020f5c" class="m-doc-self">RODIN_MULTITHREADED</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_configure_8h_8in.html">&lt;Rodin/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> supports multithreading.</p>
+<h4 id="autotoc_md9">Utilization</h4><pre class="m-code"><span class="cp">#ifdef RODIN_MULTITHREADED</span>
+<span class="w">  </span><span class="c1">// Code that leverages multithreading capabilities.</span>
+<span class="cp">#endif</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="ga02e476f33e8d5257e12e4e896f446b02"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a href="#ga02e476f33e8d5257e12e4e896f446b02" class="m-doc-self">RODIN_USE_APPLE_ACCELERATE</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_configure_8h_8in.html">&lt;Rodin/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> is built with Apple Accelerate support.</p>
+<h4 id="autotoc_md10">Utilization</h4><pre class="m-code"><span class="cp">#ifdef RODIN_USE_APPLE_ACCELERATE</span>
+<span class="w">  </span><span class="c1">// Code that uses the Apple Accelerate framework for optimized computations.</span>
+<span class="cp">#endif</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="gae5bb37e09db60bb9bc53013339319bae"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a href="#gae5bb37e09db60bb9bc53013339319bae" class="m-doc-self">RODIN_USE_SCOTCH</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_configure_8h_8in.html">&lt;Rodin/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Indicates if <a href="namespace_rodin.html" class="m-doc">Rodin</a> is built with Scotch support.</p>
+<h4 id="autotoc_md11">Utilization</h4><pre class="m-code"><span class="cp">#ifdef RODIN_USE_SCOTCH</span>
+<span class="w">  </span><span class="c1">// Code that uses the Scotch library for partioning.</span>
+<span class="cp">#endif</span></pre>
           </div></section>
           <section class="m-doc-details" id="ga0b42798412414673b17869482dbfc80e"><div>
             <h3>
@@ -487,13 +547,6 @@ $ s \geq 0 $
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0_element_8h.html">&lt;Rodin/Variational/P0/P0Element.h&gt;</a></div>
             </h3>
             <p>Indicates the maximum vector dimension a P0Element.</p>
-          </div></section>
-          <section class="m-doc-details" id="ga91e0c7f2521d66ab0e07afda91ea59fc"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">#define <a href="#ga91e0c7f2521d66ab0e07afda91ea59fc" class="m-doc-self">RODIN_P1_MAX_VECTOR_DIMENSION</a></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_element_8h.html">&lt;Rodin/Variational/P1/P1Element.h&gt;</a></div>
-            </h3>
-            <p>Indicates the maximum vector dimension a P1Element.</p>
           </div></section>
         </section>
       </div>

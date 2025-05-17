@@ -64,7 +64,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Derived&gt;</div>
+          <div class="m-doc-template">template&lt;class Mesh, class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>FiniteElementSpace <span class="m-thin">class</span>
         </h1>
         <p>Represernts a finite element space.</p>
@@ -103,6 +103,10 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a454a2020aefbc34d41040472431bf9bc" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const Mesh&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the constant reference to the mesh upon which the finite element space is built on.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#adbbffb3b019d13b0ac6aab7d801ee49b" class="m-doc">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const auto&amp;</span>
             </dt>
@@ -123,12 +127,29 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a454a2020aefbc34d41040472431bf9bc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Mesh, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const Mesh&amp; Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a454a2020aefbc34d41040472431bf9bc" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the constant reference to the mesh upon which the finite element space is built on.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Constant reference to mesh</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="adbbffb3b019d13b0ac6aab7d801ee49b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Derived&gt;
+                template&lt;class Mesh, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adbbffb3b019d13b0ac6aab7d801ee49b" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adbbffb3b019d13b0ac6aab7d801ee49b" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
             </h3>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
@@ -136,10 +157,10 @@
           <section class="m-doc-details" id="afc88aad4f21fcd13e381ccca52c085f3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Derived&gt;
+                template&lt;class Mesh, class Derived&gt;
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc88aad4f21fcd13e381ccca52c085f3" class="m-doc-self">getMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc88aad4f21fcd13e381ccca52c085f3" class="m-doc-self">getMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               const T&amp; v) const</span></span>
             </h3>
             <p>Returns the mapping of the function from the physical element to the reference element.</p>
@@ -287,10 +308,10 @@ $ S $
           <section class="m-doc-details" id="a31ecf869ce108652a0809a0a717bac35"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Derived&gt;
+                template&lt;class Mesh, class Derived&gt;
                 template&lt;class CallableType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31ecf869ce108652a0809a0a717bac35" class="m-doc-self">getInverseMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31ecf869ce108652a0809a0a717bac35" class="m-doc-self">getInverseMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               const CallableType&amp; v) const</span></span>
             </h3>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>

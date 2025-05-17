@@ -192,15 +192,9 @@
             <dd>Computes the weights from the data.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Vector&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0a67f1358e9d3b65b5d9818cc73034d3" class="m-doc">setWeights</a>(</span><span class="m-doc-wrap">Vector&amp;&amp; weights) -&gt; Derived&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8e0e4f8f5fb301acbd40d0c87cfb99c2" class="m-doc">setWeights</a>(</span><span class="m-doc-wrap">const Vector&amp; weights) -&gt; Derived&amp;</span>
             </dt>
             <dd>Sets the weights in the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object and computes the values at all the degrees of freedom.</dd>
-            <dt id="aeab9ae33467a3450878a3eeb0b2b93cf">
-              <div class="m-doc-template">template&lt;class Vector, class Matrix&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aeab9ae33467a3450878a3eeb0b2b93cf" class="m-doc-self">setWeightsAndData</a>(</span><span class="m-doc-wrap">Vector&amp;&amp; weights,
-              Matrix&amp;&amp; data) -&gt; Derived&amp;</span>
-            </dt>
-            <dd>Sets the weights and data in the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object. No computation is performed.</dd>
             <dt id="a63c8e6e5e3382fb2e1116fc833f75966">
               <span class="m-doc-wrap-bumper">auto <a href="#a63c8e6e5e3382fb2e1116fc833f75966" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               size_t local) const -&gt; auto</span>
@@ -319,13 +313,13 @@
             <p>Computes the weights from the data.</p>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a0a67f1358e9d3b65b5d9818cc73034d3"><div>
+          <section class="m-doc-details" id="a8e0e4f8f5fb301acbd40d0c87cfb99c2"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES, class Derived&gt;
                 template&lt;class Vector&gt;
               </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;FES, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a67f1358e9d3b65b5d9818cc73034d3" class="m-doc-self">setWeights</a>(</span><span class="m-doc-wrap">Vector&amp;&amp; weights)</span></span>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;FES, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e0e4f8f5fb301acbd40d0c87cfb99c2" class="m-doc-self">setWeights</a>(</span><span class="m-doc-wrap">const Vector&amp; weights)</span></span>
             </h3>
             <p>Sets the weights in the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object and computes the values at all the degrees of freedom.</p>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>

@@ -100,6 +100,18 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc">isSurface</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
             <dd>Indicates whether the mesh is a surface or not.</dd>
+            <dt id="a24a4e01af898769244e11a4f94ca8fd0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a24a4e01af898769244e11a4f94ca8fd0" class="m-doc-self">getVertexCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Gets the number of vertices in the mesh.</dd>
+            <dt id="aa26e370d99a09c33f3f759c4bc52800e">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa26e370d99a09c33f3f759c4bc52800e" class="m-doc-self">getFaceCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Gets the number of faces in the mesh.</dd>
+            <dt id="a3275fb6c3d9c1b19129046c40d555972">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3275fb6c3d9c1b19129046c40d555972" class="m-doc-self">getCellCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Gets the number of cells in the mesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0f3b89fad95e67e618f74858cd5927a3" class="m-doc">isSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -116,38 +128,22 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aed7007d20f3a38dba19ef8fd566abb46" class="m-doc">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the dimension of the ambient space.</dd>
-            <dt id="a24a4e01af898769244e11a4f94ca8fd0">
-              <span class="m-doc-wrap-bumper">auto <a href="#a24a4e01af898769244e11a4f94ca8fd0" class="m-doc-self">getVertexCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
-            </dt>
-            <dd>Gets the number of vertices in the mesh.</dd>
-            <dt id="aa26e370d99a09c33f3f759c4bc52800e">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa26e370d99a09c33f3f759c4bc52800e" class="m-doc-self">getFaceCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
-            </dt>
-            <dd>Gets the number of faces in the mesh.</dd>
-            <dt id="a3275fb6c3d9c1b19129046c40d555972">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3275fb6c3d9c1b19129046c40d555972" class="m-doc-self">getCellCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
-            </dt>
-            <dd>Gets the number of cells in the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5d7466c8a0ecd0aa519114b4f530b874" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa90969db1bab02c4a614787ead38bd00" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the total volume of the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af75e518cd72bc9e13b5b7f0f38344f7a" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae1086268930278ab20529d42d39c430e" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the sum of the volumes of the cells given by the specified attribute.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a67e7164cbae76b389702dbfa3b9f618c" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad34d7af265f67b82725809c1d00c016b" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the total perimeter of the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae9fc2ed0af3c09cc4ab05030358e9c60" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5bc492688ef067f853a2500600975cdb" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the sum of the perimeters of the cells given by the specified attribute.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a61b52a7cb2a29f7ffec47f1e5d54f021" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets the labels of the domain cells in the mesh.</dd>
             <dt id="ab95d4c2eb2f1fe32ea874dd6cc496e84">
               <span class="m-doc-wrap-bumper">auto <a href="#ab95d4c2eb2f1fe32ea874dd6cc496e84" class="m-doc-self">getBoundary</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -164,21 +160,21 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a74a7c23d97678d379a3ebc5f6ce278f5" class="m-doc-self">getPolytopeCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the count of polytope of the given type.</dd>
-            <dt id="a81d514db9e1216649cba746d424362c5">
-              <span class="m-doc-wrap-bumper">auto <a href="#a81d514db9e1216649cba746d424362c5" class="m-doc-self">getCell</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const -&gt; <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a5fad8e0be2fc8f6e429d7528c59d66ec">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5fad8e0be2fc8f6e429d7528c59d66ec" class="m-doc-self">getCell</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets an <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> to the cells of the mesh.</dd>
-            <dt id="a625c80f5f5aeed76d3810ba92712c836">
-              <span class="m-doc-wrap-bumper">auto <a href="#a625c80f5f5aeed76d3810ba92712c836" class="m-doc-self">getFace</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a01f4516e22b25edf32c08f47e35e7834">
+              <span class="m-doc-wrap-bumper">auto <a href="#a01f4516e22b25edf32c08f47e35e7834" class="m-doc-self">getFace</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets a <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> to the faces of the mesh.</dd>
-            <dt id="a76f14b1c1b05dbaaeca6729abc0a22cc">
-              <span class="m-doc-wrap-bumper">auto <a href="#a76f14b1c1b05dbaaeca6729abc0a22cc" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const -&gt; <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a51e5396aac400d4b1bab86560f7a3e59">
+              <span class="m-doc-wrap-bumper">auto <a href="#a51e5396aac400d4b1bab86560f7a3e59" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets a <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> to the vertices of the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3681b371accf6f9999639169454af5b1" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afa79eb0f79ce5382dd3ff599afd0b746" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets a <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> to the polytopes of the given dimension of the mesh.</dd>
             <dt>
@@ -229,7 +225,7 @@ $
             </dt>
             <dd>Gets a constant reference to the mesh connectivity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9964e332a29ec79a845bd38ce34d0ccf" class="m-doc">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; Eigen::Map&lt;const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad3864915d0fdbd406ea5efe9967c8d2" class="m-doc">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; Eigen::Map&lt;const Math::PointVector&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the space coordinates of the vertex at the given index.</dd>
             <dt>
@@ -239,8 +235,8 @@ $
             </dt>
             <dd>Sets the space coordinate of the vertex at the given index for the given coordinate index.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0dade2712336a5ebeb35ea0a7845a00f" class="m-doc">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
-              const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; coords) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f0d1f672741dc07564e2b4a8d2d83f9" class="m-doc">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              const Math::PointVector&amp; coords) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Sets the space coordinate of the vertex at the given index for the given coordinate index.</dd>
           </dl>
@@ -318,9 +314,9 @@ $
             </table>
 <aside class="m-note m-default"><h4>See also</h4><p><a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc">getDimension() const</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="a5d7466c8a0ecd0aa519114b4f530b874"><div>
+          <section class="m-doc-details" id="aa90969db1bab02c4a614787ead38bd00"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d7466c8a0ecd0aa519114b4f530b874" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa90969db1bab02c4a614787ead38bd00" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the total volume of the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -332,9 +328,9 @@ $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="af75e518cd72bc9e13b5b7f0f38344f7a"><div>
+          <section class="m-doc-details" id="ae1086268930278ab20529d42d39c430e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af75e518cd72bc9e13b5b7f0f38344f7a" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae1086268930278ab20529d42d39c430e" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the sum of the volumes of the cells given by the specified attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -356,9 +352,9 @@ $
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>If the element attribute does not exist then this function will return 0 as the volume.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a67e7164cbae76b389702dbfa3b9f618c"><div>
+          <section class="m-doc-details" id="ad34d7af265f67b82725809c1d00c016b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67e7164cbae76b389702dbfa3b9f618c" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad34d7af265f67b82725809c1d00c016b" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the total perimeter of the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -370,9 +366,9 @@ $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ae9fc2ed0af3c09cc4ab05030358e9c60"><div>
+          <section class="m-doc-details" id="a5bc492688ef067f853a2500600975cdb"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9fc2ed0af3c09cc4ab05030358e9c60" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bc492688ef067f853a2500600975cdb" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the sum of the perimeters of the cells given by the specified attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -394,21 +390,6 @@ $
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>If the element attribute does not exist then this function will return 0 as the perimeter.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a61b52a7cb2a29f7ffec47f1e5d54f021"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a61b52a7cb2a29f7ffec47f1e5d54f021" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Gets the labels of the domain cells in the mesh.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Set of all the attributes in the mesh object.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-default"><h4>See also</h4><p>getBoundaryAttributes() const</p></aside>
-          </div></section>
           <section class="m-doc-details" id="aa57e302d3532878660146d122c8d3af6"><div>
             <h3>
               <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa57e302d3532878660146d122c8d3af6" class="m-doc-self">getPolytopeCount</a>(</span><span class="m-doc-wrap">size_t dimension) const <span class="m-label m-warning">pure virtual</span></span></span>
@@ -426,10 +407,10 @@ $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a3681b371accf6f9999639169454af5b1"><div>
+          <section class="m-doc-details" id="afa79eb0f79ce5382dd3ff599afd0b746"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3681b371accf6f9999639169454af5b1" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa79eb0f79ce5382dd3ff599afd0b746" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets a <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> to the polytopes of the given dimension of the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -594,9 +575,9 @@ $ (d, i) $
 </g>
 </svg>-polytope.</p>
           </div></section>
-          <section class="m-doc-details" id="a9964e332a29ec79a845bd38ce34d0ccf"><div>
+          <section class="m-doc-details" id="aad3864915d0fdbd406ea5efe9967c8d2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">Eigen::Map&lt;const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9964e332a29ec79a845bd38ce34d0ccf" class="m-doc-self">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">Eigen::Map&lt;const Math::PointVector&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad3864915d0fdbd406ea5efe9967c8d2" class="m-doc-self">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the space coordinates of the vertex at the given index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -665,10 +646,10 @@ $ (0, 5, 10) $
 <span class="n">mesh</span><span class="p">.</span><span class="n">setVertexCoordinates</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">setVertexCoordinates</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">10.0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a0dade2712336a5ebeb35ea0a7845a00f"><div>
+          <section class="m-doc-details" id="a3f0d1f672741dc07564e2b4a8d2d83f9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0dade2712336a5ebeb35ea0a7845a00f" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
-              const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; coords) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f0d1f672741dc07564e2b4a8d2d83f9" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              const Math::PointVector&amp; coords) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets the space coordinate of the vertex at the given index for the given coordinate index.</p>
             <table class="m-table m-fullwidth m-flat">
