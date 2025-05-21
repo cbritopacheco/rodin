@@ -10,10 +10,12 @@
 
 namespace Rodin::Geometry
 {
+  /**
+   * @brief Alias for Sharder<Context::MPI>.
+   */
   using MPISharder = Sharder<Context::MPI>;
 
   /**
-   * @class MPISharder
    * @brief Utility for distributing a global mesh across MPI ranks by
    *        splitting into per-rank shards, scattering them from a root,
    *        and gathering the local mesh on each rank.

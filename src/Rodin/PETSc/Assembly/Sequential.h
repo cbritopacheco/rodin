@@ -45,7 +45,7 @@ namespace Rodin::Assembly
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::SequentialIteration seq(mesh, lfi.getRegion());
+          SequentialIteration seq(mesh, lfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.empty() || attrs.count(it->getAttribute()))
@@ -120,7 +120,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::SequentialIteration seq(mesh, bfi.getRegion());
+          SequentialIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.empty() || attrs.count(it->getAttribute()))
@@ -143,8 +143,8 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs  = bfi.getTestAttributes();
-          Internal::SequentialIteration trialseq(mesh, bfi.getTrialRegion());
-          Internal::SequentialIteration testseq(mesh, bfi.getTestRegion());
+          SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+          SequentialIteration testseq(mesh, bfi.getTestRegion());
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
             if (testAttrs.empty() || testAttrs.count(teIt->getAttribute()))

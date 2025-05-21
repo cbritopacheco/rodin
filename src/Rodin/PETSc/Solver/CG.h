@@ -1,4 +1,3 @@
-// CG.h
 #ifndef RODIN_SOLVER_PETSC_CG_H
 #define RODIN_SOLVER_PETSC_CG_H
 

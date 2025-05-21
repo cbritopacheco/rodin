@@ -14,6 +14,7 @@
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "Rodin/Assembly/ForwardDecls.h"
+#include "Rodin/Assembly/Default.h"
 
 #include "Exceptions/TrialFunctionMismatchException.h"
 #include "Exceptions/TestFunctionMismatchException.h"
@@ -142,6 +143,10 @@ namespace Rodin::Variational
   class BilinearForm final
     : public BilinearFormBase<Operator>
   {
+    using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
+
+    using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
+
     public:
       using TrialFESScalarType  = typename FormLanguage::Traits<TrialFES>::ScalarType;
 
@@ -167,9 +172,8 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = BilinearFormBase<OperatorType>;
 
-      using SequentialAssembly = Assembly::Sequential<OperatorType, BilinearForm>;
-
-      using MultithreadedAssembly = Assembly::Multithreaded<OperatorType, BilinearForm>;
+      using DefaultAssembly =
+        typename Assembly::Default<TrialFESContextType, TestFESContextType>::template Type<OperatorType, BilinearForm>;
 
       /**
        * @brief Constructs a LinearForm with a reference to a TestFunction and
@@ -192,11 +196,7 @@ namespace Rodin::Variational
         : Parent(op),
           m_u(u), m_v(v)
       {
-#ifdef RODIN_MULTITHREADED
-        m_assembly.reset(new MultithreadedAssembly);
-#else
-        m_assembly.reset(new SequentialAssembly);
-#endif
+        m_assembly.reset(new DefaultAssembly);
       }
 
       /**
@@ -208,11 +208,7 @@ namespace Rodin::Variational
         : Parent(std::move(op)),
           m_u(u), m_v(v)
       {
-#ifdef RODIN_MULTITHREADED
-        m_assembly.reset(new MultithreadedAssembly);
-#else
-        m_assembly.reset(new SequentialAssembly);
-#endif
+        m_assembly.reset(new DefaultAssembly);
       }
 
       constexpr

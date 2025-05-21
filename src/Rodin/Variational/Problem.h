@@ -25,6 +25,7 @@
 #include "Rodin/Utility/Extract.h"
 #include "Rodin/Utility/Product.h"
 #include "Rodin/Utility/Wrap.h"
+#include "Rodin/Assembly/Input.h"
 
 #include "ForwardDecls.h"
 

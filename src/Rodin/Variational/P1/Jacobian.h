@@ -21,7 +21,7 @@ namespace Rodin::FormLanguage
   template <class Number, class Mesh>
   struct Traits<Variational::Jacobian<Variational::GridFunction<Variational::P1<Math::Vector<Number>, Mesh>>>>
   {
-    using FESType = Variational::P1<Math::Vector<Number>>;
+    using FESType = Variational::P1<Math::Vector<Number>, Mesh>;
     using OperandType = Variational::GridFunction<FESType>;
   };
 
@@ -30,7 +30,7 @@ namespace Rodin::FormLanguage
     Variational::Jacobian<
       Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Number>, Mesh>, Space>>>
   {
-    using FESType = Variational::P1<Math::Vector<Number>>;
+    using FESType = Variational::P1<Math::Vector<Number>, Mesh>;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
     using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };

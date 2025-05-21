@@ -30,28 +30,26 @@
 
 namespace Rodin::Assembly
 {
-  namespace Internal
+  template <>
+  class MultithreadedIteration<Geometry::Mesh<Context::Local>>
   {
-    class MultithreadedIteration
-    {
-      public:
-        using MeshType = Geometry::Mesh<Context::Local>;
+    public:
+      using MeshType = Geometry::Mesh<Context::Local>;
 
-        MultithreadedIteration(const MeshType& mesh, Variational::Integrator::Region);
+      MultithreadedIteration(const MeshType& mesh, Variational::Integrator::Region);
 
-        Geometry::PolytopeIterator getIterator(Index i) const;
+      Geometry::PolytopeIterator getIterator(Index i) const;
 
-        size_t getDimension() const;
+      size_t getDimension() const;
 
-        size_t getCount() const;
+      size_t getCount() const;
 
-        bool filter(Index i) const;
+      bool filter(Index i) const;
 
-      private:
-        std::reference_wrapper<const MeshType> m_mesh;
-        Variational::Integrator::Region m_region;
-    };
-  }
+    private:
+      std::reference_wrapper<const MeshType> m_mesh;
+      Variational::Integrator::Region m_region;
+  };
 
   template <class TrialFES, class TestFES>
   class Multithreaded<
@@ -151,7 +149,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::MultithreadedIteration seq(mesh, bfi.getRegion());
+          MultithreadedIteration seq(mesh, bfi.getRegion());
           const size_t d = seq.getDimension();
           auto loop =
             [&](const Index start, const Index end)
@@ -207,7 +205,7 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::MultithreadedIteration testseq(mesh, bfi.getTestRegion());
+          MultithreadedIteration testseq(mesh, bfi.getTestRegion());
           const size_t d = testseq.getDimension();
           auto loop =
             [&](const Index start, const Index end)
@@ -223,7 +221,7 @@ namespace Rodin::Assembly
                   if (testAttrs.size() == 0 || testAttrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto teIt = testseq.getIterator(i);
-                    Internal::SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
+                    SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
                     for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                     {
                       if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
@@ -477,7 +475,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::MultithreadedIteration seq(mesh, bfi.getRegion());
+          MultithreadedIteration seq(mesh, bfi.getRegion());
           const size_t d = seq.getDimension();
           auto loop =
             [&](const Index start, const Index end)
@@ -525,7 +523,7 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::MultithreadedIteration testseq(mesh, bfi.getTestRegion());
+          MultithreadedIteration testseq(mesh, bfi.getTestRegion());
           const size_t d = testseq.getDimension();
           const auto loop =
             [&](const Index start, const Index end)
@@ -542,7 +540,7 @@ namespace Rodin::Assembly
                   if (testAttrs.size() == 0 || testAttrs.count(mesh.getAttribute(d, i)))
                   {
                     const auto teIt = testseq.getIterator(i);
-                    Internal::SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
+                    SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
                     for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                     {
                       if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
@@ -673,7 +671,7 @@ namespace Rodin::Assembly
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::MultithreadedIteration seq(mesh, lfi.getRegion());
+          MultithreadedIteration seq(mesh, lfi.getRegion());
           const size_t d = seq.getDimension();
           const auto loop =
             [&](const Index start, const Index end)

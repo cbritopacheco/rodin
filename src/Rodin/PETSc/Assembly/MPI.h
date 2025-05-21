@@ -57,7 +57,7 @@ namespace Rodin::Assembly
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::SequentialIteration seq(mesh, lfi.getRegion());
+          Internal::MPIIteration seq(mesh, lfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             const size_t d = it->getDimension();
@@ -133,9 +133,7 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         ierr = MatSetFromOptions(A);
         assert(ierr == PETSC_SUCCESS);
-        ierr = MatMPIAIJSetPreallocation(A,
-                                         /*d_nz*/PETSC_DECIDE, nullptr,
-                                         /*o_nz*/PETSC_DECIDE, nullptr);
+        ierr = MatMPIAIJSetPreallocation(A, PETSC_DECIDE, nullptr, PETSC_DECIDE, nullptr);
         assert(ierr == PETSC_SUCCESS);
         ierr = MatSetUp(A);
         assert(ierr == PETSC_SUCCESS);

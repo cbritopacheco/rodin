@@ -51,7 +51,7 @@ namespace Rodin::Variational
    * @see P1
    */
 
-  template <class Range, class Mesh = Geometry::Mesh<Context::Local>>
+  template <class Range, class Mesh>
   class P1;
 
   /**
@@ -193,7 +193,7 @@ namespace Rodin::Variational
 
       P1& operator=(P1&& other) = default;
 
-      const auto& getElementIndex()
+      const auto& getElementIndex() const
       {
         return s_elements;
       }

@@ -12,7 +12,7 @@
 #include "Rodin/FormLanguage/List.h"
 
 #include "Rodin/Assembly/ForwardDecls.h"
-#include "Rodin/Assembly/Multithreaded.h"
+#include "Rodin/Assembly/Default.h"
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Exceptions/TestFunctionMismatchException.h"
@@ -139,9 +139,8 @@ namespace Rodin::Variational
 
       using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
 
-      using SequentialAssembly = Assembly::Sequential<VectorType, LinearForm>;
-
-      using MultithreadedAssembly = Assembly::Multithreaded<VectorType, LinearForm>;
+      using DefaultAssembly =
+        typename Assembly::Default<ContextType>::template Type<VectorType, LinearForm>;
 
       using Parent = LinearFormBase<VectorType>;
 
@@ -166,11 +165,7 @@ namespace Rodin::Variational
         : Parent(vec),
           m_v(v)
       {
-#ifdef RODIN_MULTITHREADED
-        m_assembly.reset(new MultithreadedAssembly);
-#else
-        m_assembly.reset(new SequentialAssembly);
-#endif
+        m_assembly.reset(new DefaultAssembly);
       }
 
       /**
@@ -184,11 +179,7 @@ namespace Rodin::Variational
         : Parent(std::move(vec)),
           m_v(v)
       {
-#ifdef RODIN_MULTITHREADED
-        m_assembly.reset(new MultithreadedAssembly);
-#else
-        m_assembly.reset(new SequentialAssembly);
-#endif
+        m_assembly.reset(new DefaultAssembly);
       }
 
       constexpr

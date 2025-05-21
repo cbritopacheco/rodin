@@ -6,13 +6,14 @@
  */
 #include "Sequential.h"
 
-namespace Rodin::Assembly::Internal
+namespace Rodin::Assembly
 {
-  SequentialIteration::SequentialIteration(const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region region)
+  SequentialIteration<Geometry::Mesh<Context::Local>>
+  ::SequentialIteration(const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region region)
     : m_mesh(mesh), m_region(region)
   {}
 
-  Geometry::PolytopeIterator SequentialIteration::getIterator() const
+  Geometry::PolytopeIterator SequentialIteration<Geometry::Mesh<Context::Local>>::getIterator() const
   {
     Geometry::PolytopeIterator it;
     switch (m_region)

@@ -55,6 +55,11 @@ namespace Rodin::Geometry
 
       Shard& operator=(Shard&& other);
 
+      /**
+       * @brief Indicates whether the given polytope is a ghost element.
+       * @param[in] d Dimension of the polytope
+       * @param[in] idx Local index of the polytope
+       */
       bool isGhost(size_t d, Index idx) const;
 
       const PolytopeMap& getPolytopeMap(size_t d) const;

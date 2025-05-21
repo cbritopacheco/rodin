@@ -16,9 +16,10 @@
 #include "ForwardDecls.h"
 #include "AssemblyBase.h"
 
-namespace Rodin::Assembly::Internal
+namespace Rodin::Assembly
 {
-  class SequentialIteration
+  template <>
+  class SequentialIteration<Geometry::Mesh<Context::Local>>
   {
     public:
       using MeshType = Geometry::Mesh<Context::Local>;
@@ -31,6 +32,10 @@ namespace Rodin::Assembly::Internal
       std::reference_wrapper<const MeshType> m_mesh;
       Variational::Integrator::Region m_region;
   };
+
+  SequentialIteration(
+      const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region)
+    -> SequentialIteration<Geometry::Mesh<Context::Local>>;
 }
 
 namespace Rodin::Assembly
@@ -82,7 +87,7 @@ namespace Rodin::Assembly
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::SequentialIteration seq(mesh, lfi.getRegion());
+          SequentialIteration seq(mesh, lfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
@@ -172,7 +177,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::SequentialIteration seq(mesh, bfi.getRegion());
+          SequentialIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
@@ -190,8 +195,8 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::SequentialIteration trialseq(mesh, bfi.getTrialRegion());
-          Internal::SequentialIteration testseq(mesh, bfi.getTestRegion());
+          SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+          SequentialIteration testseq(mesh, bfi.getTestRegion());
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
             if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
@@ -357,7 +362,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::SequentialIteration seq(mesh, bfi.getRegion());
+          SequentialIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
@@ -381,12 +386,12 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::SequentialIteration testseq(mesh, bfi.getTestRegion());
+          SequentialIteration testseq(mesh, bfi.getTestRegion());
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
             if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
             {
-              Internal::SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+              SequentialIteration trialseq(mesh, bfi.getTrialRegion());
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
                 if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))

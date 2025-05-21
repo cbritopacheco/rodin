@@ -36,6 +36,8 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpace<MeshType, P1<RangeType, MeshType>>;
 
+      using Parent::getGlobalIndex;
+
       P1(const MeshType& mesh)
         : m_mesh(mesh),
           m_fes(mesh.getShard())
@@ -103,12 +105,12 @@ namespace Rodin::Variational
       {
         const auto& mesh = getMesh();
         const auto& shard = mesh.getShard();
-        const auto idx = mesh.getGlobalIndex(d, globalIdx);
+        const auto idx = mesh.getLocalIndex(d, globalIdx);
         boost::optional<Geometry::Polytope::Type> local;
-        if (local)
+        if (idx)
         {
           if (!shard.isGhost(d, *idx))
-            local = shard.getGeometry(d, *local);
+            local = shard.getGeometry(d, *idx);
         }
         auto res = boost::mpi::all_reduce(
             mesh.getContext().getCommunicator(), local,

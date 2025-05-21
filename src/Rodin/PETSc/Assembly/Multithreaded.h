@@ -94,7 +94,7 @@ namespace Rodin::Assembly
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::MultithreadedIteration seq(mesh, lfi.getRegion());
+          MultithreadedIteration seq(mesh, lfi.getRegion());
           const PetscInt dim = PetscInt(seq.getDimension());
           const auto  loop = [&](PetscInt start, PetscInt end)
           {
@@ -238,7 +238,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::MultithreadedIteration seq(mesh, bfi.getRegion());
+          MultithreadedIteration seq(mesh, bfi.getRegion());
           const PetscInt dim = PetscInt(seq.getDimension());
 
           const auto loop = [&](PetscInt start, PetscInt end)
@@ -284,7 +284,7 @@ namespace Rodin::Assembly
         { 
           const auto& tAttrs = bfi.getTestAttributes();
           const auto& rAttrs = bfi.getTrialAttributes();
-          Internal::MultithreadedIteration testSeq(mesh, bfi.getTestRegion());
+          MultithreadedIteration testSeq(mesh, bfi.getTestRegion());
           const PetscInt dimT = PetscInt(testSeq.getDimension());
 
           const auto loop = [&](PetscInt start, PetscInt end)
@@ -300,7 +300,7 @@ namespace Rodin::Assembly
                 continue;
 
               const auto te = testSeq.getIterator(ti);
-              Internal::SequentialIteration trialSeq{ mesh, integrator->getTrialRegion() };
+              SequentialIteration trialSeq{ mesh, integrator->getTrialRegion() };
               for (auto tr = trialSeq.getIterator(); tr; ++tr)
               {
                 if (!rAttrs.empty() && !rAttrs.count(tr->getAttribute()))

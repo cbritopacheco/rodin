@@ -23,6 +23,12 @@ namespace Rodin::Assembly
 
   template <class ... Ts>
   class BilinearFormTupleAssemblyInput;
+
+  template <class Mesh>
+  class SequentialIteration;
+
+  template <class Mesh>
+  class MultithreadedIteration;
 }
 
 #endif
