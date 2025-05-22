@@ -51,6 +51,10 @@ namespace Rodin::Assembly
       Variational::Integrator::Region m_region;
   };
 
+  MultithreadedIteration(
+      const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region)
+    -> MultithreadedIteration<Geometry::Mesh<Context::Local>>;
+
   template <class TrialFES, class TestFES>
   class Multithreaded<
     std::vector<Eigen::Triplet<
