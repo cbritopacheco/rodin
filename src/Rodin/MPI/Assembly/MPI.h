@@ -5,7 +5,7 @@
 
 #include "Rodin/MPI/Geometry/Mesh.h"
 
-namespace Rodin::Assembly::Internal
+namespace Rodin::Assembly
 {
   class MPIIteration
   {

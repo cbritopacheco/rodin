@@ -9,6 +9,7 @@
 
 #include "PETSc/Assembly/Sequential.h"
 #include "PETSc/Assembly/Multithreaded.h"
+#include "PETSc/Assembly/MPI.h"
 
 #include "PETSc/Solver/CG.h"
 

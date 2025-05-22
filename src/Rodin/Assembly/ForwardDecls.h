@@ -29,6 +29,9 @@ namespace Rodin::Assembly
 
   template <class Mesh>
   class MultithreadedIteration;
+
+  template <class ... Ts>
+  class Default;
 }
 
 #endif

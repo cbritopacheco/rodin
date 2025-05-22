@@ -1,6 +1,6 @@
 #include "MPI.h"
 
-namespace Rodin::Assembly::Internal
+namespace Rodin::Assembly
 {
   MPIIteration::MPIIteration(const Geometry::Mesh<Context::MPI>& mesh, Variational::Integrator::Region region)
     : m_mesh(mesh), m_region(region)

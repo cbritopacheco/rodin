@@ -1,14 +1,15 @@
 #ifndef RODIN_ASSEMBLY_DEFAULT_H
 #define RODIN_ASSEMBLY_DEFAULT_H
 
-#include "ForwardDecls.h"
 #include "Rodin/Context/Sequential.h"
+
+#include "ForwardDecls.h"
+
+#include "Sequential.h"
+#include "Multithreaded.h"
 
 namespace Rodin::Assembly
 {
-  template <class ... Ts>
-  class Default;
-
   template <>
   class Default<Context::Local>
   {

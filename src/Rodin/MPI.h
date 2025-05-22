@@ -2,6 +2,7 @@
 #define RODIN_MPI_H
 
 #include "MPI/Context.h"
-#include "MPI/Variational/P1.h"
+#include "MPI/Assembly.h"
+#include "MPI/Variational.h"
 
 #endif

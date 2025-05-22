@@ -38,6 +38,89 @@ namespace Rodin::Variational
 
       using Parent::getGlobalIndex;
 
+      /**
+       * @brief Mapping for the scalar/complex P1 space.
+       */
+      template <class FunctionDerived>
+      class Mapping : public FiniteElementSpaceMappingBase<Mapping<FunctionDerived>>
+      {
+        public:
+          using FunctionType = FunctionBase<FunctionDerived>;
+
+          Mapping(const Geometry::Polytope& polytope, const FunctionType& v)
+            : m_polytope(polytope), m_trans(m_polytope.getTransformation()), m_v(v.copy())
+          {}
+
+          Mapping(const Mapping&) = default;
+
+          auto operator()(const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            return getFunction()(p);
+          }
+
+          template <class T>
+          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            return getFunction()(res, p);
+          }
+
+          constexpr
+          const FunctionType& getFunction() const
+          {
+            assert(m_v);
+            return *m_v;
+          }
+
+        private:
+          Geometry::Polytope m_polytope;
+          std::reference_wrapper<const Geometry::PolytopeTransformation> m_trans;
+          std::unique_ptr<FunctionType> m_v;
+      };
+
+      /**
+       * @brief Inverse mapping for the scalar/complex P1 space.
+       */
+      template <class CallableType>
+      class InverseMapping : public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
+      {
+        public:
+          using FunctionType = CallableType;
+
+          /**
+           * @param[in] polytope Reference to polytope on the mesh.
+           * @param[in] v Reference to the function defined on the reference
+           * space.
+           */
+          InverseMapping(const FunctionType& v)
+            : m_v(v)
+          {}
+
+          InverseMapping(const InverseMapping&) = default;
+
+          constexpr
+          auto operator()(const Geometry::Point& p) const
+          {
+            return getFunction()(p.getReferenceCoordinates());
+          }
+
+          template <class T>
+          auto operator()(T& res, const Geometry::Point& p) const
+          {
+            return getFunction()(res, p.getReferenceCoordinates());
+          }
+
+          constexpr
+          const FunctionType& getFunction() const
+          {
+            return m_v.get();
+          }
+
+        private:
+          std::reference_wrapper<const FunctionType> m_v;
+      };
+
       P1(const MeshType& mesh)
         : m_mesh(mesh),
           m_fes(mesh.getShard())
@@ -68,7 +151,7 @@ namespace Rodin::Variational
 
       P1& operator=(P1&& other) = default;
 
-      const FESType& getLocal() const
+      const FESType& getShard() const
       {
         return m_fes;
       }
@@ -128,7 +211,7 @@ namespace Rodin::Variational
 
       size_t getVectorDimension() const override
       {
-        const auto& fes = getLocal();
+        const auto& fes = this->getShard();
         return fes.getVectorDimension();
       }
 
@@ -141,7 +224,7 @@ namespace Rodin::Variational
       {
         const auto& mesh = getMesh();
         const auto& shard = mesh.getShard();
-        const auto& fes = getLocal();
+        const auto& fes = this->getShard();
         const auto idx = mesh.getLocalIndex(d, globalIdx);
         IndexArray local;
         if (idx)
@@ -164,7 +247,7 @@ namespace Rodin::Variational
         const auto& [d, globalIdx] = p;
         const auto& mesh = getMesh();
         const auto& shard = mesh.getShard();
-        const auto& fes = getLocal();
+        const auto& fes = this->getShard();
         const auto idx = mesh.getLocalIndex(d, globalIdx);
         boost::optional<Index> local;
         if (idx)

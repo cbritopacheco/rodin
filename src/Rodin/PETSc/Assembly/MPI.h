@@ -7,10 +7,11 @@
 #include <boost/mpi/collectives.hpp>
 
 #include "Rodin/Assembly/AssemblyBase.h"
-#include "Rodin/Assembly/MPI.h"
 #include "Rodin/Variational/LinearForm.h"
 #include "Rodin/Variational/BilinearForm.h"
-#include "Rodin/Geometry/MPI/Mesh.h"
+
+#include "Rodin/MPI/Geometry.h"
+#include "Rodin/MPI/Assembly.h"
 
 namespace Rodin::Assembly
 {
@@ -57,7 +58,7 @@ namespace Rodin::Assembly
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::MPIIteration seq(mesh, lfi.getRegion());
+          MPIIteration seq(mesh, lfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             const size_t d = it->getDimension();
@@ -144,7 +145,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::MPIIteration seq(mesh, bfi.getRegion());
+          MPIIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             auto d = it->getDimension();
@@ -169,57 +170,57 @@ namespace Rodin::Assembly
         }
 
         // Global coupling contributions skipping ghosts
-        for (auto& bfi : input.getGlobalBFIs())
-        {
-          const auto& testAttrs  = bfi.getTestAttributes();
-          const auto& trialAttrs = bfi.getTrialAttributes();
-          Internal::MPIIteration testSeq(mesh, bfi.getTestRegion());
-          Internal::SequentialIteration trialSeq(mesh, bfi.getTrialRegion());
-          for (auto teIt = testSeq.getIterator(); teIt; ++teIt)
-          {
-            auto dt = teIt->getDimension();
-            auto tg = teIt->getIndex();
-            if (shard.isGhost(dt, tg))
-              continue;
+        // for (auto& bfi : input.getGlobalBFIs())
+        // {
+        //   const auto& testAttrs  = bfi.getTestAttributes();
+        //   const auto& trialAttrs = bfi.getTrialAttributes();
+        //   MPIIteration testSeq(mesh, bfi.getTestRegion());
+        //   SequentialIteration trialSeq(mesh, bfi.getTrialRegion());
+        //   for (auto teIt = testSeq.getIterator(); teIt; ++teIt)
+        //   {
+        //     auto dt = teIt->getDimension();
+        //     auto tg = teIt->getIndex();
+        //     if (shard.isGhost(dt, tg))
+        //       continue;
 
-            const auto& tmap = shard.getPolytopeMap(dt).left;
-            auto tLoc = tmap.find(tg);
-            if (tLoc == tmap.end())
-              continue;
-            auto tLid = tLoc->second;
+        //     const auto& tmap = shard.getPolytopeMap(dt).left;
+        //     auto tLoc = tmap.find(tg);
+        //     if (tLoc == tmap.end())
+        //       continue;
+        //     auto tLid = tLoc->second;
 
-            if (testAttrs.empty() || testAttrs.count(teIt->getAttribute()))
-            {
-              for (auto trIt = trialSeq.getIterator(); trIt; ++trIt)
-              {
-                auto dr = trIt->getDimension();
-                auto rg = trIt->getIndex();
-                if (shard.isGhost(dr, rg))
-                  continue;
+        //     if (testAttrs.empty() || testAttrs.count(teIt->getAttribute()))
+        //     {
+        //       for (auto trIt = trialSeq.getIterator(); trIt; ++trIt)
+        //       {
+        //         auto dr = trIt->getDimension();
+        //         auto rg = trIt->getIndex();
+        //         if (shard.isGhost(dr, rg))
+        //           continue;
 
-                const auto& rmap = shard.getPolytopeMap(dr).left;
-                auto rLoc = rmap.find(rg);
-                if (rLoc == rmap.end())
-                  continue;
-                auto rLid = rLoc->second;
+        //         const auto& rmap = shard.getPolytopeMap(dr).left;
+        //         auto rLoc = rmap.find(rg);
+        //         if (rLoc == rmap.end())
+        //           continue;
+        //         auto rLid = rLoc->second;
 
-                if (trialAttrs.empty() || trialAttrs.count(trIt->getAttribute()))
-                {
-                  bfi.setPolytope(*trIt, *teIt);
-                  const auto& rows = testFES .getDOFs(dt, tLid);
-                  const auto& cols = trialFES.getDOFs(dr, rLid);
-                  for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
-                    for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
-                    {
-                      const PetscScalar v = PetscScalar(bfi.integrate(j, i));
-                      ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
-                      assert(ierr == PETSC_SUCCESS);
-                    }
-                }
-              }
-            }
-          }
-        }
+        //         if (trialAttrs.empty() || trialAttrs.count(trIt->getAttribute()))
+        //         {
+        //           bfi.setPolytope(*trIt, *teIt);
+        //           const auto& rows = testFES .getDOFs(dt, tLid);
+        //           const auto& cols = trialFES.getDOFs(dr, rLid);
+        //           for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
+        //             for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
+        //             {
+        //               const PetscScalar v = PetscScalar(bfi.integrate(j, i));
+        //               ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
+        //               assert(ierr == PETSC_SUCCESS);
+        //             }
+        //         }
+        //       }
+        //     }
+        //   }
+        // }
 
         ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);

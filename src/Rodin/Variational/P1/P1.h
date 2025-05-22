@@ -51,7 +51,7 @@ namespace Rodin::Variational
    * @see P1
    */
 
-  template <class Range, class Mesh>
+  template <class Range, class Mesh = Geometry::Mesh<Context::Local>>
   class P1;
 
   /**
