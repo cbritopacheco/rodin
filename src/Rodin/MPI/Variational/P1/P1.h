@@ -232,11 +232,10 @@ namespace Rodin::Variational
           if (!shard.isGhost(d, *idx))
             local = fes.getDOFs(d, *idx);
         }
-        auto res = boost::mpi::all_reduce(
+        auto dofs = boost::mpi::all_reduce(
             mesh.getContext().getCommunicator(), local,
             [](auto const& a, auto const& b) { return a.size() > 0 ? a : b; });
-        assert(res.size() > 0);
-        auto& dofs = (m_dofs[d][globalIdx] = std::move(res));
+        assert(dofs.size() > 0);
         for (auto& dof : dofs)
           dof = getGlobalIndex(dof);
         return dofs;
