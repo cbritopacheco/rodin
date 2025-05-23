@@ -31,14 +31,18 @@ namespace Rodin::Math
         ::Mat& A = this->getOperator();
         ::Vec& b = this->getVector();
 
+        PetscErrorCode ierr;
+        MPI_Comm comm;
+        ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(A), &comm);
+        assert(ierr == PETSC_SUCCESS);
+
         std::vector<PetscInt> ids;
         ids.reserve(dofs.size());
         for (auto const& kv : dofs)
           ids.push_back(PetscInt(kv.first) + PetscInt(offset));
+
         IS is;
-        ISCreateGeneral(PETSC_COMM_WORLD,
-                        PetscInt(ids.size()), ids.data(),
-                        PETSC_COPY_VALUES, &is);
+        ISCreateGeneral(PETSC_COMM_WORLD, PetscInt(ids.size()), ids.data(), PETSC_COPY_VALUES, &is);
 
         Vec x;
         VecDuplicate(b, &x);

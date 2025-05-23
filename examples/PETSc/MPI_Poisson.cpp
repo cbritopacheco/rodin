@@ -76,13 +76,13 @@ int main(int argc, char** argv)
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, Zero());
-  // poisson.assemble();
+  poisson.assemble();
 
-  LinearForm lf(v, b);
-  lf = Integral(f, v);
-  lf.assemble();
+  // LinearForm lf(v, b);
+  // lf = Integral(f, v);
+  // lf.assemble();
 
-  VecView(b, PETSC_VIEWER_STDOUT_WORLD);
+  // VecView(b, PETSC_VIEWER_STDOUT_WORLD);
 
   // BilinearForm bf(u, v, a);
   // bf = Integral(Grad(u), Grad(v));
