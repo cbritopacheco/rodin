@@ -77,30 +77,6 @@ namespace Rodin::Geometry
         return m_ghosts;
       }
 
-      Real getVolume() const override;
-
-      Real getVolume(Attribute attr) const override;
-
-      Real getVolume(const FlatSet<Attribute>& attr) const override;
-
-      Real getPerimeter() const override;
-
-      Real getPerimeter(Attribute attr) const override;
-
-      Real getPerimeter(const FlatSet<Attribute>& attr) const override;
-
-      Real getArea() const override;
-
-      Real getArea(Attribute attr) const override;
-
-      Real getArea(const FlatSet<Attribute>& attr) const override;
-
-      Real getMeasure(size_t d) const override;
-
-      Real getMeasure(size_t d, Attribute attr) const override;
-
-      Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const override;
-
     private:
       std::vector<PolytopeMap> m_s2ps;
       std::vector<IndexSet> m_ghosts;

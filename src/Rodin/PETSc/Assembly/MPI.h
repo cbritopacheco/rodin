@@ -44,8 +44,8 @@ namespace Rodin::Assembly
         const auto& comm  = ctx.getCommunicator();
 
         // Compute local and global sizes via Boost.MPI
-        const PetscInt localSize = PetscInt(fes.getSize());
-        const PetscInt globalSize = boost::mpi::all_reduce(comm, localSize, std::plus<PetscInt>());
+        const PetscInt localSize = PetscInt(fes.getShard().getSize());
+        const PetscInt globalSize = PetscInt(fes.getSize());
 
         ierr = VecSetSizes(res, localSize, globalSize);
         assert(ierr == PETSC_SUCCESS);
@@ -124,10 +124,10 @@ namespace Rodin::Assembly
         const auto& comm     = ctx.getCommunicator();
 
         // Compute local/global sizes
-        const PetscInt localRows = PetscInt(testFES.getSize());
-        const PetscInt localCols = PetscInt(trialFES.getSize());
-        const PetscInt globalRows = boost::mpi::all_reduce(comm, localRows, std::plus<PetscInt>());
-        const PetscInt globalCols = boost::mpi::all_reduce(comm, localCols, std::plus<PetscInt>());
+        const PetscInt localRows = PetscInt(testFES.getShard().getSize());
+        const PetscInt localCols = PetscInt(trialFES.getShard().getSize());
+        const PetscInt globalRows = PetscInt(testFES.getSize());
+        const PetscInt globalCols = PetscInt(trialFES.getSize());
 
         // Create/init Mat
         ierr = MatSetSizes(A, localRows, localCols, globalRows, globalCols);
@@ -156,8 +156,8 @@ namespace Rodin::Assembly
             if (attrs.empty() || attrs.count(it->getAttribute()))
             {
               bfi.setPolytope(*it);
-              const auto& rows = testFES .getDOFs(d, i);
-              const auto& cols = trialFES.getDOFs(d, i);
+              const auto& rows = testFES.getShard().getDOFs(d, i);
+              const auto& cols = trialFES.getShard().getDOFs(d, i);
               for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
                 for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
                 {

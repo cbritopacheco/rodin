@@ -1,4 +1,5 @@
 #include <boost/serialization/optional.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 #include "Mesh.h"
 
@@ -54,29 +55,66 @@ namespace Rodin::Geometry
 
   size_t MPIMesh::getPolytopeCount(size_t d) const
   {
-    const auto& comm = m_context.getCommunicator();
+    boost::mpi::communicator comm = m_context.getCommunicator();
     const auto& shard = getShard();
-    size_t res = shard.getPolytopeCount(d) - shard.getGhosts()[d].size();
-    boost::mpi::all_reduce(comm, res, std::plus<size_t>());
-    return res;
+    std::vector<size_t> localIdx;
+    localIdx.reserve(shard.getPolytopeCount(d));
+    for (auto it = shard.getPolytope(d); it; ++it)
+    {
+      const Index idx = it->getIndex();
+      if (!shard.isGhost(d, idx))
+        localIdx.push_back(getGlobalIndex(d, idx));
+    }
+    const size_t localMax = localIdx.empty() ? 0 : *std::max_element(localIdx.begin(), localIdx.end());
+    const size_t globalMax = boost::mpi::all_reduce(comm, localMax, boost::mpi::maximum<size_t>());
+    const size_t N = globalMax + 1;
+    using Block = boost::dynamic_bitset<>::block_type;
+    constexpr size_t BITS = sizeof(Block) * 8;
+    size_t nBlocks = (N + BITS - 1) / BITS;
+    std::vector<Block> local_blocks(nBlocks, 0);
+    for (auto g : localIdx)
+      local_blocks[g / BITS] |= (Block(1) << (g % BITS));
+    std::vector<Block> globalBlocks(nBlocks);
+    boost::mpi::all_reduce(
+        comm, local_blocks.data(), nBlocks, globalBlocks.data(), std::bit_or<Block>());
+    size_t total = 0;
+    for (auto w : globalBlocks)
+        total += __builtin_popcountll(w);
+    return total;
   }
 
   size_t MPIMesh::getPolytopeCount(Polytope::Type g) const
   {
-    const auto& comm = m_context.getCommunicator();
-    const auto& shard = getShard();
     const size_t d = Polytope::getGeometryDimension(g);
-    size_t res = 0;
+    boost::mpi::communicator comm = m_context.getCommunicator();
+    const auto& shard = getShard();
+    std::vector<size_t> localIdx;
+    localIdx.reserve(shard.getPolytopeCount(d));
     for (auto it = shard.getPolytope(d); it; ++it)
     {
-      if (!shard.isGhost(d, it->getIndex()))
+      const Index idx = it->getIndex();
+      if (!shard.isGhost(d, idx))
       {
         if (it->getGeometry() == g)
-          res++;
+          localIdx.push_back(getGlobalIndex(d, idx));
       }
     }
-    boost::mpi::all_reduce(comm, res, std::plus<size_t>());
-    return res;
+    const size_t localMax = localIdx.empty() ? 0 : *std::max_element(localIdx.begin(), localIdx.end());
+    const size_t globalMax = boost::mpi::all_reduce(comm, localMax, boost::mpi::maximum<size_t>());
+    const size_t N = globalMax + 1;
+    using Block = boost::dynamic_bitset<>::block_type;
+    constexpr size_t BITS = sizeof(Block) * 8;
+    size_t nBlocks = (N + BITS - 1) / BITS;
+    std::vector<Block> local_blocks(nBlocks, 0);
+    for (auto g : localIdx)
+      local_blocks[g / BITS] |= (Block(1) << (g % BITS));
+    std::vector<Block> globalBlocks(nBlocks);
+    boost::mpi::all_reduce(
+        comm, local_blocks.data(), nBlocks, globalBlocks.data(), std::bit_or<Block>());
+    size_t total = 0;
+    for (auto w : globalBlocks)
+        total += __builtin_popcountll(w);
+    return total;
   }
 
   Shard& MPIMesh::getShard()
@@ -209,35 +247,16 @@ namespace Rodin::Geometry
     return boost::mpi::all_reduce(comm, local, std::logical_or<bool>());
   }
 
-  Real MPIMesh::getMeasure(size_t d) const
-  {
-    const auto& comm = m_context.getCommunicator();
-    const auto& shard = getShard();
-    Real local = shard.getMeasure(d);
-    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
-  }
-
-  Real MPIMesh::getMeasure(size_t d, Attribute attr) const
-  {
-    const auto& comm = m_context.getCommunicator();
-    const auto& shard = getShard();
-    Real local = shard.getMeasure(d, attr);
-    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
-  }
-
-  Real MPIMesh::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
-  {
-    const auto& comm = m_context.getCommunicator();
-    const auto& shard = getShard();
-    Real local = shard.getMeasure(d, attrs);
-    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
-  }
-
   Real MPIMesh::getVolume() const
   {
     const auto& comm = m_context.getCommunicator();
     const auto& shard = getShard();
-    Real local = shard.getVolume();
+    Real local = 0;
+    for (auto it = shard.getPolytope(3); it; ++it)
+    {
+      if (!shard.isGhost(3, it->getIndex()))
+        local += it->getMeasure();
+    }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
   }
 
@@ -245,39 +264,31 @@ namespace Rodin::Geometry
   {
     const auto& comm = m_context.getCommunicator();
     const auto& shard = getShard();
-    Real local = shard.getVolume(attr);
+    Real local = 0;
+    for (auto it = shard.getPolytope(3); it; ++it)
+    {
+      if (it->getAttribute() == attr)
+      {
+        if (!shard.isGhost(3, it->getIndex()))
+          local += it->getMeasure();
+      }
+    }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
   }
 
-  Real MPIMesh::getVolume(const FlatSet<Attribute>& attrs) const
+  Real MPIMesh::getVolume(const FlatSet<Attribute>& attr) const
   {
     const auto& comm = m_context.getCommunicator();
     const auto& shard = getShard();
-    Real local = shard.getVolume(attrs);
-    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
-  }
-
-  Real MPIMesh::getArea() const
-  {
-    const auto& comm = m_context.getCommunicator();
-    const auto& shard = getShard();
-    Real local = shard.getArea();
-    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
-  }
-
-  Real MPIMesh::getArea(Attribute attr) const
-  {
-    const auto& comm = m_context.getCommunicator();
-    const auto& shard = getShard();
-    Real local = shard.getArea(attr);
-    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
-  }
-
-  Real MPIMesh::getArea(const FlatSet<Attribute>& attrs) const
-  {
-    const auto& comm = m_context.getCommunicator();
-    const auto& shard = getShard();
-    Real local = shard.getArea(attrs);
+    Real local = 0;
+    for (auto it = shard.getPolytope(3); it; ++it)
+    {
+      if (attr.contains(it->getAttribute()))
+      {
+        if (!shard.isGhost(3, it->getIndex()))
+          local += it->getMeasure();
+      }
+    }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
   }
 
@@ -285,7 +296,12 @@ namespace Rodin::Geometry
   {
     const auto& comm = m_context.getCommunicator();
     const auto& shard = getShard();
-    Real local = shard.getPerimeter();
+    Real local = 0;
+    for (auto it = shard.getBoundary(); it; ++it)
+    {
+      if (!shard.isGhost(it->getDimension(), it->getIndex()))
+        local += it->getMeasure();
+    }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
   }
 
@@ -293,15 +309,121 @@ namespace Rodin::Geometry
   {
     const auto& comm = m_context.getCommunicator();
     const auto& shard = getShard();
-    Real local = shard.getPerimeter(attr);
+    Real local = 0;
+    for (auto it = shard.getBoundary(); it; ++it)
+    {
+      if (it->getAttribute() == attr)
+      {
+        if (!shard.isGhost(it->getDimension(), it->getIndex()))
+          local += it->getMeasure();
+      }
+    }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
   }
 
-  Real MPIMesh::getPerimeter(const FlatSet<Attribute>& attrs) const
+  Real MPIMesh::getPerimeter(const FlatSet<Attribute>& attr) const
   {
     const auto& comm = m_context.getCommunicator();
     const auto& shard = getShard();
-    Real local = shard.getPerimeter(attrs);
+    Real local = 0;
+    for (auto it = shard.getBoundary(); it; ++it)
+    {
+      if (attr.contains(it->getAttribute()))
+      {
+        if (!shard.isGhost(it->getDimension(), it->getIndex()))
+          local += it->getMeasure();
+      }
+    }
+    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
+  }
+
+  Real MPIMesh::getArea() const
+  {
+    const auto& comm = m_context.getCommunicator();
+    const auto& shard = getShard();
+    Real local = 0;
+    for (auto it = shard.getPolytope(2); it; ++it)
+    {
+      if (!shard.isGhost(2, it->getIndex()))
+        local += it->getMeasure();
+    }
+    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
+  }
+
+  Real MPIMesh::getArea(Attribute attr) const
+  {
+    const auto& comm = m_context.getCommunicator();
+    const auto& shard = getShard();
+    Real local = 0;
+    for (auto it = shard.getPolytope(2); it; ++it)
+    {
+      if (it->getAttribute() == attr)
+      {
+        if (!shard.isGhost(2, it->getIndex()))
+          local += it->getMeasure();
+      }
+    }
+    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
+  }
+
+  Real MPIMesh::getArea(const FlatSet<Attribute>& attr) const
+  {
+    const auto& comm = m_context.getCommunicator();
+    const auto& shard = getShard();
+    Real local = 0;
+    for (auto it = shard.getPolytope(2); it; ++it)
+    {
+      if (attr.contains(it->getAttribute()))
+      {
+        if (!shard.isGhost(2, it->getIndex()))
+          local += it->getMeasure();
+      }
+    }
+    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
+  }
+
+  Real MPIMesh::getMeasure(size_t d) const
+  {
+    const auto& comm = m_context.getCommunicator();
+    const auto& shard = getShard();
+    Real local = 0;
+    for (auto it = shard.getPolytope(d); it; ++it)
+    {
+      if (!shard.isGhost(d, it->getIndex()))
+        local += it->getMeasure();
+    }
+    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
+  }
+
+  Real MPIMesh::getMeasure(size_t d, Attribute attr) const
+  {
+    const auto& comm = m_context.getCommunicator();
+    const auto& shard = getShard();
+    Real local = 0;
+    for (auto it = shard.getPolytope(d); it; ++it)
+    {
+      if (it->getAttribute() == attr)
+      {
+        if (!shard.isGhost(d, it->getIndex()))
+          local += it->getMeasure();
+      }
+    }
+    return boost::mpi::all_reduce(comm, local, std::plus<Real>());
+  }
+
+  Real MPIMesh::getMeasure(size_t d, const FlatSet<Attribute>& attr) const
+  {
+    const auto& comm = m_context.getCommunicator();
+    const auto& shard = getShard();
+    Real local = 0;
+    for (auto it = shard.getPolytope(d); it; ++it)
+    {
+      if (attr.contains(it->getAttribute()))
+      {
+        if (!shard.isGhost(d, it->getIndex()))
+          local += it->getMeasure();
+      }
+    }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
   }
 

@@ -22,13 +22,17 @@ int main(int argc, char** argv)
   mpi::environment env(argc, argv);
   mpi::communicator world;
   Context::MPI mpi(env, world);
-  Geometry::MPISharder sharder(mpi);
 
+  PetscErrorCode ierr;
+  ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+  assert(ierr == PETSC_SUCCESS);
+
+  Geometry::MPISharder sharder(mpi);
   if (world.rank() == 0)
   {
     std::cout << "Sharding\n";
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 32, 32 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 2);
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
@@ -37,8 +41,18 @@ int main(int argc, char** argv)
     sharder.scatter(0);
   }
 
+  std::ostringstream mesh_name, sol_name;
+  mesh_name << "mesh." << std::setfill('0') << std::setw(6) << world.rank();
+  std::string filename = mesh_name.str();
+
   std::cout << "Gather\n";
   auto mesh = sharder.gather(0);
+  std::cout << "Vertex count: " << mesh.getVertexCount() << "\n";
+
+  std::cout << "Local count: " << mesh.getShard().getVertexCount() << "\n";
+  std::cout << "Ghosts: " << mesh.getShard().getGhosts()[0].size() << "\n";
+  mesh.save(filename, IO::FileFormat::MFEM);
+  std::cout << "Saved\n";
 
   Mat a;
   MatCreate(mpi.getCommunicator(), &a);
@@ -62,13 +76,27 @@ int main(int argc, char** argv)
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, Zero());
-  poisson.assemble();
+  // poisson.assemble();
 
-  CG(poisson).solve();
+  LinearForm lf(v, b);
+  lf = Integral(f, v);
+  lf.assemble();
+
+  VecView(b, PETSC_VIEWER_STDOUT_WORLD);
+
+  // BilinearForm bf(u, v, a);
+  // bf = Integral(Grad(u), Grad(v));
+  // bf.assemble();
+
+  // poisson.assemble();
+
+  // CG(poisson).solve();
 
   // mpiMesh.getShard().save(
   //     "Gathered" + std::to_string(world.rank()) + ".mesh",
   //     IO::FileFormat::MEDIT);
   // mpiMesh.save("Gathered" + std::to_string(world.rank()) + ".mesh", IO::FileFormat::MEDIT);
+
+  PetscFinalize();
 }
 
