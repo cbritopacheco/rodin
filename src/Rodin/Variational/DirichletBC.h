@@ -13,6 +13,9 @@
 #include "Rodin/Utility.h"
 #include "Rodin/FormLanguage/List.h"
 
+#include "Rodin/Assembly/ForwardDecls.h"
+#include "Rodin/Assembly/Default.h"
+
 #include "ForwardDecls.h"
 
 #include "Function.h"
@@ -119,6 +122,11 @@ namespace Rodin::Variational
 
       using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
+      using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+
+      using DefaultAssembly =
+        typename Assembly::Default<ContextType>::template Type<DOFs, DirichletBC>;
+
       /// Parent class
       using Parent = DirichletBCBase<ScalarType>;
 
@@ -129,7 +137,9 @@ namespace Rodin::Variational
        */
       DirichletBC(const OperandType& u, const ValueType& v)
         : m_u(u), m_value(v.copy())
-      {}
+      {
+        m_assembly.reset(new DefaultAssembly);
+      }
 
       /**
        * @brief Copy constructor
@@ -212,37 +222,7 @@ namespace Rodin::Variational
        */
       void assemble() override
       {
-        const auto& fes = m_u.get().getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        Geometry::FaceIterator it;
-        if (m_essBdr.size() > 0)
-          it = mesh.getFace();
-        else
-          it = mesh.getBoundary();
-        m_dofs.clear();
-        for (; !it.end(); ++it)
-        {
-          const auto& polytope = *it;
-          if (m_essBdr.size() == 0 || m_essBdr.count(polytope.getAttribute()))
-          {
-            const size_t d = polytope.getDimension();
-            const size_t i = polytope.getIndex();
-            const auto& fe = fes.getFiniteElement(d, i);
-            const auto& mapping =
-              fes.getMapping({ d, i }, getValue().template cast<FESRangeType>());
-            for (Index local = 0; local < fe.getCount(); local++)
-            {
-              const Index global = fes.getGlobalIndex({ d, i }, local);
-              auto find = m_dofs.find(global);
-              if (find == m_dofs.end())
-              {
-                const auto& lf = fe.getLinearForm(local);
-                const auto s = lf(mapping);
-                m_dofs.insert(find, std::pair{ global, s });
-              }
-            }
-          }
-        }
+        m_assembly->execute(m_dofs, { m_u.get(), *m_value, m_essBdr });
       }
 
       bool isComponent() const override
@@ -252,7 +232,7 @@ namespace Rodin::Variational
 
       const OperandType& getOperand() const override
       {
-        return m_u;
+        return m_u.get();
       }
 
       const ValueType& getValue() const override
@@ -266,6 +246,12 @@ namespace Rodin::Variational
         return m_dofs;
       }
 
+      const Assembly::AssemblyBase<IndexMap<ScalarType>, DirichletBC>& getAssembly() const
+      {
+        assert(m_assembly);
+        return *m_assembly;
+      }
+
       DirichletBC* copy() const noexcept override
       {
         return new DirichletBC(*this);
@@ -276,6 +262,8 @@ namespace Rodin::Variational
       std::unique_ptr<ValueType> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
       IndexMap<ScalarType> m_dofs;
+
+      std::unique_ptr<Assembly::AssemblyBase<IndexMap<ScalarType>, DirichletBC>> m_assembly;
   };
 
   /**

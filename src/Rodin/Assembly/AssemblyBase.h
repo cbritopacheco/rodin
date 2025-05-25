@@ -96,6 +96,33 @@ namespace Rodin::Assembly
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
+
+  template <class Scalar, class FES, class ValueDerived>
+  class AssemblyBase<
+    IndexMap<Scalar>,
+    Variational::DirichletBC<
+      Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>>
+    : public FormLanguage::Base
+  {
+    public:
+      using ScalarType = Scalar;
+
+      using ValueType = Variational::FunctionBase<ValueDerived>;
+
+      using InputType = DirichletBCAssemblyInput<Scalar, FES, ValueType>;
+
+      AssemblyBase() = default;
+
+      AssemblyBase(const AssemblyBase&) = default;
+
+      AssemblyBase(AssemblyBase&&) = default;
+
+      virtual ~AssemblyBase() = default;
+
+      virtual void execute(IndexMap<ScalarType>& out, const InputType& data) const = 0;
+
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
 }
 
 #endif

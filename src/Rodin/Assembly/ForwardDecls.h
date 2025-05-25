@@ -24,6 +24,9 @@ namespace Rodin::Assembly
   template <class ... Ts>
   class BilinearFormTupleAssemblyInput;
 
+  template <class Scalar, class FES, class ValueDerived>
+  class DirichletBCAssemblyInput;
+
   template <class Mesh>
   class SequentialIteration;
 

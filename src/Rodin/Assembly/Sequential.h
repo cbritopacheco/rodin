@@ -606,6 +606,86 @@ namespace Rodin::Assembly
           return new Sequential(*this);
         }
     };
+
+
+  template <class Scalar, class FES, class ValueDerived>
+  class Sequential<
+    IndexMap<Scalar>,
+    Variational::DirichletBC<
+      Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>> final
+    : public AssemblyBase<
+        IndexMap<Scalar>,
+        Variational::DirichletBC<
+          Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>>
+  {
+    public:
+      using FESType = FES;
+
+      using TrialFunctionType = Variational::TrialFunction<FES>;
+
+      using ValueType = Variational::FunctionBase<ValueDerived>;
+
+      using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
+
+      using Parent = AssemblyBase<IndexMap<Scalar>, DirichletBCType>;
+
+      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
+      using InputType = typename Parent::InputType;
+
+      Sequential() = default;
+
+      Sequential(const Sequential& other)
+        : Parent(other)
+      {}
+
+      Sequential(Sequential&& other)
+        : Parent(std::move(other))
+      {}
+
+      void execute(IndexMap<Scalar>& res, const InputType& input) const override
+      {
+        const auto& u = input.getOperand();
+        const auto& essBdr = input.getEssentialBoundary();
+        const auto& value = input.getValue();
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        Geometry::FaceIterator it;
+        if (essBdr.size() > 0)
+          it = mesh.getFace();
+        else
+          it = mesh.getBoundary();
+        res.clear();
+        for (; !it.end(); ++it)
+        {
+          const auto& polytope = *it;
+          if (essBdr.size() == 0 || essBdr.count(polytope.getAttribute()))
+          {
+            const size_t d = polytope.getDimension();
+            const size_t i = polytope.getIndex();
+            const auto& fe = fes.getFiniteElement(d, i);
+            const auto& mapping =
+              fes.getMapping({ d, i }, value.template cast<FESRangeType>());
+            for (Index local = 0; local < fe.getCount(); local++)
+            {
+              const Index global = fes.getGlobalIndex({ d, i }, local);
+              auto find = res.find(global);
+              if (find == res.end())
+              {
+                const auto& lf = fe.getLinearForm(local);
+                const auto s = lf(mapping);
+                res.insert(find, std::pair{ global, s });
+              }
+            }
+          }
+        }
+      }
+
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+  };
 }
 
 #endif

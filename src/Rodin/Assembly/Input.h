@@ -199,6 +199,44 @@ namespace Rodin::Assembly
       Offsets m_offsets;
       const Tuple<Ts...> m_ins;
   };
+
+  template <class Scalar, class FES, class Value>
+  class DirichletBCAssemblyInput
+  {
+    public:
+      using TrialFunctionType = Variational::TrialFunction<FES>;
+
+      using ValueType = Value;
+
+      using OperandType = Variational::TrialFunction<FES>;
+
+      using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
+
+      DirichletBCAssemblyInput(
+          const OperandType& u, const ValueType& value, const FlatSet<Geometry::Attribute>& essBdr)
+        : m_u(u), m_value(value), m_essBdr(essBdr)
+      {}
+
+      const OperandType& getOperand() const
+      {
+        return m_u.get();
+      }
+
+      const ValueType& getValue() const
+      {
+        return m_value.get();
+      }
+
+      const FlatSet<Geometry::Attribute>& getEssentialBoundary() const
+      {
+        return m_essBdr.get();
+      }
+
+    private:
+      std::reference_wrapper<const OperandType> m_u;
+      std::reference_wrapper<const ValueType> m_value;
+      std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;
+  };
 }
 
 #endif

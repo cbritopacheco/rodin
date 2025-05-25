@@ -17,7 +17,7 @@
 #include <boost/serialization/access.hpp>
 
 #include "Rodin/Array.h"
-#include "Rodin/Context/Sequential.h"
+#include "Rodin/Context/Local.h"
 
 #include "ForwardDecls.h"
 

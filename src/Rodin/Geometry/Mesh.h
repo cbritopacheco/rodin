@@ -17,9 +17,9 @@
 #include "Rodin/Math.h"
 #include "Rodin/Types.h"
 #include "Rodin/Configure.h"
+#include "Rodin/Context/Local.h"
 #include "Rodin/Threads/Mutable.h"
 #include "Rodin/IO/ForwardDecls.h"
-#include "Rodin/Context/Sequential.h"
 #include "Rodin/Utility/IsSpecialization.h"
 
 #include "Rodin/Serialization/Array.h"

@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CONTEXT_SEQUENTIAL_H
-#define RODIN_CONTEXT_SEQUENTIAL_H
+#ifndef RODIN_CONTEXT_LOCAL_H
+#define RODIN_CONTEXT_LOCAL_H
 
 #include <boost/serialization/base_object.hpp>
 
