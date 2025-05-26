@@ -67,7 +67,31 @@
           <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>Multithreaded&lt;::Vec, Variational::LinearForm&lt;FES, ::Vec&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p><a href="class_rodin_1_1_assembly_1_1_multithreaded.html" class="m-doc">Multithreaded</a> assembly for PETSc Vec (linear form)</p>
+        <p><a href="class_rodin_1_1_assembly_1_1_open_m_p.html" class="m-doc">OpenMP</a> assembly for PETSc Vec (linear form)</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a4c918a6959cbe61500c62db585362207">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4c918a6959cbe61500c62db585362207" class="m-doc-self">setThreadCount</a>(</span><span class="m-doc-wrap">size_t tc) -&gt; <a href="class_rodin_1_1_assembly_1_1_multithreaded.html" class="m-doc">Multithreaded</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Set number of <a href="class_rodin_1_1_assembly_1_1_open_m_p.html" class="m-doc">OpenMP</a> threads.</dd>
+            <dt id="a2c80d9cf01a06038bc42cf79d1af63df">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc-self">getThreadCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Get current thread count or max if not set.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>
