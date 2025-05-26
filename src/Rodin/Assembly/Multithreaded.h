@@ -7,6 +7,8 @@
 #ifndef RODIN_ASSEMBLY_MULTITHREADED_H
 #define RODIN_ASSEMBLY_MULTITHREADED_H
 
+#include <omp.h>
+
 #include "Rodin/Math/Vector.h"
 
 #include "Rodin/Math/Matrix.h"
@@ -98,44 +100,16 @@ namespace Rodin::Assembly
 
       using InputType = typename Parent::InputType;
 
-#ifdef RODIN_MULTITHREADED
-      Multithreaded()
-        : Multithreaded(Threads::getGlobalThreadPool())
-      {}
-#else
-      Multithreaded()
-        : Multithreaded(std::thread::hardware_concurrency())
-      {}
-#endif
-
-      Multithreaded(std::reference_wrapper<Threads::ThreadPool> pool)
-        : m_pool(pool)
-      {}
-
-      Multithreaded(size_t threadCount)
-        : m_pool(threadCount)
-      {
-        assert(threadCount > 0);
-      }
+      Multithreaded() = default;
 
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_pool(
-            std::visit(
-              [](auto&& arg) -> std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>
-              {
-                using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, std::reference_wrapper<Threads::ThreadPool>>)
-                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(arg);
-                else
-                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(
-                      std::in_place_type_t<Threads::ThreadPool>(), arg.getThreadCount());
-              }, other.m_pool))
+          m_threadCount(other.m_threadCount)
       {}
 
       Multithreaded(Multithreaded&& other)
         : Parent(std::move(other)),
-          m_pool(std::move(other.getThreadPool()))
+          m_threadCount(std::move(other.m_threadCount))
       {}
 
       /**
@@ -144,138 +118,70 @@ namespace Rodin::Assembly
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
-        const size_t capacity =
-          input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
+        const size_t capacity = input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
         res.clear();
         res.reserve(capacity);
-        const size_t threadCount = getThreadPool().getThreadCount();
         const auto& mesh = input.getTestFES().getMesh();
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
           MultithreadedIteration seq(mesh, bfi.getRegion());
-          const size_t d = seq.getDimension();
-          auto loop =
-            [&](const Index start, const Index end)
+          const Index d = seq.getDimension();
+          const Index count = seq.getCount();
+          const int tc = m_threadCount.has_value() ? m_threadCount.value() : omp_get_max_threads();
+
+#pragma omp parallel num_threads(tc)
+          {
+            // one integrator + triplet buffer per thread
+            std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+            OperatorType local;
+            local.reserve(capacity / tc);
+
+#pragma omp for nowait
+            for (Index i = 0; i < count; ++i)
             {
-              OperatorType triplets;
-              std::unique_ptr<LocalBilinearFormIntegratorBaseType>  lbfi;
-              lbfi.reset(bfi.copy());
-              triplets.reserve(capacity / threadCount);
-              for (Index i = start; i < end; ++i)
+              if (seq.filter(i))
               {
-                if (seq.filter(i))
+                if (attrs.empty() || attrs.count(mesh.getAttribute(d, i)))
                 {
-                  if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
+                  auto it = seq.getIterator(i);
+                  integrator->setPolytope(*it);
+
+                  const auto& rows = input.getTestFES().getDOFs(d, i);
+                  const auto& cols = input.getTrialFES().getDOFs(d, i);
+                  for (size_t r = 0; r < rows.size(); ++r)
                   {
-                    const auto it = seq.getIterator(i);
-                    lbfi->setPolytope(*it);
-                    const auto& rows = input.getTestFES().getDOFs(d, i);
-                    const auto& cols = input.getTrialFES().getDOFs(d, i);
-                    for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+                    for (size_t c = 0; c < cols.size(); ++c)
                     {
-                      for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
-                      {
-                        const ScalarType s = lbfi->integrate(m, l);
-                        if (s != ScalarType(0))
-                          triplets.emplace_back(rows(l), cols(m), s);
-                      }
+                      const ScalarType s = integrator->integrate(c, r);
+                      if (s != ScalarType(0))
+                        local.emplace_back(rows(r), cols(c), s);
                     }
                   }
                 }
               }
-              m_mutex.lock();
-              res.insert(res.end(),
-                  std::make_move_iterator(triplets.begin()),
-                  std::make_move_iterator(triplets.end()));
-              m_mutex.unlock();
-              triplets.clear();
-            };
+            }
 
-          if (std::holds_alternative<Threads::ThreadPool>(m_pool))
-          {
-            auto& threadPool = std::get<Threads::ThreadPool>(m_pool);
-            threadPool.pushLoop(0, seq.getCount(), loop);
-            threadPool.waitForTasks();
-          }
-          else
-          {
-            auto& threadPool = std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
-            threadPool.pushLoop(0, seq.getCount(), loop);
-            threadPool.waitForTasks();
-          }
-        }
-        for (auto& bfi : input.getGlobalBFIs())
-        {
-          const auto& trialAttrs = bfi.getTrialAttributes();
-          const auto& testAttrs = bfi.getTestAttributes();
-          MultithreadedIteration testseq(mesh, bfi.getTestRegion());
-          const size_t d = testseq.getDimension();
-          auto loop =
-            [&](const Index start, const Index end)
+#pragma omp critical
             {
-              OperatorType triplets;
-              std::unique_ptr<GlobalBilinearFormIntegratorBaseType> gbfi;
-              gbfi.reset(bfi.copy());
-              triplets.reserve(capacity / threadCount);
-              for (Index i = start; i < end; ++i)
-              {
-                if (testseq.filter(i))
-                {
-                  if (testAttrs.size() == 0 || testAttrs.count(mesh.getAttribute(d, i)))
-                  {
-                    const auto teIt = testseq.getIterator(i);
-                    SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
-                    for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
-                    {
-                      if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
-                      {
-                        gbfi->setPolytope(*trIt, *teIt);
-                        const auto& rows = input.getTestFES().getDOFs(d, teIt->getIndex());
-                        const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
-                        for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
-                        {
-                          for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
-                          {
-                            const ScalarType s = gbfi->integrate(m, l);
-                            if (s != ScalarType(0))
-                              triplets.emplace_back(rows(l), cols(m), s);
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-              m_mutex.lock();
-              res.insert(res.end(),
-                  std::make_move_iterator(triplets.begin()),
-                  std::make_move_iterator(triplets.end()));
-              m_mutex.unlock();
-              triplets.clear();
-            };
-
-          if (std::holds_alternative<Threads::ThreadPool>(m_pool))
-          {
-            auto& threadPool = std::get<Threads::ThreadPool>(m_pool);
-            threadPool.pushLoop(0, testseq.getCount(), loop);
-            threadPool.waitForTasks();
-          }
-          else
-          {
-            auto& threadPool = std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
-            threadPool.pushLoop(0, testseq.getCount(), loop);
-            threadPool.waitForTasks();
-          }
+              res.insert(
+                res.end(),
+                std::make_move_iterator(local.begin()),
+                std::make_move_iterator(local.end()));
+            }
+          } // end parallel
         }
       }
 
-      Threads::ThreadPool& getThreadPool() const
+      size_t getThreadCount() const noexcept
       {
-        if (std::holds_alternative<Threads::ThreadPool>(m_pool))
-          return std::get<Threads::ThreadPool>(m_pool);
-        else
-          return std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+        return m_threadCount.value_or(omp_get_max_threads());
+      }
+
+      Multithreaded& setThreadCount(size_t threadCount) noexcept
+      {
+        m_threadCount = threadCount;
+        return *this;
       }
 
       Multithreaded* copy() const noexcept override
@@ -284,8 +190,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      mutable Threads::Mutex m_mutex;
-      mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
+      std::optional<size_t> m_threadCount;
   };
 
   /**
@@ -330,19 +235,7 @@ namespace Rodin::Assembly
 
       using InputType = typename Parent::InputType;
 
-#ifdef RODIN_MULTITHREADED
-      Multithreaded()
-        : Multithreaded(Threads::getGlobalThreadPool())
-      {}
-#else
-      Multithreaded()
-        : Multithreaded(std::thread::hardware_concurrency())
-      {}
-#endif
-
-      Multithreaded(std::reference_wrapper<Threads::ThreadPool> pool)
-        : m_assembly(pool)
-      {}
+      Multithreaded() = default;
 
       Multithreaded(size_t threadCount)
         : m_assembly(threadCount)
@@ -372,6 +265,17 @@ namespace Rodin::Assembly
             input.getLocalBFIs(), input.getGlobalBFIs() });
         res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
+      }
+
+      size_t getThreadCount() const noexcept
+      {
+        return m_assembly.getThreadCount();
+      }
+
+      Multithreaded& setThreadCount(size_t threadCount) noexcept
+      {
+        m_assembly.setThreadCount(threadCount);
+        return *this;
       }
 
       Multithreaded* copy() const noexcept override
@@ -426,166 +330,120 @@ namespace Rodin::Assembly
 
       using InputType = typename Parent::InputType;
 
-#ifdef RODIN_MULTITHREADED
-      Multithreaded()
-        : Multithreaded(Threads::getGlobalThreadPool())
-      {}
-#else
-      Multithreaded()
-        : Multithreaded(std::thread::hardware_concurrency())
-      {}
-#endif
-
-      Multithreaded(std::reference_wrapper<Threads::ThreadPool> pool)
-        : m_pool(pool)
-      {}
-
-      Multithreaded(size_t threadCount)
-        : m_pool(threadCount)
-      {
-        assert(threadCount > 0);
-      }
+      Multithreaded() = default;
 
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_pool(
-            std::visit(
-              [](auto&& arg) -> std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>
-              {
-                using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, std::reference_wrapper<Threads::ThreadPool>>)
-                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(arg);
-                else
-                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(
-                      std::in_place_type_t<Threads::ThreadPool>(), arg.getThreadCount());
-              }, other.m_pool))
+          m_threadCount(other.m_threadCount)
       {}
 
       Multithreaded(Multithreaded&& other)
         : Parent(std::move(other)),
-          m_pool(std::move(other.getThreadPool()))
+          m_threadCount(std::move(other.m_threadCount))
       {}
 
-      /**
-       * @brief Executes the assembly and returns the linear operator
-       * associated to the bilinear form.
-       */
       void execute(OperatorType& res, const InputType& input) const override
       {
         res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
-        auto& threadPool = getThreadPool();
+
         const auto& mesh = input.getTestFES().getMesh();
+        const int tc = m_threadCount.has_value() ? m_threadCount.value() : omp_get_max_threads();
+
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
           MultithreadedIteration seq(mesh, bfi.getRegion());
-          const size_t d = seq.getDimension();
-          auto loop =
-            [&](const Index start, const Index end)
-            {
-              OperatorType pres;
-              std::unique_ptr<LocalBilinearFormIntegratorBaseType> lbfi;
-              lbfi.reset(bfi.copy());
-              pres.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
-              pres.setZero();
-              for (Index i = start; i < end; ++i)
-              {
-                if (seq.filter(i))
-                {
-                  if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
-                  {
-                    const auto it = seq.getIterator(i);
-                    lbfi->setPolytope(*it);
-                    const auto& rows = input.getTestFES().getDOFs(d, i);
-                    const auto& cols = input.getTrialFES().getDOFs(d, i);
-                    for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
-                      for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
-                        pres(rows(l), cols(m)) += lbfi->integrate(m, l);
-                  }
-                }
-              }
-              m_mutex.lock();
-              res += pres;
-              m_mutex.unlock();
-            };
+          const Index d     = seq.getDimension();
+          const Index count = seq.getCount();
 
-          if (std::holds_alternative<Threads::ThreadPool>(m_pool))
+#pragma omp parallel num_threads(tc)
           {
-            auto& threadPool = std::get<Threads::ThreadPool>(m_pool);
-            threadPool.pushLoop(0, seq.getCount(), loop);
-            threadPool.waitForTasks();
-          }
-          else
-          {
-            auto& threadPool = std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
-            threadPool.pushLoop(0, seq.getCount(), loop);
-            threadPool.waitForTasks();
+            auto lbfi = std::unique_ptr<LocalBilinearFormIntegratorBaseType>(bfi.copy());
+            OperatorType local;
+            local.resize(res.rows(), res.cols());
+            local.setZero();
+
+#pragma omp for nowait
+            for (Index i = 0; i < count; ++i)
+            {
+              if (!seq.filter(i)) continue;
+              if (!attrs.empty() &&
+                  !attrs.count(mesh.getAttribute(d, i)))
+                continue;
+
+              auto it = seq.getIterator(i);
+              lbfi->setPolytope(*it);
+
+              const auto& rows = input.getTestFES().getDOFs(d, i);
+              const auto& cols = input.getTrialFES().getDOFs(d, i);
+              for (size_t r = 0; r < rows.size(); ++r)
+                for (size_t c = 0; c < cols.size(); ++c)
+                  local(rows(r), cols(c)) += lbfi->integrate(c, r);
+            }
+
+#pragma omp critical
+            {
+              res += local;
+            }
           }
         }
+
+        // --- Global (coupling) contributions ---
         for (auto& bfi : input.getGlobalBFIs())
         {
+          const auto& testAttrs  = bfi.getTestAttributes();
           const auto& trialAttrs = bfi.getTrialAttributes();
-          const auto& testAttrs = bfi.getTestAttributes();
           MultithreadedIteration testseq(mesh, bfi.getTestRegion());
-          const size_t d = testseq.getDimension();
-          const auto loop =
-            [&](const Index start, const Index end)
+          const Index d = testseq.getDimension();
+          const Index count = testseq.getCount();
+
+#pragma omp parallel num_threads(tc)
+          {
+            auto gbfi = std::unique_ptr<GlobalBilinearFormIntegratorBaseType>(bfi.copy());
+            OperatorType local;
+            local.resize(res.rows(), res.cols());
+            local.setZero();
+
+#pragma omp for nowait
+            for (Index i = 0; i < count; ++i)
             {
-              OperatorType tl_res;
-              std::unique_ptr<GlobalBilinearFormIntegratorBaseType> gbfi;
-              gbfi.reset(bfi.copy());
-              tl_res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
-              tl_res.setZero();
-              for (Index i = start; i < end; ++i)
+              if (testseq.filter(i))
               {
-                if (testseq.filter(i))
+                if (testAttrs.empty() || testAttrs.count(mesh.getAttribute(d, i)))
                 {
-                  if (testAttrs.size() == 0 || testAttrs.count(mesh.getAttribute(d, i)))
+                  auto teIt = testseq.getIterator(i);
+                  SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
+
+                  for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                   {
-                    const auto teIt = testseq.getIterator(i);
-                    SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
-                    for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+                    if (trialAttrs.empty() || trialAttrs.count(trIt->getAttribute()))
                     {
-                      if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
-                      {
-                        gbfi->setPolytope(*trIt, *teIt);
-                        const auto& rows = input.getTestFES().getDOFs(d, teIt->getIndex());
-                        const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
-                        for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
-                          for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
-                            tl_res(rows(l), cols(m)) += gbfi->integrate(m, l);
-                      }
+                      gbfi->setPolytope(*trIt, *teIt);
+
+                      const auto& rows = input.getTestFES().getDOFs(d, teIt->getIndex());
+                      const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
+                      for (size_t r = 0; r < rows.size(); ++r)
+                        for (size_t c = 0; c < cols.size(); ++c)
+                          local(rows(r), cols(c)) += gbfi->integrate(c, r);
                     }
                   }
                 }
               }
-              m_mutex.lock();
-              res += tl_res;
-              m_mutex.unlock();
-            };
+            }
 
-          if (std::holds_alternative<Threads::ThreadPool>(m_pool))
-          {
-            auto& threadPool = std::get<Threads::ThreadPool>(m_pool);
-            threadPool.pushLoop(0, testseq.getCount(), loop);
-            threadPool.waitForTasks();
-          }
-          else
-          {
-            auto& threadPool = std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
-            threadPool.pushLoop(0, testseq.getCount(), loop);
-            threadPool.waitForTasks();
+#pragma omp critical
+            {
+              res += local;
+            }
           }
         }
       }
 
-      Threads::ThreadPool& getThreadPool() const
+      Multithreaded& setThreadCount(size_t threadCount) noexcept
       {
-        if (std::holds_alternative<Threads::ThreadPool>(m_pool))
-          return std::get<Threads::ThreadPool>(m_pool);
-        else
-          return std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+        m_threadCount = threadCount;
+        return *this;
       }
 
       Multithreaded* copy() const noexcept override
@@ -594,8 +452,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      mutable Threads::Mutex m_mutex;
-      mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
+      std::optional<size_t> m_threadCount;
   };
 
   /**
@@ -623,108 +480,76 @@ namespace Rodin::Assembly
 
       using InputType = typename Parent::InputType;
 
-#ifdef RODIN_MULTITHREADED
-      Multithreaded()
-        : Multithreaded(Threads::getGlobalThreadPool())
-      {}
-#else
-      Multithreaded()
-        : Multithreaded(std::thread::hardware_concurrency())
-      {}
-#endif
-
-      Multithreaded(std::reference_wrapper<Threads::ThreadPool> pool)
-        : m_pool(pool)
-      {}
-
-      Multithreaded(size_t threadCount)
-        : m_pool(threadCount)
-      {
-        assert(threadCount > 0);
-      }
+      Multithreaded() = default;
 
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_pool(
-            std::visit(
-              [](auto&& arg) -> std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>
-              {
-                using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, std::reference_wrapper<Threads::ThreadPool>>)
-                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(arg);
-                else
-                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(
-                      std::in_place_type_t<Threads::ThreadPool>(), arg.getThreadCount());
-              }, other.m_pool))
+          m_threadCount(other.m_threadCount)
       {}
 
       Multithreaded(Multithreaded&& other)
         : Parent(std::move(other)),
-          m_pool(std::move(other.getThreadPool()))
+          m_threadCount(std::move(other.m_threadCount))
       {}
 
-      /**
-       * @brief Executes the assembly and returns the vector associated to the
-       * linear form.
-       */
       void execute(VectorType& res, const InputType& input) const override
       {
+        // initialize global vector
         res.resize(input.getFES().getSize());
         res.setZero();
+
         const auto& mesh = input.getFES().getMesh();
+        const int tc = static_cast<int>(getThreadCount());
+
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
           MultithreadedIteration seq(mesh, lfi.getRegion());
-          const size_t d = seq.getDimension();
-          const auto loop =
-            [&](const Index start, const Index end)
+          const Index d = seq.getDimension();
+          const Index count = seq.getCount();
+
+#pragma omp parallel num_threads(tc)
+          {
+            auto integrator =
+              std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>>(lfi.copy());
+            VectorType local;
+            local.resize(res.size());
+            local.setZero();
+
+#pragma omp for nowait
+            for (Index i = 0; i < count; ++i)
             {
-              VectorType tl_res;
-              std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>> tl_lfi;
-              tl_lfi.reset(lfi.copy());
-              tl_res.resize(input.getFES().getSize());
-              tl_res.setZero();
-              for (Index i = start; i < end; ++i)
+              if (seq.filter(i))
               {
-                if (seq.filter(i))
+                if (attrs.empty() || attrs.count(mesh.getAttribute(d, i)))
                 {
-                  if (attrs.size() == 0 || attrs.count(mesh.getAttribute(d, i)))
-                  {
-                    const auto it = seq.getIterator(i);
-                    tl_lfi->setPolytope(*it);
-                    const auto& dofs = input.getFES().getDOFs(d, i);
-                    for (size_t l = 0; l < static_cast<size_t>(dofs.size()); l++)
-                      tl_res(dofs(l)) += tl_lfi->integrate(l);
-                  }
+                  auto it = seq.getIterator(i);
+                  integrator->setPolytope(*it);
+
+                  const auto& dofs = input.getFES().getDOFs(d, i);
+                  for (size_t k = 0; k < dofs.size(); ++k)
+                    local(dofs(k)) += integrator->integrate(k);
                 }
               }
-              m_mutex.lock();
-              res += tl_res;
-              m_mutex.unlock();
-            };
+            }
 
-          if (std::holds_alternative<Threads::ThreadPool>(m_pool))
-          {
-            auto& threadPool = std::get<Threads::ThreadPool>(m_pool);
-            threadPool.pushLoop(0, seq.getCount(), loop);
-            threadPool.waitForTasks();
-          }
-          else
-          {
-            auto& threadPool = std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
-            threadPool.pushLoop(0, seq.getCount(), loop);
-            threadPool.waitForTasks();
+#pragma omp critical
+            {
+              res += local;
+            }
           }
         }
       }
 
-      const Threads::ThreadPool& getThreadPool() const
+      Multithreaded& setThreadCount(size_t threadCount) noexcept
       {
-        if (std::holds_alternative<Threads::ThreadPool>(m_pool))
-          return std::get<Threads::ThreadPool>(m_pool);
-        else
-          return std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
+        m_threadCount = threadCount;
+        return *this;
+      }
+
+      size_t getThreadCount() const noexcept
+      {
+        return m_threadCount.value_or(omp_get_max_threads());
       }
 
       Multithreaded* copy() const noexcept override
@@ -733,8 +558,111 @@ namespace Rodin::Assembly
       }
 
     private:
-      mutable Threads::Mutex m_mutex;
-      mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
+      std::optional<size_t> m_threadCount;
+  };
+
+  template <class Scalar, class FES, class ValueDerived>
+  class Multithreaded<
+    IndexMap<Scalar>,
+    Variational::DirichletBC<
+      Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>> final
+    : public AssemblyBase<
+        IndexMap<Scalar>,
+        Variational::DirichletBC<
+          Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>>
+  {
+    public:
+      using FESType = FES;
+
+      using TrialFunctionType = Variational::TrialFunction<FES>;
+
+      using ValueType = Variational::FunctionBase<ValueDerived>;
+
+      using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
+
+      using Parent = AssemblyBase<IndexMap<Scalar>, DirichletBCType>;
+
+      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
+      using InputType = typename Parent::InputType;
+
+      Multithreaded() = default;
+
+      Multithreaded(const Multithreaded& other)
+        : Parent(other),
+          m_threadCount(other.m_threadCount)
+      {}
+
+      Multithreaded(Multithreaded&& other)
+        : Parent(std::move(other)),
+          m_threadCount(std::move(other.m_threadCount))
+      {}
+
+      void execute(IndexMap<Scalar>& res, const InputType& input) const override
+      {
+        const auto& u = input.getOperand();
+        const auto& value = input.getValue();
+        const auto& essBdr = input.getEssentialBoundary();
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t faceDim = mesh.getDimension() - 1;
+        const size_t faceCount = mesh.getFaceCount();
+        const size_t threadCount = m_threadCount.has_value() ? m_threadCount.value() : omp_get_max_threads();
+
+#pragma omp parallel num_threads(threadCount)
+        {
+          IndexMap<Scalar> partial;
+
+#pragma omp for nowait
+          for (Index i = 0; i < faceCount; ++i)
+          {
+            if (mesh.isBoundary(i))
+            {
+              if (essBdr.size() == 0 || essBdr.count(mesh.getAttribute(faceDim, i)))
+              {
+                const auto& fe = fes.getFiniteElement(faceDim, i);
+                const auto& mapping =
+                  fes.getMapping({ faceDim, i }, value.template cast<FESRangeType>());
+                for (Index local = 0; local < fe.getCount(); local++)
+                {
+                  const Index global = fes.getGlobalIndex({ faceDim, i }, local);
+                  auto find = partial.find(global);
+                  if (find == partial.end())
+                  {
+                    const auto& lf = fe.getLinearForm(local);
+                    const auto s = lf(mapping);
+                    partial.insert(find, { global, s });
+                  }
+                }
+              }
+            }
+          }
+
+#pragma omp critical
+          {
+            res.insert(boost::container::ordered_unique_range, partial.begin(), partial.end());
+          }
+        }
+      }
+
+      size_t getThreadCount() const noexcept
+      {
+        return m_threadCount.value_or(omp_get_max_threads());
+      }
+
+      Multithreaded& setThreadCount(size_t threadCount) noexcept
+      {
+        m_threadCount = threadCount;
+        return *this;
+      }
+
+      Multithreaded* copy() const noexcept override
+      {
+        return new Multithreaded(*this);
+      }
+
+    private:
+      std::optional<size_t> m_threadCount;
   };
 }
 

@@ -82,6 +82,7 @@ option(BUILD_SHARED_LIBS              "Build using shared libraries"            
 
 if (RODIN_MULTITHREADED)
   set(RODIN_THREAD_SAFE ON CACHE BOOL "" FORCE)
+  set(RODIN_USE_OPENMP ON CACHE BOOL "" FORCE)
   set(Boost_USE_MULTITHREADED ON)
 endif()
 
@@ -138,7 +139,6 @@ if (RODIN_CODE_COVERAGE)
 endif()
 
 if (RODIN_BUILD_SRC)
-  # set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
   # ---- Find and build dependencies -----------------------------------------
   # ---- PThreads ----
   set(THREADS_PREFER_PTHREAD_FLAG ON)

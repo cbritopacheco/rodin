@@ -116,7 +116,6 @@ namespace Rodin::Threads
       BS::thread_pool m_pool;
   };
 
-#ifdef RODIN_MULTITHREADED
   namespace Internal
   {
     /**
@@ -141,7 +140,6 @@ namespace Rodin::Threads
   {
     return Internal::globalThreadPool;
   }
-#endif
 }
 
 #endif

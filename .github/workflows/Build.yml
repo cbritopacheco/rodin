@@ -40,6 +40,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y
           libgl1-mesa-dev
           lcov
+          libomp-dev
           libsdl2-dev
           libglfw3-dev
           libopenal-dev
@@ -84,6 +85,7 @@ jobs:
           lcov
           sdl2
           glfw
+          libomp-dev
           openal-soft
           vulkan-headers
           molten-vk

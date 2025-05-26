@@ -12,8 +12,6 @@ add_library(RodinAssembly
 add_library(Rodin::Assembly ALIAS RodinAssembly)
 
 if (RODIN_USE_OPENMP)
-  target_sources(RodinAssembly PUBLIC OpenMP.h)
-  target_sources(RodinAssembly PUBLIC OpenMP.cpp)
   target_link_libraries(RodinAssembly PUBLIC OpenMP::OpenMP_CXX)
 endif()
 

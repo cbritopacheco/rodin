@@ -149,7 +149,8 @@ namespace Rodin::Variational
           m_u(other.m_u),
           m_value(other.m_value->copy()),
           m_essBdr(other.m_essBdr),
-          m_dofs(other.m_dofs)
+          m_dofs(other.m_dofs),
+          m_assembly(other.m_assembly->copy())
       {}
 
       /**
@@ -160,7 +161,8 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u)),
           m_value(std::move(other.m_value)),
           m_essBdr(std::move(other.m_essBdr)),
-          m_dofs(std::move(other.m_dofs))
+          m_dofs(std::move(other.m_dofs)),
+          m_assembly(std::move(other.m_assembly))
       {}
 
       /**
@@ -222,6 +224,7 @@ namespace Rodin::Variational
        */
       void assemble() override
       {
+        assert(m_assembly);
         m_assembly->execute(m_dofs, { m_u.get(), *m_value, m_essBdr });
       }
 

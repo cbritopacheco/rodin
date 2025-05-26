@@ -7,9 +7,13 @@
 #ifndef RODIN_ASSEMBLY_MULTITHREADED_PETSC_H
 #define RODIN_ASSEMBLY_MULTITHREADED_PETSC_H
 
+#include <omp.h>
 #include <petsc.h>
 #include <petscerror.h>
 #include <type_traits>
+#include <vector>
+#include <memory>
+#include <optional>
 
 #include "Rodin/Assembly/AssemblyBase.h"
 #include "Rodin/Assembly/Sequential.h"
@@ -22,7 +26,7 @@
 namespace Rodin::Assembly
 {
   /**
-   * @brief Multithreaded assembly for PETSc Vec (linear form)
+   * @brief OpenMP assembly for PETSc Vec (linear form)
    */
   template <class FES>
   class Multithreaded<
@@ -40,40 +44,30 @@ namespace Rodin::Assembly
       using Parent         = AssemblyBase<VectorType, LinearFormType>;
       using InputType      = typename Parent::InputType;
 
-#ifdef RODIN_MULTITHREADED
-      Multithreaded()
-        : Multithreaded(Threads::getGlobalThreadPool())
-      {}
-#else
-      Multithreaded()
-        : Multithreaded(std::thread::hardware_concurrency())
-      {}
-#endif
-
-      Multithreaded(std::reference_wrapper<Threads::ThreadPool> pool)
-        : m_pool(pool)
-      {}
-
-      Multithreaded(size_t threadCount)
-        : m_pool(threadCount)
-      {
-        assert(threadCount > 0);
-      }
+      Multithreaded() = default;
 
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_pool(
-            std::visit(
-              [](auto&& arg) -> std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>
-              {
-                using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, std::reference_wrapper<Threads::ThreadPool>>)
-                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(arg);
-                else
-                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(
-                      std::in_place_type_t<Threads::ThreadPool>(), arg.getThreadCount());
-              }, other.m_pool))
+          m_threadCount(other.m_threadCount)
       {}
+
+      Multithreaded(Multithreaded&& other)
+        : Parent(std::move(other)),
+          m_threadCount(std::move(other.m_threadCount))
+      {}
+
+      /// Set number of OpenMP threads
+      Multithreaded& setThreadCount(size_t tc) noexcept
+      {
+        m_threadCount = tc;
+        return *this;
+      }
+
+      /// Get current thread count or max if not set
+      size_t getThreadCount() const noexcept
+      {
+        return m_threadCount.value_or(omp_get_max_threads());
+      }
 
       void execute(VectorType& res, const InputType& input) const override
       {
@@ -90,50 +84,51 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
 
         const auto& mesh = input.getFES().getMesh();
+        const int tc     = static_cast<int>(getThreadCount());
 
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
           MultithreadedIteration seq(mesh, lfi.getRegion());
           const PetscInt dim = PetscInt(seq.getDimension());
-          const auto  loop = [&](PetscInt start, PetscInt end)
+          const PetscInt cnt = PetscInt(seq.getCount());
+
+#pragma omp parallel num_threads(tc)
           {
-            // Thread‐local accumulation vector
+            // thread-local accumulator
             std::vector<PetscScalar> local(n, PetscScalar(0));
             auto integrator = std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>>(lfi.copy());
 
-            for (PetscInt i = start; i < end; ++i)
+#pragma omp for nowait
+            for (PetscInt i = 0; i < cnt; ++i)
             {
-              if (!seq.filter(i)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, i))) continue;
-
-              const auto it = seq.getIterator(i);
-              integrator->setPolytope(*it);
-              const auto& dofs = input.getFES().getDOFs(dim, i);
-              for (size_t k = 0; k < dofs.size(); ++k)
-                local[dofs[k]] += PetscScalar(integrator->integrate(k));
-            }
-
-            // Merge into global Vec under lock
-            m_mutex.lock();
-            for (PetscInt idx = 0; idx < n; ++idx)
-            {
-              if (local[idx] != PetscScalar(0))
+              if (seq.filter(i) &&
+                 (attrs.empty() || attrs.count(mesh.getAttribute(dim, i))))
               {
-                ierr = VecSetValue(res, idx, local[idx], ADD_VALUES);
-                assert(ierr == PETSC_SUCCESS);
+                auto it = seq.getIterator(i);
+                integrator->setPolytope(*it);
+                const auto& dofs = input.getFES().getDOFs(dim, i);
+                for (size_t k = 0; k < dofs.size(); ++k)
+                {
+                  local[dofs[k]] += PetscScalar(integrator->integrate(k));
+                }
               }
             }
-            m_mutex.unlock();
-          };
 
-          // Dispatch to pool
-          auto& pool = getThreadPool();
-          pool.pushLoop(0, seq.getCount(), loop);
-          pool.waitForTasks();
+#pragma omp critical
+            {
+              for (PetscInt idx = 0; idx < n; ++idx)
+              {
+                if (local[idx] != PetscScalar(0))
+                {
+                  ierr = VecSetValue(res, idx, local[idx], ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
+                }
+              }
+            }
+          } // end parallel
         }
 
-        // Finalize assembly
         ierr = VecAssemblyBegin(res);
         assert(ierr == PETSC_SUCCESS);
 
@@ -146,73 +141,53 @@ namespace Rodin::Assembly
         return new Multithreaded(*this);
       }
 
-      Threads::ThreadPool& getThreadPool() const
-      {
-        if (std::holds_alternative<Threads::ThreadPool>(m_pool))
-          return std::get<Threads::ThreadPool>(m_pool);
-        else
-          return std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
-      }
-
     private:
-      mutable Threads::Mutex m_mutex;
-      mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
+      std::optional<size_t> m_threadCount;
   };
 
   /**
-   * @brief Multithreaded assembly for PETSc Mat (bilinear form)
+   * @brief OpenMP assembly for PETSc Mat (bilinear form)
    */
   template <class TrialFES, class TestFES>
-  class Multithreaded<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>> final
+  class Multithreaded<
+    ::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>> final
     : public AssemblyBase<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>>
   {
     public:
-      using DotType = typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
+      using DotType       = typename FormLanguage::Dot<
+                             typename FormLanguage::Traits<TrialFES>::ScalarType,
+                             typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
+      static_assert(
+        std::is_same_v<DotType, PetscScalar>,
+        "FES ScalarTypes must yield PetscScalar for PETSc Mat assembly"
+      );
       using OperatorType    = ::Mat;
       using BilinearFormType= Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
       using Parent          = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType       = typename Parent::InputType;
 
-      static_assert(
-        std::is_same_v<DotType, PetscScalar>,
-        "FES ScalarTypes must yield PetscScalar for PETSc Mat assembly");
-
-#ifdef RODIN_MULTITHREADED
-      Multithreaded()
-        : Multithreaded(Threads::getGlobalThreadPool())
-      {}
-#else
-      Multithreaded()
-        : Multithreaded(std::thread::hardware_concurrency())
-      {}
-#endif
-
-      Multithreaded(std::reference_wrapper<Threads::ThreadPool> pool)
-        : m_pool(pool)
-      {}
-
-      Multithreaded(size_t threadCount)
-        : m_pool(threadCount)
-      {
-        assert(threadCount > 0);
-      }
-
+      Multithreaded() = default;
       Multithreaded(const Multithreaded& other)
         : Parent(other),
-          m_pool(
-            std::visit(
-              [](auto&& arg) -> std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>
-              {
-                using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, std::reference_wrapper<Threads::ThreadPool>>)
-                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(arg);
-                else
-                  return std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>>(
-                      std::in_place_type_t<Threads::ThreadPool>(), arg.getThreadCount());
-              }, other.m_pool))
+          m_threadCount(other.m_threadCount)
       {}
+      Multithreaded(Multithreaded&& other)
+        : Parent(std::move(other)),
+          m_threadCount(std::move(other.m_threadCount))
+      {}
+
+      /// Set number of OpenMP threads
+      Multithreaded& setThreadCount(size_t tc) noexcept
+      {
+        m_threadCount = tc;
+        return *this;
+      }
+
+      /// Get current thread count or max if not set
+      size_t getThreadCount() const noexcept
+      {
+        return m_threadCount.value_or(omp_get_max_threads());
+      }
 
       void execute(OperatorType& A, const InputType& input) const override
       {
@@ -233,6 +208,7 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
 
         const auto& mesh = input.getTestFES().getMesh();
+        const int tc = static_cast<int>(getThreadCount());
 
         // Local contributions
         for (auto& bfi : input.getLocalBFIs())
@@ -240,120 +216,111 @@ namespace Rodin::Assembly
           const auto& attrs = bfi.getAttributes();
           MultithreadedIteration seq(mesh, bfi.getRegion());
           const PetscInt dim = PetscInt(seq.getDimension());
+          const PetscInt cnt = PetscInt(seq.getCount());
 
-          const auto loop = [&](PetscInt start, PetscInt end)
+#pragma omp parallel num_threads(tc)
           {
             std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+            local.reserve(cnt);
             auto integrator = std::unique_ptr<Variational::LocalBilinearFormIntegratorBase<PetscScalar>>(bfi.copy());
 
-            for (PetscInt i = start; i < end; ++i)
+#pragma omp for nowait
+            for (PetscInt i = 0; i < cnt; ++i)
             {
-              if (!seq.filter(i)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, i))) continue;
-
-              const auto it = seq.getIterator(i);
-              integrator->setPolytope(*it);
-              const auto& rows = input.getTestFES().getDOFs(dim, i);
-              const auto& cols = input.getTrialFES().getDOFs(dim, i);
-
-              for (size_t r = 0; r < rows.size(); ++r)
-                for (size_t c = 0; c < cols.size(); ++c)
-                {
-                  const PetscScalar v = PetscScalar(integrator->integrate(c, r));
-                  if (v != PetscScalar(0))
-                    local.emplace_back(rows[r], cols[c], v);
-                }
-            }
-
-            m_mutex.lock();
-            for (auto& [i,j,v] : local)
-            {
-              ierr = MatSetValue(A, i, j, v, ADD_VALUES);
-              assert(ierr == PETSC_SUCCESS);
-            }
-            m_mutex.unlock();
-          };
-
-          auto& pool = getThreadPool();
-          pool.pushLoop(0, seq.getCount(), loop);
-          pool.waitForTasks();
-        }
-
-        // Global contributions
-        for (auto& bfi : input.getGlobalBFIs())
-        { 
-          const auto& tAttrs = bfi.getTestAttributes();
-          const auto& rAttrs = bfi.getTrialAttributes();
-          MultithreadedIteration testSeq(mesh, bfi.getTestRegion());
-          const PetscInt dimT = PetscInt(testSeq.getDimension());
-
-          const auto loop = [&](PetscInt start, PetscInt end)
-          {
-            std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
-            auto integrator = std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase<PetscScalar>>(bfi.copy());
-
-            for (PetscInt ti = start; ti < end; ++ti)
-            {
-              if (!testSeq.filter(ti))
-                continue;
-              if (!tAttrs.empty() && !tAttrs.count(mesh.getAttribute(dimT, ti)))
-                continue;
-
-              const auto te = testSeq.getIterator(ti);
-              SequentialIteration trialSeq{ mesh, integrator->getTrialRegion() };
-              for (auto tr = trialSeq.getIterator(); tr; ++tr)
+              if (seq.filter(i) &&
+                 (attrs.empty() || attrs.count(mesh.getAttribute(dim, i))))
               {
-                if (!rAttrs.empty() && !rAttrs.count(tr->getAttribute()))
-                  continue;
-                integrator->setPolytope(*tr, *te);
-                const auto& rows = input.getTestFES().getDOFs(dimT, ti);
-                const auto& cols = input.getTrialFES().getDOFs(PetscInt(tr->getDimension()), tr->getIndex());
-
+                auto it = seq.getIterator(i);
+                integrator->setPolytope(*it);
+                const auto& rows = input.getTestFES().getDOFs(dim, i);
+                const auto& cols = input.getTrialFES().getDOFs(dim, i);
                 for (size_t r = 0; r < rows.size(); ++r)
+                {
                   for (size_t c = 0; c < cols.size(); ++c)
                   {
                     const PetscScalar v = PetscScalar(integrator->integrate(c, r));
                     if (v != PetscScalar(0))
+                    {
                       local.emplace_back(rows[r], cols[c], v);
+                    }
                   }
+                }
               }
             }
 
-            m_mutex.lock();
-            for (auto& [i,j,v] : local)
+#pragma omp critical
             {
-              ierr = MatSetValue(A, i, j, v, ADD_VALUES);
-              assert(ierr == PETSC_SUCCESS);
+              for (auto& [i,j,v] : local)
+              {
+                ierr = MatSetValue(A, i, j, v, ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+              }
             }
-            m_mutex.unlock();
-          };
-
-          auto& pool = getThreadPool();
-          pool.pushLoop(0, testSeq.getCount(), loop);
-          pool.waitForTasks();
+          }
         }
 
-        // Finalize assembly
+        // Global contributions
+//         for (auto& bfi : input.getGlobalBFIs())
+//         {
+//           const auto& tAttrs = bfi.getTestAttributes();
+//           const auto& rAttrs = bfi.getTrialAttributes();
+//           MultithreadedIteration testSeq(mesh, bfi.getTestRegion());
+//           const PetscInt dimT = PetscInt(testSeq.getDimension());
+//           const PetscInt cntT = PetscInt(testSeq.getCount());
+// 
+// #pragma omp parallel num_threads(tc)
+//           {
+//             std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+//             local.reserve(cntT);
+//             auto integrator = std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase<PetscScalar>>(bfi.copy());
+// 
+// #pragma omp for nowait
+//             for (PetscInt ti = 0; ti < cntT; ++ti)
+//             {
+//               if (testSeq.filter(ti) &&
+//                  (tAttrs.empty() || tAttrs.count(mesh.getAttribute(dimT, ti))))
+//               {
+//                 auto teIt = testSeq.getIterator(ti);
+//                 SequentialIteration trialSeq{ mesh, integrator->getTrialRegion() };
+//                 for (auto trIt = trialSeq.getIterator(); trIt; ++trIt)
+//                 {
+//                   if (rAttrs.empty() || rAttrs.count(trIt->getAttribute()))
+//                   {
+//                     integrator->setPolytope(*trIt, *teIt);
+//                     const auto& rows = input.getTestFES().getDOFs(dimT, ti);
+//                     const auto& cols = input.getTrialFES().getDOFs(PetscInt(trIt->getDimension()), trIt->getIndex());
+//                     for (size_t r = 0; r < rows.size(); ++r)
+//                     {
+//                       for (size_t c = 0; c < cols.size(); ++c)
+//                       {
+//                         const PetscScalar v = PetscScalar(integrator->integrate(c, r));
+//                         if (v != PetscScalar(0))
+//                         {
+//                           local.emplace_back(rows[r], cols[c], v);
+//                         }
+//                       }
+//                     }
+//                   }
+//                 }
+//               }
+//             }
+// 
+//             #pragma omp critical
+//             {
+//               for (auto& [i,j,v] : local)
+//               {
+//                 ierr = MatSetValue(A, i, j, v, ADD_VALUES);
+//                 assert(ierr == PETSC_SUCCESS);
+//               }
+//             }
+//           }
+//         }
+
         ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+        ierr = MatAssemblyEnd(A,   MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
-      }
-
-      Threads::ThreadPool& getThreadPool()
-      {
-        if (std::holds_alternative<Threads::ThreadPool>(m_pool))
-          return std::get<Threads::ThreadPool>(m_pool);
-        else
-          return std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
-      }
-
-      Threads::ThreadPool& getThreadPool() const
-      {
-        return std::holds_alternative<Threads::ThreadPool>(m_pool)
-          ? std::get<Threads::ThreadPool>(m_pool)
-          : std::get<std::reference_wrapper<Threads::ThreadPool>>(m_pool).get();
       }
 
       Multithreaded* copy() const noexcept override
@@ -362,10 +329,8 @@ namespace Rodin::Assembly
       }
 
     private:
-      mutable Threads::Mutex m_mutex;
-      mutable std::variant<Threads::ThreadPool, std::reference_wrapper<Threads::ThreadPool>> m_pool;
+      std::optional<size_t> m_threadCount;
   };
 }
 
 #endif // RODIN_ASSEMBLY_MULTITHREADED_PETSC_H
-

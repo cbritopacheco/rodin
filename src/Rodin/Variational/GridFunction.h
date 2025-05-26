@@ -505,10 +505,9 @@ namespace Rodin::Variational
         std::vector<Real> ns(fes.getSize(), 0);
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
-#ifdef RODIN_MULTITHREADED
 #ifdef RODIN_USE_OPENMP
           // OpenMP parallel region: each thread gets its own local storage.
-          #pragma omp parallel
+#pragma omp parallel
           {
             // Each thread creates its own copy of the function object.
             std::unique_ptr<FunctionBase<NestedDerived>> local_fn(fn.copy());
@@ -521,7 +520,7 @@ namespace Rodin::Variational
             local_vs.reserve(capacity);
 
             // Parallelize the loop over the cells.
-            #pragma omp for schedule(dynamic)
+#pragma omp for schedule(dynamic)
             for (Index i = 0; i < mesh.getCellCount(); ++i)
             {
               auto it = mesh.getCell(i);
@@ -542,7 +541,7 @@ namespace Rodin::Variational
             } // End of omp-for
 
             // In a single (critical) section, update the shared global arrays.
-            #pragma omp critical
+#pragma omp critical
             {
               for (Index j = 0; j < local_is.size(); ++j)
               {
@@ -553,50 +552,6 @@ namespace Rodin::Variational
               }
             }
           }
-#else
-          // Fallback multi-threading implementation using ThreadPool.
-          auto& threadPool = Threads::getGlobalThreadPool();
-          auto loop =
-            [&](const Index start, const Index end)
-            {
-              const size_t capacity = fes.getSize() / threadPool.getThreadCount();
-              std::vector<Index> is;
-              is.reserve(capacity);
-              std::vector<ScalarType> vs;
-              vs.reserve(capacity);
-              std::unique_ptr<FunctionBase<NestedDerived>> fnt(fn.copy());
-              for (Index i = start; i < end; ++i)
-              {
-                const auto it = mesh.getCell(i);
-                const auto& polytope = *it;
-                if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-                {
-                  const auto& i = polytope.getIndex();
-                  const auto& fe = fes.getFiniteElement(d, i);
-                  const auto& trans = mesh.getPolytopeTransformation(d, i);
-                  for (size_t local = 0; local < fe.getCount(); local++)
-                  {
-                    const Geometry::Point p(polytope, trans, fe.getNode(local));
-                    assert(m_data.rows() == 1);
-                    is.push_back(fes.getGlobalIndex({ d, i }, local));
-                    vs.push_back(fnt->getValue(p));
-                  }
-                }
-              }
-              assert(is.size() == vs.size());
-              m_mutex.lock();
-              for (Index i = 0; i < is.size(); i++)
-              {
-                const Index global = is[i];
-                m_data(global) =
-                  (vs[i] + ns[global] * m_data(global)) / (ns[global] + 1);
-                ns[global] += 1;
-              }
-              m_mutex.unlock();
-            };
-          threadPool.pushLoop(0, mesh.getCellCount(), loop);
-          threadPool.waitForTasks();
-#endif
 #else
           // Single-threaded version.
           for (auto it = mesh.getCell(); !it.end(); ++it)

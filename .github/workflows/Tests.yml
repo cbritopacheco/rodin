@@ -39,8 +39,9 @@ jobs:
       - name: Install dependencies
         run: >-
           sudo apt-get update && sudo apt-get install -y
-          libgl1-mesa-dev
           lcov
+          libomp-dev
+          libgl1-mesa-dev
           libsdl2-dev
           libglfw3-dev
           libopenal-dev
