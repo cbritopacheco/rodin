@@ -99,11 +99,11 @@ target_link_libraries(RodinVariational
   PUBLIC
   Rodin::QF
   Rodin::IO
+  Rodin::Math
   Rodin::Alert
   Rodin::Utility
   Rodin::Geometry
   Rodin::Assembly
-  Rodin::Math
   Rodin::FormLanguage)
 
 install(TARGETS RodinVariational

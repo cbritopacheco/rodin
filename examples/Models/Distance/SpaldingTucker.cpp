@@ -7,6 +7,7 @@
 #include <Rodin/Math.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Models/Distance/Poisson.h>
 #include <Rodin/Models/Distance/SignedPoisson.h>

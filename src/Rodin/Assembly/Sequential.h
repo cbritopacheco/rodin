@@ -9,7 +9,7 @@
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
-#include "Rodin/Variational/BilinearForm.h"
+#include "Rodin/Variational/Integrator.h"
 
 #include "Rodin/Utility/Repeat.h"
 

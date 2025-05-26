@@ -4,19 +4,17 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <thread>
-
-#include "Multithreaded.h"
+#include "OpenMP.h"
 
 namespace Rodin::Assembly
 {
-  MultithreadedIteration<Geometry::Mesh<Context::Local>>
-  ::MultithreadedIteration(const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region region)
+  OpenMPIteration<Geometry::Mesh<Context::Local>>
+  ::OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region region)
     : m_mesh(mesh), m_region(region)
   {}
 
   Geometry::PolytopeIterator
-  MultithreadedIteration<Geometry::Mesh<Context::Local>>::getIterator(Index i) const
+  OpenMPIteration<Geometry::Mesh<Context::Local>>::getIterator(Index i) const
   {
     Geometry::PolytopeIterator it;
     switch (m_region)
@@ -38,7 +36,7 @@ namespace Rodin::Assembly
     return it;
   }
 
-  size_t MultithreadedIteration<Geometry::Mesh<Context::Local>>::getDimension() const
+  size_t OpenMPIteration<Geometry::Mesh<Context::Local>>::getDimension() const
   {
     switch (m_region)
     {
@@ -57,7 +55,7 @@ namespace Rodin::Assembly
     return 0;
   }
 
-  size_t MultithreadedIteration<Geometry::Mesh<Context::Local>>::getCount() const
+  size_t OpenMPIteration<Geometry::Mesh<Context::Local>>::getCount() const
   {
     switch (m_region)
     {
@@ -76,7 +74,7 @@ namespace Rodin::Assembly
     return 0;
   }
 
-  bool MultithreadedIteration<Geometry::Mesh<Context::Local>>::filter(Index i) const
+  bool OpenMPIteration<Geometry::Mesh<Context::Local>>::filter(Index i) const
   {
     switch (m_region)
     {
@@ -98,4 +96,5 @@ namespace Rodin::Assembly
     return false;
   }
 }
+
 

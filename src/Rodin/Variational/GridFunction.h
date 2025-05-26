@@ -7,10 +7,6 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
-#ifdef RODIN_USE_OPENMP
-#include <omp.h>
-#endif
-
 #include <cmath>
 #include <utility>
 #include <fstream>
@@ -503,55 +499,6 @@ namespace Rodin::Variational
         std::vector<Real> ns(fes.getSize(), 0);
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
-#ifdef RODIN_USE_OPENMP
-          // OpenMP parallel region: each thread gets its own local storage.
-#pragma omp parallel
-          {
-            // Each thread creates its own copy of the function object.
-            std::unique_ptr<FunctionBase<NestedDerived>> local_fn(fn.copy());
-
-            // Reserve local storage based on an estimate of entries per thread.
-            const size_t capacity = fes.getSize() / omp_get_num_threads();
-            std::vector<Index> local_is;
-            local_is.reserve(capacity);
-            std::vector<ScalarType> local_vs;
-            local_vs.reserve(capacity);
-
-            // Parallelize the loop over the cells.
-#pragma omp for schedule(dynamic)
-            for (Index i = 0; i < mesh.getCellCount(); ++i)
-            {
-              auto it = mesh.getCell(i);
-              const auto& polytope = *it;
-              if (attrs.empty() || attrs.count(polytope.getAttribute()))
-              {
-                const auto& cellIndex = polytope.getIndex();
-                const auto& fe = fes.getFiniteElement(d, cellIndex);
-                const auto& trans = mesh.getPolytopeTransformation(d, cellIndex);
-                for (size_t local = 0; local < fe.getCount(); ++local)
-                {
-                  // Create the geometry point and compute function value.
-                  const Geometry::Point p(polytope, trans, fe.getNode(local));
-                  local_is.push_back(fes.getGlobalIndex({ d, cellIndex }, local));
-                  local_vs.push_back(local_fn->getValue(p));
-                }
-              }
-            } // End of omp-for
-
-            // In a single (critical) section, update the shared global arrays.
-#pragma omp critical
-            {
-              for (Index j = 0; j < local_is.size(); ++j)
-              {
-                const Index global = local_is[j];
-                // Update m_data with a new weighted average.
-                m_data(global) = (local_vs[j] + ns[global] * m_data(global)) / (ns[global] + 1);
-                ns[global] += 1;
-              }
-            }
-          }
-#else
-          // Single-threaded version.
           for (auto it = mesh.getCell(); !it.end(); ++it)
           {
             const auto& polytope = *it;
@@ -571,7 +518,6 @@ namespace Rodin::Variational
               }
             }
           }
-#endif
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {

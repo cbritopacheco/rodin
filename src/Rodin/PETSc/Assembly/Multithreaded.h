@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ASSEMBLY_MULTITHREADED_PETSC_H
-#define RODIN_ASSEMBLY_MULTITHREADED_PETSC_H
+#ifndef RODIN_ASSEMBLY_OPENMP_PETSC_H
+#define RODIN_ASSEMBLY_OPENMP_PETSC_H
 
 #include <omp.h>
 #include <petsc.h>
@@ -15,11 +15,7 @@
 #include <memory>
 #include <optional>
 
-#include "Rodin/Assembly/AssemblyBase.h"
-#include "Rodin/Assembly/Sequential.h"
-#include "Rodin/Variational/LinearForm.h"
-#include "Rodin/Variational/BilinearForm.h"
-#include "Rodin/Utility/Overloaded.h"
+#include "Rodin/Assembly/OpenMP.h"
 
 namespace Rodin::Assembly
 {
@@ -27,7 +23,7 @@ namespace Rodin::Assembly
    * @brief OpenMP assembly for PETSc Vec (linear form)
    */
   template <class FES>
-  class Multithreaded<
+  class OpenMP<
     ::Vec, Variational::LinearForm<FES, ::Vec>> final
     : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
   {
@@ -42,20 +38,20 @@ namespace Rodin::Assembly
       using Parent         = AssemblyBase<VectorType, LinearFormType>;
       using InputType      = typename Parent::InputType;
 
-      Multithreaded() = default;
+      OpenMP() = default;
 
-      Multithreaded(const Multithreaded& other)
+      OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      Multithreaded(Multithreaded&& other)
+      OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
       /// Set number of OpenMP threads
-      Multithreaded& setThreadCount(size_t tc) noexcept
+      OpenMP& setThreadCount(size_t tc) noexcept
       {
         m_threadCount = tc;
         return *this;
@@ -87,7 +83,7 @@ namespace Rodin::Assembly
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          MultithreadedIteration seq(mesh, lfi.getRegion());
+          OpenMPIteration seq(mesh, lfi.getRegion());
           const PetscInt dim = PetscInt(seq.getDimension());
           const PetscInt cnt = PetscInt(seq.getCount());
 
@@ -134,9 +130,9 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
       }
 
-      Multithreaded* copy() const noexcept override
+      OpenMP* copy() const noexcept override
       {
-        return new Multithreaded(*this);
+        return new OpenMP(*this);
       }
 
     private:
@@ -147,7 +143,7 @@ namespace Rodin::Assembly
    * @brief OpenMP assembly for PETSc Mat (bilinear form)
    */
   template <class TrialFES, class TestFES>
-  class Multithreaded<
+  class OpenMP<
     ::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>> final
     : public AssemblyBase<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>>
   {
@@ -164,18 +160,18 @@ namespace Rodin::Assembly
       using Parent          = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType       = typename Parent::InputType;
 
-      Multithreaded() = default;
-      Multithreaded(const Multithreaded& other)
+      OpenMP() = default;
+      OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
-      Multithreaded(Multithreaded&& other)
+      OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
       /// Set number of OpenMP threads
-      Multithreaded& setThreadCount(size_t tc) noexcept
+      OpenMP& setThreadCount(size_t tc) noexcept
       {
         m_threadCount = tc;
         return *this;
@@ -212,7 +208,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          MultithreadedIteration seq(mesh, bfi.getRegion());
+          OpenMPIteration seq(mesh, bfi.getRegion());
           const PetscInt dim = PetscInt(seq.getDimension());
           const PetscInt cnt = PetscInt(seq.getCount());
 
@@ -262,7 +258,7 @@ namespace Rodin::Assembly
 //         {
 //           const auto& tAttrs = bfi.getTestAttributes();
 //           const auto& rAttrs = bfi.getTrialAttributes();
-//           MultithreadedIteration testSeq(mesh, bfi.getTestRegion());
+//           OpenMPIteration testSeq(mesh, bfi.getTestRegion());
 //           const PetscInt dimT = PetscInt(testSeq.getDimension());
 //           const PetscInt cntT = PetscInt(testSeq.getCount());
 // 
@@ -321,9 +317,9 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
       }
 
-      Multithreaded* copy() const noexcept override
+      OpenMP* copy() const noexcept override
       {
-        return new Multithreaded(*this);
+        return new OpenMP(*this);
       }
 
     private:
@@ -331,4 +327,4 @@ namespace Rodin::Assembly
   };
 }
 
-#endif // RODIN_ASSEMBLY_MULTITHREADED_PETSC_H
+#endif // RODIN_ASSEMBLY_OpenMP_PETSC_H

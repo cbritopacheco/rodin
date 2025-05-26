@@ -1,19 +1,10 @@
-set(RodinAssembly_HEADERS
-  AssemblyBase.h
-  Sequential.h
-  Multithreaded.h)
+set(RodinAssembly_HEADERS AssemblyBase.h Sequential.h)
 
-set(RodinAssembly_SRCS
-  Sequential.cpp
-  Multithreaded.cpp)
+set(RodinAssembly_SRCS Sequential.cpp)
 
 add_library(RodinAssembly
   ${RodinAssembly_SRCS} ${RodinAssembly_HEADERS})
 add_library(Rodin::Assembly ALIAS RodinAssembly)
-
-if (RODIN_USE_OPENMP)
-  target_link_libraries(RodinAssembly PUBLIC OpenMP::OpenMP_CXX)
-endif()
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinAssembly
@@ -21,10 +12,14 @@ target_include_directories(RodinAssembly
 
 target_link_libraries(RodinAssembly
   PUBLIC
-  Threads::Threads
-  Rodin::Utility
-  Rodin::FormLanguage
-  Rodin::Variational)
+  Rodin::Variational
+  Rodin::FormLanguage)
+
+if (RODIN_USE_OPENMP)
+  target_sources(RodinAssembly PRIVATE OpenMP.cpp)
+  find_package(OpenMP REQUIRED)
+  target_link_libraries(RodinAssembly PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
 install(TARGETS RodinAssembly
   EXPORT       RodinTargets

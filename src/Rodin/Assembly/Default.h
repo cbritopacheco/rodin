@@ -5,8 +5,9 @@
 
 #include "ForwardDecls.h"
 
-#include "Sequential.h"
-#include "Multithreaded.h"
+#ifdef RODIN_USE_OPENMP
+
+#include "OpenMP.h"
 
 namespace Rodin::Assembly
 {
@@ -14,28 +15,42 @@ namespace Rodin::Assembly
   class Default<Context::Local>
   {
     public:
-#ifdef RODIN_MULTITHREADED
       template <class LinearAlgebraType, class Object>
-      using Type = Multithreaded<LinearAlgebraType, Object>;
-#else
-      template <class LinearAlgebraType, class Object>
-      using Type = Sequential<LinearAlgebraType, Object>;
-#endif
+      using Type = OpenMP<LinearAlgebraType, Object>;
   };
 
   template <>
   class Default<Context::Local, Context::Local>
   {
     public:
-#ifdef RODIN_MULTITHREADED
       template <class LinearAlgebraType, class Object>
-      using Type = Multithreaded<LinearAlgebraType, Object>;
+      using Type = OpenMP<LinearAlgebraType, Object>;
+ };
+}
+
 #else
+
+#include "Sequential.h"
+
+namespace Rodin::Assembly
+{
+  template <>
+  class Default<Context::Local>
+  {
+    public:
       template <class LinearAlgebraType, class Object>
       using Type = Sequential<LinearAlgebraType, Object>;
-#endif
- };
+  };
 
+  template <>
+  class Default<Context::Local, Context::Local>
+  {
+    public:
+      template <class LinearAlgebraType, class Object>
+      using Type = Sequential<LinearAlgebraType, Object>;
+ };
 }
+
+#endif
 
 #endif

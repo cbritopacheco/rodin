@@ -140,18 +140,8 @@ endif()
 
 if (RODIN_BUILD_SRC)
   # ---- Find and build dependencies -----------------------------------------
-  # ---- PThreads ----
-  set(THREADS_PREFER_PTHREAD_FLAG ON)
-  find_package(Threads REQUIRED)
-
-  if (RODIN_USE_OPENMP)
-    find_package(OpenMP REQUIRED)
-  endif()
-
   # ---- Boost ----
   add_compile_definitions(PRIVATE BOOST_ASIO_HAS_STD_INVOKE_RESULT=1)
-  # set(Boost_USE_STATIC_LIBS        OFF)
-  # set(Boost_USE_STATIC_RUNTIME     OFF)
 
   find_package(Boost 1.74 REQUIRED
     COMPONENTS

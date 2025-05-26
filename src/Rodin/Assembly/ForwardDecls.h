@@ -9,11 +9,8 @@ namespace Rodin::Assembly
   template <class LinearAlgebraType, class Operand>
   class Sequential;
 
-  template <class LinearAlgebraType, class Operand>
-  class Multithreaded;
-
-  template <class Operand>
-  class OpenMP;
+  template <class Mesh>
+  class SequentialIteration;
 
   template <class TrialFES, class TestFES>
   class BilinearFormAssemblyInput;
@@ -27,14 +24,19 @@ namespace Rodin::Assembly
   template <class Scalar, class FES, class ValueDerived>
   class DirichletBCAssemblyInput;
 
-  template <class Mesh>
-  class SequentialIteration;
-
-  template <class Mesh>
-  class MultithreadedIteration;
-
   template <class ... Ts>
   class Default;
 }
+
+#ifdef RODIN_USE_OPENMP
+namespace Rodin::Assembly
+{
+  template <class LinearAlgebraType, class Operand>
+  class OpenMP;
+
+  template <class Mesh>
+  class OpenMPIteration;
+}
+#endif
 
 #endif

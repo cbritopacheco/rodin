@@ -6,6 +6,7 @@
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 
 #include <RodinExternal/MMG.h>

@@ -4,7 +4,13 @@ add_library(Rodin::Threads ALIAS RodinThreads)
 target_include_directories(RodinThreads
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
-target_link_libraries(RodinThreads INTERFACE Rodin::Alert)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+target_link_libraries(RodinThreads
+  INTERFACE
+  Rodin::Alert
+  Threads::Threads)
 
 install(
   TARGETS      RodinThreads
