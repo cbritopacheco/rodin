@@ -23,8 +23,6 @@
 #include "Rodin/Alert.h"
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
-#include "Rodin/Threads/ThreadPool.h"
-
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/SubMesh.h"
 

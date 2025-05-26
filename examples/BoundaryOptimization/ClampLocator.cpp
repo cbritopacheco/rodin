@@ -8,7 +8,6 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
-#include <Rodin/Threads/ThreadPool.h>
 
 #include <chrono>
 #include "Tools.h"

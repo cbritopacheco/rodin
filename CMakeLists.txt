@@ -143,7 +143,6 @@ if (RODIN_BUILD_SRC)
   # ---- PThreads ----
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads REQUIRED)
-  add_subdirectory(third-party/BS_thread_pool)
 
   if (RODIN_USE_OPENMP)
     find_package(OpenMP REQUIRED)

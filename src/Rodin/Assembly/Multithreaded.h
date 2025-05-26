@@ -14,9 +14,6 @@
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SparseMatrix.h"
 
-#include "Rodin/Threads/Mutex.h"
-#include "Rodin/Threads/ThreadPool.h"
-
 #include "Rodin/Variational/LinearForm.h"
 #include "Rodin/Variational/BilinearForm.h"
 

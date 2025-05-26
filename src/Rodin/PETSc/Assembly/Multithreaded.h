@@ -17,8 +17,6 @@
 
 #include "Rodin/Assembly/AssemblyBase.h"
 #include "Rodin/Assembly/Sequential.h"
-#include "Rodin/Threads/Mutex.h"
-#include "Rodin/Threads/ThreadPool.h"
 #include "Rodin/Variational/LinearForm.h"
 #include "Rodin/Variational/BilinearForm.h"
 #include "Rodin/Utility/Overloaded.h"

@@ -9,7 +9,6 @@
 #include <Rodin/Math.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
-#include <Rodin/Threads/ThreadPool.h>
 #include <Rodin/Solver.h>
 
 #include "Tools.h"
