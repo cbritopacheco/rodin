@@ -650,31 +650,28 @@ namespace Rodin::Assembly
         const auto& value = input.getValue();
         const auto& fes = u.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        Geometry::FaceIterator it;
-        if (essBdr.size() > 0)
-          it = mesh.getFace();
-        else
-          it = mesh.getBoundary();
+        const size_t faceCount = mesh.getFaceCount();
+        const size_t faceDim = mesh.getDimension() - 1;
         res.clear();
-        for (; !it.end(); ++it)
+        for (Index i = 0; i < faceCount; i++)
         {
-          const auto& polytope = *it;
-          if (essBdr.size() == 0 || essBdr.count(polytope.getAttribute()))
+          if (mesh.isBoundary(i))
           {
-            const size_t d = polytope.getDimension();
-            const size_t i = polytope.getIndex();
-            const auto& fe = fes.getFiniteElement(d, i);
-            const auto& mapping =
-              fes.getMapping({ d, i }, value.template cast<FESRangeType>());
-            for (Index local = 0; local < fe.getCount(); local++)
+            if (essBdr.size() == 0 || essBdr.count(mesh.getAttribute(faceDim, i)))
             {
-              const Index global = fes.getGlobalIndex({ d, i }, local);
-              auto find = res.find(global);
-              if (find == res.end())
+              const auto& fe = fes.getFiniteElement(faceDim, i);
+              const auto& mapping =
+                fes.getMapping({ faceDim, i }, value.template cast<FESRangeType>());
+              for (Index local = 0; local < fe.getCount(); local++)
               {
-                const auto& lf = fe.getLinearForm(local);
-                const auto s = lf(mapping);
-                res.insert(find, std::pair{ global, s });
+                const Index global = fes.getGlobalIndex({ faceDim, i }, local);
+                auto find = res.find(global);
+                if (find == res.end())
+                {
+                  const auto& lf = fe.getLinearForm(local);
+                  const auto s = lf(mapping);
+                  res.insert(find, std::pair{ global, s });
+                }
               }
             }
           }
