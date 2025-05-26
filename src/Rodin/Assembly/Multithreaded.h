@@ -628,7 +628,7 @@ namespace Rodin::Assembly
                   {
                     const auto& lf = fe.getLinearForm(local);
                     const auto s = lf(mapping);
-                    partial.insert(find, { global, s });
+                    partial.insert(find, std::pair{ global, s });
                   }
                 }
               }
