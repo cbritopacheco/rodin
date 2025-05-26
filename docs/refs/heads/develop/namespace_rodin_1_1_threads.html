@@ -75,7 +75,6 @@
               <ul>
                 <li><a href="#nested-classes">Classes</a></li>
                 <li><a href="#typedef-members">Typedefs</a></li>
-                <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
@@ -93,10 +92,6 @@
               class <a href="class_rodin_1_1_threads_1_1_shared.html" class="m-doc">Shared</a>
             </dt>
             <dd>A thread-safe wrapper for shared resources.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_threads_1_1_thread_pool.html" class="m-doc">ThreadPool</a>
-            </dt>
-            <dd>A thread pool wrapper for managing concurrent tasks.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Resource&gt;</div>
               class <a href="class_rodin_1_1_threads_1_1_unsafe.html" class="m-doc">Unsafe</a>
@@ -118,15 +113,6 @@
             <dd>Alias for std::mutex.</dd>
           </dl>
         </section>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a5257cdeddf51db141eb307cb9b35d120" class="m-doc">getGlobalThreadPool</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_threads_1_1_thread_pool.html" class="m-doc">ThreadPool</a>&amp;</span>
-            </dt>
-            <dd>Retrieves the global thread pool.</dd>
-          </dl>
-        </section>
         <section>
           <h2>Typedef documentation</h2>
           <section class="m-doc-details" id="acded863dbfdd730829d4188d67eefcf0"><div>
@@ -135,24 +121,6 @@
             </h3>
             <p>Alias for std::mutex.</p>
 <p>This alias defines Mutex as an alternative name for std::mutex, which is used throughout <a href="namespace_rodin.html" class="m-doc">Rodin</a> for mutual exclusion in multithreaded contexts.</p>
-          </div></section>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a5257cdeddf51db141eb307cb9b35d120"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_threads_1_1_thread_pool.html" class="m-doc">ThreadPool</a>&amp; Rodin::<wbr />Threads::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5257cdeddf51db141eb307cb9b35d120" class="m-doc-self">getGlobalThreadPool</a>(</span><span class="m-doc-wrap">)</span></span>
-            </h3>
-            <p>Retrieves the global thread pool.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>A reference to the global <a href="class_rodin_1_1_threads_1_1_thread_pool.html" class="m-doc">ThreadPool</a>.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>This function returns a reference to a global <a href="class_rodin_1_1_threads_1_1_thread_pool.html" class="m-doc">ThreadPool</a> instance which can be used throughout the application for managing concurrent tasks.</p>
           </div></section>
         </section>
       </div>
