@@ -9,6 +9,7 @@
 
 #include <petsc.h>
 #include "Rodin/Math/LinearSystem.h"
+#include <iostream>
 
 namespace Rodin::Math
 {
@@ -28,25 +29,25 @@ namespace Rodin::Math
       template <class DOFScalar>
       LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
+        PetscErrorCode ierr;
+
         ::Mat& A = this->getOperator();
         ::Vec& b = this->getVector();
+        ::Vec& x = this->getGuess();
 
-        PetscErrorCode ierr;
-        MPI_Comm comm;
-        ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(A), &comm);
-        assert(ierr == PETSC_SUCCESS);
+        if (!x)
+        {
+          ierr = VecDuplicate(b, &x);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecZeroEntries(x);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
-        std::vector<PetscInt> ids;
-        ids.reserve(dofs.size());
+        std::vector<PetscInt> rows;
+        rows.reserve(dofs.size());
         for (auto const& kv : dofs)
-          ids.push_back(PetscInt(kv.first) + PetscInt(offset));
+          rows.push_back(PetscInt(kv.first) + PetscInt(offset));
 
-        IS is;
-        ISCreateGeneral(PETSC_COMM_WORLD, PetscInt(ids.size()), ids.data(), PETSC_COPY_VALUES, &is);
-
-        Vec x;
-        VecDuplicate(b, &x);
-        VecZeroEntries(x);
         for (auto const& kv : dofs)
         {
           const PetscInt  i   = PetscInt(kv.first) + PetscInt(offset);
@@ -56,10 +57,8 @@ namespace Rodin::Math
 
         VecAssemblyBegin(x);
         VecAssemblyEnd(x);
-        MatZeroRowsColumnsIS(A, is, 1.0, x, b);
 
-        ISDestroy(&is);
-        VecDestroy(&x);
+        MatZeroRowsColumns(A, rows.size(), rows.data(), 1.0, x, b);
 
         return *this;
       }

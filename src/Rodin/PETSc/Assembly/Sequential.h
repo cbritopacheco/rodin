@@ -106,6 +106,9 @@ namespace Rodin::Assembly
         ierr = MatSetSizes(A, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
         assert(ierr == PETSC_SUCCESS);
 
+        ierr = MatSeqAIJSetPreallocation(A, PETSC_DETERMINE, PETSC_NULLPTR);
+        assert(ierr == PETSC_SUCCESS);
+
         ierr = MatSetFromOptions(A);
         assert(ierr == PETSC_SUCCESS);
 
@@ -123,21 +126,27 @@ namespace Rodin::Assembly
           SequentialIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
+            const size_t d = it->getDimension();
+            const Index i = it->getIndex();
+
             if (attrs.empty() || attrs.count(it->getAttribute()))
             {
               bfi.setPolytope(*it);
-              const auto& rows = input.getTestFES().getDOFs(it.getDimension(), it->getIndex());
-              const auto& cols = input.getTrialFES().getDOFs(it.getDimension(), it->getIndex());
+              const auto& rows = input.getTestFES().getDOFs(d, i);
+              const auto& cols = input.getTrialFES().getDOFs(d, i);
               for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
+              {
                 for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
                 {
                   const PetscScalar v = PetscScalar(bfi.integrate(j, i));
                   ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
                   assert(ierr == PETSC_SUCCESS);
                 }
+              }
             }
           }
         }
+
         // Global contributions
         for (auto& bfi : input.getGlobalBFIs())
         {

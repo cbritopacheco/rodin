@@ -67,17 +67,16 @@ namespace Rodin::Solver
                        PetscReal dtol,
                        PetscInt  maxIt) noexcept;
 
-    KSP& setOperators(OperatorType A, OperatorType P = nullptr) noexcept;
+    KSP& setPreconditioner(OperatorType P) noexcept;
 
   private:
-    ::KSP       m_ksp{nullptr};
-    ::KSPType   m_type{KSPGMRES};
-    PetscReal   m_rtol   {PETSC_DEFAULT},
-                m_abstol {PETSC_DEFAULT},
-                m_dtol   {PETSC_DEFAULT};
-    PetscInt    m_maxIt  {PETSC_DEFAULT};
-    OperatorType m_A     {nullptr},
-                 m_P     {nullptr};
+    ::KSP        m_ksp;
+    ::KSPType    m_type;
+    PetscReal    m_rtol,
+                 m_abstol,
+                 m_dtol;
+    PetscInt     m_maxIt;
+    OperatorType m_preconditioner;
   };
 
 } // namespace Rodin::Solver

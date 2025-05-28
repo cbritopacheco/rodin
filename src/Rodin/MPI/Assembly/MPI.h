@@ -75,7 +75,9 @@ namespace Rodin::Assembly
         const size_t faceCount = shard.getFaceCount();
         for (Index i = 0; i < faceCount; ++i)
         {
-          if (shard.isBoundary(i) && !shard.isGhost(faceDim, i))
+          if (shard.isGhost(faceDim, i))
+            continue;
+          if (shard.isBoundary(i))
           {
             if (essBdr.size() == 0 || essBdr.count(shard.getAttribute(faceDim, i)))
             {

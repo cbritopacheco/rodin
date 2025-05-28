@@ -17,7 +17,14 @@
 namespace Rodin::Solver
 {
   KSP::KSP(ProblemType& pb)
-    : Parent(pb)
+    : Parent(pb),
+      m_ksp(PETSC_NULLPTR),
+      m_type(PETSC_NULLPTR),
+      m_rtol(PETSC_DECIDE),
+      m_abstol(PETSC_DECIDE),
+      m_dtol(PETSC_DECIDE),
+      m_maxIt(PETSC_DECIDE),
+      m_preconditioner(PETSC_NULLPTR)
   {
     PetscErrorCode ierr;
     MPI_Comm comm;
@@ -70,9 +77,10 @@ namespace Rodin::Solver
     assert(ierr == PETSC_SUCCESS);
 
     // set operators (use A as both if P not set)
-    m_A = A;
-    m_P = (m_P ? m_P : A);
-    ierr = KSPSetOperators(m_ksp, m_A, m_P);
+    if (m_preconditioner)
+      ierr = KSPSetOperators(m_ksp, A, m_preconditioner);
+    else
+      ierr = KSPSetOperators(m_ksp, A, A);
     assert(ierr == PETSC_SUCCESS);
 
     // allow CLI overrides
@@ -102,10 +110,9 @@ namespace Rodin::Solver
     return *this;
   }
 
-  KSP& KSP::setOperators(OperatorType A, OperatorType P) noexcept
+  KSP& KSP::setPreconditioner(OperatorType preconditioner) noexcept
   {
-    m_A = A;
-    m_P = (P ? P : A);
+    m_preconditioner = preconditioner;
     return *this;
   }
 }

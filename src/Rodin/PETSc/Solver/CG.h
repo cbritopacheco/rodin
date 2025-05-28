@@ -43,11 +43,6 @@ namespace Rodin::Solver
      */
     CG(CG&& other);
 
-    /**
-     * @brief Destructor.
-     */
-    ~CG() override;
-
     CG* copy() const noexcept override
     {
       return new CG(*this);

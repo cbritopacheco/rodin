@@ -133,12 +133,16 @@ namespace Rodin::Assembly
         // Create/init Mat
         ierr = MatSetSizes(A, localRows, localCols, globalRows, globalCols);
         assert(ierr == PETSC_SUCCESS);
-        ierr = MatSetFromOptions(A);
-        assert(ierr == PETSC_SUCCESS);
+
         ierr = MatMPIAIJSetPreallocation(A, PETSC_DECIDE, nullptr, PETSC_DECIDE, nullptr);
         assert(ierr == PETSC_SUCCESS);
+
+        ierr = MatSetFromOptions(A);
+        assert(ierr == PETSC_SUCCESS);
+
         ierr = MatSetUp(A);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
 
@@ -149,11 +153,11 @@ namespace Rodin::Assembly
           MPIIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
-            auto d = it->getDimension();
-            auto i = it->getIndex();
+            const size_t d = it->getDimension();
+            const Index i = it->getIndex();
+
             if (shard.isGhost(d, i))
               continue;
-
             if (attrs.empty() || attrs.count(it->getAttribute()))
             {
               bfi.setPolytope(*it);

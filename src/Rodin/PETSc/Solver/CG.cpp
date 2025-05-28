@@ -15,8 +15,5 @@ namespace Rodin::Solver
   CG<::Mat, ::Vec>::CG(CG&& other)
     : Parent(std::move(other))
   {}
-
-  CG<::Mat, ::Vec>::~CG() = default;
-
-} // namespace Rodin::Solver
+}
 

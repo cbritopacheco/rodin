@@ -124,26 +124,12 @@ namespace Rodin::Variational
       P1(const MeshType& mesh)
         : m_mesh(mesh),
           m_fes(mesh.getShard())
-      {
-        const auto& ctx = mesh.getContext();
-        const auto& comm = ctx.getCommunicator();
-        size_t local = m_fes.getSize();
-        Index inclusiveSum = 0;
-        boost::mpi::scan(comm, local, inclusiveSum, std::plus<Index>());
-        m_offset = inclusiveSum - local;
-      }
+      {}
 
       P1(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
           m_fes(mesh.getShard(), vdim)
-      {
-        const auto& ctx = mesh.getContext();
-        const auto& comm = ctx.getCommunicator();
-        size_t local = m_fes.getSize();
-        Index inclusiveSum = 0;
-        boost::mpi::scan(comm, local, inclusiveSum, std::plus<Index>());
-        m_offset = inclusiveSum - local;
-      }
+      {}
 
       P1(const P1& other) = default;
 
@@ -162,7 +148,10 @@ namespace Rodin::Variational
        */
       Index getGlobalIndex(Index localIdx) const
       {
-        return m_offset + localIdx;
+        const auto& mesh = getMesh();
+        const auto& shard = mesh.getShard();
+        const auto& pm = shard.getPolytopeMap(0);
+        return pm.left.at(localIdx).get_right();
       }
 
       /**
@@ -171,11 +160,11 @@ namespace Rodin::Variational
        */
       std::optional<Index> getLocalIndex(Index globalIdx) const
       {
-        const size_t sz = m_fes.getSize();
-        if (globalIdx >= m_offset && globalIdx <  m_offset + sz)
-          return globalIdx - m_offset;
-        else
+        const auto& map = getShard().getPolytopeMap(0).right;
+        auto it = map.find(globalIdx);
+        if (it == map.end())
           return std::nullopt;
+        return it->get_left();
       }
 
       /**
@@ -290,9 +279,6 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const MeshType> m_mesh;
       FESType m_fes;
-      size_t m_offset;
-
-      mutable std::vector<FlatMap<Index, IndexArray>> m_dofs;
   };
 }
 
