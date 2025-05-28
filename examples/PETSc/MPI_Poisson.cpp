@@ -41,18 +41,11 @@ int main(int argc, char** argv)
     sharder.scatter(0);
   }
 
-  std::ostringstream mesh_name, sol_name;
-  mesh_name << "mesh." << std::setfill('0') << std::setw(6) << world.rank();
-  std::string filename = mesh_name.str();
-
   std::cout << "Gather\n";
   auto mesh = sharder.gather(0);
   std::cout << "Vertex count: " << mesh.getVertexCount() << "\n";
-
   std::cout << "Local count: " << mesh.getShard().getVertexCount() << "\n";
   std::cout << "Ghosts: " << mesh.getShard().getGhosts()[0].size() << "\n";
-  mesh.save(filename, IO::FileFormat::MFEM);
-  std::cout << "Saved\n";
 
   Mat a;
   MatCreate(mpi.getCommunicator(), &a);
@@ -74,9 +67,11 @@ int main(int argc, char** argv)
   // Define problem
   Problem poisson(u, v, axb);
   poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
+          - Integral(f, v);
+          //+ DirichletBC(u, Zero());
   poisson.assemble();
+
+  VecView(b, PETSC_VIEWER_STDOUT_WORLD);
 
   // LinearForm lf(v, b);
   // lf = Integral(f, v);
@@ -90,7 +85,16 @@ int main(int argc, char** argv)
 
   // poisson.assemble();
 
-  // CG(poisson).solve();
+  std::exit(1);
+  CG(poisson).solve();
+
+  std::ostringstream mesh_name, sol_name;
+  mesh_name << "mesh." << std::setfill('0') << std::setw(6) << world.rank();
+  sol_name << "sol." << std::setfill('0') << std::setw(6) << world.rank();
+
+  mesh.save(mesh_name.str(), IO::FileFormat::MFEM);
+  std::cout << "Saved\n";
+  u.getSolution().save(sol_name.str(), IO::FileFormat::MFEM);
 
   // mpiMesh.getShard().save(
   //     "Gathered" + std::to_string(world.rank()) + ".mesh",

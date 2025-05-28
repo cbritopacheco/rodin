@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 32, 32 });
+  mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
   mesh.getConnectivity().compute(1, 2);
 
   ScalarFunction f = 1;
@@ -47,9 +47,12 @@ int main(int argc, char** argv)
   // Define problem
   Problem poisson(u, v, axb);
   poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
+          - Integral(f, v);
+          //+ DirichletBC(u, Zero());
   poisson.assemble();
+
+
+  VecView(b, PETSC_VIEWER_STDOUT_WORLD);
 
   CG(poisson).solve();
 

@@ -51,7 +51,7 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         ierr = VecSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
-        ierr = VecSet(res, PetscScalar(0));
+        ierr = VecZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
         // Local contributions skipping ghosts
@@ -72,7 +72,8 @@ namespace Rodin::Assembly
               for (PetscInt i = 0; i < PetscInt(dofs.size()); ++i)
               {
                 const PetscScalar v = PetscScalar(lfi.integrate(i));
-                ierr = VecSetValue(res, PetscInt(dofs[i]), v, ADD_VALUES);
+                ierr = VecSetValue(
+                    res, PetscInt(fes.getGlobalIndex(dofs[i])), v, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
               }
             }
@@ -159,12 +160,17 @@ namespace Rodin::Assembly
               const auto& rows = testFES.getShard().getDOFs(d, i);
               const auto& cols = trialFES.getShard().getDOFs(d, i);
               for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
+              {
                 for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
                 {
                   PetscScalar v = PetscScalar(bfi.integrate(j, i));
-                  ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
+                  ierr = MatSetValue(
+                      A,
+                      testFES.getGlobalIndex(rows[i]), trialFES.getGlobalIndex(cols[j]),
+                      v, ADD_VALUES);
                   assert(ierr == PETSC_SUCCESS);
                 }
+              }
             }
           }
         }

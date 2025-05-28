@@ -603,7 +603,9 @@ namespace Rodin::Assembly
         const auto& mesh = fes.getMesh();
         const size_t faceDim = mesh.getDimension() - 1;
         const size_t faceCount = mesh.getFaceCount();
-        const size_t threadCount = m_threadCount.has_value() ? m_threadCount.value() : omp_get_max_threads();
+        const size_t threadCount =
+          m_threadCount.has_value() ? m_threadCount.value() : omp_get_max_threads();
+        res.clear();
 
 #pragma omp parallel num_threads(threadCount)
         {
