@@ -259,7 +259,6 @@ namespace Rodin::Variational
         return getFiniteElementSpace().getSize();
       }
 
-
       Derived& setZero()
       {
         m_data.setZero();
@@ -292,12 +291,12 @@ namespace Rodin::Variational
 
       Derived& operator=(std::function<RangeType(const Geometry::Point&)> fn)
       {
-        return project(fn);
+        return projectOnCells(fn);
       }
 
       Derived& operator=(std::function<void(RangeType&, const Geometry::Point&)> fn)
       {
-        return project(fn);
+        return projectOnCells(fn);
       }
 
       /**
@@ -306,7 +305,7 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& operator=(const FunctionBase<NestedDerived>& fn)
       {
-        return project(fn);
+        return projectOnCells(fn);
       }
 
       /**
@@ -409,30 +408,30 @@ namespace Rodin::Variational
        * @param[in] fn Scalar valued function
        * @param[in] attr Attribute
        */
-      auto& project(
+      auto& projectOnCells(
           std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return project(fn, FlatSet<Geometry::Attribute>{ attr });
+        return projectOnCells(fn, FlatSet<Geometry::Attribute>{ attr });
       }
 
-      auto& project(
+      auto& projectOnCells(
           std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return project(fn, FlatSet<Geometry::Attribute>{ attr });
+        return projectOnCells(fn, FlatSet<Geometry::Attribute>{ attr });
       }
 
-      auto& project(
+      auto& projectOnCells(
           std::function<RangeType(const Geometry::Point&)> fn,
           const FlatSet<Geometry::Attribute>& attrs = {})
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
           assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return project(ScalarFunction(fn));
+          return projectOnCells(ScalarFunction(fn));
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
-          return project(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
+          return projectOnCells(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
         }
         else
         {
@@ -441,18 +440,18 @@ namespace Rodin::Variational
         }
       }
 
-      auto& project(
+      auto& projectOnCells(
           std::function<void(RangeType&, const Geometry::Point&)> fn,
           const FlatSet<Geometry::Attribute>& attrs = {})
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
           assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return project(ScalarFunction(fn));
+          return projectOnCells(ScalarFunction(fn));
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
-          return project(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
+          return projectOnCells(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
         }
         else
         {
@@ -462,9 +461,9 @@ namespace Rodin::Variational
       }
 
       template <class NestedDerived>
-      Derived& project(const FunctionBase<NestedDerived>& fn)
+      Derived& projectOnCells(const FunctionBase<NestedDerived>& fn)
       {
-        return project(fn, FlatSet<Geometry::Attribute>{});
+        return projectOnCells(fn, FlatSet<Geometry::Attribute>{});
       }
 
       /**
@@ -474,13 +473,13 @@ namespace Rodin::Variational
        * domain elements with the given attribute.
        *
        * It is a convenience function to call
-       * project(const FunctionBase&, const FlatSet<Geometry::Atribute>&) with one
+       * projectOnCells(const FunctionBase&, const FlatSet<Geometry::Atribute>&) with one
        * attribute.
        */
       template <class NestedDerived>
-      Derived& project(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
+      Derived& projectOnCells(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
-        return project(fn, FlatSet<Geometry::Attribute>{attr});
+        return projectOnCells(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       /**
@@ -491,7 +490,7 @@ namespace Rodin::Variational
        * empty, this function will project over all elements in the mesh.
        */
       template <class NestedDerived>
-      Derived& project(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
+      Derived& projectOnCells(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
@@ -618,37 +617,14 @@ namespace Rodin::Variational
       {
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        const size_t d = mesh.getDimension() - 1;
-        std::vector<Real> ns(fes.getSize(), 0);
         for (auto it = mesh.getBoundary(); !it.end(); ++it)
         {
           const auto& polytope = *it;
           if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
           {
-            const auto& i = polytope.getIndex();
-            const auto& fe = fes.getFiniteElement(d, i);
-            const auto& trans = mesh.getPolytopeTransformation(d, i);
-            for (size_t local = 0; local < fe.getCount(); local++)
-            {
-              const Geometry::Point p(polytope, trans, fe.getNode(local));
-              const Index global = fes.getGlobalIndex({ d, i }, local);
-              if constexpr (std::is_same_v<RangeType, ScalarType>)
-              {
-                assert(m_data.rows() == 1);
-                m_data(global) =
-                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1);
-              }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-              {
-                m_data.col(global) =
-                  (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1);
-              }
-              else
-              {
-                assert(false);
-              }
-              ns[global] += 1;
-            }
+            const auto& polytope = *it;
+            if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
+              project(fn, { polytope.getDimension(), polytope.getIndex() });
           }
         }
         return static_cast<Derived&>(*this);
@@ -721,38 +697,11 @@ namespace Rodin::Variational
       {
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        const size_t d = mesh.getDimension() - 1;
-        std::vector<Real> ns(fes.getSize(), 0);
         for (auto it = mesh.getFace(); !it.end(); ++it)
         {
           const auto& polytope = *it;
           if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-          {
-            const auto& i = polytope.getIndex();
-            const auto& fe = fes.getFiniteElement(d, i);
-            const auto& trans = mesh.getPolytopeTransformation(d, i);
-            for (size_t local = 0; local < fe.getCount(); local++)
-            {
-              const Geometry::Point p(polytope, trans, fe.getNode(local));
-              const Index global = fes.getGlobalIndex({ d, i }, local);
-              if constexpr (std::is_same_v<RangeType, ScalarType>)
-              {
-                assert(m_data.rows() == 1);
-                m_data(global) =
-                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1);
-              }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-              {
-                m_data.col(global) =
-                  (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1);
-              }
-              else
-              {
-                assert(false);
-              }
-              ns[global] += 1;
-            }
-          }
+            project(fn, { polytope.getDimension(), polytope.getIndex() });
         }
         return static_cast<Derived&>(*this);
       }
@@ -825,32 +774,39 @@ namespace Rodin::Variational
       {
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        const size_t d = mesh.getDimension() - 1;
         for (auto it = mesh.getInterface(); !it.end(); ++it)
         {
           const auto& polytope = *it;
           if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
+            project(fn, { polytope.getDimension(), polytope.getIndex() });
+        }
+        return static_cast<Derived&>(*this);
+      }
+
+      template <class NestedDerived>
+      Derived& project(const FunctionBase<NestedDerived>& fn, const std::pair<size_t, Index>& p)
+      {
+        const auto& fes = getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const auto& [d, i] = p;
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto it = mesh.getPolytope(d, i);
+        const auto& trans = mesh.getPolytopeTransformation(d, i);
+        for (size_t local = 0; local < fe.getCount(); local++)
+        {
+          const Geometry::Point p(*it, trans, fe.getNode(local));
+          if constexpr (std::is_same_v<RangeType, ScalarType>)
           {
-            const auto& i = polytope.getIndex();
-            const auto& fe = fes.getFiniteElement(d, i);
-            const auto& trans = mesh.getPolytopeTransformation(d, i);
-            for (size_t local = 0; local < fe.getCount(); local++)
-            {
-              const Geometry::Point p(polytope, trans, fe.getNode(local));
-              if constexpr (std::is_same_v<RangeType, ScalarType>)
-              {
-                assert(m_data.rows() == 1);
-                m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
-              }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-              {
-                m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
-              }
-              else
-              {
-                assert(false);
-              }
-            }
+            assert(m_data.rows() == 1);
+            m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+          }
+          else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
+          {
+            m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+          }
+          else
+          {
+            assert(false);
           }
         }
         return static_cast<Derived&>(*this);
@@ -1043,7 +999,6 @@ namespace Rodin::Variational
       {
         return getValue(getFiniteElementSpace().getGlobalIndex(p, local));
       }
-
 
       /**
        * @brief Gets the value of the GridFunction at the global degree of

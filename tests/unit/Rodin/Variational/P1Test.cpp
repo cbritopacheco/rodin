@@ -62,7 +62,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
-    gf.project(c);
+    gf = c;
 
     EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
 
@@ -126,7 +126,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf1(fes);
 
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
-    gf1.project(c);
+    gf1 = c;
 
     EXPECT_EQ(gf1.getRangeShape(), RangeShape(1, 1));
 
@@ -166,7 +166,7 @@ namespace Rodin::Tests::Unit
     }
 
     GridFunction gf2(fes);
-    gf2.project([](const Geometry::Point& p) { return 5 * p.x() + 100 * p.y(); });
+    gf2 = [](const Geometry::Point& p) { return 5 * p.x() + 100 * p.y(); };
 
     EXPECT_EQ(gf1.getRangeShape(), RangeShape(1, 1));
 
@@ -187,7 +187,7 @@ namespace Rodin::Tests::Unit
     }
 
     GridFunction gf3(fes);
-    gf3.project([](const Geometry::Point& p) { return p.x() - p.y(); });
+    gf3.projectOnCells([](const Geometry::Point& p) { return p.x() - p.y(); });
 
     EXPECT_EQ(gf1.getRangeShape(), RangeShape(1, 1));
 
@@ -208,7 +208,7 @@ namespace Rodin::Tests::Unit
     }
 
     GridFunction gf4(fes);
-    gf4.project([](const Geometry::Point& p) { return 666 * p.x() - 999 * p.y(); });
+    gf4.projectOnCells([](const Geometry::Point& p) { return 666 * p.x() - 999 * p.y(); });
 
     EXPECT_EQ(gf1.getRangeShape(), RangeShape(1, 1));
 
@@ -284,7 +284,7 @@ namespace Rodin::Tests::Unit
       [](const Geometry::Point& p){ return p.y(); }
     };
 
-    gf1.project(c1);
+    gf1 = c1;
 
     RandomFloat gen(0.0, 1.0);
 
@@ -314,7 +314,7 @@ namespace Rodin::Tests::Unit
       [](const Geometry::Point& p){ return p.x(); }
     };
 
-    gf2.project(c2);
+    gf2 = c2;
 
     {
       auto it = mesh.getPolytope(mdim, 0);
@@ -338,7 +338,7 @@ namespace Rodin::Tests::Unit
 
     VectorFunction c3 = { [](const Geometry::Point& p){ return p.x() + p.y(); }, 0 };
 
-    gf3.project(c3);
+    gf3 = c3;
 
     {
       auto it = mesh.getPolytope(mdim, 0);
@@ -365,7 +365,7 @@ namespace Rodin::Tests::Unit
       [](const Geometry::Point& p){ return -5 * p.x() + 666 * p.y(); },
     };
 
-    gf4.project(c4);
+    gf4 = c4;
 
     {
       auto it = mesh.getPolytope(mdim, 0);

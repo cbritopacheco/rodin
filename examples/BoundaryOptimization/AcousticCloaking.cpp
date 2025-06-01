@@ -287,7 +287,7 @@ int main(int, char**)
 
       Alert::Info() << "Computing conormal..." << Alert::Raise;
       GridFunction conormal(drvfes);
-      conormal.project(Grad(dist), { SoundSoft, SoundHard });
+      conormal.projectOnCells(Grad(dist), { SoundSoft, SoundHard });
       conormal.stableNormalize();
 
       conormal.getFiniteElementSpace().getMesh().save("Conormal.mesh");
