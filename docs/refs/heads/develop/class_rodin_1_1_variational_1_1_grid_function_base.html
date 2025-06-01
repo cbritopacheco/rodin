@@ -157,19 +157,19 @@
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_division.html" class="m-doc">Division</a> by a scalar value.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab3ab459e19cc53f859c894d98c8e063f" class="m-doc">project</a>(</span><span class="m-doc-wrap">std::function&lt;<a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>(const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;)&gt; fn,
+              <span class="m-doc-wrap-bumper">auto <a href="#a171c1a05a71ec77849fb3875e1bf63c4" class="m-doc">projectOnCells</a>(</span><span class="m-doc-wrap">std::function&lt;<a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>(const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;)&gt; fn,
               <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr) -&gt; auto&amp;</span>
             </dt>
             <dd>Projects a scalar valued function on the region of the mesh with the given attribute.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a79963fbe61a07757f5c7712259f1cc57" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; fn,
+              <span class="m-doc-wrap-bumper">auto <a href="#a91440b4c3381fab95309a71dc3f8538c" class="m-doc">projectOnCells</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; fn,
               <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr) -&gt; Derived&amp;</span>
             </dt>
             <dd>Projects a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2c7e68ddfece818c8c4c35e64de96764" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; fn,
+              <span class="m-doc-wrap-bumper">auto <a href="#a912a08964c37b10f9105e672b4b2772e" class="m-doc">projectOnCells</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; fn,
               const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; Derived&amp;</span>
             </dt>
             <dd>Projects a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance on the grid function.</dd>
@@ -254,12 +254,12 @@
             </table>
 <p>This function will compute the minimum value in the grid function data array.</p><h4 id="Complexity">Complexity</h4><p>The operation is linear in the size of the number of entries in the underlying matrix.</p>
           </div></section>
-          <section class="m-doc-details" id="ab3ab459e19cc53f859c894d98c8e063f"><div>
+          <section class="m-doc-details" id="a171c1a05a71ec77849fb3875e1bf63c4"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;FES, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3ab459e19cc53f859c894d98c8e063f" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">std::function&lt;<a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>(const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;)&gt; fn,
+              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;FES, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a171c1a05a71ec77849fb3875e1bf63c4" class="m-doc-self">projectOnCells</a>(</span><span class="m-doc-wrap">std::function&lt;<a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>(const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;)&gt; fn,
               <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr)</span></span>
             </h3>
             <p>Projects a scalar valued function on the region of the mesh with the given attribute.</p>
@@ -279,25 +279,25 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a79963fbe61a07757f5c7712259f1cc57"><div>
+          <section class="m-doc-details" id="a91440b4c3381fab95309a71dc3f8538c"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES, class Derived&gt;
                 template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;FES, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a79963fbe61a07757f5c7712259f1cc57" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; fn,
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;FES, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a91440b4c3381fab95309a71dc3f8538c" class="m-doc-self">projectOnCells</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; fn,
               <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr)</span></span>
             </h3>
             <p>Projects a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance.</p>
-<p>This function will project a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance on the domain elements with the given attribute.</p><p>It is a convenience function to call project(const FunctionBase&amp;, const FlatSet&lt;Geometry::Atribute&gt;&amp;) with one attribute.</p>
+<p>This function will project a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance on the domain elements with the given attribute.</p><p>It is a convenience function to call projectOnCells(const FunctionBase&amp;, const FlatSet&lt;Geometry::Atribute&gt;&amp;) with one attribute.</p>
           </div></section>
-          <section class="m-doc-details" id="a2c7e68ddfece818c8c4c35e64de96764"><div>
+          <section class="m-doc-details" id="a912a08964c37b10f9105e672b4b2772e"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES, class Derived&gt;
                 template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;FES, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c7e68ddfece818c8c4c35e64de96764" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; fn,
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;FES, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a912a08964c37b10f9105e672b4b2772e" class="m-doc-self">projectOnCells</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; fn,
               const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs)</span></span>
             </h3>
             <p>Projects a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance on the grid function.</p>
