@@ -109,7 +109,7 @@ namespace Rodin::Tests::Benchmarks
     GridFunction gf(fes);
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     for (auto _ : st)
-      gf.project(c);
+      gf.projectOnCells(c);
   }
 
   BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Real_SumOfComponents)
@@ -119,7 +119,7 @@ namespace Rodin::Tests::Benchmarks
     GridFunction gf(fes);
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     for (auto _ : st)
-      gf.project(c);
+      gf.projectOnCells(c);
   }
 
   BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Real_SumOfComponents)
@@ -129,7 +129,7 @@ namespace Rodin::Tests::Benchmarks
     GridFunction gf(fes);
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     for (auto _ : st)
-      gf.project(c);
+      gf.projectOnCells(c);
   }
 
   BENCHMARK_F(P1Benchmark, 2D_Square_GridFunction_Projection_Vector_Components)
@@ -143,7 +143,7 @@ namespace Rodin::Tests::Benchmarks
       [](const Geometry::Point& p) { return p.y(); },
     };
     for (auto _ : st)
-      gf.project(c);
+      gf.projectOnCells(c);
   }
 
   BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Vector_Components)
@@ -157,7 +157,7 @@ namespace Rodin::Tests::Benchmarks
       [](const Geometry::Point& p) { return p.y(); },
     };
     for (auto _ : st)
-      gf.project(c);
+      gf.projectOnCells(c);
   }
 
   BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Vector_Components)
@@ -171,6 +171,6 @@ namespace Rodin::Tests::Benchmarks
       [](const Geometry::Point& p) { return p.y(); },
     };
     for (auto _ : st)
-      gf.project(c);
+      gf.projectOnCells(c);
   }
 }

@@ -2,6 +2,12 @@
 
 namespace Rodin::Geometry
 {
+  Shard::Flags const Shard::Flags::None(0b00);
+
+  Shard::Flags const Shard::Flags::Owned(0b01);
+
+  Shard::Flags const Shard::Flags::Ghost(0b10);
+
   Shard::Builder& Shard::Builder::initialize(const Mesh<Context>& parent)
   {
     const size_t dim = parent.getDimension();
@@ -9,12 +15,12 @@ namespace Rodin::Geometry
     m_parent = parent;
     m_build.initialize(sdim);
     m_s2ps.resize(dim + 1);
-    m_ghosts.resize(dim + 1);
+    m_flags.resize(dim + 1);
     m_sidx.resize(dim + 1, 0);
     return *this;
   }
 
-  Shard::Builder& Shard::Builder::include(size_t d, Index parentIdx)
+  Shard::Builder& Shard::Builder::include(size_t d, Index parentIdx, const Flags& flags)
   {
     auto& build = m_build;
     assert(m_parent.has_value());
@@ -46,55 +52,13 @@ namespace Rodin::Geometry
     if (inserted) // Polytope was not already in the map
     {
       build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
+      m_flags[d].insert({ childIdx, flags });
       m_sidx[d] += 1;
     }
     else
     {
       build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
-    }
-    m_dimension = std::max(m_dimension, d);
-    return *this;
-  }
-
-  Shard::Builder& Shard::Builder::ghost(size_t d, Index parentIdx)
-  {
-    auto& build = m_build;
-    assert(m_parent.has_value());
-    const auto& parent = m_parent.value().get();
-    const auto& conn = parent.getConnectivity();
-    const auto& parentPolytope = conn.getPolytope(d, parentIdx);
-    IndexArray childPolytope(parentPolytope.size());
-    assert(childPolytope.size() >= 0);
-    for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
-    {
-      const Index parentVertex = parentPolytope.coeff(i);
-      const Index childVertex = m_sidx[0];
-      const auto [it, inserted] = m_s2ps[0].right.insert({ parentVertex, childVertex });
-      if (inserted) // Vertex was not already in the map
-      {
-        childPolytope.coeffRef(i) = childVertex;
-        m_sidx[0] += 1;
-        m_ghosts[0].insert(childVertex);
-      }
-      else // Vertex was already in the map
-      {
-        childPolytope.coeffRef(i) = it->get_left();
-      }
-    }
-    // Add polytope with original geometry and new vertex ordering
-    build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
-    const Index childIdx = m_sidx[d];
-    const auto [it, inserted] = m_s2ps[d].right.insert({ parentIdx, childIdx });
-    // Add polytope information
-    if (inserted) // Polytope was not already in the map
-    {
-      build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
-      m_sidx[d] += 1;
-      m_ghosts[d].insert(childIdx);
-    }
-    else
-    {
-      build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
+      m_flags[d][it->get_left()] |= flags;
     }
     m_dimension = std::max(m_dimension, d);
     return *this;
@@ -119,8 +83,12 @@ namespace Rodin::Geometry
     for (auto it = m_s2ps[cellDim].left.begin(); it != m_s2ps[cellDim].left.end(); ++it)
     {
       Index cIdx = it->get_left();
-      if (!m_ghosts[cellDim].contains(cIdx))
-        originals.push_back(it->get_right());
+      const auto& flags = m_flags[cellDim].at(cIdx);
+      if (flags & Shard::Flags::Ghost)
+      {
+        include(cellDim, it->get_right(), Shard::Flags::Ghost);
+        continue;
+      }
     }
 
     const auto& nbrs = pconn.getIncidence(cellDim, cellDim);
@@ -129,7 +97,7 @@ namespace Rodin::Geometry
       for (Index nb : nbrs.at(p))
       {
         if (m_s2ps[cellDim].right.find(nb) == m_s2ps[cellDim].right.end())
-          ghost(cellDim, nb);
+          include(cellDim, nb, Shard::Flags::Ghost);
       }
     }
 
@@ -142,7 +110,7 @@ namespace Rodin::Geometry
         Index pParent = it->get_right();
         for (Index sub : down.at(pParent))
           if (m_s2ps[d - 1].right.find(sub) == m_s2ps[d - 1].right.end())
-            ghost(d - 1, sub);
+            include(d - 1, sub, Shard::Flags::Ghost);
       }
     }
 
@@ -176,34 +144,30 @@ namespace Rodin::Geometry
 
     Shard res;
     res.Parent::operator=(m_build.finalize());
-    res.m_s2ps   = std::move(m_s2ps);
-    res.m_ghosts = std::move(m_ghosts);
+    res.m_s2ps = std::move(m_s2ps);
     return res;
   }
 
   Shard::Shard(const Shard& other)
     : Parent(other),
-      m_s2ps(other.m_s2ps),
-      m_ghosts(other.m_ghosts)
+      m_s2ps(other.m_s2ps)
   {}
 
   Shard::Shard(Shard&& other)
     : Parent(std::move(other)),
-      m_s2ps(std::move(other.m_s2ps)),
-      m_ghosts(std::move(other.m_ghosts))
+      m_s2ps(std::move(other.m_s2ps))
   {}
 
   Shard& Shard::operator=(Shard&& other)
   {
     Parent::operator=(std::move(other));
     m_s2ps = std::move(other.m_s2ps);
-    m_ghosts = std::move(other.m_ghosts);
     return *this;
   }
 
   bool Shard::isGhost(size_t d, Index idx) const
   {
-    return m_ghosts[d].contains(idx);
+    return m_flags[d].at(idx) & Shard::Flags::Ghost;
   }
 
   const Shard::PolytopeMap& Shard::getPolytopeMap(size_t d) const

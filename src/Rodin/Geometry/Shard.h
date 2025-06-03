@@ -1,6 +1,7 @@
 #ifndef RODIN_GEOMETRY_SHARD_H
 #define RODIN_GEOMETRY_SHARD_H
 
+#include <type_traits>
 #include <boost/bimap/vector_of.hpp>
 
 #include "Rodin/Pair.h"
@@ -14,6 +15,69 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
+
+      /**
+       * @brief Bitmask enum indicating the state of a polytope in the shard.
+       *
+       * A polytope can be:
+       * - Owned locally
+       * - Ghosted from a remote process
+       */
+      class Flags
+      {
+        friend class boost::serialization::access;
+
+        public:
+          using BitSet = std::bitset<2>;
+
+          static const Flags None; ///< No flags set
+          static const Flags Owned; ///< Polytope is owned by the local process
+          static const Flags Ghost; ///< Polytope is ghosted from a remote process
+
+          Flags()
+            : m_bits(None.m_bits)
+          {}
+
+          Flags(BitSet bits)
+            : m_bits(bits)
+          {}
+
+          Flags(const Flags& other)
+            : m_bits(other.m_bits)
+          {}
+
+          Flags operator|(const Flags& rhs) const
+          {
+            return m_bits | rhs.m_bits;
+          }
+
+          Boolean operator&(const Flags& rhs) const
+          {
+            return (m_bits & rhs.m_bits).any();
+          }
+
+          Flags& operator|=(const Flags& rhs)
+          {
+            m_bits |= rhs.m_bits;
+            return *this;
+          }
+
+          Flags& operator=(const Flags& other)
+          {
+            m_bits = other.m_bits;
+            return *this;
+          }
+
+          template<class Archive>
+          void serialize(Archive& ar, const unsigned int version)
+          {
+            ar & m_bits;
+          }
+
+        private:
+          BitSet m_bits;
+      };
+
       using PolytopeMap =
         boost::bimap<
           boost::bimaps::vector_of<Index>,
@@ -30,9 +94,7 @@ namespace Rodin::Geometry
 
           Builder& initialize(const Mesh<Context>& parent);
 
-          Builder& include(size_t d, Index parentIdx);
-
-          Builder& ghost(size_t d, Index parentIdx);
+          Builder& include(size_t d, Index parentIdx, const Flags& flags = Shard::Flags::None);
 
           Builder& include(size_t d, const IndexSet& indices);
 
@@ -43,7 +105,7 @@ namespace Rodin::Geometry
           Mesh<Context>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<PolytopeMap> m_s2ps;
-          std::vector<IndexSet> m_ghosts;
+          std::vector<FlatMap<Index, Flags>> m_flags;
           size_t m_dimension;
       };
 
@@ -69,17 +131,12 @@ namespace Rodin::Geometry
       {
         ar & boost::serialization::base_object<Mesh<Context>>(*this);
         ar & m_s2ps;
-        ar & m_ghosts;
-      }
-
-      const auto& getGhosts() const
-      {
-        return m_ghosts;
+        // ar & m_flags;
       }
 
     private:
       std::vector<PolytopeMap> m_s2ps;
-      std::vector<IndexSet> m_ghosts;
+      std::vector<FlatMap<Index, Flags>> m_flags;
   };
 }
 

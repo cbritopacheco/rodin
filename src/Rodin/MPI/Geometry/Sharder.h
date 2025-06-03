@@ -75,7 +75,7 @@ namespace Rodin::Geometry
         for (Index i = 0; i < mesh.getCellCount(); i++)
         {
           const size_t partIdx = partitioner.getPartition(i);
-          sbs[partIdx].include(cellDim, i);
+          sbs[partIdx].include(cellDim, i, Shard::Flags::Owned);
           for (size_t d = 1; d <= cellDim - 1; d++)
           {
             const auto& inc = mesh.getConnectivity().getIncidence(cellDim, d);

@@ -46,7 +46,6 @@ int main(int argc, char** argv)
   mesh.getShard().getConnectivity().compute(1, 2);
   std::cout << "Vertex count: " << mesh.getVertexCount() << "\n";
   std::cout << "Local count: " << mesh.getShard().getVertexCount() << "\n";
-  std::cout << "Ghosts: " << mesh.getShard().getGhosts()[0].size() << "\n";
 
   Mat a;
   MatCreate(mpi.getCommunicator(), &a);
