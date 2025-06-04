@@ -64,13 +64,6 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Shard::Builder& Shard::Builder::include(size_t d, const IndexSet& indices)
-  {
-    for (const Index parentIdx : indices)
-      include(d, parentIdx);
-    return *this;
-  }
-
   Shard Shard::Builder::finalize()
   {
     assert(m_parent.has_value());
@@ -145,23 +138,27 @@ namespace Rodin::Geometry
     Shard res;
     res.Parent::operator=(m_build.finalize());
     res.m_s2ps = std::move(m_s2ps);
+    res.m_flags = std::move(m_flags);
     return res;
   }
 
   Shard::Shard(const Shard& other)
     : Parent(other),
-      m_s2ps(other.m_s2ps)
+      m_s2ps(other.m_s2ps),
+      m_flags(other.m_flags)
   {}
 
   Shard::Shard(Shard&& other)
     : Parent(std::move(other)),
-      m_s2ps(std::move(other.m_s2ps))
+      m_s2ps(std::move(other.m_s2ps)),
+      m_flags(std::move(other.m_flags))
   {}
 
   Shard& Shard::operator=(Shard&& other)
   {
     Parent::operator=(std::move(other));
     m_s2ps = std::move(other.m_s2ps);
+    m_flags = std::move(other.m_flags);
     return *this;
   }
 

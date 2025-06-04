@@ -5,6 +5,9 @@
 #include <boost/bimap/vector_of.hpp>
 
 #include "Rodin/Pair.h"
+#include "Rodin/BitSet.h"
+#include "Rodin/Serialization/FlatMap.h"
+#include "Rodin/Serialization/BitSet.h"
 
 #include "SubMesh.h"
 
@@ -28,8 +31,6 @@ namespace Rodin::Geometry
         friend class boost::serialization::access;
 
         public:
-          using BitSet = std::bitset<2>;
-
           static const Flags None; ///< No flags set
           static const Flags Owned; ///< Polytope is owned by the local process
           static const Flags Ghost; ///< Polytope is ghosted from a remote process
@@ -38,7 +39,7 @@ namespace Rodin::Geometry
             : m_bits(None.m_bits)
           {}
 
-          Flags(BitSet bits)
+          Flags(BitSet2 bits)
             : m_bits(bits)
           {}
 
@@ -75,7 +76,7 @@ namespace Rodin::Geometry
           }
 
         private:
-          BitSet m_bits;
+          BitSet2 m_bits;
       };
 
       using PolytopeMap =
@@ -95,8 +96,6 @@ namespace Rodin::Geometry
           Builder& initialize(const Mesh<Context>& parent);
 
           Builder& include(size_t d, Index parentIdx, const Flags& flags = Shard::Flags::None);
-
-          Builder& include(size_t d, const IndexSet& indices);
 
           Shard finalize();
 
@@ -131,7 +130,7 @@ namespace Rodin::Geometry
       {
         ar & boost::serialization::base_object<Mesh<Context>>(*this);
         ar & m_s2ps;
-        // ar & m_flags;
+        ar & m_flags;
       }
 
     private:
