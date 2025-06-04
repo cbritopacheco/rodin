@@ -5,7 +5,6 @@
 #include <boost/bimap/vector_of.hpp>
 
 #include "Rodin/Pair.h"
-#include "Rodin/BitSet.h"
 #include "Rodin/Serialization/FlatMap.h"
 #include "Rodin/Serialization/BitSet.h"
 
@@ -18,7 +17,6 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
-
       /**
        * @brief Bitmask enum indicating the state of a polytope in the shard.
        *
