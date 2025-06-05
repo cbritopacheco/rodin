@@ -37,7 +37,7 @@ namespace Rodin::Geometry
     {
       const size_t partition = partitioner.getPartition(i);
 
-      for (size_t d = 0; d < cellDim - 1; d++)
+      for (size_t d = 0; d <= cellDim - 1; d++)
       {
         for (const Index idx : conn.getIncidence({ cellDim, d }, i))
         {
@@ -68,7 +68,7 @@ namespace Rodin::Geometry
         if (partition == partitioner.getPartition(nbr))
           continue;
 
-        for (size_t d = 0; d < cellDim - 1; d++)
+        for (size_t d = 0; d <= cellDim - 1; d++)
         {
           for (const Index idx : conn.getIncidence({ cellDim, d }, nbr))
           {
