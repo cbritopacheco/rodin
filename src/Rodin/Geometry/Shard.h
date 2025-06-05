@@ -52,7 +52,7 @@ namespace Rodin::Geometry
 
           Boolean operator&(const Flags& rhs) const
           {
-            return (m_bits & rhs.m_bits).any();
+            return has(rhs);
           }
 
           Flags& operator|=(const Flags& rhs)
@@ -65,6 +65,11 @@ namespace Rodin::Geometry
           {
             m_bits = other.m_bits;
             return *this;
+          }
+
+          Boolean has(Flags flag) const
+          {
+            return (m_bits & flag.m_bits).any();
           }
 
           template<class Archive>
@@ -95,7 +100,13 @@ namespace Rodin::Geometry
 
           Builder& include(size_t d, Index parentIdx, const Flags& flags = Shard::Flags::None);
 
+          Builder& flag(size_t d, Index parentIdx, const Flags& flags);
+
           Shard finalize();
+
+          const PolytopeMap& getPolytopeMap(size_t d) const;
+
+          size_t getPolytopeCount(size_t d) const;
 
         private:
           std::optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
@@ -129,6 +140,11 @@ namespace Rodin::Geometry
         ar & boost::serialization::base_object<Mesh<Context>>(*this);
         ar & m_s2ps;
         ar & m_flags;
+      }
+
+      const FlatMap<Index, Flags>& getFlags(size_t d) const
+      {
+        return m_flags[d];
       }
 
     private:

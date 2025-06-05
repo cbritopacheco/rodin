@@ -8,6 +8,22 @@ namespace Rodin::Geometry
 
   Shard::Flags const Shard::Flags::Ghost(0b10);
 
+  const Shard::PolytopeMap& Shard::Builder::getPolytopeMap(size_t d) const
+  {
+    return m_s2ps[d];
+  }
+
+  size_t Shard::Builder::getPolytopeCount(size_t d) const
+  {
+    return m_s2ps[d].size();
+  }
+
+  Shard::Builder& Shard::Builder::flag(size_t d, Index parentIdx, const Flags& flags)
+  {
+    m_flags[d][parentIdx] = flags;
+    return *this;
+  }
+
   Shard::Builder& Shard::Builder::initialize(const Mesh<Context>& parent)
   {
     const size_t dim = parent.getDimension();
@@ -29,38 +45,64 @@ namespace Rodin::Geometry
     const auto& parentPolytope = conn.getPolytope(d, parentIdx);
     IndexArray childPolytope(parentPolytope.size());
     assert(childPolytope.size() >= 0);
-    for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
+    if (d == 0)
     {
-      const Index parentVertex = parentPolytope.coeff(i);
-      const Index childVertex = m_sidx[0];
-      const auto [it, inserted] = m_s2ps[0].right.insert({ parentVertex, childVertex });
+      const Index childIdx = m_sidx[0];
+      const auto [it, inserted] = m_s2ps[0].right.insert({ parentIdx, childIdx });
       if (inserted) // Vertex was not already in the map
       {
-        childPolytope.coeffRef(i) = childVertex;
+        build.attribute({ 0, childIdx }, parent.getAttribute(0, parentIdx));
+        m_flags[0][childIdx] = flags;
         m_sidx[0] += 1;
       }
-      else // Vertex was already in the map
+      else
       {
-        childPolytope.coeffRef(i) = it->get_left();
+        build.attribute({ 0, it->get_left() }, parent.getAttribute(0, parentIdx));
+        m_flags[0][it->get_left()] = flags;
       }
-    }
-    // Add polytope with original geometry and new vertex ordering
-    build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
-    const Index childIdx = m_sidx[d];
-    const auto [it, inserted] = m_s2ps[d].right.insert({ parentIdx, childIdx });
-    // Add polytope information
-    if (inserted) // Polytope was not already in the map
-    {
-      build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
-      m_flags[d].insert({ childIdx, flags });
-      m_sidx[d] += 1;
     }
     else
     {
-      build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
-      m_flags[d][it->get_left()] |= flags;
+      const Index childIdx = m_sidx[d];
+      const auto [it, inserted] = m_s2ps[d].right.insert({ parentIdx, childIdx });
+
+      // Add polytope information
+      if (inserted) // Polytope was not already in the map
+      {
+        build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
+        m_sidx[d] += 1;
+
+        for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
+        {
+          const Index parentVertex = parentPolytope.coeff(i);
+          const Index childVertex = m_sidx[0];
+          const auto [itVertex, insertedVertex] = m_s2ps[0].right.insert({ parentVertex, childVertex });
+          if (insertedVertex) // Vertex was not already in the map
+          {
+            childPolytope.coeffRef(i) = childVertex;
+            build.attribute({ 0, childVertex }, parent.getAttribute(0, parentVertex));
+            m_sidx[0] += 1;
+          }
+          else // Vertex was already in the map
+          {
+            build.attribute({ 0, itVertex->get_left() }, parent.getAttribute(0, parentVertex));
+            childPolytope.coeffRef(i) = itVertex->get_left();
+          }
+        }
+
+        // Add polytope with original geometry and new vertex ordering
+        build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
+        m_flags[d][childIdx] = flags;
+      }
+      else
+      {
+        build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
+        m_flags[d][it->get_left()] = flags;
+      }
     }
+
     m_dimension = std::max(m_dimension, d);
+
     return *this;
   }
 
@@ -68,44 +110,9 @@ namespace Rodin::Geometry
   {
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();
-    auto&       conn   = m_build.getConnectivity();
+    auto& conn = m_build.getConnectivity();
     const size_t cellDim = parent.getDimension();
-    const auto& pconn   = parent.getConnectivity();
-
-    std::vector<Index> originals;
-    for (auto it = m_s2ps[cellDim].left.begin(); it != m_s2ps[cellDim].left.end(); ++it)
-    {
-      Index cIdx = it->get_left();
-      const auto& flags = m_flags[cellDim].at(cIdx);
-      if (flags & Shard::Flags::Ghost)
-      {
-        include(cellDim, it->get_right(), Shard::Flags::Ghost);
-        continue;
-      }
-    }
-
-    const auto& nbrs = pconn.getIncidence(cellDim, cellDim);
-    for (Index p : originals)
-    {
-      for (Index nb : nbrs.at(p))
-      {
-        if (m_s2ps[cellDim].right.find(nb) == m_s2ps[cellDim].right.end())
-          include(cellDim, nb, Shard::Flags::Ghost);
-      }
-    }
-
-    for (size_t d = cellDim; d > 0; --d)
-    {
-      const auto& down = pconn.getIncidence(d, d - 1);
-      if (down.size() == 0) continue;
-      for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
-      {
-        Index pParent = it->get_right();
-        for (Index sub : down.at(pParent))
-          if (m_s2ps[d - 1].right.find(sub) == m_s2ps[d - 1].right.end())
-            include(d - 1, sub, Shard::Flags::Ghost);
-      }
-    }
+    const auto& pconn = parent.getConnectivity();
 
     for (size_t d = 0; d <= cellDim; ++d)
     {
@@ -117,12 +124,12 @@ namespace Rodin::Geometry
         Incidence cInc(m_s2ps[d].size());
         for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
         {
-          Index cIdx = it->get_left();
-          Index pIdx = it->get_right();
+          const Index cIdx = it->get_left();
+          const Index pIdx = it->get_right();
           cInc[cIdx].reserve(pInc.at(pIdx).size());
           for (Index pNbr : pInc.at(pIdx))
           {
-            auto found = m_s2ps[dp].right.find(pNbr);
+            const auto found = m_s2ps[dp].right.find(pNbr);
             if (found != m_s2ps[dp].right.end())
               cInc[cIdx].insert_unique(found->get_left());
           }

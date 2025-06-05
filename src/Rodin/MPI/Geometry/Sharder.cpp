@@ -17,45 +17,74 @@ namespace Rodin::Geometry
   {
     m_shards.clear();
     const auto& mesh = partitioner.getMesh();
+    const auto& conn = mesh.getConnectivity();
     const size_t cellDim = mesh.getDimension();
     const size_t numShards = partitioner.getCount();
-    assert(m_context.getCommunicator().size() > 0);
+    assert(m_context.getCommunicator().size() >= 0);
     assert(partitioner.getCount() == static_cast<size_t>(m_context.getCommunicator().size()));
     assert(numShards > 0);
+
     std::vector<Shard::Builder> sbs(numShards);
     for (auto& sb : sbs)
       sb.initialize(mesh);
-    std::vector<std::vector<Boolean>> visited;
-    visited.resize(cellDim + 1);
-    for (size_t d = 0; d < cellDim; d++)
-      visited[d].resize(mesh.getPolytopeCount(d), false);
+
+    // Determine ownership of polytopes
+    std::vector<std::vector<Boolean>> owned;
+    owned.resize(cellDim + 1);
+    for (size_t d = 0; d < cellDim + 1; d++)
+      owned[d].resize(mesh.getPolytopeCount(d), false);
     for (Index i = 0; i < mesh.getCellCount(); i++)
     {
-      const size_t partIdx = partitioner.getPartition(i);
-      sbs[partIdx].include(cellDim, i, Shard::Flags::Owned);
-      for (size_t d = 1; d <= cellDim - 1; d++)
+      const size_t partition = partitioner.getPartition(i);
+
+      for (size_t d = 0; d < cellDim - 1; d++)
       {
-        const auto& inc = mesh.getConnectivity().getIncidence(cellDim, d);
-        if (inc.size() > 0)
+        for (const Index idx : conn.getIncidence({ cellDim, d }, i))
         {
-          for (const auto& idx : inc.at(i))
+          if (owned[d][idx])
           {
-            if (visited[d][idx])
-            {
-              sbs[partIdx].include(d, idx, Shard::Flags::Owned);
-            }
-            else
-            {
-              sbs[partIdx].include(d, idx, Shard::Flags::None);
-              visited[d][idx] = true;
-            }
+            sbs[partition].include(d, idx, Shard::Flags::None);
+          }
+          else
+          {
+            sbs[partition].include(d, idx, Shard::Flags::Owned);
+            owned[d][idx] = true;
           }
         }
       }
+
+      assert(!owned[cellDim][i]);
+      sbs[partition].include(cellDim, i, Shard::Flags::Owned);
+      owned[cellDim][i] = true;
     }
+
+    // Determine ghost polytopes
+    for (Index i = 0; i < mesh.getCellCount(); i++)
+    {
+      const size_t partition = partitioner.getPartition(i);
+
+      for (const Index nbr : conn.getIncidence({ cellDim, cellDim }, i))
+      {
+        if (partition == partitioner.getPartition(nbr))
+          continue;
+
+        for (size_t d = 0; d < cellDim - 1; d++)
+        {
+          for (const Index idx : conn.getIncidence({ cellDim, d }, nbr))
+          {
+            auto find = sbs[partition].getPolytopeMap(d).right.find(idx);
+            if (find == sbs[partition].getPolytopeMap(d).right.end())
+              sbs[partition].include(d, idx, Shard::Flags::Ghost);
+          }
+        }
+        sbs[partition].include(cellDim, nbr, Shard::Flags::Ghost);
+      }
+    }
+
     m_shards.resize(numShards);
     for (size_t i = 0; i < numShards; i++)
       m_shards[i] = sbs[i].finalize();
+
     return *this;
   }
 
@@ -66,7 +95,7 @@ namespace Rodin::Geometry
     std::vector<boost::mpi::request> reqs(m_shards.size());
     for (size_t i = 0; i < m_shards.size(); i++)
     {
-      assert(root > 0);
+      assert(root >= 0);
       if (i == static_cast<size_t>(root))
         continue;
       reqs[i] = comm.isend(i, tag, m_shards[i]);
