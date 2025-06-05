@@ -58,7 +58,7 @@ namespace Rodin::Geometry
       else
       {
         build.attribute({ 0, it->get_left() }, parent.getAttribute(0, parentIdx));
-        m_flags[0][it->get_left()] = flags;
+        m_flags[0][it->get_left()] |= flags;
       }
     }
     else
@@ -85,8 +85,8 @@ namespace Rodin::Geometry
           }
           else // Vertex was already in the map
           {
-            build.attribute({ 0, itVertex->get_left() }, parent.getAttribute(0, parentVertex));
             childPolytope.coeffRef(i) = itVertex->get_left();
+            build.attribute({ 0, itVertex->get_left() }, parent.getAttribute(0, parentVertex));
           }
         }
 
@@ -97,7 +97,7 @@ namespace Rodin::Geometry
       else
       {
         build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
-        m_flags[d][it->get_left()] = flags;
+        m_flags[d][it->get_left()] |= flags;
       }
     }
 
@@ -172,6 +172,11 @@ namespace Rodin::Geometry
   bool Shard::isGhost(size_t d, Index idx) const
   {
     return m_flags[d].at(idx) & Shard::Flags::Ghost;
+  }
+
+  bool Shard::isOwned(size_t d, Index idx) const
+  {
+    return m_flags[d].at(idx) & Shard::Flags::Owned;
   }
 
   const Shard::PolytopeMap& Shard::getPolytopeMap(size_t d) const

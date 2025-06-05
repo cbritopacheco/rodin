@@ -132,6 +132,8 @@ namespace Rodin::Geometry
        */
       bool isGhost(size_t d, Index idx) const;
 
+      bool isOwned(size_t d, Index idx) const;
+
       const PolytopeMap& getPolytopeMap(size_t d) const;
 
       template<class Archive>

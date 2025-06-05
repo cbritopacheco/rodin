@@ -43,18 +43,24 @@ int main(int argc, char** argv)
     {
       if (sharder.getShard(0).isGhost(it->getDimension(), it->getIndex()))
         sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 4);
+      else if (sharder.getShard(0).isOwned(it->getDimension(), it->getIndex()))
+        sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 8);
     }
 
     for (auto it = sharder.getShard(0).getFace(); it; ++it)
     {
       if (sharder.getShard(0).isGhost(it->getDimension(), it->getIndex()))
         sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 5);
+      else if (sharder.getShard(0).isOwned(it->getDimension(), it->getIndex()))
+        sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 10);
     }
 
     for (auto it = sharder.getShard(0).getVertex(); it; ++it)
     {
       if (sharder.getShard(0).isGhost(it->getDimension(), it->getIndex()))
         sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 6);
+      else if (sharder.getShard(0).isOwned(it->getDimension(), it->getIndex()))
+        sharder.getShard(0).setAttribute({ it->getDimension(), it->getIndex() }, 12);
     }
 
     sharder.getShard(0).save("Shard.0.mesh", IO::FileFormat::MEDIT);
@@ -64,18 +70,24 @@ int main(int argc, char** argv)
     {
       if (sharder.getShard(1).isGhost(it->getDimension(), it->getIndex()))
         sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 7);
+      else if (sharder.getShard(1).isOwned(it->getDimension(), it->getIndex()))
+        sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 14);
     }
 
     for (auto it = sharder.getShard(1).getFace(); it; ++it)
     {
       if (sharder.getShard(1).isGhost(it->getDimension(), it->getIndex()))
         sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 8);
+      else if (sharder.getShard(1).isOwned(it->getDimension(), it->getIndex()))
+        sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 16);
     }
 
     for (auto it = sharder.getShard(1).getVertex(); it; ++it)
     {
       if (sharder.getShard(1).isGhost(it->getDimension(), it->getIndex()))
         sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 9);
+      else if (sharder.getShard(1).isOwned(it->getDimension(), it->getIndex()))
+        sharder.getShard(1).setAttribute({ it->getDimension(), it->getIndex() }, 18);
     }
     sharder.getShard(1).save("Shard.1.mesh", IO::FileFormat::MEDIT);
 
