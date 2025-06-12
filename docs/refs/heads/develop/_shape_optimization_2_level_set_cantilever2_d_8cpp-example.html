@@ -116,6 +116,7 @@
 <span class="w">  </span><span class="n">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
 <span class="w">  </span><span class="n">BilinearForm</span><span class="w">  </span><span class="n">bf</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="w">  </span><span class="n">bf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LinearElasticityIntegral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span>
+<span class="w">  </span><span class="n">bf</span><span class="p">.</span><span class="n">assemble</span><span class="p">();</span>
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">bf</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">);</span>
 <span class="p">};</span>
 
