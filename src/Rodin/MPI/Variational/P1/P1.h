@@ -16,6 +16,11 @@ namespace Rodin::Variational
         Geometry::Mesh<Context::MPI>, P1<Real, Geometry::Mesh<Context::MPI>>>
   {
     public:
+      using IndexBimap =
+        boost::bimap<
+          boost::bimaps::vector_of<Index>,
+          boost::bimaps::unordered_set_of<Index>>;
+
       /// Represents the Context of the P1 space
       using ContextType = Context::MPI;
 
@@ -124,7 +129,30 @@ namespace Rodin::Variational
       P1(const MeshType& mesh)
         : m_mesh(mesh),
           m_fes(mesh.getShard())
-      {}
+      {
+        const auto& ctx = mesh.getContext();
+        const auto& comm = ctx.getCommunicator();
+        const auto& shard = mesh.getShard();
+
+        size_t owned = 0;
+        for (size_t i = 0; i < shard.getVertexCount(); ++i)
+          owned += shard.isOwned(0, i);
+
+        size_t offset = boost::mpi::scan(comm, owned, std::plus<size_t>()) - owned;
+
+        std::vector<Index> requested;
+        for (size_t i = 0; i < shard.getVertexCount(); ++i)
+        {
+          if (shard.isOwned(0, i))
+            m_loc2glob.right.insert({ i + offset, i });
+          else
+            requested.push_back(shard.getGlobalIndex(0, i));
+        }
+
+        boost::mpi::broadcast(comm, requested, comm.rank());
+
+        // Request the global indices for the ghost vertices
+      }
 
       P1(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
@@ -279,6 +307,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const MeshType> m_mesh;
       FESType m_fes;
+      IndexBimap m_loc2glob;
   };
 }
 

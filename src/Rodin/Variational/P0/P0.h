@@ -67,17 +67,17 @@ namespace Rodin::Variational
    * This class is scalar valued, i.e. evaluations of the function are of
    * Rodin::Real type.
    */
-  template <class Number>
-  class P0<Number, Geometry::Mesh<Context::Local>> final
+  template <>
+  class P0<Real, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
-        Geometry::Mesh<Context::Local>, P0<Number, Geometry::Mesh<Context::Local>>>
+        Geometry::Mesh<Context::Local>, P0<Real, Geometry::Mesh<Context::Local>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
     using IndexMap = FlatMap<Index, Index>;
 
     public:
-      using ScalarType = Number;
+      using ScalarType = Real;
 
       /// Range type of value
       using RangeType = ScalarType;
@@ -293,17 +293,6 @@ namespace Rodin::Variational
 
   template <class Mesh>
   using ComplexP0 = P0<Complex, Mesh>;
-
-  template <class ScalarType>
-  const Geometry::GeometryIndexed<P0Element<ScalarType>>
-  P0<ScalarType, Geometry::Mesh<Context::Local>>::s_elements =
-  {
-    { Geometry::Polytope::Type::Point, P0Element<ScalarType>(Geometry::Polytope::Type::Point) },
-    { Geometry::Polytope::Type::Segment, P0Element<ScalarType>(Geometry::Polytope::Type::Segment) },
-    { Geometry::Polytope::Type::Triangle, P0Element<ScalarType>(Geometry::Polytope::Type::Triangle) },
-    { Geometry::Polytope::Type::Quadrilateral, P0Element<ScalarType>(Geometry::Polytope::Type::Quadrilateral) },
-    { Geometry::Polytope::Type::Tetrahedron, P0Element<ScalarType>(Geometry::Polytope::Type::Tetrahedron) }
-  };
 }
 
 #endif

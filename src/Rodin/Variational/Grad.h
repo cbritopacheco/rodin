@@ -33,7 +33,6 @@ namespace Rodin::Variational
 
   /**
    * @ingroup GradSpecializations
-   * @brief Gradient of a P1 GridFunction
    */
   template <class FES, class Derived>
   class GradBase<GridFunction<FES>, Derived>

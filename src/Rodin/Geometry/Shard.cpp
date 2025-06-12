@@ -183,5 +183,10 @@ namespace Rodin::Geometry
   {
     return m_s2ps[d];
   }
+
+  Index Shard::getGlobalIndex(size_t d, Index idx) const
+  {
+    return m_s2ps[d].left.at(idx).get_right();
+  }
 }
 

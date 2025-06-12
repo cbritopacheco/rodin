@@ -192,8 +192,10 @@ namespace Rodin::Variational
           const size_t count = mesh.getVertexCount();
           const size_t vdim = fes.getVectorDimension();
           for (size_t i = 0; i < sz; i++)
+          {
             for (size_t d = 0; d < vdim; d++)
               data.col(i).coeffRef(d) = w(i % count + d * count);
+          }
         }
         else
         {

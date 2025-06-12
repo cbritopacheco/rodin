@@ -120,6 +120,104 @@ namespace Rodin::Variational
     }
   };
 
+  const Geometry::GeometryIndexed<std::vector<std::vector<RealP1Element::DerivativeFunction>>>
+  RealP1Element::s_ds =
+  {
+    { Geometry::Polytope::Type::Point,
+      {
+        { { 0, 0, Geometry::Polytope::Type::Point } }
+      },
+    },
+    { Geometry::Polytope::Type::Segment,
+      {
+        {
+          { 0, 0, Geometry::Polytope::Type::Segment },
+          { 0, 1, Geometry::Polytope::Type::Segment }
+        },
+      }
+    },
+    { Geometry::Polytope::Type::Triangle,
+      {
+        {
+          { 0, 0, Geometry::Polytope::Type::Triangle },
+          { 0, 1, Geometry::Polytope::Type::Triangle },
+          { 0, 2, Geometry::Polytope::Type::Triangle }
+        },
+        {
+          { 1, 0, Geometry::Polytope::Type::Triangle },
+          { 1, 1, Geometry::Polytope::Type::Triangle },
+          { 1, 2, Geometry::Polytope::Type::Triangle }
+        }
+      }
+    },
+    { Geometry::Polytope::Type::Quadrilateral,
+      {
+        {
+          { 0, 0, Geometry::Polytope::Type::Quadrilateral },
+          { 0, 1, Geometry::Polytope::Type::Quadrilateral },
+          { 0, 2, Geometry::Polytope::Type::Quadrilateral },
+          { 0, 3, Geometry::Polytope::Type::Quadrilateral }
+        },
+        {
+          { 1, 0, Geometry::Polytope::Type::Quadrilateral },
+          { 1, 1, Geometry::Polytope::Type::Quadrilateral },
+          { 1, 2, Geometry::Polytope::Type::Quadrilateral },
+          { 1, 3, Geometry::Polytope::Type::Quadrilateral }
+        }
+      }
+    },
+    { Geometry::Polytope::Type::Tetrahedron,
+      {
+        {
+          { 0, 0, Geometry::Polytope::Type::Tetrahedron },
+          { 0, 1, Geometry::Polytope::Type::Tetrahedron },
+          { 0, 2, Geometry::Polytope::Type::Tetrahedron },
+          { 0, 3, Geometry::Polytope::Type::Tetrahedron }
+        },
+        {
+          { 1, 0, Geometry::Polytope::Type::Tetrahedron },
+          { 1, 1, Geometry::Polytope::Type::Tetrahedron },
+          { 1, 2, Geometry::Polytope::Type::Tetrahedron },
+          { 1, 3, Geometry::Polytope::Type::Tetrahedron }
+        },
+        {
+          { 2, 0, Geometry::Polytope::Type::Tetrahedron },
+          { 2, 1, Geometry::Polytope::Type::Tetrahedron },
+          { 2, 2, Geometry::Polytope::Type::Tetrahedron },
+          { 2, 3, Geometry::Polytope::Type::Tetrahedron }
+        }
+      }
+    },
+    { Geometry::Polytope::Type::Wedge,
+      {
+        {
+          { 0, 0, Geometry::Polytope::Type::Wedge },
+          { 0, 1, Geometry::Polytope::Type::Wedge },
+          { 0, 2, Geometry::Polytope::Type::Wedge },
+          { 0, 3, Geometry::Polytope::Type::Wedge },
+          { 0, 4, Geometry::Polytope::Type::Wedge },
+          { 0, 5, Geometry::Polytope::Type::Wedge }
+        },
+        {
+          { 1, 0, Geometry::Polytope::Type::Wedge },
+          { 1, 1, Geometry::Polytope::Type::Wedge },
+          { 1, 2, Geometry::Polytope::Type::Wedge },
+          { 1, 3, Geometry::Polytope::Type::Wedge },
+          { 1, 4, Geometry::Polytope::Type::Wedge },
+          { 1, 5, Geometry::Polytope::Type::Wedge }
+        },
+        {
+          { 2, 0, Geometry::Polytope::Type::Wedge },
+          { 2, 1, Geometry::Polytope::Type::Wedge },
+          { 2, 2, Geometry::Polytope::Type::Wedge },
+          { 2, 3, Geometry::Polytope::Type::Wedge },
+          { 2, 4, Geometry::Polytope::Type::Wedge },
+          { 2, 5, Geometry::Polytope::Type::Wedge }
+        }
+      }
+    }
+  };
+
   const Geometry::GeometryIndexed<std::vector<RealP1Element::LinearForm>>
   RealP1Element::s_ls =
   {
@@ -585,8 +683,425 @@ namespace Rodin::Variational
     return Math::nan<Real>();
   }
 
+  void RealP1Element::DerivativeFunction::operator()(Real& out, const Math::SpatialVector<Real>& r) const
+  {
+    switch (m_g)
+    {
+      case Geometry::Polytope::Type::Point:
+      {
+        assert(m_d == 0);
+        assert(m_local == 0);
+        out = 0;
+        break;
+      }
+      case Geometry::Polytope::Type::Segment:
+      {
+        assert(m_d == 0);
+        switch (m_local)
+        {
+          case 0:
+          {
+            out = -1;
+            break;
+          }
+          case 1:
+          {
+            out = 1;
+            break;
+          }
+          default:
+          {
+            assert(false);
+            out = Math::nan<Real>();
+            break;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::Triangle:
+      {
+        switch (m_local)
+        {
+          case 0:
+          {
+            if (m_d == 0)
+            {
+              out = -1;
+            }
+            else if (m_d == 1)
+            {
+              out = -1;
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 1:
+          {
+            if (m_d == 0)
+            {
+              out = 1;
+            }
+            else if (m_d == 1)
+            {
+              out = 0;
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 2:
+          {
+            if (m_d == 0)
+            {
+              out = 0;
+            }
+            else if (m_d == 1)
+            {
+              out = 1;
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          default:
+          {
+            assert(false);
+            out = Math::nan<Real>();
+            break;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::Quadrilateral:
+      {
+        switch (m_local)
+        {
+          case 0:
+          {
+            if (m_d == 0)
+            {
+              out = r.y() - 1;
+            }
+            else if (m_d == 1)
+            {
+              out = r.x() - 1;
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 1:
+          {
+            if (m_d == 0)
+            {
+              out = 1 - r.y();
+            }
+            else if (m_d == 1)
+            {
+              out = -r.x();
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 2:
+          {
+            if (m_d == 0)
+            {
+              out = -r.y();
+            }
+            else if (m_d == 1)
+            {
+              out = 1 - r.x();
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 3:
+          {
+            if (m_d == 0)
+            {
+              out = r.y();
+            }
+            else if (m_d == 1)
+            {
+              out = r.x();
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          default:
+          {
+            assert(false);
+            out = Math::nan<Real>();
+            break;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::Tetrahedron:
+      {
+        switch (m_local)
+        {
+          case 0:
+          {
+            if (m_d == 0)
+            {
+              out = -1;
+            }
+            else if (m_d == 1)
+            {
+              out = -1;
+            }
+            else if (m_d == 2)
+            {
+              out = -1;
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 1:
+          {
+            if (m_d == 0)
+            {
+              out = 1;
+            }
+            else if (m_d == 1)
+            {
+              out = 0;
+            }
+            else if (m_d == 2)
+            {
+              out = 0;
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 2:
+          {
+            if (m_d == 0)
+            {
+              out = 0;
+            }
+            else if (m_d == 1)
+            {
+              out = 1;
+            }
+            else if (m_d == 2)
+            {
+              out = 0;
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 3:
+          {
+            if (m_d == 0)
+            {
+              out = 0;
+            }
+            else if (m_d == 1)
+            {
+              out = 0;
+            }
+            else if (m_d == 2)
+            {
+              out = 1;
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          default:
+          {
+            assert(false);
+            out = Math::nan<Real>();
+            break;
+          }
+        }
+      }
+      case Geometry::Polytope::Type::Wedge:
+      {
+        switch (m_local)
+        {
+          case 0:
+          {
+            if (m_d == 0)
+            {
+              out = r.z() - 1;
+            }
+            else if (m_d == 1)
+            {
+              out = r.z() - 1;
+            }
+            else if (m_d == 2)
+            {
+              out = r.x() + r.y() - 1;
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 1:
+          {
+            if (m_d == 0)
+            {
+              out = 1 - r.z();
+            }
+            else if (m_d == 1)
+            {
+              out = 0;
+            }
+            else if (m_d == 2)
+            {
+              out = -r.x();
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 2:
+          {
+            if (m_d == 0)
+            {
+              out = 0;
+            }
+            else if (m_d == 1)
+            {
+              out = 1 - r.z();
+            }
+            else if (m_d == 2)
+            {
+              out = -r.y();
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 3:
+          {
+            if (m_d == 0)
+            {
+              out = -r.z();
+            }
+            else if (m_d == 1)
+            {
+              out = -r.z();
+            }
+            else if (m_d == 2)
+            {
+              out = 1 - r.x() - r.y();
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 4:
+          {
+            if (m_d == 0)
+            {
+              out = r.z();
+            }
+            else if (m_d == 1)
+            {
+              out = 0;
+            }
+            else if (m_d == 2)
+            {
+              out = r.x();
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          case 5:
+          {
+            if (m_d == 0)
+            {
+              out = 0;
+            }
+            else if (m_d == 1)
+            {
+              out = r.z();
+            }
+            else if (m_d == 2)
+            {
+              out = r.y();
+            }
+            else
+            {
+              assert(false);
+              out = Math::nan<Real>();
+            }
+            break;
+          }
+          default:
+          {
+            assert(false);
+            out = Math::nan<Real>();
+            break;
+          }
+        }
+      }
+    }
+    assert(false);
+    out = Math::nan<Real>();
+  }
+
   void
-  RealP1Element::GradientFunction::operator()(Math::SpatialVector<Real>& out, const Math::SpatialVector<Real>& r) const
+  RealP1Element::GradientFunction::operator()(
+      Math::SpatialVector<Real>& out, const Math::SpatialVector<Real>& r) const
   {
     switch (m_g)
     {

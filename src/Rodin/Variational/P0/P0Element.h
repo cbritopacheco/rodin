@@ -97,7 +97,6 @@ namespace Rodin::Variational
           LinearForm& operator=(LinearForm&&) = default;
 
           template <class T>
-          inline
           constexpr
           auto operator()(const T& v) const
           {
@@ -133,7 +132,6 @@ namespace Rodin::Variational
           constexpr
           BasisFunction& operator=(BasisFunction&&) = default;
 
-          inline
           constexpr
           Real operator()(const Math::SpatialVector<Real>& r) const
           {
@@ -166,13 +164,11 @@ namespace Rodin::Variational
           constexpr
           GradientFunction& operator=(GradientFunction&&) = default;
 
-          inline
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             return Math::SpatialVector<Real>::Zero(Geometry::Polytope::getGeometryDimension(m_g));
           }
 
-          inline
           void operator()(Math::SpatialVector<Real>& out, const Math::SpatialVector<Real>& r) const
           {
             assert(static_cast<size_t>(r.size()) == Geometry::Polytope::getGeometryDimension(m_g));
@@ -220,21 +216,18 @@ namespace Rodin::Variational
        * @brief Gets the number of degrees of freedom in the finite element.
        * @returns Number of degrees of freedom
        */
-      inline
       constexpr
       size_t getCount() const
       {
         return 1;
       }
 
-      inline
       constexpr
       const Math::PointMatrix& getNodes() const
       {
         return s_nodes[getGeometry()];
       }
 
-      inline
       constexpr
       const auto& getLinearForm(size_t i) const
       {
@@ -242,7 +235,6 @@ namespace Rodin::Variational
         return s_ls[getGeometry()];
       }
 
-      inline
       constexpr
       const auto& getBasis(size_t i) const
       {
@@ -250,7 +242,6 @@ namespace Rodin::Variational
         return s_basis[getGeometry()];
       }
 
-      inline
       constexpr
       const auto& getGradient(size_t i) const
       {
@@ -258,7 +249,6 @@ namespace Rodin::Variational
         return s_gradient[getGeometry()];
       }
 
-      inline
       constexpr
       size_t getOrder() const
       {

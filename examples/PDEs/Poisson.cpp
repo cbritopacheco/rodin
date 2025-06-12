@@ -19,47 +19,32 @@ int main(int, char**)
 {
   // Build a mesh
   Mesh mesh;
-  // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
-  mesh.load("SphereTetra.mesh", IO::FileFormat::MEDIT);
-  // mesh.scale(1.0 / 31);
-  // mesh.getConnectivity().compute(1, 2);
-  mesh.save("Poisson.geo", IO::FileFormat::ENSIGHT6);
-  mesh.save("Poisson.mesh", IO::FileFormat::MFEM);
+  mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 32, 32 });
 
-  // Functions
-  P1 vh(mesh, 3);
+  mesh.scale(1. / 31.0);
+  mesh.getConnectivity().compute(1, 2);
 
-  GridFunction gf(vh);
-  gf = [](Math::Vector<Real>& x, const Point& p)
-  {
-    x.resize(3);
-    // x[0] = -p.x() * p.z();
-    // x[1] = -p.y() * p.z();
-    // x[2] = 1 - p.z() * p.z();
-    x[0] = -p.y();
-    x[1] = p.x();
-    x[2] = 0.0;
-  };
-  gf.save("Poisson.vct", IO::FileFormat::ENSIGHT6);
-  gf.save("Poisson.gf", IO::FileFormat::MFEM);
+  P1 vh(mesh);
+  ScalarFunction f =
+    [](const Point& p) {
+      return cos(10 * M_PI * p.x());
+    };
 
-  // ScalarFunction f(1.0);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
 
-  // TrialFunction u(vh);
-  // TestFunction  v(vh);
+  // Define problem
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
 
-  // // Define problem
-  // Problem poisson(u, v);
-  // poisson = Integral(Grad(u), Grad(v))
-  //         - Integral(f, v)
-  //         + DirichletBC(u, Zero());
+  // Solve
+  CG(poisson).solve();
 
-  // // Solve
-  // CG(poisson).solve();
-
-  // // Save solution
-  // u.getSolution().save("Poisson.gf");
-  // mesh.save("Poisson.mesh");
+  // Save solution
+  u.getSolution().save("Poisson.gf");
+  mesh.save("Poisson.mesh");
 
   return 0;
 }

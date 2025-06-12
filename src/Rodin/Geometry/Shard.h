@@ -134,6 +134,8 @@ namespace Rodin::Geometry
 
       bool isOwned(size_t d, Index idx) const;
 
+      Index getGlobalIndex(size_t d, Index idx) const;
+
       const PolytopeMap& getPolytopeMap(size_t d) const;
 
       template<class Archive>

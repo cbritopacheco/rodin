@@ -167,6 +167,40 @@ namespace Rodin::Variational
           Geometry::Polytope::Type m_g;
       };
 
+      class DerivativeFunction
+      {
+        public:
+          using ReturnType = Real;
+
+          constexpr
+          DerivativeFunction(size_t d, size_t local, Geometry::Polytope::Type g)
+            : m_d(d), m_local(local), m_g(g)
+          {}
+
+          constexpr
+          DerivativeFunction(const DerivativeFunction&) = default;
+
+          constexpr
+          DerivativeFunction& operator=(const DerivativeFunction&) = default;
+
+          constexpr
+          DerivativeFunction& operator=(DerivativeFunction&&) = default;
+
+          ReturnType operator()(const Math::SpatialVector<Real>& r) const
+          {
+            ReturnType out;
+            operator()(out, r);
+            return out;
+          }
+
+          void operator()(ReturnType& out, const Math::SpatialVector<Real>& r) const;
+
+        private:
+          size_t m_d;
+          size_t m_local;
+          Geometry::Polytope::Type m_g;
+      };
+
       constexpr
       P1Element() = default;
 
@@ -257,6 +291,7 @@ namespace Rodin::Variational
       static const Geometry::GeometryIndexed<std::vector<LinearForm>> s_ls;
       static const Geometry::GeometryIndexed<std::vector<BasisFunction>> s_basis;
       static const Geometry::GeometryIndexed<std::vector<GradientFunction>> s_gradient;
+      static const Geometry::GeometryIndexed<std::vector<std::vector<DerivativeFunction>>> s_ds;
   };
 
   template <>

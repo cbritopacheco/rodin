@@ -34,12 +34,13 @@ namespace Rodin::Variational
    * @ingroup GridFunctionSpecializations
    * @brief P0 GridFunction
    */
-  template <class Number, class Mesh>
-  class GridFunction<P0<Number, Mesh>> final
-    : public GridFunctionBase<P0<Number, Mesh>, GridFunction<P0<Number, Mesh>>>
+  template <class Range, class Mesh>
+  class GridFunction<P0<Range, Mesh>> final
+    : public GridFunctionBase<P0<Range, Mesh>, GridFunction<P0<Range, Mesh>>>
   {
     public:
-      using FESType = P0<Number, Mesh>;
+      /// Type of finite element space to which the GridFunction belongs to
+      using FESType = P0<Range, Mesh>;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
@@ -51,6 +52,7 @@ namespace Rodin::Variational
 
       using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
 
+      /// Parent class
       using Parent = GridFunctionBase<FESType, GridFunction<FESType>>;
 
       using Parent::getValue;
@@ -88,7 +90,6 @@ namespace Rodin::Variational
       /**
        * @brief Move assignment operator.
        */
-      inline
       constexpr
       GridFunction& operator=(GridFunction&& other)
       {
@@ -102,10 +103,10 @@ namespace Rodin::Variational
       {
         static_assert(std::is_same_v<RangeType, Real>);
         const auto& fes = this->getFiniteElementSpace();
-        const auto& fesMesh = fes.getMesh();
+        const auto& mesh = fes.getMesh();
         const auto& polytope = p.getPolytope();
-        assert(fesMesh == polytope.getMesh());
-        const size_t d = fesMesh.getDimension();
+        assert(mesh == polytope.getMesh());
+        const size_t d = mesh.getDimension();
         assert(d == polytope.getDimension());
         const Index i = polytope.getIndex();
         assert(fes.getFiniteElement(d, i).getCount() == 1);
@@ -126,20 +127,19 @@ namespace Rodin::Variational
       GridFunction& setWeights()
       {
         auto& data = this->getData();
+        auto& w = this->getWeights().emplace(this->getFiniteElementSpace().getSize());
         if (!this->getWeights().has_value())
         {
           auto& weights = this->getWeights().emplace(this->getFiniteElementSpace().getSize());
           if constexpr (std::is_same_v<RangeType, Real>)
           {
             assert(data.rows() == 1);
-            std::copy(data.data(), data.data() + data.size(), weights.data());
+            w = data.transpose();
           }
           else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
           {
-            const auto& fes = this->getFiniteElementSpace();
-            const size_t vdim = fes.getVectorDimension();
-            for (size_t i = 0; i < fes.getSize(); i++)
-              weights.coeffRef(i) = data.col(i).coeff(i % vdim);
+            assert(false);
+            weights.setConstant(NAN);
           }
           else
           {
@@ -153,26 +153,19 @@ namespace Rodin::Variational
       template <class Vector>
       GridFunction& setWeights(Vector&& weights)
       {
-        assert(weights.size() >= 0);
-        assert(static_cast<size_t>(weights.size()) == this->getFiniteElementSpace().getSize());
         auto& data = this->getData();
-        const auto& w = this->getWeights().emplace(std::forward<Vector>(weights));
+        auto& w = this->getWeights().emplace();
+        Math::duplicate(weights, w);
+        Math::copy(weights, w);
         if constexpr (std::is_same_v<RangeType, Real>)
         {
           assert(data.rows() == 1);
-          std::copy(w.data(), w.data() + w.size(), data.data());
+          data = w.transpose();
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<Real>>)
         {
-          const size_t sz = w.size();
-          const auto& fes = this->getFiniteElementSpace();
-          const auto& mesh = fes.getMesh();
-          const size_t count = mesh.getVertexCount();
-          const size_t vdim = fes.getVectorDimension();
-          data.setZero();
-          for (size_t i = 0; i < sz; i++)
-            for (size_t d = 0; d < vdim; d++)
-              data.col(i).coeffRef(d) = w(i % count + d * count);
+          assert(false);
+          data.setConstant(NAN);
         }
         else
         {
@@ -184,8 +177,8 @@ namespace Rodin::Variational
 
   };
 
-  template <class Number, class Mesh>
-  GridFunction(const P0<Number, Mesh>&) -> GridFunction<P0<Number, Mesh>>;
+  template <class Range, class Mesh>
+  GridFunction(const P0<Range, Mesh>&) -> GridFunction<P0<Range, Mesh>>;
 }
 
 #endif
