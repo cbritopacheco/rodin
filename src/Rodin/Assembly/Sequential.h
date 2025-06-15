@@ -608,20 +608,20 @@ namespace Rodin::Assembly
     };
 
 
-  template <class Scalar, class FES, class ValueDerived>
+  template <class Scalar, class Solution, class FES, class ValueDerived>
   class Sequential<
     IndexMap<Scalar>,
     Variational::DirichletBC<
-      Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>> final
+      Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>> final
     : public AssemblyBase<
         IndexMap<Scalar>,
         Variational::DirichletBC<
-          Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>>
+          Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
   {
     public:
       using FESType = FES;
 
-      using TrialFunctionType = Variational::TrialFunction<FES>;
+      using TrialFunctionType = Variational::TrialFunction<Solution, FES>;
 
       using ValueType = Variational::FunctionBase<ValueDerived>;
 
@@ -668,8 +668,7 @@ namespace Rodin::Assembly
                 auto find = res.find(global);
                 if (find == res.end())
                 {
-                  const auto& lf = fe.getLinearForm(local);
-                  const auto s = lf(mapping);
+                  const auto s = fe.getLinearForm(local)(mapping);
                   res.insert(find, std::pair{ global, s });
                 }
               }

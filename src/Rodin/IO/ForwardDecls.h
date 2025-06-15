@@ -37,10 +37,10 @@ namespace Rodin::IO
   template <FileFormat fmt, class Trait>
   class MeshPrinter;
 
-  template <FileFormat fmt, class FES>
+  template <FileFormat fmt, class FES, class Data>
   class GridFunctionLoader;
 
-  template <FileFormat fmt, class FES>
+  template <FileFormat fmt, class FES, class Data>
   class GridFunctionPrinter;
 
   inline

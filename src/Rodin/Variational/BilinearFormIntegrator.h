@@ -29,8 +29,9 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the object given a TrialFunction and a TestFunction.
        */
-      template <class TrialFES, class TestFES>
-      BilinearFormIntegratorBase(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
+      template <class Solution, class TrialFES, class TestFES>
+      BilinearFormIntegratorBase(
+          const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
         : m_u(u.copy()), m_v(v.copy())
       {}
 

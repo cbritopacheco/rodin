@@ -235,15 +235,24 @@ namespace Rodin::IO
   };
 
   template <class FES>
-  class GridFunctionPrinter<FileFormat::ENSIGHT6, FES>
-    : public GridFunctionPrinterBase<FES>
+  class GridFunctionPrinter<
+    FileFormat::ENSIGHT6,
+    FES,
+    Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+    : public GridFunctionPrinterBase<
+      FES,
+      Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
   {
     public:
       using FESType = FES;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using Parent = GridFunctionPrinterBase<FESType>;
+      using DataType = Math::Vector<ScalarType>;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = GridFunctionPrinterBase<FESType, DataType>;
 
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)

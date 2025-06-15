@@ -64,7 +64,7 @@ namespace Rodin::Variational
    * @brief Represents a function which belongs to a trial space
    * @tparam FES Type of finite element space
    */
-  template <class FES>
+  template <class Solution, class FES>
   class TrialFunction;
 
   /**
@@ -188,7 +188,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for grid function objects.
    */
-  template <class FES, class Derived>
+  template <class FES, class Data, class Derived>
   class GridFunctionBase;
 
   /**
@@ -217,7 +217,7 @@ namespace Rodin::Variational
    * @see GridFunctionBase
    * @see GridFunctionSpecializations
    */
-  template <class FES>
+  template <class FES, class Data>
   class GridFunction;
 
   /**

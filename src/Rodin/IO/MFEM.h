@@ -503,15 +503,24 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Context::Local>>>
-    : public GridFunctionPrinterBase<Variational::P0<Range, Geometry::Mesh<Context::Local>>>
+  class GridFunctionPrinter<
+    FileFormat::MFEM,
+    Variational::P0<Range, Geometry::Mesh<Context::Local>>,
+    Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
+    : public GridFunctionPrinterBase<
+        Variational::P0<Range, Geometry::Mesh<Context::Local>>,
+        Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
     public:
       using FESType = Variational::P0<Range, Geometry::Mesh<Context::Local>>;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 
-      using Parent = GridFunctionPrinterBase<FESType>;
+      using DataType = Math::Vector<ScalarType>;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = GridFunctionPrinterBase<FESType, DataType>;
 
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
@@ -535,21 +544,82 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionLoader<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Local>>>
-    : public GridFunctionLoaderBase<Variational::P1<Range, Geometry::Mesh<Context::Local>>>
+  class GridFunctionLoader<
+    FileFormat::MFEM,
+    Variational::P1<Range, Geometry::Mesh<Context::Local>>,
+    Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
+    : public GridFunctionLoaderBase<
+        Variational::P1<Range, Geometry::Mesh<Context::Local>>,
+        Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
     public:
       using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 
-      using Parent = GridFunctionLoaderBase<FESType>;
+      using DataType = Math::Vector<ScalarType>;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = GridFunctionPrinterBase<FESType, DataType>;
 
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf)
       {}
 
-      void load(std::istream& is) override;
+      void load(std::istream& is) override
+      {
+        using boost::spirit::x3::space;
+        using boost::spirit::x3::blank;
+        using boost::spirit::x3::uint_;
+        using boost::spirit::x3::_attr;
+        using boost::spirit::x3::char_;
+
+        MFEM::GridFunctionHeader header;
+        const auto get_fec = [&](auto& ctx) { header.fec = _attr(ctx); };
+        const auto get_vdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
+        const auto get_ordering = [&](auto& ctx) { header.ordering = static_cast<MFEM::Ordering>(_attr(ctx)); };
+
+        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        auto it = line.begin();
+        const auto pfes = boost::spirit::x3::string("FiniteElementSpace");
+        const bool rfes = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
+        assert(it == line.end() && rfes);
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it = line.begin();
+        const auto pfec = boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
+        bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
+        assert(it == line.end() && rfec);
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it = line.begin();
+        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[get_vdim];
+        bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
+        assert(it == line.end() && rvdim);
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it = line.begin();
+        const auto pordering = boost::spirit::x3::string("Ordering:") >> uint_[get_ordering];
+        bool rordering = boost::spirit::x3::phrase_parse(it, line.end(), pordering, space);
+        assert(it == line.end() && rordering);
+
+        auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        assert(header.vdim == fes.getVectorDimension());
+        auto& data = gf.getData();
+        if (data.size() > 0)
+        {
+          line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+          data.coeffRef(0) = std::stod(line);
+          assert(data.size() >= 0);
+          for (size_t i = 1; i < static_cast<size_t>(data.size()); i++)
+            is >> data.coeffRef(i);
+          if (header.ordering == MFEM::Ordering::Nodes)
+            data.transposeInPlace();
+        }
+        gf.setWeights();
+      }
 
     private:
       size_t m_dimension;
@@ -558,15 +628,26 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Local>>>
-    : public GridFunctionPrinterBase<Variational::P1<Range, Geometry::Mesh<Context::Local>>>
+  class GridFunctionPrinter<
+    FileFormat::MFEM,
+    Variational::P1<Range, Geometry::Mesh<Context::Local>>,
+    Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
+    : public GridFunctionPrinterBase<
+        Variational::P1<Range, Geometry::Mesh<Context::Local>>,
+        Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
     public:
-      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
+      using FESType = Variational::P0<Range, Geometry::Mesh<Context::Local>>;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using RangeType = Range;
 
-      using Parent = GridFunctionPrinterBase<FESType>;
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+
+      using DataType = Math::Vector<ScalarType>;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = GridFunctionPrinterBase<FESType, DataType>;
 
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
@@ -589,7 +670,5 @@ namespace Rodin::IO
       }
   };
 }
-
-#include "MFEM.hpp"
 
 #endif

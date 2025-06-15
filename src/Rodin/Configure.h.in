@@ -230,12 +230,6 @@
 #define RODIN_DEFAULT_POLYTOPE_ATTRIBUTE 1
 
 /**
- * @ingroup RodinDirectives
- * @brief Indicates the default gridfunction save precision.
- */
-#define RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION 8
-
-/**
  * @brief Represents the constant used for fuzzy comparison.
  */
 #define RODIN_FUZZY_CONSTANT 1e-5

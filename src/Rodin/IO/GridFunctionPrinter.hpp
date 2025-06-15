@@ -7,11 +7,5 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_HPP
 #define RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_HPP
 
-#include "GridFunctionPrinter.h"
-
-#include "MEDIT.h"
-
-namespace Rodin::IO
-{}
 
 #endif

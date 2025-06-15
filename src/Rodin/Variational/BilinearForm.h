@@ -239,30 +239,12 @@ namespace Rodin::Variational
        * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
        * at @f$ ( u, v ) @f$.
        */
+      template <class DataType>
       constexpr
-      ScalarType operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
+      ScalarType operator()(
+        const GridFunction<TrialFES, DataType>& u, const GridFunction<TestFES, DataType>& v) const
       {
-        const auto& trialWeights = u.getWeights();
-        const auto& testWeights = v.getWeights();
-        if (!trialWeights.has_value())
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Trial GridFunction weights have not been calculated. "
-            << "Call " << Alert::Identifier::Function("setWeights()")
-            << " on the GridFunction object."
-            << Alert::Raise;
-        }
-        assert(trialWeights.has_value());
-        if (!testWeights.has_value())
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Test GridFunction weights have not been calculated. "
-            << "Call " << Alert::Identifier::Function("setWeights()")
-            << " on the GridFunction object."
-            << Alert::Raise;
-        }
-        assert(testWeights.has_value());
-        return (this->getOperator() * testWeights.value()).dot(trialWeights.value());
+        return (this->getOperator() * v.getData()).dot(u.getData());
       }
 
       void assemble() override

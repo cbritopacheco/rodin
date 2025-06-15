@@ -200,17 +200,15 @@ namespace Rodin::Assembly
       const Tuple<Ts...> m_ins;
   };
 
-  template <class Scalar, class FES, class Value>
+  template <class Scalar, class Solution, class FES, class Value>
   class DirichletBCAssemblyInput
   {
     public:
-      using TrialFunctionType = Variational::TrialFunction<FES>;
-
       using ValueType = Value;
 
-      using OperandType = Variational::TrialFunction<FES>;
+      using OperandType = Variational::TrialFunction<Solution, FES>;
 
-      using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
+      using DirichletBCType = Variational::DirichletBC<OperandType, ValueType>;
 
       DirichletBCAssemblyInput(
           const OperandType& u, const ValueType& value, const FlatSet<Geometry::Attribute>& essBdr)

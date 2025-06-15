@@ -21,13 +21,15 @@
 
 namespace Rodin::IO
 {
-  template <class FES>
-  class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FES>>
+  template <class FES, class Data>
+  class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FES, Data>>
   {
     public:
       using FESType = FES;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using DataType = Data;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
 
       using Parent = IO::Printer<ObjectType>;
 
@@ -35,7 +37,7 @@ namespace Rodin::IO
         : m_gf(gf)
       {}
 
-      const Variational::GridFunction<FES>& getObject() const override
+      const ObjectType& getObject() const override
       {
         return m_gf.get();
       }

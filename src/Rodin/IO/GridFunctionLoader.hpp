@@ -7,13 +7,4 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_HPP
 #define RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_HPP
 
-#include <boost/algorithm/string.hpp>
-
-#include "Rodin/Variational/GridFunction.h"
-
-#include "GridFunctionLoader.h"
-
-namespace Rodin::IO
-{}
-
 #endif

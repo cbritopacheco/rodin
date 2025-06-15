@@ -48,13 +48,6 @@ namespace Rodin::Variational
   class P0;
 
   /**
-   * @ingroup GridFunctionSpecializations
-   * @brief GridFunction on the P0 finite element space.
-   */
-  template <class Range, class Mesh>
-  class GridFunction<P0<Range, Mesh>>;
-
-  /**
    * @brief Alias for P0Element<Real>
    */
   using RealP0Element = P0Element<Real>;

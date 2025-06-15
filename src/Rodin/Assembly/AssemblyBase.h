@@ -97,11 +97,11 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class Scalar, class FES, class ValueDerived>
+  template <class Scalar, class Solution, class FES, class ValueDerived>
   class AssemblyBase<
     IndexMap<Scalar>,
     Variational::DirichletBC<
-      Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>>
+      Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
     : public FormLanguage::Base
   {
     public:
@@ -109,7 +109,7 @@ namespace Rodin::Assembly
 
       using ValueType = Variational::FunctionBase<ValueDerived>;
 
-      using InputType = DirichletBCAssemblyInput<Scalar, FES, ValueType>;
+      using InputType = DirichletBCAssemblyInput<Scalar, Solution, FES, ValueType>;
 
       AssemblyBase() = default;
 

@@ -18,13 +18,15 @@
 
 namespace Rodin::IO
 {
-  template <class FES>
-  class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES>>
+  template <class FES, class Data>
+  class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES, Data>>
   {
     public:
       using FESType = FES;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using DataType = Data;
+
+      using ObjectType = Variational::GridFunction<FESType, Data>;
 
       using Parent = IO::Loader<ObjectType>;
 
