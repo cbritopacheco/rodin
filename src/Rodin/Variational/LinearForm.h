@@ -206,20 +206,11 @@ namespace Rodin::Variational
        *
        * @returns The value which the linear form takes at @f$ u @f$.
        */
+      template <class Data>
       constexpr
-      ScalarType operator()(const GridFunction<FES>& u) const
+      ScalarType operator()(const GridFunction<FES, Data>& u) const
       {
-        const auto& weights = u.getWeights();
-        if (!weights.has_value())
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "GridFunction weights have not been calculated. "
-            << "Call " << Alert::Identifier::Function("setWeights()")
-            << " on the GridFunction object."
-            << Alert::Raise;
-        }
-        assert(weights.has_value());
-        return this->getVector().dot(weights.value());
+        return this->getVector().dot(u.getData());
       }
 
       constexpr

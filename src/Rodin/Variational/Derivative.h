@@ -32,17 +32,17 @@ namespace Rodin::Variational
   /**
    * @ingroup GradSpecializations
    */
-  template <class FES, class Derived>
-  class DerivativeBase<GridFunction<FES>, Derived>
+  template <class FES, class Data, class Derived>
+  class DerivativeBase<GridFunction<FES, Data>, Derived>
     : public ScalarFunctionBase<
-        typename FormLanguage::Traits<FES>::ScalarType, DerivativeBase<GridFunction<FES>, Derived>>
+        typename FormLanguage::Traits<FES>::ScalarType, DerivativeBase<GridFunction<FES, Data>, Derived>>
   {
     public:
       using FESType = FES;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       using Parent = ScalarFunctionBase<ScalarType, DerivativeBase<OperandType, Derived>>;
 

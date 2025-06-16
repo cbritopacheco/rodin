@@ -34,10 +34,10 @@ namespace Rodin::Variational
   /**
    * @ingroup GradSpecializations
    */
-  template <class FES, class Derived>
-  class GradBase<GridFunction<FES>, Derived>
+  template <class FES, class Data, class Derived>
+  class GradBase<GridFunction<FES, Data>, Derived>
     : public VectorFunctionBase<
-        typename FormLanguage::Traits<FES>::ScalarType, GradBase<GridFunction<FES>, Derived>>
+        typename FormLanguage::Traits<FES>::ScalarType, GradBase<GridFunction<FES, Data>, Derived>>
   {
     public:
       using FESType = FES;
@@ -46,7 +46,7 @@ namespace Rodin::Variational
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       using Parent = VectorFunctionBase<ScalarType, GradBase<OperandType, Derived>>;
 

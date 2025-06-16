@@ -189,13 +189,13 @@ namespace Rodin::Variational
    * @ingroup IntegralSpecializations
    * @brief Integration of a GridFunction object.
    */
-  template <class FES>
-  class Integral<GridFunction<FES>> final
-    : public QuadratureRule<GridFunction<FES>>
+  template <class FES, class Data>
+  class Integral<GridFunction<FES, Data>> final
+    : public QuadratureRule<GridFunction<FES, Data>>
   {
     public:
       /// Type of integrand
-      using IntegrandType = GridFunction<FES>;
+      using IntegrandType = GridFunction<FES, Data>;
 
       /// Parent class
       using Parent = QuadratureRule<IntegrandType>;
@@ -228,8 +228,8 @@ namespace Rodin::Variational
       }
   };
 
-  template <class FES>
-  Integral(const GridFunction<FES>&) -> Integral<GridFunction<FES>>;
+  template <class FES, class Data>
+  Integral(const GridFunction<FES, Data>&) -> Integral<GridFunction<FES, Data>>;
 }
 
 #endif

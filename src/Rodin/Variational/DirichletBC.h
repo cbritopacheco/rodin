@@ -102,15 +102,15 @@ namespace Rodin::Variational
    * @f]
    * on the subset of the boundary @f$ \Gamma_D \subset \mathcal{B}_h @f$.
    */
-  template <class FES, class ValueDerived>
-  class DirichletBC<TrialFunction<FES>, FunctionBase<ValueDerived>> final
+  template <class Solution, class FES, class ValueDerived>
+  class DirichletBC<TrialFunction<Solution, FES>, FunctionBase<ValueDerived>> final
     : public DirichletBCBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
       using FESType = FES;
 
       /// Operand type
-      using OperandType = TrialFunction<FESType>;
+      using OperandType = TrialFunction<Solution, FESType>;
 
       /// Scalar type
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
@@ -275,9 +275,9 @@ namespace Rodin::Variational
    * @tparam FES Type of finite element space
    * @tparam ValueDerived Derived type of FunctionBase
    */
-  template <class FES, class FunctionDerived>
-  DirichletBC(const TrialFunction<FES>&, const FunctionBase<FunctionDerived>&)
-    -> DirichletBC<TrialFunction<FES>, FunctionBase<FunctionDerived>>;
+  template <class Solution, class FES, class FunctionDerived>
+  DirichletBC(const TrialFunction<Solution, FES>&, const FunctionBase<FunctionDerived>&)
+    -> DirichletBC<TrialFunction<Solution, FES>, FunctionBase<FunctionDerived>>;
 }
 
 #endif

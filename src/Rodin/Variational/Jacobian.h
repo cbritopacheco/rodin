@@ -31,10 +31,10 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of a P1 GridFunction
    */
-  template <class FES, class Derived>
-  class JacobianBase<GridFunction<FES>, Derived>
+  template <class FES, class Data, class Derived>
+  class JacobianBase<GridFunction<FES, Data>, Derived>
     : public MatrixFunctionBase<
-        typename FormLanguage::Traits<FES>::ScalarType, JacobianBase<GridFunction<FES>, Derived>>
+        typename FormLanguage::Traits<FES>::ScalarType, JacobianBase<GridFunction<FES, Data>, Derived>>
   {
     public:
       using FESType = FES;
@@ -43,7 +43,7 @@ namespace Rodin::Variational
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       using Parent =
         MatrixFunctionBase<ScalarType, JacobianBase<OperandType, Derived>>;

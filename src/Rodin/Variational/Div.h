@@ -27,16 +27,16 @@ namespace Rodin::Variational
    * @ingroup DivSpecializations
    * @brief Divergence of a P1 GridFunction
    */
-  template <class FES, class Derived>
-  class DivBase<GridFunction<FES>, Derived>
-    : public ScalarFunctionBase<typename FormLanguage::Traits<FES>::ScalarType, DivBase<GridFunction<FES>, Derived>>
+  template <class FES, class Data, class Derived>
+  class DivBase<GridFunction<FES, Data>, Derived>
+    : public ScalarFunctionBase<typename FormLanguage::Traits<FES>::ScalarType, DivBase<GridFunction<FES, Data>, Derived>>
   {
     public:
       using FESType = FES;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using OperandType = GridFunction<FES>;
+      using OperandType = GridFunction<FES, Data>;
 
       /// Parent class
       using Parent = ScalarFunctionBase<ScalarType, DivBase<OperandType, Derived>>;

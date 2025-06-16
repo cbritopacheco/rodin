@@ -3,7 +3,7 @@
 
 #include "ForwardDecls.h"
 
-#include "Rodin/QF/GaussLegendre.h"
+#include "Rodin/QF/GenericPolytopeQuadrature.h"
 
 #include "Dot.h"
 #include "Sum.h"
@@ -128,13 +128,13 @@ namespace Rodin::Variational
    * @ingroup IntegralSpecializations
    * @brief Integration of a GridFunction object.
    */
-  template <class FES>
-  class QuadratureRule<GridFunction<FES>> : public Integrator
+  template <class FES, class Data>
+  class QuadratureRule<GridFunction<FES, Data>> : public Integrator
   {
     public:
       using FESType = FES;
 
-      using IntegrandType = GridFunction<FESType>;
+      using IntegrandType = GridFunction<FESType, Data>;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
@@ -268,7 +268,7 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::reference_wrapper<const GridFunction<FES>>   m_u;
+      std::reference_wrapper<const GridFunction<FES, Data>>   m_u;
       TestFunction<FES>                                 m_v;
 
       FlatSet<Geometry::Attribute>                  m_attrs;

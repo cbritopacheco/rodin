@@ -980,14 +980,14 @@ namespace Rodin::Variational
 
       GridFunction& operator+=(const GridFunction& rhs)
       {
-        assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
         this->getData().array() += rhs.getData().array();
         return *this;
       }
 
       GridFunction& operator-=(const GridFunction& rhs)
       {
-        assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
         this->getData().array() -= rhs.getData().array();
         return *this;
       }

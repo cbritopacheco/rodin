@@ -14,12 +14,12 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class Scalar, class Mesh>
-  struct Traits<Variational::Div<Variational::GridFunction<Variational::P1<Math::Vector<Scalar>, Mesh>>>>
+  template <class Scalar, class Data, class Mesh>
+  struct Traits<Variational::Div<Variational::GridFunction<Variational::P1<Math::Vector<Scalar>, Mesh>, Data>>>
   {
     using FESType = Variational::P1<Math::Vector<Scalar>, Mesh>;
     using ScalarType = Scalar;
-    using OperandType = Variational::GridFunction<Variational::P1<Math::Vector<Scalar>, Mesh>>;
+    using OperandType = Variational::GridFunction<Variational::P1<Math::Vector<Scalar>, Mesh>, Data>;
   };
 
   template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -41,7 +41,7 @@ namespace Rodin::Variational
    * @ingroup DivSpecializations
    * @brief Divient of a P1 GridFunction
    */
-  template <class Scalar, class Mesh>
+  template <class Scalar, class Data, class Mesh>
   class Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>>> final
     : public DivBase<
         GridFunction<P1<Math::Vector<Scalar>, Mesh>>,

@@ -139,7 +139,7 @@ namespace Rodin::Variational
    * @f$ represents the size (total number of degrees-of-freedom) of the trial
    * space, and @f$ m @f$ represents the size of the test space.
    */
-  template <class TrialFES, class TestFES, class Operator>
+  template <class Solution, class TrialFES, class TestFES, class Operator>
   class BilinearForm final
     : public BilinearFormBase<Operator>
   {
@@ -153,6 +153,8 @@ namespace Rodin::Variational
       using TestFESScalarType   = typename FormLanguage::Traits<TestFES>::ScalarType;
 
       using ScalarType = typename FormLanguage::Mult<TrialFESScalarType, TestFESScalarType>::Type;
+
+      using SolutionType = Solution;
 
       /// Type of operator associated to the bilinear form
       using OperatorType = Operator;
@@ -181,7 +183,7 @@ namespace Rodin::Variational
        * @param[in] v Reference to a TestFunction
        */
       constexpr
-      BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
+      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
         : BilinearForm(u, v, OperatorType())
       {}
 
@@ -192,7 +194,7 @@ namespace Rodin::Variational
        * @param[in] vec Reference to a vector
        */
       constexpr
-      BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, OperatorType& op)
+      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, OperatorType& op)
         : Parent(op),
           m_u(u), m_v(v)
       {
@@ -204,7 +206,7 @@ namespace Rodin::Variational
        * a TestFunction, and an owned operator.
        */
       constexpr
-      BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
+      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
         : Parent(std::move(op)),
           m_u(u), m_v(v)
       {
@@ -239,10 +241,10 @@ namespace Rodin::Variational
        * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
        * at @f$ ( u, v ) @f$.
        */
-      template <class DataType>
+      template <class UData, class VData>
       constexpr
       ScalarType operator()(
-        const GridFunction<TrialFES, DataType>& u, const GridFunction<TestFES, DataType>& v) const
+        const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
         return (this->getOperator() * v.getData()).dot(u.getData());
       }
@@ -255,7 +257,7 @@ namespace Rodin::Variational
              trialFES, testFES, getLocalIntegrators(), getGlobalIntegrators() });
       }
 
-      const TrialFunction<TrialFES>& getTrialFunction() const override
+      const TrialFunction<SolutionType, TrialFES>& getTrialFunction() const override
       {
         return m_u.get();
       }
@@ -426,7 +428,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
+      std::reference_wrapper<const TrialFunction<Solution, TrialFES>> m_u;
       std::reference_wrapper<const TestFunction<TestFES>>   m_v;
       std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
       LocalBilinearFormIntegratorBaseListType               m_lbfis;
