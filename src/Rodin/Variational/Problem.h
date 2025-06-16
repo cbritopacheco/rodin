@@ -99,8 +99,8 @@ namespace Rodin::Variational
    * @brief General class to assemble linear systems with `Operator`
    * and `Vector` generic types in a sequential context.
    */
-  template <class TrialFES, class TestFES, class Operator, class Vector>
-  class Problem<TrialFES, TestFES, Operator, Vector>
+  template <class Solution, class TrialFES, class TestFES, class Operator, class Vector>
+  class Problem<Solution, TrialFES, TestFES, Operator, Vector>
     : public ProblemBase<Operator, Vector,
         typename FormLanguage::Mult<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -140,7 +140,7 @@ namespace Rodin::Variational
       using Parent = ProblemBase<OperatorType, VectorType, ScalarType>;
 
       constexpr
-      Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+      Problem(TrialFunction<Solution, TrialFES>& u, TestFunction<TestFES>& v)
         : Problem(u, v, LinearSystemType())
       {}
 
@@ -152,7 +152,8 @@ namespace Rodin::Variational
        * @param[in,out] v %Test function
        */
       constexpr
-      Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, const LinearSystemType& axb)
+      Problem(
+          TrialFunction<Solution, TrialFES>& u, TestFunction<TestFES>& v, const LinearSystemType& axb)
          :  m_trialFunction(u), m_testFunction(v),
             m_axb(axb),
             m_assembled(false)
@@ -169,7 +170,7 @@ namespace Rodin::Variational
       void operator=(const Problem& other) = delete;
 
       constexpr
-      TrialFunction<TrialFES>& getTrialFunction()
+      TrialFunction<Solution, TrialFES>& getTrialFunction()
       {
         return m_trialFunction;
       }
@@ -181,7 +182,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      const TrialFunction<TrialFES>& getTrialFunction() const
+      const TrialFunction<Solution, TrialFES>& getTrialFunction() const
       {
         return m_trialFunction.get();
       }
@@ -310,7 +311,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<TrialFunction<TrialFES>> m_trialFunction;
+      std::reference_wrapper<TrialFunction<Solution, TrialFES>> m_trialFunction;
       std::reference_wrapper<TestFunction<TestFES>>   m_testFunction;
 
       LinearSystemType  m_axb;
@@ -322,8 +323,8 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    */
-  template <class TrialFES, class TestFES>
-  Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+  template <class Solution, class TrialFES, class TestFES>
+  Problem(TrialFunction<Solution, TrialFES>& u, TestFunction<TestFES>& v)
     -> Problem<
         TrialFES, TestFES,
         Math::SparseMatrix<
@@ -336,8 +337,10 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    */
-  template <class TrialFES, class TestFES, class Operator, class Vector>
-  Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, Math::LinearSystem<Operator, Vector>& axb)
+  template <class Solution, class TrialFES, class TestFES, class Operator, class Vector>
+  Problem(
+      TrialFunction<Solution, TrialFES>& u, TestFunction<TestFES>& v,
+      Math::LinearSystem<Operator, Vector>& axb)
     -> Problem<TrialFES, TestFES, Operator, Vector>;
 
   template <class Operator, class Vector, class U1, class U2, class ... Us>
@@ -419,8 +422,8 @@ namespace Rodin::Variational
 
       using TestFESTuple = typename Utility::Extract<TestFunctionTuple>::template Type<GetFES>;
 
-      template <class TrialFES, class TestFES>
-      using BilinearFormType = BilinearForm<TrialFES, TestFES, OperatorType>;
+      template <class Solution, class TrialFES, class TestFES>
+      using BilinearFormType = BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       template <class TestFES>
       using LinearFormType = LinearForm<TestFES, VectorType>;
@@ -458,6 +461,7 @@ namespace Rodin::Variational
                     .map(
                       [](const auto& uv)
                       { return BilinearFormType<
+                          typename FormLanguage::Traits<decltype(uv.first())>::SolutionType,
                           typename std::decay_t<
                           typename Utility::UnwrapRefDecay<decltype(uv.first())>::Type>::FES,
                           typename std::decay_t<

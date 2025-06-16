@@ -10,6 +10,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Variational/Integrator.h"
+#include "Rodin/Math/Traits.h"
 
 #include "Rodin/Utility/Repeat.h"
 
@@ -113,14 +114,14 @@ namespace Rodin::Assembly
    * @brief Sequential assembly of the Math::SparseMatrix associated to a
    * BilinearFormBase object.
    */
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class Sequential<
     Math::Matrix<
       typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Variational::BilinearForm<
-      TrialFES, TestFES,
+      Solution, TrialFES, TestFES,
       Math::Matrix<
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -131,7 +132,7 @@ namespace Rodin::Assembly
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
         Variational::BilinearForm<
-          TrialFES, TestFES,
+          Solution, TrialFES, TestFES,
           Math::Matrix<
             typename FormLanguage::Dot<
               typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -149,7 +150,7 @@ namespace Rodin::Assembly
 
       using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -228,14 +229,14 @@ namespace Rodin::Assembly
    * @brief Sequential assembly of the Math::SparseMatrix associated to a
    * BilinearFormBase object.
    */
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class Sequential<
     Math::SparseMatrix<
       typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Variational::BilinearForm<
-      TrialFES, TestFES,
+      Solution, TrialFES, TestFES,
       Math::SparseMatrix<
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -246,7 +247,7 @@ namespace Rodin::Assembly
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
         Variational::BilinearForm<
-          TrialFES, TestFES,
+          Solution, TrialFES, TestFES,
           Math::SparseMatrix<
             typename FormLanguage::Dot<
               typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -260,7 +261,7 @@ namespace Rodin::Assembly
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -286,7 +287,7 @@ namespace Rodin::Assembly
         Sequential<
           std::vector<Eigen::Triplet<ScalarType>>,
           Variational::BilinearForm<
-            TrialFES, TestFES,
+            Solution, TrialFES, TestFES,
             std::vector<Eigen::Triplet<ScalarType>>>> assembly;
         assembly.execute(triplets, {
           input.getTrialFES(), input.getTestFES(),
@@ -301,13 +302,13 @@ namespace Rodin::Assembly
       }
   };
 
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class Sequential<
     std::vector<Eigen::Triplet<
       typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
-    Variational::BilinearForm<TrialFES, TestFES,
+    Variational::BilinearForm<Solution, TrialFES, TestFES,
       std::vector<Eigen::Triplet<
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -317,7 +318,7 @@ namespace Rodin::Assembly
           typename FormLanguage::Dot<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
-        Variational::BilinearForm<TrialFES, TestFES,
+        Variational::BilinearForm<Solution, TrialFES, TestFES,
           std::vector<Eigen::Triplet<
             typename FormLanguage::Dot<
               typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -331,11 +332,14 @@ namespace Rodin::Assembly
 
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType =
+        Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
-      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+      using LocalBilinearFormIntegratorBaseType =
+        Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
+      using GlobalBilinearFormIntegratorBaseType =
+        Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -421,13 +425,13 @@ namespace Rodin::Assembly
       }
   };
 
-  template <class ... TrialFES, class ... TestFES>
+  template <class ... Solution, class ... TrialFES, class ... TestFES>
   class Sequential<
     std::vector<Eigen::Triplet<Real>>,
-    Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>> final
+    Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>> final
       : public AssemblyBase<
           std::vector<Eigen::Triplet<Real>>,
-          Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>>
+          Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>>
   {
     public:
       using ScalarType = Real;
@@ -435,7 +439,7 @@ namespace Rodin::Assembly
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
       using TupleType =
-        Tuple<Variational::BilinearForm<TrialFES, TestFES, OperatorType>...>;
+        Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>...>;
 
       using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -461,7 +465,7 @@ namespace Rodin::Assembly
       {
         using AssemblyTuple =
           Tuple<Sequential<std::vector<Eigen::Triplet<Real>>,
-          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>...>;
+          Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>...>;
 
         AssemblyTuple assembly;
 
@@ -500,19 +504,19 @@ namespace Rodin::Assembly
       }
   };
 
-  template <class ... TrialFES, class ... TestFES>
+  template <class ... Solution, class ... TrialFES, class ... TestFES>
   class Sequential<
     Math::SparseMatrix<Real>,
-    Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>...>> final
+    Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Real>>...>> final
       : public AssemblyBase<
           Math::SparseMatrix<Real>,
-          Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>...>>
+          Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Real>>...>>
     {
       public:
         using Parent =
           AssemblyBase<
             Math::SparseMatrix<Real>,
-            Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>...>>;
+            Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Real>>...>>;
 
         using InputType = typename Parent::InputType;
 
@@ -533,7 +537,7 @@ namespace Rodin::Assembly
           Sequential<
             std::vector<Eigen::Triplet<Real>>,
             Tuple<
-              Variational::BilinearForm<TrialFES, TestFES,
+              Variational::BilinearForm<Solution, TrialFES, TestFES,
               std::vector<Eigen::Triplet<Real>>>...>> assembly;
           res.resize(input.getRows(), input.getColumns());
           std::vector<Eigen::Triplet<Real>> triplets;

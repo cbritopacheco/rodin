@@ -11,6 +11,8 @@ namespace Rodin::FormLanguage
   {
     using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TrialSpace;
+
+    using SolutionType = Solution;
   };
 }
 

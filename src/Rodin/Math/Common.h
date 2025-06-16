@@ -12,7 +12,6 @@
 #include <Eigen/Core>
 
 #include "Rodin/Types.h"
-#include "Rodin/FormLanguage/Traits.h"
 
 namespace Rodin::Math
 {
@@ -260,57 +259,6 @@ namespace Rodin::Math
       return (lhs.conjugate().array() * rhs.array()).rowwise().sum().colwise().sum().value();
     }
   }
-}
-
-namespace Rodin::FormLanguage
-{
-  template <>
-  struct Traits<Real>
-  {
-    using ScalarType = Real;
-  };
-
-  template <>
-  struct Traits<Complex>
-  {
-    using ScalarType = Complex;
-  };
-
-  template <class LHS, class RHS>
-  struct Sum
-  {
-    using Type = decltype(Math::sum(std::declval<LHS>(), std::declval<RHS>()));
-  };
-
-  template <class LHS, class RHS>
-  struct Minus
-  {
-    using Type = decltype(Math::minus(std::declval<LHS>(), std::declval<RHS>()));
-  };
-
-  template <class Operand>
-  struct UnaryMinus
-  {
-    using Type = decltype(Math::minus(std::declval<Operand>()));
-  };
-
-  template <class LHS, class RHS>
-  struct Mult
-  {
-    using Type = decltype(Math::mult(std::declval<LHS>(), std::declval<RHS>()));
-  };
-
-  template <class LHS, class RHS>
-  struct Division
-  {
-    using Type = decltype(Math::division(std::declval<LHS>(), std::declval<RHS>()));
-  };
-
-  template <class LHS, class RHS>
-  struct Dot
-  {
-    using Type = decltype(Math::dot(std::declval<LHS>(), std::declval<RHS>()));
-  };
 }
 
 #endif

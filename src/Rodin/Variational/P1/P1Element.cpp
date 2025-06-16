@@ -537,13 +537,13 @@ namespace Rodin::Variational
 
 namespace Rodin::Variational
 {
-  Real RealP1Element::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
+  void RealP1Element::BasisFunction::operator()(Real& res, const Math::SpatialVector<Real>& r) const
   {
     switch (m_g)
     {
       case Geometry::Polytope::Type::Point:
       {
-        return 1;
+        res = 1;
       }
       case Geometry::Polytope::Type::Segment:
       {
@@ -551,16 +551,16 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return 1 - r.x();
+            res = 1 - r.x();
           }
           case 1:
           {
-            return r.x();
+            res = r.x();
           }
           default:
           {
             assert(false);
-            return Math::nan<Real>();
+            res = Math::nan<Real>();
           }
         }
       }
@@ -570,20 +570,20 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return -r.x() - r.y() + 1;
+            res = -r.x() - r.y() + 1;
           }
           case 1:
           {
-            return r.x();
+            res = r.x();
           }
           case 2:
           {
-            return r.y();
+            res = r.y();
           }
           default:
           {
             assert(false);
-            return Math::nan<Real>();
+            res = Math::nan<Real>();
           }
         }
       }
@@ -595,24 +595,24 @@ namespace Rodin::Variational
           {
             const Real x = r.x();
             const Real y = r.y();
-            return x * y - x - y + 1;
+            res = x * y - x - y + 1;
           }
           case 1:
           {
-            return r.x() * (1 - r.y());
+            res = r.x() * (1 - r.y());
           }
           case 2:
           {
-            return r.y() * (1 - r.x());
+            res = r.y() * (1 - r.x());
           }
           case 3:
           {
-            return r.x() * r.y();
+            res = r.x() * r.y();
           }
           default:
           {
             assert(false);
-            return Math::nan<Real>();
+            res = Math::nan<Real>();
           }
         }
       }
@@ -622,24 +622,24 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return - r.x() - r.y() - r.z() + 1;
+            res = - r.x() - r.y() - r.z() + 1;
           }
           case 1:
           {
-            return r.x();
+            res = r.x();
           }
           case 2:
           {
-            return r.y();
+            res = r.y();
           }
           case 3:
           {
-            return r.z();
+            res = r.z();
           }
           default:
           {
             assert(false);
-            return Math::nan<Real>();
+            res = Math::nan<Real>();
           }
         }
       }
@@ -649,38 +649,38 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1;
+            res = r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1;
           }
           case 1:
           {
-            return r.x() * (1 - r.z());
+            res = r.x() * (1 - r.z());
           }
           case 2:
           {
-            return r.y() * (1 - r.z());
+            res = r.y() * (1 - r.z());
           }
           case 3:
           {
-            return r.z() * (1 - r.x() - r.y());
+            res = r.z() * (1 - r.x() - r.y());
           }
           case 4:
           {
-            return r.x() * r.z();
+            res = r.x() * r.z();
           }
           case 5:
           {
-            return r.y() * r.z();
+            res = r.y() * r.z();
           }
           default:
           {
             assert(false);
-            return Math::nan<Real>();
+            res = Math::nan<Real>();
           }
         }
       }
     }
     assert(false);
-    return Math::nan<Real>();
+    res = Math::nan<Real>();
   }
 
   void RealP1Element::DerivativeFunction::operator()(Real& out, const Math::SpatialVector<Real>& r) const

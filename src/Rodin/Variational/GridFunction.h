@@ -37,8 +37,21 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class FES, class Data, class Derived>
-  struct Traits<Variational::GridFunctionBase<FES, Data, Derived>>
+  template <class Derived, class FES, class Data>
+  struct Traits<Variational::GridFunctionBase<Derived, FES, Data>>
+  {
+    using FESType = FES;
+    using DataType = Data;
+
+    using MeshType = typename Traits<FESType>::MeshType;
+    using RangeType = typename Traits<FESType>::RangeType;
+    using ElementType = typename Traits<FESType>::ElementType;
+    using ContextType = typename Traits<FESType>::ContextType;
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+  };
+
+  template <class FES, class Data>
+  struct Traits<Variational::GridFunction<FES, Data>>
   {
     using FESType = FES;
     using DataType = Data;
@@ -70,7 +83,7 @@ namespace Rodin::Variational
   template <
     class Derived,
     class FES = typename FormLanguage::Traits<Derived>::FESType,
-    class Data = typename FormLanguage::Traits<FES>::DataType>
+    class Data = typename FormLanguage::Traits<Derived>::DataType>
   class GridFunctionBase : public LazyEvaluator<GridFunctionBase<Derived, FES, Data>>
   {
     public:
@@ -93,7 +106,7 @@ namespace Rodin::Variational
       using DataType = Math::Vector<ScalarType>;
 
       /// Parent class
-      using Parent = LazyEvaluator<GridFunctionBase<FESType, Data, Derived>>;
+      using Parent = LazyEvaluator<GridFunctionBase<Derived, FESType, Data>>;
 
       static_assert(
           std::is_same_v<RangeType, ScalarType> ||
@@ -224,13 +237,13 @@ namespace Rodin::Variational
         {
           case IO::FileFormat::MFEM:
           {
-            IO::GridFunctionLoader<IO::FileFormat::MFEM, DataType, FESType>(
+            IO::GridFunctionLoader<IO::FileFormat::MFEM, FESType, DataType>(
               static_cast<Derived&>(*this)).load(input);
             break;
           }
           case IO::FileFormat::MEDIT:
           {
-            IO::GridFunctionLoader<IO::FileFormat::MEDIT, DataType, FES>(
+            IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES, DataType>(
               static_cast<Derived&>(*this)).load(input);
             break;
           }
@@ -263,19 +276,19 @@ namespace Rodin::Variational
         {
           case IO::FileFormat::MFEM:
           {
-            IO::GridFunctionPrinter<IO::FileFormat::MFEM, DataType, FESType>(
+            IO::GridFunctionPrinter<IO::FileFormat::MFEM, FESType, DataType>(
               static_cast<const Derived&>(*this)).print(output);
             break;
           }
           case IO::FileFormat::MEDIT:
           {
-            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, DataType, FESType>(
+            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FESType, DataType>(
               static_cast<const Derived&>(*this)).print(output);
             break;
           }
           case IO::FileFormat::ENSIGHT6:
           {
-            IO::GridFunctionPrinter<IO::FileFormat::ENSIGHT6, DataType, FESType>(
+            IO::GridFunctionPrinter<IO::FileFormat::ENSIGHT6, FESType, DataType>(
               static_cast<const Derived&>(*this)).print(output);
             break;
           }
@@ -821,7 +834,7 @@ namespace Rodin::Variational
        */
       const ScalarType& operator[](Index global) const
       {
-        return static_cast<Derived&>(*this).operator[](global);
+        return static_cast<const Derived&>(*this).operator[](global);
       }
 
       /**
@@ -895,7 +908,8 @@ namespace Rodin::Variational
 
   template <class FES>
   class GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>> final
-    : public GridFunctionBase<GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
+    : public GridFunctionBase<
+        GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
   {
     public:
       using FESType = FES;
@@ -904,7 +918,9 @@ namespace Rodin::Variational
 
       using DataType = Math::Vector<ScalarType>;
 
-      using Parent = GridFunctionBase<FESType, DataType, GridFunction<FESType, DataType>>;
+      using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
+
+      using Parent::operator=;
 
       GridFunction(const FESType& fes)
         : Parent(fes)
@@ -1004,6 +1020,10 @@ namespace Rodin::Variational
         return *this;
       }
   };
+
+  template <class FES>
+  GridFunction(const FES& fes)
+    -> GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
 }
 
 #endif

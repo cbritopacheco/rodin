@@ -12,7 +12,7 @@
 
 #include "Rodin/Alert.h"
 #include "Rodin/FormLanguage/Base.h"
-
+#include "Rodin/Math/Traits.h"
 
 #include "ForwardDecls.h"
 #include "Function.h"

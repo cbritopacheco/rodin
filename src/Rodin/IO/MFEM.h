@@ -637,7 +637,7 @@ namespace Rodin::IO
         Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
     public:
-      using FESType = Variational::P0<Range, Geometry::Mesh<Context::Local>>;
+      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
 
       using RangeType = Range;
 

@@ -12,6 +12,7 @@
 #include "Rodin/Types.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/Traits.h"
 
 #include "ForwardDecls.h"
 

@@ -9,6 +9,7 @@
 
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/List.h"
+#include "Rodin/Math/Traits.h"
 
 #include "ForwardDecls.h"
 #include "Function.h"

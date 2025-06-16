@@ -135,7 +135,15 @@ namespace Rodin::Variational
           constexpr
           Real operator()(const Math::SpatialVector<Real>& r) const
           {
-            return 1;
+            Real res;
+            this->operator()(res, r);
+            return res;
+          }
+
+          constexpr
+          void operator()(Real& res, const Math::SpatialVector<Real>& r) const
+          {
+            res = 1;
           }
       };
 

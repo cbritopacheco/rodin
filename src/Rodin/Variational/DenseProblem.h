@@ -14,8 +14,8 @@ namespace Rodin::Variational
   template <class ... Parameters>
   class DenseProblem;
 
-  template <class TrialFES, class TestFES>
-  DenseProblem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
+  template <class Solution, class TrialFES, class TestFES>
+  DenseProblem(TrialFunction<Solution, TrialFES>&, TestFunction<TestFES>&)
     -> DenseProblem<TrialFES, TestFES,
           Math::Matrix<
             typename FormLanguage::Mult<

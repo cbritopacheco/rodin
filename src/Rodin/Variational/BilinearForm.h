@@ -194,7 +194,8 @@ namespace Rodin::Variational
        * @param[in] vec Reference to a vector
        */
       constexpr
-      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, OperatorType& op)
+      BilinearForm(
+          const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, OperatorType& op)
         : Parent(op),
           m_u(u), m_v(v)
       {
@@ -206,7 +207,8 @@ namespace Rodin::Variational
        * a TestFunction, and an owned operator.
        */
       constexpr
-      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
+      BilinearForm(
+          const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
         : Parent(std::move(op)),
           m_u(u), m_v(v)
       {
@@ -435,22 +437,23 @@ namespace Rodin::Variational
       GlobalBilinearFormIntegratorBaseListType              m_gbfis;
   };
 
-  template <class TrialFES, class TestFES>
-  BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
-    -> BilinearForm<TrialFES, TestFES,
+  template <class Solution, class TrialFES, class TestFES>
+  BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
+    -> BilinearForm<Solution, TrialFES, TestFES,
         Math::SparseMatrix<
           typename FormLanguage::Mult<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>
           ::Type>>;
 
-  template <class TrialFES, class TestFES, class Operator>
-  BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
-    -> BilinearForm<TrialFES, TestFES, Operator>;
+  template <class Solution, class TrialFES, class TestFES, class Operator>
+  BilinearForm(
+      const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
+    -> BilinearForm<Solution, TrialFES, TestFES, Operator>;
 
-  template <class TrialFES, class TestFES, class Operator>
-  BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, Operator& op)
-    -> BilinearForm<TrialFES, TestFES, Operator>;
+  template <class Solution, class TrialFES, class TestFES, class Operator>
+  BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, Operator& op)
+    -> BilinearForm<Solution, TrialFES, TestFES, Operator>;
 }
 
 #include "BilinearForm.hpp"

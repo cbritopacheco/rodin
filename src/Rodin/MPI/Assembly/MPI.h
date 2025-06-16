@@ -28,20 +28,20 @@ namespace Rodin::Assembly
   template <class LinearAlgebraType, class Operand>
   class MPI;
 
-  template <class Scalar, class FES, class ValueDerived>
+  template <class Scalar, class Solution, class FES, class ValueDerived>
   class MPI<
     IndexMap<Scalar>,
     Variational::DirichletBC<
-      Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>> final
+      Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>> final
     : public AssemblyBase<
         IndexMap<Scalar>,
         Variational::DirichletBC<
-          Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>>
+          Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
   {
     public:
       using FESType = FES;
 
-      using TrialFunctionType = Variational::TrialFunction<FES>;
+      using TrialFunctionType = Variational::TrialFunction<Solution, FES>;
 
       using ValueType = Variational::FunctionBase<ValueDerived>;
 

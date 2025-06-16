@@ -188,7 +188,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for grid function objects.
    */
-  template <class FES, class Data, class Derived>
+  template <class Derived, class FES, class Data>
   class GridFunctionBase;
 
   /**
@@ -278,7 +278,7 @@ namespace Rodin::Variational
    *
    * @see BilinearFormSpecializations
    */
-  template <class TrialFES, class TestFES, class OperatorType>
+  template <class Solution, class TrialFES, class TestFES, class OperatorType>
   class BilinearForm;
 
   /**

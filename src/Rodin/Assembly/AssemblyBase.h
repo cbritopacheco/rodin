@@ -15,8 +15,8 @@
 
 namespace Rodin::Assembly
 {
-  template <class OperatorType, class TrialFES, class TestFES>
-  class AssemblyBase<OperatorType, Variational::BilinearForm<TrialFES, TestFES, OperatorType>>
+  template <class OperatorType, class Solution, class TrialFES, class TestFES>
+  class AssemblyBase<OperatorType, Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>>
     : public FormLanguage::Base
   {
     public:
@@ -35,8 +35,8 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class OperatorType, class ... TrialFES, class ... TestFES>
-  class AssemblyBase<OperatorType, Tuple<Variational::BilinearForm<TrialFES, TestFES, OperatorType>...>>
+  template <class OperatorType, class Solution, class ... TrialFES, class ... TestFES>
+  class AssemblyBase<OperatorType, Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>...>>
   {
     public:
       static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
