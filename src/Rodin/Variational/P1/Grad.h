@@ -16,12 +16,12 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class Range, class Mesh>
-  struct Traits<Variational::Grad<Variational::GridFunction<Variational::P1<Range, Mesh>>>>
+  template <class Range, class Data, class Mesh>
+  struct Traits<Variational::Grad<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
     using FESType = Variational::P1<Range, Mesh>;
 
-    using OperandType = Variational::GridFunction<FESType>;
+    using OperandType = Variational::GridFunction<FESType, Data>;
 
     using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
 
@@ -50,9 +50,9 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P1 GridFunction
    */
-  template <class Range, class Mesh>
-  class Grad<GridFunction<P1<Range, Mesh>>> final
-    : public GradBase<GridFunction<P1<Range, Mesh>>, Grad<GridFunction<P1<Range, Mesh>>>>
+  template <class Range, class Data, class Mesh>
+  class Grad<GridFunction<P1<Range, Mesh>, Data>> final
+    : public GradBase<GridFunction<P1<Range, Mesh>, Data>, Grad<GridFunction<P1<Range, Mesh>, Data>>>
   {
     public:
       using FESType = P1<Range, Mesh>;
@@ -63,7 +63,7 @@ namespace Rodin::Variational
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
@@ -172,8 +172,8 @@ namespace Rodin::Variational
    * @ingroup RodinCTAD
    * @brief CTAD for Grad of a P1 GridFunction
    */
-  template <class Number, class Mesh>
-  Grad(const GridFunction<P1<Number, Mesh>>&) -> Grad<GridFunction<P1<Number, Mesh>>>;
+  template <class Range, class Data, class Mesh>
+  Grad(const GridFunction<P1<Range, Mesh>, Data>&) -> Grad<GridFunction<P1<Range, Mesh>, Data>>;
 
   /**
    * @ingroup GradSpecializations

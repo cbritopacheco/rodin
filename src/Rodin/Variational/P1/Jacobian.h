@@ -18,19 +18,22 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class Number, class Mesh>
-  struct Traits<Variational::Jacobian<Variational::GridFunction<Variational::P1<Math::Vector<Number>, Mesh>>>>
-  {
-    using FESType = Variational::P1<Math::Vector<Number>, Mesh>;
-    using OperandType = Variational::GridFunction<FESType>;
-  };
-
-  template <class NestedDerived, class Number, class Mesh, Variational::ShapeFunctionSpaceType Space>
+  template <class Range, class Data, class Mesh>
   struct Traits<
     Variational::Jacobian<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Number>, Mesh>, Space>>>
+      Variational::GridFunction<
+        Variational::P1<Range, Mesh>, Data>>>
   {
-    using FESType = Variational::P1<Math::Vector<Number>, Mesh>;
+    using FESType = Variational::P1<Range, Mesh>;
+    using OperandType = Variational::GridFunction<FESType, Data>;
+  };
+
+  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<
+    Variational::Jacobian<
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
+  {
+    using FESType = Variational::P1<Range, Mesh>;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
     using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
@@ -42,20 +45,19 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an P1 GridFunction object.
    */
-  template <class Number, class Mesh>
-  class Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>> final
+  template <class Range, class Data, class Mesh>
+  class Jacobian<GridFunction<P1<Range, Mesh>, Data>> final
     : public JacobianBase<
-        GridFunction<P1<Math::Vector<Number>, Mesh>>,
-        Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>>>
+        GridFunction<P1<Range, Mesh>, Data>, Jacobian<GridFunction<P1<Range, Mesh>, Data>>>
   {
     public:
-      using FESType = P1<Math::Vector<Number>, Mesh>;
+      using FESType = P1<Range, Mesh>;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
@@ -159,9 +161,8 @@ namespace Rodin::Variational
    * @ingroup RodinCTAD
    * @brief CTAD for Jacobian of a P1 GridFunction
    */
-  template <class Number, class Mesh>
-  Jacobian(const GridFunction<P1<Math::Vector<Number>, Mesh>>&)
-    -> Jacobian<GridFunction<P1<Math::Vector<Number>, Mesh>>>;
+  template <class Range, class Data, class Mesh>
+  Jacobian(const GridFunction<P1<Range, Mesh>, Data>&) -> Jacobian<GridFunction<P1<Range, Mesh>, Data>>;
 
   /**
    * @ingroup JacobianSpecializations

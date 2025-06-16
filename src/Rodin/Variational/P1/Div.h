@@ -42,10 +42,10 @@ namespace Rodin::Variational
    * @brief Divient of a P1 GridFunction
    */
   template <class Scalar, class Data, class Mesh>
-  class Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>>> final
+  class Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>> final
     : public DivBase<
-        GridFunction<P1<Math::Vector<Scalar>, Mesh>>,
-        Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>>>>
+        GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>,
+        Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>>
   {
     public:
       using FESType = Variational::P1<Math::Vector<Scalar>, Mesh>;
@@ -55,7 +55,7 @@ namespace Rodin::Variational
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       /// Operand type
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       /// Parent class
       using Parent = DivBase<OperandType, Div<OperandType>>;
@@ -164,8 +164,9 @@ namespace Rodin::Variational
    * @ingroup RodinCTAD
    * @brief CTAD for Div of a P1 GridFunction
    */
-  template <class ... Ts>
-  Div(const GridFunction<P1<Ts...>>&) -> Div<GridFunction<P1<Ts...>>>;
+  template <class Scalar, class Data, class Mesh>
+  Div(const GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>&)
+    -> Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>;
 
   /**
    * @ingroup DivSpecializations

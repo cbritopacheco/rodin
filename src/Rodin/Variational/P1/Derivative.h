@@ -5,12 +5,12 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class Range, class Mesh>
-  struct Traits<Variational::Derivative<Variational::GridFunction<Variational::P1<Range, Mesh>>>>
+  template <class Range, class Data, class Mesh>
+  struct Traits<Variational::Derivative<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
     using FESType = Variational::P1<Range, Mesh>;
 
-    using OperandType = Variational::GridFunction<FESType>;
+    using OperandType = Variational::GridFunction<FESType, Data>;
 
     using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
 
@@ -39,9 +39,9 @@ namespace Rodin::Variational
    * @ingroup DerivativeSpecializations
    * @brief Derivative of a P1 GridFunction
    */
-  template <class Range, class Mesh>
-  class Derivative<GridFunction<P1<Range, Mesh>>> final
-    : public DerivativeBase<GridFunction<P1<Range, Mesh>>, Derivative<GridFunction<P1<Range, Mesh>>>>
+  template <class Range, class Data, class Mesh>
+  class Derivative<GridFunction<P1<Range, Mesh>, Data>> final
+    : public DerivativeBase<GridFunction<P1<Range, Mesh>, Data>, Derivative<GridFunction<P1<Range, Mesh>, Data>>>
   {
     public:
       using FESType = P1<Range, Mesh>;
@@ -52,7 +52,7 @@ namespace Rodin::Variational
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       using Parent = DerivativeBase<OperandType, Derivative<OperandType>>;
 
@@ -167,9 +167,9 @@ namespace Rodin::Variational
    * @ingroup RodinCTAD
    * @brief CTAD for Derivative of a P1 GridFunction
    */
-  template <class Range, class Mesh>
-  Derivative(size_t, const GridFunction<P1<Range, Mesh>>&)
-    -> Derivative<GridFunction<P1<Range, Mesh>>>;
+  template <class Range, class Data, class Mesh>
+  Derivative(size_t, const GridFunction<P1<Range, Mesh>, Data>&)
+    -> Derivative<GridFunction<P1<Range, Mesh>, Data>>;
 }
 
 #endif

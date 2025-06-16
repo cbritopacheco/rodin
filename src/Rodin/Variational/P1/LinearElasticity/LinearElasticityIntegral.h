@@ -9,8 +9,8 @@
 
 namespace Rodin::Variational
 {
-  template <class MuDerived, class LambdaDerived, class Range, class Mesh>
-  class LinearElasticityIntegrator<P1<Range, Mesh>, MuDerived, LambdaDerived> final
+  template <class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh>
+  class LinearElasticityIntegrator<Solution, P1<Range, Mesh>, MuDerived, LambdaDerived> final
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType>
   {
     public:
@@ -39,7 +39,7 @@ namespace Rodin::Variational
 
     public:
       LinearElasticityIntegrator(
-          const TrialFunction<TrialFESType>& u, const TestFunction<TestFESType>& v,
+          const TrialFunction<Solution, TrialFESType>& u, const TestFunction<TestFESType>& v,
           const LambdaType& lambda, const MuType& mu)
         : Parent(u, v),
           m_lambda(lambda.copy()), m_mu(mu.copy()),
@@ -61,7 +61,6 @@ namespace Rodin::Variational
           m_testfes(std::move(other.m_testfes))
       {}
 
-      inline
       const Geometry::Polytope& getPolytope() const final override
       {
         return m_polytope.value().get();
@@ -129,7 +128,6 @@ namespace Rodin::Variational
         return m_weight * m_distortion * m_matrix(te, tr);
       }
 
-      inline
       constexpr
       const MuType& getMu() const
       {
@@ -137,7 +135,6 @@ namespace Rodin::Variational
         return *m_mu;
       }
 
-      inline
       constexpr
       const LambdaType& getLambda() const
       {
@@ -145,12 +142,12 @@ namespace Rodin::Variational
         return *m_lambda;
       }
 
-      inline Integrator::Region getRegion() const override
+      Integrator::Region getRegion() const override
       {
         return Integrator::Region::Cells;
       }
 
-      inline LinearElasticityIntegrator* copy() const noexcept override
+      LinearElasticityIntegrator* copy() const noexcept override
       {
         return new LinearElasticityIntegrator(*this);
       }
