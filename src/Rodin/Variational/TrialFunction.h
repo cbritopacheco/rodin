@@ -6,8 +6,8 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class FES, class Solution>
-  struct Traits<Variational::TrialFunction<FES, Solution>>
+  template <class Solution, class FES>
+  struct Traits<Variational::TrialFunction<Solution, FES>>
   {
     using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TrialSpace;
@@ -20,7 +20,7 @@ namespace Rodin::Variational
 {
   template <class Solution, class FES>
   class TrialFunction final
-    : public ShapeFunction<TrialFunction<FES, Solution>, FES, TrialSpace>
+    : public ShapeFunction<TrialFunction<Solution, FES>, FES, TrialSpace>
   {
     public:
       using FESType = FES;
@@ -29,10 +29,15 @@ namespace Rodin::Variational
       using SolutionType = Solution;
 
       using Parent =
-        ShapeFunction<TrialFunction<FESType, Solution>, FESType, TrialSpace>;
+        ShapeFunction<TrialFunction<SolutionType, FESType>, FESType, TrialSpace>;
 
       static_assert(std::is_base_of_v<FiniteElementSpaceBase, FES>,
           "FES is not a finite element space.");
+
+      constexpr
+      TrialFunction(const FES& fes)
+        : Parent(fes)
+      {}
 
       constexpr
       TrialFunction(const FES& fes, SolutionType& gf)
@@ -130,8 +135,7 @@ namespace Rodin::Variational
   template <class FES>
   TrialFunction(const FES&)
     -> TrialFunction<
-        GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>,
-        FES>;
+        GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>, FES>;
 }
 #endif
 

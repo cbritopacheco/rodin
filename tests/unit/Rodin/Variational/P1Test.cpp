@@ -66,10 +66,10 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
 
-    EXPECT_NEAR(gf.getValue(0), 0, RODIN_FUZZY_CONSTANT);
-    EXPECT_NEAR(gf.getValue(1), 1, RODIN_FUZZY_CONSTANT);
-    EXPECT_NEAR(gf.getValue(2), 1, RODIN_FUZZY_CONSTANT);
-    EXPECT_NEAR(gf.getValue(3), 2, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(gf[0], 0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(gf[1], 1, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(gf[2], 1, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(gf[3], 2, RODIN_FUZZY_CONSTANT);
   }
 
   TEST(Rodin_Variational_Real_P1_GridFunction_FuzzyTest, TriangularUniformGrid16_ProjectOnBoundary_Constant)

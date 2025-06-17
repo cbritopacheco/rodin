@@ -201,7 +201,6 @@ int main(int, char**)
     Alert::Info() << "Computing objective..." << Alert::Raise;
     GridFunction j(sfes);
     j = 0.5 * Pow(Frobenius(Grad(u.getSolution())), 2);
-    j.setWeights();
 
     const Real J = Integral(j).compute();
     const Real objective =

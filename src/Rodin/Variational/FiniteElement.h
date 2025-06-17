@@ -65,7 +65,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       Geometry::Polytope::Type getGeometry() const
       {
@@ -76,7 +75,6 @@ namespace Rodin::Variational
        * @brief Gets the number of degrees of freedom in the finite element.
        * @note CRTP method to be overriden in Derived class.
        */
-      inline
       constexpr
       size_t getCount() const
       {
@@ -86,7 +84,6 @@ namespace Rodin::Variational
       /**
        * @brief Gets the i-th degree of freedom on the finite element.
        */
-      inline
       constexpr
       auto getNode(size_t i) const
       {
@@ -96,7 +93,6 @@ namespace Rodin::Variational
       /**
        * @note CRTP method to be overriden in Derived class.
        */
-      inline
       constexpr
       const Math::PointMatrix& getNodes() const
       {
@@ -107,7 +103,6 @@ namespace Rodin::Variational
        * @brief Gets the i-th basis function of the finite element.
        * @note CRTP method to be overriden in Derived class.
        */
-      inline
       constexpr
       const auto& getBasis(size_t i) const
       {
@@ -118,14 +113,12 @@ namespace Rodin::Variational
        * @brief Gets the i-th linear function on the finite element.
        * @note CRTP method to be overriden in Derived class.
        */
-      inline
       constexpr
       const auto& getLinearForm(size_t i) const
       {
         return static_cast<const Derived&>(*this).getLinearForm(i);
       }
 
-      inline
       constexpr
       size_t getOrder() const
       {

@@ -284,7 +284,7 @@ namespace Rodin::Variational
          solver.solve(a, x, b);
 
          // Recover solution
-         getTrialFunction().emplace().getSolution().setWeights(x);
+         getTrialFunction().emplace().getSolution().setData(x);
       }
 
       Problem& operator=(const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) override
@@ -326,6 +326,7 @@ namespace Rodin::Variational
   template <class Solution, class TrialFES, class TestFES>
   Problem(TrialFunction<Solution, TrialFES>& u, TestFunction<TestFES>& v)
     -> Problem<
+        Solution,
         TrialFES, TestFES,
         Math::SparseMatrix<
           typename FormLanguage::Mult<
@@ -375,7 +376,16 @@ namespace Rodin::Variational
       template <class T>
       struct GetFES<std::reference_wrapper<T>>
       {
-        using Type = typename FormLanguage::Traits<T>::FES;
+        using Type = typename FormLanguage::Traits<T>::FESType;
+      };
+
+      template <class T>
+      struct GetSolution;
+
+      template <class T>
+      struct GetSolution<std::reference_wrapper<T>>
+      {
+        using Type = typename FormLanguage::Traits<T>::SolutionType;
       };
 
       template <class T>
@@ -418,18 +428,32 @@ namespace Rodin::Variational
             std::reference_wrapper<Us>...>>()
             .template filter<IsTestFunctionReferenceWrapper>());
 
+      using SolutionTuple = typename Utility::Extract<TrialFunctionTuple>::template Type<GetSolution>;
+
       using TrialFESTuple = typename Utility::Extract<TrialFunctionTuple>::template Type<GetFES>;
 
       using TestFESTuple = typename Utility::Extract<TestFunctionTuple>::template Type<GetFES>;
 
-      template <class Solution, class TrialFES, class TestFES>
-      using BilinearFormType = BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
+      template<class U, class V>
+      using BilinearFormType =
+        BilinearForm<
+          typename FormLanguage::Traits<
+            std::decay_t<typename Utility::UnwrapRefDecay<U>::Type>
+          >::SolutionType,
+          typename FormLanguage::Traits<
+            std::decay_t<typename Utility::UnwrapRefDecay<U>::Type>
+          >::FESType,
+          typename FormLanguage::Traits<
+            std::decay_t<typename Utility::UnwrapRefDecay<V>::Type>
+          >::FESType,
+          OperatorType
+        >;
 
       template <class TestFES>
       using LinearFormType = LinearForm<TestFES, VectorType>;
 
       using BilinearFormTuple =
-        typename Utility::Product<TrialFESTuple, TestFESTuple>::template Type<BilinearFormType>;
+        typename Utility::Product<TrialFunctionTuple, TestFunctionTuple>::template Type<BilinearFormType>;
 
       using LinearFormTuple =
         typename Utility::Wrap<TestFESTuple>::template Type<LinearFormType>;
@@ -454,20 +478,14 @@ namespace Rodin::Variational
                 [](const auto& v)
                 { return LinearFormType<
                     typename std::decay_t<
-                    typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FES>(v.get());
+                    typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FESType>(v.get());
                 })),
-          m_bft(m_us.product(
-                [](const auto& u, const auto& v) { return Pair(u, v); }, m_vs)
-                    .map(
-                      [](const auto& uv)
-                      { return BilinearFormType<
-                          typename FormLanguage::Traits<decltype(uv.first())>::SolutionType,
-                          typename std::decay_t<
-                          typename Utility::UnwrapRefDecay<decltype(uv.first())>::Type>::FES,
-                          typename std::decay_t<
-                          typename Utility::UnwrapRefDecay<decltype(uv.second())>::Type>::FES>(
-                              uv.first().get(), uv.second().get());
-                      })),
+          m_bft(m_us.product([](const auto& u, const auto& v) { return Pair(u, v); }, m_vs)
+                    .map([](const auto& uv)
+                         { return BilinearFormType<
+                             decltype(uv.first()), decltype(uv.second())>(
+                                 uv.first().get(), uv.second().get());
+                         })),
           m_assembled(false),
           m_axb(m_stiffness, m_guess, m_mass)
       {
@@ -604,8 +622,7 @@ namespace Rodin::Variational
          m_us.iapply(
              [&](size_t i, auto& u)
              {
-              const size_t n = u.get().getFiniteElementSpace().getSize();
-              u.get().emplace().getSolution().setWeights(m_guess.segment(m_trialOffsets[i], n).eval());
+               u.get().emplace().getSolution().setData(m_guess);
              });
       }
 

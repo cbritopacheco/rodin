@@ -544,6 +544,7 @@ namespace Rodin::Variational
       case Geometry::Polytope::Type::Point:
       {
         res = 1;
+        return;
       }
       case Geometry::Polytope::Type::Segment:
       {
@@ -552,15 +553,18 @@ namespace Rodin::Variational
           case 0:
           {
             res = 1 - r.x();
+            return;
           }
           case 1:
           {
             res = r.x();
+            return;
           }
           default:
           {
             assert(false);
             res = Math::nan<Real>();
+            return;
           }
         }
       }
@@ -571,19 +575,23 @@ namespace Rodin::Variational
           case 0:
           {
             res = -r.x() - r.y() + 1;
+            return;
           }
           case 1:
           {
             res = r.x();
+            return;
           }
           case 2:
           {
             res = r.y();
+            return;
           }
           default:
           {
             assert(false);
             res = Math::nan<Real>();
+            return;
           }
         }
       }
@@ -596,23 +604,28 @@ namespace Rodin::Variational
             const Real x = r.x();
             const Real y = r.y();
             res = x * y - x - y + 1;
+            return;
           }
           case 1:
           {
             res = r.x() * (1 - r.y());
+            return;
           }
           case 2:
           {
             res = r.y() * (1 - r.x());
+            return;
           }
           case 3:
           {
             res = r.x() * r.y();
+            return;
           }
           default:
           {
             assert(false);
             res = Math::nan<Real>();
+            return;
           }
         }
       }
@@ -623,23 +636,28 @@ namespace Rodin::Variational
           case 0:
           {
             res = - r.x() - r.y() - r.z() + 1;
+            return;
           }
           case 1:
           {
             res = r.x();
+            return;
           }
           case 2:
           {
             res = r.y();
+            return;
           }
           case 3:
           {
             res = r.z();
+            return;
           }
           default:
           {
             assert(false);
             res = Math::nan<Real>();
+            return;
           }
         }
       }
@@ -650,31 +668,38 @@ namespace Rodin::Variational
           case 0:
           {
             res = r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1;
+            return;
           }
           case 1:
           {
             res = r.x() * (1 - r.z());
+            return;
           }
           case 2:
           {
             res = r.y() * (1 - r.z());
+            return;
           }
           case 3:
           {
             res = r.z() * (1 - r.x() - r.y());
+            return;
           }
           case 4:
           {
             res = r.x() * r.z();
+            return;
           }
           case 5:
           {
             res = r.y() * r.z();
+            return;
           }
           default:
           {
             assert(false);
             res = Math::nan<Real>();
+            return;
           }
         }
       }
@@ -1300,7 +1325,7 @@ namespace Rodin::Variational
     out.setConstant(Math::nan<Real>());
   }
 
-  Complex ComplexP1Element::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
+  void ComplexP1Element::BasisFunction::operator()(Complex& out, const Math::SpatialVector<Real>& r) const
   {
     using namespace std::complex_literals;
     switch (m_g)
@@ -1311,12 +1336,14 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return Complex(1, 0);
+            out = Complex(1, 0);
+            return;
           }
           default:
           {
             assert(false);
-            return Math::nan<Complex>();
+            out = Math::nan<Complex>();
+            return;
           }
         }
       }
@@ -1326,16 +1353,19 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return (1 - r.x());
+            out = (1 - r.x());
+            return;
           }
           case 1:
           {
-            return r.x();
+            out = r.x();
+            return;
           }
           default:
           {
             assert(false);
-            return Math::nan<Complex>();
+            out = Math::nan<Complex>();
+            return;
           }
         }
       }
@@ -1345,20 +1375,23 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return (-r.x() - r.y() + 1);
+            out = (-r.x() - r.y() + 1);
+            return;
           }
           case 1:
           {
-            return r.x();
+            out = r.x();
+            return;
           }
           case 2:
           {
-            return r.y();
+            out = r.y();
+            return;
           }
           default:
           {
             assert(false);
-            return Math::nan<Complex>();
+            out = Math::nan<Complex>();
           }
         }
       }
@@ -1370,24 +1403,29 @@ namespace Rodin::Variational
           {
             const auto x = r.x();
             const auto y = r.y();
-            return (x * y - x - y + 1);
+            out = (x * y - x - y + 1);
+            return;
           }
           case 1:
           {
-            return r.x() * (1 - r.y());
+            out = r.x() * (1 - r.y());
+            return;
           }
           case 2:
           {
-            return r.y() * (1 - r.x());
+            out = r.y() * (1 - r.x());
+            return;
           }
           case 3:
           {
-            return r.x() * r.y();
+            out = r.x() * r.y();
+            return;
           }
           default:
           {
             assert(false);
-            return Math::nan<Complex>();
+            out = Math::nan<Complex>();
+            return;
           }
         }
       }
@@ -1397,24 +1435,29 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return (-r.x() - r.y() - r.z() + 1);
+            out = (-r.x() - r.y() - r.z() + 1);
+            return;
           }
           case 1:
           {
-            return r.x();
+            out = r.x();
+            return;
           }
           case 2:
           {
-            return r.y();
+            out = r.y();
+            return;
           }
           case 3:
           {
-            return r.z();
+            out = r.z();
+            return;
           }
           default:
           {
             assert(false);
-            return Math::nan<Complex>();
+            out = Math::nan<Complex>();
+            return;
           }
         }
       }
@@ -1424,38 +1467,45 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return (r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1);
+            out = (r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1);
+            return;
           }
           case 1:
           {
-            return (r.x() * (1 - r.z()));
+            out = (r.x() * (1 - r.z()));
+            return;
           }
           case 2:
           {
-            return (r.y() * (1 - r.z()));
+            out = (r.y() * (1 - r.z()));
+            return;
           }
           case 3:
           {
-            return (r.z() * (1 - r.x() - r.y()));
+            out = (r.z() * (1 - r.x() - r.y()));
+            return;
           }
           case 4:
           {
-            return (r.x() * r.z());
+            out = (r.x() * r.z());
+            return;
           }
           case 5:
           {
-            return (r.y() * r.z());
+            out = (r.y() * r.z());
+            return;
           }
           default:
           {
             assert(false);
-            return Math::nan<Real>();
+            out = Math::nan<Real>();
+            return;
           }
         }
       }
     }
     assert(false);
-    return Math::nan<Complex>();
+    out = Math::nan<Complex>();
   }
 
   void ComplexP1Element::GradientFunction::operator()

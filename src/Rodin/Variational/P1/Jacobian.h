@@ -145,7 +145,7 @@ namespace Rodin::Variational
           for (size_t local = 0; local < fe.getCount(); local++)
           {
             fe.getJacobian(local)(jacobian, rc);
-            res += gf.getValue(fes.getGlobalIndex({d, i}, local)).coeff(local % vdim) * jacobian;
+            res += gf[fes.getGlobalIndex({d, i}, local)] * jacobian;
           }
           out = res * p.getJacobianInverse();
         }

@@ -619,7 +619,7 @@ namespace Rodin::IO
 
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
-      using Parent = GridFunctionPrinterBase<FESType, DataType>;
+      using Parent = GridFunctionLoaderBase<FESType, DataType>;
 
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf),
@@ -731,15 +731,8 @@ namespace Rodin::IO
                              << Alert::Raise;
         }
 
-        auto& data = gf.getData();
-        assert(data.rows() >= 0);
-        assert(static_cast<size_t>(data.rows()) == vdim);
-        assert(data.cols() % vdim == 0);
-        assert(data.cols() / vdim == size);
-        assert(data.size() >= 0);
-        for (size_t i = 0; i < static_cast<size_t>(data.size()); i++)
-          is >> data.coeffRef(i);
-        gf.setWeights();
+        for (size_t i = 0; i < gf.getSize(); i++)
+          is >> gf[i];
       }
 
     private:

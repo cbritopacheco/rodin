@@ -7,16 +7,17 @@
 
 namespace Rodin::IO
 {
-  template <class Range>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::MPI>>>
-    : public GridFunctionPrinterBase<Variational::P1<Range, Geometry::Mesh<Context::MPI>>>
+  template <class Range, class Data>
+  class GridFunctionPrinter<FileFormat::MFEM, Data, Variational::P1<Range, Geometry::Mesh<Context::MPI>>>
+    : public GridFunctionPrinterBase<Variational::P1<Range, Geometry::Mesh<Context::MPI>>, Data>
   {
     public:
       using FESType = Variational::P1<Range, Geometry::Mesh<Context::MPI>>;
+      using DataType = Data;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
 
-      using Parent = GridFunctionPrinterBase<FESType>;
+      using Parent = GridFunctionPrinterBase<FESType, DataType>;
 
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
@@ -31,11 +32,8 @@ namespace Rodin::IO
            << "VDim: " << fes.getVectorDimension() << '\n'
            << "Ordering: " << MFEM::Ordering::VectorDimension
            << "\n\n";
-        const auto& matrix = gf.getData();
-        const Real* data = matrix.data();
-        assert(matrix.size() >= 0);
-        for (size_t i = 0; i < static_cast<size_t>(matrix.size()); i++)
-          os << data[i] << '\n';
+        for (size_t i = 0; i < static_cast<size_t>(gf.getSize()); i++)
+          os << gf[i] << '\n';
       }
   };
 }

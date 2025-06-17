@@ -90,7 +90,6 @@ namespace Rodin::Variational
         return res;
       }
 
-      inline
       const std::optional<ScalarType>& getValue() const
       {
         return m_value;
@@ -178,7 +177,6 @@ namespace Rodin::Variational
        *
        * @returns Value of integral
        */
-      inline
       ScalarType compute()
       {
         switch (getRegion())
@@ -189,7 +187,7 @@ namespace Rodin::Variational
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf.from(lfi).assemble();
-            return m_value.emplace(m_lf(m_u));
+            return m_value.emplace(m_lf(m_u.get()));
           }
           case Region::Boundary:
           {
@@ -197,7 +195,7 @@ namespace Rodin::Variational
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf.from(lfi).assemble();
-            return m_value.emplace(m_lf(m_u));
+            return m_value.emplace(m_lf(m_u.get()));
           }
           case Region::Faces:
           {
@@ -205,7 +203,7 @@ namespace Rodin::Variational
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf.from(lfi).assemble();
-            return m_value.emplace(m_lf(m_u));
+            return m_value.emplace(m_lf(m_u.get()));
           }
           case Region::Interface:
           {
@@ -213,7 +211,7 @@ namespace Rodin::Variational
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf.from(lfi).assemble();
-            return m_value.emplace(m_lf(m_u));
+            return m_value.emplace(m_lf(m_u.get()));
           }
         }
         assert(false);
@@ -229,7 +227,6 @@ namespace Rodin::Variational
        *
        * @returns Value of integral
        */
-      inline
       operator ScalarType()
       {
         if (!m_value.has_value())
@@ -238,26 +235,22 @@ namespace Rodin::Variational
           return m_value.value();
       }
 
-      inline
       QuadratureRule& over(Geometry::Attribute attr)
       {
         return over(FlatSet<Geometry::Attribute>{attr});
       }
 
-      inline
       QuadratureRule& over(const FlatSet<Geometry::Attribute>& attrs)
       {
         m_attrs = attrs;
         return *this;
       }
 
-      inline
       const std::optional<ScalarType>& getValue() const
       {
         return m_value;
       }
 
-      inline
       Type getType() const override
       {
         return Integrator::Type::Linear;
@@ -333,7 +326,6 @@ namespace Rodin::Variational
           m_integrand(std::move(other.m_integrand))
       {}
 
-      inline
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -341,7 +333,6 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      inline
       const Geometry::Polytope& getPolytope() const override
       {
         return m_polytope.value().get();
@@ -435,7 +426,6 @@ namespace Rodin::Variational
           m_integrand(std::move(other.m_integrand))
       {}
 
-      inline
       constexpr
       const IntegrandType& getIntegrand() const
       {

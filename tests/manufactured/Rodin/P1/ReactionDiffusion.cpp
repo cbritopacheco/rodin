@@ -103,7 +103,6 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
       // Compute the L² error.
       GridFunction diff(vh);
       diff = Pow(u.getSolution() - u_exact, 2);
-      diff.setWeights();
       Real error = Integral(diff).compute();
 
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -152,13 +151,11 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
 
     GridFunction diff0(vh);
     diff0 = Pow(u0.getSolution() - u0_exact, 2);
-    diff0.setWeights();
     Real error0 = Integral(diff0).compute();
     EXPECT_NEAR(error0, 0, RODIN_FUZZY_CONSTANT);
 
     GridFunction diff1(vh);
     diff1 = Pow(u1.getSolution() - u1_exact, 2);
-    diff1.setWeights();
     Real error1 = Integral(diff1).compute();
     EXPECT_NEAR(error1, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -206,13 +203,11 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
       // Compute the L² error for u.
       GridFunction diff_u(vh);
       diff_u = Pow(u.getSolution() - u_exact, 2);
-      diff_u.setWeights();
       Real error_u = Integral(diff_u).compute();
 
       // Compute the L² error for v.
       GridFunction diff_v(vh);
       diff_v = Pow(v.getSolution() - v_exact, 2);
-      diff_v.setWeights();
       Real error_v = Integral(diff_v).compute();
 
       EXPECT_NEAR(error_u, 0, RODIN_FUZZY_CONSTANT);

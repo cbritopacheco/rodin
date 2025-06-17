@@ -251,6 +251,86 @@ namespace Rodin::Variational
     private:
       FlatSet<Geometry::Attribute> m_traceDomain;
   };
+
+  template <class Invocable>
+  class Function<Invocable> : public FunctionBase<Function<Invocable>>
+  {
+    public:
+      using Parent = FunctionBase<Function<Invocable>>;
+
+      using RangeType = typename FormLanguage::Traits<Invocable>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using TraceDomain = FlatSet<Geometry::Attribute>;
+
+      Function(Invocable fn)
+        : m_invocable(std::move(fn))
+      {}
+
+      Function(const Function& other)
+        : Parent(other),
+          m_invocable(other.m_invocable)
+      {}
+
+      Function(Function&& other) noexcept
+        : Parent(std::move(other)),
+          m_invocable(std::move(other.m_invocable))
+      {}
+
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        if constexpr (std::is_invocable_v<Invocable, const Geometry::Point&>)
+        {
+          return m_invocable(p);
+        }
+        else if constexpr (std::is_invocable_v<Invocable, RangeType&, const Geometry::Point&>)
+        {
+          RangeType res;
+          m_invocable(res, p);
+          return res;
+        }
+        else
+        {
+          assert(false);
+          return void();
+        }
+      }
+
+      constexpr
+      void getValue(RangeType& out, const Geometry::Point& p) const
+      {
+        if constexpr (std::is_invocable_v<Invocable, const Geometry::Point&>)
+        {
+          out = m_invocable(p);
+        }
+        else if constexpr (std::is_invocable_v<Invocable, RangeType&, const Geometry::Point&>)
+        {
+          m_invocable(out, p);
+        }
+        else
+        {
+          assert(false);
+          out = RangeType();
+        }
+      }
+
+      Function* copy() const noexcept override
+      {
+        return new Function(*this);
+      }
+
+    private:
+      Invocable m_invocable;
+  };
+
+  template <
+    class Invocable,
+    typename = std::enable_if_t<
+      std::is_invocable_r_v<typename FormLanguage::Traits<Invocable>::RangeType, const Geometry::Point&> ||
+      std::is_invocable_v<Invocable, typename FormLanguage::Traits<Invocable>::RangeType&, const Geometry::Point&>>>
+  Function(Invocable) -> Function<Invocable>;
 }
 
 namespace Rodin

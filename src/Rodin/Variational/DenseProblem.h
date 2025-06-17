@@ -16,7 +16,9 @@ namespace Rodin::Variational
 
   template <class Solution, class TrialFES, class TestFES>
   DenseProblem(TrialFunction<Solution, TrialFES>&, TestFunction<TestFES>&)
-    -> DenseProblem<TrialFES, TestFES,
+    -> DenseProblem<
+          Solution,
+          TrialFES, TestFES,
           Math::Matrix<
             typename FormLanguage::Mult<
               typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -34,8 +36,9 @@ namespace Rodin::Variational
    * @brief General class to assemble linear systems with `Math::Matrix`
    * and `Math::Vector` types in a serial context.
    */
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class DenseProblem<
+    Solution,
     TrialFES, TestFES,
     Math::Matrix<
       typename FormLanguage::Mult<
@@ -43,6 +46,7 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
     : public Problem<
+        Solution,
         TrialFES, TestFES,
         Math::Matrix<
           typename FormLanguage::Mult<
@@ -53,6 +57,7 @@ namespace Rodin::Variational
     {
       public:
         using Parent = Problem<
+          Solution,
           TrialFES, TestFES,
           Math::Matrix<
             typename FormLanguage::Mult<

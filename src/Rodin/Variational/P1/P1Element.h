@@ -374,7 +374,14 @@ namespace Rodin::Variational
           constexpr
           BasisFunction& operator=(BasisFunction&&) = default;
 
-          ReturnType operator()(const Math::SpatialVector<Real>& r) const;
+          ReturnType operator()(const Math::SpatialVector<Real>& r) const
+          {
+            ReturnType out;
+            operator()(out, r);
+            return out;
+          }
+
+          void operator()(ReturnType& out, const Math::SpatialVector<Real>& r) const;
 
         private:
           size_t m_i;

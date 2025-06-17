@@ -235,6 +235,12 @@ namespace Rodin::Variational
       }
 
       constexpr
+      const Geometry::Point& getPoint() const
+      {
+        return static_cast<const Derived&>(*this).getPoint();
+      }
+
+      constexpr
       Derived& setPoint(const Geometry::Point& p)
       {
         return static_cast<Derived&>(*this).setPoint(p);
@@ -328,7 +334,7 @@ namespace Rodin::Variational
 
       constexpr
       ShapeFunction(const FESType& fes)
-        : ShapeFunction(fes)
+        : Parent(fes)
       {}
 
       constexpr
@@ -355,6 +361,13 @@ namespace Rodin::Variational
         const size_t d = polytope.getDimension();
         const size_t i = polytope.getIndex();
         return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
+      }
+
+      constexpr
+      const Geometry::Point& getPoint() const
+      {
+        assert(m_p);
+        return m_p.value().get();
       }
 
       ShapeFunction& setPoint(const Geometry::Point& p)

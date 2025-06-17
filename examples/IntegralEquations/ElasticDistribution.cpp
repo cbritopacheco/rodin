@@ -111,12 +111,9 @@ int main(int, char**)
       u.getSolution().save("scaled.gf");
       std::exit(1);
 
-      u.getSolution().setWeights();
-
       Alert::Info() << "Getting data." << Alert::Raise;
       GridFunction phi(sfes);
       phi = Pow(Frobenius(e1 - Potential(K, u.getSolution())), 2);
-      phi.setWeights();
 
       Real err = Integral(phi).compute();
 

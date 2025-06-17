@@ -84,6 +84,7 @@ namespace Rodin::Variational
   template <class Derived>
   class FunctionBase;
 
+  template <class ... Values>
   class Function;
 
   /**

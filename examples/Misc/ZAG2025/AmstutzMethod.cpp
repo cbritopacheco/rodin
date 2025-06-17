@@ -36,8 +36,8 @@ static constexpr Real tgv = std::numeric_limits<float>::max();
 
 using RealFES = P1<Real>;
 using VectorFES = P1<Math::Vector<Real>>;
-using RealGridFunction = GridFunction<RealFES>;
-using VectorGridFunction = GridFunction<VectorFES>;
+using RealGridFunction = GridFunction<RealFES, Math::Vector<Real>>;
+using VectorGridFunction = GridFunction<VectorFES, Math::Vector<Real>>;
 using ShapeGradient = VectorGridFunction;
 
 Real J(const RealGridFunction& u, Real ell);

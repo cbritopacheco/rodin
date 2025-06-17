@@ -212,7 +212,6 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
     // Compute L2 error
     GridFunction diff(vh);
     diff = Pow(dist - phit, 2);
-    diff.setWeights();
     double error = Integral(diff).compute();
     fout << t << "," << error << '\n' << std::flush;
 

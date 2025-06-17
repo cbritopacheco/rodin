@@ -561,7 +561,7 @@ namespace Rodin::IO
 
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
-      using Parent = GridFunctionPrinterBase<FESType, DataType>;
+      using Parent = GridFunctionLoaderBase<FESType, DataType>;
 
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf)
@@ -618,7 +618,6 @@ namespace Rodin::IO
           if (header.ordering == MFEM::Ordering::Nodes)
             data.transposeInPlace();
         }
-        gf.setWeights();
       }
 
     private:

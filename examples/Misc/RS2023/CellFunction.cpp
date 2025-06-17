@@ -105,11 +105,9 @@ int main(int, char**)
 
   GridFunction Ah00(vh);
   Ah00 = [&](const Point& p) { return gamma(p) - gamma(p) * Jacobian(psi)(p).coeff(0, 0); };
-  Ah00.setWeights();
 
   GridFunction Ah11(vh);
   Ah11 = [&](const Point& p) { return gamma(p) - gamma(p) * Jacobian(psi)(p).coeff(1, 1); };
-  Ah11.setWeights();
 
   Alert::Success() << "Homogenized coefficient: "
                    << Alert::NewLine

@@ -37,7 +37,8 @@ const constexpr Real dt = 4 * (hmax - hmin);
 static constexpr double alpha = dt;
 
 // Compliance
-inline Real compliance(const GridFunction<FES>& w)
+template <class Data>
+Real compliance(const GridFunction<FES, Data>& w)
 {
   auto& vh = w.getFiniteElementSpace();
   TrialFunction u(vh);

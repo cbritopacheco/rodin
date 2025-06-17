@@ -100,7 +100,6 @@ namespace Rodin::Tests::Manufactured::Conductivity
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -157,7 +156,6 @@ namespace Rodin::Tests::Manufactured::Conductivity
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -227,7 +225,6 @@ namespace Rodin::Tests::Manufactured::Conductivity
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -295,7 +292,6 @@ namespace Rodin::Tests::Manufactured::Conductivity
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -365,7 +361,6 @@ namespace Rodin::Tests::Manufactured::Conductivity
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -434,7 +429,6 @@ namespace Rodin::Tests::Manufactured::Conductivity
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }

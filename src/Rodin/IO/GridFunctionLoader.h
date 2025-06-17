@@ -34,7 +34,6 @@ namespace Rodin::IO
         : m_gf(gf)
       {}
 
-    protected:
       ObjectType& getObject() override
       {
         return m_gf.get();

@@ -175,6 +175,12 @@ namespace Rodin::Variational
         return Component(static_cast<Derived&>(*this), 2);
       }
 
+      constexpr
+      Derived& setData(const DataType& data)
+      {
+        return static_cast<Derived&>(*this);
+      }
+
       /**
        * @brief Returns a constant reference to the GridFunction data.
        */
@@ -433,20 +439,7 @@ namespace Rodin::Variational
           std::function<RangeType(const Geometry::Point&)> fn,
           const FlatSet<Geometry::Attribute>& attrs = {})
       {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnCells(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return projectOnCells(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
+        return projectOnCells(Function(fn), attrs);
       }
 
       auto& projectOnCells(
@@ -921,6 +914,8 @@ namespace Rodin::Variational
       using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
 
       using Parent::operator=;
+      using Parent::min;
+      using Parent::max;
 
       GridFunction(const FESType& fes)
         : Parent(fes)
@@ -1017,6 +1012,13 @@ namespace Rodin::Variational
       GridFunction& operator/=(const GridFunction& rhs)
       {
         this->getData().array() /= rhs.getData().array();
+        return *this;
+      }
+
+      constexpr
+      GridFunction& setData(const DataType& data)
+      {
+        this->getData() = data;
         return *this;
       }
   };
