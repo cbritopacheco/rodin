@@ -446,20 +446,7 @@ namespace Rodin::Variational
           std::function<void(RangeType&, const Geometry::Point&)> fn,
           const FlatSet<Geometry::Attribute>& attrs = {})
       {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnCells(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return projectOnCells(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
+        return projectOnCells(Function(fn), attrs);
       }
 
       template <class NestedDerived>

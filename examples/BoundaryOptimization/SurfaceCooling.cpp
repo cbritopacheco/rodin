@@ -35,8 +35,8 @@ static constexpr Real tgv = std::numeric_limits<float>::max();
 
 using RealFES = P1<Real>;
 using VectorFES = P1<Math::Vector<Real>>;
-using RealGridFunction = GridFunction<RealFES>;
-using VectorGridFunction = GridFunction<VectorFES>;
+using RealGridFunction = GridFunction<RealFES, Math::Vector<Real>>;
+using VectorGridFunction = GridFunction<VectorFES, Math::Vector<Real>>;
 using ShapeGradient = VectorGridFunction;
 
 int main(int, char**)
@@ -187,7 +187,6 @@ int main(int, char**)
     Alert::Info() << "Computing conormal to GammaD..." << Alert::Raise;
     GridFunction conormal(dvfes);
     conormal = Grad(dist);
-    conormal.stableNormalize();
 
     Alert::Info() << "Computing shape gradient..." << Alert::Raise;
     auto hadamard = 1. / epsilon * u.getSolution() * p.getSolution() + ell;

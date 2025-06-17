@@ -27,7 +27,7 @@ namespace Rodin::Models::Hilbert
    * \int_{\mathbb{R}^d} u \cdot v \ dx
    * @f]
    */
-  template <class FES>
+  template <class Solution, class FES>
   class H1a
   {
     using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
@@ -119,10 +119,11 @@ namespace Rodin::Models::Hilbert
       }
 
     private:
-      std::reference_wrapper<const FES>   m_fes;
-      Variational::TrialFunction<FES>     m_trial;
-      Variational::TestFunction<FES>      m_test;
-      Variational::Problem<FES, FES, Context::Local, Math::SparseMatrix<Real>, Math::Vector<Real>> m_pb;
+      std::reference_wrapper<const FES>           m_fes;
+      Variational::TrialFunction<Solution, FES>   m_trial;
+      Variational::TestFunction<FES>              m_test;
+      Variational::Problem<
+        FES, FES, Context::Local, Math::SparseMatrix<Real>, Math::Vector<Real>> m_pb;
       Real m_alpha;
       Solver::CG<Math::SparseMatrix<Real>, Math::Vector<Real>> m_cg;
   };

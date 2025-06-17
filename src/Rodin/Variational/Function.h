@@ -252,11 +252,11 @@ namespace Rodin::Variational
       FlatSet<Geometry::Attribute> m_traceDomain;
   };
 
-  template <class Invocable>
-  class Function<Invocable> : public FunctionBase<Function<Invocable>>
+  template <class Invocable, class Range>
+  class Function<Invocable, Range> : public FunctionBase<Function<Invocable, Range>>
   {
     public:
-      using Parent = FunctionBase<Function<Invocable>>;
+      using Parent = FunctionBase<Function<Invocable, Range>>;
 
       using RangeType = typename FormLanguage::Traits<Invocable>::RangeType;
 
@@ -264,7 +264,7 @@ namespace Rodin::Variational
 
       using TraceDomain = FlatSet<Geometry::Attribute>;
 
-      Function(Invocable fn)
+      Function(const Invocable& fn)
         : m_invocable(std::move(fn))
       {}
 
@@ -327,10 +327,51 @@ namespace Rodin::Variational
 
   template <
     class Invocable,
+    class Range = std::invoke_result_t<Invocable, const Geometry::Point&>,
     typename = std::enable_if_t<
-      std::is_invocable_r_v<typename FormLanguage::Traits<Invocable>::RangeType, const Geometry::Point&> ||
-      std::is_invocable_v<Invocable, typename FormLanguage::Traits<Invocable>::RangeType&, const Geometry::Point&>>>
-  Function(Invocable) -> Function<Invocable>;
+      std::is_invocable_v<Invocable, const Geometry::Point&> ||
+      std::is_invocable_v<Invocable, Range&, const Geometry::Point&>>>
+  Function(Invocable) -> Function<Invocable, Range>;
+
+  template <class Range>
+  class Function<Range> : public FunctionBase<Function<Range>>
+  {
+    public:
+      using RangeType = Range;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using TraceDomain = FlatSet<Geometry::Attribute>;
+
+      Function(const Range& value)
+        : m_value(std::move(value))
+      {}
+
+      Function(const Function& other)
+        : m_value(other.m_value)
+      {}
+
+      Function(Function&& other) noexcept
+        : m_value(std::move(other.m_value))
+      {}
+
+      constexpr
+      auto getValue(const Geometry::Point&) const
+      {
+        return m_value;
+      }
+
+      Function* copy() const noexcept
+      {
+        return new Function(*this);
+      }
+
+    private:
+      Range m_value;
+  };
+
+  template <class Range>
+  Function(const Range&) -> Function<Range>;
 }
 
 namespace Rodin
