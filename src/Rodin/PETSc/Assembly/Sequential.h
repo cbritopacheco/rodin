@@ -77,9 +77,9 @@ namespace Rodin::Assembly
 
 
   // Sequential assembly for PETSc Mat (bilinear form)
-  template <class TrialFES, class TestFES>
-  class Sequential<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>> final
-    : public AssemblyBase<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>>
+  template <class Solution, class TrialFES, class TestFES>
+  class Sequential<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
+    : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
   {
 
     public:
@@ -88,7 +88,7 @@ namespace Rodin::Assembly
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
       using OperatorType    = ::Mat;
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
       using Parent           = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType        = typename Parent::InputType;
 

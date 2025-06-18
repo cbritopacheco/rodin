@@ -219,12 +219,6 @@ namespace Rodin::Variational
       }
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(), 1 };
-      }
-
-      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);

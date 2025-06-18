@@ -132,12 +132,6 @@ namespace Rodin::Variational
       }
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return getOperand().getRangeShape();
-      }
-
-      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);

@@ -91,9 +91,7 @@ namespace Rodin::Variational
       constexpr
       Sum(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        assert(lhs.getRangeShape() == rhs.getRangeShape());
-      }
+      {}
 
       constexpr
       Sum(const Sum& other)
@@ -106,13 +104,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        assert(getLHS().getRangeShape() == getLHS().getRangeShape());
-        return getLHS().getRangeShape();
-      }
 
       constexpr
       const auto& getLHS() const
@@ -149,7 +140,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return getLHS().getValue(p) + getRHS().getValue(p);
+        return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
       }
 
       template <class T>
@@ -306,7 +297,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return getLHS().getBasis(local) + getRHS().getBasis(local);
+        return this->object(getLHS().getBasis(local)) + this->object(getRHS().getBasis(local));
       }
 
       constexpr

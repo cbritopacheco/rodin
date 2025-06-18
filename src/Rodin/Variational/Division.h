@@ -54,12 +54,6 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return getLHS().getRangeShape();
-      }
-
-      constexpr
       Division& traceOf(Geometry::Attribute attr)
       {
         getLHS().traceOf(attr);

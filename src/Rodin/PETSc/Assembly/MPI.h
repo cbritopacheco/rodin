@@ -93,12 +93,9 @@ namespace Rodin::Assembly
   };
 
   // MPI assembly for PETSc Mat (bilinear form) -- skipping ghosts via Shard + Boost.MPI
-  template <class TrialFES, class TestFES>
-  class MPI<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>> final
-    : public AssemblyBase<
-        ::Mat,
-        Variational::BilinearForm<TrialFES, TestFES, ::Mat>
-      >
+  template <class Solution, class TrialFES, class TestFES>
+  class MPI<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
+    : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
   {
     public:
       using DotType =
@@ -110,7 +107,7 @@ namespace Rodin::Assembly
         "DotType must be PetscScalar"
       );
       using OperatorType     = ::Mat;
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
       using Parent           = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType        = typename Parent::InputType;
 

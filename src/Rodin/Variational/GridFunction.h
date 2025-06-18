@@ -219,12 +219,6 @@ namespace Rodin::Variational
         return getFiniteElementSpace().getVectorDimension();
       }
 
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getFiniteElementSpace().getVectorDimension(), 1 };
-      }
-
       Derived& load(
           const boost::filesystem::path& filename,
           IO::FileFormat fmt = IO::FileFormat::MFEM)
@@ -376,7 +370,11 @@ namespace Rodin::Variational
         {
           const auto& phi = fe.getBasis(local);
           phi(v, rc);
-          res += this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
+          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
+          if (local == 0)
+            res = k; // Initializes the result (resizes)
+          else
+            res += k; // Accumulates the result (does not resize)
         }
       }
 
@@ -1013,6 +1011,14 @@ namespace Rodin::Variational
   template <class FES>
   GridFunction(const FES& fes)
     -> GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
+
+  template <class FES, class Data>
+  GridFunction(const FES& fes, Data& data)
+    -> GridFunction<FES, Data>;
+
+  template <class FES, class Data>
+  GridFunction(const FES& fes, Data&& data)
+    -> GridFunction<FES, Data>;
 }
 
 #endif

@@ -64,12 +64,6 @@ namespace Rodin::Variational
       LazyEvaluator& operator=(LazyEvaluator&&) = delete;
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return m_ref.get().getRangeShape();
-      }
-
-      constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);

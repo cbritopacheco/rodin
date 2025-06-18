@@ -61,7 +61,9 @@ int main(int argc, char** argv)
 
   P1 vh(mesh);
 
-  TrialFunction u(vh);
+  GridFunction sol(vh, x);
+
+  TrialFunction u(vh, sol);
   TestFunction  v(vh);
 
   // Define problem

@@ -91,8 +91,8 @@ namespace Rodin::Variational
       virtual ProblemBase* copy() const noexcept override = 0;
   };
 
-  template <class TrialFES, class TestFES, class Operator, class Vector>
-  class Problem<TrialFES, TestFES, Operator, Vector>;
+  template <class Solution, class TrialFES, class TestFES, class Operator, class Vector>
+  class Problem<Solution, TrialFES, TestFES, Operator, Vector>;
 
   /**
    * @ingroup ProblemSpecializations
@@ -269,8 +269,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      void solve(
-          Solver::SolverBase<OperatorType, VectorType, ScalarType>& solver) override
+      void solve(Solver::SolverBase<OperatorType, VectorType, ScalarType>& solver) override
       {
          // Assemble the system
          if (!m_assembled)
@@ -342,11 +341,10 @@ namespace Rodin::Variational
   Problem(
       TrialFunction<Solution, TrialFES>& u, TestFunction<TestFES>& v,
       Math::LinearSystem<Operator, Vector>& axb)
-    -> Problem<TrialFES, TestFES, Operator, Vector>;
+    -> Problem<Solution, TrialFES, TestFES, Operator, Vector>;
 
   template <class Operator, class Vector, class U1, class U2, class ... Us>
-  class Problem<
-      Tuple<U1, U2, Us...>, Operator, Vector>
+  class Problem<Tuple<U1, U2, Us...>, Operator, Vector>
     : public ProblemBase<Operator, Vector, Real>
   {
 

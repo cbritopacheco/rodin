@@ -69,12 +69,6 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { 1, 1 };
-      }
-
       virtual BooleanFunctionBase* copy() const noexcept override = 0;
   };
 

@@ -111,7 +111,7 @@ namespace Rodin::Variational
       constexpr
       auto& emplace()
       {
-        m_gf.emplace(SolutionType(this->getFiniteElementSpace()));
+        m_gf.emplace(this->getFiniteElementSpace());
         return *this;
       }
 

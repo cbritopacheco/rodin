@@ -79,12 +79,6 @@ namespace Rodin::Variational
         }
       }
 
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getRows(), getColumns() };
-      }
-
       /**
        * @brief Gets the number of rows in the matrix
        * @returns Number of rows

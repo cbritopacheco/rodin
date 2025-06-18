@@ -182,16 +182,6 @@ namespace Rodin::Variational
         return Space;
       }
 
-      /**
-       * @brief Gets the shape of the range space.
-       * @note CRTP function to be overriden in the Derived class.
-       */
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return static_cast<const Derived&>(*this).getRangeShape();
-      }
-
       auto x() const
       {
         return Component(*this, 0);

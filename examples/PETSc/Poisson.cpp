@@ -31,9 +31,6 @@ int main(int argc, char** argv)
 
   P1 vh(mesh);
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-
   Mat a;
   MatCreate(PETSC_COMM_SELF, &a);
 
@@ -43,6 +40,11 @@ int main(int argc, char** argv)
   VecCreate(PETSC_COMM_SELF, &b);
 
   LinearSystem axb(a, x, b);
+
+  GridFunction sol(vh, x);
+
+  TrialFunction u(vh);
+  TestFunction  v(vh);
 
   // Define problem
   Problem poisson(u, v, axb);

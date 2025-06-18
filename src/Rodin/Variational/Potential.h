@@ -166,26 +166,6 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
-        {
-          static_assert(std::is_same_v<RHSRangeType, ScalarType>);
-          return { 1, 1 };
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
-        {
-          static_assert(std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>);
-          return getOperand().getRangeShape();
-        }
-        else
-        {
-          assert(false);
-          return { 0, 0 };
-        }
-      }
-
       const auto& getKernel() const
       {
         return m_kernel.get();
@@ -269,7 +249,8 @@ namespace Rodin::Variational
         const auto& kernel = getKernel();
         const auto& operand = getOperand();
         const auto& mesh = p.getPolytope().getMesh();
-        res.resize(getRangeShape().height());
+        assert(false);
+        // res.resize(getRangeShape().height());
         res.setZero();
         Math::Matrix<ScalarType> kxy;
         if (m_qf.has_value())
