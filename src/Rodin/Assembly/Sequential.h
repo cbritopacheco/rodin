@@ -188,7 +188,7 @@ namespace Rodin::Assembly
               const auto& cols = input.getTrialFES().getDOFs(it.getDimension(), it->getIndex());
               for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
                 for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
-                  res(rows(l), cols(m)) += bfi.integrate(m, l);
+                  res(rows(l), cols(m)) += Math::conj(bfi.integrate(m, l));
             }
           }
         }
@@ -211,7 +211,7 @@ namespace Rodin::Assembly
                   const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
                   for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
                     for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
-                      res(rows(l), cols(m)) += bfi.integrate(m, l);
+                      res(rows(l), cols(m)) += Math::conj(bfi.integrate(m, l));
                 }
               }
             }
@@ -378,7 +378,7 @@ namespace Rodin::Assembly
               {
                 for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                 {
-                  const ScalarType s = bfi.integrate(m, l);
+                  const ScalarType s = Math::conj(bfi.integrate(m, l));
                   if (s != ScalarType(0))
                     res.emplace_back(rows(l), cols(m), s);
                 }
@@ -407,7 +407,7 @@ namespace Rodin::Assembly
                   {
                     for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                     {
-                      const ScalarType s = bfi.integrate(m, l);
+                      const ScalarType s = Math::conj(bfi.integrate(m, l));
                       if (s != ScalarType(0))
                         res.emplace_back(rows(l), cols(m), s);
                     }

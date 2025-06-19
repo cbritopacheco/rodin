@@ -342,7 +342,7 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const T& v) const
           {
-            return Math::conj(v(s_nodes[m_g].col(m_i)));
+            return v(s_nodes[m_g].col(m_i));
           }
 
         private:

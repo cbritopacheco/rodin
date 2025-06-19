@@ -240,24 +240,14 @@ namespace Rodin::Math
   constexpr
   Complex dot(const Complex& lhs, const Complex& rhs)
   {
-    return conj(lhs) * rhs;
+    return lhs * conj(rhs);
   }
 
   template <class LHSDerived, class RHSDerived>
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
-    using LHS = Eigen::MatrixBase<LHSDerived>;
-    using RHS = Eigen::MatrixBase<RHSDerived>;
-    if constexpr (LHS::IsVectorAtCompileTime)
-    {
-      static_assert(RHS::IsVectorAtCompileTime);
-      return lhs.dot(rhs);
-    }
-    else
-    {
-      return (lhs.conjugate().array() * rhs.array()).rowwise().sum().colwise().sum().value();
-    }
+    return (lhs.array() * rhs.conjugate().array()).sum();
   }
 }
 

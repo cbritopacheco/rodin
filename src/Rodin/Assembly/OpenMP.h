@@ -149,7 +149,7 @@ namespace Rodin::Assembly
                   {
                     for (size_t c = 0; c < cols.size(); ++c)
                     {
-                      const ScalarType s = integrator->integrate(c, r);
+                      const ScalarType s = Math::conj(integrator->integrate(c, r));
                       if (s != ScalarType(0))
                         local.emplace_back(rows(r), cols(c), s);
                     }
@@ -375,7 +375,7 @@ namespace Rodin::Assembly
               const auto& cols = input.getTrialFES().getDOFs(d, i);
               for (size_t r = 0; r < rows.size(); ++r)
                 for (size_t c = 0; c < cols.size(); ++c)
-                  local(rows(r), cols(c)) += lbfi->integrate(c, r);
+                  local(rows(r), cols(c)) += Math::conj(lbfi->integrate(c, r));
             }
 
 #pragma omp critical
@@ -421,7 +421,7 @@ namespace Rodin::Assembly
                       const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
                       for (size_t r = 0; r < rows.size(); ++r)
                         for (size_t c = 0; c < cols.size(); ++c)
-                          local(rows(r), cols(c)) += gbfi->integrate(c, r);
+                          local(rows(r), cols(c)) += Math::conj(gbfi->integrate(c, r));
                     }
                   }
                 }

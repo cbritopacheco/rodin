@@ -1353,12 +1353,12 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            out = (1 - r.x());
+            out = Complex(1 - r.x(), 0);
             return;
           }
           case 1:
           {
-            out = r.x();
+            out = Complex(r.x(), 0);
             return;
           }
           default:
@@ -1375,17 +1375,17 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            out = (-r.x() - r.y() + 1);
+            out = Complex(-r.x() - r.y() + 1, 0);
             return;
           }
           case 1:
           {
-            out = r.x();
+            out = Complex(r.x(), 0);
             return;
           }
           case 2:
           {
-            out = r.y();
+            out = Complex(r.y(), 0);
             return;
           }
           default:
@@ -1403,22 +1403,22 @@ namespace Rodin::Variational
           {
             const auto x = r.x();
             const auto y = r.y();
-            out = (x * y - x - y + 1);
+            out = Complex(x * y - x - y + 1, 0);
             return;
           }
           case 1:
           {
-            out = r.x() * (1 - r.y());
+            out = Complex(r.x() * (1 - r.y()), 0);
             return;
           }
           case 2:
           {
-            out = r.y() * (1 - r.x());
+            out = Complex(r.y() * (1 - r.x()), 0);
             return;
           }
           case 3:
           {
-            out = r.x() * r.y();
+            out = Complex(r.x() * r.y(), 0);
             return;
           }
           default:

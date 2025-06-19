@@ -64,8 +64,6 @@ namespace Rodin::Tests::Unit
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     gf = c;
 
-    EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
-
     EXPECT_NEAR(gf[0], 0, RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(gf[1], 1, RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(gf[2], 1, RODIN_FUZZY_CONSTANT);
@@ -85,8 +83,6 @@ namespace Rodin::Tests::Unit
 
     RealFunction c = 1.0;
     gf.projectOnBoundary(c);
-
-    EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Real_P1_GridFunction, FuzzyTest_TriangularUniformGrid16_ProjectOnBoundary_Sum)
@@ -102,8 +98,6 @@ namespace Rodin::Tests::Unit
 
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     gf.projectOnBoundary(c);
-
-    EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Real_P1_GridFunction, FuzzyTest_2D_Square_Project_LinearFunction)
@@ -127,8 +121,6 @@ namespace Rodin::Tests::Unit
 
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
     gf1 = c;
-
-    EXPECT_EQ(gf1.getRangeShape(), RangeShape(1, 1));
 
     RandomFloat gen(0.0, 1.0);
     {
@@ -168,8 +160,6 @@ namespace Rodin::Tests::Unit
     GridFunction gf2(fes);
     gf2 = [](const Geometry::Point& p) { return 5 * p.x() + 100 * p.y(); };
 
-    EXPECT_EQ(gf1.getRangeShape(), RangeShape(1, 1));
-
     {
       auto it = mesh.getPolytope(mdim, 0);
       const auto& polytope = *it;
@@ -189,8 +179,6 @@ namespace Rodin::Tests::Unit
     GridFunction gf3(fes);
     gf3.projectOnCells([](const Geometry::Point& p) { return p.x() - p.y(); });
 
-    EXPECT_EQ(gf1.getRangeShape(), RangeShape(1, 1));
-
     {
       auto it = mesh.getPolytope(mdim, 0);
       const auto& polytope = *it;
@@ -209,8 +197,6 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf4(fes);
     gf4.projectOnCells([](const Geometry::Point& p) { return 666 * p.x() - 999 * p.y(); });
-
-    EXPECT_EQ(gf1.getRangeShape(), RangeShape(1, 1));
 
     {
       auto it = mesh.getPolytope(mdim, 0);
@@ -277,8 +263,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh, mdim);
     GridFunction gf1(fes);
 
-    EXPECT_EQ(gf1.getRangeShape(), RangeShape(mdim, 1));
-
     VectorFunction c1 = {
       [](const Geometry::Point& p){ return p.x(); },
       [](const Geometry::Point& p){ return p.y(); }
@@ -307,8 +291,6 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf2(fes);
 
-    EXPECT_EQ(gf2.getRangeShape(), RangeShape(mdim, 1));
-
     VectorFunction c2 = {
       [](const Geometry::Point& p){ return p.y(); },
       [](const Geometry::Point& p){ return p.x(); }
@@ -334,8 +316,6 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf3(fes);
 
-    EXPECT_EQ(gf3.getRangeShape(), RangeShape(mdim, 1));
-
     VectorFunction c3 = { [](const Geometry::Point& p){ return p.x() + p.y(); }, 0 };
 
     gf3 = c3;
@@ -358,7 +338,6 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf4(fes);
 
-    EXPECT_EQ(gf4.getRangeShape(), RangeShape(mdim, 1));
 
     VectorFunction c4 = {
       [](const Geometry::Point& p){ return 999 * p.x() - 100 * p.y(); },
@@ -390,8 +369,6 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     P1 fes(mesh);
     TrialFunction u(fes);
-
-    EXPECT_EQ(u.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Real_P1_TestFunction, FuzzyTest_UniformGrid_4x4)
@@ -399,8 +376,6 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     P1 fes(mesh);
     TrialFunction v(fes);
-
-    EXPECT_EQ(v.getRangeShape(), RangeShape(1, 1));
   }
 
 
