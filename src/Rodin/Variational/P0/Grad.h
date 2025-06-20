@@ -185,6 +185,8 @@ namespace Rodin::Variational
 
       using FESType = P0<RangeType, MeshType>;
 
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
@@ -238,14 +240,8 @@ namespace Rodin::Variational
 
       auto getBasis(size_t local) const
       {
-        const auto& p = m_p.value().get();
-        assert(p.getPolytope().isCell());
-        const size_t d = p.getPolytope().getDimension();
-        const auto& fes = this->getFiniteElementSpace();
-        const Index i = p.getPolytope().getIndex();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return p.getJacobianInverse().transpose() * fe.getGradient(local)(rc);
+        const size_t sdim = getPoint().getPolytope().getMesh().getSpaceDimension();
+        return Math::Vector<ScalarType>::Zero(sdim);
       }
 
       Grad* copy() const noexcept override

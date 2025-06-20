@@ -320,7 +320,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return getOperand().getBasis(local).coeff(m_idx);
+        return this->object(getOperand().getBasis(local)).coeff(m_idx);
       }
 
       Component* copy() const noexcept override

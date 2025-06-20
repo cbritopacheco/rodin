@@ -12,7 +12,6 @@
 namespace Rodin::Variational
 {
   template <class LHSDerived, class Number, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  inline
   constexpr
   auto
   operator-(const FunctionBase<LHSDerived>& lhs, Number rhs)
@@ -21,7 +20,6 @@ namespace Rodin::Variational
   }
 
   template <class Number, class RHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  inline
   constexpr
   auto
   operator-(Number lhs, const FunctionBase<RHSDerived>& rhs)
@@ -30,7 +28,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSDerived, class RHSDerived>
-  inline
   constexpr
   auto
   operator-(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
@@ -39,7 +36,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  inline
   constexpr
   auto
   operator-(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
@@ -48,7 +44,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator-(
@@ -59,7 +54,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator-(
@@ -70,7 +64,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator-(
@@ -81,7 +74,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSNumber, class RHSNumber>
-  inline
   constexpr
   auto
   operator-(

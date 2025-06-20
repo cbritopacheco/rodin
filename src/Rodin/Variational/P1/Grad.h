@@ -155,7 +155,9 @@ namespace Rodin::Variational
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            fe.getGradient(local)(grad, rc);
+            const auto basis = fe.getBasis(local);
+            for (size_t i = 0; i < d; i++)
+              grad(i) = basis.getDerivative(i)(rc);
             res += gf[fes.getGlobalIndex({d, i}, local)] * grad;
           }
           out = p.getJacobianInverse().transpose() * res;
@@ -237,18 +239,28 @@ namespace Rodin::Variational
       Grad& setPoint(const Geometry::Point& p)
       {
         m_p = p;
+        const auto& polytope = p.getPolytope();
+        const auto& rc = p.getReferenceCoordinates();
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const size_t count = fe.getCount();
+        const size_t vdim = fes.getVectorDimension();
+        m_gradient.resize(count);
+        for (size_t local = 0; local < count; local++)
+        {
+          m_gradient[local].resize(d);
+          const auto basis = fe.getBasis(local);
+          for (size_t i = 0; i < vdim; i++)
+            m_gradient[local](i) = basis.getDerivative(i)(rc);
+        }
         return *this;
       }
 
       auto getBasis(size_t local) const
       {
-        const auto& p = m_p.value().get();
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& rc = p.getReferenceCoordinates();
-        return p.getJacobianInverse().transpose() * this->object(fe.getGradient(local)(rc));
+        return getPoint().getJacobianInverse().transpose() * m_gradient[local];
       }
 
       Grad* copy() const noexcept override
@@ -258,6 +270,8 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
+
+      std::vector<Math::SpatialVector<ScalarType>> m_gradient;
 
       std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
   };

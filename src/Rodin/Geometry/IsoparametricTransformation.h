@@ -124,14 +124,14 @@ namespace Rodin::Geometry
         const size_t pdim = getPhysicalDimension();
         res.resize(pdim, rdim);
         res.setZero();
-        Math::SpatialVector<Real> gradient;
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
-          m_fe.getGradient(local)(gradient, rc);
+          const auto basis = m_fe.getBasis(local);
           for (size_t i = 0; i < rdim; i++)
           {
+            const auto derivative = basis.template getDerivative<1>(i);
             assert(res.col(i).size() == m_pm.col(local).size());
-            res.col(i).noalias() += m_pm.col(local) * gradient.coeff(i);
+            res.col(i).noalias() += m_pm.col(local) * derivative(rc);
           }
         }
       }

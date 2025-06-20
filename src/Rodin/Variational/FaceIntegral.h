@@ -72,12 +72,12 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline Integrator::Region getRegion() const override
+      Integrator::Region getRegion() const override
       {
         return Integrator::Region::Faces;
       }
 
-      inline FaceIntegral* copy() const noexcept override
+      FaceIntegral* copy() const noexcept override
       {
         return new FaceIntegral(*this);
       }
@@ -135,12 +135,12 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline Integrator::Region getRegion() const override
+      Integrator::Region getRegion() const override
       {
         return Integrator::Region::Faces;
       }
 
-      inline FaceIntegral* copy() const noexcept override
+      FaceIntegral* copy() const noexcept override
       {
         return new FaceIntegral(*this);
       }

@@ -168,13 +168,15 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an P1 ShapeFunction object.
    */
-  template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Number>, Mesh>, Space>> final
-    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Number>, Mesh>, Space>>>
+  template <class ShapeFunctionDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>
+  class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>> final
+    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>>>
   {
     public:
-      using FESType = P1<Math::Vector<Number>, Mesh>;
+      using FESType = P1<Range, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
+
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using OperandType = ShapeFunction<ShapeFunctionDerived, FESType, SpaceType>;
 
@@ -227,18 +229,31 @@ namespace Rodin::Variational
       Jacobian& setPoint(const Geometry::Point& p)
       {
         m_p = p;
+        const auto& polytope = p.getPolytope();
+        const auto& rc = p.getReferenceCoordinates();
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const size_t count = fe.getCount();
+        const size_t vdim = fes.getVectorDimension();
+        m_jacobian.resize(count);
+        for (size_t local = 0; local < count; local++)
+        {
+          m_jacobian[local].resize(vdim, d);
+          for (size_t i = 0; i < vdim; i++)
+          {
+            for (size_t j = 0; j < d; j++)
+              m_jacobian[local](i, j) = fe.getDerivative(i, j, local)(rc);
+          }
+        }
         return *this;
       }
 
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto& p = m_p.value().get();
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
-        const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return this->object(fe.getJacobian(local)(rc)) * p.getJacobianInverse();
+        return m_jacobian[local] * getPoint().getJacobianInverse();
       }
 
       Jacobian* copy() const noexcept override
@@ -248,6 +263,8 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
+
+      std::vector<Math::SpatialMatrix<ScalarType>> m_jacobian;
 
       std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
   };
