@@ -57,6 +57,8 @@ namespace Rodin::Variational
    * @brief Alias for P1Element<Math::Vector<Real>>
    */
   using VectorP1Element = P1Element<Math::Vector<Real>>;
+
+  using RealVectorP1Element = P1Element<Math::Vector<Real>>;
 }
 
 #endif

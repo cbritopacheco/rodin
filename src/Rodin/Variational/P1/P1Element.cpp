@@ -48,22 +48,10 @@ namespace Rodin::Variational
                         {0, 0, 0, 1, 1, 1}} },
   };
 
-  const std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
-  VectorP1Element::s_nodes = Internal::initVectorP1Nodes();
-
-  const std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION>
-  VectorP1Element::s_ls = Internal::initVectorP1LinearForms();
-
-  const std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::BasisFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION>
-  VectorP1Element::s_basis = Internal::initVectorP1Basis();
-
-  const std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::JacobianFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION>
-  VectorP1Element::s_jacobian = Internal::initVectorP1Jacobian();
-
   namespace Internal
   {
     std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
-    initVectorP1Nodes()
+    InitVectorP1Nodes()
     {
       std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION> res;
       for (size_t vdim = 1; vdim < RODIN_P1_MAX_VECTOR_DIMENSION; vdim++)
@@ -88,57 +76,6 @@ namespace Rodin::Variational
               break;
             }
           }
-        }
-      }
-      return res;
-    }
-
-    std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION>
-    initVectorP1LinearForms()
-    {
-      std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION> res;
-      for (size_t vdim = 1; vdim < RODIN_P1_MAX_VECTOR_DIMENSION; vdim++)
-      {
-        for (auto g : Geometry::Polytope::Types)
-        {
-          const size_t n = Geometry::Polytope::getVertexCount(g);
-          res[vdim][g].resize(n * vdim);
-          for (size_t i = 0; i < n * vdim; i++)
-            res[vdim][g][i] = VectorP1Element::LinearForm(vdim, i, g);
-        }
-      }
-      return res;
-    }
-
-    std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::BasisFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION>
-    initVectorP1Basis()
-    {
-      std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::BasisFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION> res;
-      for (size_t vdim = 1; vdim < RODIN_P1_MAX_VECTOR_DIMENSION; vdim++)
-      {
-        for (auto g : Geometry::Polytope::Types)
-        {
-          const size_t n = Geometry::Polytope::getVertexCount(g);
-          res[vdim][g].resize(n * vdim);
-          for (size_t i = 0; i < n * vdim; i++)
-            res[vdim][g][i] = VectorP1Element::BasisFunction(vdim, i, g);
-        }
-      }
-      return res;
-    }
-
-    std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::JacobianFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION>
-    initVectorP1Jacobian()
-    {
-      std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::JacobianFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION> res;
-      for (size_t vdim = 1; vdim < RODIN_P1_MAX_VECTOR_DIMENSION; vdim++)
-      {
-        for (auto g : Geometry::Polytope::Types)
-        {
-          const size_t n = Geometry::Polytope::getVertexCount(g);
-          res[vdim][g].resize(n * vdim);
-          for (size_t i = 0; i < n * vdim; i++)
-            res[vdim][g][i] = VectorP1Element::JacobianFunction(vdim, i, g);
         }
       }
       return res;

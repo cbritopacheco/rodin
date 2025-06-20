@@ -202,31 +202,31 @@ namespace Rodin::Variational
       constexpr
       size_t getCount() const
       {
-        return Geometry::Polytope::getVertexCount(getGeometry());
+        return Geometry::Polytope::getVertexCount(this->getGeometry());
       }
 
       constexpr
       const Math::PointMatrix& getNodes() const
       {
-        return s_nodes[getGeometry()];
+        return s_nodes[this->getGeometry()];
       }
 
       constexpr
-      auto getLinearForm(size_t i) const
+      LinearForm getLinearForm(size_t i) const
       {
-        return LinearForm(i, getGeometry());
+        return LinearForm(i, this->getGeometry());
       }
 
       constexpr
-      auto getBasis(size_t i) const
+      BasisFunction getBasis(size_t i) const
       {
-        return BasisFunction(i, getGeometry());
+        return BasisFunction(i, this->getGeometry());
       }
 
       constexpr
       size_t getOrder() const
       {
-        switch (getGeometry())
+        switch (this->getGeometry())
         {
           case Geometry::Polytope::Type::Point:
             return 0;
@@ -426,25 +426,27 @@ namespace Rodin::Variational
       constexpr
       const Math::PointMatrix& getNodes() const
       {
-        return s_nodes[getGeometry()];
+        return s_nodes[this->getGeometry()];
       }
 
-      const auto& getLinearForm(size_t local) const
+      constexpr
+      LinearForm getLinearForm(size_t local) const
       {
         assert(local < getCount());
-        return s_ls[getGeometry()][local];
+        return LinearForm(local, this->getGeometry());
       }
 
-      const BasisFunction& getBasis(size_t local) const
+      constexpr
+      BasisFunction getBasis(size_t local) const
       {
         assert(local < getCount());
-        return s_basis[getGeometry()][local];
+        return BasisFunction(local, this->getGeometry());
       }
 
       constexpr
       size_t getOrder() const
       {
-        switch (getGeometry())
+        switch (this->getGeometry())
         {
           case Geometry::Polytope::Type::Point:
             return 0;
@@ -462,19 +464,16 @@ namespace Rodin::Variational
 
     private:
       static const Geometry::GeometryIndexed<Math::PointMatrix> s_nodes;
-      static const Geometry::GeometryIndexed<std::vector<LinearForm>> s_ls;
-      static const Geometry::GeometryIndexed<std::vector<BasisFunction>> s_basis;
   };
 
   /**
    * @ingroup FiniteElements
    * @ingroup P1ElementSpecializations
    * @brief Degree 1 vector Lagrange element
-   *
-   * @see @m_defelement{Vector Lagrange,https://defelement.com/elements/vector-lagrange.html}
    */
-  template <>
-  class P1Element<Math::Vector<Real>> final : public FiniteElementBase<P1Element<Math::Vector<Real>>>
+  template <class Scalar>
+  class P1Element<Math::Vector<Scalar>> final
+    : public FiniteElementBase<P1Element<Math::Vector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -482,8 +481,10 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<P1Element>;
 
+      using ScalarType = Scalar;
+
       /// Type of range
-      using RangeType = Math::Vector<Real>;
+      using RangeType = Math::Vector<Scalar>;
 
       class LinearForm
       {
@@ -516,7 +517,7 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const T& v) const
           {
-            return v(s_nodes[m_vdim][m_g].col(m_i)).coeff(static_cast<size_t>(m_i % m_vdim));
+            return v(s_nodes[m_vdim][m_g].col(m_i)).coeff(m_i % m_vdim);
           }
 
         private:
@@ -610,34 +611,33 @@ namespace Rodin::Variational
       constexpr
       size_t getCount() const
       {
-        return Geometry::Polytope::getVertexCount(getGeometry()) * m_vdim;
+        return Geometry::Polytope::getVertexCount(this->getGeometry()) * m_vdim;
       }
 
       constexpr
       const Math::PointMatrix& getNodes() const
       {
-        return s_nodes[m_vdim][getGeometry()];
+        return s_nodes[m_vdim][this->getGeometry()];
       }
 
       constexpr
       auto getLinearForm(size_t i) const
       {
         assert(i < getCount());
-        return s_ls[m_vdim][getGeometry()][i];
+        return LinearForm(m_vdim, i, this->getGeometry());
       }
 
       constexpr
-      auto getBasis(size_t i) const
+      BasisFunction getBasis(size_t i) const
       {
         assert(i < getCount());
-
+        return BasisFunction(m_vdim, i, this->getGeometry());
       }
-
 
       constexpr
       size_t getOrder() const
       {
-        switch (getGeometry())
+        switch (this->getGeometry())
         {
           case Geometry::Polytope::Type::Point:
             return 0;
@@ -654,17 +654,7 @@ namespace Rodin::Variational
       }
 
     private:
-      static const
-      std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION> s_nodes;
-
-      static const
-      std::array<Geometry::GeometryIndexed<std::vector<LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION> s_ls;
-
-      static const
-      std::array<Geometry::GeometryIndexed<std::vector<BasisFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION> s_basis;
-
-      static const
-      std::array<Geometry::GeometryIndexed<std::vector<JacobianFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION> s_jacobian;
+      static const std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION> s_nodes;
 
       size_t m_vdim;
   };
@@ -672,16 +662,12 @@ namespace Rodin::Variational
   namespace Internal
   {
     std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
-    initVectorP1Nodes();
-
-    std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION> initVectorP1LinearForms();
-
-    std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::BasisFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION>
-    initVectorP1Basis();
-
-    std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::JacobianFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION>
-    initVectorP1Jacobian();
+    InitVectorP1Nodes();
   }
+
+  template <class Scalar>
+  const std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
+  P1Element<Math::Vector<Scalar>>::s_nodes = Internal::InitVectorP1Nodes();
 }
 
 #include "P1Element.hpp"
