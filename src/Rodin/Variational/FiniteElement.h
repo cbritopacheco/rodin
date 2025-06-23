@@ -52,20 +52,6 @@ namespace Rodin::Variational
       virtual ~FiniteElementBase() = default;
 
       constexpr
-      FiniteElementBase& operator=(const FiniteElementBase& other)
-      {
-        m_g = other.m_g;
-        return *this;
-      }
-
-      constexpr
-      FiniteElementBase& operator=(FiniteElementBase&& other)
-      {
-        m_g = std::move(other.m_g);
-        return *this;
-      }
-
-      constexpr
       Geometry::Polytope::Type getGeometry() const
       {
         return m_g;
@@ -85,18 +71,9 @@ namespace Rodin::Variational
        * @brief Gets the i-th degree of freedom on the finite element.
        */
       constexpr
-      auto getNode(size_t i) const
+      const Math::SpatialVector<Real>& getNode(size_t i) const
       {
-        return getNodes().col(i);
-      }
-
-      /**
-       * @note CRTP method to be overriden in Derived class.
-       */
-      constexpr
-      const Math::PointMatrix& getNodes() const
-      {
-        return static_cast<const Derived&>(*this).getNodes();
+        return static_cast<const Derived&>(*this).getNode(i);
       }
 
       /**
@@ -126,7 +103,7 @@ namespace Rodin::Variational
       }
 
     private:
-      Geometry::Polytope::Type m_g;
+      const Geometry::Polytope::Type m_g;
   };
 }
 

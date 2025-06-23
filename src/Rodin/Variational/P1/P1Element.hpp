@@ -11,410 +11,9 @@
 
 namespace Rodin::Variational
 {
-  template <size_t Order>
+  template <class Scalar>
   constexpr
-  Real P1Element<Real>::BasisFunction::DerivativeFunction<Order>::operator()(const Math::SpatialVector<Real>& r) const
-  {
-    if constexpr (Order == 0)
-    {
-      return BasisFunction(m_local, m_g)(r);
-    }
-    else if constexpr (Order == 1)
-    {
-      switch (m_g)
-      {
-        case Geometry::Polytope::Type::Point:
-        {
-          assert(m_local == 0);
-          return 0;
-        }
-        case Geometry::Polytope::Type::Segment:
-        {
-          switch (m_local)
-          {
-            case 0:
-            {
-              return -1;
-            }
-            case 1:
-            {
-              return 1;
-            }
-            default:
-            {
-              assert(false);
-              return Math::nan<Real>();
-            }
-          }
-        }
-        case Geometry::Polytope::Type::Triangle:
-        {
-          switch (m_local)
-          {
-            case 0:
-            {
-              if (m_i == 0)
-              {
-                return -1;
-              }
-              else if (m_i == 1)
-              {
-                return -1;
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 1:
-            {
-              if (m_i == 0)
-              {
-                return 1;
-              }
-              else if (m_i == 1)
-              {
-                return 0;
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 2:
-            {
-              if (m_i == 0)
-              {
-                return 0;
-              }
-              else if (m_i == 1)
-              {
-                return 1;
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            default:
-            {
-              assert(false);
-              return Math::nan<Real>();
-            }
-          }
-        }
-        case Geometry::Polytope::Type::Quadrilateral:
-        {
-          switch (m_local)
-          {
-            case 0:
-            {
-              if (m_i == 0)
-              {
-                return r.y() - 1;
-              }
-              else if (m_i == 1)
-              {
-                return r.x() - 1;
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 1:
-            {
-              if (m_i == 0)
-              {
-                return 1 - r.y();
-              }
-              else if (m_i == 1)
-              {
-                return -r.x();
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 2:
-            {
-              if (m_i == 0)
-              {
-                return -r.y();
-              }
-              else if (m_i == 1)
-              {
-                return 1 - r.x();
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 3:
-            {
-              if (m_i == 0)
-              {
-                return r.y();
-              }
-              else if (m_i == 1)
-              {
-                return r.x();
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            default:
-            {
-              assert(false);
-              return Math::nan<Real>();
-            }
-          }
-        }
-        case Geometry::Polytope::Type::Tetrahedron:
-        {
-          switch (m_local)
-          {
-            case 0:
-            {
-              if (m_i == 0)
-              {
-                return -1;
-              }
-              else if (m_i == 1)
-              {
-                return -1;
-              }
-              else if (m_i == 2)
-              {
-                return -1;
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 1:
-            {
-              if (m_i == 0)
-              {
-                return 1;
-              }
-              else if (m_i == 1)
-              {
-                return 0;
-              }
-              else if (m_i == 2)
-              {
-                return 0;
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 2:
-            {
-              if (m_i == 0)
-              {
-                return 0;
-              }
-              else if (m_i == 1)
-              {
-                return 1;
-              }
-              else if (m_i == 2)
-              {
-                return 0;
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 3:
-            {
-              if (m_i == 0)
-              {
-                return 0;
-              }
-              else if (m_i == 1)
-              {
-                return 0;
-              }
-              else if (m_i == 2)
-              {
-                return 1;
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            default:
-            {
-              assert(false);
-              return Math::nan<Real>();
-            }
-          }
-        }
-        case Geometry::Polytope::Type::Wedge:
-        {
-          switch (m_local)
-          {
-            case 0:
-            {
-              if (m_i == 0)
-              {
-                return r.z() - 1;
-              }
-              else if (m_i == 1)
-              {
-                return r.z() - 1;
-              }
-              else if (m_i == 2)
-              {
-                return r.x() + r.y() - 1;
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 1:
-            {
-              if (m_i == 0)
-              {
-                return 1 - r.z();
-              }
-              else if (m_i == 1)
-              {
-                return 0;
-              }
-              else if (m_i == 2)
-              {
-                return -r.x();
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 2:
-            {
-              if (m_i == 0)
-              {
-                return 0;
-              }
-              else if (m_i == 1)
-              {
-                return 1 - r.z();
-              }
-              else if (m_i == 2)
-              {
-                return -r.y();
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 3:
-            {
-              if (m_i == 0)
-              {
-                return -r.z();
-              }
-              else if (m_i == 1)
-              {
-                return -r.z();
-              }
-              else if (m_i == 2)
-              {
-                return 1 - r.x() - r.y();
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 4:
-            {
-              if (m_i == 0)
-              {
-                return r.z();
-              }
-              else if (m_i == 1)
-              {
-                return 0;
-              }
-              else if (m_i == 2)
-              {
-                return r.x();
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            case 5:
-            {
-              if (m_i == 0)
-              {
-                return 0;
-              }
-              else if (m_i == 1)
-              {
-                return r.z();
-              }
-              else if (m_i == 2)
-              {
-                return r.y();
-              }
-              else
-              {
-                assert(false);
-                return Math::nan<Real>();
-              }
-            }
-            default:
-            {
-              assert(false);
-              return Math::nan<Real>();
-            }
-          }
-        }
-      }
-      assert(false);
-      return Math::nan<Real>();
-    }
-    else
-    {
-      return 0;
-    }
-  }
-
-  constexpr
-  Real RealP1Element::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
+  Scalar P1Element<Scalar>::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
   {
     switch (m_g)
     {
@@ -434,10 +33,10 @@ namespace Rodin::Variational
           {
             return r.x();
           }
-          default:
+          default: [[unlikely]]
           {
             assert(false);
-            return Math::nan<Real>();
+            return Math::nan<Scalar>();
           }
         }
       }
@@ -457,10 +56,10 @@ namespace Rodin::Variational
           {
             return r.y();
           }
-          default:
+          default: [[unlikely]]
           {
             assert(false);
-            return Math::nan<Real>();
+            return Math::nan<Scalar>();
           }
         }
       }
@@ -470,8 +69,8 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            const Real x = r.x();
-            const Real y = r.y();
+            const auto& x = r.x();
+            const auto& y = r.y();
             return x * y - x - y + 1;
           }
           case 1:
@@ -486,10 +85,10 @@ namespace Rodin::Variational
           {
             return r.x() * r.y();
           }
-          default:
+          default: [[unlikely]]
           {
             assert(false);
-            return Math::nan<Real>();
+            return Math::nan<Scalar>();
           }
         }
       }
@@ -513,10 +112,10 @@ namespace Rodin::Variational
           {
             return r.z();
           }
-          default:
+          default: [[unlikely]]
           {
             assert(false);
-            return Math::nan<Real>();
+            return Math::nan<Scalar>();
           }
         }
       }
@@ -548,16 +147,419 @@ namespace Rodin::Variational
           {
             return r.y() * r.z();
           }
-          default:
+          default: [[unlikely]]
           {
             assert(false);
-            return Math::nan<Real>();
+            return Math::nan<Scalar>();
           }
         }
       }
     }
     assert(false);
-    return Math::nan<Real>();
+    return Math::nan<Scalar>();
+  }
+
+  template <class Scalar>
+  template <size_t Order>
+  constexpr
+  Scalar P1Element<Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(const Math::SpatialVector<Real>& r) const
+  {
+    if constexpr (Order == 0)
+    {
+      return BasisFunction(m_local, m_g)(r);
+    }
+    else if constexpr (Order == 1)
+    {
+      switch (m_g)
+      {
+        case Geometry::Polytope::Type::Point:
+        {
+          assert(m_local == 0);
+          return 0;
+        }
+        case Geometry::Polytope::Type::Segment:
+        {
+          switch (m_local)
+          {
+            case 0:
+            {
+              return -1;
+            }
+            case 1:
+            {
+              return 1;
+            }
+            default: [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
+          }
+        }
+        case Geometry::Polytope::Type::Triangle:
+        {
+          switch (m_local)
+          {
+            case 0:
+            {
+              if (m_i == 0)
+              {
+                return -1;
+              }
+              else if (m_i == 1)
+              {
+                return -1;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 1:
+            {
+              if (m_i == 0)
+              {
+                return 1;
+              }
+              else if (m_i == 1)
+              {
+                return 0;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 2:
+            {
+              if (m_i == 0)
+              {
+                return 0;
+              }
+              else if (m_i == 1)
+              {
+                return 1;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            default: [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
+          }
+        }
+        case Geometry::Polytope::Type::Quadrilateral:
+        {
+          switch (m_local)
+          {
+            case 0:
+            {
+              if (m_i == 0)
+              {
+                return r.y() - 1;
+              }
+              else if (m_i == 1)
+              {
+                return r.x() - 1;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 1:
+            {
+              if (m_i == 0)
+              {
+                return 1 - r.y();
+              }
+              else if (m_i == 1)
+              {
+                return -r.x();
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 2:
+            {
+              if (m_i == 0)
+              {
+                return -r.y();
+              }
+              else if (m_i == 1)
+              {
+                return 1 - r.x();
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 3:
+            {
+              if (m_i == 0)
+              {
+                return r.y();
+              }
+              else if (m_i == 1)
+              {
+                return r.x();
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            default:
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
+          }
+        }
+        case Geometry::Polytope::Type::Tetrahedron:
+        {
+          switch (m_local)
+          {
+            case 0:
+            {
+              if (m_i == 0)
+              {
+                return -1;
+              }
+              else if (m_i == 1)
+              {
+                return -1;
+              }
+              else if (m_i == 2)
+              {
+                return -1;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 1:
+            {
+              if (m_i == 0)
+              {
+                return 1;
+              }
+              else if (m_i == 1)
+              {
+                return 0;
+              }
+              else if (m_i == 2)
+              {
+                return 0;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 2:
+            {
+              if (m_i == 0)
+              {
+                return 0;
+              }
+              else if (m_i == 1)
+              {
+                return 1;
+              }
+              else if (m_i == 2)
+              {
+                return 0;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 3:
+            {
+              if (m_i == 0)
+              {
+                return 0;
+              }
+              else if (m_i == 1)
+              {
+                return 0;
+              }
+              else if (m_i == 2)
+              {
+                return 1;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            default: [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
+          }
+        }
+        case Geometry::Polytope::Type::Wedge:
+        {
+          switch (m_local)
+          {
+            case 0:
+            {
+              if (m_i == 0)
+              {
+                return r.z() - 1;
+              }
+              else if (m_i == 1)
+              {
+                return r.z() - 1;
+              }
+              else if (m_i == 2)
+              {
+                return r.x() + r.y() - 1;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 1:
+            {
+              if (m_i == 0)
+              {
+                return 1 - r.z();
+              }
+              else if (m_i == 1)
+              {
+                return 0;
+              }
+              else if (m_i == 2)
+              {
+                return -r.x();
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 2:
+            {
+              if (m_i == 0)
+              {
+                return 0;
+              }
+              else if (m_i == 1)
+              {
+                return 1 - r.z();
+              }
+              else if (m_i == 2)
+              {
+                return -r.y();
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 3:
+            {
+              if (m_i == 0)
+              {
+                return -r.z();
+              }
+              else if (m_i == 1)
+              {
+                return -r.z();
+              }
+              else if (m_i == 2)
+              {
+                return 1 - r.x() - r.y();
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 4:
+            {
+              if (m_i == 0)
+              {
+                return r.z();
+              }
+              else if (m_i == 1)
+              {
+                return 0;
+              }
+              else if (m_i == 2)
+              {
+                return r.x();
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 5:
+            {
+              if (m_i == 0)
+              {
+                return 0;
+              }
+              else if (m_i == 1)
+              {
+                return r.z();
+              }
+              else if (m_i == 2)
+              {
+                return r.y();
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            default: [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
+          }
+        }
+      }
+      assert(false);
+      return Math::nan<Scalar>();
+    }
+    else
+    {
+      return 0;
+    }
   }
 }
 
