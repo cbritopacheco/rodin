@@ -49,28 +49,6 @@ namespace Rodin::Geometry
     return os;
   }
 
-  const GeometryIndexed<Math::PointMatrix> Polytope::s_vertices =
-  {
-    { Polytope::Type::Point,
-      Math::PointMatrix{{0}} },
-    { Polytope::Type::Segment,
-      Math::PointMatrix{{0, 1}} },
-    { Polytope::Type::Triangle,
-      Math::PointMatrix{{0, 1, 0},
-                        {0, 0, 1}} },
-    { Polytope::Type::Quadrilateral,
-      Math::PointMatrix{{0, 1, 0, 1},
-                        {0, 0, 1, 1}} },
-    { Polytope::Type::Tetrahedron,
-      Math::PointMatrix{{0, 1, 0, 0},
-                        {0, 0, 1, 0},
-                        {0, 0, 0, 1}} },
-    { Polytope::Type::Wedge,
-      Math::PointMatrix{{0, 1, 0, 0, 1, 0},
-                        {0, 0, 1, 0, 0, 1},
-                        {0, 0, 0, 1, 1, 1}} },
-  };
-
   bool operator==(const Polytope& lhs, const Polytope& rhs)
   {
     bool res = true;
@@ -105,16 +83,6 @@ namespace Rodin::Geometry
     const auto& vertices = getVertices();
     return VertexIterator(
         getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
-  }
-
-  const Math::PointMatrix& Polytope::getVertices(Polytope::Type g)
-  {
-    return s_vertices[g];
-  }
-
-  const Array<Index>& Polytope::getVertices() const
-  {
-    return m_mesh.get().getConnectivity().getPolytope(getDimension(), getIndex());
   }
 
   PolytopeIterator Polytope::getAdjacent() const

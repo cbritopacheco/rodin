@@ -44,6 +44,142 @@ namespace Rodin::Geometry
         Wedge
       };
 
+      struct Traits
+      {
+        public:
+          constexpr Traits(Type g)
+            : m_g(g)
+          {}
+
+          constexpr
+          bool isSimplex(Polytope::Type g)
+          {
+            switch (g)
+            {
+              case Type::Point:
+              case Type::Segment:
+              case Type::Triangle:
+              case Type::Tetrahedron:
+                return true;
+              case Type::Quadrilateral:
+              case Type::Wedge:
+                return false;
+            }
+            assert(false);
+            return false;
+          }
+
+          constexpr
+          size_t getGeometryDimension()
+          {
+            switch (m_g)
+            {
+              case Type::Point:
+                return 0;
+              case Type::Segment:
+                return 1;
+              case Type::Triangle:
+              case Type::Quadrilateral:
+                return 2;
+              case Type::Tetrahedron:
+              case Type::Wedge:
+                return 3;
+            }
+            assert(false);
+            return 0;
+          }
+
+          constexpr
+          size_t getVertexCount()
+          {
+            switch (m_g)
+            {
+              case Type::Point:
+                return 1;
+              case Type::Segment:
+                return 2;
+              case Type::Triangle:
+                return 3;
+              case Type::Quadrilateral:
+              case Type::Tetrahedron:
+                return 4;
+              case Type::Wedge:
+                return 6;
+            }
+            assert(false);
+            return 0;
+          }
+
+          const Math::SpatialVector<Real>& getVertex(size_t i) const
+          {
+            switch (m_g)
+            {
+              case Type::Point:
+              {
+                static thread_local const Math::SpatialVector<Real> s_node{{ 0 }};
+                return s_node;
+              }
+              case Type::Segment:
+              {
+                static thread_local const std::vector<Math::SpatialVector<Real>> s_nodes =
+                {
+                  Math::SpatialVector<Real>{{ 0 }},
+                  Math::SpatialVector<Real>{{ 1 }}
+                };
+                return s_nodes[i];
+              }
+              case Type::Triangle:
+              {
+                static thread_local const std::vector<Math::SpatialVector<Real>> s_nodes =
+                {
+                  Math::SpatialVector<Real>{{ 0, 0 }},
+                  Math::SpatialVector<Real>{{ 1, 0 }},
+                  Math::SpatialVector<Real>{{ 0, 1 }}
+                };
+                return s_nodes[i];
+              }
+              case Type::Quadrilateral:
+              {
+                static thread_local const std::vector<Math::SpatialVector<Real>> s_nodes =
+                {
+                  Math::SpatialVector<Real>{{ 0, 0 }},
+                  Math::SpatialVector<Real>{{ 1, 0 }},
+                  Math::SpatialVector<Real>{{ 0, 1 }},
+                  Math::SpatialVector<Real>{{ 1, 1 }}
+                };
+                return s_nodes[i];
+              }
+              case Type::Tetrahedron:
+              {
+                static thread_local const std::vector<Math::SpatialVector<Real>> s_nodes =
+                {
+                  Math::SpatialVector<Real>{{ 0, 0, 0 }},
+                  Math::SpatialVector<Real>{{ 1, 0, 0 }},
+                  Math::SpatialVector<Real>{{ 0, 1, 0 }},
+                  Math::SpatialVector<Real>{{ 0, 0, 1 }}
+                };
+                return s_nodes[i];
+              }
+              case Type::Wedge:
+              {
+                static thread_local const std::vector<Math::SpatialVector<Real>> s_nodes =
+                {
+                  Math::SpatialVector<Real>{{ 0, 0, 0 }},
+                  Math::SpatialVector<Real>{{ 1, 0, 0 }},
+                  Math::SpatialVector<Real>{{ 0, 1, 0 }},
+                  Math::SpatialVector<Real>{{ 0, 0, 1 }},
+                  Math::SpatialVector<Real>{{ 1, 0, 1 }},
+                  Math::SpatialVector<Real>{{ 0, 1, 1 }}
+                };
+                return s_nodes[i];
+              }
+            }
+          }
+
+        private:
+          const Type m_g;
+      };
+
       /**
        * @brief Iterable of possible polytope geometry types.
        */
@@ -56,72 +192,6 @@ namespace Rodin::Geometry
         Type::Tetrahedron,
         Type::Wedge
       };
-
-      static const Math::PointMatrix& getVertices(Polytope::Type g);
-
-      static auto getVertex(size_t i, Polytope::Type g)
-      {
-        return getVertices(g).col(i);
-      }
-
-      constexpr
-      static size_t getVertexCount(Polytope::Type g)
-      {
-        switch (g)
-        {
-          case Type::Point:
-            return 1;
-          case Type::Segment:
-            return 2;
-          case Type::Triangle:
-            return 3;
-          case Type::Quadrilateral:
-          case Type::Tetrahedron:
-            return 4;
-          case Type::Wedge:
-            return 6;
-        }
-        assert(false);
-        return 0;
-      }
-
-      constexpr
-      static size_t getGeometryDimension(Polytope::Type g)
-      {
-        switch (g)
-        {
-          case Type::Point:
-            return 0;
-          case Type::Segment:
-            return 1;
-          case Type::Triangle:
-          case Type::Quadrilateral:
-            return 2;
-          case Type::Tetrahedron:
-          case Type::Wedge:
-            return 3;
-        }
-        assert(false);
-        return 0;
-      }
-
-      constexpr
-      static bool isSimplex(Polytope::Type g)
-      {
-        switch (g)
-        {
-          case Type::Point:
-          case Type::Segment:
-          case Type::Triangle:
-          case Type::Tetrahedron:
-            return true;
-          case Type::Quadrilateral:
-          case Type::Wedge:
-            return false;
-        }
-        assert(false);
-        return false;
-      }
 
       /**
        * @brief Consructs a polytope of dimension @f$ d @f$ and index @f$ i @f$

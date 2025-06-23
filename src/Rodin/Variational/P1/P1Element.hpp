@@ -12,6 +12,56 @@
 namespace Rodin::Variational
 {
   template <class Scalar>
+  const Geometry::GeometryIndexed<std::vector<Math::SpatialVector<Real>>>
+  P1Element<Scalar>::s_nodes =
+  {
+    { Geometry::Polytope::Type::Point,
+      {
+        Math::SpatialVector<Real>{ { 0 } }
+      }
+    },
+    {
+      Geometry::Polytope::Type::Segment,
+      {
+        Math::SpatialVector<Real>{ { 0 } }, Math::SpatialVector<Real>{ { 1 } }
+      }
+    },
+    { Geometry::Polytope::Type::Triangle,
+      {
+        Math::SpatialVector<Real>{{ 0, 0 }},
+        Math::SpatialVector<Real>{{ 1, 0 }},
+        Math::SpatialVector<Real>{{ 0, 1 }}
+      }
+    },
+    { Geometry::Polytope::Type::Quadrilateral,
+      {
+        Math::SpatialVector<Real>{{ 0, 0 }},
+        Math::SpatialVector<Real>{{ 1, 0 }},
+        Math::SpatialVector<Real>{{ 1, 1 }},
+        Math::SpatialVector<Real>{{ 0, 1 }}
+      }
+    },
+    { Geometry::Polytope::Type::Tetrahedron,
+      {
+        Math::SpatialVector<Real>{{ 0, 0, 0 }},
+        Math::SpatialVector<Real>{{ 1, 0, 0 }},
+        Math::SpatialVector<Real>{{ 0, 1, 0 }},
+        Math::SpatialVector<Real>{{ 0, 0, 1 }}
+      }
+    },
+    { Geometry::Polytope::Type::Wedge,
+      {
+        Math::SpatialVector<Real>{{ 0, 0, 0 }},
+        Math::SpatialVector<Real>{{ 1, 0, 0 }},
+        Math::SpatialVector<Real>{{ 0, 1, 0 }},
+        Math::SpatialVector<Real>{{ 0, 0, 1 }},
+        Math::SpatialVector<Real>{{ 1, 0, 1 }},
+        Math::SpatialVector<Real>{{ 0, 1, 1 }}
+      }
+    }
+  };
+
+  template <class Scalar>
   constexpr
   Scalar P1Element<Scalar>::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
   {
@@ -162,7 +212,8 @@ namespace Rodin::Variational
   template <class Scalar>
   template <size_t Order>
   constexpr
-  Scalar P1Element<Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(const Math::SpatialVector<Real>& r) const
+  Scalar P1Element<Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
+      const Math::SpatialVector<Real>& r) const
   {
     if constexpr (Order == 0)
     {

@@ -7,12 +7,6 @@
 #ifndef RODIN_VARIATIONAL_P1_P1ELEMENT_H
 #define RODIN_VARIATIONAL_P1_P1ELEMENT_H
 
-/**
- * @ingroup RodinDirectives
- * @brief Indicates the maximum vector dimension a P1Element
- */
-#define RODIN_P1_MAX_VECTOR_DIMENSION 16
-
 #include "Rodin/Types.h"
 
 #include "Rodin/Geometry/Mesh.h"
