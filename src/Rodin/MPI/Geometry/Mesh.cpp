@@ -85,7 +85,7 @@ namespace Rodin::Geometry
 
   size_t MPIMesh::getPolytopeCount(Polytope::Type g) const
   {
-    const size_t d = Polytope::getGeometryDimension(g);
+    const size_t d = Polytope::Traits(g).getDimension();
     boost::mpi::communicator comm = m_context.getCommunicator();
     const auto& shard = getShard();
     std::vector<size_t> localIdx;

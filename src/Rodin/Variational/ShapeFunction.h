@@ -330,13 +330,13 @@ namespace Rodin::Variational
       constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
-          m_phi(other.m_phi)
+          m_basis(other.m_basis)
       {}
 
       constexpr
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
-          m_phi(std::move(other.m_phi))
+          m_basis(std::move(other.m_basis))
       {}
 
       constexpr
@@ -368,16 +368,16 @@ namespace Rodin::Variational
         const auto& fes = this->getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
         const size_t count = fe.getCount();
-        m_phi.resize(count);
+        m_basis.resize(count);
         for (size_t local = 0; local < count; local++)
-          m_phi[local] = fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
+          m_basis[local] = fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
         return *this;
       }
 
       constexpr
       const RangeType& getBasis(size_t local) const
       {
-        return m_phi[local];
+        return m_basis[local];
       }
 
       constexpr
@@ -394,7 +394,7 @@ namespace Rodin::Variational
     private:
       std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
 
-      std::vector<RangeType> m_phi;
+      std::vector<RangeType> m_basis;
   };
 }
 

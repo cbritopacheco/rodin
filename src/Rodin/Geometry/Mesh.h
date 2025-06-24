@@ -763,8 +763,11 @@ namespace Rodin::Geometry
       {
         for (auto it = getVertex(); !it.end(); ++it)
         {
-          const Geometry::Point p(*it, it->getTransformation(),
-              Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
+          const Geometry::Point p(
+              *it,
+              it->getTransformation(),
+              Polytope::Traits(Polytope::Type::Point).getVertex(0),
+              it->getCoordinates());
           m_vertices.col(it->getIndex()) += u(p);
         }
         return *this;

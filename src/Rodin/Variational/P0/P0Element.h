@@ -9,6 +9,8 @@
 
 #include "Rodin/Types.h"
 
+#include "Rodin/Math/Traits.h"
+
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Connectivity.h"
 #include "Rodin/Geometry/GeometryIndexed.h"
@@ -27,6 +29,7 @@ namespace Rodin::FormLanguage
   template <class Range>
   struct Traits<Variational::P0Element<Range>>
   {
+    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
     using RangeType = Range;
   };
 }
@@ -64,11 +67,9 @@ namespace Rodin::Variational
       {
         public:
           constexpr
-          LinearForm(size_t i, Geometry::Polytope::Type g)
-            : m_i(i), m_g(g)
-          {
-            assert(i < Geometry::Polytope::getVertexCount(g));
-          }
+          LinearForm(Geometry::Polytope::Type g)
+            : m_g(g)
+          {}
 
           constexpr
           LinearForm(const LinearForm&) = default;
@@ -77,11 +78,10 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const T& v) const
           {
-            return v(s_nodes[m_g][m_i]);
+            return v(s_nodes[m_g]);
           }
 
         private:
-          const size_t m_i;
           const Geometry::Polytope::Type m_g;
       };
 
@@ -117,11 +117,7 @@ namespace Rodin::Variational
           };
 
           constexpr
-          BasisFunction(size_t local, Geometry::Polytope::Type g)
-            : m_local(local), m_g(g)
-          {
-            assert(local < Geometry::Polytope::getVertexCount(g));
-          }
+          BasisFunction() = default;
 
           constexpr
           BasisFunction(const BasisFunction&) = default;
@@ -140,14 +136,10 @@ namespace Rodin::Variational
 
           template <size_t Order>
           constexpr
-          DerivativeFunction<Order> getDerivative(size_t i) const
+          DerivativeFunction<Order> getDerivative(size_t) const
           {
             return DerivativeFunction<Order>();
           }
-
-        private:
-          const size_t m_local;
-          const Geometry::Polytope::Type m_g;
       };
 
       constexpr
@@ -185,38 +177,25 @@ namespace Rodin::Variational
       }
 
       constexpr
-      LinearForm getLinearForm(size_t i) const
+      LinearForm getLinearForm(size_t) const
       {
-        return LinearForm(i, this->getGeometry());
+        return LinearForm(this->getGeometry());
       }
 
       constexpr
-      BasisFunction getBasis(size_t i) const
+      BasisFunction getBasis(size_t) const
       {
-        return BasisFunction(i, this->getGeometry());
+        return BasisFunction();
       }
 
       constexpr
       size_t getOrder() const
       {
-        switch (this->getGeometry())
-        {
-          case Geometry::Polytope::Type::Point:
-            return 0;
-          case Geometry::Polytope::Type::Segment:
-          case Geometry::Polytope::Type::Triangle:
-          case Geometry::Polytope::Type::Tetrahedron:
-            return 1;
-          case Geometry::Polytope::Type::Quadrilateral:
-          case Geometry::Polytope::Type::Wedge:
-            return 2;
-        }
-        assert(false);
         return 0;
       }
 
     private:
-      static const Geometry::GeometryIndexed<std::vector<Math::SpatialVector<Real>>> s_nodes;
+      static const Geometry::GeometryIndexed<Math::SpatialVector<Real>> s_nodes;
   };
 
   /**
@@ -262,9 +241,8 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const T& v) const
           {
-            const size_t vdim = Geometry::Polytope::getGeometryDimension(m_g);
-            const P0Element<ScalarType> P0e(m_g);
-            return v(P0e.getNode(m_local / vdim)).coeff(m_local % vdim);
+            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
+            return v(P0Element<ScalarType>(m_g).getNode(m_local / vdim)).coeff(m_local % vdim);
           }
 
         private:
@@ -296,11 +274,6 @@ namespace Rodin::Variational
               {
                 return 0;
               }
-
-            private:
-              const size_t m_i, m_j;
-              const size_t m_local;
-              const Geometry::Polytope::Type m_g;
           };
 
           constexpr
@@ -319,20 +292,25 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          Math::Vector<ScalarType> operator()(const Math::SpatialVector<ScalarType>& r) const
+          auto operator()(const Math::SpatialVector<ScalarType>& r) const
           {
-            Math::Vector<ScalarType> res;
-            operator()(res, r);
-            return res;
+            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
+            return Math::Vector<ScalarType>::Zero(vdim);
           }
 
           constexpr
           void operator()(Math::Vector<ScalarType>& out, const Math::SpatialVector<Real>& rc) const
           {
-            const size_t vdim = Geometry::Polytope::getGeometryDimension(m_g);
+            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
             out.resize(vdim);
             out.setZero();
-            out.coeffRef(m_local % vdim) = P0Element<ScalarType>(m_g).getBasis(m_local / vdim)(rc);
+          }
+
+          template <size_t Order>
+          constexpr
+          DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
+          {
+            return DerivativeFunction<Order>(i, m_local, m_g);
           }
 
         private:
@@ -360,8 +338,7 @@ namespace Rodin::Variational
       constexpr
       size_t getCount() const
       {
-        return Geometry::Polytope::getVertexCount(this->getGeometry()
-            ) * Geometry::Polytope::getGeometryDimension(this->getGeometry());
+        return Geometry::Polytope::Traits(this->getGeometry()).getDimension();
       }
 
       constexpr
@@ -379,7 +356,7 @@ namespace Rodin::Variational
       constexpr
       const Math::SpatialVector<Real>& getNode(size_t local) const
       {
-        const size_t vdim = Geometry::Polytope::getGeometryDimension(this->getGeometry());
+        const size_t vdim = Geometry::Polytope::Traits(this->getGeometry()).getDimension();
         return P0Element<ScalarType>(this->getGeometry()).getNode(local / vdim);
       }
 

@@ -91,7 +91,15 @@ namespace Rodin::Variational
 
           m_jac1.resize(fe.getCount());
           for (size_t i = 0; i < fe.getCount(); i++)
-            fe.getJacobian(i)(m_jac1[i], rc);
+          {
+            m_jac1[i].resize(d, d);
+            const auto basis = fe.getBasis(i);
+            for (size_t j = 0; j < d; j++)
+            {
+              for (size_t k = 0; k < d; k++)
+                m_jac1[i](j, k) = basis.template getDerivative<1>(j, k)(rc);
+            }
+          }
 
           for (size_t i = 0; i < fe.getCount(); i++)
           {

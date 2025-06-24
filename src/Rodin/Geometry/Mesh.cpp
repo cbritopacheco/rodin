@@ -345,7 +345,7 @@ namespace Rodin::Geometry
     {
       auto g = getGeometry(dimension, idx);
       const size_t sdim = getSpaceDimension();
-      const size_t n = Polytope::getVertexCount(g);
+      const size_t n = Polytope::Traits(g).getVertexCount();
       Math::PointMatrix pm(sdim, n);
       const auto& polytope = getConnectivity().getPolytope(dimension, idx);
       assert(n == static_cast<size_t>(polytope.size()));
@@ -696,7 +696,7 @@ namespace Rodin::Geometry
   Mesh<Context::Local> Mesh<Context::Local>::UniformGrid(Polytope::Type g, const Array<size_t>& dimensions)
   {
     Builder build;
-    const size_t dim = Polytope::getGeometryDimension(g);
+    const size_t dim = Polytope::Traits(g).getDimension();
     switch (g)
     {
       case Polytope::Type::Point:

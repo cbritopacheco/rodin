@@ -58,11 +58,8 @@ namespace Rodin::Geometry
         ptr(i)->~T();
     }
 
-    template <
-      class U = T,
-      class = std::enable_if_t<std::is_copy_assignable<U>::value>>
     GeometryIndexed& operator=(const GeometryIndexed& other)
-      noexcept(std::is_nothrow_copy_assignable<U>::value)
+      noexcept(std::is_nothrow_copy_assignable<T>::value)
     {
       if (this != &other)
         for (size_t i = 0; i < Count; ++i)
@@ -70,14 +67,8 @@ namespace Rodin::Geometry
       return *this;
     }
 
-    // --------------------------------------------------------------------------
-    // Move‐assignment: enabled iff T is move‐assignable
-    // --------------------------------------------------------------------------
-    template <
-      class U = T,
-      class = std::enable_if_t<std::is_move_assignable<U>::value>>
     GeometryIndexed& operator=(GeometryIndexed&& other)
-      noexcept(std::is_nothrow_move_assignable<U>::value)
+      noexcept(std::is_nothrow_move_assignable<T>::value)
     {
       if (this != &other)
         for (size_t i = 0; i < Count; ++i)

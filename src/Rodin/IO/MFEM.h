@@ -335,7 +335,7 @@ namespace Rodin::IO::MFEM
         return {};
       res.geometry = *g;
 
-     res.vertices.resize(Geometry::Polytope::getVertexCount(res.geometry));
+     res.vertices.resize(Geometry::Polytope::Traits(res.geometry).getVertexCount());
      size_t i = 0;
      const auto get_vertex = [&](auto& ctx) { res.vertices(i++) = _attr(ctx); };
      const auto pvs = repeat(res.vertices.size())[uint_[get_vertex]];

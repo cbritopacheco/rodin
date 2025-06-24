@@ -85,6 +85,11 @@ namespace Rodin::Geometry
         getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
   }
 
+  const Array<Index>& Polytope::getVertices() const
+  {
+    return m_mesh.get().getConnectivity().getPolytope(getDimension(), getIndex());
+  }
+
   PolytopeIterator Polytope::getAdjacent() const
   {
     const size_t d = getDimension();

@@ -321,7 +321,7 @@ namespace Rodin::IO
               break;
             }
           }
-          const size_t d = Geometry::Polytope::getGeometryDimension(g);
+          const size_t d = Geometry::Polytope::Traits(g).getDimension();
           if (d <= mesh.getDimension())
           {
             os << mesh.getPolytopeCount(g) << '\n';

@@ -144,11 +144,16 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          SpatialMatrixType jacobian(vdim, d);
+          SpatialMatrixType jacobian(d, d);
           out = 0;
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            fe.getJacobian(local)(jacobian, rc);
+            for (size_t i = 0; i < vdim; i++)
+            {
+              const auto basis = fe.getBasis(local);
+              for (size_t j = 0; j < d; j++)
+                jacobian(i, j) = basis.template getDerivative<1>(i, j)(rc);
+            }
             out += gf[fes.getGlobalIndex({d, i}, local)] * (jacobian * p.getJacobianInverse()).trace();
           }
         }
@@ -245,7 +250,7 @@ namespace Rodin::Variational
           for (size_t i = 0; i < vdim; i++)
           {
             for (size_t j = 0; j < d; j++)
-              m_jacobian[local](i, j) = fe.getDerivative(i, j, local)(rc);
+              m_jacobian[local](i, j) = fe.template getDerivative<1>(i, j)(rc);
           }
         }
         return *this;

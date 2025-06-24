@@ -52,9 +52,9 @@ namespace Rodin::Geometry
           {}
 
           constexpr
-          bool isSimplex(Polytope::Type g)
+          bool isSimplex()
           {
-            switch (g)
+            switch (m_g)
             {
               case Type::Point:
               case Type::Segment:
@@ -70,7 +70,7 @@ namespace Rodin::Geometry
           }
 
           constexpr
-          size_t getGeometryDimension()
+          size_t getDimension()
           {
             switch (m_g)
             {

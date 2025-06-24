@@ -157,7 +157,7 @@ namespace Rodin::Variational
           {
             const auto basis = fe.getBasis(local);
             for (size_t i = 0; i < d; i++)
-              grad(i) = basis.getDerivative(i)(rc);
+              grad(i) = basis.template getDerivative<1>(i)(rc);
             res += gf[fes.getGlobalIndex({d, i}, local)] * grad;
           }
           out = p.getJacobianInverse().transpose() * res;
@@ -253,7 +253,7 @@ namespace Rodin::Variational
           m_gradient[local].resize(d);
           const auto basis = fe.getBasis(local);
           for (size_t i = 0; i < vdim; i++)
-            m_gradient[local](i) = basis.getDerivative(i)(rc);
+            m_gradient[local](i) = basis.template getDerivative<1>(i)(rc);
         }
         return *this;
       }

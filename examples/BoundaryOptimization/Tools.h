@@ -16,8 +16,7 @@ namespace Rodin::Examples::BoundaryOptimization
     for (auto it = tf.getFiniteElementSpace().getMesh().getVertex(); !it.end(); ++it)
     {
       const Geometry::Point p(*it, it->getTransformation(),
-          Geometry::Polytope::getVertices(
-            Geometry::Polytope::Type::Point).col(0), it->getCoordinates());
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0), it->getCoordinates());
       const Real tp = tf(p);
       if (tp > 1e-12 && (tp / tc) > (1 - 1e-12))
       {

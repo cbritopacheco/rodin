@@ -135,6 +135,10 @@ namespace Rodin::Variational
           std::unique_ptr<FunctionType> m_v;
       };
 
+      template <class FunctionDerived>
+      Mapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v)
+        -> Mapping<FunctionDerived>;
+
       /**
        * @brief Inverse mapping for the scalar/complex P1 space.
        */
@@ -176,6 +180,9 @@ namespace Rodin::Variational
         private:
           std::reference_wrapper<const FunctionType> m_v;
       };
+
+      template <class Callable>
+      InverseMapping(const Callable& v) -> InverseMapping<Callable>;
 
       P1(const MeshType& mesh)
         : m_mesh(mesh)
@@ -427,11 +434,13 @@ namespace Rodin::Variational
           std::reference_wrapper<const FunctionType> m_v;
       };
 
+      template <class Callable>
+      InverseMapping(const Callable& v) -> InverseMapping<Callable>;
+
       P1(const Geometry::Mesh<ContextType>& mesh, size_t vdim)
         : m_mesh(mesh), m_vdim(vdim)
       {
         const size_t vn = mesh.getVertexCount();
-        assert(m_vdim < RODIN_P1_MAX_VECTOR_DIMENSION);
         m_dofs.resize(mesh.getDimension() + 1);
         for (size_t d = 0; d <= mesh.getDimension(); d++)
         {

@@ -66,7 +66,7 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>::polytope(Polytope::Type t, const Array<Index>& in)
   {
     assert(in.size() > 0);
-    const size_t d = Polytope::getGeometryDimension(t);
+    const size_t d = Polytope::Traits(t).getDimension();
     assert(d > 0);
     assert(d <= m_maximalDimension);
     auto [it, inserted] = m_index[d].right.insert({ in, m_count[d]});
@@ -85,7 +85,7 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>::polytope(Polytope::Type t, Array<Index>&& in)
   {
     assert(in.size() > 0);
-    const size_t d = Polytope::getGeometryDimension(t);
+    const size_t d = Polytope::Traits(t).getDimension();
     assert(d > 0);
     assert(d <= m_maximalDimension);
     auto [it, inserted] = m_index[d].right.insert({ std::move(in), m_count[d] });

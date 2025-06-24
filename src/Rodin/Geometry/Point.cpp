@@ -131,7 +131,7 @@ namespace Rodin::Geometry
     if (!m_jacobianInverse.read().has_value())
     {
       const auto& polytope = getPolytope();
-      const size_t rdim = Polytope::getGeometryDimension(polytope.getGeometry());
+      const size_t rdim = Polytope::Traits(polytope.getGeometry()).getDimension();
       const size_t sdim = polytope.getMesh().getSpaceDimension();
       assert(rdim <= sdim);
       if (rdim == sdim)

@@ -334,7 +334,7 @@ namespace Rodin::IO
             const Geometry::Point p(
               *it,
               it->getTransformation(),
-              Geometry::Polytope::getVertices(Geometry::Polytope::Type::Point).col(0),
+              Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
               it->getCoordinates()
             );
 

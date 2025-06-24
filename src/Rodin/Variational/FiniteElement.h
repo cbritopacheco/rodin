@@ -29,6 +29,8 @@ namespace Rodin::Variational
   class FiniteElementBase
   {
     public:
+      using ScalarType = typename FormLanguage::Traits<Derived>::ScalarType;
+
       constexpr
       FiniteElementBase()
         : m_g(Geometry::Polytope::Type::Point)

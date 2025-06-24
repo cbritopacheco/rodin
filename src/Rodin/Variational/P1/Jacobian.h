@@ -139,12 +139,17 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          SpatialMatrixType jacobian(vdim, d);
+          SpatialMatrixType jacobian(d, d);
           SpatialMatrixType res(vdim, d);
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            fe.getJacobian(local)(jacobian, rc);
+            const auto basis = fe.getBasis(local);
+            for (size_t j = 0; j < d; j++)
+            {
+              for (size_t k = 0; k < d; k++)
+                jacobian(j, k) = basis.template getDerivative<1>(j, k)(rc);
+            }
             res += gf[fes.getGlobalIndex({d, i}, local)] * jacobian;
           }
           out = res * p.getJacobianInverse();
@@ -177,6 +182,8 @@ namespace Rodin::Variational
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       using OperandType = ShapeFunction<ShapeFunctionDerived, FESType, SpaceType>;
 
@@ -243,8 +250,9 @@ namespace Rodin::Variational
           m_jacobian[local].resize(vdim, d);
           for (size_t i = 0; i < vdim; i++)
           {
+            const auto basis = fe.getBasis(local);
             for (size_t j = 0; j < d; j++)
-              m_jacobian[local](i, j) = fe.getDerivative(i, j, local)(rc);
+              m_jacobian[local](i, j) = basis.template getDerivative<1>(i, j)(rc);
           }
         }
         return *this;
@@ -264,7 +272,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const OperandType> m_u;
 
-      std::vector<Math::SpatialMatrix<ScalarType>> m_jacobian;
+      std::vector<SpatialMatrixType> m_jacobian;
 
       std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
   };
