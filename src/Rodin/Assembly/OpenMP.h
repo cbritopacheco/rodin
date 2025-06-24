@@ -53,13 +53,13 @@ namespace Rodin::Assembly
       const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region)
     -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
 
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class OpenMP<
     std::vector<Eigen::Triplet<
       typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
-    Variational::BilinearForm<TrialFES, TestFES,
+    Variational::BilinearForm<Solution, TrialFES, TestFES,
       std::vector<Eigen::Triplet<
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -69,7 +69,7 @@ namespace Rodin::Assembly
           typename FormLanguage::Dot<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
-        Variational::BilinearForm<TrialFES, TestFES,
+        Variational::BilinearForm<Solution, TrialFES, TestFES,
           std::vector<Eigen::Triplet<
             typename FormLanguage::Dot<
               typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -84,7 +84,7 @@ namespace Rodin::Assembly
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
       using BilinearFormType =
-        Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+        Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       using LocalBilinearFormIntegratorBaseType =
         Variational::LocalBilinearFormIntegratorBase<ScalarType>;
@@ -193,13 +193,14 @@ namespace Rodin::Assembly
    * @brief OpenMP assembly of the Math::SparseMatrix associated to a
    * BilinearFormBase object.
    */
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class OpenMP<
     Math::SparseMatrix<
       typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Variational::BilinearForm<
+      Solution,
       TrialFES, TestFES,
       Math::SparseMatrix<
         typename FormLanguage::Dot<
@@ -211,6 +212,7 @@ namespace Rodin::Assembly
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
         Variational::BilinearForm<
+          Solution,
           TrialFES, TestFES,
           Math::SparseMatrix<
             typename FormLanguage::Dot<
@@ -225,7 +227,7 @@ namespace Rodin::Assembly
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -282,16 +284,17 @@ namespace Rodin::Assembly
     private:
       OpenMP<
         std::vector<Eigen::Triplet<ScalarType>>,
-        Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<ScalarType>>>> m_assembly;
+        Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<ScalarType>>>> m_assembly;
   };
 
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class OpenMP<
     Math::Matrix<
       typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Variational::BilinearForm<
+      Solution,
       TrialFES, TestFES,
       Math::Matrix<
         typename FormLanguage::Dot<
@@ -302,7 +305,9 @@ namespace Rodin::Assembly
           typename FormLanguage::Dot<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-        Variational::BilinearForm<TrialFES, TestFES,
+        Variational::BilinearForm<
+          Solution,
+          TrialFES, TestFES,
           Math::Matrix<
             typename FormLanguage::Dot<
               typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -320,7 +325,7 @@ namespace Rodin::Assembly
 
       using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -557,20 +562,20 @@ namespace Rodin::Assembly
       std::optional<size_t> m_threadCount;
   };
 
-  template <class Scalar, class FES, class ValueDerived>
+  template <class Scalar, class Solution, class FES, class ValueDerived>
   class OpenMP<
     IndexMap<Scalar>,
     Variational::DirichletBC<
-      Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>> final
+      Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>> final
     : public AssemblyBase<
         IndexMap<Scalar>,
         Variational::DirichletBC<
-          Variational::TrialFunction<FES>, Variational::FunctionBase<ValueDerived>>>
+          Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
   {
     public:
       using FESType = FES;
 
-      using TrialFunctionType = Variational::TrialFunction<FES>;
+      using TrialFunctionType = Variational::TrialFunction<Solution, FES>;
 
       using ValueType = Variational::FunctionBase<ValueDerived>;
 
@@ -626,11 +631,7 @@ namespace Rodin::Assembly
                   const Index global = fes.getGlobalIndex({ faceDim, i }, local);
                   auto find = partial.find(global);
                   if (find == partial.end())
-                  {
-                    const auto& lf = fe.getLinearForm(local);
-                    const auto s = lf(mapping);
-                    partial.insert(find, std::pair{ global, s });
-                  }
+                    partial.insert(find, std::pair{ global, fe.getLinearForm(local)(mapping) });
                 }
               }
             }

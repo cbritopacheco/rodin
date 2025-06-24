@@ -246,18 +246,18 @@ namespace Rodin::Variational
         const auto& fes = this->getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
         const size_t count = fe.getCount();
-        const size_t vdim = fes.getVectorDimension();
         m_gradient.resize(count);
         for (size_t local = 0; local < count; local++)
         {
           m_gradient[local].resize(d);
           const auto basis = fe.getBasis(local);
-          for (size_t i = 0; i < vdim; i++)
-            m_gradient[local](i) = basis.template getDerivative<1>(i)(rc);
+          for (size_t j = 0; j < d; j++)
+            m_gradient[local](j) = basis.template getDerivative<1>(j)(rc);
         }
         return *this;
       }
 
+      constexpr
       auto getBasis(size_t local) const
       {
         return getPoint().getJacobianInverse().transpose() * m_gradient[local];

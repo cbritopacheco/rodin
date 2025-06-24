@@ -357,19 +357,16 @@ namespace Rodin::Variational
       void interpolate(RangeType& res, const Geometry::Point& p) const
       {
         const auto& fes = this->getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
         const auto& polytope = p.getPolytope();
-        assert(&mesh == &polytope.getMesh());
         const size_t d = polytope.getDimension();
         const Index  i = polytope.getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
-        const auto& rc = p.getReferenceCoordinates();
         const size_t count = fe.getCount();
         RangeType v;
         for (Index local = 0; local < count; ++local)
         {
-          const auto& phi = fe.getBasis(local);
-          phi(v, rc);
+          const auto mapping = fes.getInverseMapping({ d, i }, fe.getBasis(local));
+          mapping(v, p);
           const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
           if (local == 0)
             res = k; // Initializes the result (resizes)
@@ -382,10 +379,9 @@ namespace Rodin::Variational
       void project(const FunctionBase<NestedDerived>& fn, const std::pair<size_t, Index>& p)
       {
         const auto& fes = getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
         const auto& [d, i] = p;
         const auto& fe = fes.getFiniteElement(d, i);
-        const auto& mapping =
+        const auto mapping =
           fes.getMapping({ d, i }, fn.template cast<RangeType>());
         for (Index local = 0; local < fe.getCount(); local++)
         {

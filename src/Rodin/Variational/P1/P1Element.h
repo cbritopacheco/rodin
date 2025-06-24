@@ -214,9 +214,6 @@ namespace Rodin::Variational
         assert(false);
         return 0;
       }
-
-    private:
-      static const Geometry::GeometryIndexed<std::vector<Math::SpatialVector<Real>>> s_nodes;
   };
 
   /**
@@ -232,7 +229,7 @@ namespace Rodin::Variational
 
     public:
       /// Parent class
-      using Parent = FiniteElementBase<P1Element>;
+      using Parent = FiniteElementBase<P1Element<Math::Vector<Scalar>>>;
 
       using ScalarType = Scalar;
 
@@ -263,8 +260,7 @@ namespace Rodin::Variational
           auto operator()(const T& v) const
           {
             const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
-            const P1Element<ScalarType> p1e(m_g);
-            return v(p1e.getNode(m_local / vdim)).coeff(m_local % vdim);
+            return v(P1Element<ScalarType>(m_g).getNode(m_local / vdim)).coeff(m_local % vdim);
           }
 
         private:
@@ -311,16 +307,25 @@ namespace Rodin::Variational
                 const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
                 if constexpr (Order == 0)
                 {
-                  return BasisFunction(m_local, m_g)(rc);
+                  if (m_i == m_local % vdim)
+                  {
+                    return P1Element<ScalarType>(m_g).getBasis(m_local / vdim)(rc);
+                  }
+                  else
+                  {
+                    return 0;
+                  }
                 }
                 else if constexpr (Order == 1)
                 {
-                  if (m_i == m_local % vdim) [[likely]]
+                  if (m_i == m_local % vdim)
                   {
                     return P1Element<ScalarType>(m_g).getBasis(m_local / vdim).template getDerivative<1>(m_j)(rc);
                   }
                   else
+                  {
                     return 0;
+                  }
                 }
                 else
                 {
@@ -350,7 +355,7 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          Math::Vector<ScalarType> operator()(const Math::SpatialVector<ScalarType>& r) const
+          Math::Vector<ScalarType> operator()(const Math::SpatialVector<Real>& r) const
           {
             Math::Vector<ScalarType> res;
             operator()(res, r);

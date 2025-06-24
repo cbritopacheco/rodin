@@ -505,9 +505,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      constexpr
       ScalarType operator()(size_t tr, size_t te)
       {
-        return Math::dot(getLHS().getBasis(tr), getRHS().getBasis(te));
+        return Math::dot(this->object(getLHS().getBasis(tr)), this->object(getRHS().getBasis(te)));
       }
 
       Dot* copy() const noexcept final override

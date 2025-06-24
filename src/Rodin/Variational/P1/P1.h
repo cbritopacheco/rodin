@@ -174,11 +174,11 @@ namespace Rodin::Variational
           constexpr
           const FunctionType& getFunction() const
           {
-            return m_v.get();
+            return m_v;
           }
 
         private:
-          std::reference_wrapper<const FunctionType> m_v;
+          const FunctionType m_v;
       };
 
       template <class Callable>
@@ -427,11 +427,11 @@ namespace Rodin::Variational
           constexpr
           const FunctionType& getFunction() const
           {
-            return m_v.get();
+            return m_v;
           }
 
         private:
-          std::reference_wrapper<const FunctionType> m_v;
+          const FunctionType m_v;
       };
 
       template <class Callable>

@@ -671,10 +671,7 @@ namespace Rodin::Assembly
                 const Index global = fes.getGlobalIndex({ faceDim, i }, local);
                 auto find = res.find(global);
                 if (find == res.end())
-                {
-                  const auto s = fe.getLinearForm(local)(mapping);
-                  res.insert(find, std::pair{ global, s });
-                }
+                  res.insert(find, std::pair{ global, fe.getLinearForm(local)(mapping) });
               }
             }
           }
