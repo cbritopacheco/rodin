@@ -148,6 +148,7 @@ if (RODIN_BUILD_SRC)
     system
     filesystem
     serialization
+    headers
     )
   include_directories(${Boost_INCLUDE_DIRS})
 

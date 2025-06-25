@@ -17,34 +17,47 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  // Build a mesh
+  auto pi = Rodin::Math::Constants::pi();
+  size_t M = 4;
+
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 32, 32 });
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { M, M });
 
-  mesh.scale(1. / 31.0);
-  mesh.getConnectivity().compute(1, 2);
+      mesh.scale(1.0 / (M - 1));
+      mesh.getConnectivity().compute(1, 2);
 
-  P1 vh(mesh);
-  ScalarFunction f =
-    [](const Point& p) {
-      return cos(10 * M_PI * p.x());
-    };
+  P1 vh(mesh, mesh.getSpaceDimension());
+  VectorFunction f{
+    (pi * pi - 1) * sin(pi * F::x) * exp(F::y),
+    (pi * pi - 1) * sin(pi * F::y) * exp(F::x)
+  };
 
   TrialFunction u(vh);
   TestFunction  v(vh);
 
-  // Define problem
+  // Apply Dirichlet conditions on the entire boundary.
   Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
+  poisson = Integral(Jacobian(u), Jacobian(v))
           - Integral(f, v)
-          + DirichletBC(u, Zero());
+          + DirichletBC(u, VectorFunction{
+              sin(pi * F::x) * exp(F::y),
+              sin(pi * F::y) * exp(F::x)
+            });
+  poisson.assemble();
+  // CG(poisson).solve();
 
-  // Solve
-  CG(poisson).solve();
+  std::cout << poisson.getLinearSystem().getOperator() << std::endl;
+  std::cout << "==============" << std::endl;
+  std::cout << poisson.getLinearSystem().getVector() << std::endl;
 
-  // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  // VectorFunction solution{
+  //   sin(pi * F::x) * exp(F::y),
+  //   sin(pi * F::y) * exp(F::x)
+  // };
+
+  // // Save solution
+  // u.getSolution().save("Poisson.gf");
+  // mesh.save("Poisson.mesh");
 
   return 0;
 }

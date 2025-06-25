@@ -13,10 +13,13 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-#include <boost/filesystem.hpp>
 #include <type_traits>
 
 #include <boost/process.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/process/child.hpp>
+#include <boost/process/pipe.hpp>
+#include <boost/process/system.hpp>
 
 #include "Rodin/Alert.h"
 
