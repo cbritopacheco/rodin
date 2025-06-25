@@ -531,6 +531,9 @@ namespace Rodin::Variational
             return s_elements[m_vdim];
           }
         }
+        assert(false);
+        static thread_local constexpr ElementType s_null(0, Geometry::Polytope::Type::Point);
+        return s_null;
       }
 
       size_t getSize() const override
