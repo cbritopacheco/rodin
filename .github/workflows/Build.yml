@@ -85,7 +85,7 @@ jobs:
           lcov
           sdl2
           glfw
-          libomp-dev
+          libomp
           openal-soft
           vulkan-headers
           molten-vk
