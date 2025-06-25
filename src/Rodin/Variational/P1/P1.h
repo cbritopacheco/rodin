@@ -135,10 +135,6 @@ namespace Rodin::Variational
           std::unique_ptr<FunctionType> m_v;
       };
 
-      template <class FunctionDerived>
-      Mapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v)
-        -> Mapping<FunctionDerived>;
-
       /**
        * @brief Inverse mapping for the scalar/complex P1 space.
        */
@@ -180,9 +176,6 @@ namespace Rodin::Variational
         private:
           const FunctionType m_v;
       };
-
-      template <class Callable>
-      InverseMapping(const Callable& v) -> InverseMapping<Callable>;
 
       P1(const MeshType& mesh)
         : m_mesh(mesh)
@@ -288,12 +281,6 @@ namespace Rodin::Variational
         return Mapping<FunctionDerived>(*mesh.getPolytope(d, i), v);
       }
 
-      template <class FunctionDerived>
-      auto getMapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v) const
-      {
-        return Mapping<FunctionDerived>(polytope, v);
-      }
-
       /**
        * @brief Returns the inverse mapping of the function from the physical
        * element to the reference element.
@@ -302,12 +289,6 @@ namespace Rodin::Variational
        */
       template <class CallableType>
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
-      {
-        return InverseMapping<CallableType>(v);
-      }
-
-      template <class CallableType>
-      auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
       {
         return InverseMapping<CallableType>(v);
       }
@@ -405,10 +386,6 @@ namespace Rodin::Variational
           std::unique_ptr<FunctionType> m_v;
       };
 
-      template <class FunctionDerived>
-      Mapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v)
-        -> Mapping<FunctionDerived>;
-
       template <class CallableType>
       class InverseMapping : public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
       {
@@ -447,9 +424,6 @@ namespace Rodin::Variational
         private:
           const FunctionType m_v;
       };
-
-      template <class Callable>
-      InverseMapping(const Callable& v) -> InverseMapping<Callable>;
 
       P1(const Geometry::Mesh<ContextType>& mesh, size_t vdim)
         : m_mesh(mesh), m_vdim(vdim)
@@ -591,19 +565,13 @@ namespace Rodin::Variational
       {
         const auto [d, i] = idx;
         const auto& mesh = getMesh();
-        return P1::Mapping(*mesh.getPolytope(d, i), v);
+        return Mapping<FunctionDerived>(*mesh.getPolytope(d, i), v);
       }
 
       template <class CallableType>
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
-        return InverseMapping(v);
-      }
-
-      template <class CallableType>
-      auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
-      {
-        return InverseMapping(v);
+        return InverseMapping<CallableType>(v);
       }
 
     private:
