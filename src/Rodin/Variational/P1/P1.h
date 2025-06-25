@@ -229,6 +229,9 @@ namespace Rodin::Variational
             return s_element;
           }
         }
+        assert(false);
+        static thread_local constexpr ElementType s_null;
+        return s_null;
       }
 
       size_t getSize() const override

@@ -9,7 +9,6 @@
 
 #include "Matrix.h"
 #include "Vector.h"
-#include "Tensor.h"
 
 #include "SparseMatrix.h"
 

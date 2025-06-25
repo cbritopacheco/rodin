@@ -174,6 +174,9 @@ namespace Rodin::Geometry
                 return s_nodes[i];
               }
             }
+            assert(false);
+            static thread_local const Math::SpatialVector<Real> s_null;
+            return s_null;
           }
 
         private:
