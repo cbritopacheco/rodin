@@ -240,13 +240,8 @@ namespace Rodin::Variational
       {
         public:
           constexpr
-          LinearForm()
-            : m_local(0), m_g(Geometry::Polytope::Type::Point)
-          {}
-
-          constexpr
-          LinearForm(size_t local, Geometry::Polytope::Type g)
-            : m_local(local), m_g(g)
+          LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
+            : m_vdim(vdim), m_local(local), m_g(g)
           {}
 
           constexpr
@@ -259,11 +254,11 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const T& v) const
           {
-            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
-            return v(P1Element<ScalarType>(m_g).getNode(m_local / vdim)).coeff(m_local % vdim);
+            return v(P1Element<ScalarType>(m_g).getNode(m_local / m_vdim)).coeff(m_local % m_vdim);
           }
 
         private:
+          const size_t m_vdim;
           const size_t m_local;
           const Geometry::Polytope::Type m_g;
       };
@@ -288,8 +283,8 @@ namespace Rodin::Variational
                * @param g Geometry type of the polytope
                */
               constexpr
-              DerivativeFunction(size_t i, size_t j, size_t local, Geometry::Polytope::Type g)
-                : m_i(i), m_j(j), m_local(local), m_g(g)
+              DerivativeFunction(size_t i, size_t j, size_t vdim, size_t local, Geometry::Polytope::Type g)
+                : m_i(i), m_j(j), m_vdim(vdim), m_local(local), m_g(g)
               {}
 
               constexpr
@@ -304,12 +299,11 @@ namespace Rodin::Variational
               constexpr
               Scalar operator()(const Math::SpatialVector<Real>& rc) const
               {
-                const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
                 if constexpr (Order == 0)
                 {
-                  if (m_i == m_local % vdim)
+                  if (m_i == m_local % m_vdim)
                   {
-                    return P1Element<ScalarType>(m_g).getBasis(m_local / vdim)(rc);
+                    return P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
                   }
                   else
                   {
@@ -318,9 +312,9 @@ namespace Rodin::Variational
                 }
                 else if constexpr (Order == 1)
                 {
-                  if (m_i == m_local % vdim)
+                  if (m_i == m_local % m_vdim)
                   {
-                    return P1Element<ScalarType>(m_g).getBasis(m_local / vdim).template getDerivative<1>(m_j)(rc);
+                    return P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim).template getDerivative<1>(m_j)(rc);
                   }
                   else
                   {
@@ -335,18 +329,14 @@ namespace Rodin::Variational
 
             private:
               const size_t m_i, m_j;
+              const size_t m_vdim;
               const size_t m_local;
               const Geometry::Polytope::Type m_g;
           };
 
           constexpr
-          BasisFunction()
-            : m_local(0), m_g(Geometry::Polytope::Type::Point)
-          {}
-
-          constexpr
-          BasisFunction(size_t local, Geometry::Polytope::Type g)
-            : m_local(local), m_g(g)
+          BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
+            : m_vdim(vdim), m_local(local), m_g(g)
           {}
 
           constexpr
@@ -365,20 +355,20 @@ namespace Rodin::Variational
           constexpr
           void operator()(Math::Vector<ScalarType>& out, const Math::SpatialVector<Real>& rc) const
           {
-            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
-            out.resize(vdim);
+            out.resize(m_vdim);
             out.setZero();
-            out.coeffRef(m_local % vdim) = P1Element<ScalarType>(m_g).getBasis(m_local / vdim)(rc);
+            out.coeffRef(m_local % m_vdim) = P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
           }
 
           template <size_t Order>
           constexpr
           DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
           {
-            return DerivativeFunction<Order>(i, j, m_local, m_g);
+            return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
           }
 
         private:
+          const size_t m_vdim;
           const size_t m_local;
           const Geometry::Polytope::Type m_g;
       };
@@ -386,8 +376,8 @@ namespace Rodin::Variational
       P1Element() = default;
 
       constexpr
-      P1Element(Geometry::Polytope::Type geometry)
-        : Parent(geometry)
+      P1Element(size_t vdim, Geometry::Polytope::Type geometry)
+        : Parent(geometry), m_vdim(vdim)
       {}
 
       constexpr
@@ -403,27 +393,25 @@ namespace Rodin::Variational
       constexpr
       size_t getCount() const
       {
-        return Geometry::Polytope::Traits(this->getGeometry()).getVertexCount()
-          * Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        return m_vdim * Geometry::Polytope::Traits(this->getGeometry()).getVertexCount();
       }
 
       constexpr
-      auto getLinearForm(size_t local) const
+      LinearForm getLinearForm(size_t local) const
       {
-        return LinearForm(local, this->getGeometry());
+        return LinearForm(m_vdim, local, this->getGeometry());
       }
 
       constexpr
       BasisFunction getBasis(size_t local) const
       {
-        return BasisFunction(local, this->getGeometry());
+        return BasisFunction(m_vdim, local, this->getGeometry());
       }
 
       constexpr
       const Math::SpatialVector<Real>& getNode(size_t local) const
       {
-        const size_t vdim = Geometry::Polytope::Traits(this->getGeometry()).getDimension();
-        return P1Element<ScalarType>(this->getGeometry()).getNode(local / vdim);
+        return P1Element<ScalarType>(this->getGeometry()).getNode(local / m_vdim);
       }
 
       constexpr
@@ -444,6 +432,9 @@ namespace Rodin::Variational
         assert(false);
         return 0;
       }
+
+    private:
+      const size_t m_vdim;
   };
 }
 

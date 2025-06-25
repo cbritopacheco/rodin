@@ -200,14 +200,42 @@ namespace Rodin::Variational
 
       P1& operator=(P1&& other) = default;
 
-      const auto& getElementIndex() const
-      {
-        return s_elements;
-      }
-
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
-        return s_elements[getMesh().getGeometry(d, i)];
+        const auto g = getMesh().getGeometry(d, i);
+        switch (g)
+        {
+          case Geometry::Polytope::Type::Point:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Point);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Segment:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Segment);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Triangle:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Triangle);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Quadrilateral:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Quadrilateral);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Tetrahedron:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Tetrahedron);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Wedge:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Wedge);
+            return s_element;
+          }
+        }
       }
 
       size_t getSize() const override
@@ -285,21 +313,7 @@ namespace Rodin::Variational
       }
 
     private:
-      static const Geometry::GeometryIndexed<P1Element<RangeType>> s_elements;
-
       std::reference_wrapper<const MeshType> m_mesh;
-  };
-
-  template <class Scalar>
-  const Geometry::GeometryIndexed<P1Element<Scalar>>
-  P1<Scalar, Geometry::Mesh<Context::Local>>::s_elements =
-  {
-    { Geometry::Polytope::Type::Point, P1Element<Scalar>(Geometry::Polytope::Type::Point) },
-    { Geometry::Polytope::Type::Segment, P1Element<Scalar>(Geometry::Polytope::Type::Segment) },
-    { Geometry::Polytope::Type::Triangle, P1Element<Scalar>(Geometry::Polytope::Type::Triangle) },
-    { Geometry::Polytope::Type::Quadrilateral, P1Element<Scalar>(Geometry::Polytope::Type::Quadrilateral) },
-    { Geometry::Polytope::Type::Tetrahedron, P1Element<Scalar>(Geometry::Polytope::Type::Tetrahedron) },
-    { Geometry::Polytope::Type::Wedge, P1Element<Scalar>(Geometry::Polytope::Type::Wedge) }
   };
 
   template <class Context>
@@ -470,7 +484,76 @@ namespace Rodin::Variational
 
       const VectorP1Element& getFiniteElement(size_t d, Index i) const
       {
-        return s_elements[getMesh().getGeometry(d, i)];
+        const auto& g = getMesh().getGeometry(d, i);
+        switch (g)
+        {
+          case Geometry::Polytope::Type::Point:
+          {
+            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            {
+              ElementType(0, Geometry::Polytope::Type::Point),
+              ElementType(1, Geometry::Polytope::Type::Point),
+              ElementType(2, Geometry::Polytope::Type::Point),
+              ElementType(3, Geometry::Polytope::Type::Point)
+            };
+            return s_elements[m_vdim];
+          }
+          case Geometry::Polytope::Type::Segment:
+          {
+            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            {
+              ElementType(0, Geometry::Polytope::Type::Segment),
+              ElementType(1, Geometry::Polytope::Type::Segment),
+              ElementType(2, Geometry::Polytope::Type::Segment),
+              ElementType(3, Geometry::Polytope::Type::Segment)
+            };
+            return s_elements[m_vdim];
+          }
+          case Geometry::Polytope::Type::Triangle:
+          {
+            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            {
+              ElementType(0, Geometry::Polytope::Type::Triangle),
+              ElementType(1, Geometry::Polytope::Type::Triangle),
+              ElementType(2, Geometry::Polytope::Type::Triangle),
+              ElementType(3, Geometry::Polytope::Type::Triangle)
+            };
+            return s_elements[m_vdim];
+          }
+          case Geometry::Polytope::Type::Quadrilateral:
+          {
+            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            {
+              ElementType(0, Geometry::Polytope::Type::Quadrilateral),
+              ElementType(1, Geometry::Polytope::Type::Quadrilateral),
+              ElementType(2, Geometry::Polytope::Type::Quadrilateral),
+              ElementType(3, Geometry::Polytope::Type::Quadrilateral)
+            };
+            return s_elements[m_vdim];
+          }
+          case Geometry::Polytope::Type::Tetrahedron:
+          {
+            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            {
+              ElementType(0, Geometry::Polytope::Type::Tetrahedron),
+              ElementType(1, Geometry::Polytope::Type::Tetrahedron),
+              ElementType(2, Geometry::Polytope::Type::Tetrahedron),
+              ElementType(3, Geometry::Polytope::Type::Tetrahedron)
+            };
+            return s_elements[m_vdim];
+          }
+          case Geometry::Polytope::Type::Wedge:
+          {
+            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            {
+              ElementType(0, Geometry::Polytope::Type::Wedge),
+              ElementType(1, Geometry::Polytope::Type::Wedge),
+              ElementType(2, Geometry::Polytope::Type::Wedge),
+              ElementType(3, Geometry::Polytope::Type::Wedge)
+            };
+            return s_elements[m_vdim];
+          }
+        }
       }
 
       size_t getSize() const override
@@ -524,8 +607,6 @@ namespace Rodin::Variational
       }
 
     private:
-      static const Geometry::GeometryIndexed<ElementType> s_elements;
-
       std::reference_wrapper<const Geometry::Mesh<ContextType>> m_mesh;
       size_t m_vdim;
       std::vector<std::vector<IndexArray>> m_dofs;
@@ -534,18 +615,6 @@ namespace Rodin::Variational
   template <class Context>
   P1(const Geometry::Mesh<Context>&, size_t)
     -> P1<Math::Vector<Real>, Geometry::Mesh<Context>>;
-
-  template <class Scalar>
-  const Geometry::GeometryIndexed<P1Element<Math::Vector<Scalar>>>
-  P1<Math::Vector<Scalar>, Geometry::Mesh<Context::Local>>::s_elements =
-  {
-    { Geometry::Polytope::Type::Point, P1Element<Math::Vector<Scalar>>(Geometry::Polytope::Type::Point) },
-    { Geometry::Polytope::Type::Segment, P1Element<Math::Vector<Scalar>>(Geometry::Polytope::Type::Segment) },
-    { Geometry::Polytope::Type::Triangle, P1Element<Math::Vector<Scalar>>(Geometry::Polytope::Type::Triangle) },
-    { Geometry::Polytope::Type::Quadrilateral, P1Element<Math::Vector<Scalar>>(Geometry::Polytope::Type::Quadrilateral) },
-    { Geometry::Polytope::Type::Tetrahedron, P1Element<Math::Vector<Scalar>>(Geometry::Polytope::Type::Tetrahedron) },
-    { Geometry::Polytope::Type::Wedge, P1Element<Math::Vector<Scalar>>(Geometry::Polytope::Type::Wedge) }
-  };
 
   /// Alias for a vector valued P1 finite element space
   template <class Mesh>

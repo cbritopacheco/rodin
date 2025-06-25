@@ -176,9 +176,9 @@ namespace Rodin::Variational
       }
 
       constexpr
-      Derived& setData(const DataType& data)
+      Derived& setData(const DataType& data, size_t offset = 0)
       {
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).setData(data, offset);
       }
 
       /**
@@ -902,14 +902,14 @@ namespace Rodin::Variational
         : Parent(fes)
       {
         auto& data = this->getData();
-        data.resize(fes.getSize() * fes.getVectorDimension());
+        data.resize(fes.getSize());
         data.setZero();
       }
 
       GridFunction(const FESType& fes, DataType& data)
         : Parent(fes, data)
       {
-        data.resize(fes.getSize() * fes.getVectorDimension());
+        data.resize(fes.getSize());
         data.setZero();
       }
 
@@ -917,7 +917,7 @@ namespace Rodin::Variational
         : Parent(fes, std::move(_data))
       {
         auto& data = this->getData();
-        data.resize(fes.getSize() * fes.getVectorDimension());
+        data.resize(fes.getSize());
         data.setZero();
       }
 
@@ -996,10 +996,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
-      GridFunction& setData(const DataType& data)
+      GridFunction& setData(const DataType& data, size_t offset = 0)
       {
-        this->getData() = data;
+        const auto sz = this->getFiniteElementSpace().getSize();
+        assert(offset + sz <= data.size());
+        this->getData() = data.segment(offset, sz);
         return *this;
       }
   };

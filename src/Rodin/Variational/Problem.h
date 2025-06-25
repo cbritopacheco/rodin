@@ -620,7 +620,7 @@ namespace Rodin::Variational
          m_us.iapply(
              [&](size_t i, auto& u)
              {
-               u.get().emplace().getSolution().setData(m_guess);
+               u.get().emplace().getSolution().setData(m_guess, m_trialOffsets[i]);
              });
       }
 
