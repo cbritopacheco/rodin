@@ -357,14 +357,17 @@ namespace Rodin::Variational
       const Geometry::Point& getPoint() const
       {
         assert(m_p);
-        return m_p.value().get();
+        return *m_p;
       }
 
       ShapeFunction& setPoint(const Geometry::Point& p)
       {
-        m_p = p;
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
+        if (m_p == &p)
+          return *this;
+        m_p = &p;
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
         const auto& fes = this->getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
         const size_t count = fe.getCount();
@@ -392,9 +395,9 @@ namespace Rodin::Variational
       }
 
     private:
-      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
-
       std::vector<RangeType> m_basis;
+
+      const Geometry::Point* m_p;
   };
 }
 

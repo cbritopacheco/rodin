@@ -276,7 +276,7 @@ namespace Rodin::IO::MEDIT
     public:
       struct Data
       {
-        Math::PointVector vertex;
+        Math::SpatialPoint vertex;
         Geometry::Attribute attribute;
       };
 
@@ -295,7 +295,7 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         size_t i = 0;
-        Data res{ Math::PointVector(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
+        Data res{ Math::SpatialPoint(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
         const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
         const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
         const auto p = double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];
@@ -808,7 +808,6 @@ namespace Rodin::IO
           {
             const Geometry::Point p(
                 *it,
-                it->getTransformation(),
                 Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
                 it->getCoordinates());
             os << gf(p) << '\n';

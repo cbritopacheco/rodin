@@ -191,10 +191,9 @@ namespace Rodin::Variational
             {
               const auto& polytope = *it;
               const auto& qf = m_qf.value()(polytope);
-              const auto& trans = polytope.getTransformation();
               for (size_t i = 0; i < qf.getSize(); i++)
               {
-                const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
+                const Geometry::Point y(polytope, std::ref(qf.getPoint(i)));
                 res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
               }
             }
@@ -221,10 +220,9 @@ namespace Rodin::Variational
             {
               const auto& polytope = *it;
               const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
-              const auto& trans = polytope.getTransformation();
               for (size_t i = 0; i < qf.getSize(); i++)
               {
-                const Geometry::Point y(polytope, trans, std::cref(qf.getPoint(i)));
+                const Geometry::Point y(polytope, qf.getPoint(i));
                 res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
               }
             }
@@ -259,10 +257,9 @@ namespace Rodin::Variational
           {
             const auto& polytope = *it;
             const auto& qf = m_qf.value()(polytope);
-            const auto& trans = polytope.getTransformation();
             for (size_t i = 0; i < qf.getSize(); i++)
             {
-              const Geometry::Point y(polytope, trans, std::cref(qf.getPoint(i)));
+              const Geometry::Point y(polytope, qf.getPoint(i));
               kernel(kxy, p, y);
               res += qf.getWeight(i) * y.getDistortion() * kxy * operand(y);
             }
@@ -274,10 +271,9 @@ namespace Rodin::Variational
           {
             const auto& polytope = *it;
             const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
-            const auto& trans = polytope.getTransformation();
             for (size_t i = 0; i < qf.getSize(); i++)
             {
-              const Geometry::Point y(polytope, trans, std::cref(qf.getPoint(i)));
+              const Geometry::Point y(polytope, qf.getPoint(i));
               kernel(kxy, p, y);
               res += qf.getWeight(i) * y.getDistortion() * kxy * operand(y);
             }

@@ -70,12 +70,11 @@ namespace Rodin::Variational
           m_qfgg.emplace(polytope.getGeometry());
           m_qf = m_qfgg.value();
         }
-        const auto& trans = polytope.getTransformation();
         const auto& qf = m_qf.value().get();
         m_ps.clear();
         m_ps.reserve(qf.getSize());
         for (size_t i = 0; i < qf.getSize(); i++)
-          m_ps.emplace_back(polytope, trans, std::cref(qf.getPoint(i)));
+          m_ps.emplace_back(polytope, qf.getPoint(i));
         return *this;
       }
 
@@ -313,17 +312,27 @@ namespace Rodin::Variational
 
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
-          m_integrand(integrand.copy())
+          m_integrand(integrand.copy()),
+          m_polytope(nullptr),
+          m_set(false)
       {}
 
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
-          m_integrand(other.m_integrand->copy())
+          m_integrand(other.m_integrand->copy()),
+          m_polytope(other.m_polytope),
+          m_set(false)
       {}
 
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
-          m_integrand(std::move(other.m_integrand))
+          m_integrand(std::move(other.m_integrand)),
+          m_polytope(std::move(other.m_polytope)),
+          m_qf(std::move(other.m_qf)),
+          m_ps(std::move(other.m_ps)),
+          m_set(std::move(other.m_set)),
+          m_order(std::move(other.m_order)),
+          m_geometry(std::move(other.m_geometry))
       {}
 
       constexpr
@@ -335,28 +344,41 @@ namespace Rodin::Variational
 
       const Geometry::Polytope& getPolytope() const override
       {
-        return m_polytope.value().get();
+        assert(m_polytope);
+        return *m_polytope;
       }
 
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) override
       {
-        m_polytope = polytope;
+        m_polytope = &polytope;
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
         const auto& integrand = *m_integrand;
         const auto& trial = integrand.getLHS();
         const auto& test = integrand.getRHS();
-        const auto& trans = polytope.getTransformation();
         const auto& trialfes = trial.getFiniteElementSpace();
         const auto& testfes = test.getFiniteElementSpace();
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
         const size_t order = std::max(trialfe.getOrder(), testfe.getOrder());
-        m_qf.reset(new QF::GenericPolytopeQuadrature(order, polytope.getGeometry()));
-        m_ps.clear();
-        m_ps.reserve(m_qf->getSize());
-        for (size_t i = 0; i < m_qf->getSize(); i++)
-          m_ps.emplace_back(polytope, trans, std::cref(m_qf->getPoint(i)));
+        const auto& geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_order != order || m_geometry != geometry;
+        if (recompute)
+        {
+          m_set = true;
+          m_order = order;
+          m_geometry = geometry;
+          m_qf.reset(new QF::GenericPolytopeQuadrature(order, geometry));
+          m_ps.clear();
+          m_ps.reserve(m_qf->getSize());
+          for (size_t i = 0; i < m_qf->getSize(); i++)
+            m_ps.emplace_back(polytope, m_qf->getPoint(i));
+        }
+        else
+        {
+          for (size_t i = 0; i < m_qf->getSize(); i++)
+            m_ps[i].setPolytope(polytope);
+        }
         return *this;
       }
 
@@ -379,9 +401,13 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
       std::vector<Geometry::Point> m_ps;
+
+      const Geometry::Polytope* m_polytope;
+      bool m_set;
+      size_t m_order;
+      Geometry::Polytope::Type m_geometry;
   };
 
   /**
@@ -411,19 +437,29 @@ namespace Rodin::Variational
       constexpr
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
-          m_integrand(integrand.copy())
+          m_integrand(integrand.copy()),
+          m_polytope(nullptr),
+          m_set(false)
       {}
 
       constexpr
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
-          m_integrand(other.m_integrand->copy())
+          m_integrand(other.m_integrand->copy()),
+          m_polytope(other.m_polytope),
+          m_set(false)
       {}
 
       constexpr
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
-          m_integrand(std::move(other.m_integrand))
+          m_integrand(std::move(other.m_integrand)),
+          m_polytope(std::move(other.m_polytope)),
+          m_qf(std::move(other.m_qf)),
+          m_ps(std::move(other.m_ps)),
+          m_set(std::move(other.m_set)),
+          m_order(std::move(other.m_order)),
+          m_geometry(std::move(other.m_geometry))
       {}
 
       constexpr
@@ -435,24 +471,37 @@ namespace Rodin::Variational
 
       const Geometry::Polytope& getPolytope() const override
       {
-        return m_polytope.value().get();
+        assert(m_polytope);
+        return *m_polytope;
       }
 
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
-        m_polytope = polytope;
+        m_polytope = &polytope;
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
-        const auto& trans = polytope.getTransformation();
         const auto& integrand = getIntegrand();
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
         const size_t order = fe.getOrder();
-        m_qf.reset(new QF::GenericPolytopeQuadrature(order, polytope.getGeometry()));
-        m_ps.clear();
-        m_ps.reserve(m_qf->getSize());
-        for (size_t i = 0; i < m_qf->getSize(); i++)
-          m_ps.emplace_back(polytope, trans, std::cref(m_qf->getPoint(i)));
+        const auto& geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_order != order || m_geometry != geometry;
+        if (recompute)
+        {
+          m_set = true;
+          m_order = order;
+          m_geometry = geometry;
+          m_qf.reset(new QF::GenericPolytopeQuadrature(order, geometry));
+          m_ps.clear();
+          m_ps.reserve(m_qf->getSize());
+          for (size_t i = 0; i < m_qf->getSize(); i++)
+            m_ps.emplace_back(polytope, m_qf->getPoint(i));
+        }
+        else
+        {
+          for (size_t i = 0; i < m_qf->getSize(); i++)
+            m_ps[i].setPolytope(polytope);
+        }
         return *this;
       }
 
@@ -475,9 +524,13 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
       std::vector<Geometry::Point> m_ps;
+
+      const Geometry::Polytope* m_polytope;
+      bool m_set;
+      size_t m_order;
+      Geometry::Polytope::Type m_geometry;
   };
 }
 

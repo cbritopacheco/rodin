@@ -69,10 +69,9 @@ namespace Rodin::Variational
       LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
-        const auto& trans = polytope.getTransformation();
         m_qf.emplace(polytope.getGeometry());
         assert(m_qf->getSize() == 1);
-        m_p.emplace(polytope, trans, std::cref(m_qf->getPoint(0)));
+        m_p.emplace(polytope, m_qf->getPoint(0));
         m_weight = m_qf->getWeight(0);
         m_distortion = m_p->getDistortion();
         const size_t d = polytope.getDimension();

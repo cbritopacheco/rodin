@@ -135,7 +135,7 @@ namespace Rodin::Tests::Unit
         const Real y = gen();
         const Math::Vector<Real> rc{{x, y}};
         const Math::Vector<Real> pc = trans.transform(rc);
-        const Point p(polytope, trans, Math::Vector<Real>{{x, y}});
+        const Point p(polytope, Math::Vector<Real>{{x, y}});
         EXPECT_NEAR(gf1.getValue(p), pc.x() + pc.y(), RODIN_FUZZY_CONSTANT);
       }
     }
@@ -152,7 +152,7 @@ namespace Rodin::Tests::Unit
         const Real y = gen();
         const Math::Vector<Real> rc{{x, y}};
         const Math::Vector<Real> pc = trans.transform(rc);
-        const Point p(polytope, trans, rc);
+        const Point p(polytope, rc);
         EXPECT_NEAR(gf1.getValue(p), pc.x() + pc.y(), RODIN_FUZZY_CONSTANT);
       }
     }
@@ -171,7 +171,7 @@ namespace Rodin::Tests::Unit
         const Real y = gen();
         const Math::Vector<Real> rc{{x, y}};
         const Math::Vector<Real> pc = trans.transform(rc);
-        const Point p(polytope, trans, rc);
+        const Point p(polytope, rc);
         EXPECT_NEAR(gf2.getValue(p), 5 * pc.x() + 100 * pc.y(), RODIN_FUZZY_CONSTANT);
       }
     }
@@ -190,7 +190,7 @@ namespace Rodin::Tests::Unit
         const Real y = gen();
         const Math::Vector<Real> rc{{x, y}};
         const Math::Vector<Real> pc = trans.transform(rc);
-        const Point p(polytope, trans, rc);
+        const Point p(polytope, rc);
         EXPECT_NEAR(gf3.getValue(p), pc.x() - pc.y(), RODIN_FUZZY_CONSTANT);
       }
     }
@@ -209,7 +209,7 @@ namespace Rodin::Tests::Unit
         const Real y = gen();
         const Math::Vector<Real> rc{{x, y}};
         const Math::Vector<Real> pc = trans.transform(rc);
-        const Point p(polytope, trans, rc);
+        const Point p(polytope, rc);
         EXPECT_NEAR(gf4.getValue(p), 666 * pc.x() - 999 * pc.y(), RODIN_FUZZY_CONSTANT);
       }
     }
@@ -283,7 +283,7 @@ namespace Rodin::Tests::Unit
         const Real y = gen();
         const Math::Vector<Real> rc{{x, y}};
         const Math::Vector<Real> pc = trans.transform(rc);
-        const Point p(polytope, trans, rc);
+        const Point p(polytope, rc);
         EXPECT_NEAR((gf1.getValue(p) - Math::Vector<Real>{{pc.x(), pc.y()}}).norm(), 0, RODIN_FUZZY_CONSTANT);
         break;
       }
@@ -309,7 +309,7 @@ namespace Rodin::Tests::Unit
         const Real y = gen();
         const Math::Vector<Real> rc{{x, y}};
         const Math::Vector<Real> pc = trans.transform(rc);
-        const Point p(polytope, trans, rc);
+        const Point p(polytope, rc);
         EXPECT_NEAR((gf2.getValue(p) - Math::Vector<Real>{{pc.y(), pc.x()}}).norm(), 0, RODIN_FUZZY_CONSTANT);
       }
     }
@@ -331,7 +331,7 @@ namespace Rodin::Tests::Unit
         const Real y = gen();
         const Math::Vector<Real> rc{{x, y}};
         const Math::Vector<Real> pc = trans.transform(rc);
-        const Point p(polytope, trans, rc);
+        const Point p(polytope, rc);
         EXPECT_NEAR((gf3.getValue(p) - Math::Vector<Real>{{pc.x() + pc.y(), 0}}).norm(), 0, RODIN_FUZZY_CONSTANT);
       }
     }
@@ -357,7 +357,7 @@ namespace Rodin::Tests::Unit
         const Real y = gen();
         const Math::Vector<Real> rc{{x, y}};
         const Math::Vector<Real> pc = trans.transform(rc);
-        const Point p(polytope, trans, rc);
+        const Point p(polytope, rc);
         const Math::Vector<Real> actual{{999 * p.x() - 100 * p.y(), -5 * p.x() + 666 * p.y()}};
         EXPECT_NEAR((gf4.getValue(p) - actual).norm(), 0, RODIN_FUZZY_CONSTANT);
       }

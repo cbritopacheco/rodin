@@ -543,12 +543,12 @@ namespace Rodin::Geometry
     shard.save(filename, fmt);
   }
 
-  Eigen::Map<const Math::PointVector> MPIMesh::getVertexCoordinates(Index globalIdx) const
+  Eigen::Map<const Math::SpatialPoint> MPIMesh::getVertexCoordinates(Index globalIdx) const
   {
     auto idx = getLocalIndex(0, globalIdx);
     const auto& shard = getShard();
     const auto& comm = m_context.getCommunicator();
-    Math::PointVector local;
+    Math::SpatialPoint local;
     if (idx)
     {
       if (!shard.isGhost(0, *idx))

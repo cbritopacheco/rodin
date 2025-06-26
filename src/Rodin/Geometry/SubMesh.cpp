@@ -73,10 +73,6 @@ namespace Rodin::Geometry
       }
       i = find->get_left();
     }
-    std::unique_ptr<Polytope> childPolytope(getPolytope(d, i).release());
-    return Point(
-        std::move(*childPolytope),
-        getPolytopeTransformation(d, i),
-        std::cref(p.getReferenceCoordinates()), p.getPhysicalCoordinates());
+    return Point(*getPolytope(d, i), p.getReferenceCoordinates(), p.getPhysicalCoordinates());
   }
 }

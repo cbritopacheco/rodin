@@ -210,7 +210,9 @@ namespace Rodin::Variational
 
       Grad(Grad&& other)
         : Parent(std::move(other)),
-          m_u(std::move(other.m_u))
+          m_u(std::move(other.m_u)),
+          m_gradient(std::move(other.m_gradient)),
+          m_p(std::move(other.m_p))
       {}
 
       constexpr
@@ -233,12 +235,15 @@ namespace Rodin::Variational
 
       const Geometry::Point& getPoint() const
       {
-        return m_p.value().get();
+        assert(m_p);
+        return *m_p;
       }
 
       Grad& setPoint(const Geometry::Point& p)
       {
-        m_p = p;
+        if (m_p == &p)
+          return *this;
+        m_p = &p;
         const auto& polytope = p.getPolytope();
         const auto& rc = p.getReferenceCoordinates();
         const size_t d = polytope.getDimension();
@@ -273,7 +278,7 @@ namespace Rodin::Variational
 
       std::vector<Math::SpatialVector<ScalarType>> m_gradient;
 
-      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      const Geometry::Point* m_p;
   };
 
   template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>

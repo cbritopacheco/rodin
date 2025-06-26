@@ -200,11 +200,17 @@ namespace Rodin::Geometry
        * @brief Consructs a polytope of dimension @f$ d @f$ and index @f$ i @f$
        * belonging to the given mesh.
        */
-      Polytope(size_t dimension, Index index, const MeshBase& mesh);
+      Polytope(size_t dimension, Index index, const MeshBase& mesh)
+        : m_dimension(dimension), m_index(index), m_mesh(mesh)
+      {}
 
       Polytope(const Polytope&) = default;
 
       Polytope(Polytope&&) = default;
+
+      Polytope& operator=(const Polytope&) = default;
+
+      Polytope& operator=(Polytope&&) = default;
 
       virtual ~Polytope() = default;
 
@@ -269,10 +275,8 @@ namespace Rodin::Geometry
       Polytope& setAttribute();
 
     private:
-      static const GeometryIndexed<Math::PointMatrix> s_vertices;
-
-      const size_t m_dimension;
-      const Index m_index;
+      size_t m_dimension;
+      Index m_index;
       std::reference_wrapper<const MeshBase> m_mesh;
   };
 

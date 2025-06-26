@@ -111,14 +111,14 @@ namespace Rodin::Variational
 
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
-            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            const Geometry::Point p(m_polytope, r);
             return getFunction()(p);
           }
 
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
-            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            const Geometry::Point p(m_polytope, r);
             return getFunction()(res, p);
           }
 
@@ -363,16 +363,16 @@ namespace Rodin::Variational
 
           Mapping(const Mapping&) = default;
 
-          auto operator()(const Math::SpatialVector<Real>& r) const
+          auto operator()(const Math::SpatialPoint& r) const
           {
-            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            const Geometry::Point p(m_polytope, r);
             return getFunction()(p);
           }
 
           template <class T>
-          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
+          auto operator()(T& res, const Math::SpatialPoint& r) const
           {
-            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            const Geometry::Point p(m_polytope, r);
             return getFunction()(res, p);
           }
 

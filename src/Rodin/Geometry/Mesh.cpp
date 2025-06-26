@@ -924,13 +924,7 @@ namespace Rodin::Geometry
     {
       if (it->get() == *this)
       {
-        auto pit = this->getPolytope(d, i);
-        std::unique_ptr<Polytope> parentPolytope(pit.release());
-        return Point(
-            std::move(*parentPolytope),
-            this->getPolytopeTransformation(d, i),
-            std::cref(p.getReferenceCoordinates()),
-            p.getPhysicalCoordinates());
+        return Point(*this->getPolytope(d, i), p.getReferenceCoordinates(), p.getPhysicalCoordinates());
       }
       else if (it->get().isSubMesh())
       {

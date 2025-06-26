@@ -64,9 +64,6 @@ namespace Rodin::Geometry
   }
 
   // ---- Polytope -----------------------------------------------------------
-  Polytope::Polytope(size_t dimension, Index index, const MeshBase& mesh)
-    : m_dimension(dimension), m_index(index), m_mesh(mesh)
-  {}
 
   Attribute Polytope::getAttribute() const
   {
@@ -113,7 +110,7 @@ namespace Rodin::Geometry
     QF::GenericPolytopeQuadrature qf(getTransformation().getJacobianOrder(), getGeometry());
     for (size_t i = 0; i < qf.getSize(); i++)
     {
-      const Geometry::Point p(*this, getTransformation(), std::cref(qf.getPoint(i)));
+      const Geometry::Point p(*this, qf.getPoint(i));
       res += qf.getWeight(i) * p.getDistortion();
     }
     return res;

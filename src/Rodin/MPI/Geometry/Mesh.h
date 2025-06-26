@@ -138,7 +138,7 @@ namespace Rodin::Geometry
 
       Mesh& setVertexCoordinates(Index globalIdx, Real s, size_t i) override;
 
-      Mesh& setVertexCoordinates(Index globalIdx, const Math::PointVector& coords) override;
+      Mesh& setVertexCoordinates(Index globalIdx, const Math::SpatialPoint& coords) override;
 
       virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index globalIdx) const override;
 
@@ -160,7 +160,7 @@ namespace Rodin::Geometry
         const boost::filesystem::path& filename,
         IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
 
-      Eigen::Map<const Math::PointVector> getVertexCoordinates(Index globalIdx) const override;
+      Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index globalIdx) const override;
 
       SubMeshBase& asSubMesh() override
       {
@@ -186,7 +186,7 @@ namespace Rodin::Geometry
       Context::MPI m_context;
       Shard m_shard;
 
-      mutable FlatMap<Index, Math::PointVector> m_vertices;
+      mutable FlatMap<Index, Math::SpatialPoint> m_vertices;
       mutable TransformationIndex m_transformationIndex;
   };
 }

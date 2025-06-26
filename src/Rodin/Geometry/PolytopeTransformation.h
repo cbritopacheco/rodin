@@ -57,6 +57,8 @@ namespace Rodin::Geometry
       constexpr
       PolytopeTransformation(PolytopeTransformation&&) = default;
 
+      PolytopeTransformation& operator=(PolytopeTransformation&&) = default;
+
       virtual ~PolytopeTransformation() = default;
 
       constexpr
@@ -153,8 +155,8 @@ namespace Rodin::Geometry
       virtual PolytopeTransformation* copy() const noexcept override = 0;
 
     private:
-      const size_t m_rdim;
-      const size_t m_pdim;
+      size_t m_rdim;
+      size_t m_pdim;
   };
 }
 

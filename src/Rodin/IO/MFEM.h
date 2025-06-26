@@ -277,7 +277,7 @@ namespace Rodin::IO::MFEM
       {}
 
       template <class Iterator>
-      std::optional<Math::PointVector> operator()(Iterator begin, Iterator end) const
+      std::optional<Math::SpatialPoint> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::blank;
@@ -286,7 +286,7 @@ namespace Rodin::IO::MFEM
         using boost::spirit::x3::_attr;
 
         size_t i = 0;
-        Math::PointVector res(m_sdim);
+        Math::SpatialPoint res(m_sdim);
         const auto get_double = [&](auto& ctx) { assert(i < m_sdim); res(i++) = _attr(ctx); };
         const auto p = repeat(m_sdim)[double_[get_double]];
         const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);

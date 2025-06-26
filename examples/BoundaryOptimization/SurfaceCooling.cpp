@@ -224,8 +224,7 @@ int main(int, char**)
       std::vector<Point> cs;
       for (auto it = dOmega.getVertex(); !it.end(); ++it)
       {
-        const Point p(*it, it->getTransformation(),
-            Polytope::Traits(Polytope::Type::Point).getVertex(0), it->getCoordinates());
+        const Point p(*it, Polytope::Traits(Polytope::Type::Point).getVertex(0), it->getCoordinates());
         const Real tp = topo(p);
         if (Math::abs(1 - tc / tp) < 1e-5)
           cs.emplace_back(std::move(p));

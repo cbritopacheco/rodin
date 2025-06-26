@@ -53,21 +53,21 @@ namespace Rodin::Variational
           using FunctionType = FunctionBase<FunctionDerived>;
 
           Mapping(const Geometry::Polytope& polytope, const FunctionType& v)
-            : m_polytope(polytope), m_trans(m_polytope.getTransformation()), m_v(v.copy())
+            : m_polytope(polytope), m_v(v.copy())
           {}
 
           Mapping(const Mapping&) = default;
 
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
-            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            const Geometry::Point p(m_polytope, r);
             return getFunction()(p);
           }
 
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
-            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            const Geometry::Point p(m_polytope,r);
             return getFunction()(res, p);
           }
 
@@ -80,7 +80,6 @@ namespace Rodin::Variational
 
         private:
           Geometry::Polytope m_polytope;
-          std::reference_wrapper<const Geometry::PolytopeTransformation> m_trans;
           std::unique_ptr<FunctionType> m_v;
       };
 

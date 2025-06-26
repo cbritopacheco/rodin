@@ -29,7 +29,7 @@ namespace Rodin::Math
   using SpatialVector =
     Eigen::Matrix<ScalarType, Eigen::Dynamic, 1, 0, RODIN_MAXIMAL_SPACE_DIMENSION, 1>;
 
-  using PointVector = SpatialVector<Real>;
+  using SpatialPoint = SpatialVector<Real>;
 
   template <class ScalarType, size_t Size>
   using FixedSizeVector = Eigen::Vector<ScalarType, Size>;
