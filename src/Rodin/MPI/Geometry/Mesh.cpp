@@ -537,7 +537,7 @@ namespace Rodin::Geometry
   }
 
   void MPIMesh::save(
-    const boost::filesystem::path& filename, IO::FileFormat fmt, size_t precison) const
+    const boost::filesystem::path& filename, IO::FileFormat fmt) const
   {
     const auto& shard = getShard();
     shard.save(filename, fmt);

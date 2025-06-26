@@ -158,7 +158,7 @@ namespace Rodin::Geometry
 
       void save(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
+        IO::FileFormat fmt = IO::FileFormat::MFEM) const override;
 
       Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index globalIdx) const override;
 

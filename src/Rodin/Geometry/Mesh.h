@@ -256,7 +256,7 @@ namespace Rodin::Geometry
 
       virtual void save(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const = 0;
+        IO::FileFormat fmt = IO::FileFormat::MFEM) const = 0;
 
       virtual void flush() = 0;
 
@@ -956,7 +956,7 @@ namespace Rodin::Geometry
       */
       virtual void save(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
+        IO::FileFormat fmt = IO::FileFormat::MFEM) const override;
 
       virtual Mesh& scale(Real c) override;
 

@@ -110,8 +110,7 @@ namespace Rodin::Geometry
   }
 
   void Mesh<Context::Local>::save(
-      const boost::filesystem::path& filename,
-      IO::FileFormat fmt, size_t precision) const
+      const boost::filesystem::path& filename, IO::FileFormat fmt) const
   {
     std::ofstream ofs(filename.c_str());
     if (!ofs)
@@ -120,7 +119,6 @@ namespace Rodin::Geometry
         << "Failed to open " << filename << " for writing."
         << Alert::Raise;
     }
-    ofs.precision(precision);
     switch (fmt)
     {
       case IO::FileFormat::MFEM:

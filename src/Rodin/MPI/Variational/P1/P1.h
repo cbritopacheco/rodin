@@ -13,7 +13,7 @@ namespace Rodin::Variational
   template <class Range>
   class P1<Range, Geometry::Mesh<Context::MPI>> final
     : public FiniteElementSpace<
-        Geometry::Mesh<Context::MPI>, P1<Real, Geometry::Mesh<Context::MPI>>>
+        Geometry::Mesh<Context::MPI>, P1<Range, Geometry::Mesh<Context::MPI>>>
   {
     public:
       using IndexBimap =
@@ -129,28 +129,7 @@ namespace Rodin::Variational
         : m_mesh(mesh),
           m_fes(mesh.getShard())
       {
-        const auto& ctx = mesh.getContext();
-        const auto& comm = ctx.getCommunicator();
-        const auto& shard = mesh.getShard();
-
-        size_t owned = 0;
-        for (size_t i = 0; i < shard.getVertexCount(); ++i)
-          owned += shard.isOwned(0, i);
-
-        size_t offset = boost::mpi::scan(comm, owned, std::plus<size_t>()) - owned;
-
-        std::vector<Index> requested;
-        for (size_t i = 0; i < shard.getVertexCount(); ++i)
-        {
-          if (shard.isOwned(0, i))
-            m_loc2glob.right.insert({ i + offset, i });
-          else
-            requested.push_back(shard.getGlobalIndex(0, i));
-        }
-
-        boost::mpi::broadcast(comm, requested, comm.rank());
-
-        // Request the global indices for the ghost vertices
+        assert(false);
       }
 
       P1(const MeshType& mesh, size_t vdim)
@@ -204,19 +183,12 @@ namespace Rodin::Variational
       {
         const auto& mesh = getMesh();
         const auto& shard = mesh.getShard();
-        const auto idx = mesh.getLocalIndex(d, globalIdx);
-        boost::optional<Geometry::Polytope::Type> local;
-        if (idx)
-        {
-          if (!shard.isGhost(d, *idx))
-            local = shard.getGeometry(d, *idx);
-        }
-        auto res = boost::mpi::all_reduce(
-            mesh.getContext().getCommunicator(), local,
+        std::optional<Index> localIdx = mesh.getLocalIndex(d, globalIdx);
+        localIdx = boost::mpi::all_reduce(
+            mesh.getContext().getCommunicator(), localIdx,
             [](auto const& a, auto const& b) { return a ? a : b; });
-        assert(res);
-        const auto& index = m_fes.getElementIndex();
-        return index[*res];
+        assert(localIdx);
+        return m_fes.getFiniteElement(*localIdx, globalIdx);
       }
 
       size_t getSize() const override
@@ -238,10 +210,11 @@ namespace Rodin::Variational
 
       const IndexArray& getDOFs(size_t d, Index globalIdx) const override
       {
+        static IndexArray s_dofs;
         const auto& mesh = getMesh();
         const auto& shard = mesh.getShard();
         const auto& fes = this->getShard();
-        const auto idx = mesh.getLocalIndex(d, globalIdx);
+        const auto localIdx = mesh.getLocalIndex(d, globalIdx);
         IndexArray local;
         if (idx)
         {
@@ -254,7 +227,7 @@ namespace Rodin::Variational
         assert(dofs.size() > 0);
         for (auto& dof : dofs)
           dof = getGlobalIndex(dof);
-        return dofs;
+        return s_dofs;
       }
 
       Index getGlobalIndex(const std::pair<size_t, Index>& p, Index localDof) const override
