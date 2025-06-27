@@ -181,6 +181,7 @@ namespace Rodin::Variational
        */
       const auto& getFiniteElement(size_t d, Index globalIdx) const
       {
+        static thread_local ElementType s_element;
         const auto& mesh = getMesh();
         const auto& shard = mesh.getShard();
         std::optional<Index> localIdx = mesh.getLocalIndex(d, globalIdx);
@@ -210,22 +211,17 @@ namespace Rodin::Variational
 
       const IndexArray& getDOFs(size_t d, Index globalIdx) const override
       {
-        static IndexArray s_dofs;
+        static thread_local IndexArray s_dofs;
         const auto& mesh = getMesh();
         const auto& shard = mesh.getShard();
         const auto& fes = this->getShard();
         const auto localIdx = mesh.getLocalIndex(d, globalIdx);
-        IndexArray local;
-        if (idx)
+        if (localIdx)
         {
-          if (!shard.isGhost(d, *idx))
-            local = fes.getDOFs(d, *idx);
+          if (!shard.isGhost(d, *localIdx))
+            s_dofs = fes.getDOFs(*localIdx, globalIdx);
         }
-        auto dofs = boost::mpi::all_reduce(
-            mesh.getContext().getCommunicator(), local,
-            [](auto const& a, auto const& b) { return a.size() > 0 ? a : b; });
-        assert(dofs.size() > 0);
-        for (auto& dof : dofs)
+        for (auto& dof : s_dofs)
           dof = getGlobalIndex(dof);
         return s_dofs;
       }
