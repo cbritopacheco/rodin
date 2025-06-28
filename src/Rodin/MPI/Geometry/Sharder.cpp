@@ -29,55 +29,62 @@ namespace Rodin::Geometry
       sb.initialize(mesh);
 
     // Determine ownership of polytopes
-    std::vector<std::vector<Boolean>> owned;
-    owned.resize(cellDim + 1);
+    std::vector<std::vector<Index>> owner(cellDim + 1);
+    std::vector<std::vector<uint8_t>> owned(cellDim + 1);
     for (size_t d = 0; d < cellDim + 1; d++)
-      owned[d].resize(mesh.getPolytopeCount(d), false);
-    for (Index i = 0; i < mesh.getCellCount(); i++)
     {
-      const size_t partition = partitioner.getPartition(i);
-
+      owner[d].resize(mesh.getPolytopeCount(d));
+      owned[d].resize(mesh.getPolytopeCount(d), false);
+    }
+    for (Index cellIdx = 0; cellIdx < mesh.getCellCount(); cellIdx++)
+    {
+      const size_t partition = partitioner.getPartition(cellIdx);
       for (size_t d = 0; d <= cellDim - 1; d++)
       {
-        for (const Index idx : conn.getIncidence({ cellDim, d }, i))
+        const auto& inc = conn.getIncidence(cellDim, d);
+        if (inc.empty())
+          continue;
+        for (const Index idx : inc.at(cellIdx))
         {
           if (owned[d][idx])
           {
-            sbs[partition].include(d, idx, Shard::Flags::None);
+            sbs[partition].include(d, idx, { owner[d][idx], Shard::Flags::None });
           }
           else
           {
-            sbs[partition].include(d, idx, Shard::Flags::Owned);
+            sbs[partition].include(d, idx, { partition, Shard::Flags::Owned });
+            owner[d][idx] = partition;
             owned[d][idx] = true;
           }
         }
       }
-
-      assert(!owned[cellDim][i]);
-      sbs[partition].include(cellDim, i, Shard::Flags::Owned);
-      owned[cellDim][i] = true;
+      assert(!owned[cellDim][cellIdx]);
+      sbs[partition].include(cellDim, cellIdx, { partition, Shard::Flags::Owned });
+      owner[cellDim][cellIdx] = partition;
+      owned[cellDim][cellIdx] = true;
     }
 
     // Determine ghost polytopes
-    for (Index i = 0; i < mesh.getCellCount(); i++)
+    for (Index cellIdx = 0; cellIdx < mesh.getCellCount(); cellIdx++)
     {
-      const size_t partition = partitioner.getPartition(i);
-
-      for (const Index nbr : conn.getIncidence({ cellDim, cellDim }, i))
+      const size_t partition = partitioner.getPartition(cellIdx);
+      for (const Index nbr : conn.getIncidence({ cellDim, cellDim }, cellIdx))
       {
         if (partition == partitioner.getPartition(nbr))
           continue;
-
         for (size_t d = 0; d <= cellDim - 1; d++)
         {
-          for (const Index idx : conn.getIncidence({ cellDim, d }, nbr))
+          const auto& inc = conn.getIncidence(cellDim, d);
+          if (inc.empty())
+            continue;
+          for (const Index idx : inc.at(nbr))
           {
             auto find = sbs[partition].getPolytopeMap(d).right.find(idx);
             if (find == sbs[partition].getPolytopeMap(d).right.end())
-              sbs[partition].include(d, idx, Shard::Flags::Ghost);
+              sbs[partition].include(d, idx, { owner[d][idx], Shard::Flags::Ghost });
           }
         }
-        sbs[partition].include(cellDim, nbr, Shard::Flags::Ghost);
+        sbs[partition].include(cellDim, nbr, { owner[cellDim][cellIdx], Shard::Flags::Ghost });
       }
     }
 

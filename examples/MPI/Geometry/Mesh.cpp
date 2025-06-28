@@ -20,14 +20,15 @@ int main(int argc, char** argv)
   {
 
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 32, 32 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Quadrilateral, { 32, 32 });
     mesh.getConnectivity().compute(2, 2);
-    mesh.getConnectivity().compute(2, 1);
+    // mesh.getConnectivity().compute(2, 1);
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
     for (auto it = mesh.getCell(); it; ++it)
     {
-      mesh.setAttribute({it->getDimension(), it->getIndex()}, partitioner.getPartition(it->getIndex()) + 1);
+      mesh.setAttribute(
+          {it->getDimension(), it->getIndex()}, partitioner.getPartition(it->getIndex()) * 3 + 1);
     }
     mesh.save("Global.mesh", IO::FileFormat::MEDIT);
     std::cout << "Sharding into " << partitioner.getCount() << "...\n";

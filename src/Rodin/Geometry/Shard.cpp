@@ -18,12 +18,6 @@ namespace Rodin::Geometry
     return m_s2ps[d].size();
   }
 
-  Shard::Builder& Shard::Builder::flag(size_t d, Index parentIdx, const Flags& flags)
-  {
-    m_flags[d][parentIdx] = flags;
-    return *this;
-  }
-
   Shard::Builder& Shard::Builder::initialize(const Mesh<Context>& parent)
   {
     const size_t dim = parent.getDimension();
@@ -31,12 +25,12 @@ namespace Rodin::Geometry
     m_parent = parent;
     m_build.initialize(sdim);
     m_s2ps.resize(dim + 1);
-    m_flags.resize(dim + 1);
+    m_ownership.resize(dim + 1);
     m_sidx.resize(dim + 1, 0);
     return *this;
   }
 
-  Shard::Builder& Shard::Builder::include(size_t d, Index parentIdx, const Flags& flags)
+  Shard::Builder& Shard::Builder::include(size_t d, Index parentIdx, const Ownership& ownership)
   {
     auto& build = m_build;
     assert(m_parent.has_value());
@@ -52,13 +46,12 @@ namespace Rodin::Geometry
       if (inserted) // Vertex was not already in the map
       {
         build.attribute({ 0, childIdx }, parent.getAttribute(0, parentIdx));
-        m_flags[0][childIdx] = flags;
+        m_ownership[0].push_back(ownership);
         m_sidx[0] += 1;
       }
       else
       {
         build.attribute({ 0, it->get_left() }, parent.getAttribute(0, parentIdx));
-        m_flags[0][it->get_left()] |= flags;
       }
     }
     else
@@ -70,6 +63,7 @@ namespace Rodin::Geometry
       if (inserted) // Polytope was not already in the map
       {
         build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
+        m_ownership[d].push_back(ownership);
         m_sidx[d] += 1;
 
         for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
@@ -81,6 +75,7 @@ namespace Rodin::Geometry
           {
             childPolytope.coeffRef(i) = childVertex;
             build.attribute({ 0, childVertex }, parent.getAttribute(0, parentVertex));
+            m_ownership[0].push_back(ownership);
             m_sidx[0] += 1;
           }
           else // Vertex was already in the map
@@ -92,12 +87,10 @@ namespace Rodin::Geometry
 
         // Add polytope with original geometry and new vertex ordering
         build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
-        m_flags[d][childIdx] = flags;
       }
       else
       {
         build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
-        m_flags[d][it->get_left()] |= flags;
       }
     }
 
@@ -113,14 +106,13 @@ namespace Rodin::Geometry
     auto& conn = m_build.getConnectivity();
     const size_t cellDim = parent.getDimension();
     const auto& pconn = parent.getConnectivity();
-
     for (size_t d = 0; d <= cellDim; ++d)
     {
       for (size_t dp = 0; dp <= cellDim; ++dp)
       {
         const auto& pInc = pconn.getIncidence(d, dp);
-        if (pInc.empty()) continue;
-
+        if (pInc.empty())
+          continue;
         Incidence cInc(m_s2ps[d].size());
         for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
         {
@@ -145,38 +137,43 @@ namespace Rodin::Geometry
     Shard res;
     res.Parent::operator=(m_build.finalize());
     res.m_s2ps = std::move(m_s2ps);
-    res.m_flags = std::move(m_flags);
+    res.m_ownership = std::move(m_ownership);
     return res;
   }
 
   Shard::Shard(const Shard& other)
     : Parent(other),
       m_s2ps(other.m_s2ps),
-      m_flags(other.m_flags)
+      m_ownership(other.m_ownership)
   {}
 
   Shard::Shard(Shard&& other)
     : Parent(std::move(other)),
       m_s2ps(std::move(other.m_s2ps)),
-      m_flags(std::move(other.m_flags))
+      m_ownership(std::move(other.m_ownership))
   {}
 
   Shard& Shard::operator=(Shard&& other)
   {
     Parent::operator=(std::move(other));
     m_s2ps = std::move(other.m_s2ps);
-    m_flags = std::move(other.m_flags);
+    m_ownership = std::move(other.m_ownership);
     return *this;
   }
 
   bool Shard::isGhost(size_t d, Index idx) const
   {
-    return m_flags[d].at(idx) & Shard::Flags::Ghost;
+    return m_ownership[d][idx].flags & Shard::Flags::Ghost;
   }
 
   bool Shard::isOwned(size_t d, Index idx) const
   {
-    return m_flags[d].at(idx) & Shard::Flags::Owned;
+    return m_ownership[d][idx].flags & Shard::Flags::Owned;
+  }
+
+  Index Shard::getOwner(size_t d, Index idx) const
+  {
+    return m_ownership[d][idx].owner;
   }
 
   const Shard::PolytopeMap& Shard::getPolytopeMap(size_t d) const

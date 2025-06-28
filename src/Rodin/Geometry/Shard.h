@@ -17,6 +17,15 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
+      using PolytopeMap =
+        boost::bimap<
+          boost::bimaps::vector_of<Index>,
+          boost::bimaps::unordered_set_of<Index>>;
+
+      using ContextType = Rodin::Context::Local;
+
+      using Parent = Mesh<ContextType>;
+
       /**
        * @brief Bitmask enum indicating the state of a polytope in the shard.
        *
@@ -82,14 +91,20 @@ namespace Rodin::Geometry
           BitSet2 m_bits;
       };
 
-      using PolytopeMap =
-        boost::bimap<
-          boost::bimaps::vector_of<Index>,
-          boost::bimaps::unordered_set_of<Index>>;
+      struct Ownership
+      {
+        friend class boost::serialization::access;
 
-      using ContextType = Rodin::Context::Local;
+        Index owner;
+        Flags flags;
 
-      using Parent = Mesh<ContextType>;
+        template<class Archive>
+        void serialize(Archive& ar, const unsigned int version)
+        {
+          ar & owner;
+          ar & flags;
+        }
+      };
 
       class Builder
       {
@@ -98,9 +113,7 @@ namespace Rodin::Geometry
 
           Builder& initialize(const Mesh<Context>& parent);
 
-          Builder& include(size_t d, Index parentIdx, const Flags& flags = Shard::Flags::None);
-
-          Builder& flag(size_t d, Index parentIdx, const Flags& flags);
+          Builder& include(size_t d, Index parentIdx, const Ownership& ownership);
 
           Shard finalize();
 
@@ -113,7 +126,7 @@ namespace Rodin::Geometry
           Mesh<Context>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<PolytopeMap> m_s2ps;
-          std::vector<FlatMap<Index, Flags>> m_flags;
+          std::vector<std::vector<Ownership>> m_ownership;
           size_t m_dimension;
       };
 
@@ -134,6 +147,8 @@ namespace Rodin::Geometry
 
       bool isOwned(size_t d, Index idx) const;
 
+      Index getOwner(size_t d, Index idx) const;
+
       Index getGlobalIndex(size_t d, Index idx) const;
 
       const PolytopeMap& getPolytopeMap(size_t d) const;
@@ -143,17 +158,17 @@ namespace Rodin::Geometry
       {
         ar & boost::serialization::base_object<Mesh<Context>>(*this);
         ar & m_s2ps;
-        ar & m_flags;
+        ar & m_ownership;
       }
 
-      const FlatMap<Index, Flags>& getFlags(size_t d) const
+      const auto& getOwnership(size_t d) const
       {
-        return m_flags[d];
+        return m_ownership[d];
       }
 
     private:
       std::vector<PolytopeMap> m_s2ps;
-      std::vector<FlatMap<Index, Flags>> m_flags;
+      std::vector<std::vector<Ownership>> m_ownership;
   };
 }
 
