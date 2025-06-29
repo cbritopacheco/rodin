@@ -106,12 +106,12 @@ namespace Rodin::Geometry
     return m_index[dim];
   }
 
-  const std::optional<Index>
+  const Optional<Index>
   Connectivity<Context::Local>::getIndex(size_t dim, const IndexArray& key) const
   {
     auto it = m_index[dim].right.find(key);
     if (it == m_index[dim].right.end())
-      return std::nullopt;
+      return {};
     else
       return it->get_left();
   }

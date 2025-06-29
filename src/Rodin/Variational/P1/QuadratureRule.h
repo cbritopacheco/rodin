@@ -134,9 +134,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      std::optional<QF::QF1P1> m_qf;
-      std::optional<Geometry::Point> m_p;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::QF1P1> m_qf;
+      Optional<Geometry::Point> m_p;
 
       Real m_distortion;
       Real m_weight;
@@ -308,9 +308,9 @@ namespace Rodin::Variational
 
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      std::optional<QF::QF1P1> m_qf;
-      std::optional<Geometry::Point> m_p;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::QF1P1> m_qf;
+      Optional<Geometry::Point> m_p;
 
       Real m_weight;
       Real m_distortion;
@@ -553,9 +553,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      std::optional<QF::QF1P1> m_qf;
-      std::optional<Geometry::Point> m_p;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::QF1P1> m_qf;
+      Optional<Geometry::Point> m_p;
 
       Real m_distortion;
       Real m_weight;
@@ -790,9 +790,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      std::optional<QF::QF1P1> m_qf;
-      std::optional<Geometry::Point> m_p;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::QF1P1> m_qf;
+      Optional<Geometry::Point> m_p;
 
       Real m_weight;
       Real m_distortion;
@@ -1026,9 +1026,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      std::optional<QF::QF1P1> m_qf;
-      std::optional<Geometry::Point> m_p;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::QF1P1> m_qf;
+      Optional<Geometry::Point> m_p;
 
       Real m_weight;
       Real m_distortion;
@@ -1264,9 +1264,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      std::optional<QF::QF1P1> m_qf;
-      std::optional<Geometry::Point> m_p;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::QF1P1> m_qf;
+      Optional<Geometry::Point> m_p;
 
       Real m_distortion;
       Real m_weight;
@@ -1506,9 +1506,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      std::optional<QF::QF1P1> m_qf;
-      std::optional<Geometry::Point> m_p;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::QF1P1> m_qf;
+      Optional<Geometry::Point> m_p;
 
       Real m_weight;
       Real m_distortion;
@@ -1833,12 +1833,12 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_trp;
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_tep;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_trp;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_tep;
 
       const QF::QF1P1 m_qfs;
-      std::optional<QF::QF1P1> m_qftr;
-      std::optional<QF::QF1P1> m_qfte;
+      Optional<QF::QF1P1> m_qftr;
+      Optional<QF::QF1P1> m_qfte;
 
       Real m_weight;
       Real m_distortion;

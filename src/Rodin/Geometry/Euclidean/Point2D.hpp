@@ -11,7 +11,7 @@ namespace Rodin::Geometry::Euclidean
 {
   template <class T>
   constexpr
-  std::optional<LineSegment2D<T>> Point2D<T>::connect(const Point2D<T>& other) const
+  Optional<LineSegment2D<T>> Point2D<T>::connect(const Point2D<T>& other) const
   {
     if (*this == other)
       return {};
@@ -21,7 +21,7 @@ namespace Rodin::Geometry::Euclidean
 
   template <class T>
   constexpr
-  std::optional<LineSegment2D<T>> Point2D<T>::connect(const Line2D<T>& line) const
+  Optional<LineSegment2D<T>> Point2D<T>::connect(const Line2D<T>& line) const
   {
     assert(line.a() != T{0} || line.b() != T{0});
 
@@ -44,7 +44,7 @@ namespace Rodin::Geometry::Euclidean
 
   template <class T>
   constexpr
-  std::optional<LineSegment2D<T>> Point2D<T>::connect(const Circle<T>& other) const
+  Optional<LineSegment2D<T>> Point2D<T>::connect(const Circle<T>& other) const
   {
     auto v = other(*this);
     if (v < T{0})

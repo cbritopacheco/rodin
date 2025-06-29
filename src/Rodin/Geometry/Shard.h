@@ -113,7 +113,7 @@ namespace Rodin::Geometry
 
           Builder& initialize(const Mesh<Context>& parent);
 
-          Builder& include(size_t d, Index parentIdx, const Ownership& ownership);
+          Builder& include(size_t d, Index parentIdx, const Ownership& ownership, const Index& halo);
 
           Shard finalize();
 
@@ -122,11 +122,12 @@ namespace Rodin::Geometry
           size_t getPolytopeCount(size_t d) const;
 
         private:
-          std::optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
+          Optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
           Mesh<Context>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<PolytopeMap> m_s2ps;
           std::vector<std::vector<Ownership>> m_ownership;
+          std::vector<std::vector<IndexSet>> m_halo;
           size_t m_dimension;
       };
 
@@ -147,9 +148,9 @@ namespace Rodin::Geometry
 
       bool isOwned(size_t d, Index idx) const;
 
-      Index getOwner(size_t d, Index idx) const;
+      IndexSet getHalo(size_t d, Index idx) const;
 
-      Index getGlobalIndex(size_t d, Index idx) const;
+      Index getOwner(size_t d, Index idx) const;
 
       const PolytopeMap& getPolytopeMap(size_t d) const;
 
@@ -169,6 +170,7 @@ namespace Rodin::Geometry
     private:
       std::vector<PolytopeMap> m_s2ps;
       std::vector<std::vector<Ownership>> m_ownership;
+      std::vector<std::vector<IndexSet>> m_halo;
   };
 }
 

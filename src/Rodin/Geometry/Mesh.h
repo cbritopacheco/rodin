@@ -191,7 +191,7 @@ namespace Rodin::Geometry
         return this != &other;
       }
 
-      virtual std::optional<Point> inclusion(const Point& p) const;
+      virtual Optional<Point> inclusion(const Point& p) const;
 
       /**
        * @brief Indicates if the mesh is empty or not.

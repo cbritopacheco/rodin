@@ -37,7 +37,7 @@ namespace Rodin::Geometry
        * @brief Represents the restriction of a Point of a Mesh @f$ P @f$ into
        * a Point of a SubMesh @f$ C @f$.
        */
-      virtual std::optional<Point> restriction(const Point& p) const = 0;
+      virtual Optional<Point> restriction(const Point& p) const = 0;
 
       /**
        * @returns Reference to the parent Mesh object
@@ -113,7 +113,7 @@ namespace Rodin::Geometry
           SubMesh finalize();
 
         private:
-          std::optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
+          Optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
           Mesh<Context>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<PolytopeMap> m_s2ps;
@@ -140,7 +140,7 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      std::optional<Point> restriction(const Point& p) const override;
+      Optional<Point> restriction(const Point& p) const override;
 
       bool isSubMesh() const override
       {

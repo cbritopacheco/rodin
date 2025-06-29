@@ -127,7 +127,7 @@ namespace Rodin::Geometry
     return m_shard;
   }
 
-  std::optional<Index> MPIMesh::getLocalIndex(size_t dimension, Index globalIdx) const
+  Optional<Index> MPIMesh::getLocalIndex(size_t dimension, Index globalIdx) const
   {
     const auto& map = getShard().getPolytopeMap(dimension).right;
     auto it = map.find(globalIdx);

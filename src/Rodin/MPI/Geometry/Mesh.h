@@ -46,7 +46,7 @@ namespace Rodin::Geometry
 
       const Shard& getShard() const;
 
-      std::optional<Index> getLocalIndex(size_t dimension, Index globalIdx) const;
+      Optional<Index> getLocalIndex(size_t dimension, Index globalIdx) const;
 
       Index getGlobalIndex(size_t dimension, Index localIdx) const;
 

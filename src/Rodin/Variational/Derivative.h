@@ -228,7 +228,7 @@ namespace Rodin::Variational
       size_t m_i;
       std::reference_wrapper<const OperandType> m_u;
 
-      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      Optional<std::reference_wrapper<const Geometry::Point>> m_p;
 
       std::vector<Math::SpatialVector<Real>> m_gradients;
   };

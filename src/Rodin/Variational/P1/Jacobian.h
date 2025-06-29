@@ -274,7 +274,7 @@ namespace Rodin::Variational
 
       std::vector<SpatialMatrixType> m_jacobian;
 
-      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      Optional<std::reference_wrapper<const Geometry::Point>> m_p;
   };
 
   template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>

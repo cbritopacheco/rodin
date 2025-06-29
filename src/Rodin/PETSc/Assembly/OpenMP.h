@@ -136,7 +136,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      std::optional<size_t> m_threadCount;
+      Optional<size_t> m_threadCount;
   };
 
   /**
@@ -323,7 +323,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      std::optional<size_t> m_threadCount;
+      Optional<size_t> m_threadCount;
   };
 }
 

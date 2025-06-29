@@ -36,7 +36,7 @@ namespace Rodin::Geometry
     return m_parent.get();
   }
 
-  std::optional<Point> SubMesh<Context::Local>::restriction(const Point& p) const
+  Optional<Point> SubMesh<Context::Local>::restriction(const Point& p) const
   {
     const auto& polytope = p.getPolytope();
     const size_t d = polytope.getDimension();

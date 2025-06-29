@@ -162,9 +162,9 @@ namespace Rodin::External::MMG
       Real m_ls;
       SplitMap m_split;
       bool m_meshTheSurface;
-      std::optional<Real> m_rmc;
+      Optional<Real> m_rmc;
       FlatSet<Geometry::Attribute> m_lsBaseReferences;
-      std::optional<Geometry::Attribute> m_isoref;
+      Optional<Geometry::Attribute> m_isoref;
 
       SplitMap m_uniqueSplit;
 

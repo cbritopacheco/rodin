@@ -137,7 +137,7 @@ namespace Rodin::External::MMG
       return *this;
     }
 
-    std::optional<boost::process::ipstream>& getOutputLog()
+    Optional<boost::process::ipstream>& getOutputLog()
     {
       return m_out;
     }
@@ -174,7 +174,7 @@ namespace Rodin::External::MMG
 
     boost::filesystem::path m_executable;
     unsigned int m_ncpu;
-    std::optional<boost::process::ipstream> m_out;
+    Optional<boost::process::ipstream> m_out;
   };
 }
 

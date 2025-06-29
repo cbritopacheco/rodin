@@ -165,9 +165,9 @@ namespace Rodin::Variational
       std::reference_wrapper<const TrialFESType> m_trialfes;
       std::reference_wrapper<const TestFESType> m_testfes;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      std::optional<QF::QF1P1> m_qf;
-      std::optional<Geometry::Point> m_p;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::QF1P1> m_qf;
+      Optional<Geometry::Point> m_p;
 
       Real m_distortion;
       Real m_weight;

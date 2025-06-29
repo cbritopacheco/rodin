@@ -26,11 +26,12 @@ namespace Rodin::Geometry
     m_build.initialize(sdim);
     m_s2ps.resize(dim + 1);
     m_ownership.resize(dim + 1);
+    m_halo.resize(dim + 1);
     m_sidx.resize(dim + 1, 0);
     return *this;
   }
 
-  Shard::Builder& Shard::Builder::include(size_t d, Index parentIdx, const Ownership& ownership)
+  Shard::Builder& Shard::Builder::include(size_t d, Index parentIdx, const Ownership& ownership, const Index& halo)
   {
     auto& build = m_build;
     assert(m_parent.has_value());
@@ -47,11 +48,17 @@ namespace Rodin::Geometry
       {
         build.attribute({ 0, childIdx }, parent.getAttribute(0, parentIdx));
         m_ownership[0].push_back(ownership);
+        if (ownership.owner == halo)
+          m_halo[0].emplace_back();
+        else
+          m_halo[0].push_back(IndexSet{ halo });
         m_sidx[0] += 1;
       }
       else
       {
         build.attribute({ 0, it->get_left() }, parent.getAttribute(0, parentIdx));
+        if (ownership.owner != halo)
+          m_halo[0][it->get_left()].insert(halo);
       }
     }
     else
@@ -64,6 +71,10 @@ namespace Rodin::Geometry
       {
         build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
         m_ownership[d].push_back(ownership);
+        if (ownership.owner == halo)
+          m_halo[d].emplace_back();
+        else
+          m_halo[d].push_back(IndexSet{ halo });
         m_sidx[d] += 1;
 
         for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
@@ -76,12 +87,18 @@ namespace Rodin::Geometry
             childPolytope.coeffRef(i) = childVertex;
             build.attribute({ 0, childVertex }, parent.getAttribute(0, parentVertex));
             m_ownership[0].push_back(ownership);
+            if (ownership.owner == halo)
+              m_halo[0].emplace_back();
+            else
+              m_halo[0].push_back(IndexSet{ halo });
             m_sidx[0] += 1;
           }
           else // Vertex was already in the map
           {
             childPolytope.coeffRef(i) = itVertex->get_left();
             build.attribute({ 0, itVertex->get_left() }, parent.getAttribute(0, parentVertex));
+            if (ownership.owner != halo)
+              m_halo[0][itVertex->get_left()].insert(halo);
           }
         }
 
@@ -91,6 +108,8 @@ namespace Rodin::Geometry
       else
       {
         build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
+        if (ownership.owner != halo)
+          m_halo[d][it->get_left()].insert(halo);
       }
     }
 
@@ -138,19 +157,22 @@ namespace Rodin::Geometry
     res.Parent::operator=(m_build.finalize());
     res.m_s2ps = std::move(m_s2ps);
     res.m_ownership = std::move(m_ownership);
+    res.m_halo = std::move(m_halo);
     return res;
   }
 
   Shard::Shard(const Shard& other)
     : Parent(other),
       m_s2ps(other.m_s2ps),
-      m_ownership(other.m_ownership)
+      m_ownership(other.m_ownership),
+      m_halo(other.m_halo)
   {}
 
   Shard::Shard(Shard&& other)
     : Parent(std::move(other)),
       m_s2ps(std::move(other.m_s2ps)),
-      m_ownership(std::move(other.m_ownership))
+      m_ownership(std::move(other.m_ownership)),
+      m_halo(std::move(other.m_halo))
   {}
 
   Shard& Shard::operator=(Shard&& other)
@@ -158,6 +180,7 @@ namespace Rodin::Geometry
     Parent::operator=(std::move(other));
     m_s2ps = std::move(other.m_s2ps);
     m_ownership = std::move(other.m_ownership);
+    m_halo = std::move(other.m_halo);
     return *this;
   }
 
@@ -181,9 +204,9 @@ namespace Rodin::Geometry
     return m_s2ps[d];
   }
 
-  Index Shard::getGlobalIndex(size_t d, Index idx) const
+  IndexSet Shard::getHalo(size_t d, Index idx) const
   {
-    return m_s2ps[d].left.at(idx).get_right();
+    return m_halo[d][idx];
   }
 }
 

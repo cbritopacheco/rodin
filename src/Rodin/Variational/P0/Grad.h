@@ -252,7 +252,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const OperandType> m_u;
 
-      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      Optional<std::reference_wrapper<const Geometry::Point>> m_p;
   };
 
   template <class NestedDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>

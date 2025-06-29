@@ -167,7 +167,7 @@ namespace Rodin::IO::MEDIT
   }
 
   inline
-  std::optional<Keyword> toKeyword(const char* str)
+  Optional<Keyword> toKeyword(const char* str)
   {
     Keyword res;
     if (str == Keyword::MeshVersionFormatted)
@@ -247,7 +247,7 @@ namespace Rodin::IO::MEDIT
 
       template <class Iterator>
       inline
-      std::optional<Data> operator()(Iterator begin, Iterator end) const
+      Optional<Data> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::uint_;
@@ -287,7 +287,7 @@ namespace Rodin::IO::MEDIT
 
       template <class Iterator>
       inline
-      std::optional<Data> operator()(Iterator begin, Iterator end) const
+      Optional<Data> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::double_;
@@ -346,7 +346,7 @@ namespace Rodin::IO::MEDIT
   {
     template <class Iterator>
     inline
-    std::optional<std::string> operator()(Iterator begin, Iterator end) const
+    Optional<std::string> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -371,7 +371,7 @@ namespace Rodin::IO::MEDIT
   {
     template <class Iterator>
     inline
-    std::optional<int> operator()(Iterator begin, Iterator end) const
+    Optional<int> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -395,7 +395,7 @@ namespace Rodin::IO::MEDIT
   {
     template <class Iterator>
     inline
-    std::optional<unsigned int> operator()(Iterator begin, Iterator end) const
+    Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -419,7 +419,7 @@ namespace Rodin::IO::MEDIT
   {
     template <class Iterator>
     inline
-    std::optional<unsigned int> operator()(Iterator begin, Iterator end) const
+    Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       static constexpr const char* expected = toCharString(Keyword::MeshVersionFormatted);
       using boost::spirit::x3::space;
@@ -466,7 +466,7 @@ namespace Rodin::IO::MEDIT
   {
     template <class Iterator>
     inline
-    std::optional<unsigned int> operator()(Iterator begin, Iterator end) const
+    Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       static constexpr const char* expected = toCharString(Keyword::Dimension);
       using boost::spirit::x3::space;
@@ -653,7 +653,7 @@ namespace Rodin::IO
       void readVersion(std::istream& is)
       {
         auto line = skipEmptyLines(is);
-        std::optional<unsigned int> version =
+        Optional<unsigned int> version =
           MEDIT::ParseMeshVersionFormatted()(line.begin(), line.end());
         if (version) // Version was on the same line
         {
@@ -673,7 +673,7 @@ namespace Rodin::IO
       void readDimension(std::istream& is)
       {
         auto line = skipEmptyLines(is);
-        std::optional<unsigned int> dimension = MEDIT::ParseDimension()(line.begin(), line.end());
+        Optional<unsigned int> dimension = MEDIT::ParseDimension()(line.begin(), line.end());
         if (dimension) // Version was on the same line
           m_spaceDimension = *dimension;
         else // Version is not on the same line
@@ -692,7 +692,7 @@ namespace Rodin::IO
         auto& gf = this->getObject();
 
         auto line = skipEmptyLines(is);
-        std::optional<std::string> kw =
+        Optional<std::string> kw =
           MEDIT::ParseKeyword()(line.begin(), line.end());
         if (!kw || *kw != MEDIT::Keyword::SolAtVertices)
         {
@@ -702,7 +702,7 @@ namespace Rodin::IO
         }
 
         line = skipEmptyLines(is);
-        std::optional<unsigned int> size = MEDIT::ParseUnsignedInteger()(line.begin(), line.end());
+        Optional<unsigned int> size = MEDIT::ParseUnsignedInteger()(line.begin(), line.end());
         if (!size)
         {
           Alert::Exception() << "Failed to parse solution size at line "

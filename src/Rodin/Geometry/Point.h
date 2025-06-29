@@ -185,11 +185,11 @@ namespace Rodin::Geometry
     private:
       Polytope m_polytope;
 
-      mutable Threads::Mutable<std::optional<const Math::SpatialVector<Real>>> m_pc;
-      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix<Real>>> m_jacobian;
-      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix<Real>>> m_jacobianInverse;
-      mutable Threads::Mutable<std::optional<const Real>>              m_jacobianDeterminant;
-      mutable Threads::Mutable<std::optional<const Real>>              m_distortion;
+      mutable Threads::Mutable<Optional<const Math::SpatialVector<Real>>> m_pc;
+      mutable Threads::Mutable<Optional<const Math::SpatialMatrix<Real>>> m_jacobian;
+      mutable Threads::Mutable<Optional<const Math::SpatialMatrix<Real>>> m_jacobianInverse;
+      mutable Threads::Mutable<Optional<const Real>>              m_jacobianDeterminant;
+      mutable Threads::Mutable<Optional<const Real>>              m_distortion;
   };
 
   /**

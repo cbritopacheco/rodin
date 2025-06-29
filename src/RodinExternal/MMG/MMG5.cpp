@@ -19,7 +19,7 @@ namespace Rodin::External::MMG
     : m_ridgeDetection(true)
   {}
 
-  MMG5_pMesh MMG5::createMesh(size_t version, size_t dim, std::optional<size_t> spaceDim)
+  MMG5_pMesh MMG5::createMesh(size_t version, size_t dim, Optional<size_t> spaceDim)
   {
     MMG5_pMesh res;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Mesh,

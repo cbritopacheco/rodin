@@ -276,7 +276,7 @@ namespace Rodin::External::MMG
         bool m_distTheBoundary;
         unsigned int m_ncpu;
         ISCDProcess m_mshdist;
-        std::optional<FlatSet<Geometry::Attribute>> m_interiorDomains;
+        Optional<FlatSet<Geometry::Attribute>> m_interiorDomains;
     };
 
   Distancer(const typename FormLanguage::Traits<RealGridFunction>::FESType&)

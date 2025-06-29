@@ -121,7 +121,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::optional<SolutionType> m_gf;
+      Optional<SolutionType> m_gf;
   };
 
   template <class Solution, class FES>

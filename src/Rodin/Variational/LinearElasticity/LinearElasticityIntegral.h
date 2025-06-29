@@ -109,7 +109,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const TrialFESType> m_trialfes;
       std::reference_wrapper<const TestFESType> m_testfes;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
       std::vector<Geometry::Point> m_ps;
 

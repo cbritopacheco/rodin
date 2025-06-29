@@ -41,7 +41,7 @@ namespace Rodin::Scotch
       std::vector<SCOTCH_Num> m_partition;
 
       SCOTCH_Graph m_graph;
-      std::optional<SCOTCH_Strat> m_strat;
+      Optional<SCOTCH_Strat> m_strat;
   };
 }
 

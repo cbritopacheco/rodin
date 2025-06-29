@@ -148,7 +148,7 @@ namespace Rodin::IO::EnSight6
 
   inline
   constexpr
-  std::optional<ElementType> getGeometry(Geometry::Polytope::Type t)
+  Optional<ElementType> getGeometry(Geometry::Polytope::Type t)
   {
     switch (t)
     {

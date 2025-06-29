@@ -8,10 +8,10 @@ namespace Rodin::Utility
   template<class T>
   struct UnwrapReference { using Type = T; };
 
-  template<class U>
+  template <class U>
   struct UnwrapReference<std::reference_wrapper<U>> { using Type = U&; };
 
-  template<class T>
+  template <class T>
   struct UnwrapRefDecay : UnwrapReference<std::decay_t<T>> {};
 }
 

@@ -89,7 +89,7 @@ namespace Rodin::Variational
         return res;
       }
 
-      const std::optional<ScalarType>& getValue() const
+      const Optional<ScalarType>& getValue() const
       {
         return m_value;
       }
@@ -113,11 +113,11 @@ namespace Rodin::Variational
       }
 
     private:
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       std::unique_ptr<IntegrandType> m_integrand;
-      std::optional<const QF::GenericPolytopeQuadrature> m_qfgg;
-      std::optional<std::reference_wrapper<const QF::QuadratureFormulaBase>> m_qf;
-      std::optional<ScalarType> m_value;
+      Optional<const QF::GenericPolytopeQuadrature> m_qfgg;
+      Optional<std::reference_wrapper<const QF::QuadratureFormulaBase>> m_qf;
+      Optional<ScalarType> m_value;
 
       std::vector<Geometry::Point> m_ps;
   };
@@ -245,7 +245,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      const std::optional<ScalarType>& getValue() const
+      const Optional<ScalarType>& getValue() const
       {
         return m_value;
       }
@@ -266,7 +266,7 @@ namespace Rodin::Variational
       FlatSet<Geometry::Attribute>                  m_attrs;
       LinearForm<FES, Math::Vector<ScalarType>>     m_lf;
 
-      std::optional<ScalarType> m_value;
+      Optional<ScalarType> m_value;
   };
 
   /**

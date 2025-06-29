@@ -301,7 +301,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const KernelType> m_kernel;
       std::unique_ptr<OperandType> m_u;
-      std::optional<
+      Optional<
         std::function<const QF::QuadratureFormulaBase&(const Geometry::Polytope&)>> m_qf;
   };
 

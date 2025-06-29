@@ -186,7 +186,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      std::optional<size_t> m_threadCount;
+      Optional<size_t> m_threadCount;
   };
 
   /**
@@ -453,7 +453,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      std::optional<size_t> m_threadCount;
+      Optional<size_t> m_threadCount;
   };
 
   /**
@@ -559,7 +559,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      std::optional<size_t> m_threadCount;
+      Optional<size_t> m_threadCount;
   };
 
   template <class Scalar, class Solution, class FES, class ValueDerived>
@@ -661,7 +661,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      std::optional<size_t> m_threadCount;
+      Optional<size_t> m_threadCount;
   };
 }
 

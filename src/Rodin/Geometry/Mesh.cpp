@@ -905,7 +905,7 @@ namespace Rodin::Geometry
     };
   }
 
-  std::optional<Point> MeshBase::inclusion(const Point& p) const
+  Optional<Point> MeshBase::inclusion(const Point& p) const
   {
     const auto& polytope = p.getPolytope();
     if (!polytope.getMesh().isSubMesh())

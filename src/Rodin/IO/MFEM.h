@@ -104,7 +104,7 @@ namespace Rodin::IO::MFEM
   }
 
   inline
-  std::optional<Keyword> toKeyword(const char* str)
+  Optional<Keyword> toKeyword(const char* str)
   {
     Keyword res;
     if (str == Keyword::boundary)
@@ -186,7 +186,7 @@ namespace Rodin::IO::MFEM
 
   inline
   constexpr
-  std::optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
+  Optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
   {
     switch (t)
     {
@@ -222,7 +222,7 @@ namespace Rodin::IO::MFEM
 
   inline
   constexpr
-  std::optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
+  Optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
   {
     switch (t)
     {
@@ -249,7 +249,7 @@ namespace Rodin::IO::MFEM
   {
     template <class Iterator>
     inline
-    std::optional<unsigned int> operator()(Iterator begin, Iterator end) const
+    Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -277,7 +277,7 @@ namespace Rodin::IO::MFEM
       {}
 
       template <class Iterator>
-      std::optional<Math::SpatialPoint> operator()(Iterator begin, Iterator end) const
+      Optional<Math::SpatialPoint> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::blank;
@@ -313,7 +313,7 @@ namespace Rodin::IO::MFEM
 
     template <class Iterator>
     inline
-    std::optional<Data> operator()(Iterator begin, Iterator end) const
+    Optional<Data> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -393,7 +393,7 @@ namespace Rodin::IO::MFEM
   {
     template <class Iterator>
     inline
-    std::optional<std::string> operator()(Iterator begin, Iterator end) const
+    Optional<std::string> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -419,7 +419,7 @@ namespace Rodin::IO::MFEM
     public:
       template <class Iterator>
       inline
-      std::optional<MeshHeader> operator()(Iterator begin, Iterator end) const
+      Optional<MeshHeader> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::blank;

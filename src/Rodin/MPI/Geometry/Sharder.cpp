@@ -48,18 +48,18 @@ namespace Rodin::Geometry
         {
           if (owned[d][idx])
           {
-            sbs[partition].include(d, idx, { owner[d][idx], Shard::Flags::None });
+            sbs[partition].include(d, idx, { owner[d][idx], Shard::Flags::None }, partition);
           }
           else
           {
-            sbs[partition].include(d, idx, { partition, Shard::Flags::Owned });
+            sbs[partition].include(d, idx, { partition, Shard::Flags::Owned }, partition);
             owner[d][idx] = partition;
             owned[d][idx] = true;
           }
         }
       }
       assert(!owned[cellDim][cellIdx]);
-      sbs[partition].include(cellDim, cellIdx, { partition, Shard::Flags::Owned });
+      sbs[partition].include(cellDim, cellIdx, { partition, Shard::Flags::Owned }, partition);
       owner[cellDim][cellIdx] = partition;
       owned[cellDim][cellIdx] = true;
     }
@@ -81,10 +81,10 @@ namespace Rodin::Geometry
           {
             auto find = sbs[partition].getPolytopeMap(d).right.find(idx);
             if (find == sbs[partition].getPolytopeMap(d).right.end())
-              sbs[partition].include(d, idx, { owner[d][idx], Shard::Flags::Ghost });
+              sbs[partition].include(d, idx, { owner[d][idx], Shard::Flags::Ghost }, partition);
           }
         }
-        sbs[partition].include(cellDim, nbr, { owner[cellDim][cellIdx], Shard::Flags::Ghost });
+        sbs[partition].include(cellDim, nbr, { owner[cellDim][cellIdx], Shard::Flags::Ghost }, partition);
       }
     }
 

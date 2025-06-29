@@ -146,7 +146,7 @@ namespace Rodin::Geometry
 
     private:
       size_t m_dimension;
-      std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
+      Optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable Threads::Unsafe<bool> m_dirty;
       mutable Threads::Unsafe<std::unique_ptr<T>> m_polytope;
