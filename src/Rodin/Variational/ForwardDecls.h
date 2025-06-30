@@ -32,12 +32,12 @@ namespace Rodin::Variational
   /**
    * @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
    */
-  static constexpr auto TrialSpace = ShapeFunctionSpaceType::Trial;
+  static constexpr const ShapeFunctionSpaceType TrialSpace = ShapeFunctionSpaceType::Trial;
 
   /**
    * @brief Shorthand variable for ShapeFunctionSpaceType::Test.
    */
-  static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
+  static constexpr const ShapeFunctionSpaceType TestSpace  = ShapeFunctionSpaceType::Test;
 
   /**
    * @brief Base class for shape function objects.

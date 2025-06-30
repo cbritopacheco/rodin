@@ -9,12 +9,13 @@ set(RodinPETSc_HEADERS
   Object.h
   Solver/KSP.h
   Solver/CG.h
+  Math/Vector.h
+  Math/Matrix.h
+  Math/LinearSystem.h
   Assembly/Sequential.h
   Assembly/MPI.h
   FormLanguage/Traits.h
-  Math/LinearSystem.h
-  Math/Vector.h
-  Math/Matrix.h
+  Variational/GridFunction.h
   )
 
 set(RodinPETSc_SRCS
@@ -23,6 +24,7 @@ set(RodinPETSc_SRCS
   Solver/CG.cpp
   Math/LinearSystem.cpp
   Math/Matrix.cpp
+  Variational/GridFunction.cpp
   )
 
 add_library(RodinPETSc ${RodinPETSc_HEADERS} ${RodinPETSc_SRCS})
