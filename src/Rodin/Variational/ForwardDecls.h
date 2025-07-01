@@ -10,16 +10,6 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Represents the shape (dimensions) of a function.
-   */
-  class RangeShape;
-
-  /**
-   * @brief Represents the possible types of ranges for a function.
-   */
-  enum class RangeType;
-
-  /**
    * @brief Enumeration class to indicate whether a derived instance of
    * ShapeFunctionBase belongs to either a trial or test space.
    */

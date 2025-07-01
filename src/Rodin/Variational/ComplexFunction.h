@@ -17,8 +17,6 @@
 
 #include "ForwardDecls.h"
 
-#include "RangeShape.h"
-
 #include "ScalarFunction.h"
 
 

@@ -13,8 +13,6 @@
 
 #include "ForwardDecls.h"
 
-#include "RangeType.h"
-#include "RangeShape.h"
 #include "FiniteElementSpace.h"
 
 namespace Rodin::FormLanguage
@@ -338,12 +336,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_basis(std::move(other.m_basis))
       {}
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { this->getFiniteElementSpace().getVectorDimension(), 1 };
-      }
 
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const

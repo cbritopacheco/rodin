@@ -20,6 +20,7 @@
 #include "Rodin/Variational/FiniteElementSpace.h"
 
 #include "ForwardDecls.h"
+#include <utility>
 
 namespace Rodin::FormLanguage
 {
@@ -151,7 +152,9 @@ namespace Rodin::Variational
       };
 
       constexpr
-      P1Element() = default;
+      P1Element()
+        : Parent(Geometry::Polytope::Type::Point)
+      {}
 
       constexpr
       P1Element(Geometry::Polytope::Type geometry)
@@ -167,6 +170,20 @@ namespace Rodin::Variational
       P1Element(P1Element&& other)
         : Parent(std::move(other))
       {}
+
+      constexpr
+      P1Element& operator=(const P1Element& other)
+      {
+        Parent::operator=(other);
+        return *this;
+      }
+
+      constexpr
+      P1Element& operator=(P1Element&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
 
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
@@ -373,7 +390,9 @@ namespace Rodin::Variational
           const Geometry::Polytope::Type m_g;
       };
 
-      P1Element() = default;
+      P1Element()
+        : Parent(Geometry::Polytope::Type::Point), m_vdim(0)
+      {}
 
       constexpr
       P1Element(size_t vdim, Geometry::Polytope::Type geometry)
@@ -389,6 +408,22 @@ namespace Rodin::Variational
       P1Element(P1Element&& other)
         : Parent(std::move(other))
       {}
+
+      constexpr
+      P1Element& operator=(const P1Element& other)
+      {
+        Parent::operator=(other);
+        m_vdim = other.m_vdim;
+        return *this;
+      }
+
+      constexpr
+      P1Element& operator=(P1Element&& other)
+      {
+        Parent::operator=(std::move(other));
+        m_vdim = std::exchange(other.m_vdim, 0);
+        return *this;
+      }
 
       constexpr
       size_t getCount() const
@@ -434,7 +469,7 @@ namespace Rodin::Variational
       }
 
     private:
-      const size_t m_vdim;
+      size_t m_vdim;
   };
 }
 

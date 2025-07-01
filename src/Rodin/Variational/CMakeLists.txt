@@ -68,8 +68,6 @@ set(RodinVariational_SRCS
   Problem.hpp
   Minus.cpp
   Function.cpp
-  RangeShape.cpp
-  RangeType.cpp
   Max.cpp
   Min.cpp
   GEQ.cpp

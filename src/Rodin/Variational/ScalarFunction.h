@@ -17,8 +17,6 @@
 
 #include "ForwardDecls.h"
 
-#include "RangeShape.h"
-
 #include "Function.h"
 
 namespace Rodin::FormLanguage

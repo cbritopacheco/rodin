@@ -89,6 +89,8 @@ namespace Rodin::Variational
     public:
       using FESType = FES;
 
+      using DataType = Data;
+
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// Range type of value
@@ -102,8 +104,6 @@ namespace Rodin::Variational
 
       /// Type of finite element
       using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
-
-      using DataType = Math::Vector<ScalarType>;
 
       /// Parent class
       using Parent = LazyEvaluator<GridFunctionBase<Derived, FESType, Data>>;
@@ -141,6 +141,8 @@ namespace Rodin::Variational
           m_fes(std::move(other.m_fes)),
           m_data(std::move(other.m_data))
       {}
+
+      virtual ~GridFunctionBase() = default;
 
       GridFunctionBase& operator=(GridFunctionBase&& other)
       {
@@ -888,6 +890,8 @@ namespace Rodin::Variational
     public:
       using FESType = FES;
 
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using DataType = Math::Vector<ScalarType>;
@@ -915,11 +919,23 @@ namespace Rodin::Variational
 
       GridFunction(const FESType& fes, DataType&& _data)
         : Parent(fes, std::move(_data))
+      {}
+
+      GridFunction(const GridFunction& other)
+        : Parent(other)
+      {}
+
+      GridFunction(GridFunction&& other)
+        : Parent(std::move(other))
+      {}
+
+      GridFunction& operator=(GridFunction&& other)
       {
-        auto& data = this->getData();
-        data.resize(fes.getSize());
-        data.setZero();
+        Parent::operator=(std::move(other));
+        return *this;
       }
+
+      virtual ~GridFunction() = default;
 
       constexpr
       ScalarType min(Index& idx) const

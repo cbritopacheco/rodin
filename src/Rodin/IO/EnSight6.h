@@ -12,7 +12,6 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Types.h"
 
-#include "Rodin/Variational/RangeType.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"

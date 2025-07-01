@@ -342,7 +342,7 @@ namespace Rodin::Variational
       template <class CallableType>
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
-        return typename FESType::InverseMapping(v);
+        return typename FESType::template InverseMapping<CallableType>(v);
       }
 
       template <class CallableType>

@@ -13,7 +13,6 @@
 
 #include "ForwardDecls.h"
 
-#include "RangeShape.h"
 #include "Function.h"
 #include "RealFunction.h"
 
@@ -74,7 +73,6 @@ namespace Rodin::Variational
           m_p(std::move(other.m_p))
       {}
 
-      inline
       constexpr
       Pow& traceOf(Geometry::Attribute attr)
       {
@@ -83,7 +81,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       Pow& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -92,7 +89,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -109,7 +105,7 @@ namespace Rodin::Variational
         return m_p;
       }
 
-      inline Pow* copy() const noexcept override
+      Pow* copy() const noexcept override
       {
         return new Pow(*this);
       }

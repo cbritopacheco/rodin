@@ -7,11 +7,7 @@
 #ifndef RODIN_VARIATIONAL_FINITEELEMENT_H
 #define RODIN_VARIATIONAL_FINITEELEMENT_H
 
-#include <unordered_map>
-
-#include "Rodin/Math/Matrix.h"
 #include "Rodin/Geometry/Polytope.h"
-#include "Rodin/Geometry/PolytopeTransformation.h"
 
 #include "ForwardDecls.h"
 
@@ -50,6 +46,26 @@ namespace Rodin::Variational
       FiniteElementBase(FiniteElementBase&& other)
         : m_g(std::move(other.m_g))
       {}
+
+      constexpr
+      FiniteElementBase& operator=(const FiniteElementBase& other)
+      {
+        if (this != &other)
+        {
+          m_g = other.m_g;
+        }
+        return static_cast<Derived&>(*this);
+      }
+
+      constexpr
+      FiniteElementBase& operator=(FiniteElementBase&& other)
+      {
+        if (this != &other)
+        {
+          m_g = std::move(other.m_g);
+        }
+        return static_cast<Derived&>(*this);
+      }
 
       virtual ~FiniteElementBase() = default;
 
@@ -105,7 +121,7 @@ namespace Rodin::Variational
       }
 
     private:
-      const Geometry::Polytope::Type m_g;
+      Geometry::Polytope::Type m_g;
   };
 }
 

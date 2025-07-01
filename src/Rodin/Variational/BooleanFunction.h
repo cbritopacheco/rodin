@@ -9,7 +9,6 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "RangeShape.h"
 
 namespace Rodin::Variational
 {

@@ -232,7 +232,6 @@ namespace Rodin::Variational
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
-        assert(lhs.getRangeShape() == rhs.getRangeShape());
         assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
       }
 
@@ -266,13 +265,6 @@ namespace Rodin::Variational
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        assert(getLHS().getRangeShape() == getRHS().getRangeShape());
-        return getLHS().getRangeShape();
       }
 
       constexpr
