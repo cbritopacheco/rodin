@@ -153,7 +153,8 @@ namespace Rodin::Variational
        */
       constexpr
       Problem(
-          TrialFunction<Solution, TrialFES>& u, TestFunction<TestFES>& v, const LinearSystemType& axb)
+          TrialFunction<Solution, TrialFES>& u, TestFunction<TestFES>& v,
+          const LinearSystemType& axb)
          :  m_trialFunction(u), m_testFunction(v),
             m_axb(axb),
             m_assembled(false)

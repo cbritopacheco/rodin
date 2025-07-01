@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_FINITEELEMENT_H
 #define RODIN_VARIATIONAL_FINITEELEMENT_H
 
+#include <boost/serialization/access.hpp>
+
 #include "Rodin/Geometry/Polytope.h"
 
 #include "ForwardDecls.h"
@@ -118,6 +120,12 @@ namespace Rodin::Variational
       size_t getOrder() const
       {
         return static_cast<const Derived&>(*this).getOrder();
+      }
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & m_g;
       }
 
     private:

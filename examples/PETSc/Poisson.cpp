@@ -1,10 +1,9 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2025.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-
 #include <Rodin/PETSc.h>
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
@@ -32,19 +31,13 @@ int main(int argc, char** argv)
   P1 vh(mesh);
 
   Mat a;
-  MatCreate(PETSC_COMM_SELF, &a);
-
-  Vec x = PETSC_NULLPTR;
-
+  Vec x;
   Vec b;
-  VecCreate(PETSC_COMM_SELF, &b);
+
+  TrialFunction u(vh, GridFunction(vh, x));
+  TestFunction  v(vh);
 
   LinearSystem axb(a, x, b);
-
-  GridFunction sol(vh, x);
-
-  TrialFunction u(vh);
-  TestFunction  v(vh);
 
   // Define problem
   Problem poisson(u, v, axb);

@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_P1_P1ELEMENT_H
 #define RODIN_VARIATIONAL_P1_P1ELEMENT_H
 
+#include <boost/serialization/access.hpp>
+
 #include "Rodin/Types.h"
 
 #include "Rodin/Math/Traits.h"
@@ -55,6 +57,8 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
     public:
+      friend class boost::serialization::access;
+
       /// Parent class
       using Parent = FiniteElementBase<P1Element<Scalar>>;
 
@@ -231,6 +235,12 @@ namespace Rodin::Variational
         assert(false);
         return 0;
       }
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & boost::serialization::base_object<Parent>(*this);
+      }
   };
 
   /**
@@ -245,6 +255,8 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
     public:
+      friend class boost::serialization::access;
+
       /// Parent class
       using Parent = FiniteElementBase<P1Element<Math::Vector<Scalar>>>;
 
@@ -466,6 +478,13 @@ namespace Rodin::Variational
         }
         assert(false);
         return 0;
+      }
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & boost::serialization::base_object<Parent>(*this);
+        ar & m_vdim;
       }
 
     private:

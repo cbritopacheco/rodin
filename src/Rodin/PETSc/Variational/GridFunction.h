@@ -187,36 +187,62 @@ namespace Rodin::Variational
 
       ScalarType& operator[](Index global)
       {
-        PetscInt local;
-        if (m_begin <= global && global < m_end)
+        if constexpr (std::is_same_v<ContextType, Context::Local>)
         {
-          local = static_cast<PetscInt>(global - m_begin);
+          return reinterpret_cast<ScalarType*>(m_raw)[static_cast<PetscInt>(global)];
+        }
+        else if constexpr (std::is_same_v<ContextType, Context::MPI>)
+        {
+          PetscInt local;
+          if (m_begin <= global && global < m_end)
+          {
+            local = static_cast<PetscInt>(global - m_begin);
+          }
+          else
+          {
+            const auto& fes = this->getFiniteElementSpace();
+            const Optional<Index> localIdx = fes.getLocalIndex(global);
+            assert(localIdx);
+            local = *localIdx;
+          }
+          return reinterpret_cast<ScalarType*>(m_raw)[local];
         }
         else
         {
-          const auto& fes = this->getFiniteElementSpace();
-          Optional<Index> localIdx = fes.getLocalIndex(global);
-          assert(localIdx);
-          local = *localIdx;
+          static_assert(
+              std::is_same_v<ContextType, Context::Local>
+              || std::is_same_v<ContextType, Context::MPI>);
         }
-        return reinterpret_cast<ScalarType*>(m_raw)[local];
       }
 
       const ScalarType& operator[](Index global) const
       {
-        PetscInt local;
-        if (m_begin <= global && global < m_end)
+        if constexpr (std::is_same_v<ContextType, Context::Local>)
         {
-          local = static_cast<PetscInt>(global - m_begin);
+          return reinterpret_cast<const ScalarType*>(m_raw)[static_cast<PetscInt>(global)];
+        }
+        else if constexpr (std::is_same_v<ContextType, Context::MPI>)
+        {
+          PetscInt local;
+          if (m_begin <= global && global < m_end)
+          {
+            local = static_cast<PetscInt>(global - m_begin);
+          }
+          else
+          {
+            const auto& fes = this->getFiniteElementSpace();
+            const Optional<Index> localIdx = fes.getLocalIndex(global);
+            assert(localIdx);
+            local = *localIdx;
+          }
+          return reinterpret_cast<const ScalarType*>(m_raw)[local];
         }
         else
         {
-          const auto& fes = this->getFiniteElementSpace();
-          Optional<Index> localIdx = fes.getLocalIndex(global);
-          assert(localIdx);
-          local = *localIdx;
+          static_assert(
+              std::is_same_v<ContextType, Context::Local>
+              || std::is_same_v<ContextType, Context::MPI>);
         }
-        return reinterpret_cast<const ScalarType*>(m_raw)[local];
       }
 
       GridFunction& operator+=(const ScalarType& rhs)
