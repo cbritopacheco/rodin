@@ -7,9 +7,6 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
 #define RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
 
-#include <map>
-#include <optional>
-
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -43,7 +40,5 @@ namespace Rodin::IO
       std::reference_wrapper<ObjectType> m_gf;
   };
 }
-
-#include "GridFunctionLoader.hpp"
 
 #endif

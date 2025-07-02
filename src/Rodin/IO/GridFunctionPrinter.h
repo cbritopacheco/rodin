@@ -7,46 +7,14 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_H
 #define RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_H
 
-#include <map>
-#include <optional>
 #include <boost/filesystem.hpp>
-
-#include "Rodin/Types.h"
-#include "Rodin/Context.h"
-#include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
 
-#include "Printer.h"
-
 namespace Rodin::IO
 {
-  template <class FES, class Data>
-  class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FES, Data>>
-  {
-    public:
-      using FESType = FES;
-
-      using DataType = Data;
-
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
-
-      using Parent = IO::Printer<ObjectType>;
-
-      GridFunctionPrinterBase(const ObjectType& gf)
-        : m_gf(gf)
-      {}
-
-      const ObjectType& getObject() const override
-      {
-        return m_gf.get();
-      }
-
-    private:
-      std::reference_wrapper<const ObjectType> m_gf;
-  };
+  template <FileFormat Fmt, class FES, class Data>
+  class GridFunctionPrinterBase;
 }
-
-#include "GridFunctionPrinter.hpp"
 
 #endif

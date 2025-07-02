@@ -2,9 +2,7 @@
 #define RODIN_PETSC_OBJECT_H
 
 #include <petsc.h>
-#include <vector>
 #include <atomic>
-#include <functional>  // for reference_wrapper
 
 namespace Rodin::PETSc
 {

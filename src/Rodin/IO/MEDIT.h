@@ -741,35 +741,49 @@ namespace Rodin::IO
       size_t m_currentLineNumber;
   };
 
-  template <class FES>
-  class GridFunctionPrinter<
-    FileFormat::MEDIT,
-    FES,
-    Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
-    : public GridFunctionPrinterBase<
-        FES,
-        Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+  template <class FES, class Data>
+  class GridFunctionPrinterBase<FileFormat::MEDIT, FES, Data>
+    : public Printer<Variational::GridFunction<FES, Data>>
   {
     public:
       using FESType = FES;
 
-      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      static constexpr FileFormat Format = FileFormat::MEDIT;
 
-      using DataType = Math::Vector<ScalarType>;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using DataType = Data;
 
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
-      using Parent = GridFunctionPrinterBase<FESType, DataType>;
+      using Parent = Printer<ObjectType>;
 
-      GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf)
+      GridFunctionPrinterBase(const ObjectType& gf)
+        : m_gf(gf)
       {}
 
       void print(std::ostream& os) override
       {
         printVersion(os);
         printDimension(os);
-        printData(os);
+
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t vdim = fes.getVectorDimension();
+
+        os << MEDIT::Keyword::SolAtVertices << '\n'
+           << mesh.getVertexCount() << '\n'
+           << 1 // Only one solution
+           << " " << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Real)
+           << '\n';
+
+        this->printData(os);
+
+        os << '\n';
+
         printEnd(os);
       }
 
@@ -786,18 +800,48 @@ namespace Rodin::IO
         os << MEDIT::Keyword::Dimension << '\n' << mesh.getSpaceDimension() << "\n\n";
       }
 
+      void printEnd(std::ostream& os)
+      {
+        os << '\n' << IO::MEDIT::Keyword::End;
+      }
+
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
+
+      virtual void printData(std::ostream& os) = 0;
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
+  };
+
+  template <class FES>
+  class GridFunctionPrinter<
+    FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+    : public GridFunctionPrinterBase<
+        FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+  {
+    public:
+      using FESType = FES;
+
+      static constexpr FileFormat Format = FileFormat::MEDIT;
+
+      using RangeType = typename FormLanguage::Traits<FES>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using DataType = Math::Vector<ScalarType>;
+
+      using Parent = GridFunctionPrinterBase<Format, FES, DataType>;
+
+      using Parent::Parent;
+
       void printData(std::ostream& os)
       {
         const auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        const size_t vdim = fes.getVectorDimension();
-        os << MEDIT::Keyword::SolAtVertices << '\n'
-           << mesh.getVertexCount() << '\n'
-           << 1 // Only one solution
-           << " " << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Real)
-           << '\n';
-
         if constexpr (Utility::IsSpecialization<FES, Variational::P1>::Value)
         {
           os << gf.getData().reshaped();
@@ -814,11 +858,6 @@ namespace Rodin::IO
           }
         }
         os << '\n';
-      }
-
-      void printEnd(std::ostream& os)
-      {
-        os << '\n' << IO::MEDIT::Keyword::End;
       }
   };
 }

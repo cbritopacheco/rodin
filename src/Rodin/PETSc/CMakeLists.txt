@@ -7,19 +7,21 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinPETSc_HEADERS
   ForwardDecls.h
   Object.h
+  IO/MFEM.h
   Solver/KSP.h
   Solver/CG.h
   Math/Vector.h
   Math/Matrix.h
   Math/LinearSystem.h
-  Assembly/Sequential.h
   Assembly/MPI.h
-  FormLanguage/Traits.h
+  Assembly/Sequential.h
   Variational/GridFunction.h
+  FormLanguage/Traits.h
   )
 
 set(RodinPETSc_SRCS
   Object.cpp
+  IO/MFEM.cpp
   Solver/KSP.cpp
   Solver/CG.cpp
   Math/LinearSystem.cpp
