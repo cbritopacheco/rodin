@@ -7,7 +7,7 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinPETSc_HEADERS
   ForwardDecls.h
   Object.h
-  IO/MFEM.h
+  IO/GridFunctionPrinter.h
   Solver/KSP.h
   Solver/CG.h
   Math/Vector.h
@@ -21,7 +21,7 @@ set(RodinPETSc_HEADERS
 
 set(RodinPETSc_SRCS
   Object.cpp
-  IO/MFEM.cpp
+  IO/GridFunctionPrinter.cpp
   Solver/KSP.cpp
   Solver/CG.cpp
   Math/LinearSystem.cpp

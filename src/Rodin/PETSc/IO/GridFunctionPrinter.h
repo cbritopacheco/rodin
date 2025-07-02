@@ -4,28 +4,27 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_PETSC_IO_MEDIT_H
-#define RODIN_PETSC_IO_MEDIT_H
+#ifndef RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
+#define RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 
 #include <petsc.h>
 #include <petscsystypes.h>
 #include <petscvec.h>
 
-#include "Rodin/Context/Local.h"
-#include "Rodin/IO/MEDIT.h"
-
-#include "Rodin/MPI/Context.h"
+#include "Rodin/IO/GridFunctionPrinter.h"
+#include "Rodin/FormLanguage/Traits.h"
+#include "Rodin/IO/ForwardDecls.h"
 
 namespace Rodin::IO
 {
-  template <class FES>
-  class GridFunctionPrinter<FileFormat::MEDIT, FES, ::Vec>
-    : public GridFunctionPrinterBase<FileFormat::MEDIT, FES, ::Vec>
+  template <FileFormat Fmt, class FES>
+  class GridFunctionPrinter<Fmt, FES, ::Vec>
+    : public GridFunctionPrinterBase<Fmt, FES, ::Vec>
   {
     public:
       using FESType = FES;
 
-      static constexpr FileFormat Format = FileFormat::MEDIT;
+      static constexpr FileFormat Format = Fmt;
 
       using RangeType = typename FormLanguage::Traits<FES>::RangeType;
 
@@ -43,13 +42,9 @@ namespace Rodin::IO
       {
         const auto& gf = this->getObject();
         const auto& data = gf.getData();
-        const PetscInt sz = 0;
-        VecGetSize(data, &sz);
-        const PetscScalar* raw = nullptr;
-        VecGetArrayRead(data, &raw);
-        for (PetscInt i = 0; i < sz; ++i)
+        const auto& raw = gf.getRaw();
+        for (PetscInt i = 0; i < gf.getSize(); ++i)
           os << raw[i] << "\n";
-        VecRestoreArrayRead(data, &raw);
       }
   };
 }
