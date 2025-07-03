@@ -28,6 +28,12 @@ namespace Rodin::Variational
   class GridFunction<FES, ::Vec> final
     : public GridFunctionBase<GridFunction<FES, ::Vec>>
   {
+    enum class State
+    {
+      Acquired,
+      Unacquired
+    };
+
     public:
       using FESType = FES;
 
@@ -44,14 +50,26 @@ namespace Rodin::Variational
       using Parent::min;
       using Parent::max;
 
+      static_assert(
+        std::is_same_v<ContextType, Context::Local> ||
+        std::is_same_v<ContextType, Context::MPI>);
+
       GridFunction(const FESType& fes)
-        : Parent(fes)
+        : Parent(fes),
+          m_write(State::Unacquired),
+          m_rawWrite(nullptr),
+          m_read(State::Unacquired),
+          m_rawRead(nullptr)
       {
         init(this->getData());
       }
 
       GridFunction(const FESType& fes, DataType& data)
-        : Parent(fes, data)
+        : Parent(fes, data),
+          m_write(State::Unacquired),
+          m_rawWrite(nullptr),
+          m_read(State::Unacquired),
+          m_rawRead(nullptr)
       {
         init(data);
       }
@@ -60,7 +78,11 @@ namespace Rodin::Variational
         : Parent(other.getFiniteElementSpace()),
           m_begin(other.m_begin),
           m_end(other.m_end),
-          m_ghosts(other.m_ghosts)
+          m_ghosts(other.m_ghosts),
+          m_write(State::Unacquired),
+          m_rawWrite(nullptr),
+          m_read(State::Unacquired),
+          m_rawRead(nullptr)
       {
         PetscErrorCode ierr;
 
@@ -71,9 +93,6 @@ namespace Rodin::Variational
 
         ierr = VecCopy(other.getData(), data);
         assert(ierr == PETSC_SUCCESS);
-
-        ierr = VecGetArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
       }
 
       GridFunction(GridFunction&& other) noexcept
@@ -81,7 +100,10 @@ namespace Rodin::Variational
           m_begin(std::move(other.m_begin)),
           m_end(std::move(other.m_end)),
           m_ghosts(std::move(other.m_ghosts)),
-          m_raw(std::exchange(other.m_raw, nullptr))
+          m_write(std::move(other.m_write)),
+          m_rawWrite(std::exchange(other.m_rawWrite, nullptr)),
+          m_read(std::move(other.m_read)),
+          m_rawRead(std::exchange(other.m_rawRead, nullptr))
       {}
 
       GridFunction& operator=(const GridFunction& other) = delete;
@@ -90,10 +112,17 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
+          Parent::operator=(std::move(other));
           PetscErrorCode ierr;
-          if (m_raw)
+          if (m_rawWrite && m_write == State::Acquired)
           {
-            ierr = VecRestoreArray(this->getData(), &m_raw);
+            ierr = VecRestoreArray(this->getData(), &m_rawWrite);
+            assert(ierr == PETSC_SUCCESS);
+          }
+
+          if (m_rawRead && m_read == State::Acquired)
+          {
+            ierr = VecRestoreArrayRead(this->getData(), &m_rawRead);
             assert(ierr == PETSC_SUCCESS);
           }
 
@@ -108,7 +137,10 @@ namespace Rodin::Variational
           m_begin = std::move(other.m_begin);
           m_end = std::move(other.m_end);
           m_ghosts = std::move(other.m_ghosts);
-          m_raw = std::exchange(other.m_raw, nullptr);
+          m_write = std::exchange(other.m_write, State::Unacquired);
+          m_rawWrite = std::exchange(other.m_rawWrite, nullptr);
+          m_read = std::exchange(other.m_read, State::Unacquired);
+          m_rawRead = std::exchange(other.m_rawRead, nullptr);
         }
         return *this;
       }
@@ -116,9 +148,15 @@ namespace Rodin::Variational
       virtual ~GridFunction()
       {
         PetscErrorCode ierr;
-        if (m_raw)
+        if (m_rawWrite && m_write == State::Acquired)
         {
-          ierr = VecRestoreArray(this->getData(), &m_raw);
+          ierr = VecRestoreArray(this->getData(), &m_rawWrite);
+          assert(ierr == PETSC_SUCCESS);
+        }
+
+        if (m_rawRead && m_read == State::Acquired)
+        {
+          ierr = VecRestoreArrayRead(this->getData(), &m_rawRead);
           assert(ierr == PETSC_SUCCESS);
         }
 
@@ -153,31 +191,26 @@ namespace Rodin::Variational
           m_ghosts.resize(ghostSize);
           for (size_t i = 0; i < ghostSize; ++i)
             m_ghosts[i] = fes.getGlobalIndex(m_end + i);
-          ierr = VecCreateGhost(comm, localSize, globalSize, ghostSize, m_ghosts.data(), &data);
+          ierr = VecCreateGhost(
+              comm, localSize, globalSize, ghostSize, m_ghosts.data(), &data);
           assert(ierr == PETSC_SUCCESS);
         }
         else
         {
           static_assert(std::is_same_v<ContextType, Context::Local> || std::is_same_v<ContextType, Context::MPI>);
         }
-
         ierr = VecZeroEntries(data);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
       }
 
       constexpr
       ScalarType min(Index& idx) const
       {
+        flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecRestoreArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
         ScalarType res;
         ierr = VecMin(data, idx, &res);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
         return res;
       }
@@ -185,23 +218,22 @@ namespace Rodin::Variational
       constexpr
       ScalarType max(Index& idx) const
       {
+        flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecRestoreArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
         ScalarType res;
         ierr = VecMax(data, idx, &res);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
         return res;
       }
 
       ScalarType& operator[](Index global)
       {
+        acquire();
+
         if constexpr (std::is_same_v<ContextType, Context::Local>)
         {
-          return reinterpret_cast<ScalarType*>(m_raw)[static_cast<PetscInt>(global)];
+          return m_rawWrite[static_cast<PetscInt>(global)];
         }
         else if constexpr (std::is_same_v<ContextType, Context::MPI>)
         {
@@ -217,7 +249,7 @@ namespace Rodin::Variational
             assert(localIdx);
             local = *localIdx;
           }
-          return reinterpret_cast<ScalarType*>(m_raw)[local];
+          return m_rawWrite[local];
         }
         else
         {
@@ -229,9 +261,11 @@ namespace Rodin::Variational
 
       const ScalarType& operator[](Index global) const
       {
+        acquire();
+
         if constexpr (std::is_same_v<ContextType, Context::Local>)
         {
-          return reinterpret_cast<const ScalarType*>(m_raw)[static_cast<PetscInt>(global)];
+          return m_rawRead[static_cast<PetscInt>(global)];
         }
         else if constexpr (std::is_same_v<ContextType, Context::MPI>)
         {
@@ -247,7 +281,7 @@ namespace Rodin::Variational
             assert(localIdx);
             local = *localIdx;
           }
-          return reinterpret_cast<const ScalarType*>(m_raw)[local];
+          return m_rawRead[local];
         }
         else
         {
@@ -260,13 +294,10 @@ namespace Rodin::Variational
       GridFunction& operator+=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
+        flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecRestoreArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
         ierr = VecShift(data, rhs);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
         return *this;
       }
@@ -274,39 +305,30 @@ namespace Rodin::Variational
       GridFunction& operator-=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
+        flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecRestoreArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
         ierr = VecShift(data, -rhs);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
         return *this;
       }
 
       GridFunction& operator*=(const ScalarType& rhs)
       {
+        flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecRestoreArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
         ierr = VecScale(data, rhs);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
         return *this;
       }
 
       GridFunction& operator/=(const ScalarType& rhs)
       {
+        flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecRestoreArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
         ierr = VecScale(data, 1.0 / rhs);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
         return static_cast<GridFunction&>(*this);
       }
@@ -314,13 +336,10 @@ namespace Rodin::Variational
       GridFunction& operator+=(const GridFunction& rhs)
       {
         assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecRestoreArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
         ierr = VecAXPY(data, 1.0, rhs.getData());
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
         return *this;
       }
@@ -328,63 +347,60 @@ namespace Rodin::Variational
       GridFunction& operator-=(const GridFunction& rhs)
       {
         assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecRestoreArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
         ierr = VecAXPY(data, -1.0, rhs.getData());
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
         return *this;
       }
 
       GridFunction& operator*=(const GridFunction& rhs)
       {
+        flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecRestoreArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
         ierr = VecPointwiseMult(data, data, rhs.getData());
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
         return *this;
       }
 
       GridFunction& operator/=(const GridFunction& rhs)
       {
+        flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecRestoreArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
         ierr = VecPointwiseDivide(data, data, rhs.getData());
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(data, &m_raw);
         assert(ierr == PETSC_SUCCESS);
         return *this;
       }
 
-      GridFunction& setData(const DataType& src, size_t offset = 0)
+      GridFunction& setData(const DataType& other, size_t offset = 0)
       {
+        flush();
+
         auto& data = this->getData();
 
         PetscErrorCode ierr;
-
-        PetscScalar* raw = nullptr;
-        ierr = VecGetArray(src, &raw);
-        assert(ierr == PETSC_SUCCESS);
 
         PetscInt localSize;
         ierr = VecGetLocalSize(data, &localSize);
         assert(ierr == PETSC_SUCCESS);
 
-        std::memcpy(m_raw, raw + static_cast<PetscInt>(offset), localSize * sizeof(PetscScalar));
-
-        ierr = VecRestoreArray(src, &raw);
+        const PetscScalar* src = nullptr;
+        ierr = VecGetArrayRead(other, &src);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecRestoreArray(data, &m_raw);
+        PetscScalar* dst = nullptr;
+        ierr = VecGetArray(data, &dst);
+        assert(ierr == PETSC_SUCCESS);
+
+        std::memcpy(dst, src + static_cast<PetscInt>(offset), localSize * sizeof(PetscScalar));
+
+        ierr = VecRestoreArray(data, &dst);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = VecRestoreArrayRead(other, &src);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = VecGhostUpdateBegin(data, INSERT_VALUES, SCATTER_FORWARD);
@@ -393,26 +409,68 @@ namespace Rodin::Variational
         ierr = VecGhostUpdateEnd(data, INSERT_VALUES, SCATTER_FORWARD);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecGetArray(data, &m_raw);
-        assert(ierr == PETSC_SUCCESS);
-
         return *this;
       }
 
       PetscScalar* getRaw()
       {
-        return m_raw;
+        return m_rawWrite;
       }
 
       const PetscScalar* getRaw() const
       {
-        return m_raw;
+        return m_rawRead;
+      }
+
+      void acquire()
+      {
+        if (m_write == State::Unacquired)
+        {
+          PetscErrorCode ierr = VecGetArray(this->getData(), &m_rawWrite);
+          assert(ierr == PETSC_SUCCESS);
+          m_write = State::Acquired;
+        }
+      }
+
+      void acquire() const
+      {
+        if (m_read == State::Unacquired)
+        {
+          PetscErrorCode ierr = VecGetArrayRead(this->getData(), &m_rawRead);
+          assert(ierr == PETSC_SUCCESS);
+          m_read = State::Acquired;
+        }
+      }
+
+      void flush()
+      {
+        if (m_write == State::Acquired)
+        {
+          PetscErrorCode ierr = VecRestoreArray(this->getData(), &m_rawWrite);
+          assert(ierr == PETSC_SUCCESS);
+          m_write = State::Unacquired;
+        }
+      }
+
+      void flush() const
+      {
+        if (m_read == State::Acquired)
+        {
+          PetscErrorCode ierr = VecRestoreArrayRead(this->getData(), &m_rawRead);
+          assert(ierr == PETSC_SUCCESS);
+          m_read = State::Unacquired;
+        }
       }
 
     private:
       size_t m_begin, m_end;
       std::vector<PetscInt> m_ghosts;
-      PetscScalar* m_raw;
+
+      mutable State m_write;
+      mutable PetscScalar* m_rawWrite;
+
+      mutable State m_read;
+      mutable const PetscScalar* m_rawRead;
   };
 }
 
