@@ -47,24 +47,19 @@ int main(int argc, char** argv)
   std::cout << "Vertex count: " << mesh.getVertexCount() << "\n";
   std::cout << "Local count: " << mesh.getShard().getVertexCount() << "\n";
 
-  Mat a;
-  MatCreate(mpi.getCommunicator(), &a);
-
-  Vec x = PETSC_NULLPTR;
-
-  Vec b;
-  VecCreate(mpi.getCommunicator(), &b);
-
-  LinearSystem axb(a, x, b);
+  LinearSystem<::Mat, ::Vec> axb(mpi.getCommunicator());
+  ::Mat& a = axb.getOperator();
+  ::Vec& x = axb.getSolution();
+  ::Vec& b = axb.getVector();
 
   ScalarFunction f = 1;
 
   P1 vh(mesh);
 
-  GridFunction sol(vh, x);
-
-  TrialFunction u(vh, sol);
+  ::Vec data;
+  TrialFunction u(vh, data);
   TestFunction  v(vh);
+  auto& d = u.getSolution();
 
   // Define problem
   Problem poisson(u, v, axb);

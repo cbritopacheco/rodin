@@ -18,37 +18,39 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
-  template <class Solution, class FES>
+  template <class Data, class FES>
   class TrialFunction final
-    : public ShapeFunction<TrialFunction<Solution, FES>, FES, TrialSpace>
+    : public ShapeFunction<TrialFunction<Data, FES>, FES, TrialSpace>
   {
     public:
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = TrialSpace;
 
-      using SolutionType = Solution;
+      using DataType = Data;
+
+      using SolutionType = GridFunction<FES, DataType>;
 
       using Parent =
-        ShapeFunction<TrialFunction<SolutionType, FESType>, FESType, TrialSpace>;
+        ShapeFunction<TrialFunction<DataType, FESType>, FESType, TrialSpace>;
 
-      static_assert(std::is_base_of_v<FiniteElementSpaceBase, FES>,
-          "FES is not a finite element space.");
+      static_assert(std::is_base_of_v<FiniteElementSpaceBase, FES>);
 
       constexpr
       TrialFunction(const FES& fes)
-        : Parent(fes)
+        : Parent(fes),
+          m_gf(fes)
       {}
 
       constexpr
-      TrialFunction(const FES& fes, SolutionType& gf)
+      TrialFunction(const FES& fes, DataType& data)
         : Parent(fes),
-          m_gf(std::ref(gf))
+          m_gf(fes, data)
       {}
 
       constexpr
-      TrialFunction(const FES& fes, SolutionType&& gf)
+      TrialFunction(const FES& fes, DataType&& data)
         : Parent(fes),
-          m_gf(std::move(gf))
+          m_gf(fes, std::move(data))
       {}
 
       constexpr
@@ -97,45 +99,34 @@ namespace Rodin::Variational
       constexpr
       SolutionType& getSolution()
       {
-        assert(m_gf.has_value());
-        return m_gf.value();
+        return m_gf;
       }
 
       constexpr
       const SolutionType& getSolution() const
       {
-        assert(m_gf.has_value());
-        return m_gf.value();
-      }
-
-      constexpr
-      auto& emplace()
-      {
-        m_gf.emplace(this->getFiniteElementSpace());
-        return *this;
+        return m_gf;
       }
 
       TrialFunction* copy() const noexcept override
       {
-        return new TrialFunction(*this);
+        // No data is copied.
+        return new TrialFunction(this->getFiniteElementSpace());
       }
 
     private:
-      Optional<SolutionType> m_gf;
+      SolutionType m_gf;
   };
-
-  template <class Solution, class FES>
-  TrialFunction(const FES&, Solution&)
-    -> TrialFunction<Solution, FES>;
-
-  template <class Solution, class FES>
-  TrialFunction(const FES&, Solution&&)
-    -> TrialFunction<Solution, FES>;
 
   template <class FES>
   TrialFunction(const FES&)
-    -> TrialFunction<
-        GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>, FES>;
+    -> TrialFunction<Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>, FES>;
+
+  template <class Data, class FES>
+  TrialFunction(const FES&, Data&) -> TrialFunction<Data, FES>;
+
+  template <class Data, class FES>
+  TrialFunction(const FES&, Data&&) -> TrialFunction<Data, FES>;
 }
 #endif
 

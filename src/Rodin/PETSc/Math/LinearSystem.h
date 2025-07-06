@@ -7,9 +7,10 @@
 #ifndef RODIN_PETSC_MATH_SYSTEM_H
 #define RODIN_PETSC_MATH_SYSTEM_H
 
+#include <boost/mpi/communicator.hpp>
 #include <petsc.h>
+#include <utility>
 #include "Rodin/Math/LinearSystem.h"
-#include <iostream>
 
 namespace Rodin::Math
 {
@@ -24,7 +25,29 @@ namespace Rodin::Math
 
       using Parent = LinearSystemBase<::Mat, ::Vec, LinearSystem<::Mat, ::Vec>>;
 
-      using Parent::Parent;
+      LinearSystem(const boost::mpi::communicator& comm)
+        : Parent(::Mat(), ::Vec(), ::Vec())
+      {
+        PetscErrorCode ierr;
+        ierr = MatCreate(comm, &this->getOperator());
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecCreate(comm, &this->getVector());
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecCreate(comm, &this->getVector());
+        assert(ierr == PETSC_SUCCESS);
+      }
+
+      LinearSystem(::Mat&& stiffness, ::Vec&& guess, ::Vec&& mass) noexcept
+        : Parent(::Mat(), ::Vec(), ::Vec())
+      {
+        this->getOperator() = std::exchange(stiffness, nullptr);
+        this->getVector() = std::exchange(guess, nullptr);
+        this->getSolution() = std::exchange(mass, nullptr);
+      }
+
+      LinearSystem(::Mat& stiffness, ::Vec& guess, ::Vec& mass)
+        : Parent(stiffness, guess, mass)
+      {}
 
       template <class DOFScalar>
       LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
@@ -33,7 +56,7 @@ namespace Rodin::Math
 
         ::Mat& A = this->getOperator();
         ::Vec& b = this->getVector();
-        ::Vec& x = this->getGuess();
+        ::Vec& x = this->getSolution();
 
         if (!x)
         {

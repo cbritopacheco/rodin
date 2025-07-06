@@ -82,37 +82,43 @@ namespace Rodin::Math
 
       MatrixType& getOperator()
       {
-        auto& ref = std::visit([](auto& m) -> MatrixType& { return m; }, m_stiffness);
+        auto& ref =
+          std::visit([](auto& m) -> MatrixType& { return m; }, m_stiffness);
         return ref;
       }
 
       const MatrixType& getOperator() const
       {
-        const auto& ref = std::visit([](const auto& m) -> const MatrixType& { return m; }, m_stiffness);
+        const auto& ref =
+          std::visit([](const auto& m) -> const MatrixType& { return m; }, m_stiffness);
         return ref;
       }
 
       VectorType& getVector()
       {
-        auto& ref = std::visit([](auto& m) -> VectorType& { return m; }, m_mass);
+        auto& ref =
+          std::visit([](auto& m) -> VectorType& { return m; }, m_mass);
         return ref;
       }
 
       const VectorType& getVector() const
       {
-        const auto& ref = std::visit([](const auto& m) -> const VectorType& { return m; }, m_mass);
+        const auto& ref =
+          std::visit([](const auto& m) -> const VectorType& { return m; }, m_mass);
         return ref;
       }
 
-      VectorType& getGuess()
+      VectorType& getSolution()
       {
-        auto& ref = std::visit([](auto& m) -> VectorType& { return m; }, m_guess);
+        auto& ref =
+          std::visit([](auto& m) -> VectorType& { return m; }, m_guess);
         return ref;
       }
 
-      const VectorType& getGuess() const
+      const VectorType& getSolution() const
       {
-        const auto& ref = std::visit([](const auto& m) -> const VectorType& { return m; }, m_guess);
+        const auto& ref =
+          std::visit([](const auto& m) -> const VectorType& { return m; }, m_guess);
         return ref;
       }
 

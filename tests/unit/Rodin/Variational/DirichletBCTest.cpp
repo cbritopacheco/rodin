@@ -19,7 +19,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
 
     TrialFunction u(fes);
-    u.emplace();
 
     RealFunction c = 1;
 
@@ -40,7 +39,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
 
     TrialFunction u(fes);
-    u.emplace();
 
     RealFunction c = 1;
 

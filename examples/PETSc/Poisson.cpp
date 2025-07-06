@@ -34,7 +34,8 @@ int main(int argc, char** argv)
   Vec x;
   Vec b;
 
-  TrialFunction u(vh, GridFunction(vh, x));
+  ::Vec data;
+  TrialFunction u(vh, data);
   TestFunction  v(vh);
 
   LinearSystem axb(a, x, b);

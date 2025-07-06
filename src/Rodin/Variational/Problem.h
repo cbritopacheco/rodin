@@ -279,12 +279,12 @@ namespace Rodin::Variational
          // Solve the system AX = B
          auto& axb = getLinearSystem();
          auto& a = axb.getOperator();
-         auto& x = axb.getGuess();
+         auto& x = axb.getSolution();
          auto& b = axb.getVector();
          solver.solve(a, x, b);
 
          // Recover solution
-         getTrialFunction().emplace().getSolution().setData(x);
+         getTrialFunction().getSolution().setData(x);
       }
 
       Problem& operator=(const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) override
@@ -621,7 +621,7 @@ namespace Rodin::Variational
          m_us.iapply(
              [&](size_t i, auto& u)
              {
-               u.get().emplace().getSolution().setData(m_guess, m_trialOffsets[i]);
+               u.get().getSolution().setData(m_guess, m_trialOffsets[i]);
              });
       }
 

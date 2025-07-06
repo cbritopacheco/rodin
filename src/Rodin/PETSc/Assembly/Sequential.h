@@ -18,14 +18,12 @@ namespace Rodin::Assembly
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
-      static_assert(
-        std::is_same_v<ScalarType, PetscScalar>,
-        "FES::ScalarType must be PetscScalar for PETSc Vec assembly"
-      );
       using VectorType      = ::Vec;
       using LinearFormType  = Variational::LinearForm<FES, VectorType>;
       using Parent          = AssemblyBase<VectorType, LinearFormType>;
       using InputType       = typename Parent::InputType;
+
+      static_assert(std::is_same_v<ScalarType, PetscScalar>);
 
       void execute(VectorType& res, const InputType& input) const override
       {

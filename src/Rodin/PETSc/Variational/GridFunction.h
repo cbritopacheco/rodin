@@ -56,16 +56,20 @@ namespace Rodin::Variational
 
       GridFunction(const FESType& fes)
         : Parent(fes),
+          m_owned(true),
           m_write(State::Unacquired),
           m_rawWrite(nullptr),
           m_read(State::Unacquired),
           m_rawRead(nullptr)
       {
-        init(this->getData());
+        auto& data = this->getData();
+        VecCreate(PETSC_COMM_SELF, &data);
+        init(data);
       }
 
       GridFunction(const FESType& fes, DataType& data)
         : Parent(fes, data),
+          m_owned(false),
           m_write(State::Unacquired),
           m_rawWrite(nullptr),
           m_read(State::Unacquired),
@@ -76,6 +80,7 @@ namespace Rodin::Variational
 
       GridFunction(const GridFunction& other)
         : Parent(other.getFiniteElementSpace()),
+          m_owned(true),
           m_begin(other.m_begin),
           m_end(other.m_end),
           m_ghosts(other.m_ghosts),
@@ -97,6 +102,7 @@ namespace Rodin::Variational
 
       GridFunction(GridFunction&& other) noexcept
         : Parent(other.getFiniteElementSpace(), std::exchange(other.getData(), nullptr)),
+          m_owned(std::exchange(other.m_owned, false)),
           m_begin(std::move(other.m_begin)),
           m_end(std::move(other.m_end)),
           m_ghosts(std::move(other.m_ghosts)),
@@ -127,7 +133,7 @@ namespace Rodin::Variational
           }
 
           auto& data = this->getData();
-          if (data)
+          if (m_owned && data)
           {
             ierr = VecDestroy(&data);
             assert(ierr == PETSC_SUCCESS);
@@ -161,7 +167,7 @@ namespace Rodin::Variational
         }
 
         auto& data = this->getData();
-        if (data)
+        if (m_owned && data)
         {
           ierr = VecDestroy(&data);
           assert(ierr == PETSC_SUCCESS);
@@ -175,9 +181,10 @@ namespace Rodin::Variational
         const auto& mesh = fes.getMesh();
         if constexpr (std::is_same_v<ContextType, Context::Local>)
         {
-          VecCreate(PETSC_COMM_SELF, &data);
-          VecSetType(data, VECSEQ);
-          VecSetSizes(data, fes.getSize(), PETSC_DECIDE);
+          ierr = VecSetSizes(data, fes.getSize(), PETSC_DECIDE);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(data);
+          assert(ierr == PETSC_SUCCESS);
         }
         else if constexpr (std::is_same_v<ContextType, Context::MPI>)
         {
@@ -187,17 +194,22 @@ namespace Rodin::Variational
           const size_t localSize = fes.getShard().getSize();
           fes.getOwnershipRange(m_begin, m_end);
           const size_t ownedSize = m_end - m_begin;
+          ierr = VecSetSizes(data, localSize, globalSize);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(data);
+          assert(ierr == PETSC_SUCCESS);
           size_t ghostSize = localSize - ownedSize;
           m_ghosts.resize(ghostSize);
           for (size_t i = 0; i < ghostSize; ++i)
             m_ghosts[i] = fes.getGlobalIndex(m_end + i);
-          ierr = VecCreateGhost(
-              comm, localSize, globalSize, ghostSize, m_ghosts.data(), &data);
+          ierr = VecMPISetGhost(data, ghostSize, m_ghosts.data());
           assert(ierr == PETSC_SUCCESS);
         }
         else
         {
-          static_assert(std::is_same_v<ContextType, Context::Local> || std::is_same_v<ContextType, Context::MPI>);
+          static_assert(
+              std::is_same_v<ContextType, Context::Local> ||
+              std::is_same_v<ContextType, Context::MPI>);
         }
         ierr = VecZeroEntries(data);
         assert(ierr == PETSC_SUCCESS);
@@ -463,6 +475,7 @@ namespace Rodin::Variational
       }
 
     private:
+      bool m_owned;
       size_t m_begin, m_end;
       std::vector<PetscInt> m_ghosts;
 

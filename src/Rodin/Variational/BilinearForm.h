@@ -89,7 +89,8 @@ namespace Rodin::Variational
        */
       OperatorType& getOperator()
       {
-        auto& ref = std::visit([](auto& m) -> OperatorType& { return m; }, m_operator);
+        auto& ref =
+          std::visit([](auto& m) -> OperatorType& { return m; }, m_operator);
         return ref;
       }
 
@@ -98,7 +99,8 @@ namespace Rodin::Variational
        */
       const OperatorType& getOperator() const
       {
-        const auto& ref = std::visit([](const auto& m) -> const OperatorType& { return m; }, m_operator);
+        const auto& ref =
+          std::visit([](const auto& m) -> const OperatorType& { return m; }, m_operator);
         return ref;
       }
 
