@@ -7,7 +7,6 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
-#include <cmath>
 #include <utility>
 #include <fstream>
 #include <functional>
@@ -72,6 +71,77 @@ namespace Rodin::Variational
    * @see GridFunction
    */
 
+  template <class StrictType>
+  class GridFunctionBaseReference
+    : public FunctionBase<GridFunctionBaseReference<StrictType>>
+  {
+    public:
+      using Parent = FunctionBase<GridFunctionBaseReference<StrictType>>;
+
+      /**
+       * @brief R-Values are not allowed.
+       */
+      GridFunctionBaseReference(StrictType&&) = delete;
+
+      /**
+       * @brief Prevent implicit copies.
+       */
+      GridFunctionBaseReference(const StrictType& ref) = delete;
+
+      /**
+       * @brief Constructs the LazyEvaluator object from a constant reference
+       * the data-full object.
+       */
+      explicit
+      constexpr
+      GridFunctionBaseReference(std::reference_wrapper<const StrictType> ref)
+        : m_ref(ref)
+      {}
+
+      /**
+       * @brief Copy constructor.
+       */
+      constexpr
+      GridFunctionBaseReference(const GridFunctionBaseReference& other)
+        : Parent(other),
+          m_ref(other.m_ref)
+      {}
+
+      /**
+       * @brief Move constructor.
+       */
+      constexpr
+      GridFunctionBaseReference(GridFunctionBaseReference&& other)
+        : Parent(std::move(other)),
+          m_ref(std::move(other.m_ref))
+      {}
+
+      GridFunctionBaseReference& operator=(const GridFunctionBaseReference&) = delete;
+
+      GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
+
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return m_ref.get().getValue(p);
+      }
+
+      template <class T>
+      constexpr
+      void getValue(T& res, const Geometry::Point& p) const
+      {
+        m_ref.get().getValue(res, p);
+      }
+
+      GridFunctionBaseReference* copy() const noexcept final override
+      {
+        return new GridFunctionBaseReference(*this);
+      }
+
+    private:
+      std::reference_wrapper<const StrictType> m_ref;
+  };
+
   /**
    * @brief Abstract base class for GridFunction objects.
    *
@@ -84,7 +154,8 @@ namespace Rodin::Variational
     class Derived,
     class FES = typename FormLanguage::Traits<Derived>::FESType,
     class Data = typename FormLanguage::Traits<Derived>::DataType>
-  class GridFunctionBase : public LazyEvaluator<GridFunctionBase<Derived, FES, Data>>
+  class GridFunctionBase
+    : public GridFunctionBaseReference<GridFunctionBase<Derived, FES, Data>>
   {
     public:
       using FESType = FES;
@@ -106,7 +177,8 @@ namespace Rodin::Variational
       using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
 
       /// Parent class
-      using Parent = LazyEvaluator<GridFunctionBase<Derived, FESType, Data>>;
+      using Parent =
+        GridFunctionBaseReference<GridFunctionBase<Derived, FESType, Data>>;
 
       static_assert(
           std::is_same_v<RangeType, ScalarType> ||

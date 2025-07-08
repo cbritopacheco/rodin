@@ -487,4 +487,10 @@ namespace Rodin::Variational
   };
 }
 
+namespace Rodin::PETSc
+{
+  template <class FES>
+  using GridFunction = Variational::GridFunction<FES, ::Vec>;
+}
+
 #endif

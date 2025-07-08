@@ -7,10 +7,24 @@
 #ifndef RODIN_MATH_SYSTEM_H
 #define RODIN_MATH_SYSTEM_H
 
-#include "Rodin/Math.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
+
+#include "ForwardDecls.h"
+
+namespace Rodin::FormLanguage
+{
+  template <class Operator, class Vector>
+  struct Traits<Math::LinearSystem<Operator, Vector>>
+  {
+    using OperatorType = Operator;
+
+    using VectorType = Vector;
+
+    using ScalarType = typename Traits<OperatorType>::ScalarType;
+  };
+}
 
 namespace Rodin::Math
 {

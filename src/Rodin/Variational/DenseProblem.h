@@ -14,17 +14,6 @@ namespace Rodin::Variational
   template <class ... Parameters>
   class DenseProblem;
 
-  template <class Solution, class TrialFES, class TestFES>
-  DenseProblem(TrialFunction<Solution, TrialFES>&, TestFunction<TestFES>&)
-    -> DenseProblem<
-          Solution,
-          TrialFES, TestFES,
-          Math::Matrix<
-            typename FormLanguage::Mult<
-              typename FormLanguage::Traits<TrialFES>::ScalarType,
-              typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-          Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>;
-
   /**
    * @defgroup DenseProblemSpecializations DenseProblem Template Specializations
    * @brief Template specializations of the DenseProblem class.
@@ -36,39 +25,25 @@ namespace Rodin::Variational
    * @brief General class to assemble linear systems with `Math::Matrix`
    * and `Math::Vector` types in a serial context.
    */
-  template <class Solution, class TrialFES, class TestFES>
-  class DenseProblem<
-    Solution,
-    TrialFES, TestFES,
-    Math::Matrix<
-      typename FormLanguage::Mult<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-    Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
-    : public Problem<
-        Solution,
-        TrialFES, TestFES,
-        Math::Matrix<
-          typename FormLanguage::Mult<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TrialFES>::ScalarType>
-          ::Type>,
-        Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
-    {
-      public:
-        using Parent = Problem<
-          Solution,
-          TrialFES, TestFES,
-          Math::Matrix<
-            typename FormLanguage::Mult<
-              typename FormLanguage::Traits<TrialFES>::ScalarType,
-              typename FormLanguage::Traits<TrialFES>::ScalarType>
-            ::Type>,
-          Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>;
+  template <class U, class V, class LinearSystem>
+  class DenseProblem<U, V, LinearSystem> : public Problem<U, V, LinearSystem>
+  {
+    public:
+      using Parent = Problem<U, V, LinearSystem>;
+      using Parent::Parent;
+      using Parent::operator=;
+  };
 
-        using Parent::Parent;
-        using Parent::operator=;
-    };
+  template <class U, class V>
+  DenseProblem(U& u, V& v)
+    -> DenseProblem<U, V,
+        Math::LinearSystem<
+          Math::Matrix<
+            typename FormLanguage::Traits<typename FormLanguage::Traits<U>::FESType>
+            ::ScalarType>,
+          Math::Vector<
+            typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>
+            ::ScalarType>>>;
 }
 
 #endif

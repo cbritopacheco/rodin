@@ -27,6 +27,7 @@ set(RodinPETSc_SRCS
   Math/LinearSystem.cpp
   Math/Matrix.cpp
   Variational/GridFunction.cpp
+  Variational/TrialFunction.cpp
   )
 
 add_library(RodinPETSc ${RodinPETSc_HEADERS} ${RodinPETSc_SRCS})

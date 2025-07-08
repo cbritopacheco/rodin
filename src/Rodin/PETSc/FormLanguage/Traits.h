@@ -22,8 +22,5 @@ namespace Rodin::FormLanguage
   };
 }
 
-namespace Rodin::PETSc
-{}
-
 #endif
 

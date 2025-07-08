@@ -311,14 +311,12 @@ namespace Rodin::Variational
   class L2;
 
   /**
-   * @brief Represents the lazy evaluation of a mesh function.
-   *
    * The main objective of this class is to wrap the reference of a data-full
    * object into a light object which permits evaluation. This way one is able
    * to call the `copy()` method without actually copying the underlying data.
    */
   template <class StrictType>
-  class LazyEvaluator;
+  class FunctionBaseCopy;
 
   template <class ... Args>
   class Zero;
@@ -1053,17 +1051,11 @@ namespace Rodin::Variational
   template <class Operand, class ... Parameters>
   class PeriodicBC;
 
-  template <class Scalar>
-  class ProblemBodyBase;
-
   template <class Operator, class Vector, class Scalar>
   class ProblemBody;
 
-  /**
-   * @brief Base class for variational problem objects.
-   */
-  template <class Operator, class Vector, class Scalar>
-  class ProblemBase;
+  template <class Scalar>
+  class ProblemBodyBase;
 
   /**
    * @brief Represents a variational problem.
@@ -1076,6 +1068,12 @@ namespace Rodin::Variational
    */
   template <class ... Parameters>
   class Problem;
+
+  /**
+   * @brief Base class for variational problem objects.
+   */
+  template <class Operator, class Vector, class Scalar>
+  class ProblemBase;
 }
 
 #endif

@@ -34,39 +34,38 @@ int main(int argc, char** argv)
   Vec x;
   Vec b;
 
-  ::Vec data;
-  TrialFunction u(vh, data);
+  PETSc::TrialFunction u(vh);
   TestFunction  v(vh);
 
   LinearSystem axb(a, x, b);
 
   // Define problem
-  Problem poisson(u, v, axb);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-  poisson.assemble();
+  // Problem poisson(u, v, axb);
+  // poisson = Integral(Grad(u), Grad(v))
+  //         - Integral(f, v)
+  //         + DirichletBC(u, Zero());
+  // poisson.assemble();
 
-  std::cout << "Matrix :" << "\n";
-  MatView(a, PETSC_VIEWER_STDOUT_WORLD);
+  // std::cout << "Matrix :" << "\n";
+  // MatView(a, PETSC_VIEWER_STDOUT_WORLD);
 
-  std::cout << "RHS size: " << "\n";
-  VecView(b, PETSC_VIEWER_STDOUT_WORLD);
+  // std::cout << "RHS size: " << "\n";
+  // VecView(b, PETSC_VIEWER_STDOUT_WORLD);
 
-  CG(poisson).solve();
+  // CG(poisson).solve();
 
-  std::cout << "x after solve:\n";
-  VecView(x, PETSC_VIEWER_STDOUT_WORLD);
+  // std::cout << "x after solve:\n";
+  // VecView(x, PETSC_VIEWER_STDOUT_WORLD);
 
-  // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  // // Save solution
+  // u.getSolution().save("Poisson.gf");
+  // mesh.save("Poisson.mesh");
 
-  MatDestroy(&a);
-  VecDestroy(&x);
-  VecDestroy(&b);
+  // MatDestroy(&a);
+  // VecDestroy(&x);
+  // VecDestroy(&b);
 
-  PetscFinalize();
+  // PetscFinalize();
 
   return 0;
 }

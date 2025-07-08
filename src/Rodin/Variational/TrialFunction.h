@@ -1,7 +1,9 @@
 #ifndef RODIN_VARIATIONAL_TRIALFUNCTION_H
 #define RODIN_VARIATIONAL_TRIALFUNCTION_H
 
-#include "Component.h"
+#include <functional>
+
+#include "Rodin/Variational/ForwardDecls.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
@@ -18,39 +20,113 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
-  template <class Data, class FES>
-  class TrialFunction final
-    : public ShapeFunction<TrialFunction<Data, FES>, FES, TrialSpace>
+  template <class Solution, class FES>
+  class TrialFunctionReference
+    : public ShapeFunction<TrialFunctionReference<Solution, FES>, FES, ShapeFunctionSpaceType::Trial>
+  {
+    public:
+      using FESType = FES;
+      static constexpr ShapeFunctionSpaceType SpaceType = ShapeFunctionSpaceType::Trial;
+
+      using Parent =
+        ShapeFunction<TrialFunctionReference<Solution, FESType>, FESType, SpaceType>;
+
+      explicit
+      TrialFunctionReference(const TrialFunction<Solution, FESType>& ref, const FESType& fes)
+        : Parent(fes),
+          m_ref(std::cref(ref))
+      {}
+
+      TrialFunctionReference(const TrialFunctionReference& other)
+        : Parent(other),
+          m_ref(other.m_ref)
+      {}
+
+      TrialFunctionReference(TrialFunctionReference&& other)
+        : Parent(std::move(other)),
+          m_ref(std::move(other.m_ref))
+      {}
+
+      TrialFunctionReference& setPoint(const Geometry::Point& p)
+      {
+        m_ref.get().setPoint(p);
+        return *this;
+      }
+
+      constexpr
+      auto x() const
+      {
+        return m_ref.get().x();
+      }
+
+      constexpr
+      auto y() const
+      {
+        return m_ref.get().y();
+      }
+
+      constexpr
+      auto z() const
+      {
+        return m_ref.get().z();
+      }
+
+      constexpr
+      const auto& getLeaf() const
+      {
+        return m_ref.get().getLeaf();
+      }
+
+      constexpr
+      auto& getSolution()
+      {
+        return m_ref.get().getSolution();
+      }
+
+      constexpr
+      const auto& getSolution() const
+      {
+        return m_ref.get().getSolution();
+      }
+
+      TrialFunctionReference* copy() const noexcept final override
+      {
+        return new TrialFunctionReference(*this);
+      }
+
+    private:
+      std::reference_wrapper<const TrialFunction<Solution, FESType>> m_ref;
+  };
+
+  template <class Solution, class FES>
+  class TrialFunction : public TrialFunctionReference<Solution, FES>
   {
     public:
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = TrialSpace;
 
-      using DataType = Data;
+      using SolutionType = Solution;
 
-      using SolutionType = GridFunction<FES, DataType>;
-
-      using Parent =
-        ShapeFunction<TrialFunction<DataType, FESType>, FESType, TrialSpace>;
+      using Parent = TrialFunctionReference<SolutionType, FESType>;
 
       static_assert(std::is_base_of_v<FiniteElementSpaceBase, FES>);
 
       constexpr
       TrialFunction(const FES& fes)
-        : Parent(fes),
+        : Parent(*this, fes),
           m_gf(fes)
       {}
 
       constexpr
-      TrialFunction(const FES& fes, DataType& data)
+      TrialFunction(SolutionType& gf, const FES& fes)
         : Parent(fes),
-          m_gf(fes, data)
+          m_gf(std::ref(gf))
       {}
 
       constexpr
-      TrialFunction(const FES& fes, DataType&& data)
+      TrialFunction(SolutionType&& gf, const FES& fes)
         : Parent(fes),
-          m_gf(fes, std::move(data))
+          m_gf(std::move(gf))
       {}
 
       constexpr
@@ -99,34 +175,33 @@ namespace Rodin::Variational
       constexpr
       SolutionType& getSolution()
       {
-        return m_gf;
+        auto& ref = std::visit([](auto& m) -> SolutionType& { return m; }, m_gf);
+        return ref;
       }
 
       constexpr
       const SolutionType& getSolution() const
       {
-        return m_gf;
-      }
-
-      TrialFunction* copy() const noexcept override
-      {
-        // No data is copied.
-        return new TrialFunction(this->getFiniteElementSpace());
+        const auto& ref =
+          std::visit([](const auto& m) -> const SolutionType& { return m; }, m_gf);
+        return ref;
       }
 
     private:
-      SolutionType m_gf;
+      std::variant<std::reference_wrapper<SolutionType>, SolutionType> m_gf;
   };
 
   template <class FES>
   TrialFunction(const FES&)
-    -> TrialFunction<Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>, FES>;
+    -> TrialFunction<
+        GridFunction<FES, Math::Vector<
+          typename FormLanguage::Traits<FES>::ScalarType>>, FES>;
 
-  template <class Data, class FES>
-  TrialFunction(const FES&, Data&) -> TrialFunction<Data, FES>;
+  template <class Solution, class FES>
+  TrialFunction(Solution&, const FES&) -> TrialFunction<Solution, FES>;
 
-  template <class Data, class FES>
-  TrialFunction(const FES&, Data&&) -> TrialFunction<Data, FES>;
+  template <class Solution, class FES>
+  TrialFunction(Solution&&, const FES&) -> TrialFunction<Solution, FES>;
 }
 #endif
 
