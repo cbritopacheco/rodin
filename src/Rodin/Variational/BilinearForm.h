@@ -54,23 +54,12 @@ namespace Rodin::Variational
        * which is owned by the LinearFormBase instance.
        */
       BilinearFormBase()
-        : m_operator(OperatorType())
+        : BilinearFormBase(OperatorType{})
       {}
 
-      /**
-       * @brief Constructs a linear form with reference to vector which is not
-       * owned by the LinearFormBase instance.
-       */
-      BilinearFormBase(OperatorType& vec)
-        : m_operator(std::ref(vec))
-      {}
-
-      /**
-       * @brief Constructs a linear form with a vector which is owned by the
-       * LinearFormBase instance.
-       */
+      template <class OperatorType>
       BilinearFormBase(OperatorType&& vec)
-        : m_operator(std::move(vec))
+        : m_operator(std::forward<OperatorType>(vec))
       {}
 
       BilinearFormBase(const BilinearFormBase& other)
@@ -186,8 +175,10 @@ namespace Rodin::Variational
        */
       constexpr
       BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
-        : BilinearForm(u, v, OperatorType())
-      {}
+        : m_u(u), m_v(v)
+      {
+        m_assembly.reset(new DefaultAssembly);
+      }
 
       /**
        * @brief Constructs a LinearForm with a reference to a TestFunction and
@@ -196,8 +187,7 @@ namespace Rodin::Variational
        * @param[in] vec Reference to a vector
        */
       constexpr
-      BilinearForm(
-          const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, OperatorType& op)
+      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, OperatorType& op)
         : Parent(op),
           m_u(u), m_v(v)
       {
@@ -205,12 +195,13 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Constructs a LinearForm with a references to a TrialFunction and
-       * a TestFunction, and an owned operator.
+       * @brief Constructs a LinearForm with a reference to a TestFunction and
+       * an non-owned vector.
+       * @param[in] v Reference to a TestFunction
+       * @param[in] vec Reference to a vector
        */
       constexpr
-      BilinearForm(
-          const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
+      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, OperatorType&& op)
         : Parent(std::move(op)),
           m_u(u), m_v(v)
       {
@@ -449,12 +440,7 @@ namespace Rodin::Variational
           ::Type>>;
 
   template <class Solution, class TrialFES, class TestFES, class Operator>
-  BilinearForm(
-      const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
-    -> BilinearForm<Solution, TrialFES, TestFES, Operator>;
-
-  template <class Solution, class TrialFES, class TestFES, class Operator>
-  BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, Operator& op)
+  BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
     -> BilinearForm<Solution, TrialFES, TestFES, Operator>;
 }
 

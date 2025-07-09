@@ -36,23 +36,16 @@ namespace Rodin::Variational
        * which is owned by the LinearFormBase instance.
        */
       LinearFormBase()
-        : m_vector(VectorType())
+        : LinearFormBase(VectorType{})
       {}
 
       /**
        * @brief Constructs a linear form with reference to vector which is not
        * owned by the LinearFormBase instance.
        */
-      LinearFormBase(VectorType& vec)
-        : m_vector(std::ref(vec))
-      {}
-
-      /**
-       * @brief Constructs a linear form with a vector which is owned by the
-       * LinearFormBase instance.
-       */
-      LinearFormBase(VectorType&& vec)
-        : m_vector(std::move(vec))
+      template <class T, class = std::enable_if_t<std::is_same_v<std::decay_t<T>, VectorType>>>
+      LinearFormBase(T&& vec)
+        : m_vector(std::forward<VectorType>(vec))
       {}
 
       LinearFormBase(const LinearFormBase& other)
@@ -151,7 +144,7 @@ namespace Rodin::Variational
        */
       constexpr
       LinearForm(const TestFunction<FES>& v)
-        : LinearForm(v, Vector())
+        : LinearForm(v, VectorType{})
       {}
 
       /**
@@ -160,23 +153,10 @@ namespace Rodin::Variational
        * @param[in] v Reference to a TestFunction
        * @param[in] vec Reference to a vector
        */
+      template <class VectorType>
       constexpr
-      LinearForm(const TestFunction<FES>& v, Vector& vec)
-        : Parent(vec),
-          m_v(v)
-      {
-        m_assembly.reset(new DefaultAssembly);
-      }
-
-      /**
-       * @brief Constructs a LinearForm with a reference to a TestFunction and
-       * an owned vector.
-       * @param[in] v Reference to a TestFunction
-       * @param[in] vec Vector which will be owned by the LinearForm
-       */
-      constexpr
-      LinearForm(const TestFunction<FES>& v, Vector&& vec)
-        : Parent(std::move(vec)),
+      LinearForm(const TestFunction<FES>& v, VectorType&& vec)
+        : Parent(std::forward<VectorType>(vec)),
           m_v(v)
       {
         m_assembly.reset(new DefaultAssembly);
@@ -333,20 +313,6 @@ namespace Rodin::Variational
    * @ingroup RodinCTAD
    * @brief CTAD for LinearForm.
    * @param[in] v Reference to a TestFunction
-   * @param[in] vec Vector reference, not owned by the LinearForm
-   *
-   * The constructor taking a TestFunction reference and a vector reference
-   * deduces a LinearForm with a Vector reference which is not owned by
-   * the LinearForm instance.
-   */
-  template <class FES, class Vector>
-  LinearForm(const TestFunction<FES>& v, Vector& vec)
-    -> LinearForm<FES, Vector>;
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for LinearForm.
-   * @param[in] v Reference to a TestFunction
    * @param[in] vec Vector which will be owned by the LinearForm
    *
    * The constructor taking a TestFunction reference and a vector r-value
@@ -354,8 +320,7 @@ namespace Rodin::Variational
    * the LinearForm instance.
    */
   template <class FES, class Vector>
-  LinearForm(const TestFunction<FES>& v, Vector&& vec)
-    -> LinearForm<FES, Vector>;
+  LinearForm(const TestFunction<FES>& v, Vector&& vec) -> LinearForm<FES, Vector>;
 }
 
 #include "LinearForm.hpp"

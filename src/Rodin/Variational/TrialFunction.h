@@ -117,16 +117,11 @@ namespace Rodin::Variational
           m_gf(fes)
       {}
 
-      constexpr
-      TrialFunction(SolutionType& gf, const FES& fes)
-        : Parent(fes),
-          m_gf(std::ref(gf))
-      {}
-
+      template <class SolutionType>
       constexpr
       TrialFunction(SolutionType&& gf, const FES& fes)
         : Parent(fes),
-          m_gf(std::move(gf))
+          m_gf(std::forward<SolutionType>(gf))
       {}
 
       constexpr
@@ -196,9 +191,6 @@ namespace Rodin::Variational
     -> TrialFunction<
         GridFunction<FES, Math::Vector<
           typename FormLanguage::Traits<FES>::ScalarType>>, FES>;
-
-  template <class Solution, class FES>
-  TrialFunction(Solution&, const FES&) -> TrialFunction<Solution, FES>;
 
   template <class Solution, class FES>
   TrialFunction(Solution&&, const FES&) -> TrialFunction<Solution, FES>;

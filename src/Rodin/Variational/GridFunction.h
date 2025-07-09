@@ -28,7 +28,6 @@
 
 #include "Function.h"
 #include "Component.h"
-#include "LazyEvaluator.h"
 #include "ScalarFunction.h"
 #include "VectorFunction.h"
 #include "MatrixFunction.h"
@@ -185,21 +184,14 @@ namespace Rodin::Variational
           std::is_same_v<RangeType, Math::Vector<ScalarType>>);
 
       GridFunctionBase(const FES& fes)
-        : Parent(std::cref(*this)),
-          m_fes(fes),
-          m_data(DataType())
+        : GridFunctionBase(fes, DataType{})
       {}
 
-      GridFunctionBase(const FES& fes, DataType& data)
-        : Parent(std::cref(*this)),
-          m_fes(fes),
-          m_data(std::ref(data))
-      {}
-
+      template <class DataType>
       GridFunctionBase(const FES& fes, DataType&& data)
         : Parent(std::cref(*this)),
           m_fes(fes),
-          m_data(std::move(data))
+          m_data(std::forward<DataType>(data))
       {}
 
       GridFunctionBase(const GridFunctionBase& other)
@@ -975,23 +967,17 @@ namespace Rodin::Variational
       using Parent::max;
 
       GridFunction(const FESType& fes)
-        : Parent(fes)
-      {
-        auto& data = this->getData();
-        data.resize(fes.getSize());
-        data.setZero();
-      }
-
-      GridFunction(const FESType& fes, DataType& data)
-        : Parent(fes, data)
-      {
-        data.resize(fes.getSize());
-        data.setZero();
-      }
-
-      GridFunction(const FESType& fes, DataType&& _data)
-        : Parent(fes, std::move(_data))
+        : GridFunction(fes, DataType{})
       {}
+
+      template <class DataType>
+      GridFunction(const FESType& fes, DataType&& data)
+        : Parent(fes, std::forward<DataType>(data))
+      {
+        auto& d = this->getData();
+        d.resize(fes.getSize());
+        d.setZero();
+      }
 
       GridFunction(const GridFunction& other)
         : Parent(other)
@@ -1096,10 +1082,6 @@ namespace Rodin::Variational
   template <class FES>
   GridFunction(const FES& fes)
     -> GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
-
-  template <class FES, class Data>
-  GridFunction(const FES& fes, Data& data)
-    -> GridFunction<FES, Data>;
 
   template <class FES, class Data>
   GridFunction(const FES& fes, Data&& data)

@@ -4,16 +4,16 @@
 
 namespace Rodin::Geometry
 {
-  MPISharder::Sharder(const Context::MPI& context)
+  Sharder<Context::MPI>::Sharder(const Context::MPI& context)
     : m_context(context)
   {}
 
-  MPIMesh MPISharder::distribute(Partitioner& p, int root)
+  MPIMesh Sharder<Context::MPI>::distribute(Partitioner& p, int root)
   {
     return shard(p).scatter(root).gather(root);
   }
 
-  MPISharder& Sharder<Context::MPI>::shard(Partitioner& partitioner)
+  Sharder<Context::MPI>& Sharder<Context::MPI>::shard(Partitioner& partitioner)
   {
     m_shards.clear();
     const auto& mesh = partitioner.getMesh();
@@ -95,7 +95,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MPISharder& MPISharder::scatter(int root)
+  Sharder<Context::MPI>& Sharder<Context::MPI>::scatter(int root)
   {
     const auto& comm = m_context.getCommunicator();
     const int tag = m_context.getEnvironment().collectives_tag();
@@ -112,7 +112,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MPIMesh MPISharder::gather(int root)
+  MPIMesh Sharder<Context::MPI>::gather(int root)
   {
     const auto& comm = m_context.getCommunicator();
     const int tag = m_context.getEnvironment().collectives_tag();
@@ -131,19 +131,19 @@ namespace Rodin::Geometry
     }
   }
 
-  Shard& MPISharder::getShard(size_t i)
+  Shard& Sharder<Context::MPI>::getShard(size_t i)
   {
     assert(i < m_shards.size());
     return m_shards[i];
   }
 
-  const Shard& MPISharder::getShard(size_t i) const
+  const Shard& Sharder<Context::MPI>::getShard(size_t i) const
   {
     assert(i < m_shards.size());
     return m_shards[i];
   }
 
-  const Context::MPI& MPISharder::getContext() const
+  const Context::MPI& Sharder<Context::MPI>::getContext() const
   {
     return m_context;
   }

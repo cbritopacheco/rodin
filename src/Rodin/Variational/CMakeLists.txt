@@ -65,7 +65,6 @@ set(RodinVariational_SRCS
   BilinearForm.hpp
   Dot.cpp
   LinearForm.hpp
-  Problem.hpp
   Minus.cpp
   Function.cpp
   Max.cpp

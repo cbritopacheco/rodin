@@ -26,17 +26,18 @@ namespace Rodin::Variational
    * and `Math::Vector` types in a serial context.
    */
   template <class U, class V, class LinearSystem>
-  class DenseProblem<U, V, LinearSystem> : public Problem<U, V, LinearSystem>
+  class DenseProblem<Tuple<U, V>, LinearSystem> : public Problem<Tuple<U, V>, LinearSystem>
   {
     public:
-      using Parent = Problem<U, V, LinearSystem>;
+      using Parent = Problem<Tuple<U, V>, LinearSystem>;
       using Parent::Parent;
       using Parent::operator=;
   };
 
   template <class U, class V>
   DenseProblem(U& u, V& v)
-    -> DenseProblem<U, V,
+    -> DenseProblem<
+        Tuple<U, V>,
         Math::LinearSystem<
           Math::Matrix<
             typename FormLanguage::Traits<typename FormLanguage::Traits<U>::FESType>
@@ -44,6 +45,9 @@ namespace Rodin::Variational
           Math::Vector<
             typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>
             ::ScalarType>>>;
+
+  template <class U, class V, class LinearSystem>
+  DenseProblem(U& u, V& v, LinearSystem& axb) -> DenseProblem<Tuple<U, V>, LinearSystem>;
 }
 
 #endif

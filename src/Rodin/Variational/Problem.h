@@ -83,7 +83,7 @@ namespace Rodin::Variational
    * and `Vector` generic types in a sequential context.
    */
   template <class U, class V, class LinearSystem>
-  class Problem<U, V, LinearSystem>
+  class Problem<Tuple<U, V>, LinearSystem>
     : public ProblemBase<
         typename FormLanguage::Traits<LinearSystem>::OperatorType,
         typename FormLanguage::Traits<LinearSystem>::VectorType,
@@ -132,18 +132,18 @@ namespace Rodin::Variational
           m_axb(LinearSystemType())
       {}
 
-      /**
-       * @brief Constructs an empty problem involving the trial function @f$ u @f$
-       * and the test function @f$ v @f$.
-       *
-       * @param[in,out] u Trial function
-       * @param[in,out] v %Test function
-       */
       constexpr
       Problem(U& u, V& v, LinearSystemType& axb)
         : m_assembled(false),
           m_trialFunction(u), m_testFunction(v),
           m_axb(std::ref(axb))
+      {}
+
+      constexpr
+      Problem(U& u, V& v, LinearSystemType&& axb)
+        : m_assembled(false),
+          m_trialFunction(u), m_testFunction(v),
+          m_axb(std::move(axb))
       {}
 
       /**
@@ -314,7 +314,7 @@ namespace Rodin::Variational
    */
   template <class U, class V>
   Problem(U& u, V& v)
-    -> Problem<U, V, Math::LinearSystem<
+    -> Problem<Tuple<U, V>, Math::LinearSystem<
           Math::SparseMatrix<
             typename FormLanguage::Mult<
               typename FormLanguage::Traits<typename FormLanguage::Traits<U>::FESType>::ScalarType,
@@ -323,7 +323,7 @@ namespace Rodin::Variational
             typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>>>;
 
   template <class U, class V, class LinearSystem>
-  Problem(U& u, V& v, LinearSystem& axb) -> Problem<U, V, LinearSystem>;
+  Problem(U& u, V& v, LinearSystem& axb) -> Problem<Tuple<U, V>, LinearSystem>;
 
   template <class LinearSystem, class U1, class U2, class ... Us>
   class Problem<Tuple<U1, U2, Us...>, LinearSystem>
@@ -452,36 +452,11 @@ namespace Rodin::Variational
 
     public:
       Problem(U1& u1, U2& u2, Us&... us)
-        : m_assembled(false),
-          m_us(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
-            .template filter<IsTrialFunctionReferenceWrapper>()),
-          m_vs(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
-            .template filter<IsTestFunctionReferenceWrapper>()),
-          m_axb(LinearSystemType()),
-          m_lft(m_vs.map(
-                [](const auto& v)
-                { return LinearFormType<
-                    typename std::decay_t<
-                    typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FESType>(v.get());
-                })),
-          m_bft(m_us.product([](const auto& u, const auto& v) { return Pair(u, v); }, m_vs)
-                    .map([](const auto& uv)
-                         { return BilinearFormType<
-                             decltype(uv.first()), decltype(uv.second())>(
-                                 uv.first().get(), uv.second().get());
-                         }))
-      {
-        m_bfa.reset(new BilinearFormTupleSequentialAssembly);
-        m_lfa.reset(new LinearFormTupleSequentialAssembly);
-        m_us.iapply([&](size_t i, const auto& u)
-            { m_trialUUIDMap.right.insert({ i, u.get().getUUID() }); });
-        m_vs.iapply([&](size_t i, const auto& v)
-            { m_testUUIDMap.right.insert({ i, v.get().getUUID() }); });
-      }
+        : Problem(u1, u2, us..., LinearSystemType{})
+      {}
 
-      Problem(U1& u1, U2& u2, Us&... us, LinearSystemType& axb)
+      template <class AXB>
+      Problem(U1& u1, U2& u2, Us&... us, AXB&& axb)
         : m_assembled(false),
           m_us(
             Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
@@ -489,7 +464,6 @@ namespace Rodin::Variational
           m_vs(
             Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
             .template filter<IsTestFunctionReferenceWrapper>()),
-          m_axb(axb),
           m_lft(m_vs.map(
                 [](const auto& v)
                 { return LinearFormType<
@@ -501,7 +475,8 @@ namespace Rodin::Variational
                          { return BilinearFormType<
                              decltype(uv.first()), decltype(uv.second())>(
                                  uv.first().get(), uv.second().get());
-                         }))
+                         })),
+          m_axb(std::forward<AXB>(axb))
       {
         m_bfa.reset(new BilinearFormTupleSequentialAssembly);
         m_lfa.reset(new LinearFormTupleSequentialAssembly);
@@ -514,6 +489,47 @@ namespace Rodin::Variational
       Problem& assemble() override
       {
         auto& axb = getLinearSystem();
+
+        m_bft.apply([&](auto& bf) { bf.clear(); });
+        m_lft.apply([&](auto& lf) { lf.clear(); });
+
+        for (auto& bfi : m_pb.getLocalBFIs())
+        {
+          m_bft.apply(
+              [&](auto& bf)
+              {
+                if (bfi.getTrialFunction().getUUID() == bf.getTrialFunction().getUUID() &&
+                    bfi.getTestFunction().getUUID() == bf.getTestFunction().getUUID())
+                {
+                  bf.add(bfi);
+                }
+              });
+        }
+
+        for (auto& bfi : m_pb.getGlobalBFIs())
+        {
+          m_bft.apply(
+              [&](auto& bf)
+              {
+                if (bfi.getTrialFunction().getUUID() == bf.getTrialFunction().getUUID() &&
+                    bfi.getTestFunction().getUUID() == bf.getTestFunction().getUUID())
+                {
+                  bf.add(bfi);
+                }
+              });
+        }
+
+        for (auto& lfi : m_pb.getLFIs())
+        {
+          m_lft.apply(
+              [&](auto& lf)
+              {
+                if (lfi.getTestFunction().getUUID() == lf.getTestFunction().getUUID())
+                {
+                  lf.add(UnaryMinus(lfi));
+                }
+              });
+        }
 
         auto bt =
           m_bft.map(
@@ -608,7 +624,7 @@ namespace Rodin::Variational
             {
               const auto ui = m_trialUUIDMap.left.find(u.get().getUUID());
               size_t offset = m_trialOffsets[ui->second];
-              for (auto& dbc : m_dbcs)
+              for (auto& dbc : m_pb.getDBCs())
               {
                 if (dbc.getOperand().getUUID() == u.get().getUUID())
                 {
@@ -645,51 +661,8 @@ namespace Rodin::Variational
 
       Problem& operator=(const ProblemBody<OperatorType, VectorType, Real>& rhs) override
       {
-        m_bft.apply([&](auto& bf) { bf.clear(); });
-        m_lft.apply([&](auto& lf) { lf.clear(); });
-
-        for (auto& bfi : rhs.getLocalBFIs())
-        {
-          m_bft.apply(
-              [&](auto& bf)
-              {
-                if (bfi.getTrialFunction().getUUID() == bf.getTrialFunction().getUUID() &&
-                    bfi.getTestFunction().getUUID() == bf.getTestFunction().getUUID())
-                {
-                  bf.add(bfi);
-                }
-              });
-        }
-
-        for (auto& bfi : rhs.getGlobalBFIs())
-        {
-          m_bft.apply(
-              [&](auto& bf)
-              {
-                if (bfi.getTrialFunction().getUUID() == bf.getTrialFunction().getUUID() &&
-                    bfi.getTestFunction().getUUID() == bf.getTestFunction().getUUID())
-                {
-                  bf.add(bfi);
-                }
-              });
-        }
-
-        for (auto& lfi : rhs.getLFIs())
-        {
-          m_lft.apply(
-              [&](auto& lf)
-              {
-                if (lfi.getTestFunction().getUUID() == lf.getTestFunction().getUUID())
-                {
-                  lf.add(UnaryMinus(lfi));
-                }
-              });
-        }
-
-        m_dbcs = rhs.getDBCs();
-
+        m_pb = rhs;
         m_assembled = false;
-
         return *this;
       }
 
@@ -705,12 +678,16 @@ namespace Rodin::Variational
 
       LinearSystemType& getLinearSystem() override
       {
-        return m_axb;
+        auto& ref =
+          std::visit([](auto& m) -> LinearSystemType& { return m; }, m_axb);
+        return ref;
       }
 
       const LinearSystemType& getLinearSystem() const override
       {
-        return m_axb;
+        const auto& ref =
+          std::visit([](const auto& m) -> const LinearSystemType& { return m; }, m_axb);
+        return ref;
       }
 
       Problem* copy() const noexcept override
@@ -725,21 +702,21 @@ namespace Rodin::Variational
       TrialFunctionTuple  m_us;
       TestFunctionTuple   m_vs;
 
-      LinearSystemType    m_axb;
-
       LinearFormTuple     m_lft;
       BilinearFormTuple   m_bft;
 
-      EssentialBoundary<ScalarType> m_dbcs;
+      ProblemBody<OperatorType, VectorType, ScalarType> m_pb;
 
-      std::array<size_t, TrialFunctionTuple::Size> m_trialOffsets;
-      std::array<size_t, TestFunctionTuple::Size> m_testOffsets;
+      std::array<size_t, TrialFunctionTuple::Size>  m_trialOffsets;
+      std::array<size_t, TestFunctionTuple::Size>   m_testOffsets;
 
       boost::bimap<FormLanguage::Base::UUID, size_t> m_trialUUIDMap;
       boost::bimap<FormLanguage::Base::UUID, size_t> m_testUUIDMap;
 
-      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>> m_bfa;
-      std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>> m_lfa;
+      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>>  m_bfa;
+      std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>>      m_lfa;
+
+      std::variant<std::reference_wrapper<LinearSystemType>, LinearSystemType> m_axb;
   };
 
   template <class U1, class U2, class ... Us>
@@ -756,6 +733,10 @@ namespace Rodin::Variational
 
   template <class U1, class U2, class ... Us, class LinearSystem>
   Problem(U1& u1, U2& u2, Us&... us, LinearSystem& axb)
+    -> Problem<Tuple<U1, U2, Us...>, LinearSystem>;
+
+  template <class U1, class U2, class ... Us, class LinearSystem>
+  Problem(U1& u1, U2& u2, Us&... us, LinearSystem&& axb)
     -> Problem<Tuple<U1, U2, Us...>, LinearSystem>;
 }
 

@@ -9,13 +9,14 @@
 namespace mpi = boost::mpi;
 
 using namespace Rodin;
+using namespace Rodin::MPI;
 
 int main(int argc, char** argv)
 {
   mpi::environment env(argc, argv);
   mpi::communicator world;
   Context::MPI mpi(env, world);
-  Geometry::MPISharder sharder(mpi);
+  Sharder sharder(mpi);
   if (world.rank() == 0)
   {
 

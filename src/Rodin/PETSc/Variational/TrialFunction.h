@@ -13,28 +13,19 @@ namespace Rodin::PETSc
   class TrialFunction : public Variational::TrialFunction<GridFunction<FES>, FES>
   {
     public:
-      using Parent = Variational::TrialFunction<GridFunction<FES>, FES>;
       using FESType = FES;
       using SolutionType = GridFunction<FES>;
 
+      using Parent = Variational::TrialFunction<GridFunction<FES>, FES>;
+      using Parent::Parent;
+
       TrialFunction(const FESType& fes)
         : Parent(fes)
-      {}
-
-      TrialFunction(SolutionType& gf, const FESType& fes)
-        : Parent(gf, fes)
-      {}
-
-      TrialFunction(SolutionType&& gf, const FESType& fes)
-        : Parent(std::move(gf), fes)
       {}
   };
 
   template <class FES>
   TrialFunction(const FES& fes) -> TrialFunction<FES>;
-
-  template <class FES>
-  TrialFunction(GridFunction<FES>& gf, const FES& fes) -> TrialFunction<FES>;
 
   template <class FES>
   TrialFunction(GridFunction<FES>&& gf, const FES& fes) -> TrialFunction<FES>;

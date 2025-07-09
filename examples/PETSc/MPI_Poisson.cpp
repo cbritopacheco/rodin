@@ -27,7 +27,7 @@ int main(int argc, char** argv)
   ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
   assert(ierr == PETSC_SUCCESS);
 
-  Geometry::MPISharder sharder(mpi);
+  Rodin::MPI::Sharder sharder(mpi);
   if (world.rank() == 0)
   {
     std::cout << "Sharding\n";
@@ -36,9 +36,7 @@ int main(int argc, char** argv)
     mesh.getConnectivity().compute(2, 2);
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
-    sharder.shard(partitioner);
-    std::cout << "Scatter\n";
-    sharder.scatter(0);
+    sharder.shard(partitioner).scatter(0);
   }
 
   std::cout << "Gather\n";
@@ -47,22 +45,15 @@ int main(int argc, char** argv)
   std::cout << "Vertex count: " << mesh.getVertexCount() << "\n";
   std::cout << "Local count: " << mesh.getShard().getVertexCount() << "\n";
 
-  PETSc::LinearSystem axb(mpi.getCommunicator());
+  P1 vh(mesh);
 
-  ::Mat& a = axb.getOperator();
-  ::Vec& x = axb.getSolution();
-  ::Vec& b = axb.getVector();
+  // Define problem
+  PETSc::TrialFunction u(vh);
+  PETSc::TestFunction  v(vh);
 
   ScalarFunction f = 1;
 
-  P1 vh(mesh);
-
-  PETSc::TrialFunction u(vh);
-  TestFunction v(vh);
-  auto& d = u.getSolution();
-
-  // Define problem
-  Problem poisson(u, v, axb);
+  PETSc::Problem poisson(u, v);
   // poisson = Integral(Grad(u), Grad(v))
   //         - Integral(f, v)
   //         + DirichletBC(u, Zero());

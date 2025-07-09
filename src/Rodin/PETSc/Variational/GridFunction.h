@@ -51,8 +51,8 @@ namespace Rodin::Variational
       using Parent::max;
 
       static_assert(
-        std::is_same_v<ContextType, Context::Local> ||
-        std::is_same_v<ContextType, Context::MPI>);
+          std::is_same_v<ContextType, Context::Local> ||
+          std::is_same_v<ContextType, Context::MPI>);
 
       GridFunction(const FESType& fes)
         : Parent(fes),
@@ -63,8 +63,25 @@ namespace Rodin::Variational
           m_rawRead(nullptr)
       {
         auto& data = this->getData();
-        VecCreate(PETSC_COMM_SELF, &data);
-        init(data);
+        PetscErrorCode ierr;
+        if constexpr (std::is_same_v<ContextType, Context::Local>)
+        {
+          ierr = VecCreate(PETSC_COMM_SELF, &data);
+          assert(ierr == PETSC_SUCCESS);
+        }
+        else if constexpr (std::is_same_v<ContextType, Context::MPI>)
+        {
+          const auto& mesh = fes.getMesh();
+          const auto& ctx = mesh.getContext();
+          ierr = VecCreate(ctx.getCommunicator(), &data);
+          assert(ierr == PETSC_SUCCESS);
+        }
+        else
+        {
+          assert(false);
+        }
+
+        setup(data);
       }
 
       GridFunction(const FESType& fes, DataType& data)
@@ -75,7 +92,7 @@ namespace Rodin::Variational
           m_read(State::Unacquired),
           m_rawRead(nullptr)
       {
-        init(data);
+        setup(data);
       }
 
       GridFunction(const GridFunction& other)
@@ -174,7 +191,7 @@ namespace Rodin::Variational
         }
       }
 
-      void init(DataType& data)
+      void setup(DataType& data)
       {
         PetscErrorCode ierr;
         const auto& fes = this->getFiniteElementSpace();
@@ -207,9 +224,7 @@ namespace Rodin::Variational
         }
         else
         {
-          static_assert(
-              std::is_same_v<ContextType, Context::Local> ||
-              std::is_same_v<ContextType, Context::MPI>);
+          assert(false);
         }
         ierr = VecZeroEntries(data);
         assert(ierr == PETSC_SUCCESS);
@@ -265,9 +280,7 @@ namespace Rodin::Variational
         }
         else
         {
-          static_assert(
-              std::is_same_v<ContextType, Context::Local>
-              || std::is_same_v<ContextType, Context::MPI>);
+          assert(false);
         }
       }
 
@@ -297,9 +310,7 @@ namespace Rodin::Variational
         }
         else
         {
-          static_assert(
-              std::is_same_v<ContextType, Context::Local>
-              || std::is_same_v<ContextType, Context::MPI>);
+          assert(false);
         }
       }
 

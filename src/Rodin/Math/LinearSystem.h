@@ -32,24 +32,21 @@ namespace Rodin::Math
   class LinearSystemBase
   {
     public:
-      using MatrixType = Matrix;
+      using MatrixType =
+        Matrix;
 
-      using VectorType = Vector;
+      using VectorType =
+        Vector;
 
       LinearSystemBase()
-        : m_stiffness(MatrixType()), m_guess(VectorType()), m_mass(VectorType())
+        : LinearSystemBase(MatrixType{}, VectorType{}, VectorType{})
       {}
 
-      LinearSystemBase(const MatrixType& s, const VectorType& g, const VectorType& m) = delete;
-
-      LinearSystemBase(MatrixType&& stiffness, VectorType&& guess, VectorType&& mass) noexcept
-        : m_stiffness(std::move(stiffness)),
-          m_guess(std::move(guess)),
-          m_mass(std::move(mass))
-      {}
-
-      LinearSystemBase(MatrixType& stiffness, VectorType& guess, VectorType& mass)
-        : m_stiffness(std::ref(stiffness)), m_guess(std::ref(guess)), m_mass(std::ref(mass))
+      template <class MatrixType, class VectorType>
+      LinearSystemBase(MatrixType&& stiffness, VectorType&& guess, VectorType&& mass)
+        : m_stiffness(std::forward<MatrixType>(stiffness)),
+          m_guess(std::forward<VectorType>(guess)),
+          m_mass(std::forward<VectorType>(mass))
       {}
 
       LinearSystemBase(const LinearSystemBase& other)
@@ -153,11 +150,14 @@ namespace Rodin::Math
     : public LinearSystemBase<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>
   {
     public:
-      using MatrixType = Math::SparseMatrix<MatrixScalar>;
+      using MatrixType =
+        Math::SparseMatrix<MatrixScalar>;
 
-      using VectorType = Math::Vector<VectorScalar>;
+      using VectorType =
+        Math::Vector<VectorScalar>;
 
-      using Parent = LinearSystemBase<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>;
+      using Parent =
+        LinearSystemBase<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>;
 
       using Parent::Parent;
 
@@ -345,11 +345,14 @@ namespace Rodin::Math
     : public LinearSystemBase<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>
   {
     public:
-      using MatrixType = Math::Matrix<MatrixScalar>;
+      using MatrixType =
+        Math::Matrix<MatrixScalar>;
 
-      using VectorType = Math::Vector<VectorScalar>;
+      using VectorType =
+        Math::Vector<VectorScalar>;
 
-      using Parent = LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixScalar, VectorScalar>>;
+      using Parent =
+        LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixScalar, VectorScalar>>;
 
       using Parent::Parent;
 

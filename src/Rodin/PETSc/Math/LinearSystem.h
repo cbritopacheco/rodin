@@ -27,9 +27,15 @@ namespace Rodin::Math
 
       LinearSystem(const boost::mpi::communicator& comm);
 
-      LinearSystem(::Mat&& a, ::Vec&& x, ::Vec&& b) noexcept;
-
       LinearSystem(::Mat& stiffness, ::Vec& guess, ::Vec& mass);
+
+      LinearSystem(::Mat&& stiffness, ::Vec&& guess, ::Vec&& mass) noexcept;
+
+      LinearSystem(const LinearSystem& other);
+
+      LinearSystem(LinearSystem&& other) noexcept;
+
+      virtual ~LinearSystem();
 
       template <class DOFScalar>
       LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)

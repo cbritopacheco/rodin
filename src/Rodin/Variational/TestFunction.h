@@ -17,7 +17,7 @@ namespace Rodin::FormLanguage
 namespace Rodin::Variational
 {
   template <class FES>
-  class TestFunction final
+  class TestFunction
     : public ShapeFunction<TestFunction<FES>, FES, TestSpace>
   {
     public:

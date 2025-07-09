@@ -15,7 +15,7 @@ int main(int argc, char** argv)
   mpi::environment env(argc, argv);
   mpi::communicator world;
   Context::MPI mpi(env, world);
-  Geometry::MPISharder sharder(mpi);
+  Rodin::MPI::Sharder sharder(mpi);
 
   if (world.rank() == 0)
   {
