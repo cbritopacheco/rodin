@@ -4,7 +4,13 @@
 
 namespace Rodin::PETSc
 {
+  Vector::Vector()
+    : MPI(*this),
+      m_vec(PETSC_NULLPTR)
+  {}
+
   Vector::Vector(const boost::mpi::communicator& comm)
+    : MPI(*this)
   {
     PetscErrorCode ierr;
     ierr = VecCreate(comm, &m_vec);
@@ -12,7 +18,8 @@ namespace Rodin::PETSc
   }
 
   Vector::Vector(const Vector& other)
-    : Object(other),
+    : Parent(other),
+      MPI(*this),
       m_vec(other.m_vec)
   {
     PetscErrorCode ierr;
@@ -23,7 +30,8 @@ namespace Rodin::PETSc
   }
 
   Vector::Vector(Vector&& other) noexcept
-    : Object(std::move(other)),
+    : Parent(std::move(other)),
+      MPI(*this),
       m_vec(std::exchange(other.m_vec, PETSC_NULLPTR))
   {}
 
@@ -63,6 +71,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::operator+=(const Vector& other)
   {
+    assert(m_vec && other.m_vec);
     PetscErrorCode ierr = VecAXPY(m_vec, 1.0, other.m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -70,6 +79,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::operator-=(const Vector& other)
   {
+    assert(m_vec && other.m_vec);
     PetscErrorCode ierr = VecAXPY(m_vec, -1.0, other.m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -77,6 +87,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::operator*=(const Vector& rhs)
   {
+    assert(m_vec && rhs.m_vec);
     PetscErrorCode ierr = VecPointwiseMult(m_vec, m_vec, rhs.m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -84,6 +95,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::operator/=(const Vector& rhs)
   {
+    assert(m_vec && rhs.m_vec);
     PetscErrorCode ierr = VecPointwiseDivide(m_vec, m_vec, rhs.m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -91,6 +103,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::operator*=(const PetscScalar& rhs)
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecScale(m_vec, rhs);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -98,6 +111,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::operator/=(const PetscScalar& rhs)
   {
+    assert(m_vec);
     assert(rhs != PetscScalar(0));
     PetscErrorCode ierr = VecScale(m_vec, 1.0 / rhs);
     assert(ierr == PETSC_SUCCESS);
@@ -106,6 +120,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::operator+=(const PetscScalar& other)
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecShift(m_vec, other);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -113,13 +128,31 @@ namespace Rodin::PETSc
 
   Vector& Vector::operator-=(const PetscScalar& other)
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecShift(m_vec, -other);
     assert(ierr == PETSC_SUCCESS);
     return *this;
   }
 
+  Vector& Vector::create(MPI_Comm comm)
+  {
+    PetscErrorCode ierr;
+    ierr = VecCreate(comm, &m_vec);
+    assert(ierr == PETSC_SUCCESS);
+    return *this;
+  }
+
+  Vector& Vector::destroy()
+  {
+    PetscErrorCode ierr = VecDestroy(&m_vec);
+    assert(ierr == PETSC_SUCCESS);
+    m_vec = PETSC_NULLPTR;
+    return *this;
+  }
+
   Vector& Vector::setType(const ::VecType& type)
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecSetType(m_vec, type);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -127,6 +160,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::setFromOptions()
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecSetFromOptions(m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -134,6 +168,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::setSizes(PetscInt localSize, PetscInt globalSize)
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecSetSizes(m_vec, localSize, globalSize);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -141,6 +176,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::zeroEntries()
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecZeroEntries(m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -148,6 +184,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::setValue(PetscInt idx, const PetscScalar& value, ::InsertMode mode)
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecSetValue(m_vec, idx, value, mode);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -155,6 +192,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::assemblyBegin()
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecAssemblyBegin(m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -162,6 +200,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::assemblyEnd()
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecAssemblyEnd(m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -169,6 +208,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::axpy(const PetscScalar& alpha, const Vector& x)
   {
+    assert(m_vec && x.m_vec);
     PetscErrorCode ierr = VecAXPY(m_vec, alpha, x.m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -176,6 +216,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::aypx(const PetscScalar& beta, const Vector& x)
   {
+    assert(m_vec && x.m_vec);
     PetscErrorCode ierr = VecAYPX(m_vec, beta, x.m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -183,6 +224,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::axpby(const PetscScalar& alpha, const PetscScalar& beta, const Vector& x)
   {
+    assert(m_vec && x.m_vec);
     PetscErrorCode ierr = VecAXPBY(m_vec, alpha, beta, x.m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -190,6 +232,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::waxpy(const PetscScalar& alpha, const Vector& x, const Vector& y)
   {
+    assert(m_vec && x.m_vec && y.m_vec);
     PetscErrorCode ierr = VecWAXPY(m_vec, alpha, x.m_vec, y.m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -198,6 +241,7 @@ namespace Rodin::PETSc
   Vector& Vector::axpbypcz(
       const PetscScalar& alpha, const Vector& x, const PetscScalar& beta, const Vector& y, const PetscScalar& gamma)
   {
+    assert(m_vec && x.m_vec && y.m_vec);
     PetscErrorCode ierr = VecAXPBYPCZ(m_vec, alpha, beta, gamma, x.m_vec, y.m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -205,6 +249,7 @@ namespace Rodin::PETSc
 
   const Vector& Vector::getArrayRead(const PetscScalar *a[]) const
   {
+    assert(m_vec);
     PetscErrorCode ierr;
     ierr = VecGetArrayRead(m_vec, a);
     assert(ierr == PETSC_SUCCESS);
@@ -213,6 +258,7 @@ namespace Rodin::PETSc
 
   const Vector& Vector::restoreArrayRead(const PetscScalar *a[]) const
   {
+    assert(m_vec);
     PetscErrorCode ierr;
     ierr = VecRestoreArrayRead(m_vec, a);
     assert(ierr == PETSC_SUCCESS);
@@ -221,6 +267,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::getArrayWrite(PetscScalar *a[])
   {
+    assert(m_vec);
     PetscErrorCode ierr;
     ierr = VecGetArray(m_vec, a);
     assert(ierr == PETSC_SUCCESS);
@@ -229,6 +276,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::restoreArrayWrite(PetscScalar *a[])
   {
+    assert(m_vec);
     PetscErrorCode ierr;
     ierr = VecRestoreArray(m_vec, a);
     assert(ierr == PETSC_SUCCESS);
@@ -237,6 +285,7 @@ namespace Rodin::PETSc
 
   const Vector& Vector::getLocalSize(PetscInt* size) const
   {
+    assert(m_vec);
     PetscErrorCode ierr = VecGetLocalSize(m_vec, size);
     assert(ierr == PETSC_SUCCESS);
     return *this;
@@ -244,6 +293,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::ghostUpdateBegin(::InsertMode mode, ::ScatterMode scatterMode)
   {
+    assert(m_vec);
     PetscErrorCode ierr;
     ierr = VecGhostUpdateBegin(m_vec, mode, scatterMode);
     assert(ierr == PETSC_SUCCESS);
@@ -252,6 +302,7 @@ namespace Rodin::PETSc
 
   Vector& Vector::ghostUpdateEnd(::InsertMode mode, ::ScatterMode scatterMode)
   {
+    assert(m_vec);
     PetscErrorCode ierr;
     ierr = VecGhostUpdateEnd(m_vec, mode, scatterMode);
     assert(ierr == PETSC_SUCCESS);
@@ -260,6 +311,7 @@ namespace Rodin::PETSc
 
   const Vector& Vector::getComm(MPI_Comm* comm) const noexcept
   {
+    assert(m_vec);
     PetscErrorCode ierr;
     ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(m_vec), comm);
     assert(ierr == PETSC_SUCCESS);

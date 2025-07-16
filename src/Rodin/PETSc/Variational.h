@@ -5,5 +5,6 @@
 #include "Variational/TrialFunction.h"
 #include "Variational/TestFunction.h"
 #include "Variational/Problem.h"
+#include "Variational/BilinearForm.h"
 
 #endif

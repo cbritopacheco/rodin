@@ -26,8 +26,9 @@ set(RodinPETSc_SRCS
   Assembly/MPI.cpp
   Assembly/OpenMP.cpp
   Assembly/Sequential.cpp
-  Math/LinearSystem.cpp
+  Math/Vector.cpp
   Math/Matrix.cpp
+  Math/LinearSystem.cpp
   Variational/GridFunction.cpp
   Variational/TrialFunction.cpp
   )

@@ -40,6 +40,8 @@ namespace Rodin::PETSc
           Vector& m_vec; ///< Reference to the parent Vector object.
       } MPI;
 
+      Vector();
+
       Vector(const boost::mpi::communicator& comm);
 
       Vector(const Vector& other);
@@ -68,6 +70,10 @@ namespace Rodin::PETSc
 
       Vector& operator/=(const PetscScalar& rhs);
 
+      Vector& create(MPI_Comm comm);
+
+      Vector& destroy();
+
       Vector& setType(const ::VecType& type);
 
       Vector& setFromOptions();
@@ -94,6 +100,8 @@ namespace Rodin::PETSc
           const PetscScalar& alpha, const Vector& x,
           const PetscScalar& beta, const Vector& y,
           const PetscScalar& gamma);
+
+      Vector& dot(const Vector& x, PetscScalar* result) const;
 
       const Vector& getArrayRead(const PetscScalar *a[]) const;
 

@@ -47,100 +47,9 @@ namespace Rodin::Variational
     public:
       using OperatorType = Operator;
 
+      using ScalarType = typename FormLanguage::Traits<OperatorType>::ScalarType;
+
       using Parent = FormLanguage::Base;
-
-      /**
-       * @brief Constructs a linear form with a default constructed vector
-       * which is owned by the LinearFormBase instance.
-       */
-      constexpr
-      BilinearFormBase() = default;
-
-      constexpr
-      BilinearFormBase(const BilinearFormBase& other)
-        : Parent(other),
-          m_operator(other.m_operator)
-      {}
-
-      constexpr
-      BilinearFormBase(BilinearFormBase&& other)
-        : Parent(std::move(other)),
-          m_operator(std::move(other.m_operator))
-      {}
-
-      /**
-       * @brief Gets the reference to the associated operator of the bilinear
-       * form.
-       */
-      OperatorType& getOperator()
-      {
-        return m_operator;
-      }
-
-      /** @brief Gets a constant reference to the associated operator of the
-       * bilinear form.
-       */
-      const OperatorType& getOperator() const
-      {
-        return m_operator;
-      }
-
-      /**
-       * @brief Assembles the bilinear form.
-       *
-       * This method will assemble the underlying sparse matrix associated
-       * the bilinear form.
-       *
-       * @see getMatrix()
-       */
-      virtual void assemble() = 0;
-
-      /**
-       * @brief Gets the reference to the associated TrialFunction object.
-       * @returns Reference to this (for method chaining)
-       */
-      virtual const FormLanguage::Base& getTrialFunction() const = 0;
-
-      /**
-       * @brief Gets the reference to the associated TestFunction object.
-       * @returns Reference to this (for method chaining)
-       */
-      virtual const FormLanguage::Base& getTestFunction() const = 0;
-
-      virtual BilinearFormBase* copy() const noexcept override = 0;
-
-    private:
-      OperatorType m_operator;
-  };
-
-  /**
-   * @ingroup BilinearFormSpecializations
-   * @brief Speciallization of BilinearForm for a matrix type.
-   *
-   * This specialization aids in the construction of a @f$ m \times n @f$
-   * matrix @f$ A @f$, which is associated to the bilinear form. Here, @f$ n
-   * @f$ represents the size (total number of degrees-of-freedom) of the trial
-   * space, and @f$ m @f$ represents the size of the test space.
-   */
-  template <class Solution, class TrialFES, class TestFES, class Operator>
-  class BilinearForm final
-    : public BilinearFormBase<Operator>
-  {
-    using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
-
-    using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
-
-    public:
-      using TrialFESScalarType  = typename FormLanguage::Traits<TrialFES>::ScalarType;
-
-      using TestFESScalarType   = typename FormLanguage::Traits<TestFES>::ScalarType;
-
-      using ScalarType = typename FormLanguage::Mult<TrialFESScalarType, TestFESScalarType>::Type;
-
-      using SolutionType = Solution;
-
-      /// Type of operator associated to the bilinear form
-      using OperatorType = Operator;
 
       using LocalBilinearFormIntegratorBaseType =
         LocalBilinearFormIntegratorBase<ScalarType>;
@@ -154,78 +63,30 @@ namespace Rodin::Variational
       using GlobalBilinearFormIntegratorBaseListType =
         FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
-      /// Parent class
-      using Parent = BilinearFormBase<OperatorType>;
-
-      using DefaultAssembly =
-        typename Assembly::Default<TrialFESContextType, TestFESContextType>::template Type<OperatorType, BilinearForm>;
-
       /**
-       * @brief Constructs a LinearForm with a reference to a TestFunction and
-       * a default constructed vector owned by the LinearForm instance.
-       * @param[in] v Reference to a TestFunction
+       * @brief Constructs a linear form with a default constructed vector
+       * which is owned by the LinearFormBase instance.
        */
       constexpr
-      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
-        : m_u(u), m_v(v),
-          m_assembly(new DefaultAssembly)
-      {}
+      BilinearFormBase() = default;
 
       constexpr
-      BilinearForm(const BilinearForm& other)
+      BilinearFormBase(const BilinearFormBase& other)
         : Parent(other),
-          m_u(other.m_u), m_v(other.m_v),
-          m_assembly(other.m_assembly->copy()),
+          m_operator(other.m_operator),
           m_lbfis(other.m_lbfis),
           m_gbfis(other.m_gbfis)
       {}
 
       constexpr
-      BilinearForm(BilinearForm&& other)
+      BilinearFormBase(BilinearFormBase&& other)
         : Parent(std::move(other)),
-          m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
-          m_assembly(std::move(other.m_assembly)),
+          m_operator(std::move(other.m_operator)),
           m_lbfis(std::move(other.m_lbfis)),
           m_gbfis(std::move(other.m_gbfis))
       {}
 
-      /**
-       * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
-       * v @f$.
-       *
-       * Given grid functions @f$ u @f$ and @f$ v @f$, this function will
-       * compute the action of the bilinear mapping @f$ a(u, v) @f$.
-       *
-       * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
-       * at @f$ ( u, v ) @f$.
-       */
-      template <class UData, class VData>
-      constexpr
-      ScalarType operator()(
-        const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
-      {
-        return (this->getOperator() * v.getData()).dot(u.getData());
-      }
-
-      void assemble() override
-      {
-         const auto& trialFES = getTrialFunction().getFiniteElementSpace();
-         const auto& testFES = getTestFunction().getFiniteElementSpace();
-         getAssembly().execute(this->getOperator(), {
-             trialFES, testFES, getLocalIntegrators(), getGlobalIntegrators() });
-      }
-
-      const TrialFunction<SolutionType, TrialFES>& getTrialFunction() const override
-      {
-        return m_u.get();
-      }
-
-      const TestFunction<TestFES>& getTestFunction() const override
-      {
-        return m_v.get();
-      }
-
-      BilinearForm& operator=(const LocalBilinearFormIntegratorBaseType& bfi)
+      BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         this->from(bfi);
         return *this;
@@ -234,14 +95,14 @@ namespace Rodin::Variational
       /**
        * @todo
        */
-      BilinearForm& operator=(
+      BilinearFormBase& operator=(
           const FormLanguage::List<LocalBilinearFormIntegratorBaseType>& bfis)
       {
         this->from(bfis);
         return *this;
       }
 
-      BilinearForm& operator=(const GlobalBilinearFormIntegratorBaseType& bfi)
+      BilinearFormBase& operator=(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
         this->from(bfi);
         return *this;
@@ -250,7 +111,7 @@ namespace Rodin::Variational
       /**
        * @todo
        */
-      BilinearForm& operator=(
+      BilinearFormBase& operator=(
           const FormLanguage::List<GlobalBilinearFormIntegratorBaseType>& bfis)
       {
         this->from(bfis);
@@ -281,32 +142,20 @@ namespace Rodin::Variational
         return m_gbfis;
       }
 
-      BilinearForm& setAssembly(const Assembly::AssemblyBase<OperatorType, BilinearForm>& assembly)
-      {
-        m_assembly.reset(assembly.copy());
-        return *this;
-      }
-
-      const Assembly::AssemblyBase<OperatorType, BilinearForm>& getAssembly() const
-      {
-        assert(m_assembly);
-        return *m_assembly;
-      }
-
       /**
        * @brief Builds the bilinear form the given bilinear integrator
        * @param[in] bfi Bilinear integrator which will be used to
        * build the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      BilinearForm& from(const LocalBilinearFormIntegratorBaseType& bfi)
+      BilinearFormBase& from(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         m_lbfis.clear();
         add(bfi);
         return *this;
       }
 
-      BilinearForm& from(const LocalBilinearFormIntegratorBaseListType& bfi)
+      BilinearFormBase& from(const LocalBilinearFormIntegratorBaseListType& bfi)
       {
         m_lbfis.clear();
         add(bfi);
@@ -317,7 +166,7 @@ namespace Rodin::Variational
        * @brief Adds a bilinear integrator to the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      BilinearForm& add(const LocalBilinearFormIntegratorBaseType& bfi)
+      BilinearFormBase& add(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
           TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
@@ -327,7 +176,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      BilinearForm& add(const LocalBilinearFormIntegratorBaseListType& bfis)
+      BilinearFormBase& add(const LocalBilinearFormIntegratorBaseListType& bfis)
       {
         m_lbfis.add(bfis);
         return *this;
@@ -339,14 +188,14 @@ namespace Rodin::Variational
        * build the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      BilinearForm& from(const GlobalBilinearFormIntegratorBaseType& bfi)
+      BilinearFormBase& from(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
         m_gbfis.clear();
         add(bfi);
         return *this;
       }
 
-      BilinearForm& from(const GlobalBilinearFormIntegratorBaseListType& bfi)
+      BilinearFormBase& from(const GlobalBilinearFormIntegratorBaseListType& bfi)
       {
         m_gbfis.clear();
         add(bfi);
@@ -357,7 +206,7 @@ namespace Rodin::Variational
        * @brief Adds a bilinear integrator to the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      BilinearForm& add(const GlobalBilinearFormIntegratorBaseType& bfi)
+      BilinearFormBase& add(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
         if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
           TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
@@ -367,17 +216,200 @@ namespace Rodin::Variational
         return *this;
       }
 
-      BilinearForm& add(const GlobalBilinearFormIntegratorBaseListType& bfis)
+      BilinearFormBase& add(const GlobalBilinearFormIntegratorBaseListType& bfis)
       {
         m_gbfis.add(bfis);
         return *this;
       }
 
-      BilinearForm& clear()
+      BilinearFormBase& clear()
       {
         m_lbfis.clear();
         m_gbfis.clear();
         return *this;
+      }
+
+      /**
+       * @brief Gets the reference to the associated operator of the bilinear
+       * form.
+       */
+      virtual OperatorType& getOperator() = 0;
+
+      /** @brief Gets a constant reference to the associated operator of the
+       * bilinear form.
+       */
+      virtual const OperatorType& getOperator() const = 0;
+
+      /**
+       * @brief Assembles the bilinear form.
+       *
+       * This method will assemble the underlying sparse matrix associated
+       * the bilinear form.
+       *
+       * @see getMatrix()
+       */
+      virtual void assemble() = 0;
+
+      /**
+       * @brief Gets the reference to the associated TrialFunction object.
+       * @returns Reference to this (for method chaining)
+       */
+      virtual const FormLanguage::Base& getTrialFunction() const = 0;
+
+      /**
+       * @brief Gets the reference to the associated TestFunction object.
+       * @returns Reference to this (for method chaining)
+       */
+      virtual const FormLanguage::Base& getTestFunction() const = 0;
+
+      virtual BilinearFormBase* copy() const noexcept override = 0;
+
+    private:
+      OperatorType m_operator;
+
+      LocalBilinearFormIntegratorBaseListType               m_lbfis;
+      GlobalBilinearFormIntegratorBaseListType              m_gbfis;
+  };
+
+  /**
+   * @ingroup BilinearFormSpecializations
+   * @brief Speciallization of BilinearForm for a matrix type.
+   *
+   * This specialization aids in the construction of a @f$ m \times n @f$
+   * matrix @f$ A @f$, which is associated to the bilinear form. Here, @f$ n
+   * @f$ represents the size (total number of degrees-of-freedom) of the trial
+   * space, and @f$ m @f$ represents the size of the test space.
+   */
+  template <class Solution, class TrialFES, class TestFES, class Scalar>
+  class BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>> final
+    : public BilinearFormBase<Math::SparseMatrix<Scalar>>
+  {
+    using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
+
+    using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
+
+    public:
+      using SolutionType = Solution;
+
+      using ScalarType = Scalar;
+
+      /// Type of operator associated to the bilinear form
+      using OperatorType = Math::SparseMatrix<ScalarType>;
+
+      /// Parent class
+      using Parent = BilinearFormBase<OperatorType>;
+
+      using Parent::operator=;
+
+      using DefaultAssembly =
+        typename Assembly::Default<TrialFESContextType, TestFESContextType>
+          ::template Type<OperatorType, BilinearForm>;
+
+      /**
+       * @brief Constructs a LinearForm with a reference to a TestFunction and
+       * a default constructed vector owned by the LinearForm instance.
+       * @param[in] v Reference to a TestFunction
+       */
+      constexpr
+      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
+        : m_u(u), m_v(v),
+          m_assembly(new DefaultAssembly)
+      {}
+
+      constexpr
+      BilinearForm(const BilinearForm& other)
+        : Parent(other),
+          m_u(other.m_u), m_v(other.m_v),
+          m_assembly(other.m_assembly->copy())
+      {}
+
+      constexpr
+      BilinearForm(BilinearForm&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
+          m_assembly(std::move(other.m_assembly))
+      {}
+
+      BilinearForm& operator=(const BilinearForm& bf)
+      {
+        if (this != &bf)
+        {
+          m_u = bf.m_u;
+          m_v = bf.m_v;
+          m_operator = bf.m_operator;
+          m_assembly.reset(bf.m_assembly->copy());
+        }
+        return *this;
+      }
+
+      BilinearForm& operator=(BilinearForm&& bf) noexcept
+      {
+        if (this != &bf)
+        {
+          m_u = std::move(bf.m_u);
+          m_v = std::move(bf.m_v);
+          m_operator = std::move(bf.m_operator);
+          m_assembly = std::move(bf.m_assembly);
+        }
+        return *this;
+      }
+
+      /**
+       * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
+       * v @f$.
+       *
+       * Given grid functions @f$ u @f$ and @f$ v @f$, this function will
+       * compute the action of the bilinear mapping @f$ a(u, v) @f$.
+       *
+       * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
+       * at @f$ ( u, v ) @f$.
+       */
+      template <class UData, class VData>
+      constexpr
+      ScalarType operator()(
+        const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
+      {
+        return (this->getOperator() * v.getData()).dot(u.getData());
+      }
+
+      const Assembly::AssemblyBase<OperatorType, BilinearForm>& getAssembly() const
+      {
+        assert(m_assembly);
+        return *m_assembly;
+      }
+
+      BilinearForm& setAssembly(const Assembly::AssemblyBase<OperatorType, BilinearForm>& assembly)
+      {
+        m_assembly.reset(assembly.copy());
+        return *this;
+      }
+
+      OperatorType& getOperator() override
+      {
+        return m_operator;
+      }
+
+      const OperatorType& getOperator() const override
+      {
+        return m_operator;
+      }
+
+      void assemble() override
+      {
+        const auto& trialFES = getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = getTestFunction().getFiniteElementSpace();
+        this->getAssembly().execute(this->getOperator(), {
+          trialFES, testFES, this->getLocalIntegrators(), this->getGlobalIntegrators() });
+      }
+
+      const TrialFunction<SolutionType, TrialFES>& getTrialFunction() const override
+      {
+        return m_u.get();
+      }
+
+      const TestFunction<TestFES>& getTestFunction() const override
+      {
+        return m_v.get();
       }
 
       BilinearForm* copy() const noexcept override
@@ -386,21 +418,166 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const TrialFunction<Solution, TrialFES>> m_u;
-      std::reference_wrapper<const TestFunction<TestFES>>   m_v;
+      OperatorType m_operator;
+      std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
+      std::reference_wrapper<const TestFunction<TestFES>>               m_v;
       std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
-      LocalBilinearFormIntegratorBaseListType               m_lbfis;
-      GlobalBilinearFormIntegratorBaseListType              m_gbfis;
   };
 
   template <class Solution, class TrialFES, class TestFES>
   BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
-    -> BilinearForm<Solution, TrialFES, TestFES,
+    -> BilinearForm<
+        Solution, TrialFES, TestFES,
         Math::SparseMatrix<
           typename FormLanguage::Mult<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>
           ::Type>>;
+
+
+  template <class Solution, class TrialFES, class TestFES, class Scalar>
+  class BilinearForm<Solution, TrialFES, TestFES, Math::Matrix<Scalar>> final
+    : public BilinearFormBase<Math::Matrix<Scalar>>
+  {
+    using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
+
+    using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
+
+    public:
+      using SolutionType = Solution;
+
+      using ScalarType = Scalar;
+
+      /// Type of operator associated to the bilinear form
+      using OperatorType = Math::Matrix<ScalarType>;
+
+      /// Parent class
+      using Parent = BilinearFormBase<OperatorType>;
+
+      using Parent::operator=;
+
+      using DefaultAssembly =
+        typename Assembly::Default<TrialFESContextType, TestFESContextType>
+          ::template Type<OperatorType, BilinearForm>;
+
+      /**
+       * @brief Constructs a LinearForm with a reference to a TestFunction and
+       * a default constructed vector owned by the LinearForm instance.
+       * @param[in] v Reference to a TestFunction
+       */
+      constexpr
+      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
+        : m_u(u), m_v(v),
+          m_assembly(new DefaultAssembly)
+      {}
+
+      constexpr
+      BilinearForm(const BilinearForm& other)
+        : Parent(other),
+          m_u(other.m_u), m_v(other.m_v),
+          m_assembly(other.m_assembly->copy())
+      {}
+
+      constexpr
+      BilinearForm(BilinearForm&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
+          m_assembly(std::move(other.m_assembly))
+      {}
+
+      BilinearForm& operator=(const BilinearForm& bf)
+      {
+        if (this != &bf)
+        {
+          m_u = bf.m_u;
+          m_v = bf.m_v;
+          m_operator = bf.m_operator;
+          m_assembly.reset(bf.m_assembly->copy());
+        }
+        return *this;
+      }
+
+      BilinearForm& operator=(BilinearForm&& bf) noexcept
+      {
+        if (this != &bf)
+        {
+          m_u = std::move(bf.m_u);
+          m_v = std::move(bf.m_v);
+          m_operator = std::move(bf.m_operator);
+          m_assembly = std::move(bf.m_assembly);
+        }
+        return *this;
+      }
+
+      /**
+       * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
+       * v @f$.
+       *
+       * Given grid functions @f$ u @f$ and @f$ v @f$, this function will
+       * compute the action of the bilinear mapping @f$ a(u, v) @f$.
+       *
+       * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
+       * at @f$ ( u, v ) @f$.
+       */
+      template <class UData, class VData>
+      constexpr
+      ScalarType operator()(
+        const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
+      {
+        return (this->getOperator() * v.getData()).dot(u.getData());
+      }
+
+      const Assembly::AssemblyBase<OperatorType, BilinearForm>& getAssembly() const
+      {
+        assert(m_assembly);
+        return *m_assembly;
+      }
+
+      BilinearForm& setAssembly(const Assembly::AssemblyBase<OperatorType, BilinearForm>& assembly)
+      {
+        m_assembly.reset(assembly.copy());
+        return *this;
+      }
+
+      OperatorType& getOperator() override
+      {
+        return m_operator;
+      }
+
+      const OperatorType& getOperator() const override
+      {
+        return m_operator;
+      }
+
+      void assemble() override
+      {
+        const auto& trialFES = getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = getTestFunction().getFiniteElementSpace();
+        this->getAssembly().execute(this->getOperator(), {
+          trialFES, testFES, this->getLocalIntegrators(), this->getGlobalIntegrators() });
+      }
+
+      const TrialFunction<SolutionType, TrialFES>& getTrialFunction() const override
+      {
+        return m_u.get();
+      }
+
+      const TestFunction<TestFES>& getTestFunction() const override
+      {
+        return m_v.get();
+      }
+
+      BilinearForm* copy() const noexcept override
+      {
+        return new BilinearForm(*this);
+      }
+
+    private:
+      OperatorType m_operator;
+      std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
+      std::reference_wrapper<const TestFunction<TestFES>>               m_v;
+      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
+  };
 }
 
 #endif

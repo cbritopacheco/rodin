@@ -184,19 +184,18 @@ namespace Rodin::Variational
           std::is_same_v<RangeType, Math::Vector<ScalarType>>);
 
       GridFunctionBase(const FES& fes)
-        : GridFunctionBase(fes, DataType{})
+        : Parent(std::cref(*this)),
+          m_fes(std::cref(fes))
       {}
 
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(std::cref(*this)),
-          m_fes(other.m_fes),
-          m_data(other.m_data)
+          m_fes(other.m_fes)
       {}
 
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(std::cref(*this)),
-          m_fes(std::move(other.m_fes)),
-          m_data(std::move(other.m_data))
+          m_fes(std::move(other.m_fes))
       {}
 
       virtual ~GridFunctionBase() = default;
@@ -204,7 +203,6 @@ namespace Rodin::Variational
       GridFunctionBase& operator=(GridFunctionBase&& other)
       {
         m_fes = std::move(other.m_fes);
-        m_data = std::move(other.m_data);
         return *this;
       }
 
@@ -246,7 +244,7 @@ namespace Rodin::Variational
       constexpr
       auto& getData()
       {
-        return m_data;
+        return static_cast<Derived&>(*this).getData();
       }
 
       /**
@@ -255,7 +253,7 @@ namespace Rodin::Variational
       constexpr
       const DataType& getData() const
       {
-        return m_data;
+        return static_cast<const Derived&>(*this).getData();
       }
 
       constexpr
@@ -934,7 +932,6 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const FESType> m_fes;
-      DataType m_data;
   };
 
   template <class FES>
@@ -958,16 +955,11 @@ namespace Rodin::Variational
       using Parent::max;
 
       GridFunction(const FESType& fes)
-        : GridFunction(fes, DataType{})
-      {}
-
-      template <class DataType>
-      GridFunction(const FESType& fes, DataType&& data)
-        : Parent(fes, std::forward<DataType>(data))
+        : Parent(fes)
       {
-        auto& d = this->getData();
-        d.resize(fes.getSize());
-        d.setZero();
+        auto& data = this->getData();
+        data.resize(fes.getSize());
+        data.setZero();
       }
 
       GridFunction(const GridFunction& other)
@@ -1068,6 +1060,21 @@ namespace Rodin::Variational
         this->getData() = data.segment(offset, sz);
         return *this;
       }
+
+      constexpr
+      auto& getData()
+      {
+        return m_data;
+      }
+
+      constexpr
+      const DataType& getData() const
+      {
+        return m_data;
+      }
+
+    private:
+      DataType m_data;
   };
 
   template <class FES>

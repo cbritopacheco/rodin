@@ -29,13 +29,15 @@ namespace Rodin::Math
       using Parent =
         LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixType, VectorType>>;
 
+      LinearSystem() = default;
+
       LinearSystem(const boost::mpi::communicator& comm);
 
       LinearSystem(const LinearSystem& other);
 
       LinearSystem(LinearSystem&& other) noexcept;
 
-      virtual ~LinearSystem();
+      virtual ~LinearSystem() = default;
 
       LinearSystem& operator=(const LinearSystem& other);
 

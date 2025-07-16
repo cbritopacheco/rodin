@@ -60,6 +60,8 @@ namespace Rodin::PETSc
 
       using Parent = Object;
 
+      Matrix();
+
       Matrix(const boost::mpi::communicator& comm);
 
       Matrix(const Matrix& other);
@@ -110,6 +112,8 @@ namespace Rodin::PETSc
 
       Matrix& zeroRowsColumns(
         PetscInt n, const PetscInt rows[], PetscScalar diag, Vector& x, Vector& b);
+
+      Matrix& mult(const Vector& x, Vector& y) const;
 
       const Matrix& getComm(MPI_Comm& comm) const noexcept;
 
