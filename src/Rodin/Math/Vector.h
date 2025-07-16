@@ -7,7 +7,6 @@
 #ifndef RODIN_MATH_VECTOR_H
 #define RODIN_MATH_VECTOR_H
 
-#include <vector>
 #include <Eigen/Core>
 #include <Eigen/Dense>
 

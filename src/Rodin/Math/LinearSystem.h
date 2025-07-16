@@ -4,9 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MATH_SYSTEM_H
-#define RODIN_MATH_SYSTEM_H
+#ifndef RODIN_MATH_LINEARSYSTEM_H
+#define RODIN_MATH_LINEARSYSTEM_H
 
+#include "Rodin/Array.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
@@ -38,112 +39,78 @@ namespace Rodin::Math
       using VectorType =
         Vector;
 
-      LinearSystemBase()
-        : LinearSystemBase(MatrixType{}, VectorType{}, VectorType{})
-      {}
+      constexpr
+      LinearSystemBase() = default;
 
-      template <class MatrixType, class VectorType>
-      LinearSystemBase(MatrixType&& stiffness, VectorType&& guess, VectorType&& mass)
-        : m_stiffness(std::forward<MatrixType>(stiffness)),
-          m_guess(std::forward<VectorType>(guess)),
-          m_mass(std::forward<VectorType>(mass))
-      {}
+      constexpr
+      LinearSystemBase(const LinearSystemBase& other) = default;
 
-      LinearSystemBase(const LinearSystemBase& other)
-        : m_stiffness(other.m_stiffness), m_guess(other.m_guess), m_mass(other.m_mass)
-      {}
+      constexpr
+      LinearSystemBase(LinearSystemBase&& other) noexcept = default;
 
-      LinearSystemBase(LinearSystemBase&& other) noexcept
-        : m_stiffness(std::move(other.m_stiffness)), m_guess(std::move(other.m_guess)), m_mass(std::move(other.m_mass))
-      {}
+      virtual ~LinearSystemBase() = default;
 
-      LinearSystemBase& operator=(const LinearSystemBase& other)
-      {
-        if (this != &other)
-        {
-          m_stiffness = other.m_stiffness;
-          m_guess = other.m_guess;
-          m_mass = other.m_mass;
-        }
-        return *this;
-      }
+      constexpr
+      LinearSystemBase& operator=(const LinearSystemBase& other) = default;
 
-      LinearSystemBase& operator=(LinearSystemBase&& other) noexcept
-      {
-        if (this != &other)
-        {
-          m_stiffness = std::move(other.m_stiffness);
-          m_guess = std::move(other.m_guess);
-          m_mass = std::move(other.m_mass);
-        }
-        return *this;
-      }
+      constexpr
+      LinearSystemBase& operator=(LinearSystemBase&& other) noexcept = default;
 
       template <class DOFScalar>
-      LinearSystemBase& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
+      constexpr
+      LinearSystemBase& eliminate(
+          const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
         return static_cast<Derived&>(*this).eliminate(dofs, offset);
       }
 
       template <class DOFScalar>
-      LinearSystemBase& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
+      constexpr
+      LinearSystemBase& merge(
+          const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
       {
         return static_cast<Derived&>(*this).merge(dofs, offset);
       }
 
+      constexpr
       MatrixType& getOperator()
       {
-        auto& ref =
-          std::visit([](auto& m) -> MatrixType& { return m; }, m_stiffness);
-        return ref;
+        return static_cast<Derived&>(*this).getOperator();
       }
 
+      constexpr
       const MatrixType& getOperator() const
       {
-        const auto& ref =
-          std::visit([](const auto& m) -> const MatrixType& { return m; }, m_stiffness);
-        return ref;
+        return static_cast<const Derived&>(*this).getOperator();
       }
 
+      constexpr
       VectorType& getVector()
       {
-        auto& ref =
-          std::visit([](auto& m) -> VectorType& { return m; }, m_mass);
-        return ref;
+        return static_cast<Derived&>(*this).getVector();
       }
 
+      constexpr
       const VectorType& getVector() const
       {
-        const auto& ref =
-          std::visit([](const auto& m) -> const VectorType& { return m; }, m_mass);
-        return ref;
+        return static_cast<const Derived&>(*this).getVector();
       }
 
+      constexpr
       VectorType& getSolution()
       {
-        auto& ref =
-          std::visit([](auto& m) -> VectorType& { return m; }, m_guess);
-        return ref;
+        return static_cast<Derived&>(*this).getSolution();
       }
 
+      constexpr
       const VectorType& getSolution() const
       {
-        const auto& ref =
-          std::visit([](const auto& m) -> const VectorType& { return m; }, m_guess);
-        return ref;
+        return static_cast<const Derived&>(*this).getSolution();
       }
-
-    private:
-      std::variant<std::reference_wrapper<MatrixType>, MatrixType> m_stiffness;
-      std::variant<std::reference_wrapper<VectorType>, VectorType> m_guess;
-      std::variant<std::reference_wrapper<VectorType>, VectorType> m_mass;
   };
 
   template <class Matrix, class Vector>
   class LinearSystem;
-
-  template <class Matrix, class Vector>
-  LinearSystem(Matrix&, Vector&, Vector&) -> LinearSystem<Matrix, Vector>;
 
   template <class MatrixScalar, class VectorScalar>
   class LinearSystem<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>>
@@ -159,9 +126,55 @@ namespace Rodin::Math
       using Parent =
         LinearSystemBase<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>;
 
-      using Parent::Parent;
+      constexpr
+      LinearSystem() = default;
+
+      constexpr
+      LinearSystem(const LinearSystem& other)
+        : Parent(other),
+          m_operator(other.m_operator),
+          m_vector(other.m_vector),
+          m_solution(other.m_solution)
+      {}
+
+      constexpr
+      LinearSystem(LinearSystem&& other) noexcept
+        : Parent(std::move(other)),
+          m_operator(std::move(other.m_operator)),
+          m_vector(std::move(other.m_vector)),
+          m_solution(std::move(other.m_solution))
+      {}
+
+      constexpr
+      LinearSystem& operator=(const LinearSystem& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_operator = other.m_operator;
+          m_vector = other.m_vector;
+          m_solution = other.m_solution;
+        }
+        return *this;
+      }
+
+      constexpr
+      LinearSystem& operator=(LinearSystem&& other) noexcept
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_operator = std::move(other.m_operator);
+          m_vector = std::move(other.m_vector);
+          m_solution = std::move(other.m_solution);
+        }
+        return *this;
+      }
+
+      virtual ~LinearSystem() = default;
 
       template <class DOFScalar>
+      constexpr
       LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
         auto& stiffness = this->getOperator();
@@ -338,6 +351,47 @@ namespace Rodin::Math
         }
         return *this;
       }
+
+      constexpr
+      MatrixType& getOperator()
+      {
+        return m_operator;
+      }
+
+      constexpr
+      const MatrixType& getOperator() const
+      {
+        return m_operator;
+      }
+
+      constexpr
+      VectorType& getVector()
+      {
+        return m_vector;
+      }
+
+      constexpr
+      const VectorType& getVector() const
+      {
+        return m_vector;
+      }
+
+      constexpr
+      VectorType& getSolution()
+      {
+        return m_solution;
+      }
+
+      constexpr
+      const VectorType& getSolution() const
+      {
+        return m_solution;
+      }
+
+    private:
+      MatrixType m_operator; ///< The operator of the linear system.
+      VectorType m_vector;   ///< The vector of the linear system.
+      VectorType m_solution; ///< The solution vector of the linear system.
   };
 
   template <class MatrixScalar, class VectorScalar>
@@ -354,7 +408,52 @@ namespace Rodin::Math
       using Parent =
         LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixScalar, VectorScalar>>;
 
-      using Parent::Parent;
+      constexpr
+      LinearSystem() = default;
+
+      constexpr
+      LinearSystem(const LinearSystem& other)
+        : Parent(other),
+          m_operator(other.m_operator),
+          m_vector(other.m_vector),
+          m_solution(other.m_solution)
+      {}
+
+      constexpr
+      LinearSystem(LinearSystem&& other) noexcept
+        : Parent(std::move(other)),
+          m_operator(std::move(other.m_operator)),
+          m_vector(std::move(other.m_vector)),
+          m_solution(std::move(other.m_solution))
+      {}
+
+      virtual ~LinearSystem() = default;
+
+      constexpr
+      LinearSystem& operator=(const LinearSystem& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_operator = other.m_operator;
+          m_vector = other.m_vector;
+          m_solution = other.m_solution;
+        }
+        return *this;
+      }
+
+      constexpr
+      LinearSystem& operator=(LinearSystem&& other) noexcept
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_operator = std::move(other.m_operator);
+          m_vector = std::move(other.m_vector);
+          m_solution = std::move(other.m_solution);
+        }
+        return *this;
+      }
 
       template <class DOFScalar>
       LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
@@ -513,6 +612,47 @@ namespace Rodin::Math
         }
         return *this;
       }
+
+      constexpr
+      MatrixType& getOperator()
+      {
+        return m_operator;
+      }
+
+      constexpr
+      const MatrixType& getOperator() const
+      {
+        return m_operator;
+      }
+
+      constexpr
+      VectorType& getVector()
+      {
+        return m_vector;
+      }
+
+      constexpr
+      const VectorType& getVector() const
+      {
+        return m_vector;
+      }
+
+      constexpr
+      VectorType& getSolution()
+      {
+        return m_solution;
+      }
+
+      constexpr
+      const VectorType& getSolution() const
+      {
+        return m_solution;
+      }
+
+    private:
+      MatrixType m_operator; ///< The operator of the linear system.
+      VectorType m_vector;   ///< The vector of the linear system.
+      VectorType m_solution; ///< The solution vector of the linear system.
   };
 }
 

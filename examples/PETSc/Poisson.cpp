@@ -37,7 +37,7 @@ int main(int argc, char** argv)
   PETSc::TrialFunction u(vh);
   TestFunction  v(vh);
 
-  LinearSystem axb(a, x, b);
+  // LinearSystem axb(a, x, b);
 
   // Define problem
   // Problem poisson(u, v, axb);

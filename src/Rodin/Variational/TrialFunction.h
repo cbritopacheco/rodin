@@ -170,20 +170,17 @@ namespace Rodin::Variational
       constexpr
       SolutionType& getSolution()
       {
-        auto& ref = std::visit([](auto& m) -> SolutionType& { return m; }, m_gf);
-        return ref;
+        return m_gf;
       }
 
       constexpr
       const SolutionType& getSolution() const
       {
-        const auto& ref =
-          std::visit([](const auto& m) -> const SolutionType& { return m; }, m_gf);
-        return ref;
+        return m_gf;
       }
 
     private:
-      std::variant<std::reference_wrapper<SolutionType>, SolutionType> m_gf;
+      SolutionType m_gf;
   };
 
   template <class FES>

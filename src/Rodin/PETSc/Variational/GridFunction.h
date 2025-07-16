@@ -11,12 +11,13 @@
 #include <petscsys.h>
 #include <petscsystypes.h>
 #include <petscvec.h>
-#include <utility>
 
-#include "Rodin/Context/Local.h"
 #include "Rodin/Types.h"
+#include "Rodin/Context/Local.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/GridFunction.h"
+
+#include "Rodin/PETSc/Math/Vector.h"
 
 #ifdef RODIN_USE_MPI
 #include "Rodin/MPI/Context.h"
@@ -25,8 +26,8 @@
 namespace Rodin::Variational
 {
   template <class FES>
-  class GridFunction<FES, ::Vec> final
-    : public GridFunctionBase<GridFunction<FES, ::Vec>>
+  class GridFunction<FES, PETSc::Vector> final
+    : public GridFunctionBase<GridFunction<FES, PETSc::Vector>>
   {
     enum class State
     {
@@ -37,7 +38,7 @@ namespace Rodin::Variational
     public:
       using FESType = FES;
 
-      using DataType = ::Vec;
+      using DataType = PETSc::Vector;
 
       using ScalarType = PetscScalar;
 
@@ -81,17 +82,6 @@ namespace Rodin::Variational
           assert(false);
         }
 
-        setup(data);
-      }
-
-      GridFunction(const FESType& fes, DataType& data)
-        : Parent(fes, data),
-          m_owned(false),
-          m_write(State::Unacquired),
-          m_rawWrite(nullptr),
-          m_read(State::Unacquired),
-          m_rawRead(nullptr)
-      {
         setup(data);
       }
 
@@ -182,26 +172,15 @@ namespace Rodin::Variational
           ierr = VecRestoreArrayRead(this->getData(), &m_rawRead);
           assert(ierr == PETSC_SUCCESS);
         }
-
-        auto& data = this->getData();
-        if (m_owned && data)
-        {
-          ierr = VecDestroy(&data);
-          assert(ierr == PETSC_SUCCESS);
-        }
       }
 
       void setup(DataType& data)
       {
-        PetscErrorCode ierr;
         const auto& fes = this->getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         if constexpr (std::is_same_v<ContextType, Context::Local>)
         {
-          ierr = VecSetSizes(data, fes.getSize(), PETSC_DECIDE);
-          assert(ierr == PETSC_SUCCESS);
-          ierr = VecSetFromOptions(data);
-          assert(ierr == PETSC_SUCCESS);
+          data.setSizes(fes.getSize(), PETSC_DECIDE).setFromOptions();
         }
         else if constexpr (std::is_same_v<ContextType, Context::MPI>)
         {
@@ -211,23 +190,18 @@ namespace Rodin::Variational
           const size_t localSize = fes.getShard().getSize();
           fes.getOwnershipRange(m_begin, m_end);
           const size_t ownedSize = m_end - m_begin;
-          ierr = VecSetSizes(data, localSize, globalSize);
-          assert(ierr == PETSC_SUCCESS);
-          ierr = VecSetFromOptions(data);
-          assert(ierr == PETSC_SUCCESS);
+          data.setSizes(localSize, globalSize).setFromOptions();
           size_t ghostSize = localSize - ownedSize;
           m_ghosts.resize(ghostSize);
           for (size_t i = 0; i < ghostSize; ++i)
             m_ghosts[i] = fes.getGlobalIndex(m_end + i);
-          ierr = VecMPISetGhost(data, ghostSize, m_ghosts.data());
-          assert(ierr == PETSC_SUCCESS);
+          data.MPI.setGhost(ghostSize, m_ghosts.data());
         }
         else
         {
           assert(false);
         }
-        ierr = VecZeroEntries(data);
-        assert(ierr == PETSC_SUCCESS);
+        data.zeroEntries();
       }
 
       constexpr
@@ -403,34 +377,21 @@ namespace Rodin::Variational
         flush();
 
         auto& data = this->getData();
-
-        PetscErrorCode ierr;
-
         PetscInt localSize;
-        ierr = VecGetLocalSize(data, &localSize);
-        assert(ierr == PETSC_SUCCESS);
+        data.getLocalSize(&localSize);
 
         const PetscScalar* src = nullptr;
-        ierr = VecGetArrayRead(other, &src);
-        assert(ierr == PETSC_SUCCESS);
-
+        other.getArrayRead(&src);
         PetscScalar* dst = nullptr;
-        ierr = VecGetArray(data, &dst);
-        assert(ierr == PETSC_SUCCESS);
+        data.getArrayWrite(&dst);
 
         std::memcpy(dst, src + static_cast<PetscInt>(offset), localSize * sizeof(PetscScalar));
 
-        ierr = VecRestoreArray(data, &dst);
-        assert(ierr == PETSC_SUCCESS);
+        data.restoreArrayWrite(&dst);
+        other.restoreArrayRead(&src);
 
-        ierr = VecRestoreArrayRead(other, &src);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = VecGhostUpdateBegin(data, INSERT_VALUES, SCATTER_FORWARD);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = VecGhostUpdateEnd(data, INSERT_VALUES, SCATTER_FORWARD);
-        assert(ierr == PETSC_SUCCESS);
+        data.ghostUpdateBegin(INSERT_VALUES, SCATTER_FORWARD);
+        data.ghostUpdateEnd(INSERT_VALUES, SCATTER_FORWARD);
 
         return *this;
       }
@@ -501,7 +462,7 @@ namespace Rodin::Variational
 namespace Rodin::PETSc
 {
   template <class FES>
-  using GridFunction = Variational::GridFunction<FES, ::Vec>;
+  using GridFunction = Variational::GridFunction<FES, PETSc::Vector>;
 }
 
 #endif

@@ -99,6 +99,9 @@ namespace Rodin::Variational
       using LinearSystemType =
         LinearSystem;
 
+      using SolutionType =
+        typename FormLanguage::Traits<TrialFunctionType>::SolutionType;
+
       using TrialFESType =
         typename FormLanguage::Traits<U>::FESType;
 
@@ -129,21 +132,15 @@ namespace Rodin::Variational
       Problem(U& u, V& v)
         : m_assembled(false),
           m_trialFunction(u), m_testFunction(v),
-          m_axb(LinearSystemType())
+          m_axb(LinearSystemType{})
       {}
 
-      constexpr
-      Problem(U& u, V& v, LinearSystemType& axb)
-        : m_assembled(false),
-          m_trialFunction(u), m_testFunction(v),
-          m_axb(std::ref(axb))
-      {}
-
+      template <class LinearSystemType>
       constexpr
       Problem(U& u, V& v, LinearSystemType&& axb)
         : m_assembled(false),
           m_trialFunction(u), m_testFunction(v),
-          m_axb(std::move(axb))
+          m_axb(std::forward<LinearSystemType>(axb))
       {}
 
       /**
@@ -182,6 +179,10 @@ namespace Rodin::Variational
 
       Problem& assemble() override
       {
+        using LinearFormType = LinearForm<TestFESType, VectorType>;
+        using BilinearFormType =
+          BilinearForm<SolutionType, TrialFESType, TestFESType, OperatorType>;
+
         auto& pb = m_pb;
         auto& u = getTrialFunction();
         auto& v = getTestFunction();
@@ -192,20 +193,20 @@ namespace Rodin::Variational
         auto& dbcs = pb.getDBCs();
         auto& pbcs = pb.getPBCs();
 
-        LinearForm lf(v, mass);
+        LinearFormType lf(v);
         for (auto& lfi : pb.getLFIs())
           lf.add(UnaryMinus(lfi)); // Negate every linear form integrator
         lf.assemble();
 
-        BilinearForm bf(u, v, stiffness);
+        BilinearFormType bf(u, v);
         for (auto& bfi : pb.getLocalBFIs())
           bf.add(bfi);
         for (auto& bfi : pb.getGlobalBFIs())
           bf.add(bfi);
-        for (auto& bf : bfs)
+        for (auto& _bf : bfs)
         {
-          bf.assemble();
-          Math::axpy(stiffness, 1.0, bf.getOperator());
+          _bf.assemble();
+          stiffness += _bf.getOperator();
         }
         bf.assemble();
 
@@ -282,16 +283,12 @@ namespace Rodin::Variational
 
       LinearSystemType& getLinearSystem() override
       {
-        auto& ref =
-          std::visit([](auto& m) -> LinearSystemType& { return m; }, m_axb);
-        return ref;
+        return m_axb;
       }
 
       const LinearSystemType& getLinearSystem() const override
       {
-        const auto& ref =
-          std::visit([](const auto& m) -> const LinearSystemType& { return m; }, m_axb);
-        return ref;
+        return m_axb;
       }
 
       Problem* copy() const noexcept override
@@ -304,7 +301,7 @@ namespace Rodin::Variational
       Boolean m_assembled;
       std::reference_wrapper<TrialFunctionType> m_trialFunction;
       std::reference_wrapper<TestFunctionType>  m_testFunction;
-      std::variant<std::reference_wrapper<LinearSystemType>, LinearSystemType> m_axb;
+      LinearSystemType m_axb;
 
       ProblemBody<OperatorType, VectorType, ScalarType> m_pb;
   };
@@ -678,16 +675,12 @@ namespace Rodin::Variational
 
       LinearSystemType& getLinearSystem() override
       {
-        auto& ref =
-          std::visit([](auto& m) -> LinearSystemType& { return m; }, m_axb);
-        return ref;
+        return m_axb;
       }
 
       const LinearSystemType& getLinearSystem() const override
       {
-        const auto& ref =
-          std::visit([](const auto& m) -> const LinearSystemType& { return m; }, m_axb);
-        return ref;
+        return m_axb;
       }
 
       Problem* copy() const noexcept override
@@ -716,7 +709,7 @@ namespace Rodin::Variational
       std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>>  m_bfa;
       std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>>      m_lfa;
 
-      std::variant<std::reference_wrapper<LinearSystemType>, LinearSystemType> m_axb;
+      LinearSystemType m_axb;
   };
 
   template <class U1, class U2, class ... Us>

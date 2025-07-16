@@ -187,13 +187,6 @@ namespace Rodin::Variational
         : GridFunctionBase(fes, DataType{})
       {}
 
-      template <class DataType>
-      GridFunctionBase(const FES& fes, DataType&& data)
-        : Parent(std::cref(*this)),
-          m_fes(fes),
-          m_data(std::forward<DataType>(data))
-      {}
-
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(std::cref(*this)),
           m_fes(other.m_fes),
@@ -253,8 +246,7 @@ namespace Rodin::Variational
       constexpr
       auto& getData()
       {
-        auto& ref = std::visit([](auto& m) -> DataType& { return m; }, m_data);
-        return ref;
+        return m_data;
       }
 
       /**
@@ -263,8 +255,7 @@ namespace Rodin::Variational
       constexpr
       const DataType& getData() const
       {
-        const auto& ref = std::visit([](const auto& m) -> const DataType& { return m; }, m_data);
-        return ref;
+        return m_data;
       }
 
       constexpr
@@ -943,7 +934,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const FESType> m_fes;
-      std::variant<std::reference_wrapper<DataType>, DataType> m_data;
+      DataType m_data;
   };
 
   template <class FES>

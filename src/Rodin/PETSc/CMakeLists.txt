@@ -16,7 +16,6 @@ set(RodinPETSc_HEADERS
   Assembly/MPI.h
   Assembly/Sequential.h
   Variational/GridFunction.h
-  FormLanguage/Traits.h
   )
 
 set(RodinPETSc_SRCS
@@ -24,6 +23,9 @@ set(RodinPETSc_SRCS
   IO/GridFunctionPrinter.cpp
   Solver/KSP.cpp
   Solver/CG.cpp
+  Assembly/MPI.cpp
+  Assembly/OpenMP.cpp
+  Assembly/Sequential.cpp
   Math/LinearSystem.cpp
   Math/Matrix.cpp
   Variational/GridFunction.cpp
@@ -48,4 +50,8 @@ target_link_libraries(RodinPETSc
   Rodin::Assembly
   Rodin::FormLanguage
   PETSc::PETSc)
+
+if (RODIN_USE_OPENMP)
+  target_link_libraries(RodinPETSc PUBLIC Rodin::OpenMP)
+endif()
 

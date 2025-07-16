@@ -15,7 +15,6 @@
 #include "Rodin/FormLanguage/Traits.h"
 
 #include "Rodin/Types.h"
-#include "Rodin/Array.h"
 
 namespace Rodin::Math
 {

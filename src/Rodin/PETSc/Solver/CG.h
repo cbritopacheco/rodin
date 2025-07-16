@@ -12,14 +12,14 @@ namespace Rodin::Solver
   /**
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * ::Mat and ::Vec.
+   * PETSc::Matrix and PETSc::Vector.
    */
   template <>
-  class CG<::Mat, ::Vec> final : public KSP
+  class CG<PETSc::Matrix, PETSc::Vector> final : public KSP
   {
   public:
-    using OperatorType = ::Mat;
-    using VectorType   = ::Vec;
+    using OperatorType = PETSc::Matrix;
+    using VectorType   = PETSc::Vector;
     using ScalarType   = PetscScalar;
     using ProblemType  = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
     using Parent       = KSP;
@@ -53,7 +53,8 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief Class template argument deduction for CG from ProblemBase.
    */
-  CG(Variational::ProblemBase<::Mat, ::Vec, PetscScalar>&) -> CG<::Mat, ::Vec>;
+  CG(Variational::ProblemBase<PETSc::Matrix, PETSc::Vector, PetscScalar>&)
+    -> CG<PETSc::Matrix, PETSc::Vector>;
 
 } // namespace Rodin::Solver
 

@@ -4,32 +4,32 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_PETSC_MATH_SYSTEM_H
-#define RODIN_PETSC_MATH_SYSTEM_H
+#ifndef RODIN_PETSC_MATH_LINEARSYSTEM_H
+#define RODIN_PETSC_MATH_LINEARSYSTEM_H
 
 #include <boost/mpi/communicator.hpp>
 #include <petsc.h>
-#include <utility>
 #include "Rodin/Math/LinearSystem.h"
+#include "Rodin/PETSc/Math/Matrix.h"
+#include "Rodin/PETSc/Math/Vector.h"
 
 namespace Rodin::Math
 {
   template <>
-  class LinearSystem<::Mat, ::Vec>
-    : public LinearSystemBase<::Mat, ::Vec, LinearSystem<::Mat, ::Vec>>
+  class LinearSystem<PETSc::Matrix, PETSc::Vector>
+    : public LinearSystemBase<PETSc::Matrix, PETSc::Vector, LinearSystem<PETSc::Matrix, PETSc::Vector>>
   {
     public:
-      using MatrixType = ::Mat;
+      using MatrixType =
+        PETSc::Matrix;
 
-      using VectorType = ::Vec;
+      using VectorType =
+        PETSc::Vector;
 
-      using Parent = LinearSystemBase<::Mat, ::Vec, LinearSystem<::Mat, ::Vec>>;
+      using Parent =
+        LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixType, VectorType>>;
 
       LinearSystem(const boost::mpi::communicator& comm);
-
-      LinearSystem(::Mat& stiffness, ::Vec& guess, ::Vec& mass);
-
-      LinearSystem(::Mat&& stiffness, ::Vec&& guess, ::Vec&& mass) noexcept;
 
       LinearSystem(const LinearSystem& other);
 
@@ -37,40 +37,29 @@ namespace Rodin::Math
 
       virtual ~LinearSystem();
 
+      LinearSystem& operator=(const LinearSystem& other);
+
+      LinearSystem& operator=(LinearSystem&& other) noexcept;
+
       template <class DOFScalar>
       LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
-        PetscErrorCode ierr;
-
-        ::Mat& A = this->getOperator();
-        ::Vec& b = this->getVector();
-        ::Vec& x = this->getSolution();
-
-        if (!x)
-        {
-          ierr = VecDuplicate(b, &x);
-          assert(ierr == PETSC_SUCCESS);
-          ierr = VecZeroEntries(x);
-          assert(ierr == PETSC_SUCCESS);
-        }
-
+        auto& A = this->getOperator();
+        auto& b = this->getVector();
+        auto& x = this->getSolution();
         std::vector<PetscInt> rows;
         rows.reserve(dofs.size());
         for (auto const& kv : dofs)
           rows.push_back(PetscInt(kv.first) + PetscInt(offset));
-
         for (auto const& kv : dofs)
         {
           const PetscInt  i   = PetscInt(kv.first) + PetscInt(offset);
-          const PetscReal ui  = PetscReal(kv.second);
-          VecSetValue(x, i, ui, INSERT_VALUES);
+          const auto& ui  = kv.second;
+          x.setValue(i, ui, INSERT_VALUES);
         }
-
-        VecAssemblyBegin(x);
-        VecAssemblyEnd(x);
-
-        MatZeroRowsColumns(A, rows.size(), rows.data(), 1.0, x, b);
-
+        x.assemblyBegin();
+        x.assemblyEnd();
+        A.zeroRowsColumns(rows.size(), rows.data(), 1.0, x, b);
         return *this;
       }
 
@@ -79,15 +68,55 @@ namespace Rodin::Math
           const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
       {
         throw "Unimplemented.";
-
         return *this;
       }
+
+      constexpr
+      MatrixType& getOperator()
+      {
+        return m_operator;
+      }
+
+      constexpr
+      const MatrixType& getOperator() const
+      {
+        return m_operator;
+      }
+
+      constexpr
+      VectorType& getVector()
+      {
+        return m_vector;
+      }
+
+      constexpr
+      const VectorType& getVector() const
+      {
+        return m_vector;
+      }
+
+      constexpr
+      VectorType& getSolution()
+      {
+        return m_solution;
+      }
+
+      constexpr
+      const VectorType& getSolution() const
+      {
+        return m_solution;
+      }
+
+    private:
+      MatrixType m_operator; ///< The operator of the linear system.
+      VectorType m_vector;   ///< The vector of the linear system.
+      VectorType m_solution; ///< The solution vector of the linear system.
   };
 }
 
 namespace Rodin::PETSc
 {
-  using LinearSystem = Math::LinearSystem<::Mat, ::Vec>;
+  using LinearSystem = Math::LinearSystem<PETSc::Matrix, PETSc::Vector>;
 }
 
 #endif

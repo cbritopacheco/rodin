@@ -1,52 +1,52 @@
-#include "LinearSystem.h"
 #include <petscsys.h>
+
+#include "LinearSystem.h"
 
 namespace Rodin::Math
 {
-  LinearSystem<::Mat, ::Vec>::LinearSystem(const boost::mpi::communicator& comm)
+  LinearSystem<PETSc::Matrix, PETSc::Vector>::LinearSystem(const boost::mpi::communicator& comm)
+    : m_operator(comm),
+      m_vector(comm),
+      m_solution(comm)
+  {}
+
+  LinearSystem<PETSc::Matrix, PETSc::Vector>::LinearSystem(const LinearSystem& other)
+    : Parent(other),
+      m_operator(other.m_operator),
+      m_vector(other.m_vector),
+      m_solution(other.m_solution)
+  {}
+
+  LinearSystem<PETSc::Matrix, PETSc::Vector>::LinearSystem(LinearSystem&& other) noexcept
+    : Parent(std::move(other)),
+      m_operator(std::move(other.m_operator)),
+      m_vector(std::move(other.m_vector)),
+      m_solution(std::move(other.m_solution))
+  {}
+
+  LinearSystem<PETSc::Matrix, PETSc::Vector>&
+  LinearSystem<PETSc::Matrix, PETSc::Vector>::operator=(const LinearSystem& other)
   {
-    PetscErrorCode ierr;
-    ierr = MatCreate(comm, &this->getOperator());
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecCreate(comm, &this->getVector());
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecCreate(comm, &this->getVector());
-    assert(ierr == PETSC_SUCCESS);
+    if (this != &other)
+    {
+      Parent::operator=(other);
+      m_operator = other.m_operator;
+      m_vector = other.m_vector;
+      m_solution = other.m_solution;
+    }
+    return *this;
   }
 
-  LinearSystem<::Mat, ::Vec>::LinearSystem(::Mat& a, ::Vec& x, ::Vec& b)
-    : Parent(a, x, b)
-  {}
-
-  LinearSystem<::Mat, ::Vec>::LinearSystem(::Mat&& a, ::Vec&& x, ::Vec&& b) noexcept
-    : Parent(std::exchange(a, nullptr), std::exchange(x, nullptr), std::exchange(b, nullptr))
-  {}
-
-  LinearSystem<::Mat, ::Vec>::LinearSystem(const LinearSystem& other)
-    : Parent(other)
-  {}
-
-  LinearSystem<::Mat, ::Vec>::LinearSystem(LinearSystem&& other) noexcept
-    : Parent(std::move(other))
-  {}
-
-  LinearSystem<::Mat, ::Vec>::~LinearSystem()
+  LinearSystem<PETSc::Matrix, PETSc::Vector>&
+  LinearSystem<PETSc::Matrix, PETSc::Vector>::operator=(LinearSystem&& other) noexcept
   {
-    PetscErrorCode ierr;
-    if (this->getOperator())
+    if (this != &other)
     {
-      ierr = MatDestroy(&this->getOperator());
-      assert(ierr == PETSC_SUCCESS);
+      Parent::operator=(std::move(other));
+      m_operator = std::move(other.m_operator);
+      m_vector = std::move(other.m_vector);
+      m_solution = std::move(other.m_solution);
     }
-    if (this->getVector())
-    {
-      ierr = VecDestroy(&this->getVector());
-      assert(ierr == PETSC_SUCCESS);
-    }
-    if (this->getSolution())
-    {
-      ierr = VecDestroy(&this->getSolution());
-      assert(ierr == PETSC_SUCCESS);
-    }
+    return *this;
   }
 }

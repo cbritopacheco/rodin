@@ -2,23 +2,26 @@
 #define RODIN_PETSC_ASSEMBLY_SEQUENTIAL_H
 
 #include <petsc.h>
-#include <type_traits>
 
 #include "Rodin/Assembly/AssemblyBase.h"
+#include "Rodin/Assembly/Sequential.h"
+
 #include "Rodin/Variational/LinearForm.h"
 #include "Rodin/Variational/BilinearForm.h"
-#include "Rodin/Assembly/Sequential.h"
+
+#include "Rodin/PETSc/Math/Vector.h"
+#include "Rodin/PETSc/Math/Matrix.h"
 
 namespace Rodin::Assembly
 {
   // Sequential assembly for PETSc Vec (linear form)
   template <class FES>
-  class Sequential<::Vec, Variational::LinearForm<FES, ::Vec>> final
-    : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
+  class Sequential<PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>> final
+    : public AssemblyBase<PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
-      using VectorType      = ::Vec;
+      using VectorType      = PETSc::Vector;
       using LinearFormType  = Variational::LinearForm<FES, VectorType>;
       using Parent          = AssemblyBase<VectorType, LinearFormType>;
       using InputType       = typename Parent::InputType;
@@ -27,18 +30,8 @@ namespace Rodin::Assembly
 
       void execute(VectorType& res, const InputType& input) const override
       {
-        PetscErrorCode ierr;
         const PetscInt n = PetscInt(input.getFES().getSize());
-
-        ierr = VecSetSizes(res, n, PETSC_DECIDE);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = VecSetFromOptions(res);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = VecZeroEntries(res);
-        assert(ierr == PETSC_SUCCESS);
-
+        res.setSizes(n, PETSC_DECIDE).setFromOptions().zeroEntries();
         const auto& mesh = input.getFES().getMesh();
         for (auto& lfi : input.getLFIs())
         {
@@ -53,18 +46,13 @@ namespace Rodin::Assembly
               for (PetscInt l = 0; l < PetscInt(dofs.size()); ++l)
               {
                 const PetscScalar v = PetscScalar(lfi.integrate(l));
-                ierr = VecSetValue(res, PetscInt(dofs[l]), v, ADD_VALUES);
-                assert(ierr == PETSC_SUCCESS);
+                res.setValue(PetscInt(dofs[l]), v, ADD_VALUES);
               }
             }
           }
         }
-
-        ierr = VecAssemblyBegin(res);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = VecAssemblyEnd(res);
-        assert(ierr == PETSC_SUCCESS);
+        res.assemblyBegin();
+        res.assemblyEnd();
       }
 
       Sequential* copy() const noexcept override
@@ -76,8 +64,8 @@ namespace Rodin::Assembly
 
   // Sequential assembly for PETSc Mat (bilinear form)
   template <class Solution, class TrialFES, class TestFES>
-  class Sequential<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
-    : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
+  class Sequential<PETSc::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix>> final
+    : public AssemblyBase<PETSc::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix>>
   {
 
     public:
@@ -85,7 +73,7 @@ namespace Rodin::Assembly
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
-      using OperatorType    = ::Mat;
+      using OperatorType    = PETSc::Matrix;
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
       using Parent           = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType        = typename Parent::InputType;
@@ -95,26 +83,15 @@ namespace Rodin::Assembly
         "FES ScalarTypes must yield PetscScalar for PETSc Mat assembly"
       );
 
-      void execute(OperatorType& A, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) const override
       {
-        PetscErrorCode ierr;
         const PetscInt m = PetscInt(input.getTestFES().getSize());
         const PetscInt n = PetscInt(input.getTrialFES().getSize());
-
-        ierr = MatSetSizes(A, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSeqAIJSetPreallocation(A, PETSC_DETERMINE, PETSC_NULLPTR);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetFromOptions(A);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatZeroEntries(A);
-        assert(ierr == PETSC_SUCCESS);
+        res.setSizes(m, n, PETSC_DETERMINE, PETSC_DETERMINE)
+           .SeqAIJ.setPreallocation(PETSC_DETERMINE, PETSC_NULLPTR)
+           .setFromOptions()
+           .setUp()
+           .zeroEntries();
 
         const auto& mesh = input.getTrialFES().getMesh();
         // Local contributions
@@ -137,8 +114,7 @@ namespace Rodin::Assembly
                 for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
                 {
                   const PetscScalar v = PetscScalar(bfi.integrate(j, i));
-                  ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
+                  res.setValue(rows[i], cols[j], v, ADD_VALUES);
                 }
               }
             }
@@ -167,20 +143,15 @@ namespace Rodin::Assembly
                     for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
                     {
                       const PetscScalar v = PetscScalar(bfi.integrate(j, i));
-                      ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
-                      assert(ierr == PETSC_SUCCESS);
+                      res.setValue(rows[i], cols[j], v, ADD_VALUES);
                     }
                 }
               }
             }
           }
         }
-
-        ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-        assert(ierr == PETSC_SUCCESS);
+        res.assemblyBegin(MAT_FINAL_ASSEMBLY);
+        res.assemblyEnd(MAT_FINAL_ASSEMBLY);
       }
 
       Sequential* copy() const noexcept override

@@ -1,122 +1,132 @@
 #ifndef RODIN_PETSC_MATH_VECTOR_H
 #define RODIN_PETSC_MATH_VECTOR_H
 
+#include <boost/mpi/communicator.hpp>
+
+#include <mpi.h>
+
 #include <petsc.h>
+#include <petscsys.h>
+#include <petscsystypes.h>
 
-#include "Rodin/Math/ForwardDecls.h"
-#include "Rodin/Math/Vector.h"
+#include "Rodin/FormLanguage/Traits.h"
 
-namespace Rodin::Math
+#include "Rodin/PETSc/Object.h"
+
+namespace Rodin::PETSc
 {
-  void duplicate(const ::Vec& src, ::Vec& dst);
-
-  template <class Scalar, int Size>
-  void duplicate(const ::Vec& src, Eigen::Vector<Scalar, Size>& dst)
+  class Vector : public Object
   {
-    PetscErrorCode ierr;
-    PetscInt sz;
-    ierr = VecGetLocalSize(src, &sz);
-    assert(ierr == PETSC_SUCCESS);
-    dst.resize(sz);
-  }
+    public:
+      using Parent = Object;
 
-  void copy(const ::Vec& src, ::Vec& dst);
+      class MPI
+      {
+        public:
+          constexpr
+          MPI(Vector& vec)
+            : m_vec(vec)
+          {}
 
-  template <class Scalar, int Size>
-  void copy(const ::Vec& src, Eigen::Vector<Scalar, Size>& dst)
+          Vector& setGhost(PetscInt nghost, const PetscInt ghosts[])
+          {
+            PetscErrorCode ierr;
+            ierr = VecMPISetGhost(m_vec.m_vec, nghost, ghosts);
+            assert(ierr == PETSC_SUCCESS);
+            return m_vec;
+          }
+
+        private:
+          Vector& m_vec; ///< Reference to the parent Vector object.
+      } MPI;
+
+      Vector(const boost::mpi::communicator& comm);
+
+      Vector(const Vector& other);
+
+      Vector(Vector&& other) noexcept;
+
+      virtual ~Vector() override;
+
+      Vector& operator=(const Vector& other);
+
+      Vector& operator=(Vector&& other) noexcept;
+
+      Vector& operator+=(const Vector& other);
+
+      Vector& operator-=(const Vector& other);
+
+      Vector& operator*=(const Vector& rhs);
+
+      Vector& operator/=(const Vector& rhs);
+
+      Vector& operator+=(const PetscScalar& other);
+
+      Vector& operator-=(const PetscScalar& other);
+
+      Vector& operator*=(const PetscScalar& rhs);
+
+      Vector& operator/=(const PetscScalar& rhs);
+
+      Vector& setType(const ::VecType& type);
+
+      Vector& setFromOptions();
+
+      Vector& setSizes(PetscInt localSize, PetscInt globalSize);
+
+      Vector& zeroEntries();
+
+      Vector& setValue(PetscInt idx, const PetscScalar& value, ::InsertMode mode);
+
+      Vector& assemblyBegin();
+
+      Vector& assemblyEnd();
+
+      Vector& axpy(const PetscScalar& alpha, const Vector& x);
+
+      Vector& aypx(const PetscScalar& beta, const Vector& x);
+
+      Vector& axpby(const PetscScalar& alpha, const PetscScalar& beta, const Vector& x);
+
+      Vector& waxpy(const PetscScalar& alpha, const Vector& x, const Vector& y);
+
+      Vector& axpbypcz(
+          const PetscScalar& alpha, const Vector& x,
+          const PetscScalar& beta, const Vector& y,
+          const PetscScalar& gamma);
+
+      const Vector& getArrayRead(const PetscScalar *a[]) const;
+
+      const Vector& restoreArrayRead(const PetscScalar *a[]) const;
+
+      Vector& getArrayWrite(PetscScalar *a[]);
+
+      Vector& restoreArrayWrite(PetscScalar *a[]);
+
+      Vector& ghostUpdateBegin(::InsertMode mode, ::ScatterMode scatterMode);
+
+      Vector& ghostUpdateEnd(::InsertMode mode, ::ScatterMode scatterMode);
+
+      const Vector& getLocalSize(PetscInt* size) const;
+
+      const Vector& getComm(MPI_Comm* comm) const noexcept;
+
+      ::PetscObject& getHandle() noexcept override;
+
+      const ::PetscObject& getHandle() const noexcept;
+
+    private:
+      ::Vec m_vec;
+  };
+}
+
+namespace Rodin::FormLanguage
+{
+  template <>
+  struct Traits<PETSc::Vector>
   {
-    PetscErrorCode ierr;
-    const PetscScalar* vec = nullptr;
-    ierr = VecGetArrayRead(src, &vec);
-    assert(ierr == PETSC_SUCCESS);
-    std::copy(vec, vec + dst.size(), dst.data());
-    ierr = VecRestoreArrayRead(src, &vec);
-    assert(ierr == PETSC_SUCCESS);
-  }
-
-  template <class Scalar, int Size>
-  void axpy(Eigen::Vector<Scalar, Size>& y, Scalar alpha, const ::Vec& x)
-  {
-    if (alpha == Scalar(0))
-      return;
-    PetscErrorCode ierr;
-    PetscInt sz;
-    ierr = VecGetLocalSize(x, &sz);
-    assert(ierr == PETSC_SUCCESS);
-    assert(y.size() == sz);
-    const PetscScalar* vec = nullptr;
-    ierr = VecGetArrayRead(x, &vec);
-    assert(ierr == PETSC_SUCCESS);
-    Eigen::Map<const Eigen::Vector<PetscScalar, Size>, Eigen::Unaligned> xm(vec, sz);
-    if constexpr (std::is_same_v<Scalar, PetscScalar>)
-      y.noalias() += alpha * xm;
-    else
-      y.noalias() += alpha * xm.template cast<Scalar>();
-    ierr = VecRestoreArrayRead(x, &vec);
-    assert(ierr == PETSC_SUCCESS);
-  }
-
-  template <class Scalar>
-  void axpy(::Vec& y, Scalar alpha, const ::Vec& x)
-  {
-    PetscErrorCode ierr;
-    ierr = VecAXPY(y, alpha, x);
-    assert(ierr == PETSC_SUCCESS);
-  }
-
-  template <class Scalar, int Rows, int Cols, int Options>
-  void duplicate(const ::Mat& src, Eigen::Matrix<Scalar, Rows, Cols, Options>& dst)
-  {
-    PetscErrorCode ierr;
-    PetscInt rows, cols;
-    ierr = MatGetLocalSize(src, &rows, &cols);
-    assert(ierr == PETSC_SUCCESS);
-    dst.resize(rows, cols);
-  }
-
-  template <class Scalar>
-  void duplicate(const ::Mat& src, Math::SparseMatrix<Scalar>& dst)
-  {
-    PetscErrorCode ierr;
-    PetscInt       rows, cols;
-    ierr = MatGetLocalSize(src, &rows, &cols);
-    assert(ierr == PETSC_SUCCESS);
-    dst.resize(static_cast<int>(rows), static_cast<int>(cols));
-    for (PetscInt i = 0; i < rows; ++i)
-    {
-      PetscInt           nnz;
-      const PetscInt    *colsIdx = nullptr;
-      const PetscScalar *unused  = nullptr;
-      ierr = MatGetRow(src, i, &nnz, &colsIdx, &unused);
-      assert(ierr == PETSC_SUCCESS);
-      for (PetscInt k = 0; k < nnz; ++k)
-        dst.insert(i, colsIdx[k]) = Scalar(0);
-      ierr = MatRestoreRow(src, i, &nnz, &colsIdx, &unused);
-      assert(ierr == PETSC_SUCCESS);
-    }
-    dst.makeCompressed();
-  }
-
-  template <class Scalar>
-  void copy(const ::Mat& src, Math::SparseMatrix<Scalar>& dst)
-  {
-    PetscErrorCode ierr;
-    PetscInt       rows, cols;
-    ierr = MatGetLocalSize(src, &rows, &cols);
-    assert(ierr == PETSC_SUCCESS);
-    for (PetscInt i = 0; i < rows; ++i)
-    {
-      PetscInt           nnz;
-      const PetscInt    *colsIdx = nullptr;
-      const PetscScalar *vals    = nullptr;
-      ierr = MatGetRow(src, i, &nnz, &colsIdx, &vals);
-      assert(ierr == PETSC_SUCCESS);
-      for (PetscInt k = 0; k < nnz; ++k)
-        dst.coeffRef(i, colsIdx[k]) = static_cast<Scalar>(vals[k]);
-      ierr = MatRestoreRow(src, i, &nnz, &colsIdx, &vals);
-      assert(ierr == PETSC_SUCCESS);
-    }
-  }
+    using ScalarType = PetscScalar;
+  };
 }
 
 #endif

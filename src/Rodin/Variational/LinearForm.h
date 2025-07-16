@@ -35,26 +35,18 @@ namespace Rodin::Variational
        * @brief Constructs a linear form with a default constructed vector
        * which is owned by the LinearFormBase instance.
        */
-      LinearFormBase()
-        : LinearFormBase(VectorType{})
-      {}
+      constexpr
+      LinearFormBase() = default;
 
-      /**
-       * @brief Constructs a linear form with reference to vector which is not
-       * owned by the LinearFormBase instance.
-       */
-      template <class T, class = std::enable_if_t<std::is_same_v<std::decay_t<T>, VectorType>>>
-      LinearFormBase(T&& vec)
-        : m_vector(std::forward<VectorType>(vec))
-      {}
-
+      constexpr
       LinearFormBase(const LinearFormBase& other)
-        : FormLanguage::Base(other),
+        : Parent(other),
           m_vector(other.m_vector)
       {}
 
+      constexpr
       LinearFormBase(LinearFormBase&& other)
-        : FormLanguage::Base(std::move(other)),
+        : Parent(std::move(other)),
           m_vector(std::move(other.m_vector))
       {}
 
@@ -64,8 +56,7 @@ namespace Rodin::Variational
        */
       VectorType& getVector()
       {
-        auto& ref = std::visit([](auto& m) -> VectorType& { return m; }, m_vector);
-        return ref;
+        return m_vector;
       }
 
       /**
@@ -74,8 +65,7 @@ namespace Rodin::Variational
        */
       const VectorType& getVector() const
       {
-        const auto& ref = std::visit([](const auto& m) -> const VectorType& { return m; }, m_vector);
-        return ref;
+        return m_vector;
       }
 
       /**
@@ -97,7 +87,7 @@ namespace Rodin::Variational
       virtual LinearFormBase* copy() const noexcept override = 0;
 
     private:
-      std::variant<std::reference_wrapper<VectorType>, VectorType> m_vector;
+      VectorType m_vector;
   };
 
   /**
@@ -144,23 +134,9 @@ namespace Rodin::Variational
        */
       constexpr
       LinearForm(const TestFunction<FES>& v)
-        : LinearForm(v, VectorType{})
+        : m_v(v),
+          m_assembly(new DefaultAssembly)
       {}
-
-      /**
-       * @brief Constructs a LinearForm with a reference to a TestFunction and
-       * an non-owned vector.
-       * @param[in] v Reference to a TestFunction
-       * @param[in] vec Reference to a vector
-       */
-      template <class VectorType>
-      constexpr
-      LinearForm(const TestFunction<FES>& v, VectorType&& vec)
-        : Parent(std::forward<VectorType>(vec)),
-          m_v(v)
-      {
-        m_assembly.reset(new DefaultAssembly);
-      }
 
       constexpr
       LinearForm(const LinearForm& other)
@@ -308,21 +284,6 @@ namespace Rodin::Variational
   template <class FES>
   LinearForm(const TestFunction<FES>& v)
     -> LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for LinearForm.
-   * @param[in] v Reference to a TestFunction
-   * @param[in] vec Vector which will be owned by the LinearForm
-   *
-   * The constructor taking a TestFunction reference and a vector r-value
-   * reference deduces a LinearForm with a Vector value which is owned by
-   * the LinearForm instance.
-   */
-  template <class FES, class Vector>
-  LinearForm(const TestFunction<FES>& v, Vector&& vec) -> LinearForm<FES, Vector>;
 }
-
-#include "LinearForm.hpp"
 
 #endif

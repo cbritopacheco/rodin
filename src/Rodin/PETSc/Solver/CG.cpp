@@ -2,17 +2,17 @@
 
 namespace Rodin::Solver
 {
-  CG<::Mat, ::Vec>::CG(ProblemType& pb)
+  CG<PETSc::Matrix, PETSc::Vector>::CG(ProblemType& pb)
     : Parent(pb)
   {
     setType(KSPCG);
   }
 
-  CG<::Mat, ::Vec>::CG(const CG& other)
+  CG<PETSc::Matrix, PETSc::Vector>::CG(const CG& other)
     : Parent(other)
   {}
 
-  CG<::Mat, ::Vec>::CG(CG&& other)
+  CG<PETSc::Matrix, PETSc::Vector>::CG(CG&& other)
     : Parent(std::move(other))
   {}
 }

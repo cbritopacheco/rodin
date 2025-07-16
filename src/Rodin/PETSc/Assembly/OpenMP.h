@@ -24,8 +24,8 @@ namespace Rodin::Assembly
    */
   template <class FES>
   class OpenMP<
-    ::Vec, Variational::LinearForm<FES, ::Vec>> final
-    : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
+    PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>> final
+    : public AssemblyBase<PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
@@ -33,7 +33,7 @@ namespace Rodin::Assembly
         std::is_same_v<ScalarType, PetscScalar>,
         "FES::ScalarType must be PetscScalar for PETSc Vec assembly"
       );
-      using VectorType     = ::Vec;
+      using VectorType     = PETSc::Vector;
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
       using Parent         = AssemblyBase<VectorType, LinearFormType>;
       using InputType      = typename Parent::InputType;

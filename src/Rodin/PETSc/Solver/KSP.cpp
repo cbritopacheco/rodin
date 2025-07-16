@@ -7,10 +7,9 @@
 #include <cassert>
 #include <petsc.h>
 
-#include "Rodin/PETSc/Math/LinearSystem.h"
-#include "Rodin/PETSc/FormLanguage/Traits.h"
-
 #include "Rodin/Variational/Problem.h"
+
+#include "Rodin/PETSc/Math/LinearSystem.h"
 
 #include "KSP.h"
 
@@ -23,13 +22,13 @@ namespace Rodin::Solver
       m_rtol(PETSC_DECIDE),
       m_abstol(PETSC_DECIDE),
       m_dtol(PETSC_DECIDE),
-      m_maxIt(PETSC_DECIDE),
-      m_preconditioner(PETSC_NULLPTR)
+      m_maxIt(PETSC_DECIDE)
   {
     PetscErrorCode ierr;
     MPI_Comm comm;
     ierr = PetscObjectGetComm(
-        reinterpret_cast<PetscObject>(pb.getLinearSystem().getOperator()), &comm);
+        reinterpret_cast<PetscObject>(
+          pb.getLinearSystem().getOperator().getHandle()), &comm);
     ierr = KSPCreate(comm, &m_ksp);
     assert(ierr == PETSC_SUCCESS);
   }
@@ -40,7 +39,7 @@ namespace Rodin::Solver
     {
       PetscErrorCode ierr = KSPDestroy(&m_ksp);
       assert(ierr == PETSC_SUCCESS);
-      m_ksp = nullptr;
+      m_ksp = PETSC_NULLPTR;
     }
   }
 
@@ -53,21 +52,9 @@ namespace Rodin::Solver
   {
     PetscErrorCode ierr;
 
-    if (x)
-    {
-      // use nonzero initial guess
-      ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
-      assert(ierr == PETSC_SUCCESS);
-    }
-    else
-    {
-      ierr = VecDuplicate(b, &x);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = VecZeroEntries(x);
-      assert(ierr == PETSC_SUCCESS);
-    }
-
-    assert(x);
+    // use nonzero initial guess
+    ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
+    assert(ierr == PETSC_SUCCESS);
 
     // configure solver
     ierr = KSPSetType(m_ksp, m_type);
@@ -78,17 +65,29 @@ namespace Rodin::Solver
 
     // set operators (use A as both if P not set)
     if (m_preconditioner)
-      ierr = KSPSetOperators(m_ksp, A, m_preconditioner);
+    {
+      ierr = KSPSetOperators(
+          m_ksp,
+          reinterpret_cast<::Mat>(A.getHandle()),
+          reinterpret_cast<::Mat>(m_preconditioner->getHandle()));
+    }
     else
-      ierr = KSPSetOperators(m_ksp, A, A);
-    assert(ierr == PETSC_SUCCESS);
+    {
+      ierr = KSPSetOperators(
+          m_ksp,
+          reinterpret_cast<::Mat>(A.getHandle()),
+          reinterpret_cast<::Mat>(A.getHandle()));
+      assert(ierr == PETSC_SUCCESS);
+    }
 
     // allow CLI overrides
     ierr = KSPSetFromOptions(m_ksp);
     assert(ierr == PETSC_SUCCESS);
 
     // solve
-    ierr = KSPSolve(m_ksp, b, x);
+    ierr = KSPSolve(m_ksp,
+        reinterpret_cast<::Vec>(b.getHandle()),
+        reinterpret_cast<::Vec>(x.getHandle()));
     assert(ierr == PETSC_SUCCESS);
   }
 
