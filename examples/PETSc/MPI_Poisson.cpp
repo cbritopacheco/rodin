@@ -1,3 +1,4 @@
+#include "Rodin/Variational/ForwardDecls.h"
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 
@@ -19,6 +20,7 @@ using namespace Rodin::Variational;
 
 int main(int argc, char** argv)
 {
+  sleep(5);
   mpi::environment env(argc, argv);
   mpi::communicator world;
   Context::MPI mpi(env, world);
@@ -34,26 +36,66 @@ int main(int argc, char** argv)
     Geometry::LocalMesh mesh;
     mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 2);
+    mesh.getConnectivity().compute(1, 2);
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
     sharder.shard(partitioner).scatter(0);
   }
 
-  std::cout << "Gather\n";
+  // std::cout << "Gather\n";
   auto mesh = sharder.gather(0);
-  mesh.getShard().getConnectivity().compute(1, 2);
-  std::cout << "Vertex count: " << mesh.getVertexCount() << "\n";
-  std::cout << "Local count: " << mesh.getShard().getVertexCount() << "\n";
+  // mesh.getShard().getConnectivity().compute(1, 2);
+  // std::cout << "Vertex count: " << mesh.getVertexCount() << "\n";
+  // std::cout << "Shard: " << world.rank() <<  " Local count: "
+  // << mesh.getShard().getVertexCount() << "\n";
 
-  P1 vh(mesh);
+  auto& shard = mesh.getShard();
+
+  mesh.getShard().save(
+      "Gathered" + std::to_string(world.rank()) + ".mesh",
+      IO::FileFormat::MEDIT);
+  // print polytope map
+  for (size_t d = 0; d < mesh.getDimension(); ++d)
+  {
+    std::cout << "Dimension: " << d << "\n";
+    const auto& map = shard.getPolytopeMap(d);
+    for (const auto& [local, global] : map.left)
+    {
+      std::cout << "Local: " << local << ", Global: " << global << "\n";
+    }
+  }
+
+  // Print halo
+  if (world.rank() == 0)
+  {
+    std::cout << "Halo information:\n";
+    for (size_t d = 0; d <= mesh.getDimension(); ++d)
+    {
+      std::cout << "Dimension: " << d << "\n";
+      for (Index i = 0; i < shard.getPolytopeCount(d); ++i)
+      {
+          std::cout << "Owned polytope: " << i << "\n";
+          const auto& halo = shard.getHalo(d, i);
+          std::cout << "Halo: ";
+          for (const auto& h : halo)
+          {
+            std::cout << h << " ";
+          }
+          std::cout << "\n";
+        }
+    }
+  }
+
+  // P1 vh(mesh);
+  // PETSc::GridFunction gf(vh);
 
   // Define problem
-  PETSc::TrialFunction u(vh);
-  PETSc::TestFunction  v(vh);
+  // PETSc::TrialFunction u(vh);
+  // PETSc::TestFunction  v(vh);
 
-  ScalarFunction f = 1;
+  // ScalarFunction f = 1;
 
-  PETSc::Problem poisson(u, v);
+  // PETSc::Problem poisson(u, v);
   // poisson = Integral(Grad(u), Grad(v))
   //         - Integral(f, v)
   //         + DirichletBC(u, Zero());

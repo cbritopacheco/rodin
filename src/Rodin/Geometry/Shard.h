@@ -148,7 +148,7 @@ namespace Rodin::Geometry
 
       bool isOwned(size_t d, Index idx) const;
 
-      IndexSet getHalo(size_t d, Index idx) const;
+      const IndexSet& getHalo(size_t d, Index idx) const;
 
       Index getOwner(size_t d, Index idx) const;
 
@@ -160,6 +160,7 @@ namespace Rodin::Geometry
         ar & boost::serialization::base_object<Mesh<Context>>(*this);
         ar & m_s2ps;
         ar & m_ownership;
+        ar & m_halo;
       }
 
       const auto& getOwnership(size_t d) const

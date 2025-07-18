@@ -204,7 +204,7 @@ namespace Rodin::Geometry
     return m_s2ps[d];
   }
 
-  IndexSet Shard::getHalo(size_t d, Index idx) const
+  const IndexSet& Shard::getHalo(size_t d, Index idx) const
   {
     return m_halo[d][idx];
   }

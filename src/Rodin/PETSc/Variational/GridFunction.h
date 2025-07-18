@@ -26,7 +26,7 @@
 namespace Rodin::Variational
 {
   template <class FES>
-  class GridFunction<FES, PETSc::Vector> final
+  class GridFunction<FES, PETSc::Vector>
     : public GridFunctionBase<GridFunction<FES, PETSc::Vector>>
   {
     enum class State
@@ -406,7 +406,17 @@ namespace Rodin::Variational
 namespace Rodin::PETSc
 {
   template <class FES>
-  using GridFunction = Variational::GridFunction<FES, PETSc::Vector>;
+  class GridFunction : public Variational::GridFunction<FES, PETSc::Vector>
+  {
+    public:
+      using FESType = FES;
+      using DataType = PETSc::Vector;
+      using Parent = Variational::GridFunction<FESType, DataType>;
+      using Parent::Parent;
+  };
+
+  template <class FES>
+  GridFunction(const FES& fes) -> GridFunction<FES>;
 }
 
 #endif
