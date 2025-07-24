@@ -1,4 +1,5 @@
 #include <boost/multi_array.hpp>
+#include <cassert>
 
 #include "Sharder.h"
 
@@ -23,19 +24,22 @@ namespace Rodin::Geometry
     assert(m_context.getCommunicator().size() >= 0);
     assert(partitioner.getCount() == static_cast<size_t>(m_context.getCommunicator().size()));
     assert(numShards > 0);
-
     std::vector<Shard::Builder> sbs(numShards);
     for (auto& sb : sbs)
       sb.initialize(mesh);
+    std::vector<std::vector<Index>> owner(cellDim + 1);     // Owner of each polytope
+    std::vector<std::vector<Index>> local(cellDim + 1);     // Owning shard index for each polytope
+    std::vector<std::vector<IndexSet>> halo(cellDim + 1);   // Halo information for each polytope
+    std::vector<std::vector<uint8_t>> visited(cellDim + 1); // Visited polytopes
 
-    // Determine ownership of polytopes
-    std::vector<std::vector<Index>> owner(cellDim + 1);
-    std::vector<std::vector<uint8_t>> owned(cellDim + 1);
     for (size_t d = 0; d < cellDim + 1; d++)
     {
       owner[d].resize(mesh.getPolytopeCount(d));
-      owned[d].resize(mesh.getPolytopeCount(d), false);
+      local[d].resize(mesh.getPolytopeCount(d));
+      halo[d].resize(mesh.getPolytopeCount(d));
+      visited[d].resize(mesh.getPolytopeCount(d), false);
     }
+
     for (Index cellIdx = 0; cellIdx < mesh.getCellCount(); cellIdx++)
     {
       const size_t partition = partitioner.getPartition(cellIdx);
@@ -44,31 +48,35 @@ namespace Rodin::Geometry
         const auto& inc = conn.getIncidence(cellDim, d);
         if (inc.empty())
           continue;
-        for (const Index idx : inc.at(cellIdx))
+        for (const Index& idx : inc.at(cellIdx))
         {
-          if (owned[d][idx])
+          if (visited[d][idx])
           {
-            sbs[partition].include(d, idx, { owner[d][idx], Shard::Flags::None }, partition);
+            sbs[partition].include({ d, idx }, Shard::Flags::None);
+            halo[d][idx].insert(partition);
           }
           else
           {
-            sbs[partition].include(d, idx, { partition, Shard::Flags::Owned }, partition);
+            const auto [localIdx, inserted] = sbs[partition].include({ d, idx }, Shard::Flags::Owned);
+            assert(inserted);
             owner[d][idx] = partition;
-            owned[d][idx] = true;
+            local[d][idx] = localIdx;
+            visited[d][idx] = true;
           }
         }
       }
-      assert(!owned[cellDim][cellIdx]);
-      sbs[partition].include(cellDim, cellIdx, { partition, Shard::Flags::Owned }, partition);
+      assert(!visited[cellDim][cellIdx]);
+      const auto [localIdx, inserted] = sbs[partition].include({ cellDim, cellIdx }, Shard::Flags::Owned);
+      assert(inserted);
       owner[cellDim][cellIdx] = partition;
-      owned[cellDim][cellIdx] = true;
+      local[cellDim][cellIdx] = localIdx;
+      visited[cellDim][cellIdx] = true;
     }
 
-    // Determine ghost polytopes
     for (Index cellIdx = 0; cellIdx < mesh.getCellCount(); cellIdx++)
     {
       const size_t partition = partitioner.getPartition(cellIdx);
-      for (const Index nbr : conn.getIncidence({ cellDim, cellDim }, cellIdx))
+      for (const Index& nbr : conn.getIncidence({ cellDim, cellDim }, cellIdx))
       {
         if (partition == partitioner.getPartition(nbr))
           continue;
@@ -81,10 +89,25 @@ namespace Rodin::Geometry
           {
             auto find = sbs[partition].getPolytopeMap(d).right.find(idx);
             if (find == sbs[partition].getPolytopeMap(d).right.end())
-              sbs[partition].include(d, idx, { owner[d][idx], Shard::Flags::Ghost }, partition);
+            {
+              sbs[partition].include({ d, idx }, Shard::Flags::Ghost);
+              halo[d][idx].insert(partition);
+            }
           }
         }
-        sbs[partition].include(cellDim, nbr, { owner[cellDim][cellIdx], Shard::Flags::Ghost }, partition);
+        sbs[partition].include({ cellDim, nbr }, Shard::Flags::Ghost);
+        halo[cellDim][nbr].insert(partition);
+      }
+    }
+
+    // Now move the ownership and halo information into the shards
+    for (size_t d = 0; d < cellDim + 1; d++)
+    {
+      for (size_t i = 0; i < mesh.getPolytopeCount(d); i++)
+      {
+        for (const Index& h : halo[d][i])
+          sbs[h].getOwner(d).insert({ local[d][i], owner[d][i] });
+        sbs[owner[d][i]].getHalo(d).insert({ local[d][i], std::move(halo[d][i]) });
       }
     }
 

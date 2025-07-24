@@ -66,25 +66,25 @@ int main(int argc, char** argv)
   }
 
   // Print halo
-  if (world.rank() == 0)
-  {
-    std::cout << "Halo information:\n";
-    for (size_t d = 0; d <= mesh.getDimension(); ++d)
-    {
-      std::cout << "Dimension: " << d << "\n";
-      for (Index i = 0; i < shard.getPolytopeCount(d); ++i)
-      {
-          std::cout << "Owned polytope: " << i << "\n";
-          const auto& halo = shard.getHalo(d, i);
-          std::cout << "Halo: ";
-          for (const auto& h : halo)
-          {
-            std::cout << h << " ";
-          }
-          std::cout << "\n";
-        }
-    }
-  }
+  // if (world.rank() == 0)
+  // {
+  //   std::cout << "Halo information:\n";
+  //   for (size_t d = 0; d <= mesh.getDimension(); ++d)
+  //   {
+  //     std::cout << "Dimension: " << d << "\n";
+  //     for (Index i = 0; i < shard.getPolytopeCount(d); ++i)
+  //     {
+  //         std::cout << "Owned polytope: " << i << "\n";
+  //         const auto& halo = shard.getHalo(d, i);
+  //         std::cout << "Halo: ";
+  //         for (const auto& h : halo)
+  //         {
+  //           std::cout << h << " ";
+  //         }
+  //         std::cout << "\n";
+  //       }
+  //   }
+  // }
 
   // P1 vh(mesh);
   // PETSc::GridFunction gf(vh);

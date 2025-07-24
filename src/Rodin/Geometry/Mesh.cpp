@@ -502,52 +502,6 @@ namespace Rodin::Geometry
     return totalMeasure;
   }
 
-  CCL Mesh<Context::Local>::ccl(
-      std::function<bool(const Polytope&, const Polytope&)> p,
-      size_t d,
-      const FlatSet<Attribute>& attrs) const
-  {
-    FlatSet<Index> visited;
-    visited.reserve(getPolytopeCount(d));
-    std::deque<Index> searchQueue;
-    std::deque<FlatSet<Index>> res;
-
-    // Perform the labelling
-    for (auto it = getPolytope(d); it; ++it)
-    {
-      const Index i = it->getIndex();
-      if (!visited.count(i))
-      {
-        if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-        {
-          res.push_back({});
-          searchQueue.push_back(i);
-        }
-        while (searchQueue.size() > 0)
-        {
-          const Index idx = searchQueue.back();
-          auto el = getPolytope(d, idx);
-          searchQueue.pop_back();
-          auto result = visited.insert(idx);
-          const Boolean inserted = result.second;
-          if (inserted)
-          {
-            res.back().insert(idx);
-            for (auto adj = el->getAdjacent(); adj; ++adj)
-            {
-              if (p(*el, *adj))
-              {
-                if (attrs.size() == 0 || attrs.count(adj->getAttribute()))
-                  searchQueue.push_back(adj->getIndex());
-              }
-            }
-          }
-        }
-      }
-    }
-    return res;
-  }
-
   size_t Mesh<Context::Local>::getPolytopeCount(size_t dimension) const
   {
     return m_connectivity.getCount(dimension);

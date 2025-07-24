@@ -53,10 +53,11 @@ namespace Rodin::Examples::BoundaryOptimization
     const size_t per = mesh.getPerimeter();
     const size_t D = mesh.getDimension();
     auto ccl = mesh.ccl(
+        D - 1,
         [](const Geometry::Polytope& p1, const Geometry::Polytope& p2)
         {
           return p1.getAttribute() == p2.getAttribute();
-        }, D - 1, attrs );
+        }, attrs);
     size_t ccs = ccl.getCount();
 
     for (const auto& cc : ccl)

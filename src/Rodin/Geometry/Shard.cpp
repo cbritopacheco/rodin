@@ -1,4 +1,6 @@
 #include "Shard.h"
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
 
 namespace Rodin::Geometry
 {
@@ -25,21 +27,48 @@ namespace Rodin::Geometry
     m_parent = parent;
     m_build.initialize(sdim);
     m_s2ps.resize(dim + 1);
-    m_ownership.resize(dim + 1);
+    m_flags.resize(dim + 1);
+    m_owner.resize(dim + 1);
     m_halo.resize(dim + 1);
     m_sidx.resize(dim + 1, 0);
     return *this;
   }
 
-  Shard::Builder& Shard::Builder::include(size_t d, Index parentIdx, const Ownership& ownership, const Index& halo)
+  FlatMap<Index, Index>& Shard::Builder::getOwner(size_t d)
   {
-    auto& build = m_build;
+    assert(d < m_owner.size());
+    return m_owner[d];
+  }
+
+  FlatMap<Index, IndexSet>& Shard::Builder::getHalo(size_t d)
+  {
+    assert(d < m_halo.size());
+    return m_halo[d];
+  }
+
+  const FlatMap<Index, Index>& Shard::Builder::getOwner(size_t d) const
+  {
+    assert(d < m_owner.size());
+    return m_owner[d];
+  }
+
+  const FlatMap<Index, IndexSet>& Shard::Builder::getHalo(size_t d) const
+  {
+    assert(d < m_halo.size());
+    return m_halo[d];
+  }
+
+  std::pair<Index, Boolean> Shard::Builder::include(const std::pair<size_t, Index>& p, const Flags& flags)
+  {
+    const auto& [d, parentIdx] = p;
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();
     const auto& conn = parent.getConnectivity();
     const auto& parentPolytope = conn.getPolytope(d, parentIdx);
-    IndexArray childPolytope(parentPolytope.size());
-    assert(childPolytope.size() >= 0);
+    auto& build = m_build;
+
+    std::pair<Index, Boolean> res;
+
     if (d == 0)
     {
       const Index childIdx = m_sidx[0];
@@ -47,75 +76,46 @@ namespace Rodin::Geometry
       if (inserted) // Vertex was not already in the map
       {
         build.attribute({ 0, childIdx }, parent.getAttribute(0, parentIdx));
-        m_ownership[0].push_back(ownership);
-        if (ownership.owner == halo)
-          m_halo[0].emplace_back();
-        else
-          m_halo[0].push_back(IndexSet{ halo });
+        m_flags[0].push_back(flags);
         m_sidx[0] += 1;
       }
-      else
-      {
-        build.attribute({ 0, it->get_left() }, parent.getAttribute(0, parentIdx));
-        if (ownership.owner != halo)
-          m_halo[0][it->get_left()].insert(halo);
-      }
+      res = { it->get_left(), inserted };
     }
     else
     {
       const Index childIdx = m_sidx[d];
       const auto [it, inserted] = m_s2ps[d].right.insert({ parentIdx, childIdx });
-
+      assert(parentPolytope.size());
+      IndexArray childPolytope(parentPolytope.size());
       // Add polytope information
       if (inserted) // Polytope was not already in the map
       {
         build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
-        m_ownership[d].push_back(ownership);
-        if (ownership.owner == halo)
-          m_halo[d].emplace_back();
-        else
-          m_halo[d].push_back(IndexSet{ halo });
+        m_flags[d].push_back(flags);
         m_sidx[d] += 1;
-
         for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
         {
           const Index parentVertex = parentPolytope.coeff(i);
-          const Index childVertex = m_sidx[0];
-          const auto [itVertex, insertedVertex] = m_s2ps[0].right.insert({ parentVertex, childVertex });
-          if (insertedVertex) // Vertex was not already in the map
+          const auto find = m_s2ps[0].right.find(parentVertex);
+          if (find != m_s2ps[0].right.end()) // Vertex is in the map
           {
-            childPolytope.coeffRef(i) = childVertex;
-            build.attribute({ 0, childVertex }, parent.getAttribute(0, parentVertex));
-            m_ownership[0].push_back(ownership);
-            if (ownership.owner == halo)
-              m_halo[0].emplace_back();
-            else
-              m_halo[0].push_back(IndexSet{ halo });
-            m_sidx[0] += 1;
+            childPolytope.coeffRef(i) = find->get_left();
           }
-          else // Vertex was already in the map
+          else // Vertex is not in the map
           {
-            childPolytope.coeffRef(i) = itVertex->get_left();
-            build.attribute({ 0, itVertex->get_left() }, parent.getAttribute(0, parentVertex));
-            if (ownership.owner != halo)
-              m_halo[0][itVertex->get_left()].insert(halo);
+            Alert::MemberFunctionException(*this, __func__)
+              << "Vertex " << parentVertex << " of polytope " << parentIdx
+              << " of dimension " << d << " is not in the map."
+              << Alert::Raise;
           }
         }
-
         // Add polytope with original geometry and new vertex ordering
         build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
       }
-      else
-      {
-        build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
-        if (ownership.owner != halo)
-          m_halo[d][it->get_left()].insert(halo);
-      }
+      res = { it->get_left(), inserted };
     }
-
     m_dimension = std::max(m_dimension, d);
-
-    return *this;
+    return res;
   }
 
   Shard Shard::Builder::finalize()
@@ -156,7 +156,8 @@ namespace Rodin::Geometry
     Shard res;
     res.Parent::operator=(m_build.finalize());
     res.m_s2ps = std::move(m_s2ps);
-    res.m_ownership = std::move(m_ownership);
+    res.m_flags = std::move(m_flags);
+    res.m_owner = std::move(m_owner);
     res.m_halo = std::move(m_halo);
     return res;
   }
@@ -164,14 +165,16 @@ namespace Rodin::Geometry
   Shard::Shard(const Shard& other)
     : Parent(other),
       m_s2ps(other.m_s2ps),
-      m_ownership(other.m_ownership),
+      m_flags(other.m_flags),
+      m_owner(other.m_owner),
       m_halo(other.m_halo)
   {}
 
   Shard::Shard(Shard&& other)
     : Parent(std::move(other)),
       m_s2ps(std::move(other.m_s2ps)),
-      m_ownership(std::move(other.m_ownership)),
+      m_flags(std::move(other.m_flags)),
+      m_owner(std::move(other.m_owner)),
       m_halo(std::move(other.m_halo))
   {}
 
@@ -179,34 +182,37 @@ namespace Rodin::Geometry
   {
     Parent::operator=(std::move(other));
     m_s2ps = std::move(other.m_s2ps);
-    m_ownership = std::move(other.m_ownership);
+    m_flags = std::move(other.m_flags);
+    m_owner = std::move(other.m_owner);
     m_halo = std::move(other.m_halo);
     return *this;
   }
 
   bool Shard::isGhost(size_t d, Index idx) const
   {
-    return m_ownership[d][idx].flags & Shard::Flags::Ghost;
+    return m_flags[d][idx] & Shard::Flags::Ghost;
   }
 
   bool Shard::isOwned(size_t d, Index idx) const
   {
-    return m_ownership[d][idx].flags & Shard::Flags::Owned;
+    return m_flags[d][idx] & Shard::Flags::Owned;
   }
 
-  Index Shard::getOwner(size_t d, Index idx) const
+  const FlatMap<Index, Index>& Shard::getOwner(size_t d) const
   {
-    return m_ownership[d][idx].owner;
+    assert(d < m_owner.size());
+    return m_owner[d];
+  }
+
+  const FlatMap<Index, IndexSet>& Shard::getHalo(size_t d) const
+  {
+    assert(d < m_halo.size());
+    return m_halo[d];
   }
 
   const Shard::PolytopeMap& Shard::getPolytopeMap(size_t d) const
   {
     return m_s2ps[d];
-  }
-
-  const IndexSet& Shard::getHalo(size_t d, Index idx) const
-  {
-    return m_halo[d][idx];
   }
 }
 

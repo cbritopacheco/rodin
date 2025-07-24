@@ -197,6 +197,7 @@ namespace Rodin::Variational
         for (auto& lfi : pb.getLFIs())
           lf.add(UnaryMinus(lfi)); // Negate every linear form integrator
         lf.assemble();
+        mass = std::move(lf.getVector());
 
         BilinearFormType bf(u, v);
         for (auto& bfi : pb.getLocalBFIs())
@@ -209,6 +210,7 @@ namespace Rodin::Variational
           stiffness += _bf.getOperator();
         }
         bf.assemble();
+        stiffness = std::move(bf.getOperator());
 
         // Impose Dirichlet boundary conditions
         auto& trial = getTrialFunction();
