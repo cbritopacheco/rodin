@@ -19,6 +19,7 @@
 #include "Exceptions/TrialFunctionMismatchException.h"
 #include "Exceptions/TestFunctionMismatchException.h"
 
+#include "UnaryMinus.h"
 #include "ForwardDecls.h"
 #include "TrialFunction.h"
 #include "TestFunction.h"
@@ -73,7 +74,6 @@ namespace Rodin::Variational
       constexpr
       BilinearFormBase(const BilinearFormBase& other)
         : Parent(other),
-          m_operator(other.m_operator),
           m_lbfis(other.m_lbfis),
           m_gbfis(other.m_gbfis)
       {}
@@ -81,42 +81,9 @@ namespace Rodin::Variational
       constexpr
       BilinearFormBase(BilinearFormBase&& other)
         : Parent(std::move(other)),
-          m_operator(std::move(other.m_operator)),
           m_lbfis(std::move(other.m_lbfis)),
           m_gbfis(std::move(other.m_gbfis))
       {}
-
-      BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseType& bfi)
-      {
-        this->from(bfi);
-        return *this;
-      }
-
-      /**
-       * @todo
-       */
-      BilinearFormBase& operator=(
-          const FormLanguage::List<LocalBilinearFormIntegratorBaseType>& bfis)
-      {
-        this->from(bfis);
-        return *this;
-      }
-
-      BilinearFormBase& operator=(const GlobalBilinearFormIntegratorBaseType& bfi)
-      {
-        this->from(bfi);
-        return *this;
-      }
-
-      /**
-       * @todo
-       */
-      BilinearFormBase& operator=(
-          const FormLanguage::List<GlobalBilinearFormIntegratorBaseType>& bfis)
-      {
-        this->from(bfis);
-        return *this;
-      }
 
       constexpr
       LocalBilinearFormIntegratorBaseListType& getLocalIntegrators()
@@ -148,17 +115,17 @@ namespace Rodin::Variational
        * build the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      BilinearFormBase& from(const LocalBilinearFormIntegratorBaseType& bfi)
+      BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         m_lbfis.clear();
-        add(bfi);
+        m_lbfis.add(bfi);
         return *this;
       }
 
-      BilinearFormBase& from(const LocalBilinearFormIntegratorBaseListType& bfi)
+      BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseListType& bfi)
       {
         m_lbfis.clear();
-        add(bfi);
+        m_lbfis.add(bfi);
         return *this;
       }
 
@@ -166,7 +133,7 @@ namespace Rodin::Variational
        * @brief Adds a bilinear integrator to the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      BilinearFormBase& add(const LocalBilinearFormIntegratorBaseType& bfi)
+      BilinearFormBase& operator+=(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
           TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
@@ -176,29 +143,9 @@ namespace Rodin::Variational
         return *this;
       }
 
-      BilinearFormBase& add(const LocalBilinearFormIntegratorBaseListType& bfis)
+      BilinearFormBase& operator+=(const LocalBilinearFormIntegratorBaseListType& bfis)
       {
         m_lbfis.add(bfis);
-        return *this;
-      }
-
-      /**
-       * @brief Builds the bilinear form the given bilinear integrator
-       * @param[in] bfi Bilinear integrator which will be used to
-       * build the bilinear form.
-       * @returns Reference to this (for method chaining)
-       */
-      BilinearFormBase& from(const GlobalBilinearFormIntegratorBaseType& bfi)
-      {
-        m_gbfis.clear();
-        add(bfi);
-        return *this;
-      }
-
-      BilinearFormBase& from(const GlobalBilinearFormIntegratorBaseListType& bfi)
-      {
-        m_gbfis.clear();
-        add(bfi);
         return *this;
       }
 
@@ -206,7 +153,7 @@ namespace Rodin::Variational
        * @brief Adds a bilinear integrator to the bilinear form.
        * @returns Reference to this (for method chaining)
        */
-      BilinearFormBase& add(const GlobalBilinearFormIntegratorBaseType& bfi)
+      BilinearFormBase& operator+=(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
         if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
           TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
@@ -216,16 +163,49 @@ namespace Rodin::Variational
         return *this;
       }
 
-      BilinearFormBase& add(const GlobalBilinearFormIntegratorBaseListType& bfis)
+      BilinearFormBase& operator+=(const GlobalBilinearFormIntegratorBaseListType& bfis)
       {
         m_gbfis.add(bfis);
         return *this;
       }
 
-      BilinearFormBase& clear()
+      /**
+       * @brief Adds a bilinear integrator to the bilinear form.
+       * @returns Reference to this (for method chaining)
+       */
+      BilinearFormBase& operator-=(const LocalBilinearFormIntegratorBaseType& bfi)
       {
-        m_lbfis.clear();
-        m_gbfis.clear();
+        if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+          TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
+        if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
+        m_lbfis.add(UnaryMinus(bfi));
+        return *this;
+      }
+
+      BilinearFormBase& operator-=(const LocalBilinearFormIntegratorBaseListType& bfis)
+      {
+        m_lbfis.add(UnaryMinus(bfis));
+        return *this;
+      }
+
+      /**
+       * @brief Adds a bilinear integrator to the bilinear form.
+       * @returns Reference to this (for method chaining)
+       */
+      BilinearFormBase& operator-=(const GlobalBilinearFormIntegratorBaseType& bfi)
+      {
+        if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+          TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
+        if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
+        m_gbfis.add(UnaryMinus(bfi));
+        return *this;
+      }
+
+      BilinearFormBase& operator-=(const GlobalBilinearFormIntegratorBaseListType& bfis)
+      {
+        m_gbfis.add(UnaryMinus(bfis));
         return *this;
       }
 
@@ -265,8 +245,6 @@ namespace Rodin::Variational
       virtual BilinearFormBase* copy() const noexcept override = 0;
 
     private:
-      OperatorType m_operator;
-
       LocalBilinearFormIntegratorBaseListType               m_lbfis;
       GlobalBilinearFormIntegratorBaseListType              m_gbfis;
   };
@@ -300,6 +278,8 @@ namespace Rodin::Variational
       using Parent = BilinearFormBase<OperatorType>;
 
       using Parent::operator=;
+      using Parent::operator+=;
+      using Parent::operator-=;
 
       using DefaultAssembly =
         typename Assembly::Default<TrialFESContextType, TestFESContextType>
@@ -418,10 +398,10 @@ namespace Rodin::Variational
       }
 
     private:
-      OperatorType m_operator;
       std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
       std::reference_wrapper<const TestFunction<TestFES>>               m_v;
       std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
+      OperatorType m_operator;
   };
 
   template <class Solution, class TrialFES, class TestFES>
@@ -449,12 +429,16 @@ namespace Rodin::Variational
       using ScalarType = Scalar;
 
       /// Type of operator associated to the bilinear form
-      using OperatorType = Math::Matrix<ScalarType>;
+      using OperatorType =
+        Math::Matrix<ScalarType>;
 
       /// Parent class
-      using Parent = BilinearFormBase<OperatorType>;
+      using Parent =
+        BilinearFormBase<OperatorType>;
 
       using Parent::operator=;
+      using Parent::operator+=;
+      using Parent::operator-=;
 
       using DefaultAssembly =
         typename Assembly::Default<TrialFESContextType, TestFESContextType>
@@ -573,10 +557,10 @@ namespace Rodin::Variational
       }
 
     private:
-      OperatorType m_operator;
       std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
       std::reference_wrapper<const TestFunction<TestFES>>               m_v;
       std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
+      OperatorType m_operator;
   };
 }
 

@@ -45,12 +45,22 @@ namespace Rodin::PETSc
     }
   }
 
+  Vector::operator bool() const noexcept
+  {
+    return m_vec != PETSC_NULLPTR;
+  }
+
   Vector& Vector::operator=(const Vector& other)
   {
     if (this != &other)
     {
       Parent::operator=(other);
       PetscErrorCode ierr;
+      if (m_vec != PETSC_NULLPTR)
+      {
+        ierr = VecDestroy(&m_vec);
+        assert(ierr == PETSC_SUCCESS);
+      }
       ierr = VecDuplicate(other.m_vec, &m_vec);
       assert(ierr == PETSC_SUCCESS);
       ierr = VecCopy(other.m_vec, m_vec);
@@ -64,6 +74,11 @@ namespace Rodin::PETSc
     if (this != &other)
     {
       Parent::operator=(std::move(other));
+      if (m_vec != PETSC_NULLPTR)
+      {
+        PetscErrorCode ierr = VecDestroy(&m_vec);
+        assert(ierr == PETSC_SUCCESS);
+      }
       m_vec = std::exchange(other.m_vec, PETSC_NULLPTR);
     }
     return *this;
@@ -130,6 +145,25 @@ namespace Rodin::PETSc
   {
     assert(m_vec);
     PetscErrorCode ierr = VecShift(m_vec, -other);
+    assert(ierr == PETSC_SUCCESS);
+    return *this;
+  }
+
+  const Vector& Vector::duplicate(Vector& dst) const
+  {
+    assert(m_vec);
+    PetscErrorCode ierr;
+    ierr = VecDuplicate(m_vec, &dst.m_vec);
+    assert(ierr == PETSC_SUCCESS);
+    return *this;
+  }
+
+  const Vector& Vector::copy(Vector& dst) const
+  {
+    assert(m_vec);
+    assert(dst.m_vec);
+    PetscErrorCode ierr;
+    ierr = VecCopy(m_vec, dst.m_vec);
     assert(ierr == PETSC_SUCCESS);
     return *this;
   }

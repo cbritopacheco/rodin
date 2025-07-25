@@ -25,11 +25,7 @@ namespace Rodin::Solver
       m_maxIt(PETSC_DECIDE)
   {
     PetscErrorCode ierr;
-    MPI_Comm comm;
-    ierr = PetscObjectGetComm(
-        reinterpret_cast<PetscObject>(
-          pb.getLinearSystem().getOperator().getHandle()), &comm);
-    ierr = KSPCreate(comm, &m_ksp);
+    ierr = KSPCreate(pb.getLinearSystem().getCommunicator(), &m_ksp);
     assert(ierr == PETSC_SUCCESS);
   }
 

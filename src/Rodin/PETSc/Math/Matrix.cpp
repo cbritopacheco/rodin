@@ -49,6 +49,21 @@ namespace Rodin::PETSc
     }
   }
 
+  Matrix& Matrix::create(MPI_Comm comm)
+  {
+    PetscErrorCode ierr = MatCreate(comm, &m_mat);
+    assert(ierr == PETSC_SUCCESS);
+    return *this;
+  }
+
+  Matrix& Matrix::destroy()
+  {
+    PetscErrorCode ierr = MatDestroy(&m_mat);
+    assert(ierr == PETSC_SUCCESS);
+    m_mat = PETSC_NULLPTR;
+    return *this;
+  }
+
   Matrix& Matrix::setType(const ::MatType& type)
   {
     assert(m_mat);
@@ -118,6 +133,11 @@ namespace Rodin::PETSc
     PetscErrorCode ierr = MatAssemblyEnd(m_mat, type);
     assert(ierr == PETSC_SUCCESS);
     return *this;
+  }
+
+  Matrix::operator bool() const noexcept
+  {
+    return m_mat != PETSC_NULLPTR;
   }
 
   Matrix& Matrix::operator=(const Matrix& other)

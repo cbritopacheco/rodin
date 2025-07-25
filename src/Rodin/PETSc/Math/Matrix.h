@@ -71,6 +71,8 @@ namespace Rodin::PETSc
 
       virtual ~Matrix() override;
 
+      operator bool() const noexcept;
+
       Matrix& operator=(const Matrix& other);
 
       Matrix& operator=(Matrix&& other) noexcept;
@@ -88,6 +90,10 @@ namespace Rodin::PETSc
       Matrix& operator*=(const PetscScalar& rhs);
 
       Matrix& operator/=(const PetscScalar& rhs);
+
+      Matrix& create(MPI_Comm comm);
+
+      Matrix& destroy();
 
       const Matrix& duplicate(Matrix& dst) const;
 

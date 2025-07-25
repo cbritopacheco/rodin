@@ -185,7 +185,8 @@ namespace Rodin::Variational
             auto lfi = Variational::Integral(m_v);
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
-            m_lf.from(lfi).assemble();
+            m_lf = lfi;
+            m_lf.assemble();
             return m_value.emplace(m_lf(m_u.get()));
           }
           case Region::Boundary:
@@ -193,7 +194,8 @@ namespace Rodin::Variational
             auto lfi = Variational::BoundaryIntegral(m_v);
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
-            m_lf.from(lfi).assemble();
+            m_lf = lfi;
+            m_lf.assemble();
             return m_value.emplace(m_lf(m_u.get()));
           }
           case Region::Faces:
@@ -201,7 +203,8 @@ namespace Rodin::Variational
             auto lfi = Variational::FaceIntegral(m_v);
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
-            m_lf.from(lfi).assemble();
+            m_lf = lfi;
+            m_lf.assemble();
             return m_value.emplace(m_lf(m_u.get()));
           }
           case Region::Interface:
@@ -209,7 +212,8 @@ namespace Rodin::Variational
             auto lfi = Variational::InterfaceIntegral(m_v);
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
-            m_lf.from(lfi).assemble();
+            m_lf = lfi;
+            m_lf.assemble();
             return m_value.emplace(m_lf(m_u.get()));
           }
         }

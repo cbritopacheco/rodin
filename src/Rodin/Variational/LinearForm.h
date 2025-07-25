@@ -10,13 +10,16 @@
 #include "Rodin/Configure.h"
 
 #include "Rodin/FormLanguage/List.h"
+#include "Rodin/FormLanguage/Traits.h"
 
-#include "Rodin/Assembly/ForwardDecls.h"
 #include "Rodin/Assembly/Default.h"
+#include "Rodin/Assembly/ForwardDecls.h"
 
-#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Math/Vector.h"
+
 #include "Exceptions/TestFunctionMismatchException.h"
 
+#include "UnaryMinus.h"
 #include "ForwardDecls.h"
 #include "TestFunction.h"
 #include "LinearFormIntegrator.h"
@@ -28,6 +31,12 @@ namespace Rodin::Variational
   {
     public:
       using VectorType = Vector;
+
+      using ScalarType = typename FormLanguage::Traits<VectorType>::ScalarType;
+
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<ScalarType>;
+
+      using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
 
       using Parent = FormLanguage::Base;
 
@@ -41,31 +50,95 @@ namespace Rodin::Variational
       constexpr
       LinearFormBase(const LinearFormBase& other)
         : Parent(other),
-          m_vector(other.m_vector)
+          m_lfis(other.m_lfis)
       {}
 
       constexpr
       LinearFormBase(LinearFormBase&& other)
         : Parent(std::move(other)),
-          m_vector(std::move(other.m_vector))
+          m_lfis(std::move(other.m_lfis))
       {}
 
-      /**
-       * @brief Gets the reference to the (local) associated vector
-       * to the LinearForm.
-       */
-      VectorType& getVector()
+      LinearFormBase& operator=(const LinearFormBase& other)
       {
-        return m_vector;
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_lfis = other.m_lfis;
+        }
+        return *this;
       }
 
-      /**
-       * @brief Gets the reference to the (local) associated vector
-       * to the LinearForm.
-       */
-      const VectorType& getVector() const
+      LinearFormBase& operator=(LinearFormBase&& other) noexcept
       {
-        return m_vector;
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_lfis = std::move(other.m_lfis);
+        }
+        return *this;
+      }
+
+      constexpr
+      LinearFormIntegratorBaseListType& getIntegrators()
+      {
+        return m_lfis;
+      }
+
+      constexpr
+      const LinearFormIntegratorBaseListType& getIntegrators() const
+      {
+        return m_lfis;
+      }
+
+      constexpr
+      LinearFormBase& operator+=(const LinearFormIntegratorBaseType& lfi)
+      {
+        if (lfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(lfi.getTestFunction()) << Alert::Raise;
+        m_lfis.add(lfi);
+        return *this;
+      }
+
+      constexpr
+      LinearFormBase& operator+=(const LinearFormIntegratorBaseListType& lfis)
+      {
+        m_lfis.add(lfis);
+        return *this;
+      }
+
+      constexpr
+      LinearFormBase& operator-=(const LinearFormIntegratorBaseType& lfi)
+      {
+        if (lfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(lfi.getTestFunction()) << Alert::Raise;
+        m_lfis.add(UnaryMinus(lfi));
+        return *this;
+      }
+
+      constexpr
+      LinearFormBase& operator-=(const LinearFormIntegratorBaseListType& lfis)
+      {
+        m_lfis.add(UnaryMinus(lfis));
+        return *this;
+      }
+
+      constexpr
+      LinearFormBase& operator=(const LinearFormIntegratorBaseType& lfi)
+      {
+        if (lfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(lfi.getTestFunction()) << Alert::Raise;
+        m_lfis.clear();
+        m_lfis.add(lfi);
+        return *this;
+      }
+
+      constexpr
+      LinearFormBase& operator=(const LinearFormIntegratorBaseListType& lfis)
+      {
+        m_lfis.clear();
+        m_lfis.add(lfis);
+        return *this;
       }
 
       /**
@@ -79,6 +152,18 @@ namespace Rodin::Variational
       virtual void assemble() = 0;
 
       /**
+       * @brief Gets the reference to the (local) associated vector
+       * to the LinearForm.
+       */
+      virtual VectorType& getVector() = 0;
+
+      /**
+       * @brief Gets the reference to the (local) associated vector
+       * to the LinearForm.
+       */
+      virtual const VectorType& getVector() const = 0;
+
+      /**
        * @brief Gets the test function argument associated to this linear
        * form.
        */
@@ -87,7 +172,7 @@ namespace Rodin::Variational
       virtual LinearFormBase* copy() const noexcept override = 0;
 
     private:
-      VectorType m_vector;
+      LinearFormIntegratorBaseListType m_lfis;
   };
 
   /**
@@ -105,27 +190,29 @@ namespace Rodin::Variational
    * A linear form can be specified by from one or more
    * LinearFormIntegratorBase instances.
    */
-  template <class FES, class Vector>
-  class LinearForm final
-    : public LinearFormBase<Vector>
+  template <class FES>
+  class LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>> final
+    : public LinearFormBase<Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
   {
     public:
       using FESType = FES;
 
-      using VectorType = Vector;
-
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      using VectorType = Math::Vector<ScalarType>;
+
       using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
-
-      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<ScalarType>;
-
-      using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
 
       using DefaultAssembly =
         typename Assembly::Default<ContextType>::template Type<VectorType, LinearForm>;
 
       using Parent = LinearFormBase<VectorType>;
+
+      using Parent::operator=;
+
+      using Parent::operator+=;
+
+      using Parent::operator-=;
 
       /**
        * @brief Constructs a LinearForm with a reference to a TestFunction and
@@ -143,7 +230,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_v(other.m_v),
           m_assembly(other.m_assembly->copy()),
-          m_lfis(other.m_lfis)
+          m_vector(other.m_vector)
       {}
 
       constexpr
@@ -151,8 +238,32 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
           m_assembly(std::move(other.m_assembly)),
-          m_lfis(std::move(other.m_lfis))
+          m_vector(std::move(other.m_vector))
       {}
+
+      LinearForm& operator=(const LinearForm& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_v = other.m_v;
+          m_assembly.reset(other.m_assembly->copy());
+          m_vector = other.m_vector;
+        }
+        return *this;
+      }
+
+      LinearForm& operator=(LinearForm&& other) noexcept
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_v = std::move(other.m_v);
+          m_assembly = std::move(other.m_assembly);
+          m_vector = std::move(other.m_vector);
+        }
+        return *this;
+      }
 
       /**
        * @brief Evaluates the linear form at the function @f$ u @f$.
@@ -170,89 +281,38 @@ namespace Rodin::Variational
       }
 
       constexpr
-      LinearFormIntegratorBaseListType& getIntegrators()
-      {
-        return m_lfis;
-      }
-
-      constexpr
-      const LinearFormIntegratorBaseListType& getIntegrators() const
-      {
-        return m_lfis;
-      }
-
-      LinearForm& setAssembly(const Assembly::AssemblyBase<VectorType, LinearForm>& assembly)
-      {
-        m_assembly.reset(assembly.copy());
-        return *this;
-      }
-
       const Assembly::AssemblyBase<VectorType, LinearForm>& getAssembly() const
       {
         assert(m_assembly);
         return *m_assembly;
       }
 
+      constexpr
+      LinearForm& setAssembly(const Assembly::AssemblyBase<VectorType, LinearForm>& assembly)
+      {
+        m_assembly.reset(assembly.copy());
+        return *this;
+      }
+
       void assemble() override
       {
         const auto& fes = getTestFunction().getFiniteElementSpace();
-        getAssembly().execute(this->getVector(), { fes, getIntegrators() });
+        this->getAssembly().execute(this->getVector(), { fes, this->getIntegrators() });
+      }
+
+      VectorType& getVector() override
+      {
+        return m_vector;
+      }
+
+      const VectorType& getVector() const override
+      {
+        return m_vector;
       }
 
       const TestFunction<FES>& getTestFunction() const override
       {
         return m_v.get();
-      }
-      /**
-       * @brief Builds the linear form the given LinearFormIntegratorBase
-       * instance
-       * @param[in] lfi Integrator which will be used to build the linear form.
-       * @returns Reference to this (for method chaining)
-       */
-      LinearForm& from(const LinearFormIntegratorBaseType& lfi)
-      {
-        m_lfis.clear();
-        add(lfi);
-        return *this;
-      }
-
-      LinearForm& from(const LinearFormIntegratorBaseListType& lfi)
-      {
-        m_lfis.clear();
-        add(lfi);
-        return *this;
-      }
-
-      /**
-       * @brief Builds the linear form the given LinearFormIntegratorBase
-       * instance
-       * @param[in] lfi Integrator which will be used to build the linear form.
-       * @returns Reference to this (for method chaining)
-       */
-      LinearForm& add(const LinearFormIntegratorBaseType& lfi)
-      {
-        if (lfi.getTestFunction().getUUID() != getTestFunction().getUUID())
-          TestFunctionMismatchException(lfi.getTestFunction()) << Alert::Raise;
-        m_lfis.add(lfi);
-        return *this;
-      }
-
-      LinearForm& add(const LinearFormIntegratorBaseListType& lfis)
-      {
-        m_lfis.add(lfis);
-        return *this;
-      }
-
-      LinearForm& operator=(const LinearFormIntegratorBaseType& lfi)
-      {
-        from(lfi);
-        return *this;
-      }
-
-      LinearForm& operator=(const LinearFormIntegratorBaseListType& lfis)
-      {
-        from(lfis);
-        return *this;
       }
 
       LinearForm* copy() const noexcept override
@@ -260,16 +320,10 @@ namespace Rodin::Variational
         return new LinearForm(*this);
       }
 
-      LinearForm& clear()
-      {
-        m_lfis.clear();
-        return *this;
-      }
-
     private:
       std::reference_wrapper<const TestFunction<FES>> m_v;
       std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearForm>> m_assembly;
-      LinearFormIntegratorBaseListType m_lfis;
+      VectorType m_vector;
   };
 
   /**

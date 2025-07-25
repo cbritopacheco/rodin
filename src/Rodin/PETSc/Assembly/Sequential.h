@@ -2,6 +2,7 @@
 #define RODIN_PETSC_ASSEMBLY_SEQUENTIAL_H
 
 #include <petsc.h>
+#include <petscsys.h>
 
 #include "Rodin/Assembly/AssemblyBase.h"
 #include "Rodin/Assembly/Sequential.h"
@@ -30,6 +31,7 @@ namespace Rodin::Assembly
 
       void execute(VectorType& res, const InputType& input) const override
       {
+        res.create(PETSC_COMM_SELF);
         const PetscInt n = PetscInt(input.getFES().getSize());
         res.setSizes(n, PETSC_DECIDE).setFromOptions().zeroEntries();
         const auto& mesh = input.getFES().getMesh();
@@ -85,6 +87,7 @@ namespace Rodin::Assembly
 
       void execute(OperatorType& res, const InputType& input) const override
       {
+        res.create(PETSC_COMM_SELF);
         const PetscInt m = PetscInt(input.getTestFES().getSize());
         const PetscInt n = PetscInt(input.getTrialFES().getSize());
         res.setSizes(m, n, PETSC_DETERMINE, PETSC_DETERMINE)

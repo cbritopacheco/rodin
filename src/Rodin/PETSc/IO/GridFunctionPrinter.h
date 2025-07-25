@@ -40,10 +40,10 @@ namespace Rodin::IO
 
       void printData(std::ostream& os) override
       {
-        const auto& gf = this->getObject();
-        assert(gf.getSize() <= std::numeric_limits<PetscInt>::max());
-        for (PetscInt i = 0; i < static_cast<PetscInt>(gf.getSize()); ++i)
-          os << gf[i] << "\n";
+        // const auto& gf = this->getObject();
+        // assert(gf.getSize() <= std::numeric_limits<PetscInt>::max());
+        // for (PetscInt i = 0; i < static_cast<PetscInt>(gf.getSize()); ++i)
+        //   os << gf[i] << "\n";
       }
   };
 }

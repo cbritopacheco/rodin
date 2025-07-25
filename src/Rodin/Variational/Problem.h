@@ -83,7 +83,7 @@ namespace Rodin::Variational
    * and `Vector` generic types in a sequential context.
    */
   template <class LinearSystem, class U, class V>
-  class ProblemUV
+  class ProblemUVBase
     : public ProblemBase<
         typename FormLanguage::Traits<LinearSystem>::OperatorType,
         typename FormLanguage::Traits<LinearSystem>::VectorType,
@@ -131,12 +131,12 @@ namespace Rodin::Variational
       using Parent = ProblemBase<OperatorType, VectorType, ScalarType>;
 
       constexpr
-      ProblemUV(U& u, V& v)
+      ProblemUVBase(U& u, V& v)
         : m_assembled(false),
           m_trialFunction(u), m_testFunction(v)
       {}
 
-      ProblemUV(const ProblemUV& other)
+      ProblemUVBase(const ProblemUVBase& other)
         : Parent(other),
           m_assembled(other.m_assembled),
           m_trialFunction(other.m_trialFunction.get()),
@@ -144,7 +144,7 @@ namespace Rodin::Variational
           m_pb(other.m_pb)
       {}
 
-      ProblemUV(ProblemUV&& other)
+      ProblemUVBase(ProblemUVBase&& other)
         : Parent(std::move(other)),
           m_assembled(std::exchange(other.m_assembled, false)),
           m_trialFunction(std::move(other.m_trialFunction)),
@@ -152,7 +152,7 @@ namespace Rodin::Variational
           m_pb(std::move(other.m_pb))
       {}
 
-      ProblemUV& operator=(const ProblemUV& other)
+      ProblemUVBase& operator=(const ProblemUVBase& other)
       {
         if (this != &other)
         {
@@ -164,7 +164,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      ProblemUV& operator=(ProblemUV&& other) noexcept
+      ProblemUVBase& operator=(ProblemUVBase&& other) noexcept
       {
         if (this != &other)
         {
@@ -200,7 +200,7 @@ namespace Rodin::Variational
         return m_testFunction.get();
       }
 
-      ProblemUV& assemble() override
+      virtual ProblemUVBase& assemble() override
       {
         using LinearFormType = LinearForm<TestFESType, VectorType>;
         using BilinearFormType =
@@ -218,15 +218,15 @@ namespace Rodin::Variational
 
         LinearFormType lf(v);
         for (auto& lfi : pb.getLFIs())
-          lf.add(UnaryMinus(lfi)); // Negate every linear form integrator
+          lf -= lfi;
         lf.assemble();
         mass = std::move(lf.getVector());
 
         BilinearFormType bf(u, v);
         for (auto& bfi : pb.getLocalBFIs())
-          bf.add(bfi);
+          bf += bfi;
         for (auto& bfi : pb.getGlobalBFIs())
-          bf.add(bfi);
+          bf += bfi;
         for (auto& _bf : bfs)
         {
           _bf.assemble();
@@ -299,14 +299,14 @@ namespace Rodin::Variational
          getTrialFunction().getSolution().setData(x);
       }
 
-      ProblemUV& operator=(const ProblemBodyType& rhs) override
+      ProblemUVBase& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
         m_assembled = false;
         return *this;
       }
 
-      virtual ProblemUV* copy() const noexcept override = 0;
+      virtual ProblemUVBase* copy() const noexcept override = 0;
 
     private:
       Boolean m_assembled;
@@ -316,7 +316,7 @@ namespace Rodin::Variational
   };
 
   template <class LinearSystem, class U, class V>
-  class Problem<LinearSystem, U, V> : public ProblemUV<LinearSystem, U, V>
+  class Problem<LinearSystem, U, V> : public ProblemUVBase<LinearSystem, U, V>
   {
     public:
       using LinearSystemType = LinearSystem;
@@ -332,7 +332,7 @@ namespace Rodin::Variational
 
       using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
 
-      using Parent = ProblemUV<LinearSystem, U, V>;
+      using Parent = ProblemUVBase<LinearSystem, U, V>;
 
       constexpr
       Problem(U& u, V& v)
@@ -412,7 +412,7 @@ namespace Rodin::Variational
           U, V>;
 
   template <class LinearSystem, class U1, class U2, class ... Us>
-  class ProblemUs
+  class ProblemUsBase
     : public ProblemBase<
         typename FormLanguage::Traits<LinearSystem>::OperatorType,
         typename FormLanguage::Traits<LinearSystem>::VectorType,
@@ -540,7 +540,7 @@ namespace Rodin::Variational
         Assembly::Sequential<VectorType, LinearFormTuple>;
 
     public:
-      ProblemUs(U1& u1, U2& u2, Us&... us)
+      ProblemUsBase(U1& u1, U2& u2, Us&... us)
         : m_assembled(false),
           m_us(
             Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
@@ -569,7 +569,7 @@ namespace Rodin::Variational
             { m_testUUIDMap.right.insert({ i, v.get().getUUID() }); });
       }
 
-      ProblemUs(const ProblemUs& other)
+      ProblemUsBase(const ProblemUsBase& other)
         : Parent(other),
           m_assembled(other.m_assembled),
           m_us(other.m_us),
@@ -584,7 +584,7 @@ namespace Rodin::Variational
           m_lfa(other.m_lfa->copy())
       {}
 
-      ProblemUs(ProblemUs&& other) noexcept
+      ProblemUsBase(ProblemUsBase&& other) noexcept
         : Parent(std::move(other)),
           m_assembled(std::exchange(other.m_assembled, false)),
           m_us(std::move(other.m_us)),
@@ -599,7 +599,7 @@ namespace Rodin::Variational
           m_lfa(std::move(other.m_lfa))
       {}
 
-      ProblemUs& operator=(const ProblemUs& other)
+      ProblemUsBase& operator=(const ProblemUsBase& other)
       {
         if (this != &other)
         {
@@ -618,7 +618,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      ProblemUs& operator=(ProblemUs&& other)
+      ProblemUsBase& operator=(ProblemUsBase&& other)
       {
         if (this != &other)
         {
@@ -637,7 +637,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      ProblemUs& assemble() override
+      virtual ProblemUsBase& assemble() override
       {
         auto& axb = getLinearSystem();
 
@@ -652,7 +652,7 @@ namespace Rodin::Variational
                 if (bfi.getTrialFunction().getUUID() == bf.getTrialFunction().getUUID() &&
                     bfi.getTestFunction().getUUID() == bf.getTestFunction().getUUID())
                 {
-                  bf.add(bfi);
+                  bf += bfi;
                 }
               });
         }
@@ -665,7 +665,7 @@ namespace Rodin::Variational
                 if (bfi.getTrialFunction().getUUID() == bf.getTrialFunction().getUUID() &&
                     bfi.getTestFunction().getUUID() == bf.getTestFunction().getUUID())
                 {
-                  bf.add(bfi);
+                  bf += bfi;
                 }
               });
         }
@@ -677,7 +677,7 @@ namespace Rodin::Variational
               {
                 if (lfi.getTestFunction().getUUID() == lf.getTestFunction().getUUID())
                 {
-                  lf.add(UnaryMinus(lfi));
+                  lf -= lfi;
                 }
               });
         }
@@ -810,7 +810,7 @@ namespace Rodin::Variational
             });
       }
 
-      ProblemUs& operator=(const ProblemBodyType& rhs) override
+      ProblemUsBase& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
         m_assembled = false;
@@ -831,7 +831,7 @@ namespace Rodin::Variational
 
       virtual const LinearSystemType& getLinearSystem() const override = 0;
 
-      virtual ProblemUs* copy() const noexcept override = 0;
+      virtual ProblemUsBase* copy() const noexcept override = 0;
 
     private:
       Boolean m_assembled;
@@ -855,7 +855,7 @@ namespace Rodin::Variational
   };
 
   template <class LinearSystem, class U1, class U2, class ... Us>
-  class Problem<LinearSystem, U1, U2, Us...> : public ProblemUs<LinearSystem, U1, U2, Us...>
+  class Problem<LinearSystem, U1, U2, Us...> : public ProblemUsBase<LinearSystem, U1, U2, Us...>
   {
     public:
       using LinearSystemType = LinearSystem;
@@ -872,7 +872,7 @@ namespace Rodin::Variational
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
-      using Parent = ProblemUs<LinearSystem, U1, U2, Us...>;
+      using Parent = ProblemUsBase<LinearSystem, U1, U2, Us...>;
 
       Problem(U1& u1, U2& u2, Us&... us)
         : Parent(u1, u2, us...)

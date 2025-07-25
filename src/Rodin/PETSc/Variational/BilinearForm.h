@@ -2,9 +2,9 @@
 #define RODIN_PETSC_VARIATIONAL_BILINEARFORM_H
 
 #include "Rodin/PETSc/Variational/GridFunction.h"
-#include "Rodin/Variational/BilinearForm.h"
-
 #include "Rodin/PETSc/Math/Matrix.h"
+
+#include "Rodin/Variational/BilinearForm.h"
 
 namespace Rodin::Variational
 {
@@ -21,13 +21,17 @@ namespace Rodin::Variational
 
       using ScalarType = PetscScalar;
 
-      /// Type of operator associated to the bilinear form
+      /// Type of operator associated to the bilinear form.
       using OperatorType = PETSc::Matrix;
 
-      /// Parent class
+      /// Parent class.
       using Parent = BilinearFormBase<OperatorType>;
 
       using Parent::operator=;
+
+      using Parent::operator+=;
+
+      using Parent::operator-=;
 
       using DefaultAssembly =
         typename Assembly::Default<TrialFESContextType, TestFESContextType>
@@ -48,14 +52,16 @@ namespace Rodin::Variational
       BilinearForm(const BilinearForm& other)
         : Parent(other),
           m_u(other.m_u), m_v(other.m_v),
-          m_assembly(other.m_assembly->copy())
+          m_assembly(other.m_assembly->copy()),
+          m_operator(other.m_operator)
       {}
 
       constexpr
       BilinearForm(BilinearForm&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
-          m_assembly(std::move(other.m_assembly))
+          m_assembly(std::move(other.m_assembly)),
+          m_operator(other.m_operator)
       {}
 
       BilinearForm& operator=(const BilinearForm& bf)
@@ -64,8 +70,8 @@ namespace Rodin::Variational
         {
           m_u = bf.m_u;
           m_v = bf.m_v;
-          m_operator = bf.m_operator;
           m_assembly.reset(bf.m_assembly->copy());
+          m_operator = bf.m_operator;
         }
         return *this;
       }
@@ -76,8 +82,8 @@ namespace Rodin::Variational
         {
           m_u = std::move(bf.m_u);
           m_v = std::move(bf.m_v);
-          m_operator = std::move(bf.m_operator);
           m_assembly = std::move(bf.m_assembly);
+          m_operator = std::move(bf.m_operator);
         }
         return *this;
       }
@@ -149,10 +155,10 @@ namespace Rodin::Variational
       }
 
     private:
-      OperatorType m_operator;
       std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
       std::reference_wrapper<const TestFunction<TestFES>>               m_v;
       std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
+      OperatorType m_operator;
   };
 }
 

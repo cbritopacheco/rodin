@@ -30,7 +30,7 @@ namespace Rodin::Math
       using Parent =
         LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixType, VectorType>>;
 
-      LinearSystem() = default;
+      LinearSystem();
 
       LinearSystem(MPI_Comm comm);
 
@@ -56,7 +56,7 @@ namespace Rodin::Math
           rows.push_back(PetscInt(kv.first) + PetscInt(offset));
         for (auto const& kv : dofs)
         {
-          const PetscInt  i   = PetscInt(kv.first) + PetscInt(offset);
+          const PetscInt i = PetscInt(kv.first) + PetscInt(offset);
           const auto& ui  = kv.second;
           x.setValue(i, ui, INSERT_VALUES);
         }
@@ -72,6 +72,16 @@ namespace Rodin::Math
       {
         throw "Unimplemented.";
         return *this;
+      }
+
+      LinearSystem& create(MPI_Comm comm);
+
+      LinearSystem& destroy();
+
+      constexpr
+      MPI_Comm getCommunicator() const noexcept
+      {
+        return m_comm;
       }
 
       constexpr
@@ -111,6 +121,7 @@ namespace Rodin::Math
       }
 
     private:
+      MPI_Comm m_comm; ///< The MPI communicator for the linear system.
       MatrixType m_operator; ///< The operator of the linear system.
       VectorType m_vector;   ///< The vector of the linear system.
       VectorType m_solution; ///< The solution vector of the linear system.

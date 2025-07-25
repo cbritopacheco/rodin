@@ -50,6 +50,8 @@ namespace Rodin::PETSc
 
       virtual ~Vector() override;
 
+      operator bool() const noexcept;
+
       Vector& operator=(const Vector& other);
 
       Vector& operator=(Vector&& other) noexcept;
@@ -73,6 +75,10 @@ namespace Rodin::PETSc
       Vector& create(MPI_Comm comm);
 
       Vector& destroy();
+
+      const Vector& duplicate(Vector& dst) const;
+
+      const Vector& copy(Vector& dst) const;
 
       Vector& setType(const ::VecType& type);
 

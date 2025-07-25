@@ -19,7 +19,6 @@ using namespace Rodin::Variational;
 int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
-  PetscPrintf(PETSC_COMM_WORLD,"Hello World\n");
 
   // Build a mesh
   Mesh mesh;
@@ -33,13 +32,12 @@ int main(int argc, char** argv)
   PETSc::TrialFunction u(vh);
   PETSc::TestFunction  v(vh);
 
-
   // Define problem
   PETSc::Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, Zero());
-  poisson.assemble();
+  CG(poisson).solve();
 
   // Save solution
   u.getSolution().save("Poisson.gf");

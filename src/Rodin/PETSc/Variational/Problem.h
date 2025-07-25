@@ -15,10 +15,10 @@
 namespace Rodin::PETSc
 {
   template <class U, class V>
-  class Problem : public Variational::ProblemUV<LinearSystem, U, V>
+  class Problem : public Variational::ProblemUVBase<LinearSystem, U, V>
   {
     public:
-      using Parent = Variational::ProblemUV<LinearSystem, U, V>;
+      using Parent = Variational::ProblemUVBase<LinearSystem, U, V>;
 
       using LinearSystemType = LinearSystem;
 
@@ -38,30 +38,26 @@ namespace Rodin::PETSc
       using TestFESType = typename FormLanguage::Traits<V>::FESType;
 
       Problem(U& u, V& v)
-        : Parent(u, v),
-          m_axb(
-              [&]() -> MPI_Comm
-              {
-                using TrialFESContextType = typename FormLanguage::Traits<TrialFESType>::ContextType;
-                if constexpr (std::is_same_v<TrialFESContextType, Context::Local>)
-                {
-                  return PETSC_COMM_SELF;
-                }
-                else if constexpr (std::is_same_v<TrialFESContextType, Context::MPI>)
-                {
-                  const auto& fes = u.getFiniteElementSpace();
-                  const auto& mesh = fes.getMesh();
-                  const auto& ctx = mesh.getContext();
-                  const MPI_Comm comm = ctx.getCommunicator();
-                  return comm;
-                }
-                else
-                {
-                  assert(false);
-                  return MPI_COMM_NULL;
-                }
-              }())
-      {}
+        : Parent(u, v)
+      {
+        using TrialFESContextType = typename FormLanguage::Traits<TrialFESType>::ContextType;
+        if constexpr (std::is_same_v<TrialFESContextType, Context::Local>)
+        {
+          m_axb.create(PETSC_COMM_SELF);
+        }
+        else if constexpr (std::is_same_v<TrialFESContextType, Context::MPI>)
+        {
+          const auto& fes = u.getFiniteElementSpace();
+          const auto& mesh = fes.getMesh();
+          const auto& ctx = mesh.getContext();
+          const MPI_Comm comm = ctx.getCommunicator();
+          m_axb.create(comm);
+        }
+        else
+        {
+          assert(false);
+        }
+      }
 
       constexpr
       Problem(const Problem& other)
