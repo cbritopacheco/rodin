@@ -19,7 +19,6 @@ set(RodinPETSc_HEADERS
   )
 
 set(RodinPETSc_SRCS
-  Object.cpp
   IO/GridFunctionPrinter.cpp
   Solver/KSP.cpp
   Solver/CG.cpp

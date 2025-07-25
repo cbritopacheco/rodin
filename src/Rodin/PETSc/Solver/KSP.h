@@ -24,16 +24,18 @@ namespace Rodin::Solver
    *
    * Combines programmatic configuration with command‐line overrides.
    */
-  class KSP : public SolverBase< PETSc::Matrix, PETSc::Vector, PetscScalar>, public PETSc::Object
+  class KSP
+    : public SolverBase< PETSc::Matrix, PETSc::Vector, PetscScalar>,
+      public PETSc::Object<::KSP>
   {
     public:
+      using HandleType = ::KSP;
       using OperatorType = PETSc::Matrix;
       using VectorType   = PETSc::Vector;
       using ScalarType   = PetscScalar;
-      using Parent       = SolverBase<OperatorType, VectorType, ScalarType>;
       using ProblemType  = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using Parent       = SolverBase<OperatorType, VectorType, ScalarType>;
       using Parent::solve;
-
       /**
        * @brief Construct and create the PETSc KSP object.
        *
@@ -45,8 +47,6 @@ namespace Rodin::Solver
       explicit KSP(ProblemType& pb);
 
       virtual ~KSP() override;
-
-      ::PetscObject& getHandle() noexcept override;
 
       /**
        * @brief Solve @f$ Ax = b @f$, allocating @f$ x @f$ if null.
@@ -71,8 +71,12 @@ namespace Rodin::Solver
 
       KSP& setPreconditioner(OperatorType P) noexcept;
 
+      HandleType& getHandle() noexcept override;
+
+      const HandleType& getHandle() const noexcept override;
+
     private:
-      ::KSP        m_ksp;
+      HandleType   m_ksp;
       ::KSPType    m_type;
       PetscReal    m_rtol,
                    m_abstol,

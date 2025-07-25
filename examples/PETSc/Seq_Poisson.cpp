@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/PETSc.h>
+
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
@@ -29,19 +30,22 @@ int main(int argc, char** argv)
 
   P1 vh(mesh);
 
-  PETSc::TrialFunction u(vh);
-  PETSc::TestFunction  v(vh);
+  // Leave the block so PETSc objects are cleaned up automatically !!
+  {
+    PETSc::TrialFunction u(vh);
+    PETSc::TestFunction  v(vh);
 
-  // Define problem
-  PETSc::Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-  CG(poisson).solve();
+    // Define problem
+    PETSc::Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+    CG(poisson).solve();
 
-  // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+    // Save solution
+    u.getSolution().save("Poisson.gf");
+    mesh.save("Poisson.mesh");
+  }
 
   PetscFinalize();
 

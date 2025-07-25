@@ -248,14 +248,14 @@ namespace Rodin::PETSc
     return *this;
   }
 
-  ::PetscObject& Matrix::getHandle() noexcept
+  ::Mat& Matrix::getHandle() noexcept
   {
-    return reinterpret_cast<::PetscObject&>(m_mat);
+    return m_mat;
   }
 
-  const ::PetscObject& Matrix::getHandle() const noexcept
+  const ::Mat& Matrix::getHandle() const noexcept
   {
-    return reinterpret_cast<const ::PetscObject&>(m_mat);
+    return m_mat;
   }
 }
 

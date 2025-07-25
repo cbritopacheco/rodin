@@ -47,8 +47,11 @@ namespace Rodin::Variational
       using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
 
       using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
+
       using Parent::operator=;
+
       using Parent::min;
+
       using Parent::max;
 
       static_assert(
@@ -68,6 +71,7 @@ namespace Rodin::Variational
         {
           data.create(PETSC_COMM_SELF);
           data.setSizes(fes.getSize(), PETSC_DECIDE).setFromOptions();
+          data.setFromOptions();
         }
         else if constexpr (std::is_same_v<ContextType, Context::MPI>)
         {
@@ -315,20 +319,27 @@ namespace Rodin::Variational
 
       GridFunction& setData(const DataType& other, size_t offset = 0)
       {
-        flush();
-        auto& data = this->getData();
-        PetscInt localSize;
-        data.getLocalSize(&localSize);
-        const PetscScalar* src = nullptr;
-        other.getArrayRead(&src);
-        PetscScalar* dst = nullptr;
-        data.getArrayWrite(&dst);
-        std::memcpy(
-            dst, src + static_cast<PetscInt>(offset), localSize * sizeof(PetscScalar));
-        data.restoreArrayWrite(&dst);
-        other.restoreArrayRead(&src);
-        data.ghostUpdateBegin(INSERT_VALUES, SCATTER_FORWARD);
-        data.ghostUpdateEnd(INSERT_VALUES, SCATTER_FORWARD);
+        if constexpr (std::is_same_v<ContextType, Context::Local>)
+        {
+          assert(offset == 0);
+          other.copy(m_data);
+        }
+        else
+        {
+          // flush();
+          // auto& data = this->getData();
+          // PetscInt localSize;
+          // data.getLocalSize(&localSize);
+          // const PetscScalar* src = nullptr;
+          // other.getArrayRead(&src);
+          // PetscScalar* dst = nullptr;
+          // data.getArrayWrite(&dst);
+          // std::memcpy(dst, src + static_cast<PetscInt>(offset), localSize * sizeof(PetscScalar));
+          // data.restoreArrayWrite(&dst);
+          // other.restoreArrayRead(&src);
+          // data.ghostUpdateBegin(INSERT_VALUES, SCATTER_FORWARD);
+          // data.ghostUpdateEnd(INSERT_VALUES, SCATTER_FORWARD);
+        }
         return *this;
       }
 

@@ -14,6 +14,7 @@
 
 #include "Rodin/PETSc/Math/Vector.h"
 #include <limits>
+#include <petscsystypes.h>
 
 namespace Rodin::IO
 {
@@ -40,10 +41,10 @@ namespace Rodin::IO
 
       void printData(std::ostream& os) override
       {
-        // const auto& gf = this->getObject();
-        // assert(gf.getSize() <= std::numeric_limits<PetscInt>::max());
-        // for (PetscInt i = 0; i < static_cast<PetscInt>(gf.getSize()); ++i)
-        //   os << gf[i] << "\n";
+        const auto& gf = this->getObject();
+        const size_t sz = gf.getSize();
+        for (size_t i = 0; i < sz; ++i)
+          os << gf[i] << "\n";
       }
   };
 }

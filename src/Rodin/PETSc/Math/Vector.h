@@ -15,10 +15,12 @@
 
 namespace Rodin::PETSc
 {
-  class Vector : public Object
+  class Vector : public Object<::Vec>
   {
     public:
-      using Parent = Object;
+      using HandleType = ::Vec;
+
+      using Parent = Object<HandleType>;
 
       class MPI
       {
@@ -123,14 +125,12 @@ namespace Rodin::PETSc
 
       const Vector& getLocalSize(PetscInt* size) const;
 
-      const Vector& getComm(MPI_Comm* comm) const noexcept;
+      HandleType& getHandle() noexcept override;
 
-      ::PetscObject& getHandle() noexcept override;
-
-      const ::PetscObject& getHandle() const noexcept;
+      const HandleType& getHandle() const noexcept override;
 
     private:
-      ::Vec m_vec;
+      HandleType m_vec;
   };
 }
 

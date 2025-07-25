@@ -343,22 +343,13 @@ namespace Rodin::PETSc
     return *this;
   }
 
-  const Vector& Vector::getComm(MPI_Comm* comm) const noexcept
+  ::Vec& Vector::getHandle() noexcept
   {
-    assert(m_vec);
-    PetscErrorCode ierr;
-    ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(m_vec), comm);
-    assert(ierr == PETSC_SUCCESS);
-    return *this;
+    return m_vec;
   }
 
-  ::PetscObject& Vector::getHandle() noexcept
+  const ::Vec& Vector::getHandle() const noexcept
   {
-    return reinterpret_cast<::PetscObject&>(m_vec);
-  }
-
-  const ::PetscObject& Vector::getHandle() const noexcept
-  {
-    return reinterpret_cast<const ::PetscObject&>(m_vec);
+    return m_vec;
   }
 }

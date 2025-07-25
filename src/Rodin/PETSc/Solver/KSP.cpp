@@ -39,51 +39,44 @@ namespace Rodin::Solver
     }
   }
 
-  ::PetscObject& KSP::getHandle() noexcept
+  ::KSP& KSP::getHandle() noexcept
   {
-    return reinterpret_cast<::PetscObject&>(m_ksp);
+    return m_ksp;
+  }
+
+  const ::KSP& KSP::getHandle() const noexcept
+  {
+    return m_ksp;
   }
 
   void KSP::solve(OperatorType& A, VectorType& x, VectorType& b)
   {
     PetscErrorCode ierr;
 
-    // use nonzero initial guess
     ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
     assert(ierr == PETSC_SUCCESS);
 
-    // configure solver
     ierr = KSPSetType(m_ksp, m_type);
     assert(ierr == PETSC_SUCCESS);
 
     ierr = KSPSetTolerances(m_ksp, m_rtol, m_abstol, m_dtol, m_maxIt);
     assert(ierr == PETSC_SUCCESS);
 
-    // set operators (use A as both if P not set)
     if (m_preconditioner)
     {
-      ierr = KSPSetOperators(
-          m_ksp,
-          reinterpret_cast<::Mat>(A.getHandle()),
-          reinterpret_cast<::Mat>(m_preconditioner->getHandle()));
+      ierr = KSPSetOperators(m_ksp, A.getHandle(), m_preconditioner->getHandle());
+      assert(ierr == PETSC_SUCCESS);
     }
     else
     {
-      ierr = KSPSetOperators(
-          m_ksp,
-          reinterpret_cast<::Mat>(A.getHandle()),
-          reinterpret_cast<::Mat>(A.getHandle()));
+      ierr = KSPSetOperators(m_ksp, A.getHandle(), A.getHandle());
       assert(ierr == PETSC_SUCCESS);
     }
 
-    // allow CLI overrides
     ierr = KSPSetFromOptions(m_ksp);
     assert(ierr == PETSC_SUCCESS);
 
-    // solve
-    ierr = KSPSolve(m_ksp,
-        reinterpret_cast<::Vec>(b.getHandle()),
-        reinterpret_cast<::Vec>(x.getHandle()));
+    ierr = KSPSolve(m_ksp, b.getHandle(), x.getHandle());
     assert(ierr == PETSC_SUCCESS);
   }
 
@@ -98,10 +91,10 @@ namespace Rodin::Solver
                           PetscReal dtol,
                           PetscInt  maxIt) noexcept
   {
-    m_rtol   = rtol;
+    m_rtol = rtol;
     m_abstol = abstol;
-    m_dtol   = dtol;
-    m_maxIt  = maxIt;
+    m_dtol = dtol;
+    m_maxIt = maxIt;
     return *this;
   }
 

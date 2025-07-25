@@ -15,7 +15,7 @@
 
 namespace Rodin::PETSc
 {
-  class Matrix : public Object
+  class Matrix : public Object<::Mat>
   {
     public:
       class SeqAIJ
@@ -59,7 +59,9 @@ namespace Rodin::PETSc
           Matrix& m_mat; ///< Reference to the parent Matrix object.
       } MPIAIJ;
 
-      using Parent = Object;
+      using HandleType = ::Mat;
+
+      using Parent = Object<HandleType>;
 
       Matrix();
 
@@ -124,12 +126,12 @@ namespace Rodin::PETSc
 
       const Matrix& getComm(MPI_Comm& comm) const noexcept;
 
-      ::PetscObject& getHandle() noexcept override;
+      HandleType& getHandle() noexcept override;
 
-      const ::PetscObject& getHandle() const noexcept;
+      const HandleType& getHandle() const noexcept override;
 
     private:
-      ::Mat m_mat;
+      HandleType m_mat;
   };
 }
 
