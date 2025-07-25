@@ -126,10 +126,21 @@ namespace Rodin::Geometry
           size_t m_dimension;
       };
 
+      /**
+       * @brief Default constructor.
+       */
       Shard() = default;
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other The shard to copy from
+       */
       Shard(const Shard& other);
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other The shard to move from
+       */
       Shard(Shard&& other);
 
       Shard& operator=(Shard&& other);
@@ -141,6 +152,11 @@ namespace Rodin::Geometry
        */
       bool isGhost(size_t d, Index idx) const;
 
+      /**
+       * @brief Indicates whether the given polytope is owned by the shard.
+       * @param[in] d Dimension of the polytope
+       * @param[in] idx Local index of the polytope
+       */
       bool isOwned(size_t d, Index idx) const;
 
       const FlatMap<Index, Index>& getOwner(size_t d) const;
@@ -149,7 +165,7 @@ namespace Rodin::Geometry
 
       const PolytopeMap& getPolytopeMap(size_t d) const;
 
-      template<class Archive>
+      template <class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {
         ar & boost::serialization::base_object<Mesh<Context>>(*this);

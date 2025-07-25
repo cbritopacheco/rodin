@@ -82,7 +82,7 @@ namespace Rodin::Variational
           size_t ghostSize = localSize - ownedSize;
           m_ghosts.resize(ghostSize);
           for (size_t i = 0; i < ghostSize; ++i)
-            m_ghosts[i] = fes.getGlobalIndex(m_end + i);
+            m_ghosts[i] = fes.getGlobalIndex(ownedSize + i);
           data.MPI.setGhost(ghostSize, m_ghosts.data());
         }
         else

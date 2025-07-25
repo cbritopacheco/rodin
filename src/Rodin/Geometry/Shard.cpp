@@ -58,7 +58,8 @@ namespace Rodin::Geometry
     return m_halo[d];
   }
 
-  std::pair<Index, Boolean> Shard::Builder::include(const std::pair<size_t, Index>& p, const Flags& flags)
+  std::pair<Index, Boolean> Shard::Builder::include(
+      const std::pair<size_t, Index>& p, const Flags& flags)
   {
     const auto& [d, parentIdx] = p;
     assert(m_parent.has_value());

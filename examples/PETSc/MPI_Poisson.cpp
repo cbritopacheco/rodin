@@ -10,6 +10,7 @@
 #include <Rodin/MPI/Geometry/Sharder.h>
 
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
+#include <string>
 
 namespace mpi = boost::mpi;
 
@@ -20,7 +21,6 @@ using namespace Rodin::Variational;
 
 int main(int argc, char** argv)
 {
-  sleep(5);
   mpi::environment env(argc, argv);
   mpi::communicator world;
   Context::MPI mpi(env, world);
@@ -34,60 +34,29 @@ int main(int argc, char** argv)
   {
     std::cout << "Sharding\n";
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 3, 3 });
     mesh.getConnectivity().compute(2, 2);
     mesh.getConnectivity().compute(1, 2);
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
+
+    for (auto it = mesh.getCell(); it; ++it)
+    {
+      mesh.setAttribute(
+          {it->getDimension(), it->getIndex()}, partitioner.getPartition(it->getIndex()) + 1);
+    }
+    mesh.save("Global.mesh", IO::FileFormat::MEDIT);
     sharder.shard(partitioner).scatter(0);
   }
 
-  // std::cout << "Gather\n";
   auto mesh = sharder.gather(0);
-  // mesh.getShard().getConnectivity().compute(1, 2);
-  // std::cout << "Vertex count: " << mesh.getVertexCount() << "\n";
-  // std::cout << "Shard: " << world.rank() <<  " Local count: "
-  // << mesh.getShard().getVertexCount() << "\n";
-
   auto& shard = mesh.getShard();
+  shard.save("Gathered" + std::to_string(world.rank()) + ".mesh", IO::FileFormat::MEDIT);
+  std::cout << "Gathered.\n";
+  P1 vh(mesh);
+  std::cout << "Created P1 space with " << vh.getSize() << " DOFs.\n";
 
-  mesh.getShard().save(
-      "Gathered" + std::to_string(world.rank()) + ".mesh",
-      IO::FileFormat::MEDIT);
-  // print polytope map
-  for (size_t d = 0; d < mesh.getDimension(); ++d)
-  {
-    std::cout << "Dimension: " << d << "\n";
-    const auto& map = shard.getPolytopeMap(d);
-    for (const auto& [local, global] : map.left)
-    {
-      std::cout << "Local: " << local << ", Global: " << global << "\n";
-    }
-  }
-
-  // Print halo
-  // if (world.rank() == 0)
-  // {
-  //   std::cout << "Halo information:\n";
-  //   for (size_t d = 0; d <= mesh.getDimension(); ++d)
-  //   {
-  //     std::cout << "Dimension: " << d << "\n";
-  //     for (Index i = 0; i < shard.getPolytopeCount(d); ++i)
-  //     {
-  //         std::cout << "Owned polytope: " << i << "\n";
-  //         const auto& halo = shard.getHalo(d, i);
-  //         std::cout << "Halo: ";
-  //         for (const auto& h : halo)
-  //         {
-  //           std::cout << h << " ";
-  //         }
-  //         std::cout << "\n";
-  //       }
-  //   }
-  // }
-
-  // P1 vh(mesh);
-  // PETSc::GridFunction gf(vh);
+  PETSc::GridFunction gf(vh);
 
   // Define problem
   // PETSc::TrialFunction u(vh);

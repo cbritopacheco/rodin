@@ -21,9 +21,9 @@ int main(int argc, char** argv)
   {
 
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Quadrilateral, { 32, 32 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 3, 3 });
     mesh.getConnectivity().compute(2, 2);
-    mesh.getConnectivity().compute(2, 1);
+    // mesh.getConnectivity().compute(2, 1);
     std::cout << mesh.getFaceCount() << std::endl;
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());

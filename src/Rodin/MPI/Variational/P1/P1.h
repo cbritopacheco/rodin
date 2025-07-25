@@ -14,7 +14,7 @@
 namespace Rodin::Variational
 {
   template <class Range>
-  class P1<Range, Geometry::Mesh<Context::MPI>> final
+  class P1<Range, Geometry::Mesh<Context::MPI>>
     : public FiniteElementSpace<
         Geometry::Mesh<Context::MPI>, P1<Range, Geometry::Mesh<Context::MPI>>>
   {
@@ -132,103 +132,53 @@ namespace Rodin::Variational
         : m_mesh(mesh),
           m_fes(mesh.getShard())
       {
-        // std::cout << "Constructing P1 space on rank " << mesh.getContext().getCommunicator().rank() << std::endl;
-        // const auto& comm  = mesh.getContext().getCommunicator();
-        // const auto& shard = mesh.getShard();
-        // const size_t count = shard.getVertexCount();
+        const auto& comm  = mesh.getContext().getCommunicator();
+        const auto& shard = mesh.getShard();
+        const auto& halo = shard.getHalo(0);
+        const auto& owner = shard.getOwner(0);
 
-        // m_owned = 0;
-        // for (Index i = 0; i < count; ++i)
-        // {
-        //   if (shard.isOwned(0, i))
-        //     ++m_owned;
-        // }
+        m_owned = halo.size();
+        const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
+        m_offset = inclusive - m_owned;
 
-        // size_t inclusive = 0;
-        // inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
-        // m_offset = inclusive - m_owned;
+        FlatMap<Index, std::vector<std::pair<Index, Index>>> push, pull;
+        Index dofIdx = 0;
+        for (size_t i = 0; i < shard.getVertexCount(); ++i)
+        {
+          if (shard.isOwned(0, i))
+          {
+            for (const Index& peer : halo.at(i))
+            {
+              assert(peer != comm.rank());
+              const Index& global = mesh.getGlobalIndex(0, i);
+              push[peer].push_back({ global, dofIdx + m_offset });
+            }
+            m_loc2glob.right.insert({ dofIdx + m_offset, i });
+            dofIdx++;
+          }
+          else
+          {
+            pull.try_emplace(owner.at(i));
+          }
+        }
 
-        // for (Index i = 0; i < count; ++i)
-        // {
-        //   if (shard.isOwned(0, i))
-        //     m_loc2glob.right.insert({ i + m_offset, i });
-        // }
+        std::vector<boost::mpi::request> requests;
+        for (auto& [owner, requested] : pull)
+          requests.push_back(comm.irecv(owner, 0, pull[owner]));
+        for (const auto& [peer, requested] : push)
+          requests.push_back(comm.isend(peer, 0, push[peer]));
+        boost::mpi::wait_all(requests.begin(), requests.end());
 
-        // std::cout << "Rank " << comm.rank()
-        //           << "  offset: " << m_offset
-        //           << ", owned: " << m_owned
-        //           << ", total: " << count
-        //           << ", local2global size: " << m_loc2glob.right.size()
-        //           << std::endl;
-
-        // if (comm.rank() == 1)
-        //   sleep(5);
-
-        // FlatMap<Index, std::vector<Pair<Index, Index>>> push, pull;
-        // for (size_t i = 0; i < count; ++i)
-        // {
-        //   if (shard.isOwned(0, i))
-        //   {
-        //     assert(shard.getOwner(0, i) == comm.rank());
-        //     std::cout << "Rank " << comm.rank()
-        //               << "  owned vertex: " << i
-        //               << std::endl;
-        //     const auto& halo = shard.getHalo(0, i);
-        //     // for (const Index peer : halo)
-        //     // {
-        //     //   assert(peer != comm.rank());
-        //     //   const Index global = mesh.getGlobalIndex(0, i);
-        //     //   push[peer].push_back({ global, i + m_offset });
-        //     // }
-        //   }
-        //   else
-        //   {
-        //     const Index owner = shard.getOwner(0, i);
-        //     pull.try_emplace(owner);
-        //   }
-        // }
-
-// MPI_Barrier(comm);
-// std::exit(1);
-// 
-// std::cout << "Rank " << comm.rank()
-//           << "  pull keys (will irecv from): ";
-// for (auto& kv : pull) std::cout << kv.first << " ";
-// std::cout << "\nRank " << comm.rank()
-//           << "  push keys (will isend to):  ";
-// for (auto& kv : push) std::cout << kv.first << " ";
-// std::cout << std::endl;
-// 
-//         std::vector<boost::mpi::request> requests;
-// 
-//         for (auto& [owner, requested] : pull)
-//           requests.push_back(comm.irecv(owner, 0, pull[owner]));
-// 
-//         for (const auto& [peer, requested] : push)
-//           requests.push_back(comm.isend(peer, 0, push[peer]));
-// 
-// std::cout << "Rank " << comm.rank()
-//           << " will irecv " << pull.size()
-//           << " from ranks: ";
-// for (auto& kv : pull) std::cout << kv.first << ' ';
-// std::cout << "; and isend to ranks: ";
-// for (auto& kv : push) std::cout << kv.first << ' ';
-// std::cout << std::endl;
-// 
-//         boost::mpi::wait_all(requests.begin(), requests.end());
-// 
-//         std::exit(1);
-// 
-//         for (const auto& [owner, requested] : pull)
-//         {
-//           for (size_t i = 0; i < requested.size(); ++i)
-//           {
-//             const auto local = mesh.getLocalIndex(0, requested[i].first());
-//             assert(local);
-//             const Index global = requested[i].second();
-//             m_loc2glob.right.insert({ global, *local});
-//           }
-//         }
+        for (const auto& [owner, requested] : pull)
+        {
+          for (size_t i = 0; i < requested.size(); ++i)
+          {
+            const auto local = mesh.getLocalIndex(0, requested[i].first);
+            assert(local);
+            const Index& global = requested[i].second;
+            m_loc2glob.right.insert({ global, *local});
+          }
+        }
       }
 
       P1(const MeshType& mesh, size_t vdim)
@@ -397,6 +347,11 @@ namespace Rodin::Variational
       size_t m_owned;
       Bimap m_loc2glob;
   };
+}
+
+namespace Rodin::MPI
+{
+  using P1 = Variational::P1<Real, Geometry::Mesh<Context::MPI>>;
 }
 
 #endif
