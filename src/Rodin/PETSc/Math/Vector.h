@@ -42,7 +42,7 @@ namespace Rodin::PETSc
 
       Vector();
 
-      Vector(const boost::mpi::communicator& comm);
+      Vector(MPI_Comm comm);
 
       Vector(const Vector& other);
 

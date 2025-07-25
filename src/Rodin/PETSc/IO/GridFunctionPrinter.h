@@ -7,19 +7,19 @@
 #ifndef RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 #define RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 
-#include <petsc.h>
-#include <petscsystypes.h>
-#include <petscvec.h>
-
-#include "Rodin/IO/GridFunctionPrinter.h"
-#include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/IO/GridFunctionPrinter.h"
+
+#include "Rodin/FormLanguage/Traits.h"
+
+#include "Rodin/PETSc/Math/Vector.h"
+#include <limits>
 
 namespace Rodin::IO
 {
   template <FileFormat Fmt, class FES>
-  class GridFunctionPrinter<Fmt, FES, ::Vec>
-    : public GridFunctionPrinterBase<Fmt, FES, ::Vec>
+  class GridFunctionPrinter<Fmt, FES, PETSc::Vector>
+    : public GridFunctionPrinterBase<Fmt, FES, PETSc::Vector>
   {
     public:
       using FESType = FES;
@@ -30,7 +30,7 @@ namespace Rodin::IO
 
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
-      using DataType = ::Vec;
+      using DataType = PETSc::Vector;
 
       using Parent = GridFunctionPrinterBase<Format, FES, DataType>;
 
@@ -41,10 +41,9 @@ namespace Rodin::IO
       void printData(std::ostream& os) override
       {
         const auto& gf = this->getObject();
-        const auto& data = gf.getData();
-        const auto& raw = gf.getRaw();
-        for (PetscInt i = 0; i < gf.getSize(); ++i)
-          os << raw[i] << "\n";
+        assert(gf.getSize() <= std::numeric_limits<PetscInt>::max());
+        for (PetscInt i = 0; i < static_cast<PetscInt>(gf.getSize()); ++i)
+          os << gf[i] << "\n";
       }
   };
 }

@@ -1,49 +1,127 @@
 #ifndef RODIN_PETSC_VARIATIONAL_PROBLEM_H
 #define RODIN_PETSC_VARIATIONAL_PROBLEM_H
 
+#include <mpi.h>
 #include <petsc.h>
+#include <petscsys.h>
+#include <type_traits>
 
+#include "Rodin/Context/Local.h"
+#include "Rodin/MPI/Context/MPI.h"
 #include "Rodin/Variational/Problem.h"
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
 
 namespace Rodin::PETSc
 {
-  template <class ... Ps>
-  class Problem;
-
-  template <class U1, class U2, class ... Us>
-  class Problem<Tuple<U1, U2, Us ...>, LinearSystem> : public Variational::Problem<Tuple<U1, U2, Us ...>, LinearSystem>
+  template <class U, class V>
+  class Problem : public Variational::ProblemUV<LinearSystem, U, V>
   {
-    using Parent = Variational::Problem<Tuple<U1, U2, Us ...>, LinearSystem>;
-    using Parent::operator=;
-
     public:
-      Problem(U1& u1, U2& u2, Us& ... us)
-        : Parent(u1, u2, us..., LinearSystem(u1.getFiniteElementSpace().getMesh().getContext().getCommunicator()))
-      {
-        assert(
-            u1.getFiniteElementSpace().getMesh().getContext().getCommunicator()
-            ==
-            u2.getFiniteElementSpace().getMesh().getContext().getCommunicator());
+      using Parent = Variational::ProblemUV<LinearSystem, U, V>;
 
-        assert((... && (
-            u2.getFiniteElementSpace().getMesh().getContext().getCommunicator()
-            ==
-            us.getFiniteElementSpace().getMesh().getContext().getCommunicator())));
+      using LinearSystemType = LinearSystem;
+
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystem>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+
+      using ProblemBodyType = Variational::ProblemBody<OperatorType, VectorType, ScalarType>;
+
+      using TrialFESType = typename FormLanguage::Traits<U>::FESType;
+
+      using TestFESType = typename FormLanguage::Traits<V>::FESType;
+
+      Problem(U& u, V& v)
+        : Parent(u, v),
+          m_axb(
+              [&]() -> MPI_Comm
+              {
+                using TrialFESContextType = typename FormLanguage::Traits<TrialFESType>::ContextType;
+                if constexpr (std::is_same_v<TrialFESContextType, Context::Local>)
+                {
+                  return PETSC_COMM_SELF;
+                }
+                else if constexpr (std::is_same_v<TrialFESContextType, Context::MPI>)
+                {
+                  const auto& fes = u.getFiniteElementSpace();
+                  const auto& mesh = fes.getMesh();
+                  const auto& ctx = mesh.getContext();
+                  const MPI_Comm comm = ctx.getCommunicator();
+                  return comm;
+                }
+                else
+                {
+                  assert(false);
+                  return MPI_COMM_NULL;
+                }
+              }())
+      {}
+
+      constexpr
+      Problem(const Problem& other)
+        : Parent(other),
+          m_axb(other.m_axb)
+      {}
+
+      constexpr
+      Problem(Problem&& other) noexcept
+        : Parent(std::move(other)),
+          m_axb(std::move(other.m_axb))
+      {}
+
+      Problem& operator=(const Problem& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_axb = other.m_axb;
+        }
+        return *this;
       }
 
-      template <class AXB>
-      Problem(U1& u1, U2& u2, Us& ... us, AXB&& axb)
-        : Parent(u1, u2, us..., std::forward<AXB>(axb))
-      {}
+      Problem& operator=(Problem&& other) noexcept
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_axb = std::move(other.m_axb);
+        }
+        return *this;
+      }
+
+      Problem& operator=(const ProblemBodyType& rhs) override
+      {
+        Parent::operator=(rhs);
+        return *this;
+      }
+
+      LinearSystemType& getLinearSystem() override
+      {
+        return m_axb;
+      }
+
+      const LinearSystemType& getLinearSystem() const override
+      {
+        return m_axb;
+      }
+
+      Problem* copy() const noexcept override
+      {
+        return new Problem(*this);
+      }
+
+    private:
+      LinearSystemType m_axb;
   };
 
-  template <class U1, class U2, class ... Us>
-  Problem(U1&, U2&, Us&...) -> Problem<Tuple<U1, U2, Us...>, LinearSystem>;
-
-  template <class U1, class U2, class ... Us, class AXB>
-  Problem(U1& u1, U2& u2, Us& ... us, AXB&& axb) -> Problem<Tuple<U1, U2, Us...>, AXB>;
+  template <class U, class V>
+  Problem(U&, V&) -> Problem<U, V>;
 }
 
 #endif

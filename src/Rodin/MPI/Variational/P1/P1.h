@@ -149,7 +149,8 @@ namespace Rodin::Variational
           {
             for (const Index& peer : halo.at(i))
             {
-              assert(peer != comm.rank());
+              assert(comm.rank() >= 0);
+              assert(peer != static_cast<Index>(comm.rank()));
               const Index& global = mesh.getGlobalIndex(0, i);
               push[peer].push_back({ global, dofIdx + m_offset });
             }
@@ -283,7 +284,8 @@ namespace Rodin::Variational
         if (localIdx)
         {
           const Index& owner = shard.getOwner(d).at(*localIdx);
-          if (owner == comm.rank())
+          assert(comm.rank() >= 0);
+          if (owner == static_cast<Index>(comm.rank()))
             send = m_fes.getDOFs(*localIdx, globalIdx);
         }
         auto recv =
@@ -309,7 +311,8 @@ namespace Rodin::Variational
         if (localIdx)
         {
           const Index& owner = shard.getOwner(d).at(*localIdx);
-          if (owner == comm.rank())
+          assert(comm.rank() >= 0);
+          if (owner == static_cast<Index>(comm.rank()))
             send = fes.getGlobalIndex({ d, *localIdx }, localDof);
         }
         auto recv =

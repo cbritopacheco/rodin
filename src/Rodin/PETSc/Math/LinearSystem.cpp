@@ -1,10 +1,11 @@
+#include <mpi.h>
 #include <petscsys.h>
 
 #include "LinearSystem.h"
 
 namespace Rodin::Math
 {
-  LinearSystem<PETSc::Matrix, PETSc::Vector>::LinearSystem(const boost::mpi::communicator& comm)
+  LinearSystem<PETSc::Matrix, PETSc::Vector>::LinearSystem(MPI_Comm comm)
     : m_operator(comm),
       m_vector(comm),
       m_solution(comm)

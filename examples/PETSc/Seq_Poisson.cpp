@@ -23,49 +23,29 @@ int main(int argc, char** argv)
 
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
   mesh.getConnectivity().compute(1, 2);
 
   ScalarFunction f = 1;
 
   P1 vh(mesh);
 
-  Mat a;
-  Vec x;
-  Vec b;
-
   PETSc::TrialFunction u(vh);
-  TestFunction  v(vh);
+  PETSc::TestFunction  v(vh);
 
-  // LinearSystem axb(a, x, b);
 
   // Define problem
-  // Problem poisson(u, v, axb);
-  // poisson = Integral(Grad(u), Grad(v))
-  //         - Integral(f, v)
-  //         + DirichletBC(u, Zero());
-  // poisson.assemble();
+  PETSc::Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+  poisson.assemble();
 
-  // std::cout << "Matrix :" << "\n";
-  // MatView(a, PETSC_VIEWER_STDOUT_WORLD);
+  // Save solution
+  u.getSolution().save("Poisson.gf");
+  mesh.save("Poisson.mesh");
 
-  // std::cout << "RHS size: " << "\n";
-  // VecView(b, PETSC_VIEWER_STDOUT_WORLD);
-
-  // CG(poisson).solve();
-
-  // std::cout << "x after solve:\n";
-  // VecView(x, PETSC_VIEWER_STDOUT_WORLD);
-
-  // // Save solution
-  // u.getSolution().save("Poisson.gf");
-  // mesh.save("Poisson.mesh");
-
-  // MatDestroy(&a);
-  // VecDestroy(&x);
-  // VecDestroy(&b);
-
-  // PetscFinalize();
+  PetscFinalize();
 
   return 0;
 }

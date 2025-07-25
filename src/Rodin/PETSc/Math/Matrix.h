@@ -2,6 +2,7 @@
 #define RODIN_PETSC_MATH_MATRIX_H
 
 #include <boost/mpi/communicator.hpp>
+#include <mpi.h>
 #include <petsc.h>
 #include <petscmat.h>
 #include <petscsystypes.h>
@@ -62,7 +63,7 @@ namespace Rodin::PETSc
 
       Matrix();
 
-      Matrix(const boost::mpi::communicator& comm);
+      Matrix(MPI_Comm comm);
 
       Matrix(const Matrix& other);
 

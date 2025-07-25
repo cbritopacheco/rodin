@@ -8,6 +8,7 @@
 #define RODIN_PETSC_MATH_LINEARSYSTEM_H
 
 #include <boost/mpi/communicator.hpp>
+#include <mpi.h>
 #include <petsc.h>
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/PETSc/Math/Matrix.h"
@@ -31,7 +32,7 @@ namespace Rodin::Math
 
       LinearSystem() = default;
 
-      LinearSystem(const boost::mpi::communicator& comm);
+      LinearSystem(MPI_Comm comm);
 
       LinearSystem(const LinearSystem& other);
 

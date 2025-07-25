@@ -1,3 +1,4 @@
+#include <mpi.h>
 #include <petscmat.h>
 #include <petscsystypes.h>
 
@@ -11,7 +12,7 @@ namespace Rodin::PETSc
       m_mat(PETSC_NULLPTR)
   {}
 
-  Matrix::Matrix(const boost::mpi::communicator& comm)
+  Matrix::Matrix(MPI_Comm comm)
     : SeqAIJ(*this),
       MPIAIJ(*this)
   {

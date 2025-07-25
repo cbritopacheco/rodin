@@ -9,7 +9,7 @@ namespace Rodin::PETSc
       m_vec(PETSC_NULLPTR)
   {}
 
-  Vector::Vector(const boost::mpi::communicator& comm)
+  Vector::Vector(MPI_Comm comm)
     : MPI(*this)
   {
     PetscErrorCode ierr;

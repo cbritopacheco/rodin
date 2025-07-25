@@ -58,10 +58,10 @@ namespace Rodin::Variational
       GridFunction(const FESType& fes)
         : Parent(fes),
           m_owned(true),
-          m_write(State::Unacquired),
-          m_rawWrite(nullptr),
           m_read(State::Unacquired),
-          m_rawRead(nullptr)
+          m_rawRead(nullptr),
+          m_write(State::Unacquired),
+          m_rawWrite(nullptr)
       {
         auto& data = this->getData();
         if constexpr (std::is_same_v<ContextType, Context::Local>)

@@ -25,11 +25,11 @@ namespace Rodin::Variational
    * @brief General class to assemble linear systems with `Math::Matrix`
    * and `Math::Vector` types in a serial context.
    */
-  template <class U, class V, class LinearSystem>
-  class DenseProblem<Tuple<U, V>, LinearSystem> : public Problem<Tuple<U, V>, LinearSystem>
+  template <class LinearSystem, class U, class V>
+  class DenseProblem<LinearSystem, U, V> : public Problem<LinearSystem, U, V>
   {
     public:
-      using Parent = Problem<Tuple<U, V>, LinearSystem>;
+      using Parent = Problem<LinearSystem, U, V>;
       using Parent::Parent;
       using Parent::operator=;
   };
@@ -37,17 +37,14 @@ namespace Rodin::Variational
   template <class U, class V>
   DenseProblem(U& u, V& v)
     -> DenseProblem<
-        Tuple<U, V>,
         Math::LinearSystem<
           Math::Matrix<
             typename FormLanguage::Traits<typename FormLanguage::Traits<U>::FESType>
             ::ScalarType>,
           Math::Vector<
             typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>
-            ::ScalarType>>>;
-
-  template <class U, class V, class LinearSystem>
-  DenseProblem(U& u, V& v, LinearSystem& axb) -> DenseProblem<Tuple<U, V>, LinearSystem>;
+            ::ScalarType>>,
+          U, V>;
 }
 
 #endif

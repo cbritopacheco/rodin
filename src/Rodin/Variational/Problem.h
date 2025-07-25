@@ -82,8 +82,8 @@ namespace Rodin::Variational
    * @brief General class to assemble linear systems with `Operator`
    * and `Vector` generic types in a sequential context.
    */
-  template <class U, class V, class LinearSystem>
-  class Problem<Tuple<U, V>, LinearSystem>
+  template <class LinearSystem, class U, class V>
+  class ProblemUV
     : public ProblemBase<
         typename FormLanguage::Traits<LinearSystem>::OperatorType,
         typename FormLanguage::Traits<LinearSystem>::VectorType,
@@ -117,6 +117,8 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
+      using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
+
       using TrialFESScalarType =
         typename FormLanguage::Traits<TrialFESType>::ScalarType;
 
@@ -129,29 +131,50 @@ namespace Rodin::Variational
       using Parent = ProblemBase<OperatorType, VectorType, ScalarType>;
 
       constexpr
-      Problem(U& u, V& v)
+      ProblemUV(U& u, V& v)
         : m_assembled(false),
-          m_trialFunction(u), m_testFunction(v),
-          m_axb(LinearSystemType{})
+          m_trialFunction(u), m_testFunction(v)
       {}
 
-      template <class LinearSystemType>
-      constexpr
-      Problem(U& u, V& v, LinearSystemType&& axb)
-        : m_assembled(false),
-          m_trialFunction(u), m_testFunction(v),
-          m_axb(std::forward<LinearSystemType>(axb))
+      ProblemUV(const ProblemUV& other)
+        : Parent(other),
+          m_assembled(other.m_assembled),
+          m_trialFunction(other.m_trialFunction.get()),
+          m_testFunction(other.m_testFunction.get()),
+          m_pb(other.m_pb)
       {}
 
-      /**
-       * @brief Deleted copy constructor.
-       */
-      Problem(const Problem& other) = delete;
+      ProblemUV(ProblemUV&& other)
+        : Parent(std::move(other)),
+          m_assembled(std::exchange(other.m_assembled, false)),
+          m_trialFunction(std::move(other.m_trialFunction)),
+          m_testFunction(std::move(other.m_testFunction)),
+          m_pb(std::move(other.m_pb))
+      {}
 
-      /**
-       * @brief Deleted copy assignment operator.
-       */
-      void operator=(const Problem& other) = delete;
+      ProblemUV& operator=(const ProblemUV& other)
+      {
+        if (this != &other)
+        {
+          m_assembled = other.m_assembled;
+          m_trialFunction = other.m_trialFunction.get();
+          m_testFunction = other.m_testFunction.get();
+          m_pb = other.m_pb;
+        }
+        return *this;
+      }
+
+      ProblemUV& operator=(ProblemUV&& other) noexcept
+      {
+        if (this != &other)
+        {
+          m_assembled = std::exchange(other.m_assembled, false);
+          m_trialFunction = std::move(other.m_trialFunction);
+          m_testFunction = std::move(other.m_testFunction);
+          m_pb = std::move(other.m_pb);
+        }
+        return *this;
+      }
 
       constexpr
       TrialFunctionType& getTrialFunction()
@@ -177,16 +200,16 @@ namespace Rodin::Variational
         return m_testFunction.get();
       }
 
-      Problem& assemble() override
+      ProblemUV& assemble() override
       {
         using LinearFormType = LinearForm<TestFESType, VectorType>;
         using BilinearFormType =
           BilinearForm<SolutionType, TrialFESType, TestFESType, OperatorType>;
 
         auto& pb = m_pb;
-        auto& u = getTrialFunction();
-        auto& v = getTestFunction();
-        auto& axb = getLinearSystem();
+        auto& u = this->getTrialFunction();
+        auto& v = this->getTestFunction();
+        auto& axb = this->getLinearSystem();
         auto& mass = axb.getVector();
         auto& stiffness = axb.getOperator();
         auto& bfs = pb.getBFs();
@@ -266,7 +289,7 @@ namespace Rodin::Variational
             assemble();
 
          // Solve the system AX = B
-         auto& axb = getLinearSystem();
+         auto& axb = this->getLinearSystem();
          auto& a = axb.getOperator();
          auto& x = axb.getSolution();
          auto& b = axb.getVector();
@@ -276,10 +299,81 @@ namespace Rodin::Variational
          getTrialFunction().getSolution().setData(x);
       }
 
-      Problem& operator=(const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) override
+      ProblemUV& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
         m_assembled = false;
+        return *this;
+      }
+
+      virtual ProblemUV* copy() const noexcept override = 0;
+
+    private:
+      Boolean m_assembled;
+      std::reference_wrapper<TrialFunctionType> m_trialFunction;
+      std::reference_wrapper<TestFunctionType>  m_testFunction;
+      ProblemBodyType m_pb;
+  };
+
+  template <class LinearSystem, class U, class V>
+  class Problem<LinearSystem, U, V> : public ProblemUV<LinearSystem, U, V>
+  {
+    public:
+      using LinearSystemType = LinearSystem;
+
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystem>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+
+      using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
+
+      using Parent = ProblemUV<LinearSystem, U, V>;
+
+      constexpr
+      Problem(U& u, V& v)
+        : Parent(u, v)
+      {}
+
+      constexpr
+      Problem(const Problem& other)
+        : Parent(other),
+          m_axb(other.m_axb)
+      {}
+
+      constexpr
+      Problem(Problem&& other) noexcept
+        : Parent(std::move(other)),
+          m_axb(std::move(other.m_axb))
+      {}
+
+      Problem& operator=(const Problem& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_axb = other.m_axb;
+        }
+        return *this;
+      }
+
+      Problem& operator=(Problem&& other) noexcept
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_axb = std::move(other.m_axb);
+        }
+        return *this;
+      }
+
+      Problem& operator=(const ProblemBodyType& rhs) override
+      {
+        Parent::operator=(rhs);
         return *this;
       }
 
@@ -295,17 +389,11 @@ namespace Rodin::Variational
 
       Problem* copy() const noexcept override
       {
-        assert(false);
-        return nullptr;
+        return new Problem(*this);
       }
 
     private:
-      Boolean m_assembled;
-      std::reference_wrapper<TrialFunctionType> m_trialFunction;
-      std::reference_wrapper<TestFunctionType>  m_testFunction;
       LinearSystemType m_axb;
-
-      ProblemBody<OperatorType, VectorType, ScalarType> m_pb;
   };
 
   /**
@@ -313,19 +401,18 @@ namespace Rodin::Variational
    */
   template <class U, class V>
   Problem(U& u, V& v)
-    -> Problem<Tuple<U, V>, Math::LinearSystem<
-          Math::SparseMatrix<
-            typename FormLanguage::Mult<
-              typename FormLanguage::Traits<typename FormLanguage::Traits<U>::FESType>::ScalarType,
-              typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>::Type>,
-          Math::Vector<
-            typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>>>;
-
-  template <class U, class V, class LinearSystem>
-  Problem(U& u, V& v, LinearSystem& axb) -> Problem<Tuple<U, V>, LinearSystem>;
+    -> Problem<
+          Math::LinearSystem<
+            Math::SparseMatrix<
+              typename FormLanguage::Mult<
+                typename FormLanguage::Traits<typename FormLanguage::Traits<U>::FESType>::ScalarType,
+                typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>::Type>,
+            Math::Vector<
+              typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>>,
+          U, V>;
 
   template <class LinearSystem, class U1, class U2, class ... Us>
-  class Problem<Tuple<U1, U2, Us...>, LinearSystem>
+  class ProblemUs
     : public ProblemBase<
         typename FormLanguage::Traits<LinearSystem>::OperatorType,
         typename FormLanguage::Traits<LinearSystem>::VectorType,
@@ -351,6 +438,9 @@ namespace Rodin::Variational
 
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+
+      using ProblemBodyType =
+        ProblemBody<OperatorType, VectorType, ScalarType>;
 
       using Parent = ProblemBase<OperatorType, VectorType, ScalarType>;
 
@@ -450,12 +540,7 @@ namespace Rodin::Variational
         Assembly::Sequential<VectorType, LinearFormTuple>;
 
     public:
-      Problem(U1& u1, U2& u2, Us&... us)
-        : Problem(u1, u2, us..., LinearSystemType{})
-      {}
-
-      template <class AXB>
-      Problem(U1& u1, U2& u2, Us&... us, AXB&& axb)
+      ProblemUs(U1& u1, U2& u2, Us&... us)
         : m_assembled(false),
           m_us(
             Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
@@ -474,8 +559,7 @@ namespace Rodin::Variational
                          { return BilinearFormType<
                              decltype(uv.first()), decltype(uv.second())>(
                                  uv.first().get(), uv.second().get());
-                         })),
-          m_axb(std::forward<AXB>(axb))
+                         }))
       {
         m_bfa.reset(new BilinearFormTupleSequentialAssembly);
         m_lfa.reset(new LinearFormTupleSequentialAssembly);
@@ -485,12 +569,80 @@ namespace Rodin::Variational
             { m_testUUIDMap.right.insert({ i, v.get().getUUID() }); });
       }
 
-      Problem& assemble() override
+      ProblemUs(const ProblemUs& other)
+        : Parent(other),
+          m_assembled(other.m_assembled),
+          m_us(other.m_us),
+          m_vs(other.m_vs),
+          m_lft(other.m_lft),
+          m_bft(other.m_bft),
+          m_trialOffsets(other.m_trialOffsets),
+          m_testOffsets(other.m_testOffsets),
+          m_trialUUIDMap(other.m_trialUUIDMap),
+          m_testUUIDMap(other.m_testUUIDMap),
+          m_bfa(other.m_bfa->copy()),
+          m_lfa(other.m_lfa->copy())
+      {}
+
+      ProblemUs(ProblemUs&& other) noexcept
+        : Parent(std::move(other)),
+          m_assembled(std::exchange(other.m_assembled, false)),
+          m_us(std::move(other.m_us)),
+          m_vs(std::move(other.m_vs)),
+          m_lft(std::move(other.m_lft)),
+          m_bft(std::move(other.m_bft)),
+          m_trialOffsets(std::move(other.m_trialOffsets)),
+          m_testOffsets(std::move(other.m_testOffsets)),
+          m_trialUUIDMap(std::move(other.m_trialUUIDMap)),
+          m_testUUIDMap(std::move(other.m_testUUIDMap)),
+          m_bfa(std::move(other.m_bfa)),
+          m_lfa(std::move(other.m_lfa))
+      {}
+
+      ProblemUs& operator=(const ProblemUs& other)
+      {
+        if (this != &other)
+        {
+          m_assembled = other.m_assembled;
+          m_us = other.m_us;
+          m_vs = other.m_vs;
+          m_lft = other.m_lft;
+          m_bft = other.m_bft;
+          m_trialOffsets = other.m_trialOffsets;
+          m_testOffsets = other.m_testOffsets;
+          m_trialUUIDMap = other.m_trialUUIDMap;
+          m_testUUIDMap = other.m_testUUIDMap;
+          m_bfa.reset(other.m_bfa->copy());
+          m_lfa.reset(other.m_lfa->copy());
+        }
+        return *this;
+      }
+
+      ProblemUs& operator=(ProblemUs&& other)
+      {
+        if (this != &other)
+        {
+          m_assembled = std::exchange(other.m_assembled, false);
+          m_us = std::move(other.m_us);
+          m_vs = std::move(other.m_vs);
+          m_lft = std::move(other.m_lft);
+          m_bft = std::move(other.m_bft);
+          m_trialOffsets = std::move(other.m_trialOffsets);
+          m_testOffsets = std::move(other.m_testOffsets);
+          m_trialUUIDMap = std::move(other.m_trialUUIDMap);
+          m_testUUIDMap = std::move(other.m_testUUIDMap);
+          m_bfa.reset(std::move(other.m_bfa));
+          m_lfa.reset(std::move(other.m_lfa));
+        }
+        return *this;
+      }
+
+      ProblemUs& assemble() override
       {
         auto& axb = getLinearSystem();
 
-        m_bft.apply([&](auto& bf) { bf.clear(); });
         m_lft.apply([&](auto& lf) { lf.clear(); });
+        m_bft.apply([&](auto& bf) { bf.clear(); });
 
         for (auto& bfi : m_pb.getLocalBFIs())
         {
@@ -530,6 +682,15 @@ namespace Rodin::Variational
               });
         }
 
+        auto lt =
+          m_lft.map(
+              [](auto& lf)
+              {
+                auto& v = lf.getTestFunction();
+                return Assembly::LinearFormAssemblyInput(
+                    v.getFiniteElementSpace(), lf.getIntegrators());
+              });
+
         auto bt =
           m_bft.map(
               [](auto& bf)
@@ -539,15 +700,6 @@ namespace Rodin::Variational
                 return Assembly::BilinearFormAssemblyInput(
                     u.getFiniteElementSpace(), v.getFiniteElementSpace(),
                     bf.getLocalIntegrators(), bf.getGlobalIntegrators());
-              });
-
-        auto lt =
-          m_lft.map(
-              [](auto& lf)
-              {
-                auto& v = lf.getTestFunction();
-                return Assembly::LinearFormAssemblyInput(
-                    v.getFiniteElementSpace(), lf.getIntegrators());
               });
 
         // Compute trial offsets
@@ -592,6 +744,14 @@ namespace Rodin::Variational
         std::array<Pair<size_t, size_t>, decltype(bt)::Size> boffsets;
         std::array<size_t, decltype(lt)::Size> loffsets;
 
+        m_lft.iapply(
+            [&](const Index i, const auto& lf)
+            {
+              auto vi = m_testUUIDMap.left.find(lf.getTestFunction().getUUID());
+              if (vi != m_testUUIDMap.left.end())
+                loffsets[i] = m_testOffsets[vi->second];
+            });
+
         m_bft.iapply(
             [&](const Index i, const auto& bf)
             {
@@ -599,14 +759,6 @@ namespace Rodin::Variational
               auto vi = m_testUUIDMap.left.find(bf.getTestFunction().getUUID());
               if (ui != m_trialUUIDMap.left.end() && vi != m_testUUIDMap.left.end())
                 boffsets[i] = Pair{ m_trialOffsets[ui->second], m_testOffsets[vi->second] };
-            });
-
-        m_lft.iapply(
-            [&](const Index i, const auto& lf)
-            {
-              auto vi = m_testUUIDMap.left.find(lf.getTestFunction().getUUID());
-              if (vi != m_testUUIDMap.left.end())
-                loffsets[i] = m_testOffsets[vi->second];
             });
 
         // Assemble stiffness operator
@@ -658,7 +810,7 @@ namespace Rodin::Variational
             });
       }
 
-      Problem& operator=(const ProblemBody<OperatorType, VectorType, Real>& rhs) override
+      ProblemUs& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
         m_assembled = false;
@@ -675,21 +827,11 @@ namespace Rodin::Variational
         return m_testOffsets;
       }
 
-      LinearSystemType& getLinearSystem() override
-      {
-        return m_axb;
-      }
+      virtual LinearSystemType& getLinearSystem() override = 0;
 
-      const LinearSystemType& getLinearSystem() const override
-      {
-        return m_axb;
-      }
+      virtual const LinearSystemType& getLinearSystem() const override = 0;
 
-      Problem* copy() const noexcept override
-      {
-        assert(false);
-        return nullptr;
-      }
+      virtual ProblemUs* copy() const noexcept override = 0;
 
     private:
       Boolean m_assembled;
@@ -710,29 +852,98 @@ namespace Rodin::Variational
 
       std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>>  m_bfa;
       std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>>      m_lfa;
+  };
 
+  template <class LinearSystem, class U1, class U2, class ... Us>
+  class Problem<LinearSystem, U1, U2, Us...> : public ProblemUs<LinearSystem, U1, U2, Us...>
+  {
+    public:
+      using LinearSystemType = LinearSystem;
+
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+
+      using ProblemBodyType =
+        ProblemBody<OperatorType, VectorType, ScalarType>;
+
+      using Parent = ProblemUs<LinearSystem, U1, U2, Us...>;
+
+      Problem(U1& u1, U2& u2, Us&... us)
+        : Parent(u1, u2, us...)
+      {}
+
+      Problem(const Problem& other)
+        : Parent(other),
+          m_axb(other.m_axb)
+      {}
+
+      Problem(Problem&& other) noexcept
+        : Parent(std::move(other)),
+          m_axb(std::move(other.m_axb))
+      {}
+
+      Problem& operator=(const Problem& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_axb = other.m_axb;
+        }
+        return *this;
+      }
+
+      Problem& operator=(Problem&& other) noexcept
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_axb = std::move(other.m_axb);
+        }
+        return *this;
+      }
+
+      Problem& operator=(const ProblemBodyType& rhs) override
+      {
+        Parent::operator=(rhs);
+        return *this;
+      }
+
+      LinearSystemType& getLinearSystem() override
+      {
+        return m_axb;
+      }
+
+      const LinearSystemType& getLinearSystem() const override
+      {
+        return m_axb;
+      }
+
+      Problem* copy() const noexcept override
+      {
+        return new Problem(*this);
+      }
+
+    private:
       LinearSystemType m_axb;
   };
 
   template <class U1, class U2, class ... Us>
   Problem(U1& u1, U2& u2, Us&... us)
     -> Problem<
-        Tuple<U1, U2, Us...>,
         Math::LinearSystem<
           Math::SparseMatrix<
             typename FormLanguage::Mult<
               typename FormLanguage::Traits<typename FormLanguage::Traits<U1>::FESType>::ScalarType,
               typename FormLanguage::Traits<typename FormLanguage::Traits<U2>::FESType>::ScalarType>::Type>,
           Math::Vector<
-            typename FormLanguage::Traits<typename FormLanguage::Traits<U2>::FESType>::ScalarType>>>;
-
-  template <class U1, class U2, class ... Us, class LinearSystem>
-  Problem(U1& u1, U2& u2, Us&... us, LinearSystem& axb)
-    -> Problem<Tuple<U1, U2, Us...>, LinearSystem>;
-
-  template <class U1, class U2, class ... Us, class LinearSystem>
-  Problem(U1& u1, U2& u2, Us&... us, LinearSystem&& axb)
-    -> Problem<Tuple<U1, U2, Us...>, LinearSystem>;
+            typename FormLanguage::Traits<typename FormLanguage::Traits<U2>::FESType>::ScalarType>>,
+        U1, U2, Us...>;
 }
 
 #endif
