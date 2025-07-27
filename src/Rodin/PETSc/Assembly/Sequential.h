@@ -12,6 +12,8 @@
 
 #include "Rodin/PETSc/Math/Vector.h"
 #include "Rodin/PETSc/Math/Matrix.h"
+#include "Rodin/PETSc/Math/LinearSystem.h"
+#include "Rodin/Variational/Problem.h"
 
 namespace Rodin::Assembly
 {
@@ -22,10 +24,10 @@ namespace Rodin::Assembly
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
-      using VectorType      = PETSc::Vector;
-      using LinearFormType  = Variational::LinearForm<FES, VectorType>;
-      using Parent          = AssemblyBase<VectorType, LinearFormType>;
-      using InputType       = typename Parent::InputType;
+      using VectorType = PETSc::Vector;
+      using LinearFormType = Variational::LinearForm<FES, VectorType>;
+      using Parent = AssemblyBase<VectorType, LinearFormType>;
+      using InputType = typename Parent::InputType;
 
       static_assert(std::is_same_v<ScalarType, PetscScalar>);
 
@@ -69,16 +71,15 @@ namespace Rodin::Assembly
   class Sequential<PETSc::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix>> final
     : public AssemblyBase<PETSc::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix>>
   {
-
     public:
       using DotType =
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
-      using OperatorType    = PETSc::Matrix;
+      using OperatorType = PETSc::Matrix;
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
-      using Parent           = AssemblyBase<OperatorType, BilinearFormType>;
-      using InputType        = typename Parent::InputType;
+      using Parent = AssemblyBase<OperatorType, BilinearFormType>;
+      using InputType = typename Parent::InputType;
 
       static_assert(
         std::is_same_v<DotType, PetscScalar>,

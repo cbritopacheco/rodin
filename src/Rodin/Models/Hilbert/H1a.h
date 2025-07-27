@@ -31,8 +31,16 @@ namespace Rodin::Models::Hilbert
   class H1a
   {
     using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
     using FESRange = typename FormLanguage::Traits<FES>::RangeType;
-    static_assert(std::is_same_v<FESRange, Real> || std::is_same_v<FESRange, Math::Vector<Real>>);
+
+    using LinearSystemType =
+      Math::LinearSystem<Math::SparseMatrix<FESRange>, Math::Vector<FESRange>>;
+
+    using SolverType = Solver::CG<LinearSystemType>;
+
+    static_assert(std::is_same_v<FESRange, Real> ||
+        std::is_same_v<FESRange, Math::Vector<Real>>);
 
     public:
       H1a(const FES& fes)
@@ -60,7 +68,7 @@ namespace Rodin::Models::Hilbert
           hilbert = Integral(m_alpha * m_alpha * Grad(g), Grad(w))
                   + Integral(g, w)
                   - lf;
-          hilbert.solve(m_cg);
+          hilbert.solve(m_solver);
           return g.getSolution();
         }
         else if constexpr (std::is_same_v<FESRange, Math::Vector<Real>>)
@@ -71,7 +79,7 @@ namespace Rodin::Models::Hilbert
           hilbert = Integral(m_alpha * m_alpha * Jacobian(g), Jacobian(w))
                   + Integral(g, w)
                   - lf;
-          hilbert.solve(m_cg);
+          hilbert.solve(m_solver);
           return g.getSolution();
         }
         else
@@ -81,38 +89,32 @@ namespace Rodin::Models::Hilbert
         }
       }
 
-      inline
       H1a& operator+=(const Variational::DirichletBCBase<ScalarType>& dbc)
       {
         m_pb += dbc;
         return *this;
       }
 
-      inline
       auto& getProblem()
       {
         return m_pb;
       }
 
-      inline
       const auto& getProblem() const
       {
         return m_pb;
       }
 
-      inline
       const auto& getTrialFunction() const
       {
         return m_trial;
       }
 
-      inline
       const auto& getTestFunction() const
       {
         return m_test;
       }
 
-      inline
       const FES& getFiniteElementSpace() const
       {
         return m_fes.get();
@@ -125,7 +127,7 @@ namespace Rodin::Models::Hilbert
       Variational::Problem<
         FES, FES, Context::Local, Math::SparseMatrix<Real>, Math::Vector<Real>> m_pb;
       Real m_alpha;
-      Solver::CG<Math::SparseMatrix<Real>, Math::Vector<Real>> m_cg;
+      SolverType m_solver;
   };
 }
 

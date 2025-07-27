@@ -24,13 +24,20 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for SparseLU
+   */
+  template <class LinearSystem>
+  SparseLU(Variational::ProblemBase<LinearSystem>&) -> SparseLU<LinearSystem>;
+
+  /**
    * @ingroup SparseLUSpecializations
    * @brief Sparse supernodal LU factorization for general matrices for use
    * with Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
   template <class Scalar>
-  class SparseLU<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class SparseLU<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -39,13 +46,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      SparseLU(ProblemType& pb)
+      SparseLU(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -57,10 +66,10 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        m_solver.compute(A);
-        x = m_solver.solve(b);
+        m_solver.compute(axb.getOperator());
+        axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
       SparseLU* copy() const noexcept override
@@ -71,14 +80,6 @@ namespace Rodin::Solver
     private:
       Eigen::SparseLU<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for SparseLU
-   */
-  template <class Scalar>
-  SparseLU(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> SparseLU<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

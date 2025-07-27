@@ -9,6 +9,7 @@
 
 #include <Eigen/SparseQR>
 
+#include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
@@ -24,13 +25,20 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for SparseQR
+   */
+  template <class LinearSystem>
+  SparseQR(Variational::ProblemBase<LinearSystem>&) -> SparseQR<LinearSystem>;
+
+  /**
    * @ingroup SparseQRSpecializations
    * @brief Sparse left-looking QR factorization with numerical column pivoting
    * for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class SparseQR<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class SparseQR<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -39,13 +47,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      SparseQR(ProblemType& pb)
+      SparseQR(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -57,13 +67,12 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        m_solver.compute(A);
-        x = m_solver.solve(b);
+        m_solver.compute(axb.getOperator());
+        axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      inline
       SparseQR* copy() const noexcept override
       {
         return new SparseQR(*this);
@@ -72,14 +81,6 @@ namespace Rodin::Solver
     private:
       Eigen::SparseQR<OperatorType, Eigen::COLAMDOrdering<int>> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for SparseQR
-   */
-  template <class Scalar>
-  SparseQR(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> SparseQR<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

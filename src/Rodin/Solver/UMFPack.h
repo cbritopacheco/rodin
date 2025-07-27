@@ -28,12 +28,19 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for UMFPack
+   */
+  template <class LinearSystem>
+  UMFPack(Variational::ProblemBase<LinearSystem>&) -> UMFPack<LinearSystem>;
+
+  /**
    * @ingroup UMFPackSpecializations
    * @brief UMFPack for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class UMFPack<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class UMFPack<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -42,13 +49,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      UMFPack(ProblemType& pb)
+      UMFPack(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -62,10 +71,10 @@ namespace Rodin::Solver
 
       ~UMFPack() = default;
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        m_solver.compute(A);
-        x = m_solver.solve(b);
+        m_solver.compute(axb.getOperator());
+        axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
       void printControl()
@@ -91,14 +100,6 @@ namespace Rodin::Solver
     private:
       Eigen::UmfPackLU<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for UMFPack
-   */
-  template <class Scalar>
-  UMFPack(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> UMFPack<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif // #ifdef RODIN_USE_UMFPACK

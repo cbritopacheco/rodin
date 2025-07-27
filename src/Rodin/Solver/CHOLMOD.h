@@ -24,9 +24,16 @@
 
 namespace Rodin::Solver::CHOLMOD
 {
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for SupernodalLLT
+   */
+  template <class LinearSystemType>
+  SupernodalLLT(Variational::ProblemBase<LinearSystemType>&) -> SupernodalLLT<LinearSystemType>;
+
   template <class Scalar>
-  class SupernodalLLT<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class SupernodalLLT<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>>
   {
     public:
       using ScalarType = Scalar;
@@ -35,13 +42,15 @@ namespace Rodin::Solver::CHOLMOD
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      SupernodalLLT(ProblemType& pb)
+      SupernodalLLT(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -55,13 +64,13 @@ namespace Rodin::Solver::CHOLMOD
 
       ~SupernodalLLT() = default;
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        m_solver.compute(A);
-        x = m_solver.solve(b);
+        m_solver.compute(axb.getOperator());
+        axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      bool success() const
+      Real success() const
       {
         return m_solver.info() == Eigen::Success;
       }
@@ -74,14 +83,6 @@ namespace Rodin::Solver::CHOLMOD
     private:
       Eigen::CholmodSupernodalLLT<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for SupernodalLLT
-   */
-  template <class Scalar>
-  SupernodalLLT(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> SupernodalLLT<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif // #ifdef RODIN_USE_CHOLMOD

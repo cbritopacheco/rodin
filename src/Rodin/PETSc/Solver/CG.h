@@ -3,6 +3,7 @@
 
 #include <petscksp.h>
 
+#include "Rodin/PETSc/Math/LinearSystem.h"
 #include "Rodin/Solver/CG.h"
 #include "KSP.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -15,21 +16,22 @@ namespace Rodin::Solver
    * PETSc::Matrix and PETSc::Vector.
    */
   template <>
-  class CG<PETSc::Matrix, PETSc::Vector> final : public KSP
+  class CG<PETSc::LinearSystem> final : public KSP
   {
   public:
     using OperatorType = PETSc::Matrix;
-    using VectorType   = PETSc::Vector;
-    using ScalarType   = PetscScalar;
-    using ProblemType  = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
-    using Parent       = KSP;
+    using VectorType = PETSc::Vector;
+    using ScalarType = PetscScalar;
+    using LinearSystemType = PETSc::LinearSystem;
+    using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+    using Parent = KSP;
     using Parent::solve;
 
     /**
      * @brief Construct a CG solver and set the PETSc type to KSPCG.
      * @param pb The variational problem to solve.
      */
-    explicit CG(ProblemType& pb);
+    explicit CG(ProblemBaseType& pb);
 
     /**
      * @brief Copy constructor.
@@ -48,14 +50,6 @@ namespace Rodin::Solver
       return new CG(*this);
     }
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief Class template argument deduction for CG from ProblemBase.
-   */
-  CG(Variational::ProblemBase<PETSc::Matrix, PETSc::Vector, PetscScalar>&)
-    -> CG<PETSc::Matrix, PETSc::Vector>;
-
 } // namespace Rodin::Solver
 
 #endif // RODIN_SOLVER_PETSC_CG_H

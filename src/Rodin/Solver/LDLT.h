@@ -9,8 +9,10 @@
 
 #include <Eigen/SparseCholesky>
 
+#include "Rodin/Math/ForwardDecls.h"
+#include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Math/SparseMatrix.h"
+#include "Rodin/Math/Matrix.h"
 
 #include "ForwardDecls.h"
 #include "Solver.h"
@@ -24,13 +26,20 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for LDLT
+   */
+  template <class LinearSystem>
+  LDLT(Variational::ProblemBase<LinearSystem>&) -> LDLT<LinearSystem>;
+
+  /**
    * @ingroup LDLTSpecializations
    * @brief A direct sparse LDLT Cholesky factorizations without square root
    * for use with Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
   template <class Scalar>
-  class LDLT<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class LDLT<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -39,13 +48,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::Matrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      LDLT(ProblemType& pb)
+      LDLT(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -57,12 +68,11 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        x = m_solver.compute(A).solve(b);
+        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
-      inline
       LDLT* copy() const noexcept override
       {
         return new LDLT(*this);
@@ -71,14 +81,6 @@ namespace Rodin::Solver
     private:
       Eigen::LDLT<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for LDLT
-   */
-  template <class Scalar>
-  LDLT(Variational::ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> LDLT<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

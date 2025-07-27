@@ -8,6 +8,7 @@
 #define RODIN_SOLVER_PETSC_KSP_H
 
 #include <petscksp.h>
+#include "Rodin/PETSc/Math/LinearSystem.h"
 #include "Rodin/Solver/Solver.h"
 #include "Rodin/PETSc/Object.h"
 #include "Rodin/PETSc/Math/Matrix.h"
@@ -25,16 +26,16 @@ namespace Rodin::Solver
    * Combines programmatic configuration with command‐line overrides.
    */
   class KSP
-    : public SolverBase< PETSc::Matrix, PETSc::Vector, PetscScalar>,
-      public PETSc::Object<::KSP>
+    : public SolverBase<PETSc::LinearSystem>, public PETSc::Object<::KSP>
   {
     public:
       using HandleType = ::KSP;
+      using ScalarType   = PetscScalar;
       using OperatorType = PETSc::Matrix;
       using VectorType   = PETSc::Vector;
-      using ScalarType   = PetscScalar;
-      using ProblemType  = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
-      using Parent       = SolverBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = PETSc::LinearSystem;
+      using ProblemBaseType = Variational::ProblemBase<PETSc::LinearSystem>;
+      using Parent = SolverBase<PETSc::LinearSystem>;
       using Parent::solve;
       /**
        * @brief Construct and create the PETSc KSP object.
@@ -44,7 +45,7 @@ namespace Rodin::Solver
        * @param pb   Variational problem this solver will solve.
        * @param comm MPI communicator (default PETSC_COMM_WORLD).
        */
-      explicit KSP(ProblemType& pb);
+      explicit KSP(ProblemBaseType& pb);
 
       virtual ~KSP() override;
 
@@ -60,7 +61,7 @@ namespace Rodin::Solver
        * @param x Solution vector (initial guess in; may be PETSC_NULL).
        * @param b Right‐hand side vector.
        */
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override;
+      void solve(LinearSystemType& b) override;
 
       KSP& setType(::KSPType type) noexcept;
 
@@ -84,7 +85,6 @@ namespace Rodin::Solver
       PetscInt     m_maxIt;
       std::optional<OperatorType> m_preconditioner;
   };
-
 } // namespace Rodin::Solver
 
 #endif // RODIN_SOLVER_PETSC_KSP_H

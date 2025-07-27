@@ -9,6 +9,7 @@
 
 #include <Eigen/Dense>
 
+#include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
@@ -24,13 +25,20 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for HouseholderQR
+   */
+  template <class LinearSystem>
+  HouseholderQR(Variational::ProblemBase<LinearSystem>&) -> HouseholderQR<LinearSystem>;
+
+  /**
    * @ingroup HouseholderQRSpecializations
    * @brief A direct sparse HouseholderQR Cholesky factorizations without square root
    * for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class HouseholderQR<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class HouseholderQR<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -39,13 +47,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::Matrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      HouseholderQR(ProblemType& pb)
+      HouseholderQR(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -57,12 +67,11 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        x = m_solver.compute(A).solve(b);
+        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
-      inline
       HouseholderQR* copy() const noexcept override
       {
         return new HouseholderQR(*this);
@@ -71,14 +80,6 @@ namespace Rodin::Solver
     private:
       Eigen::HouseholderQR<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for HouseholderQR
-   */
-  template <class Scalar>
-  HouseholderQR(Variational::ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> HouseholderQR<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

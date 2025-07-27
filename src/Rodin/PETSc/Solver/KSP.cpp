@@ -15,7 +15,7 @@
 
 namespace Rodin::Solver
 {
-  KSP::KSP(ProblemType& pb)
+  KSP::KSP(ProblemBaseType& pb)
     : Parent(pb),
       m_ksp(PETSC_NULLPTR),
       m_type(PETSC_NULLPTR),
@@ -49,8 +49,10 @@ namespace Rodin::Solver
     return m_ksp;
   }
 
-  void KSP::solve(OperatorType& A, VectorType& x, VectorType& b)
+  void KSP::solve(PETSc::LinearSystem& axb)
   {
+    auto& [a, x, b] = axb;
+
     PetscErrorCode ierr;
 
     ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
@@ -64,12 +66,12 @@ namespace Rodin::Solver
 
     if (m_preconditioner)
     {
-      ierr = KSPSetOperators(m_ksp, A.getHandle(), m_preconditioner->getHandle());
+      ierr = KSPSetOperators(m_ksp, a.getHandle(), m_preconditioner->getHandle());
       assert(ierr == PETSC_SUCCESS);
     }
     else
     {
-      ierr = KSPSetOperators(m_ksp, A.getHandle(), A.getHandle());
+      ierr = KSPSetOperators(m_ksp, a.getHandle(), a.getHandle());
       assert(ierr == PETSC_SUCCESS);
     }
 
@@ -86,10 +88,8 @@ namespace Rodin::Solver
     return *this;
   }
 
-  KSP& KSP::setTolerances(PetscReal rtol,
-                          PetscReal abstol,
-                          PetscReal dtol,
-                          PetscInt  maxIt) noexcept
+  KSP& KSP::setTolerances(
+      PetscReal rtol, PetscReal abstol, PetscReal dtol, PetscInt  maxIt) noexcept
   {
     m_rtol = rtol;
     m_abstol = abstol;

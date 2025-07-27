@@ -43,15 +43,18 @@ namespace Rodin::Variational
   /**
    * @brief Abstract base class for variational problems.
    */
-  template <class Operator, class Vector, class Scalar>
+  template <class LinearSystem>
   class ProblemBase : public FormLanguage::Base
   {
     public:
-      using OperatorType = Operator;
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
-      using VectorType = Vector;
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystem>::VectorType;
 
-      using ScalarType = Scalar;
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
       ProblemBase() = default;
 
@@ -62,12 +65,11 @@ namespace Rodin::Variational
       virtual ProblemBase& operator=(
           const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) = 0;
 
-      virtual void solve(
-          Solver::SolverBase<OperatorType, VectorType, ScalarType>& solver) = 0;
+      virtual void solve(Solver::SolverBase<LinearSystem>& solver) = 0;
 
-      virtual Math::LinearSystem<OperatorType, VectorType>& getLinearSystem() = 0;
+      virtual LinearSystem& getLinearSystem() = 0;
 
-      virtual const Math::LinearSystem<OperatorType, VectorType>& getLinearSystem() const = 0;
+      virtual const LinearSystem& getLinearSystem() const = 0;
 
       /**
        * @brief Assembles the underlying linear system to solve.
@@ -83,11 +85,7 @@ namespace Rodin::Variational
    * and `Vector` generic types in a sequential context.
    */
   template <class LinearSystem, class U, class V>
-  class ProblemUVBase
-    : public ProblemBase<
-        typename FormLanguage::Traits<LinearSystem>::OperatorType,
-        typename FormLanguage::Traits<LinearSystem>::VectorType,
-        typename FormLanguage::Traits<LinearSystem>::ScalarType>
+  class ProblemUVBase : public ProblemBase<LinearSystem>
   {
     public:
       using TrialFunctionType =
@@ -128,7 +126,7 @@ namespace Rodin::Variational
       using LinearFormIntegratorBaseType =
         LinearFormIntegratorBase<TestFESScalarType>;
 
-      using Parent = ProblemBase<OperatorType, VectorType, ScalarType>;
+      using Parent = ProblemBase<LinearSystemType>;
 
       constexpr
       ProblemUVBase(U& u, V& v)
@@ -202,7 +200,9 @@ namespace Rodin::Variational
 
       virtual ProblemUVBase& assemble() override
       {
-        using LinearFormType = LinearForm<TestFESType, VectorType>;
+        using LinearFormType =
+          LinearForm<TestFESType, VectorType>;
+
         using BilinearFormType =
           BilinearForm<SolutionType, TrialFESType, TestFESType, OperatorType>;
 
@@ -282,21 +282,19 @@ namespace Rodin::Variational
         return *this;
       }
 
-      void solve(Solver::SolverBase<OperatorType, VectorType, ScalarType>& solver) override
+      void solve(Solver::SolverBase<LinearSystemType>& solver) override
       {
+         auto& axb = this->getLinearSystem();
+
          // Assemble the system
          if (!m_assembled)
             assemble();
 
          // Solve the system AX = B
-         auto& axb = this->getLinearSystem();
-         auto& a = axb.getOperator();
-         auto& x = axb.getSolution();
-         auto& b = axb.getVector();
-         solver.solve(a, x, b);
+         solver.solve(axb);
 
          // Recover solution
-         getTrialFunction().getSolution().setData(x);
+         getTrialFunction().getSolution().setData(axb.getSolution());
       }
 
       ProblemUVBase& operator=(const ProblemBodyType& rhs) override
@@ -412,11 +410,7 @@ namespace Rodin::Variational
           U, V>;
 
   template <class LinearSystem, class U1, class U2, class ... Us>
-  class ProblemUsBase
-    : public ProblemBase<
-        typename FormLanguage::Traits<LinearSystem>::OperatorType,
-        typename FormLanguage::Traits<LinearSystem>::VectorType,
-        typename FormLanguage::Traits<LinearSystem>::ScalarType>
+  class ProblemUsBase : public ProblemBase<LinearSystem>
   {
     template <class T>
     struct IsTrialOrTestFunction
@@ -442,7 +436,7 @@ namespace Rodin::Variational
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
-      using Parent = ProblemBase<OperatorType, VectorType, ScalarType>;
+      using Parent = ProblemBase<LinearSystemType>;
 
     private:
       template <class T>
@@ -791,7 +785,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      void solve(Solver::SolverBase<OperatorType, VectorType, ScalarType>& solver) override
+      void solve(Solver::SolverBase<LinearSystemType>& solver) override
       {
         auto& axb = getLinearSystem();
 
@@ -800,7 +794,7 @@ namespace Rodin::Variational
            assemble();
 
         // Solve the system AX = B
-        solver.solve(axb.getOperator(), axb.getSolution(), axb.getVector());
+        solver.solve(axb);
 
         // Recover solutions
         m_us.iapply(

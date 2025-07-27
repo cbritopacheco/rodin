@@ -4,11 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_LeastSquaresCG_H
-#define RODIN_SOLVER_LeastSquaresCG_H
+#ifndef RODIN_SOLVER_LEASTSQUARESCG_H
+#define RODIN_SOLVER_LEASTSQUARESCG_H
 
-#include <optional>
-#include <functional>
 #include <Eigen/SparseCholesky>
 
 #include "Rodin/Math/Vector.h"
@@ -25,14 +23,17 @@ namespace Rodin::Solver
    * @see LeastSquaresCG
    */
 
+  template <class LinearSystem>
+  LeastSquaresCG(Variational::ProblemBase<LinearSystem>&) -> LeastSquaresCG<LinearSystem>;
+
   /**
    * @ingroup LeastSquaresCGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
    * Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class LeastSquaresCG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class LeastSquaresCG<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -41,13 +42,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      LeastSquaresCG(ProblemType& pb)
+      LeastSquaresCG(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -61,7 +64,7 @@ namespace Rodin::Solver
 
       ~LeastSquaresCG() = default;
 
-      LeastSquaresCG& setTolerance(double tol)
+      LeastSquaresCG& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
@@ -73,12 +76,11 @@ namespace Rodin::Solver
         return *this;
       }
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        x = m_solver.compute(A).solve(b);
+        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
-      inline
       LeastSquaresCG* copy() const noexcept override
       {
         return new LeastSquaresCG(*this);
@@ -88,24 +90,14 @@ namespace Rodin::Solver
       Eigen::LeastSquaresConjugateGradient<OperatorType> m_solver;
   };
 
-  template <class Scalar>
-  LeastSquaresCG(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> LeastSquaresCG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
-
-  /**
-   * @defgroup LeastSquaresCGSpecializations LeastSquaresCG Template Specializations
-   * @brief Template specializations of the LeastSquaresCG class.
-   * @see LeastSquaresCG
-   */
-
   /**
    * @ingroup LeastSquaresCGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
    * Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
   template <class Scalar>
-  class LeastSquaresCG<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class LeastSquaresCG<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -116,9 +108,12 @@ namespace Rodin::Solver
       /// Type of linear operator
       using OperatorType = Math::Matrix<Scalar>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      /// Type of linear system
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
@@ -136,7 +131,7 @@ namespace Rodin::Solver
 
       ~LeastSquaresCG() = default;
 
-      LeastSquaresCG& setTolerance(double tol)
+      LeastSquaresCG& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
@@ -148,13 +143,12 @@ namespace Rodin::Solver
         return *this;
       }
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        m_solver.compute(A);
-        x = m_solver.solve(b);
+        m_solver.compute(axb.getOperator());
+        axb.getSolution() = m_solver.solve(axb.getOperator());
       }
 
-      inline
       LeastSquaresCG* copy() const noexcept override
       {
         return new LeastSquaresCG(*this);
@@ -163,10 +157,6 @@ namespace Rodin::Solver
     private:
       Eigen::LeastSquaresConjugateGradient<OperatorType> m_solver;
   };
-
-  template <class Scalar>
-  LeastSquaresCG(Variational::ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> LeastSquaresCG<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

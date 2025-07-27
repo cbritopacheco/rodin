@@ -24,7 +24,7 @@ namespace Rodin::Solver
    * has type @f$ \text{VectorType} @f$, and the right hand side @f$ b @f$ has
    * type @f$ \text{VectorType} @f$.
    */
-  template <class OperatorType, class VectorType, class Scalar>
+  template <class LinearSystem>
   class SolverBase;
 
   /**
@@ -42,7 +42,7 @@ namespace Rodin::Solver
    * @tparam VectorType Type of vector for the right hand side
    * @see CGSpecializations
    */
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class CG;
 
   /**
@@ -51,7 +51,7 @@ namespace Rodin::Solver
    * @tparam VectorType Type of vector for the right hand side
    * @see SimplicialLLTSpecializations
    */
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class SimplicialLLT;
 
   /**
@@ -60,19 +60,19 @@ namespace Rodin::Solver
    * @tparam VectorType Type of vector for the right hand side
    * @see SimplicialLDLTSpecializations
    */
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class SimplicialLDLT;
 
   /**
    * @brief Robust Cholesky decomposition of a dense matrix with pivoting.
    */
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class LDLT;
 
   /**
    * @brief Robust Cholesky decomposition of a dense matrix with pivoting.
    */
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class HouseholderQR;
 
   /**
@@ -81,7 +81,7 @@ namespace Rodin::Solver
    * @tparam VectorType Type of vector for the right hand side
    * @see SparseLUSpecializations
    */
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class SparseLU;
 
   /**
@@ -89,38 +89,38 @@ namespace Rodin::Solver
    * pivoting.
    * @see SparseQRSpecializations
    */
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class SparseQR;
 
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class LeastSquaresCG;
 
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class BiCGSTAB;
 
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class GMRES;
 
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class DGMRES;
 
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class IDRSTABL;
 
 #ifdef RODIN_USE_SPQR
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class SPQR;
 #endif
 
 #ifdef RODIN_USE_UMFPACK
-  template <class OperatorType, class VectorType>
+  template <class LinearSystem>
   class UMFPack;
 #endif
 
 #ifdef RODIN_USE_CHOLMOD
   namespace CHOLMOD
   {
-    template <class OperatorType, class VectorType>
+    template <class LinearSystem>
     class SupernodalLLT;
   }
 #endif

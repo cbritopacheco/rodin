@@ -656,5 +656,69 @@ namespace Rodin::Math
   };
 }
 
+namespace std
+{
+  template <class Matrix, class Vector>
+  struct tuple_size<Rodin::Math::LinearSystem<Matrix, Vector>>
+    : std::integral_constant<std::size_t, 3> {};
+
+  template <class Matrix, class Vector>
+  struct tuple_element<0, Rodin::Math::LinearSystem<Matrix, Vector>>
+  {
+    using type = Matrix;
+  };
+
+  template <class Matrix, class Vector>
+  struct tuple_element<1, Rodin::Math::LinearSystem<Matrix, Vector>>
+  {
+    using type = Vector;
+  };
+
+  template <class Matrix, class Vector>
+  struct tuple_element<2, Rodin::Math::LinearSystem<Matrix, Vector>>
+  {
+    using type = Vector;
+  };
+}
+
+namespace Rodin::Math
+{
+  template <std::size_t I, class Matrix, class Vector>
+  decltype(auto) get(LinearSystem<Matrix, Vector>& ls)
+  {
+    static_assert(I < 3);
+    if constexpr (I == 0) return (ls.getOperator());
+    else if constexpr (I == 1) return (ls.getSolution());
+    else return (ls.getVector());
+  }
+
+  template <std::size_t I, class Matrix, class Vector>
+  decltype(auto) get(const LinearSystem<Matrix, Vector>& ls)
+  {
+    static_assert(I < 3);
+    if constexpr (I == 0) return (ls.getOperator());
+    else if constexpr (I == 1) return (ls.getSolution());
+    else return (ls.getVector());
+  }
+
+  template <std::size_t I, class Matrix, class Vector>
+  decltype(auto) get(LinearSystem<Matrix, Vector>&& ls)
+  {
+    static_assert(I < 3);
+    if constexpr (I == 0) return std::move(ls.getOperator());
+    else if constexpr (I == 1) return std::move(ls.getSolution());
+    else return std::move(ls.getVector());
+  }
+
+  template <std::size_t I, class Matrix, class Vector>
+  decltype(auto) get(const LinearSystem<Matrix, Vector>&& ls)
+  {
+    static_assert(I < 3);
+    if constexpr (I == 0) return std::move(ls.getOperator());
+    else if constexpr (I == 1) return std::move(ls.getSolution());
+    else return std::move(ls.getVector());
+  }
+}
+
 #endif
 

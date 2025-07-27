@@ -1072,7 +1072,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for variational problem objects.
    */
-  template <class Operator, class Vector, class Scalar>
+  template <class LinearSystem>
   class ProblemBase;
 }
 

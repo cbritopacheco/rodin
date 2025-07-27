@@ -7,14 +7,14 @@
 #ifndef RODIN_SOLVER_CG_H
 #define RODIN_SOLVER_CG_H
 
-#include <optional>
-#include <functional>
 #include <Eigen/SparseCholesky>
 
+#include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
+#include "Rodin/Types.h"
 #include "Solver.h"
 
 namespace Rodin::Solver
@@ -26,13 +26,20 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for CG
+   */
+  template <class LinearSystem>
+  CG(Variational::ProblemBase<LinearSystem>&) -> CG<LinearSystem>;
+
+  /**
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
    * Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class CG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class CG<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -41,16 +48,18 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
       /**
        * @brief Constructs the CG object with default parameters.
        */
-      CG(ProblemType& pb)
+      CG(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -64,7 +73,7 @@ namespace Rodin::Solver
 
       ~CG() = default;
 
-      CG& setTolerance(double tol)
+      CG& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
@@ -76,12 +85,12 @@ namespace Rodin::Solver
         return *this;
       }
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        x = m_solver.compute(A).solve(b);
+        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
-      bool success() const
+      Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
@@ -96,21 +105,13 @@ namespace Rodin::Solver
   };
 
   /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for CG
-   */
-  template <class Scalar>
-  CG(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> CG<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
-
-  /**
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
    * Math::Matrix and Math::Vector.
    */
   template <class Scalar>
-  class CG<Math::Matrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class CG<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -119,9 +120,11 @@ namespace Rodin::Solver
 
       using OperatorType = Math::Matrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
@@ -135,7 +138,7 @@ namespace Rodin::Solver
 
       ~CG() = default;
 
-      CG& setTolerance(double tol)
+      CG& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
@@ -147,12 +150,12 @@ namespace Rodin::Solver
         return *this;
       }
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        x = m_solver.compute(A).solve(b);
+        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
-      bool success() const
+      Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
@@ -165,14 +168,6 @@ namespace Rodin::Solver
     private:
       Eigen::ConjugateGradient<OperatorType, Eigen::Lower | Eigen::Upper> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for CG
-   */
-  template <class Scalar>
-  CG(Variational::ProblemBase<Math::Matrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> CG<Math::Matrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif
