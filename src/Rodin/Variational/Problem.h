@@ -11,6 +11,7 @@
 #include <functional>
 #include <boost/mp11.hpp>
 
+#include "Rodin/Assembly/ForwardDecls.h"
 #include "Rodin/Pair.h"
 #include "Rodin/Tuple.h"
 #include "Rodin/Alert.h"
@@ -56,25 +57,27 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
+      using ProblemBodyType =
+        ProblemBody<OperatorType, VectorType, ScalarType>;
+
       ProblemBase() = default;
 
       ProblemBase(ProblemBase&& other) = default;
 
       ProblemBase(const ProblemBase& other) = default;
 
-      virtual ProblemBase& operator=(
-          const ProblemBody<OperatorType, VectorType, ScalarType>& rhs) = 0;
+      virtual ProblemBase& operator=(const ProblemBodyType& rhs) = 0;
 
       virtual void solve(Solver::SolverBase<LinearSystem>& solver) = 0;
-
-      virtual LinearSystem& getLinearSystem() = 0;
-
-      virtual const LinearSystem& getLinearSystem() const = 0;
 
       /**
        * @brief Assembles the underlying linear system to solve.
        */
       virtual ProblemBase& assemble() = 0;
+
+      virtual LinearSystem& getLinearSystem() = 0;
+
+      virtual const LinearSystem& getLinearSystem() const = 0;
 
       virtual ProblemBase* copy() const noexcept override = 0;
   };
@@ -96,6 +99,9 @@ namespace Rodin::Variational
 
       using LinearSystemType =
         LinearSystem;
+
+      using SolverBaseType =
+        Solver::SolverBase<LinearSystem>;
 
       using SolutionType =
         typename FormLanguage::Traits<TrialFunctionType>::SolutionType;
@@ -130,34 +136,27 @@ namespace Rodin::Variational
 
       constexpr
       ProblemUVBase(U& u, V& v)
-        : m_assembled(false),
-          m_trialFunction(u), m_testFunction(v)
+        : m_trialFunction(u), m_testFunction(v)
       {}
 
       ProblemUVBase(const ProblemUVBase& other)
         : Parent(other),
-          m_assembled(other.m_assembled),
-          m_trialFunction(other.m_trialFunction.get()),
-          m_testFunction(other.m_testFunction.get()),
-          m_pb(other.m_pb)
+          m_trialFunction(other.m_trialFunction),
+          m_testFunction(other.m_testFunction)
       {}
 
       ProblemUVBase(ProblemUVBase&& other)
         : Parent(std::move(other)),
-          m_assembled(std::exchange(other.m_assembled, false)),
           m_trialFunction(std::move(other.m_trialFunction)),
-          m_testFunction(std::move(other.m_testFunction)),
-          m_pb(std::move(other.m_pb))
+          m_testFunction(std::move(other.m_testFunction))
       {}
 
       ProblemUVBase& operator=(const ProblemUVBase& other)
       {
         if (this != &other)
         {
-          m_assembled = other.m_assembled;
-          m_trialFunction = other.m_trialFunction.get();
-          m_testFunction = other.m_testFunction.get();
-          m_pb = other.m_pb;
+          m_trialFunction = other.m_trialFunction;
+          m_testFunction = other.m_testFunction;
         }
         return *this;
       }
@@ -166,10 +165,8 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          m_assembled = std::exchange(other.m_assembled, false);
           m_trialFunction = std::move(other.m_trialFunction);
           m_testFunction = std::move(other.m_testFunction);
-          m_pb = std::move(other.m_pb);
         }
         return *this;
       }
@@ -198,126 +195,28 @@ namespace Rodin::Variational
         return m_testFunction.get();
       }
 
-      virtual ProblemUVBase& assemble() override
-      {
-        using LinearFormType =
-          LinearForm<TestFESType, VectorType>;
+      virtual ProblemUVBase& assemble() override = 0;
 
-        using BilinearFormType =
-          BilinearForm<SolutionType, TrialFESType, TestFESType, OperatorType>;
+      virtual void solve(SolverBaseType& solver) override = 0;
 
-        auto& pb = m_pb;
-        auto& u = this->getTrialFunction();
-        auto& v = this->getTestFunction();
-        auto& axb = this->getLinearSystem();
-        auto& mass = axb.getVector();
-        auto& stiffness = axb.getOperator();
-        auto& bfs = pb.getBFs();
-        auto& dbcs = pb.getDBCs();
-        auto& pbcs = pb.getPBCs();
-
-        LinearFormType lf(v);
-        for (auto& lfi : pb.getLFIs())
-          lf -= lfi;
-        lf.assemble();
-        mass = std::move(lf.getVector());
-
-        BilinearFormType bf(u, v);
-        for (auto& bfi : pb.getLocalBFIs())
-          bf += bfi;
-        for (auto& bfi : pb.getGlobalBFIs())
-          bf += bfi;
-        for (auto& _bf : bfs)
-        {
-          _bf.assemble();
-          stiffness += _bf.getOperator();
-        }
-        bf.assemble();
-        stiffness = std::move(bf.getOperator());
-
-        // Impose Dirichlet boundary conditions
-        auto& trial = getTrialFunction();
-        const auto& trialFES = trial.getFiniteElementSpace();
-        const auto& test = getTestFunction();
-        const auto& testFES = test.getFiniteElementSpace();
-        for (auto& dbc : dbcs)
-        {
-          dbc.assemble();
-          const auto& dofs = dbc.getDOFs();
-          if (dbc.isComponent())
-          {
-            assert(false);
-          }
-          else
-          {
-            axb.eliminate(dofs);
-          }
-        }
-
-        // Impose periodic boundary conditions
-        if (trialFES == testFES)
-        {
-          for (auto& pbc : pbcs)
-          {
-            pbc.assemble();
-            const auto& dofs = pbc.getDOFs();
-
-            if (pbc.isComponent())
-            {
-              assert(false);
-            }
-            else
-            {
-              axb.merge(dofs);
-            }
-          }
-        }
-        else
-        {
-          assert(false); // Not handled yet
-        }
-
-        m_assembled = true;
-
-        return *this;
-      }
-
-      void solve(Solver::SolverBase<LinearSystemType>& solver) override
-      {
-         auto& axb = this->getLinearSystem();
-
-         // Assemble the system
-         if (!m_assembled)
-            assemble();
-
-         // Solve the system AX = B
-         solver.solve(axb);
-
-         // Recover solution
-         getTrialFunction().getSolution().setData(axb.getSolution());
-      }
-
-      ProblemUVBase& operator=(const ProblemBodyType& rhs) override
-      {
-        m_pb = rhs;
-        m_assembled = false;
-        return *this;
-      }
+      virtual ProblemUVBase& operator=(const ProblemBodyType& rhs) override = 0;
 
       virtual ProblemUVBase* copy() const noexcept override = 0;
 
     private:
-      Boolean m_assembled;
       std::reference_wrapper<TrialFunctionType> m_trialFunction;
-      std::reference_wrapper<TestFunctionType>  m_testFunction;
-      ProblemBodyType m_pb;
+      std::reference_wrapper<TestFunctionType> m_testFunction;
   };
 
   template <class LinearSystem, class U, class V>
   class Problem<LinearSystem, U, V> : public ProblemUVBase<LinearSystem, U, V>
   {
     public:
-      using LinearSystemType = LinearSystem;
+      using LinearSystemType =
+        LinearSystem;
+
+      using SolverBaseType =
+        Solver::SolverBase<LinearSystemType>;
 
       using OperatorType =
         typename FormLanguage::Traits<LinearSystem>::OperatorType;
@@ -328,9 +227,11 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
-      using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
+      using ProblemBodyType =
+        ProblemBody<OperatorType, VectorType, ScalarType>;
 
-      using Parent = ProblemUVBase<LinearSystem, U, V>;
+      using Parent =
+        ProblemUVBase<LinearSystem, U, V>;
 
       constexpr
       Problem(U& u, V& v)
@@ -340,13 +241,19 @@ namespace Rodin::Variational
       constexpr
       Problem(const Problem& other)
         : Parent(other),
-          m_axb(other.m_axb)
+          m_assembled(other.m_assembled),
+          m_pb(other.m_pb),
+          m_axb(other.m_axb),
+          m_assembly(other.m_assembly->copy())
       {}
 
       constexpr
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
-          m_axb(std::move(other.m_axb))
+          m_assembled(other.m_assembled),
+          m_pb(std::move(other.m_pb)),
+          m_axb(std::move(other.m_axb)),
+          m_assembly(std::move(other.m_assembly))
       {}
 
       Problem& operator=(const Problem& other)
@@ -354,7 +261,10 @@ namespace Rodin::Variational
         if (this != &other)
         {
           Parent::operator=(other);
+          m_assembled = other.m_assembled;
+          m_pb = other.m_pb;
           m_axb = other.m_axb;
+          m_assembly.reset(other.m_assembly->copy());
         }
         return *this;
       }
@@ -364,14 +274,35 @@ namespace Rodin::Variational
         if (this != &other)
         {
           Parent::operator=(std::move(other));
+          m_assembled = std::exchange(other.m_assembled, false);
+          m_pb = std::move(other.m_pb);
           m_axb = std::move(other.m_axb);
+          m_assembly = std::move(other.m_assembly);
         }
         return *this;
+      }
+
+      Problem& assemble() override
+      {
+        m_assembly->execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
+        m_assembled = true;
+        return *this;
+      }
+
+      void solve(SolverBaseType& solver) override
+      {
+         auto& axb = this->getLinearSystem();
+         if (!m_assembled)
+            this->assemble();
+         solver.solve(axb);
+         this->getTrialFunction().getSolution().setData(axb.getSolution());
       }
 
       Problem& operator=(const ProblemBodyType& rhs) override
       {
         Parent::operator=(rhs);
+        m_pb = rhs;
+        m_assembled = false;
         return *this;
       }
 
@@ -391,7 +322,10 @@ namespace Rodin::Variational
       }
 
     private:
+      Boolean m_assembled;
+      ProblemBodyType m_pb;
       LinearSystemType m_axb;
+      std::unique_ptr<Assembly::AssemblyBase<LinearSystem, Problem>> m_assembly;
   };
 
   /**
@@ -788,15 +722,9 @@ namespace Rodin::Variational
       void solve(Solver::SolverBase<LinearSystemType>& solver) override
       {
         auto& axb = getLinearSystem();
-
-        // Assemble the system
         if (!m_assembled)
-           assemble();
-
-        // Solve the system AX = B
+           this->assemble();
         solver.solve(axb);
-
-        // Recover solutions
         m_us.iapply(
             [&](size_t i, auto& u)
             {

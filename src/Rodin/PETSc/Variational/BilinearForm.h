@@ -135,7 +135,7 @@ namespace Rodin::Variational
       {
         const auto& trialFES = getTrialFunction().getFiniteElementSpace();
         const auto& testFES = getTestFunction().getFiniteElementSpace();
-        this->getAssembly().execute(this->getOperator(), {
+        this->getAssembly().execute(m_operator, {
           trialFES, testFES, this->getLocalIntegrators(), this->getGlobalIntegrators() });
       }
 
