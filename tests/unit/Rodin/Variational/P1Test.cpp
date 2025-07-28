@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
+#include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 
 using namespace Rodin;

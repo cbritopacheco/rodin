@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
+
+#include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
+
 #include "Rodin/Solver/CG.h"
 
 using namespace Rodin;

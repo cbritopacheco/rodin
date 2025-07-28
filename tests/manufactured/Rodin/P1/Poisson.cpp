@@ -6,9 +6,10 @@
  */
 #include <gtest/gtest.h>
 
-#include "Rodin/Test/Random.h"
+#include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Solver/CG.h"
+#include "Rodin/Test/Random.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
