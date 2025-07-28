@@ -7,31 +7,29 @@
 #ifndef RODIN_VARIATIONAL_PROBLEM_H
 #define RODIN_VARIATIONAL_PROBLEM_H
 
-#include <variant>
 #include <functional>
 #include <boost/mp11.hpp>
 
-#include "Rodin/Assembly/ForwardDecls.h"
 #include "Rodin/Pair.h"
-#include "Rodin/Tuple.h"
-#include "Rodin/Alert.h"
-#include "Rodin/Geometry.h"
-#include "Rodin/Solver/Solver.h"
+
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Math/SparseMatrix.h"
-#include "Rodin/FormLanguage/Base.h"
+
 #include "Rodin/Utility/Extract.h"
 #include "Rodin/Utility/Product.h"
 #include "Rodin/Utility/Wrap.h"
+
+#include "Rodin/Assembly/ForwardDecls.h"
 #include "Rodin/Assembly/Input.h"
 
-#include "ForwardDecls.h"
+#include "Rodin/Solver/Solver.h"
 
+#include "Rodin/FormLanguage/Base.h"
+
+#include "ForwardDecls.h"
 #include "ProblemBody.h"
-#include "LinearForm.h"
-#include "BilinearForm.h"
 
 namespace Rodin::Variational
 {
@@ -121,8 +119,6 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
-      using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
-
       using TrialFESScalarType =
         typename FormLanguage::Traits<TrialFESType>::ScalarType;
 
@@ -132,7 +128,11 @@ namespace Rodin::Variational
       using LinearFormIntegratorBaseType =
         LinearFormIntegratorBase<TestFESScalarType>;
 
-      using Parent = ProblemBase<LinearSystemType>;
+      using ProblemBodyType =
+        ProblemBody<OperatorType, VectorType, ScalarType>;
+
+      using Parent =
+        ProblemBase<LinearSystemType>;
 
       constexpr
       ProblemUVBase(U& u, V& v)
@@ -208,8 +208,9 @@ namespace Rodin::Variational
       std::reference_wrapper<TestFunctionType> m_testFunction;
   };
 
-  template <class LinearSystem, class U, class V>
-  class Problem<LinearSystem, U, V> : public ProblemUVBase<LinearSystem, U, V>
+  template <class LinearSystem, class TrialFunction, class TestFunction>
+  class Problem<LinearSystem, TrialFunction, TestFunction>
+    : public ProblemUVBase<LinearSystem, TrialFunction, TestFunction>
   {
     public:
       using LinearSystemType =
@@ -230,11 +231,14 @@ namespace Rodin::Variational
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      using AssemblyType =
+        Assembly::Generic<LinearSystem, Problem>;
+
       using Parent =
-        ProblemUVBase<LinearSystem, U, V>;
+        ProblemUVBase<LinearSystem, TrialFunction, TestFunction>;
 
       constexpr
-      Problem(U& u, V& v)
+      Problem(TrialFunction& u, TestFunction& v)
         : Parent(u, v)
       {}
 
@@ -243,8 +247,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_assembled(other.m_assembled),
           m_pb(other.m_pb),
-          m_axb(other.m_axb),
-          m_assembly(other.m_assembly->copy())
+          m_axb(other.m_axb)
       {}
 
       constexpr
@@ -284,7 +287,7 @@ namespace Rodin::Variational
 
       Problem& assemble() override
       {
-        m_assembly->execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
+        m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
         m_assembled = true;
         return *this;
       }
@@ -300,7 +303,6 @@ namespace Rodin::Variational
 
       Problem& operator=(const ProblemBodyType& rhs) override
       {
-        Parent::operator=(rhs);
         m_pb = rhs;
         m_assembled = false;
         return *this;
@@ -325,7 +327,7 @@ namespace Rodin::Variational
       Boolean m_assembled;
       ProblemBodyType m_pb;
       LinearSystemType m_axb;
-      std::unique_ptr<Assembly::AssemblyBase<LinearSystem, Problem>> m_assembly;
+      AssemblyType m_assembly;
   };
 
   /**

@@ -44,9 +44,9 @@ int main(int argc, char** argv)
   auto mesh = sharder.gather(0);
   P1 vh(mesh);
 
-  {
-    PETSc::GridFunction gf(vh);
-  }
+  // {
+  //   PETSc::Variational::GridFunction gf(vh);
+  // }
 
   PetscFinalize();
 }

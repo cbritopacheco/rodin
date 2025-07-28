@@ -414,20 +414,25 @@ namespace Rodin::Variational
   };
 }
 
-namespace Rodin::PETSc
+namespace Rodin::PETSc::Variational
 {
   template <class FES>
-  class GridFunction : public Variational::GridFunction<FES, PETSc::Vector>
+  class GridFunction
+    : public Rodin::Variational::GridFunction<FES, PETSc::Vector>
   {
     public:
-      using FESType = FES;
-      using DataType = PETSc::Vector;
-      using Parent = Variational::GridFunction<FESType, DataType>;
+      using Parent = Rodin::Variational::GridFunction<FES, PETSc::Vector>;
       using Parent::Parent;
+      using Parent::operator[];
+      using Parent::operator=;
+      using Parent::operator+=;
+      using Parent::operator-=;
+      using Parent::operator*=;
+      using Parent::operator/=;
   };
 
   template <class FES>
-  GridFunction(const FES& fes) -> GridFunction<FES>;
+  GridFunction(const FES&) -> GridFunction<FES>;
 }
 
 #endif

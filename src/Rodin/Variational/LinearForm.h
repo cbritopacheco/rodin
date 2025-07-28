@@ -7,19 +7,15 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORM_H
 #define RODIN_VARIATIONAL_LINEARFORM_H
 
-#include "Rodin/Configure.h"
-
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/FormLanguage/Traits.h"
 
-#include "Rodin/Assembly/Default.h"
 #include "Rodin/Assembly/ForwardDecls.h"
 
 #include "Rodin/Math/Vector.h"
 
 #include "Exceptions/TestFunctionMismatchException.h"
 
-#include "UnaryMinus.h"
 #include "ForwardDecls.h"
 #include "TestFunction.h"
 #include "LinearFormIntegrator.h"
@@ -197,14 +193,20 @@ namespace Rodin::Variational
     public:
       using FESType = FES;
 
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType =
+        typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using VectorType = Math::Vector<ScalarType>;
+      using VectorType =
+        Math::Vector<ScalarType>;
 
-      using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+      using ContextType =
+        typename FormLanguage::Traits<FESType>::ContextType;
 
-      using DefaultAssembly =
+      using DefaultAssemblyType =
         typename Assembly::Default<ContextType>::template Type<VectorType, LinearForm>;
+
+      using AssemblyType =
+        DefaultAssemblyType;
 
       using Parent = LinearFormBase<VectorType>;
 
@@ -221,24 +223,23 @@ namespace Rodin::Variational
        */
       constexpr
       LinearForm(const TestFunction<FES>& v)
-        : m_v(v),
-          m_assembly(new DefaultAssembly)
+        : m_v(v)
       {}
 
       constexpr
       LinearForm(const LinearForm& other)
         : Parent(other),
           m_v(other.m_v),
-          m_assembly(other.m_assembly->copy()),
-          m_vector(other.m_vector)
+          m_vector(other.m_vector),
+          m_assembly(other.m_assembly)
       {}
 
       constexpr
       LinearForm(LinearForm&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
-          m_assembly(std::move(other.m_assembly)),
-          m_vector(std::move(other.m_vector))
+          m_vector(std::move(other.m_vector)),
+          m_assembly(std::move(other.m_assembly))
       {}
 
       LinearForm& operator=(const LinearForm& other)
@@ -247,8 +248,8 @@ namespace Rodin::Variational
         {
           Parent::operator=(other);
           m_v = other.m_v;
-          m_assembly.reset(other.m_assembly->copy());
           m_vector = other.m_vector;
+          m_assembly = other.m_assembly;
         }
         return *this;
       }
@@ -259,8 +260,8 @@ namespace Rodin::Variational
         {
           Parent::operator=(std::move(other));
           m_v = std::move(other.m_v);
-          m_assembly = std::move(other.m_assembly);
           m_vector = std::move(other.m_vector);
+          m_assembly = std::move(other.m_assembly);
         }
         return *this;
       }
@@ -280,24 +281,10 @@ namespace Rodin::Variational
         return this->getVector().dot(u.getData());
       }
 
-      constexpr
-      const Assembly::AssemblyBase<VectorType, LinearForm>& getAssembly() const
-      {
-        assert(m_assembly);
-        return *m_assembly;
-      }
-
-      constexpr
-      LinearForm& setAssembly(const Assembly::AssemblyBase<VectorType, LinearForm>& assembly)
-      {
-        m_assembly.reset(assembly.copy());
-        return *this;
-      }
-
       void assemble() override
       {
         const auto& fes = getTestFunction().getFiniteElementSpace();
-        this->getAssembly().execute(this->getVector(), { fes, this->getIntegrators() });
+        m_assembly.execute(this->getVector(), { fes, this->getIntegrators() });
       }
 
       VectorType& getVector() override
@@ -322,8 +309,8 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const TestFunction<FES>> m_v;
-      std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearForm>> m_assembly;
       VectorType m_vector;
+      AssemblyType m_assembly;
   };
 
   /**

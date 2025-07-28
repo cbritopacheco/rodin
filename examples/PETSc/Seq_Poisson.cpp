@@ -30,22 +30,24 @@ int main(int argc, char** argv)
 
   P1 vh(mesh);
 
+  PETSc::Variational::GridFunction u(vh);
+
   // Leave the block so PETSc objects are cleaned up automatically !!
-  {
-    PETSc::TrialFunction u(vh);
-    PETSc::TestFunction  v(vh);
+  // {
+  //   PETSc::Variational::TrialFunction u(vh);
+  //   PETSc::Variational::TestFunction  v(vh);
 
-    // Define problem
-    PETSc::Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
-    CG(poisson).solve();
+  //   // Define problem
+  //   Problem poisson(u, v);
+  //   poisson = Integral(Grad(u), Grad(v))
+  //           - Integral(f, v)
+  //           + DirichletBC(u, Zero());
+  //   CG(poisson).solve();
 
-    // Save solution
-    u.getSolution().save("Poisson.gf");
-    mesh.save("Poisson.mesh");
-  }
+  //   // Save solution
+  //   u.getSolution().save("Poisson.gf");
+  //   mesh.save("Poisson.mesh");
+  // }
 
   PetscFinalize();
 

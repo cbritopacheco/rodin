@@ -3,17 +3,17 @@
 
 namespace Rodin::Solver
 {
-  CG<PETSc::LinearSystem>::CG(ProblemBaseType& pb)
+  CG<PETSc::Math::LinearSystem>::CG(ProblemBaseType& pb)
     : Parent(pb)
   {
     this->setType(KSPCG);
   }
 
-  CG<PETSc::LinearSystem>::CG(const CG& other)
+  CG<PETSc::Math::LinearSystem>::CG(const CG& other)
     : Parent(other)
   {}
 
-  CG<PETSc::LinearSystem>::CG(CG&& other)
+  CG<PETSc::Math::LinearSystem>::CG(CG&& other)
     : Parent(std::move(other))
   {}
 }

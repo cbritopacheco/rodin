@@ -49,7 +49,7 @@ namespace Rodin::Solver
     return m_ksp;
   }
 
-  void KSP::solve(PETSc::LinearSystem& axb)
+  void KSP::solve(PETSc::Math::LinearSystem& axb)
   {
     auto& [a, x, b] = axb;
 

@@ -7,17 +7,17 @@
 #ifndef RODIN_ASSEMBLY_SEQUENTIAL_H
 #define RODIN_ASSEMBLY_SEQUENTIAL_H
 
-#include "Rodin/Math/ForwardDecls.h"
+#include "Rodin/Context/Local.h"
+
+#include "Rodin/Tuple.h"
+#include "Rodin/Math/Traits.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
-#include "Rodin/PETSc/Math/LinearSystem.h"
-#include "Rodin/Variational/Integrator.h"
-#include "Rodin/Math/Traits.h"
 
-#include "Rodin/Utility/Repeat.h"
+#include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/Integrator.h"
 
 #include "ForwardDecls.h"
-#include "AssemblyBase.h"
 
 namespace Rodin::Assembly
 {
@@ -684,90 +684,6 @@ namespace Rodin::Assembly
       {
         return new Sequential(*this);
       }
-  };
-
-  template <class LinearSystem, class U, class V>
-  class Sequential<LinearSystem, Variational::Problem<LinearSystem, U, V>>
-  {
-    public:
-
-
-        // using LinearFormType =
-        //   LinearForm<TestFESType, VectorType>;
-
-        // using BilinearFormType =
-        //   BilinearForm<SolutionType, TrialFESType, TestFESType, OperatorType>;
-
-        // auto& pb = m_pb;
-        // auto& u = this->getTrialFunction();
-        // auto& v = this->getTestFunction();
-        // auto& axb = this->getLinearSystem();
-        // auto& mass = axb.getVector();
-        // auto& stiffness = axb.getOperator();
-        // auto& bfs = pb.getBFs();
-        // auto& dbcs = pb.getDBCs();
-        // auto& pbcs = pb.getPBCs();
-
-        // LinearFormType lf(v);
-        // for (auto& lfi : pb.getLFIs())
-        //   lf -= lfi;
-        // lf.assemble();
-        // mass = std::move(lf.getVector());
-
-        // BilinearFormType bf(u, v);
-        // for (auto& bfi : pb.getLocalBFIs())
-        //   bf += bfi;
-        // for (auto& bfi : pb.getGlobalBFIs())
-        //   bf += bfi;
-        // for (auto& _bf : bfs)
-        // {
-        //   _bf.assemble();
-        //   stiffness += _bf.getOperator();
-        // }
-        // bf.assemble();
-        // stiffness = std::move(bf.getOperator());
-
-        // // Impose Dirichlet boundary conditions
-        // auto& trial = this->getTrialFunction();
-        // const auto& trialFES = trial.getFiniteElementSpace();
-        // const auto& test = this->getTestFunction();
-        // const auto& testFES = test.getFiniteElementSpace();
-        // for (auto& dbc : dbcs)
-        // {
-        //   dbc.assemble();
-        //   const auto& dofs = dbc.getDOFs();
-        //   if (dbc.isComponent())
-        //   {
-        //     assert(false);
-        //   }
-        //   else
-        //   {
-        //     axb.eliminate(dofs);
-        //   }
-        // }
-
-        // // Impose periodic boundary conditions
-        // if (trialFES == testFES)
-        // {
-        //   for (auto& pbc : pbcs)
-        //   {
-        //     pbc.assemble();
-        //     const auto& dofs = pbc.getDOFs();
-
-        //     if (pbc.isComponent())
-        //     {
-        //       assert(false);
-        //     }
-        //     else
-        //     {
-        //       axb.merge(dofs);
-        //     }
-        //   }
-        // }
-        // else
-        // {
-        //   assert(false); // Not handled yet
-        // }
   };
 }
 

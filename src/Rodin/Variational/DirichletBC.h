@@ -14,7 +14,6 @@
 #include "Rodin/FormLanguage/List.h"
 
 #include "Rodin/Assembly/ForwardDecls.h"
-#include "Rodin/Assembly/Default.h"
 
 #include "ForwardDecls.h"
 
@@ -124,8 +123,11 @@ namespace Rodin::Variational
 
       using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
 
-      using DefaultAssembly =
+      using DefaultAssemblyType =
         typename Assembly::Default<ContextType>::template Type<DOFs, DirichletBC>;
+
+      using AssemblyType =
+        DefaultAssemblyType;
 
       /// Parent class
       using Parent = DirichletBCBase<ScalarType>;
@@ -137,9 +139,7 @@ namespace Rodin::Variational
        */
       DirichletBC(const OperandType& u, const ValueType& v)
         : m_u(u), m_value(v.copy())
-      {
-        m_assembly.reset(new DefaultAssembly);
-      }
+      {}
 
       /**
        * @brief Copy constructor
@@ -150,7 +150,7 @@ namespace Rodin::Variational
           m_value(other.m_value->copy()),
           m_essBdr(other.m_essBdr),
           m_dofs(other.m_dofs),
-          m_assembly(other.m_assembly->copy())
+          m_assembly(other.m_assembly)
       {}
 
       /**
@@ -224,8 +224,7 @@ namespace Rodin::Variational
        */
       void assemble() override
       {
-        assert(m_assembly);
-        m_assembly->execute(m_dofs, { m_u.get(), *m_value, m_essBdr });
+        m_assembly.execute(m_dofs, { m_u.get(), *m_value, m_essBdr });
       }
 
       bool isComponent() const override
@@ -265,8 +264,7 @@ namespace Rodin::Variational
       std::unique_ptr<ValueType> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
       IndexMap<ScalarType> m_dofs;
-
-      std::unique_ptr<Assembly::AssemblyBase<IndexMap<ScalarType>, DirichletBC>> m_assembly;
+      AssemblyType m_assembly;
   };
 
   /**

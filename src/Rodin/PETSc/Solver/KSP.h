@@ -26,16 +26,16 @@ namespace Rodin::Solver
    * Combines programmatic configuration with command‐line overrides.
    */
   class KSP
-    : public SolverBase<PETSc::LinearSystem>, public PETSc::Object<::KSP>
+    : public SolverBase<PETSc::Math::LinearSystem>, public PETSc::Object<::KSP>
   {
     public:
       using HandleType = ::KSP;
       using ScalarType   = PetscScalar;
       using OperatorType = PETSc::Matrix;
       using VectorType   = PETSc::Vector;
-      using LinearSystemType = PETSc::LinearSystem;
-      using ProblemBaseType = Variational::ProblemBase<PETSc::LinearSystem>;
-      using Parent = SolverBase<PETSc::LinearSystem>;
+      using LinearSystemType = PETSc::Math::LinearSystem;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      using Parent = SolverBase<LinearSystemType>;
       using Parent::solve;
       /**
        * @brief Construct and create the PETSc KSP object.

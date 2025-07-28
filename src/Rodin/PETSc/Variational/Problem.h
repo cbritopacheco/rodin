@@ -8,34 +8,47 @@
 
 #include "Rodin/Context/Local.h"
 #include "Rodin/MPI/Context/MPI.h"
+#include "Rodin/PETSc/Variational/TestFunction.h"
 #include "Rodin/Variational/Problem.h"
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
 
-namespace Rodin::PETSc
+#include "Rodin/PETSc/Assembly/Generic.h"
+
+namespace Rodin::Variational
 {
   template <class U, class V>
-  class Problem : public Variational::ProblemUVBase<LinearSystem, U, V>
+  class Problem<PETSc::Math::LinearSystem, U, V> : public Variational::ProblemUVBase<PETSc::Math::LinearSystem, U, V>
   {
     public:
-      using Parent = Variational::ProblemUVBase<LinearSystem, U, V>;
+      using LinearSystemType =
+        PETSc::Math::LinearSystem;
 
-      using LinearSystemType = LinearSystem;
+      using AssemblyType =
+        PETSc::Assembly::Generic<LinearSystemType, Problem>;
+
+      using SolverBaseType =
+        Solver::SolverBase<LinearSystemType>;
 
       using OperatorType =
-        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
       using VectorType =
-        typename FormLanguage::Traits<LinearSystem>::VectorType;
+        typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
       using ScalarType =
-        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
       using ProblemBodyType = Variational::ProblemBody<OperatorType, VectorType, ScalarType>;
 
-      using TrialFESType = typename FormLanguage::Traits<U>::FESType;
+      using TrialFESType =
+        typename FormLanguage::Traits<U>::FESType;
 
-      using TestFESType = typename FormLanguage::Traits<V>::FESType;
+      using TestFESType =
+        typename FormLanguage::Traits<V>::FESType;
+
+      using Parent =
+        Variational::ProblemUVBase<LinearSystemType, U, V>;
 
       Problem(U& u, V& v)
         : Parent(u, v)
@@ -97,6 +110,22 @@ namespace Rodin::PETSc
         return *this;
       }
 
+      Problem& assemble() override
+      {
+        // m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
+        m_assembled = true;
+        return *this;
+      }
+
+      void solve(SolverBaseType& solver) override
+      {
+         // auto& axb = this->getLinearSystem();
+         // if (!m_assembled)
+         //    this->assemble();
+         // solver.solve(axb);
+         // this->getTrialFunction().getSolution().setData(axb.getSolution());
+      }
+
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
@@ -113,11 +142,21 @@ namespace Rodin::PETSc
       }
 
     private:
+      Boolean m_assembled;
+      ProblemBodyType m_pb;
       LinearSystemType m_axb;
+      AssemblyType m_assembly;
   };
 
   template <class U, class V>
   Problem(U&, V&) -> Problem<U, V>;
+}
+
+namespace Rodin::PETSc::Variational
+{
+  template <class TrialFunction, class TestFunction>
+  using Problem =
+    Rodin::Variational::Problem<PETSc::Math::LinearSystem, TrialFunction, TestFunction>;
 }
 
 #endif

@@ -98,24 +98,10 @@ namespace Rodin::Variational
         return result;
       }
 
-      constexpr
-      const Assembly::AssemblyBase<VectorType, LinearForm>& getAssembly() const
-      {
-        assert(m_assembly);
-        return *m_assembly;
-      }
-
-      constexpr
-      LinearForm& setAssembly(const Assembly::AssemblyBase<VectorType, LinearForm>& assembly)
-      {
-        m_assembly.reset(assembly.copy());
-        return *this;
-      }
-
       void assemble() override
       {
         const auto& fes = getTestFunction().getFiniteElementSpace();
-        this->getAssembly().execute(this->getVector(), { fes, this->getIntegrators() });
+        m_assembly.execute(this->getVector(), { fes, this->getIntegrators() });
       }
 
       VectorType& getVector() override
@@ -140,33 +126,15 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const TestFunction<FES>> m_v;
-      std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearForm>> m_assembly;
+      DefaultAssembly m_assembly;
       VectorType m_vector;
   };
 }
 
-namespace Rodin::PETSc
+namespace Rodin::PETSc::Variational
 {
   template <class FES>
-  class LinearForm : public Variational::LinearForm<FES, PETSc::Vector>
-  {
-    public:
-      using FESType = FES;
-
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-
-      using VectorType = PETSc::Vector;
-
-      using Parent = Variational::LinearForm<FESType, VectorType>;
-
-      using Parent::Parent;
-
-      using Parent::operator=;
-
-      using Parent::operator+=;
-
-      using Parent::operator-=;
-  };
+  using LinearForm = Rodin::Variational::LinearForm<FES, PETSc::Vector>;
 }
 
 #endif

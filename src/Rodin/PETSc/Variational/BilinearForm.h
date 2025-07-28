@@ -5,6 +5,7 @@
 #include "Rodin/PETSc/Math/Matrix.h"
 
 #include "Rodin/Variational/BilinearForm.h"
+#include <cstdint>
 
 namespace Rodin::Variational
 {
@@ -17,9 +18,15 @@ namespace Rodin::Variational
     using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
 
     public:
-      using SolutionType = Solution;
+      using SolutionType =
+        Solution;
 
-      using ScalarType = PetscScalar;
+      using ScalarType =
+        PetscScalar;
+
+      template <class FES>
+      using GridFunctionType =
+        PETSc::Variational::GridFunction<FES>;
 
       /// Type of operator associated to the bilinear form.
       using OperatorType = PETSc::Matrix;
@@ -99,7 +106,7 @@ namespace Rodin::Variational
        * at @f$ ( u, v ) @f$.
        */
       ScalarType operator()(
-        const PETSc::GridFunction<TrialFES>& u, const PETSc::GridFunction<TestFES>& v) const
+          const GridFunctionType<TrialFES>& u, const GridFunctionType<TestFES>& v) const
       {
         PETSc::Vector tmp;
         u.duplicate(tmp);
@@ -107,18 +114,6 @@ namespace Rodin::Variational
         ScalarType result;
         tmp.dot(u.getData(), &result);
         return result;
-      }
-
-      const Assembly::AssemblyBase<OperatorType, BilinearForm>& getAssembly() const
-      {
-        assert(m_assembly);
-        return *m_assembly;
-      }
-
-      BilinearForm& setAssembly(const Assembly::AssemblyBase<OperatorType, BilinearForm>& assembly)
-      {
-        m_assembly.reset(assembly.copy());
-        return *this;
       }
 
       OperatorType& getOperator() override
@@ -135,7 +130,7 @@ namespace Rodin::Variational
       {
         const auto& trialFES = getTrialFunction().getFiniteElementSpace();
         const auto& testFES = getTestFunction().getFiniteElementSpace();
-        this->getAssembly().execute(m_operator, {
+        m_assembly.execute(m_operator, {
           trialFES, testFES, this->getLocalIntegrators(), this->getGlobalIntegrators() });
       }
 
@@ -157,9 +152,16 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
       std::reference_wrapper<const TestFunction<TestFES>>               m_v;
-      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
+      DefaultAssembly m_assembly;
       OperatorType m_operator;
   };
+}
+
+namespace Rodin::PETSc::Variational
+{
+  template <class Solution, class TrialFES, class TestFES>
+  using BilinearForm =
+    Rodin::Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix>;
 }
 
 #endif

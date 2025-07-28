@@ -7,19 +7,14 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
-#include "Rodin/Configure.h"
-
-#include "Rodin/Pair.h"
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "Rodin/Assembly/ForwardDecls.h"
-#include "Rodin/Assembly/Default.h"
 
 #include "Exceptions/TrialFunctionMismatchException.h"
 #include "Exceptions/TestFunctionMismatchException.h"
 
-#include "UnaryMinus.h"
 #include "ForwardDecls.h"
 #include "TrialFunction.h"
 #include "TestFunction.h"
@@ -274,16 +269,21 @@ namespace Rodin::Variational
       /// Type of operator associated to the bilinear form
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
+      using DefaultAssemblyType =
+        typename Assembly::Default<TrialFESContextType, TestFESContextType>
+          ::template Type<OperatorType, BilinearForm>;
+
+      using AssemblyType =
+        DefaultAssemblyType;
+
       /// Parent class
       using Parent = BilinearFormBase<OperatorType>;
 
       using Parent::operator=;
-      using Parent::operator+=;
-      using Parent::operator-=;
 
-      using DefaultAssembly =
-        typename Assembly::Default<TrialFESContextType, TestFESContextType>
-          ::template Type<OperatorType, BilinearForm>;
+      using Parent::operator+=;
+
+      using Parent::operator-=;
 
       /**
        * @brief Constructs a LinearForm with a reference to a TestFunction and
@@ -292,15 +292,14 @@ namespace Rodin::Variational
        */
       constexpr
       BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
-        : m_u(u), m_v(v),
-          m_assembly(new DefaultAssembly)
+        : m_u(u), m_v(v)
       {}
 
       constexpr
       BilinearForm(const BilinearForm& other)
         : Parent(other),
           m_u(other.m_u), m_v(other.m_v),
-          m_assembly(other.m_assembly->copy())
+          m_assembly(other.m_assembly)
       {}
 
       constexpr
@@ -310,26 +309,26 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
-      BilinearForm& operator=(const BilinearForm& bf)
+      BilinearForm& operator=(const BilinearForm& other)
       {
-        if (this != &bf)
+        if (this != &other)
         {
-          m_u = bf.m_u;
-          m_v = bf.m_v;
-          m_operator = bf.m_operator;
-          m_assembly.reset(bf.m_assembly->copy());
+          m_u = other.m_u;
+          m_v = other.m_v;
+          m_operator = other.m_operator;
+          m_assembly = other.m_assembly;
         }
         return *this;
       }
 
-      BilinearForm& operator=(BilinearForm&& bf) noexcept
+      BilinearForm& operator=(BilinearForm&& other) noexcept
       {
-        if (this != &bf)
+        if (this != &other)
         {
-          m_u = std::move(bf.m_u);
-          m_v = std::move(bf.m_v);
-          m_operator = std::move(bf.m_operator);
-          m_assembly = std::move(bf.m_assembly);
+          m_u = std::move(other.m_u);
+          m_v = std::move(other.m_v);
+          m_operator = std::move(other.m_operator);
+          m_assembly = std::move(other.m_assembly);
         }
         return *this;
       }
@@ -352,18 +351,6 @@ namespace Rodin::Variational
         return (this->getOperator() * v.getData()).dot(u.getData());
       }
 
-      const Assembly::AssemblyBase<OperatorType, BilinearForm>& getAssembly() const
-      {
-        assert(m_assembly);
-        return *m_assembly;
-      }
-
-      BilinearForm& setAssembly(const Assembly::AssemblyBase<OperatorType, BilinearForm>& assembly)
-      {
-        m_assembly.reset(assembly.copy());
-        return *this;
-      }
-
       OperatorType& getOperator() override
       {
         return m_operator;
@@ -378,7 +365,7 @@ namespace Rodin::Variational
       {
         const auto& trialFES = getTrialFunction().getFiniteElementSpace();
         const auto& testFES = getTestFunction().getFiniteElementSpace();
-        this->getAssembly().execute(this->getOperator(), {
+        m_assembly.execute(m_operator, {
           trialFES, testFES, this->getLocalIntegrators(), this->getGlobalIntegrators() });
       }
 
@@ -400,8 +387,8 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
       std::reference_wrapper<const TestFunction<TestFES>>               m_v;
-      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
       OperatorType m_operator;
+      AssemblyType m_assembly;
   };
 
   template <class Solution, class TrialFES, class TestFES>
@@ -437,12 +424,16 @@ namespace Rodin::Variational
         BilinearFormBase<OperatorType>;
 
       using Parent::operator=;
+
       using Parent::operator+=;
+
       using Parent::operator-=;
 
-      using DefaultAssembly =
+      using DefaultAssemblyType =
         typename Assembly::Default<TrialFESContextType, TestFESContextType>
           ::template Type<OperatorType, BilinearForm>;
+
+      using AssemblyType = DefaultAssemblyType;
 
       /**
        * @brief Constructs a LinearForm with a reference to a TestFunction and
@@ -451,44 +442,45 @@ namespace Rodin::Variational
        */
       constexpr
       BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
-        : m_u(u), m_v(v),
-          m_assembly(new DefaultAssembly)
+        : m_u(u), m_v(v)
       {}
 
       constexpr
       BilinearForm(const BilinearForm& other)
         : Parent(other),
           m_u(other.m_u), m_v(other.m_v),
-          m_assembly(other.m_assembly->copy())
+          m_operator(other.m_operator),
+          m_assembly(other.m_assembly)
       {}
 
       constexpr
       BilinearForm(BilinearForm&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
+          m_operator(std::move(other.m_operator)),
           m_assembly(std::move(other.m_assembly))
       {}
 
-      BilinearForm& operator=(const BilinearForm& bf)
+      BilinearForm& operator=(const BilinearForm& other)
       {
-        if (this != &bf)
+        if (this != &other)
         {
-          m_u = bf.m_u;
-          m_v = bf.m_v;
-          m_operator = bf.m_operator;
-          m_assembly.reset(bf.m_assembly->copy());
+          m_u = other.m_u;
+          m_v = other.m_v;
+          m_operator = other.m_operator;
+          m_assembly = other.m_assembly;
         }
         return *this;
       }
 
-      BilinearForm& operator=(BilinearForm&& bf) noexcept
+      BilinearForm& operator=(BilinearForm&& other) noexcept
       {
-        if (this != &bf)
+        if (this != &other)
         {
-          m_u = std::move(bf.m_u);
-          m_v = std::move(bf.m_v);
-          m_operator = std::move(bf.m_operator);
-          m_assembly = std::move(bf.m_assembly);
+          m_u = std::move(other.m_u);
+          m_v = std::move(other.m_v);
+          m_operator = std::move(other.m_operator);
+          m_assembly = std::move(other.m_assembly);
         }
         return *this;
       }
@@ -511,18 +503,6 @@ namespace Rodin::Variational
         return (this->getOperator() * v.getData()).dot(u.getData());
       }
 
-      const Assembly::AssemblyBase<OperatorType, BilinearForm>& getAssembly() const
-      {
-        assert(m_assembly);
-        return *m_assembly;
-      }
-
-      BilinearForm& setAssembly(const Assembly::AssemblyBase<OperatorType, BilinearForm>& assembly)
-      {
-        m_assembly.reset(assembly.copy());
-        return *this;
-      }
-
       OperatorType& getOperator() override
       {
         return m_operator;
@@ -537,7 +517,7 @@ namespace Rodin::Variational
       {
         const auto& trialFES = getTrialFunction().getFiniteElementSpace();
         const auto& testFES = getTestFunction().getFiniteElementSpace();
-        this->getAssembly().execute(this->getOperator(), {
+        m_assembly.execute(this->getOperator(), {
           trialFES, testFES, this->getLocalIntegrators(), this->getGlobalIntegrators() });
       }
 
@@ -559,8 +539,8 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
       std::reference_wrapper<const TestFunction<TestFES>>               m_v;
-      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
       OperatorType m_operator;
+      AssemblyType m_assembly;
   };
 }
 

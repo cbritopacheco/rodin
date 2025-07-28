@@ -10,10 +10,6 @@
 #include <omp.h>
 #include <petsc.h>
 #include <petscerror.h>
-#include <type_traits>
-#include <vector>
-#include <memory>
-#include <optional>
 
 #include "Rodin/Assembly/OpenMP.h"
 
@@ -325,6 +321,12 @@ namespace Rodin::Assembly
     private:
       Optional<size_t> m_threadCount;
   };
+}
+
+namespace Rodin::PETSc::Assembly
+{
+  template <class LinearAlgebraType, class Operand>
+  using OpenMP = Rodin::Assembly::OpenMP<LinearAlgebraType, Operand>;
 }
 
 #endif // RODIN_ASSEMBLY_OpenMP_PETSC_H

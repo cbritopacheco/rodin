@@ -4,9 +4,9 @@
 #include <petscksp.h>
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
-#include "Rodin/Solver/CG.h"
-#include "KSP.h"
 #include "Rodin/Variational/ForwardDecls.h"
+
+#include "KSP.h"
 
 namespace Rodin::Solver
 {
@@ -16,13 +16,13 @@ namespace Rodin::Solver
    * PETSc::Matrix and PETSc::Vector.
    */
   template <>
-  class CG<PETSc::LinearSystem> final : public KSP
+  class CG<PETSc::Math::LinearSystem> final : public KSP
   {
   public:
     using OperatorType = PETSc::Matrix;
     using VectorType = PETSc::Vector;
     using ScalarType = PetscScalar;
-    using LinearSystemType = PETSc::LinearSystem;
+    using LinearSystemType = PETSc::Math::LinearSystem;
     using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
     using Parent = KSP;
     using Parent::solve;

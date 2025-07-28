@@ -7,44 +7,16 @@
 
 #include "GridFunction.h"
 
-namespace Rodin::PETSc
+namespace Rodin::PETSc::Variational
 {
   template <class FES>
-  class TrialFunction : public Variational::TrialFunction<GridFunction<FES>, FES>
-  {
-    public:
-      using FESType = FES;
-      using SolutionType = GridFunction<FES>;
-
-      using Parent = Variational::TrialFunction<GridFunction<FES>, FES>;
-      using Parent::Parent;
-
-      TrialFunction(const FESType& fes)
-        : Parent(fes)
-      {}
-  };
-
-  template <class FES>
-  TrialFunction(const FES& fes) -> TrialFunction<FES>;
-
-  template <class FES>
-  TrialFunction(GridFunction<FES>&& gf, const FES& fes) -> TrialFunction<FES>;
-}
-
-namespace Rodin::FormLanguage
-{
-  template <class FES>
-  struct Traits<PETSc::TrialFunction<FES>>
-  {
-    using FESType = FES;
-    using SolutionType = typename PETSc::GridFunction<FES>;
-  };
+  using TrialFunction = Rodin::Variational::TrialFunction<PETSc::Variational::GridFunction<FES>, FES>;
 }
 
 namespace Rodin::Variational
 {
   template <class FES>
-  struct IsTrialFunction<PETSc::TrialFunction<FES>>
+  struct IsTrialFunction<PETSc::Variational::TrialFunction<FES>>
   {
     static constexpr Boolean Value = true;
   };

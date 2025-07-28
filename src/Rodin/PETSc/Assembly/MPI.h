@@ -151,4 +151,10 @@ namespace Rodin::Assembly
   };
 }
 
+namespace Rodin::PETSc::Assembly
+{
+  template <class LinearAlgebraType, class Operand>
+  using MPI = Rodin::Assembly::MPI<LinearAlgebraType, Operand>;
+}
+
 #endif // RODIN_PETSC_ASSEMBLY_MPI_H

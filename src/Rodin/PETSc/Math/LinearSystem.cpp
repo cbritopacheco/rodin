@@ -12,24 +12,24 @@ namespace Rodin::Math
   LinearSystem<PETSc::Matrix, PETSc::Vector>::LinearSystem(MPI_Comm comm)
     : m_comm(comm),
       m_operator(comm),
-      m_vector(comm),
-      m_solution(comm)
+      m_solution(comm),
+      m_vector(comm)
   {}
 
   LinearSystem<PETSc::Matrix, PETSc::Vector>::LinearSystem(const LinearSystem& other)
     : Parent(other),
       m_comm(other.m_comm),
       m_operator(other.m_operator),
-      m_vector(other.m_vector),
-      m_solution(other.m_solution)
+      m_solution(other.m_solution),
+      m_vector(other.m_vector)
   {}
 
   LinearSystem<PETSc::Matrix, PETSc::Vector>::LinearSystem(LinearSystem&& other) noexcept
     : Parent(std::move(other)),
       m_comm(std::exchange(other.m_comm, MPI_COMM_NULL)),
       m_operator(std::move(other.m_operator)),
-      m_vector(std::move(other.m_vector)),
-      m_solution(std::move(other.m_solution))
+      m_solution(std::move(other.m_solution)),
+      m_vector(std::move(other.m_vector))
   {}
 
   LinearSystem<PETSc::Matrix, PETSc::Vector>&
@@ -40,8 +40,8 @@ namespace Rodin::Math
       Parent::operator=(other);
       m_comm = other.m_comm;
       m_operator = other.m_operator;
-      m_vector = other.m_vector;
       m_solution = other.m_solution;
+      m_vector = other.m_vector;
     }
     return *this;
   }
@@ -54,8 +54,8 @@ namespace Rodin::Math
       Parent::operator=(std::move(other));
       m_comm = std::exchange(other.m_comm, MPI_COMM_NULL);
       m_operator = std::move(other.m_operator);
-      m_vector = std::move(other.m_vector);
       m_solution = std::move(other.m_solution);
+      m_vector = std::move(other.m_vector);
     }
     return *this;
   }
@@ -65,8 +65,8 @@ namespace Rodin::Math
   {
     m_comm = comm;
     m_operator.create(comm);
-    m_vector.create(comm);
     m_solution.create(comm);
+    m_vector.create(comm);
     return *this;
   }
 
@@ -75,8 +75,8 @@ namespace Rodin::Math
   {
     m_comm = MPI_COMM_NULL;
     m_operator.destroy();
-    m_vector.destroy();
     m_solution.destroy();
+    m_vector.destroy();
     return *this;
   }
 }

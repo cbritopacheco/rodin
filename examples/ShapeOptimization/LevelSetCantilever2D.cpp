@@ -5,9 +5,11 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Variational/LinearElasticity.h>
+
 #include <RodinExternal/MMG.h>
 
 using namespace Rodin;

@@ -4,9 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <Rodin/Math.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
-#include <Rodin/Math.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
 

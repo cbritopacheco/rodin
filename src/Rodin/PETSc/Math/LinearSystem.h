@@ -7,9 +7,9 @@
 #ifndef RODIN_PETSC_MATH_LINEARSYSTEM_H
 #define RODIN_PETSC_MATH_LINEARSYSTEM_H
 
-#include <boost/mpi/communicator.hpp>
-#include <mpi.h>
 #include <petsc.h>
+#include <boost/mpi/communicator.hpp>
+
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/PETSc/Math/Matrix.h"
 #include "Rodin/PETSc/Math/Vector.h"
@@ -123,14 +123,14 @@ namespace Rodin::Math
     private:
       MPI_Comm m_comm; ///< The MPI communicator for the linear system.
       MatrixType m_operator; ///< The operator of the linear system.
-      VectorType m_vector;   ///< The vector of the linear system.
       VectorType m_solution; ///< The solution vector of the linear system.
+      VectorType m_vector;   ///< The vector of the linear system.
   };
 }
 
-namespace Rodin::PETSc
+namespace Rodin::PETSc::Math
 {
-  using LinearSystem = Math::LinearSystem<PETSc::Matrix, PETSc::Vector>;
+  using LinearSystem = Rodin::Math::LinearSystem<PETSc::Matrix, PETSc::Vector>;
 }
 
 #endif

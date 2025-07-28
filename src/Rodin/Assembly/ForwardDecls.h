@@ -26,6 +26,9 @@ namespace Rodin::Assembly
 
   template <class ... Ts>
   class Default;
+
+  template <class ... Ts>
+  class Generic;
 }
 
 #ifdef RODIN_USE_OPENMP

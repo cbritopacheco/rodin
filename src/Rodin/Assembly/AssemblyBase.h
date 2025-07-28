@@ -12,6 +12,7 @@
 
 #include "ForwardDecls.h"
 #include "Input.h"
+#include "Rodin/Variational/ProblemBody.h"
 
 namespace Rodin::Assembly
 {
@@ -120,6 +121,46 @@ namespace Rodin::Assembly
       virtual ~AssemblyBase() = default;
 
       virtual void execute(IndexMap<ScalarType>& out, const InputType& data) const = 0;
+
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
+
+  template <class LinearSystem, class TrialFunction, class TestFunction>
+  class AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
+    : public FormLanguage::Base
+  {
+    public:
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystem>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+
+      using ProblemBodyType =
+        Variational::ProblemBody<OperatorType, VectorType, ScalarType>;
+
+      using InputType =
+        ProblemAssemblyInput<ProblemBodyType, TrialFunction, TestFunction>;
+
+      using Parent =
+        FormLanguage::Base;
+
+      AssemblyBase() = default;
+
+      AssemblyBase(const AssemblyBase& other)
+        : Parent(other)
+      {}
+
+      AssemblyBase(AssemblyBase&& other)
+        : Parent(std::move(other))
+      {}
+
+      virtual ~AssemblyBase() = default;
+
+      virtual void execute(LinearSystem& out, const InputType& input) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };

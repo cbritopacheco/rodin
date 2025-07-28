@@ -165,5 +165,11 @@ namespace Rodin::Assembly
   };
 }
 
+namespace Rodin::PETSc
+{
+  template <class LinearAlgebraType, class Operand>
+  using Sequential = Assembly::Sequential<LinearAlgebraType, Operand>;
+}
+
 #endif // RODIN_ASSEMBLY_SEQUENTIAL_PETSC_H
 
