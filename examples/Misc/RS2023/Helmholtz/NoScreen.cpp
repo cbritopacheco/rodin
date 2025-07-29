@@ -7,8 +7,8 @@
 #include <thread>
 #include <chrono>
 #include <fstream>
-#include <Rodin/Solver.h>
 #include <Rodin/Assembly.h>
+#include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 

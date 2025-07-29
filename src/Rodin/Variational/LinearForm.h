@@ -20,6 +20,22 @@
 #include "TestFunction.h"
 #include "LinearFormIntegrator.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class Vector>
+  struct Traits<Variational::LinearFormBase<Vector>>
+  {
+    using VectorType = Vector;
+  };
+
+  template <class FES, class Vector>
+  struct Traits<Variational::LinearForm<FES, Vector>>
+  {
+    using FESType = FES;
+    using VectorType = Vector;
+  };
+}
+
 namespace Rodin::Variational
 {
   template <class Vector>
@@ -191,7 +207,8 @@ namespace Rodin::Variational
     : public LinearFormBase<Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
   {
     public:
-      using FESType = FES;
+      using FESType =
+        FES;
 
       using ScalarType =
         typename FormLanguage::Traits<FESType>::ScalarType;
@@ -199,16 +216,20 @@ namespace Rodin::Variational
       using VectorType =
         Math::Vector<ScalarType>;
 
-      using ContextType =
-        typename FormLanguage::Traits<FESType>::ContextType;
+      using FESMeshType =
+        typename FormLanguage::Traits<FESType>::MeshType;
+
+      using FESMeshContextType =
+        typename FormLanguage::Traits<FESMeshType>::ContextType;
 
       using DefaultAssemblyType =
-        typename Assembly::Default<ContextType>::template Type<VectorType, LinearForm>;
+        typename Assembly::Default<FESMeshContextType>::template Type<VectorType, LinearForm>;
 
       using AssemblyType =
         DefaultAssemblyType;
 
-      using Parent = LinearFormBase<VectorType>;
+      using Parent =
+        LinearFormBase<VectorType>;
 
       using Parent::operator=;
 

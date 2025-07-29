@@ -17,15 +17,15 @@
 namespace Rodin::Math
 {
   template <>
-  class LinearSystem<PETSc::Matrix, PETSc::Vector>
-    : public LinearSystemBase<PETSc::Matrix, PETSc::Vector, LinearSystem<PETSc::Matrix, PETSc::Vector>>
+  class LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>
+    : public LinearSystemBase<PETSc::Math::Matrix, PETSc::Math::Vector, LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>>
   {
     public:
       using MatrixType =
-        PETSc::Matrix;
+        PETSc::Math::Matrix;
 
       using VectorType =
-        PETSc::Vector;
+        PETSc::Math::Vector;
 
       using Parent =
         LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixType, VectorType>>;
@@ -130,7 +130,7 @@ namespace Rodin::Math
 
 namespace Rodin::PETSc::Math
 {
-  using LinearSystem = Rodin::Math::LinearSystem<PETSc::Matrix, PETSc::Vector>;
+  using LinearSystem = Rodin::Math::LinearSystem<Matrix, Vector>;
 }
 
 #endif

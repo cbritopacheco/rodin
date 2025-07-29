@@ -21,13 +21,26 @@ namespace Rodin::Assembly
     : public AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
   {
     public:
-      using LinearSystemType = LinearSystem;
+      using LinearSystemType =
+        LinearSystem;
 
       using TrialFESType =
         typename FormLanguage::Traits<TrialFunction>::FESType;
 
       using TestFESType =
         typename FormLanguage::Traits<TestFunction>::FESType;
+
+      using TrialFESMeshType =
+        typename FormLanguage::Traits<TrialFESType>::MeshType;
+
+      using TestFESMeshType =
+        typename FormLanguage::Traits<TestFESType>::MeshType;
+
+      using TrialFESMeshContextType =
+        typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
+
+      using TestFESMeshContextType =
+        typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
@@ -41,17 +54,19 @@ namespace Rodin::Assembly
       using SolutionType =
         typename FormLanguage::Traits<TrialFunction>::SolutionType;
 
-      using LinearFormType =
-        Variational::LinearForm<TestFESType, VectorType>;
-
-      using DirichletBCType =
-        Variational::DirichletBC<TrialFunction, VectorType>;
-
       using BilinearFormType =
         Variational::BilinearForm<SolutionType, TrialFESType, TestFESType, OperatorType>;
 
-      using LinearFormIntegratorBaseListType =
-        FormLanguage::List<Variational::LinearFormIntegratorBase<ScalarType>>;
+      using BilinearFormAssemblyType =
+        typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
+          ::template Type<OperatorType, BilinearFormType>;
+
+      using LinearFormType =
+        Variational::LinearForm<TestFESType, VectorType>;
+
+      using LinearFormAssemblyType =
+        typename Assembly::Default<TestFESMeshContextType>
+          ::template Type<VectorType, LinearFormType>;
 
       using Parent =
         AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>;
@@ -71,65 +86,57 @@ namespace Rodin::Assembly
 
       void execute(LinearSystem& out, const InputType& input) const override
       {
-        // const auto& u = input.getTrialFunction();
-        // const auto& v = input.getTestFunction();
-        // const auto& trialFES = u.getFiniteElementSpace();
-        // const auto& testFES = v.getFiniteElementSpace();
-        // auto& pb = input.getProblemBody();
-        // auto& [stiffness, solution, mass] = out;
+        const auto& u = input.getTrialFunction();
+        const auto& v = input.getTestFunction();
+        const auto& trialFES = u.getFiniteElementSpace();
+        const auto& testFES = v.getFiniteElementSpace();
+        auto& pb = input.getProblemBody();
+        auto& [stiffness, solution, mass] = out;
 
-        // m_bfa.execute(stiffness, { u.getFiniteElementSpace(), v.getFiniteElementSpace(), pb.getLocalBFIs(), pb.getGlobalBFIs() });
-        // for (auto& bf : pb.getBFs())
-        //   stiffness += bf.getOperator();
+        const BilinearFormAssemblyType bfa;
+        bfa.execute(
+            stiffness,
+            {
+              u.getFiniteElementSpace(),
+              v.getFiniteElementSpace(),
+              pb.getLocalBFIs(),
+              pb.getGlobalBFIs()
+            });
 
-        // m_lfa.execute(mass, { v.getFiniteElementSpace(), pb.getLFIs() });
-        // mass *= -1;
+        for (auto& bf : pb.getBFs())
+          stiffness += bf.getOperator();
 
-        // for (auto& dbc : pb.getDBCs())
-        // {
-        //   dbc.assemble();
-        //   const auto& dofs = dbc.getDOFs();
-        //   if (dbc.isComponent())
-        //   {
-        //     assert(false);
-        //   }
-        //   else
-        //   {
-        //     out.eliminate(dofs);
-        //   }
-        // }
+        const LinearFormAssemblyType lfa;
+        lfa.execute(
+            mass,
+            {
+              v.getFiniteElementSpace(),
+              pb.getLFIs()
+            });
 
-        // if (trialFES == testFES)
-        // {
-        //   for (auto& pbc : pb.getPBCs())
-        //   {
-        //     pbc.assemble();
-        //     const auto& dofs = pbc.getDOFs();
+        for (const auto& lf : pb.getLFs())
+          mass += lf.getVector();
 
-        //     if (pbc.isComponent())
-        //     {
-        //       assert(false);
-        //     }
-        //     else
-        //     {
-        //       out.merge(dofs);
-        //     }
-        //   }
-        // }
-        // else
-        // {
-        //   assert(false); // Not handled yet
-        // }
+        mass *= -1;
+
+        for (auto& dbc : pb.getDBCs())
+        {
+          dbc.assemble();
+          out.eliminate(dbc.getDOFs());
+        }
+
+        for (auto& pbc : pb.getPBCs())
+        {
+          assert(trialFES == testFES);
+          pbc.assemble();
+          out.merge(pbc.getDOFs());
+        }
       }
 
       Generic* copy() const noexcept override
       {
         return new Generic(*this);
       }
-
-    private:
-      // Default<Context::Local>::Type<VectorType, LinearFormType> m_lfa;
-      // Default<Context::Local>::Type<OperatorType, BilinearFormType> m_bfa;
   };
 }
 

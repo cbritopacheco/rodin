@@ -25,7 +25,16 @@ namespace Rodin::FormLanguage
   template <class Operator>
   struct Traits<Variational::BilinearFormBase<Operator>>
   {
-    using ScalarType = typename FormLanguage::Traits<Operator>::ScalarType;
+    using OperatorType = Operator;
+  };
+
+  template <class Solution, class TrialFES, class TestFES, class Operator>
+  struct Traits<Variational::BilinearForm<Solution, TrialFES, TestFES, Operator>>
+  {
+    using SolutionType = Solution;
+    using TrialFESType = TrialFES;
+    using TestFESType = TestFES;
+    using OperatorType = Operator;
   };
 }
 
@@ -41,11 +50,14 @@ namespace Rodin::Variational
   class BilinearFormBase : public FormLanguage::Base
   {
     public:
-      using OperatorType = Operator;
+      using OperatorType =
+        Operator;
 
-      using ScalarType = typename FormLanguage::Traits<OperatorType>::ScalarType;
+      using ScalarType =
+        typename FormLanguage::Traits<OperatorType>::ScalarType;
 
-      using Parent = FormLanguage::Base;
+      using Parent =
+        FormLanguage::Base;
 
       using LocalBilinearFormIntegratorBaseType =
         LocalBilinearFormIntegratorBase<ScalarType>;
@@ -240,8 +252,8 @@ namespace Rodin::Variational
       virtual BilinearFormBase* copy() const noexcept override = 0;
 
     private:
-      LocalBilinearFormIntegratorBaseListType               m_lbfis;
-      GlobalBilinearFormIntegratorBaseListType              m_gbfis;
+      LocalBilinearFormIntegratorBaseListType m_lbfis;
+      GlobalBilinearFormIntegratorBaseListType m_gbfis;
   };
 
   /**
@@ -257,17 +269,28 @@ namespace Rodin::Variational
   class BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>> final
     : public BilinearFormBase<Math::SparseMatrix<Scalar>>
   {
-    using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
+    using TrialFESMeshType =
+      typename FormLanguage::Traits<TrialFES>::MeshType;
 
-    using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
+    using TestFESMeshType =
+      typename FormLanguage::Traits<TestFES>::MeshType;
+
+    using TrialFESContextType =
+      typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
+
+    using TestFESContextType =
+      typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
     public:
-      using SolutionType = Solution;
+      using SolutionType =
+        Solution;
 
-      using ScalarType = Scalar;
+      using ScalarType =
+        Scalar;
 
       /// Type of operator associated to the bilinear form
-      using OperatorType = Math::SparseMatrix<ScalarType>;
+      using OperatorType =
+        Math::SparseMatrix<ScalarType>;
 
       using DefaultAssemblyType =
         typename Assembly::Default<TrialFESContextType, TestFESContextType>
@@ -385,8 +408,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
-      std::reference_wrapper<const TestFunction<TestFES>>               m_v;
+      std::reference_wrapper<const TrialFunction<Solution, TrialFES>> m_u;
+      std::reference_wrapper<const TestFunction<TestFES>> m_v;
       OperatorType m_operator;
       AssemblyType m_assembly;
   };
@@ -537,8 +560,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
-      std::reference_wrapper<const TestFunction<TestFES>>               m_v;
+      std::reference_wrapper<const TrialFunction<Solution, TrialFES>> m_u;
+      std::reference_wrapper<const TestFunction<TestFES>> m_v;
       OperatorType m_operator;
       AssemblyType m_assembly;
   };

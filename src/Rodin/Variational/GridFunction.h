@@ -40,12 +40,6 @@ namespace Rodin::FormLanguage
   {
     using FESType = FES;
     using DataType = Data;
-
-    using MeshType = typename Traits<FESType>::MeshType;
-    using RangeType = typename Traits<FESType>::RangeType;
-    using ElementType = typename Traits<FESType>::ElementType;
-    using ContextType = typename Traits<FESType>::ContextType;
-    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 
   template <class FES, class Data>
@@ -53,12 +47,6 @@ namespace Rodin::FormLanguage
   {
     using FESType = FES;
     using DataType = Data;
-
-    using MeshType = typename Traits<FESType>::MeshType;
-    using RangeType = typename Traits<FESType>::RangeType;
-    using ElementType = typename Traits<FESType>::ElementType;
-    using ContextType = typename Traits<FESType>::ContextType;
-    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 }
 

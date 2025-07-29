@@ -1,5 +1,6 @@
-#include "CG.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
+
+#include "CG.h"
 
 namespace Rodin::Solver
 {

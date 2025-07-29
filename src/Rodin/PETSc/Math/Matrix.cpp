@@ -4,7 +4,7 @@
 
 #include "Matrix.h"
 
-namespace Rodin::PETSc
+namespace Rodin::PETSc::Math
 {
   Matrix::Matrix()
     : SeqAIJ(*this),

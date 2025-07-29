@@ -10,8 +10,8 @@
 namespace Rodin::Variational
 {
   template <class Solution, class TrialFES, class TestFES>
-  class BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix> final
-    : public BilinearFormBase<PETSc::Matrix>
+  class BilinearForm<Solution, TrialFES, TestFES, PETSc::Math::Matrix> final
+    : public BilinearFormBase<PETSc::Math::Matrix>
   {
     using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
 
@@ -29,7 +29,11 @@ namespace Rodin::Variational
         PETSc::Variational::GridFunction<FES>;
 
       /// Type of operator associated to the bilinear form.
-      using OperatorType = PETSc::Matrix;
+      using OperatorType = PETSc::Math::Matrix;
+
+      using DefaultAssembly =
+        typename Assembly::Default<TrialFESContextType, TestFESContextType>
+          ::template Type<OperatorType, BilinearForm>;
 
       /// Parent class.
       using Parent = BilinearFormBase<OperatorType>;
@@ -40,10 +44,6 @@ namespace Rodin::Variational
 
       using Parent::operator-=;
 
-      using DefaultAssembly =
-        typename Assembly::Default<TrialFESContextType, TestFESContextType>
-          ::template Type<OperatorType, BilinearForm>;
-
       /**
        * @brief Constructs a LinearForm with a reference to a TestFunction and
        * a default constructed vector owned by the LinearForm instance.
@@ -51,15 +51,14 @@ namespace Rodin::Variational
        */
       constexpr
       BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
-        : m_u(u), m_v(v),
-          m_assembly(new DefaultAssembly)
+        : m_u(u), m_v(v)
       {}
 
       constexpr
       BilinearForm(const BilinearForm& other)
         : Parent(other),
           m_u(other.m_u), m_v(other.m_v),
-          m_assembly(other.m_assembly->copy()),
+          m_assembly(other.m_assembly),
           m_operator(other.m_operator)
       {}
 
@@ -108,7 +107,7 @@ namespace Rodin::Variational
       ScalarType operator()(
           const GridFunctionType<TrialFES>& u, const GridFunctionType<TestFES>& v) const
       {
-        PETSc::Vector tmp;
+        PETSc::Math::Vector tmp;
         u.duplicate(tmp);
         this->getOperator().mult(v.getData(), tmp);
         ScalarType result;
@@ -150,18 +149,18 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const TrialFunction<Solution, TrialFES>>   m_u;
-      std::reference_wrapper<const TestFunction<TestFES>>               m_v;
+      std::reference_wrapper<const TrialFunction<Solution, TrialFES>> m_u;
+      std::reference_wrapper<const TestFunction<TestFES>> m_v;
       DefaultAssembly m_assembly;
       OperatorType m_operator;
   };
 }
 
-namespace Rodin::PETSc::Variational
+namespace Rodin::PETSc::Math::Variational
 {
   template <class Solution, class TrialFES, class TestFES>
   using BilinearForm =
-    Rodin::Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix>;
+    Rodin::Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Math::Matrix>;
 }
 
 #endif

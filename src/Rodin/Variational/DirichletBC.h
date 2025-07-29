@@ -106,25 +106,35 @@ namespace Rodin::Variational
     : public DirichletBCBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
-      using FESType = FES;
+      using FESType =
+        FES;
 
       /// Operand type
-      using OperandType = TrialFunction<Solution, FESType>;
+      using OperandType =
+        TrialFunction<Solution, FESType>;
 
       /// Scalar type
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType =
+        typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using DOFs = IndexMap<ScalarType>;
+      using DOFs =
+        IndexMap<ScalarType>;
 
       /// Value type
-      using ValueType = FunctionBase<ValueDerived>;
+      using ValueType =
+        FunctionBase<ValueDerived>;
 
-      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using FESMeshType =
+        typename FormLanguage::Traits<FESType>::MeshType;
 
-      using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+      using FESRangeType =
+        typename FormLanguage::Traits<FESType>::RangeType;
+
+      using FESMeshContextType =
+        typename FormLanguage::Traits<FESMeshType>::ContextType;
 
       using DefaultAssemblyType =
-        typename Assembly::Default<ContextType>::template Type<DOFs, DirichletBC>;
+        typename Assembly::Default<FESMeshContextType>::template Type<DOFs, DirichletBC>;
 
       using AssemblyType =
         DefaultAssemblyType;

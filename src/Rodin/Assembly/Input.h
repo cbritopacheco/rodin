@@ -7,6 +7,8 @@
 #ifndef RODIN_ASSEMBLY_INPUT_H
 #define RODIN_ASSEMBLY_INPUT_H
 
+#include <functional>
+
 #include "Rodin/Math.h"
 #include "Rodin/Tuple.h"
 
@@ -17,7 +19,6 @@
 
 #include "ForwardDecls.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
-#include <functional>
 
 namespace Rodin::Assembly
 {

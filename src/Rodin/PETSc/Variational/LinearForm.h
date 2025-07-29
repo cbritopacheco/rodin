@@ -9,15 +9,15 @@
 namespace Rodin::Variational
 {
   template <class FES>
-  class LinearForm<FES, PETSc::Vector> final
-    : public LinearFormBase<PETSc::Vector>
+  class LinearForm<FES, PETSc::Math::Vector> final
+    : public LinearFormBase<PETSc::Math::Vector>
   {
     public:
       using FESType = FES;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using VectorType = PETSc::Vector;
+      using VectorType = PETSc::Math::Vector;
 
       using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
 
@@ -39,15 +39,14 @@ namespace Rodin::Variational
        */
       constexpr
       LinearForm(const TestFunction<FES>& v)
-        : m_v(v),
-          m_assembly(new DefaultAssembly)
+        : m_v(v)
       {}
 
       constexpr
       LinearForm(const LinearForm& other)
         : Parent(other),
           m_v(other.m_v),
-          m_assembly(other.m_assembly->copy()),
+          m_assembly(other.m_assembly),
           m_vector(other.m_vector)
       {}
 
@@ -91,7 +90,7 @@ namespace Rodin::Variational
        *
        * @returns The value which the linear form takes at @f$ u @f$.
        */
-      ScalarType operator()(const GridFunction<FES, PETSc::Vector>& u) const
+      ScalarType operator()(const GridFunction<FES, PETSc::Math::Vector>& u) const
       {
         ScalarType result;
         this->getVector().dot(u.getData(), &result);
@@ -131,10 +130,10 @@ namespace Rodin::Variational
   };
 }
 
-namespace Rodin::PETSc::Variational
+namespace Rodin::PETSc::Math::Variational
 {
   template <class FES>
-  using LinearForm = Rodin::Variational::LinearForm<FES, PETSc::Vector>;
+  using LinearForm = Rodin::Variational::LinearForm<FES, PETSc::Math::Vector>;
 }
 
 #endif

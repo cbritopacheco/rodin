@@ -2,7 +2,7 @@
 #include <petscsystypes.h>
 #include <petscvec.h>
 
-namespace Rodin::PETSc
+namespace Rodin::PETSc::Math
 {
   Vector::Vector()
     : MPI(*this),

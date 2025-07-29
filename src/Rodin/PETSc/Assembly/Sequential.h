@@ -19,12 +19,12 @@ namespace Rodin::Assembly
 {
   // Sequential assembly for PETSc Vec (linear form)
   template <class FES>
-  class Sequential<PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>> final
-    : public AssemblyBase<PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>>
+  class Sequential<PETSc::Math::Vector, Variational::LinearForm<FES, PETSc::Math::Vector>> final
+    : public AssemblyBase<PETSc::Math::Vector, Variational::LinearForm<FES, PETSc::Math::Vector>>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
-      using VectorType = PETSc::Vector;
+      using VectorType = PETSc::Math::Vector;
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
       using Parent = AssemblyBase<VectorType, LinearFormType>;
       using InputType = typename Parent::InputType;
@@ -68,15 +68,15 @@ namespace Rodin::Assembly
 
   // Sequential assembly for PETSc Mat (bilinear form)
   template <class Solution, class TrialFES, class TestFES>
-  class Sequential<PETSc::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix>> final
-    : public AssemblyBase<PETSc::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix>>
+  class Sequential<PETSc::Math::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Math::Matrix>> final
+    : public AssemblyBase<PETSc::Math::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Math::Matrix>>
   {
     public:
       using DotType =
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
-      using OperatorType = PETSc::Matrix;
+      using OperatorType = PETSc::Math::Matrix;
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType = typename Parent::InputType;

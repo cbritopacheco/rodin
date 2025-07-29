@@ -13,7 +13,7 @@
 
 #include "Rodin/PETSc/Object.h"
 
-namespace Rodin::PETSc
+namespace Rodin::PETSc::Math
 {
   class Vector : public Object<::Vec>
   {
@@ -137,7 +137,7 @@ namespace Rodin::PETSc
 namespace Rodin::FormLanguage
 {
   template <>
-  struct Traits<PETSc::Vector>
+  struct Traits<PETSc::Math::Vector>
   {
     using ScalarType = PetscScalar;
   };

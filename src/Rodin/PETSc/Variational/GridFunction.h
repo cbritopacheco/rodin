@@ -26,8 +26,8 @@
 namespace Rodin::Variational
 {
   template <class FES>
-  class GridFunction<FES, PETSc::Vector>
-    : public GridFunctionBase<GridFunction<FES, PETSc::Vector>>
+  class GridFunction<FES, PETSc::Math::Vector>
+    : public GridFunctionBase<GridFunction<FES, PETSc::Math::Vector>>
   {
     enum class State
     {
@@ -36,17 +36,26 @@ namespace Rodin::Variational
     };
 
     public:
-      using FESType = FES;
+      using FESType =
+        FES;
 
-      using DataType = PETSc::Vector;
+      using DataType =
+        PETSc::Math::Vector;
 
-      using ScalarType = PetscScalar;
+      using ScalarType =
+        PetscScalar;
 
-      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using RangeType =
+        typename FormLanguage::Traits<FESType>::RangeType;
 
-      using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+      using FESMeshType =
+        typename FormLanguage::Traits<FESType>::MeshType;
 
-      using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
+      using FESMeshContextType =
+        typename FormLanguage::Traits<FESMeshType>::ContextType;
+
+      using Parent =
+        GridFunctionBase<GridFunction<FESType, DataType>>;
 
       using Parent::operator=;
 
@@ -55,8 +64,8 @@ namespace Rodin::Variational
       using Parent::max;
 
       static_assert(
-          std::is_same_v<ContextType, Context::Local> ||
-          std::is_same_v<ContextType, Context::MPI>);
+          std::is_same_v<FESMeshContextType, Context::Local> ||
+          std::is_same_v<FESMeshContextType, Context::MPI>);
 
       GridFunction(const FESType& fes)
         : Parent(fes),
@@ -67,13 +76,13 @@ namespace Rodin::Variational
           m_rawWrite(nullptr)
       {
         auto& data = this->getData();
-        if constexpr (std::is_same_v<ContextType, Context::Local>)
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
           data.create(PETSC_COMM_SELF);
           data.setSizes(fes.getSize(), PETSC_DECIDE).setFromOptions();
           data.setFromOptions();
         }
-        else if constexpr (std::is_same_v<ContextType, Context::MPI>)
+        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
           const auto& mesh = fes.getMesh();
           const auto& ctx = mesh.getContext();
@@ -177,11 +186,11 @@ namespace Rodin::Variational
       {
         acquire();
 
-        if constexpr (std::is_same_v<ContextType, Context::Local>)
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
           return m_rawWrite[static_cast<PetscInt>(global)];
         }
-        else if constexpr (std::is_same_v<ContextType, Context::MPI>)
+        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
           PetscInt local;
           if (m_begin <= global && global < m_end)
@@ -207,11 +216,11 @@ namespace Rodin::Variational
       {
         acquire();
 
-        if constexpr (std::is_same_v<ContextType, Context::Local>)
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
           return m_rawRead[static_cast<PetscInt>(global)];
         }
-        else if constexpr (std::is_same_v<ContextType, Context::MPI>)
+        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
           PetscInt local;
           if (m_begin <= global && global < m_end)
@@ -319,7 +328,7 @@ namespace Rodin::Variational
 
       GridFunction& setData(const DataType& other, size_t offset = 0)
       {
-        if constexpr (std::is_same_v<ContextType, Context::Local>)
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
           assert(offset == 0);
           other.copy(m_data);
@@ -418,10 +427,10 @@ namespace Rodin::PETSc::Variational
 {
   template <class FES>
   class GridFunction
-    : public Rodin::Variational::GridFunction<FES, PETSc::Vector>
+    : public Rodin::Variational::GridFunction<FES, PETSc::Math::Vector>
   {
     public:
-      using Parent = Rodin::Variational::GridFunction<FES, PETSc::Vector>;
+      using Parent = Rodin::Variational::GridFunction<FES, PETSc::Math::Vector>;
       using Parent::Parent;
       using Parent::operator[];
       using Parent::operator=;

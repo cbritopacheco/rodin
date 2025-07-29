@@ -13,14 +13,13 @@
 #include "Rodin/FormLanguage/Traits.h"
 
 #include "Rodin/PETSc/Math/Vector.h"
-#include <limits>
 #include <petscsystypes.h>
 
 namespace Rodin::IO
 {
   template <FileFormat Fmt, class FES>
-  class GridFunctionPrinter<Fmt, FES, PETSc::Vector>
-    : public GridFunctionPrinterBase<Fmt, FES, PETSc::Vector>
+  class GridFunctionPrinter<Fmt, FES, PETSc::Math::Vector>
+    : public GridFunctionPrinterBase<Fmt, FES, PETSc::Math::Vector>
   {
     public:
       using FESType = FES;
@@ -31,7 +30,7 @@ namespace Rodin::IO
 
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
-      using DataType = PETSc::Vector;
+      using DataType = PETSc::Math::Vector;
 
       using Parent = GridFunctionPrinterBase<Format, FES, DataType>;
 

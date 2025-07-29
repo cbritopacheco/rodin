@@ -23,9 +23,7 @@ namespace Rodin::FormLanguage
 
     using OperandType = Variational::GridFunction<FESType, Data>;
 
-    using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
-
-    using RangeType = Math::Vector<ScalarType>;
+    using RangeType = Range;
   };
 
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -38,9 +36,7 @@ namespace Rodin::FormLanguage
 
     using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
 
-    using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
-
-    using RangeType = Math::Vector<ScalarType>;
+    using RangeType = Range;
   };
 }
 

@@ -15,9 +15,9 @@
 namespace Rodin::Assembly
 {
   template <class FES>
-  class MPI<PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>> final
+  class MPI<PETSc::Math::Vector, Variational::LinearForm<FES, PETSc::Math::Vector>> final
     : public AssemblyBase<
-        PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>>
+        PETSc::Math::Vector, Variational::LinearForm<FES, PETSc::Math::Vector>>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
@@ -25,7 +25,7 @@ namespace Rodin::Assembly
         std::is_same_v<ScalarType, PetscScalar>,
         "FES::ScalarType must be PetscScalar"
       );
-      using VectorType     = PETSc::Vector;
+      using VectorType     = PETSc::Math::Vector;
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
       using Parent         = AssemblyBase<VectorType, LinearFormType>;
       using InputType      = typename Parent::InputType;
@@ -76,8 +76,8 @@ namespace Rodin::Assembly
   };
 
   template <class Solution, class TrialFES, class TestFES>
-  class MPI<PETSc::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix>> final
-    : public AssemblyBase<PETSc::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Matrix>>
+  class MPI<PETSc::Math::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Math::Matrix>> final
+    : public AssemblyBase<PETSc::Math::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Math::Matrix>>
   {
     public:
       using DotType =
@@ -88,7 +88,7 @@ namespace Rodin::Assembly
         std::is_same_v<DotType, PetscScalar>,
         "DotType must be PetscScalar"
       );
-      using OperatorType     = PETSc::Matrix;
+      using OperatorType     = PETSc::Math::Matrix;
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
       using Parent           = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType        = typename Parent::InputType;
@@ -151,7 +151,7 @@ namespace Rodin::Assembly
   };
 }
 
-namespace Rodin::PETSc::Assembly
+namespace Rodin::PETSc::Math::Assembly
 {
   template <class LinearAlgebraType, class Operand>
   using MPI = Rodin::Assembly::MPI<LinearAlgebraType, Operand>;

@@ -18,38 +18,43 @@ namespace Rodin::Solver
   template <>
   class CG<PETSc::Math::LinearSystem> final : public KSP
   {
-  public:
-    using OperatorType = PETSc::Matrix;
-    using VectorType = PETSc::Vector;
-    using ScalarType = PetscScalar;
-    using LinearSystemType = PETSc::Math::LinearSystem;
-    using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-    using Parent = KSP;
-    using Parent::solve;
+    public:
+      using OperatorType = PETSc::Math::Matrix;
+      using VectorType = PETSc::Math::Vector;
+      using ScalarType = PetscScalar;
+      using LinearSystemType = PETSc::Math::LinearSystem;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      using Parent = KSP;
+      using Parent::solve;
 
-    /**
-     * @brief Construct a CG solver and set the PETSc type to KSPCG.
-     * @param pb The variational problem to solve.
-     */
-    explicit CG(ProblemBaseType& pb);
+      /**
+       * @brief Construct a CG solver and set the PETSc type to KSPCG.
+       * @param pb The variational problem to solve.
+       */
+      explicit CG(ProblemBaseType& pb);
 
-    /**
-     * @brief Copy constructor.
-     * @param other Another CG instance.
-     */
-    CG(const CG& other);
+      /**
+       * @brief Copy constructor.
+       * @param other Another CG instance.
+       */
+      CG(const CG& other);
 
-    /**
-     * @brief Move constructor.
-     * @param other Moved-from CG instance.
-     */
-    CG(CG&& other);
+      /**
+       * @brief Move constructor.
+       * @param other Moved-from CG instance.
+       */
+      CG(CG&& other);
 
-    CG* copy() const noexcept override
-    {
-      return new CG(*this);
-    }
+      CG* copy() const noexcept override
+      {
+        return new CG(*this);
+      }
   };
-} // namespace Rodin::Solver
+}
+
+namespace Rodin::PETSc::Solver
+{
+  using CG = Rodin::Solver::CG<Math::LinearSystem>;
+}
 
 #endif // RODIN_SOLVER_PETSC_CG_H

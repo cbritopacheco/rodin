@@ -31,8 +31,8 @@ namespace Rodin::Solver
     public:
       using HandleType = ::KSP;
       using ScalarType   = PetscScalar;
-      using OperatorType = PETSc::Matrix;
-      using VectorType   = PETSc::Vector;
+      using OperatorType = PETSc::Math::Matrix;
+      using VectorType   = PETSc::Math::Vector;
       using LinearSystemType = PETSc::Math::LinearSystem;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
       using Parent = SolverBase<LinearSystemType>;
@@ -86,5 +86,10 @@ namespace Rodin::Solver
       std::optional<OperatorType> m_preconditioner;
   };
 } // namespace Rodin::Solver
+
+namespace Rodin::PETSc::Solver
+{
+  using KSP = Rodin::Solver::KSP;
+}
 
 #endif // RODIN_SOLVER_PETSC_KSP_H
