@@ -9,16 +9,19 @@
 #include "Rodin/Context/Local.h"
 #include "Rodin/MPI/Context/MPI.h"
 #include "Rodin/PETSc/Variational/TestFunction.h"
+#include "Rodin/PETSc/Variational/TrialFunction.h"
 #include "Rodin/Variational/Problem.h"
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
 
 #include "Rodin/PETSc/Assembly/Generic.h"
+#include "Rodin/Variational/TestFunction.h"
 
 namespace Rodin::Variational
 {
   template <class U, class V>
-  class Problem<PETSc::Math::LinearSystem, U, V> : public Variational::ProblemUVBase<PETSc::Math::LinearSystem, U, V>
+  class Problem<PETSc::Math::LinearSystem, U, V>
+    : public Variational::ProblemUVBase<PETSc::Math::LinearSystem, U, V>
   {
     public:
       using LinearSystemType =
@@ -47,18 +50,23 @@ namespace Rodin::Variational
       using TestFESType =
         typename FormLanguage::Traits<V>::FESType;
 
+      using TrialFESMeshType =
+        typename FormLanguage::Traits<TrialFESType>::MeshType;
+
+      using TrialFESMeshContextType =
+        typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
+
       using Parent =
         Variational::ProblemUVBase<LinearSystemType, U, V>;
 
       Problem(U& u, V& v)
         : Parent(u, v)
       {
-        using TrialFESContextType = typename FormLanguage::Traits<TrialFESType>::ContextType;
-        if constexpr (std::is_same_v<TrialFESContextType, Context::Local>)
+        if constexpr (std::is_same_v<TrialFESMeshContextType, Context::Local>)
         {
           m_axb.create(PETSC_COMM_SELF);
         }
-        else if constexpr (std::is_same_v<TrialFESContextType, Context::MPI>)
+        else if constexpr (std::is_same_v<TrialFESMeshContextType, Context::MPI>)
         {
           const auto& fes = u.getFiniteElementSpace();
           const auto& mesh = fes.getMesh();
@@ -106,24 +114,25 @@ namespace Rodin::Variational
 
       Problem& operator=(const ProblemBodyType& rhs) override
       {
-        Parent::operator=(rhs);
+        m_pb = rhs;
+        m_assembled = false;
         return *this;
       }
 
       Problem& assemble() override
       {
-        // m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
+        m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
         m_assembled = true;
         return *this;
       }
 
       void solve(SolverBaseType& solver) override
       {
-         // auto& axb = this->getLinearSystem();
-         // if (!m_assembled)
-         //    this->assemble();
-         // solver.solve(axb);
-         // this->getTrialFunction().getSolution().setData(axb.getSolution());
+        auto& axb = this->getLinearSystem();
+        if (!m_assembled)
+           this->assemble();
+        solver.solve(axb);
+        this->getTrialFunction().getSolution().setData(axb.getSolution());
       }
 
       LinearSystemType& getLinearSystem() override
@@ -148,8 +157,14 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
-  template <class U, class V>
-  Problem(U&, V&) -> Problem<U, V>;
+  template <class Solution, class TrialFES, class TestFES>
+  Problem(
+      PETSc::Variational::TrialFunction<Solution, TrialFES>&,
+      PETSc::Variational::TestFunction<TestFES>&)
+    -> Problem<
+          PETSc::Math::LinearSystem,
+          TrialFunction<Solution, TrialFES>,
+          TestFunction<TestFES>>;
 }
 
 namespace Rodin::PETSc::Variational

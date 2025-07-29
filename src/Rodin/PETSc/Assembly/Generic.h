@@ -13,11 +13,17 @@
 
 namespace Rodin::Assembly
 {
-  template <class LinearSystem, class TrialFunction, class TestFunction>
-  class Generic<LinearSystem, Variational::Problem<PETSc::Math::LinearSystem, TrialFunction, TestFunction>> final
+  template <class TrialFunction, class TestFunction>
+  class Generic<
+    PETSc::Math::LinearSystem, Variational::Problem<
+      PETSc::Math::LinearSystem, TrialFunction, TestFunction>> final
+    : public AssemblyBase<
+        PETSc::Math::LinearSystem,
+        Variational::Problem<PETSc::Math::LinearSystem, TrialFunction, TestFunction>>
   {
     public:
-      using LinearSystemType = LinearSystem;
+      using LinearSystemType =
+        PETSc::Math::LinearSystem;
 
       using TrialFESType =
         typename FormLanguage::Traits<TrialFunction>::FESType;
@@ -47,7 +53,9 @@ namespace Rodin::Assembly
         Variational::BilinearForm<SolutionType, TrialFESType, TestFESType, OperatorType>;
 
       using Parent =
-        AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>;
+        AssemblyBase<
+          LinearSystemType,
+          Variational::Problem<LinearSystemType, TrialFunction, TestFunction>>;
 
       using InputType =
         typename Parent::InputType;
@@ -61,6 +69,16 @@ namespace Rodin::Assembly
       Generic(Generic&& other)
         : Parent(std::move(other))
       {}
+
+      void execute(LinearSystemType& out, const InputType& input) const override
+      {
+        assert(false); // TODO
+      }
+
+      Generic* copy() const noexcept override
+      {
+        return new Generic(*this);
+      }
   };
 }
 

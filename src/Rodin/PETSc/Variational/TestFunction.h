@@ -5,42 +5,42 @@
 
 #include "Rodin/Variational/TestFunction.h"
 
-namespace Rodin::PETSc
+namespace Rodin::PETSc::Variational
 {
   template <class FES>
-  class TestFunction : public Variational::TestFunction<FES>
+  class TestFunction : public Rodin::Variational::TestFunction<FES>
   {
     public:
-      using Parent = Variational::TestFunction<FES>;
-      using FESType = FES;
+      using FESType =
+        FES;
 
-      TestFunction(const FESType& fes)
-        : Parent(fes)
-      {}
+      using Parent =
+        Rodin::Variational::TestFunction<FESType>;
+
+      using Parent::Parent;
   };
 
   template <class FES>
   TestFunction(const FES& fes) -> TestFunction<FES>;
 }
 
-namespace Rodin::FormLanguage
-{
-  template <class FES>
-  struct Traits<PETSc::TestFunction<FES>>
-  {
-    using FESType = FES;
-  };
-}
-
 namespace Rodin::Variational
 {
   template <class FES>
-  struct IsTestFunction<PETSc::TestFunction<FES>>
+  struct IsTestFunction<PETSc::Variational::TestFunction<FES>>
   {
     static constexpr Boolean Value = true;
   };
 }
 
+namespace Rodin::FormLanguage
+{
+  template <class FES>
+  struct Traits<PETSc::Variational::TestFunction<FES>>
+  {
+    using FESType = FES;
+  };
+}
 
 #endif
 

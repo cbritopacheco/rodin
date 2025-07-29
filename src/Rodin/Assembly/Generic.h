@@ -84,7 +84,7 @@ namespace Rodin::Assembly
         : Parent(std::move(other))
       {}
 
-      void execute(LinearSystem& out, const InputType& input) const override
+      void execute(LinearSystemType& out, const InputType& input) const override
       {
         const auto& u = input.getTrialFunction();
         const auto& v = input.getTestFunction();

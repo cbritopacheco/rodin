@@ -34,7 +34,9 @@ namespace Rodin::IO
 
       using Parent = GridFunctionPrinterBase<Format, FES, DataType>;
 
-      using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+      using FESMeshType = typename FormLanguage::Traits<FESType>::MeshType;
+
+      using FESMeshContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
       using Parent::Parent;
 
