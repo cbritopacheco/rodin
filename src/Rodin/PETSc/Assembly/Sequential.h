@@ -34,10 +34,9 @@ namespace Rodin::Assembly
 
       void execute(VectorType& res, const InputType& input) const override
       {
-        PetscErrorCode ierr;
-        ierr = VecCreate(PETSC_COMM_SELF, &res);
-        assert(ierr == PETSC_SUCCESS);
+        assert(res);
         const size_t n = input.getFES().getSize();
+        PetscErrorCode ierr;
         ierr = VecSetSizes(res, n, PETSC_DECIDE);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecSetFromOptions(res);
@@ -96,11 +95,10 @@ namespace Rodin::Assembly
 
       void execute(OperatorType& res, const InputType& input) const override
       {
-        PetscErrorCode ierr;
-        ierr = MatCreate(PETSC_COMM_SELF, &res);
-        assert(ierr == PETSC_SUCCESS);
+        assert(res);
         const size_t m = input.getTestFES().getSize();
         const size_t n = input.getTrialFES().getSize();
+        PetscErrorCode ierr;
         ierr = MatSetSizes(res, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
         assert(ierr == PETSC_SUCCESS);
         ierr = MatSeqAIJSetPreallocation(res, PETSC_DETERMINE, PETSC_NULLPTR);

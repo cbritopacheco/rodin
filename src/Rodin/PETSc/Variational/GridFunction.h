@@ -71,6 +71,8 @@ namespace Rodin::Variational
       using Parent =
         GridFunctionBase<GridFunction<FESType, DataType>>;
 
+      using Parent::projectOnCells;
+
       using Parent::operator=;
 
       using Parent::min;
@@ -361,33 +363,121 @@ namespace Rodin::Variational
           ierr = VecCopy(other, m_data);
           assert(ierr == PETSC_SUCCESS);
         }
+        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          flush();
+          auto& data = this->getData();
+          PetscInt localSize;
+          ierr = VecGetLocalSize(data, &localSize);
+          assert(ierr == PETSC_SUCCESS);
+          const PetscScalar* src = nullptr;
+          ierr = VecGetArrayRead(other, &src);
+          assert(ierr == PETSC_SUCCESS);
+          PetscScalar* dst = nullptr;
+          ierr = VecGetArrayWrite(data, &dst);
+          assert(ierr == PETSC_SUCCESS);
+          std::memcpy(dst, src + static_cast<PetscInt>(offset), localSize * sizeof(PetscScalar));
+          ierr = VecRestoreArrayWrite(other, &dst);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecRestoreArrayRead(data, &src);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateBegin(data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         else
         {
-          // flush();
-          // auto& data = this->getData();
-          // PetscInt localSize;
-          // data.getLocalSize(&localSize);
-          // const PetscScalar* src = nullptr;
-          // other.getArrayRead(&src);
-          // PetscScalar* dst = nullptr;
-          // data.getArrayWrite(&dst);
-          // std::memcpy(dst, src + static_cast<PetscInt>(offset), localSize * sizeof(PetscScalar));
-          // data.restoreArrayWrite(&dst);
-          // other.restoreArrayRead(&src);
-          // data.ghostUpdateBegin(INSERT_VALUES, SCATTER_FORWARD);
-          // data.ghostUpdateEnd(INSERT_VALUES, SCATTER_FORWARD);
+          assert(false);
         }
         return *this;
       }
 
-      PetscScalar* getRaw()
+      constexpr
+      void interpolate(RangeType& res, const Geometry::Point& p) const
       {
-        return m_write.raw;
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index  i = polytope.getIndex();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const size_t count = fe.getCount();
+        RangeType v;
+        for (Index local = 0; local < count; ++local)
+        {
+          const auto mapping = fes.getInverseMapping({ d, i }, fe.getBasis(local));
+          mapping(v, p);
+          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
+          if (local == 0)
+            res = k; // Initializes the result (resizes)
+          else
+            res += k; // Accumulates the result (does not resize)
+        }
       }
 
-      const PetscScalar* getRaw() const
+      template <class NestedDerived>
+      GridFunction& projectOnCells(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        return m_read.raw;
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        {
+          const auto& fes = this->getFiniteElementSpace();
+          const auto& mesh = fes.getMesh();
+          for (auto it = mesh.getCell(); it; ++it)
+          {
+            const auto& polytope = *it;
+            if (pred(polytope))
+              project(fn, { polytope.getDimension(), polytope.getIndex() });
+          }
+        }
+        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          const auto& fes = this->getFiniteElementSpace().getShard();
+          const auto& mesh = fes.getMesh().getShard();
+          for (auto it = mesh.getCell(); it; ++it)
+          {
+            const auto& polytope = *it;
+            if (pred(polytope))
+              project(fn, { polytope.getDimension(), polytope.getIndex() });
+          }
+        }
+        else
+        {
+          assert(false);
+        }
+        return *this;
+      }
+
+      template <class NestedDerived>
+      void project(const FunctionBase<NestedDerived>& fn, const std::pair<size_t, Index>& p)
+      {
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& [d, i] = p;
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        {
+          const auto& fe = fes.getFiniteElement(d, i);
+          const auto mapping =
+            fes.getMapping({ d, i }, fn.template cast<RangeType>());
+          for (Index local = 0; local < fe.getCount(); local++)
+          {
+            const Index global = fes.getGlobalIndex({ d, i }, local);
+            this->operator[](global) = fe.getLinearForm(local)(mapping);
+          }
+        }
+        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          const auto& fe = fes.getShard().getFiniteElement(d, i);
+          const auto mapping =
+            fes.getMapping({ d, i }, fn.template cast<RangeType>());
+          for (Index local = 0; local < fe.getCount(); local++)
+          {
+            const Index global = fes.getGlobalIndex({ d, i }, local);
+            this->operator[](global) = fe.getLinearForm(local)(mapping);
+          }
+        }
+        else
+        {
+          assert(false);
+        }
       }
 
       void acquire()

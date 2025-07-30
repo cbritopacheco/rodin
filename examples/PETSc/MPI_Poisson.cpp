@@ -1,3 +1,4 @@
+#include "Rodin/PETSc/Variational/GridFunction.h"
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 
@@ -47,19 +48,34 @@ int main(int argc, char** argv)
   ScalarFunction f = 1;
 
   {
-    PETSc::Variational::TrialFunction u(vh);
-    PETSc::Variational::TestFunction  v(vh);
+    PETSc::Variational::GridFunction gf(vh);
+    gf = Cos(F::x);
+    gf.save("Poisson." + std::to_string(world.rank()) + ".gf");
+    // PETSc::Variational::TrialFunction u(vh);
+    // PETSc::Variational::TestFunction  v(vh);
 
-    // Define problem
-    Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
-    CG(poisson).solve();
+    // // Define problem
+    // Problem poisson(u, v);
+    // poisson = Integral(Grad(u), Grad(v))
+    //         - Integral(f, v);
+    //         // + DirichletBC(u, Zero());
+    // poisson.assemble();
+
+
+    // auto& mat = poisson.getLinearSystem().getOperator();
+    // MatView(mat, PETSC_VIEWER_STDOUT_WORLD);
+
+    // auto& solution = poisson.getLinearSystem().getSolution();
+    // VecView(solution, PETSC_VIEWER_STDOUT_WORLD);
+
+    // auto& vec = poisson.getLinearSystem().getVector();
+    // VecView(vec, PETSC_VIEWER_STDOUT_WORLD);
+
+    // CG(poisson).solve();
 
     // Save solution
-    u.getSolution().save("Poisson.gf");
-    mesh.save("Poisson.mesh");
+    // u.getSolution().save("Poisson." + std::to_string(world.rank()) + ".gf");
+    // mesh.save("Poisson." + std::to_string(world.rank()) + ".mesh");
   }
 
   PetscFinalize();

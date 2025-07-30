@@ -100,10 +100,10 @@ namespace Rodin::Assembly
         const auto& testFES = v.getFiniteElementSpace();
         auto& pb = input.getProblemBody();
         auto& [stiffness, solution, mass] = out;
-
         const MPI_Comm comm = out.getCommunicator();
 
         const BilinearFormAssemblyType bfa;
+        assert(stiffness);
         bfa.execute(
             stiffness,
             {
@@ -120,6 +120,7 @@ namespace Rodin::Assembly
         }
 
         const LinearFormAssemblyType lfa;
+        assert(mass);
         lfa.execute(
             mass,
             {
@@ -142,6 +143,7 @@ namespace Rodin::Assembly
         ierr = VecDuplicate(mass, &solution);
         assert(ierr == PETSC_SUCCESS);
 
+        assert(solution);
         for (auto& dbc : pb.getDBCs())
         {
           dbc.assemble();

@@ -18,7 +18,7 @@ namespace Rodin::FormLanguage
    * @see Traits
    */
 
-  template <class ... Args>
+  template <class T, class Enable = void>
   struct Traits;
 }
 

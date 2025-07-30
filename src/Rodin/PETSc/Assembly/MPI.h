@@ -34,6 +34,7 @@ namespace Rodin::Assembly
 
       void execute(VectorType& res, const InputType& input) const override
       {
+        assert(res);
         const auto& fes = input.getFES();
         const auto& mesh = fes.getMesh();
         const auto& shard = mesh.getShard();
@@ -41,15 +42,17 @@ namespace Rodin::Assembly
         const auto& comm = ctx.getCommunicator();
         const size_t localSize = fes.getShard().getSize();
         const size_t globalSize = fes.getSize();
+
         PetscErrorCode ierr;
-        ierr = VecCreate(comm, &res);
-        assert(ierr == PETSC_SUCCESS);
         ierr = VecSetSizes(res, localSize, globalSize);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
+
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
@@ -66,14 +69,17 @@ namespace Rodin::Assembly
               const auto& dofs = fes.getShard().getDOFs(d, i);
               for (PetscInt i = 0; i < dofs.size(); ++i)
               {
-                const PetscScalar v = PetscScalar(lfi.integrate(i));
-                VecSetValue(res, fes.getGlobalIndex(dofs[i]), v, ADD_VALUES);
+                const PetscScalar v = lfi.integrate(i);
+                ierr = VecSetValue(res, fes.getGlobalIndex(dofs[i]), v, ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
               }
             }
           }
         }
+
         ierr = VecAssemblyBegin(res);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecAssemblyEnd(res);
         assert(ierr == PETSC_SUCCESS);
       }
@@ -104,29 +110,35 @@ namespace Rodin::Assembly
 
       void execute(OperatorType& res, const InputType& input) const override
       {
+        assert(res);
         const auto& testFES  = input.getTestFES();
         const auto& trialFES = input.getTrialFES();
-        const auto& mesh     = testFES.getMesh();
-        const auto& shard    = mesh.getShard();
-        const auto& ctx      = mesh.getContext();
-        const auto& comm     = ctx.getCommunicator();
+        const auto& mesh = testFES.getMesh();
+        const auto& shard = mesh.getShard();
+        const auto& ctx = mesh.getContext();
+        const auto& comm = ctx.getCommunicator();
         const size_t localRows = testFES.getShard().getSize();
         const size_t localCols = trialFES.getShard().getSize();
         const size_t globalRows = testFES.getSize();
         const size_t globalCols = trialFES.getSize();
+
         PetscErrorCode ierr;
-        ierr = MatCreate(comm, &res);
-        assert(ierr == PETSC_SUCCESS);
         ierr = MatSetSizes(res, localRows, localCols, globalRows, globalCols);
         assert(ierr == PETSC_SUCCESS);
-        ierr = MatMPIAIJSetPreallocation(res, PETSC_DECIDE, PETSC_NULLPTR, PETSC_DECIDE, PETSC_NULLPTR);
+
+        ierr = MatMPIAIJSetPreallocation(
+            res, PETSC_DECIDE, PETSC_NULLPTR, PETSC_DECIDE, PETSC_NULLPTR);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatSetUp(res);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
+
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
@@ -147,7 +159,7 @@ namespace Rodin::Assembly
               {
                 for (PetscInt j = 0; j < cols.size(); ++j)
                 {
-                  PetscScalar v = PetscScalar(bfi.integrate(j, i));
+                  PetscScalar v = bfi.integrate(j, i);
                   ierr = MatSetValue(
                       res,
                       testFES.getGlobalIndex(rows[i]),
@@ -158,8 +170,10 @@ namespace Rodin::Assembly
             }
           }
         }
+
         ierr = MatAssemblyBegin(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatAssemblyEnd(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
       }

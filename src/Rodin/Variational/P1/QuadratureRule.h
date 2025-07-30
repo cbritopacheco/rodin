@@ -270,20 +270,13 @@ namespace Rodin::Variational
         const auto& f = integrand.getLHS();
         const auto& fes = integrand.getFiniteElementSpace();
         const bool recompute = !m_set || m_geometry != geometry;
-        P1Element<RHSRangeType> fe(geometry);
+        P1Element<RHSRangeType> fe;
         if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
-        {
           fe = P1Element<RHSRangeType>(geometry);
-        }
         else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
-        {
-          // static_assert((std::is_same_v<RHSRangeType, void> || std::is_same_v<ScalarType, void>) && std::is_same_v<RHSRangeType, ScalarType>);
           fe = P1Element<RHSRangeType>(d, geometry);
-        }
         else
-        {
           assert(false);
-        }
         if (recompute)
         {
           m_set = true;

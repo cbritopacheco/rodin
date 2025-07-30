@@ -70,7 +70,7 @@ namespace Rodin::Variational
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
-            const Geometry::Point p(m_polytope,r);
+            const Geometry::Point p(m_polytope, r);
             return getFunction()(res, p);
           }
 

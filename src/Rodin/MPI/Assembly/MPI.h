@@ -39,19 +39,26 @@ namespace Rodin::Assembly
           Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
   {
     public:
-      using FESType = FES;
+      using FESType =
+        FES;
 
-      using TrialFunctionType = Variational::TrialFunction<Solution, FES>;
+      using TrialFunctionType =
+        Variational::TrialFunction<Solution, FES>;
 
-      using ValueType = Variational::FunctionBase<ValueDerived>;
+      using ValueType =
+        Variational::FunctionBase<ValueDerived>;
 
-      using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
+      using DirichletBCType =
+        Variational::DirichletBC<TrialFunctionType, ValueType>;
 
-      using Parent = AssemblyBase<IndexMap<Scalar>, DirichletBCType>;
+      using Parent =
+        AssemblyBase<IndexMap<Scalar>, DirichletBCType>;
 
-      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using FESRangeType =
+        typename FormLanguage::Traits<FESType>::RangeType;
 
-      using InputType = typename Parent::InputType;
+      using InputType =
+        typename Parent::InputType;
 
       MPI() = default;
 

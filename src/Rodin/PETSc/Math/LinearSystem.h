@@ -52,19 +52,24 @@ namespace Rodin::Math
         auto& a = this->getOperator();
         auto& b = this->getVector();
         auto& x = this->getSolution();
+        PetscErrorCode ierr;
         std::vector<PetscInt> rows;
         rows.reserve(dofs.size());
         for (auto const& kv : dofs)
-          rows.push_back(PetscInt(kv.first) + PetscInt(offset));
+          rows.push_back(kv.first + offset);
         for (auto const& kv : dofs)
         {
-          const PetscInt i = PetscInt(kv.first) + PetscInt(offset);
-          const auto& ui  = kv.second;
-          VecSetValue(x, i, ui, INSERT_VALUES);
+          const PetscInt i = kv.first + offset;
+          const auto& ui = kv.second;
+          ierr = VecSetValue(x, i, ui, INSERT_VALUES);
+          assert(ierr == PETSC_SUCCESS);
         }
-        VecAssemblyBegin(x);
-        VecAssemblyEnd(x);
-        MatZeroRows(a, rows.size(), rows.data(), 1.0, x, b);
+        ierr = VecAssemblyBegin(x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecAssemblyEnd(x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatZeroRows(a, rows.size(), rows.data(), 1.0, x, b);
+        assert(ierr == PETSC_SUCCESS);
         return *this;
       }
 
