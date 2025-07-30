@@ -69,7 +69,7 @@ namespace Rodin::Assembly
           ::template Type<VectorType, LinearFormType>;
 
       using Parent =
-        AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>;
+        AssemblyBase<LinearSystemType, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>;
 
       using InputType =
         typename Parent::InputType;

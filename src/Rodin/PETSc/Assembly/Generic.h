@@ -9,7 +9,11 @@
 
 #include "Rodin/Assembly/ForwardDecls.h"
 
+#include "Rodin/MPI/Context/MPI.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
+#include <petscmat.h>
+#include <petscsys.h>
+#include <petscvec.h>
 
 namespace Rodin::Assembly
 {
@@ -31,6 +35,20 @@ namespace Rodin::Assembly
       using TestFESType =
         typename FormLanguage::Traits<TestFunction>::FESType;
 
+      using TrialFESMeshType =
+        typename FormLanguage::Traits<TrialFESType>::MeshType;
+
+      using TestFESMeshType =
+        typename FormLanguage::Traits<TestFESType>::MeshType;
+
+      using TrialFESMeshContextType =
+        typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
+
+      using TestFESMeshContextType =
+        typename FormLanguage::Traits<TestFESMeshType>::ContextType;
+
+      static_assert(std::is_same_v<TrialFESMeshContextType, TestFESMeshContextType>);
+
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
@@ -43,19 +61,22 @@ namespace Rodin::Assembly
       using SolutionType =
         typename FormLanguage::Traits<TrialFunction>::SolutionType;
 
-      using LinearFormType =
-        Variational::LinearForm<TestFESType, VectorType>;
-
-      using DirichletBCType =
-        Variational::DirichletBC<TrialFunction, VectorType>;
-
       using BilinearFormType =
         Variational::BilinearForm<SolutionType, TrialFESType, TestFESType, OperatorType>;
 
+      using BilinearFormAssemblyType =
+        typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
+          ::template Type<OperatorType, BilinearFormType>;
+
+      using LinearFormType =
+        Variational::LinearForm<TestFESType, VectorType>;
+
+      using LinearFormAssemblyType =
+        typename Assembly::Default<TestFESMeshContextType>
+          ::template Type<VectorType, LinearFormType>;
+
       using Parent =
-        AssemblyBase<
-          LinearSystemType,
-          Variational::Problem<LinearSystemType, TrialFunction, TestFunction>>;
+        AssemblyBase<LinearSystemType, Variational::Problem<LinearSystemType, TrialFunction, TestFunction>>;
 
       using InputType =
         typename Parent::InputType;
@@ -72,7 +93,69 @@ namespace Rodin::Assembly
 
       void execute(LinearSystemType& out, const InputType& input) const override
       {
-        assert(false); // TODO
+        const auto& u = input.getTrialFunction();
+        const auto& v = input.getTestFunction();
+        const auto& trialFES = u.getFiniteElementSpace();
+        const auto& testFES = v.getFiniteElementSpace();
+        auto& pb = input.getProblemBody();
+        auto& [stiffness, solution, mass] = out;
+
+        MPI_Comm comm;
+        PetscErrorCode ierr;
+        ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(stiffness), &comm);
+        assert(ierr == PETSC_SUCCESS);
+
+        const BilinearFormAssemblyType bfa;
+        bfa.execute(
+            stiffness,
+            {
+              u.getFiniteElementSpace(),
+              v.getFiniteElementSpace(),
+              pb.getLocalBFIs(),
+              pb.getGlobalBFIs()
+            });
+
+        for (auto& bf : pb.getBFs())
+        {
+          ierr = MatAXPY(stiffness, 1.0, bf.getOperator(), UNKNOWN_NONZERO_PATTERN);
+          assert(ierr == PETSC_SUCCESS);
+        }
+
+        const LinearFormAssemblyType lfa;
+        lfa.execute(
+            mass,
+            {
+              v.getFiniteElementSpace(),
+              pb.getLFIs()
+            });
+
+        for (const auto& lf : pb.getLFs())
+        {
+          ierr = VecAXPY(mass, 1.0, lf.getVector());
+          assert(ierr == PETSC_SUCCESS);
+        }
+
+        ierr = VecScale(mass, -1.0);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = VecCreate(comm, &solution);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = VecDuplicate(mass, &solution);
+        assert(ierr == PETSC_SUCCESS);
+
+        for (auto& dbc : pb.getDBCs())
+        {
+          dbc.assemble();
+          out.eliminate(dbc.getDOFs());
+        }
+
+        for (auto& pbc : pb.getPBCs())
+        {
+          assert(trialFES == testFES);
+          pbc.assemble();
+          out.merge(pbc.getDOFs());
+        }
       }
 
       Generic* copy() const noexcept override

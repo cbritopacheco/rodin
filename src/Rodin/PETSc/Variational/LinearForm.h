@@ -5,6 +5,7 @@
 #include "Rodin/PETSc/Math/Vector.h"
 
 #include "Rodin/Variational/LinearForm.h"
+#include <petscsystypes.h>
 
 namespace Rodin::Variational
 {
@@ -93,7 +94,9 @@ namespace Rodin::Variational
       ScalarType operator()(const GridFunction<FES, PETSc::Math::Vector>& u) const
       {
         ScalarType result;
-        this->getVector().dot(u.getData(), &result);
+        PetscErrorCode ierr;
+        ierr = VecDot(this->getVector().getData(), u.getData(), &result);
+        assert(ierr == PETSC_SUCCESS);
         return result;
       }
 

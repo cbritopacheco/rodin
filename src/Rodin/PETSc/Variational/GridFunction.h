@@ -8,9 +8,11 @@
 #define RODIN_PETSC_VARIATIONAL_GRIDFUNCTION_H
 
 #include <petsc.h>
+#include <petscmacros.h>
 #include <petscsys.h>
 #include <petscsystypes.h>
 #include <petscvec.h>
+#include <utility>
 
 #include "Rodin/Types.h"
 #include "Rodin/Context/Local.h"
@@ -33,6 +35,18 @@ namespace Rodin::Variational
     {
       Acquired,
       Unacquired
+    };
+
+    struct ArrayWrite
+    {
+      State state = State::Unacquired;
+      PetscScalar* raw = PETSC_NULLPTR;
+    };
+
+    struct ArrayRead
+    {
+      State state = State::Unacquired;
+      const PetscScalar* raw = PETSC_NULLPTR;
     };
 
     public:
@@ -69,67 +83,66 @@ namespace Rodin::Variational
 
       GridFunction(const FESType& fes)
         : Parent(fes),
-          m_owned(true),
-          m_read(State::Unacquired),
-          m_rawRead(nullptr),
-          m_write(State::Unacquired),
-          m_rawWrite(nullptr)
+          m_read{.state = State::Unacquired, .raw = PETSC_NULLPTR},
+          m_write{.state = State::Unacquired, .raw = PETSC_NULLPTR}
       {
         auto& data = this->getData();
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
-          data.create(PETSC_COMM_SELF);
-          data.setSizes(fes.getSize(), PETSC_DECIDE).setFromOptions();
-          data.setFromOptions();
+          VecCreate(PETSC_COMM_SELF, &data);
+          VecSetSizes(data, fes.getSize(), PETSC_DECIDE);
+          VecSetFromOptions(data);
         }
         else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
           const auto& mesh = fes.getMesh();
           const auto& ctx = mesh.getContext();
+          PetscErrorCode ierr;
           data.create(ctx.getCommunicator());
           const size_t globalSize = fes.getSize();
           const size_t localSize = fes.getShard().getSize();
           fes.getOwnershipRange(m_begin, m_end);
           const size_t ownedSize = m_end - m_begin;
-          data.setSizes(localSize, globalSize).setFromOptions();
+          ierr = VecSetSizes(data, localSize, globalSize);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(data);
+          assert(ierr == PETSC_SUCCESS);
           size_t ghostSize = localSize - ownedSize;
           m_ghosts.resize(ghostSize);
           for (size_t i = 0; i < ghostSize; ++i)
             m_ghosts[i] = fes.getGlobalIndex(ownedSize + i);
-          data.MPI.setGhost(ghostSize, m_ghosts.data());
+          ierr = VecMPISetGhost(data, ghostSize, m_ghosts.data());
+          assert(ierr == PETSC_SUCCESS);
         }
         else
         {
           assert(false);
         }
-        data.zeroEntries();
+        VecZeroEntries(data);
       }
 
       GridFunction(const GridFunction& other)
         : Parent(other.getFiniteElementSpace()),
           m_data(other.getData()),
-          m_owned(true),
           m_begin(other.m_begin),
           m_end(other.m_end),
           m_ghosts(other.m_ghosts),
-          m_read(State::Unacquired),
-          m_rawRead(nullptr),
-          m_write(State::Unacquired),
-          m_rawWrite(nullptr)
+          m_read{.state = State::Unacquired, .raw = PETSC_NULLPTR},
+          m_write{.state = State::Unacquired, .raw = PETSC_NULLPTR}
       {}
 
       GridFunction(GridFunction&& other) noexcept
         : Parent(other.getFiniteElementSpace(), std::exchange(other.getData(), nullptr)),
           m_data(std::move(other.getData())),
-          m_owned(std::exchange(other.m_owned, false)),
           m_begin(std::move(other.m_begin)),
           m_end(std::move(other.m_end)),
-          m_ghosts(std::move(other.m_ghosts)),
-          m_read(std::move(other.m_read)),
-          m_rawRead(std::exchange(other.m_rawRead, nullptr)),
-          m_write(std::move(other.m_write)),
-          m_rawWrite(std::exchange(other.m_rawWrite, nullptr))
-      {}
+          m_ghosts(std::move(other.m_ghosts))
+      {
+        m_read.state = std::exchange(other.m_read, State::Unacquired);
+        m_read.raw = std::exchange(other.m_read.raw, PETSC_NULLPTR);
+        m_write.state = std::exchange(other.m_write, State::Unacquired);
+        m_write.raw = std::exchange(other.m_write.raw, PETSC_NULLPTR);
+      }
 
       GridFunction& operator=(const GridFunction& other) = delete;
 
@@ -142,20 +155,31 @@ namespace Rodin::Variational
           m_begin = std::move(other.m_begin);
           m_end = std::move(other.m_end);
           m_ghosts = std::move(other.m_ghosts);
-          m_read = std::exchange(other.m_read, State::Unacquired);
-          m_rawRead = std::exchange(other.m_rawRead, nullptr);
-          m_write = std::exchange(other.m_write, State::Unacquired);
-          m_rawWrite = std::exchange(other.m_rawWrite, nullptr);
+          m_read.state = std::exchange(other.m_read, State::Unacquired);
+          m_read.raw = std::exchange(other.m_read.raw, PETSC_NULLPTR);
+          m_write.state = std::exchange(other.m_write, State::Unacquired);
+          m_write.raw = std::exchange(other.m_write.raw, PETSC_NULLPTR);
         }
         return *this;
       }
 
       virtual ~GridFunction()
       {
-        if (m_rawRead && m_read == State::Acquired)
-          m_data.restoreArrayRead(&m_rawRead);
-        if (m_rawWrite && m_write == State::Acquired)
-          m_data.restoreArrayWrite(&m_rawWrite);
+        PetscErrorCode ierr;
+        if (m_read.state == State::Acquired)
+        {
+          assert(m_read.raw);
+          ierr = VecRestoreArrayRead(m_data, &m_read.raw);
+          assert(ierr == PETSC_SUCCESS);
+        }
+        if (m_write.state == State::Acquired)
+        {
+          assert(m_write.raw);
+          ierr = VecRestoreArrayWrite(m_data, &m_write.raw);
+          assert(ierr == PETSC_SUCCESS);
+        }
+        ierr = VecDestroy(&m_data);
+        assert(ierr == PETSC_SUCCESS);
       }
 
       constexpr
@@ -188,7 +212,7 @@ namespace Rodin::Variational
 
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
-          return m_rawWrite[static_cast<PetscInt>(global)];
+          return m_write.raw[static_cast<PetscInt>(global)];
         }
         else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
@@ -204,7 +228,7 @@ namespace Rodin::Variational
             assert(localIdx);
             local = *localIdx;
           }
-          return m_rawWrite[local];
+          return m_write.raw[local];
         }
         else
         {
@@ -218,7 +242,7 @@ namespace Rodin::Variational
 
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
-          return m_rawRead[static_cast<PetscInt>(global)];
+          return m_read.raw[static_cast<PetscInt>(global)];
         }
         else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
@@ -234,7 +258,7 @@ namespace Rodin::Variational
             assert(localIdx);
             local = *localIdx;
           }
-          return m_rawRead[local];
+          return m_read.raw[local];
         }
         else
         {
@@ -328,10 +352,12 @@ namespace Rodin::Variational
 
       GridFunction& setData(const DataType& other, size_t offset = 0)
       {
+        PetscErrorCode ierr;
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
           assert(offset == 0);
-          other.copy(m_data);
+          ierr = VecCopy(other, m_data);
+          assert(ierr == PETSC_SUCCESS);
         }
         else
         {
@@ -354,47 +380,47 @@ namespace Rodin::Variational
 
       PetscScalar* getRaw()
       {
-        return m_rawWrite;
+        return m_write.raw;
       }
 
       const PetscScalar* getRaw() const
       {
-        return m_rawRead;
+        return m_read.raw;
       }
 
       void acquire()
       {
-        if (m_write == State::Unacquired)
+        if (m_write.state == State::Unacquired)
         {
-          m_data.getArrayWrite(&m_rawWrite);
-          m_write = State::Acquired;
+          VecGetArrayWrite(m_data, &m_write.raw);
+          m_write.state = State::Acquired;
         }
       }
 
       void acquire() const
       {
-        if (m_read == State::Unacquired)
+        if (m_read.state == State::Unacquired)
         {
-          m_data.getArrayRead(&m_rawRead);
-          m_read = State::Acquired;
+          VecGetArrayRead(m_data, &m_read.raw);
+          m_read.state = State::Acquired;
         }
       }
 
       void flush()
       {
-        if (m_write == State::Acquired)
+        if (m_write.state == State::Acquired)
         {
-          m_data.restoreArrayWrite(&m_rawWrite);
-          m_write = State::Unacquired;
+          VecRestoreArrayWrite(m_data, &m_write.raw);
+          m_write.state = State::Unacquired;
         }
       }
 
       void flush() const
       {
-        if (m_read == State::Acquired)
+        if (m_read.state == State::Acquired)
         {
-          m_data.restoreArrayRead(&m_rawRead);
-          m_read = State::Unacquired;
+          VecRestoreArrayRead(m_data, &m_read.raw);
+          m_read.state = State::Unacquired;
         }
       }
 
@@ -408,18 +434,37 @@ namespace Rodin::Variational
         return m_data;
       }
 
+      const size_t& getBegin() const
+      {
+        return m_begin;
+      }
+
+      const size_t& getEnd() const
+      {
+        return m_end;
+      }
+
+      const auto& getGhosts() const
+      {
+        return m_ghosts;
+      }
+
+      const ArrayRead& getArrayRead() const
+      {
+        return m_read;
+      }
+
+      const ArrayWrite& getArrayWrite() const
+      {
+        return m_write;
+      }
+
     private:
       DataType m_data;
-
-      bool m_owned;
       size_t m_begin, m_end;
       std::vector<PetscInt> m_ghosts;
-
-      mutable State m_read;
-      mutable const PetscScalar* m_rawRead;
-
-      mutable State m_write;
-      mutable PetscScalar* m_rawWrite;
+      mutable ArrayRead m_read;
+      mutable ArrayWrite m_write;
   };
 }
 

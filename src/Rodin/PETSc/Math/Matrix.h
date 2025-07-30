@@ -15,130 +15,132 @@
 
 namespace Rodin::PETSc::Math
 {
-  class Matrix : public Object<::Mat>
-  {
-    public:
-      class SeqAIJ
-      {
-        public:
-          constexpr
-          SeqAIJ(Matrix& mat)
-            : m_mat(mat)
-          {}
+  using Matrix = ::Mat;
 
-          Matrix& setPreallocation(PetscInt nz, const PetscInt nnz[])
-          {
-            PetscErrorCode ierr;
-            ierr = MatSeqAIJSetPreallocation(m_mat.m_mat, nz, nnz);
-            assert(ierr == PETSC_SUCCESS);
-            return m_mat;
-          }
+  // class Matrix : public Object<::Mat>
+  // {
+  //   public:
+  //     class SeqAIJ
+  //     {
+  //       public:
+  //         constexpr
+  //         SeqAIJ(Matrix& mat)
+  //           : m_mat(mat)
+  //         {}
 
-        private:
-          Matrix& m_mat; ///< Reference to the parent Matrix object.
-      } SeqAIJ;
+  //         Matrix& setPreallocation(PetscInt nz, const PetscInt nnz[])
+  //         {
+  //           PetscErrorCode ierr;
+  //           ierr = MatSeqAIJSetPreallocation(m_mat.m_mat, nz, nnz);
+  //           assert(ierr == PETSC_SUCCESS);
+  //           return m_mat;
+  //         }
 
-      class MPIAIJ
-      {
-        public:
-          constexpr
-          MPIAIJ(Matrix& mat)
-            : m_mat(mat)
-          {}
+  //       private:
+  //         Matrix& m_mat; ///< Reference to the parent Matrix object.
+  //     } SeqAIJ;
 
-          Matrix& setPreallocation(
-              PetscInt d_nz, const PetscInt d_nnz[], PetscInt o_nz, const PetscInt o_nnz[])
-          {
-            PetscErrorCode ierr;
-            ierr = MatMPIAIJSetPreallocation(m_mat.m_mat, d_nz, d_nnz, o_nz, o_nnz);
-            assert(ierr == PETSC_SUCCESS);
-            return m_mat;
-          }
+  //     class MPIAIJ
+  //     {
+  //       public:
+  //         constexpr
+  //         MPIAIJ(Matrix& mat)
+  //           : m_mat(mat)
+  //         {}
 
-        private:
-          Matrix& m_mat; ///< Reference to the parent Matrix object.
-      } MPIAIJ;
+  //         Matrix& setPreallocation(
+  //             PetscInt d_nz, const PetscInt d_nnz[], PetscInt o_nz, const PetscInt o_nnz[])
+  //         {
+  //           PetscErrorCode ierr;
+  //           ierr = MatMPIAIJSetPreallocation(m_mat.m_mat, d_nz, d_nnz, o_nz, o_nnz);
+  //           assert(ierr == PETSC_SUCCESS);
+  //           return m_mat;
+  //         }
 
-      using HandleType = ::Mat;
+  //       private:
+  //         Matrix& m_mat; ///< Reference to the parent Matrix object.
+  //     } MPIAIJ;
 
-      using Parent = Object<HandleType>;
+  //     using HandleType = ::Mat;
 
-      Matrix();
+  //     using Parent = Object<HandleType>;
 
-      Matrix(MPI_Comm comm);
+  //     Matrix();
 
-      Matrix(const Matrix& other);
+  //     Matrix(MPI_Comm comm);
 
-      Matrix(Matrix&& other) noexcept;
+  //     Matrix(const Matrix& other);
 
-      virtual ~Matrix() override;
+  //     Matrix(Matrix&& other) noexcept;
 
-      operator bool() const noexcept;
+  //     virtual ~Matrix() override;
 
-      Matrix& operator=(const Matrix& other);
+  //     operator bool() const noexcept;
 
-      Matrix& operator=(Matrix&& other) noexcept;
+  //     Matrix& operator=(const Matrix& other);
 
-      Matrix& operator+=(const Matrix& other);
+  //     Matrix& operator=(Matrix&& other) noexcept;
 
-      Matrix& operator-=(const Matrix& other);
+  //     Matrix& operator+=(const Matrix& other);
 
-      Matrix& operator*=(const Matrix& rhs);
+  //     Matrix& operator-=(const Matrix& other);
 
-      Matrix& operator+=(const PetscScalar& other);
+  //     Matrix& operator*=(const Matrix& rhs);
 
-      Matrix& operator-=(const PetscScalar& other);
+  //     Matrix& operator+=(const PetscScalar& other);
 
-      Matrix& operator*=(const PetscScalar& rhs);
+  //     Matrix& operator-=(const PetscScalar& other);
 
-      Matrix& operator/=(const PetscScalar& rhs);
+  //     Matrix& operator*=(const PetscScalar& rhs);
 
-      Matrix& create(MPI_Comm comm);
+  //     Matrix& operator/=(const PetscScalar& rhs);
 
-      Matrix& destroy();
+  //     Matrix& create(MPI_Comm comm);
 
-      const Matrix& duplicate(Matrix& dst) const;
+  //     Matrix& destroy();
 
-      Matrix& setType(const ::MatType& type);
+  //     const Matrix& duplicate(Matrix& dst) const;
 
-      Matrix& setFromOptions();
+  //     Matrix& setType(const ::MatType& type);
 
-      Matrix& setSizes(
-          const PetscInt& localRows, const PetscInt& localCols,
-          const PetscInt& globalRows, const PetscInt& globalCols);
+  //     Matrix& setFromOptions();
 
-      Matrix& zeroEntries();
+  //     Matrix& setSizes(
+  //         const PetscInt& localRows, const PetscInt& localCols,
+  //         const PetscInt& globalRows, const PetscInt& globalCols);
 
-      Matrix& setUp();
+  //     Matrix& zeroEntries();
 
-      Matrix& setValue(
-          const PetscInt& row, const PetscInt& col,
-          const PetscScalar& value, ::InsertMode mode);
+  //     Matrix& setUp();
 
-      Matrix& assemblyBegin(::MatAssemblyType type);
+  //     Matrix& setValue(
+  //         const PetscInt& row, const PetscInt& col,
+  //         const PetscScalar& value, ::InsertMode mode);
 
-      Matrix& assemblyEnd(::MatAssemblyType type);
+  //     Matrix& assemblyBegin(::MatAssemblyType type);
 
-      Matrix& zeroRowsColumns(
-        PetscInt n, const PetscInt rows[], PetscScalar diag, Vector& x, Vector& b);
+  //     Matrix& assemblyEnd(::MatAssemblyType type);
 
-      Matrix& mult(const Vector& x, Vector& y) const;
+  //     Matrix& zeroRowsColumns(
+  //       PetscInt n, const PetscInt rows[], PetscScalar diag, Vector& x, Vector& b);
 
-      const Matrix& getComm(MPI_Comm& comm) const noexcept;
+  //     Matrix& mult(const Vector& x, Vector& y) const;
 
-      HandleType& getHandle() noexcept override;
+  //     const Matrix& getComm(MPI_Comm& comm) const noexcept;
 
-      const HandleType& getHandle() const noexcept override;
+  //     HandleType& getHandle() noexcept override;
 
-    private:
-      HandleType m_mat;
-  };
+  //     const HandleType& getHandle() const noexcept override;
+
+  //   private:
+  //     HandleType m_mat;
+  // };
 }
 
 namespace Rodin::FormLanguage
 {
   template <>
-  struct Traits<PETSc::Math::Matrix>
+  struct Traits<::Mat>
   {
     using ScalarType = PetscScalar;
   };

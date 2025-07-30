@@ -9,6 +9,8 @@
 
 #include <petsc.h>
 #include <boost/mpi/communicator.hpp>
+#include <petscmat.h>
+#include <petscvec.h>
 
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/PETSc/Math/Matrix.h"
@@ -47,7 +49,7 @@ namespace Rodin::Math
       template <class DOFScalar>
       LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
-        auto& A = this->getOperator();
+        auto& a = this->getOperator();
         auto& b = this->getVector();
         auto& x = this->getSolution();
         std::vector<PetscInt> rows;
@@ -58,11 +60,11 @@ namespace Rodin::Math
         {
           const PetscInt i = PetscInt(kv.first) + PetscInt(offset);
           const auto& ui  = kv.second;
-          x.setValue(i, ui, INSERT_VALUES);
+          VecSetValue(x, i, ui, INSERT_VALUES);
         }
-        x.assemblyBegin();
-        x.assemblyEnd();
-        A.zeroRowsColumns(rows.size(), rows.data(), 1.0, x, b);
+        VecAssemblyBegin(x);
+        VecAssemblyEnd(x);
+        MatZeroRows(a, rows.size(), rows.data(), 1.0, x, b);
         return *this;
       }
 

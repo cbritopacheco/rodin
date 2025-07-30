@@ -3,6 +3,7 @@
 
 #include <petsc.h>
 #include <petscsys.h>
+#include <petscsystypes.h>
 
 #include "Rodin/Assembly/AssemblyBase.h"
 #include "Rodin/Assembly/Sequential.h"
@@ -33,9 +34,16 @@ namespace Rodin::Assembly
 
       void execute(VectorType& res, const InputType& input) const override
       {
-        res.create(PETSC_COMM_SELF);
-        const PetscInt n = PetscInt(input.getFES().getSize());
-        res.setSizes(n, PETSC_DECIDE).setFromOptions().zeroEntries();
+        PetscErrorCode ierr;
+        ierr = VecCreate(PETSC_COMM_SELF, &res);
+        assert(ierr == PETSC_SUCCESS);
+        const size_t n = input.getFES().getSize();
+        ierr = VecSetSizes(res, n, PETSC_DECIDE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetFromOptions(res);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecZeroEntries(res);
+        assert(ierr == PETSC_SUCCESS);
         const auto& mesh = input.getFES().getMesh();
         for (auto& lfi : input.getLFIs())
         {
@@ -47,16 +55,16 @@ namespace Rodin::Assembly
             {
               lfi.setPolytope(*it);
               const auto& dofs = input.getFES().getDOFs(it.getDimension(), it->getIndex());
-              for (PetscInt l = 0; l < PetscInt(dofs.size()); ++l)
+              for (PetscInt l = 0; l < dofs.size(); ++l)
               {
                 const PetscScalar v = PetscScalar(lfi.integrate(l));
-                res.setValue(PetscInt(dofs[l]), v, ADD_VALUES);
+                VecSetValue(res, dofs[l], v, ADD_VALUES);
               }
             }
           }
         }
-        res.assemblyBegin();
-        res.assemblyEnd();
+        VecAssemblyBegin(res);
+        VecAssemblyEnd(res);
       }
 
       Sequential* copy() const noexcept override
@@ -88,15 +96,21 @@ namespace Rodin::Assembly
 
       void execute(OperatorType& res, const InputType& input) const override
       {
-        res.create(PETSC_COMM_SELF);
-        const PetscInt m = PetscInt(input.getTestFES().getSize());
-        const PetscInt n = PetscInt(input.getTrialFES().getSize());
-        res.setSizes(m, n, PETSC_DETERMINE, PETSC_DETERMINE)
-           .SeqAIJ.setPreallocation(PETSC_DETERMINE, PETSC_NULLPTR)
-           .setFromOptions()
-           .setUp()
-           .zeroEntries();
-
+        PetscErrorCode ierr;
+        ierr = MatCreate(PETSC_COMM_SELF, &res);
+        assert(ierr == PETSC_SUCCESS);
+        const size_t m = input.getTestFES().getSize();
+        const size_t n = input.getTrialFES().getSize();
+        ierr = MatSetSizes(res, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatSeqAIJSetPreallocation(res, PETSC_DETERMINE, PETSC_NULLPTR);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatSetFromOptions(res);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatSetUp(res);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatZeroEntries(res);
+        assert(ierr == PETSC_SUCCESS);
         const auto& mesh = input.getTrialFES().getMesh();
         // Local contributions
         for (auto& bfi : input.getLocalBFIs())
@@ -113,12 +127,13 @@ namespace Rodin::Assembly
               bfi.setPolytope(*it);
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
-              for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
+              for (PetscInt i = 0; i < rows.size(); ++i)
               {
-                for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
+                for (PetscInt j = 0; j < cols.size(); ++j)
                 {
                   const PetscScalar v = PetscScalar(bfi.integrate(j, i));
-                  res.setValue(rows[i], cols[j], v, ADD_VALUES);
+                  ierr = MatSetValue(res, rows[i], cols[j], v, ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
                 }
               }
             }
@@ -143,19 +158,22 @@ namespace Rodin::Assembly
                   bfi.setPolytope(*trIt, *teIt);
                   const auto& rows = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
                   const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
-                  for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
-                    for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
+                  for (PetscInt i = 0; i < rows.size(); ++i)
+                    for (PetscInt j = 0; j < cols.size(); ++j)
                     {
                       const PetscScalar v = PetscScalar(bfi.integrate(j, i));
-                      res.setValue(rows[i], cols[j], v, ADD_VALUES);
+                      ierr = MatSetValue(res, rows[i], cols[j], v, ADD_VALUES);
+                      assert(ierr == PETSC_SUCCESS);
                     }
                 }
               }
             }
           }
         }
-        res.assemblyBegin(MAT_FINAL_ASSEMBLY);
-        res.assemblyEnd(MAT_FINAL_ASSEMBLY);
+        ierr = MatAssemblyBegin(res, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatAssemblyEnd(res, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
       }
 
       Sequential* copy() const noexcept override

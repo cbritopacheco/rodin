@@ -15,129 +15,131 @@
 
 namespace Rodin::PETSc::Math
 {
-  class Vector : public Object<::Vec>
-  {
-    public:
-      using HandleType = ::Vec;
+  using Vector = ::Vec;
 
-      using Parent = Object<HandleType>;
+  // class Vector : public Object<::Vec>
+  // {
+  //   public:
+  //     using HandleType = ::Vec;
 
-      class MPI
-      {
-        public:
-          constexpr
-          MPI(Vector& vec)
-            : m_vec(vec)
-          {}
+  //     using Parent = Object<HandleType>;
 
-          Vector& setGhost(PetscInt nghost, const PetscInt ghosts[])
-          {
-            PetscErrorCode ierr;
-            ierr = VecMPISetGhost(m_vec.m_vec, nghost, ghosts);
-            assert(ierr == PETSC_SUCCESS);
-            return m_vec;
-          }
+  //     class MPI
+  //     {
+  //       public:
+  //         constexpr
+  //         MPI(Vector& vec)
+  //           : m_vec(vec)
+  //         {}
 
-        private:
-          Vector& m_vec; ///< Reference to the parent Vector object.
-      } MPI;
+  //         Vector& setGhost(PetscInt nghost, const PetscInt ghosts[])
+  //         {
+  //           PetscErrorCode ierr;
+  //           ierr = VecMPISetGhost(m_vec.m_vec, nghost, ghosts);
+  //           assert(ierr == PETSC_SUCCESS);
+  //           return m_vec;
+  //         }
 
-      Vector();
+  //       private:
+  //         Vector& m_vec; ///< Reference to the parent Vector object.
+  //     } MPI;
 
-      Vector(MPI_Comm comm);
+  //     Vector();
 
-      Vector(const Vector& other);
+  //     Vector(MPI_Comm comm);
 
-      Vector(Vector&& other) noexcept;
+  //     Vector(const Vector& other);
 
-      virtual ~Vector() override;
+  //     Vector(Vector&& other) noexcept;
 
-      operator bool() const noexcept;
+  //     virtual ~Vector() override;
 
-      Vector& operator=(const Vector& other);
+  //     operator bool() const noexcept;
 
-      Vector& operator=(Vector&& other) noexcept;
+  //     Vector& operator=(const Vector& other);
 
-      Vector& operator+=(const Vector& other);
+  //     Vector& operator=(Vector&& other) noexcept;
 
-      Vector& operator-=(const Vector& other);
+  //     Vector& operator+=(const Vector& other);
 
-      Vector& operator*=(const Vector& rhs);
+  //     Vector& operator-=(const Vector& other);
 
-      Vector& operator/=(const Vector& rhs);
+  //     Vector& operator*=(const Vector& rhs);
 
-      Vector& operator+=(const PetscScalar& other);
+  //     Vector& operator/=(const Vector& rhs);
 
-      Vector& operator-=(const PetscScalar& other);
+  //     Vector& operator+=(const PetscScalar& other);
 
-      Vector& operator*=(const PetscScalar& rhs);
+  //     Vector& operator-=(const PetscScalar& other);
 
-      Vector& operator/=(const PetscScalar& rhs);
+  //     Vector& operator*=(const PetscScalar& rhs);
 
-      Vector& create(MPI_Comm comm);
+  //     Vector& operator/=(const PetscScalar& rhs);
 
-      Vector& destroy();
+  //     Vector& create(MPI_Comm comm);
 
-      const Vector& duplicate(Vector& dst) const;
+  //     Vector& destroy();
 
-      const Vector& copy(Vector& dst) const;
+  //     const Vector& duplicate(Vector& dst) const;
 
-      Vector& setType(const ::VecType& type);
+  //     const Vector& copy(Vector& dst) const;
 
-      Vector& setFromOptions();
+  //     Vector& setType(const ::VecType& type);
 
-      Vector& setSizes(PetscInt localSize, PetscInt globalSize);
+  //     Vector& setFromOptions();
 
-      Vector& zeroEntries();
+  //     Vector& setSizes(PetscInt localSize, PetscInt globalSize);
 
-      Vector& setValue(PetscInt idx, const PetscScalar& value, ::InsertMode mode);
+  //     Vector& zeroEntries();
 
-      Vector& assemblyBegin();
+  //     Vector& setValue(PetscInt idx, const PetscScalar& value, ::InsertMode mode);
 
-      Vector& assemblyEnd();
+  //     Vector& assemblyBegin();
 
-      Vector& axpy(const PetscScalar& alpha, const Vector& x);
+  //     Vector& assemblyEnd();
 
-      Vector& aypx(const PetscScalar& beta, const Vector& x);
+  //     Vector& axpy(const PetscScalar& alpha, const Vector& x);
 
-      Vector& axpby(const PetscScalar& alpha, const PetscScalar& beta, const Vector& x);
+  //     Vector& aypx(const PetscScalar& beta, const Vector& x);
 
-      Vector& waxpy(const PetscScalar& alpha, const Vector& x, const Vector& y);
+  //     Vector& axpby(const PetscScalar& alpha, const PetscScalar& beta, const Vector& x);
 
-      Vector& axpbypcz(
-          const PetscScalar& alpha, const Vector& x,
-          const PetscScalar& beta, const Vector& y,
-          const PetscScalar& gamma);
+  //     Vector& waxpy(const PetscScalar& alpha, const Vector& x, const Vector& y);
 
-      Vector& dot(const Vector& x, PetscScalar* result) const;
+  //     Vector& axpbypcz(
+  //         const PetscScalar& alpha, const Vector& x,
+  //         const PetscScalar& beta, const Vector& y,
+  //         const PetscScalar& gamma);
 
-      const Vector& getArrayRead(const PetscScalar *a[]) const;
+  //     Vector& dot(const Vector& x, PetscScalar* result) const;
 
-      const Vector& restoreArrayRead(const PetscScalar *a[]) const;
+  //     const Vector& getArrayRead(const PetscScalar *a[]) const;
 
-      Vector& getArrayWrite(PetscScalar *a[]);
+  //     const Vector& restoreArrayRead(const PetscScalar *a[]) const;
 
-      Vector& restoreArrayWrite(PetscScalar *a[]);
+  //     Vector& getArrayWrite(PetscScalar *a[]);
 
-      Vector& ghostUpdateBegin(::InsertMode mode, ::ScatterMode scatterMode);
+  //     Vector& restoreArrayWrite(PetscScalar *a[]);
 
-      Vector& ghostUpdateEnd(::InsertMode mode, ::ScatterMode scatterMode);
+  //     Vector& ghostUpdateBegin(::InsertMode mode, ::ScatterMode scatterMode);
 
-      const Vector& getLocalSize(PetscInt* size) const;
+  //     Vector& ghostUpdateEnd(::InsertMode mode, ::ScatterMode scatterMode);
 
-      HandleType& getHandle() noexcept override;
+  //     const Vector& getLocalSize(PetscInt* size) const;
 
-      const HandleType& getHandle() const noexcept override;
+  //     HandleType& getHandle() noexcept override;
 
-    private:
-      HandleType m_vec;
-  };
+  //     const HandleType& getHandle() const noexcept override;
+
+  //   private:
+  //     HandleType m_vec;
+  // };
 }
 
 namespace Rodin::FormLanguage
 {
   template <>
-  struct Traits<PETSc::Math::Vector>
+  struct Traits<::Vec>
   {
     using ScalarType = PetscScalar;
   };

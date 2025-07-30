@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <petscsys.h>
+#include <utility>
 
 #include "LinearSystem.h"
 
@@ -10,11 +11,12 @@ namespace Rodin::Math
   {}
 
   LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::LinearSystem(MPI_Comm comm)
-    : m_comm(comm),
-      m_operator(comm),
-      m_solution(comm),
-      m_vector(comm)
-  {}
+    : m_comm(comm)
+  {
+    MatCreate(comm, &m_operator);
+    VecCreate(comm, &m_solution);
+    VecCreate(comm, &m_vector);
+  }
 
   LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::LinearSystem(const LinearSystem& other)
     : Parent(other),
@@ -27,9 +29,9 @@ namespace Rodin::Math
   LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::LinearSystem(LinearSystem&& other) noexcept
     : Parent(std::move(other)),
       m_comm(std::exchange(other.m_comm, MPI_COMM_NULL)),
-      m_operator(std::move(other.m_operator)),
-      m_solution(std::move(other.m_solution)),
-      m_vector(std::move(other.m_vector))
+      m_operator(std::exchange(other.m_operator, PETSC_NULLPTR)),
+      m_solution(std::exchange(other.m_solution, PETSC_NULLPTR)),
+      m_vector(std::exchange(other.m_vector, PETSC_NULLPTR))
   {}
 
   LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>&
@@ -53,9 +55,9 @@ namespace Rodin::Math
     {
       Parent::operator=(std::move(other));
       m_comm = std::exchange(other.m_comm, MPI_COMM_NULL);
-      m_operator = std::move(other.m_operator);
-      m_solution = std::move(other.m_solution);
-      m_vector = std::move(other.m_vector);
+      m_operator = std::exchange(other.m_operator, PETSC_NULLPTR);
+      m_solution = std::exchange(other.m_solution, PETSC_NULLPTR);
+      m_vector = std::exchange(other.m_vector, PETSC_NULLPTR);
     }
     return *this;
   }
@@ -64,9 +66,9 @@ namespace Rodin::Math
   LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::create(MPI_Comm comm)
   {
     m_comm = comm;
-    m_operator.create(comm);
-    m_solution.create(comm);
-    m_vector.create(comm);
+    MatCreate(comm, &m_operator);
+    VecCreate(comm, &m_solution);
+    VecCreate(comm, &m_vector);
     return *this;
   }
 
@@ -74,9 +76,9 @@ namespace Rodin::Math
   LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::destroy()
   {
     m_comm = MPI_COMM_NULL;
-    m_operator.destroy();
-    m_solution.destroy();
-    m_vector.destroy();
+    MatDestroy(&m_operator);
+    VecDestroy(&m_solution);
+    VecDestroy(&m_vector);
     return *this;
   }
 }

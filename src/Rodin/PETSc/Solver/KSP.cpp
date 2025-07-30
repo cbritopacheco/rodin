@@ -66,19 +66,19 @@ namespace Rodin::Solver
 
     if (m_preconditioner)
     {
-      ierr = KSPSetOperators(m_ksp, a.getHandle(), m_preconditioner->getHandle());
+      ierr = KSPSetOperators(m_ksp, a, *m_preconditioner);
       assert(ierr == PETSC_SUCCESS);
     }
     else
     {
-      ierr = KSPSetOperators(m_ksp, a.getHandle(), a.getHandle());
+      ierr = KSPSetOperators(m_ksp, a, a);
       assert(ierr == PETSC_SUCCESS);
     }
 
     ierr = KSPSetFromOptions(m_ksp);
     assert(ierr == PETSC_SUCCESS);
 
-    ierr = KSPSolve(m_ksp, b.getHandle(), x.getHandle());
+    ierr = KSPSolve(m_ksp, b, x);
     assert(ierr == PETSC_SUCCESS);
   }
 

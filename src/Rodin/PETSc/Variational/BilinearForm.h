@@ -6,6 +6,7 @@
 
 #include "Rodin/Variational/BilinearForm.h"
 #include <cstdint>
+#include <petscsystypes.h>
 
 namespace Rodin::Variational
 {
@@ -107,11 +108,15 @@ namespace Rodin::Variational
       ScalarType operator()(
           const GridFunctionType<TrialFES>& u, const GridFunctionType<TestFES>& v) const
       {
-        PETSc::Math::Vector tmp;
-        u.duplicate(tmp);
-        this->getOperator().mult(v.getData(), tmp);
         ScalarType result;
-        tmp.dot(u.getData(), &result);
+        PetscErrorCode ierr;
+        ::Vec tmp;
+        ierr = VecDuplicate(tmp, u.getData());
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatMult(this->getOperator(), v.getData(), tmp);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecDot(tmp, u.getData(), &result);
+        assert(ierr == PETSC_SUCCESS);
         return result;
       }
 
