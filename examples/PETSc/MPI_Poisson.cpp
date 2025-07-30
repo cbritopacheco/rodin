@@ -1,16 +1,14 @@
-#include "Rodin/Variational/ForwardDecls.h"
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 
 #include <Rodin/MPI.h>
 #include <Rodin/PETSc.h>
+
+#include <Rodin/Types.h>
+#include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
+#include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
-
-#include <Rodin/MPI/Geometry/Mesh.h>
-#include <Rodin/MPI/Geometry/Sharder.h>
-
-#include <Rodin/Geometry/BalancedCompactPartitioner.h>
-#include <string>
 
 namespace mpi = boost::mpi;
 
@@ -18,6 +16,8 @@ using namespace Rodin;
 using namespace Rodin::Math;
 using namespace Rodin::Solver;
 using namespace Rodin::Variational;
+
+static constexpr Index ROOT_RANK = 0;
 
 int main(int argc, char** argv)
 {
@@ -30,7 +30,7 @@ int main(int argc, char** argv)
   assert(ierr == PETSC_SUCCESS);
 
   Rodin::MPI::Sharder sharder(mpi);
-  if (world.rank() == 0)
+  if (world.rank() == ROOT_RANK)
   {
     Geometry::LocalMesh mesh;
     mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 3, 3 });
@@ -38,15 +38,29 @@ int main(int argc, char** argv)
     mesh.getConnectivity().compute(1, 2);
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
-    sharder.shard(partitioner).scatter(0);
+    sharder.shard(partitioner).scatter(ROOT_RANK);
   }
 
-  auto mesh = sharder.gather(0);
+  auto mesh = sharder.gather(ROOT_RANK);
   P1 vh(mesh);
 
-  // {
-  //   PETSc::Variational::GridFunction gf(vh);
-  // }
+  ScalarFunction f = 1;
+
+  {
+    PETSc::Variational::TrialFunction u(vh);
+    PETSc::Variational::TestFunction  v(vh);
+
+    // Define problem
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+    CG(poisson).solve();
+
+    // Save solution
+    u.getSolution().save("Poisson.gf");
+    mesh.save("Poisson.mesh");
+  }
 
   PetscFinalize();
 }

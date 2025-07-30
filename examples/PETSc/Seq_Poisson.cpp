@@ -31,7 +31,6 @@ int main(int argc, char** argv)
 
   P1 vh(mesh);
 
-  // Leave the block so PETSc objects are cleaned up automatically !!
   {
     PETSc::Variational::TrialFunction u(vh);
     PETSc::Variational::TestFunction  v(vh);

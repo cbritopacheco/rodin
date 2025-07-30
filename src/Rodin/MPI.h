@@ -4,6 +4,7 @@
 #include "MPI/Context.h"
 #include "MPI/Assembly.h"
 #include "MPI/Variational.h"
+#include "MPI/Geometry.h"
 #include "MPI/IO.h"
 
 #endif

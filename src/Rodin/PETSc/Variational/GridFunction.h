@@ -98,7 +98,9 @@ namespace Rodin::Variational
           const auto& mesh = fes.getMesh();
           const auto& ctx = mesh.getContext();
           PetscErrorCode ierr;
-          data.create(ctx.getCommunicator());
+          const MPI_Comm comm = ctx.getCommunicator();
+          ierr = VecCreate(comm, &data);
+          assert(ierr == PETSC_SUCCESS);
           const size_t globalSize = fes.getSize();
           const size_t localSize = fes.getShard().getSize();
           fes.getOwnershipRange(m_begin, m_end);

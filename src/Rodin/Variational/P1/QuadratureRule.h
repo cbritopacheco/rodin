@@ -192,28 +192,34 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
-      using FESType = P1<Range, Mesh>;
+      using FESType =
+        P1<Range, Mesh>;
 
-      using LHSType = FunctionBase<LHSDerived>;
+      using LHSType =
+        FunctionBase<LHSDerived>;
 
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, TestSpace>, FESType, TestSpace>;
 
-      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+      using LHSRangeType =
+        typename FormLanguage::Traits<LHSType>::RangeType;
 
-      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+      using RHSRangeType =
+        typename FormLanguage::Traits<RHSType>::RangeType;
 
-      using IntegrandType = ShapeFunctionBase<Dot<LHSType, RHSType>>;
+      using IntegrandType =
+        ShapeFunctionBase<Dot<LHSType, RHSType>>;
 
-      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+      using IntegrandRangeType =
+        typename FormLanguage::Traits<IntegrandType>::RangeType;
 
-      using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+      using ScalarType =
+        typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
-      using Parent = LinearFormIntegratorBase<ScalarType>;
+      using Parent =
+        LinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
-
-      using RangeType = Range;
 
       constexpr
       QuadratureRule(const IntegrandType& integrand)
@@ -259,15 +265,25 @@ namespace Rodin::Variational
       {
         m_polytope = polytope;
         const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
         const auto& geometry = polytope.getGeometry();
         const auto& integrand = getIntegrand().getDerived();
         const auto& f = integrand.getLHS();
         const auto& fes = integrand.getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, idx);
-
         const bool recompute = !m_set || m_geometry != geometry;
-
+        P1Element<RHSRangeType> fe(geometry);
+        if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
+        {
+          fe = P1Element<RHSRangeType>(geometry);
+        }
+        else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+        {
+          // static_assert((std::is_same_v<RHSRangeType, void> || std::is_same_v<ScalarType, void>) && std::is_same_v<RHSRangeType, ScalarType>);
+          fe = P1Element<RHSRangeType>(d, geometry);
+        }
+        else
+        {
+          assert(false);
+        }
         if (recompute)
         {
           m_set = true;
@@ -282,16 +298,12 @@ namespace Rodin::Variational
             fe.getBasis(local)(m_basis[local], m_qf->getPoint(0));
           m_dot.resize(fe.getCount());
         }
-
-        static thread_local RangeType s_v;
+        static thread_local RHSRangeType s_v;
         auto& p = *m_p;
         p.setPolytope(polytope);
-
         f(s_v, p);
-
         for (size_t local = 0; local < fe.getCount(); local++)
           m_dot[local] = Math::dot(s_v, m_basis[local]);
-
         return *this;
       }
 
@@ -315,7 +327,7 @@ namespace Rodin::Variational
       Real m_weight;
       Real m_distortion;
 
-      std::vector<RangeType> m_basis;
+      std::vector<RHSRangeType> m_basis;
       std::vector<ScalarType> m_dot;
 
       bool m_set;
@@ -684,8 +696,7 @@ namespace Rodin::Variational
           m_p(std::move(other.m_p)),
           m_weight(std::move(other.m_weight)),
           m_distortion(std::move(other.m_distortion)),
-          m_grad1(std::move(other.m_grad1)),
-          m_grad2(std::move(other.m_grad2)),
+          m_grad(std::move(other.m_grad)),
           m_matrix(std::move(other.m_matrix))
       {}
 
@@ -714,7 +725,6 @@ namespace Rodin::Variational
           m_weight = m_qf->getWeight(0);
           m_distortion = m_p->getDistortion();
           const size_t d = polytope.getDimension();
-          const Index idx = polytope.getIndex();
           const auto& integrand = getIntegrand();
           const auto& lhs = integrand.getLHS();
           const auto& rhs = integrand.getRHS();
@@ -722,58 +732,26 @@ namespace Rodin::Variational
           const auto& testfes = rhs.getFiniteElementSpace();
           const auto& rc = m_qf->getPoint(0);
           const auto& p = *m_p;
-          if (trialfes == testfes)
+          assert(trialfes == testfes);
+          Math::SpatialVector<ScalarType> grad(d);
+          const P1Element<LHSRange> fe(geometry);
+          m_matrix.resize(fe.getCount(), fe.getCount());
+          m_grad.resize(fe.getCount());
+          for (size_t local = 0; local < fe.getCount(); local++)
           {
-            Math::SpatialVector<ScalarType> grad(d);
-            const auto& fe = trialfes.getFiniteElement(d, idx);
-            m_matrix.resize(fe.getCount(), fe.getCount());
-
-            m_grad1.resize(fe.getCount());
-            for (size_t local = 0; local < fe.getCount(); local++)
-            {
-              const auto basis = fe.getBasis(local);
-              for (size_t j = 0; j < d; j++)
-                grad(j) = basis.template getDerivative<1>(j)(rc);
-              m_grad1[local] = p.getJacobianInverse().transpose() * grad;
-            }
-            for (size_t i = 0; i < fe.getCount(); i++)
-              m_matrix(i, i) = m_grad1[i].squaredNorm();
-            for (size_t i = 0; i < fe.getCount(); i++)
-            {
-              for (size_t j = 0; j < i; j++)
-                m_matrix(i, j) = Math::dot(m_grad1[j], m_grad1[i]);
-            }
-            m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
+            const auto basis = fe.getBasis(local);
+            for (size_t j = 0; j < d; j++)
+              grad(j) = basis.template getDerivative<1>(j)(rc);
+            m_grad[local] = p.getJacobianInverse().transpose() * grad;
           }
-          else
+          for (size_t i = 0; i < fe.getCount(); i++)
+            m_matrix(i, i) = m_grad[i].squaredNorm();
+          for (size_t i = 0; i < fe.getCount(); i++)
           {
-            Math::SpatialVector<ScalarType> grad1(d), grad2(d);
-            const auto& trialfe = lhs.getFiniteElementSpace().getFiniteElement(d, idx);
-            m_grad1.resize(trialfe.getCount());
-            for (size_t i = 0; i < trialfe.getCount(); i++)
-            {
-              const auto basis = trialfe.getBasis(i);
-              for (size_t local = 0; local < d; local++)
-                grad1(local) = basis.template getDerivative<1>(local)(rc);
-              m_grad1[i] = p.getJacobianInverse().transpose() * grad1;
-            }
-
-            const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
-            m_grad2.resize(testfe.getCount());
-            for (size_t i = 0; i < testfe.getCount(); i++)
-            {
-              const auto basis = testfe.getBasis(i);
-              for (size_t local = 0; local < d; local++)
-                grad2(local) = basis.template getDerivative<1>(local)(rc);
-              m_grad2[i] = p.getJacobianInverse().transpose() * grad2;
-            }
-
-            for (size_t i = 0; i < testfe.getCount(); i++)
-            {
-              for (size_t j = 0; j < trialfe.getCount(); j++)
-                m_matrix(i, j) = Math::dot(m_grad1[j], m_grad2[i]);
-            }
+            for (size_t j = 0; j < i; j++)
+              m_matrix(i, j) = Math::dot(m_grad[j], m_grad[i]);
           }
+          m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
         }
         return *this;
       }
@@ -796,7 +774,7 @@ namespace Rodin::Variational
 
       Real m_weight;
       Real m_distortion;
-      std::vector<Math::SpatialVector<ScalarType>> m_grad1, m_grad2;
+      std::vector<Math::SpatialVector<ScalarType>> m_grad;
 
       Math::Matrix<ScalarType> m_matrix;
 

@@ -1,11 +1,11 @@
 #ifndef RODIN_MPI_VARIATIONAL_P1_P1_H
 #define RODIN_MPI_VARIATIONAL_P1_P1_H
 
+#include <mpi.h>
 #include <boost/serialization/optional.hpp>
-#include <mpi_proto.h>
 
-#include "Rodin/MPI/Variational/FiniteElementSpace.h"
 #include "Rodin/MPI/Geometry/Mesh.h"
+#include "Rodin/MPI/Variational/FiniteElementSpace.h"
 
 #include "Rodin/Variational/P1/P1.h"
 
@@ -243,7 +243,7 @@ namespace Rodin::Variational
         boost::optional<ElementType> send;
         if (localIdx)
         {
-          const Index owner = shard.getOwner(d, *localIdx);
+          const Index owner = shard.getOwner(d).at(*localIdx);
           if (owner == comm.rank())
             send = m_fes.getFiniteElement(*localIdx, globalIdx);
         }
