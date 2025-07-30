@@ -6,16 +6,16 @@
 
 namespace Rodin::Math
 {
-  LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::LinearSystem()
-    : m_comm(MPI_COMM_NULL)
-  {}
-
   LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::LinearSystem(MPI_Comm comm)
     : m_comm(comm)
   {
-    MatCreate(comm, &m_operator);
-    VecCreate(comm, &m_solution);
-    VecCreate(comm, &m_vector);
+    PetscErrorCode ierr;
+    ierr = MatCreate(comm, &m_operator);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecCreate(comm, &m_solution);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecCreate(comm, &m_vector);
+    assert(ierr == PETSC_SUCCESS);
   }
 
   LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::LinearSystem(const LinearSystem& other)
@@ -33,6 +33,18 @@ namespace Rodin::Math
       m_solution(std::exchange(other.m_solution, PETSC_NULLPTR)),
       m_vector(std::exchange(other.m_vector, PETSC_NULLPTR))
   {}
+
+  LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::~LinearSystem()
+  {
+    m_comm = MPI_COMM_NULL;
+    PetscErrorCode ierr;
+    ierr = MatDestroy(&m_operator);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecDestroy(&m_solution);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecDestroy(&m_vector);
+    assert(ierr == PETSC_SUCCESS);
+  }
 
   LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>&
   LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::operator=(const LinearSystem& other)
@@ -59,26 +71,6 @@ namespace Rodin::Math
       m_solution = std::exchange(other.m_solution, PETSC_NULLPTR);
       m_vector = std::exchange(other.m_vector, PETSC_NULLPTR);
     }
-    return *this;
-  }
-
-  LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>&
-  LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::create(MPI_Comm comm)
-  {
-    m_comm = comm;
-    MatCreate(comm, &m_operator);
-    VecCreate(comm, &m_solution);
-    VecCreate(comm, &m_vector);
-    return *this;
-  }
-
-  LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>&
-  LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>::destroy()
-  {
-    m_comm = MPI_COMM_NULL;
-    MatDestroy(&m_operator);
-    VecDestroy(&m_solution);
-    VecDestroy(&m_vector);
     return *this;
   }
 }

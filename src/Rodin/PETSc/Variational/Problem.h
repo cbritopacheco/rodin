@@ -56,29 +56,45 @@ namespace Rodin::Variational
       using TrialFESMeshContextType =
         typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
 
+      using TestFESMeshType =
+        typename FormLanguage::Traits<TestFESType>::MeshType;
+
+      using TestFESMeshContextType =
+        typename FormLanguage::Traits<TestFESMeshType>::ContextType;
+
       using Parent =
         Variational::ProblemUVBase<LinearSystemType, U, V>;
 
+      static_assert(
+          std::is_same_v<TrialFESMeshContextType, Context::Local> ||
+          std::is_same_v<TrialFESMeshContextType, Context::MPI>);
+
+      static_assert(
+          std::is_same_v<TrialFESMeshContextType, TestFESMeshContextType>);
+
       Problem(U& u, V& v)
-        : Parent(u, v)
-      {
-        if constexpr (std::is_same_v<TrialFESMeshContextType, Context::Local>)
-        {
-          m_axb.create(PETSC_COMM_SELF);
-        }
-        else if constexpr (std::is_same_v<TrialFESMeshContextType, Context::MPI>)
-        {
-          const auto& fes = u.getFiniteElementSpace();
-          const auto& mesh = fes.getMesh();
-          const auto& ctx = mesh.getContext();
-          const MPI_Comm comm = ctx.getCommunicator();
-          m_axb.create(comm);
-        }
-        else
-        {
-          assert(false);
-        }
-      }
+        : Parent(u, v),
+          m_axb(
+              [&]() -> MPI_Comm
+              {
+                if constexpr (std::is_same_v<TrialFESMeshContextType, Context::Local>)
+                {
+                  return PETSC_COMM_SELF;
+                }
+                else if constexpr (std::is_same_v<TrialFESMeshContextType, Context::MPI>)
+                {
+                  const auto& fes = u.getFiniteElementSpace();
+                  const auto& mesh = fes.getMesh();
+                  const auto& ctx = mesh.getContext();
+                  const MPI_Comm comm = ctx.getCommunicator();
+                  return comm;
+                }
+                else
+                {
+                  assert(false);
+                }
+              }())
+      {}
 
       constexpr
       Problem(const Problem& other)

@@ -40,7 +40,7 @@ namespace Rodin::Math
 
       LinearSystem(LinearSystem&& other) noexcept;
 
-      virtual ~LinearSystem() = default;
+      virtual ~LinearSystem();
 
       LinearSystem& operator=(const LinearSystem& other);
 

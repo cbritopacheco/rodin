@@ -93,6 +93,7 @@ namespace Rodin::Assembly
 
       void execute(LinearSystemType& out, const InputType& input) const override
       {
+        PetscErrorCode ierr;
         const auto& u = input.getTrialFunction();
         const auto& v = input.getTestFunction();
         const auto& trialFES = u.getFiniteElementSpace();
@@ -100,10 +101,7 @@ namespace Rodin::Assembly
         auto& pb = input.getProblemBody();
         auto& [stiffness, solution, mass] = out;
 
-        MPI_Comm comm;
-        PetscErrorCode ierr;
-        ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(stiffness), &comm);
-        assert(ierr == PETSC_SUCCESS);
+        const MPI_Comm comm = out.getCommunicator();
 
         const BilinearFormAssemblyType bfa;
         bfa.execute(
