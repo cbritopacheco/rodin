@@ -90,10 +90,13 @@ namespace Rodin::Variational
         {
           ierr = VecCreate(PETSC_COMM_SELF, &data);
           assert(ierr == PETSC_SUCCESS);
+
           ierr = VecSetSizes(data, fes.getSize(), PETSC_DECIDE);
           assert(ierr == PETSC_SUCCESS);
+
           ierr = VecSetFromOptions(data);
           assert(ierr == PETSC_SUCCESS);
+
           ierr = VecZeroEntries(data);
           assert(ierr == PETSC_SUCCESS);
         }
@@ -239,19 +242,10 @@ for (int r = 0; r < comm.size(); ++r) {
         }
         else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
-          Index local;
-          if (m_begin <= global && global < m_end)
-          {
-            local = global - m_begin;
-          }
-          else
-          {
-            const auto& fes = this->getFiniteElementSpace();
-            const Optional<Index> localIdx = fes.getLocalIndex(global);
-            assert(localIdx);
-            local = *localIdx;
-          }
-          return m_write.raw[local];
+          const auto& fes = this->getFiniteElementSpace();
+          const Optional<Index> localIdx = fes.getLocalIndex(global);
+          assert(localIdx);
+          return m_write.raw[*localIdx];
         }
         else
         {
@@ -431,7 +425,8 @@ for (int r = 0; r < comm.size(); ++r) {
       }
 
       template <class NestedDerived>
-      GridFunction& projectOnCells(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
+      GridFunction& projectOnCells(
+          const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
@@ -489,7 +484,8 @@ for (int r = 0; r < comm.size(); ++r) {
             shard.getMapping({ d, i }, fn.template cast<RangeType>());
           for (Index local = 0; local < fe.getCount(); local++)
           {
-            const Index global = fes.getGlobalIndex(shard.getGlobalIndex({ d, i }, local));
+            const Index global =
+              fes.getGlobalIndex(shard.getGlobalIndex({ d, i }, local));
             this->operator[](global) = fe.getLinearForm(local)(mapping);
           }
         }

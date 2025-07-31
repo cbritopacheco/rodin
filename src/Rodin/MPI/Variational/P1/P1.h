@@ -3,6 +3,7 @@
 
 #include <mpi.h>
 #include <boost/serialization/optional.hpp>
+#include <sys/mman.h>
 
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/MPI/Variational/FiniteElementSpace.h"
@@ -179,7 +180,7 @@ namespace Rodin::Variational
             const auto local = mesh.getLocalIndex(0, requested[i].first);
             assert(local);
             const Index& global = requested[i].second;
-            m_loc2glob.right.insert({ global, *local});
+            m_loc2glob.right.insert({ global, *local });
           }
         }
 
