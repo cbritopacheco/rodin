@@ -366,11 +366,11 @@ namespace Rodin::Variational
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          this->interpolate(res, p);
+          static_cast<const Derived&>(*this).interpolate(res, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(res, *inclusion);
+          static_cast<const Derived&>(*this).interpolate(res, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
@@ -378,7 +378,7 @@ namespace Rodin::Variational
           const auto restriction = submesh.restriction(p);
           if (restriction)
           {
-            this->interpolate(res, *restriction);
+            static_cast<const Derived&>(*this).interpolate(res, *restriction);
           }
           else
           {
@@ -399,38 +399,13 @@ namespace Rodin::Variational
       constexpr
       void interpolate(RangeType& res, const Geometry::Point& p) const
       {
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index  i = polytope.getIndex();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const size_t count = fe.getCount();
-        RangeType v;
-        for (Index local = 0; local < count; ++local)
-        {
-          const auto mapping = fes.getInverseMapping({ d, i }, fe.getBasis(local));
-          mapping(v, p);
-          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
-          if (local == 0)
-            res = k; // Initializes the result (resizes)
-          else
-            res += k; // Accumulates the result (does not resize)
-        }
+        static_cast<const Derived&>(*this).interpolate(res, p);
       }
 
       template <class NestedDerived>
       void project(const FunctionBase<NestedDerived>& fn, const std::pair<size_t, Index>& p)
       {
-        const auto& fes = getFiniteElementSpace();
-        const auto& [d, i] = p;
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto mapping =
-          fes.getMapping({ d, i }, fn.template cast<RangeType>());
-        for (Index local = 0; local < fe.getCount(); local++)
-        {
-          const Index global = fes.getGlobalIndex({ d, i }, local);
-          this->operator[](global) = fe.getLinearForm(local)(mapping);
-        }
+        static_cast<Derived&>(*this).project(fn, p);
       }
 
       template <class NestedDerived>
@@ -518,19 +493,7 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& projectOnCells(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        const auto& fes = getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        for (auto it = mesh.getCell(); !it.end(); ++it)
-        {
-          const auto& polytope = *it;
-          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-          {
-            const auto& polytope = *it;
-            if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-              project(fn, { polytope.getDimension(), polytope.getIndex() });
-          }
-        }
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).projectOnCells(fn, attrs);
       }
 
       auto& projectOnBoundary(
@@ -808,7 +771,7 @@ namespace Rodin::Variational
       Index argmin() const
       {
         Index idx = 0;
-        this->min(idx);
+        static_cast<const Derived&>(*this).min(idx);
         return idx;
       }
 
@@ -816,7 +779,7 @@ namespace Rodin::Variational
       Index argmax() const
       {
         Index idx;
-        this->max(idx);
+        static_cast<const Derived&>(*this).max(idx);
         return idx;
       }
 
@@ -941,6 +904,7 @@ namespace Rodin::Variational
       using Parent::operator=;
       using Parent::min;
       using Parent::max;
+      using Parent::projectOnCells;
 
       GridFunction(const FESType& fes)
         : Parent(fes)
@@ -1039,6 +1003,62 @@ namespace Rodin::Variational
       {
         this->getData().array() /= rhs.getData().array();
         return *this;
+      }
+
+      /**
+       * @brief Interpolates the GridFunction at the given point.
+       *
+       * @note Can be overriden.
+       */
+      constexpr
+      void interpolate(RangeType& res, const Geometry::Point& p) const
+      {
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index  i = polytope.getIndex();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const size_t count = fe.getCount();
+        RangeType v;
+        for (Index local = 0; local < count; ++local)
+        {
+          const auto mapping = fes.getInverseMapping({ d, i }, fe.getBasis(local));
+          mapping(v, p);
+          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
+          if (local == 0)
+            res = k; // Initializes the result (resizes)
+          else
+            res += k; // Accumulates the result (does not resize)
+        }
+      }
+
+      template <class NestedDerived>
+      GridFunction& projectOnCells(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
+      {
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        for (auto it = mesh.getCell(); !it.end(); ++it)
+        {
+          const auto& polytope = *it;
+          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
+            project(fn, { polytope.getDimension(), polytope.getIndex() });
+        }
+        return *this;
+      }
+
+      template <class NestedDerived>
+      void project(const FunctionBase<NestedDerived>& fn, const std::pair<size_t, Index>& p)
+      {
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& [d, i] = p;
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto mapping =
+          fes.getMapping({ d, i }, fn.template cast<RangeType>());
+        for (Index local = 0; local < fe.getCount(); local++)
+        {
+          const Index global = fes.getGlobalIndex({ d, i }, local);
+          this->operator[](global) = fe.getLinearForm(local)(mapping);
+        }
       }
 
       GridFunction& setData(const DataType& data, size_t offset = 0)

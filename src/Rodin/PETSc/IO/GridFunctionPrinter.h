@@ -7,13 +7,16 @@
 #ifndef RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 #define RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 
+#include "Rodin/Context/Local.h"
+
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/IO/GridFunctionPrinter.h"
 
 #include "Rodin/FormLanguage/Traits.h"
 
+#include "Rodin/MPI/Context/MPI.h"
 #include "Rodin/PETSc/Math/Vector.h"
-#include <petscsystypes.h>
+#include <petscvec.h>
 
 namespace Rodin::IO
 {
@@ -42,10 +45,30 @@ namespace Rodin::IO
 
       void printData(std::ostream& os) override
       {
-        const auto& gf = this->getObject();
-        const size_t sz = gf.getSize();
-        for (size_t i = 0; i < sz; ++i)
-          os << gf[i] << "\n";
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        {
+          const auto& gf = this->getObject();
+          const size_t sz = gf.getSize();
+          for (size_t i = 0; i < sz; ++i)
+            os << gf[i] << "\n";
+        }
+        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          const auto& gf = this->getObject();
+          const auto& fes = gf.getFiniteElementSpace();
+          const auto& shard = fes.getShard();
+          const auto& read = gf.acquire().getArrayRead();
+          const size_t sz = shard.getSize();
+          VecView(gf.getData(), PETSC_VIEWER_STDOUT_WORLD);
+          assert(read.raw);
+          assert(read.acquired);
+          for (size_t i = 0; i < sz; ++i)
+            os << read.raw[i] << "\n";
+        }
+        else
+        {
+          assert(false);
+        }
       }
   };
 }

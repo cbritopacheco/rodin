@@ -36,7 +36,8 @@ int main(int argc, char** argv)
     Geometry::LocalMesh mesh;
     mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 3, 3 });
     mesh.getConnectivity().compute(2, 2);
-    mesh.getConnectivity().compute(1, 2);
+    mesh.save("Poisson.mesh");
+    // mesh.getConnectivity().compute(1, 2);
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
     sharder.shard(partitioner).scatter(ROOT_RANK);
@@ -45,37 +46,14 @@ int main(int argc, char** argv)
   auto mesh = sharder.gather(ROOT_RANK);
   P1 vh(mesh);
 
+  mesh.save("Poisson." + std::to_string(world.rank()) + ".mesh");
+
   ScalarFunction f = 1;
 
   {
     PETSc::Variational::GridFunction gf(vh);
     gf = Cos(F::x);
     gf.save("Poisson." + std::to_string(world.rank()) + ".gf");
-    // PETSc::Variational::TrialFunction u(vh);
-    // PETSc::Variational::TestFunction  v(vh);
-
-    // // Define problem
-    // Problem poisson(u, v);
-    // poisson = Integral(Grad(u), Grad(v))
-    //         - Integral(f, v);
-    //         // + DirichletBC(u, Zero());
-    // poisson.assemble();
-
-
-    // auto& mat = poisson.getLinearSystem().getOperator();
-    // MatView(mat, PETSC_VIEWER_STDOUT_WORLD);
-
-    // auto& solution = poisson.getLinearSystem().getSolution();
-    // VecView(solution, PETSC_VIEWER_STDOUT_WORLD);
-
-    // auto& vec = poisson.getLinearSystem().getVector();
-    // VecView(vec, PETSC_VIEWER_STDOUT_WORLD);
-
-    // CG(poisson).solve();
-
-    // Save solution
-    // u.getSolution().save("Poisson." + std::to_string(world.rank()) + ".gf");
-    // mesh.save("Poisson." + std::to_string(world.rank()) + ".mesh");
   }
 
   PetscFinalize();

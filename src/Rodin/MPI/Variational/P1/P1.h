@@ -163,6 +163,8 @@ namespace Rodin::Variational
           }
         }
 
+        assert(m_owned == dofIdx);
+
         std::vector<boost::mpi::request> requests;
         for (auto& [owner, requested] : pull)
           requests.push_back(comm.irecv(owner, 0, pull[owner]));
@@ -180,6 +182,22 @@ namespace Rodin::Variational
             m_loc2glob.right.insert({ global, *local});
           }
         }
+
+for (int r = 0; r < comm.size(); ++r) {
+  if (comm.rank() == r) {
+    std::cout << "=== rank " << r << " ===\n";
+    for (auto it = m_loc2glob.left.begin(); it != m_loc2glob.left.end(); ++it) {
+      std::cout
+        << " local=" << it->first
+        << " -> global="  << it->second
+        << "\n";
+    }
+    std::cout << std::flush;
+  }
+  comm.barrier();    // wait so next rank prints cleanly
+}
+
+
       }
 
       P1(const MeshType& mesh, size_t vdim)
@@ -208,9 +226,9 @@ namespace Rodin::Variational
        * @brief Returns the global distributed index of the given local
        * distributed index.
        */
-      Index getGlobalIndex(Index localIdx) const
+      Index getGlobalIndex(Index globalIdx) const
       {
-        return m_loc2glob.left.at(localIdx).get_right();
+        return m_loc2glob.left.at(globalIdx).get_right();
       }
 
       /**
