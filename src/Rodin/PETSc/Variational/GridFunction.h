@@ -107,8 +107,6 @@ namespace Rodin::Variational
           const auto& comm = ctx.getCommunicator();
           const size_t globalSize = fes.getSize();
           const size_t localSize = fes.getShard().getSize();
-          fes.getOwnershipRange(m_begin, m_end);
-          const size_t ownedSize = m_end - m_begin;
 
           ierr = VecCreate(comm, &data);
           assert(ierr == PETSC_SUCCESS);
@@ -119,23 +117,8 @@ namespace Rodin::Variational
           ierr = VecSetFromOptions(data);
           assert(ierr == PETSC_SUCCESS);
 
-          size_t ghostSize = localSize - ownedSize;
-          m_ghosts.resize(ghostSize);
-          for (size_t i = 0; i < ghostSize; ++i)
-            m_ghosts[i] = fes.getGlobalIndex(ownedSize + i);
-
-for (int r = 0; r < comm.size(); ++r) {
-  if (comm.rank() == r) {
-    std::cout << "=== rank " << r << " ===\n";
-    for (size_t i = 0; i < m_ghosts.size(); ++i) {
-      std::cout << " ghost[" << i << "] = " << m_ghosts[i] << "\n";
-    }
-    std::cout << std::flush;
-  }
-  comm.barrier();    // wait so next rank prints cleanly
-}
-
-          ierr = VecMPISetGhost(data, ghostSize, m_ghosts.data());
+          const auto& ghosts = fes.getGhosts();
+          ierr = VecMPISetGhost(data, ghosts.left.size(), ghosts.left.data());
           assert(ierr == PETSC_SUCCESS);
 
           ierr = VecZeroEntries(data);
@@ -150,19 +133,13 @@ for (int r = 0; r < comm.size(); ++r) {
       GridFunction(const GridFunction& other)
         : Parent(other.getFiniteElementSpace()),
           m_data(other.getData()),
-          m_begin(other.m_begin),
-          m_end(other.m_end),
-          m_ghosts(other.m_ghosts),
           m_read{.acquired = false, .raw = PETSC_NULLPTR},
           m_write{.acquired = false, .raw = PETSC_NULLPTR}
       {}
 
       GridFunction(GridFunction&& other) noexcept
         : Parent(other.getFiniteElementSpace(), std::exchange(other.getData(), nullptr)),
-          m_data(std::move(other.getData())),
-          m_begin(std::move(other.m_begin)),
-          m_end(std::move(other.m_end)),
-          m_ghosts(std::move(other.m_ghosts))
+          m_data(std::move(other.getData()))
       {
         m_read.acquired = std::exchange(other.m_read, false);
         m_read.raw = std::exchange(other.m_read.raw, PETSC_NULLPTR);
@@ -178,9 +155,6 @@ for (int r = 0; r < comm.size(); ++r) {
         {
           Parent::operator=(std::move(other));
           m_data = std::move(other.m_data);
-          m_begin = std::move(other.m_begin);
-          m_end = std::move(other.m_end);
-          m_ghosts = std::move(other.m_ghosts);
           m_read.acquired = std::exchange(other.m_read, false);
           m_read.raw = std::exchange(other.m_read.raw, PETSC_NULLPTR);
           m_write.acquired = std::exchange(other.m_write, false);
@@ -243,9 +217,20 @@ for (int r = 0; r < comm.size(); ++r) {
         else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
           const auto& fes = this->getFiniteElementSpace();
-          const Optional<Index> localIdx = fes.getLocalIndex(global);
-          assert(localIdx);
-          return m_write.raw[*localIdx];
+
+          size_t begin, end;
+          fes.getOwnershipRange(m_begin, m_end);
+
+          PetscInt local;
+          if (begin <= global && global < end)
+          {
+            local = global - begin;
+          }
+          else
+          {
+            local = end - begin + fes.getGhosts().right.at(global);
+          }
+          return m_write.raw[local];
         }
         else
         {
@@ -263,17 +248,19 @@ for (int r = 0; r < comm.size(); ++r) {
         }
         else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
+          const auto& fes = this->getFiniteElementSpace();
+
+          size_t begin, end;
+          fes.getOwnershipRange(m_begin, m_end);
+
           PetscInt local;
-          if (m_begin <= global && global < m_end)
+          if (begin <= global && global < end)
           {
-            local = global - m_begin;
+            local = global - begin;
           }
           else
           {
-            const auto& fes = this->getFiniteElementSpace();
-            const Optional<Index> localIdx = fes.getLocalIndex(global);
-            assert(localIdx);
-            local = *localIdx;
+            local = end - begin + fes.getGhosts().right.at(global);
           }
           return m_read.raw[local];
         }
@@ -673,21 +660,6 @@ for (int r = 0; r < comm.size(); ++r) {
         return m_data;
       }
 
-      const size_t& getBegin() const
-      {
-        return m_begin;
-      }
-
-      const size_t& getEnd() const
-      {
-        return m_end;
-      }
-
-      const auto& getGhosts() const
-      {
-        return m_ghosts;
-      }
-
       const ArrayRead& getArrayRead() const
       {
         return m_read;
@@ -701,7 +673,6 @@ for (int r = 0; r < comm.size(); ++r) {
     private:
       DataType m_data;
       size_t m_begin, m_end;
-      std::vector<PetscInt> m_ghosts;
 
       mutable ArrayRead m_read;
       mutable ArrayWrite m_write;

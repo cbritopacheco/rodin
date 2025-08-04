@@ -53,36 +53,8 @@ int main(int argc, char** argv)
   {
     PETSc::Variational::GridFunction gf(vh);
     gf = Cos(F::x);
-    gf.save("Poisson." + std::to_string(world.rank()) + ".gf");
+    // gf.save("Poisson." + std::to_string(world.rank()) + ".gf");
   }
-
-  // Vec v;
-  // VecCreate(PETSC_COMM_WORLD, &v);
-
-  // size_t sz;
-  // if (world.rank() == 0)
-  // {
-  //   sz = 7;
-  // }
-  // else
-  // {
-  //   sz = 8;
-  // }
-  // VecSetSizes(v, sz, 10);
-  // VecSetFromOptions(v);
-
-  // std::vector<int> ghosts;
-  // if (world.rank() == 0)
-  // {
-  //   ghosts = { 2, 3 };
-  // }
-  // else
-  // {
-  //   ghosts = { 4, 5, 6 };
-  // }
-
-  // VecMPISetGhost(v, ghosts.size(), ghosts.data());
-
 
   PetscFinalize();
 }

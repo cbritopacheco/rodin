@@ -149,10 +149,10 @@ namespace Rodin::Variational
 
       using DataType = Data;
 
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-
       /// Range type of value
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
       /// Type of mesh on which the finite element space is built
       using MeshType = Geometry::Mesh<Context::Local>;

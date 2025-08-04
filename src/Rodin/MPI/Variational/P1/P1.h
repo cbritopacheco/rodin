@@ -20,7 +20,13 @@ namespace Rodin::Variational
         Geometry::Mesh<Context::MPI>, P1<Range, Geometry::Mesh<Context::MPI>>>
   {
     public:
-      using Bimap =
+      struct GhostBimap
+      {
+        std::vector<Index> left;
+        FlatMap<Index, Index> right;
+      };
+
+      using IndexBimap =
         boost::bimap<
           boost::bimaps::vector_of<Index>,
           boost::bimaps::unordered_set_of<Index>>;
@@ -133,7 +139,8 @@ namespace Rodin::Variational
         : m_mesh(mesh),
           m_fes(mesh.getShard())
       {
-        const auto& comm  = mesh.getContext().getCommunicator();
+        const auto& ctx = mesh.getContext();
+        const auto& comm  = ctx.getCommunicator();
         const auto& shard = mesh.getShard();
         const auto& halo = shard.getHalo(0);
         const auto& owner = shard.getOwner(0);
@@ -148,15 +155,21 @@ namespace Rodin::Variational
         {
           if (shard.isOwned(0, i))
           {
+            const Index id = mesh.getGlobalIndex(0, i);
+            const auto& dofs = m_fes.getDOFs(0, i);
+            assert(dofs.size() == 1);
+            const Index local = dofs[0];
+            const Index global = dofIdx + m_offset;
+            const auto [it, inserted] = m_local_to_global.right.insert({ global, local });
+            assert(inserted);
+            dofIdx++;
+
             for (const Index& peer : halo.at(i))
             {
               assert(comm.rank() >= 0);
               assert(peer != static_cast<Index>(comm.rank()));
-              const Index& global = mesh.getGlobalIndex(0, i);
-              push[peer].push_back({ global, dofIdx + m_offset });
+              push[peer].push_back({ id, global });
             }
-            m_loc2glob.right.insert({ dofIdx + m_offset, i });
-            dofIdx++;
           }
           else
           {
@@ -164,47 +177,125 @@ namespace Rodin::Variational
           }
         }
 
-        assert(m_owned == dofIdx);
-
-        std::vector<boost::mpi::request> requests;
+        std::vector<boost::mpi::request> irecv;
         for (auto& [owner, requested] : pull)
-          requests.push_back(comm.irecv(owner, 0, pull[owner]));
+          irecv.push_back(comm.irecv(owner, 0, pull[owner]));
+
+        std::vector<boost::mpi::request> isend;
         for (const auto& [peer, requested] : push)
-          requests.push_back(comm.isend(peer, 0, push[peer]));
-        boost::mpi::wait_all(requests.begin(), requests.end());
+          isend.push_back(comm.isend(peer, 0, push[peer]));
+
+        boost::mpi::wait_all(isend.begin(), isend.end());
+
+        boost::mpi::wait_all(irecv.begin(), irecv.end());
 
         for (const auto& [owner, requested] : pull)
         {
-          for (size_t i = 0; i < requested.size(); ++i)
+          for (const auto& [id, global] : requested)
           {
-            const auto local = mesh.getLocalIndex(0, requested[i].first);
-            assert(local);
-            const Index& global = requested[i].second;
-            m_loc2glob.right.insert({ global, *local });
+            const auto i = mesh.getLocalIndex(0, id);
+            assert(i);
+            const auto& dofs = m_fes.getDOFs(0, *i);
+            assert(dofs.size() == 1);
+            const auto [it, inserted] = m_local_to_global.right.insert({ global, dofs[0] });
+            assert(inserted);
           }
         }
 
-for (int r = 0; r < comm.size(); ++r) {
-  if (comm.rank() == r) {
-    std::cout << "=== rank " << r << " ===\n";
-    for (auto it = m_loc2glob.left.begin(); it != m_loc2glob.left.end(); ++it) {
-      std::cout
-        << " local=" << it->first
-        << " -> global="  << it->second
-        << "\n";
-    }
-    std::cout << std::flush;
-  }
-  comm.barrier();    // wait so next rank prints cleanly
-}
-
-
+        const size_t begin = m_offset, end = m_offset + m_owned;
+        Index offset = 0;
+        for (size_t i = 0; i < m_fes.getSize(); ++i)
+        {
+          const Index global = this->getGlobalIndex(i);
+          if (global < begin || end <= global)
+          {
+            auto [it, inserted] = m_ghosts.right.insert({ global, offset });
+            assert(inserted);
+            m_ghosts.left.push_back(offset);
+            offset++;
+          }
+        }
       }
 
       P1(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
           m_fes(mesh.getShard(), vdim)
-      {}
+      {
+        static thread_local std::vector<Index> s_send;
+
+        const auto& ctx = mesh.getContext();
+        const auto& comm  = ctx.getCommunicator();
+        const auto& shard = mesh.getShard();
+        const auto& halo = shard.getHalo(0);
+        const auto& owner = shard.getOwner(0);
+
+        m_owned = halo.size();
+        const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
+        m_offset = inclusive - m_owned;
+
+        FlatMap<Index, std::vector<std::pair<Index, std::vector<Index>>>> push, pull;
+        Index dofIdx = 0;
+        for (size_t i = 0; i < shard.getVertexCount(); ++i)
+        {
+          if (shard.isOwned(0, i))
+          {
+            const Index id = mesh.getGlobalIndex(0, i);
+            const auto& dofs = m_fes.getDOFs(0, i);
+
+            s_send.clear();
+            for (const Index& local : dofs)
+            {
+              const Index global = dofIdx + m_offset;
+              s_send.push_back(global);
+
+              const auto [it, inserted] = m_local_to_global.right.insert({ global, local });
+              assert(inserted);
+
+              dofIdx++;
+            }
+
+            for (const Index& peer : halo.at(i))
+            {
+              assert(comm.rank() >= 0);
+              assert(peer != static_cast<Index>(comm.rank()));
+              push[peer].push_back({ id, s_send });
+            }
+          }
+          else
+          {
+            pull.try_emplace(owner.at(i));
+          }
+        }
+
+        std::vector<boost::mpi::request> irecv;
+        for (auto& [owner, requested] : pull)
+          irecv.push_back(comm.irecv(owner, 0, pull[owner]));
+
+        std::vector<boost::mpi::request> isend;
+        for (const auto& [peer, requested] : push)
+          isend.push_back(comm.isend(peer, 0, push[peer]));
+
+        boost::mpi::wait_all(isend.begin(), isend.end());
+
+        boost::mpi::wait_all(irecv.begin(), irecv.end());
+
+        for (const auto& [owner, requested] : pull)
+        {
+          for (const auto& [id, global] : requested)
+          {
+            const auto i = mesh.getLocalIndex(0, id);
+            assert(i);
+            const auto& dofs = m_fes.getDOFs(0, *i);
+            assert(dofs.size() >= 0);
+            assert(dofs.size() == global.size());
+            for (size_t k = 0; k < global.size(); k++)
+            {
+              const auto [it, inserted] = m_local_to_global.right.insert({ global[k], dofs[k] });
+              assert(inserted);
+            }
+          }
+        }
+      }
 
       P1(const P1& other) = default;
 
@@ -229,7 +320,7 @@ for (int r = 0; r < comm.size(); ++r) {
        */
       Index getGlobalIndex(Index globalIdx) const
       {
-        return m_loc2glob.left.at(globalIdx).get_right();
+        return m_local_to_global.left.at(globalIdx).get_right();
       }
 
       /**
@@ -238,8 +329,8 @@ for (int r = 0; r < comm.size(); ++r) {
        */
       Optional<Index> getLocalIndex(Index globalIdx) const
       {
-        auto find = m_loc2glob.right.find(globalIdx);
-        if (find == m_loc2glob.right.end())
+        auto find = m_local_to_global.right.find(globalIdx);
+        if (find == m_local_to_global.right.end())
           return std::nullopt;
         else
           return find->get_left();
@@ -361,13 +452,19 @@ for (int r = 0; r < comm.size(); ++r) {
         return typename FESType::InverseMapping(v);
       }
 
+      const auto& getGhosts() const
+      {
+        return m_ghosts;
+      }
+
     private:
       std::reference_wrapper<const MeshType> m_mesh;
       FESType m_fes;
 
       size_t m_offset;
       size_t m_owned;
-      Bimap m_loc2glob;
+      IndexBimap m_local_to_global;
+      GhostBimap m_ghosts;
   };
 }
 

@@ -7,6 +7,8 @@
 #ifndef RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 #define RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 
+#include <petscvec.h>
+
 #include "Rodin/Context/Local.h"
 
 #include "Rodin/IO/ForwardDecls.h"
@@ -16,7 +18,6 @@
 
 #include "Rodin/MPI/Context/MPI.h"
 #include "Rodin/PETSc/Math/Vector.h"
-#include <petscvec.h>
 
 namespace Rodin::IO
 {
@@ -59,11 +60,11 @@ namespace Rodin::IO
           const auto& shard = fes.getShard();
           const auto& read = gf.acquire().getArrayRead();
           const size_t sz = shard.getSize();
-          VecView(gf.getData(), PETSC_VIEWER_STDOUT_WORLD);
           assert(read.raw);
           assert(read.acquired);
           for (size_t i = 0; i < sz; ++i)
             os << read.raw[i] << "\n";
+          gf.flush();
         }
         else
         {

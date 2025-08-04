@@ -70,10 +70,6 @@ namespace Rodin::Variational
     : public FiniteElementSpace<
         Geometry::Mesh<Context::Local>, P1<Scalar, Geometry::Mesh<Context::Local>>>
   {
-    using KeyLeft = std::tuple<size_t, Index, Index>;
-    using KeyRight = Index;
-    using IndexMap = FlatMap<Index, Index>;
-
     public:
       using ScalarType = Scalar;
 
@@ -253,8 +249,9 @@ namespace Rodin::Variational
 
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
-        const auto [d, i] = idx;
+        const auto& [d, i] = idx;
         const auto& p = getMesh().getConnectivity().getPolytope(d, i);
+        assert(p.size() >= 0);
         assert(local < static_cast<size_t>(p.size()));
         return p(local);
       }
@@ -276,7 +273,7 @@ namespace Rodin::Variational
       template <class FunctionDerived>
       auto getMapping(const std::pair<size_t, Index>& idx, const FunctionBase<FunctionDerived>& v) const
       {
-        const auto [d, i] = idx;
+        const auto& [d, i] = idx;
         const auto& mesh = getMesh();
         return Mapping<FunctionDerived>(*mesh.getPolytope(d, i), v);
       }
@@ -455,7 +452,7 @@ namespace Rodin::Variational
 
       P1& operator=(P1&& other) = default;
 
-      const VectorP1Element& getFiniteElement(size_t d, Index i) const
+      const ElementType& getFiniteElement(size_t d, Index i) const
       {
         const auto& g = getMesh().getGeometry(d, i);
         switch (g)
@@ -554,7 +551,7 @@ namespace Rodin::Variational
 
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
-        const auto [d, i] = idx;
+        const auto& [d, i] = idx;
         const auto& p = getMesh().getConnectivity().getPolytope(d, i);
         const size_t q = local / m_vdim;
         const size_t r = local % m_vdim;
@@ -565,7 +562,7 @@ namespace Rodin::Variational
       template <class FunctionDerived>
       auto getMapping(const std::pair<size_t, Index>& idx, const FunctionBase<FunctionDerived>& v) const
       {
-        const auto [d, i] = idx;
+        const auto& [d, i] = idx;
         const auto& mesh = getMesh();
         return Mapping<FunctionDerived>(*mesh.getPolytope(d, i), v);
       }

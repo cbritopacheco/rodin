@@ -24,6 +24,12 @@ namespace Rodin::Variational
   class FiniteElementSpaceBase
   {
     public:
+      struct LocalIndex
+      {
+        std::pair<size_t, Index> p;
+        Index local;
+      };
+
       FiniteElementSpaceBase() = default;
 
       FiniteElementSpaceBase(const FiniteElementSpaceBase&) = default;
