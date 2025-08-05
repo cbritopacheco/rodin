@@ -11,11 +11,6 @@
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
-#include "P1Element.h"
-#include "Rodin/Geometry/IsoparametricTransformation.h"
-
-#include "GridFunction.h"
-
 namespace Rodin::FormLanguage
 {
   template <class Range, class Data, class Mesh>

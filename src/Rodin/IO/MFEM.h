@@ -584,119 +584,42 @@ namespace Rodin::IO
       size_t m_currentLineNumber;
   };
 
-  template <class Range, class Context, class Data>
-  class GridFunctionPrinterBase<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Context>>, Data>
-  : public Printer<Variational::GridFunction<Variational::P0<Range, Geometry::Mesh<Context>>, Data>>
-  {
-    public:
-      using FESType = Variational::P0<Range, Geometry::Mesh<Context>>;
 
-      static constexpr FileFormat Format = FileFormat::MFEM;
-
-      using RangeType = Range;
-
-      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-
-      using DataType = Data;
-
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
-
-      using Parent = Printer<ObjectType>;
-
-      GridFunctionPrinterBase(const ObjectType& gf)
-        : m_gf(gf)
-      {}
-
-      void print(std::ostream& os) override
-      {
-        const auto& gf = this->getObject();
-        const auto& fes = gf.getFiniteElementSpace();
-        os << "FiniteElementSpace\n"
-           << "FiniteElementCollection: " << "L2_" << fes.getMesh().getDimension() << "D_P0\n"
-           << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: " << MFEM::Ordering::VectorDimension
-           << "\n\n";
-        this->printData(os);
-      }
-
-      const ObjectType& getObject() const override
-      {
-        return m_gf.get();
-      }
-
-      virtual void printData(std::ostream& os) = 0;
-
-    private:
-      std::reference_wrapper<const ObjectType> m_gf;
-  };
-
-
-  template <class Range, class Context, class Data>
-  class GridFunctionPrinterBase<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context>>, Data>
-  : public Printer<Variational::GridFunction<Variational::P1<Range, Geometry::Mesh<Context>>, Data>>
-  {
-    public:
-      using FESType = Variational::P1<Range, Geometry::Mesh<Context>>;
-
-      static constexpr FileFormat Format = FileFormat::MFEM;
-
-      using RangeType = Range;
-
-      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-
-      using DataType = Data;
-
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
-
-      using Parent = Printer<ObjectType>;
-
-      GridFunctionPrinterBase(const ObjectType& gf)
-        : m_gf(gf)
-      {}
-
-      void print(std::ostream& os) override
-      {
-        const auto& gf = this->getObject();
-        const auto& fes = gf.getFiniteElementSpace();
-        os << "FiniteElementSpace\n"
-           << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension() << "D_P1\n"
-           << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: " << MFEM::Ordering::VectorDimension
-           << "\n\n";
-        this->printData(os);
-      }
-
-      const ObjectType& getObject() const override
-      {
-        return m_gf.get();
-      }
-
-      virtual void printData(std::ostream& os) = 0;
-
-    private:
-      std::reference_wrapper<const ObjectType> m_gf;
-  };
-
-  template <class FES>
-  class GridFunctionPrinter<FileFormat::MFEM, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
-    : public GridFunctionPrinterBase<FileFormat::MFEM, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+  template <class FES, class Scalar>
+  class GridFunctionPrinterBase<FileFormat::MFEM, FES, Math::Vector<Scalar>>
+  : public Printer<Variational::GridFunction<FES, Math::Vector<Scalar>>>
   {
     public:
       using FESType = FES;
 
-      static constexpr FileFormat Format = FileFormat::MFEM;
+      using DataType = Math::Vector<Scalar>;
 
-      using RangeType = typename FormLanguage::Traits<FES>::RangeType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
-      using DataType = Math::Vector<ScalarType>;
+      static constexpr FileFormat Format = FileFormat::MFEM;
 
-      using Parent = GridFunctionPrinterBase<Format, FES, DataType>;
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
 
-      using Parent::Parent;
+      using Parent = Printer<ObjectType>;
 
-      void printData(std::ostream& os) override
+      GridFunctionPrinterBase(const ObjectType& gf)
+        : m_gf(gf)
+      {}
+
+      void print(std::ostream& os) override
+      {
+        this->printHeader(os);
+        this->printData(os);
+      }
+
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
+
+      void printData(std::ostream& os)
       {
         const auto& gf = this->getObject();
         const auto& vec = gf.getData();
@@ -705,6 +628,11 @@ namespace Rodin::IO
         for (size_t i = 0; i < static_cast<size_t>(vec.size()); i++)
           os << data[i] << '\n';
       }
+
+      virtual void printHeader(std::ostream& os) = 0;
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
   };
 }
 

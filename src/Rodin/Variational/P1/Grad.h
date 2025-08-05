@@ -12,8 +12,6 @@
 
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
-#include "GridFunction.h"
-
 namespace Rodin::FormLanguage
 {
   template <class Range, class Data, class Mesh>
@@ -208,7 +206,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_gradient(std::move(other.m_gradient)),
-          m_p(std::move(other.m_p))
+          m_p(std::exchange(other.m_p, nullptr))
       {}
 
       constexpr
