@@ -20,12 +20,6 @@ namespace Rodin::Variational
         Geometry::Mesh<Context::MPI>, P1<Range, Geometry::Mesh<Context::MPI>>>
   {
     public:
-      struct GhostBimap
-      {
-        std::vector<Index> left;
-        FlatMap<Index, Index> right;
-      };
-
       using IndexBimap =
         boost::bimap<
           boost::bimaps::vector_of<Index>,
@@ -199,20 +193,6 @@ namespace Rodin::Variational
             assert(dofs.size() == 1);
             const auto [it, inserted] = m_local_to_global.right.insert({ global, dofs[0] });
             assert(inserted);
-          }
-        }
-
-        const size_t begin = m_offset, end = m_offset + m_owned;
-        Index offset = 0;
-        for (size_t i = 0; i < m_fes.getSize(); ++i)
-        {
-          const Index global = this->getGlobalIndex(i);
-          if (global < begin || end <= global)
-          {
-            auto [it, inserted] = m_ghosts.right.insert({ global, offset });
-            assert(inserted);
-            m_ghosts.left.push_back(offset);
-            offset++;
           }
         }
       }
@@ -452,11 +432,6 @@ namespace Rodin::Variational
         return typename FESType::InverseMapping(v);
       }
 
-      const auto& getGhosts() const
-      {
-        return m_ghosts;
-      }
-
     private:
       std::reference_wrapper<const MeshType> m_mesh;
       FESType m_fes;
@@ -464,7 +439,6 @@ namespace Rodin::Variational
       size_t m_offset;
       size_t m_owned;
       IndexBimap m_local_to_global;
-      GhostBimap m_ghosts;
   };
 }
 

@@ -66,7 +66,7 @@ namespace Rodin::Variational
    * Rodin::Real type.
    */
   template <class Scalar>
-  class P1<Scalar, Geometry::Mesh<Context::Local>> final
+  class P1<Scalar, Geometry::Mesh<Context::Local>>
     : public FiniteElementSpace<
         Geometry::Mesh<Context::Local>, P1<Scalar, Geometry::Mesh<Context::Local>>>
   {
@@ -181,10 +181,30 @@ namespace Rodin::Variational
 
       P1(P1&& other)
         : Parent(std::move(other)),
-          m_mesh(other.m_mesh)
+          m_mesh(std::move(other.m_mesh))
       {}
 
-      P1& operator=(P1&& other) = default;
+      virtual ~P1() = default;
+
+      P1& operator=(P1&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_mesh = std::move(other.m_mesh);
+        }
+        return *this;
+      }
+
+      P1& operator=(const P1& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_mesh = other.m_mesh;
+        }
+        return *this;
+      }
 
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
@@ -446,11 +466,45 @@ namespace Rodin::Variational
         }
       }
 
-      P1(const P1& other) = default;
+      P1(const P1& other)
+        : Parent(other),
+          m_mesh(other.m_mesh),
+          m_vdim(other.m_vdim),
+          m_dofs(other.m_dofs)
+      {}
 
-      P1(P1&& other) = default;
+      P1(P1&& other)
+        : Parent(std::move(other)),
+          m_mesh(std::move(other.m_mesh)),
+          m_vdim(std::move(other.m_vdim)),
+          m_dofs(std::move(other.m_dofs))
+      {}
 
-      P1& operator=(P1&& other) = default;
+      virtual ~P1() = default;
+
+      P1& operator=(P1&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_mesh = std::move(other.m_mesh);
+          m_vdim = std::move(other.m_vdim);
+          m_dofs = std::move(other.m_dofs);
+        }
+        return *this;
+      }
+
+      P1& operator=(const P1& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_mesh = other.m_mesh;
+          m_vdim = other.m_vdim;
+          m_dofs = other.m_dofs;
+        }
+        return *this;
+      }
 
       const ElementType& getFiniteElement(size_t d, Index i) const
       {

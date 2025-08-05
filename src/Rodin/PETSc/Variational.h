@@ -1,6 +1,7 @@
 #ifndef RODIN_PETSC_VARIATIONAL_H
 #define RODIN_PETSC_VARIATIONAL_H
 
+#include "Variational/P1.h"
 #include "Variational/Problem.h"
 #include "Variational/LinearForm.h"
 #include "Variational/BilinearForm.h"

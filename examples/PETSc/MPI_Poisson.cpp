@@ -44,13 +44,10 @@ int main(int argc, char** argv)
   }
 
   auto mesh = sharder.gather(ROOT_RANK);
-  P1 vh(mesh);
-
   mesh.save("Poisson." + std::to_string(world.rank()) + ".mesh");
 
-  ScalarFunction f = 1;
-
   {
+    PETSc::Variational::P1 vh(mesh);
     PETSc::Variational::GridFunction gf(vh);
     gf = Cos(F::x);
     // gf.save("Poisson." + std::to_string(world.rank()) + ".gf");
