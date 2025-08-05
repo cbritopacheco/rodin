@@ -10,8 +10,6 @@
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Div.h"
 
-#include "GridFunction.h"
-
 namespace Rodin::FormLanguage
 {
   template <class Scalar, class Data, class Mesh>
@@ -206,7 +204,8 @@ namespace Rodin::Variational
 
       Div(Div&& other)
         : Parent(std::move(other)),
-          m_u(std::move(other.m_u))
+          m_u(std::move(other.m_u)),
+          m_p(std::exchange(other.m_p, nullptr))
       {}
 
       constexpr
@@ -229,12 +228,15 @@ namespace Rodin::Variational
 
       const Geometry::Point& getPoint() const
       {
-        return m_p.value().get();
+        assert(m_p);
+        return *m_p;
       }
 
       Div& setPoint(const Geometry::Point& p)
       {
-        m_p = p;
+        if (m_p == &p)
+          return *this;
+        m_p = &p;
         const auto& polytope = p.getPolytope();
         const auto& rc = p.getReferenceCoordinates();
         const size_t d = polytope.getDimension();
@@ -259,7 +261,7 @@ namespace Rodin::Variational
       constexpr
       ScalarType getBasis(size_t local) const
       {
-        const auto& p = m_p.value().get();
+        const auto& p = this->getPoint();
         return (m_jacobian[local] * p.getJacobianInverse()).trace();
       }
 
@@ -279,7 +281,7 @@ namespace Rodin::Variational
 
       std::vector<Math::SpatialMatrix<ScalarType>> m_jacobian;
 
-      Optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      const Geometry::Point* m_p;
   };
 
   template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
