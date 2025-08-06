@@ -36,13 +36,18 @@ namespace Rodin::Assembly
       {
         assert(res);
         const size_t n = input.getFES().getSize();
+
         PetscErrorCode ierr;
+
         ierr = VecSetSizes(res, n, PETSC_DECIDE);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
+
         const auto& mesh = input.getFES().getMesh();
         for (auto& lfi : input.getLFIs())
         {
@@ -57,13 +62,18 @@ namespace Rodin::Assembly
               for (PetscInt l = 0; l < dofs.size(); ++l)
               {
                 const PetscScalar v = PetscScalar(lfi.integrate(l));
-                VecSetValue(res, dofs[l], v, ADD_VALUES);
+                ierr = VecSetValue(res, dofs[l], v, ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
               }
             }
           }
         }
-        VecAssemblyBegin(res);
-        VecAssemblyEnd(res);
+
+        ierr = VecAssemblyBegin(res);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = VecAssemblyEnd(res);
+        assert(ierr == PETSC_SUCCESS);
       }
 
       Sequential* copy() const noexcept override
@@ -98,17 +108,23 @@ namespace Rodin::Assembly
         assert(res);
         const size_t m = input.getTestFES().getSize();
         const size_t n = input.getTrialFES().getSize();
+
         PetscErrorCode ierr;
         ierr = MatSetSizes(res, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatSeqAIJSetPreallocation(res, PETSC_DETERMINE, PETSC_NULLPTR);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatSetUp(res);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
+
         const auto& mesh = input.getTrialFES().getMesh();
         // Local contributions
         for (auto& bfi : input.getLocalBFIs())
@@ -168,8 +184,10 @@ namespace Rodin::Assembly
             }
           }
         }
+
         ierr = MatAssemblyBegin(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatAssemblyEnd(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
       }

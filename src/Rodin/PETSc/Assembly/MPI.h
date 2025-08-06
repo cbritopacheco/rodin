@@ -52,6 +52,9 @@ namespace Rodin::Assembly
         ierr = VecZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
+        PetscInt rstart, rend;
+        VecGetOwnershipRange(res, &rstart, &rend);
+
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
@@ -68,8 +71,11 @@ namespace Rodin::Assembly
               const auto& dofs = fes.getShard().getDOFs(d, i);
               for (PetscInt i = 0; i < dofs.size(); ++i)
               {
+                const Index r = fes.getGlobalIndex(dofs[i]);
+                if (r < rstart || rend <= r)
+                  continue; // Skip dofs that are not owned by this process
                 const PetscScalar v = lfi.integrate(i);
-                ierr = VecSetValue(res, fes.getGlobalIndex(dofs[i]), v, ADD_VALUES);
+                ierr = VecSetValue(res, r, v, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
               }
             }
@@ -110,6 +116,7 @@ namespace Rodin::Assembly
       void execute(OperatorType& res, const InputType& input) const override
       {
         assert(res);
+
         const auto& testFES  = input.getTestFES();
         const auto& trialFES = input.getTrialFES();
         const auto& mesh = testFES.getMesh();
@@ -138,6 +145,10 @@ namespace Rodin::Assembly
         ierr = MatZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
+        PetscInt rstart, rend;
+        ierr = MatGetOwnershipRange(res, &rstart, &rend);
+        assert(ierr == PETSC_SUCCESS);
+
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
@@ -146,7 +157,6 @@ namespace Rodin::Assembly
           {
             const size_t d = it->getDimension();
             const Index i = it->getIndex();
-
             if (shard.isGhost(d, i))
               continue;
             if (attrs.empty() || attrs.count(it->getAttribute()))
@@ -154,15 +164,16 @@ namespace Rodin::Assembly
               bfi.setPolytope(*it);
               const auto& rows = testFES.getShard().getDOFs(d, i);
               const auto& cols = trialFES.getShard().getDOFs(d, i);
-              for (PetscInt i = 0; i < rows.size(); ++i)
+              for (Index i = 0; i < rows.size(); ++i)
               {
-                for (PetscInt j = 0; j < cols.size(); ++j)
+                const Index r = testFES.getGlobalIndex(rows[i]);
+                if (r < rstart || rend <= r)
+                  continue; // Skip rows that are not owned by this process
+                for (Index j = 0; j < cols.size(); ++j)
                 {
+                  const Index c = trialFES.getGlobalIndex(cols[j]);
                   PetscScalar v = bfi.integrate(j, i);
-                  ierr = MatSetValue(
-                      res,
-                      testFES.getGlobalIndex(rows[i]),
-                      trialFES.getGlobalIndex(cols[j]), v, ADD_VALUES);
+                  ierr = MatSetValue(res, r, c, v, ADD_VALUES);
                   assert(ierr == PETSC_SUCCESS);
                 }
               }

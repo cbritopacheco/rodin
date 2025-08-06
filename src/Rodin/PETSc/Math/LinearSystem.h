@@ -32,8 +32,6 @@ namespace Rodin::Math
       using Parent =
         LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixType, VectorType>>;
 
-      LinearSystem();
-
       LinearSystem(MPI_Comm comm);
 
       LinearSystem(const LinearSystem& other);
@@ -52,11 +50,14 @@ namespace Rodin::Math
         auto& a = this->getOperator();
         auto& b = this->getVector();
         auto& x = this->getSolution();
+
         PetscErrorCode ierr;
+
         std::vector<PetscInt> rows;
         rows.reserve(dofs.size());
         for (auto const& kv : dofs)
           rows.push_back(kv.first + offset);
+
         for (auto const& kv : dofs)
         {
           const PetscInt i = kv.first + offset;
@@ -64,12 +65,16 @@ namespace Rodin::Math
           ierr = VecSetValue(x, i, ui, INSERT_VALUES);
           assert(ierr == PETSC_SUCCESS);
         }
+
         ierr = VecAssemblyBegin(x);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecAssemblyEnd(x);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatZeroRows(a, rows.size(), rows.data(), 1.0, x, b);
         assert(ierr == PETSC_SUCCESS);
+
         return *this;
       }
 
