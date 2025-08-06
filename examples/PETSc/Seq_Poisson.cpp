@@ -20,33 +20,34 @@ using namespace Rodin::Variational;
 
 int main(int argc, char** argv)
 {
-  // PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
 
-  // // Build a mesh
-  // Mesh mesh;
-  // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  // mesh.getConnectivity().compute(1, 2);
+  // Build a mesh
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.getConnectivity().compute(1, 2);
 
-  // ScalarFunction f = 1;
+  ScalarFunction f = 1;
 
-  // {
-  //   PETSc::Variational::P1 vh(mesh);
-  //   PETSc::Variational::TrialFunction u(vh);
-  //   PETSc::Variational::TestFunction  v(vh);
+  P1 vh(mesh);
 
-  //   // Define problem
-  //   Problem poisson(u, v);
-  //   poisson = Integral(Grad(u), Grad(v))
-  //           - Integral(f, v)
-  //           + DirichletBC(u, Zero());
-  //   CG(poisson).solve();
+  {
+    PETSc::Variational::TrialFunction u(vh);
+    PETSc::Variational::TestFunction  v(vh);
 
-  //   // Save solution
-  //   u.getSolution().save("Poisson.gf");
-  //   mesh.save("Poisson.mesh");
-  // }
+    // Define problem
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+    CG(poisson).solve();
 
-  // PetscFinalize();
+    // Save solution
+    u.getSolution().save("Poisson.gf");
+    mesh.save("Poisson.mesh");
+  }
+
+  PetscFinalize();
 
   return 0;
 }

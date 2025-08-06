@@ -6,7 +6,5 @@
 #include "P0/P0Element.h"
 #include "P0/GridFunction.h"
 
-#include "P0/MFEM.h"
-
 #endif
 
