@@ -17,9 +17,8 @@
 namespace Rodin::Assembly
 {
   template <class FES>
-  class MPI<PETSc::Math::Vector, Variational::LinearForm<FES, PETSc::Math::Vector>> final
-    : public AssemblyBase<
-        PETSc::Math::Vector, Variational::LinearForm<FES, PETSc::Math::Vector>>
+  class MPI<::Vec, Variational::LinearForm<FES, ::Vec>> final
+    : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
@@ -27,7 +26,7 @@ namespace Rodin::Assembly
         std::is_same_v<ScalarType, PetscScalar>,
         "FES::ScalarType must be PetscScalar"
       );
-      using VectorType     = PETSc::Math::Vector;
+      using VectorType     = ::Vec;
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
       using Parent         = AssemblyBase<VectorType, LinearFormType>;
       using InputType      = typename Parent::InputType;
@@ -91,8 +90,8 @@ namespace Rodin::Assembly
   };
 
   template <class Solution, class TrialFES, class TestFES>
-  class MPI<PETSc::Math::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Math::Matrix>> final
-    : public AssemblyBase<PETSc::Math::Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Math::Matrix>>
+  class MPI<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
+    : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
   {
     public:
       using DotType =
@@ -103,7 +102,7 @@ namespace Rodin::Assembly
         std::is_same_v<DotType, PetscScalar>,
         "DotType must be PetscScalar"
       );
-      using OperatorType     = PETSc::Math::Matrix;
+      using OperatorType     = ::Mat;
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
       using Parent           = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType        = typename Parent::InputType;

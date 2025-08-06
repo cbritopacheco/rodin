@@ -46,11 +46,6 @@ namespace Rodin::Variational
 
       using Parent = ScalarFunctionBase<ScalarType, DerivativeBase<OperandType, Derived>>;
 
-      /**
-       * @brief Constructs the gradient of a @f$ \mathbb{P}_1 @f$ function @f$
-       * u @f$.
-       * @param[in] u P1 GridFunction
-       */
       DerivativeBase(const OperandType& u)
         : m_u(u)
       {

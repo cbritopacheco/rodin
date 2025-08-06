@@ -22,37 +22,37 @@ static constexpr Index ROOT_RANK = 0;
 
 int main(int argc, char** argv)
 {
-  mpi::environment env(argc, argv);
-  mpi::communicator world;
-  Context::MPI mpi(env, world);
+  // mpi::environment env(argc, argv);
+  // mpi::communicator world;
+  // Context::MPI mpi(env, world);
 
-  PetscErrorCode ierr;
-  ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
-  assert(ierr == PETSC_SUCCESS);
+  // PetscErrorCode ierr;
+  // ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+  // assert(ierr == PETSC_SUCCESS);
 
-  Rodin::MPI::Sharder sharder(mpi);
-  if (world.rank() == ROOT_RANK)
-  {
-    Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 3, 3 });
-    mesh.getConnectivity().compute(2, 2);
-    mesh.save("Poisson.mesh");
-    // mesh.getConnectivity().compute(1, 2);
-    Geometry::BalancedCompactPartitioner partitioner(mesh);
-    partitioner.partition(world.size());
-    sharder.shard(partitioner).scatter(ROOT_RANK);
-  }
+  // Rodin::MPI::Sharder sharder(mpi);
+  // if (world.rank() == ROOT_RANK)
+  // {
+  //   Geometry::LocalMesh mesh;
+  //   mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 3, 3 });
+  //   mesh.getConnectivity().compute(2, 2);
+  //   mesh.save("Poisson.mesh");
+  //   // mesh.getConnectivity().compute(1, 2);
+  //   Geometry::BalancedCompactPartitioner partitioner(mesh);
+  //   partitioner.partition(world.size());
+  //   sharder.shard(partitioner).scatter(ROOT_RANK);
+  // }
 
-  auto mesh = sharder.gather(ROOT_RANK);
-  mesh.save("Poisson." + std::to_string(world.rank()) + ".mesh");
+  // auto mesh = sharder.gather(ROOT_RANK);
+  // mesh.save("Poisson." + std::to_string(world.rank()) + ".mesh");
 
-  {
-    PETSc::Variational::P1 vh(mesh);
-    PETSc::Variational::GridFunction gf(vh);
-    gf = Cos(F::x);
-    // gf.save("Poisson." + std::to_string(world.rank()) + ".gf");
-  }
+  // {
+  //   PETSc::Variational::P1 vh(mesh);
+  //   PETSc::Variational::GridFunction gf(vh);
+  //   gf = Cos(F::x);
+  //   // gf.save("Poisson." + std::to_string(world.rank()) + ".gf");
+  // }
 
-  PetscFinalize();
+  // PetscFinalize();
 }
 

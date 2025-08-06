@@ -75,9 +75,27 @@ namespace Rodin::PETSc::Variational
 
   template <class Mesh>
   P1(const Mesh&, size_t) -> P1<Rodin::Math::Vector<Real>, Mesh>;
+}
 
-  // template <class Mesh>
-  // P1(const Mesh&, size_t) -> P1<Math::Vector<Real>, Mesh>;
+namespace Rodin::FormLanguage
+{
+  template <class Scalar, class Mesh>
+  struct Traits<PETSc::Variational::P1<Scalar, Mesh>>
+  {
+    using MeshType = Mesh;
+    using ScalarType = Scalar;
+    using RangeType = ScalarType;
+    using ElementType = Variational::P1Element<RangeType>;
+  };
+
+  template <class Scalar, class Mesh>
+  struct Traits<PETSc::Variational::P1<Math::Vector<Scalar>, Mesh>>
+  {
+    using MeshType = Mesh;
+    using ScalarType = Scalar;
+    using RangeType = Math::Vector<ScalarType>;
+    using ElementType = Variational::P1Element<RangeType>;
+  };
 }
 
 #endif

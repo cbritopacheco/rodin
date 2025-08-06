@@ -14,7 +14,9 @@
 
   - @subpage guides-connectivity
 
-  @subsection guides-finite-elements-index Finite elements
+  @subsection guides-fem-index The finite element method
+
+  - @subpage fem-ciarlet
 
   @subsection guides-variational-index Weak formulations and variational problems
 

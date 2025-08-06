@@ -156,7 +156,7 @@ namespace Rodin::Geometry
     : Polytope(0, index, mesh)
   {}
 
-  Eigen::Map<const Math::SpatialVector<Real>> Vertex::getCoordinates() const
+  Eigen::Map<const Math::SpatialPoint> Vertex::getCoordinates() const
   {
     return getMesh().getVertexCoordinates(getIndex());
   }

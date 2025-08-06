@@ -11,8 +11,8 @@
 namespace Rodin::Variational
 {
   template <class Solution, class TrialFES, class TestFES>
-  class BilinearForm<Solution, TrialFES, TestFES, PETSc::Math::Matrix> final
-    : public BilinearFormBase<PETSc::Math::Matrix>
+  class BilinearForm<Solution, TrialFES, TestFES, ::Mat> final
+    : public BilinearFormBase<::Mat>
   {
     using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
 
@@ -30,7 +30,7 @@ namespace Rodin::Variational
         PETSc::Variational::GridFunction<FES>;
 
       /// Type of operator associated to the bilinear form.
-      using OperatorType = PETSc::Math::Matrix;
+      using OperatorType = ::Mat;
 
       using DefaultAssembly =
         typename Assembly::Default<TrialFESContextType, TestFESContextType>
@@ -165,7 +165,7 @@ namespace Rodin::PETSc::Math::Variational
 {
   template <class Solution, class TrialFES, class TestFES>
   using BilinearForm =
-    Rodin::Variational::BilinearForm<Solution, TrialFES, TestFES, PETSc::Math::Matrix>;
+    Rodin::Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>;
 }
 
 #endif

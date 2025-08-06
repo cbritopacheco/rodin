@@ -28,8 +28,8 @@
 namespace Rodin::Variational
 {
   template <class FES>
-  class GridFunction<FES, PETSc::Math::Vector>
-    : public GridFunctionBase<GridFunction<FES, PETSc::Math::Vector>>
+  class GridFunction<FES, ::Vec>
+    : public GridFunctionBase<GridFunction<FES, ::Vec>>
   {
     struct ArrayWrite
     {
@@ -50,7 +50,7 @@ namespace Rodin::Variational
         FES;
 
       using DataType =
-        PETSc::Math::Vector;
+        ::Vec;
 
       using ScalarType =
         PetscScalar;
@@ -683,10 +683,10 @@ namespace Rodin::PETSc::Variational
 {
   template <class FES>
   class GridFunction
-    : public Rodin::Variational::GridFunction<FES, PETSc::Math::Vector>
+    : public Rodin::Variational::GridFunction<FES, ::Vec>
   {
     public:
-      using Parent = Rodin::Variational::GridFunction<FES, PETSc::Math::Vector>;
+      using Parent = Rodin::Variational::GridFunction<FES, ::Vec>;
       using Parent::Parent;
       using Parent::operator[];
       using Parent::operator=;

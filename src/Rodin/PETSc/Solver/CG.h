@@ -19,8 +19,8 @@ namespace Rodin::Solver
   class CG<PETSc::Math::LinearSystem> final : public KSP
   {
     public:
-      using OperatorType = PETSc::Math::Matrix;
-      using VectorType = PETSc::Math::Vector;
+      using OperatorType = ::Mat;
+      using VectorType = ::Vec;
       using ScalarType = PetscScalar;
       using LinearSystemType = PETSc::Math::LinearSystem;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;

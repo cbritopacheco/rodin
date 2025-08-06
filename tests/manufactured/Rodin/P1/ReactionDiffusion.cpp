@@ -223,12 +223,6 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
       ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
-  // INSTANTIATE_TEST_SUITE_P(
-  //   MeshParams32x32,
-  //   ManufacturedReactionDiffusionTest32x32,
-  //   ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
-  // );
-
   INSTANTIATE_TEST_SUITE_P(
     MeshParams64x64,
     ManufacturedReactionDiffusionTest64x64,

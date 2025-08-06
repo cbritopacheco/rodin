@@ -13,7 +13,7 @@ namespace Rodin::Variational
 {
   template <class Scalar>
   constexpr
-  Scalar P1Element<Scalar>::BasisFunction::operator()(const Math::SpatialVector<Real>& r) const
+  Scalar P1Element<Scalar>::BasisFunction::operator()(const Math::SpatialPoint& r) const
   {
     switch (m_g)
     {
@@ -163,7 +163,7 @@ namespace Rodin::Variational
   template <size_t Order>
   constexpr
   Scalar P1Element<Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
-      const Math::SpatialVector<Real>& r) const
+      const Math::SpatialPoint& r) const
   {
     if constexpr (Order == 0)
     {

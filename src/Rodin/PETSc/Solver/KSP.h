@@ -31,8 +31,8 @@ namespace Rodin::Solver
     public:
       using HandleType = ::KSP;
       using ScalarType   = PetscScalar;
-      using OperatorType = PETSc::Math::Matrix;
-      using VectorType   = PETSc::Math::Vector;
+      using OperatorType = ::Mat;
+      using VectorType   = ::Vec;
       using LinearSystemType = PETSc::Math::LinearSystem;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
       using Parent = SolverBase<LinearSystemType>;

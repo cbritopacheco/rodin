@@ -7,6 +7,7 @@
 #include "GenericPolytopeQuadrature.h"
 
 #include "QF1P1.h"
+#include "QF2P1.h"
 #include "GrundmannMoller.h"
 
 namespace Rodin::QF
@@ -36,7 +37,7 @@ namespace Rodin::QF
       }
       case Geometry::Polytope::Type::Quadrilateral:
       {
-        m_qf = std::make_unique<QF1P1>(g);
+        m_qf = std::make_unique<QF2P1>(g);
         break;
       }
       case Geometry::Polytope::Type::Tetrahedron:

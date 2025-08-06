@@ -110,72 +110,72 @@ namespace Rodin::Geometry
             return 0;
           }
 
-          const Math::SpatialVector<Real>& getVertex(size_t i) const
+          const Math::SpatialPoint& getVertex(size_t i) const
           {
             switch (m_g)
             {
               case Type::Point:
               {
-                static thread_local const Math::SpatialVector<Real> s_node{{ 0 }};
+                static thread_local const Math::SpatialPoint s_node{{ 0 }};
                 return s_node;
               }
               case Type::Segment:
               {
-                static thread_local const std::vector<Math::SpatialVector<Real>> s_nodes =
+                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
                 {
-                  Math::SpatialVector<Real>{{ 0 }},
-                  Math::SpatialVector<Real>{{ 1 }}
+                  Math::SpatialPoint{{ 0 }},
+                  Math::SpatialPoint{{ 1 }}
                 };
                 return s_nodes[i];
               }
               case Type::Triangle:
               {
-                static thread_local const std::vector<Math::SpatialVector<Real>> s_nodes =
+                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
                 {
-                  Math::SpatialVector<Real>{{ 0, 0 }},
-                  Math::SpatialVector<Real>{{ 1, 0 }},
-                  Math::SpatialVector<Real>{{ 0, 1 }}
+                  Math::SpatialPoint{{ 0, 0 }},
+                  Math::SpatialPoint{{ 1, 0 }},
+                  Math::SpatialPoint{{ 0, 1 }}
                 };
                 return s_nodes[i];
               }
               case Type::Quadrilateral:
               {
-                static thread_local const std::vector<Math::SpatialVector<Real>> s_nodes =
+                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
                 {
-                  Math::SpatialVector<Real>{{ 0, 0 }},
-                  Math::SpatialVector<Real>{{ 1, 0 }},
-                  Math::SpatialVector<Real>{{ 0, 1 }},
-                  Math::SpatialVector<Real>{{ 1, 1 }}
+                  Math::SpatialPoint{{ 0, 0 }},
+                  Math::SpatialPoint{{ 1, 0 }},
+                  Math::SpatialPoint{{ 0, 1 }},
+                  Math::SpatialPoint{{ 1, 1 }}
                 };
                 return s_nodes[i];
               }
               case Type::Tetrahedron:
               {
-                static thread_local const std::vector<Math::SpatialVector<Real>> s_nodes =
+                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
                 {
-                  Math::SpatialVector<Real>{{ 0, 0, 0 }},
-                  Math::SpatialVector<Real>{{ 1, 0, 0 }},
-                  Math::SpatialVector<Real>{{ 0, 1, 0 }},
-                  Math::SpatialVector<Real>{{ 0, 0, 1 }}
+                  Math::SpatialPoint{{ 0, 0, 0 }},
+                  Math::SpatialPoint{{ 1, 0, 0 }},
+                  Math::SpatialPoint{{ 0, 1, 0 }},
+                  Math::SpatialPoint{{ 0, 0, 1 }}
                 };
                 return s_nodes[i];
               }
               case Type::Wedge:
               {
-                static thread_local const std::vector<Math::SpatialVector<Real>> s_nodes =
+                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
                 {
-                  Math::SpatialVector<Real>{{ 0, 0, 0 }},
-                  Math::SpatialVector<Real>{{ 1, 0, 0 }},
-                  Math::SpatialVector<Real>{{ 0, 1, 0 }},
-                  Math::SpatialVector<Real>{{ 0, 0, 1 }},
-                  Math::SpatialVector<Real>{{ 1, 0, 1 }},
-                  Math::SpatialVector<Real>{{ 0, 1, 1 }}
+                  Math::SpatialPoint{{ 0, 0, 0 }},
+                  Math::SpatialPoint{{ 1, 0, 0 }},
+                  Math::SpatialPoint{{ 0, 1, 0 }},
+                  Math::SpatialPoint{{ 0, 0, 1 }},
+                  Math::SpatialPoint{{ 1, 0, 1 }},
+                  Math::SpatialPoint{{ 0, 1, 1 }}
                 };
                 return s_nodes[i];
               }
             }
             assert(false);
-            static thread_local const Math::SpatialVector<Real> s_null;
+            static thread_local const Math::SpatialPoint s_null;
             return s_null;
           }
 
@@ -377,7 +377,7 @@ namespace Rodin::Geometry
         return getCoordinates()(i);
       }
 
-      Eigen::Map<const Math::SpatialVector<Real>> getCoordinates() const;
+      Eigen::Map<const Math::SpatialPoint> getCoordinates() const;
 
       constexpr
       Type getGeometry() const
