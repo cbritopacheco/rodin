@@ -1127,6 +1127,4 @@ namespace Rodin::Geometry
   };
 }
 
-#include "Mesh.hpp"
-
 #endif

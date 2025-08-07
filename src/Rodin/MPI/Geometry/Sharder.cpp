@@ -1,6 +1,9 @@
 #include <boost/multi_array.hpp>
 #include <cassert>
 
+#include "Rodin/Serialization/BitSet.h"
+#include "Rodin/Serialization/FlatMap.h"
+
 #include "Sharder.h"
 
 namespace Rodin::Geometry

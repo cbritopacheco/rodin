@@ -264,7 +264,6 @@ namespace Rodin::Variational
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
-        const size_t d = polytope.getDimension();
         const auto& geometry = polytope.getGeometry();
         const auto& integrand = getIntegrand().getDerived();
         const auto& f = integrand.getLHS();
@@ -274,7 +273,7 @@ namespace Rodin::Variational
         if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
           fe = P1Element<RHSRangeType>(geometry);
         else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
-          fe = P1Element<RHSRangeType>(d, geometry);
+          fe = P1Element<RHSRangeType>(fes.getVectorDimension(), geometry);
         else
           assert(false);
         if (recompute)

@@ -4,11 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_SUBMESH_H
-#define RODIN_MESH_SUBMESH_H
+#ifndef RODIN_GEOMETRY_SUBMESH_H
+#define RODIN_GEOMETRY_SUBMESH_H
 
-#include <map>
-#include <optional>
 #include <functional>
 #include <boost/bimap.hpp>
 
@@ -26,10 +24,11 @@ namespace Rodin::Geometry
   class SubMeshBase
   {
     public:
-      using PolytopeMap =
-        boost::bimap<
-          boost::bimaps::vector_of<Index>,
-          boost::bimaps::unordered_set_of<Index>>;
+      struct PolytopeMap
+      {
+        std::vector<Index> left;
+        FlatMap<Index, Index> right;
+      };
 
       using Ancestor = std::reference_wrapper<const MeshBase>;
 
@@ -52,7 +51,6 @@ namespace Rodin::Geometry
        */
       virtual const PolytopeMap& getPolytopeMap(size_t d) const = 0;
 
-      inline
       constexpr
       bool operator==(const SubMeshBase& other) const
       {

@@ -17,7 +17,8 @@ namespace Rodin::Geometry
 
   size_t Shard::Builder::getPolytopeCount(size_t d) const
   {
-    return m_s2ps[d].size();
+    assert(m_s2ps[d].left.size() == m_s2ps[d].right.size());
+    return m_s2ps[d].left.size();
   }
 
   Shard::Builder& Shard::Builder::initialize(const Mesh<Context>& parent)
@@ -76,11 +77,12 @@ namespace Rodin::Geometry
       const auto [it, inserted] = m_s2ps[0].right.insert({ parentIdx, childIdx });
       if (inserted) // Vertex was not already in the map
       {
+        m_s2ps[0].left.push_back(parentIdx);
         build.attribute({ 0, childIdx }, parent.getAttribute(0, parentIdx));
         m_flags[0].push_back(flags);
         m_sidx[0] += 1;
       }
-      res = { it->get_left(), inserted };
+      res = { it->second, inserted };
     }
     else
     {
@@ -91,6 +93,7 @@ namespace Rodin::Geometry
       // Add polytope information
       if (inserted) // Polytope was not already in the map
       {
+        m_s2ps[d].left.push_back(parentIdx);
         build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
         m_flags[d].push_back(flags);
         m_sidx[d] += 1;
@@ -100,7 +103,7 @@ namespace Rodin::Geometry
           const auto find = m_s2ps[0].right.find(parentVertex);
           if (find != m_s2ps[0].right.end()) // Vertex is in the map
           {
-            childPolytope.coeffRef(i) = find->get_left();
+            childPolytope.coeffRef(i) = find->second;
           }
           else // Vertex is not in the map
           {
@@ -113,7 +116,7 @@ namespace Rodin::Geometry
         // Add polytope with original geometry and new vertex ordering
         build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
       }
-      res = { it->get_left(), inserted };
+      res = { it->second, inserted };
     }
     m_dimension = std::max(m_dimension, d);
     return res;
@@ -133,17 +136,17 @@ namespace Rodin::Geometry
         const auto& pInc = pconn.getIncidence(d, dp);
         if (pInc.empty())
           continue;
-        Incidence cInc(m_s2ps[d].size());
-        for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
+        Incidence cInc(m_s2ps[d].left.size());
+        for (size_t i = 0; i < m_s2ps[d].left.size(); ++i)
         {
-          const Index cIdx = it->get_left();
-          const Index pIdx = it->get_right();
+          const Index& cIdx = i;
+          const Index& pIdx = m_s2ps[d].left[i];
           cInc[cIdx].reserve(pInc.at(pIdx).size());
           for (Index pNbr : pInc.at(pIdx))
           {
             const auto found = m_s2ps[dp].right.find(pNbr);
             if (found != m_s2ps[dp].right.end())
-              cInc[cIdx].insert_unique(found->get_left());
+              cInc[cIdx].insert_unique(found->second);
           }
         }
         conn.setIncidence({ d, dp }, std::move(cInc));
@@ -151,8 +154,8 @@ namespace Rodin::Geometry
     }
 
     m_build.nodes(m_sidx[0]);
-    for (auto it = m_s2ps[0].left.begin(); it != m_s2ps[0].left.end(); ++it)
-      m_build.vertex(parent.getVertexCoordinates(it->get_right()));
+    for (const Index& pIdx: m_s2ps[0].left)
+      m_build.vertex(parent.getVertexCoordinates(pIdx));
 
     Shard res;
     res.Parent::operator=(m_build.finalize());

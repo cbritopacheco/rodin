@@ -1,15 +1,9 @@
 #ifndef RODIN_GEOMETRY_SHARD_H
 #define RODIN_GEOMETRY_SHARD_H
 
-#include <type_traits>
-#include <boost/bimap/vector_of.hpp>
-
-#include "Rodin/Pair.h"
-#include "Rodin/Serialization/FlatMap.h"
-#include "Rodin/Serialization/BitSet.h"
-
 #include "Rodin/Types.h"
-#include "SubMesh.h"
+
+#include "Rodin/Geometry/Mesh.h"
 
 namespace Rodin::Geometry
 {
@@ -18,10 +12,20 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
-      using PolytopeMap =
-        boost::bimap<
-          boost::bimaps::vector_of<Index>,
-          boost::bimaps::unordered_set_of<Index>>;
+      struct PolytopeMap
+      {
+        friend class boost::serialization::access;
+
+        std::vector<Index> left;
+        FlatMap<Index, Index> right;
+
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int version)
+        {
+          ar & left;
+          ar & right;
+        }
+      };
 
       using ContextType = Rodin::Context::Local;
 
@@ -82,7 +86,7 @@ namespace Rodin::Geometry
             return (m_bits & flag.m_bits).any();
           }
 
-          template<class Archive>
+          template <class Archive>
           void serialize(Archive& ar, const unsigned int version)
           {
             ar & m_bits;

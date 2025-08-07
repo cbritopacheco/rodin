@@ -1,8 +1,6 @@
-#include "Rodin/Alert/MemberFunctionException.h"
+#include "Polytope.h"
 
 #include "SubMesh.h"
-
-#include "Polytope.h"
 
 namespace Rodin::Geometry
 {
@@ -71,7 +69,7 @@ namespace Rodin::Geometry
         // Could not find Polytope(d, i) in the SubMesh to parent Mesh map.
         return {};
       }
-      i = find->get_left();
+      i = find->second;
     }
     return Point(*getPolytope(d, i), p.getReferenceCoordinates(), p.getPhysicalCoordinates());
   }
