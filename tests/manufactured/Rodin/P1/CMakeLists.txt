@@ -41,3 +41,14 @@ target_link_libraries(RodinManufacturedDivergencePoisson
   Rodin::Solver
   )
 gtest_discover_tests(RodinManufacturedDivergencePoisson)
+
+add_executable(RodinManufacturedLinearElasticity LinearElasticity.cpp)
+target_link_libraries(RodinManufacturedLinearElasticity
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedLinearElasticity)
