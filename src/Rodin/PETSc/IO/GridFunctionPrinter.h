@@ -50,19 +50,17 @@ namespace Rodin::IO
           const auto& gf = this->getObject();
           const size_t sz = gf.getSize();
           for (size_t i = 0; i < sz; ++i)
-            os << gf[i] << "\n";
+            os << gf[i] << '\n';
         }
         else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
           const auto& gf = this->getObject();
           const auto& fes = gf.getFiniteElementSpace();
           const auto& shard = fes.getShard();
-          const auto& read = gf.acquire().getArrayRead();
           const size_t sz = shard.getSize();
-          assert(read.raw);
-          assert(read.acquired);
+          gf.acquire();
           for (size_t i = 0; i < sz; ++i)
-            os << read.raw[i] << "\n";
+            os << gf[fes.getGlobalIndex(i)] << '\n';
           gf.flush();
         }
         else

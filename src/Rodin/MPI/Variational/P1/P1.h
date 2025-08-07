@@ -20,10 +20,11 @@ namespace Rodin::Variational
         Geometry::Mesh<Context::MPI>, P1<Range, Geometry::Mesh<Context::MPI>>>
   {
     public:
-      using IndexBimap =
-        boost::bimap<
-          boost::bimaps::vector_of<Index>,
-          boost::bimaps::unordered_set_of<Index>>;
+      struct IndexBimap
+      {
+        std::vector<Index> left;
+        FlatMap<Index, Index> right;
+      };
 
       /// Represents the Context of the P1 space
       using ContextType = Context::MPI;
@@ -171,6 +172,8 @@ namespace Rodin::Variational
           }
         }
 
+        assert(m_owned == dofIdx);
+
         std::vector<boost::mpi::request> irecv;
         for (auto& [owner, requested] : pull)
           irecv.push_back(comm.irecv(owner, 0, pull[owner]));
@@ -195,6 +198,10 @@ namespace Rodin::Variational
             assert(inserted);
           }
         }
+
+        m_local_to_global.left.resize(m_local_to_global.right.size());
+        for (const auto& [global, local] : m_local_to_global.right)
+          m_local_to_global.left[local] = global;
       }
 
       P1(const MeshType& mesh, size_t vdim)
@@ -247,6 +254,8 @@ namespace Rodin::Variational
           }
         }
 
+        assert(m_owned == dofIdx);
+
         std::vector<boost::mpi::request> irecv;
         for (auto& [owner, requested] : pull)
           irecv.push_back(comm.irecv(owner, 0, pull[owner]));
@@ -298,9 +307,9 @@ namespace Rodin::Variational
        * @brief Returns the global distributed index of the given local
        * distributed index.
        */
-      Index getGlobalIndex(Index globalIdx) const
+      Index getGlobalIndex(Index localIdx) const
       {
-        return m_local_to_global.left.at(globalIdx).get_right();
+        return m_local_to_global.left.at(localIdx);
       }
 
       /**
@@ -313,7 +322,7 @@ namespace Rodin::Variational
         if (find == m_local_to_global.right.end())
           return std::nullopt;
         else
-          return find->get_left();
+          return *find;
       }
 
       /**

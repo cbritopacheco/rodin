@@ -34,7 +34,7 @@ int main(int argc, char** argv)
   if (world.rank() == ROOT_RANK)
   {
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 3, 3 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Quadrilateral, { 16, 16 });
     mesh.getConnectivity().compute(2, 2);
     mesh.getConnectivity().compute(1, 2);
     mesh.save("Poisson.mesh");
@@ -44,7 +44,10 @@ int main(int argc, char** argv)
   }
 
   auto mesh = sharder.gather(ROOT_RANK);
-  mesh.save("Poisson." + std::to_string(world.rank()) + ".mesh");
+
+  char filename[32];
+  std::snprintf(filename, sizeof(filename), "mesh.%06d", world.rank());
+  mesh.save(filename);
 
   ScalarFunction f = 1;
 
@@ -59,16 +62,10 @@ int main(int argc, char** argv)
     poisson = Integral(Grad(u), Grad(v))
             - Integral(f, v)
             + DirichletBC(u, Zero());
-    poisson.assemble();
+    CG(poisson).solve();
 
-    MatView(poisson.getLinearSystem().getOperator(), PETSC_VIEWER_STDOUT_WORLD);
-    VecView(poisson.getLinearSystem().getVector(), PETSC_VIEWER_STDOUT_WORLD);
-
-    // CG(poisson).solve();
-
-    // Save solution
-    u.getSolution().save("Poisson." + std::to_string(world.rank()) + ".gf");
-    mesh.save("Poisson." + std::to_string(world.rank()) + ".mesh");
+    std::snprintf(filename, sizeof(filename), "sol.%06d", world.rank());
+    u.getSolution().save(filename);
   }
 
   PetscFinalize();

@@ -39,11 +39,14 @@ namespace Rodin::Assembly
         const auto& shard = mesh.getShard();
         const auto& ctx = mesh.getContext();
         const auto& comm = ctx.getCommunicator();
-        const size_t localSize = fes.getShard().getSize();
         const size_t globalSize = fes.getSize();
 
+        size_t begin, end;
+        fes.getOwnershipRange(begin, end);
+        const size_t ownedSize = end - begin;
+
         PetscErrorCode ierr;
-        ierr = VecSetSizes(res, localSize, globalSize);
+        ierr = VecSetSizes(res, ownedSize, globalSize);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = VecSetFromOptions(res);
@@ -52,9 +55,6 @@ namespace Rodin::Assembly
         ierr = VecZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
-        PetscInt rstart, rend;
-        VecGetOwnershipRange(res, &rstart, &rend);
-
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
@@ -62,18 +62,16 @@ namespace Rodin::Assembly
           for (auto it = seq.getIterator(); it; ++it)
           {
             const size_t d = it->getDimension();
-            const Index i = it->getIndex();
-            if (shard.isGhost(d, i))
+            const Index idx = it->getIndex();
+            if (shard.isGhost(d, idx))
               continue;
             if (attrs.empty() || attrs.count(it->getAttribute()))
             {
               lfi.setPolytope(*it);
-              const auto& dofs = fes.getShard().getDOFs(d, i);
+              const auto& dofs = fes.getShard().getDOFs(d, idx);
               for (PetscInt i = 0; i < dofs.size(); ++i)
               {
                 const Index r = fes.getGlobalIndex(dofs[i]);
-                if (r < rstart || rend <= r)
-                  continue; // Skip dofs that are not owned by this process
                 const PetscScalar v = lfi.integrate(i);
                 ierr = VecSetValue(res, r, v, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
@@ -117,15 +115,24 @@ namespace Rodin::Assembly
       {
         assert(res);
 
-        const auto& testFES  = input.getTestFES();
         const auto& trialFES = input.getTrialFES();
-        const auto& mesh = testFES.getMesh();
+        const auto& testFES  = input.getTestFES();
+        assert(trialFES.getMesh() == testFES.getMesh());
+        const auto& mesh = trialFES.getMesh();
         const auto& shard = mesh.getShard();
         const auto& ctx = mesh.getContext();
         const auto& comm = ctx.getCommunicator();
-        const size_t localRows = testFES.getShard().getSize();
-        const size_t localCols = trialFES.getShard().getSize();
+
+        size_t rbegin, rend;
+        testFES.getOwnershipRange(rbegin, rend);
+        const size_t localRows = rend - rbegin;
+
+        size_t cbegin, cend;
+        trialFES.getOwnershipRange(cbegin, cend);
+        const size_t localCols = cend - cbegin;
+
         const size_t globalRows = testFES.getSize();
+
         const size_t globalCols = trialFES.getSize();
 
         PetscErrorCode ierr;
@@ -145,10 +152,6 @@ namespace Rodin::Assembly
         ierr = MatZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
-        PetscInt rstart, rend;
-        ierr = MatGetOwnershipRange(res, &rstart, &rend);
-        assert(ierr == PETSC_SUCCESS);
-
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
@@ -156,19 +159,17 @@ namespace Rodin::Assembly
           for (auto it = seq.getIterator(); it; ++it)
           {
             const size_t d = it->getDimension();
-            const Index i = it->getIndex();
-            if (shard.isGhost(d, i))
+            const Index idx = it->getIndex();
+            if (shard.isGhost(d, idx))
               continue;
             if (attrs.empty() || attrs.count(it->getAttribute()))
             {
               bfi.setPolytope(*it);
-              const auto& rows = testFES.getShard().getDOFs(d, i);
-              const auto& cols = trialFES.getShard().getDOFs(d, i);
+              const auto& rows = testFES.getShard().getDOFs(d, idx);
+              const auto& cols = trialFES.getShard().getDOFs(d, idx);
               for (Index i = 0; i < rows.size(); ++i)
               {
                 const Index r = testFES.getGlobalIndex(rows[i]);
-                if (r < rstart || rend <= r)
-                  continue; // Skip rows that are not owned by this process
                 for (Index j = 0; j < cols.size(); ++j)
                 {
                   const Index c = trialFES.getGlobalIndex(cols[j]);
