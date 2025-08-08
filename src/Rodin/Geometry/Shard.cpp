@@ -82,12 +82,12 @@ namespace Rodin::Geometry
         m_flags[0].push_back(flags);
         m_sidx[0] += 1;
       }
-      res = { it->second, inserted };
+      res = std::pair<Index, Boolean>{ it->second, inserted };
     }
     else
     {
       const Index childIdx = m_sidx[d];
-      const auto [it, inserted] = m_s2ps[d].right.insert({ parentIdx, childIdx });
+      const auto [it, inserted] = m_s2ps[d].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
       assert(parentPolytope.size());
       IndexArray childPolytope(parentPolytope.size());
       // Add polytope information
@@ -116,7 +116,7 @@ namespace Rodin::Geometry
         // Add polytope with original geometry and new vertex ordering
         build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
       }
-      res = { it->second, inserted };
+      res = std::pair<Index, Boolean>{ it->second, inserted };
     }
     m_dimension = std::max(m_dimension, d);
     return res;
