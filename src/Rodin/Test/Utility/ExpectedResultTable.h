@@ -38,6 +38,7 @@ namespace Rodin::Test::Utility
        Result m_res;
        std::tuple<Parameters...> m_params;
     };
+
     constexpr ExpectedResultTable(
        std::function<Result(Parameters&&...)> model,
        std::function<bool(const Result&, const Result&)> compare =

@@ -483,30 +483,14 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MPIMesh& MPIMesh::load(
-    std::function<boost::filesystem::path(size_t)> filename, IO::FileFormat fmt)
-  {
-    const auto& comm = m_context.getCommunicator();
-    return load(filename(comm.rank()), fmt);
-  }
-
-  MPIMesh& MPIMesh::load(
-    const boost::filesystem::path& filename, IO::FileFormat fmt)
+  MPIMesh& MPIMesh::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
   {
     auto& shard = getShard();
     shard.load(filename, fmt);
     return *this;
   }
 
-  void MPIMesh::save(
-    std::function<boost::filesystem::path(size_t)> filename, IO::FileFormat fmt)
-  {
-    const auto& comm = m_context.getCommunicator();
-    save(filename(comm.rank()), fmt);
-  }
-
-  void MPIMesh::save(
-    const boost::filesystem::path& filename, IO::FileFormat fmt) const
+  void MPIMesh::save(const boost::filesystem::path& filename, IO::FileFormat fmt) const
   {
     const auto& shard = getShard();
     shard.save(filename, fmt);

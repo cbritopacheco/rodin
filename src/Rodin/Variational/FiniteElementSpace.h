@@ -166,8 +166,8 @@ namespace Rodin::Variational
        *
        * @note CRTP function to be overriden in Derived class.
        */
-      template <class T>
-      auto getMapping(const std::pair<size_t, Index>& p, const T& v) const
+      template <class Callable>
+      auto getMapping(const std::pair<size_t, Index>& p, const Callable& v) const
       {
         return static_cast<const Derived&>(*this).getMapping(p, v);
       }

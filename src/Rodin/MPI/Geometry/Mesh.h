@@ -15,6 +15,8 @@
 #include "Rodin/MPI/Context/MPI.h"
 
 #include "Connectivity.h"
+#include <mpi.h>
+#include <type_traits>
 
 namespace Rodin::Geometry
 {
@@ -145,20 +147,25 @@ namespace Rodin::Geometry
       virtual Mesh& setPolytopeTransformation(const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
 
       MPIMesh& load(
-        std::function<boost::filesystem::path(size_t)> filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM);
+        const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM) override;
 
-      MPIMesh& load(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM) override;
+      template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
+      MPIMesh& load(const Filename& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
+      {
+        const auto& comm = m_context.getCommunicator();
+        const boost::filesystem::path& path(filename(comm.rank()));
+        return this->load(path, fmt);
+      }
 
-      void save(
-        std::function<boost::filesystem::path(size_t)> filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM);
+      void save(const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM) const override;
 
-      void save(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM) const override;
+      template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
+      void save(const Filename& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
+      {
+        const auto& comm = m_context.getCommunicator();
+        const boost::filesystem::path& path(filename(comm.rank()));
+        this->save(path, fmt);
+      }
 
       Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index globalIdx) const override;
 

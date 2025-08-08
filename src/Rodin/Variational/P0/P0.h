@@ -94,17 +94,15 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpace<MeshType, P0<RangeType, MeshType>>;
 
-      /**
-       * @brief Mapping for the scalar P0 space.
-       */
-      template <class FunctionDerived>
-      class Mapping : public FiniteElementSpaceMappingBase<Mapping<FunctionDerived>>
+      template <class Callable>
+      class Mapping :
+        public FiniteElementSpaceMappingBase<Mapping<Callable>>
       {
         public:
-          using FunctionType = FunctionBase<FunctionDerived>;
+          using FunctionType = Callable;
 
           Mapping(const Geometry::Polytope& polytope, const FunctionType& v)
-            : m_polytope(polytope), m_trans(m_polytope.getTransformation()), m_v(v.copy())
+            : m_polytope(polytope), m_v(v)
           {}
 
           Mapping(const Mapping&) = default;
@@ -112,35 +110,30 @@ namespace Rodin::Variational
           auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
-            return getFunction()(p);
+            return m_v.get()(p);
           }
 
           template <class T>
           auto operator()(T& res, const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
-            return getFunction()(res, p);
+            return m_v.get()(res, p);
           }
 
           constexpr
           const FunctionType& getFunction() const
           {
-            assert(m_v);
-            return *m_v;
+            return m_v.get();
           }
 
         private:
           Geometry::Polytope m_polytope;
-          std::reference_wrapper<const Geometry::PolytopeTransformation> m_trans;
-          std::unique_ptr<FunctionType> m_v;
+          std::reference_wrapper<const FunctionType> m_v;
       };
 
-      /**
-       * @brief Inverse mapping for the scalar P0 space.
-       */
       template <class CallableType>
-      class InverseMapping
-        : public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
+      class InverseMapping :
+        public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
       {
         public:
           using FunctionType = CallableType;
@@ -159,23 +152,23 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
-            return getFunction()(p.getReferenceCoordinates());
+            return m_v.get()(p.getReferenceCoordinates());
           }
 
           template <class T>
           auto operator()(T& res, const Geometry::Point& p) const
           {
-            return getFunction()(res, p.getReferenceCoordinates());
+            return m_v.get()(res, p.getReferenceCoordinates());
           }
 
           constexpr
           const FunctionType& getFunction() const
           {
-            return m_v;
+            return m_v.get();
           }
 
         private:
-          const FunctionType m_v;
+          std::reference_wrapper<const FunctionType> m_v;
       };
 
       P0(const MeshType& mesh)
