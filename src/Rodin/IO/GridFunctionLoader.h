@@ -7,9 +7,6 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
 #define RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
 
-#include <map>
-#include <optional>
-
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -18,13 +15,15 @@
 
 namespace Rodin::IO
 {
-  template <class FES>
-  class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES>>
+  template <class FES, class Data>
+  class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES, Data>>
   {
     public:
       using FESType = FES;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using DataType = Data;
+
+      using ObjectType = Variational::GridFunction<FESType, Data>;
 
       using Parent = IO::Loader<ObjectType>;
 
@@ -32,7 +31,6 @@ namespace Rodin::IO
         : m_gf(gf)
       {}
 
-    protected:
       ObjectType& getObject() override
       {
         return m_gf.get();
@@ -42,7 +40,5 @@ namespace Rodin::IO
       std::reference_wrapper<ObjectType> m_gf;
   };
 }
-
-#include "GridFunctionLoader.hpp"
 
 #endif

@@ -7,7 +7,11 @@
 #ifndef RODIN_VARIATIONAL_GEOMETRYINDEXED_H
 #define RODIN_VARIATIONAL_GEOMETRYINDEXED_H
 
-#include <boost/serialization/array.hpp>
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <new>
+#include <type_traits>
 #include <boost/serialization/access.hpp>
 
 #include "Polytope.h"
@@ -17,71 +21,95 @@ namespace Rodin::Geometry
   template <class T>
   class GeometryIndexed
   {
+    static constexpr size_t Count = Polytope::Types.size();
+    using Storage = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
+
     friend class boost::serialization::access;
 
-    public:
-      constexpr
-      GeometryIndexed()
-      {
-        for (auto& v : m_map)
-          v = T();
-      }
+  public:
+    GeometryIndexed()
+    {
+      for (size_t i = 0; i < Count; ++i)
+        new (&m_map[i]) T();
+    }
 
-      constexpr
-      GeometryIndexed(std::initializer_list<std::pair<Polytope::Type, T>> l)
-      {
-        // All geometries must be handled exactly once
-        assert(l.size() == Polytope::Types.size());
+    GeometryIndexed(std::initializer_list<std::pair<Polytope::Type, T>> l)
+    {
+      assert(l.size() == Count);
+      for (const auto& [type, value] : l)
+        new (&m_map[static_cast<size_t>(type)]) T(std::move(value));
+    }
 
-        for (const auto& v : l)
-          m_map[static_cast<size_t>(v.first)] = v.second;
-      }
+    GeometryIndexed(const GeometryIndexed& other)
+    {
+      for (size_t i = 0; i < Count; ++i)
+        new (&m_map[i]) T(*other.ptr(i));
+    }
 
-      constexpr
-      GeometryIndexed(const GeometryIndexed&) = default;
+    GeometryIndexed(GeometryIndexed&& other) noexcept(std::is_nothrow_move_constructible<T>::value)
+    {
+      for (size_t i = 0; i < Count; ++i)
+        new (&m_map[i]) T(std::move(*other.ptr(i)));
+    }
 
-      constexpr
-      GeometryIndexed(GeometryIndexed&&) = default;
+    ~GeometryIndexed()
+    {
+      for (size_t i = 0; i < Count; ++i)
+        ptr(i)->~T();
+    }
 
-      constexpr
-      GeometryIndexed& operator=(const GeometryIndexed&) = default;
+    GeometryIndexed& operator=(const GeometryIndexed& other)
+      noexcept(std::is_nothrow_copy_assignable<T>::value)
+    {
+      if (this != &other)
+        for (size_t i = 0; i < Count; ++i)
+          *ptr(i) = *other.ptr(i);
+      return *this;
+    }
 
-      constexpr
-      GeometryIndexed& operator=(GeometryIndexed&&) = default;
+    GeometryIndexed& operator=(GeometryIndexed&& other)
+      noexcept(std::is_nothrow_move_assignable<T>::value)
+    {
+      if (this != &other)
+        for (size_t i = 0; i < Count; ++i)
+          *ptr(i) = std::move(*other.ptr(i));
+      return *this;
+    }
 
-      constexpr
-      T& operator[](Polytope::Type geom)
-      {
-        const size_t g = static_cast<size_t>(geom);
-        assert(g < m_map.size());
-        return m_map[g];
-      }
+    T& operator[](Polytope::Type type)
+    {
+      return *ptr(static_cast<size_t>(type));
+    }
 
-      constexpr
-      const T& operator[](Polytope::Type geom) const
-      {
-        const size_t g = static_cast<size_t>(geom);
-        assert(g < m_map.size());
-        return m_map[g];
-      }
+    const T& operator[](Polytope::Type type) const
+    {
+      return *ptr(static_cast<size_t>(type));
+    }
 
-      constexpr
-      size_t size() const
-      {
-        return Polytope::Types.size();
-      }
+    constexpr size_t size() const { return Count; }
 
-      template<class Archive>
-      void serialize(Archive & ar, const unsigned int version)
-      {
-        ar & boost::serialization::make_array(m_map.data(), m_map.size());
-      }
+    template<class Archive>
+    void serialize(Archive& ar, const unsigned int version)
+    {
+      for (size_t i = 0; i < Count; ++i)
+        ar & *ptr(i);
+    }
 
-    private:
-      std::array<T, Polytope::Types.size()> m_map;
+  private:
+    std::array<Storage, Count> m_map;
+
+    T* ptr(size_t i)
+    {
+      assert(i < Count);
+      return reinterpret_cast<T*>(&m_map[i]);
+    }
+
+    const T* ptr(size_t i) const
+    {
+      assert(i < Count);
+      return reinterpret_cast<const T*>(&m_map[i]);
+    }
   };
 }
 
-
 #endif
-

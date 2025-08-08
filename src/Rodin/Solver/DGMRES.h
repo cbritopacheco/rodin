@@ -13,6 +13,7 @@
 #include <unsupported/Eigen/IterativeSolvers>
 
 #include "Rodin/Configure.h"
+#include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
@@ -28,12 +29,19 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for DGMRES
+   */
+  template <class LinearSystem>
+  DGMRES(Variational::ProblemBase<LinearSystem>&) -> DGMRES<LinearSystem>;
+
+  /**
    * @ingroup DGMRESSpecializations
    * @brief DGMRES for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class DGMRES<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class DGMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -42,13 +50,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      DGMRES(ProblemType& pb)
+      DGMRES(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -62,13 +72,13 @@ namespace Rodin::Solver
 
       ~DGMRES() = default;
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        m_solver.compute(A);
-        x = m_solver.solve(b);
+        m_solver.compute(axb.getOperator());
+        axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      DGMRES& setTolerance(Real tol)
+      DGMRES& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
@@ -88,14 +98,6 @@ namespace Rodin::Solver
     private:
       Eigen::DGMRES<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for DGMRES
-   */
-  template <class Scalar>
-  DGMRES(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> DGMRES<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

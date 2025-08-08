@@ -1,6 +1,8 @@
 #ifndef RODIN_ASSEMBLY_DEFAULT_H
 #define RODIN_ASSEMBLY_DEFAULT_H
 
+#include "Rodin/Configure.h"
+
 #include "Rodin/Context/Local.h"
 
 #include "ForwardDecls.h"

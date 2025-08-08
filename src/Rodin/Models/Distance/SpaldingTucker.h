@@ -21,8 +21,8 @@ namespace Rodin::Models::Distance
   class SpaldingTucker
   {
     public:
-      template <class FES>
-      auto operator()(const Variational::GridFunction<FES>& gf)
+      template <class FES, class Data>
+      auto operator()(const Variational::GridFunction<FES, Data>& gf)
       {
         Variational::GridFunction dist(gf.getFiniteElementSpace());
         Math::SpatialVector<Real> gu;

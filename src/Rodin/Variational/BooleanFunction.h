@@ -9,7 +9,6 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "RangeShape.h"
 
 namespace Rodin::Variational
 {
@@ -67,12 +66,6 @@ namespace Rodin::Variational
       Boolean getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { 1, 1 };
       }
 
       virtual BooleanFunctionBase* copy() const noexcept override = 0;

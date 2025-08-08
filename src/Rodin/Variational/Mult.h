@@ -12,7 +12,7 @@
 
 #include "Rodin/Alert.h"
 #include "Rodin/FormLanguage/Base.h"
-
+#include "Rodin/Math/Traits.h"
 
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -161,40 +161,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, Boolean>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Integer>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Real>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Complex>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Vector>::Value)
-        {
-          return getLHS().getRangeShape().product(getRHS().getRangeShape());
-        }
-        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Matrix>::Value)
-        {
-          return getLHS().getRangeShape().product(getRHS().getRangeShape());
-        }
-        else
-        {
-          assert(false);
-          return { 0, 0 };
-        }
-      }
 
       constexpr
       Mult& traceOf(Geometry::Attribute attr)
@@ -384,40 +350,6 @@ namespace Rodin::Variational
       }
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, Boolean>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Integer>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Real>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Complex>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Vector>::Value)
-        {
-          return getLHS().getRangeShape().product(getRHS().getRangeShape());
-        }
-        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Matrix>::Value)
-        {
-          return getLHS().getRangeShape().product(getRHS().getRangeShape());
-        }
-        else
-        {
-          assert(false);
-          return { 0, 0 };
-        }
-      }
-
-      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
@@ -550,30 +482,6 @@ namespace Rodin::Variational
       const auto& getLeaf() const
       {
         return getLHS().getLeaf();
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
-        {
-          return getLHS().getRangeShape();
-        }
-        else if constexpr (
-            std::is_same_v<LHSRangeType, Math::Vector<ScalarType>> ||
-            std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
-        {
-          return getLHS().getRangeShape().product(getRHS().getRangeShape());
-        }
-        else
-        {
-          assert(false);
-          return { 0, 0 };
-        }
       }
 
       constexpr

@@ -1,18 +1,20 @@
+#include "Rodin/PETSc/Math/LinearSystem.h"
+
 #include "CG.h"
 
 namespace Rodin::Solver
 {
-  CG<::Mat, ::Vec>::CG(ProblemType& pb)
+  CG<PETSc::Math::LinearSystem>::CG(ProblemBaseType& pb)
     : Parent(pb)
   {
-    setType(KSPCG);
+    this->setType(KSPCG);
   }
 
-  CG<::Mat, ::Vec>::CG(const CG& other)
+  CG<PETSc::Math::LinearSystem>::CG(const CG& other)
     : Parent(other)
   {}
 
-  CG<::Mat, ::Vec>::CG(CG&& other)
+  CG<PETSc::Math::LinearSystem>::CG(CG&& other)
     : Parent(std::move(other))
   {}
 }

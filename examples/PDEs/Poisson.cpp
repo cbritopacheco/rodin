@@ -6,8 +6,8 @@
  */
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
-#include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
@@ -17,29 +17,22 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 32, 32 });
-
-  mesh.scale(1. / 31.0);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
   mesh.getConnectivity().compute(1, 2);
 
   P1 vh(mesh);
-  ScalarFunction f =
-    [](const Point& p) {
-      return cos(10 * M_PI * p.x());
-    };
 
   TrialFunction u(vh);
   TestFunction  v(vh);
 
-  // Define problem
+  ScalarFunction f = 1;
+
+  // Apply Dirichlet conditions on the entire boundary.
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, Zero());
-
-  // Solve
   CG(poisson).solve();
 
   // Save solution

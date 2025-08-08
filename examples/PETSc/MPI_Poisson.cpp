@@ -1,14 +1,15 @@
+#include "Rodin/PETSc/Variational/GridFunction.h"
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 
 #include <Rodin/MPI.h>
 #include <Rodin/PETSc.h>
+
+#include <Rodin/Types.h>
+#include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
+#include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
-
-#include <Rodin/MPI/Geometry/Mesh.h>
-#include <Rodin/MPI/Geometry/Sharder.h>
-
-#include <Rodin/Geometry/BalancedCompactPartitioner.h>
 
 namespace mpi = boost::mpi;
 
@@ -16,6 +17,8 @@ using namespace Rodin;
 using namespace Rodin::Math;
 using namespace Rodin::Solver;
 using namespace Rodin::Variational;
+
+static constexpr Index ROOT_RANK = 0;
 
 int main(int argc, char** argv)
 {
@@ -27,84 +30,43 @@ int main(int argc, char** argv)
   ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
   assert(ierr == PETSC_SUCCESS);
 
-  Geometry::MPISharder sharder(mpi);
-  if (world.rank() == 0)
+  Rodin::MPI::Sharder sharder(mpi);
+  if (world.rank() == ROOT_RANK)
   {
-    std::cout << "Sharding\n";
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Quadrilateral, { 16, 16 });
     mesh.getConnectivity().compute(2, 2);
+    mesh.getConnectivity().compute(1, 2);
+    mesh.save("Poisson.mesh");
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
-    sharder.shard(partitioner);
-    std::cout << "Scatter\n";
-    sharder.scatter(0);
+    sharder.shard(partitioner).scatter(ROOT_RANK);
   }
 
-  std::cout << "Gather\n";
-  auto mesh = sharder.gather(0);
-  mesh.getShard().getConnectivity().compute(1, 2);
-  std::cout << "Vertex count: " << mesh.getVertexCount() << "\n";
-  std::cout << "Local count: " << mesh.getShard().getVertexCount() << "\n";
+  auto mesh = sharder.gather(ROOT_RANK);
 
-  Mat a;
-  MatCreate(mpi.getCommunicator(), &a);
-
-  Vec x = PETSC_NULLPTR;
-
-  Vec b;
-  VecCreate(mpi.getCommunicator(), &b);
-
-  LinearSystem axb(a, x, b);
+  char filename[32];
+  std::snprintf(filename, sizeof(filename), "mesh.%06d", world.rank());
+  mesh.save(filename);
 
   ScalarFunction f = 1;
 
   P1 vh(mesh);
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
+  {
+    PETSc::Variational::TrialFunction u(vh);
+    PETSc::Variational::TestFunction  v(vh);
 
-  // Define problem
-  Problem poisson(u, v, axb);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-  poisson.assemble();
+    // Define problem
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+    CG(poisson).solve();
 
-  // LinearForm lf(v, b);
-  // lf = Integral(f, v);
-  // lf.assemble();
-
-  // VecView(b, PETSC_VIEWER_STDOUT_WORLD);
-
-  // BilinearForm bf(u, v, a);
-  // bf = Integral(Grad(u), Grad(v));
-  // bf.assemble();
-
-  // poisson.assemble();
-
-  std::cout << "Matrix :" << "\n";
-  MatView(a, PETSC_VIEWER_STDOUT_WORLD);
-
-  std::cout << "RHS size: " << "\n";
-  VecView(b, PETSC_VIEWER_STDOUT_WORLD);
-
-  CG(poisson).solve();
-
-  std::cout << "x after solve:\n";
-  VecView(x, PETSC_VIEWER_STDOUT_WORLD);
-
-  std::ostringstream mesh_name, sol_name;
-  mesh_name << "mesh." << std::setfill('0') << std::setw(6) << world.rank();
-  sol_name << "sol." << std::setfill('0') << std::setw(6) << world.rank();
-
-  mesh.save(mesh_name.str(), IO::FileFormat::MFEM);
-  u.getSolution().save(sol_name.str(), IO::FileFormat::MFEM);
-
-  // mpiMesh.getShard().save(
-  //     "Gathered" + std::to_string(world.rank()) + ".mesh",
-  //     IO::FileFormat::MEDIT);
-  // mpiMesh.save("Gathered" + std::to_string(world.rank()) + ".mesh", IO::FileFormat::MEDIT);
+    std::snprintf(filename, sizeof(filename), "sol.%06d", world.rank());
+    u.getSolution().save(filename);
+  }
 
   PetscFinalize();
 }

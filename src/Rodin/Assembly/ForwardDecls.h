@@ -21,11 +21,14 @@ namespace Rodin::Assembly
   template <class ... Ts>
   class BilinearFormTupleAssemblyInput;
 
-  template <class Scalar, class FES, class ValueDerived>
+  template <class Scalar, class Solution, class FES, class ValueDerived>
   class DirichletBCAssemblyInput;
 
   template <class ... Ts>
   class Default;
+
+  template <class ... Ts>
+  class Generic;
 }
 
 #ifdef RODIN_USE_OPENMP

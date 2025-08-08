@@ -31,16 +31,16 @@ namespace Rodin::IO
     ENSIGHT6 ///< EnSight6 file format
   };
 
-  template <FileFormat fmt, class Trait>
+  template <FileFormat Fmt, class Trait>
   class MeshLoader;
 
-  template <FileFormat fmt, class Trait>
+  template <FileFormat Fmt, class Trait>
   class MeshPrinter;
 
-  template <FileFormat fmt, class FES>
+  template <FileFormat Fmt, class FES, class Data>
   class GridFunctionLoader;
 
-  template <FileFormat fmt, class FES>
+  template <FileFormat Fmt, class FES, class Data>
   class GridFunctionPrinter;
 
   inline

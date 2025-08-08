@@ -105,6 +105,18 @@ namespace Rodin::FormLanguage
     using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
     using Type = typename RangeOf<ResultType>::Type;
   };
+
+  template <class R>
+  struct Traits<std::function<void(R&, const Geometry::Point&)>>
+  {
+    using RangeType = R;
+  };
+
+  template <class R>
+  struct Traits<std::function<R(const Geometry::Point&)>>
+  {
+    using RangeType = R;
+  };
 }
 
 #endif

@@ -8,8 +8,11 @@
 #define RODIN_SOLVER_PETSC_KSP_H
 
 #include <petscksp.h>
+#include "Rodin/PETSc/Math/LinearSystem.h"
 #include "Rodin/Solver/Solver.h"
 #include "Rodin/PETSc/Object.h"
+#include "Rodin/PETSc/Math/Matrix.h"
+#include "Rodin/PETSc/Math/Vector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::Solver
@@ -22,63 +25,71 @@ namespace Rodin::Solver
    *
    * Combines programmatic configuration with command‐line overrides.
    */
-  class KSP : public SolverBase< ::Mat, ::Vec, PetscScalar>, public PETSc::Object
+  class KSP
+    : public SolverBase<PETSc::Math::LinearSystem>, public PETSc::Object<::KSP>
   {
-  public:
-    using OperatorType = ::Mat;
-    using VectorType   = ::Vec;
-    using ScalarType   = PetscScalar;
-    using Parent       = SolverBase<OperatorType, VectorType, ScalarType>;
-    using ProblemType  = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
-    using Parent::solve;
+    public:
+      using HandleType = ::KSP;
+      using ScalarType   = PetscScalar;
+      using OperatorType = ::Mat;
+      using VectorType   = ::Vec;
+      using LinearSystemType = PETSc::Math::LinearSystem;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      using Parent = SolverBase<LinearSystemType>;
+      using Parent::solve;
+      /**
+       * @brief Construct and create the PETSc KSP object.
+       *
+       * Initializes to PETSC defaults.
+       *
+       * @param pb   Variational problem this solver will solve.
+       * @param comm MPI communicator (default PETSC_COMM_WORLD).
+       */
+      explicit KSP(ProblemBaseType& pb);
 
-    /**
-     * @brief Construct and create the PETSc KSP object.
-     *
-     * Initializes to PETSC defaults.
-     *
-     * @param pb   Variational problem this solver will solve.
-     * @param comm MPI communicator (default PETSC_COMM_WORLD).
-     */
-    explicit KSP(ProblemType& pb);
+      virtual ~KSP() override;
 
-    ~KSP() override;
+      /**
+       * @brief Solve @f$ Ax = b @f$, allocating @f$ x @f$ if null.
+       *
+       * If `x == PETSC_NULL`, automatically `VecDuplicate(b, &x)` and zero it.
+       * Otherwise uses `x` contents as initial guess.
+       *
+       * Applies programmatic settings, then SetFromOptions, then KSPSolve.
+       *
+       * @param A Left‐hand side matrix.
+       * @param x Solution vector (initial guess in; may be PETSC_NULL).
+       * @param b Right‐hand side vector.
+       */
+      void solve(LinearSystemType& b) override;
 
-    ::PetscObject& getHandle() noexcept override;
+      KSP& setType(::KSPType type) noexcept;
 
-    /**
-     * @brief Solve @f$ Ax = b @f$, allocating @f$ x @f$ if null.
-     *
-     * If `x == PETSC_NULL`, automatically `VecDuplicate(b, &x)` and zero it.
-     * Otherwise uses `x` contents as initial guess.
-     *
-     * Applies programmatic settings, then SetFromOptions, then KSPSolve.
-     *
-     * @param A Left‐hand side matrix.
-     * @param x Solution vector (initial guess in; may be PETSC_NULL).
-     * @param b Right‐hand side vector.
-     */
-    void solve(OperatorType& A, VectorType& x, VectorType& b) override;
+      KSP& setTolerances(PetscReal rtol,
+                         PetscReal abstol,
+                         PetscReal dtol,
+                         PetscInt  maxIt) noexcept;
 
-    KSP& setType(::KSPType type) noexcept;
+      KSP& setPreconditioner(OperatorType P) noexcept;
 
-    KSP& setTolerances(PetscReal rtol,
-                       PetscReal abstol,
-                       PetscReal dtol,
-                       PetscInt  maxIt) noexcept;
+      HandleType& getHandle() noexcept override;
 
-    KSP& setPreconditioner(OperatorType P) noexcept;
+      const HandleType& getHandle() const noexcept override;
 
-  private:
-    ::KSP        m_ksp;
-    ::KSPType    m_type;
-    PetscReal    m_rtol,
-                 m_abstol,
-                 m_dtol;
-    PetscInt     m_maxIt;
-    OperatorType m_preconditioner;
+    private:
+      HandleType   m_ksp;
+      ::KSPType    m_type;
+      PetscReal    m_rtol,
+                   m_abstol,
+                   m_dtol;
+      PetscInt     m_maxIt;
+      std::optional<OperatorType> m_preconditioner;
   };
-
 } // namespace Rodin::Solver
+
+namespace Rodin::PETSc::Solver
+{
+  using KSP = Rodin::Solver::KSP;
+}
 
 #endif // RODIN_SOLVER_PETSC_KSP_H

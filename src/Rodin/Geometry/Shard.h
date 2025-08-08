@@ -1,14 +1,9 @@
 #ifndef RODIN_GEOMETRY_SHARD_H
 #define RODIN_GEOMETRY_SHARD_H
 
-#include <type_traits>
-#include <boost/bimap/vector_of.hpp>
+#include "Rodin/Types.h"
 
-#include "Rodin/Pair.h"
-#include "Rodin/Serialization/FlatMap.h"
-#include "Rodin/Serialization/BitSet.h"
-
-#include "SubMesh.h"
+#include "Rodin/Geometry/Mesh.h"
 
 namespace Rodin::Geometry
 {
@@ -17,6 +12,25 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
+      struct PolytopeMap
+      {
+        friend class boost::serialization::access;
+
+        std::vector<Index> left;
+        FlatMap<Index, Index> right;
+
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int version)
+        {
+          ar & left;
+          ar & right;
+        }
+      };
+
+      using ContextType = Rodin::Context::Local;
+
+      using Parent = Mesh<ContextType>;
+
       /**
        * @brief Bitmask enum indicating the state of a polytope in the shard.
        *
@@ -72,7 +86,7 @@ namespace Rodin::Geometry
             return (m_bits & flag.m_bits).any();
           }
 
-          template<class Archive>
+          template <class Archive>
           void serialize(Archive& ar, const unsigned int version)
           {
             ar & m_bits;
@@ -82,15 +96,6 @@ namespace Rodin::Geometry
           BitSet2 m_bits;
       };
 
-      using PolytopeMap =
-        boost::bimap<
-          boost::bimaps::vector_of<Index>,
-          boost::bimaps::unordered_set_of<Index>>;
-
-      using ContextType = Rodin::Context::Local;
-
-      using Parent = Mesh<ContextType>;
-
       class Builder
       {
         public:
@@ -98,9 +103,7 @@ namespace Rodin::Geometry
 
           Builder& initialize(const Mesh<Context>& parent);
 
-          Builder& include(size_t d, Index parentIdx, const Flags& flags = Shard::Flags::None);
-
-          Builder& flag(size_t d, Index parentIdx, const Flags& flags);
+          std::pair<Index, Boolean> include(const std::pair<size_t, Index>& p, const Flags& flags);
 
           Shard finalize();
 
@@ -108,19 +111,40 @@ namespace Rodin::Geometry
 
           size_t getPolytopeCount(size_t d) const;
 
+          FlatMap<Index, Index>& getOwner(size_t d);
+
+          FlatMap<Index, IndexSet>& getHalo(size_t d);
+
+          const FlatMap<Index, Index>& getOwner(size_t d) const;
+
+          const FlatMap<Index, IndexSet>& getHalo(size_t d) const;
+
         private:
-          std::optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
+          Optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
           Mesh<Context>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<PolytopeMap> m_s2ps;
-          std::vector<FlatMap<Index, Flags>> m_flags;
+          std::vector<std::vector<Flags>> m_flags;
+          std::vector<FlatMap<Index, IndexSet>> m_halo;
+          std::vector<FlatMap<Index, Index>> m_owner;
           size_t m_dimension;
       };
 
+      /**
+       * @brief Default constructor.
+       */
       Shard() = default;
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other The shard to copy from
+       */
       Shard(const Shard& other);
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other The shard to move from
+       */
       Shard(Shard&& other);
 
       Shard& operator=(Shard&& other);
@@ -132,28 +156,34 @@ namespace Rodin::Geometry
        */
       bool isGhost(size_t d, Index idx) const;
 
+      /**
+       * @brief Indicates whether the given polytope is owned by the shard.
+       * @param[in] d Dimension of the polytope
+       * @param[in] idx Local index of the polytope
+       */
       bool isOwned(size_t d, Index idx) const;
 
-      Index getGlobalIndex(size_t d, Index idx) const;
+      const FlatMap<Index, Index>& getOwner(size_t d) const;
+
+      const FlatMap<Index, IndexSet>& getHalo(size_t d) const;
 
       const PolytopeMap& getPolytopeMap(size_t d) const;
 
-      template<class Archive>
+      template <class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {
         ar & boost::serialization::base_object<Mesh<Context>>(*this);
         ar & m_s2ps;
         ar & m_flags;
-      }
-
-      const FlatMap<Index, Flags>& getFlags(size_t d) const
-      {
-        return m_flags[d];
+        ar & m_owner;
+        ar & m_halo;
       }
 
     private:
       std::vector<PolytopeMap> m_s2ps;
-      std::vector<FlatMap<Index, Flags>> m_flags;
+      std::vector<std::vector<Flags>> m_flags;
+      std::vector<FlatMap<Index, Index>> m_owner;
+      std::vector<FlatMap<Index, IndexSet>> m_halo;
   };
 }
 

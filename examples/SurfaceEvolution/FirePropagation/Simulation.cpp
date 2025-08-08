@@ -6,7 +6,6 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
-#include <Rodin/Variational/LazyEvaluator.h>
 
 using namespace std;
 using namespace Rodin;
@@ -26,6 +25,7 @@ class Environment
 {
   public:
     using Context = Context::Local;
+    using DataType = Math::Vector<Real>;
     using RealFES = P1<Real>;
     using VectorFES = P1<Math::Vector<Real>>;
 
@@ -188,14 +188,14 @@ class Environment
           return *this;
         }
 
-        const GridFunction<VectorFES>& getDirection() const
+        const GridFunction<VectorFES, DataType>& getDirection() const
         {
           return m_direction;
         }
 
       private:
         std::reference_wrapper<Environment> m_env;
-        GridFunction<VectorFES> m_direction;
+        GridFunction<VectorFES, DataType> m_direction;
     };
 
     Environment(MMG::Mesh& topography, const VegetalStratum& vegetalStratum)
@@ -305,11 +305,11 @@ class Environment
     RealFES m_sfes;
     VectorFES m_vfes;
 
-    GridFunction<VectorFES> m_wind;
+    GridFunction<VectorFES, DataType> m_wind;
 
-    GridFunction<RealFES> m_terrainHeight;
+    GridFunction<RealFES, DataType> m_terrainHeight;
 
-    GridFunction<RealFES> m_curvature;
+    GridFunction<RealFES, DataType> m_curvature;
 
     VegetalStratum m_vegetalStratum;
 
@@ -317,7 +317,7 @@ class Environment
 
     const Real m_gravity;
 
-    GridFunction<RealFES> m_fireDist;
+    GridFunction<RealFES, DataType> m_fireDist;
 
     Real m_elapsedTime;
 };

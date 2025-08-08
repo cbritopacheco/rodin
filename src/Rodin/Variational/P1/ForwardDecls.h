@@ -47,13 +47,6 @@ namespace Rodin::Variational
   class P1;
 
   /**
-   * @ingroup GridFunctionSpecializations
-   * @brief GridFunction on the P1 finite element space.
-   */
-  template <class Range, class Mesh>
-  class GridFunction<P1<Range, Mesh>>;
-
-  /**
    * @brief Alias for P1Element<Real>
    */
   using RealP1Element = P1Element<Real>;
@@ -64,6 +57,8 @@ namespace Rodin::Variational
    * @brief Alias for P1Element<Math::Vector<Real>>
    */
   using VectorP1Element = P1Element<Math::Vector<Real>>;
+
+  using RealVectorP1Element = P1Element<Math::Vector<Real>>;
 }
 
 #endif

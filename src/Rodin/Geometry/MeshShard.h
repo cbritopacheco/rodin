@@ -28,7 +28,7 @@ namespace Rodin::Geometry
           Shard finalize();
 
         private:
-          std::optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
+          Optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
           Mesh<Context>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<boost::bimap<Index, Index>> m_s2ps;

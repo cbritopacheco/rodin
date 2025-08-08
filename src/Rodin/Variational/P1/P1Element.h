@@ -7,13 +7,14 @@
 #ifndef RODIN_VARIATIONAL_P1_P1ELEMENT_H
 #define RODIN_VARIATIONAL_P1_P1ELEMENT_H
 
-/**
- * @ingroup RodinDirectives
- * @brief Indicates the maximum vector dimension a P1Element
- */
-#define RODIN_P1_MAX_VECTOR_DIMENSION 16
+#include <boost/serialization/access.hpp>
 
+#include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
+
+#include "Rodin/Math/Traits.h"
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Connectivity.h"
@@ -24,6 +25,7 @@
 #include "Rodin/Variational/FiniteElementSpace.h"
 
 #include "ForwardDecls.h"
+#include <utility>
 
 namespace Rodin::FormLanguage
 {
@@ -33,6 +35,7 @@ namespace Rodin::FormLanguage
   template <class Range>
   struct Traits<Variational::P1Element<Range>>
   {
+    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
     using RangeType = Range;
   };
 }
@@ -49,19 +52,23 @@ namespace Rodin::Variational
    * @ingroup FiniteElements
    * @ingroup P1ElementSpecializations
    * @brief Degree 1 scalar Lagrange element
-   * @see @m_defelement{Lagrange,https://defelement.com/elements/lagrange.html}
+   * @tparam Scalar Type of scalar range (e.g., Real, Complex)
    */
-  template <>
-  class P1Element<Real> final : public FiniteElementBase<P1Element<Real>>
+  template <class Scalar>
+  class P1Element final : public FiniteElementBase<P1Element<Scalar>>
   {
     using G = Geometry::Polytope::Type;
 
     public:
+      friend class boost::serialization::access;
+
       /// Parent class
-      using Parent = FiniteElementBase<P1Element<Real>>;
+      using Parent = FiniteElementBase<P1Element<Scalar>>;
+
+      using ScalarType = Scalar;
 
       /// Type of range
-      using RangeType = Real;
+      using RangeType = ScalarType;
 
       /**
        * @brief Represents a linear form of a P1 scalar element.
@@ -72,275 +79,21 @@ namespace Rodin::Variational
           constexpr
           LinearForm(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
-          {
-            assert(i < Geometry::Polytope::getVertexCount(g));
-          }
-
-          constexpr
-          LinearForm(const LinearForm&) = default;
-
-          constexpr
-          LinearForm(LinearForm&&) = default;
-
-          constexpr
-          LinearForm& operator=(const LinearForm&) = default;
-
-          constexpr
-          LinearForm& operator=(LinearForm&&) = default;
-
-          template <class T>
-          constexpr
-          auto operator()(const T& v) const
-          {
-            return v(s_nodes[m_g].col(m_i));
-          }
-
-        private:
-          size_t m_i;
-          Geometry::Polytope::Type m_g;
-      };
-
-      /**
-       * @brief Represents a basis function of a P1 scalar element.
-       */
-      class BasisFunction
-      {
-        public:
-          using ReturnType = Real;
-
-          constexpr
-          BasisFunction(size_t i, Geometry::Polytope::Type g)
-            : m_i(i), m_g(g)
-          {
-            assert(i < Geometry::Polytope::getVertexCount(g));
-          }
-
-          constexpr
-          BasisFunction(const BasisFunction&) = default;
-
-          constexpr
-          BasisFunction& operator=(const BasisFunction&) = default;
-
-          constexpr
-          BasisFunction& operator=(BasisFunction&&) = default;
-
-          Real operator()(const Math::SpatialVector<Real>& r) const;
-
-        private:
-          size_t m_i;
-          Geometry::Polytope::Type m_g;
-      };
-
-      /**
-       * @brief Represents a gradient basis function of a P1 scalar element.
-       */
-      class GradientFunction
-      {
-        public:
-          constexpr
-          GradientFunction(size_t i, Geometry::Polytope::Type g)
-            : m_i(i), m_g(g)
-          {
-            assert(i < Geometry::Polytope::getVertexCount(g));
-          }
-
-          constexpr
-          GradientFunction(const GradientFunction&) = default;
-
-          constexpr
-          GradientFunction& operator=(const GradientFunction&) = default;
-
-          constexpr
-          GradientFunction& operator=(GradientFunction&&) = default;
-
-          Math::SpatialVector<Real> operator()(const Math::SpatialVector<Real>& r) const
-          {
-            Math::SpatialVector<Real> out;
-            operator()(out, r);
-            return out;
-          }
-
-          void operator()(Math::SpatialVector<Real>& out, const Math::SpatialVector<Real>& r) const;
-
-        private:
-          size_t m_i;
-          Geometry::Polytope::Type m_g;
-      };
-
-      class DerivativeFunction
-      {
-        public:
-          using ReturnType = Real;
-
-          constexpr
-          DerivativeFunction(size_t d, size_t local, Geometry::Polytope::Type g)
-            : m_d(d), m_local(local), m_g(g)
           {}
 
           constexpr
-          DerivativeFunction(const DerivativeFunction&) = default;
-
-          constexpr
-          DerivativeFunction& operator=(const DerivativeFunction&) = default;
-
-          constexpr
-          DerivativeFunction& operator=(DerivativeFunction&&) = default;
-
-          ReturnType operator()(const Math::SpatialVector<Real>& r) const
-          {
-            ReturnType out;
-            operator()(out, r);
-            return out;
-          }
-
-          void operator()(ReturnType& out, const Math::SpatialVector<Real>& r) const;
-
-        private:
-          size_t m_d;
-          size_t m_local;
-          Geometry::Polytope::Type m_g;
-      };
-
-      constexpr
-      P1Element() = default;
-
-      constexpr
-      P1Element(Geometry::Polytope::Type geometry)
-        : Parent(geometry)
-      {}
-
-      constexpr
-      P1Element(const P1Element& other)
-        : Parent(other)
-      {}
-
-      constexpr
-      P1Element(P1Element&& other)
-        : Parent(std::move(other))
-      {}
-
-      constexpr
-      P1Element& operator=(const P1Element& other)
-      {
-        Parent::operator=(other);
-        return *this;
-      }
-
-      constexpr
-      P1Element& operator=(P1Element&& other)
-      {
-        Parent::operator=(std::move(other));
-        return *this;
-      }
-
-      /**
-       * @brief Gets the number of degrees of freedom in the finite element.
-       * @returns Number of degrees of freedom
-       */
-      constexpr
-      size_t getCount() const
-      {
-        return Geometry::Polytope::getVertexCount(getGeometry());
-      }
-
-      constexpr
-      const Math::PointMatrix& getNodes() const
-      {
-        return s_nodes[getGeometry()];
-      }
-
-      const auto& getLinearForm(size_t i) const
-      {
-        assert(i < getCount());
-        return s_ls[getGeometry()][i];
-      }
-
-      const auto& getBasis(size_t i) const
-      {
-        assert(i < getCount());
-        return s_basis[getGeometry()][i];
-      }
-
-      const auto& getGradient(size_t i) const
-      {
-        assert(i < getCount());
-        return s_gradient[getGeometry()][i];
-      }
-
-      constexpr
-      size_t getOrder() const
-      {
-        switch (getGeometry())
-        {
-          case Geometry::Polytope::Type::Point:
-            return 0;
-          case Geometry::Polytope::Type::Segment:
-          case Geometry::Polytope::Type::Triangle:
-          case Geometry::Polytope::Type::Tetrahedron:
-            return 1;
-          case Geometry::Polytope::Type::Quadrilateral:
-          case Geometry::Polytope::Type::Wedge:
-            return 2;
-        }
-        assert(false);
-        return 0;
-      }
-
-    private:
-      static const Geometry::GeometryIndexed<Math::PointMatrix> s_nodes;
-      static const Geometry::GeometryIndexed<std::vector<LinearForm>> s_ls;
-      static const Geometry::GeometryIndexed<std::vector<BasisFunction>> s_basis;
-      static const Geometry::GeometryIndexed<std::vector<GradientFunction>> s_gradient;
-      static const Geometry::GeometryIndexed<std::vector<std::vector<DerivativeFunction>>> s_ds;
-  };
-
-  template <>
-  class P1Element<Complex> final : public FiniteElementBase<P1Element<Complex>>
-  {
-    using G = Geometry::Polytope::Type;
-
-    public:
-      /// Parent class
-      using Parent = FiniteElementBase<P1Element<Complex>>;
-
-      /// Type of range
-      using RangeType = Complex;
-
-      /**
-       * @brief Represents a linear form of a P1 scalar element.
-       */
-      class LinearForm
-      {
-        public:
-          constexpr
-          LinearForm(size_t i, Geometry::Polytope::Type g)
-            : m_i(i), m_g(g)
-          {
-            assert(i < Geometry::Polytope::getVertexCount(g));
-          }
-
-          constexpr
           LinearForm(const LinearForm&) = default;
-
-          constexpr
-          LinearForm(LinearForm&&) = default;
-
-          constexpr
-          LinearForm& operator=(const LinearForm&) = default;
-
-          constexpr
-          LinearForm& operator=(LinearForm&&) = default;
 
           template <class T>
           constexpr
           auto operator()(const T& v) const
           {
-            return Math::conj(v(s_nodes[m_g].col(m_i)));
+            return v(Geometry::Polytope::Traits(m_g).getVertex(m_i));
           }
 
         private:
-          size_t m_i;
-          Geometry::Polytope::Type m_g;
+          const size_t m_i;
+          const Geometry::Polytope::Type m_g;
       };
 
       /**
@@ -349,71 +102,109 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
-          using ReturnType = RangeType;
+          using ReturnType = Scalar;
+
+          template <size_t Order>
+          class DerivativeFunction
+          {
+            public:
+              constexpr
+              DerivativeFunction(size_t i, size_t local, Geometry::Polytope::Type g)
+                : m_i(i), m_local(local), m_g(g)
+              {}
+
+              constexpr
+              DerivativeFunction(const DerivativeFunction&) = default;
+
+              constexpr
+              void operator()(ReturnType& out, const Math::SpatialPoint& r) const
+              {
+                out = this->operator()(r);
+              }
+
+              constexpr
+              ReturnType operator()(const Math::SpatialPoint& r) const;
+
+            private:
+              const size_t m_i;
+              const size_t m_local;
+              const Geometry::Polytope::Type m_g;
+          };
+
+          class GradientFunction
+          {
+            public:
+              using ReturnType = Math::SpatialVector<ScalarType>;
+
+              constexpr
+              GradientFunction(size_t local, Geometry::Polytope::Type g)
+                : m_local(local), m_g(g)
+              {}
+
+              constexpr
+              GradientFunction(const GradientFunction&) = default;
+
+              constexpr
+              void operator()(ReturnType& out, const Math::SpatialPoint& r) const
+              {
+                const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
+                out.resize(dim);
+                for (size_t i = 0; i < dim; ++i)
+                  out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
+              }
+
+              constexpr
+              ReturnType operator()(const Math::SpatialPoint& r) const
+              {
+                ReturnType res;
+                this->operator()(res, r);
+                return res;
+              }
+
+            private:
+              const size_t m_local;
+              const Geometry::Polytope::Type m_g;
+          };
 
           constexpr
-          BasisFunction(size_t i, Geometry::Polytope::Type g)
-            : m_i(i), m_g(g)
-          {
-            assert(i < Geometry::Polytope::getVertexCount(g));
-          }
+          BasisFunction(size_t local, Geometry::Polytope::Type g)
+            : m_local(local), m_g(g)
+          {}
 
           constexpr
           BasisFunction(const BasisFunction&) = default;
 
           constexpr
-          BasisFunction& operator=(const BasisFunction&) = default;
-
-          constexpr
-          BasisFunction& operator=(BasisFunction&&) = default;
-
-          ReturnType operator()(const Math::SpatialVector<Real>& r) const;
-
-        private:
-          size_t m_i;
-          Geometry::Polytope::Type m_g;
-      };
-
-      /**
-       * @brief Represents a gradient basis function of a P1 scalar element.
-       */
-      class GradientFunction
-      {
-        public:
-          using ReturnType = Math::SpatialVector<Complex>;
-
-          constexpr
-          GradientFunction(size_t i, Geometry::Polytope::Type g)
-            : m_i(i), m_g(g)
+          void operator()(ReturnType& out, const Math::SpatialPoint& r) const
           {
-            assert(i < Geometry::Polytope::getVertexCount(g));
+            out = this->operator()(r);
           }
 
           constexpr
-          GradientFunction(const GradientFunction&) = default;
+          ReturnType operator()(const Math::SpatialPoint& r) const;
 
+          template <size_t Order>
           constexpr
-          GradientFunction& operator=(const GradientFunction&) = default;
-
-          constexpr
-          GradientFunction& operator=(GradientFunction&&) = default;
-
-          ReturnType operator()(const Math::SpatialVector<Real>& r) const
+          DerivativeFunction<Order> getDerivative(size_t i) const
           {
-            ReturnType out;
-            operator()(out, r);
-            return out;
+            return DerivativeFunction<Order>(i, m_local, m_g);
           }
 
-          void operator()(ReturnType& out, const Math::SpatialVector<Real>& r) const;
+          constexpr
+          GradientFunction getGradient() const
+          {
+            return GradientFunction(m_local, m_g);
+          }
 
         private:
-          size_t m_i;
-          Geometry::Polytope::Type m_g;
+          const size_t m_local;
+          const Geometry::Polytope::Type m_g;
       };
 
       constexpr
-      P1Element() = default;
+      P1Element()
+        : Parent(Geometry::Polytope::Type::Point)
+      {}
 
       constexpr
       P1Element(Geometry::Polytope::Type geometry)
@@ -451,37 +242,31 @@ namespace Rodin::Variational
       constexpr
       size_t getCount() const
       {
-        return Geometry::Polytope::getVertexCount(getGeometry());
+        return Geometry::Polytope::Traits(this->getGeometry()).getVertexCount();
       }
 
       constexpr
-      const Math::PointMatrix& getNodes() const
+      const Math::SpatialPoint& getNode(size_t i) const
       {
-        return s_nodes[getGeometry()];
+        return Geometry::Polytope::Traits(this->getGeometry()).getVertex(i);
       }
 
-      const auto& getLinearForm(size_t i) const
+      constexpr
+      LinearForm getLinearForm(size_t i) const
       {
-        assert(i < getCount());
-        return s_ls[getGeometry()][i];
+        return LinearForm(i, this->getGeometry());
       }
 
-      const auto& getBasis(size_t i) const
+      constexpr
+      BasisFunction getBasis(size_t i) const
       {
-        assert(i < getCount());
-        return s_basis[getGeometry()][i];
-      }
-
-      const auto& getGradient(size_t i) const
-      {
-        assert(i < getCount());
-        return s_gradient[getGeometry()][i];
+        return BasisFunction(i, this->getGeometry());
       }
 
       constexpr
       size_t getOrder() const
       {
-        switch (getGeometry())
+        switch (this->getGeometry())
         {
           case Geometry::Polytope::Type::Point:
             return 0;
@@ -497,46 +282,42 @@ namespace Rodin::Variational
         return 0;
       }
 
-    private:
-      static const Geometry::GeometryIndexed<Math::PointMatrix> s_nodes;
-      static const Geometry::GeometryIndexed<std::vector<LinearForm>> s_ls;
-      static const Geometry::GeometryIndexed<std::vector<BasisFunction>> s_basis;
-      static const Geometry::GeometryIndexed<std::vector<GradientFunction>> s_gradient;
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & boost::serialization::base_object<Parent>(*this);
+      }
   };
 
   /**
    * @ingroup FiniteElements
    * @ingroup P1ElementSpecializations
    * @brief Degree 1 vector Lagrange element
-   *
-   * @see @m_defelement{Vector Lagrange,https://defelement.com/elements/vector-lagrange.html}
    */
-  template <>
-  class P1Element<Math::Vector<Real>> final : public FiniteElementBase<P1Element<Math::Vector<Real>>>
+  template <class Scalar>
+  class P1Element<Math::Vector<Scalar>> final
+    : public FiniteElementBase<P1Element<Math::Vector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
     public:
+      friend class boost::serialization::access;
+
       /// Parent class
-      using Parent = FiniteElementBase<P1Element>;
+      using Parent = FiniteElementBase<P1Element<Math::Vector<Scalar>>>;
+
+      using ScalarType = Scalar;
 
       /// Type of range
-      using RangeType = Math::Vector<Real>;
+      using RangeType = Math::Vector<Scalar>;
 
       class LinearForm
       {
         public:
           constexpr
-          LinearForm()
-            : m_vdim(0), m_i(0), m_g(Geometry::Polytope::Type::Point)
+          LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
+            : m_vdim(vdim), m_local(local), m_g(g)
           {}
-
-          constexpr
-          LinearForm(size_t vdim, size_t i, Geometry::Polytope::Type g)
-            : m_vdim(vdim), m_i(i), m_g(g)
-          {
-            assert(m_vdim > 0);
-          }
 
           constexpr
           LinearForm(const LinearForm&) = default;
@@ -544,39 +325,137 @@ namespace Rodin::Variational
           constexpr
           LinearForm(LinearForm&&) = default;
 
-          constexpr
-          LinearForm& operator=(const LinearForm&) = default;
-
-          constexpr
-          LinearForm& operator=(LinearForm&&) = default;
-
           template <class T>
           constexpr
           auto operator()(const T& v) const
           {
-            return v(s_nodes[m_vdim][m_g].col(m_i)).coeff(static_cast<size_t>(m_i % m_vdim));
+            return v(P1Element<ScalarType>(m_g).getNode(m_local / m_vdim)).coeff(m_local % m_vdim);
           }
 
         private:
-          size_t m_vdim;
-          size_t m_i;
-          Geometry::Polytope::Type m_g;
+          const size_t m_vdim;
+          const size_t m_local;
+          const Geometry::Polytope::Type m_g;
       };
 
       class BasisFunction
       {
         public:
-          constexpr
-          BasisFunction()
-            : m_vdim(0), m_i(0), m_g(Geometry::Polytope::Type::Point)
-          {}
+          using ReturnType = Math::Vector<ScalarType>;
+
+          /**
+           * @brief Represents a derivative function of a P1 vector element.
+           * @tparam Order Order of the derivative (0 for function, 1 for first
+           * derivative, etc.)
+           */
+          template <size_t Order>
+          class DerivativeFunction
+          {
+            public:
+              /**
+               * @brief Constructs a derivative function for the P1 element.
+               * @param i Index of the vector component
+               * @param j Index of the space variable
+               * @param local Local index of the basis function
+               * @param g Geometry type of the polytope
+               */
+              constexpr
+              DerivativeFunction(size_t i, size_t j, size_t vdim, size_t local, Geometry::Polytope::Type g)
+                : m_i(i), m_j(j), m_vdim(vdim), m_local(local), m_g(g)
+              {}
+
+              constexpr
+              DerivativeFunction(const DerivativeFunction&) = default;
+
+              constexpr
+              void operator()(Scalar& out, const Math::SpatialPoint& r) const
+              {
+                out = this->operator()(r);
+              }
+
+              constexpr
+              Scalar operator()(const Math::SpatialPoint& rc) const
+              {
+                if constexpr (Order == 0)
+                {
+                  if (m_i == m_local % m_vdim)
+                  {
+                    return P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
+                  }
+                  else
+                  {
+                    return 0;
+                  }
+                }
+                else if constexpr (Order == 1)
+                {
+                  if (m_i == m_local % m_vdim)
+                  {
+                    return P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim).template getDerivative<1>(m_j)(rc);
+                  }
+                  else
+                  {
+                    return 0;
+                  }
+                }
+                else
+                {
+                  return 0;
+                }
+              }
+
+            private:
+              const size_t m_i, m_j;
+              const size_t m_vdim;
+              const size_t m_local;
+              const Geometry::Polytope::Type m_g;
+          };
+
+          class JacobianFunction
+          {
+            public:
+              using ReturnType = Math::PointMatrix;
+
+              constexpr
+              JacobianFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
+                : m_vdim(vdim), m_local(local), m_g(g)
+              {}
+
+              constexpr
+              JacobianFunction(const JacobianFunction&) = default;
+
+              constexpr
+              JacobianFunction(JacobianFunction&&) = default;
+
+              constexpr
+              void operator()(ReturnType& out, const Math::SpatialPoint& r) const
+              {
+                const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
+                out.resize(m_vdim, dim);
+                for (size_t i = 0; i < m_vdim; ++i)
+                {
+                  for (size_t j = 0; j < dim; ++j)
+                    out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
+                }
+              }
+
+              ReturnType operator()(const Math::SpatialPoint& r) const
+              {
+                ReturnType res;
+                this->operator()(res, r);
+                return res;
+              }
+
+            private:
+              const size_t m_vdim;
+              const size_t m_local;
+              const Geometry::Polytope::Type m_g;
+          };
 
           constexpr
-          BasisFunction(size_t vdim, size_t i, Geometry::Polytope::Type g)
-            : m_vdim(vdim), m_i(i), m_g(g)
-          {
-            assert(m_vdim > 0);
-          }
+          BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
+            : m_vdim(vdim), m_local(local), m_g(g)
+          {}
 
           constexpr
           BasisFunction(const BasisFunction&) = default;
@@ -584,143 +463,103 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          constexpr
-          BasisFunction& operator=(const BasisFunction&) = default;
-
-          constexpr
-          BasisFunction& operator=(BasisFunction&&) = default;
-
-          Math::Vector<Real> operator()(const Math::SpatialVector<Real>& r) const
+          ReturnType operator()(const Math::SpatialPoint& r) const
           {
-            Math::Vector<Real> res;
+            Math::Vector<ScalarType> res;
             operator()(res, r);
             return res;
           }
 
-          void operator()(Math::Vector<Real>& out, const Math::SpatialVector<Real>& r) const;
-
-        private:
-          size_t m_vdim;
-          size_t m_i;
-          Geometry::Polytope::Type m_g;
-      };
-
-      class JacobianFunction
-      {
-        public:
           constexpr
-          JacobianFunction()
-            : m_vdim(0), m_i(0), m_g(Geometry::Polytope::Type::Point)
-          {}
-
-          constexpr
-          JacobianFunction(size_t vdim, size_t i, Geometry::Polytope::Type g)
-            : m_vdim(vdim), m_i(i), m_g(g)
+          void operator()(ReturnType& out, const Math::SpatialPoint& rc) const
           {
-            assert(m_vdim > 0);
+            out.resize(m_vdim);
+            out.setZero();
+            out.coeffRef(m_local % m_vdim) = P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
+          }
+
+          template <size_t Order>
+          constexpr
+          DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
+          {
+            return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
           }
 
           constexpr
-          JacobianFunction(const JacobianFunction&) = default;
-
-          constexpr
-          JacobianFunction(JacobianFunction&&) = default;
-
-          constexpr
-          JacobianFunction& operator=(const JacobianFunction&) = default;
-
-          constexpr
-          JacobianFunction& operator=(JacobianFunction&&) = default;
-
-          Math::SpatialMatrix<Real> operator()(const Math::SpatialVector<Real>& rc) const
+          JacobianFunction getJacobian() const
           {
-            Math::SpatialMatrix<Real> res;
-            operator()(res, rc);
-            return res;
+            return JacobianFunction(m_vdim, m_local, m_g);
           }
 
-          void operator()(Math::SpatialMatrix<Real>& out, const Math::SpatialVector<Real>& rc) const;
-
         private:
-          size_t m_vdim;
-          size_t m_i;
-          Geometry::Polytope::Type m_g;
+          const size_t m_vdim;
+          const size_t m_local;
+          const Geometry::Polytope::Type m_g;
       };
 
-      P1Element() = default;
+      P1Element()
+        : Parent(Geometry::Polytope::Type::Point), m_vdim(0)
+      {}
 
       constexpr
       P1Element(size_t vdim, Geometry::Polytope::Type geometry)
-        : Parent(geometry),
-          m_vdim(vdim)
+        : Parent(geometry), m_vdim(vdim)
       {}
 
       constexpr
       P1Element(const P1Element& other)
-        : Parent(other),
-          m_vdim(other.m_vdim)
+        : Parent(other)
       {}
 
       constexpr
       P1Element(P1Element&& other)
-        : Parent(std::move(other)),
-          m_vdim(other.m_vdim)
+        : Parent(std::move(other))
       {}
 
-      P1Element& operator=(P1Element&& other)
+      constexpr
+      P1Element& operator=(const P1Element& other)
       {
-        if (this != &other)
-        {
-          Parent::operator=(std::move(other));
-          m_vdim = std::move(other.m_vdim);
-        }
+        Parent::operator=(other);
+        m_vdim = other.m_vdim;
         return *this;
       }
 
-      P1Element& operator=(const P1Element& other)
+      constexpr
+      P1Element& operator=(P1Element&& other)
       {
-        if (this != &other)
-        {
-          Parent::operator=(other);
-          m_vdim = other.m_vdim;
-        }
+        Parent::operator=(std::move(other));
+        m_vdim = std::exchange(other.m_vdim, 0);
         return *this;
       }
 
       constexpr
       size_t getCount() const
       {
-        return Geometry::Polytope::getVertexCount(getGeometry()) * m_vdim;
+        return m_vdim * Geometry::Polytope::Traits(this->getGeometry()).getVertexCount();
       }
 
       constexpr
-      const Math::PointMatrix& getNodes() const
+      LinearForm getLinearForm(size_t local) const
       {
-        return s_nodes[m_vdim][getGeometry()];
+        return LinearForm(m_vdim, local, this->getGeometry());
       }
 
-      const auto& getLinearForm(size_t i) const
+      constexpr
+      BasisFunction getBasis(size_t local) const
       {
-        assert(i < getCount());
-        return s_ls[m_vdim][getGeometry()][i];
+        return BasisFunction(m_vdim, local, this->getGeometry());
       }
 
-      const auto& getBasis(size_t i) const
+      constexpr
+      const Math::SpatialPoint& getNode(size_t local) const
       {
-        assert(i < getCount());
-        return s_basis[m_vdim][getGeometry()][i];
-      }
-
-      const auto& getJacobian(size_t i) const
-      {
-        assert(i < getCount());
-        return s_jacobian[m_vdim][getGeometry()][i];
+        return P1Element<ScalarType>(this->getGeometry()).getNode(local / m_vdim);
       }
 
       constexpr
       size_t getOrder() const
       {
-        switch (getGeometry())
+        switch (this->getGeometry())
         {
           case Geometry::Polytope::Type::Point:
             return 0;
@@ -736,35 +575,18 @@ namespace Rodin::Variational
         return 0;
       }
 
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & boost::serialization::base_object<Parent>(*this);
+        ar & m_vdim;
+      }
+
     private:
-      static const
-      std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION> s_nodes;
-
-      static const
-      std::array<Geometry::GeometryIndexed<std::vector<LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION> s_ls;
-
-      static const
-      std::array<Geometry::GeometryIndexed<std::vector<BasisFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION> s_basis;
-
-      static const
-      std::array<Geometry::GeometryIndexed<std::vector<JacobianFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION> s_jacobian;
-
       size_t m_vdim;
   };
-
-  namespace Internal
-  {
-    std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
-    initVectorP1Nodes();
-
-    std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION> initVectorP1LinearForms();
-
-    std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::BasisFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION>
-    initVectorP1Basis();
-
-    std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::JacobianFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION>
-    initVectorP1Jacobian();
-  }
 }
+
+#include "P1Element.hpp"
 
 #endif

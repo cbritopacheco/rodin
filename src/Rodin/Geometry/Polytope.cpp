@@ -49,28 +49,6 @@ namespace Rodin::Geometry
     return os;
   }
 
-  const GeometryIndexed<Math::PointMatrix> Polytope::s_vertices =
-  {
-    { Polytope::Type::Point,
-      Math::PointMatrix{{0}} },
-    { Polytope::Type::Segment,
-      Math::PointMatrix{{0, 1}} },
-    { Polytope::Type::Triangle,
-      Math::PointMatrix{{0, 1, 0},
-                        {0, 0, 1}} },
-    { Polytope::Type::Quadrilateral,
-      Math::PointMatrix{{0, 1, 0, 1},
-                        {0, 0, 1, 1}} },
-    { Polytope::Type::Tetrahedron,
-      Math::PointMatrix{{0, 1, 0, 0},
-                        {0, 0, 1, 0},
-                        {0, 0, 0, 1}} },
-    { Polytope::Type::Wedge,
-      Math::PointMatrix{{0, 1, 0, 0, 1, 0},
-                        {0, 0, 1, 0, 0, 1},
-                        {0, 0, 0, 1, 1, 1}} },
-  };
-
   bool operator==(const Polytope& lhs, const Polytope& rhs)
   {
     bool res = true;
@@ -86,9 +64,6 @@ namespace Rodin::Geometry
   }
 
   // ---- Polytope -----------------------------------------------------------
-  Polytope::Polytope(size_t dimension, Index index, const MeshBase& mesh)
-    : m_dimension(dimension), m_index(index), m_mesh(mesh)
-  {}
 
   Attribute Polytope::getAttribute() const
   {
@@ -105,11 +80,6 @@ namespace Rodin::Geometry
     const auto& vertices = getVertices();
     return VertexIterator(
         getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
-  }
-
-  const Math::PointMatrix& Polytope::getVertices(Polytope::Type g)
-  {
-    return s_vertices[g];
   }
 
   const Array<Index>& Polytope::getVertices() const
@@ -140,7 +110,7 @@ namespace Rodin::Geometry
     QF::GenericPolytopeQuadrature qf(getTransformation().getJacobianOrder(), getGeometry());
     for (size_t i = 0; i < qf.getSize(); i++)
     {
-      const Geometry::Point p(*this, getTransformation(), std::cref(qf.getPoint(i)));
+      const Geometry::Point p(*this, qf.getPoint(i));
       res += qf.getWeight(i) * p.getDistortion();
     }
     return res;
@@ -186,7 +156,7 @@ namespace Rodin::Geometry
     : Polytope(0, index, mesh)
   {}
 
-  Eigen::Map<const Math::SpatialVector<Real>> Vertex::getCoordinates() const
+  Eigen::Map<const Math::SpatialPoint> Vertex::getCoordinates() const
   {
     return getMesh().getVertexCoordinates(getIndex());
   }

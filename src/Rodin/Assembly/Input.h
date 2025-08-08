@@ -7,6 +7,8 @@
 #ifndef RODIN_ASSEMBLY_INPUT_H
 #define RODIN_ASSEMBLY_INPUT_H
 
+#include <functional>
+
 #include "Rodin/Math.h"
 #include "Rodin/Tuple.h"
 
@@ -16,6 +18,7 @@
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
+#include "Rodin/Variational/LinearFormIntegrator.h"
 
 namespace Rodin::Assembly
 {
@@ -200,17 +203,15 @@ namespace Rodin::Assembly
       const Tuple<Ts...> m_ins;
   };
 
-  template <class Scalar, class FES, class Value>
+  template <class Scalar, class Solution, class FES, class Value>
   class DirichletBCAssemblyInput
   {
     public:
-      using TrialFunctionType = Variational::TrialFunction<FES>;
-
       using ValueType = Value;
 
-      using OperandType = Variational::TrialFunction<FES>;
+      using OperandType = Variational::TrialFunction<Solution, FES>;
 
-      using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
+      using DirichletBCType = Variational::DirichletBC<OperandType, ValueType>;
 
       DirichletBCAssemblyInput(
           const OperandType& u, const ValueType& value, const FlatSet<Geometry::Attribute>& essBdr)
@@ -236,6 +237,43 @@ namespace Rodin::Assembly
       std::reference_wrapper<const OperandType> m_u;
       std::reference_wrapper<const ValueType> m_value;
       std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;
+  };
+
+  template <class ProblemBody, class TrialFunction, class TestFunction>
+  class ProblemAssemblyInput
+  {
+    public:
+      using ProblemBodyType = ProblemBody;
+
+      /**
+       * @param[in,out] body Reference to the problem body.
+       */
+      ProblemAssemblyInput(
+          ProblemBody& body, const TrialFunction& trialFunction, const TestFunction& testFunction)
+        : m_body(body),
+          m_trialFunction(trialFunction),
+          m_testFunction(testFunction)
+      {}
+
+      ProblemBody& getProblemBody() const
+      {
+        return m_body.get();
+      }
+
+      const TrialFunction& getTrialFunction() const
+      {
+        return m_trialFunction.get();
+      }
+
+      const TestFunction& getTestFunction() const
+      {
+        return m_testFunction.get();
+      }
+
+    private:
+      std::reference_wrapper<ProblemBody> m_body;
+      std::reference_wrapper<const TrialFunction> m_trialFunction;
+      std::reference_wrapper<const TestFunction> m_testFunction;
   };
 }
 

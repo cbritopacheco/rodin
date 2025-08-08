@@ -1,5 +1,5 @@
-add_executable(PETSc_Poisson Poisson.cpp)
-target_link_libraries(PETSc_Poisson
+add_executable(PETSc_Seq_Poisson Seq_Poisson.cpp)
+target_link_libraries(PETSc_Seq_Poisson
   PUBLIC
   Rodin::Geometry
   Rodin::Solver

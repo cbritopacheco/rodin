@@ -7,9 +7,6 @@
 #ifndef RODIN_SOLVER_IDRSTABL_H
 #define RODIN_SOLVER_IDRSTABL_H
 
-#include <optional>
-#include <functional>
-
 #include <unsupported/Eigen/IterativeSolvers>
 
 #include "Rodin/Configure.h"
@@ -28,12 +25,19 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for IDRSTABL
+   */
+  template <class LinearSystem>
+  IDRSTABL(Variational::ProblemBase<LinearSystem>&) -> IDRSTABL<LinearSystem>;
+
+  /**
    * @ingroup IDRSTABLSpecializations
    * @brief IDRSTABL for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class IDRSTABL<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class IDRSTABL<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -42,13 +46,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      IDRSTABL(ProblemType& pb)
+      IDRSTABL(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -62,15 +68,15 @@ namespace Rodin::Solver
 
       ~IDRSTABL() = default;
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        m_solver.compute(A);
-        x = m_solver.solve(b);
+        m_solver.compute(axb.getOperator());
+        axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      IDRSTABL& setMaxIterations(size_t it)
+      IDRSTABL& setMaxIterations(size_t maxIt)
       {
-        m_solver.setMaxIterations(it);
+        m_solver.setMaxIterations(maxIt);
         return *this;
       }
 
@@ -80,7 +86,7 @@ namespace Rodin::Solver
         return *this;
       }
 
-      bool success() const
+      Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
@@ -93,14 +99,6 @@ namespace Rodin::Solver
     private:
       Eigen::IDRSTABL<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for IDRSTABL
-   */
-  template <class Scalar>
-  IDRSTABL(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> IDRSTABL<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

@@ -66,12 +66,6 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return getOperand().getRangeShape();
-      }
-
-      constexpr
       const OperandType& getOperand() const
       {
         assert(m_op);
@@ -167,12 +161,6 @@ namespace Rodin::Variational
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return getOperand().getRangeShape();
       }
 
       constexpr

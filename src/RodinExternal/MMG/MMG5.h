@@ -50,7 +50,7 @@ namespace Rodin::External::MMG
       /**
        * @internal
        */
-      static MMG5_pMesh createMesh(size_t version, size_t dim, std::optional<size_t> spaceDim = {});
+      static MMG5_pMesh createMesh(size_t version, size_t dim, Optional<size_t> spaceDim = {});
 
       /**
        * @internal
@@ -344,7 +344,7 @@ namespace Rodin::External::MMG
       MMG5& setParameters(MMG5_pMesh mesh);
 
     private:
-      std::optional<Real> m_hmin, m_hmax, m_hausd, m_hgrad;
+      Optional<Real> m_hmin, m_hmax, m_hausd, m_hgrad;
       bool m_ridgeDetection;
   };
 }

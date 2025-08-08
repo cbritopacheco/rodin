@@ -7,30 +7,25 @@
 #include <cassert>
 #include <petsc.h>
 
-#include "Rodin/PETSc/Math/LinearSystem.h"
-#include "Rodin/PETSc/FormLanguage/Traits.h"
-
 #include "Rodin/Variational/Problem.h"
+
+#include "Rodin/PETSc/Math/LinearSystem.h"
 
 #include "KSP.h"
 
 namespace Rodin::Solver
 {
-  KSP::KSP(ProblemType& pb)
+  KSP::KSP(ProblemBaseType& pb)
     : Parent(pb),
       m_ksp(PETSC_NULLPTR),
       m_type(PETSC_NULLPTR),
       m_rtol(PETSC_DECIDE),
       m_abstol(PETSC_DECIDE),
       m_dtol(PETSC_DECIDE),
-      m_maxIt(PETSC_DECIDE),
-      m_preconditioner(PETSC_NULLPTR)
+      m_maxIt(PETSC_DECIDE)
   {
     PetscErrorCode ierr;
-    MPI_Comm comm;
-    ierr = PetscObjectGetComm(
-        reinterpret_cast<PetscObject>(pb.getLinearSystem().getOperator()), &comm);
-    ierr = KSPCreate(comm, &m_ksp);
+    ierr = KSPCreate(pb.getLinearSystem().getCommunicator(), &m_ksp);
     assert(ierr == PETSC_SUCCESS);
   }
 
@@ -40,54 +35,49 @@ namespace Rodin::Solver
     {
       PetscErrorCode ierr = KSPDestroy(&m_ksp);
       assert(ierr == PETSC_SUCCESS);
-      m_ksp = nullptr;
+      m_ksp = PETSC_NULLPTR;
     }
   }
 
-  ::PetscObject& KSP::getHandle() noexcept
+  ::KSP& KSP::getHandle() noexcept
   {
-    return reinterpret_cast<::PetscObject&>(m_ksp);
+    return m_ksp;
   }
 
-  void KSP::solve(OperatorType& A, VectorType& x, VectorType& b)
+  const ::KSP& KSP::getHandle() const noexcept
   {
+    return m_ksp;
+  }
+
+  void KSP::solve(PETSc::Math::LinearSystem& axb)
+  {
+    auto& [a, x, b] = axb;
+
     PetscErrorCode ierr;
 
-    if (x)
-    {
-      // use nonzero initial guess
-      ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
-      assert(ierr == PETSC_SUCCESS);
-    }
-    else
-    {
-      ierr = VecDuplicate(b, &x);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = VecZeroEntries(x);
-      assert(ierr == PETSC_SUCCESS);
-    }
+    ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
+    assert(ierr == PETSC_SUCCESS);
 
-    assert(x);
-
-    // configure solver
     ierr = KSPSetType(m_ksp, m_type);
     assert(ierr == PETSC_SUCCESS);
 
     ierr = KSPSetTolerances(m_ksp, m_rtol, m_abstol, m_dtol, m_maxIt);
     assert(ierr == PETSC_SUCCESS);
 
-    // set operators (use A as both if P not set)
     if (m_preconditioner)
-      ierr = KSPSetOperators(m_ksp, A, m_preconditioner);
+    {
+      ierr = KSPSetOperators(m_ksp, a, *m_preconditioner);
+      assert(ierr == PETSC_SUCCESS);
+    }
     else
-      ierr = KSPSetOperators(m_ksp, A, A);
-    assert(ierr == PETSC_SUCCESS);
+    {
+      ierr = KSPSetOperators(m_ksp, a, a);
+      assert(ierr == PETSC_SUCCESS);
+    }
 
-    // allow CLI overrides
     ierr = KSPSetFromOptions(m_ksp);
     assert(ierr == PETSC_SUCCESS);
 
-    // solve
     ierr = KSPSolve(m_ksp, b, x);
     assert(ierr == PETSC_SUCCESS);
   }
@@ -98,15 +88,13 @@ namespace Rodin::Solver
     return *this;
   }
 
-  KSP& KSP::setTolerances(PetscReal rtol,
-                          PetscReal abstol,
-                          PetscReal dtol,
-                          PetscInt  maxIt) noexcept
+  KSP& KSP::setTolerances(
+      PetscReal rtol, PetscReal abstol, PetscReal dtol, PetscInt  maxIt) noexcept
   {
-    m_rtol   = rtol;
+    m_rtol = rtol;
     m_abstol = abstol;
-    m_dtol   = dtol;
-    m_maxIt  = maxIt;
+    m_dtol = dtol;
+    m_maxIt = maxIt;
     return *this;
   }
 

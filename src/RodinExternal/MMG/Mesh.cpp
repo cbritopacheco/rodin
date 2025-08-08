@@ -37,7 +37,7 @@ namespace Rodin::External::MMG
   }
 
   void Mesh::save(
-     const boost::filesystem::path& filename, IO::FileFormat fmt, size_t precison) const
+     const boost::filesystem::path& filename, IO::FileFormat fmt) const
   {
     if (fmt == IO::FileFormat::MEDIT)
     {
@@ -48,13 +48,12 @@ namespace Rodin::External::MMG
           << "Failed to open " << filename << " for writing."
           << Alert::Raise;
       }
-      os.precision(precison);
       MMG::MeshPrinter printer(*this);
       printer.print(os);
     }
     else
     {
-      Parent::save(filename, fmt, precison);
+      Parent::save(filename, fmt);
     }
   }
 

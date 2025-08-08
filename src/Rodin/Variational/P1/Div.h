@@ -10,16 +10,14 @@
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Div.h"
 
-#include "GridFunction.h"
-
 namespace Rodin::FormLanguage
 {
-  template <class Scalar, class Mesh>
-  struct Traits<Variational::Div<Variational::GridFunction<Variational::P1<Math::Vector<Scalar>, Mesh>>>>
+  template <class Scalar, class Data, class Mesh>
+  struct Traits<Variational::Div<Variational::GridFunction<Variational::P1<Math::Vector<Scalar>, Mesh>, Data>>>
   {
     using FESType = Variational::P1<Math::Vector<Scalar>, Mesh>;
     using ScalarType = Scalar;
-    using OperandType = Variational::GridFunction<Variational::P1<Math::Vector<Scalar>, Mesh>>;
+    using OperandType = Variational::GridFunction<Variational::P1<Math::Vector<Scalar>, Mesh>, Data>;
   };
 
   template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -41,11 +39,11 @@ namespace Rodin::Variational
    * @ingroup DivSpecializations
    * @brief Divient of a P1 GridFunction
    */
-  template <class Scalar, class Mesh>
-  class Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>>> final
+  template <class Scalar, class Data, class Mesh>
+  class Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>> final
     : public DivBase<
-        GridFunction<P1<Math::Vector<Scalar>, Mesh>>,
-        Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>>>>
+        GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>,
+        Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>>
   {
     public:
       using FESType = Variational::P1<Math::Vector<Scalar>, Mesh>;
@@ -55,7 +53,7 @@ namespace Rodin::Variational
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       /// Operand type
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       /// Parent class
       using Parent = DivBase<OperandType, Div<OperandType>>;
@@ -144,12 +142,17 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          SpatialMatrixType jacobian(vdim, d);
+          SpatialMatrixType jacobian(d, d);
           out = 0;
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            fe.getJacobian(local)(jacobian, rc);
-            out += gf.getValue(fes.getGlobalIndex({d, i}, local)).coeff(local % vdim) * (jacobian * p.getJacobianInverse()).trace();
+            for (size_t j = 0; j < d; j++)
+            {
+              const auto basis = fe.getBasis(local);
+              for (size_t k = 0; k < d; k++)
+                jacobian(j, k) = basis.template getDerivative<1>(j, k)(rc);
+            }
+            out += gf[fes.getGlobalIndex({d, i}, local)] * (jacobian * p.getJacobianInverse()).trace();
           }
         }
       }
@@ -164,8 +167,9 @@ namespace Rodin::Variational
    * @ingroup RodinCTAD
    * @brief CTAD for Div of a P1 GridFunction
    */
-  template <class ... Ts>
-  Div(const GridFunction<P1<Ts...>>&) -> Div<GridFunction<P1<Ts...>>>;
+  template <class Scalar, class Data, class Mesh>
+  Div(const GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>&)
+    -> Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>;
 
   /**
    * @ingroup DivSpecializations
@@ -200,7 +204,8 @@ namespace Rodin::Variational
 
       Div(Div&& other)
         : Parent(std::move(other)),
-          m_u(std::move(other.m_u))
+          m_u(std::move(other.m_u)),
+          m_p(std::exchange(other.m_p, nullptr))
       {}
 
       constexpr
@@ -216,12 +221,6 @@ namespace Rodin::Variational
       }
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return { 1, 1 };
-      }
-
-      constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         return getOperand().getDOFs(polytope);
@@ -229,24 +228,42 @@ namespace Rodin::Variational
 
       const Geometry::Point& getPoint() const
       {
-        return m_p.value().get();
+        assert(m_p);
+        return *m_p;
       }
 
       Div& setPoint(const Geometry::Point& p)
       {
-        m_p = p;
+        if (m_p == &p)
+          return *this;
+        m_p = &p;
+        const auto& polytope = p.getPolytope();
+        const auto& rc = p.getReferenceCoordinates();
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const size_t count = fe.getCount();
+        const size_t vdim = fes.getVectorDimension();
+        m_jacobian.resize(count);
+        for (size_t local = 0; local < count; local++)
+        {
+          m_jacobian[local].resize(vdim, d);
+          const auto basis = fe.getBasis(local);
+          for (size_t i = 0; i < vdim; i++)
+          {
+            for (size_t j = 0; j < d; j++)
+              m_jacobian[local](i, j) = basis.template getDerivative<1>(i, j)(rc);
+          }
+        }
         return *this;
       }
 
       constexpr
       ScalarType getBasis(size_t local) const
       {
-        const auto& p = m_p.value().get();
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
-        const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        const auto& rc = p.getReferenceCoordinates();
-        return (fe.getJacobian(local)(rc) * p.getJacobianInverse()).trace();
+        const auto& p = this->getPoint();
+        return (m_jacobian[local] * p.getJacobianInverse()).trace();
       }
 
       constexpr
@@ -263,7 +280,9 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const OperandType> m_u;
 
-      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      std::vector<Math::SpatialMatrix<ScalarType>> m_jacobian;
+
+      const Geometry::Point* m_p;
   };
 
   template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>

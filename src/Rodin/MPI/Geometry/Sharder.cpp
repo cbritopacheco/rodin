@@ -1,19 +1,23 @@
 #include <boost/multi_array.hpp>
+#include <cassert>
+
+#include "Rodin/Serialization/BitSet.h"
+#include "Rodin/Serialization/FlatMap.h"
 
 #include "Sharder.h"
 
 namespace Rodin::Geometry
 {
-  MPISharder::Sharder(const Context::MPI& context)
+  Sharder<Context::MPI>::Sharder(const Context::MPI& context)
     : m_context(context)
   {}
 
-  MPIMesh MPISharder::distribute(Partitioner& p, int root)
+  MPIMesh Sharder<Context::MPI>::distribute(Partitioner& p, int root)
   {
     return shard(p).scatter(root).gather(root);
   }
 
-  MPISharder& Sharder<Context::MPI>::shard(Partitioner& partitioner)
+  Sharder<Context::MPI>& Sharder<Context::MPI>::shard(Partitioner& partitioner)
   {
     m_shards.clear();
     const auto& mesh = partitioner.getMesh();
@@ -23,62 +27,99 @@ namespace Rodin::Geometry
     assert(m_context.getCommunicator().size() >= 0);
     assert(partitioner.getCount() == static_cast<size_t>(m_context.getCommunicator().size()));
     assert(numShards > 0);
-
     std::vector<Shard::Builder> sbs(numShards);
     for (auto& sb : sbs)
       sb.initialize(mesh);
+    std::vector<std::vector<Index>> owner(cellDim + 1);     // Owner of each polytope
+    std::vector<std::vector<Index>> local(cellDim + 1);     // Owning shard index for each polytope
+    std::vector<std::vector<IndexSet>> halo(cellDim + 1);   // Halo information for each polytope
+    std::vector<std::vector<uint8_t>> visited(cellDim + 1); // Visited polytopes
 
-    // Determine ownership of polytopes
-    std::vector<std::vector<Boolean>> owned;
-    owned.resize(cellDim + 1);
     for (size_t d = 0; d < cellDim + 1; d++)
-      owned[d].resize(mesh.getPolytopeCount(d), false);
-    for (Index i = 0; i < mesh.getCellCount(); i++)
     {
-      const size_t partition = partitioner.getPartition(i);
+      owner[d].resize(mesh.getPolytopeCount(d));
+      local[d].resize(mesh.getPolytopeCount(d));
+      halo[d].resize(mesh.getPolytopeCount(d));
+      visited[d].resize(mesh.getPolytopeCount(d), false);
+    }
 
+    for (Index cellIdx = 0; cellIdx < mesh.getCellCount(); cellIdx++)
+    {
+      const size_t partition = partitioner.getPartition(cellIdx);
       for (size_t d = 0; d <= cellDim - 1; d++)
       {
-        for (const Index idx : conn.getIncidence({ cellDim, d }, i))
+        const auto& inc = conn.getIncidence(cellDim, d);
+        if (inc.empty())
+          continue;
+        for (const Index& idx : inc.at(cellIdx))
         {
-          if (owned[d][idx])
+          if (visited[d][idx])
           {
-            sbs[partition].include(d, idx, Shard::Flags::None);
+            if (owner[d][idx] != partition)
+              halo[d][idx].insert(partition);
+            const auto [localIdx, inserted] =
+              sbs[partition].include({ d, idx }, Shard::Flags::None);
+            if (inserted)
+              sbs[partition].getOwner(d)[localIdx] = owner[d][idx];
           }
           else
           {
-            sbs[partition].include(d, idx, Shard::Flags::Owned);
-            owned[d][idx] = true;
+            const auto [localIdx, inserted] =
+              sbs[partition].include({ d, idx }, Shard::Flags::Owned);
+            assert(inserted);
+            owner[d][idx] = partition;
+            local[d][idx] = localIdx;
+            visited[d][idx] = true;
           }
         }
       }
-
-      assert(!owned[cellDim][i]);
-      sbs[partition].include(cellDim, i, Shard::Flags::Owned);
-      owned[cellDim][i] = true;
+      assert(!visited[cellDim][cellIdx]);
+      const auto [localIdx, inserted] =
+        sbs[partition].include({ cellDim, cellIdx }, Shard::Flags::Owned);
+      assert(inserted);
+      owner[cellDim][cellIdx] = partition;
+      local[cellDim][cellIdx] = localIdx;
+      visited[cellDim][cellIdx] = true;
     }
 
-    // Determine ghost polytopes
-    for (Index i = 0; i < mesh.getCellCount(); i++)
+    for (Index cellIdx = 0; cellIdx < mesh.getCellCount(); cellIdx++)
     {
-      const size_t partition = partitioner.getPartition(i);
-
-      for (const Index nbr : conn.getIncidence({ cellDim, cellDim }, i))
+      const size_t partition = partitioner.getPartition(cellIdx);
+      for (const Index& nbr : conn.getIncidence({ cellDim, cellDim }, cellIdx))
       {
         if (partition == partitioner.getPartition(nbr))
           continue;
-
         for (size_t d = 0; d <= cellDim - 1; d++)
         {
-          for (const Index idx : conn.getIncidence({ cellDim, d }, nbr))
+          const auto& inc = conn.getIncidence(cellDim, d);
+          if (inc.empty())
+            continue;
+          for (const Index idx : inc.at(nbr))
           {
             auto find = sbs[partition].getPolytopeMap(d).right.find(idx);
             if (find == sbs[partition].getPolytopeMap(d).right.end())
-              sbs[partition].include(d, idx, Shard::Flags::Ghost);
+            {
+              halo[d][idx].insert(partition);
+              const auto [localIdx, inserted] =
+                sbs[partition].include({ d, idx }, Shard::Flags::Ghost);
+              if (inserted)
+                sbs[partition].getOwner(d)[localIdx] = owner[d][idx];
+            }
           }
         }
-        sbs[partition].include(cellDim, nbr, Shard::Flags::Ghost);
+        halo[cellDim][nbr].insert(partition);
+        const auto [localIdx, inserted] =
+          sbs[partition].include({ cellDim, nbr }, Shard::Flags::Ghost);
+        if (inserted)
+          sbs[partition].getOwner(cellDim)[localIdx] = owner[cellDim][nbr];
       }
+    }
+
+    // Now move the halo information into the shards
+    for (size_t d = 0; d < cellDim + 1; d++)
+    {
+      for (size_t i = 0; i < mesh.getPolytopeCount(d); i++)
+        sbs[owner[d][i]].getHalo(d).insert({ local[d][i], std::move(halo[d][i]) });
     }
 
     m_shards.resize(numShards);
@@ -88,7 +129,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MPISharder& MPISharder::scatter(int root)
+  Sharder<Context::MPI>& Sharder<Context::MPI>::scatter(int root)
   {
     const auto& comm = m_context.getCommunicator();
     const int tag = m_context.getEnvironment().collectives_tag();
@@ -105,7 +146,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MPIMesh MPISharder::gather(int root)
+  MPIMesh Sharder<Context::MPI>::gather(int root)
   {
     const auto& comm = m_context.getCommunicator();
     const int tag = m_context.getEnvironment().collectives_tag();
@@ -124,19 +165,19 @@ namespace Rodin::Geometry
     }
   }
 
-  Shard& MPISharder::getShard(size_t i)
+  Shard& Sharder<Context::MPI>::getShard(size_t i)
   {
     assert(i < m_shards.size());
     return m_shards[i];
   }
 
-  const Shard& MPISharder::getShard(size_t i) const
+  const Shard& Sharder<Context::MPI>::getShard(size_t i) const
   {
     assert(i < m_shards.size());
     return m_shards[i];
   }
 
-  const Context::MPI& MPISharder::getContext() const
+  const Context::MPI& Sharder<Context::MPI>::getContext() const
   {
     return m_context;
   }

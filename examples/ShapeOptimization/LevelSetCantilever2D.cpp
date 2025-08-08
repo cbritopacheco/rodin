@@ -5,9 +5,11 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Variational/LinearElasticity.h>
+
 #include <RodinExternal/MMG.h>
 
 using namespace Rodin;
@@ -37,7 +39,8 @@ const constexpr Real dt = 4 * (hmax - hmin);
 static constexpr double alpha = dt;
 
 // Compliance
-inline Real compliance(const GridFunction<FES>& w)
+template <class Data>
+Real compliance(const GridFunction<FES, Data>& w)
 {
   auto& vh = w.getFiniteElementSpace();
   TrialFunction u(vh);

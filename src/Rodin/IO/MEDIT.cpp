@@ -30,7 +30,7 @@ namespace Rodin::IO
   void MeshLoader<FileFormat::MEDIT, Context::Local>::readVersion(std::istream& is)
   {
     auto line = skipEmptyLines(is);
-    std::optional<unsigned int> version = MEDIT::ParseMeshVersionFormatted()(line.begin(), line.end());
+    Optional<unsigned int> version = MEDIT::ParseMeshVersionFormatted()(line.begin(), line.end());
     if (version) // Version was on the same line
     {
       m_version = *version;
@@ -52,7 +52,7 @@ namespace Rodin::IO
   void MeshLoader<FileFormat::MEDIT, Context::Local>::readDimension(std::istream& is)
   {
     auto line = skipEmptyLines(is);
-    std::optional<unsigned int> dimension = MEDIT::ParseDimension()(line.begin(), line.end());
+    Optional<unsigned int> dimension = MEDIT::ParseDimension()(line.begin(), line.end());
     if (dimension) // Version was on the same line
       m_spaceDimension = *dimension;
     else // Version is not on the same line
@@ -321,7 +321,7 @@ namespace Rodin::IO
               break;
             }
           }
-          const size_t d = Geometry::Polytope::getGeometryDimension(g);
+          const size_t d = Geometry::Polytope::Traits(g).getDimension();
           if (d <= mesh.getDimension())
           {
             os << mesh.getPolytopeCount(g) << '\n';

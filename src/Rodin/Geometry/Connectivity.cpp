@@ -56,7 +56,7 @@ namespace Rodin::Geometry
     m_gcount[Geometry::Polytope::Type::Point] = count;
     for (size_t i = 0; i < count; i++)
     {
-      auto p = m_index[0].right.insert({ IndexArray{{ i }}, i });
+      const auto p = m_index[0].right.insert({ IndexArray{{ i }}, i });
       assert(p.second);
     }
     return *this;
@@ -66,10 +66,10 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>::polytope(Polytope::Type t, const Array<Index>& in)
   {
     assert(in.size() > 0);
-    const size_t d = Polytope::getGeometryDimension(t);
+    const size_t d = Polytope::Traits(t).getDimension();
     assert(d > 0);
     assert(d <= m_maximalDimension);
-    auto [it, inserted] = m_index[d].right.insert({ in, m_count[d]});
+    const auto [it, inserted] = m_index[d].right.insert({ in, m_count[d]});
     if (inserted)
     {
       m_connectivity[d][0].emplace_back().insert_unique(it->get_right().begin(), it->get_right().end());
@@ -85,10 +85,10 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>::polytope(Polytope::Type t, Array<Index>&& in)
   {
     assert(in.size() > 0);
-    const size_t d = Polytope::getGeometryDimension(t);
+    const size_t d = Polytope::Traits(t).getDimension();
     assert(d > 0);
     assert(d <= m_maximalDimension);
-    auto [it, inserted] = m_index[d].right.insert({ std::move(in), m_count[d] });
+    const auto [it, inserted] = m_index[d].right.insert({ std::move(in), m_count[d] });
     if (inserted)
     {
       m_connectivity[d][0].emplace_back().insert_unique(it->get_right().begin(), it->get_right().end());
@@ -106,12 +106,12 @@ namespace Rodin::Geometry
     return m_index[dim];
   }
 
-  const std::optional<Index>
+  const Optional<Index>
   Connectivity<Context::Local>::getIndex(size_t dim, const IndexArray& key) const
   {
-    auto it = m_index[dim].right.find(key);
+    const auto it = m_index[dim].right.find(key);
     if (it == m_index[dim].right.end())
-      return std::nullopt;
+      return {};
     else
       return it->get_left();
   }
@@ -145,12 +145,13 @@ namespace Rodin::Geometry
 
   size_t Connectivity<Context::Local>::getMeshDimension() const
   {
-    for (int i = m_count.size() - 1; i >= 0; i--)
-    {
-      if (m_count[i] > 0)
-        return i;
-    }
-    return 0;
+      // Start from size() and decrement before comparing to 0
+      for (size_t i = m_count.size(); i-- > 0; )
+      {
+          if (m_count[i] > 0)
+              return i;
+      }
+      return 0;
   }
 
   Polytope::Type Connectivity<Context::Local>::getGeometry(size_t d, Index idx) const
@@ -231,11 +232,12 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::local(size_t i, size_t d)
   {
+    static thread_local std::vector<SubPolytope> subpolytopes;
+
+    IndexSet s;
     const size_t D = getMeshDimension();
     assert(d > 0);
     assert(d < D);
-    IndexSet s;
-    std::vector<SubPolytope> subpolytopes;
     getSubPolytopes(subpolytopes, i, d);
     for (auto& [geometry, vertices] : subpolytopes)
     {

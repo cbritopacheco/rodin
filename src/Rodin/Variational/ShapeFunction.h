@@ -13,8 +13,6 @@
 
 #include "ForwardDecls.h"
 
-#include "RangeType.h"
-#include "RangeShape.h"
 #include "FiniteElementSpace.h"
 
 namespace Rodin::FormLanguage
@@ -115,8 +113,8 @@ namespace Rodin::Variational
     static constexpr Boolean Value = false;
   };
 
-  template <class FES>
-  struct IsTrialFunction<TrialFunction<FES>>
+  template <class Solution, class FES>
+  struct IsTrialFunction<TrialFunction<Solution, FES>>
   {
     static constexpr Boolean Value = true;
   };
@@ -182,16 +180,6 @@ namespace Rodin::Variational
         return Space;
       }
 
-      /**
-       * @brief Gets the shape of the range space.
-       * @note CRTP function to be overriden in the Derived class.
-       */
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return static_cast<const Derived&>(*this).getRangeShape();
-      }
-
       auto x() const
       {
         return Component(*this, 0);
@@ -234,6 +222,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getDOFs(polytope);
       }
 
+      constexpr
       const Geometry::Point& getPoint() const
       {
         return static_cast<const Derived&>(*this).getPoint();
@@ -325,7 +314,9 @@ namespace Rodin::Variational
 
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
-      using Parent = ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>;
+      using Parent =
+        ShapeFunctionBase<
+          ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>;
 
       ShapeFunction() = delete;
 
@@ -336,40 +327,15 @@ namespace Rodin::Variational
 
       constexpr
       ShapeFunction(const ShapeFunction& other)
-        : Parent(other)
+        : Parent(other),
+          m_basis(other.m_basis)
       {}
 
       constexpr
       ShapeFunction(ShapeFunction&& other)
-        : Parent(std::move(other))
+        : Parent(std::move(other)),
+          m_basis(std::move(other.m_basis))
       {}
-
-      constexpr
-      auto& emplace()
-      {
-        m_gf.emplace(this->getFiniteElementSpace());
-        return *this;
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { this->getFiniteElementSpace().getVectorDimension(), 1 };
-      }
-
-      constexpr
-      GridFunction<FES>& getSolution()
-      {
-        assert(m_gf.has_value());
-        return m_gf.value();
-      }
-
-      constexpr
-      const GridFunction<FES>& getSolution() const
-      {
-        assert(m_gf.has_value());
-        return m_gf.value();
-      }
 
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
@@ -379,27 +345,34 @@ namespace Rodin::Variational
         return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
       }
 
+      constexpr
       const Geometry::Point& getPoint() const
       {
-        assert(m_p.has_value());
-        return m_p.value().get();
+        assert(m_p);
+        return *m_p;
       }
 
       ShapeFunction& setPoint(const Geometry::Point& p)
       {
-        m_p = p;
+        if (m_p == &p)
+          return *this;
+        m_p = &p;
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const size_t count = fe.getCount();
+        m_basis.resize(count);
+        for (size_t local = 0; local < count; local++)
+          m_basis[local] = fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
         return *this;
       }
 
       constexpr
-      auto getBasis(size_t local) const
+      const RangeType& getBasis(size_t local) const
       {
-        const auto& p = m_p.value().get();
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        return fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
+        return m_basis[local];
       }
 
       constexpr
@@ -414,9 +387,9 @@ namespace Rodin::Variational
       }
 
     private:
-      std::optional<GridFunction<FES>> m_gf;
+      std::vector<RangeType> m_basis;
 
-      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      const Geometry::Point* m_p;
   };
 }
 

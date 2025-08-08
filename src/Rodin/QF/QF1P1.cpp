@@ -1,5 +1,3 @@
-#include <cmath>
-
 #include "QF1P1.h"
 
 namespace Rodin::QF

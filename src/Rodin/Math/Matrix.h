@@ -15,7 +15,6 @@
 #include "Rodin/FormLanguage/Traits.h"
 
 #include "Rodin/Types.h"
-#include "Rodin/Array.h"
 
 namespace Rodin::Math
 {
@@ -50,13 +49,6 @@ namespace Rodin::Math
    */
   template <class ScalarType, size_t Rows, size_t Cols>
   using FixedSizeMatrix = Eigen::Matrix<ScalarType, Rows, Cols>;
-
-  template <class AScalarType, class YScalarType, class XScalarType>
-  void axpy(Matrix<YScalarType>& y, AScalarType alpha, const Matrix<XScalarType>& x)
-  {
-    assert(x.size() == y.size());
-    y.noalias() += alpha * x;
-  }
 }
 
 namespace Rodin::FormLanguage

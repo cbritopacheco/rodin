@@ -10,10 +10,6 @@
 #include <omp.h>
 #include <petsc.h>
 #include <petscerror.h>
-#include <type_traits>
-#include <vector>
-#include <memory>
-#include <optional>
 
 #include "Rodin/Assembly/OpenMP.h"
 
@@ -24,8 +20,8 @@ namespace Rodin::Assembly
    */
   template <class FES>
   class OpenMP<
-    ::Vec, Variational::LinearForm<FES, ::Vec>> final
-    : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
+    PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>> final
+    : public AssemblyBase<PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
@@ -33,7 +29,7 @@ namespace Rodin::Assembly
         std::is_same_v<ScalarType, PetscScalar>,
         "FES::ScalarType must be PetscScalar for PETSc Vec assembly"
       );
-      using VectorType     = ::Vec;
+      using VectorType     = PETSc::Vector;
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
       using Parent         = AssemblyBase<VectorType, LinearFormType>;
       using InputType      = typename Parent::InputType;
@@ -65,6 +61,7 @@ namespace Rodin::Assembly
 
       void execute(VectorType& res, const InputType& input) const override
       {
+        assert(res);
         PetscErrorCode ierr;
         const PetscInt n = PetscInt(input.getFES().getSize());
 
@@ -136,7 +133,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      std::optional<size_t> m_threadCount;
+      Optional<size_t> m_threadCount;
   };
 
   /**
@@ -156,7 +153,10 @@ namespace Rodin::Assembly
         "FES ScalarTypes must yield PetscScalar for PETSc Mat assembly"
       );
       using OperatorType    = ::Mat;
-      using BilinearFormType= Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType =
+        Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using LocalBilinearFormIntegratorBaseType =
+        Variational::LocalBilinearFormIntegratorBase<PetscScalar>
       using Parent          = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType       = typename Parent::InputType;
 
@@ -183,22 +183,23 @@ namespace Rodin::Assembly
         return m_threadCount.value_or(omp_get_max_threads());
       }
 
-      void execute(OperatorType& A, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) const override
       {
+        assert(res);
         PetscErrorCode ierr;
-        const PetscInt m = PetscInt(input.getTestFES().getSize());
-        const PetscInt n = PetscInt(input.getTrialFES().getSize());
+        const PetscInt m = input.getTestFES().getSize();
+        const PetscInt n = input.getTrialFES().getSize();
 
-        ierr = MatSetSizes(A, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
+        ierr = MatSetSizes(res, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetFromOptions(A);
+        ierr = MatSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(A);
+        ierr = MatSetUp(res);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatZeroEntries(A);
+        ierr = MatZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
         const auto& mesh = input.getTestFES().getMesh();
@@ -216,7 +217,9 @@ namespace Rodin::Assembly
           {
             std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
             local.reserve(cnt);
-            auto integrator = std::unique_ptr<Variational::LocalBilinearFormIntegratorBase<PetscScalar>>(bfi.copy());
+            auto integrator =
+              std::unique_ptr<Variational::LocalBilinearFormIntegratorBase<PetscScalar>>(
+                  bfi.copy());
 
 #pragma omp for nowait
             for (PetscInt i = 0; i < cnt; ++i)
@@ -232,7 +235,7 @@ namespace Rodin::Assembly
                 {
                   for (size_t c = 0; c < cols.size(); ++c)
                   {
-                    const PetscScalar v = PetscScalar(integrator->integrate(c, r));
+                    const PetscScalar v = integrator->integrate(c, r);
                     if (v != PetscScalar(0))
                     {
                       local.emplace_back(rows[r], cols[c], v);
@@ -246,74 +249,17 @@ namespace Rodin::Assembly
             {
               for (auto& [i,j,v] : local)
               {
-                ierr = MatSetValue(A, i, j, v, ADD_VALUES);
+                ierr = MatSetValue(res, i, j, v, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
               }
             }
           }
         }
 
-        // Global contributions
-//         for (auto& bfi : input.getGlobalBFIs())
-//         {
-//           const auto& tAttrs = bfi.getTestAttributes();
-//           const auto& rAttrs = bfi.getTrialAttributes();
-//           OpenMPIteration testSeq(mesh, bfi.getTestRegion());
-//           const PetscInt dimT = PetscInt(testSeq.getDimension());
-//           const PetscInt cntT = PetscInt(testSeq.getCount());
-// 
-// #pragma omp parallel num_threads(tc)
-//           {
-//             std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
-//             local.reserve(cntT);
-//             auto integrator = std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase<PetscScalar>>(bfi.copy());
-// 
-// #pragma omp for nowait
-//             for (PetscInt ti = 0; ti < cntT; ++ti)
-//             {
-//               if (testSeq.filter(ti) &&
-//                  (tAttrs.empty() || tAttrs.count(mesh.getAttribute(dimT, ti))))
-//               {
-//                 auto teIt = testSeq.getIterator(ti);
-//                 SequentialIteration trialSeq{ mesh, integrator->getTrialRegion() };
-//                 for (auto trIt = trialSeq.getIterator(); trIt; ++trIt)
-//                 {
-//                   if (rAttrs.empty() || rAttrs.count(trIt->getAttribute()))
-//                   {
-//                     integrator->setPolytope(*trIt, *teIt);
-//                     const auto& rows = input.getTestFES().getDOFs(dimT, ti);
-//                     const auto& cols = input.getTrialFES().getDOFs(PetscInt(trIt->getDimension()), trIt->getIndex());
-//                     for (size_t r = 0; r < rows.size(); ++r)
-//                     {
-//                       for (size_t c = 0; c < cols.size(); ++c)
-//                       {
-//                         const PetscScalar v = PetscScalar(integrator->integrate(c, r));
-//                         if (v != PetscScalar(0))
-//                         {
-//                           local.emplace_back(rows[r], cols[c], v);
-//                         }
-//                       }
-//                     }
-//                   }
-//                 }
-//               }
-//             }
-// 
-//             #pragma omp critical
-//             {
-//               for (auto& [i,j,v] : local)
-//               {
-//                 ierr = MatSetValue(A, i, j, v, ADD_VALUES);
-//                 assert(ierr == PETSC_SUCCESS);
-//               }
-//             }
-//           }
-//         }
-
-        ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+        ierr = MatAssemblyBegin(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatAssemblyEnd(A,   MAT_FINAL_ASSEMBLY);
+        ierr = MatAssemblyEnd(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
       }
 
@@ -323,8 +269,14 @@ namespace Rodin::Assembly
       }
 
     private:
-      std::optional<size_t> m_threadCount;
+      Optional<size_t> m_threadCount;
   };
+}
+
+namespace Rodin::PETSc::Assembly
+{
+  template <class LinearAlgebraType, class Operand>
+  using OpenMP = Rodin::Assembly::OpenMP<LinearAlgebraType, Operand>;
 }
 
 #endif // RODIN_ASSEMBLY_OpenMP_PETSC_H

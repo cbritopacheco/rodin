@@ -14,7 +14,6 @@
 #include "Rodin/FormLanguage/List.h"
 
 #include "Rodin/Assembly/ForwardDecls.h"
-#include "Rodin/Assembly/Default.h"
 
 #include "ForwardDecls.h"
 
@@ -102,30 +101,43 @@ namespace Rodin::Variational
    * @f]
    * on the subset of the boundary @f$ \Gamma_D \subset \mathcal{B}_h @f$.
    */
-  template <class FES, class ValueDerived>
-  class DirichletBC<TrialFunction<FES>, FunctionBase<ValueDerived>> final
+  template <class Solution, class FES, class ValueDerived>
+  class DirichletBC<TrialFunction<Solution, FES>, FunctionBase<ValueDerived>> final
     : public DirichletBCBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
-      using FESType = FES;
+      using FESType =
+        FES;
 
       /// Operand type
-      using OperandType = TrialFunction<FESType>;
+      using OperandType =
+        TrialFunction<Solution, FESType>;
 
       /// Scalar type
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType =
+        typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using DOFs = IndexMap<ScalarType>;
+      using DOFs =
+        IndexMap<ScalarType>;
 
       /// Value type
-      using ValueType = FunctionBase<ValueDerived>;
+      using ValueType =
+        FunctionBase<ValueDerived>;
 
-      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using FESMeshType =
+        typename FormLanguage::Traits<FESType>::MeshType;
 
-      using ContextType = typename FormLanguage::Traits<FESType>::ContextType;
+      using FESRangeType =
+        typename FormLanguage::Traits<FESType>::RangeType;
 
-      using DefaultAssembly =
-        typename Assembly::Default<ContextType>::template Type<DOFs, DirichletBC>;
+      using FESMeshContextType =
+        typename FormLanguage::Traits<FESMeshType>::ContextType;
+
+      using DefaultAssemblyType =
+        typename Assembly::Default<FESMeshContextType>::template Type<DOFs, DirichletBC>;
+
+      using AssemblyType =
+        DefaultAssemblyType;
 
       /// Parent class
       using Parent = DirichletBCBase<ScalarType>;
@@ -137,9 +149,7 @@ namespace Rodin::Variational
        */
       DirichletBC(const OperandType& u, const ValueType& v)
         : m_u(u), m_value(v.copy())
-      {
-        m_assembly.reset(new DefaultAssembly);
-      }
+      {}
 
       /**
        * @brief Copy constructor
@@ -150,7 +160,7 @@ namespace Rodin::Variational
           m_value(other.m_value->copy()),
           m_essBdr(other.m_essBdr),
           m_dofs(other.m_dofs),
-          m_assembly(other.m_assembly->copy())
+          m_assembly(other.m_assembly)
       {}
 
       /**
@@ -224,8 +234,7 @@ namespace Rodin::Variational
        */
       void assemble() override
       {
-        assert(m_assembly);
-        m_assembly->execute(m_dofs, { m_u.get(), *m_value, m_essBdr });
+        m_assembly.execute(m_dofs, { m_u.get(), *m_value, m_essBdr });
       }
 
       bool isComponent() const override
@@ -265,8 +274,7 @@ namespace Rodin::Variational
       std::unique_ptr<ValueType> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
       IndexMap<ScalarType> m_dofs;
-
-      std::unique_ptr<Assembly::AssemblyBase<IndexMap<ScalarType>, DirichletBC>> m_assembly;
+      AssemblyType m_assembly;
   };
 
   /**
@@ -275,9 +283,9 @@ namespace Rodin::Variational
    * @tparam FES Type of finite element space
    * @tparam ValueDerived Derived type of FunctionBase
    */
-  template <class FES, class FunctionDerived>
-  DirichletBC(const TrialFunction<FES>&, const FunctionBase<FunctionDerived>&)
-    -> DirichletBC<TrialFunction<FES>, FunctionBase<FunctionDerived>>;
+  template <class Solution, class FES, class FunctionDerived>
+  DirichletBC(const TrialFunction<Solution, FES>&, const FunctionBase<FunctionDerived>&)
+    -> DirichletBC<TrialFunction<Solution, FES>, FunctionBase<FunctionDerived>>;
 }
 
 #endif

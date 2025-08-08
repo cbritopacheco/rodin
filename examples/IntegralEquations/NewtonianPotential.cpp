@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
@@ -138,22 +139,16 @@ int main(int, char**)
       mesh.save("uEx.mesh");
       std::exit(1);
 
-      u.getSolution().setWeights();
-
       Alert::Info() << "Getting data." << Alert::Raise;
 
       GridFunction one(fes);
       one = RealFunction(1);
-      one.setWeights();
 
       GridFunction phi(fes);
       phi = Potential(K, u.getSolution());
-      phi.setWeights();
 
       GridFunction resError(fes);
       resError = Pow(one - phi, 2);
-      resError.setWeights();
-
 
       GridFunction err(fes);
       err = [&](const Point& p)
@@ -163,7 +158,6 @@ int main(int, char**)
         else
           return 0.0;
       };
-      err.setWeights();
 
       const Real Aerr = pow(Integral(u.getSolution()) - 8, 2);
       const Real Rerr = Integral(resError);

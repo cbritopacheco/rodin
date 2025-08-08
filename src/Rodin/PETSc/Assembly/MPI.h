@@ -2,26 +2,23 @@
 #define RODIN_PETSC_ASSEMBLY_MPI_H
 
 #include <petsc.h>
-#include <type_traits>
-#include <boost/mpi.hpp>
-#include <boost/mpi/collectives.hpp>
+#include <petscmacros.h>
+#include <petscmat.h>
 
 #include "Rodin/Assembly/AssemblyBase.h"
+#include "Rodin/MPI/Assembly.h"
+
 #include "Rodin/Variational/LinearForm.h"
 #include "Rodin/Variational/BilinearForm.h"
 
-#include "Rodin/MPI/Geometry.h"
-#include "Rodin/MPI/Assembly.h"
+#include "Rodin/PETSc/Math/Vector.h"
+#include "Rodin/PETSc/Math/Matrix.h"
 
 namespace Rodin::Assembly
 {
-  // MPI assembly for PETSc Vec (linear form) -- skipping ghosts via Shard + Boost.MPI
   template <class FES>
   class MPI<::Vec, Variational::LinearForm<FES, ::Vec>> final
-    : public AssemblyBase<
-        ::Vec,
-        Variational::LinearForm<FES, ::Vec>
-      >
+    : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
@@ -36,25 +33,28 @@ namespace Rodin::Assembly
 
       void execute(VectorType& res, const InputType& input) const override
       {
-        PetscErrorCode ierr;
-        const auto& fes   = input.getFES();
-        const auto& mesh  = fes.getMesh();
+        assert(res);
+        const auto& fes = input.getFES();
+        const auto& mesh = fes.getMesh();
         const auto& shard = mesh.getShard();
-        const auto& ctx   = mesh.getContext();
-        const auto& comm  = ctx.getCommunicator();
+        const auto& ctx = mesh.getContext();
+        const auto& comm = ctx.getCommunicator();
+        const size_t globalSize = fes.getSize();
 
-        // Compute local and global sizes via Boost.MPI
-        const PetscInt localSize = PetscInt(fes.getShard().getSize());
-        const PetscInt globalSize = PetscInt(fes.getSize());
+        size_t begin, end;
+        fes.getOwnershipRange(begin, end);
+        const size_t ownedSize = end - begin;
 
-        ierr = VecSetSizes(res, localSize, globalSize);
+        PetscErrorCode ierr;
+        ierr = VecSetSizes(res, ownedSize, globalSize);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
-        // Local contributions skipping ghosts
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
@@ -62,18 +62,18 @@ namespace Rodin::Assembly
           for (auto it = seq.getIterator(); it; ++it)
           {
             const size_t d = it->getDimension();
-            const Index i = it->getIndex();
-            if (shard.isGhost(d, i))
+            const Index idx = it->getIndex();
+            if (shard.isGhost(d, idx))
               continue;
             if (attrs.empty() || attrs.count(it->getAttribute()))
             {
               lfi.setPolytope(*it);
-              const auto& dofs = fes.getShard().getDOFs(d, i);
-              for (PetscInt i = 0; i < PetscInt(dofs.size()); ++i)
+              const auto& dofs = fes.getShard().getDOFs(d, idx);
+              for (PetscInt i = 0; i < dofs.size(); ++i)
               {
-                const PetscScalar v = PetscScalar(lfi.integrate(i));
-                ierr = VecSetValue(
-                    res, PetscInt(fes.getGlobalIndex(dofs[i])), v, ADD_VALUES);
+                const Index r = fes.getGlobalIndex(dofs[i]);
+                const PetscScalar v = lfi.integrate(i);
+                ierr = VecSetValue(res, r, v, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
               }
             }
@@ -82,6 +82,7 @@ namespace Rodin::Assembly
 
         ierr = VecAssemblyBegin(res);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecAssemblyEnd(res);
         assert(ierr == PETSC_SUCCESS);
       }
@@ -92,13 +93,9 @@ namespace Rodin::Assembly
       }
   };
 
-  // MPI assembly for PETSc Mat (bilinear form) -- skipping ghosts via Shard + Boost.MPI
-  template <class TrialFES, class TestFES>
-  class MPI<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>> final
-    : public AssemblyBase<
-        ::Mat,
-        Variational::BilinearForm<TrialFES, TestFES, ::Mat>
-      >
+  template <class Solution, class TrialFES, class TestFES>
+  class MPI<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
+    : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
   {
     public:
       using DotType =
@@ -110,43 +107,51 @@ namespace Rodin::Assembly
         "DotType must be PetscScalar"
       );
       using OperatorType     = ::Mat;
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
       using Parent           = AssemblyBase<OperatorType, BilinearFormType>;
       using InputType        = typename Parent::InputType;
 
-      void execute(OperatorType& A, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) const override
       {
-        PetscErrorCode ierr;
-        const auto& testFES  = input.getTestFES();
+        assert(res);
+
         const auto& trialFES = input.getTrialFES();
-        const auto& mesh     = testFES.getMesh();
-        const auto& shard    = mesh.getShard();
-        const auto& ctx      = mesh.getContext();
-        const auto& comm     = ctx.getCommunicator();
+        const auto& testFES  = input.getTestFES();
+        assert(trialFES.getMesh() == testFES.getMesh());
+        const auto& mesh = trialFES.getMesh();
+        const auto& shard = mesh.getShard();
+        const auto& ctx = mesh.getContext();
+        const auto& comm = ctx.getCommunicator();
 
-        // Compute local/global sizes
-        const PetscInt localRows = PetscInt(testFES.getShard().getSize());
-        const PetscInt localCols = PetscInt(trialFES.getShard().getSize());
-        const PetscInt globalRows = PetscInt(testFES.getSize());
-        const PetscInt globalCols = PetscInt(trialFES.getSize());
+        size_t rbegin, rend;
+        testFES.getOwnershipRange(rbegin, rend);
+        const size_t localRows = rend - rbegin;
 
-        // Create/init Mat
-        ierr = MatSetSizes(A, localRows, localCols, globalRows, globalCols);
+        size_t cbegin, cend;
+        trialFES.getOwnershipRange(cbegin, cend);
+        const size_t localCols = cend - cbegin;
+
+        const size_t globalRows = testFES.getSize();
+
+        const size_t globalCols = trialFES.getSize();
+
+        PetscErrorCode ierr;
+        ierr = MatSetSizes(res, localRows, localCols, globalRows, globalCols);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatMPIAIJSetPreallocation(A, PETSC_DECIDE, nullptr, PETSC_DECIDE, nullptr);
+        ierr = MatMPIAIJSetPreallocation(
+            res, PETSC_DECIDE, PETSC_NULLPTR, PETSC_DECIDE, PETSC_NULLPTR);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetFromOptions(A);
+        ierr = MatSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(A);
+        ierr = MatSetUp(res);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatZeroEntries(A);
+        ierr = MatZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
-        // Local element contributions skipping ghosts
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
@@ -154,24 +159,22 @@ namespace Rodin::Assembly
           for (auto it = seq.getIterator(); it; ++it)
           {
             const size_t d = it->getDimension();
-            const Index i = it->getIndex();
-
-            if (shard.isGhost(d, i))
+            const Index idx = it->getIndex();
+            if (shard.isGhost(d, idx))
               continue;
             if (attrs.empty() || attrs.count(it->getAttribute()))
             {
               bfi.setPolytope(*it);
-              const auto& rows = testFES.getShard().getDOFs(d, i);
-              const auto& cols = trialFES.getShard().getDOFs(d, i);
-              for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
+              const auto& rows = testFES.getShard().getDOFs(d, idx);
+              const auto& cols = trialFES.getShard().getDOFs(d, idx);
+              for (Index i = 0; i < rows.size(); ++i)
               {
-                for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
+                const Index r = testFES.getGlobalIndex(rows[i]);
+                for (Index j = 0; j < cols.size(); ++j)
                 {
-                  PetscScalar v = PetscScalar(bfi.integrate(j, i));
-                  ierr = MatSetValue(
-                      A,
-                      testFES.getGlobalIndex(rows[i]), trialFES.getGlobalIndex(cols[j]),
-                      v, ADD_VALUES);
+                  const Index c = trialFES.getGlobalIndex(cols[j]);
+                  PetscScalar v = bfi.integrate(j, i);
+                  ierr = MatSetValue(res, r, c, v, ADD_VALUES);
                   assert(ierr == PETSC_SUCCESS);
                 }
               }
@@ -179,62 +182,10 @@ namespace Rodin::Assembly
           }
         }
 
-        // Global coupling contributions skipping ghosts
-        // for (auto& bfi : input.getGlobalBFIs())
-        // {
-        //   const auto& testAttrs  = bfi.getTestAttributes();
-        //   const auto& trialAttrs = bfi.getTrialAttributes();
-        //   MPIIteration testSeq(mesh, bfi.getTestRegion());
-        //   SequentialIteration trialSeq(mesh, bfi.getTrialRegion());
-        //   for (auto teIt = testSeq.getIterator(); teIt; ++teIt)
-        //   {
-        //     auto dt = teIt->getDimension();
-        //     auto tg = teIt->getIndex();
-        //     if (shard.isGhost(dt, tg))
-        //       continue;
-
-        //     const auto& tmap = shard.getPolytopeMap(dt).left;
-        //     auto tLoc = tmap.find(tg);
-        //     if (tLoc == tmap.end())
-        //       continue;
-        //     auto tLid = tLoc->second;
-
-        //     if (testAttrs.empty() || testAttrs.count(teIt->getAttribute()))
-        //     {
-        //       for (auto trIt = trialSeq.getIterator(); trIt; ++trIt)
-        //       {
-        //         auto dr = trIt->getDimension();
-        //         auto rg = trIt->getIndex();
-        //         if (shard.isGhost(dr, rg))
-        //           continue;
-
-        //         const auto& rmap = shard.getPolytopeMap(dr).left;
-        //         auto rLoc = rmap.find(rg);
-        //         if (rLoc == rmap.end())
-        //           continue;
-        //         auto rLid = rLoc->second;
-
-        //         if (trialAttrs.empty() || trialAttrs.count(trIt->getAttribute()))
-        //         {
-        //           bfi.setPolytope(*trIt, *teIt);
-        //           const auto& rows = testFES .getDOFs(dt, tLid);
-        //           const auto& cols = trialFES.getDOFs(dr, rLid);
-        //           for (PetscInt i = 0; i < PetscInt(rows.size()); ++i)
-        //             for (PetscInt j = 0; j < PetscInt(cols.size()); ++j)
-        //             {
-        //               const PetscScalar v = PetscScalar(bfi.integrate(j, i));
-        //               ierr = MatSetValue(A, rows[i], cols[j], v, ADD_VALUES);
-        //               assert(ierr == PETSC_SUCCESS);
-        //             }
-        //         }
-        //       }
-        //     }
-        //   }
-        // }
-
-        ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+        ierr = MatAssemblyBegin(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
-        ierr = MatAssemblyEnd (A, MAT_FINAL_ASSEMBLY);
+
+        ierr = MatAssemblyEnd(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
       }
 
@@ -243,6 +194,12 @@ namespace Rodin::Assembly
         return new MPI(*this);
       }
   };
+}
+
+namespace Rodin::PETSc::Math::Assembly
+{
+  template <class LinearAlgebraType, class Operand>
+  using MPI = Rodin::Assembly::MPI<LinearAlgebraType, Operand>;
 }
 
 #endif // RODIN_PETSC_ASSEMBLY_MPI_H

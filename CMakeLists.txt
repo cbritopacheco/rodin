@@ -84,6 +84,10 @@ if (RODIN_MULTITHREADED)
   set(RODIN_THREAD_SAFE ON CACHE BOOL "" FORCE)
   set(RODIN_USE_OPENMP ON CACHE BOOL "" FORCE)
   set(Boost_USE_MULTITHREADED ON)
+else()
+  set(RODIN_THREAD_SAFE OFF CACHE BOOL "" FORCE)
+  set(RODIN_USE_OPENMP OFF CACHE BOOL "" FORCE)
+  # set(Boost_USE_MULTITHREADED OFF)
 endif()
 
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
@@ -148,6 +152,7 @@ if (RODIN_BUILD_SRC)
     system
     filesystem
     serialization
+    headers
     )
   include_directories(${Boost_INCLUDE_DIRS})
 

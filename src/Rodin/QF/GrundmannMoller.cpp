@@ -145,17 +145,17 @@ namespace Rodin::QF
   GrundmannMoller::GrundmannMoller(size_t s, Geometry::Polytope::Type geom)
     : Parent(geom),
       m_s(s),
-      m_n(Geometry::Polytope::getGeometryDimension(geom)),
+      m_n(Geometry::Polytope::Traits(geom).getDimension()),
       m_order(2 * m_s + 1)
   {
     assert(m_order <= RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER);
-    if (!Geometry::Polytope::isSimplex(geom))
+    if (!Geometry::Polytope::Traits(geom).isSimplex())
     {
       Alert::MemberFunctionException(*this, __func__)
         << "Polytope::Type " << Alert::Notation::Print(geom) << " is not a simplex."
         << Alert::Raise;
     }
-    assert(Geometry::Polytope::isSimplex(geom));
+    assert(Geometry::Polytope::Traits(geom).isSimplex());
   }
 
   size_t GrundmannMoller::getSize() const

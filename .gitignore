@@ -151,6 +151,10 @@ _skbuild
 # ----> ccls
 .ccls-cache
 
+# ---> clangd
+.cache
+.clangd
+
 docs
 
 *.vim

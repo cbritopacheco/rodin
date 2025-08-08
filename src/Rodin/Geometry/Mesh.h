@@ -191,7 +191,7 @@ namespace Rodin::Geometry
         return this != &other;
       }
 
-      virtual std::optional<Point> inclusion(const Point& p) const;
+      virtual Optional<Point> inclusion(const Point& p) const;
 
       /**
        * @brief Indicates if the mesh is empty or not.
@@ -256,7 +256,7 @@ namespace Rodin::Geometry
 
       virtual void save(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const = 0;
+        IO::FileFormat fmt = IO::FileFormat::MFEM) const = 0;
 
       virtual void flush() = 0;
 
@@ -445,7 +445,7 @@ namespace Rodin::Geometry
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
        */
-      virtual Eigen::Map<const Math::PointVector> getVertexCoordinates(Index idx) const = 0;
+      virtual Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index idx) const = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -473,7 +473,7 @@ namespace Rodin::Geometry
        * @param[in] idx Vertex index
        * @param[in] coords New coordinates
        */
-      virtual MeshBase& setVertexCoordinates(Index idx, const Math::PointVector& coords) = 0;
+      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialPoint& coords) = 0;
 
       virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
@@ -763,8 +763,10 @@ namespace Rodin::Geometry
       {
         for (auto it = getVertex(); !it.end(); ++it)
         {
-          const Geometry::Point p(*it, it->getTransformation(),
-              Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
+          const Geometry::Point p(
+              *it,
+              Polytope::Traits(Polytope::Type::Point).getVertex(0),
+              it->getCoordinates());
           m_vertices.col(it->getIndex()) += u(p);
         }
         return *this;
@@ -825,25 +827,75 @@ namespace Rodin::Geometry
 
       Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const override;
 
-      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p) const
+      template <class BinaryPredicate>
+      CCL ccl(const BinaryPredicate& p) const
       {
-        return ccl(p, getDimension());
+        return ccl(getDimension(), p, [](const Polytope&) { return true; });
       }
 
-      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p, size_t d) const
+      template <class BinaryPredicate>
+      CCL ccl(size_t d, const BinaryPredicate& p) const
       {
-        return ccl(p, d, FlatSet<Attribute>{});
+        return ccl(d, p, [](const Polytope&) { return true; });
       }
 
-      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
-          size_t d, Attribute attr) const
+      template <class BinaryPredicate>
+      CCL ccl(size_t d, const BinaryPredicate& p, Attribute attr) const
       {
-        return ccl(p, d, FlatSet<Attribute>{ attr });
+        return ccl(d, p,
+          [attr](const Polytope& polytope) { return attr == polytope.getAttribute(); });
       }
 
-      virtual CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
-          size_t d,
-          const FlatSet<Attribute>& attrs) const;
+      template <class BinaryPredicate>
+      CCL ccl(size_t d, const BinaryPredicate& p, const FlatSet<Attribute>& attrs) const
+      {
+        return ccl(d, p,
+          [&attrs](const Polytope& polytope) { return attrs.size() == 0 || attrs.contains(polytope.getAttribute()); });
+      }
+
+      template <class BinaryPredicate, class UnitaryPredicate>
+      CCL ccl(size_t d, const BinaryPredicate& p, const UnitaryPredicate& f) const
+      {
+        FlatSet<Index> visited;
+        visited.reserve(getPolytopeCount(d));
+        std::deque<Index> searchQueue;
+        std::deque<FlatSet<Index>> res;
+
+        // Perform the labelling
+        for (auto it = getPolytope(d); it; ++it)
+        {
+          const Index i = it->getIndex();
+          if (!visited.count(i))
+          {
+            if (f(*it))
+            {
+              res.push_back({});
+              searchQueue.push_back(i);
+            }
+            while (searchQueue.size() > 0)
+            {
+              const Index idx = searchQueue.back();
+              const auto el = getPolytope(d, idx);
+              searchQueue.pop_back();
+              const auto result = visited.insert(idx);
+              const Boolean inserted = result.second;
+              if (inserted)
+              {
+                res.back().insert(idx);
+                for (auto adj = el->getAdjacent(); adj; ++adj)
+                {
+                  if (p(*el, *adj))
+                  {
+                    if (f(*adj))
+                      searchQueue.push_back(adj->getIndex());
+                  }
+                }
+              }
+            }
+          }
+        }
+        return res;
+      }
 
       /**
       * @brief Skins the mesh to obtain its boundary mesh
@@ -954,7 +1006,7 @@ namespace Rodin::Geometry
       */
       virtual void save(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
+        IO::FileFormat fmt = IO::FileFormat::MFEM) const override;
 
       virtual Mesh& scale(Real c) override;
 
@@ -1074,7 +1126,5 @@ namespace Rodin::Geometry
       Context m_context;
   };
 }
-
-#include "Mesh.hpp"
 
 #endif

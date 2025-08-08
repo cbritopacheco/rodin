@@ -17,8 +17,6 @@
 
 #include "ForwardDecls.h"
 
-#include "RangeShape.h"
-
 #include "Function.h"
 
 namespace Rodin::FormLanguage
@@ -61,12 +59,6 @@ namespace Rodin::Variational
       {}
 
       virtual ~ScalarFunctionBase() = default;
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { 1, 1 };
-      }
 
       const Derived& getDerived() const
       {

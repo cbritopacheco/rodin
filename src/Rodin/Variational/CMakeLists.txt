@@ -62,14 +62,9 @@ set(RodinVariational_SRCS
   Sum.cpp
   UnaryMinus.cpp
   Mult.cpp
-  BilinearForm.hpp
   Dot.cpp
-  LinearForm.hpp
-  Problem.hpp
   Minus.cpp
   Function.cpp
-  RangeShape.cpp
-  RangeType.cpp
   Max.cpp
   Min.cpp
   GEQ.cpp

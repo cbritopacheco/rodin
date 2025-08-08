@@ -122,12 +122,6 @@ namespace Rodin::Variational
 
       virtual ~VectorFunctionBase() = default;
 
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getDimension(), 1 };
-      }
-
       const Derived& getDerived() const
       {
         return static_cast<const Derived&>(*this);

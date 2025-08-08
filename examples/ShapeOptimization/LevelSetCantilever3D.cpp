@@ -6,6 +6,7 @@
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
 
@@ -41,8 +42,8 @@ static double alpha = dt;
 
 using FES = VectorP1<Mesh<Context::Local>>;
 
-// Compliance
-inline Real compliance(const GridFunction<FES>& w)
+template <class Data>
+Real compliance(const GridFunction<FES, Data>& w)
 {
   auto& vh = w.getFiniteElementSpace();
   TrialFunction u(vh);

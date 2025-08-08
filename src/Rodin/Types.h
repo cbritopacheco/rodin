@@ -84,6 +84,9 @@ namespace Rodin
 
   using BitSet2 = std::bitset<2>;
 
+  template <class T>
+  using Optional = std::optional<T>;
+
 #if __cpp_size_t_suffix < 202011L
   constexpr
   std::size_t operator "" _UZ (unsigned long long x)

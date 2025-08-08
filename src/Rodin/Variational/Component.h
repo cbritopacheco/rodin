@@ -167,12 +167,12 @@ namespace Rodin::Variational
   /**
    * @brief Represents the component (or entry) of a vectorial GridFunction.
    */
-  template <class FES>
-  class Component<GridFunction<FES>> final
-    : public RealFunctionBase<Component<GridFunction<FES>>>
+  template <class FES, class Data>
+  class Component<GridFunction<FES, Data>> final
+    : public RealFunctionBase<Component<GridFunction<FES, Data>>>
   {
     public:
-      using OperandType = GridFunction<FES>;
+      using OperandType = GridFunction<FES, Data>;
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
@@ -210,7 +210,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      const GridFunction<FES>& getGridFunction() const
+      const OperandType& getGridFunction() const
       {
         return m_u.get();
       }
@@ -231,8 +231,8 @@ namespace Rodin::Variational
       const size_t m_idx;
   };
 
-  template <class FES>
-  Component(GridFunction<FES>&, size_t) -> Component<GridFunction<FES>>;
+  template <class FES, class Data>
+  Component(GridFunction<FES, Data>&, size_t) -> Component<GridFunction<FES, Data>>;
 
   /**
    * @brief Represents the component (or entry) of a vectorial ShapeFunction.
@@ -320,7 +320,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return getOperand().getBasis(local).coeff(m_idx);
+        return this->object(getOperand().getBasis(local)).coeff(m_idx);
       }
 
       Component* copy() const noexcept override

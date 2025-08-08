@@ -14,7 +14,6 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "RangeShape.h"
 
 namespace Rodin::FormLanguage
 {
@@ -77,12 +76,6 @@ namespace Rodin::Variational
         {
           res = getValue(p);
         }
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getRows(), getColumns() };
       }
 
       /**

@@ -32,25 +32,20 @@ namespace Rodin::Variational
   /**
    * @ingroup GradSpecializations
    */
-  template <class FES, class Derived>
-  class DerivativeBase<GridFunction<FES>, Derived>
+  template <class FES, class Data, class Derived>
+  class DerivativeBase<GridFunction<FES, Data>, Derived>
     : public ScalarFunctionBase<
-        typename FormLanguage::Traits<FES>::ScalarType, DerivativeBase<GridFunction<FES>, Derived>>
+        typename FormLanguage::Traits<FES>::ScalarType, DerivativeBase<GridFunction<FES, Data>, Derived>>
   {
     public:
       using FESType = FES;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       using Parent = ScalarFunctionBase<ScalarType, DerivativeBase<OperandType, Derived>>;
 
-      /**
-       * @brief Constructs the gradient of a @f$ \mathbb{P}_1 @f$ function @f$
-       * u @f$.
-       * @param[in] u P1 GridFunction
-       */
       DerivativeBase(const OperandType& u)
         : m_u(u)
       {
@@ -188,12 +183,6 @@ namespace Rodin::Variational
       }
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return { 1, 1 };
-      }
-
-      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
@@ -234,7 +223,7 @@ namespace Rodin::Variational
       size_t m_i;
       std::reference_wrapper<const OperandType> m_u;
 
-      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      Optional<std::reference_wrapper<const Geometry::Point>> m_p;
 
       std::vector<Math::SpatialVector<Real>> m_gradients;
   };

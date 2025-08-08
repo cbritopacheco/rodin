@@ -8,6 +8,7 @@
 #define RODIN_TUPLE_H
 
 #include <tuple>
+#include <boost/serialization/access.hpp>
 
 #include "Rodin/Types.h"
 #include "Rodin/Utility/Make.h"
@@ -25,6 +26,8 @@ namespace Rodin
   class Tuple<> : public std::tuple<>
   {
     public:
+      friend class boost::serialization::access;
+
       /**
        * @brief Dummy type alias for the empty tuple.
        *
@@ -117,6 +120,10 @@ namespace Rodin
       {
         return 0;
       }
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {}
   };
 
   Tuple() -> Tuple<>;
@@ -436,7 +443,19 @@ namespace Rodin
             std::index_sequence_for<T, Ts...>(), std::index_sequence_for<Gs...>());
       }
 
+      template <class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        serializeImpl(ar, version, std::index_sequence_for<T, Ts...>{});
+      }
+
     private:
+      template <class Archive, std::size_t ... Indices>
+      void serializeImpl(Archive& ar, const unsigned int version, std::index_sequence<Indices...>)
+      {
+        (ar & ... & std::get<Indices>(*this));
+      }
+
       template <class Function, std::size_t ... Indices>
       constexpr
       void applyImpl(Function&& func, std::index_sequence<Indices...>)

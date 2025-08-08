@@ -2,6 +2,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "Mesh.h"
+#include "Rodin/Geometry/Polytope.h"
 
 namespace Rodin::Geometry
 {
@@ -55,66 +56,34 @@ namespace Rodin::Geometry
 
   size_t MPIMesh::getPolytopeCount(size_t d) const
   {
-    boost::mpi::communicator comm = m_context.getCommunicator();
+    size_t localCount = 0;
     const auto& shard = getShard();
-    std::vector<size_t> localIdx;
-    localIdx.reserve(shard.getPolytopeCount(d));
-    for (auto it = shard.getPolytope(d); it; ++it)
+    const auto& ctx = getContext();
+    const boost::mpi::communicator& comm = ctx.getCommunicator();
+    for (size_t i = 0; i < shard.getPolytopeCount(d); ++i)
     {
-      const Index idx = it->getIndex();
-      if (!shard.isGhost(d, idx))
-        localIdx.push_back(getGlobalIndex(d, idx));
+      if (shard.isOwned(d, i))
+        ++localCount;
     }
-    const size_t localMax = localIdx.empty() ? 0 : *std::max_element(localIdx.begin(), localIdx.end());
-    const size_t globalMax = boost::mpi::all_reduce(comm, localMax, boost::mpi::maximum<size_t>());
-    const size_t N = globalMax + 1;
-    using Block = boost::dynamic_bitset<>::block_type;
-    constexpr size_t BITS = sizeof(Block) * 8;
-    size_t nBlocks = (N + BITS - 1) / BITS;
-    std::vector<Block> local_blocks(nBlocks, 0);
-    for (auto g : localIdx)
-      local_blocks[g / BITS] |= (Block(1) << (g % BITS));
-    std::vector<Block> globalBlocks(nBlocks);
-    boost::mpi::all_reduce(
-        comm, local_blocks.data(), nBlocks, globalBlocks.data(), std::bit_or<Block>());
-    size_t total = 0;
-    for (auto w : globalBlocks)
-        total += __builtin_popcountll(w);
-    return total;
+    return boost::mpi::all_reduce(comm, localCount, std::plus<size_t>());
   }
 
   size_t MPIMesh::getPolytopeCount(Polytope::Type g) const
   {
-    const size_t d = Polytope::getGeometryDimension(g);
-    boost::mpi::communicator comm = m_context.getCommunicator();
+    const size_t d = Polytope::Traits(g).getDimension();
+    size_t localCount = 0;
     const auto& shard = getShard();
-    std::vector<size_t> localIdx;
-    localIdx.reserve(shard.getPolytopeCount(d));
-    for (auto it = shard.getPolytope(d); it; ++it)
+    const auto& ctx = getContext();
+    const boost::mpi::communicator& comm = ctx.getCommunicator();
+    for (size_t i = 0; i < shard.getPolytopeCount(d); ++i)
     {
-      const Index idx = it->getIndex();
-      if (!shard.isGhost(d, idx))
+      if (shard.getGeometry(d, i) == g)
       {
-        if (it->getGeometry() == g)
-          localIdx.push_back(getGlobalIndex(d, idx));
+        if (shard.isOwned(d, i))
+          ++localCount;
       }
     }
-    const size_t localMax = localIdx.empty() ? 0 : *std::max_element(localIdx.begin(), localIdx.end());
-    const size_t globalMax = boost::mpi::all_reduce(comm, localMax, boost::mpi::maximum<size_t>());
-    const size_t N = globalMax + 1;
-    using Block = boost::dynamic_bitset<>::block_type;
-    constexpr size_t BITS = sizeof(Block) * 8;
-    size_t nBlocks = (N + BITS - 1) / BITS;
-    std::vector<Block> local_blocks(nBlocks, 0);
-    for (auto g : localIdx)
-      local_blocks[g / BITS] |= (Block(1) << (g % BITS));
-    std::vector<Block> globalBlocks(nBlocks);
-    boost::mpi::all_reduce(
-        comm, local_blocks.data(), nBlocks, globalBlocks.data(), std::bit_or<Block>());
-    size_t total = 0;
-    for (auto w : globalBlocks)
-        total += __builtin_popcountll(w);
-    return total;
+    return boost::mpi::all_reduce(comm, localCount, std::plus<size_t>());
   }
 
   Shard& MPIMesh::getShard()
@@ -127,20 +96,20 @@ namespace Rodin::Geometry
     return m_shard;
   }
 
-  std::optional<Index> MPIMesh::getLocalIndex(size_t dimension, Index globalIdx) const
+  Optional<Index> MPIMesh::getLocalIndex(size_t dimension, Index globalIdx) const
   {
     const auto& map = getShard().getPolytopeMap(dimension).right;
     auto it = map.find(globalIdx);
     if (it == map.end())
       return std::nullopt;
-    return it->get_left();
+    return it->second;
   }
 
   Index MPIMesh::getGlobalIndex(size_t dimension, Index localIdx) const
   {
     const auto& shard = getShard();
     const auto& pm = shard.getPolytopeMap(dimension);
-    return pm.left.at(localIdx).get_right();
+    return pm.left.at(localIdx);
   }
 
   CellIterator MPIMesh::getCell() const
@@ -226,7 +195,7 @@ namespace Rodin::Geometry
     const auto idx = getLocalIndex(d, faceIdx);
     if (idx)
     {
-      if (!shard.isGhost(d, *idx))
+      if (shard.isOwned(d, *idx))
         local = shard.isInterface(*idx);
     }
     return boost::mpi::all_reduce(comm, local, std::logical_or<bool>());
@@ -241,7 +210,7 @@ namespace Rodin::Geometry
     const auto idx = getLocalIndex(d, faceIdx);
     if (idx)
     {
-      if (!shard.isGhost(d, *idx))
+      if (shard.isOwned(d, *idx))
         local = shard.isBoundary(*idx);
     }
     return boost::mpi::all_reduce(comm, local, std::logical_or<bool>());
@@ -254,7 +223,7 @@ namespace Rodin::Geometry
     Real local = 0;
     for (auto it = shard.getPolytope(3); it; ++it)
     {
-      if (!shard.isGhost(3, it->getIndex()))
+      if (shard.isOwned(3, it->getIndex()))
         local += it->getMeasure();
     }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
@@ -269,7 +238,7 @@ namespace Rodin::Geometry
     {
       if (it->getAttribute() == attr)
       {
-        if (!shard.isGhost(3, it->getIndex()))
+        if (shard.isOwned(3, it->getIndex()))
           local += it->getMeasure();
       }
     }
@@ -285,7 +254,7 @@ namespace Rodin::Geometry
     {
       if (attr.contains(it->getAttribute()))
       {
-        if (!shard.isGhost(3, it->getIndex()))
+        if (shard.isOwned(3, it->getIndex()))
           local += it->getMeasure();
       }
     }
@@ -299,7 +268,7 @@ namespace Rodin::Geometry
     Real local = 0;
     for (auto it = shard.getBoundary(); it; ++it)
     {
-      if (!shard.isGhost(it->getDimension(), it->getIndex()))
+      if (shard.isOwned(it->getDimension(), it->getIndex()))
         local += it->getMeasure();
     }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
@@ -314,7 +283,7 @@ namespace Rodin::Geometry
     {
       if (it->getAttribute() == attr)
       {
-        if (!shard.isGhost(it->getDimension(), it->getIndex()))
+        if (shard.isOwned(it->getDimension(), it->getIndex()))
           local += it->getMeasure();
       }
     }
@@ -330,7 +299,7 @@ namespace Rodin::Geometry
     {
       if (attr.contains(it->getAttribute()))
       {
-        if (!shard.isGhost(it->getDimension(), it->getIndex()))
+        if (shard.isOwned(it->getDimension(), it->getIndex()))
           local += it->getMeasure();
       }
     }
@@ -344,7 +313,7 @@ namespace Rodin::Geometry
     Real local = 0;
     for (auto it = shard.getPolytope(2); it; ++it)
     {
-      if (!shard.isGhost(2, it->getIndex()))
+      if (shard.isOwned(2, it->getIndex()))
         local += it->getMeasure();
     }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
@@ -359,7 +328,7 @@ namespace Rodin::Geometry
     {
       if (it->getAttribute() == attr)
       {
-        if (!shard.isGhost(2, it->getIndex()))
+        if (shard.isOwned(2, it->getIndex()))
           local += it->getMeasure();
       }
     }
@@ -375,7 +344,7 @@ namespace Rodin::Geometry
     {
       if (attr.contains(it->getAttribute()))
       {
-        if (!shard.isGhost(2, it->getIndex()))
+        if (shard.isOwned(2, it->getIndex()))
           local += it->getMeasure();
       }
     }
@@ -389,7 +358,7 @@ namespace Rodin::Geometry
     Real local = 0;
     for (auto it = shard.getPolytope(d); it; ++it)
     {
-      if (!shard.isGhost(d, it->getIndex()))
+      if (shard.isOwned(d, it->getIndex()))
         local += it->getMeasure();
     }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
@@ -404,7 +373,7 @@ namespace Rodin::Geometry
     {
       if (it->getAttribute() == attr)
       {
-        if (!shard.isGhost(d, it->getIndex()))
+        if (shard.isOwned(d, it->getIndex()))
           local += it->getMeasure();
       }
     }
@@ -420,7 +389,7 @@ namespace Rodin::Geometry
     {
       if (attr.contains(it->getAttribute()))
       {
-        if (!shard.isGhost(d, it->getIndex()))
+        if (shard.isOwned(d, it->getIndex()))
           local += it->getMeasure();
       }
     }
@@ -435,7 +404,7 @@ namespace Rodin::Geometry
     PolytopeTransformation* local;
     if (idx)
     {
-      if (!shard.isGhost(dimension, *idx))
+      if (shard.isOwned(dimension, *idx))
         local = shard.getPolytopeTransformation(dimension, *idx).copy();
     }
     auto res = boost::mpi::all_reduce(comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
@@ -457,7 +426,7 @@ namespace Rodin::Geometry
     boost::optional<Polytope::Type> local;
     if (idx)
     {
-      if (!shard.isGhost(dimension, *idx))
+      if (shard.isOwned(dimension, *idx))
         local = shard.getGeometry(dimension, *idx);
     }
     auto res = boost::mpi::all_reduce(comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
@@ -473,7 +442,7 @@ namespace Rodin::Geometry
     boost::optional<Attribute> local;
     if (idx)
     {
-      if (!shard.isGhost(dimension, *idx))
+      if (shard.isOwned(dimension, *idx))
         local = shard.getAttribute(dimension, *idx);
     }
     auto res = boost::mpi::all_reduce(comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
@@ -537,21 +506,21 @@ namespace Rodin::Geometry
   }
 
   void MPIMesh::save(
-    const boost::filesystem::path& filename, IO::FileFormat fmt, size_t precison) const
+    const boost::filesystem::path& filename, IO::FileFormat fmt) const
   {
     const auto& shard = getShard();
     shard.save(filename, fmt);
   }
 
-  Eigen::Map<const Math::PointVector> MPIMesh::getVertexCoordinates(Index globalIdx) const
+  Eigen::Map<const Math::SpatialPoint> MPIMesh::getVertexCoordinates(Index globalIdx) const
   {
     auto idx = getLocalIndex(0, globalIdx);
     const auto& shard = getShard();
     const auto& comm = m_context.getCommunicator();
-    Math::PointVector local;
+    Math::SpatialPoint local;
     if (idx)
     {
-      if (!shard.isGhost(0, *idx))
+      if (shard.isOwned(0, *idx))
         local = shard.getVertexCoordinates(*idx);
     }
     assert(local.size() >= 0);

@@ -7,7 +7,6 @@
 #ifndef RODIN_MATH_VECTOR_H
 #define RODIN_MATH_VECTOR_H
 
-#include <vector>
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
@@ -29,7 +28,7 @@ namespace Rodin::Math
   using SpatialVector =
     Eigen::Matrix<ScalarType, Eigen::Dynamic, 1, 0, RODIN_MAXIMAL_SPACE_DIMENSION, 1>;
 
-  using PointVector = SpatialVector<Real>;
+  using SpatialPoint = SpatialVector<Real>;
 
   template <class ScalarType, size_t Size>
   using FixedSizeVector = Eigen::Vector<ScalarType, Size>;
@@ -57,26 +56,6 @@ namespace Rodin::Math
 
   template <class ScalarType>
   using Vector128 = FixedSizeVector<ScalarType, 128>;
-
-  template <class SourceScalar, int SourceSize, class DestScalar, int DestSize>
-  void duplicate(const Eigen::Vector<SourceScalar, SourceSize>& src, Eigen::Vector<DestScalar, DestSize>& dest)
-  {
-    dest.resize(src.size());
-  }
-
-  template <class SourceScalar, int SourceSize, class DestScalar, int DestSize>
-  void copy(const Eigen::Vector<SourceScalar, SourceSize>& src, Eigen::Vector<DestScalar, DestSize>& dest)
-  {
-    assert(src.size() == dest.size());
-    std::copy(src.data(), src.data() + src.size(), dest.data());
-  }
-
-  template <class Scalar, class SourceScalar, int SourceSize, class DestScalar, int DestSize>
-  void axpy(Eigen::Vector<DestScalar, DestSize>& y, Scalar alpha, const Eigen::Vector<SourceScalar, SourceSize>& x)
-  {
-    assert(x.size() == y.size());
-    y.noalias() += alpha * x;
-  }
 }
 
 namespace Rodin::FormLanguage

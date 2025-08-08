@@ -36,7 +36,7 @@ namespace Rodin::Geometry
       using Parent::inverse;
 
       IsoparametricTransformation(Math::PointMatrix&& pm, FE&& fe)
-        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+        : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
           m_fe(std::move(fe))
       {
@@ -48,7 +48,7 @@ namespace Rodin::Geometry
        * pm : sdim x dof
        */
       IsoparametricTransformation(const Math::PointMatrix& pm, const FE& fe)
-        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+        : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
           m_fe(fe)
       {
@@ -57,7 +57,7 @@ namespace Rodin::Geometry
       }
 
       IsoparametricTransformation(Math::PointMatrix&& pm, const FE& fe)
-        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+        : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
           m_fe(fe)
       {
@@ -66,7 +66,7 @@ namespace Rodin::Geometry
       }
 
       IsoparametricTransformation(const Math::PointMatrix& pm, FE&& fe)
-        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+        : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
           m_fe(std::move(fe))
       {
@@ -124,14 +124,14 @@ namespace Rodin::Geometry
         const size_t pdim = getPhysicalDimension();
         res.resize(pdim, rdim);
         res.setZero();
-        Math::SpatialVector<Real> gradient;
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
-          m_fe.getGradient(local)(gradient, rc);
+          const auto basis = m_fe.getBasis(local);
           for (size_t i = 0; i < rdim; i++)
           {
+            const auto derivative = basis.template getDerivative<1>(i);
             assert(res.col(i).size() == m_pm.col(local).size());
-            res.col(i).noalias() += m_pm.col(local) * gradient.coeff(i);
+            res.col(i).noalias() += m_pm.col(local) * derivative(rc);
           }
         }
       }

@@ -132,7 +132,7 @@ namespace Rodin::Geometry
 
       const PolytopeIndex& getIndexMap(size_t dim) const;
 
-      const std::optional<Index> getIndex(size_t dim, const IndexArray& key) const;
+      const Optional<Index> getIndex(size_t dim, const IndexArray& key) const;
 
       Connectivity& setIncidence(const std::pair<size_t, size_t>& p, Incidence&& inc);
 

@@ -6,6 +6,7 @@
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
 
@@ -35,8 +36,8 @@ static constexpr Real tgv = std::numeric_limits<float>::max();
 
 using RealFES = P1<Real>;
 using VectorFES = P1<Math::Vector<Real>>;
-using RealGridFunction = GridFunction<RealFES>;
-using VectorGridFunction = GridFunction<VectorFES>;
+using RealGridFunction = GridFunction<RealFES, Math::Vector<Real>>;
+using VectorGridFunction = GridFunction<VectorFES, Math::Vector<Real>>;
 using ShapeGradient = VectorGridFunction;
 
 int main(int, char**)
@@ -187,7 +188,6 @@ int main(int, char**)
     Alert::Info() << "Computing conormal to GammaD..." << Alert::Raise;
     GridFunction conormal(dvfes);
     conormal = Grad(dist);
-    conormal.stableNormalize();
 
     Alert::Info() << "Computing shape gradient..." << Alert::Raise;
     auto hadamard = 1. / epsilon * u.getSolution() * p.getSolution() + ell;
@@ -225,8 +225,7 @@ int main(int, char**)
       std::vector<Point> cs;
       for (auto it = dOmega.getVertex(); !it.end(); ++it)
       {
-        const Point p(*it, it->getTransformation(),
-            Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
+        const Point p(*it, Polytope::Traits(Polytope::Type::Point).getVertex(0), it->getCoordinates());
         const Real tp = topo(p);
         if (Math::abs(1 - tc / tp) < 1e-5)
           cs.emplace_back(std::move(p));

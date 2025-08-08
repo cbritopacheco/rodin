@@ -47,12 +47,6 @@ namespace Rodin::Geometry
    */
   class PointBase
   {
-    enum class PolytopeStorage
-    {
-      Value,
-      Reference
-    };
-
     public:
       /// Denotes the type of coordinates.
       enum class Coordinates
@@ -62,26 +56,13 @@ namespace Rodin::Geometry
       };
 
       explicit
-      PointBase(
-          std::reference_wrapper<const Polytope> polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans,
-          const Math::SpatialVector<Real>& pc);
+      PointBase(const Polytope& polytope);
 
       explicit
-      PointBase(
-          std::reference_wrapper<const Polytope> polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans);
+      PointBase(const Polytope& polytope, const Math::SpatialPoint& pc);
 
       explicit
-      PointBase(
-          Polytope&& polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans,
-          const Math::SpatialVector<Real>& pc);
-
-      explicit
-      PointBase(
-          Polytope&& polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans);
+      PointBase(const Polytope& polytope, Math::SpatialPoint&& pc);
 
       /**
        * @brief Copy constructor.
@@ -173,11 +154,6 @@ namespace Rodin::Geometry
 
       const Polytope& getPolytope() const;
 
-      const PolytopeTransformation& getTransformation() const
-      {
-        return m_trans.get();
-      }
-
       const Math::SpatialVector<Real>& getPhysicalCoordinates() const;
 
       const Math::SpatialVector<Real>& getCoordinates(Coordinates coords = Coordinates::Physical) const;
@@ -202,18 +178,18 @@ namespace Rodin::Geometry
        */
       Real getDistortion() const;
 
+      PointBase& setPolytope(const Polytope& polytope);
+
       virtual const Math::SpatialVector<Real>& getReferenceCoordinates() const = 0;
 
     private:
-      PolytopeStorage m_polytopeStorage;
-      std::variant<const Polytope, std::reference_wrapper<const Polytope>> m_polytope;
-      std::reference_wrapper<const PolytopeTransformation> m_trans;
+      Polytope m_polytope;
 
-      mutable Threads::Mutable<std::optional<const Math::SpatialVector<Real>>> m_pc;
-      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix<Real>>> m_jacobian;
-      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix<Real>>> m_jacobianInverse;
-      mutable Threads::Mutable<std::optional<const Real>>              m_jacobianDeterminant;
-      mutable Threads::Mutable<std::optional<const Real>>              m_distortion;
+      mutable Threads::Mutable<Optional<const Math::SpatialVector<Real>>> m_pc;
+      mutable Threads::Mutable<Optional<const Math::SpatialMatrix<Real>>> m_jacobian;
+      mutable Threads::Mutable<Optional<const Math::SpatialMatrix<Real>>> m_jacobianInverse;
+      mutable Threads::Mutable<Optional<const Real>>              m_jacobianDeterminant;
+      mutable Threads::Mutable<Optional<const Real>>              m_distortion;
   };
 
   /**
@@ -237,84 +213,35 @@ namespace Rodin::Geometry
    */
   class Point final : public PointBase
   {
-    enum class RCStorage
-    {
-      Value,
-      Reference
-    };
-
     public:
       using Parent = PointBase;
 
       explicit
-      Point(
-          std::reference_wrapper<const Polytope> polytope,
-          std::reference_wrapper<const Math::SpatialVector<Real>> rc,
-          const Math::SpatialVector<Real>& pc)
-        : Point(polytope, std::cref(polytope.get().getTransformation()), rc, pc)
-      {}
+      Point(const Polytope& polytope, const Math::SpatialPoint& rc);
 
       explicit
-      Point(
-          std::reference_wrapper<const Polytope> polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector<Real>> rc,
-          const Math::SpatialVector<Real>& pc);
+      Point(const Polytope& polytope, Math::SpatialPoint&& rc);
 
       explicit
-      Point(
-          std::reference_wrapper<const Polytope> polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector<Real>&& rc,
-          const Math::SpatialVector<Real>& pc);
+      Point(const Polytope& polytope, const Math::SpatialPoint& rc, const Math::SpatialPoint& pc);
 
       explicit
-      Point(
-          std::reference_wrapper<const Polytope> polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector<Real>> rc);
+      Point(const Polytope& polytope, const Math::SpatialPoint& rc, Math::SpatialPoint&& pc);
 
       explicit
-      Point(
-          std::reference_wrapper<const Polytope> polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector<Real>&& rc);
+      Point(const Polytope& polytope, Math::SpatialPoint&& rc, const Math::SpatialPoint& pc);
 
       explicit
-      Point(
-          Polytope&& polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector<Real>> rc,
-          const Math::SpatialVector<Real>& pc);
-
-      explicit
-      Point(
-          Polytope&& polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector<Real>&& rc,
-          const Math::SpatialVector<Real>& pc);
-
-      explicit
-      Point(
-          Polytope&& polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans,
-          std::reference_wrapper<const Math::SpatialVector<Real>> rc);
-
-      explicit
-      Point(
-          Polytope&& polytope,
-          std::reference_wrapper<const PolytopeTransformation> trans,
-          Math::SpatialVector<Real>&& rc);
+      Point(const Polytope& polytope, Math::SpatialPoint&& rc, Math::SpatialPoint&& pc);
 
       Point(const Point& other);
 
       Point(Point&& other);
 
-      const Math::SpatialVector<Real>& getReferenceCoordinates() const override;
+      const Math::SpatialPoint& getReferenceCoordinates() const override;
 
     private:
-      const RCStorage m_rcStorage;
-      std::variant<const Math::SpatialVector<Real>, std::reference_wrapper<const Math::SpatialVector<Real>>> m_rc;
+      std::variant<const Math::SpatialPoint, std::reference_wrapper<Math::SpatialPoint>> m_rc;
   };
 
   template <class EigenDerived>

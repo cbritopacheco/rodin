@@ -44,7 +44,7 @@ namespace Rodin::Geometry::Euclidean
        */
       inline
       constexpr
-      std::optional<LineSegment2D<T>> connect(const Point2D& other) const;
+      Optional<LineSegment2D<T>> connect(const Point2D& other) const;
 
       /**
        * Computes the line segment where the start point is the current point
@@ -56,7 +56,7 @@ namespace Rodin::Geometry::Euclidean
        */
       inline
       constexpr
-      std::optional<LineSegment2D<T>> connect(const Line2D<T>& other) const;
+      Optional<LineSegment2D<T>> connect(const Line2D<T>& other) const;
 
       /**
        * Computes the line segment where the start point is the current point and
@@ -68,7 +68,7 @@ namespace Rodin::Geometry::Euclidean
        */
       inline
       constexpr
-      std::optional<LineSegment2D<T>> connect(const Circle<T>& other) const;
+      Optional<LineSegment2D<T>> connect(const Circle<T>& other) const;
   };
 }
 

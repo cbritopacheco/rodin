@@ -9,25 +9,28 @@
 namespace mpi = boost::mpi;
 
 using namespace Rodin;
+using namespace Rodin::MPI;
 
 int main(int argc, char** argv)
 {
   mpi::environment env(argc, argv);
   mpi::communicator world;
   Context::MPI mpi(env, world);
-  Geometry::MPISharder sharder(mpi);
+  Sharder sharder(mpi);
   if (world.rank() == 0)
   {
 
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 32, 32 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 3, 3 });
     mesh.getConnectivity().compute(2, 2);
-    mesh.getConnectivity().compute(2, 1);
+    // mesh.getConnectivity().compute(2, 1);
+    std::cout << mesh.getFaceCount() << std::endl;
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
     for (auto it = mesh.getCell(); it; ++it)
     {
-      mesh.setAttribute({it->getDimension(), it->getIndex()}, partitioner.getPartition(it->getIndex()) + 1);
+      mesh.setAttribute(
+          {it->getDimension(), it->getIndex()}, partitioner.getPartition(it->getIndex()) * 3 + 1);
     }
     mesh.save("Global.mesh", IO::FileFormat::MEDIT);
     std::cout << "Sharding into " << partitioner.getCount() << "...\n";

@@ -7,13 +7,12 @@
 #ifndef RODIN_IO_MFEM_H
 #define RODIN_IO_MFEM_H
 
-#include <iomanip>
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
+#include <ostream>
 
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
-#include "Rodin/Alert.h"
-#include "Rodin/Context.h"
 #include "Rodin/Geometry/Types.h"
 #include "Rodin/Geometry/Polytope.h"
 
@@ -104,7 +103,7 @@ namespace Rodin::IO::MFEM
   }
 
   inline
-  std::optional<Keyword> toKeyword(const char* str)
+  Optional<Keyword> toKeyword(const char* str)
   {
     Keyword res;
     if (str == Keyword::boundary)
@@ -186,7 +185,7 @@ namespace Rodin::IO::MFEM
 
   inline
   constexpr
-  std::optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
+  Optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
   {
     switch (t)
     {
@@ -222,7 +221,7 @@ namespace Rodin::IO::MFEM
 
   inline
   constexpr
-  std::optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
+  Optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
   {
     switch (t)
     {
@@ -249,7 +248,7 @@ namespace Rodin::IO::MFEM
   {
     template <class Iterator>
     inline
-    std::optional<unsigned int> operator()(Iterator begin, Iterator end) const
+    Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -277,7 +276,7 @@ namespace Rodin::IO::MFEM
       {}
 
       template <class Iterator>
-      std::optional<Math::PointVector> operator()(Iterator begin, Iterator end) const
+      Optional<Math::SpatialPoint> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::blank;
@@ -286,7 +285,7 @@ namespace Rodin::IO::MFEM
         using boost::spirit::x3::_attr;
 
         size_t i = 0;
-        Math::PointVector res(m_sdim);
+        Math::SpatialPoint res(m_sdim);
         const auto get_double = [&](auto& ctx) { assert(i < m_sdim); res(i++) = _attr(ctx); };
         const auto p = repeat(m_sdim)[double_[get_double]];
         const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
@@ -313,7 +312,7 @@ namespace Rodin::IO::MFEM
 
     template <class Iterator>
     inline
-    std::optional<Data> operator()(Iterator begin, Iterator end) const
+    Optional<Data> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -335,7 +334,7 @@ namespace Rodin::IO::MFEM
         return {};
       res.geometry = *g;
 
-     res.vertices.resize(Geometry::Polytope::getVertexCount(res.geometry));
+     res.vertices.resize(Geometry::Polytope::Traits(res.geometry).getVertexCount());
      size_t i = 0;
      const auto get_vertex = [&](auto& ctx) { res.vertices(i++) = _attr(ctx); };
      const auto pvs = repeat(res.vertices.size())[uint_[get_vertex]];
@@ -393,7 +392,7 @@ namespace Rodin::IO::MFEM
   {
     template <class Iterator>
     inline
-    std::optional<std::string> operator()(Iterator begin, Iterator end) const
+    Optional<std::string> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -419,7 +418,7 @@ namespace Rodin::IO::MFEM
     public:
       template <class Iterator>
       inline
-      std::optional<MeshHeader> operator()(Iterator begin, Iterator end) const
+      Optional<MeshHeader> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::blank;
@@ -503,18 +502,111 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Context::Local>>>
-    : public GridFunctionPrinterBase<Variational::P0<Range, Geometry::Mesh<Context::Local>>>
+  class GridFunctionLoader<
+    FileFormat::MFEM,
+    Variational::P1<Range, Geometry::Mesh<Context::Local>>,
+    Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
+    : public GridFunctionLoaderBase<
+        Variational::P1<Range, Geometry::Mesh<Context::Local>>,
+        Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
     public:
-      using FESType = Variational::P0<Range, Geometry::Mesh<Context::Local>>;
+      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 
-      using Parent = GridFunctionPrinterBase<FESType>;
+      using DataType = Math::Vector<ScalarType>;
 
-      GridFunctionPrinter(const ObjectType& gf)
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = GridFunctionLoaderBase<FESType, DataType>;
+
+      GridFunctionLoader(ObjectType& gf)
         : Parent(gf)
+      {}
+
+      void load(std::istream& is) override
+      {
+        using boost::spirit::x3::space;
+        using boost::spirit::x3::blank;
+        using boost::spirit::x3::uint_;
+        using boost::spirit::x3::_attr;
+        using boost::spirit::x3::char_;
+
+        MFEM::GridFunctionHeader header;
+        const auto get_fec = [&](auto& ctx) { header.fec = _attr(ctx); };
+        const auto get_vdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
+        const auto get_ordering = [&](auto& ctx) { header.ordering = static_cast<MFEM::Ordering>(_attr(ctx)); };
+
+        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        auto it = line.begin();
+        const auto pfes = boost::spirit::x3::string("FiniteElementSpace");
+        const bool rfes = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
+        assert(it == line.end() && rfes);
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it = line.begin();
+        const auto pfec = boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
+        bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
+        assert(it == line.end() && rfec);
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it = line.begin();
+        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[get_vdim];
+        bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
+        assert(it == line.end() && rvdim);
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it = line.begin();
+        const auto pordering = boost::spirit::x3::string("Ordering:") >> uint_[get_ordering];
+        bool rordering = boost::spirit::x3::phrase_parse(it, line.end(), pordering, space);
+        assert(it == line.end() && rordering);
+
+        auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        assert(header.vdim == fes.getVectorDimension());
+        auto& data = gf.getData();
+        if (data.size() > 0)
+        {
+          line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+          data.coeffRef(0) = std::stod(line);
+          assert(data.size() >= 0);
+          for (size_t i = 1; i < static_cast<size_t>(data.size()); i++)
+            is >> data.coeffRef(i);
+          if (header.ordering == MFEM::Ordering::VectorDimension)
+            data.transposeInPlace();
+        }
+      }
+
+    private:
+      size_t m_dimension;
+      size_t m_spaceDimension;
+      size_t m_currentLineNumber;
+  };
+
+  template <class Range, class Context, class Data>
+  class GridFunctionPrinterBase<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Context>>, Data>
+  : public Printer<Variational::GridFunction<Variational::P0<Range, Geometry::Mesh<Context>>, Data>>
+  {
+    public:
+      using RangeType = Range;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using DataType = Data;
+
+      using MeshType = Geometry::Mesh<Context>;
+
+      using FESType = Variational::P0<Range, MeshType>;
+
+      static constexpr FileFormat Format = FileFormat::MFEM;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = Printer<ObjectType>;
+
+      GridFunctionPrinterBase(const ObjectType& gf)
+        : m_gf(gf)
       {}
 
       void print(std::ostream& os) override
@@ -524,52 +616,46 @@ namespace Rodin::IO
         os << "FiniteElementSpace\n"
            << "FiniteElementCollection: " << "L2_" << fes.getMesh().getDimension() << "D_P0\n"
            << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: " << MFEM::Ordering::VectorDimension
+           << "Ordering: " << MFEM::Ordering::Nodes
            << "\n\n";
-        const auto& matrix = gf.getData();
-        const Real* data = matrix.data();
-        assert(matrix.size() >= 0);
-        for (size_t i = 0; i < static_cast<size_t>(matrix.size()); i++)
-          os << data[i] << '\n';
+        this->printData(os);
       }
-  };
 
-  template <class Range>
-  class GridFunctionLoader<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Local>>>
-    : public GridFunctionLoaderBase<Variational::P1<Range, Geometry::Mesh<Context::Local>>>
-  {
-    public:
-      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
 
-      using ObjectType = Variational::GridFunction<FESType>;
-
-      using Parent = GridFunctionLoaderBase<FESType>;
-
-      GridFunctionLoader(ObjectType& gf)
-        : Parent(gf)
-      {}
-
-      void load(std::istream& is) override;
+      virtual void printData(std::ostream& os) = 0;
 
     private:
-      size_t m_dimension;
-      size_t m_spaceDimension;
-      size_t m_currentLineNumber;
+      std::reference_wrapper<const ObjectType> m_gf;
   };
 
-  template <class Range>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context::Local>>>
-    : public GridFunctionPrinterBase<Variational::P1<Range, Geometry::Mesh<Context::Local>>>
+
+  template <class Range, class Context, class Data>
+  class GridFunctionPrinterBase<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context>>, Data>
+  : public Printer<Variational::GridFunction<Variational::P1<Range, Geometry::Mesh<Context>>, Data>>
   {
     public:
-      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
+      using RangeType = Range;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
-      using Parent = GridFunctionPrinterBase<FESType>;
+      using DataType = Data;
 
-      GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf)
+      using MeshType = Geometry::Mesh<Context>;
+
+      using FESType = Variational::P1<Range, MeshType>;
+
+      static constexpr FileFormat Format = FileFormat::MFEM;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = Printer<ObjectType>;
+
+      GridFunctionPrinterBase(const ObjectType& gf)
+        : m_gf(gf)
       {}
 
       void print(std::ostream& os) override
@@ -579,17 +665,47 @@ namespace Rodin::IO
         os << "FiniteElementSpace\n"
            << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension() << "D_P1\n"
            << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: " << MFEM::Ordering::VectorDimension
+           << "Ordering: " << MFEM::Ordering::Nodes
            << "\n\n";
-        const auto& matrix = gf.getData();
-        const Real* data = matrix.data();
-        assert(matrix.size() >= 0);
-        for (size_t i = 0; i < static_cast<size_t>(matrix.size()); i++)
+        this->printData(os);
+      }
+
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
+
+      virtual void printData(std::ostream& os) = 0;
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
+  };
+
+  template <class FES, class Scalar>
+  class GridFunctionPrinter<FileFormat::MFEM, FES, Math::Vector<Scalar>> final
+    : public GridFunctionPrinterBase<FileFormat::MFEM, FES, Math::Vector<Scalar>>
+  {
+    public:
+      using DataType = Math::Vector<Scalar>;
+
+      using ObjectType = Variational::GridFunction<FES, DataType>;
+
+      using Parent = GridFunctionPrinterBase<FileFormat::MFEM, FES, DataType>;
+
+      GridFunctionPrinter(const ObjectType& gf)
+        : Parent(gf)
+      {}
+
+      void printData(std::ostream& os) override
+      {
+        const auto& gf = this->getObject();
+        const auto& vec = gf.getData();
+        const auto* data = vec.data();
+        assert(vec.size() >= 0);
+        for (size_t i = 0; i < static_cast<size_t>(vec.size()); i++)
           os << data[i] << '\n';
       }
   };
 }
-
-#include "MFEM.hpp"
 
 #endif

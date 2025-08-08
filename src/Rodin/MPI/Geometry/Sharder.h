@@ -85,11 +85,11 @@ namespace Rodin::Geometry
       Context::MPI m_context;
       std::vector<Shard> m_shards;
   };
+}
 
-  /**
-   * @brief Alias for Sharder<Context::MPI>.
-   */
-  using MPISharder = Sharder<Context::MPI>;
+namespace Rodin::MPI
+{
+  using Sharder = Geometry::Sharder<Context::MPI>;
 }
 
 #endif

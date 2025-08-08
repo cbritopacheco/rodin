@@ -24,13 +24,20 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for SimplicialLDLT
+   */
+  template <class LinearSystemType>
+  SimplicialLDLT(Variational::ProblemBase<LinearSystemType>&) -> SimplicialLDLT<LinearSystemType>;
+
+  /**
    * @ingroup SimplicialLDLTSpecializations
    * @brief A direct sparse LDLT Cholesky factorizations without square root
    * for use with Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
   template <class Scalar>
-  class SimplicialLDLT<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class SimplicialLDLT<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -39,13 +46,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      SimplicialLDLT(ProblemType& pb)
+      SimplicialLDLT(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -57,9 +66,9 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        x = m_solver.compute(A).solve(b);
+        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
       inline
@@ -71,15 +80,6 @@ namespace Rodin::Solver
     private:
       Eigen::SimplicialLDLT<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for SimplicialLDLT
-   */
-  template <class Scalar>
-  SimplicialLDLT(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> SimplicialLDLT<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
-
 }
 
 #endif

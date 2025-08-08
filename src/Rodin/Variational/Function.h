@@ -22,12 +22,7 @@
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Utility/Overloaded.h"
 
-#include "Rodin/Variational/RangeType.h"
-
 #include "ForwardDecls.h"
-
-#include "RangeType.h"
-#include "RangeShape.h"
 
 namespace Rodin::FormLanguage
 {
@@ -119,57 +114,6 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets the set of attributes which will be interpreted as the
-       * domains to "trace".
-       *
-       * The domains to trace are interpreted as the domains where there
-       * shall be a continuous extension from values to the interior
-       * boundaries. If the trace domain is empty, then this has the
-       * semantic value that it has not been specified yet.
-       */
-      constexpr
-      const TraceDomain& getTraceDomain() const
-      {
-        return m_traceDomain;
-      }
-
-      constexpr
-      Transpose<FunctionBase> T() const
-      {
-        return Transpose<FunctionBase>(*this);
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return static_cast<const Derived&>(*this).getRangeShape();
-      }
-
-      /**
-       * @brief Evaluates the function on a Point belonging to the mesh.
-       * @note CRTP function to be overriden in Derived class.
-       */
-      constexpr
-      auto getValue(const Geometry::Point& p) const
-      {
-        return static_cast<const Derived&>(*this).getValue(p);
-      }
-
-      template <class T>
-      constexpr
-      void getValue(T& res, const Geometry::Point& p) const
-      {
-        if constexpr (Internal::HasGetValueMethod<Derived, T&, const Geometry::Point&>::Value)
-        {
-          static_cast<const Derived&>(*this).getValue(res, p);
-        }
-        else
-        {
-          res = getValue(p);
-        }
-      }
-
-      /**
        * @brief Evaluates the function on a Point belonging to the mesh.
        *
        * This calls the function get getValue(const Geometry::Point&).
@@ -177,24 +121,55 @@ namespace Rodin::Variational
       constexpr
       auto operator()(const Geometry::Point& p) const
       {
-        return getValue(p);
+        return this->getValue(p);
       }
 
       template <class T>
       constexpr
       void operator()(T& res, const Geometry::Point& p) const
       {
-        getValue(res, p);
+        this->getValue(res, p);
       }
 
-      auto coeff(size_t i, size_t j) const
+      auto operator()(size_t i) const
+      {
+        return Component(*this, i);
+      }
+
+      auto operator()(size_t i, size_t j) const
       {
         return Component(*this, i, j);
       }
 
-      auto coeff(size_t i) const
+      constexpr
+      auto x() const
       {
-        return Component(*this, i);
+        return Component(*this, 0);
+      }
+
+      constexpr
+      auto y() const
+      {
+        return Component(*this, 1);
+      }
+
+      constexpr
+      auto z() const
+      {
+        return Component(*this, 2);
+      }
+
+      constexpr
+      auto T() const
+      {
+        return Transpose(*this);
+      }
+
+      template <class ToRange>
+      constexpr
+      auto cast() const
+      {
+        return Cast<FunctionBase, ToRange>(*this);
       }
 
       /**
@@ -226,6 +201,21 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
+      /**
+       * @brief Gets the set of attributes which will be interpreted as the
+       * domains to "trace".
+       *
+       * The domains to trace are interpreted as the domains where there
+       * shall be a continuous extension from values to the interior
+       * boundaries. If the trace domain is empty, then this has the
+       * semantic value that it has not been specified yet.
+       */
+      constexpr
+      const TraceDomain& getTraceDomain() const
+      {
+        return m_traceDomain;
+      }
+
       Derived& getDerived()
       {
         return static_cast<Derived&>(*this);
@@ -236,11 +226,28 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this);
       }
 
-      template <class ToRange>
+      /**
+       * @brief Evaluates the function on a Point belonging to the mesh.
+       * @note CRTP function to be overriden in Derived class.
+       */
       constexpr
-      auto cast() const
+      auto getValue(const Geometry::Point& p) const
       {
-        return Cast<FunctionBase, ToRange>(*this);
+        return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      template <class T>
+      constexpr
+      void getValue(T& res, const Geometry::Point& p) const
+      {
+        if constexpr (Internal::HasGetValueMethod<Derived, T&, const Geometry::Point&>::Value)
+        {
+          static_cast<const Derived&>(*this).getValue(res, p);
+        }
+        else
+        {
+          res = this->getValue(p);
+        }
       }
 
       virtual FunctionBase* copy() const noexcept override
@@ -251,6 +258,80 @@ namespace Rodin::Variational
     private:
       FlatSet<Geometry::Attribute> m_traceDomain;
   };
+
+  template <class T>
+  class Function<T> : public FunctionBase<Function<T>>
+  {
+    public:
+      using Parent = FunctionBase<Function<T>>;
+
+      using RangeType = typename FormLanguage::Traits<T>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using TraceDomain = FlatSet<Geometry::Attribute>;
+
+      Function(const T& v)
+        : m_v(v)
+      {}
+
+      Function(const Function& other)
+        : Parent(other),
+          m_v(other.m_v)
+      {}
+
+      Function(Function&& other) noexcept
+        : Parent(std::move(other)),
+          m_v(std::move(other.m_v))
+      {}
+
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        if constexpr (std::is_invocable_r_v<RangeType, T, const Geometry::Point&>)
+        {
+          return m_v(p);
+        }
+        else if constexpr (std::is_invocable_v<T, RangeType&, const Geometry::Point&>)
+        {
+          RangeType res;
+          m_v(res, p);
+          return res;
+        }
+        else
+        {
+          return m_v;
+        }
+      }
+
+      constexpr
+      void getValue(RangeType& out, const Geometry::Point& p) const
+      {
+        if constexpr (std::is_invocable_r_v<RangeType, T, const Geometry::Point&>)
+        {
+          out = m_v(p);
+        }
+        else if constexpr (std::is_invocable_v<T, RangeType&, const Geometry::Point&>)
+        {
+          m_v(out, p);
+        }
+        else
+        {
+          out = m_v;
+        }
+      }
+
+      Function* copy() const noexcept override
+      {
+        return new Function(*this);
+      }
+
+    private:
+      T m_v;
+  };
+
+  template <class T>
+  Function(const T&) -> Function<T>;
 }
 
 namespace Rodin

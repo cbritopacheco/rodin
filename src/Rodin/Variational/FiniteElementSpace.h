@@ -24,13 +24,28 @@ namespace Rodin::Variational
   class FiniteElementSpaceBase
   {
     public:
+      struct LocalIndex
+      {
+        std::pair<size_t, Index> p;
+        Index local;
+      };
+
+      constexpr
       FiniteElementSpaceBase() = default;
 
+      constexpr
       FiniteElementSpaceBase(const FiniteElementSpaceBase&) = default;
 
+      constexpr
       FiniteElementSpaceBase(FiniteElementSpaceBase&&) = default;
 
+      constexpr
       FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
+
+      constexpr
+      FiniteElementSpaceBase& operator=(const FiniteElementSpaceBase&) = default;
+
+      virtual ~FiniteElementSpaceBase() = default;
 
       constexpr
       bool operator==(const FiniteElementSpaceBase& other) const
@@ -95,6 +110,23 @@ namespace Rodin::Variational
       using Parent = FiniteElementSpaceBase;
 
       using MeshType = Mesh;
+
+      constexpr
+      FiniteElementSpace() = default;
+
+      constexpr
+      FiniteElementSpace(const FiniteElementSpace&) = default;
+
+      constexpr
+      FiniteElementSpace(FiniteElementSpace&&) = default;
+
+      constexpr
+      FiniteElementSpace& operator=(FiniteElementSpace&&) = default;
+
+      constexpr
+      FiniteElementSpace& operator=(const FiniteElementSpace&) = default;
+
+      virtual ~FiniteElementSpace() = default;
 
       const Mesh& getMesh() const override
       {
@@ -170,6 +202,23 @@ namespace Rodin::Variational
   class FiniteElementSpaceMappingBase
   {
     public:
+      constexpr
+      FiniteElementSpaceMappingBase() = default;
+
+      constexpr
+      FiniteElementSpaceMappingBase(const FiniteElementSpaceMappingBase&) = default;
+
+      constexpr
+      FiniteElementSpaceMappingBase(FiniteElementSpaceMappingBase&&) = default;
+
+      constexpr
+      FiniteElementSpaceMappingBase& operator=(FiniteElementSpaceMappingBase&&) = default;
+
+      constexpr
+      FiniteElementSpaceMappingBase& operator=(const FiniteElementSpaceMappingBase&) = default;
+
+      virtual ~FiniteElementSpaceMappingBase() = default;
+
       /**
        * @brief Evaluates the mapped function on the reference coordinates.
        *
@@ -214,6 +263,23 @@ namespace Rodin::Variational
   class FiniteElementSpaceInverseMappingBase
   {
     public:
+      constexpr
+      FiniteElementSpaceInverseMappingBase() = default;
+
+      constexpr
+      FiniteElementSpaceInverseMappingBase(const FiniteElementSpaceInverseMappingBase&) = default;
+
+      constexpr
+      FiniteElementSpaceInverseMappingBase(FiniteElementSpaceInverseMappingBase&&) = default;
+
+      constexpr
+      FiniteElementSpaceInverseMappingBase& operator=(FiniteElementSpaceInverseMappingBase&&) = default;
+
+      constexpr
+      FiniteElementSpaceInverseMappingBase& operator=(const FiniteElementSpaceInverseMappingBase&) = default;
+
+      virtual ~FiniteElementSpaceInverseMappingBase() = default;
+
       /**
        * @brief Evaluates the mapped function on the physical coordinates.
        *

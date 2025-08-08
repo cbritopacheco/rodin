@@ -11,6 +11,7 @@
 #include <optional>
 #include <functional>
 
+#include "Rodin/Types.h"
 #include "Rodin/Plot/ForwardDecls.h"
 #include "Rodin/Plot/Backend/Renderer/Common.h"
 
@@ -48,7 +49,7 @@ namespace Rodin::Plot::Backend::Bases
       Renderer::DrawableGroup2D& getTopLevelDrawableGroup();
       const Renderer::DrawableGroup2D& getTopLevelDrawableGroup() const;
 
-      std::optional<std::reference_wrapper<BaseArtist2D>> m_parent;
+      Optional<std::reference_wrapper<BaseArtist2D>> m_parent;
       std::vector<std::unique_ptr<BaseArtist2D>> m_artists;
       std::vector<BaseDrawable2D*> m_drawables;
   };

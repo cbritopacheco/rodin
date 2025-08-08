@@ -169,7 +169,6 @@ void run(int id, const std::vector<Data>& grid)
 
     GridFunction diff(vh);
     diff = chi_e * Pow(u0 - ue, 2);
-    diff.setWeights();
     const Real error = Integral(diff);
     Alert::Success() << "L2 Error: " << error
                      << Alert::NewLine

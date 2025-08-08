@@ -45,7 +45,7 @@ namespace Rodin::Geometry::Euclidean
   template <class T>
   inline
   constexpr
-  std::optional<T> Line2D<T>::operator()(T x) const
+  Optional<T> Line2D<T>::operator()(T x) const
   {
     if (b() == T{0})
       return {};
@@ -87,7 +87,7 @@ namespace Rodin::Geometry::Euclidean
   template <class T>
   inline
   constexpr
-  std::optional<T> Line2D<T>::slope() const
+  Optional<T> Line2D<T>::slope() const
   {
     if (b() == T{0})
       return {};
@@ -98,7 +98,7 @@ namespace Rodin::Geometry::Euclidean
   template <class T>
   inline
   constexpr
-  std::optional<T> Line2D<T>::xIntercept() const
+  Optional<T> Line2D<T>::xIntercept() const
   {
     if (a() == T{0})
       return {};
@@ -109,7 +109,7 @@ namespace Rodin::Geometry::Euclidean
   template <class T>
   inline
   constexpr
-  std::optional<T> Line2D<T>::yIntercept() const
+  Optional<T> Line2D<T>::yIntercept() const
   {
     if (b() == T{0})
       return {};
@@ -136,7 +136,7 @@ namespace Rodin::Geometry::Euclidean
   template <class T>
   inline
   constexpr
-  std::optional<Point2D<T>> Line2D<T>::intersect(const Line2D<T>& other) const
+  Optional<Point2D<T>> Line2D<T>::intersect(const Line2D<T>& other) const
   {
     auto det = a() * other.b() - other.a() * b();
     if (det == T{0})
@@ -209,7 +209,7 @@ namespace Rodin::Geometry::Euclidean
   template <class T>
   inline
   constexpr
-  std::optional<LineSegment2D<T>> Line2D<T>::connect(const Circle<T>& other) const
+  Optional<LineSegment2D<T>> Line2D<T>::connect(const Circle<T>& other) const
   {
     // Compute line segment from line to center
     auto ls = connect(other.center());
