@@ -200,7 +200,7 @@ namespace Rodin::Variational
       auto x() const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
-        assert(getFiniteElementSpace().getVectorDimension() >= 1);
+        assert(m_fes.get().getVectorDimension() >= 1);
         return Component(static_cast<Derived&>(*this), 0);
       }
 
@@ -208,7 +208,7 @@ namespace Rodin::Variational
       auto y() const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
-        assert(getFiniteElementSpace().getVectorDimension() >= 2);
+        assert(m_fes.get().getVectorDimension() >= 2);
         return Component(static_cast<Derived&>(*this), 1);
       }
 
@@ -216,7 +216,7 @@ namespace Rodin::Variational
       auto z() const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
-        assert(getFiniteElementSpace().getVectorDimension() >= 3);
+        assert(m_fes.get().getVectorDimension() >= 3);
         return Component(static_cast<Derived&>(*this), 2);
       }
 
@@ -253,13 +253,13 @@ namespace Rodin::Variational
       constexpr
       size_t getSize() const
       {
-        return getFiniteElementSpace().getSize();
+        return m_fes.get().getSize();
       }
 
       constexpr
       size_t getDimension() const
       {
-        return getFiniteElementSpace().getVectorDimension();
+        return m_fes.get().getVectorDimension();
       }
 
       Derived& load(
@@ -350,7 +350,7 @@ namespace Rodin::Variational
       RangeType getValue(const Geometry::Point& p) const
       {
         RangeType res;
-        getValue(res, p);
+        static_cast<const Derived&>(*this).getValue(res, p);
         return res;
       }
 
@@ -411,22 +411,22 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& operator=(const FunctionBase<NestedDerived>& fn)
       {
-        return projectOnCells(fn);
+        return static_cast<Derived&>(*this).projectOnCells(fn);
       }
 
       Derived& operator=(std::function<RangeType(const Geometry::Point&)> fn)
       {
-        return projectOnCells(fn);
+        return static_cast<Derived&>(*this).projectOnCells(fn);
       }
 
       Derived& operator=(std::function<void(RangeType&, const Geometry::Point&)> fn)
       {
-        return projectOnCells(fn);
+        return static_cast<Derived&>(*this).projectOnCells(fn);
       }
 
       Derived& operator=(const RangeType& v)
       {
-        return projectOnCells([&](RangeType& res, const Geometry::Point&) { res = v; });
+        return static_cast<Derived&>(*this).projectOnCells([&](RangeType& res, const Geometry::Point&) { res = v; });
       }
 
       /**
@@ -438,33 +438,33 @@ namespace Rodin::Variational
       auto& projectOnCells(
           std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return projectOnCells(fn, FlatSet<Geometry::Attribute>{ attr });
+        return static_cast<Derived&>(*this).projectOnCells(fn, FlatSet<Geometry::Attribute>{ attr });
       }
 
       auto& projectOnCells(
           std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return projectOnCells(fn, FlatSet<Geometry::Attribute>{ attr });
+        return static_cast<Derived&>(*this).projectOnCells(fn, FlatSet<Geometry::Attribute>{ attr });
       }
 
       auto& projectOnCells(
           std::function<RangeType(const Geometry::Point&)> fn,
           const FlatSet<Geometry::Attribute>& attrs = {})
       {
-        return projectOnCells(Function(fn), attrs);
+        return static_cast<Derived&>(*this).projectOnCells(Function(fn), attrs);
       }
 
       auto& projectOnCells(
           std::function<void(RangeType&, const Geometry::Point&)> fn,
           const FlatSet<Geometry::Attribute>& attrs = {})
       {
-        return projectOnCells(Function(fn), attrs);
+        return static_cast<Derived&>(*this).projectOnCells(Function(fn), attrs);
       }
 
       template <class NestedDerived>
       Derived& projectOnCells(const FunctionBase<NestedDerived>& fn)
       {
-        return projectOnCells(fn, FlatSet<Geometry::Attribute>{});
+        return static_cast<Derived&>(*this).projectOnCells(fn, FlatSet<Geometry::Attribute>{});
       }
 
       /**
@@ -480,7 +480,7 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& projectOnCells(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
-        return projectOnCells(fn, FlatSet<Geometry::Attribute>{attr});
+        return static_cast<Derived&>(*this).projectOnCells(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       /**
@@ -499,13 +499,13 @@ namespace Rodin::Variational
       auto& projectOnBoundary(
           std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
+        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       auto& projectOnBoundary(
           std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
+        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       auto& projectOnBoundary(
@@ -514,12 +514,12 @@ namespace Rodin::Variational
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnBoundary(ScalarFunction(fn));
+          assert(m_fes.get().getVectorDimension() == 1);
+          return static_cast<Derived&>(*this).projectOnBoundary(ScalarFunction(fn));
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
-          return projectOnBoundary(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
+          return static_cast<Derived&>(*this).projectOnBoundary(VectorFunction(m_fes.get().getVectorDimension(), fn));
         }
         else
         {
@@ -534,12 +534,12 @@ namespace Rodin::Variational
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnBoundary(ScalarFunction(fn));
+          assert(m_fes.get().getVectorDimension() == 1);
+          return static_cast<Derived&>(*this).projectOnBoundary(ScalarFunction(fn));
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
-          return projectOnBoundary(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
+          return static_cast<Derived&>(*this).projectOnBoundary(VectorFunction(m_fes.get().getVectorDimension(), fn));
         }
         else
         {
@@ -551,19 +551,19 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn)
       {
-        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{});
+        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{});
       }
 
       template <class NestedDerived>
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
-        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
+        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       template <class NestedDerived>
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        const auto& fes = getFiniteElementSpace();
+        const auto& fes = m_fes.get();
         const auto& mesh = fes.getMesh();
         for (auto it = mesh.getBoundary(); !it.end(); ++it)
         {
@@ -572,7 +572,7 @@ namespace Rodin::Variational
           {
             const auto& polytope = *it;
             if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-              project(fn, { polytope.getDimension(), polytope.getIndex() });
+              static_cast<Derived&>(*this).project(fn, { polytope.getDimension(), polytope.getIndex() });
           }
         }
         return static_cast<Derived&>(*this);
@@ -581,13 +581,13 @@ namespace Rodin::Variational
       auto& projectOnFaces(
           std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
+        return static_cast<Derived&>(*this).projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       auto& projectOnFaces(
           std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
+        return static_cast<Derived&>(*this).projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       auto& projectOnFaces(
@@ -595,12 +595,12 @@ namespace Rodin::Variational
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnFaces(ScalarFunction(fn));
+          assert(m_fes.get().getVectorDimension() == 1);
+          return static_cast<Derived&>(*this).projectOnFaces(ScalarFunction(fn));
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
-          return projectOnFaces(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
+          return static_cast<Derived&>(*this).projectOnFaces(VectorFunction(m_fes.get().getVectorDimension(), fn));
         }
         else
         {
@@ -614,12 +614,12 @@ namespace Rodin::Variational
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnFaces(ScalarFunction(fn));
+          assert(m_fes.get().getVectorDimension() == 1);
+          return static_cast<Derived&>(*this).projectOnFaces(ScalarFunction(fn));
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
-          return projectOnFaces(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
+          return static_cast<Derived&>(*this).projectOnFaces(VectorFunction(m_fes.get().getVectorDimension(), fn));
         }
         else
         {
@@ -631,25 +631,25 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn)
       {
-        return projectOnFaces(fn, FlatSet<Geometry::Attribute>{});
+        return static_cast<Derived&>(*this).projectOnFaces(fn, FlatSet<Geometry::Attribute>{});
       }
 
       template <class NestedDerived>
       Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
-        return projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
+        return static_cast<Derived&>(*this).projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       template <class NestedDerived>
       Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        const auto& fes = getFiniteElementSpace();
+        const auto& fes = m_fes.get();
         const auto& mesh = fes.getMesh();
         for (auto it = mesh.getFace(); !it.end(); ++it)
         {
           const auto& polytope = *it;
           if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-            project(fn, { polytope.getDimension(), polytope.getIndex() });
+            static_cast<Derived&>(*this).project(fn, { polytope.getDimension(), polytope.getIndex() });
         }
         return static_cast<Derived&>(*this);
       }
@@ -657,13 +657,13 @@ namespace Rodin::Variational
       auto& projectOnInterfaces(
           std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
+        return static_cast<Derived&>(*this).projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       auto& projectOnInterfaces(
           std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{ attr });
+        return static_cast<Derived&>(*this).projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{ attr });
       }
 
       auto& projectOnInterfaces(
@@ -671,12 +671,12 @@ namespace Rodin::Variational
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnInterfaces(ScalarFunction(fn));
+          assert(m_fes.get().getVectorDimension() == 1);
+          return static_cast<Derived&>(*this).projectOnInterfaces(ScalarFunction(fn));
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
-          return projectOnInterfaces(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
+          return static_cast<Derived&>(*this).projectOnInterfaces(VectorFunction(m_fes.get().getVectorDimension(), fn));
         }
         else
         {
@@ -690,12 +690,12 @@ namespace Rodin::Variational
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnInterfaces(ScalarFunction(fn));
+          assert(m_fes.get().getVectorDimension() == 1);
+          return static_cast<Derived&>(*this).projectOnInterfaces(ScalarFunction(fn));
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
         {
-          return projectOnInterfaces(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
+          return static_cast<Derived&>(*this).projectOnInterfaces(VectorFunction(m_fes.get().getVectorDimension(), fn));
         }
         else
         {
@@ -707,26 +707,26 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& projectOnInterfaces(const FunctionBase<NestedDerived>& fn)
       {
-        return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{});
+        return static_cast<Derived&>(*this).projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{});
       }
 
       template <class NestedDerived>
       Derived& projectOnInterfaces(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
-        return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
+        return static_cast<Derived&>(*this).projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       template <class NestedDerived>
       Derived& projectOnInterfaces(
           const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        const auto& fes = getFiniteElementSpace();
+        const auto& fes = m_fes.get();
         const auto& mesh = fes.getMesh();
         for (auto it = mesh.getInterface(); !it.end(); ++it)
         {
           const auto& polytope = *it;
           if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-            project(fn, { polytope.getDimension(), polytope.getIndex() });
+            static_cast<Derived&>(*this).project(fn, { polytope.getDimension(), polytope.getIndex() });
         }
         return static_cast<Derived&>(*this);
       }
