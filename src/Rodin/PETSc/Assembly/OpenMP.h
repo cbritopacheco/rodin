@@ -20,8 +20,8 @@ namespace Rodin::Assembly
    */
   template <class FES>
   class OpenMP<
-    PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>> final
-    : public AssemblyBase<PETSc::Vector, Variational::LinearForm<FES, PETSc::Vector>>
+    ::Vec, Variational::LinearForm<FES, ::Vec>> final
+    : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
@@ -29,10 +29,18 @@ namespace Rodin::Assembly
         std::is_same_v<ScalarType, PetscScalar>,
         "FES::ScalarType must be PetscScalar for PETSc Vec assembly"
       );
-      using VectorType     = PETSc::Vector;
-      using LinearFormType = Variational::LinearForm<FES, VectorType>;
-      using Parent         = AssemblyBase<VectorType, LinearFormType>;
-      using InputType      = typename Parent::InputType;
+
+      using VectorType =
+        ::Vec;
+
+      using LinearFormType =
+        Variational::LinearForm<FES, VectorType>;
+
+      using Parent =
+        AssemblyBase<VectorType, LinearFormType>;
+
+      using InputType =
+        typename Parent::InputType;
 
       OpenMP() = default;
 
@@ -139,10 +147,10 @@ namespace Rodin::Assembly
   /**
    * @brief OpenMP assembly for PETSc Mat (bilinear form)
    */
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class OpenMP<
-    ::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>> final
-    : public AssemblyBase<::Mat, Variational::BilinearForm<TrialFES, TestFES, ::Mat>>
+    ::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
+    : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
   {
     public:
       using DotType       = typename FormLanguage::Dot<
@@ -152,13 +160,21 @@ namespace Rodin::Assembly
         std::is_same_v<DotType, PetscScalar>,
         "FES ScalarTypes must yield PetscScalar for PETSc Mat assembly"
       );
-      using OperatorType    = ::Mat;
+
+      using OperatorType =
+        ::Mat;
+
       using BilinearFormType =
-        Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+        Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
+
       using LocalBilinearFormIntegratorBaseType =
-        Variational::LocalBilinearFormIntegratorBase<PetscScalar>
-      using Parent          = AssemblyBase<OperatorType, BilinearFormType>;
-      using InputType       = typename Parent::InputType;
+        Variational::LocalBilinearFormIntegratorBase<PetscScalar>;
+
+      using Parent =
+        AssemblyBase<OperatorType, BilinearFormType>;
+
+      using InputType =
+        typename Parent::InputType;
 
       OpenMP() = default;
       OpenMP(const OpenMP& other)

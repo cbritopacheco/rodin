@@ -50,6 +50,7 @@ target_link_libraries(RodinPETSc
   PETSc::PETSc)
 
 if (RODIN_USE_OPENMP)
-  target_link_libraries(RodinPETSc PUBLIC Rodin::OpenMP)
+  find_package(OpenMP REQUIRED)
+  target_link_libraries(RodinPETSc PUBLIC OpenMP::OpenMP_CXX)
 endif()
 
