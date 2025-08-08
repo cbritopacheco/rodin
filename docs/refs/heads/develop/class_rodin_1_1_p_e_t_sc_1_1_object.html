@@ -64,95 +64,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-template">template&lt;class Handle&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_p_e_t_sc.html">PETSc</a>::<wbr/></span>Object <span class="m-thin">class</span>
         </h1>
         <p>Base‐class for any wrapper around a PETSc object.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#derived-classes">Derived classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
 <p>Each derived instance is automatically tracked in a per‐thread registry, and any remaining PETSc handles are destroyed at PetscFinalize().</p>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::Solver::KSP</a>
-            </dt>
-            <dd>PETSc <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> (Krylov) linear solver wrapper.</dd>
-          </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt>
-              struct <a href="struct_rodin_1_1_p_e_t_sc_1_1_object_1_1_registry.html" class="m-doc">Registry</a>
-            </dt>
-            <dd><a href="struct_rodin_1_1_p_e_t_sc_1_1_object_1_1_registry.html" class="m-doc">Registry</a> for tracking all live wrappers.</dd>
-          </dl>
-        </section>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ad97170a7be4b1b9ec11551cb0f457903" class="m-doc">Object</a>(</span><span class="m-doc-wrap">)</span>
-            </dt>
-            <dd>Construct and register this wrapper.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a977a7566eb9b4a8e95bf8e91f9ea3b00" class="m-doc">~Object</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Virtual destructor.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aea83d6c7d5e9005cf48997a9be6a4060" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) -&gt; ::PetscObject&amp; <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Access the wrapped PETSc handle.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ad97170a7be4b1b9ec11551cb0f457903"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />PETSc::<wbr />Object::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad97170a7be4b1b9ec11551cb0f457903" class="m-doc-self">Object</a>(</span><span class="m-doc-wrap">)</span></span>
-            </h3>
-            <p>Construct and register this wrapper.</p>
-<p>Installs the PetscFinalize hook on first construction, and tracks this instance in the per‐thread registry.</p>
-          </div></section>
-          <section class="m-doc-details" id="a977a7566eb9b4a8e95bf8e91f9ea3b00"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />PETSc::<wbr />Object::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a977a7566eb9b4a8e95bf8e91f9ea3b00" class="m-doc-self">~Object</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Virtual destructor.</p>
-<p>Declared pure to force derived classes to define their own destructor, ensuring proper PETSc cleanup.</p>
-          </div></section>
-          <section class="m-doc-details" id="aea83d6c7d5e9005cf48997a9be6a4060"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">::PetscObject&amp; Rodin::<wbr />PETSc::<wbr />Object::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea83d6c7d5e9005cf48997a9be6a4060" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Access the wrapped PETSc handle.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Reference to the internal PetscObject.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-        </section>
       </div>
     </div>
   </div>
