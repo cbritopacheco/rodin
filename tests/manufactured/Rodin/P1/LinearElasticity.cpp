@@ -19,7 +19,7 @@ using namespace Rodin::Solver;
 using namespace Rodin::Test::Random;
 
 /**
- * @brief Manufactured solutions for the 2D isotropic linear elasticity problem.
+ * @brief Manufactured solutions for the linear elasticity problem.
  *
  * The strong form is:
  * @f[
@@ -32,7 +32,7 @@ using namespace Rodin::Test::Random;
  *   \quad \varepsilon(u)=\tfrac12(\nabla u + (\nabla u)^T),
  * @f]
  * with Lamé parameters @f$\lambda,\mu>0@f$.  The weak form: Find
- * @f$u\in [V]^2@f$ such that
+ * @f$ u\in [V]^2 @f$ such that
  * @f[
  *   \int_\Omega \bigl[\lambda\,\mathrm{div}(u)\,\mathrm{div}(v)
  *       + 2\mu\,\varepsilon(u):\varepsilon(v)\bigr]\,dx = 0,
@@ -73,7 +73,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
    * @f[ \lambda = 1.0, \quad \mu = 1.0. @f]
    *
    * Manufactured solution (displacement):
-   * @f[ u_{\rm exact}(x,y) = \begin{pmatrix}x\\y\end{pmatrix}. @f]
+   * @f[ u_{\rm exact}(x,y) = \begin{pmatrix} x \\ y \end{pmatrix}. @f]
    *
    * Boundary data:
    * @f[ g(x,y)=u_{\rm exact}(x,y). @f]
@@ -148,14 +148,14 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
    *     \end{pmatrix}.
    * @f]
    *
-   * Since \f$u_{\rm exact}\in [\mathbb{P}_1]^2\f$, the stress field
-   * \f$\sigma(u_{\rm exact})\f$ is constant and \f$f = -\nabla\!\cdot\sigma = 0.\f$
+   * Since @f$u_{\rm exact}\in [\mathbb{P}_1]^2@f$, the stress field
+   * @f$\sigma(u_{\rm exact})@f$ is constant and @f$f = -\nabla\!\cdot\sigma = 0.@f$
    *
    * Boundary data:
    * @f[ g(x,y) = u_{\rm exact}(x,y). @f]
    *
-   * We verify that the discrete \f$L^2\f$–error vanishes exactly on a
-   * \f$16\times16\f$ mesh.
+   * We verify that the discrete @f$ L^2 @f$–error vanishes exactly on a
+   * @f$ 16 \times 16 @f$ mesh.
    */
   TEST_P(Manufactured_LinearElasticity_Test_16x16, AffineGeneral)
   {
@@ -224,7 +224,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
    * @f[
    *   u_{\rm exact}(x,y)
    *   = \begin{pmatrix}
-   *       \sin(\pi x)\,\cos(\pi y) \\[6pt]
+   *       \sin(\pi x)\,\cos(\pi y) \\[4pt]
    *       \cos(\pi x)\,\sin(\pi y)
    *     \end{pmatrix}.
    * @f]
@@ -232,7 +232,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
    * Lamé parameters:
    * @f[ \lambda = 1.0,\quad \mu = 1.0. @f]
    *
-   * Body force \f$f = -\nabla\!\cdot\sigma(u_{\rm exact})\f$ can be shown to be
+   * Body force @f$f = -\nabla\!\cdot\sigma(u_{\rm exact})@f$ can be shown to be
    * @f[
    *   f(x,y)
    *   = (2\lambda + 4\mu)\,\pi^2
@@ -245,8 +245,8 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
    * Boundary data:
    * @f[ g(x,y) = u_{\rm exact}(x,y). @f]
    *
-   * We verify that the discrete \f$L^2\f$–error of the computed solution
-   * vanishes (up to RODIN_FUZZY_CONSTANT) on a \f$16\times16\f$ mesh.
+   * We verify that the discrete @f$L^2@f$–error of the computed solution
+   * vanishes (up to RODIN_FUZZY_CONSTANT) on a @f$16\times16@f$ mesh.
    */
   TEST_P(Manufactured_LinearElasticity_Test_16x16, MixedTrigonometric)
   {
@@ -335,9 +335,9 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
    * @f[ \lambda = 2.5,\quad \mu = 0.75. @f]
    *
    * We compute the body force 
-   * \f[
+   * @f[
    *   f(x,y) = -\nabla\!\cdot\sigma\bigl(u_{\rm exact}(x,y)\bigr),
-   * \]
+   * @f]
    * which works out to the vector
    * @f[
    *   f(x,y)
@@ -357,8 +357,8 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
    *   g(x,y) = u_{\rm exact}(x,y).
    * @f]
    *
-   * We verify that the discrete \f$L^2\f$–error vanishes (up to RODIN_FUZZY_CONSTANT)
-   * on a \f$32\times32\f$ mesh of either triangles or quads.
+   * We verify that the discrete @f$L^2@f$–error vanishes (up to RODIN_FUZZY_CONSTANT)
+   * on a @f$32\times32@f$ mesh of either triangles or quads.
    */
   TEST_P(Manufactured_LinearElasticity_Test_32x32, ComplexPolyTrig)
   {
@@ -460,14 +460,14 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
    *     \end{pmatrix}.
    * @f]
    *
-   * Since \f$u_{\rm exact}\in [\mathbb{P}_1]^2\f$, the stress field
-   * \f$\sigma(u_{\rm exact})\f$ is constant and \f$f = -\nabla\!\cdot\sigma = 0.\f$
+   * Since @f$u_{\rm exact}\in [\mathbb{P}_1]^2@f$, the stress field
+   * @f$\sigma(u_{\rm exact})@f$ is constant and @f$f = -\nabla\!\cdot\sigma = 0.@f$
    *
    * Boundary data:
    * @f[ g(x,y) = u_{\rm exact}(x,y). @f]
    *
-   * We verify that the discrete \f$L^2\f$–error vanishes exactly on a
-   * \f$16\times16\f$ mesh.
+   * We verify that the discrete @f$L^2@f$–error vanishes exactly on a
+   * @f$16\times16@f$ mesh.
    */
   TEST_P(Manufactured_LinearElasticity_Test_16x16, AffineGeneralDisplaced)
   {

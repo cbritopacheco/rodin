@@ -74,7 +74,7 @@ namespace Rodin::Geometry
     if (d == 0)
     {
       const Index childIdx = m_sidx[0];
-      const auto [it, inserted] = m_s2ps[0].right.insert({ parentIdx, childIdx });
+      const auto [it, inserted] = m_s2ps[0].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
       if (inserted) // Vertex was not already in the map
       {
         m_s2ps[0].left.push_back(parentIdx);
@@ -82,7 +82,8 @@ namespace Rodin::Geometry
         m_flags[0].push_back(flags);
         m_sidx[0] += 1;
       }
-      res = std::pair<Index, Boolean>{ it->second, inserted };
+      res.first = it->second;
+      res.second = inserted;
     }
     else
     {
@@ -116,7 +117,8 @@ namespace Rodin::Geometry
         // Add polytope with original geometry and new vertex ordering
         build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
       }
-      res = std::pair<Index, Boolean>{ it->second, inserted };
+      res.first = it->second;
+      res.second = inserted;
     }
     m_dimension = std::max(m_dimension, d);
     return res;

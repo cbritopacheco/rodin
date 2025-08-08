@@ -1,5 +1,5 @@
-#ifndef RODIN_GEOMETRY_MPISHARDER_H
-#define RODIN_GEOMETRY_MPISHARDER_H
+#ifndef RODIN_MPI_GEOMETRY_SHARDER_H
+#define RODIN_MPI_GEOMETRY_SHARDER_H
 
 #include <boost/mpi/config.hpp>
 
@@ -12,21 +12,15 @@ namespace Rodin::Geometry
 {
   /**
    * @brief Utility for distributing a global mesh across MPI ranks by
-   *        splitting into per-rank shards, scattering them from a root,
-   *        and gathering the local mesh on each rank.
-   *
-   * The typical usage is:
-   * @code
-   *   MPISharder sharder(ctx);
-   *   auto mpiMesh = sharder.distribute(partitioner, rootRank);
-   * @endcode
+   * splitting into per-rank shards, scattering them from a root, and gathering
+   * the local mesh on each rank.
    */
   template <>
   class Sharder<Context::MPI>
   {
     public:
       /**
-       * @brief Construct an MPISharder with the given MPI context.
+       * @brief Construct a Sharder with the given MPI context.
        * @param context The MPI context (communicator and environment).
        */
       Sharder(const Context::MPI& context);

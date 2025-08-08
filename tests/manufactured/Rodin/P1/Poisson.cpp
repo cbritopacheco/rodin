@@ -20,7 +20,7 @@ using namespace Rodin::Test::Random;
 
 
 /**
- * @brief Manufactured solutions for the Poisson problem using P1 spaces.
+ * @brief Manufactured solutions for the Poisson problem.
  *
  * The system is given by:
  * @f[

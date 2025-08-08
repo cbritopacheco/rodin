@@ -20,13 +20,13 @@ using namespace Rodin::Solver;
  *
  * We solve the first-order problem:
  * @f[
- *   \Div(u) = f \quad 	ext{in } \Omega,
+ *   \nabla \cdot (u) = f \quad 	ext{in } \Omega,
  *   \quad u = g \quad \text{on } \partial\Omega.
  * @f]
  *
  * The least-squares weak form is: Find @f$u\in V^2@f$ such that
  * @f[
- *   \int_\Omega \Div(u)\,\Div(v)\,dx = \int_\Omega f\,\Div(v)\,dx,
+ *   \int_\Omega \nabla \cdot (u)\,\nabla \cdot (v)\,dx = \int_\Omega f\,\nabla \cdot (v)\,dx,
  * @f]
  * for all @f$v\in V^2@f$, with the essential boundary condition @f$u=g@f$.
  */
@@ -85,7 +85,7 @@ namespace Rodin::Tests::Manufactured::DivPoisson
 
   /**
    * u(x,y) = (x, y)
-   * Div(u) = 2
+   * \nabla \cdot u = 2
    */
   TEST_P(Manufactured_DivPoisson_Test_32x32, Divergence_Linear)
   {
@@ -116,7 +116,7 @@ namespace Rodin::Tests::Manufactured::DivPoisson
 
   /**
    * u(x,y) = (x(1-x)y, y(1-y)x)
-   * Div(u) = (1-2x)y + (1-2y)x
+   * \nabla \cdot u = (1-2x)y + (1-2y)x
    */
   TEST_P(Manufactured_DivPoisson_Test_32x32, Divergence_Polynomial)
   {
