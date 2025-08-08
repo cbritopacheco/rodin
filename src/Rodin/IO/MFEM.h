@@ -573,7 +573,7 @@ namespace Rodin::IO
           assert(data.size() >= 0);
           for (size_t i = 1; i < static_cast<size_t>(data.size()); i++)
             is >> data.coeffRef(i);
-          if (header.ordering == MFEM::Ordering::Nodes)
+          if (header.ordering == MFEM::Ordering::VectorDimension)
             data.transposeInPlace();
         }
       }
@@ -616,7 +616,7 @@ namespace Rodin::IO
         os << "FiniteElementSpace\n"
            << "FiniteElementCollection: " << "L2_" << fes.getMesh().getDimension() << "D_P0\n"
            << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: " << MFEM::Ordering::VectorDimension
+           << "Ordering: " << MFEM::Ordering::Nodes
            << "\n\n";
         this->printData(os);
       }
@@ -665,7 +665,7 @@ namespace Rodin::IO
         os << "FiniteElementSpace\n"
            << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension() << "D_P1\n"
            << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: " << MFEM::Ordering::VectorDimension
+           << "Ordering: " << MFEM::Ordering::Nodes
            << "\n\n";
         this->printData(os);
       }
