@@ -7,8 +7,11 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
-#include "Rodin/FormLanguage/List.h"
+#include "Rodin/Math/Traits.h"
 #include "Rodin/Math/SparseMatrix.h"
+
+#include "Rodin/FormLanguage/List.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 #include "Rodin/Assembly/ForwardDecls.h"
 

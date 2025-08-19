@@ -4,7 +4,6 @@
 #include <Eigen/Geometry>
 
 #include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/PolytopeTransformation.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
@@ -20,9 +19,11 @@ namespace Rodin::Variational
     public:
       using ScalarType = Real;
 
-      using VectorType = Math::SpatialVector<ScalarType>;
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       using Parent = VectorFunctionBase<ScalarType, FaceNormal>;
+
+      using Parent::traceOf;
 
       /**
        * @brief Constructs the outward unit on a face.
@@ -43,33 +44,27 @@ namespace Rodin::Variational
           m_sdim(std::move(other.m_sdim))
       {}
 
-      inline
       constexpr
       size_t getDimension() const
       {
         return m_sdim;
       }
 
-      VectorType getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        VectorType res;
-        getValue(res, p);
-        return res;
-      }
-
-      void getValue(VectorType& res, const Geometry::Point& p) const
-      {
+        static thread_local SpatialVectorType s_res;
         const auto& polytope = p.getPolytope();
-        const auto& vs = p.getPolytope().getVertices();
-        const auto& d = polytope.getDimension();
-        const auto& i = polytope.getIndex();
+        const auto& vs = polytope.getVertices();
+        const auto  d  = polytope.getDimension();
+        const auto  i  = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         assert(d == mesh.getDimension() - 1);
         const auto& jacobian = p.getJacobian();
-        res.resize(m_sdim);
+
+        s_res.resize(m_sdim);
         if (jacobian.rows() == 2)
         {
-          res << jacobian(1, 0), -jacobian(0, 0);
+          s_res << jacobian(1,0), -jacobian(0,0);
         }
         else if (jacobian.rows() == 3)
         {
@@ -78,17 +73,16 @@ namespace Rodin::Variational
             const Index v1 = vs[0];
             const Index v2 = vs[1];
             Eigen::Vector3<ScalarType> a =
-              mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
+                mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
             Eigen::Vector3<ScalarType> n;
             n << jacobian(1, 0), -jacobian(0, 0), jacobian(2, 0);
             n = n.cross(a);
             n.stableNormalize();
-            res = n.cross(a) + n * (n.dot(a));
-            return;
+            s_res = n.cross(a) + n * (n.dot(a));
           }
           else if (jacobian.cols() == 2)
           {
-            res <<
+            s_res <<
               jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1),
               jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1),
               jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
@@ -97,11 +91,12 @@ namespace Rodin::Variational
         else
         {
           assert(false);
-          res.setConstant(NAN);
+          s_res.setConstant(Math::nan<ScalarType>());
         }
 
-        const auto& incidence = mesh.getConnectivity().getIncidence({ d, d + 1 }, i);
+        const auto& incidence = mesh.getConnectivity().getIncidence({d, d+1}, i);
         assert(incidence.size() == 1 || incidence.size() == 2);
+
         const auto& traceDomain = getTraceDomain();
         if (traceDomain.size() == 0)
         {
@@ -113,49 +108,39 @@ namespace Rodin::Variational
         }
         else
         {
-          for (const Index i : incidence)
+          bool matched = false;
+          for (const Index cell : incidence)
           {
-            auto pit = mesh.getPolytope(d + 1, i);
+            auto pit = mesh.getPolytope(d + 1, cell);
             if (traceDomain.contains(pit->getAttribute()))
             {
               Integer ori = -1;
               for (auto vit = pit->getVertex(); vit; ++vit)
               {
                 const auto v = vit->getCoordinates() - polytope.getVertex()->getCoordinates();
-                if (res.dot(v) < 0)
+                if (s_res.dot(v) < 0)
                 {
                   ori *= -1;
                   break;
                 }
               }
-              res *= ori;
-              res.normalize();
-              return;
+              s_res *= ori;
+              s_res.normalize();
+              matched = true;
+              break;
             }
           }
 
-          UndeterminedTraceDomainException(
+          if (!matched)
+          {
+            UndeterminedTraceDomainException(
               *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
+          }
         }
+        return s_res;
       }
 
-      inline
-      constexpr
-      FaceNormal& traceOf(Geometry::Attribute attr)
-      {
-        Parent::traceOf(attr);
-        return *this;
-      }
-
-      inline
-      constexpr
-      FaceNormal& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        Parent::traceOf(attrs);
-        return *this;
-      }
-
-      inline FaceNormal* copy() const noexcept override
+      FaceNormal* copy() const noexcept override
       {
         return new FaceNormal(*this);
       }

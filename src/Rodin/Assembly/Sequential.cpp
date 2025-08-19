@@ -11,7 +11,7 @@
 namespace Rodin::Assembly
 {
   SequentialIteration<Geometry::Mesh<Context::Local>>
-  ::SequentialIteration(const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region region)
+  ::SequentialIteration(const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region& region)
     : m_mesh(mesh), m_region(region)
   {}
 
@@ -20,22 +20,22 @@ namespace Rodin::Assembly
     Geometry::PolytopeIterator it;
     switch (m_region)
     {
-      case Variational::Integrator::Region::Cells:
+      case Geometry::Region::Cells:
       {
         it = m_mesh.get().getCell();
         break;
       }
-      case Variational::Integrator::Region::Faces:
+      case Geometry::Region::Faces:
       {
         it = m_mesh.get().getFace();
         break;
       }
-      case Variational::Integrator::Region::Boundary:
+      case Geometry::Region::Boundary:
       {
         it = m_mesh.get().getBoundary();
         break;
       }
-      case Variational::Integrator::Region::Interface:
+      case Geometry::Region::Interface:
       {
         it = m_mesh.get().getInterface();
         break;

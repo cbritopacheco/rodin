@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_P1_P1ELEMENT_HPP
 #define RODIN_VARIATIONAL_P1_P1ELEMENT_HPP
 
+#include "Rodin/Math/Common.h"
+
 #include "P1Element.h"
 
 namespace Rodin::Variational

@@ -45,7 +45,7 @@ int main(int, char**)
   grad = Grad(gf);
 
   GridFunction trace(vfes);
-  trace.projectOnFaces(Grad(gf).traceOf(1));
+  trace.project(Region::Faces, Grad(gf).traceOf(1));
 
   mesh.save("Grid.mesh");
   gf.save("Function.gf");

@@ -10,6 +10,8 @@
 #include "ShapeFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
+#include <cmath>
+#include <limits>
 
 namespace Rodin::Variational
 {
@@ -180,7 +182,7 @@ namespace Rodin::Variational
       {
         switch (getRegion())
         {
-          case Region::Cells:
+          case Geometry::Region::Cells:
           {
             auto lfi = Variational::Integral(m_v);
             if (m_attrs.size() > 0)
@@ -189,7 +191,7 @@ namespace Rodin::Variational
             m_lf.assemble();
             return m_value.emplace(m_lf(m_u.get()));
           }
-          case Region::Boundary:
+          case Geometry::Region::Boundary:
           {
             auto lfi = Variational::BoundaryIntegral(m_v);
             if (m_attrs.size() > 0)
@@ -198,7 +200,7 @@ namespace Rodin::Variational
             m_lf.assemble();
             return m_value.emplace(m_lf(m_u.get()));
           }
-          case Region::Faces:
+          case Geometry::Region::Faces:
           {
             auto lfi = Variational::FaceIntegral(m_v);
             if (m_attrs.size() > 0)
@@ -207,7 +209,7 @@ namespace Rodin::Variational
             m_lf.assemble();
             return m_value.emplace(m_lf(m_u.get()));
           }
-          case Region::Interface:
+          case Geometry::Region::Interface:
           {
             auto lfi = Variational::InterfaceIntegral(m_v);
             if (m_attrs.size() > 0)
@@ -218,7 +220,7 @@ namespace Rodin::Variational
           }
         }
         assert(false);
-        return NAN;
+        return Math::nan<ScalarType>();
       }
 
       /**
@@ -259,7 +261,7 @@ namespace Rodin::Variational
         return Integrator::Type::Linear;
       }
 
-      virtual Region getRegion() const = 0;
+      virtual Geometry::Region getRegion() const = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -398,7 +400,7 @@ namespace Rodin::Variational
         return res;
       }
 
-      virtual Integrator::Region getRegion() const override = 0;
+      virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -521,7 +523,7 @@ namespace Rodin::Variational
         return res;
       }
 
-      virtual Integrator::Region getRegion() const override = 0;
+      virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 

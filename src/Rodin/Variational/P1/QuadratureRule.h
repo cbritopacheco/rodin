@@ -112,12 +112,12 @@ namespace Rodin::Variational
           const auto& rc = m_qf->getPoint(0);
           const size_t d = polytope.getDimension();
           const Index idx = polytope.getIndex();
-          const auto& integrand = getIntegrand().getDerived();
+          const auto& integrand = getIntegrand();
           const auto& fes = integrand.getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(d, idx);
           m_basis.resize(fe.getCount());
           for (size_t i = 0; i < fe.getCount(); i++)
-            fe.getBasis(i)(m_basis[i], rc);
+            m_basis[i] = fe.getBasis(i)(rc);
         }
         return *this;
       }
@@ -127,7 +127,7 @@ namespace Rodin::Variational
         return m_weight * m_distortion * m_basis[local];
       }
 
-      virtual Integrator::Region getRegion() const override = 0;
+      virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -263,10 +263,11 @@ namespace Rodin::Variational
 
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
+        static thread_local LHSRangeType s_v;
         m_polytope = polytope;
         const auto& geometry = polytope.getGeometry();
-        const auto& integrand = getIntegrand().getDerived();
-        const auto& f = integrand.getLHS();
+        const auto& integrand = getIntegrand();
+        const auto& f = integrand.getDerived().getLHS();
         const auto& fes = integrand.getFiniteElementSpace();
         const bool recompute = !m_set || m_geometry != geometry;
         P1Element<RHSRangeType> fe;
@@ -287,13 +288,12 @@ namespace Rodin::Variational
           m_distortion = m_p->getDistortion();
           m_basis.resize(fe.getCount());
           for (size_t local = 0; local < fe.getCount(); local++)
-            fe.getBasis(local)(m_basis[local], m_qf->getPoint(0));
+            m_basis[local] = fe.getBasis(local)(m_qf->getPoint(0));
           m_dot.resize(fe.getCount());
         }
-        static thread_local RHSRangeType s_v;
         auto& p = *m_p;
         p.setPolytope(polytope);
-        f(s_v, p);
+        s_v = f(p);
         for (size_t local = 0; local < fe.getCount(); local++)
           m_dot[local] = Math::dot(s_v, m_basis[local]);
         return *this;
@@ -304,7 +304,7 @@ namespace Rodin::Variational
         return m_weight * m_distortion * m_dot[local];
       }
 
-      virtual Integrator::Region getRegion() const override = 0;
+      virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -459,9 +459,9 @@ namespace Rodin::Variational
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
         const auto& integrand = getIntegrand();
-        const auto& lhs = integrand.getLHS().getDerived();
-        const auto& coeff = lhs.getLHS();
-        const auto& multiplicand = lhs.getRHS();
+        const auto& lhs = integrand.getLHS();
+        const auto& coeff = lhs.getDerived().getLHS();
+        const auto& multiplicand = lhs.getDerived().getRHS();
         const auto& rhs = integrand.getRHS();
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
@@ -491,7 +491,7 @@ namespace Rodin::Variational
             {
               m_vb1.resize(fe.getCount());
               for (size_t i = 0; i < fe.getCount(); i++)
-                fe.getBasis(i)(m_vb1[i], rc);
+                m_vb1[i] = fe.getBasis(i)(rc);
               for (size_t i = 0; i < fe.getCount(); i++)
                   m_matrix(i, i) = csv * m_vb1[i].squaredNorm();
               for (size_t i = 0; i < fe.getCount(); i++)
@@ -503,7 +503,7 @@ namespace Rodin::Variational
             {
               m_mb1.resize(fe.getCount());
               for (size_t i = 0; i < fe.getCount(); i++)
-                fe.getBasis(i)(m_mb1[i], rc);
+                m_mb1[i] = fe.getBasis(i)(rc);
               for (size_t i = 0; i < fe.getCount(); i++)
                 m_matrix(i, i) = csv * Math::dot(m_mb1[i], m_mb1[i]);
               for (size_t i = 0; i < fe.getCount(); i++)
@@ -550,7 +550,7 @@ namespace Rodin::Variational
         return m_weight * m_distortion * m_matrix(te, tr);
       }
 
-      virtual Integrator::Region getRegion() const override = 0;
+      virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -753,7 +753,7 @@ namespace Rodin::Variational
         return m_weight * m_distortion * m_matrix(te, tr);
       }
 
-      virtual Integrator::Region getRegion() const override = 0;
+      virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -918,15 +918,17 @@ namespace Rodin::Variational
 
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
+        static thread_local CoefficientRangeType s_cv;
+
         m_polytope = polytope;
         const auto& geometry = polytope.getGeometry();
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
         const auto& integrand = getIntegrand();
-        const auto& lhs = integrand.getLHS().getDerived();
+        const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
-        const auto& coeff = lhs.getLHS();
-        const auto& multiplicand = lhs.getRHS();
+        const auto& coeff = lhs.getDerived().getLHS();
+        const auto& multiplicand = lhs.getDerived().getRHS();
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
         const auto& fe = trialfes.getFiniteElement(d, idx);
@@ -955,8 +957,7 @@ namespace Rodin::Variational
 
         auto& p = *m_p;
         p.setPolytope(polytope);
-        static thread_local CoefficientRangeType s_cv;
-        coeff(s_cv, p);
+        s_cv = coeff(p);
 
         if (trialfes == testfes)
         {
@@ -989,7 +990,7 @@ namespace Rodin::Variational
         return m_weight * m_distortion * m_matrix(te, tr);
       }
 
-      virtual Integrator::Region getRegion() const override = 0;
+      virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -1227,7 +1228,7 @@ namespace Rodin::Variational
         return m_weight * m_distortion * m_matrix(te, tr);
       }
 
-      virtual Integrator::Region getRegion() const override = 0;
+      virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -1404,10 +1405,10 @@ namespace Rodin::Variational
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
         const auto& integrand = getIntegrand();
-        const auto& lhs = integrand.getLHS().getDerived();
+        const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
-        const auto& coeff = lhs.getLHS();
-        const auto& multiplicand = lhs.getRHS();
+        const auto& coeff = lhs.getDerived().getLHS();
+        const auto& multiplicand = lhs.getDerived().getRHS();
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
         const auto& rc = m_qf->getPoint(0);
@@ -1469,7 +1470,7 @@ namespace Rodin::Variational
         return m_weight * m_distortion * m_matrix(te, tr);
       }
 
-      virtual Integrator::Region getRegion() const override = 0;
+      virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -1705,29 +1706,12 @@ namespace Rodin::Variational
                   for (size_t m = 0; m < trialfe.getCount(); m++)
                   {
                     const auto& trb = trialfe.getBasis(m);
-                    trb(m_trv, rx0);
-                    teb(m_tev, rz0);
-                    m_matrix(l, m) = s0 * (m_k0 * m_trv).dot(m_tev);
-
-                    trb(m_trv, rx1);
-                    teb(m_tev, rz1);
-                    m_matrix(l, m) += s1 * (m_k1 * m_trv).dot(m_tev);
-
-                    trb(m_trv, rx2);
-                    teb(m_tev, rz2);
-                    m_matrix(l, m) += s2 * (m_k2 * m_trv).dot(m_tev);
-
-                    trb(m_trv, rx3);
-                    teb(m_tev, rz3);
-                    m_matrix(l, m) += s3 * (m_k3 * m_trv).dot(m_tev);
-
-                    trb(m_trv, rx4);
-                    teb(m_tev, rz4);
-                    m_matrix(l, m) += s4 * (m_k4 * m_trv).dot(m_tev);
-
-                    trb(m_trv, rx5);
-                    teb(m_tev, rz5);
-                    m_matrix(l, m) += s5 * (m_k5 * m_trv).dot(m_tev);
+                    m_matrix(l, m) = s0 * (m_k0 * trb(rx0)).dot(teb(rz0));
+                    m_matrix(l, m) += s1 * (m_k1 * trb(rx1)).dot(teb(rz1));
+                    m_matrix(l, m) += s2 * (m_k2 * trb(rx2)).dot(teb(rz2));
+                    m_matrix(l, m) += s3 * (m_k3 * trb(rx3)).dot(teb(rz3));
+                    m_matrix(l, m) += s4 * (m_k4 * trb(rx4)).dot(teb(rz4));
+                    m_matrix(l, m) += s5 * (m_k5 * trb(rx5)).dot(teb(rz5));
                   }
                 }
               }
@@ -1770,10 +1754,10 @@ namespace Rodin::Variational
             kernel(m_mk, x, y);
             for (size_t l = 0; l < testfe.getCount(); l++)
             {
-              testfe.getBasis(l)(m_tev, ry);
+              m_tev = testfe.getBasis(l)(ry);
               for (size_t m = 0; m < trialfe.getCount(); m++)
               {
-                trialfe.getBasis(m)(m_trv, rx);
+                m_trv = trialfe.getBasis(m)(rx);
                 m_matrix(l, m) = (m_mk * m_trv).dot(m_tev);
               }
             }
@@ -1791,12 +1775,12 @@ namespace Rodin::Variational
         return m_distortion * m_weight * m_matrix(te, tr);
       }
 
-      Region getTrialRegion() const override
+      Geometry::Region getTrialRegion() const override
       {
         return getIntegrand().getLHS().getRegion();
       }
 
-      virtual Region getTestRegion() const override = 0;
+      virtual Geometry::Region getTestRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 

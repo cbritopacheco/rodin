@@ -7,9 +7,11 @@
 #ifndef RODIN_VARIATIONAL_FROBENIUS_H
 #define RODIN_VARIATIONAL_FROBENIUS_H
 
+#include "Rodin/Math/Common.h"
+
 #include "ForwardDecls.h"
-#include "Function.h"
 #include "RealFunction.h"
+#include "Function.h"
 
 namespace Rodin::Variational
 {
@@ -49,17 +51,17 @@ namespace Rodin::Variational
           m_v(std::move(other.m_v))
       {}
 
-      constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        getOperand().getValue(m_cache, p);
         if constexpr (std::is_same_v<OperandRangeType, Real>)
         {
-          return Math::abs(m_cache);
+          return Math::abs(this->getOperand().getValue(p));
         }
         else
         {
-          return m_cache.norm();
+          static thread_local OperandRangeType s_v;
+          s_v = this->getOperand().getValue(p);
+          return s_v.norm();
         }
       }
 
@@ -76,13 +78,7 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<OperandType> m_v;
-      thread_local static OperandRangeType m_cache;
   };
-
-  template <class NestedDerived>
-  thread_local
-  typename Frobenius<FunctionBase<NestedDerived>>::OperandRangeType
-  Frobenius<FunctionBase<NestedDerived>>::m_cache;
 
   template <class NestedDerived>
   Frobenius(const FunctionBase<NestedDerived>&) -> Frobenius<FunctionBase<NestedDerived>>;

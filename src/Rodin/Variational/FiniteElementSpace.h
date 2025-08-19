@@ -7,14 +7,10 @@
 #ifndef RODIN_VARIATIONAL_FINITEELEMENTSPACE_H
 #define RODIN_VARIATIONAL_FINITEELEMENTSPACE_H
 
-#include <variant>
-
 #include "Rodin/Types.h"
-#include "Rodin/Utility.h"
 #include "Rodin/Geometry/Mesh.h"
 
 #include "ForwardDecls.h"
-#include "FiniteElement.h"
 
 namespace Rodin::Variational
 {
@@ -136,7 +132,7 @@ namespace Rodin::Variational
       /**
        * @note CRTP function to be overriden in Derived class.
        */
-      const auto& getFiniteElement(size_t d, Index i) const
+      decltype(auto) getFiniteElement(size_t d, Index i) const
       {
         return static_cast<const Derived&>(*this).getFiniteElement(d, i);
       }
@@ -166,8 +162,8 @@ namespace Rodin::Variational
        *
        * @note CRTP function to be overriden in Derived class.
        */
-      template <class T>
-      auto getMapping(const std::pair<size_t, Index>& p, const T& v) const
+      template <class Callable>
+      decltype(auto) getMapping(const std::pair<size_t, Index>& p, const Callable& v) const
       {
         return static_cast<const Derived&>(*this).getMapping(p, v);
       }
@@ -176,7 +172,7 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in Derived class.
        */
       template <class CallableType>
-      auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
+      decltype(auto) getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
         return static_cast<const Derived&>(*this).geInverseMapping(idx, v);
       }
@@ -231,15 +227,9 @@ namespace Rodin::Variational
        *
        * @note CRTP function to be overriden in Derived class.
        */
-      auto operator()(const Math::SpatialVector<Real>& r) const
+      decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
       {
         return static_cast<const Derived&>(*this).operator()(r);
-      }
-
-      template <class T>
-      void operator()(T& res, const Math::SpatialVector<Real>& r) const
-      {
-        res = this->operator()(r);
       }
   };
 
@@ -292,15 +282,9 @@ namespace Rodin::Variational
        *
        * @note CRTP function to be overriden in Derived class.
        */
-      auto operator()(const Geometry::Point& pc) const
+      decltype(auto) operator()(const Geometry::Point& pc) const
       {
         return static_cast<const Derived&>(*this).operator()(pc);
-      }
-
-      template <class T>
-      void operator()(T& res, const Geometry::Point& r) const
-      {
-        res = this->operator()(r);
       }
   };
 }

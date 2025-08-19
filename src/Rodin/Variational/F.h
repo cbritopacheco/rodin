@@ -14,6 +14,34 @@
  */
 namespace Rodin::Variational::F
 {
+  class X : public RealFunctionBase<X>
+  {
+    public:
+      using ScalarType = Real;
+
+      using Parent = RealFunctionBase<X>;
+
+      X() = default;
+
+      X(const X& other)
+        : Parent(other)
+      {}
+
+      X(X&& other)
+        : Parent(std::move(other))
+      {}
+
+      ScalarType getValue(const Geometry::Point& p) const
+      {
+        return p.x();
+      }
+
+      X* copy() const noexcept override
+      {
+        return new X(*this);
+      }
+  };
+
   /**
    * @brief Represents the first coordinate of the point.
    *
@@ -23,7 +51,35 @@ namespace Rodin::Variational::F
    *   f(x_1, \cdots, x_d) = x_1 \: .
    * @f]
    */
-  static RealFunction x([](const Geometry::Point& p) { return p.x(); });
+  static const X x;
+
+  class Y : public RealFunctionBase<Y>
+  {
+    public:
+      using ScalarType = Real;
+
+      using Parent = RealFunctionBase<Y>;
+
+      Y() = default;
+
+      Y(const Y& other)
+        : Parent(other)
+      {}
+
+      Y(Y&& other)
+        : Parent(std::move(other))
+      {}
+
+      ScalarType getValue(const Geometry::Point& p) const
+      {
+        return p.y();
+      }
+
+      Y* copy() const noexcept override
+      {
+        return new Y(*this);
+      }
+  };
 
   /**
    * @brief Represents the first coordinate of the point.
@@ -34,7 +90,35 @@ namespace Rodin::Variational::F
    *   f(x_1, \cdots, x_d) = x_2 \: .
    * @f]
    */
-  static RealFunction y([](const Geometry::Point& p) { return p.y(); });
+  static const Y y;
+
+  class Z : public RealFunctionBase<Z>
+  {
+    public:
+      using ScalarType = Real;
+
+      using Parent = RealFunctionBase<Z>;
+
+      Z() = default;
+
+      Z(const Z& other)
+        : Parent(other)
+      {}
+
+      Z(Z&& other)
+        : Parent(std::move(other))
+      {}
+
+      ScalarType getValue(const Geometry::Point& p) const
+      {
+        return p.z();
+      }
+
+      Z* copy() const noexcept override
+      {
+        return new Z(*this);
+      }
+  };
 
   /**
    * @brief Represents the first coordinate of the point.
@@ -45,7 +129,7 @@ namespace Rodin::Variational::F
    *   f(x_1, \cdots, x_d) = x_3 \: .
    * @f]
    */
-  static RealFunction z([](const Geometry::Point& p) { return p.z(); });
+  static const Z z;
 }
 
 #endif

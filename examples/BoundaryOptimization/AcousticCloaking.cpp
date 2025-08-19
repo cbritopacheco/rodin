@@ -286,7 +286,7 @@ int main(int, char**)
 
       Alert::Info() << "Computing conormal..." << Alert::Raise;
       GridFunction conormal(drvfes);
-      conormal.projectOnCells(Grad(dist), { SoundSoft, SoundHard });
+      conormal.project(Region::Cells, Grad(dist), { SoundSoft, SoundHard });
 
       conormal.getFiniteElementSpace().getMesh().save("Conormal.mesh");
       conormal.save("Conormal.gf");
@@ -325,7 +325,7 @@ int main(int, char**)
     Alert::Info() << "Meshing the support..." << Alert::Raise;
     RealFES workaroundfes(mesh);
     GridFunction workaround(workaroundfes);
-    workaround.projectOnBoundary(dist);
+    workaround.project(Region::Boundary, dist);
     mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                       .split(SoundSoft, { SoundSoft, SoundHard })
                                       .split(SoundHard, { SoundSoft, SoundHard })

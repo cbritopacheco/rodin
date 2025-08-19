@@ -44,38 +44,6 @@ set(RodinVariational_HEADERS
   )
 
 set(RodinVariational_SRCS
-  FiniteElement.cpp
-  FiniteElementSpace.cpp
-  LinearFormIntegrator.cpp
-  BilinearFormIntegrator.cpp
-  ShapeFunction.cpp
-  Derivative.cpp
-  Integral.cpp
-  Jacobian.cpp
-  GridFunction.cpp
-  Division.cpp
-  Grad.cpp
-  MatrixFunction.cpp
-  Trace.cpp
-  VectorFunction.cpp
-  Restriction.cpp
-  Sum.cpp
-  UnaryMinus.cpp
-  Mult.cpp
-  Dot.cpp
-  Minus.cpp
-  Function.cpp
-  Max.cpp
-  Min.cpp
-  GEQ.cpp
-  LEQ.cpp
-  GT.cpp
-  LT.cpp
-  ProblemBody.cpp
-  OR.cpp
-  QuadratureRule.cpp
-  AND.cpp
-  Tangent.cpp
   P0/P0.cpp
   P0/P0Element.cpp
   P1/P1.cpp

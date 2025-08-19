@@ -47,6 +47,8 @@ namespace Rodin::Variational
 
       using Parent::traceOf;
 
+      using Parent::operator();
+
       RealFunctionBase() = default;
 
       RealFunctionBase(const RealFunctionBase& other)
@@ -59,13 +61,8 @@ namespace Rodin::Variational
 
       virtual ~RealFunctionBase() = default;
 
-      const Derived& getDerived() const
-      {
-        return static_cast<const Derived&>(*this);
-      }
-
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
@@ -99,14 +96,13 @@ namespace Rodin::Variational
           m_nested(std::move(other.m_nested))
       {}
 
-      inline
       constexpr
-      ScalarType getValue(const Geometry::Point& v) const
+      decltype(auto) getValue(const Geometry::Point& v) const
       {
         return m_nested->getValue(v);
       }
 
-      inline RealFunction* copy() const noexcept override
+      RealFunction* copy() const noexcept override
       {
         return new RealFunction(*this);
       }
@@ -149,7 +145,7 @@ namespace Rodin::Variational
 
       RealFunction(RealFunction&& other)
         : Parent(std::move(other)),
-          m_x(other.m_x)
+          m_x(std::move(other.m_x))
       {}
 
       constexpr
@@ -159,12 +155,12 @@ namespace Rodin::Variational
       }
 
       constexpr
-      ScalarType getValue(const Geometry::Point&) const
+      Real getValue(const Geometry::Point&) const
       {
         return m_x;
       }
 
-      inline RealFunction* copy() const noexcept override
+      RealFunction* copy() const noexcept override
       {
         return new RealFunction(*this);
       }
@@ -202,7 +198,7 @@ namespace Rodin::Variational
 
       RealFunction(RealFunction&& other)
         : Parent(std::move(other)),
-          m_x(other.m_x)
+          m_x(std::move(other.m_x))
       {}
 
       constexpr
@@ -217,7 +213,7 @@ namespace Rodin::Variational
         return m_x;
       }
 
-      inline RealFunction* copy() const noexcept override
+      RealFunction* copy() const noexcept override
       {
         return new RealFunction(*this);
       }
@@ -256,14 +252,13 @@ namespace Rodin::Variational
           m_f(std::move(other.m_f))
       {}
 
-      inline
       constexpr
-      ScalarType getValue(const Geometry::Point& v) const
+      Real getValue(const Geometry::Point& v) const
       {
         return m_f(v);
       }
 
-      inline RealFunction* copy() const noexcept override
+      RealFunction* copy() const noexcept override
       {
         return new RealFunction(*this);
       }
@@ -275,8 +270,7 @@ namespace Rodin::Variational
   /**
    * @brief CTAD for RealFunction.
    */
-  template <class F, typename =
-    std::enable_if_t<std::is_invocable_r_v<Real, F, const Geometry::Point&>>>
+  template <class F, typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&>>>
   RealFunction(F) -> RealFunction<F>;
 }
 

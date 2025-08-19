@@ -317,7 +317,7 @@ int main(int, char**)
       try
       {
         GridFunction workaround(sfes);
-        workaround.projectOnBoundary(distAnode);
+        workaround.project(Region::Boundary, distAnode);
         mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                           .split(Anode, { Anode, Gamma })
                                           .split(Gamma, { Anode, Gamma })
@@ -346,7 +346,7 @@ int main(int, char**)
       try
       {
         GridFunction workaround(sfes);
-        workaround.projectOnBoundary(distCathode);
+        workaround.project(Region::Boundary, distCathode);
         mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                           .split(Cathode, { Cathode, Gamma })
                                           .split(Gamma, { Cathode, Gamma })

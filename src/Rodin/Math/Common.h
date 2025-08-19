@@ -94,6 +94,12 @@ namespace Rodin::Math
     return std::isnan(x);
   }
 
+  constexpr
+  Boolean isNaN(const Complex& x)
+  {
+    return std::isnan(x.real()) || std::isnan(x.imag());
+  }
+
   /**
   * @brief Determines if the floating point number is positive or negative infinity.
   * @param[in] x Value
@@ -194,6 +200,12 @@ namespace Rodin::Math
   auto nan()
   {
     return std::numeric_limits<T>::quiet_NaN();
+  }
+
+  constexpr
+  Complex nan()
+  {
+    return Complex(nan<Real>(), nan<Real>());
   }
 
   template <class LHS, class RHS>

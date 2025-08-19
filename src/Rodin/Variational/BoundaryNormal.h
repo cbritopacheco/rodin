@@ -4,6 +4,7 @@
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/SubMesh.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
+#include "Rodin/Math/Common.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
@@ -22,6 +23,10 @@ namespace Rodin::Variational
       using VectorType = Math::SpatialVector<ScalarType>;
 
       using Parent = VectorFunctionBase<ScalarType, BoundaryNormal>;
+
+      using Parent::traceOf;
+
+      using Parent::operator();
 
       /**
        * @brief Constructs the outward unit normal.
@@ -45,35 +50,10 @@ namespace Rodin::Variational
           m_mesh(std::move(other.m_mesh))
       {}
 
-      inline
       constexpr
       size_t getDimension() const
       {
         return m_sdim;
-      }
-
-      inline
-      constexpr
-      BoundaryNormal& traceOf(Geometry::Attribute attr)
-      {
-        Parent::traceOf(attr);
-        return *this;
-      }
-
-      inline
-      constexpr
-      BoundaryNormal& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        Parent::traceOf(attrs);
-        return *this;
-      }
-
-      inline
-      VectorType getValue(const Geometry::Point& p) const
-      {
-        VectorType res;
-        getValue(res, p);
-        return res;
       }
 
       void interpolate(VectorType& res, const Geometry::Point& p) const
@@ -171,32 +151,34 @@ namespace Rodin::Variational
         }
       }
 
-      void getValue(VectorType& out, const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        out.setConstant(NAN);
+        static thread_local VectorType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         if (polytopeMesh == m_mesh.get())
         {
-          interpolate(out, p);
+          this->interpolate(s_out, p);
         }
         else if (const auto inclusion = m_mesh.get().inclusion(p))
         {
-          interpolate(out, *inclusion);
+          this->interpolate(s_out, *inclusion);
         }
         else if (m_mesh.get().isSubMesh())
         {
           const auto& submesh = m_mesh.get().asSubMesh();
           const auto restriction = submesh.restriction(p);
-          interpolate(out, *restriction);
+          this->interpolate(s_out, *restriction);
         }
         else
         {
+          s_out.setConstant(Math::nan<ScalarType>());
           assert(false);
         }
+        return s_out;
       }
 
-      inline BoundaryNormal* copy() const noexcept override
+      BoundaryNormal* copy() const noexcept override
       {
         return new BoundaryNormal(*this);
       }

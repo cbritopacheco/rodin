@@ -7,18 +7,12 @@
 #ifndef RODIN_VARIATIONAL_COMPLEXFUNCTION_H
 #define RODIN_VARIATIONAL_COMPLEXFUNCTION_H
 
-#include <map>
-#include <set>
 #include <memory>
-#include <optional>
 #include <type_traits>
-
-#include "Rodin/Geometry/Polytope.h"
 
 #include "ForwardDecls.h"
 
 #include "ScalarFunction.h"
-
 
 namespace Rodin::Variational
 {
@@ -38,6 +32,8 @@ namespace Rodin::Variational
 
       using Parent::traceOf;
 
+      using Parent::operator();
+
       ComplexFunctionBase() = default;
 
       ComplexFunctionBase(const ComplexFunctionBase& other)
@@ -50,13 +46,8 @@ namespace Rodin::Variational
 
       virtual ~ComplexFunctionBase() = default;
 
-      const Derived& getDerived() const
-      {
-        return static_cast<const Derived&>(*this);
-      }
-
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
@@ -70,6 +61,10 @@ namespace Rodin::Variational
   {
     public:
       using Parent = ComplexFunctionBase<ComplexFunction<Integer>>;
+
+      using Parent::traceOf;
+
+      using Parent::operator();
 
       /**
        * @brief Constructs a ComplexFunction from an integer value.
@@ -90,12 +85,6 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      ComplexFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
-
-      constexpr
       const Integer& getValue() const
       {
         return m_x;
@@ -104,7 +93,7 @@ namespace Rodin::Variational
       constexpr
       Complex getValue(const Geometry::Point&) const
       {
-        return static_cast<Complex>(m_x);
+        return Complex(m_x, 0);
       }
 
       ComplexFunction* copy() const noexcept override
@@ -125,6 +114,10 @@ namespace Rodin::Variational
     public:
       using Parent = ComplexFunctionBase<ComplexFunction<Real>>;
 
+      using Parent::traceOf;
+
+      using Parent::operator();
+
       /**
        * @brief Constructs a ComplexFunction from an Real value.
        * @param[in] x Constant Real value
@@ -144,12 +137,6 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      ComplexFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
-
-      constexpr
       const Real& getValue() const
       {
         return m_x;
@@ -158,7 +145,7 @@ namespace Rodin::Variational
       constexpr
       Complex getValue(const Geometry::Point&) const
       {
-        return static_cast<Complex>(m_x);
+        return Complex(m_x, 0);
       }
 
       ComplexFunction* copy() const noexcept override
@@ -183,6 +170,10 @@ namespace Rodin::Variational
     public:
       using Parent = ComplexFunctionBase<ComplexFunction<Complex>>;
 
+      using Parent::traceOf;
+
+      using Parent::operator();
+
       /**
        * @brief Constructs a ComplexFunction from a constant scalar value.
        * @param[in] x Constant scalar value
@@ -200,12 +191,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_x(other.m_x)
       {}
-
-      constexpr
-      ComplexFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
 
       constexpr
       const Complex& getValue() const
@@ -241,9 +226,13 @@ namespace Rodin::Variational
     : public ComplexFunctionBase<ComplexFunction<NestedDerived>>
   {
     public:
+      using ScalarType = Complex;
+
       using Parent = ComplexFunctionBase<ComplexFunction<NestedDerived>>;
 
-      using ScalarType = Complex;
+      using Parent::traceOf;
+
+      using Parent::operator();
 
       ComplexFunction(const FunctionBase<NestedDerived>& nested)
         : m_nested(nested.copy())
@@ -265,10 +254,11 @@ namespace Rodin::Variational
         return m_nested->getValue(v);
       }
 
+      template <class ... Args>
       constexpr
-      ComplexFunction& traceOf(Geometry::Attribute attrs)
+      ComplexFunction& traceOf(const Args&... args)
       {
-        m_nested->traceOf(attrs);
+        m_nested->traceOf(args...);
         return *this;
       }
 
@@ -295,16 +285,24 @@ namespace Rodin::Variational
     : public ComplexFunctionBase<ComplexFunction<FunctionBase<RealNestedDerived>, FunctionBase<ImagNestedDerived>>>
   {
     public:
-      using RealFunctionType = FunctionBase<RealNestedDerived>;
+      using RealFunctionType =
+        FunctionBase<RealNestedDerived>;
 
-      using ImagFunctionType = FunctionBase<ImagNestedDerived>;
+      using ImagFunctionType =
+        FunctionBase<ImagNestedDerived>;
+
+      using RealFunctionRangeType =
+        typename FormLanguage::Traits<RealFunctionType>::RangeType;
+
+      using ImagFunctionRangeType =
+        typename FormLanguage::Traits<ImagFunctionType>::RangeType;
 
       using Parent =
         ComplexFunctionBase<ComplexFunction<RealFunctionType, ImagFunctionType>>;
 
-      using RealFunctionRangeType = typename FormLanguage::Traits<RealFunctionType>::RangeType;
+      using Parent::traceOf;
 
-      using ImagFunctionRangeType = typename FormLanguage::Traits<ImagFunctionType>::RangeType;
+      using Parent::operator();
 
       static_assert(std::is_same_v<RealFunctionType, Real>);
 
@@ -330,11 +328,12 @@ namespace Rodin::Variational
         return { m_re->getValue(p), m_imag->getValue(p) };
       }
 
+      template <class ... Args>
       constexpr
-      ComplexFunction& traceOf(Geometry::Attribute attrs)
+      ComplexFunction& traceOf(const Args&... args)
       {
-        m_re->traceOf(attrs);
-        m_imag->traceOf(attrs);
+        m_re->traceOf(args...);
+        m_imag->traceOf(args...);
         return *this;
       }
 
@@ -367,6 +366,10 @@ namespace Rodin::Variational
     public:
       using Parent = ComplexFunctionBase<ComplexFunction<F>>;
 
+      using Parent::traceOf;
+
+      using Parent::operator();
+
       ComplexFunction(const F& f)
         : m_f(f)
       {}
@@ -380,12 +383,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_f(std::move(other.m_f))
       {}
-
-      constexpr
-      ComplexFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
 
       constexpr
       Complex getValue(const Geometry::Point& v) const
@@ -419,6 +416,10 @@ namespace Rodin::Variational
     public:
       using Parent = ComplexFunctionBase<ComplexFunction<FReal, FImag>>;
 
+      using Parent::traceOf;
+
+      using Parent::operator();
+
       ComplexFunction(const FReal& re, const FImag& imag)
         : m_re(re), m_imag(imag)
       {}
@@ -432,22 +433,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_re(std::move(other.m_re)), m_imag(std::move(other.m_imag))
       {}
-
-      constexpr
-      ComplexFunction& traceOf(Geometry::Attribute attr)
-      {
-        m_re->traceOf(attr);
-        m_imag->traceOf(attr);
-        return *this;
-      }
-
-      constexpr
-      ComplexFunction& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        m_re->traceOf(attrs);
-        m_imag->traceOf(attrs);
-        return *this;
-      }
 
       constexpr
       Complex getValue(const Geometry::Point& p) const

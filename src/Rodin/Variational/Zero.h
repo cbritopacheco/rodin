@@ -7,15 +7,11 @@
 #ifndef RODIN_VARIATIONAL_ZERO_H
 #define RODIN_VARIATIONAL_ZERO_H
 
-#include <cmath>
-
 #include <Rodin/Math/Common.h>
 
-#include "ForwardDecls.h"
-
-#include "Function.h"
-#include "RealFunction.h"
 #include "VectorFunction.h"
+
+#include "ForwardDecls.h"
 
 namespace Rodin::Variational
 {
@@ -45,15 +41,9 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      Zero& traceOf(Geometry::Attribute attrs)
+      ScalarType getValue(const Geometry::Point&) const
       {
-        return *this;
-      }
-
-      constexpr
-      auto getValue(const Geometry::Point&) const
-      {
-        return ScalarType(0);
+        return 0;
       }
 
       Zero* copy() const noexcept override
@@ -90,21 +80,9 @@ namespace Rodin::Variational
           m_d(std::move(other.m_d))
       {}
 
-      constexpr
-      Zero& traceOf(Geometry::Attribute attrs)
-      {
-        return *this;
-      }
-
-      auto getValue(const Geometry::Point&) const
+      decltype(auto) getValue(const Geometry::Point&) const
       {
         return VectorType::Zero(m_d);
-      }
-
-      void getValue(VectorType& out, const Geometry::Point&) const
-      {
-        out.resize(m_d);
-        out.setZero();
       }
 
       Zero* copy() const noexcept override

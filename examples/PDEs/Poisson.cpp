@@ -26,7 +26,7 @@ int main(int, char**)
   TrialFunction u(vh);
   TestFunction  v(vh);
 
-  ScalarFunction f = 1;
+  RealFunction f = 1;
 
   // Apply Dirichlet conditions on the entire boundary.
   Problem poisson(u, v);

@@ -49,7 +49,7 @@ int main(int argc, char** argv)
   std::snprintf(filename, sizeof(filename), "mesh.%06d", world.rank());
   mesh.save(filename);
 
-  ScalarFunction f = 1;
+  RealFunction f = 1;
 
   P1 vh(mesh);
 

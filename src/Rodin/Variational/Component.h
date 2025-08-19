@@ -1,11 +1,11 @@
 #ifndef RODIN_VARIATIONAL_COMPONENT_H
 #define RODIN_VARIATIONAL_COMPONENT_H
 
-#include "Rodin/Utility.h"
+#include "Rodin/Geometry/Point.h"
+
+#include "Rodin/FormLanguage/Traits.h"
 
 #include "ForwardDecls.h"
-#include "GridFunction.h"
-#include "TrialFunction.h"
 
 namespace Rodin::FormLanguage
 {
@@ -81,7 +81,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return getOperand().getValue(p).coeff(m_idx);
       }
@@ -143,7 +143,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return getOperand().getValue(p).coeff(m_i, m_j);
       }
@@ -216,7 +216,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return m_u.get().getValue(p).coeff(m_idx);
       }
@@ -318,9 +318,9 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getBasis(size_t local) const
+      decltype(auto) getBasis(size_t local) const
       {
-        return this->object(getOperand().getBasis(local)).coeff(m_idx);
+        return this->object(this->getOperand().getBasis(local)).coeff(m_idx);
       }
 
       Component* copy() const noexcept override

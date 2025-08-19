@@ -8,9 +8,6 @@
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
 #include "ForwardDecls.h"
-#include "GridFunction.h"
-#include "ShapeFunction.h"
-#include "VectorFunction.h"
 #include "MatrixFunction.h"
 
 namespace Rodin::Variational
@@ -85,15 +82,9 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      SpatialMatrixType getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        SpatialMatrixType out;
-        getValue(out, p);
-        return out;
-      }
-
-      void getValue(SpatialMatrixType& out, const Geometry::Point& p) const
-      {
+        static thread_local SpatialMatrixType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -101,22 +92,23 @@ namespace Rodin::Variational
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          interpolate(out, p);
+          this->interpolate(s_out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          interpolate(out, *inclusion);
+          this->interpolate(s_out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          interpolate(out, *restriction);
+          this->interpolate(s_out, *restriction);
         }
         else
         {
           assert(false);
         }
+        return s_out;
       }
 
       constexpr

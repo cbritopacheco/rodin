@@ -64,9 +64,9 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        return getOperand().getValue(p).trace();
+        return this->getOperand().getValue(p).trace();
       }
 
       constexpr
@@ -76,9 +76,11 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      Trace& traceOf(Geometry::Attribute attrs)
+      template <class ... Args>
+      constexpr
+      Trace& traceOf(const Args& ... args)
       {
-        m_operand.traceOf(attrs);
+        m_operand->traceOf(args...);
         return *this;
       }
 
@@ -154,14 +156,14 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getBasis(size_t local) const
+      decltype(auto) getBasis(size_t local) const
       {
-        return getOperand().getBasis(local).transpose();
+        return this->getOperand().getBasis(local).transpose();
       }
 
       const FES& getFiniteElementSpace() const
       {
-        return getOperand().getFiniteElementSpace();
+        return this->getOperand().getFiniteElementSpace();
       }
 
       Trace* copy() const noexcept override

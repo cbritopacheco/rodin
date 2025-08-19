@@ -7,25 +7,18 @@
 #ifndef RODIN_VARIATIONAL_P1_P1ELEMENT_H
 #define RODIN_VARIATIONAL_P1_P1ELEMENT_H
 
+#include <utility>
+
 #include <boost/serialization/access.hpp>
 
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Types.h"
-
-#include "Rodin/Math/Traits.h"
-
-#include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/Connectivity.h"
-#include "Rodin/Geometry/GeometryIndexed.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
-#include "Rodin/Variational/FiniteElementSpace.h"
 
 #include "ForwardDecls.h"
-#include <utility>
 
 namespace Rodin::FormLanguage
 {
@@ -85,10 +78,10 @@ namespace Rodin::Variational
           LinearForm(const LinearForm&) = default;
 
           template <class T>
-          constexpr
-          auto operator()(const T& v) const
+          ScalarType operator()(const T& v) const
           {
-            return v(Geometry::Polytope::Traits(m_g).getVertex(m_i));
+            const auto& vtx = Geometry::Polytope::Traits(m_g).getVertex(m_i);
+            return v(vtx);
           }
 
         private:
@@ -102,7 +95,7 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
-          using ReturnType = Scalar;
+          using ReturnType = ScalarType;
 
           template <size_t Order>
           class DerivativeFunction
@@ -115,12 +108,6 @@ namespace Rodin::Variational
 
               constexpr
               DerivativeFunction(const DerivativeFunction&) = default;
-
-              constexpr
-              void operator()(ReturnType& out, const Math::SpatialPoint& r) const
-              {
-                out = this->operator()(r);
-              }
 
               constexpr
               ReturnType operator()(const Math::SpatialPoint& r) const;
@@ -144,21 +131,14 @@ namespace Rodin::Variational
               constexpr
               GradientFunction(const GradientFunction&) = default;
 
-              constexpr
-              void operator()(ReturnType& out, const Math::SpatialPoint& r) const
+              const ReturnType& operator()(const Math::SpatialPoint& r) const
               {
+                static thread_local ReturnType s_out;
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-                out.resize(dim);
+                s_out.resize(dim);
                 for (size_t i = 0; i < dim; ++i)
-                  out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
-              }
-
-              constexpr
-              ReturnType operator()(const Math::SpatialPoint& r) const
-              {
-                ReturnType res;
-                this->operator()(res, r);
-                return res;
+                  s_out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
+                return s_out;
               }
 
             private:
@@ -173,12 +153,6 @@ namespace Rodin::Variational
 
           constexpr
           BasisFunction(const BasisFunction&) = default;
-
-          constexpr
-          void operator()(ReturnType& out, const Math::SpatialPoint& r) const
-          {
-            out = this->operator()(r);
-          }
 
           constexpr
           ReturnType operator()(const Math::SpatialPoint& r) const;
@@ -326,10 +300,12 @@ namespace Rodin::Variational
           LinearForm(LinearForm&&) = default;
 
           template <class T>
-          constexpr
-          auto operator()(const T& v) const
+          ScalarType operator()(const T& v) const
           {
-            return v(P1Element<ScalarType>(m_g).getNode(m_local / m_vdim)).coeff(m_local % m_vdim);
+            static thread_local RangeType s_out;
+            const auto& vtx = P1Element<ScalarType>(m_g).getNode(m_local / m_vdim);
+            s_out = v(vtx);
+            return s_out.coeff(m_local % m_vdim);
           }
 
         private:
@@ -427,23 +403,17 @@ namespace Rodin::Variational
               constexpr
               JacobianFunction(JacobianFunction&&) = default;
 
-              constexpr
-              void operator()(ReturnType& out, const Math::SpatialPoint& r) const
+              const ReturnType& operator()(const Math::SpatialPoint& r) const
               {
+                static thread_local ReturnType s_out;
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-                out.resize(m_vdim, dim);
+                s_out.resize(m_vdim, dim);
                 for (size_t i = 0; i < m_vdim; ++i)
                 {
                   for (size_t j = 0; j < dim; ++j)
-                    out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
+                    s_out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
                 }
-              }
-
-              ReturnType operator()(const Math::SpatialPoint& r) const
-              {
-                ReturnType res;
-                this->operator()(res, r);
-                return res;
+                return s_out;
               }
 
             private:
@@ -463,19 +433,13 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          ReturnType operator()(const Math::SpatialPoint& r) const
+          const ReturnType& operator()(const Math::SpatialPoint& rc) const
           {
-            Math::Vector<ScalarType> res;
-            operator()(res, r);
-            return res;
-          }
-
-          constexpr
-          void operator()(ReturnType& out, const Math::SpatialPoint& rc) const
-          {
-            out.resize(m_vdim);
-            out.setZero();
-            out.coeffRef(m_local % m_vdim) = P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
+            static thread_local ReturnType s_out;
+            s_out.resize(m_vdim);
+            s_out.setZero();
+            s_out.coeffRef(m_local % m_vdim) = P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
+            return s_out;
           }
 
           template <size_t Order>

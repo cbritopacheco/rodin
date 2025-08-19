@@ -1,4 +1,5 @@
 #include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Utility/Overloaded.h"
 
 #include "ImplicitDomainMesher.h"
 

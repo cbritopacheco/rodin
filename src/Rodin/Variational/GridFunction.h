@@ -13,25 +13,23 @@
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
-#include "Rodin/Math.h"
-
+#include "Rodin/Geometry/Types.h"
 #include "Rodin/Geometry/Point.h"
-#include "Rodin/Geometry/SubMesh.h"
-
-#include "Rodin/IO/MFEM.h"
-#include "Rodin/IO/MEDIT.h"
-#include "Rodin/IO/EnSight6.h"
+#include "Rodin/Geometry/Region.h"
+#include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Geometry/PolytopeIterator.h"
 
 #include "Rodin/Alert/MemberFunctionException.h"
+
+#include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/IO/EnSight6.h"
+#include "Rodin/IO/MEDIT.h"
+#include "Rodin/IO/MFEM.h"
 
 #include "ForwardDecls.h"
 
 #include "Function.h"
-#include "Component.h"
-#include "ScalarFunction.h"
-#include "VectorFunction.h"
-#include "MatrixFunction.h"
-#include "FiniteElementSpace.h"
+
 
 namespace Rodin::FormLanguage
 {
@@ -108,16 +106,9 @@ namespace Rodin::Variational
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
-      }
-
-      template <class T>
-      constexpr
-      void getValue(T& res, const Geometry::Point& p) const
-      {
-        m_ref.get().getValue(res, p);
       }
 
       GridFunctionBaseReference* copy() const noexcept final override
@@ -346,31 +337,23 @@ namespace Rodin::Variational
         output.close();
       }
 
-      constexpr
-      RangeType getValue(const Geometry::Point& p) const
-      {
-        RangeType res;
-        static_cast<const Derived&>(*this).getValue(res, p);
-        return res;
-      }
-
       /**
        * @brief Gets the interpolated value at the point.
        */
-      constexpr
-      void getValue(RangeType& res, const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
+        static thread_local RangeType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          static_cast<const Derived&>(*this).interpolate(res, p);
+          static_cast<const Derived&>(*this).interpolate(s_out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          static_cast<const Derived&>(*this).interpolate(res, *inclusion);
+          static_cast<const Derived&>(*this).interpolate(s_out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
@@ -378,7 +361,7 @@ namespace Rodin::Variational
           const auto restriction = submesh.restriction(p);
           if (restriction)
           {
-            static_cast<const Derived&>(*this).interpolate(res, *restriction);
+            static_cast<const Derived&>(*this).interpolate(s_out, *restriction);
           }
           else
           {
@@ -389,6 +372,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        return s_out;
       }
 
       /**
@@ -402,333 +386,76 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(res, p);
       }
 
-      template <class NestedDerived>
-      void project(const FunctionBase<NestedDerived>& fn, const std::pair<size_t, Index>& p)
+      void project(const std::pair<size_t, Index>& p, const RangeType& v)
+      {
+        static_cast<Derived&>(*this).project(p,
+            [&](RangeType& out, const Geometry::Point& pt){ out = v; });
+      }
+
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
+      template <class Function>
+      void project(const std::pair<size_t, Index>& p, const Function& fn)
       {
         static_cast<Derived&>(*this).project(fn, p);
       }
 
-      template <class NestedDerived>
-      Derived& operator=(const FunctionBase<NestedDerived>& fn)
+      template <class T>
+      Derived& operator=(const T& v)
       {
-        return static_cast<Derived&>(*this).projectOnCells(fn);
+        return static_cast<Derived&>(*this).project(v);
       }
 
-      Derived& operator=(std::function<RangeType(const Geometry::Point&)> fn)
+      template <class T>
+      Derived& project(const T& fn)
       {
-        return static_cast<Derived&>(*this).projectOnCells(fn);
+        return static_cast<Derived&>(*this).project(
+            Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
       }
 
-      Derived& operator=(std::function<void(RangeType&, const Geometry::Point&)> fn)
+      template <class T>
+      Derived& project(const Geometry::Region& region, const T& fn)
       {
-        return static_cast<Derived&>(*this).projectOnCells(fn);
+        return static_cast<Derived&>(*this).project(region, fn,
+            [](const Geometry::Polytope&) { return true; });
       }
 
-      Derived& operator=(const RangeType& v)
+      template <class T>
+      Derived& project(
+          const Geometry::Region& region, const T& fn, const Geometry::Attribute& attr)
       {
-        return static_cast<Derived&>(*this).projectOnCells([&](RangeType& res, const Geometry::Point&) { res = v; });
+        return static_cast<Derived&>(*this).project(region, fn,
+            [&](const Geometry::Polytope& polytope)
+            { return polytope.getAttribute() == attr; });
       }
 
-      /**
-       * @brief Projects a scalar valued function on the region of the mesh
-       * with the given attribute.
-       * @param[in] fn Scalar valued function
-       * @param[in] attr Attribute
-       */
-      auto& projectOnCells(
-          std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
+      template <class T>
+      Derived& project(
+          const Geometry::Region& region,
+          const T& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        return static_cast<Derived&>(*this).projectOnCells(fn, FlatSet<Geometry::Attribute>{ attr });
+        return static_cast<Derived&>(*this).project(region, fn,
+            [&](const Geometry::Polytope& polytope)
+            { return attrs.size() == 0 || attrs.count(polytope.getAttribute()); });
       }
 
-      auto& projectOnCells(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
+      template <class Pred>
+      Derived& project(const Geometry::Region& region, const RangeType& fn, const Pred& pred)
       {
-        return static_cast<Derived&>(*this).projectOnCells(fn, FlatSet<Geometry::Attribute>{ attr });
-      }
-
-      auto& projectOnCells(
-          std::function<RangeType(const Geometry::Point&)> fn,
-          const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        return static_cast<Derived&>(*this).projectOnCells(Function(fn), attrs);
-      }
-
-      auto& projectOnCells(
-          std::function<void(RangeType&, const Geometry::Point&)> fn,
-          const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        return static_cast<Derived&>(*this).projectOnCells(Function(fn), attrs);
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnCells(const FunctionBase<NestedDerived>& fn)
-      {
-        return static_cast<Derived&>(*this).projectOnCells(fn, FlatSet<Geometry::Attribute>{});
+        return static_cast<Derived&>(*this).project(
+            region,
+            [&](const Geometry::Point&) -> decltype(auto)
+            { static thread_local RangeType s_out; s_out = fn; return s_out; }, pred);
       }
 
       /**
-       * @brief Projects a FunctionBase instance
-       *
-       * This function will project a FunctionBase instance on the
-       * domain elements with the given attribute.
-       *
-       * It is a convenience function to call
-       * projectOnCells(const FunctionBase&, const FlatSet<Geometry::Atribute>&) with one
-       * attribute.
+       * @note CRTP function to be overriden in Derived class.
        */
-      template <class NestedDerived>
-      Derived& projectOnCells(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
+      template <class Function, class Pred>
+      Derived& project(const Geometry::Region& region, const Function& fn, const Pred& pred)
       {
-        return static_cast<Derived&>(*this).projectOnCells(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      /**
-       * @brief Projects a FunctionBase instance on the grid function.
-       *
-       * This function will project a FunctionBase instance on the
-       * domain elements with the given attributes. If the attribute set is
-       * empty, this function will project over all elements in the mesh.
-       */
-      template <class NestedDerived>
-      Derived& projectOnCells(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
-      {
-        return static_cast<Derived&>(*this).projectOnCells(fn, attrs);
-      }
-
-      auto& projectOnBoundary(
-          std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      auto& projectOnBoundary(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      auto& projectOnBoundary(
-          std::function<RangeType(const Geometry::Point&)> fn,
-          const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(m_fes.get().getVectorDimension() == 1);
-          return static_cast<Derived&>(*this).projectOnBoundary(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return static_cast<Derived&>(*this).projectOnBoundary(VectorFunction(m_fes.get().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      auto& projectOnBoundary(
-          std::function<void(RangeType&, const Geometry::Point&)> fn,
-          const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(m_fes.get().getVectorDimension() == 1);
-          return static_cast<Derived&>(*this).projectOnBoundary(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return static_cast<Derived&>(*this).projectOnBoundary(VectorFunction(m_fes.get().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn)
-      {
-        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
-      {
-        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
-      {
-        const auto& fes = m_fes.get();
-        const auto& mesh = fes.getMesh();
-        for (auto it = mesh.getBoundary(); !it.end(); ++it)
-        {
-          const auto& polytope = *it;
-          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-          {
-            const auto& polytope = *it;
-            if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-              static_cast<Derived&>(*this).project(fn, { polytope.getDimension(), polytope.getIndex() });
-          }
-        }
-        return static_cast<Derived&>(*this);
-      }
-
-      auto& projectOnFaces(
-          std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return static_cast<Derived&>(*this).projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      auto& projectOnFaces(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return static_cast<Derived&>(*this).projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      auto& projectOnFaces(
-          std::function<RangeType(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(m_fes.get().getVectorDimension() == 1);
-          return static_cast<Derived&>(*this).projectOnFaces(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return static_cast<Derived&>(*this).projectOnFaces(VectorFunction(m_fes.get().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      auto& projectOnFaces(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(m_fes.get().getVectorDimension() == 1);
-          return static_cast<Derived&>(*this).projectOnFaces(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return static_cast<Derived&>(*this).projectOnFaces(VectorFunction(m_fes.get().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn)
-      {
-        return static_cast<Derived&>(*this).projectOnFaces(fn, FlatSet<Geometry::Attribute>{});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
-      {
-        return static_cast<Derived&>(*this).projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
-      {
-        const auto& fes = m_fes.get();
-        const auto& mesh = fes.getMesh();
-        for (auto it = mesh.getFace(); !it.end(); ++it)
-        {
-          const auto& polytope = *it;
-          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-            static_cast<Derived&>(*this).project(fn, { polytope.getDimension(), polytope.getIndex() });
-        }
-        return static_cast<Derived&>(*this);
-      }
-
-      auto& projectOnInterfaces(
-          std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return static_cast<Derived&>(*this).projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      auto& projectOnInterfaces(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return static_cast<Derived&>(*this).projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{ attr });
-      }
-
-      auto& projectOnInterfaces(
-          std::function<RangeType(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(m_fes.get().getVectorDimension() == 1);
-          return static_cast<Derived&>(*this).projectOnInterfaces(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return static_cast<Derived&>(*this).projectOnInterfaces(VectorFunction(m_fes.get().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      auto& projectOnInterfaces(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(m_fes.get().getVectorDimension() == 1);
-          return static_cast<Derived&>(*this).projectOnInterfaces(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return static_cast<Derived&>(*this).projectOnInterfaces(VectorFunction(m_fes.get().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnInterfaces(const FunctionBase<NestedDerived>& fn)
-      {
-        return static_cast<Derived&>(*this).projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnInterfaces(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
-      {
-        return static_cast<Derived&>(*this).projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnInterfaces(
-          const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
-      {
-        const auto& fes = m_fes.get();
-        const auto& mesh = fes.getMesh();
-        for (auto it = mesh.getInterface(); !it.end(); ++it)
-        {
-          const auto& polytope = *it;
-          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-            static_cast<Derived&>(*this).project(fn, { polytope.getDimension(), polytope.getIndex() });
-        }
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).project(region, fn, pred);
       }
 
       /**
@@ -902,9 +629,9 @@ namespace Rodin::Variational
       using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
 
       using Parent::operator=;
+      using Parent::project;
       using Parent::min;
       using Parent::max;
-      using Parent::projectOnCells;
 
       GridFunction(const FESType& fes)
         : Parent(fes)
@@ -1019,12 +746,10 @@ namespace Rodin::Variational
         const Index  i = polytope.getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
         const size_t count = fe.getCount();
-        RangeType v;
         for (Index local = 0; local < count; ++local)
         {
           const auto mapping = fes.getInverseMapping({ d, i }, fe.getBasis(local));
-          mapping(v, p);
-          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
+          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
           if (local == 0)
             res = k; // Initializes the result (resizes)
           else
@@ -1032,28 +757,56 @@ namespace Rodin::Variational
         }
       }
 
-      template <class NestedDerived>
-      GridFunction& projectOnCells(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
+      template <class Function, class Pred>
+      GridFunction& project(
+          const Geometry::Region& region, const Function& v, const Pred& pred)
       {
         const auto& fes = this->getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        for (auto it = mesh.getCell(); !it.end(); ++it)
+
+        Geometry::PolytopeIterator it;
+        switch (region)
+        {
+          case Geometry::Region::Cells:
+          {
+            it = mesh.getCell();
+            break;
+          }
+          case Geometry::Region::Faces:
+          {
+            it = mesh.getFace();
+            break;
+          }
+          case Geometry::Region::Boundary:
+          {
+            it = mesh.getBoundary();
+            break;
+          }
+          case Geometry::Region::Interface:
+          {
+            it = mesh.getInterface();
+            break;
+          }
+        }
+
+        while (it)
         {
           const auto& polytope = *it;
-          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-            project(fn, { polytope.getDimension(), polytope.getIndex() });
+          if (pred(polytope))
+            this->project({ polytope.getDimension(), polytope.getIndex() }, v);
+          ++it;
         }
+
         return *this;
       }
 
-      template <class NestedDerived>
-      void project(const FunctionBase<NestedDerived>& fn, const std::pair<size_t, Index>& p)
+      template <class Function>
+      void project(const std::pair<size_t, Index>& p, const Function& fn)
       {
         const auto& fes = this->getFiniteElementSpace();
         const auto& [d, i] = p;
         const auto& fe = fes.getFiniteElement(d, i);
-        const auto mapping =
-          fes.getMapping({ d, i }, fn.template cast<RangeType>());
+        const auto mapping = fes.getMapping({ d, i }, fn);
         for (Index local = 0; local < fe.getCount(); local++)
         {
           const Index global = fes.getGlobalIndex({ d, i }, local);

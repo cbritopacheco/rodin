@@ -53,11 +53,11 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
-      Division& traceOf(Geometry::Attribute attr)
+      template <class ... Args>
+      Division& traceOf(const Args& ... args)
       {
-        getLHS().traceOf(attr);
-        getRHS().traceOf(attr);
+        m_lhs->traceOf(args...);
+        m_rhs->traceOf(args...);
         return *this;
       }
 
@@ -76,17 +76,9 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return this->object(getLHS().getValue(p)) / this->object(getRHS().getValue(p));
-      }
-
-      template <class T>
-      constexpr
-      void getValue(T& res, const Geometry::Point& p) const
-      {
-        getLHS().getDerived().getValue(res, p);
-        res /= getRHS().getValue(p);
       }
 
       Division* copy() const noexcept final override

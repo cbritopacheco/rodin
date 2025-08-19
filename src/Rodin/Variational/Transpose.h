@@ -61,17 +61,9 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return this->object(getOperand().getValue(p)).transpose();
-      }
-
-      template <class T>
-      constexpr
-      void getValue(T& out, const Geometry::Point& p) const
-      {
-        getOperand().getValue(out, p);
-        out.transposeInPlace();
       }
 
       Transpose* copy() const noexcept override
