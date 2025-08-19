@@ -31,16 +31,9 @@ namespace Rodin::Variational::F
         : Parent(std::move(other))
       {}
 
-      constexpr
       ScalarType getValue(const Geometry::Point& p) const
       {
         return p.x();
-      }
-
-      constexpr
-      void getValue(ScalarType& res, const Geometry::Point& p) const
-      {
-        res = p.x();
       }
 
       X* copy() const noexcept override
@@ -77,16 +70,9 @@ namespace Rodin::Variational::F
         : Parent(std::move(other))
       {}
 
-      constexpr
       ScalarType getValue(const Geometry::Point& p) const
       {
         return p.y();
-      }
-
-      constexpr
-      void getValue(ScalarType& res, const Geometry::Point& p) const
-      {
-        res = p.y();
       }
 
       Y* copy() const noexcept override
@@ -123,16 +109,9 @@ namespace Rodin::Variational::F
         : Parent(std::move(other))
       {}
 
-      constexpr
       ScalarType getValue(const Geometry::Point& p) const
       {
         return p.z();
-      }
-
-      constexpr
-      void getValue(ScalarType& res, const Geometry::Point& p) const
-      {
-        res = p.z();
       }
 
       Z* copy() const noexcept override
