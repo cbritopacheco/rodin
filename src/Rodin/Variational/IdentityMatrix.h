@@ -40,32 +40,22 @@ namespace Rodin::Variational
           m_n(other.m_n)
       {}
 
-      inline
       size_t getRows() const
       {
         return m_n;
       }
 
-      inline
       size_t getColumns() const
       {
         return m_n;
       }
 
-      inline
-      auto getValue(const Geometry::Point&) const
+      decltype(auto) getValue(const Geometry::Point&) const
       {
         return Math::Matrix<Real>::Identity(m_n, m_n);
       }
 
-      inline
-      constexpr
-      IdentityMatrix& traceOf(const FlatSet<Geometry::Attribute>&)
-      {
-        return *this;
-      }
-
-      inline IdentityMatrix* copy() const noexcept override
+      IdentityMatrix* copy() const noexcept override
       {
         return new IdentityMatrix(*this);
       }

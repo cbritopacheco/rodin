@@ -8,7 +8,6 @@
 #define RODIN_VARIATIONAL_GEQ_H
 
 #include "ForwardDecls.h"
-#include "GridFunction.h"
 #include "BooleanFunction.h"
 
 namespace Rodin::Variational
@@ -48,28 +47,25 @@ namespace Rodin::Variational
           m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       constexpr
       Boolean getValue(const Geometry::Point& p) const
       {
         return getLHS().getValue(p) >= getRHS().getValue(p);
       }
 
-      inline
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      inline
       const auto& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      inline GEQ* copy() const noexcept final override
+      GEQ* copy() const noexcept final override
       {
         return new GEQ(*this);
       }
@@ -87,7 +83,6 @@ namespace Rodin::Variational
     -> GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  inline
   constexpr
   auto
   operator>=(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
@@ -97,7 +92,6 @@ namespace Rodin::Variational
 
   template <class Number, class RHSDerived,
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  inline
   constexpr
   auto
   operator>=(Number lhs, const FunctionBase<RHSDerived>& rhs)
@@ -107,7 +101,6 @@ namespace Rodin::Variational
 
   template <class LHSDerived, class Number,
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  inline
   constexpr
   auto
   operator>=(const FunctionBase<LHSDerived>& lhs, Number rhs)

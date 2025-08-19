@@ -8,23 +8,13 @@
 #define RODIN_VARIATIONAL_INTEGRAL_H
 
 #include <cassert>
-#include <set>
 #include <utility>
 
-#include "Rodin/FormLanguage/Base.h"
+#include "Rodin/Geometry/Region.h"
 
-#include "Dot.h"
 #include "Function.h"
-#include "LinearForm.h"
 #include "ForwardDecls.h"
-#include "GridFunction.h"
-#include "TestFunction.h"
-#include "TrialFunction.h"
-#include "FiniteElement.h"
-#include "MatrixFunction.h"
-#include "QuadratureRule.h"
-#include "LinearFormIntegrator.h"
-#include "BilinearFormIntegrator.h"
+#include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
@@ -108,9 +98,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Cells;
+        return Geometry::Region::Cells;
       }
 
       Integral* copy() const noexcept override
@@ -166,9 +156,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Cells;
+        return Geometry::Region::Cells;
       }
 
       Integral* copy() const noexcept override
@@ -217,9 +207,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Cells;
+        return Geometry::Region::Cells;
       }
 
       Integral* copy() const noexcept override

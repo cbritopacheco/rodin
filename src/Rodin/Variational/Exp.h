@@ -7,7 +7,8 @@
 #ifndef RODIN_VARIATIONAL_EXP_H
 #define RODIN_VARIATIONAL_EXP_H
 
-#include <cmath>
+#include "Rodin/Math/Common.h"
+
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RealFunction.h"
@@ -48,10 +49,18 @@ namespace Rodin::Variational
           m_v(std::move(other.m_v))
       {}
 
+      template <class ... Args>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      Exp& traceOf(const Args& ... args)
       {
-        return Math::exp(getOperand().getValue(p));
+        m_v->traceOf(args...);
+        return *this;
+      }
+
+      constexpr
+      decltype(auto) getValue(const Geometry::Point& p) const
+      {
+        return Math::exp(this->getOperand().getValue(p));
       }
 
       const OperandType& getOperand() const

@@ -7,8 +7,6 @@
 #ifndef RODIN_VARIATIONAL_MAX_H
 #define RODIN_VARIATIONAL_MAX_H
 
-#include <cmath>
-
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RealFunction.h"
@@ -49,16 +47,17 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      template <class ... Args>
       constexpr
-      Max& traceOf(Geometry::Attribute attrs)
+      Max& traceOf(const Args& ... args)
       {
-        m_lhs.traceOf(attrs);
-        m_rhs.traceOf(attrs);
+        m_lhs->traceOf(args...);
+        m_rhs->traceOf(args...);
         return *this;
       }
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
@@ -125,18 +124,19 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      template <class ... Args>
       constexpr
-      Max& traceOf(Geometry::Attribute attrs)
+      Max& traceOf(const Args& ... args)
       {
-        m_lhs.traceOf(attrs);
+        m_lhs->traceOf(args...);
         return *this;
       }
 
       constexpr
       Real getValue(const Geometry::Point& p) const
       {
-        const auto lhs = getLHS().getValue(p);
-        const auto& rhs = getRHS();
+        const auto lhs = this->getLHS().getValue(p);
+        const auto& rhs = this->getRHS();
         if (lhs < rhs)
           return rhs;
         else

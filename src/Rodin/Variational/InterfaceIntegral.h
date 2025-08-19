@@ -7,14 +7,11 @@
 #ifndef RODIN_VARIATIONAL_INTERFACEINTEGRAL_H
 #define RODIN_VARIATIONAL_INTERFACEINTEGRAL_H
 
-#include <cassert>
-#include <set>
 #include <utility>
 
-#include "Rodin/FormLanguage/Base.h"
+#include "Rodin/Geometry/Region.h"
 
 #include "ForwardDecls.h"
-#include "QuadratureRule.h"
 
 namespace Rodin::Variational
 {
@@ -72,12 +69,12 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Interface;
+        return Geometry::Region::Interface;
       }
 
-      inline InterfaceIntegral* copy() const noexcept override
+      InterfaceIntegral* copy() const noexcept override
       {
         return new InterfaceIntegral(*this);
       }
@@ -136,12 +133,12 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Interface;
+        return Geometry::Region::Interface;
       }
 
-      inline InterfaceIntegral* copy() const noexcept override
+      InterfaceIntegral* copy() const noexcept override
       {
         return new InterfaceIntegral(*this);
       }

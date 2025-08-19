@@ -4,7 +4,6 @@
 #include <Eigen/Geometry>
 
 #include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/PolytopeTransformation.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
@@ -43,7 +42,6 @@ namespace Rodin::Variational
           m_sdim(std::move(other.m_sdim))
       {}
 
-      inline
       constexpr
       size_t getDimension() const
       {
@@ -139,7 +137,6 @@ namespace Rodin::Variational
         }
       }
 
-      inline
       constexpr
       FaceNormal& traceOf(Geometry::Attribute attr)
       {
@@ -147,7 +144,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
       constexpr
       FaceNormal& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -155,7 +151,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline FaceNormal* copy() const noexcept override
+      FaceNormal* copy() const noexcept override
       {
         return new FaceNormal(*this);
       }

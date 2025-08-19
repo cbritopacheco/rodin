@@ -10,12 +10,15 @@
 #include "Rodin/Context/Local.h"
 
 #include "Rodin/Tuple.h"
+
 #include "Rodin/Math/Traits.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
+#include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Region.h"
+
 #include "Rodin/Variational/ForwardDecls.h"
-#include "Rodin/Variational/Integrator.h"
 
 #include "ForwardDecls.h"
 
@@ -27,17 +30,17 @@ namespace Rodin::Assembly
     public:
       using MeshType = Geometry::Mesh<Context::Local>;
 
-      SequentialIteration(const MeshType& mesh, Variational::Integrator::Region);
+      SequentialIteration(const MeshType& mesh, const Geometry::Region&);
 
       Geometry::PolytopeIterator getIterator() const;
 
     private:
       std::reference_wrapper<const MeshType> m_mesh;
-      Variational::Integrator::Region m_region;
+      Geometry::Region m_region;
   };
 
   SequentialIteration(
-      const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region)
+      const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
     -> SequentialIteration<Geometry::Mesh<Context::Local>>;
 }
 
@@ -666,8 +669,7 @@ namespace Rodin::Assembly
             if (essBdr.size() == 0 || essBdr.count(mesh.getAttribute(faceDim, i)))
             {
               const auto& fe = fes.getFiniteElement(faceDim, i);
-              const auto& mapping =
-                fes.getMapping({ faceDim, i }, value.template cast<FESRangeType>());
+              const auto& mapping = fes.getMapping({ faceDim, i }, value);
               for (Index local = 0; local < fe.getCount(); local++)
               {
                 const Index global = fes.getGlobalIndex({ faceDim, i }, local);

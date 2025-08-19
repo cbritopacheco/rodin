@@ -13,9 +13,7 @@
 #include "Rodin/Types.h"
 
 #include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/Connectivity.h"
 
-#include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
 #include "ForwardDecls.h"
@@ -104,17 +102,10 @@ namespace Rodin::Variational
 
           Mapping(const Mapping&) = default;
 
-          auto operator()(const Math::SpatialVector<Real>& r) const
+          decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v.get()(p);
-          }
-
-          template <class T>
-          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
-          {
-            const Geometry::Point p(m_polytope, r);
-            return m_v.get()(res, p);
           }
 
           constexpr
@@ -150,15 +141,9 @@ namespace Rodin::Variational
           InverseMapping(const InverseMapping&) = default;
 
           constexpr
-          auto operator()(const Geometry::Point& p) const
+          decltype(auto) operator()(const Geometry::Point& p) const
           {
             return m_v.get()(p.getReferenceCoordinates());
-          }
-
-          template <class T>
-          auto operator()(T& res, const Geometry::Point& p) const
-          {
-            return m_v.get()(res, p.getReferenceCoordinates());
           }
 
           constexpr
@@ -379,17 +364,10 @@ namespace Rodin::Variational
 
           Mapping(const Mapping&) = default;
 
-          auto operator()(const Math::SpatialPoint& r) const
+          decltype(auto) operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v.get()(p);
-          }
-
-          template <class T>
-          auto operator()(T& res, const Math::SpatialPoint& r) const
-          {
-            const Geometry::Point p(m_polytope, r);
-            return m_v.get()(res, p);
           }
 
           constexpr
@@ -422,15 +400,9 @@ namespace Rodin::Variational
           InverseMapping(const InverseMapping&) = default;
 
           constexpr
-          auto operator()(const Geometry::Point& p) const
+          decltype(auto) operator()(const Geometry::Point& p) const
           {
             return m_v.get()(p.getReferenceCoordinates());
-          }
-
-          template <class T>
-          auto operator()(T& res, const Geometry::Point& p) const
-          {
-            return m_v.get()(res, p.getReferenceCoordinates());
           }
 
           constexpr

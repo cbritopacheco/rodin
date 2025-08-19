@@ -9,11 +9,7 @@
 
 #include "ForwardDecls.h"
 
-#include "TrialFunction.h"
-#include "TestFunction.h"
 #include "VectorFunction.h"
-
-#include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 namespace Rodin::FormLanguage
 {
@@ -101,15 +97,9 @@ namespace Rodin::Variational
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      SpatialVectorType getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        SpatialVectorType out;
-        this->getValue(out, p);
-        return out;
-      }
-
-      void getValue(SpatialVectorType& out, const Geometry::Point& p) const
-      {
+        static thread_local SpatialVectorType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -117,22 +107,23 @@ namespace Rodin::Variational
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          this->interpolate(out, p);
+          this->interpolate(s_out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(out, *inclusion);
+          this->interpolate(s_out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(out, *restriction);
+          this->interpolate(s_out, *restriction);
         }
         else
         {
           assert(false);
         }
+        return s_out;
       }
 
       /**

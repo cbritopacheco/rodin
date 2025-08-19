@@ -7,7 +7,8 @@
 #ifndef RODIN_VARIATIONAL_COSH_H
 #define RODIN_VARIATIONAL_COSH_H
 
-#include "Rodin/Math.h"
+#include "Rodin/Math/Common.h"
+
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RealFunction.h"
@@ -46,23 +47,16 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_operand))
       {}
 
-      constexpr
-      Cosh& traceOf(Geometry::Attribute attr)
+      template <class ... Args>
+      Cosh& traceOf(const Args& ... args)
       {
-        m_operand->traceOf(attr);
+        m_operand->traceOf(args...);
         return *this;
       }
 
-      constexpr
-      Cosh& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        m_operand->traceOf(attrs);
-        return *this;
-      }
-
-      Real getValue(const Geometry::Point& p) const
-      {
-        return Math::cosh(getOperand().getValue(p));
+        return Math::cosh(m_operand->getValue(p));
       }
 
       const OperandType& getOperand() const

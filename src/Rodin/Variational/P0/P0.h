@@ -239,18 +239,18 @@ namespace Rodin::Variational
        * taking a function @f$ v \in V(\tau) @f$ from the global element @f$
        * \tau @f$ element @f$ R @f$.
        */
-      template <class FunctionDerived>
-      auto getMapping(const std::pair<size_t, Index>& idx, const FunctionBase<FunctionDerived>& v) const
+      template <class Function>
+      auto getMapping(const std::pair<size_t, Index>& idx, const Function& v) const
       {
         const auto [d, i] = idx;
         const auto& mesh = getMesh();
-        return Mapping<FunctionDerived>(*mesh.getPolytope(d, i), v);
+        return Mapping<Function>(*mesh.getPolytope(d, i), v);
       }
 
-      template <class FunctionDerived>
-      auto getMapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v) const
+      template <class Function>
+      auto getMapping(const Geometry::Polytope& polytope, const Function& v) const
       {
-        return Mapping<FunctionDerived>(polytope, v);
+        return Mapping<Function>(polytope, v);
       }
 
       /**
@@ -259,16 +259,16 @@ namespace Rodin::Variational
        * @param[in] idx Index of the element in the mesh.
        * @param[in] v Callable type
        */
-      template <class CallableType>
-      auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
+      template <class Function>
+      auto getInverseMapping(const std::pair<size_t, Index>& idx, const Function& v) const
       {
-        return InverseMapping<CallableType>(v);
+        return InverseMapping<Function>(v);
       }
 
-      template <class CallableType>
-      auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
+      template <class Function>
+      auto getInverseMapping(const Geometry::Polytope& polytope, const Function& v) const
       {
-        return InverseMapping<CallableType>(v);
+        return InverseMapping<Function>(v);
       }
 
     private:

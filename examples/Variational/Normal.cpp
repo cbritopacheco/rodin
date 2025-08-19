@@ -25,7 +25,7 @@ int main(int, char**)
 
   P1 fes(mesh, vdim);
   GridFunction gf(fes);
-  gf.projectOnBoundary(BoundaryNormal(mesh));
+  gf.project(Region::Boundary, BoundaryNormal(mesh));
 
   mesh.save("Normal.mesh");
   gf.save("Normal.gf");

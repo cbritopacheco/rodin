@@ -369,7 +369,7 @@ namespace Rodin::IO
               it->getCoordinates()
             );
 
-            gf(v, p);
+            v = gf(p);
 
             if constexpr (std::is_same_v<RangeType, Real>)
             {

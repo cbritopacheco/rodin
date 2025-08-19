@@ -149,9 +149,9 @@ namespace Rodin::Variational
         return *m_lambda;
       }
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Cells;
+        return Geometry::Region::Cells;
       }
 
       LinearElasticityIntegrator* copy() const noexcept override

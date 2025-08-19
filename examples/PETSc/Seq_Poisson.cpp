@@ -27,7 +27,7 @@ int main(int argc, char** argv)
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
   mesh.getConnectivity().compute(1, 2);
 
-  ScalarFunction f = 1;
+  RealFunction f = 1;
 
   P1 vh(mesh);
 

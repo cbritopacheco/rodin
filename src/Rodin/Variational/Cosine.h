@@ -4,10 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_Cos_H
-#define RODIN_VARIATIONAL_Cos_H
+#ifndef RODIN_VARIATIONAL_COS_H
+#define RODIN_VARIATIONAL_COS_H
 
-#include "Rodin/Math.h"
+#include "Rodin/Math/Common.h"
+
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RealFunction.h"
@@ -46,17 +47,11 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_operand))
       {}
 
+      template <class ... Args>
       constexpr
-      Cos& traceOf(Geometry::Attribute attr)
+      Cos& traceOf(const Args& ... args)
       {
-        m_operand->traceOf(attr);
-        return *this;
-      }
-
-      constexpr
-      Cos& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        m_operand->traceOf(attrs);
+        m_operand->traceOf(args...);
         return *this;
       }
 

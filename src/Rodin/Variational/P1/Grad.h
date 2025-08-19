@@ -7,7 +7,9 @@
 #ifndef RODIN_VARIATIONAL_P1_GRAD_H
 #define RODIN_VARIATIONAL_P1_GRAD_H
 
+#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Variational/Grad.h"
+#include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
@@ -116,7 +118,6 @@ namespace Rodin::Variational
         }
         else // Evaluating on a cell
         {
-          static thread_local SpatialVectorType s_gradient;
           static thread_local SpatialVectorType s_res;
 
           s_res.resize(d);
@@ -130,8 +131,8 @@ namespace Rodin::Variational
           for (size_t local = 0; local < fe.getCount(); local++)
           {
             const auto basis = fe.getBasis(local);
-            basis.getGradient()(s_gradient, rc);
-            s_res += gf[fes.getGlobalIndex({d, i}, local)] * s_gradient;
+            basis.getGradient()(rc);
+            s_res += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
           }
           out = p.getJacobianInverse().transpose() * s_res;
         }
@@ -227,7 +228,7 @@ namespace Rodin::Variational
         for (size_t local = 0; local < count; local++)
         {
           const auto basis = fe.getBasis(local);
-          basis.getGradient()(m_gradient[local], rc);
+          m_gradient[local] = basis.getGradient()(rc);
         }
         return *this;
       }

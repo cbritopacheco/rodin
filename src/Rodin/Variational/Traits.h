@@ -37,7 +37,8 @@ namespace Rodin::FormLanguage
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
-    using Type = std::invoke_result_t<Variational::ShapeFunctionBase<Derived, FES, Space>, size_t>;
+    using Type =
+      std::invoke_result_t<Variational::ShapeFunctionBase<Derived, FES, Space>, size_t>;
   };
 
   template <class T>
@@ -46,37 +47,43 @@ namespace Rodin::FormLanguage
   template <>
   struct RangeOf<Boolean>
   {
-    using Type = Boolean;
+    using Type =
+      Boolean;
   };
 
   template <>
   struct RangeOf<Integer>
   {
-    using Type = Integer;
+    using Type =
+      Integer;
   };
 
   template <>
   struct RangeOf<Real>
   {
-    using Type = Real;
+    using Type =
+      Real;
   };
 
   template <>
   struct RangeOf<Complex>
   {
-    using Type = Complex;
+    using Type =
+      Complex;
   };
 
   template <class Scalar, int Rows, int Options, int MaxRows, int MaxCols>
   struct RangeOf<Eigen::Matrix<Scalar, Rows, 1, Options, MaxRows, MaxCols>>
   {
-    using Type = Math::Vector<Scalar>;
+    using Type =
+      Math::Vector<Scalar>;
   };
 
   template <class Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
   struct RangeOf<Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>>
   {
-    using Type = Math::Matrix<Scalar>;
+    using Type =
+      Math::Matrix<Scalar>;
   };
 
   template <class MatrixXpr>
@@ -95,27 +102,19 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct RangeOf<Variational::FunctionBase<Derived>>
   {
-    using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
-    using Type = typename RangeOf<ResultType>::Type;
+    using ResultType =
+      typename ResultOf<Variational::FunctionBase<Derived>>::Type;
+    using Type =
+      typename RangeOf<std::remove_cvref_t<ResultType>>::Type;
   };
 
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
-    using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
-    using Type = typename RangeOf<ResultType>::Type;
-  };
-
-  template <class R>
-  struct Traits<std::function<void(R&, const Geometry::Point&)>>
-  {
-    using RangeType = R;
-  };
-
-  template <class R>
-  struct Traits<std::function<R(const Geometry::Point&)>>
-  {
-    using RangeType = R;
+    using ResultType =
+      typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
+    using Type =
+      typename RangeOf<std::remove_cvref_t<ResultType>>::Type;
   };
 }
 

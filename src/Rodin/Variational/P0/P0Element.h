@@ -45,8 +45,6 @@ namespace Rodin::Variational
   /**
    * @ingroup FiniteElements
    * @ingroup P0ElementSpecializations
-   * @brief Degree 1 scalar Lagrange element
-   * @see @m_defelement{Lagrange,https://defelement.com/elements/lagrange.html}
    */
   template <class Scalar>
   class P0Element final : public FiniteElementBase<P0Element<Scalar>>
@@ -56,6 +54,8 @@ namespace Rodin::Variational
     public:
       /// Parent class
       using Parent = FiniteElementBase<P0Element<Scalar>>;
+
+      using ScalarType = Scalar;
 
       /// Type of range
       using RangeType = Scalar;
@@ -76,7 +76,7 @@ namespace Rodin::Variational
 
           template <class T>
           constexpr
-          auto operator()(const T& v) const
+          ScalarType operator()(const T& v) const
           {
             return v(s_nodes[m_g]);
           }
@@ -104,12 +104,6 @@ namespace Rodin::Variational
               DerivativeFunction(const DerivativeFunction&) = default;
 
               constexpr
-              void operator()(ReturnType& out, const Math::SpatialVector<Real>& r) const
-              {
-                out = 0;
-              }
-
-              constexpr
               ReturnType operator()(const Math::SpatialVector<Real>& r) const
               {
                 return 0;
@@ -121,12 +115,6 @@ namespace Rodin::Variational
 
           constexpr
           BasisFunction(const BasisFunction&) = default;
-
-          constexpr
-          void operator()(ReturnType& out, const Math::SpatialVector<Real>& r) const
-          {
-            out = 1;
-          }
 
           constexpr
           ReturnType operator()(const Math::SpatialVector<Real>& r) const
@@ -239,7 +227,7 @@ namespace Rodin::Variational
 
           template <class T>
           constexpr
-          auto operator()(const T& v) const
+          decltype(auto) operator()(const T& v) const
           {
             const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
             return v(P0Element<ScalarType>(m_g).getNode(m_local / vdim)).coeff(m_local % vdim);
@@ -264,15 +252,9 @@ namespace Rodin::Variational
               DerivativeFunction(const DerivativeFunction&) = default;
 
               constexpr
-              void operator()(Scalar& out, const Math::SpatialVector<Real>& r) const
+              ScalarType operator()(const Math::SpatialVector<Real>& rc) const
               {
-                out = 0;
-              }
-
-              constexpr
-              Scalar operator()(const Math::SpatialVector<Real>& rc) const
-              {
-                return 0;
+                return ScalarType(0);
               }
           };
 
@@ -292,18 +274,10 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          auto operator()(const Math::SpatialVector<ScalarType>& r) const
+          decltype(auto) operator()(const Math::SpatialVector<ScalarType>& r) const
           {
             const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
             return Math::Vector<ScalarType>::Zero(vdim);
-          }
-
-          constexpr
-          void operator()(Math::Vector<ScalarType>& out, const Math::SpatialVector<Real>& rc) const
-          {
-            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
-            out.resize(vdim);
-            out.setZero();
           }
 
           template <size_t Order>

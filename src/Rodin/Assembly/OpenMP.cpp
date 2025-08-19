@@ -11,7 +11,7 @@
 namespace Rodin::Assembly
 {
   OpenMPIteration<Geometry::Mesh<Context::Local>>
-  ::OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region region)
+  ::OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region& region)
     : m_mesh(mesh), m_region(region)
   {}
 
@@ -21,14 +21,14 @@ namespace Rodin::Assembly
     Geometry::PolytopeIterator it;
     switch (m_region)
     {
-      case Variational::Integrator::Region::Cells:
+      case Geometry::Region::Cells:
       {
         it = m_mesh.get().getCell(i);
         return it;
       }
-      case Variational::Integrator::Region::Faces:
-      case Variational::Integrator::Region::Boundary:
-      case Variational::Integrator::Region::Interface:
+      case Geometry::Region::Faces:
+      case Geometry::Region::Boundary:
+      case Geometry::Region::Interface:
       {
         it = m_mesh.get().getFace(i);
         return it;
@@ -42,13 +42,13 @@ namespace Rodin::Assembly
   {
     switch (m_region)
     {
-      case Variational::Integrator::Region::Cells:
+      case Geometry::Region::Cells:
       {
         return m_mesh.get().getDimension();
       }
-      case Variational::Integrator::Region::Faces:
-      case Variational::Integrator::Region::Boundary:
-      case Variational::Integrator::Region::Interface:
+      case Geometry::Region::Faces:
+      case Geometry::Region::Boundary:
+      case Geometry::Region::Interface:
       {
         return m_mesh.get().getDimension() - 1;
       }
@@ -61,13 +61,13 @@ namespace Rodin::Assembly
   {
     switch (m_region)
     {
-      case Variational::Integrator::Region::Cells:
+      case Geometry::Region::Cells:
       {
         return m_mesh.get().getCellCount();
       }
-      case Variational::Integrator::Region::Faces:
-      case Variational::Integrator::Region::Boundary:
-      case Variational::Integrator::Region::Interface:
+      case Geometry::Region::Faces:
+      case Geometry::Region::Boundary:
+      case Geometry::Region::Interface:
       {
         return m_mesh.get().getFaceCount();
       }
@@ -80,16 +80,16 @@ namespace Rodin::Assembly
   {
     switch (m_region)
     {
-      case Variational::Integrator::Region::Faces:
-      case Variational::Integrator::Region::Cells:
+      case Geometry::Region::Faces:
+      case Geometry::Region::Cells:
       {
         return true;
       }
-      case Variational::Integrator::Region::Boundary:
+      case Geometry::Region::Boundary:
       {
         return m_mesh.get().isBoundary(i);
       }
-      case Variational::Integrator::Region::Interface:
+      case Geometry::Region::Interface:
       {
         return m_mesh.get().isInterface(i);
       }

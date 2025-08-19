@@ -7,7 +7,6 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 
-#include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/Traits.h"
 
@@ -119,36 +118,19 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      template <class ... Args>
       constexpr
-      Sum& traceOf(Geometry::Attribute attr)
+      Sum& traceOf(const Args& ... args)
       {
-        Parent::traceOf(attr);
-        getLHS().traceOf(attr);
-        getRHS().traceOf(attr);
+        m_lhs->traceOf(args...);
+        m_rhs->traceOf(args...);
         return *this;
       }
 
       constexpr
-      Sum& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        Parent::traceOf(attrs);
-        getLHS().traceOf(attrs);
-        getRHS().traceOf(attrs);
-        return *this;
-      }
-
-      constexpr
-      auto getValue(const Geometry::Point& p) const
-      {
-        return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
-      }
-
-      template <class T>
-      constexpr
-      void getValue(T& res, const Geometry::Point& p) const
-      {
-        getLHS().getValue(res, p);
-        res += getRHS().getValue(p);
+        return this->object(this->getLHS().getValue(p)) + this->object(this->getRHS().getValue(p));
       }
 
       Sum* copy() const noexcept override

@@ -7,7 +7,8 @@
 #ifndef RODIN_VARIATIONAL_ABS_H
 #define RODIN_VARIATIONAL_ABS_H
 
-#include <cmath>
+#include "Rodin/Math/Common.h"
+
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RealFunction.h"
@@ -30,9 +31,14 @@ namespace Rodin::Variational
     public:
       using OperandType = FunctionBase<NestedDerived>;
 
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
       using Parent = RealFunctionBase<Abs<OperandType>>;
 
-      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+      using Parent::traceOf;
+
+      using Parent::operator();
+
 
       Abs(const OperandType& v)
         : m_v(v.copy())
@@ -49,7 +55,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return Math::abs(getOperand().getValue(p));
       }

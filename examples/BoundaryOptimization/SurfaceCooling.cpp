@@ -252,7 +252,7 @@ int main(int, char**)
 
     Alert::Info() << "Meshing the domain..." << Alert::Raise;
     GridFunction workaround(sfes);
-    workaround.projectOnBoundary(dist);
+    workaround.project(Region::Boundary, dist);
     try
     {
       Omega = MMG::ImplicitDomainMesher().noSplit(GammaN)

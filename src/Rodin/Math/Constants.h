@@ -8,6 +8,7 @@
 #define RODIN_CORE_CONSTANTS_H
 
 #include <cmath>
+#include <limits>
 #include <type_traits>
 
 #include "Types.h"
@@ -22,13 +23,6 @@ namespace Rodin::Math::Constants
   Real pi()
   {
     return M_PI;
-  }
-
-  inline
-  constexpr
-  Real nan()
-  {
-    return NAN;
   }
 
   inline

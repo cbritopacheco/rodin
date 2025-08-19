@@ -58,49 +58,6 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
-  namespace Internal
-  {
-    template <typename T, class ... Args>
-    struct HasGetBasisMethod
-    {
-      template<typename U, typename = decltype(std::declval<U>().getBasis(std::declval<Args>()...))>
-      static std::true_type Test(int);
-
-      template<typename U>
-      static std::false_type Test(...);
-
-      using Type = decltype(Test<T>(0));
-      static constexpr bool Value = Type::value;
-    };
-
-    template <typename T, typename... Args>
-    struct HasGetBasisMethod<T, Args&...>
-    {
-      template <typename U, typename = decltype(std::declval<U>().getBasis(std::declval<Args&>()...))>
-      static std::true_type Test(int);
-
-      template <typename U>
-      static std::false_type Test(...);
-
-      using Type = decltype(Test<T>(0));
-      static constexpr bool Value = Type::value;
-    };
-
-    template <typename T, class... Args>
-    struct HasGetBasisMethodR
-    {
-        template<typename U, typename = decltype(std::declval<U>().getBasis(std::declval<Args>()...))>
-        static auto Test(int) ->
-          decltype(std::is_same<typename std::invoke_result<decltype(&U::getBasis)(U, Args...)>::type, T>::value, std::true_type{});
-
-        template<typename U>
-        static std::false_type Test(...);
-
-        using Type = decltype(Test<T>(0));
-        static constexpr bool Value = Type::value;
-    };
-  }
-
   /**
   * @defgroup ShapeFunctionSpecializations ShapeFunction Template Specializations
   * @brief Template specializations of the ShapeFunction class.
@@ -141,7 +98,11 @@ namespace Rodin::Variational
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      using Parent = FormLanguage::Base;
+      using ScalarType =
+        typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using Parent =
+        FormLanguage::Base;
 
       constexpr
       ShapeFunctionBase(const FES& fes)
@@ -159,16 +120,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_fes(std::move(other.m_fes))
       {}
-
-      Derived& getDerived()
-      {
-        return static_cast<Derived&>(*this);
-      }
-
-      const Derived& getDerived() const
-      {
-        return static_cast<const Derived&>(*this);
-      }
 
       /**
        * @brief Indicates whether the shape function is part of a %Trial or %Test
@@ -241,23 +192,9 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in the Derived class.
        */
       constexpr
-      auto getBasis(size_t local) const
+      decltype(auto) getBasis(size_t local) const
       {
         return static_cast<const Derived&>(*this).getBasis(local);
-      }
-
-      template <class T>
-      constexpr
-      void getBasis(T& basis, size_t local) const
-      {
-        if constexpr (Internal::HasGetBasisMethod<Derived, T&, size_t>::Value)
-        {
-          static_cast<const Derived&>(*this).getBasis(basis, local);
-        }
-        else
-        {
-          basis = getBasis(local);
-        }
       }
 
       /**
@@ -267,16 +204,9 @@ namespace Rodin::Variational
        * Synonym to getBasis(size_t).
        */
       constexpr
-      auto operator()(size_t local) const
+      decltype(auto) operator()(size_t local) const
       {
-        return getBasis(local);
-      }
-
-      template <class T>
-      constexpr
-      void operator()(T& res, size_t local) const
-      {
-        getBasis(res, local);
+        return static_cast<const Derived&>(*this).getBasis(local);
       }
 
       /**
@@ -287,6 +217,11 @@ namespace Rodin::Variational
       const FES& getFiniteElementSpace() const
       {
         return m_fes.get();
+      }
+
+      const Derived& getDerived() const noexcept
+      {
+        return static_cast<const Derived&>(*this);
       }
 
       virtual ShapeFunctionBase* copy() const noexcept override

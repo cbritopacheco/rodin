@@ -34,7 +34,7 @@ namespace Rodin::Assembly
     public:
       using MeshType = Geometry::Mesh<Context::Local>;
 
-      OpenMPIteration(const MeshType& mesh, Variational::Integrator::Region);
+      OpenMPIteration(const MeshType& mesh, const Geometry::Region& region);
 
       Geometry::PolytopeIterator getIterator(Index i) const;
 
@@ -46,11 +46,10 @@ namespace Rodin::Assembly
 
     private:
       std::reference_wrapper<const MeshType> m_mesh;
-      Variational::Integrator::Region m_region;
+      Geometry::Region m_region;
   };
 
-  OpenMPIteration(
-      const Geometry::Mesh<Context::Local>& mesh, Variational::Integrator::Region)
+  OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
     -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
 
   template <class Solution, class TrialFES, class TestFES>
@@ -625,7 +624,7 @@ namespace Rodin::Assembly
               {
                 const auto& fe = fes.getFiniteElement(faceDim, i);
                 const auto& mapping =
-                  fes.getMapping({ faceDim, i }, value.template cast<FESRangeType>());
+                  fes.getMapping({ faceDim, i }, value);
                 for (Index local = 0; local < fe.getCount(); local++)
                 {
                   const Index global = fes.getGlobalIndex({ faceDim, i }, local);

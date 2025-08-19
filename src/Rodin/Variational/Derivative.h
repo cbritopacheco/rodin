@@ -5,9 +5,7 @@
 #include <cstdlib>
 
 #include "ForwardDecls.h"
-#include "FiniteElementSpace.h"
-#include "GridFunction.h"
-#include "RealFunction.h"
+#include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
 {
@@ -74,15 +72,9 @@ namespace Rodin::Variational
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      ScalarType getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        ScalarType out;
-        getValue(out, p);
-        return out;
-      }
-
-      void getValue(ScalarType& out, const Geometry::Point& p) const
-      {
+        static thread_local ScalarType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -90,22 +82,23 @@ namespace Rodin::Variational
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          interpolate(out, p);
+          this->interpolate(s_out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          interpolate(out, *inclusion);
+          this->interpolate(s_out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          interpolate(out, *restriction);
+          interpolate(s_out, *restriction);
         }
         else
         {
           assert(false);
         }
+        return s_out;
       }
 
       /**
@@ -190,12 +183,13 @@ namespace Rodin::Variational
 
       const Geometry::Point& getPoint() const
       {
-        return m_p.value().get();
+        assert(m_p);
+        return *m_p;
       }
 
       Derivative& setPoint(const Geometry::Point& p)
       {
-        m_p = p;
+        m_p = &p;
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
         const Index i = polytope.getIndex();
@@ -209,7 +203,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      auto getBasis(size_t local) const
+      decltype(auto) getBasis(size_t local) const
       {
         return m_gradients[local].coeff(m_i);
       }
@@ -223,7 +217,7 @@ namespace Rodin::Variational
       size_t m_i;
       std::reference_wrapper<const OperandType> m_u;
 
-      Optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      const Geometry::Point* m_p;
 
       std::vector<Math::SpatialVector<Real>> m_gradients;
   };

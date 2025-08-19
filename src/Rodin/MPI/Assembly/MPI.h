@@ -13,13 +13,13 @@ namespace Rodin::Assembly
     public:
       using MeshType = Geometry::Mesh<Context::MPI>;
 
-      MPIIteration(const MeshType& mesh, Variational::Integrator::Region);
+      MPIIteration(const MeshType& mesh, Geometry::Region);
 
       Geometry::PolytopeIterator getIterator() const;
 
     private:
       std::reference_wrapper<const MeshType> m_mesh;
-      Variational::Integrator::Region m_region;
+      Geometry::Region m_region;
   };
 }
 
@@ -90,7 +90,7 @@ namespace Rodin::Assembly
             {
               const auto& fe = fes.getShard().getFiniteElement(faceDim, i);
               const auto& mapping =
-                fes.getShard().getMapping({ faceDim, i }, value.template cast<FESRangeType>());
+                fes.getShard().getMapping({ faceDim, i }, value);
               for (Index local = 0; local < fe.getCount(); local++)
               {
                 const Index global = fes.getGlobalIndex(

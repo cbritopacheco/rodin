@@ -8,9 +8,6 @@
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
 #include "ForwardDecls.h"
-#include "GridFunction.h"
-#include "ShapeFunction.h"
-#include "VectorFunction.h"
 #include "MatrixFunction.h"
 
 namespace Rodin::Variational

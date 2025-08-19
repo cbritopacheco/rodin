@@ -83,7 +83,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     RealFunction c = 1.0;
-    gf.projectOnBoundary(c);
+    gf.project(Region::Boundary, c);
   }
 
   TEST(Rodin_Variational_Real_P1_GridFunction, FuzzyTest_TriangularUniformGrid16_ProjectOnBoundary_Sum)
@@ -98,7 +98,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
-    gf.projectOnBoundary(c);
+    gf.project(Region::Boundary, c);
   }
 
   TEST(Rodin_Variational_Real_P1_GridFunction, FuzzyTest_2D_Square_Project_LinearFunction)
@@ -178,7 +178,7 @@ namespace Rodin::Tests::Unit
     }
 
     GridFunction gf3(fes);
-    gf3.projectOnCells([](const Geometry::Point& p) { return p.x() - p.y(); });
+    gf3.project(Region::Cells, [](const Geometry::Point& p) { return p.x() - p.y(); });
 
     {
       auto it = mesh.getPolytope(mdim, 0);
@@ -197,7 +197,7 @@ namespace Rodin::Tests::Unit
     }
 
     GridFunction gf4(fes);
-    gf4.projectOnCells([](const Geometry::Point& p) { return 666 * p.x() - 999 * p.y(); });
+    gf4.project(Region::Cells, [](const Geometry::Point& p) { return 666 * p.x() - 999 * p.y(); });
 
     {
       auto it = mesh.getPolytope(mdim, 0);

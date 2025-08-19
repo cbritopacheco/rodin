@@ -13,27 +13,23 @@
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
+#include "Rodin/Geometry/Types.h"
+#include "Rodin/Geometry/Point.h"
+#include "Rodin/Geometry/Region.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/PolytopeIterator.h"
-#include "Rodin/Math.h"
-
-#include "Rodin/Geometry/Point.h"
-#include "Rodin/Geometry/SubMesh.h"
-
-#include "Rodin/IO/MFEM.h"
-#include "Rodin/IO/MEDIT.h"
-#include "Rodin/IO/EnSight6.h"
 
 #include "Rodin/Alert/MemberFunctionException.h"
+
+#include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/IO/EnSight6.h"
+#include "Rodin/IO/MEDIT.h"
+#include "Rodin/IO/MFEM.h"
 
 #include "ForwardDecls.h"
 
 #include "Function.h"
-#include "Component.h"
-#include "ScalarFunction.h"
-#include "VectorFunction.h"
-#include "MatrixFunction.h"
-#include "FiniteElementSpace.h"
+
 
 namespace Rodin::FormLanguage
 {
@@ -110,16 +106,9 @@ namespace Rodin::Variational
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
-      }
-
-      template <class T>
-      constexpr
-      void getValue(T& res, const Geometry::Point& p) const
-      {
-        m_ref.get().getValue(res, p);
       }
 
       GridFunctionBaseReference* copy() const noexcept final override
@@ -348,31 +337,23 @@ namespace Rodin::Variational
         output.close();
       }
 
-      constexpr
-      RangeType getValue(const Geometry::Point& p) const
-      {
-        RangeType res;
-        static_cast<const Derived&>(*this).getValue(res, p);
-        return res;
-      }
-
       /**
        * @brief Gets the interpolated value at the point.
        */
-      constexpr
-      void getValue(RangeType& res, const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
+        static thread_local RangeType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          static_cast<const Derived&>(*this).interpolate(res, p);
+          static_cast<const Derived&>(*this).interpolate(s_out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          static_cast<const Derived&>(*this).interpolate(res, *inclusion);
+          static_cast<const Derived&>(*this).interpolate(s_out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
@@ -380,7 +361,7 @@ namespace Rodin::Variational
           const auto restriction = submesh.restriction(p);
           if (restriction)
           {
-            static_cast<const Derived&>(*this).interpolate(res, *restriction);
+            static_cast<const Derived&>(*this).interpolate(s_out, *restriction);
           }
           else
           {
@@ -391,6 +372,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        return s_out;
       }
 
       /**
@@ -406,9 +388,13 @@ namespace Rodin::Variational
 
       void project(const std::pair<size_t, Index>& p, const RangeType& v)
       {
-        static_cast<Derived&>(*this).project(p, [&](RangeType& out, const Geometry::Point& pt){ out = v; });
+        static_cast<Derived&>(*this).project(p,
+            [&](RangeType& out, const Geometry::Point& pt){ out = v; });
       }
 
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
       template <class Function>
       void project(const std::pair<size_t, Index>& p, const Function& fn)
       {
@@ -418,63 +404,59 @@ namespace Rodin::Variational
       template <class T>
       Derived& operator=(const T& v)
       {
-        return static_cast<Derived&>(*this).projectOnCells(v);
+        return static_cast<Derived&>(*this).project(v);
       }
 
       template <class T>
-      Derived& projectOnCells(const T& v)
+      Derived& project(const T& fn)
       {
-        return static_cast<Derived&>(*this).projectOnCells(
-            v, [](const Geometry::Polytope&){ return true; });
-      }
-
-      template <class T, class Predicate>
-      Derived& projectOnCells(const T& v, const Predicate& pred)
-      {
-        return static_cast<Derived&>(*this).projectOnCells(v, pred);
+        return static_cast<Derived&>(*this).project(
+            Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
       }
 
       template <class T>
-      Derived& projectOnCells(const T& v, Geometry::Attribute attr)
+      Derived& project(const Geometry::Region& region, const T& fn)
       {
-        return static_cast<Derived&>(*this).projectOnCells(
-            v, [&](const Geometry::Polytope& polytope){ return attr == polytope.getAttribute(); });
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnCells(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
-      {
-        return static_cast<Derived&>(*this).projectOnCells(
-            fn, [&](const Geometry::Polytope& polytope){ return attrs.size() == 0 || attrs.count(polytope.getAttribute()); });
+        return static_cast<Derived&>(*this).project(region, fn,
+            [](const Geometry::Polytope&) { return true; });
       }
 
       template <class T>
-      Derived& projectOnFaces(const T& v)
+      Derived& project(
+          const Geometry::Region& region, const T& fn, const Geometry::Attribute& attr)
       {
-        return static_cast<Derived&>(*this).projectOnFaces(
-            v, [](const Geometry::Polytope&){ return true; });
-      }
-
-      template <class T, class Predicate>
-      Derived& projectOnFaces(const T& v, const Predicate& pred)
-      {
-        return static_cast<Derived&>(*this).projectOnFaces(v, pred);
+        return static_cast<Derived&>(*this).project(region, fn,
+            [&](const Geometry::Polytope& polytope)
+            { return polytope.getAttribute() == attr; });
       }
 
       template <class T>
-      Derived& projectOnFaces(const T& v, Geometry::Attribute attr)
+      Derived& project(
+          const Geometry::Region& region,
+          const T& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        return static_cast<Derived&>(*this).projectOnFaces(
-            v, [&](const Geometry::Polytope& polytope){ return attr == polytope.getAttribute(); });
+        return static_cast<Derived&>(*this).project(region, fn,
+            [&](const Geometry::Polytope& polytope)
+            { return attrs.size() == 0 || attrs.count(polytope.getAttribute()); });
       }
 
-      template <class NestedDerived>
-      Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
+      template <class Pred>
+      Derived& project(const Geometry::Region& region, const RangeType& fn, const Pred& pred)
       {
-        return static_cast<Derived&>(*this).projectOnFaces(
-            fn, [&](const Geometry::Polytope& polytope){ return attrs.size() == 0 || attrs.count(polytope.getAttribute()); });
+        return static_cast<Derived&>(*this).project(
+            region,
+            [&](const Geometry::Point&) -> decltype(auto)
+            { static thread_local RangeType s_out; s_out = fn; return s_out; }, pred);
       }
 
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
+      template <class Function, class Pred>
+      Derived& project(const Geometry::Region& region, const Function& fn, const Pred& pred)
+      {
+        return static_cast<Derived&>(*this).project(region, fn, pred);
+      }
 
       /**
        * @brief Searches the minimum value in the grid function data.
@@ -647,9 +629,9 @@ namespace Rodin::Variational
       using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
 
       using Parent::operator=;
+      using Parent::project;
       using Parent::min;
       using Parent::max;
-      using Parent::projectOnCells;
 
       GridFunction(const FESType& fes)
         : Parent(fes)
@@ -764,12 +746,10 @@ namespace Rodin::Variational
         const Index  i = polytope.getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
         const size_t count = fe.getCount();
-        RangeType v;
         for (Index local = 0; local < count; ++local)
         {
           const auto mapping = fes.getInverseMapping({ d, i }, fe.getBasis(local));
-          mapping(v, p);
-          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
+          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
           if (local == 0)
             res = k; // Initializes the result (resizes)
           else
@@ -777,17 +757,46 @@ namespace Rodin::Variational
         }
       }
 
-      template <class T, class Predicate>
-      GridFunction& projectOnCells(const T& v, const Predicate& pred)
+      template <class Function, class Pred>
+      GridFunction& project(
+          const Geometry::Region& region, const Function& v, const Pred& pred)
       {
         const auto& fes = this->getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        for (auto it = mesh.getCell(); !it.end(); ++it)
+
+        Geometry::PolytopeIterator it;
+        switch (region)
+        {
+          case Geometry::Region::Cells:
+          {
+            it = mesh.getCell();
+            break;
+          }
+          case Geometry::Region::Faces:
+          {
+            it = mesh.getFace();
+            break;
+          }
+          case Geometry::Region::Boundary:
+          {
+            it = mesh.getBoundary();
+            break;
+          }
+          case Geometry::Region::Interface:
+          {
+            it = mesh.getInterface();
+            break;
+          }
+        }
+
+        while (it)
         {
           const auto& polytope = *it;
           if (pred(polytope))
             this->project({ polytope.getDimension(), polytope.getIndex() }, v);
+          ++it;
         }
+
         return *this;
       }
 

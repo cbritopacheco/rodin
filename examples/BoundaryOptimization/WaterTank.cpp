@@ -377,7 +377,7 @@ int main(int, char**)
     try
     {
       GridFunction workaround(sfes);
-      workaround.projectOnBoundary(dist);
+      workaround.project(Region::Boundary, dist);
       mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                         .split(Support, { Support, Gamma })
                                         .split(Gamma, { Support, Gamma })

@@ -73,9 +73,9 @@ namespace Rodin::Variational
       using Parent =
         GridFunctionBase<GridFunction<FESType, DataType>>;
 
-      using Parent::projectOnCells;
-
       using Parent::operator=;
+
+      using Parent::project;
 
       using Parent::min;
 

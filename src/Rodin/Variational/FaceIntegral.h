@@ -7,14 +7,12 @@
 #ifndef RODIN_VARIATIONAL_FACEINTEGRAL_H
 #define RODIN_VARIATIONAL_FACEINTEGRAL_H
 
-#include <cassert>
-#include <set>
+#include <memory>
 #include <utility>
 
-#include "Rodin/FormLanguage/Base.h"
+#include "Rodin/Geometry/Region.h"
 
 #include "ForwardDecls.h"
-#include "QuadratureRule.h"
 
 namespace Rodin::Variational
 {
@@ -72,9 +70,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Faces;
+        return Geometry::Region::Faces;
       }
 
       FaceIntegral* copy() const noexcept override
@@ -135,9 +133,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Faces;
+        return Geometry::Region::Faces;
       }
 
       FaceIntegral* copy() const noexcept override

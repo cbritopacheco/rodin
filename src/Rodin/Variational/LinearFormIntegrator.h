@@ -7,14 +7,11 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 
-#include <set>
-
-#include "Rodin/Cast.h"
-#include "Rodin/Math/Vector.h"
+#include "Rodin/Geometry/Region.h"
 
 #include "ForwardDecls.h"
-#include "Integrator.h"
 #include "TestFunction.h"
+#include "Integrator.h"
 
 namespace Rodin::Variational
 {
@@ -80,13 +77,13 @@ namespace Rodin::Variational
        * Specifies the material reference over which the integration should
        * take place.
        */
-      LinearFormIntegratorBase& over(Geometry::Attribute attr)
+      LinearFormIntegratorBase& over(const Geometry::Attribute& attr)
       {
         return over(FlatSet<Geometry::Attribute>{attr});
       }
 
       template <class A1, class A2, class ... As>
-      LinearFormIntegratorBase& over(A1 a1, A2 a2, As... attrs)
+      LinearFormIntegratorBase& over(const A1& a1, const A2& a2, const As&... attrs)
       {
         return over(FlatSet<Geometry::Attribute>{a1, a2, attrs...});
       }
@@ -119,7 +116,7 @@ namespace Rodin::Variational
       virtual
       LinearFormIntegratorBase* copy() const noexcept override = 0;
 
-      virtual Region getRegion() const = 0;
+      virtual Geometry::Region getRegion() const = 0;
 
     private:
       std::unique_ptr<FormLanguage::Base> m_v;

@@ -7,9 +7,6 @@
 #ifndef RODIN_MODELS_DISTANCE_SPALDINGTUCKER_H
 #define RODIN_MODELS_DISTANCE_SPALDINGTUCKER_H
 
-#include <utility>
-
-#include "Rodin/Variational/Grad.h"
 #include "Rodin/Variational/GridFunction.h"
 
 namespace Rodin::Models::Distance
@@ -25,14 +22,12 @@ namespace Rodin::Models::Distance
       auto operator()(const Variational::GridFunction<FES, Data>& gf)
       {
         Variational::GridFunction dist(gf.getFiniteElementSpace());
-        Math::SpatialVector<Real> gu;
         dist =
           [&](const Geometry::Point& p)
           {
             const Real u = gf(p);
             Variational::Grad grad(gf);
-            grad.getValue(gu, p);
-            const Real norm = gu.norm();
+            const Real norm = grad.getValue(p).norm();
             return (2 * u) / (norm + Math::sqrt(norm * norm + 2 * Math::abs(u)));
           };
         return dist;
