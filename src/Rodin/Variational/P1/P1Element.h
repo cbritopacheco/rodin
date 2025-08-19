@@ -413,6 +413,7 @@ namespace Rodin::Variational
                   for (size_t j = 0; j < dim; ++j)
                     s_out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
                 }
+                return s_out;
               }
 
             private:

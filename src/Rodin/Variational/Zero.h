@@ -41,9 +41,9 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point&) const
+      ScalarType getValue(const Geometry::Point&) const
       {
-        return ScalarType(0);
+        return 0;
       }
 
       Zero* copy() const noexcept override
