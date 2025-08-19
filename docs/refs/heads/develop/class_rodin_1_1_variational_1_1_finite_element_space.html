@@ -107,20 +107,20 @@
             </dt>
             <dd>Gets the constant reference to the mesh upon which the finite element space is built on.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adbbffb3b019d13b0ac6aab7d801ee49b" class="m-doc">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const auto&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac818e610ec48e1a2ad03ffdf958fb9e8" class="m-doc">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; decltype(auto)</span>
             </dt>
             <dd></dd>
             <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#afc88aad4f21fcd13e381ccca52c085f3" class="m-doc">getMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              const T&amp; v) const -&gt; auto</span>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6012c76ff5c321f8ac4517720db68a0d" class="m-doc">getMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const Callable&amp; v) const -&gt; decltype(auto)</span>
             </dt>
             <dd>Returns the mapping of the function from the physical element to the reference element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class CallableType&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a31ecf869ce108652a0809a0a717bac35" class="m-doc">getInverseMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
-              const CallableType&amp; v) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af2f25cb676bf832267b4a3c462476267" class="m-doc">getInverseMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              const CallableType&amp; v) const -&gt; decltype(auto)</span>
             </dt>
             <dd></dd>
           </dl>
@@ -144,42 +144,33 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="adbbffb3b019d13b0ac6aab7d801ee49b"><div>
+          <section class="m-doc-details" id="ac818e610ec48e1a2ad03ffdf958fb9e8"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Mesh, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adbbffb3b019d13b0ac6aab7d801ee49b" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac818e610ec48e1a2ad03ffdf958fb9e8" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
             </h3>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="afc88aad4f21fcd13e381ccca52c085f3"><div>
+          <section class="m-doc-details" id="a6012c76ff5c321f8ac4517720db68a0d"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Mesh, class Derived&gt;
-                template&lt;class T&gt;
+                template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc88aad4f21fcd13e381ccca52c085f3" class="m-doc-self">getMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              const T&amp; v) const</span></span>
+              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6012c76ff5c321f8ac4517720db68a0d" class="m-doc-self">getMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const Callable&amp; v) const</span></span>
             </h3>
             <p>Returns the mapping of the function from the physical element to the reference element.</p>
             <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">T</td>
-                  <td>Callable type</td>
-                </tr>
-              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Index of the element in the mesh</td>
                 </tr>
                 <tr>
@@ -305,13 +296,13 @@ $ S $
 </g>
 </svg>.</p><p>The callable type T must be a function on the mesh, i.e. the call operator must have the following signature:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a31ecf869ce108652a0809a0a717bac35"><div>
+          <section class="m-doc-details" id="af2f25cb676bf832267b4a3c462476267"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Mesh, class Derived&gt;
                 template&lt;class CallableType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31ecf869ce108652a0809a0a717bac35" class="m-doc-self">getInverseMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2f25cb676bf832267b4a3c462476267" class="m-doc-self">getInverseMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               const CallableType&amp; v) const</span></span>
             </h3>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>

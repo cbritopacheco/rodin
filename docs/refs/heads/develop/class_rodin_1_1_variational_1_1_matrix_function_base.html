@@ -105,6 +105,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a45c012c55b8470a767a7c06e1a062c73" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac1f4fe7c4fef5a9e347524ae1c5e0ee1" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets an attribute which will be interpreted as the domain to trace.</dd>
           </dl>
         </section>
         <section>
@@ -160,6 +164,24 @@
               </tfoot>
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />MatrixFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac1f4fe7c4fef5a9e347524ae1c5e0ee1" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets an attribute which will be interpreted as the domain to trace.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Convenience function to call traceOf(FlatSet&lt;int&gt;) with only one attribute.</p>
           </div></section>
         </section>
       </div>
