@@ -144,12 +144,6 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      const Real& getValue() const
-      {
-        return m_x;
-      }
-
-      constexpr
       Real getValue(const Geometry::Point&) const
       {
         return m_x;

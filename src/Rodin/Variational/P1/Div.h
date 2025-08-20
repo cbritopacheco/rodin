@@ -234,8 +234,6 @@ namespace Rodin::Variational
 
       Div& setPoint(const Geometry::Point& p)
       {
-        if (m_p == &p)
-          return *this;
         m_p = &p;
         const auto& polytope = p.getPolytope();
         const auto& rc = p.getReferenceCoordinates();
