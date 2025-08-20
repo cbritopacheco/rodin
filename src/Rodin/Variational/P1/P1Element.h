@@ -75,7 +75,7 @@ namespace Rodin::Variational
           {}
 
           constexpr
-          LinearForm(const LinearForm&) = default;
+          LinearForm(const LinearForm&) = delete;
 
           template <class T>
           ScalarType operator()(const T& v) const
@@ -625,7 +625,7 @@ namespace Rodin::Variational
           {}
 
           constexpr
-          LinearForm(const LinearForm&) = default;
+          LinearForm(const LinearForm&) = delete;
 
           constexpr
           LinearForm(LinearForm&&) = default;
@@ -799,7 +799,16 @@ namespace Rodin::Variational
       constexpr
       P1Element(size_t vdim, Geometry::Polytope::Type geometry)
         : Parent(geometry), m_vdim(vdim)
-      {}
+      {
+        const size_t count = this->getCount();
+        m_lfs.reserve(count);
+        m_bs.reserve(count);
+        for (size_t i = 0; i < count; ++i)
+        {
+          m_lfs.emplace_back(vdim, i, geometry);
+          m_bs.emplace_back(vdim, i, geometry);
+        }
+      }
 
       constexpr
       P1Element(const P1Element& other)
@@ -816,6 +825,8 @@ namespace Rodin::Variational
       {
         Parent::operator=(other);
         m_vdim = other.m_vdim;
+        m_lfs = other.m_lfs;
+        m_bs = other.m_bs;
         return *this;
       }
 
@@ -824,6 +835,8 @@ namespace Rodin::Variational
       {
         Parent::operator=(std::move(other));
         m_vdim = std::exchange(other.m_vdim, 0);
+        m_lfs = std::move(other.m_lfs);
+        m_bs = std::move(other.m_bs);
         return *this;
       }
 
@@ -834,15 +847,15 @@ namespace Rodin::Variational
       }
 
       constexpr
-      LinearForm getLinearForm(size_t local) const
+      const LinearForm& getLinearForm(size_t local) const
       {
-        return LinearForm(m_vdim, local, this->getGeometry());
+        return m_lfs[local];
       }
 
       constexpr
-      BasisFunction getBasis(size_t local) const
+      const BasisFunction& getBasis(size_t local) const
       {
-        return BasisFunction(m_vdim, local, this->getGeometry());
+        return m_bs[local];
       }
 
       constexpr
@@ -879,6 +892,9 @@ namespace Rodin::Variational
 
     private:
       size_t m_vdim;
+
+      std::vector<LinearForm> m_lfs;
+      std::vector<BasisFunction> m_bs;
   };
 }
 

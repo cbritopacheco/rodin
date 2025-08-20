@@ -148,7 +148,7 @@ namespace Rodin::Variational
           {
             for (size_t j = 0; j < d; j++)
             {
-              const auto basis = fe.getBasis(local);
+              const auto& basis = fe.getBasis(local);
               for (size_t k = 0; k < d; k++)
                 jacobian(j, k) = basis.template getDerivative<1>(j, k)(rc);
             }
@@ -249,7 +249,7 @@ namespace Rodin::Variational
         for (size_t local = 0; local < count; local++)
         {
           m_jacobian[local].resize(vdim, d);
-          const auto basis = fe.getBasis(local);
+          const auto& basis = fe.getBasis(local);
           for (size_t i = 0; i < vdim; i++)
           {
             for (size_t j = 0; j < d; j++)

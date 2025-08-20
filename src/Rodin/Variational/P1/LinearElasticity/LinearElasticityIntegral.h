@@ -92,7 +92,7 @@ namespace Rodin::Variational
           for (size_t i = 0; i < fe.getCount(); i++)
           {
             m_jac1[i].resize(d, d);
-            const auto basis = fe.getBasis(i);
+            const auto& basis = fe.getBasis(i);
             for (size_t j = 0; j < d; j++)
             {
               for (size_t k = 0; k < d; k++)

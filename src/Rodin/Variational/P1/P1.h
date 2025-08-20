@@ -467,7 +467,7 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(0, Geometry::Polytope::Type::Point),
               ElementType(1, Geometry::Polytope::Type::Point),
@@ -478,7 +478,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(0, Geometry::Polytope::Type::Segment),
               ElementType(1, Geometry::Polytope::Type::Segment),
@@ -489,7 +489,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(0, Geometry::Polytope::Type::Triangle),
               ElementType(1, Geometry::Polytope::Type::Triangle),
@@ -500,7 +500,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(0, Geometry::Polytope::Type::Quadrilateral),
               ElementType(1, Geometry::Polytope::Type::Quadrilateral),
@@ -511,7 +511,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(0, Geometry::Polytope::Type::Tetrahedron),
               ElementType(1, Geometry::Polytope::Type::Tetrahedron),
@@ -522,7 +522,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local constexpr std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(0, Geometry::Polytope::Type::Wedge),
               ElementType(1, Geometry::Polytope::Type::Wedge),
@@ -533,7 +533,7 @@ namespace Rodin::Variational
           }
         }
         assert(false);
-        static thread_local constexpr ElementType s_null(0, Geometry::Polytope::Type::Point);
+        static thread_local ElementType s_null(0, Geometry::Polytope::Type::Point);
         return s_null;
       }
 

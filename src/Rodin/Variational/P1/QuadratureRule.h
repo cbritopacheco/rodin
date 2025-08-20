@@ -1167,7 +1167,7 @@ namespace Rodin::Variational
           m_jac1.resize(fe.getCount());
           for (size_t i = 0; i < fe.getCount(); i++)
           {
-            const auto basis = fe.getBasis(i);
+            const auto& basis = fe.getBasis(i);
             for (size_t j = 0; j < d; j++)
             {
               for (size_t k = 0; k < d; k++)
@@ -1194,7 +1194,7 @@ namespace Rodin::Variational
           m_jac1.resize(trialfe.getCount());
           for (size_t i = 0; i < trialfe.getCount(); i++)
           {
-            const auto basis = trialfe.getBasis(i);
+            const auto& basis = trialfe.getBasis(i);
             for (size_t j = 0; j < d; j++)
             {
               for (size_t k = 0; k < d; k++)
@@ -1207,7 +1207,7 @@ namespace Rodin::Variational
           m_jac2.resize(testfe.getCount());
           for (size_t i = 0; i < testfe.getCount(); i++)
           {
-            const auto basis = testfe.getBasis(i);
+            const auto& basis = testfe.getBasis(i);
             for (size_t j = 0; j < d; j++)
             {
               for (size_t k = 0; k < d; k++)
@@ -1421,7 +1421,7 @@ namespace Rodin::Variational
           m_jac1.resize(fe.getCount());
           for (size_t i = 0; i < fe.getCount(); i++)
           {
-            const auto basis = fe.getBasis(i);
+            const auto& basis = fe.getBasis(i);
             for (size_t j = 0; j < d; j++)
             {
               for (size_t k = 0; k < d; k++)
