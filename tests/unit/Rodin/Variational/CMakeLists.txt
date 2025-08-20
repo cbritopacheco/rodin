@@ -22,3 +22,51 @@ target_link_libraries(RodinVariationalDirichletBCTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalDirichletBCTest)
 
+add_executable(RodinVariationalTestFunctionTest TestFunctionTest.cpp)
+target_link_libraries(RodinVariationalTestFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalTestFunctionTest)
+
+add_executable(RodinVariationalTrialFunctionTest TrialFunctionTest.cpp)
+target_link_libraries(RodinVariationalTrialFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalTrialFunctionTest)
+
+add_executable(RodinVariationalLinearFormTest LinearFormTest.cpp)
+target_link_libraries(RodinVariationalLinearFormTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalLinearFormTest)
+
+add_executable(RodinVariationalBilinearFormTest BilinearFormTest.cpp)
+target_link_libraries(RodinVariationalBilinearFormTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalBilinearFormTest)
+
+add_executable(RodinVariationalRealFunctionTest RealFunctionTest.cpp)
+target_link_libraries(RodinVariationalRealFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalRealFunctionTest)
+
+add_executable(RodinVariationalVectorFunctionTest VectorFunctionTest.cpp)
+target_link_libraries(RodinVariationalVectorFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalVectorFunctionTest)
+
