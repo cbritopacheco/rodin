@@ -86,12 +86,13 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Operator, class Vector, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;::Mat, ::Vec, PetscScalar&gt;</a>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;PETSc::Math::LinearSystem&gt;</a>
             </dt>
             <dd>Abstract base class for linear algebra solvers.</dd>
             <dt>
-              class <a href="class_rodin_1_1_p_e_t_sc_1_1_object.html" class="m-doc">Object</a>
+              <div class="m-doc-template">template&lt;class Handle&gt;</div>
+              class <a href="class_rodin_1_1_p_e_t_sc_1_1_object.html" class="m-doc">Object&lt;::KSP&gt;</a>
             </dt>
             <dd>Base‐class for any wrapper around a PETSc object.</dd>
           </dl>
@@ -101,16 +102,16 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_c_g_3_1_1_mat_00_01_1_1_vec_01_4.html" class="m-doc">CG&lt;::Mat, ::Vec&gt;</a> <span class="m-label m-flat m-warning">final</span>
+              class <a href="class_rodin_1_1_solver_1_1_c_g_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html" class="m-doc">CG&lt;PETSc::Math::LinearSystem&gt;</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
-            <dd>Conjugate gradient solver for self-adjoint problems, for use with ::Mat and ::Vec.</dd>
+            <dd>Conjugate gradient solver for self-adjoint problems, for use with PETSc::Matrix and PETSc::Vector.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a63988bfb3da7e23725fd8eb30d246898" class="m-doc">KSP</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemType</a>&amp; pb) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a3b640a52cd2031bc6b8f196f66437f70" class="m-doc">KSP</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBaseType</a>&amp; pb) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Construct and create the PETSc <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> object.</dd>
           </dl>
@@ -119,13 +120,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5a0a9c9af77e35f58a3ef9ec2fa2193a" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) -&gt; ::PetscObject&amp; <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Access the wrapped PETSc handle.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a5342e2f2fd2ce06a1602148b2cf0d97b" class="m-doc">solve</a>(</span><span class="m-doc-wrap">OperatorType&amp; A,
-              VectorType&amp; x,
-              VectorType&amp; b) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solve <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
 <title>
@@ -155,18 +150,16 @@ $ x $
 </g>
 </svg> if null.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a5f32017a07965c67d35bbd0b25e80f80" class="m-doc">solve</a>(</span><span class="m-doc-wrap">OperatorType&amp; A,
-              VectorType&amp; x,
-              VectorType&amp; b) <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a034804c767bb7fe0b83e5494bf6b947a" class="m-doc">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; b) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Solves the linear algebra system.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a63988bfb3da7e23725fd8eb30d246898"><div>
+          <section class="m-doc-details" id="a3b640a52cd2031bc6b8f196f66437f70"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a63988bfb3da7e23725fd8eb30d246898" class="m-doc-self">KSP</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemType</a>&amp; pb) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3b640a52cd2031bc6b8f196f66437f70" class="m-doc-self">KSP</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBaseType</a>&amp; pb) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Construct and create the PETSc <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -182,25 +175,9 @@ $ x $
             </table>
 <p>Initializes to PETSC defaults.</p>
           </div></section>
-          <section class="m-doc-details" id="a5a0a9c9af77e35f58a3ef9ec2fa2193a"><div>
+          <section class="m-doc-details" id="a15e7896618ae50e8f86a2bdb8ca2e2e7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">::PetscObject&amp; Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a0a9c9af77e35f58a3ef9ec2fa2193a" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Access the wrapped PETSc handle.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Reference to the internal PetscObject.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a5342e2f2fd2ce06a1602148b2cf0d97b"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5342e2f2fd2ce06a1602148b2cf0d97b" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">OperatorType&amp; A,
-              VectorType&amp; x,
-              VectorType&amp; b) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solve <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
 <title>
@@ -235,26 +212,16 @@ $ x $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">A</td>
-                  <td>Left‐hand side matrix.</td>
-                </tr>
-                <tr>
-                  <td>x</td>
-                  <td>Solution vector (initial guess in; may be PETSC_NULL).</td>
-                </tr>
-                <tr>
-                  <td>b</td>
+                  <td style="width: 1%">b</td>
                   <td>Right‐hand side vector.</td>
                 </tr>
               </tbody>
             </table>
 <p>If <code>x == PETSC_NULL</code>, automatically <code>VecDuplicate(b, &amp;x)</code> and zero it. Otherwise uses <code>x</code> contents as initial guess.</p><p>Applies programmatic settings, then SetFromOptions, then KSPSolve.</p>
           </div></section>
-          <section class="m-doc-details" id="a5f32017a07965c67d35bbd0b25e80f80"><div>
+          <section class="m-doc-details" id="a034804c767bb7fe0b83e5494bf6b947a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f32017a07965c67d35bbd0b25e80f80" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">OperatorType&amp; A,
-              VectorType&amp; x,
-              VectorType&amp; b) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a034804c767bb7fe0b83e5494bf6b947a" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; b) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Solves the linear algebra system.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -263,15 +230,7 @@ $ x $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">A&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Left hand side operator</td>
-                </tr>
-                <tr>
-                  <td>x&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Input for the initial guess, and output for the solution</td>
-                </tr>
-                <tr>
-                  <td>b&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td style="width: 1%">b&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
                   <td>Right hand side vector</td>
                 </tr>
               </tbody>

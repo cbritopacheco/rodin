@@ -86,20 +86,16 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of degrees of freedom in the finite element.</dd>
-            <dt id="a61796893ef64157670136488f4918c18">
-              <span class="m-doc-wrap-bumper">auto <a href="#a61796893ef64157670136488f4918c18" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt id="a0b092b78aed5041f8a5c01c78e7599c7">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0b092b78aed5041f8a5c01c78e7599c7" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the i-th degree of freedom on the finite element.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a992d28b9b502cbccfc1f7cac0241f7ed" class="m-doc">getNodes</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin_1_1_math.html#ae13081c68a479c0cd7970a1374e2b6c8" class="m-doc">Math::<wbr />PointMatrix</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a422cca04e1110fe68b0b7ac3a342bacb" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8c93953f1a596d6abf47a11b177dc64a" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; decltype(auto) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the i-th basis function of the finite element.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa6f5864f4ebfc0d22ab32524039568ce" class="m-doc">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5672b0ba04c02bed94a6352f2ea8e234" class="m-doc">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; decltype(auto) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the i-th linear function on the finite element.</dd>
           </dl>
@@ -116,31 +112,22 @@
             <p>Gets the number of degrees of freedom in the finite element.</p>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP method to be overriden in Derived class.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a992d28b9b502cbccfc1f7cac0241f7ed"><div>
+          <section class="m-doc-details" id="a8c93953f1a596d6abf47a11b177dc64a"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_math.html#ae13081c68a479c0cd7970a1374e2b6c8" class="m-doc">Math::<wbr />PointMatrix</a>&amp; Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a992d28b9b502cbccfc1f7cac0241f7ed" class="m-doc-self">getNodes</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP method to be overriden in Derived class.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a422cca04e1110fe68b0b7ac3a342bacb"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a422cca04e1110fe68b0b7ac3a342bacb" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c93953f1a596d6abf47a11b177dc64a" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the i-th basis function of the finite element.</p>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP method to be overriden in Derived class.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="aa6f5864f4ebfc0d22ab32524039568ce"><div>
+          <section class="m-doc-details" id="a5672b0ba04c02bed94a6352f2ea8e234"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa6f5864f4ebfc0d22ab32524039568ce" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5672b0ba04c02bed94a6352f2ea8e234" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the i-th linear function on the finite element.</p>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP method to be overriden in Derived class.</p></aside>

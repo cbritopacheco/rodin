@@ -77,6 +77,7 @@
 <span class="cm"> */</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Assembly.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational/LinearElasticity.h&gt;</span>
 
@@ -95,9 +96,6 @@
 <span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">meshFile</span><span class="p">);</span>
 <span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
-
-
-<span class="w">  </span><span class="c1">// Load mesh</span>
 
 <span class="w">  </span><span class="c1">// Functions</span>
 <span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">();</span>
