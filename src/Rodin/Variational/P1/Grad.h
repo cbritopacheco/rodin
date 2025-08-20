@@ -130,7 +130,7 @@ namespace Rodin::Variational
           const auto& rc = p.getReferenceCoordinates();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            const auto basis = fe.getBasis(local);
+            const auto& basis = fe.getBasis(local);
             basis.getGradient()(rc);
             s_res += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
           }
@@ -227,7 +227,7 @@ namespace Rodin::Variational
         m_gradient.resize(count);
         for (size_t local = 0; local < count; local++)
         {
-          const auto basis = fe.getBasis(local);
+          const auto& basis = fe.getBasis(local);
           m_gradient[local] = basis.getGradient()(rc);
         }
         return *this;
