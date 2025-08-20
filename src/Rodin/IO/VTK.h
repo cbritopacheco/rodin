@@ -15,12 +15,15 @@
 #include "Rodin/Context.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Types.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 #include "ForwardDecls.h"
 #include "MeshLoader.h"
 #include "MeshPrinter.h"
 #include "GridFunctionLoader.h"
 #include "GridFunctionPrinter.h"
+
+#include "Rodin/Variational/P1/P1.h"
 
 namespace Rodin::IO::VTK
 {
@@ -384,6 +387,48 @@ namespace Rodin::IO
   };
 
   /**
+   * @brief Base class for VTK grid function printers.
+   */
+  template <class FES, class Data>
+  class GridFunctionPrinterBase<FileFormat::VTK, FES, Data>
+    : public Printer<Variational::GridFunction<FES, Data>>
+  {
+    public:
+      using FESType = FES;
+
+      static constexpr FileFormat Format = FileFormat::VTK;
+
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using DataType = Data;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = Printer<ObjectType>;
+
+      GridFunctionPrinterBase(const ObjectType& gf)
+        : m_gf(gf)
+      {}
+
+      void print(std::ostream& os) override
+      {
+        printPointData(os);
+      }
+
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
+
+      virtual void printPointData(std::ostream& os) = 0;
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
+  };
+
+  /**
    * @brief Template specialization to print VTK format grid functions.
    * @ingroup GridFunctionPrinterSpecializations
    */
@@ -408,14 +453,11 @@ namespace Rodin::IO
 
       using Parent = GridFunctionPrinterBase<FileFormat::VTK, FESType, DataType>;
 
-      GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf)
-      {}
+      using Parent::Parent;
 
-      void print(std::ostream& os) override;
+      void printPointData(std::ostream& os) override;
 
     private:
-      void printPointData(std::ostream& os);
       void printScalars(std::ostream& os);
       void printVectors(std::ostream& os);
   };
