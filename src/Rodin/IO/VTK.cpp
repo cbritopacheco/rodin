@@ -8,6 +8,7 @@
 
 #include <sstream>
 #include "Rodin/Variational/GridFunction.h"
+#include "Rodin/Geometry/Polytope.h"
 
 namespace Rodin::IO::VTK
 {
@@ -40,13 +41,37 @@ namespace Rodin::IO
   {
     readHeader(is);
     readDataset(is);
-    readPoints(is);
+    readPoints(is);  // This also sets m_spaceDimension and adds vertices
+    m_build.initialize(m_spaceDimension);
     readCells(is);
     readCellTypes(is);
-
-    // Build the mesh using the stored data
-    // Note: The mesh building logic would need to be implemented
-    // based on the specific builder pattern used in Rodin
+    
+    // Determine mesh dimension from cell types
+    size_t meshDimension = 0;
+    for (const auto& cell : m_cells)
+    {
+      auto geom = VTK::getGeometry(cell.cellType);
+      if (geom)
+      {
+        size_t cellDim = Geometry::Polytope::Traits(*geom).getDimension();
+        meshDimension = std::max(meshDimension, cellDim);
+      }
+    }
+    
+    // Reserve space for cells of highest dimension
+    m_build.reserve(meshDimension, m_numCells);
+    
+    // Process cells to build connectivity
+    for (const auto& cell : m_cells)
+    {
+      auto geom = VTK::getGeometry(cell.cellType);
+      if (geom)
+      {
+        m_build.polytope(*geom, cell.vertices);
+      }
+    }
+    
+    getObject() = m_build.finalize();
   }
 
   void MeshLoader<FileFormat::VTK, Context::Local>::readHeader(std::istream& is)
@@ -101,11 +126,10 @@ namespace Rodin::IO
       Alert::Exception() << "Unsupported point data type: " << dataType << Alert::Raise;
     }
 
-    // Store points for later processing
-    // Note: Actual mesh building would be done in a different pattern
-    // following the existing Rodin mesh builder approach
+    // Reserve space for nodes
+    m_build.nodes(m_numPoints);
     
-    // Read point coordinates
+    // Read point coordinates and add them to the builder
     for (size_t i = 0; i < m_numPoints; i++)
     {
       line = VTK::skipEmptyLinesAndComments(is, m_currentLineNumber);
@@ -114,10 +138,12 @@ namespace Rodin::IO
       Math::SpatialPoint point(3); // VTK always uses 3D coordinates
       coords >> point(0) >> point(1) >> point(2);
       
-      // Determine actual space dimension from non-zero coordinates
+      // Determine actual space dimension from first point
       if (i == 0)
       {
         m_spaceDimension = 3;
+        // For simplicity, assume 3D unless all z-coordinates are zero
+        // A more sophisticated approach would check all points
         if (point(2) == 0.0)
         {
           m_spaceDimension = 2;
@@ -125,6 +151,9 @@ namespace Rodin::IO
             m_spaceDimension = 1;
         }
       }
+      
+      // Add vertex to builder
+      m_build.vertex(std::move(point));
     }
   }
 
@@ -381,6 +410,8 @@ namespace Rodin::IO
     // Implementation for vector data
     auto& gf = this->getObject();
     const size_t vdim = gf.getFiniteElementSpace().getVectorDimension();
+    
+    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
     
     // Read vector values
     for (size_t i = 0; i < gf.getSize() / vdim; i++)

@@ -311,6 +311,8 @@ namespace Rodin::IO
       void readCells(std::istream& is);
       void readCellTypes(std::istream& is);
 
+      Rodin::Geometry::Mesh<Rodin::Context::Local>::Builder m_build;
+      
       size_t m_currentLineNumber;
       size_t m_spaceDimension;
       size_t m_numPoints;
