@@ -70,3 +70,43 @@ target_link_libraries(RodinVariationalVectorFunctionTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalVectorFunctionTest)
 
+add_executable(RodinVariationalGridFunctionTest GridFunctionTest.cpp)
+target_link_libraries(RodinVariationalGridFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalGridFunctionTest)
+
+add_executable(RodinVariationalScalarFunctionTest ScalarFunctionTest.cpp)
+target_link_libraries(RodinVariationalScalarFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalScalarFunctionTest)
+
+add_executable(RodinVariationalGradTest GradTest.cpp)
+target_link_libraries(RodinVariationalGradTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalGradTest)
+
+add_executable(RodinVariationalIntegralTest IntegralTest.cpp)
+target_link_libraries(RodinVariationalIntegralTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalIntegralTest)
+
+add_executable(RodinVariationalDotTest DotTest.cpp)
+target_link_libraries(RodinVariationalDotTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalDotTest)
+
