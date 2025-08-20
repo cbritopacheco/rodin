@@ -14,7 +14,6 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "RangeShape.h"
 
 namespace Rodin::FormLanguage
 {
@@ -42,6 +41,10 @@ namespace Rodin::Variational
 
       using Parent = FunctionBase<MatrixFunctionBase<ScalarType, Derived>>;
 
+      using Parent::traceOf;
+
+      using Parent::operator();
+
       MatrixFunctionBase() = default;
 
       MatrixFunctionBase(const MatrixFunctionBase& other)
@@ -54,35 +57,10 @@ namespace Rodin::Variational
 
       virtual ~MatrixFunctionBase() = default;
 
-      const Derived& getDerived() const
-      {
-        return static_cast<const Derived&>(*this);
-      }
-
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
-      }
-
-      template <class MatrixType>
-      constexpr
-      void getValue(MatrixType& res, const Geometry::Point& p) const
-      {
-        if constexpr (Internal::HasGetValueMethod<Derived, MatrixType&, const Geometry::Point&>::Value)
-        {
-          return static_cast<const Derived&>(*this).getValue(res, p);
-        }
-        else
-        {
-          res = getValue(p);
-        }
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getRows(), getColumns() };
       }
 
       /**
@@ -105,20 +83,6 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getColumns();
       }
 
-      constexpr
-      MatrixFunctionBase& traceOf(Geometry::Attribute attr)
-      {
-        Parent::traceOf(attr);
-        return *this;
-      }
-
-      constexpr
-      MatrixFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        Parent::traceOf(attrs);
-        return *this;
-      }
-
       virtual MatrixFunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
@@ -139,6 +103,8 @@ namespace Rodin::Variational
 
       using Parent = MatrixFunctionBase<Scalar, MatrixFunction<MatrixType>>;
 
+      using Parent::traceOf;
+
       MatrixFunction(const MatrixType& matrix)
         : m_matrix(matrix)
       {}
@@ -154,33 +120,15 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      const MatrixType& getValue(const Geometry::Point&) const
+      decltype(auto) getValue(const Geometry::Point&) const
       {
-        return m_matrix.get();
-      }
-
-      constexpr
-      void getValue(MatrixType& res, const Geometry::Point&) const
-      {
-        res = m_matrix.get();
-      }
-
-      constexpr
-      MatrixFunction& traceOf(Geometry::Attribute)
-      {
-        return *this;
-      }
-
-      constexpr
-      MatrixFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
-      {
-        return *this;
+        return m_matrix;
       }
 
       constexpr
       size_t getRows() const
       {
-        return m_matrix.get().rows();
+        return m_matrix.rows();
       }
 
       /**
@@ -190,7 +138,7 @@ namespace Rodin::Variational
       constexpr
       size_t getColumns() const
       {
-        return m_matrix.get().cols();
+        return m_matrix.cols();
       }
 
       MatrixFunction* copy() const noexcept override
@@ -199,11 +147,11 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const MatrixType> m_matrix;
+      const MatrixType m_matrix;
   };
 
   template <class Scalar>
-  MatrixFunction(std::reference_wrapper<const Math::Matrix<Scalar>>)
+  MatrixFunction(const Math::Matrix<Scalar>&)
     -> MatrixFunction<Math::Matrix<Scalar>>;
 }
 

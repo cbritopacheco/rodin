@@ -1,7 +1,26 @@
 #include "Shard.h"
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
 
 namespace Rodin::Geometry
 {
+  Shard::Flags const Shard::Flags::None(0b00);
+
+  Shard::Flags const Shard::Flags::Owned(0b01);
+
+  Shard::Flags const Shard::Flags::Ghost(0b10);
+
+  const Shard::PolytopeMap& Shard::Builder::getPolytopeMap(size_t d) const
+  {
+    return m_s2ps[d];
+  }
+
+  size_t Shard::Builder::getPolytopeCount(size_t d) const
+  {
+    assert(m_s2ps[d].left.size() == m_s2ps[d].right.size());
+    return m_s2ps[d].left.size();
+  }
+
   Shard::Builder& Shard::Builder::initialize(const Mesh<Context>& parent)
   {
     const size_t dim = parent.getDimension();
@@ -9,161 +28,127 @@ namespace Rodin::Geometry
     m_parent = parent;
     m_build.initialize(sdim);
     m_s2ps.resize(dim + 1);
-    m_ghosts.resize(dim + 1);
+    m_flags.resize(dim + 1);
+    m_owner.resize(dim + 1);
+    m_halo.resize(dim + 1);
     m_sidx.resize(dim + 1, 0);
     return *this;
   }
 
-  Shard::Builder& Shard::Builder::include(size_t d, Index parentIdx)
+  FlatMap<Index, Index>& Shard::Builder::getOwner(size_t d)
   {
-    auto& build = m_build;
+    assert(d < m_owner.size());
+    return m_owner[d];
+  }
+
+  FlatMap<Index, IndexSet>& Shard::Builder::getHalo(size_t d)
+  {
+    assert(d < m_halo.size());
+    return m_halo[d];
+  }
+
+  const FlatMap<Index, Index>& Shard::Builder::getOwner(size_t d) const
+  {
+    assert(d < m_owner.size());
+    return m_owner[d];
+  }
+
+  const FlatMap<Index, IndexSet>& Shard::Builder::getHalo(size_t d) const
+  {
+    assert(d < m_halo.size());
+    return m_halo[d];
+  }
+
+  std::pair<Index, Boolean> Shard::Builder::include(
+      const std::pair<size_t, Index>& p, const Flags& flags)
+  {
+    const auto& [d, parentIdx] = p;
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();
     const auto& conn = parent.getConnectivity();
     const auto& parentPolytope = conn.getPolytope(d, parentIdx);
-    IndexArray childPolytope(parentPolytope.size());
-    assert(childPolytope.size() >= 0);
-    for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
-    {
-      const Index parentVertex = parentPolytope.coeff(i);
-      const Index childVertex = m_sidx[0];
-      const auto [it, inserted] = m_s2ps[0].right.insert({ parentVertex, childVertex });
-      if (inserted) // Vertex was not already in the map
-      {
-        childPolytope.coeffRef(i) = childVertex;
-        m_sidx[0] += 1;
-      }
-      else // Vertex was already in the map
-      {
-        childPolytope.coeffRef(i) = it->get_left();
-      }
-    }
-    // Add polytope with original geometry and new vertex ordering
-    build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
-    const Index childIdx = m_sidx[d];
-    const auto [it, inserted] = m_s2ps[d].right.insert({ parentIdx, childIdx });
-    // Add polytope information
-    if (inserted) // Polytope was not already in the map
-    {
-      build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
-      m_sidx[d] += 1;
-    }
-    else
-    {
-      build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
-    }
-    m_dimension = std::max(m_dimension, d);
-    return *this;
-  }
-
-  Shard::Builder& Shard::Builder::ghost(size_t d, Index parentIdx)
-  {
     auto& build = m_build;
-    assert(m_parent.has_value());
-    const auto& parent = m_parent.value().get();
-    const auto& conn = parent.getConnectivity();
-    const auto& parentPolytope = conn.getPolytope(d, parentIdx);
-    IndexArray childPolytope(parentPolytope.size());
-    assert(childPolytope.size() >= 0);
-    for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
+
+    std::pair<Index, Boolean> res;
+
+    if (d == 0)
     {
-      const Index parentVertex = parentPolytope.coeff(i);
-      const Index childVertex = m_sidx[0];
-      const auto [it, inserted] = m_s2ps[0].right.insert({ parentVertex, childVertex });
+      const Index childIdx = m_sidx[0];
+      const auto [it, inserted] = m_s2ps[0].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
       if (inserted) // Vertex was not already in the map
       {
-        childPolytope.coeffRef(i) = childVertex;
+        m_s2ps[0].left.push_back(parentIdx);
+        build.attribute({ 0, childIdx }, parent.getAttribute(0, parentIdx));
+        m_flags[0].push_back(flags);
         m_sidx[0] += 1;
-        m_ghosts[0].insert(childVertex);
       }
-      else // Vertex was already in the map
-      {
-        childPolytope.coeffRef(i) = it->get_left();
-      }
-    }
-    // Add polytope with original geometry and new vertex ordering
-    build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
-    const Index childIdx = m_sidx[d];
-    const auto [it, inserted] = m_s2ps[d].right.insert({ parentIdx, childIdx });
-    // Add polytope information
-    if (inserted) // Polytope was not already in the map
-    {
-      build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
-      m_sidx[d] += 1;
-      m_ghosts[d].insert(childIdx);
+      res.first = it->second;
+      res.second = inserted;
     }
     else
     {
-      build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
+      const Index childIdx = m_sidx[d];
+      const auto [it, inserted] = m_s2ps[d].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
+      assert(parentPolytope.size());
+      IndexArray childPolytope(parentPolytope.size());
+      // Add polytope information
+      if (inserted) // Polytope was not already in the map
+      {
+        m_s2ps[d].left.push_back(parentIdx);
+        build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
+        m_flags[d].push_back(flags);
+        m_sidx[d] += 1;
+        for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
+        {
+          const Index parentVertex = parentPolytope.coeff(i);
+          const auto find = m_s2ps[0].right.find(parentVertex);
+          if (find != m_s2ps[0].right.end()) // Vertex is in the map
+          {
+            childPolytope.coeffRef(i) = find->second;
+          }
+          else // Vertex is not in the map
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Vertex " << parentVertex << " of polytope " << parentIdx
+              << " of dimension " << d << " is not in the map."
+              << Alert::Raise;
+          }
+        }
+        // Add polytope with original geometry and new vertex ordering
+        build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
+      }
+      res.first = it->second;
+      res.second = inserted;
     }
     m_dimension = std::max(m_dimension, d);
-    return *this;
-  }
-
-  Shard::Builder& Shard::Builder::include(size_t d, const IndexSet& indices)
-  {
-    for (const Index parentIdx : indices)
-      include(d, parentIdx);
-    return *this;
+    return res;
   }
 
   Shard Shard::Builder::finalize()
   {
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();
-    auto&       conn   = m_build.getConnectivity();
+    auto& conn = m_build.getConnectivity();
     const size_t cellDim = parent.getDimension();
-    const auto& pconn   = parent.getConnectivity();
-
-    std::vector<Index> originals;
-    for (auto it = m_s2ps[cellDim].left.begin(); it != m_s2ps[cellDim].left.end(); ++it)
-    {
-      Index cIdx = it->get_left();
-      if (!m_ghosts[cellDim].contains(cIdx))
-        originals.push_back(it->get_right());
-    }
-
-    const auto& nbrs = pconn.getIncidence(cellDim, cellDim);
-    for (Index p : originals)
-    {
-      for (Index nb : nbrs.at(p))
-      {
-        if (m_s2ps[cellDim].right.find(nb) == m_s2ps[cellDim].right.end())
-          ghost(cellDim, nb);
-      }
-    }
-
-    for (size_t d = cellDim; d > 0; --d)
-    {
-      const auto& down = pconn.getIncidence(d, d - 1);
-      if (down.size() == 0) continue;
-      for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
-      {
-        Index pParent = it->get_right();
-        for (Index sub : down.at(pParent))
-          if (m_s2ps[d - 1].right.find(sub) == m_s2ps[d - 1].right.end())
-            ghost(d - 1, sub);
-      }
-    }
-
+    const auto& pconn = parent.getConnectivity();
     for (size_t d = 0; d <= cellDim; ++d)
     {
       for (size_t dp = 0; dp <= cellDim; ++dp)
       {
         const auto& pInc = pconn.getIncidence(d, dp);
-        if (pInc.empty()) continue;
-
-        Incidence cInc(m_s2ps[d].size());
-        for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
+        if (pInc.empty())
+          continue;
+        Incidence cInc(m_s2ps[d].left.size());
+        for (size_t i = 0; i < m_s2ps[d].left.size(); ++i)
         {
-          Index cIdx = it->get_left();
-          Index pIdx = it->get_right();
+          const Index& cIdx = i;
+          const Index& pIdx = m_s2ps[d].left[i];
           cInc[cIdx].reserve(pInc.at(pIdx).size());
           for (Index pNbr : pInc.at(pIdx))
           {
-            auto found = m_s2ps[dp].right.find(pNbr);
+            const auto found = m_s2ps[dp].right.find(pNbr);
             if (found != m_s2ps[dp].right.end())
-              cInc[cIdx].insert_unique(found->get_left());
+              cInc[cIdx].insert_unique(found->second);
           }
         }
         conn.setIncidence({ d, dp }, std::move(cInc));
@@ -171,200 +156,69 @@ namespace Rodin::Geometry
     }
 
     m_build.nodes(m_sidx[0]);
-    for (auto it = m_s2ps[0].left.begin(); it != m_s2ps[0].left.end(); ++it)
-      m_build.vertex(parent.getVertexCoordinates(it->get_right()));
+    for (const Index& pIdx: m_s2ps[0].left)
+      m_build.vertex(parent.getVertexCoordinates(pIdx));
 
     Shard res;
     res.Parent::operator=(m_build.finalize());
-    res.m_s2ps   = std::move(m_s2ps);
-    res.m_ghosts = std::move(m_ghosts);
+    res.m_s2ps = std::move(m_s2ps);
+    res.m_flags = std::move(m_flags);
+    res.m_owner = std::move(m_owner);
+    res.m_halo = std::move(m_halo);
     return res;
   }
 
   Shard::Shard(const Shard& other)
     : Parent(other),
       m_s2ps(other.m_s2ps),
-      m_ghosts(other.m_ghosts)
+      m_flags(other.m_flags),
+      m_owner(other.m_owner),
+      m_halo(other.m_halo)
   {}
 
   Shard::Shard(Shard&& other)
     : Parent(std::move(other)),
       m_s2ps(std::move(other.m_s2ps)),
-      m_ghosts(std::move(other.m_ghosts))
+      m_flags(std::move(other.m_flags)),
+      m_owner(std::move(other.m_owner)),
+      m_halo(std::move(other.m_halo))
   {}
 
   Shard& Shard::operator=(Shard&& other)
   {
     Parent::operator=(std::move(other));
     m_s2ps = std::move(other.m_s2ps);
-    m_ghosts = std::move(other.m_ghosts);
+    m_flags = std::move(other.m_flags);
+    m_owner = std::move(other.m_owner);
+    m_halo = std::move(other.m_halo);
     return *this;
   }
 
   bool Shard::isGhost(size_t d, Index idx) const
   {
-    return m_ghosts[d].contains(idx);
+    return m_flags[d][idx] & Shard::Flags::Ghost;
+  }
+
+  bool Shard::isOwned(size_t d, Index idx) const
+  {
+    return m_flags[d][idx] & Shard::Flags::Owned;
+  }
+
+  const FlatMap<Index, Index>& Shard::getOwner(size_t d) const
+  {
+    assert(d < m_owner.size());
+    return m_owner[d];
+  }
+
+  const FlatMap<Index, IndexSet>& Shard::getHalo(size_t d) const
+  {
+    assert(d < m_halo.size());
+    return m_halo[d];
   }
 
   const Shard::PolytopeMap& Shard::getPolytopeMap(size_t d) const
   {
     return m_s2ps[d];
-  }
-
-  Real Shard::getVolume() const
-  {
-    Real totalVolume = 0;
-    for (auto it = getPolytope(3); !it.end(); ++it)
-    {
-      if (!isGhost(3, it->getIndex()))
-        totalVolume += it->getMeasure();
-    }
-    return totalVolume;
-  }
-
-  Real Shard::getVolume(Attribute attr) const
-  {
-    Real totalVolume = 0;
-    for (auto it = getPolytope(3); !it.end(); ++it)
-    {
-      if (it->getAttribute() == attr)
-      {
-        if (!isGhost(3, it->getIndex()))
-          totalVolume += it->getMeasure();
-      }
-    }
-    return totalVolume;
-  }
-
-  Real Shard::getVolume(const FlatSet<Attribute>& attrs) const
-  {
-    Real totalVolume = 0;
-    for (auto it = getPolytope(3); !it.end(); ++it)
-    {
-      if (attrs.contains(it->getAttribute()))
-      {
-        if (!isGhost(3, it->getIndex()))
-          totalVolume += it->getMeasure();
-      }
-    }
-    return totalVolume;
-  }
-
-  Real Shard::getPerimeter() const
-  {
-    Real totalPerimeter = 0;
-    for (auto it = getBoundary(); !it.end(); ++it)
-    {
-      if (!isGhost(it->getDimension(), it->getIndex()))
-        totalPerimeter += it->getMeasure();
-    }
-    return totalPerimeter;
-  }
-
-  Real Shard::getPerimeter(Attribute attr) const
-  {
-    Real totalPerimeter = 0;
-    for (auto it = getBoundary(); !it.end(); ++it)
-    {
-      if (it->getAttribute() == attr)
-      {
-        if (!isGhost(it->getDimension(), it->getIndex()))
-          totalPerimeter += it->getMeasure();
-      }
-    }
-    return totalPerimeter;
-  }
-
-  Real Shard::getPerimeter(const FlatSet<Attribute>& attrs) const
-  {
-    Real totalPerimeter = 0;
-    for (auto it = getBoundary(); !it.end(); ++it)
-    {
-      if (attrs.contains(it->getAttribute()))
-      {
-        if (!isGhost(it->getDimension(), it->getIndex()))
-          totalPerimeter += it->getMeasure();
-      }
-    }
-    return totalPerimeter;
-  }
-
-  Real Shard::getArea() const
-  {
-    Real totalArea = 0;
-    for (auto it = getPolytope(2); !it.end(); ++it)
-    {
-      if (!isGhost(2, it->getIndex()))
-        totalArea += it->getMeasure();
-    }
-    return totalArea;
-  }
-
-  Real Shard::getArea(Attribute attr) const
-  {
-    Real totalArea = 0;
-    for (auto it = getPolytope(2); !it.end(); ++it)
-    {
-      if (it->getAttribute() == attr)
-      {
-        if (!isGhost(2, it->getIndex()))
-          totalArea += it->getMeasure();
-      }
-    }
-    return totalArea;
-  }
-
-  Real Shard::getArea(const FlatSet<Attribute>& attrs) const
-  {
-    Real totalArea = 0;
-    for (auto it = getPolytope(2); !it.end(); ++it)
-    {
-      if (attrs.contains(it->getAttribute()))
-      {
-        if (!isGhost(2, it->getIndex()))
-          totalArea += it->getMeasure();
-      }
-    }
-    return totalArea;
-  }
-
-  Real Shard::getMeasure(size_t d) const
-  {
-    Real totalMeasure = 0;
-    for (auto it = getPolytope(d); !it.end(); ++it)
-    {
-      if (!isGhost(d, it->getIndex()))
-        totalMeasure += it->getMeasure();
-    }
-    return totalMeasure;
-  }
-
-  Real Shard::getMeasure(size_t d, Attribute attr) const
-  {
-    Real totalMeasure = 0;
-    for (auto it = getPolytope(d); !it.end(); ++it)
-    {
-      if (it->getAttribute() == attr)
-      {
-        if (!isGhost(d, it->getIndex()))
-          totalMeasure += it->getMeasure();
-      }
-    }
-    return totalMeasure;
-  }
-
-  Real Shard::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
-  {
-    Real totalMeasure = 0;
-    for (auto it = getPolytope(d); !it.end(); ++it)
-    {
-      if (attrs.contains(it->getAttribute()))
-      {
-        if (!isGhost(d, it->getIndex()))
-          totalMeasure += it->getMeasure();
-      }
-    }
-    return totalMeasure;
   }
 }
 

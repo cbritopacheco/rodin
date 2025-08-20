@@ -12,7 +12,6 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Types.h"
 
-#include "Rodin/Variational/RangeType.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
@@ -148,7 +147,7 @@ namespace Rodin::IO::EnSight6
 
   inline
   constexpr
-  std::optional<ElementType> getGeometry(Geometry::Polytope::Type t)
+  Optional<ElementType> getGeometry(Geometry::Polytope::Type t)
   {
     switch (t)
     {
@@ -234,25 +233,33 @@ namespace Rodin::IO
       std::string m_descriptionLine2;
   };
 
-  template <class FES>
-  class GridFunctionPrinter<FileFormat::ENSIGHT6, FES>
-    : public GridFunctionPrinterBase<FES>
+  template <class FES, class Data>
+  class GridFunctionPrinterBase<FileFormat::ENSIGHT6, FES, Data>
+    : public Printer<Variational::GridFunction<FES, Data>>
   {
     public:
       using FESType = FES;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      static constexpr FileFormat Format = FileFormat::ENSIGHT6;
 
-      using Parent = GridFunctionPrinterBase<FESType>;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
-      GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf)
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using DataType = Data;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = Printer<ObjectType>;
+
+      GridFunctionPrinterBase(const ObjectType& gf)
+        : m_gf(gf)
       {}
 
       void print(std::ostream& os) override
       {
         printHeader(os);
-        printData(os);
+        this->printData(os);
       }
 
       void printHeader(std::ostream& os)
@@ -287,23 +294,57 @@ namespace Rodin::IO
         os << EnSight6::Keyword::per << ' ' << EnSight6::Keyword::node << '\n';
       }
 
-      void printData(std::ostream& os)
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
+
+      virtual void printData(std::ostream& os) = 0;
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
+  };
+
+  template <class FES>
+  class GridFunctionPrinter<
+    FileFormat::ENSIGHT6, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+    : public GridFunctionPrinterBase<
+        FileFormat::ENSIGHT6, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+  {
+    public:
+      using FESType = FES;
+
+      static constexpr FileFormat Format = FileFormat::ENSIGHT6;
+
+      using RangeType = typename FormLanguage::Traits<FES>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using DataType = Math::Vector<ScalarType>;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = GridFunctionPrinterBase<Format, FESType, DataType>;
+
+      using Parent::Parent;
+
+      void printData(std::ostream& os) override
       {
         const auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
+        const size_t vdim = fes.getVectorDimension();
         os << std::setprecision(5) << std::scientific;
         size_t count = 0;
         if constexpr (Utility::IsSpecialization<FES, Variational::P1>::Value)
         {
-          auto data = gf.getData();
-          const size_t rows = data.rows();
-          for (int i = 0; i < data.cols(); ++i)
+          const auto& data = gf.getData();
+          while (count < fes.getSize())
           {
             Real x0 = 0.0, x1 = 0.0, x2 = 0.0;
-            if (rows > 0) x0 = data.col(i)(0);
-            if (rows > 1) x1 = data.col(i)(1);
-            if (rows > 2) x2 = data.col(i)(2);
+            if (vdim > 0) x0 = data[count];
+            if (vdim > 1) x1 = data[count + 1];
+            if (vdim > 2) x2 = data[count + 2];
 
             // Always write three components: X, Y, Z
             os << std::setw(12) << x0
@@ -324,12 +365,11 @@ namespace Rodin::IO
           {
             const Geometry::Point p(
               *it,
-              it->getTransformation(),
-              Geometry::Polytope::getVertices(Geometry::Polytope::Type::Point).col(0),
+              Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
               it->getCoordinates()
             );
 
-            gf(v, p);
+            v = gf(p);
 
             if constexpr (std::is_same_v<RangeType, Real>)
             {

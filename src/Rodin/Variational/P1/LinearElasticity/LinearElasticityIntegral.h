@@ -9,8 +9,8 @@
 
 namespace Rodin::Variational
 {
-  template <class MuDerived, class LambdaDerived, class Range, class Mesh>
-  class LinearElasticityIntegrator<P1<Range, Mesh>, MuDerived, LambdaDerived> final
+  template <class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh>
+  class LinearElasticityIntegrator<Solution, P1<Range, Mesh>, MuDerived, LambdaDerived> final
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType>
   {
     public:
@@ -39,7 +39,7 @@ namespace Rodin::Variational
 
     public:
       LinearElasticityIntegrator(
-          const TrialFunction<TrialFESType>& u, const TestFunction<TestFESType>& v,
+          const TrialFunction<Solution, TrialFESType>& u, const TestFunction<TestFESType>& v,
           const LambdaType& lambda, const MuType& mu)
         : Parent(u, v),
           m_lambda(lambda.copy()), m_mu(mu.copy()),
@@ -61,7 +61,6 @@ namespace Rodin::Variational
           m_testfes(std::move(other.m_testfes))
       {}
 
-      inline
       const Geometry::Polytope& getPolytope() const final override
       {
         return m_polytope.value().get();
@@ -70,10 +69,9 @@ namespace Rodin::Variational
       LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
-        const auto& trans = polytope.getTransformation();
         m_qf.emplace(polytope.getGeometry());
         assert(m_qf->getSize() == 1);
-        m_p.emplace(polytope, trans, std::cref(m_qf->getPoint(0)));
+        m_p.emplace(polytope, m_qf->getPoint(0));
         m_weight = m_qf->getWeight(0);
         m_distortion = m_p->getDistortion();
         const size_t d = polytope.getDimension();
@@ -92,7 +90,15 @@ namespace Rodin::Variational
 
           m_jac1.resize(fe.getCount());
           for (size_t i = 0; i < fe.getCount(); i++)
-            fe.getJacobian(i)(m_jac1[i], rc);
+          {
+            m_jac1[i].resize(d, d);
+            const auto& basis = fe.getBasis(i);
+            for (size_t j = 0; j < d; j++)
+            {
+              for (size_t k = 0; k < d; k++)
+                m_jac1[i](j, k) = basis.template getDerivative<1>(j, k)(rc);
+            }
+          }
 
           for (size_t i = 0; i < fe.getCount(); i++)
           {
@@ -129,7 +135,6 @@ namespace Rodin::Variational
         return m_weight * m_distortion * m_matrix(te, tr);
       }
 
-      inline
       constexpr
       const MuType& getMu() const
       {
@@ -137,7 +142,6 @@ namespace Rodin::Variational
         return *m_mu;
       }
 
-      inline
       constexpr
       const LambdaType& getLambda() const
       {
@@ -145,12 +149,12 @@ namespace Rodin::Variational
         return *m_lambda;
       }
 
-      inline Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Cells;
+        return Geometry::Region::Cells;
       }
 
-      inline LinearElasticityIntegrator* copy() const noexcept override
+      LinearElasticityIntegrator* copy() const noexcept override
       {
         return new LinearElasticityIntegrator(*this);
       }
@@ -161,9 +165,9 @@ namespace Rodin::Variational
       std::reference_wrapper<const TrialFESType> m_trialfes;
       std::reference_wrapper<const TestFESType> m_testfes;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      std::optional<QF::QF1P1> m_qf;
-      std::optional<Geometry::Point> m_p;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::QF1P1> m_qf;
+      Optional<Geometry::Point> m_p;
 
       Real m_distortion;
       Real m_weight;

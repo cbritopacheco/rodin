@@ -6,9 +6,9 @@
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
-#include <Rodin/Threads/ThreadPool.h>
 
 #include <chrono>
 #include "Tools.h"
@@ -41,8 +41,8 @@ static const Real alpha = 4;
 
 using RealFES = P1<Real>;
 using VectorFES = P1<Math::Vector<Real>>;
-using RealGridFunction = GridFunction<RealFES>;
-using VectorGridFunction = GridFunction<VectorFES>;
+using RealGridFunction = GridFunction<RealFES, Math::Vector<Real>>;
+using VectorGridFunction = GridFunction<VectorFES, Math::Vector<Real>>;
 using ShapeGradient = VectorGridFunction;
 
 int main(int, char**)
@@ -255,7 +255,6 @@ int main(int, char**)
     Alert::Info() << "Computing objective..." << Alert::Raise;
     RealGridFunction j(sfes);
     j = 0.5 * Pow(Frobenius(u.getSolution()), 2)/ mesh.getVolume();
-    j.setWeights();
 
     const Real J = Integral(j).compute();
     const Real pLocator = ellLocator * mesh.getPerimeter(Locator);
@@ -317,11 +316,9 @@ int main(int, char**)
       Alert::Info() << "Computing conormal..." << Alert::Raise;
       GridFunction conormalClamp(dvfes);
       conormalClamp = Grad(distClamp);
-      conormalClamp.stableNormalize();
 
       GridFunction conormalLocator(dvfes);
       conormalLocator = Grad(distLocator);
-      conormalLocator.stableNormalize();
 
       Alert::Info() << "Computing shape gradient..." << Alert::Raise;
       TrialFunction theta(dvfes);
@@ -370,7 +367,7 @@ int main(int, char**)
       try
       {
         GridFunction workaround(sfes);
-        workaround.projectOnBoundary(distLocator);
+        workaround.project(Region::Boundary, distLocator);
         mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                           .split(Gamma, { Locator, Gamma })
                                           .split(Locator, { Locator, Gamma })
@@ -398,7 +395,7 @@ int main(int, char**)
       try
       {
         GridFunction workaround(sfes);
-        workaround.projectOnBoundary(distClamp);
+        workaround.project(Region::Boundary, distClamp);
         mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                           .split(Gamma, { Clamp, Gamma })
                                           .split(Clamp, { Clamp, Gamma })

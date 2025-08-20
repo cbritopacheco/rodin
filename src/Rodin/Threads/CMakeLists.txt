@@ -1,17 +1,19 @@
-set(RodinThreads_HEADERS ThreadPool.h)
-
-set(RodinThreads_SRCS ThreadPool.cpp)
-
-add_library(RodinThreads ${RodinThreads_SRCS} ${RodinThreads_HEADERS})
+add_library(RodinThreads INTERFACE)
 add_library(Rodin::Threads ALIAS RodinThreads)
 
 target_include_directories(RodinThreads
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
-target_link_libraries(RodinThreads PUBLIC Rodin::Alert)
-target_link_libraries(RodinThreads PUBLIC BS_thread_pool)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
-install(TARGETS RodinThreads
+target_link_libraries(RodinThreads
+  INTERFACE
+  Rodin::Alert
+  Threads::Threads)
+
+install(
+  TARGETS      RodinThreads
   EXPORT       RodinTargets
   RUNTIME      DESTINATION ${RODIN_INSTALL_BINARY_PATH}
   LIBRARY      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}

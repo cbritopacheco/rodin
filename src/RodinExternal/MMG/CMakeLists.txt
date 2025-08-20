@@ -117,5 +117,6 @@ target_link_libraries(RodinExternalMMG
   Rodin::Geometry
   Rodin::Variational
   Boost::filesystem
+  Boost::headers
   ${CMAKE_THREAD_LIBS_INIT})
 

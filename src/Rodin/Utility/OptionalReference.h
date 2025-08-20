@@ -7,10 +7,10 @@
 namespace Rodin::Utility
 {
   template <typename T>
-  class OptionalReference : public std::optional<std::reference_wrapper<T>>
+  class OptionalReference : public Optional<std::reference_wrapper<T>>
   {
     public:
-      using Parent = std::optional<std::reference_wrapper<T>>;
+      using Parent = Optional<std::reference_wrapper<T>>;
       using Parent::Parent;
 
       T* operator->()

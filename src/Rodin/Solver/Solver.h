@@ -17,15 +17,21 @@
 
 namespace Rodin::Solver
 {
-  template <class Operator, class Vector, class Scalar>
+  template <class LinearSystem>
   class SolverBase : public Copyable
   {
     public:
-      using ScalarType = Scalar;
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
-      using VectorType = Vector;
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystem>::VectorType;
 
-      using OperatorType = Operator;
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+
+      using ProblemBaseType =
+        Variational::ProblemBase<LinearSystem>;
 
       using Parent = Copyable;
 
@@ -34,7 +40,7 @@ namespace Rodin::Solver
        */
       virtual ~SolverBase() = default;
 
-      SolverBase(Variational::ProblemBase<OperatorType, VectorType, ScalarType>& pb)
+      SolverBase(ProblemBaseType& pb)
         : m_pb(pb)
       {}
 
@@ -69,10 +75,10 @@ namespace Rodin::Solver
        * solution
        * @param[in,out] b Right hand side vector
        */
-      virtual void solve(OperatorType& A, VectorType& x, VectorType& b) = 0;
+      virtual void solve(LinearSystem& b) = 0;
 
     private:
-      std::reference_wrapper<Variational::ProblemBase<OperatorType, VectorType, ScalarType>> m_pb;
+      std::reference_wrapper<ProblemBaseType> m_pb;
   };
 }
 

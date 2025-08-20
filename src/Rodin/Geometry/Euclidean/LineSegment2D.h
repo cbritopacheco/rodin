@@ -76,7 +76,7 @@ namespace Rodin::Geometry::Euclidean
      */
     inline
     constexpr
-    std::optional<Point2D<T>> intersect(const LineSegment2D<T>& other)
+    Optional<Point2D<T>> intersect(const LineSegment2D<T>& other)
     const;
 
    private:

@@ -7,12 +7,9 @@
 #ifndef RODIN_VARIATIONAL_CONJUGATE_H
 #define RODIN_VARIATIONAL_CONJUGATE_H
 
-#include "Rodin/Math/Traits.h"
-
 #include "ForwardDecls.h"
 
 #include "Function.h"
-#include "RealFunction.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
@@ -61,7 +58,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return Math::conj(this->object(getOperand().getValue(p)));
       }
@@ -132,12 +129,6 @@ namespace Rodin::Variational
       }
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return getOperand().getRangeShape();
-      }
-
-      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
@@ -156,9 +147,9 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getBasis(size_t local) const
+      decltype(auto) getBasis(size_t local) const
       {
-        return Math::conj(this->object(getOperand().getBasis(local)));
+        return Math::conj(this->object(this->getOperand().getBasis(local)));
       }
 
       const FES& getFiniteElementSpace() const

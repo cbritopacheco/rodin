@@ -7,8 +7,8 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 
-#include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/List.h"
+#include "Rodin/Math/Traits.h"
 
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -90,9 +90,7 @@ namespace Rodin::Variational
       constexpr
       Sum(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        assert(lhs.getRangeShape() == rhs.getRangeShape());
-      }
+      {}
 
       constexpr
       Sum(const Sum& other)
@@ -105,13 +103,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        assert(getLHS().getRangeShape() == getLHS().getRangeShape());
-        return getLHS().getRangeShape();
-      }
 
       constexpr
       const auto& getLHS() const
@@ -127,36 +118,19 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      template <class ... Args>
       constexpr
-      Sum& traceOf(Geometry::Attribute attr)
+      Sum& traceOf(const Args& ... args)
       {
-        Parent::traceOf(attr);
-        getLHS().traceOf(attr);
-        getRHS().traceOf(attr);
+        m_lhs->traceOf(args...);
+        m_rhs->traceOf(args...);
         return *this;
       }
 
       constexpr
-      Sum& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        Parent::traceOf(attrs);
-        getLHS().traceOf(attrs);
-        getRHS().traceOf(attrs);
-        return *this;
-      }
-
-      constexpr
-      auto getValue(const Geometry::Point& p) const
-      {
-        return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
-      }
-
-      template <class T>
-      constexpr
-      void getValue(T& res, const Geometry::Point& p) const
-      {
-        getLHS().getValue(res, p);
-        res += getRHS().getValue(p);
+        return this->object(this->getLHS().getValue(p)) + this->object(this->getRHS().getValue(p));
       }
 
       Sum* copy() const noexcept override
@@ -240,7 +214,6 @@ namespace Rodin::Variational
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
-        assert(lhs.getRangeShape() == rhs.getRangeShape());
         assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
       }
 
@@ -277,22 +250,10 @@ namespace Rodin::Variational
       }
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        assert(getLHS().getRangeShape() == getRHS().getRangeShape());
-        return getLHS().getRangeShape();
-      }
-
-      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
         return getLHS().getDOFs(element);
-      }
-
-      const Geometry::Point& getPoint() const
-      {
-        return m_lhs->getPoint();
       }
 
       Sum& setPoint(const Geometry::Point& p)
@@ -302,10 +263,15 @@ namespace Rodin::Variational
         return *this;
       }
 
+      const Geometry::Point& getPoint() const
+      {
+        return m_lhs->getPoint();
+      }
+
       constexpr
       auto getBasis(size_t local) const
       {
-        return getLHS().getBasis(local) + this->object(getRHS().getBasis(local));
+        return this->object(getLHS().getBasis(local)) + this->object(getRHS().getBasis(local));
       }
 
       constexpr

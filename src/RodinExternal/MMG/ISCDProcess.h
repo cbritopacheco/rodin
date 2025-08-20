@@ -13,10 +13,10 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-#include <boost/filesystem.hpp>
 #include <type_traits>
 
 #include <boost/process.hpp>
+#include <boost/filesystem.hpp>
 
 #include "Rodin/Alert.h"
 
@@ -136,7 +136,7 @@ namespace Rodin::External::MMG
       return *this;
     }
 
-    std::optional<boost::process::ipstream>& getOutputLog()
+    Optional<boost::process::ipstream>& getOutputLog()
     {
       return m_out;
     }
@@ -173,7 +173,7 @@ namespace Rodin::External::MMG
 
     boost::filesystem::path m_executable;
     unsigned int m_ncpu;
-    std::optional<boost::process::ipstream> m_out;
+    Optional<boost::process::ipstream> m_out;
   };
 }
 

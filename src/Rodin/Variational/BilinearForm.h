@@ -7,11 +7,11 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
-#include "Rodin/Configure.h"
-
-#include "Rodin/Pair.h"
-#include "Rodin/FormLanguage/List.h"
+#include "Rodin/Math/Traits.h"
 #include "Rodin/Math/SparseMatrix.h"
+
+#include "Rodin/FormLanguage/List.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 #include "Rodin/Assembly/ForwardDecls.h"
 
@@ -28,7 +28,16 @@ namespace Rodin::FormLanguage
   template <class Operator>
   struct Traits<Variational::BilinearFormBase<Operator>>
   {
-    using ScalarType = typename FormLanguage::Traits<Operator>::ScalarType;
+    using OperatorType = Operator;
+  };
+
+  template <class Solution, class TrialFES, class TestFES, class Operator>
+  struct Traits<Variational::BilinearForm<Solution, TrialFES, TestFES, Operator>>
+  {
+    using SolutionType = Solution;
+    using TrialFESType = TrialFES;
+    using TestFESType = TestFES;
+    using OperatorType = Operator;
   };
 }
 
@@ -44,62 +53,182 @@ namespace Rodin::Variational
   class BilinearFormBase : public FormLanguage::Base
   {
     public:
-      using OperatorType = Operator;
+      using OperatorType =
+        Operator;
 
-      using Parent = FormLanguage::Base;
+      using ScalarType =
+        typename FormLanguage::Traits<OperatorType>::ScalarType;
+
+      using Parent =
+        FormLanguage::Base;
+
+      using LocalBilinearFormIntegratorBaseType =
+        LocalBilinearFormIntegratorBase<ScalarType>;
+
+      using GlobalBilinearFormIntegratorBaseType =
+        GlobalBilinearFormIntegratorBase<ScalarType>;
+
+      using LocalBilinearFormIntegratorBaseListType =
+        FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
+
+      using GlobalBilinearFormIntegratorBaseListType =
+        FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
       /**
        * @brief Constructs a linear form with a default constructed vector
        * which is owned by the LinearFormBase instance.
        */
-      BilinearFormBase()
-        : m_operator(OperatorType())
-      {}
+      constexpr
+      BilinearFormBase() = default;
 
-      /**
-       * @brief Constructs a linear form with reference to vector which is not
-       * owned by the LinearFormBase instance.
-       */
-      BilinearFormBase(OperatorType& vec)
-        : m_operator(std::ref(vec))
-      {}
-
-      /**
-       * @brief Constructs a linear form with a vector which is owned by the
-       * LinearFormBase instance.
-       */
-      BilinearFormBase(OperatorType&& vec)
-        : m_operator(std::move(vec))
-      {}
-
+      constexpr
       BilinearFormBase(const BilinearFormBase& other)
         : Parent(other),
-          m_operator(other.m_operator)
+          m_lbfis(other.m_lbfis),
+          m_gbfis(other.m_gbfis)
       {}
 
+      constexpr
       BilinearFormBase(BilinearFormBase&& other)
         : Parent(std::move(other)),
-          m_operator(std::move(other.m_operator))
+          m_lbfis(std::move(other.m_lbfis)),
+          m_gbfis(std::move(other.m_gbfis))
       {}
+
+      constexpr
+      LocalBilinearFormIntegratorBaseListType& getLocalIntegrators()
+      {
+        return m_lbfis;
+      }
+
+      constexpr
+      const LocalBilinearFormIntegratorBaseListType& getLocalIntegrators() const
+      {
+        return m_lbfis;
+      }
+
+      constexpr
+      GlobalBilinearFormIntegratorBaseListType& getGlobalIntegrators()
+      {
+        return m_gbfis;
+      }
+
+      constexpr
+      const GlobalBilinearFormIntegratorBaseListType& getGlobalIntegrators() const
+      {
+        return m_gbfis;
+      }
+
+      /**
+       * @brief Builds the bilinear form the given bilinear integrator
+       * @param[in] bfi Bilinear integrator which will be used to
+       * build the bilinear form.
+       * @returns Reference to this (for method chaining)
+       */
+      BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseType& bfi)
+      {
+        m_lbfis.clear();
+        m_lbfis.add(bfi);
+        return *this;
+      }
+
+      BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseListType& bfi)
+      {
+        m_lbfis.clear();
+        m_lbfis.add(bfi);
+        return *this;
+      }
+
+      /**
+       * @brief Adds a bilinear integrator to the bilinear form.
+       * @returns Reference to this (for method chaining)
+       */
+      BilinearFormBase& operator+=(const LocalBilinearFormIntegratorBaseType& bfi)
+      {
+        if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+          TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
+        if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
+        m_lbfis.add(bfi);
+        return *this;
+      }
+
+      BilinearFormBase& operator+=(const LocalBilinearFormIntegratorBaseListType& bfis)
+      {
+        m_lbfis.add(bfis);
+        return *this;
+      }
+
+      /**
+       * @brief Adds a bilinear integrator to the bilinear form.
+       * @returns Reference to this (for method chaining)
+       */
+      BilinearFormBase& operator+=(const GlobalBilinearFormIntegratorBaseType& bfi)
+      {
+        if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+          TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
+        if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
+        m_gbfis.add(bfi);
+        return *this;
+      }
+
+      BilinearFormBase& operator+=(const GlobalBilinearFormIntegratorBaseListType& bfis)
+      {
+        m_gbfis.add(bfis);
+        return *this;
+      }
+
+      /**
+       * @brief Adds a bilinear integrator to the bilinear form.
+       * @returns Reference to this (for method chaining)
+       */
+      BilinearFormBase& operator-=(const LocalBilinearFormIntegratorBaseType& bfi)
+      {
+        if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+          TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
+        if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
+        m_lbfis.add(UnaryMinus(bfi));
+        return *this;
+      }
+
+      BilinearFormBase& operator-=(const LocalBilinearFormIntegratorBaseListType& bfis)
+      {
+        m_lbfis.add(UnaryMinus(bfis));
+        return *this;
+      }
+
+      /**
+       * @brief Adds a bilinear integrator to the bilinear form.
+       * @returns Reference to this (for method chaining)
+       */
+      BilinearFormBase& operator-=(const GlobalBilinearFormIntegratorBaseType& bfi)
+      {
+        if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
+          TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
+        if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
+          TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
+        m_gbfis.add(UnaryMinus(bfi));
+        return *this;
+      }
+
+      BilinearFormBase& operator-=(const GlobalBilinearFormIntegratorBaseListType& bfis)
+      {
+        m_gbfis.add(UnaryMinus(bfis));
+        return *this;
+      }
 
       /**
        * @brief Gets the reference to the associated operator of the bilinear
        * form.
        */
-      OperatorType& getOperator()
-      {
-        auto& ref = std::visit([](auto& m) -> OperatorType& { return m; }, m_operator);
-        return ref;
-      }
+      virtual OperatorType& getOperator() = 0;
 
       /** @brief Gets a constant reference to the associated operator of the
        * bilinear form.
        */
-      const OperatorType& getOperator() const
-      {
-        const auto& ref = std::visit([](const auto& m) -> const OperatorType& { return m; }, m_operator);
-        return ref;
-      }
+      virtual const OperatorType& getOperator() const = 0;
 
       /**
        * @brief Assembles the bilinear form.
@@ -126,7 +255,8 @@ namespace Rodin::Variational
       virtual BilinearFormBase* copy() const noexcept override = 0;
 
     private:
-      std::variant<std::reference_wrapper<OperatorType>, OperatorType> m_operator;
+      LocalBilinearFormIntegratorBaseListType m_lbfis;
+      GlobalBilinearFormIntegratorBaseListType m_gbfis;
   };
 
   /**
@@ -138,38 +268,48 @@ namespace Rodin::Variational
    * @f$ represents the size (total number of degrees-of-freedom) of the trial
    * space, and @f$ m @f$ represents the size of the test space.
    */
-  template <class TrialFES, class TestFES, class Operator>
-  class BilinearForm final
-    : public BilinearFormBase<Operator>
+  template <class Solution, class TrialFES, class TestFES, class Scalar>
+  class BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>> final
+    : public BilinearFormBase<Math::SparseMatrix<Scalar>>
   {
+    using TrialFESMeshType =
+      typename FormLanguage::Traits<TrialFES>::MeshType;
+
+    using TestFESMeshType =
+      typename FormLanguage::Traits<TestFES>::MeshType;
+
+    using TrialFESContextType =
+      typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
+
+    using TestFESContextType =
+      typename FormLanguage::Traits<TestFESMeshType>::ContextType;
+
     public:
-      using TrialFESScalarType  = typename FormLanguage::Traits<TrialFES>::ScalarType;
+      using SolutionType =
+        Solution;
 
-      using TestFESScalarType   = typename FormLanguage::Traits<TestFES>::ScalarType;
-
-      using ScalarType = typename FormLanguage::Mult<TrialFESScalarType, TestFESScalarType>::Type;
+      using ScalarType =
+        Scalar;
 
       /// Type of operator associated to the bilinear form
-      using OperatorType = Operator;
+      using OperatorType =
+        Math::SparseMatrix<ScalarType>;
 
-      using LocalBilinearFormIntegratorBaseType =
-        LocalBilinearFormIntegratorBase<ScalarType>;
+      using DefaultAssemblyType =
+        typename Assembly::Default<TrialFESContextType, TestFESContextType>
+          ::template Type<OperatorType, BilinearForm>;
 
-      using GlobalBilinearFormIntegratorBaseType =
-        GlobalBilinearFormIntegratorBase<ScalarType>;
-
-      using LocalBilinearFormIntegratorBaseListType =
-        FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
-
-      using GlobalBilinearFormIntegratorBaseListType =
-        FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
+      using AssemblyType =
+        DefaultAssemblyType;
 
       /// Parent class
       using Parent = BilinearFormBase<OperatorType>;
 
-      using SequentialAssembly = Assembly::Sequential<OperatorType, BilinearForm>;
+      using Parent::operator=;
 
-      using MultithreadedAssembly = Assembly::Multithreaded<OperatorType, BilinearForm>;
+      using Parent::operator+=;
+
+      using Parent::operator-=;
 
       /**
        * @brief Constructs a LinearForm with a reference to a TestFunction and
@@ -177,61 +317,47 @@ namespace Rodin::Variational
        * @param[in] v Reference to a TestFunction
        */
       constexpr
-      BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
-        : BilinearForm(u, v, OperatorType())
+      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
+        : m_u(u), m_v(v)
       {}
-
-      /**
-       * @brief Constructs a LinearForm with a reference to a TestFunction and
-       * an non-owned vector.
-       * @param[in] v Reference to a TestFunction
-       * @param[in] vec Reference to a vector
-       */
-      constexpr
-      BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, OperatorType& op)
-        : Parent(op),
-          m_u(u), m_v(v)
-      {
-#ifdef RODIN_MULTITHREADED
-        m_assembly.reset(new MultithreadedAssembly);
-#else
-        m_assembly.reset(new SequentialAssembly);
-#endif
-      }
-
-      /**
-       * @brief Constructs a LinearForm with a references to a TrialFunction and
-       * a TestFunction, and an owned operator.
-       */
-      constexpr
-      BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
-        : Parent(std::move(op)),
-          m_u(u), m_v(v)
-      {
-#ifdef RODIN_MULTITHREADED
-        m_assembly.reset(new MultithreadedAssembly);
-#else
-        m_assembly.reset(new SequentialAssembly);
-#endif
-      }
 
       constexpr
       BilinearForm(const BilinearForm& other)
         : Parent(other),
           m_u(other.m_u), m_v(other.m_v),
-          m_assembly(other.m_assembly->copy()),
-          m_lbfis(other.m_lbfis),
-          m_gbfis(other.m_gbfis)
+          m_assembly(other.m_assembly)
       {}
 
       constexpr
       BilinearForm(BilinearForm&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
-          m_assembly(std::move(other.m_assembly)),
-          m_lbfis(std::move(other.m_lbfis)),
-          m_gbfis(std::move(other.m_gbfis))
+          m_assembly(std::move(other.m_assembly))
       {}
+
+      BilinearForm& operator=(const BilinearForm& other)
+      {
+        if (this != &other)
+        {
+          m_u = other.m_u;
+          m_v = other.m_v;
+          m_operator = other.m_operator;
+          m_assembly = other.m_assembly;
+        }
+        return *this;
+      }
+
+      BilinearForm& operator=(BilinearForm&& other) noexcept
+      {
+        if (this != &other)
+        {
+          m_u = std::move(other.m_u);
+          m_v = std::move(other.m_v);
+          m_operator = std::move(other.m_operator);
+          m_assembly = std::move(other.m_assembly);
+        }
+        return *this;
+      }
 
       /**
        * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
@@ -243,41 +369,33 @@ namespace Rodin::Variational
        * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
        * at @f$ ( u, v ) @f$.
        */
+      template <class UData, class VData>
       constexpr
-      ScalarType operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
+      ScalarType operator()(
+        const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
-        const auto& trialWeights = u.getWeights();
-        const auto& testWeights = v.getWeights();
-        if (!trialWeights.has_value())
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Trial GridFunction weights have not been calculated. "
-            << "Call " << Alert::Identifier::Function("setWeights()")
-            << " on the GridFunction object."
-            << Alert::Raise;
-        }
-        assert(trialWeights.has_value());
-        if (!testWeights.has_value())
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Test GridFunction weights have not been calculated. "
-            << "Call " << Alert::Identifier::Function("setWeights()")
-            << " on the GridFunction object."
-            << Alert::Raise;
-        }
-        assert(testWeights.has_value());
-        return (this->getOperator() * testWeights.value()).dot(trialWeights.value());
+        return (this->getOperator() * v.getData()).dot(u.getData());
+      }
+
+      OperatorType& getOperator() override
+      {
+        return m_operator;
+      }
+
+      const OperatorType& getOperator() const override
+      {
+        return m_operator;
       }
 
       void assemble() override
       {
-         const auto& trialFES = getTrialFunction().getFiniteElementSpace();
-         const auto& testFES = getTestFunction().getFiniteElementSpace();
-         getAssembly().execute(this->getOperator(), {
-             trialFES, testFES, getLocalIntegrators(), getGlobalIntegrators() });
+        const auto& trialFES = getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = getTestFunction().getFiniteElementSpace();
+        m_assembly.execute(m_operator, {
+          trialFES, testFES, this->getLocalIntegrators(), this->getGlobalIntegrators() });
       }
 
-      const TrialFunction<TrialFES>& getTrialFunction() const override
+      const TrialFunction<SolutionType, TrialFES>& getTrialFunction() const override
       {
         return m_u.get();
       }
@@ -287,159 +405,156 @@ namespace Rodin::Variational
         return m_v.get();
       }
 
-      BilinearForm& operator=(const LocalBilinearFormIntegratorBaseType& bfi)
+      BilinearForm* copy() const noexcept override
       {
-        this->from(bfi);
-        return *this;
+        return new BilinearForm(*this);
       }
+
+    private:
+      std::reference_wrapper<const TrialFunction<Solution, TrialFES>> m_u;
+      std::reference_wrapper<const TestFunction<TestFES>> m_v;
+      OperatorType m_operator;
+      AssemblyType m_assembly;
+  };
+
+  template <class Solution, class TrialFES, class TestFES>
+  BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
+    -> BilinearForm<
+        Solution, TrialFES, TestFES,
+        Math::SparseMatrix<
+          typename FormLanguage::Mult<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TestFES>::ScalarType>
+          ::Type>>;
+
+
+  template <class Solution, class TrialFES, class TestFES, class Scalar>
+  class BilinearForm<Solution, TrialFES, TestFES, Math::Matrix<Scalar>> final
+    : public BilinearFormBase<Math::Matrix<Scalar>>
+  {
+    using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
+
+    using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
+
+    public:
+      using SolutionType = Solution;
+
+      using ScalarType = Scalar;
+
+      /// Type of operator associated to the bilinear form
+      using OperatorType =
+        Math::Matrix<ScalarType>;
+
+      /// Parent class
+      using Parent =
+        BilinearFormBase<OperatorType>;
+
+      using Parent::operator=;
+
+      using Parent::operator+=;
+
+      using Parent::operator-=;
+
+      using DefaultAssemblyType =
+        typename Assembly::Default<TrialFESContextType, TestFESContextType>
+          ::template Type<OperatorType, BilinearForm>;
+
+      using AssemblyType = DefaultAssemblyType;
 
       /**
-       * @todo
+       * @brief Constructs a LinearForm with a reference to a TestFunction and
+       * a default constructed vector owned by the LinearForm instance.
+       * @param[in] v Reference to a TestFunction
        */
-      BilinearForm& operator=(
-          const FormLanguage::List<LocalBilinearFormIntegratorBaseType>& bfis)
-      {
-        this->from(bfis);
-        return *this;
-      }
-
-      BilinearForm& operator=(const GlobalBilinearFormIntegratorBaseType& bfi)
-      {
-        this->from(bfi);
-        return *this;
-      }
-
-      /**
-       * @todo
-       */
-      BilinearForm& operator=(
-          const FormLanguage::List<GlobalBilinearFormIntegratorBaseType>& bfis)
-      {
-        this->from(bfis);
-        return *this;
-      }
+      constexpr
+      BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
+        : m_u(u), m_v(v)
+      {}
 
       constexpr
-      LocalBilinearFormIntegratorBaseListType& getLocalIntegrators()
-      {
-        return m_lbfis;
-      }
+      BilinearForm(const BilinearForm& other)
+        : Parent(other),
+          m_u(other.m_u), m_v(other.m_v),
+          m_operator(other.m_operator),
+          m_assembly(other.m_assembly)
+      {}
 
       constexpr
-      const LocalBilinearFormIntegratorBaseListType& getLocalIntegrators() const
+      BilinearForm(BilinearForm&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
+          m_operator(std::move(other.m_operator)),
+          m_assembly(std::move(other.m_assembly))
+      {}
+
+      BilinearForm& operator=(const BilinearForm& other)
       {
-        return m_lbfis;
+        if (this != &other)
+        {
+          m_u = other.m_u;
+          m_v = other.m_v;
+          m_operator = other.m_operator;
+          m_assembly = other.m_assembly;
+        }
+        return *this;
       }
 
+      BilinearForm& operator=(BilinearForm&& other) noexcept
+      {
+        if (this != &other)
+        {
+          m_u = std::move(other.m_u);
+          m_v = std::move(other.m_v);
+          m_operator = std::move(other.m_operator);
+          m_assembly = std::move(other.m_assembly);
+        }
+        return *this;
+      }
+
+      /**
+       * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
+       * v @f$.
+       *
+       * Given grid functions @f$ u @f$ and @f$ v @f$, this function will
+       * compute the action of the bilinear mapping @f$ a(u, v) @f$.
+       *
+       * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
+       * at @f$ ( u, v ) @f$.
+       */
+      template <class UData, class VData>
       constexpr
-      GlobalBilinearFormIntegratorBaseListType& getGlobalIntegrators()
+      ScalarType operator()(
+        const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
-        return m_gbfis;
+        return (this->getOperator() * v.getData()).dot(u.getData());
       }
 
-      constexpr
-      const GlobalBilinearFormIntegratorBaseListType& getGlobalIntegrators() const
+      OperatorType& getOperator() override
       {
-        return m_gbfis;
+        return m_operator;
       }
 
-      BilinearForm& setAssembly(const Assembly::AssemblyBase<OperatorType, BilinearForm>& assembly)
+      const OperatorType& getOperator() const override
       {
-        m_assembly.reset(assembly.copy());
-        return *this;
+        return m_operator;
       }
 
-      const Assembly::AssemblyBase<OperatorType, BilinearForm>& getAssembly() const
+      void assemble() override
       {
-        assert(m_assembly);
-        return *m_assembly;
+        const auto& trialFES = getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = getTestFunction().getFiniteElementSpace();
+        m_assembly.execute(this->getOperator(), {
+          trialFES, testFES, this->getLocalIntegrators(), this->getGlobalIntegrators() });
       }
 
-      /**
-       * @brief Builds the bilinear form the given bilinear integrator
-       * @param[in] bfi Bilinear integrator which will be used to
-       * build the bilinear form.
-       * @returns Reference to this (for method chaining)
-       */
-      BilinearForm& from(const LocalBilinearFormIntegratorBaseType& bfi)
+      const TrialFunction<SolutionType, TrialFES>& getTrialFunction() const override
       {
-        m_lbfis.clear();
-        add(bfi);
-        return *this;
+        return m_u.get();
       }
 
-      BilinearForm& from(const LocalBilinearFormIntegratorBaseListType& bfi)
+      const TestFunction<TestFES>& getTestFunction() const override
       {
-        m_lbfis.clear();
-        add(bfi);
-        return *this;
-      }
-
-      /**
-       * @brief Adds a bilinear integrator to the bilinear form.
-       * @returns Reference to this (for method chaining)
-       */
-      BilinearForm& add(const LocalBilinearFormIntegratorBaseType& bfi)
-      {
-        if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
-          TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
-        if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
-          TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
-        m_lbfis.add(bfi);
-        return *this;
-      }
-
-      BilinearForm& add(const LocalBilinearFormIntegratorBaseListType& bfis)
-      {
-        m_lbfis.add(bfis);
-        return *this;
-      }
-
-      /**
-       * @brief Builds the bilinear form the given bilinear integrator
-       * @param[in] bfi Bilinear integrator which will be used to
-       * build the bilinear form.
-       * @returns Reference to this (for method chaining)
-       */
-      BilinearForm& from(const GlobalBilinearFormIntegratorBaseType& bfi)
-      {
-        m_gbfis.clear();
-        add(bfi);
-        return *this;
-      }
-
-      BilinearForm& from(const GlobalBilinearFormIntegratorBaseListType& bfi)
-      {
-        m_gbfis.clear();
-        add(bfi);
-        return *this;
-      }
-
-      /**
-       * @brief Adds a bilinear integrator to the bilinear form.
-       * @returns Reference to this (for method chaining)
-       */
-      BilinearForm& add(const GlobalBilinearFormIntegratorBaseType& bfi)
-      {
-        if (bfi.getTrialFunction().getUUID() != getTrialFunction().getUUID())
-          TrialFunctionMismatchException(bfi.getTrialFunction()) << Alert::Raise;
-        if (bfi.getTestFunction().getUUID() != getTestFunction().getUUID())
-          TestFunctionMismatchException(bfi.getTestFunction()) << Alert::Raise;
-        m_gbfis.add(bfi);
-        return *this;
-      }
-
-      BilinearForm& add(const GlobalBilinearFormIntegratorBaseListType& bfis)
-      {
-        m_gbfis.add(bfis);
-        return *this;
-      }
-
-      BilinearForm& clear()
-      {
-        m_lbfis.clear();
-        m_gbfis.clear();
-        return *this;
+        return m_v.get();
       }
 
       BilinearForm* copy() const noexcept override
@@ -448,32 +563,12 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
-      std::reference_wrapper<const TestFunction<TestFES>>   m_v;
-      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
-      LocalBilinearFormIntegratorBaseListType               m_lbfis;
-      GlobalBilinearFormIntegratorBaseListType              m_gbfis;
+      std::reference_wrapper<const TrialFunction<Solution, TrialFES>> m_u;
+      std::reference_wrapper<const TestFunction<TestFES>> m_v;
+      OperatorType m_operator;
+      AssemblyType m_assembly;
   };
-
-  template <class TrialFES, class TestFES>
-  BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
-    -> BilinearForm<TrialFES, TestFES,
-        Math::SparseMatrix<
-          typename FormLanguage::Mult<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TestFES>::ScalarType>
-          ::Type>>;
-
-  template <class TrialFES, class TestFES, class Operator>
-  BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, Operator&& op)
-    -> BilinearForm<TrialFES, TestFES, Operator>;
-
-  template <class TrialFES, class TestFES, class Operator>
-  BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, Operator& op)
-    -> BilinearForm<TrialFES, TestFES, Operator>;
 }
-
-#include "BilinearForm.hpp"
 
 #endif
 

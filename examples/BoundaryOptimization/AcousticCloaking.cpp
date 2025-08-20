@@ -4,13 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <Rodin/Solver.h>
-#include <Rodin/Geometry.h>
 #include <Rodin/Math.h>
+#include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
+#include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
-#include <Rodin/Threads/ThreadPool.h>
-#include <Rodin/Solver.h>
 
 #include "Tools.h"
 
@@ -42,7 +41,7 @@ const Real R = 50;
 using RealFES = P1<Real>;
 using ComplexFES = P1<Complex>;
 using VectorFES = P1<Math::Vector<Real>>;
-using VectorGridFunction = GridFunction<VectorFES>;
+using VectorGridFunction = GridFunction<VectorFES, Math::Vector<Real>>;
 using ShapeGradient = VectorGridFunction;
 
 template <class ProblemType>
@@ -211,7 +210,6 @@ int main(int, char**)
     rfes.getMesh().save("Scattered.mesh");
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
-    pressure.setWeights();
     const Real J = 0.5 * Integral(pressure).compute() / mesh.getVolume();
     const Real area = mesh.getArea(SoundSoft);
     const Real objective = J + ell * area;
@@ -288,8 +286,7 @@ int main(int, char**)
 
       Alert::Info() << "Computing conormal..." << Alert::Raise;
       GridFunction conormal(drvfes);
-      conormal.project(Grad(dist), { SoundSoft, SoundHard });
-      conormal.stableNormalize();
+      conormal.project(Region::Cells, Grad(dist), { SoundSoft, SoundHard });
 
       conormal.getFiniteElementSpace().getMesh().save("Conormal.mesh");
       conormal.save("Conormal.gf");
@@ -328,7 +325,7 @@ int main(int, char**)
     Alert::Info() << "Meshing the support..." << Alert::Raise;
     RealFES workaroundfes(mesh);
     GridFunction workaround(workaroundfes);
-    workaround.projectOnBoundary(dist);
+    workaround.project(Region::Boundary, dist);
     mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                       .split(SoundSoft, { SoundSoft, SoundHard })
                                       .split(SoundHard, { SoundSoft, SoundHard })

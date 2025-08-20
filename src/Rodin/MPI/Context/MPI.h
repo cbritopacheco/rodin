@@ -7,10 +7,10 @@
 #ifndef RODIN_MPI_MPI_H
 #define RODIN_MPI_MPI_H
 
-#include "Rodin/Context/Base.h"
-
 #include <mpi.h>
 #include <boost/mpi.hpp>
+
+#include "Rodin/Context/Base.h"
 
 namespace Rodin::Context
 {

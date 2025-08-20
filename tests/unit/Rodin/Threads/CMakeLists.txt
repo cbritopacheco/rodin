@@ -6,14 +6,6 @@ target_link_libraries(RodinUnsafeTest
   Rodin::Threads)
 gtest_discover_tests(RodinUnsafeTest)
 
-add_executable(RodinThreadPoolTest ThreadPoolTest.cpp)
-target_link_libraries(RodinThreadPoolTest
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Threads)
-gtest_discover_tests(RodinThreadPoolTest)
-
 add_executable(RodinSharedTest SharedTest.cpp)
 target_link_libraries(RodinSharedTest
   PUBLIC

@@ -10,7 +10,7 @@
 
 namespace Rodin::Variational
 {
-  template <class FES, class LambdaDerived, class MuDerived>
+  template <class Solution, class FES, class LambdaDerived, class MuDerived>
   class LinearElasticityIntegrator final
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
@@ -38,7 +38,7 @@ namespace Rodin::Variational
 
     public:
       LinearElasticityIntegrator(
-          const TrialFunction<FES>& u, const TestFunction<FES>& v,
+          const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v,
           const Lambda& lambda, const Mu& mu)
         : Parent(u, v),
           m_lambda(lambda.copy()), m_mu(mu.copy()),
@@ -61,24 +61,23 @@ namespace Rodin::Variational
           m_testfes(std::move(other.m_testfes))
       {}
 
-      virtual const Geometry::Polytope& getPolytope() const override
+      const Geometry::Polytope& getPolytope() const override
       {
         return m_polytope.value().get();
       }
 
-      virtual LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) override
+      LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) override
       {
         assert(false);
         return *this;
       }
 
-      virtual ScalarType integrate(size_t tr, size_t te) override
+      ScalarType integrate(size_t tr, size_t te) override
       {
         assert(false);
         return NAN;
       }
 
-      inline
       constexpr
       const Mu& getMu() const
       {
@@ -86,7 +85,6 @@ namespace Rodin::Variational
         return *m_mu;
       }
 
-      inline
       constexpr
       const Lambda& getLambda() const
       {
@@ -94,12 +92,12 @@ namespace Rodin::Variational
         return *m_lambda;
       }
 
-      inline Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Cells;
+        return Geometry::Region::Cells;
       }
 
-      virtual LinearElasticityIntegrator* copy() const noexcept override
+      LinearElasticityIntegrator* copy() const noexcept override
       {
         return new LinearElasticityIntegrator(*this);
       }
@@ -111,29 +109,28 @@ namespace Rodin::Variational
       std::reference_wrapper<const TrialFESType> m_trialfes;
       std::reference_wrapper<const TestFESType> m_testfes;
 
-      std::optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
       std::vector<Geometry::Point> m_ps;
 
       Math::SpatialMatrix<Real> m_jac1, m_jac2;
   };
 
-  template <class FES, class LambdaDerived, class MuDerived>
+  template <class Solution, class FES, class LambdaDerived, class MuDerived>
   LinearElasticityIntegrator(
-      const TrialFunction<FES>&, const TestFunction<FES>&,
+      const TrialFunction<Solution, FES>&, const TestFunction<FES>&,
       const FunctionBase<LambdaDerived>&, const FunctionBase<MuDerived>&)
-    -> LinearElasticityIntegrator<FES, LambdaDerived, MuDerived>;
+    -> LinearElasticityIntegrator<Solution, FES, LambdaDerived, MuDerived>;
 
-  template <class FES>
+  template <class Solution, class FES>
   class LinearElasticityIntegral final
   {
     public:
-      LinearElasticityIntegral(const TrialFunction<FES>& u, const TestFunction<FES>& v)
+      LinearElasticityIntegral(const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
         : m_u(u), m_v(v)
       {}
 
       template <class L, class M>
-      inline
       constexpr
       auto
       operator()(const L& lambda, const M& mu) const
@@ -143,7 +140,6 @@ namespace Rodin::Variational
       }
 
       template <class LambdaDerived, class MuDerived>
-      inline
       constexpr
       auto
       operator()(const FunctionBase<LambdaDerived>& lambda, const FunctionBase<MuDerived>& mu) const
@@ -152,13 +148,13 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const TrialFunction<FES>> m_u;
+      std::reference_wrapper<const TrialFunction<Solution, FES>> m_u;
       std::reference_wrapper<const TestFunction<FES>>  m_v;
   };
 
-  template <class FES>
-  LinearElasticityIntegral(const TrialFunction<FES>&, const TestFunction<FES>&)
-    -> LinearElasticityIntegral<FES>;
+  template <class Solution, class FES>
+  LinearElasticityIntegral(const TrialFunction<Solution, FES>&, const TestFunction<FES>&)
+    -> LinearElasticityIntegral<Solution, FES>;
 }
 
 #endif

@@ -9,7 +9,6 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
-#include "RangeShape.h"
 
 namespace Rodin::Variational
 {
@@ -25,6 +24,8 @@ namespace Rodin::Variational
   {
     public:
       using Parent = FunctionBase<BooleanFunctionBase<Derived>>;
+      using Parent::traceOf;
+      using Parent::operator();
 
       BooleanFunctionBase() = default;
 
@@ -38,41 +39,13 @@ namespace Rodin::Variational
 
       virtual ~BooleanFunctionBase() = default;
 
-      constexpr
-      BooleanFunctionBase& traceOf(Geometry::Attribute attr)
-      {
-        Parent::traceOf(attr);
-        return *this;
-      }
-
-      constexpr
-      BooleanFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        Parent::traceOf(attrs);
-        return *this;
-      }
-
-      /**
-       * @note CRTP function to be overriden in Derived class.
-       */
-      const Derived& getDerived() const
-      {
-        return static_cast<const Derived&>(*this);
-      }
-
       /**
        * @note CRTP function to be overriden in Derived class.
        */
       constexpr
-      Boolean getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { 1, 1 };
       }
 
       virtual BooleanFunctionBase* copy() const noexcept override = 0;

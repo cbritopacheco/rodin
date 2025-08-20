@@ -167,7 +167,7 @@ namespace Rodin::IO::MEDIT
   }
 
   inline
-  std::optional<Keyword> toKeyword(const char* str)
+  Optional<Keyword> toKeyword(const char* str)
   {
     Keyword res;
     if (str == Keyword::MeshVersionFormatted)
@@ -247,7 +247,7 @@ namespace Rodin::IO::MEDIT
 
       template <class Iterator>
       inline
-      std::optional<Data> operator()(Iterator begin, Iterator end) const
+      Optional<Data> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::uint_;
@@ -276,7 +276,7 @@ namespace Rodin::IO::MEDIT
     public:
       struct Data
       {
-        Math::PointVector vertex;
+        Math::SpatialPoint vertex;
         Geometry::Attribute attribute;
       };
 
@@ -287,7 +287,7 @@ namespace Rodin::IO::MEDIT
 
       template <class Iterator>
       inline
-      std::optional<Data> operator()(Iterator begin, Iterator end) const
+      Optional<Data> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::double_;
@@ -295,7 +295,7 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         size_t i = 0;
-        Data res{ Math::PointVector(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
+        Data res{ Math::SpatialPoint(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
         const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
         const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
         const auto p = double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];
@@ -346,7 +346,7 @@ namespace Rodin::IO::MEDIT
   {
     template <class Iterator>
     inline
-    std::optional<std::string> operator()(Iterator begin, Iterator end) const
+    Optional<std::string> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -371,7 +371,7 @@ namespace Rodin::IO::MEDIT
   {
     template <class Iterator>
     inline
-    std::optional<int> operator()(Iterator begin, Iterator end) const
+    Optional<int> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -395,7 +395,7 @@ namespace Rodin::IO::MEDIT
   {
     template <class Iterator>
     inline
-    std::optional<unsigned int> operator()(Iterator begin, Iterator end) const
+    Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -419,7 +419,7 @@ namespace Rodin::IO::MEDIT
   {
     template <class Iterator>
     inline
-    std::optional<unsigned int> operator()(Iterator begin, Iterator end) const
+    Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       static constexpr const char* expected = toCharString(Keyword::MeshVersionFormatted);
       using boost::spirit::x3::space;
@@ -466,7 +466,7 @@ namespace Rodin::IO::MEDIT
   {
     template <class Iterator>
     inline
-    std::optional<unsigned int> operator()(Iterator begin, Iterator end) const
+    Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       static constexpr const char* expected = toCharString(Keyword::Dimension);
       using boost::spirit::x3::space;
@@ -602,31 +602,138 @@ namespace Rodin::IO
   };
 
   template <class Range>
-  class GridFunctionLoader<FileFormat::MEDIT,
-        Variational::P1<Range, Geometry::Mesh<Context::Local>>>
+  class GridFunctionLoader<
+    FileFormat::MEDIT,
+    Variational::P1<Range, Geometry::Mesh<Context::Local>>,
+    Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
     : public GridFunctionLoaderBase<
-        Variational::P1<Range, Geometry::Mesh<Context::Local>>>
+        Variational::P1<Range, Geometry::Mesh<Context::Local>>,
+        Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
     public:
       using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 
-      using Parent = GridFunctionLoaderBase<FESType>;
+      using DataType = Math::Vector<ScalarType>;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = GridFunctionLoaderBase<FESType, DataType>;
 
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf),
           m_currentLineNumber(0)
       {}
 
-      void load(std::istream& is) override;
+      void load(std::istream& is) override
+      {
+        readVersion(is);
+        readDimension(is);
+        readData(is);
+      }
 
-      std::istream& getline(std::istream& is, std::string& line);
-      std::string skipEmptyLines(std::istream& is);
+      std::istream& getline(std::istream& is, std::string& line)
+      {
+        m_currentLineNumber++;
+        return std::getline(is, line);
+      }
 
-      void readVersion(std::istream& is);
-      void readDimension(std::istream& is);
-      void readData(std::istream& is);
+      std::string skipEmptyLines(std::istream& is)
+      {
+        std::string line;
+        while (getline(is, line))
+        {
+          if (!MEDIT::ParseEmptyLine()(line.begin(), line.end()))
+            break;
+        }
+        return line;
+      }
+
+      void readVersion(std::istream& is)
+      {
+        auto line = skipEmptyLines(is);
+        Optional<unsigned int> version =
+          MEDIT::ParseMeshVersionFormatted()(line.begin(), line.end());
+        if (version) // Version was on the same line
+        {
+          m_version = *version;
+        }
+        else // Version is not on the same line
+        {
+          auto line = skipEmptyLines(is);
+          version = MEDIT::ParseUnsignedInteger()(line.begin(), line.end());
+          if (version)
+            m_version = *version;
+          else
+            Alert::Exception() << "Failed to parse version number of mesh." << Alert::Raise;
+        }
+      }
+
+      void readDimension(std::istream& is)
+      {
+        auto line = skipEmptyLines(is);
+        Optional<unsigned int> dimension = MEDIT::ParseDimension()(line.begin(), line.end());
+        if (dimension) // Version was on the same line
+          m_spaceDimension = *dimension;
+        else // Version is not on the same line
+        {
+          auto line = skipEmptyLines(is);
+          dimension = MEDIT::ParseUnsignedInteger()(line.begin(), line.end());
+          if (dimension)
+            m_spaceDimension = *dimension;
+          else
+            Alert::Exception() << "Failed to parse dimension of mesh." << Alert::Raise;
+        }
+      }
+
+      void readData(std::istream& is)
+      {
+        auto& gf = this->getObject();
+
+        auto line = skipEmptyLines(is);
+        Optional<std::string> kw =
+          MEDIT::ParseKeyword()(line.begin(), line.end());
+        if (!kw || *kw != MEDIT::Keyword::SolAtVertices)
+        {
+          Alert::Exception() << "Expected keyword " << MEDIT::Keyword::SolAtVertices
+                             << " on line " << m_currentLineNumber 
+                             << Alert::Raise;
+        }
+
+        line = skipEmptyLines(is);
+        Optional<unsigned int> size = MEDIT::ParseUnsignedInteger()(line.begin(), line.end());
+        if (!size)
+        {
+          Alert::Exception() << "Failed to parse solution size at line "
+                             << m_currentLineNumber
+                             << Alert::Raise;
+        }
+
+        line = skipEmptyLines(is);
+        size_t solCount, vdim;
+        using boost::spirit::x3::space;
+        using boost::spirit::x3::blank;
+        using boost::spirit::x3::uint_;
+        using boost::spirit::x3::_attr;
+        using boost::spirit::x3::repeat;
+        const auto get_sol_count = [&](auto& ctx) { solCount = _attr(ctx); };
+        const auto get_vdim = [&](auto& ctx) { vdim = _attr(ctx); };
+        const auto p = uint_[get_sol_count] >> uint_[get_vdim];
+        auto it = line.begin();
+        const bool r = boost::spirit::x3::phrase_parse(it, line.end(), p, space);
+
+        assert(solCount == 1);
+        if (it != line.end() || !r)
+        {
+          Alert::Exception() << "Failed to parse solution count and vector dimension at line "
+                             << m_currentLineNumber
+                             << Alert::Raise;
+        }
+
+        for (size_t i = 0; i < gf.getSize(); i++)
+          is >> gf[i];
+      }
 
     private:
       size_t m_version;
@@ -634,26 +741,49 @@ namespace Rodin::IO
       size_t m_currentLineNumber;
   };
 
-  template <class FES>
-  class GridFunctionPrinter<FileFormat::MEDIT, FES>
-    : public GridFunctionPrinterBase<FES>
+  template <class FES, class Data>
+  class GridFunctionPrinterBase<FileFormat::MEDIT, FES, Data>
+    : public Printer<Variational::GridFunction<FES, Data>>
   {
     public:
       using FESType = FES;
 
-      using ObjectType = Variational::GridFunction<FESType>;
+      static constexpr FileFormat Format = FileFormat::MEDIT;
 
-      using Parent = GridFunctionPrinterBase<FESType>;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
-      GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf)
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using DataType = Data;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = Printer<ObjectType>;
+
+      GridFunctionPrinterBase(const ObjectType& gf)
+        : m_gf(gf)
       {}
 
       void print(std::ostream& os) override
       {
         printVersion(os);
         printDimension(os);
-        printData(os);
+
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t vdim = fes.getVectorDimension();
+
+        os << MEDIT::Keyword::SolAtVertices << '\n'
+           << mesh.getVertexCount() << '\n'
+           << 1 // Only one solution
+           << " " << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Real)
+           << '\n';
+
+        this->printData(os);
+
+        os << '\n';
+
         printEnd(os);
       }
 
@@ -670,18 +800,48 @@ namespace Rodin::IO
         os << MEDIT::Keyword::Dimension << '\n' << mesh.getSpaceDimension() << "\n\n";
       }
 
+      void printEnd(std::ostream& os)
+      {
+        os << '\n' << IO::MEDIT::Keyword::End;
+      }
+
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
+
+      virtual void printData(std::ostream& os) = 0;
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
+  };
+
+  template <class FES>
+  class GridFunctionPrinter<
+    FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+    : public GridFunctionPrinterBase<
+        FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+  {
+    public:
+      using FESType = FES;
+
+      static constexpr FileFormat Format = FileFormat::MEDIT;
+
+      using RangeType = typename FormLanguage::Traits<FES>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using DataType = Math::Vector<ScalarType>;
+
+      using Parent = GridFunctionPrinterBase<Format, FES, DataType>;
+
+      using Parent::Parent;
+
       void printData(std::ostream& os)
       {
         const auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        const size_t vdim = fes.getVectorDimension();
-        os << MEDIT::Keyword::SolAtVertices << '\n'
-           << mesh.getVertexCount() << '\n'
-           << 1 // Only one solution
-           << " " << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Real)
-           << '\n';
-
         if constexpr (Utility::IsSpecialization<FES, Variational::P1>::Value)
         {
           os << gf.getData().reshaped();
@@ -690,21 +850,16 @@ namespace Rodin::IO
         {
           for (auto it = mesh.getVertex(); !it.end(); ++it)
           {
-            const Geometry::Point p(*it, it->getTransformation(),
-                Geometry::Polytope::getVertices(Geometry::Polytope::Type::Point).col(0),
+            const Geometry::Point p(
+                *it,
+                Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
                 it->getCoordinates());
             os << gf(p) << '\n';
           }
         }
         os << '\n';
       }
-
-      void printEnd(std::ostream& os)
-      {
-        os << '\n' << IO::MEDIT::Keyword::End;
-      }
   };
 }
 
-#include "MEDIT.hpp"
 #endif

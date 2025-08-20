@@ -13,6 +13,8 @@
 #include "Rodin/Utility.h"
 #include "Rodin/FormLanguage/List.h"
 
+#include "Rodin/Assembly/ForwardDecls.h"
+
 #include "ForwardDecls.h"
 
 #include "Function.h"
@@ -99,25 +101,43 @@ namespace Rodin::Variational
    * @f]
    * on the subset of the boundary @f$ \Gamma_D \subset \mathcal{B}_h @f$.
    */
-  template <class FES, class ValueDerived>
-  class DirichletBC<TrialFunction<FES>, FunctionBase<ValueDerived>> final
+  template <class Solution, class FES, class ValueDerived>
+  class DirichletBC<TrialFunction<Solution, FES>, FunctionBase<ValueDerived>> final
     : public DirichletBCBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
-      using FESType = FES;
+      using FESType =
+        FES;
 
       /// Operand type
-      using OperandType = TrialFunction<FESType>;
+      using OperandType =
+        TrialFunction<Solution, FESType>;
 
       /// Scalar type
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType =
+        typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using DOFs = IndexMap<ScalarType>;
+      using DOFs =
+        IndexMap<ScalarType>;
 
       /// Value type
-      using ValueType = FunctionBase<ValueDerived>;
+      using ValueType =
+        FunctionBase<ValueDerived>;
 
-      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using FESMeshType =
+        typename FormLanguage::Traits<FESType>::MeshType;
+
+      using FESRangeType =
+        typename FormLanguage::Traits<FESType>::RangeType;
+
+      using FESMeshContextType =
+        typename FormLanguage::Traits<FESMeshType>::ContextType;
+
+      using DefaultAssemblyType =
+        typename Assembly::Default<FESMeshContextType>::template Type<DOFs, DirichletBC>;
+
+      using AssemblyType =
+        DefaultAssemblyType;
 
       /// Parent class
       using Parent = DirichletBCBase<ScalarType>;
@@ -139,7 +159,8 @@ namespace Rodin::Variational
           m_u(other.m_u),
           m_value(other.m_value->copy()),
           m_essBdr(other.m_essBdr),
-          m_dofs(other.m_dofs)
+          m_dofs(other.m_dofs),
+          m_assembly(other.m_assembly)
       {}
 
       /**
@@ -150,7 +171,8 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u)),
           m_value(std::move(other.m_value)),
           m_essBdr(std::move(other.m_essBdr)),
-          m_dofs(std::move(other.m_dofs))
+          m_dofs(std::move(other.m_dofs)),
+          m_assembly(std::move(other.m_assembly))
       {}
 
       /**
@@ -212,37 +234,7 @@ namespace Rodin::Variational
        */
       void assemble() override
       {
-        const auto& fes = m_u.get().getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        Geometry::FaceIterator it;
-        if (m_essBdr.size() > 0)
-          it = mesh.getFace();
-        else
-          it = mesh.getBoundary();
-        m_dofs.clear();
-        for (; !it.end(); ++it)
-        {
-          const auto& polytope = *it;
-          if (m_essBdr.size() == 0 || m_essBdr.count(polytope.getAttribute()))
-          {
-            const size_t d = polytope.getDimension();
-            const size_t i = polytope.getIndex();
-            const auto& fe = fes.getFiniteElement(d, i);
-            const auto& mapping =
-              fes.getMapping({ d, i }, getValue().template cast<FESRangeType>());
-            for (Index local = 0; local < fe.getCount(); local++)
-            {
-              const Index global = fes.getGlobalIndex({ d, i }, local);
-              auto find = m_dofs.find(global);
-              if (find == m_dofs.end())
-              {
-                const auto& lf = fe.getLinearForm(local);
-                const auto s = lf(mapping);
-                m_dofs.insert(find, std::pair{ global, s });
-              }
-            }
-          }
-        }
+        m_assembly.execute(m_dofs, { m_u.get(), *m_value, m_essBdr });
       }
 
       bool isComponent() const override
@@ -252,7 +244,7 @@ namespace Rodin::Variational
 
       const OperandType& getOperand() const override
       {
-        return m_u;
+        return m_u.get();
       }
 
       const ValueType& getValue() const override
@@ -266,6 +258,12 @@ namespace Rodin::Variational
         return m_dofs;
       }
 
+      const Assembly::AssemblyBase<IndexMap<ScalarType>, DirichletBC>& getAssembly() const
+      {
+        assert(m_assembly);
+        return *m_assembly;
+      }
+
       DirichletBC* copy() const noexcept override
       {
         return new DirichletBC(*this);
@@ -276,6 +274,7 @@ namespace Rodin::Variational
       std::unique_ptr<ValueType> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
       IndexMap<ScalarType> m_dofs;
+      AssemblyType m_assembly;
   };
 
   /**
@@ -284,9 +283,9 @@ namespace Rodin::Variational
    * @tparam FES Type of finite element space
    * @tparam ValueDerived Derived type of FunctionBase
    */
-  template <class FES, class FunctionDerived>
-  DirichletBC(const TrialFunction<FES>&, const FunctionBase<FunctionDerived>&)
-    -> DirichletBC<TrialFunction<FES>, FunctionBase<FunctionDerived>>;
+  template <class Solution, class FES, class FunctionDerived>
+  DirichletBC(const TrialFunction<Solution, FES>&, const FunctionBase<FunctionDerived>&)
+    -> DirichletBC<TrialFunction<Solution, FES>, FunctionBase<FunctionDerived>>;
 }
 
 #endif

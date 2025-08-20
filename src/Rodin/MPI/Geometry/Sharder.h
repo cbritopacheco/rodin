@@ -1,5 +1,5 @@
-#ifndef RODIN_GEOMETRY_MPISHARDER_H
-#define RODIN_GEOMETRY_MPISHARDER_H
+#ifndef RODIN_MPI_GEOMETRY_SHARDER_H
+#define RODIN_MPI_GEOMETRY_SHARDER_H
 
 #include <boost/mpi/config.hpp>
 
@@ -10,31 +10,20 @@
 
 namespace Rodin::Geometry
 {
-  using MPISharder = Sharder<Context::MPI>;
-
   /**
-   * @class MPISharder
    * @brief Utility for distributing a global mesh across MPI ranks by
-   *        splitting into per-rank shards, scattering them from a root,
-   *        and gathering the local mesh on each rank.
-   *
-   * The typical usage is:
-   * @code
-   *   MPISharder sharder(ctx);
-   *   auto mpiMesh = sharder.distribute(partitioner, rootRank);
-   * @endcode
+   * splitting into per-rank shards, scattering them from a root, and gathering
+   * the local mesh on each rank.
    */
   template <>
   class Sharder<Context::MPI>
   {
     public:
       /**
-       * @brief Construct an MPISharder with the given MPI context.
+       * @brief Construct a Sharder with the given MPI context.
        * @param context The MPI context (communicator and environment).
        */
-      Sharder(const Context::MPI& context)
-        : m_context(context)
-      {}
+      Sharder(const Context::MPI& context);
 
       /**
        * @brief One-step distribution: shard, scatter, and gather.
@@ -45,10 +34,7 @@ namespace Rodin::Geometry
        * @param root The rank responsible for scattering shards.
        * @return The local MPI mesh built from the received shard.
        */
-      Mesh<Context::MPI> distribute(Partitioner& p, int root)
-      {
-        return shard(p).scatter(root).gather(root);
-      }
+      Mesh<Context::MPI> distribute(Partitioner& p, int root);
 
       /**
        * @brief Split the global mesh into per-rank shards (ghost layers included).
@@ -59,33 +45,7 @@ namespace Rodin::Geometry
        * @param partitioner The mesh partitioner with `getCount()==comm.size()`.
        * @return Reference to this object for chaining.
        */
-      Sharder& shard(Partitioner& partitioner)
-      {
-        m_shards.clear();
-        const auto& mesh = partitioner.getMesh();
-        const size_t cellDim = mesh.getDimension();
-        const size_t numShards = partitioner.getCount();
-        assert(partitioner.getCount() == m_context.getCommunicator().size());
-        assert(numShards > 0);
-        std::vector<Shard::Builder> sbs(numShards);
-        for (auto& sb : sbs)
-          sb.initialize(mesh);
-        for (Index i = 0; i < mesh.getCellCount(); i++)
-        {
-          const size_t partIdx = partitioner.getPartition(i);
-          sbs[partIdx].include(cellDim, i);
-          for (size_t d = 1; d <= cellDim - 1; d++)
-          {
-            const auto& inc = mesh.getConnectivity().getIncidence(cellDim, d);
-            if (inc.size() > 0)
-              sbs[partIdx].include(d, inc.at(i));
-          }
-        }
-        m_shards.resize(numShards);
-        for (size_t i = 0; i < numShards; i++)
-          m_shards[i] = sbs[i].finalize();
-        return *this;
-      }
+      Sharder& shard(Partitioner& partitioner);
 
       /**
        * @brief Scatter shards from the root rank to all ranks.
@@ -96,21 +56,7 @@ namespace Rodin::Geometry
        * @param root The rank that owns the global mesh and performs sends.
        * @return Reference to this object for chaining.
        */
-      Sharder& scatter(int root)
-      {
-        const auto& comm = m_context.getCommunicator();
-        const int tag = m_context.getEnvironment().collectives_tag();
-        std::vector<boost::mpi::request> reqs(m_shards.size());
-        for (size_t i = 0; i < m_shards.size(); i++)
-        {
-          if (i == root)
-            continue;
-          reqs[i] = comm.isend(i, tag, m_shards[i]);
-        }
-        for (auto& req : reqs)
-          req.wait();
-        return *this;
-      }
+      Sharder& scatter(int root);
 
       /**
        * @brief Gather the local shard on each rank.
@@ -121,46 +67,23 @@ namespace Rodin::Geometry
        * @param root The rank that originally scattered the shards.
        * @return The local MPI mesh built from the received shard.
        */
-      Mesh<Context::MPI> gather(int root)
-      {
-        const auto& comm = m_context.getCommunicator();
-        const int tag = m_context.getEnvironment().collectives_tag();
-        if (comm.rank() == root)
-        {
-          return Mesh<Context::MPI>::Builder(m_context).initialize(std::move(m_shards[root]))
-                                                       .finalize();
-        }
-        else
-        {
-          Shard s;
-          comm.recv(root, tag, s);
-          Mesh<Context::MPI>::Builder build(m_context);
-          build.initialize(std::move(s));
-          return build.finalize();
-        }
-      }
+      Mesh<Context::MPI> gather(int root);
 
-      Shard& getShard(size_t i)
-      {
-        assert(i < m_shards.size());
-        return m_shards[i];
-      }
+      Shard& getShard(size_t i);
 
-      const Shard& getShard(size_t i) const
-      {
-        assert(i < m_shards.size());
-        return m_shards[i];
-      }
+      const Shard& getShard(size_t i) const;
 
-      const Context::MPI& getContext() const
-      {
-        return m_context;
-      }
+      const Context::MPI& getContext() const;
 
     private:
       Context::MPI m_context;
       std::vector<Shard> m_shards;
   };
+}
+
+namespace Rodin::MPI
+{
+  using Sharder = Geometry::Sharder<Context::MPI>;
 }
 
 #endif

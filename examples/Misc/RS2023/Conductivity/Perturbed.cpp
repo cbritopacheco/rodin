@@ -6,6 +6,7 @@
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 
 #include <RodinExternal/MMG.h>
@@ -122,7 +123,6 @@ int main(int, char**)
   GridFunction diff(vh);
   GridFunction gdiff(gh);
   diff = Pow(u0 - u_e, 2);
-  diff.setWeights();
 
   Alert::Info() << "L2 Error: " << Integral(diff).compute() << Alert::Raise;
 

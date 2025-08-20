@@ -7,22 +7,27 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinPETSc_HEADERS
   ForwardDecls.h
   Object.h
+  IO/GridFunctionPrinter.h
   Solver/KSP.h
   Solver/CG.h
-  Assembly/Sequential.h
-  Assembly/MPI.h
-  FormLanguage/Traits.h
-  Math/LinearSystem.h
   Math/Vector.h
   Math/Matrix.h
+  Math/LinearSystem.h
+  Assembly/MPI.h
+  Assembly/Sequential.h
+  Variational/GridFunction.h
   )
 
 set(RodinPETSc_SRCS
-  Object.cpp
+  IO/GridFunctionPrinter.cpp
   Solver/KSP.cpp
   Solver/CG.cpp
+  Assembly/MPI.cpp
+  Assembly/OpenMP.cpp
+  Assembly/Sequential.cpp
   Math/LinearSystem.cpp
-  Math/Matrix.cpp
+  Variational/GridFunction.cpp
+  Variational/TrialFunction.cpp
   )
 
 add_library(RodinPETSc ${RodinPETSc_HEADERS} ${RodinPETSc_SRCS})
@@ -43,4 +48,9 @@ target_link_libraries(RodinPETSc
   Rodin::Assembly
   Rodin::FormLanguage
   PETSc::PETSc)
+
+if (RODIN_USE_OPENMP)
+  find_package(OpenMP REQUIRED)
+  target_link_libraries(RodinPETSc PUBLIC OpenMP::OpenMP_CXX)
+endif()
 

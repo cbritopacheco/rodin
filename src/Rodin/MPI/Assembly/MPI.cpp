@@ -1,8 +1,8 @@
 #include "MPI.h"
 
-namespace Rodin::Assembly::Internal
+namespace Rodin::Assembly
 {
-  MPIIteration::MPIIteration(const Geometry::Mesh<Context::MPI>& mesh, Variational::Integrator::Region region)
+  MPIIteration::MPIIteration(const Geometry::Mesh<Context::MPI>& mesh, Geometry::Region region)
     : m_mesh(mesh), m_region(region)
   {}
 
@@ -11,22 +11,22 @@ namespace Rodin::Assembly::Internal
     Geometry::PolytopeIterator it;
     switch (m_region)
     {
-      case Variational::Integrator::Region::Cells:
+      case Geometry::Region::Cells:
       {
         it = m_mesh.get().getShard().getCell();
         break;
       }
-      case Variational::Integrator::Region::Faces:
+      case Geometry::Region::Faces:
       {
         it = m_mesh.get().getShard().getFace();
         break;
       }
-      case Variational::Integrator::Region::Boundary:
+      case Geometry::Region::Boundary:
       {
         it = m_mesh.get().getShard().getBoundary();
         break;
       }
-      case Variational::Integrator::Region::Interface:
+      case Geometry::Region::Interface:
       {
         it = m_mesh.get().getShard().getInterface();
         break;

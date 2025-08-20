@@ -12,6 +12,7 @@
 #include "Rodin/Types.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/Traits.h"
 
 #include "ForwardDecls.h"
 
@@ -132,9 +133,7 @@ namespace Rodin::Variational
 
       Dot(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        assert(lhs.getRangeShape() == rhs.getRangeShape());
-      }
+      {}
 
       Dot(const Dot& other)
         : Parent(other),
@@ -146,11 +145,11 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
-      Dot& traceOf(Geometry::Attribute attrs)
+      template <class ... Args>
+      Dot& traceOf(const Args& ... args)
       {
-        m_lhs.traceOf(attrs);
-        m_rhs.traceOf(attrs);
+        m_lhs->traceOf(args...);
+        m_rhs->traceOf(args...);
         return *this;
       }
 
@@ -169,9 +168,8 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        assert(getLHS().getRangeShape() == getRHS().getRangeShape());
         return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getValue(p)));
       }
 
@@ -232,9 +230,7 @@ namespace Rodin::Variational
       Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        assert(lhs.getRangeShape() == rhs.getRangeShape());
-      }
+      {}
 
       constexpr
       Dot(const Dot& other)
@@ -268,12 +264,6 @@ namespace Rodin::Variational
         return getRHS().getLeaf();
       }
 
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { 1, 1 };
-      }
-
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
@@ -296,9 +286,8 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getBasis(size_t local) const
+      decltype(auto) getBasis(size_t local) const
       {
-        assert(m_lhs->getRangeShape() == m_rhs->getRangeShape());
         const auto& p = getRHS().getPoint();
         return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getBasis(local)));
       }
@@ -360,9 +349,7 @@ namespace Rodin::Variational
       Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        assert(lhs.getRangeShape() == rhs.getRangeShape());
-      }
+      {}
 
       constexpr
       Dot(const Dot& other)
@@ -396,12 +383,6 @@ namespace Rodin::Variational
         return getLHS().getLeaf();
       }
 
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { 1, 1 };
-      }
-
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
@@ -424,9 +405,8 @@ namespace Rodin::Variational
       }
 
       constexpr
-      ScalarType getBasis(size_t local) const
+      decltype(auto) getBasis(size_t local) const
       {
-        assert(m_lhs->getRangeShape() == m_rhs->getRangeShape());
         const auto& p = getLHS().getPoint();
         return Math::dot(this->object(getLHS().getBasis(local)), this->object(getRHS().getValue(p)));
       }
@@ -484,9 +464,7 @@ namespace Rodin::Variational
       constexpr
       Dot(const LHSType& lhs, const RHSType& rhs)
         : m_trial(lhs.copy()), m_test(rhs.copy())
-      {
-        assert(lhs.getRangeShape() == rhs.getRangeShape());
-      }
+      {}
 
       constexpr
       Dot(const Dot& other)
@@ -526,9 +504,10 @@ namespace Rodin::Variational
         return *this;
       }
 
-      ScalarType operator()(size_t tr, size_t te)
+      constexpr
+      decltype(auto) operator()(size_t tr, size_t te)
       {
-        return Math::dot(getLHS().getBasis(tr), getRHS().getBasis(te));
+        return Math::dot(this->object(getLHS().getBasis(tr)), this->object(getRHS().getBasis(te)));
       }
 
       Dot* copy() const noexcept final override
@@ -562,9 +541,7 @@ namespace Rodin::Variational
       constexpr
       Dot(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        assert(lhs.getRangeShape() == rhs.getRangeShape());
-      }
+      {}
 
       constexpr
       Dot(const Dot& other)

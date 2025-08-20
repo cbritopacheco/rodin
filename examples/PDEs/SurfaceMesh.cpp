@@ -1,4 +1,5 @@
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Variational.h>
 

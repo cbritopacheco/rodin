@@ -66,12 +66,6 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return getOperand().getRangeShape();
-      }
-
-      constexpr
       const OperandType& getOperand() const
       {
         assert(m_op);
@@ -79,17 +73,9 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return -this->object(getOperand().getValue(p));
-      }
-
-      template <class T>
-      constexpr
-      void getValue(T& res, const Geometry::Point& p) const
-      {
-        getOperand().getValue(res, p);
-        res *= -1;
       }
 
       constexpr
@@ -167,12 +153,6 @@ namespace Rodin::Variational
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return getOperand().getRangeShape();
       }
 
       constexpr
@@ -256,7 +236,7 @@ namespace Rodin::Variational
         return *m_op;
       }
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
         return getOperand().getRegion();
       }
@@ -372,7 +352,7 @@ namespace Rodin::Variational
         return *m_op;
       }
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
         return getOperand().getRegion();
       }

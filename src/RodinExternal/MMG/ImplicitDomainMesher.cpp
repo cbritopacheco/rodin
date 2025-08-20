@@ -1,4 +1,5 @@
 #include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Utility/Overloaded.h"
 
 #include "ImplicitDomainMesher.h"
 
@@ -329,6 +330,7 @@ namespace Rodin::External::MMG
     const size_t meshDim = mesh.getDimension();
     const auto& attributeIndex = mesh.getAttributeIndex();
     FlatSet<Geometry::Attribute> attrs;
+
     if (m_meshTheSurface)
     {
       for (auto it = attributeIndex.begin(meshDim - 1); it != attributeIndex.end(meshDim - 1); ++it)
@@ -372,7 +374,7 @@ namespace Rodin::External::MMG
     }
 
     // Delete zero ref
-    deleteBoundaryRef(mmgMesh, 0);
+    // deleteBoundaryRef(mmgMesh, 0);
 
     auto rodinMesh = meshToRodin(mmgMesh);
     destroySolution(sol);

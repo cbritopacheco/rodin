@@ -1,6 +1,8 @@
 #ifndef RODIN_UNSAFE_H
 #define RODIN_UNSAFE_H
 
+#include <atomic>
+
 #include "Rodin/Configure.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 

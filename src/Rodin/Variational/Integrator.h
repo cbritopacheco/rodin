@@ -7,12 +7,7 @@
 #ifndef RODIN_VARIATIONAL_INTEGRATOR_H
 #define RODIN_VARIATIONAL_INTEGRATOR_H
 
-#include <set>
-
-#include "Rodin/Geometry/ForwardDecls.h"
-
 #include "Rodin/FormLanguage/Base.h"
-
 
 namespace Rodin::Variational
 {
@@ -20,14 +15,6 @@ namespace Rodin::Variational
   {
     public:
       using Parent = FormLanguage::Base;
-
-      enum class Region
-      {
-        Cells,
-        Faces,
-        Boundary,
-        Interface
-      };
 
       enum class Type
       {

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 
 using namespace Rodin;
@@ -19,7 +20,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
 
     TrialFunction u(fes);
-    u.emplace();
 
     RealFunction c = 1;
 
@@ -40,7 +40,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
 
     TrialFunction u(fes);
-    u.emplace();
 
     RealFunction c = 1;
 
@@ -48,6 +47,6 @@ namespace Rodin::Tests::Unit
     dbc.on(attr);
     dbc.assemble();
 
-    EXPECT_EQ(dbc.getDOFs().size(), 256);
+    EXPECT_EQ(dbc.getDOFs().size(), 60);
   }
 }

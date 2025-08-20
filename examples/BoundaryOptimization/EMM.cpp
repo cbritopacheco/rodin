@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
@@ -45,8 +46,8 @@ static const Real alpha = 4;
 
 using RealFES = P1<Real>;
 using VectorFES = P1<Math::Vector<Real>>;
-using RealGridFunction = GridFunction<RealFES>;
-using VectorGridFunction = GridFunction<VectorFES>;
+using RealGridFunction = GridFunction<RealFES, Math::Vector<Real>>;
+using VectorGridFunction = GridFunction<VectorFES, Math::Vector<Real>>;
 using ShapeGradient = VectorGridFunction;
 
 int main(int, char**)
@@ -201,7 +202,6 @@ int main(int, char**)
     Alert::Info() << "Computing objective..." << Alert::Raise;
     GridFunction j(sfes);
     j = 0.5 * Pow(Frobenius(Grad(u.getSolution())), 2);
-    j.setWeights();
 
     const Real J = Integral(j).compute();
     const Real objective =
@@ -261,11 +261,9 @@ int main(int, char**)
       Alert::Info() << "Computing conormal..." << Alert::Raise;
       GridFunction conormalCathode(dvfes);
       conormalCathode = Grad(distCathode);
-      conormalCathode.stableNormalize();
 
       GridFunction conormalAnode(dvfes);
       conormalAnode = Grad(distAnode);
-      conormalAnode.stableNormalize();
 
       Alert::Info() << "Computing shape gradient..." << Alert::Raise;
       TrialFunction theta(dvfes);
@@ -319,7 +317,7 @@ int main(int, char**)
       try
       {
         GridFunction workaround(sfes);
-        workaround.projectOnBoundary(distAnode);
+        workaround.project(Region::Boundary, distAnode);
         mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                           .split(Anode, { Anode, Gamma })
                                           .split(Gamma, { Anode, Gamma })
@@ -348,7 +346,7 @@ int main(int, char**)
       try
       {
         GridFunction workaround(sfes);
-        workaround.projectOnBoundary(distCathode);
+        workaround.project(Region::Boundary, distCathode);
         mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                           .split(Cathode, { Cathode, Gamma })
                                           .split(Gamma, { Cathode, Gamma })

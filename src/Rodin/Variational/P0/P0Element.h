@@ -7,18 +7,9 @@
 #ifndef RODIN_VARIATIONAL_P0_P0ELEMENT_H
 #define RODIN_VARIATIONAL_P0_P0ELEMENT_H
 
-/**
- * @file
- * @brief Header contatining definitions for the class P0Element.
- */
-
-/**
- * @ingroup RodinDirectives
- * @brief Indicates the maximum vector dimension a P0Element
- */
-#define RODIN_P0_MAX_VECTOR_DIMENSION 16
-
 #include "Rodin/Types.h"
+
+#include "Rodin/Math/Traits.h"
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Connectivity.h"
@@ -38,6 +29,7 @@ namespace Rodin::FormLanguage
   template <class Range>
   struct Traits<Variational::P0Element<Range>>
   {
+    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
     using RangeType = Range;
   };
 }
@@ -53,20 +45,20 @@ namespace Rodin::Variational
   /**
    * @ingroup FiniteElements
    * @ingroup P0ElementSpecializations
-   * @brief Degree 0 scalar Lagrange element
-   * @see @m_defelement{Lagrange,https://defelement.com/elements/lagrange.html}
    */
-  template <>
-  class P0Element<Real> final : public FiniteElementBase<P0Element<Real>>
+  template <class Scalar>
+  class P0Element final : public FiniteElementBase<P0Element<Scalar>>
   {
     using G = Geometry::Polytope::Type;
 
     public:
       /// Parent class
-      using Parent = FiniteElementBase<P0Element<Real>>;
+      using Parent = FiniteElementBase<P0Element<Scalar>>;
+
+      using ScalarType = Scalar;
 
       /// Type of range
-      using RangeType = Real;
+      using RangeType = Scalar;
 
       /**
        * @brief Represents a linear form of a P0 scalar element.
@@ -75,11 +67,6 @@ namespace Rodin::Variational
       {
         public:
           constexpr
-          LinearForm()
-            : LinearForm(Geometry::Polytope::Type::Point)
-          {}
-
-          constexpr
           LinearForm(Geometry::Polytope::Type g)
             : m_g(g)
           {}
@@ -87,25 +74,15 @@ namespace Rodin::Variational
           constexpr
           LinearForm(const LinearForm&) = default;
 
-          constexpr
-          LinearForm(LinearForm&&) = default;
-
-          constexpr
-          LinearForm& operator=(const LinearForm&) = default;
-
-          constexpr
-          LinearForm& operator=(LinearForm&&) = default;
-
           template <class T>
-          inline
           constexpr
-          auto operator()(const T& v) const
+          ScalarType operator()(const T& v) const
           {
-            return v(s_nodes[m_g].col(0));
+            return v(s_nodes[m_g]);
           }
 
         private:
-          Geometry::Polytope::Type m_g;
+          const Geometry::Polytope::Type m_g;
       };
 
       /**
@@ -114,74 +91,43 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
-          using ReturnType = Real;
+          using ReturnType = Scalar;
+
+          template <size_t Order>
+          class DerivativeFunction
+          {
+            public:
+              constexpr
+              DerivativeFunction() = default;
+
+              constexpr
+              DerivativeFunction(const DerivativeFunction&) = default;
+
+              constexpr
+              ReturnType operator()(const Math::SpatialVector<Real>& r) const
+              {
+                return 0;
+              }
+          };
 
           constexpr
-          BasisFunction()
-          {}
-
-          constexpr
-          BasisFunction(Geometry::Polytope::Type)
-          {}
+          BasisFunction() = default;
 
           constexpr
           BasisFunction(const BasisFunction&) = default;
 
           constexpr
-          BasisFunction& operator=(const BasisFunction&) = default;
-
-          constexpr
-          BasisFunction& operator=(BasisFunction&&) = default;
-
-          inline
-          constexpr
-          Real operator()(const Math::SpatialVector<Real>& r) const
+          ReturnType operator()(const Math::SpatialVector<Real>& r) const
           {
             return 1;
           }
-      };
 
-      /**
-       * @brief Represents a gradient basis function of a P0 scalar element.
-       */
-      class GradientFunction
-      {
-        public:
+          template <size_t Order>
           constexpr
-          GradientFunction()
-            : GradientFunction(Geometry::Polytope::Type::Point)
-          {}
-
-          constexpr
-          GradientFunction(Geometry::Polytope::Type g)
-            : m_g(g)
-          {}
-
-          constexpr
-          GradientFunction(const GradientFunction&) = default;
-
-          constexpr
-          GradientFunction& operator=(const GradientFunction&) = default;
-
-          constexpr
-          GradientFunction& operator=(GradientFunction&&) = default;
-
-          inline
-          auto operator()(const Math::SpatialVector<Real>& r) const
+          DerivativeFunction<Order> getDerivative(size_t) const
           {
-            return Math::SpatialVector<Real>::Zero(Geometry::Polytope::getGeometryDimension(m_g));
+            return DerivativeFunction<Order>();
           }
-
-          inline
-          void operator()(Math::SpatialVector<Real>& out, const Math::SpatialVector<Real>& r) const
-          {
-            assert(static_cast<size_t>(r.size()) == Geometry::Polytope::getGeometryDimension(m_g));
-            out.resize(Geometry::Polytope::getGeometryDimension(m_g));
-            out.setZero();
-          }
-
-        private:
-          Geometry::Polytope::Type m_g;
       };
 
       constexpr
@@ -202,63 +148,34 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      constexpr
-      P0Element& operator=(const P0Element& other)
-      {
-        Parent::operator=(other);
-        return *this;
-      }
-
-      constexpr
-      P0Element& operator=(P0Element&& other)
-      {
-        Parent::operator=(std::move(other));
-        return *this;
-      }
-
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
        * @returns Number of degrees of freedom
        */
-      inline
       constexpr
       size_t getCount() const
       {
         return 1;
       }
 
-      inline
       constexpr
-      const Math::PointMatrix& getNodes() const
+      const Math::SpatialVector<Real>& getNode(size_t i) const
       {
-        return s_nodes[getGeometry()];
+        return s_nodes[this->getGeometry()][i];
       }
 
-      inline
       constexpr
-      const auto& getLinearForm(size_t i) const
+      LinearForm getLinearForm(size_t) const
       {
-        assert(i == 0);
-        return s_ls[getGeometry()];
+        return LinearForm(this->getGeometry());
       }
 
-      inline
       constexpr
-      const auto& getBasis(size_t i) const
+      BasisFunction getBasis(size_t) const
       {
-        assert(i == 0);
-        return s_basis[getGeometry()];
+        return BasisFunction();
       }
 
-      inline
-      constexpr
-      const auto& getGradient(size_t i) const
-      {
-        assert(i == 0);
-        return s_gradient[getGeometry()];
-      }
-
-      inline
       constexpr
       size_t getOrder() const
       {
@@ -266,11 +183,165 @@ namespace Rodin::Variational
       }
 
     private:
-      static const Geometry::GeometryIndexed<Math::PointMatrix> s_nodes;
-      static const Geometry::GeometryIndexed<LinearForm> s_ls;
-      static const Geometry::GeometryIndexed<BasisFunction> s_basis;
-      static const Geometry::GeometryIndexed<GradientFunction> s_gradient;
+      static const Geometry::GeometryIndexed<Math::SpatialVector<Real>> s_nodes;
+  };
+
+  /**
+   * @ingroup FiniteElements
+   * @ingroup P0ElementSpecializations
+   * @brief Degree 1 vector Lagrange element
+   */
+  template <class Scalar>
+  class P0Element<Math::Vector<Scalar>> final
+    : public FiniteElementBase<P0Element<Math::Vector<Scalar>>>
+  {
+    using G = Geometry::Polytope::Type;
+
+    public:
+      /// Parent class
+      using Parent = FiniteElementBase<P0Element>;
+
+      using ScalarType = Scalar;
+
+      /// Type of range
+      using RangeType = Math::Vector<Scalar>;
+
+      class LinearForm
+      {
+        public:
+          constexpr
+          LinearForm()
+            : m_local(0), m_g(Geometry::Polytope::Type::Point)
+          {}
+
+          constexpr
+          LinearForm(size_t local, Geometry::Polytope::Type g)
+            : m_local(local), m_g(g)
+          {}
+
+          constexpr
+          LinearForm(const LinearForm&) = default;
+
+          constexpr
+          LinearForm(LinearForm&&) = default;
+
+          template <class T>
+          constexpr
+          decltype(auto) operator()(const T& v) const
+          {
+            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
+            return v(P0Element<ScalarType>(m_g).getNode(m_local / vdim)).coeff(m_local % vdim);
+          }
+
+        private:
+          const size_t m_local;
+          const Geometry::Polytope::Type m_g;
+      };
+
+      class BasisFunction
+      {
+        public:
+          template <size_t Order>
+          class DerivativeFunction
+          {
+            public:
+              constexpr
+              DerivativeFunction() = default;
+
+              constexpr
+              DerivativeFunction(const DerivativeFunction&) = default;
+
+              constexpr
+              ScalarType operator()(const Math::SpatialVector<Real>& rc) const
+              {
+                return ScalarType(0);
+              }
+          };
+
+          constexpr
+          BasisFunction()
+            : m_local(0), m_g(Geometry::Polytope::Type::Point)
+          {}
+
+          constexpr
+          BasisFunction(size_t local, Geometry::Polytope::Type g)
+            : m_local(local), m_g(g)
+          {}
+
+          constexpr
+          BasisFunction(const BasisFunction&) = default;
+
+          constexpr
+          BasisFunction(BasisFunction&&) = default;
+
+          decltype(auto) operator()(const Math::SpatialVector<ScalarType>& r) const
+          {
+            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
+            return Math::Vector<ScalarType>::Zero(vdim);
+          }
+
+          template <size_t Order>
+          constexpr
+          DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
+          {
+            return DerivativeFunction<Order>(i, m_local, m_g);
+          }
+
+        private:
+          const size_t m_local;
+          const Geometry::Polytope::Type m_g;
+      };
+
+      P0Element() = default;
+
+      constexpr
+      P0Element(Geometry::Polytope::Type geometry)
+        : Parent(geometry)
+      {}
+
+      constexpr
+      P0Element(const P0Element& other)
+        : Parent(other)
+      {}
+
+      constexpr
+      P0Element(P0Element&& other)
+        : Parent(std::move(other))
+      {}
+
+      constexpr
+      size_t getCount() const
+      {
+        return Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+      }
+
+      constexpr
+      auto getLinearForm(size_t local) const
+      {
+        return LinearForm(local, this->getGeometry());
+      }
+
+      constexpr
+      BasisFunction getBasis(size_t local) const
+      {
+        return BasisFunction(local, this->getGeometry());
+      }
+
+      constexpr
+      const Math::SpatialVector<Real>& getNode(size_t local) const
+      {
+        const size_t vdim = Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        return P0Element<ScalarType>(this->getGeometry()).getNode(local / vdim);
+      }
+
+      constexpr
+      size_t getOrder() const
+      {
+        return 0;
+      }
   };
 }
+
+#include "P0Element.hpp"
 
 #endif

@@ -6,6 +6,7 @@
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Variational/LinearElasticity.h>
 #include <RodinExternal/MMG.h>
@@ -34,8 +35,8 @@ static constexpr Real ell  = 5.0;
 static constexpr Real alpha = 4 * hmax;
 
 
-// Compliance
-inline Real compliance(const GridFunction<FES>& w)
+template <class Data>
+Real compliance(const GridFunction<FES, Data>& w)
 {
   auto& vh = w.getFiniteElementSpace();
   TrialFunction u(vh);

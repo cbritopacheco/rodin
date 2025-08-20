@@ -67,7 +67,7 @@ namespace Rodin::Models::Distance
             {
               const Index global = fes.getGlobalIndex({ meshDim - 1, i }, local);
               labels[global] = Label::Accepted;
-              u.setValue(global, 0);
+              u[global] = 0;
             }
           }
         }

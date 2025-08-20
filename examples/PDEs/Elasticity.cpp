@@ -6,6 +6,7 @@
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Variational/LinearElasticity.h>
 
@@ -24,9 +25,6 @@ int main(int argc, char** argv)
   Mesh mesh;
   mesh.load(meshFile);
   mesh.getConnectivity().compute(1, 2);
-
-
-  // Load mesh
 
   // Functions
   size_t d = mesh.getSpaceDimension();

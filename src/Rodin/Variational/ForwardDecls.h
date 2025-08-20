@@ -10,16 +10,6 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Represents the shape (dimensions) of a function.
-   */
-  class RangeShape;
-
-  /**
-   * @brief Represents the possible types of ranges for a function.
-   */
-  enum class RangeType;
-
-  /**
    * @brief Enumeration class to indicate whether a derived instance of
    * ShapeFunctionBase belongs to either a trial or test space.
    */
@@ -32,12 +22,12 @@ namespace Rodin::Variational
   /**
    * @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
    */
-  static constexpr auto TrialSpace = ShapeFunctionSpaceType::Trial;
+  static constexpr const ShapeFunctionSpaceType TrialSpace = ShapeFunctionSpaceType::Trial;
 
   /**
    * @brief Shorthand variable for ShapeFunctionSpaceType::Test.
    */
-  static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
+  static constexpr const ShapeFunctionSpaceType TestSpace  = ShapeFunctionSpaceType::Test;
 
   /**
    * @brief Base class for shape function objects.
@@ -64,7 +54,7 @@ namespace Rodin::Variational
    * @brief Represents a function which belongs to a trial space
    * @tparam FES Type of finite element space
    */
-  template <class FES>
+  template <class Solution, class FES>
   class TrialFunction;
 
   /**
@@ -84,6 +74,7 @@ namespace Rodin::Variational
   template <class Derived>
   class FunctionBase;
 
+  template <class ... Values>
   class Function;
 
   /**
@@ -188,7 +179,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for grid function objects.
    */
-  template <class FES, class Derived>
+  template <class Derived, class FES, class Data>
   class GridFunctionBase;
 
   /**
@@ -217,7 +208,7 @@ namespace Rodin::Variational
    * @see GridFunctionBase
    * @see GridFunctionSpecializations
    */
-  template <class FES>
+  template <class FES, class Data>
   class GridFunction;
 
   /**
@@ -278,7 +269,7 @@ namespace Rodin::Variational
    *
    * @see BilinearFormSpecializations
    */
-  template <class TrialFES, class TestFES, class OperatorType>
+  template <class Solution, class TrialFES, class TestFES, class OperatorType>
   class BilinearForm;
 
   /**
@@ -320,14 +311,12 @@ namespace Rodin::Variational
   class L2;
 
   /**
-   * @brief Represents the lazy evaluation of a mesh function.
-   *
    * The main objective of this class is to wrap the reference of a data-full
    * object into a light object which permits evaluation. This way one is able
    * to call the `copy()` method without actually copying the underlying data.
    */
   template <class StrictType>
-  class LazyEvaluator;
+  class FunctionBaseCopy;
 
   template <class ... Args>
   class Zero;
@@ -1062,17 +1051,11 @@ namespace Rodin::Variational
   template <class Operand, class ... Parameters>
   class PeriodicBC;
 
-  template <class Scalar>
-  class ProblemBodyBase;
-
   template <class Operator, class Vector, class Scalar>
   class ProblemBody;
 
-  /**
-   * @brief Base class for variational problem objects.
-   */
-  template <class Operator, class Vector, class Scalar>
-  class ProblemBase;
+  template <class Scalar>
+  class ProblemBodyBase;
 
   /**
    * @brief Represents a variational problem.
@@ -1085,6 +1068,12 @@ namespace Rodin::Variational
    */
   template <class ... Parameters>
   class Problem;
+
+  /**
+   * @brief Base class for variational problem objects.
+   */
+  template <class LinearSystem>
+  class ProblemBase;
 }
 
 #endif

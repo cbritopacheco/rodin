@@ -9,6 +9,7 @@
 #include <boost/filesystem.hpp>
 
 #include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Configure.h>
 #include <Rodin/Variational.h>

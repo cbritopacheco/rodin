@@ -7,14 +7,10 @@
 #ifndef RODIN_VARIATIONAL_FINITEELEMENTSPACE_H
 #define RODIN_VARIATIONAL_FINITEELEMENTSPACE_H
 
-#include <variant>
-
 #include "Rodin/Types.h"
-#include "Rodin/Utility.h"
 #include "Rodin/Geometry/Mesh.h"
 
 #include "ForwardDecls.h"
-#include "FiniteElement.h"
 
 namespace Rodin::Variational
 {
@@ -24,13 +20,28 @@ namespace Rodin::Variational
   class FiniteElementSpaceBase
   {
     public:
+      struct LocalIndex
+      {
+        std::pair<size_t, Index> p;
+        Index local;
+      };
+
+      constexpr
       FiniteElementSpaceBase() = default;
 
+      constexpr
       FiniteElementSpaceBase(const FiniteElementSpaceBase&) = default;
 
+      constexpr
       FiniteElementSpaceBase(FiniteElementSpaceBase&&) = default;
 
+      constexpr
       FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
+
+      constexpr
+      FiniteElementSpaceBase& operator=(const FiniteElementSpaceBase&) = default;
+
+      virtual ~FiniteElementSpaceBase() = default;
 
       constexpr
       bool operator==(const FiniteElementSpaceBase& other) const
@@ -96,6 +107,23 @@ namespace Rodin::Variational
 
       using MeshType = Mesh;
 
+      constexpr
+      FiniteElementSpace() = default;
+
+      constexpr
+      FiniteElementSpace(const FiniteElementSpace&) = default;
+
+      constexpr
+      FiniteElementSpace(FiniteElementSpace&&) = default;
+
+      constexpr
+      FiniteElementSpace& operator=(FiniteElementSpace&&) = default;
+
+      constexpr
+      FiniteElementSpace& operator=(const FiniteElementSpace&) = default;
+
+      virtual ~FiniteElementSpace() = default;
+
       const Mesh& getMesh() const override
       {
         return static_cast<const Derived&>(*this).getMesh();
@@ -104,7 +132,7 @@ namespace Rodin::Variational
       /**
        * @note CRTP function to be overriden in Derived class.
        */
-      const auto& getFiniteElement(size_t d, Index i) const
+      decltype(auto) getFiniteElement(size_t d, Index i) const
       {
         return static_cast<const Derived&>(*this).getFiniteElement(d, i);
       }
@@ -134,8 +162,8 @@ namespace Rodin::Variational
        *
        * @note CRTP function to be overriden in Derived class.
        */
-      template <class T>
-      auto getMapping(const std::pair<size_t, Index>& p, const T& v) const
+      template <class Callable>
+      decltype(auto) getMapping(const std::pair<size_t, Index>& p, const Callable& v) const
       {
         return static_cast<const Derived&>(*this).getMapping(p, v);
       }
@@ -144,7 +172,7 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in Derived class.
        */
       template <class CallableType>
-      auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
+      decltype(auto) getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
         return static_cast<const Derived&>(*this).geInverseMapping(idx, v);
       }
@@ -170,6 +198,23 @@ namespace Rodin::Variational
   class FiniteElementSpaceMappingBase
   {
     public:
+      constexpr
+      FiniteElementSpaceMappingBase() = default;
+
+      constexpr
+      FiniteElementSpaceMappingBase(const FiniteElementSpaceMappingBase&) = default;
+
+      constexpr
+      FiniteElementSpaceMappingBase(FiniteElementSpaceMappingBase&&) = default;
+
+      constexpr
+      FiniteElementSpaceMappingBase& operator=(FiniteElementSpaceMappingBase&&) = default;
+
+      constexpr
+      FiniteElementSpaceMappingBase& operator=(const FiniteElementSpaceMappingBase&) = default;
+
+      virtual ~FiniteElementSpaceMappingBase() = default;
+
       /**
        * @brief Evaluates the mapped function on the reference coordinates.
        *
@@ -182,15 +227,9 @@ namespace Rodin::Variational
        *
        * @note CRTP function to be overriden in Derived class.
        */
-      auto operator()(const Math::SpatialVector<Real>& r) const
+      decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
       {
         return static_cast<const Derived&>(*this).operator()(r);
-      }
-
-      template <class T>
-      void operator()(T& res, const Math::SpatialVector<Real>& r) const
-      {
-        res = this->operator()(r);
       }
   };
 
@@ -214,6 +253,23 @@ namespace Rodin::Variational
   class FiniteElementSpaceInverseMappingBase
   {
     public:
+      constexpr
+      FiniteElementSpaceInverseMappingBase() = default;
+
+      constexpr
+      FiniteElementSpaceInverseMappingBase(const FiniteElementSpaceInverseMappingBase&) = default;
+
+      constexpr
+      FiniteElementSpaceInverseMappingBase(FiniteElementSpaceInverseMappingBase&&) = default;
+
+      constexpr
+      FiniteElementSpaceInverseMappingBase& operator=(FiniteElementSpaceInverseMappingBase&&) = default;
+
+      constexpr
+      FiniteElementSpaceInverseMappingBase& operator=(const FiniteElementSpaceInverseMappingBase&) = default;
+
+      virtual ~FiniteElementSpaceInverseMappingBase() = default;
+
       /**
        * @brief Evaluates the mapped function on the physical coordinates.
        *
@@ -226,15 +282,9 @@ namespace Rodin::Variational
        *
        * @note CRTP function to be overriden in Derived class.
        */
-      auto operator()(const Geometry::Point& pc) const
+      decltype(auto) operator()(const Geometry::Point& pc) const
       {
         return static_cast<const Derived&>(*this).operator()(pc);
-      }
-
-      template <class T>
-      void operator()(T& res, const Geometry::Point& r) const
-      {
-        res = this->operator()(r);
       }
   };
 }

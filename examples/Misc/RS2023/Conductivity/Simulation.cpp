@@ -6,6 +6,7 @@
  */
 #include <chrono>
 #include <fstream>
+#include <Rodin/Assembly.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -163,7 +164,6 @@ int main(int, char**)
 
       GridFunction diff(vh);
       diff = Pow(u0 - u_e, 2);// - Pow(Frobenius(g0 - g_e), 2);
-      diff.setWeights();
       const Real err = sqrt(Integral(diff).compute());
 
       Alert::Info() << "Error: " << err << Alert::Raise;

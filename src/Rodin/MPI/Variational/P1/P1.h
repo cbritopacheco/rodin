@@ -1,21 +1,31 @@
 #ifndef RODIN_MPI_VARIATIONAL_P1_P1_H
 #define RODIN_MPI_VARIATIONAL_P1_P1_H
 
+#include <mpi.h>
 #include <boost/serialization/optional.hpp>
+#include <sys/mman.h>
+
+#include "Rodin/MPI/Geometry/Mesh.h"
+#include "Rodin/MPI/Variational/FiniteElementSpace.h"
 
 #include "Rodin/Variational/P1/P1.h"
 
-#include "Rodin/MPI/Variational/FiniteElementSpace.h"
-#include "Rodin/MPI/Geometry/Mesh.h"
+#include "Rodin/Array.h"
 
 namespace Rodin::Variational
 {
   template <class Range>
-  class P1<Range, Geometry::Mesh<Context::MPI>> final
+  class P1<Range, Geometry::Mesh<Context::MPI>>
     : public FiniteElementSpace<
-        Geometry::Mesh<Context::MPI>, P1<Real, Geometry::Mesh<Context::MPI>>>
+        Geometry::Mesh<Context::MPI>, P1<Range, Geometry::Mesh<Context::MPI>>>
   {
     public:
+      struct IndexBimap
+      {
+        std::vector<Index> left;
+        FlatMap<Index, Index> right;
+      };
+
       /// Represents the Context of the P1 space
       using ContextType = Context::MPI;
 
@@ -36,28 +46,244 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpace<MeshType, P1<RangeType, MeshType>>;
 
+      using Parent::getGlobalIndex;
+
+      /**
+       * @brief Mapping for the scalar/complex P1 space.
+       */
+      template <class FunctionDerived>
+      class Mapping : public FiniteElementSpaceMappingBase<Mapping<FunctionDerived>>
+      {
+        public:
+          using FunctionType = FunctionBase<FunctionDerived>;
+
+          Mapping(const Geometry::Polytope& polytope, const FunctionType& v)
+            : m_polytope(polytope), m_v(v.copy())
+          {}
+
+          Mapping(const Mapping&) = default;
+
+          auto operator()(const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, r);
+            return getFunction()(p);
+          }
+
+          template <class T>
+          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, r);
+            return getFunction()(res, p);
+          }
+
+          constexpr
+          const FunctionType& getFunction() const
+          {
+            assert(m_v);
+            return *m_v;
+          }
+
+        private:
+          Geometry::Polytope m_polytope;
+          std::unique_ptr<FunctionType> m_v;
+      };
+
+      /**
+       * @brief Inverse mapping for the scalar/complex P1 space.
+       */
+      template <class CallableType>
+      class InverseMapping : public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
+      {
+        public:
+          using FunctionType = CallableType;
+
+          /**
+           * @param[in] polytope Reference to polytope on the mesh.
+           * @param[in] v Reference to the function defined on the reference
+           * space.
+           */
+          InverseMapping(const FunctionType& v)
+            : m_v(v)
+          {}
+
+          InverseMapping(const InverseMapping&) = default;
+
+          constexpr
+          auto operator()(const Geometry::Point& p) const
+          {
+            return getFunction()(p.getReferenceCoordinates());
+          }
+
+          template <class T>
+          auto operator()(T& res, const Geometry::Point& p) const
+          {
+            return getFunction()(res, p.getReferenceCoordinates());
+          }
+
+          constexpr
+          const FunctionType& getFunction() const
+          {
+            return m_v;
+          }
+
+        private:
+          const FunctionType m_v;
+      };
+
       P1(const MeshType& mesh)
         : m_mesh(mesh),
           m_fes(mesh.getShard())
       {
         const auto& ctx = mesh.getContext();
-        const auto& comm = ctx.getCommunicator();
-        size_t local = m_fes.getSize();
-        Index inclusiveSum = 0;
-        boost::mpi::scan(comm, local, inclusiveSum, std::plus<Index>());
-        m_offset = inclusiveSum - local;
+        const auto& comm  = ctx.getCommunicator();
+        const auto& shard = mesh.getShard();
+        const auto& halo = shard.getHalo(0);
+        const auto& owner = shard.getOwner(0);
+
+        m_owned = halo.size();
+        const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
+        m_offset = inclusive - m_owned;
+
+        FlatMap<Index, std::vector<std::pair<Index, Index>>> push, pull;
+        Index dofIdx = 0;
+        for (size_t i = 0; i < shard.getVertexCount(); ++i)
+        {
+          if (shard.isOwned(0, i))
+          {
+            const Index id = mesh.getGlobalIndex(0, i);
+            const auto& dofs = m_fes.getDOFs(0, i);
+            assert(dofs.size() == 1);
+            const Index local = dofs[0];
+            const Index global = dofIdx + m_offset;
+            const auto [it, inserted] = m_local_to_global.right.insert({ global, local });
+            assert(inserted);
+            dofIdx++;
+
+            for (const Index& peer : halo.at(i))
+            {
+              assert(comm.rank() >= 0);
+              assert(peer != static_cast<Index>(comm.rank()));
+              push[peer].push_back({ id, global });
+            }
+          }
+          else
+          {
+            pull.try_emplace(owner.at(i));
+          }
+        }
+
+        assert(m_owned == dofIdx);
+
+        std::vector<boost::mpi::request> irecv;
+        for (auto& [owner, requested] : pull)
+          irecv.push_back(comm.irecv(owner, 0, pull[owner]));
+
+        std::vector<boost::mpi::request> isend;
+        for (const auto& [peer, requested] : push)
+          isend.push_back(comm.isend(peer, 0, push[peer]));
+
+        boost::mpi::wait_all(isend.begin(), isend.end());
+
+        boost::mpi::wait_all(irecv.begin(), irecv.end());
+
+        for (const auto& [owner, requested] : pull)
+        {
+          for (const auto& [id, global] : requested)
+          {
+            const auto i = mesh.getLocalIndex(0, id);
+            assert(i);
+            const auto& dofs = m_fes.getDOFs(0, *i);
+            assert(dofs.size() == 1);
+            const auto [it, inserted] = m_local_to_global.right.insert({ global, dofs[0] });
+            assert(inserted);
+          }
+        }
+
+        m_local_to_global.left.resize(m_local_to_global.right.size());
+        for (const auto& [global, local] : m_local_to_global.right)
+          m_local_to_global.left[local] = global;
       }
 
       P1(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
           m_fes(mesh.getShard(), vdim)
       {
+        static thread_local std::vector<Index> s_send;
+
         const auto& ctx = mesh.getContext();
-        const auto& comm = ctx.getCommunicator();
-        size_t local = m_fes.getSize();
-        Index inclusiveSum = 0;
-        boost::mpi::scan(comm, local, inclusiveSum, std::plus<Index>());
-        m_offset = inclusiveSum - local;
+        const auto& comm  = ctx.getCommunicator();
+        const auto& shard = mesh.getShard();
+        const auto& halo = shard.getHalo(0);
+        const auto& owner = shard.getOwner(0);
+
+        m_owned = halo.size();
+        const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
+        m_offset = inclusive - m_owned;
+
+        FlatMap<Index, std::vector<std::pair<Index, std::vector<Index>>>> push, pull;
+        Index dofIdx = 0;
+        for (size_t i = 0; i < shard.getVertexCount(); ++i)
+        {
+          if (shard.isOwned(0, i))
+          {
+            const Index id = mesh.getGlobalIndex(0, i);
+            const auto& dofs = m_fes.getDOFs(0, i);
+
+            s_send.clear();
+            for (const Index& local : dofs)
+            {
+              const Index global = dofIdx + m_offset;
+              s_send.push_back(global);
+
+              const auto [it, inserted] = m_local_to_global.right.insert({ global, local });
+              assert(inserted);
+
+              dofIdx++;
+            }
+
+            for (const Index& peer : halo.at(i))
+            {
+              assert(comm.rank() >= 0);
+              assert(peer != static_cast<Index>(comm.rank()));
+              push[peer].push_back({ id, s_send });
+            }
+          }
+          else
+          {
+            pull.try_emplace(owner.at(i));
+          }
+        }
+
+        assert(m_owned == dofIdx);
+
+        std::vector<boost::mpi::request> irecv;
+        for (auto& [owner, requested] : pull)
+          irecv.push_back(comm.irecv(owner, 0, pull[owner]));
+
+        std::vector<boost::mpi::request> isend;
+        for (const auto& [peer, requested] : push)
+          isend.push_back(comm.isend(peer, 0, push[peer]));
+
+        boost::mpi::wait_all(isend.begin(), isend.end());
+
+        boost::mpi::wait_all(irecv.begin(), irecv.end());
+
+        for (const auto& [owner, requested] : pull)
+        {
+          for (const auto& [id, global] : requested)
+          {
+            const auto i = mesh.getLocalIndex(0, id);
+            assert(i);
+            const auto& dofs = m_fes.getDOFs(0, *i);
+            assert(dofs.size() >= 0);
+            assert(dofs.size() == global.size());
+            for (size_t k = 0; k < global.size(); k++)
+            {
+              const auto [it, inserted] = m_local_to_global.right.insert({ global[k], dofs[k] });
+              assert(inserted);
+            }
+          }
+        }
       }
 
       P1(const P1& other) = default;
@@ -66,9 +292,15 @@ namespace Rodin::Variational
 
       P1& operator=(P1&& other) = default;
 
-      const FESType& getLocal() const
+      const FESType& getShard() const
       {
         return m_fes;
+      }
+
+      void getOwnershipRange(Index& begin, Index& end) const
+      {
+        begin = m_offset;
+        end = m_offset + m_owned;
       }
 
       /**
@@ -77,20 +309,20 @@ namespace Rodin::Variational
        */
       Index getGlobalIndex(Index localIdx) const
       {
-        return m_offset + localIdx;
+        return m_local_to_global.left.at(localIdx);
       }
 
       /**
        * @brief Returns the local distributed index of the given global
        * distributed index.
        */
-      std::optional<Index> getLocalIndex(Index globalIdx) const
+      Optional<Index> getLocalIndex(Index globalIdx) const
       {
-        const size_t sz = m_fes.getSize();
-        if (globalIdx >= m_offset && globalIdx <  m_offset + sz)
-          return globalIdx - m_offset;
-        else
+        auto find = m_local_to_global.right.find(globalIdx);
+        if (find == m_local_to_global.right.end())
           return std::nullopt;
+        else
+          return *find;
       }
 
       /**
@@ -101,21 +333,25 @@ namespace Rodin::Variational
        */
       const auto& getFiniteElement(size_t d, Index globalIdx) const
       {
+        static thread_local ElementType s_element;
         const auto& mesh = getMesh();
+        const auto& ctx = mesh.getContext();
+        const auto& comm = ctx.getCommunicator();
         const auto& shard = mesh.getShard();
-        const auto idx = mesh.getGlobalIndex(d, globalIdx);
-        boost::optional<Geometry::Polytope::Type> local;
-        if (local)
+        const auto localIdx = mesh.getLocalIndex(d, globalIdx);
+        boost::optional<ElementType> send;
+        if (localIdx)
         {
-          if (!shard.isGhost(d, *idx))
-            local = shard.getGeometry(d, *local);
+          const Index owner = shard.getOwner(d).at(*localIdx);
+          if (owner == comm.rank())
+            send = m_fes.getFiniteElement(*localIdx, globalIdx);
         }
-        auto res = boost::mpi::all_reduce(
-            mesh.getContext().getCommunicator(), local,
-            [](auto const& a, auto const& b) { return a ? a : b; });
-        assert(res);
-        const auto& index = m_fes.getElementIndex();
-        return index[*res];
+        auto recv =
+          boost::mpi::all_reduce(
+              comm, send, [](const auto& a, const auto& b) { return a ? a : b; });
+        assert(recv);
+        s_element = *recv;
+        return s_element;
       }
 
       size_t getSize() const override
@@ -126,7 +362,7 @@ namespace Rodin::Variational
 
       size_t getVectorDimension() const override
       {
-        const auto& fes = getLocal();
+        const auto& fes = this->getShard();
         return fes.getVectorDimension();
       }
 
@@ -137,44 +373,52 @@ namespace Rodin::Variational
 
       const IndexArray& getDOFs(size_t d, Index globalIdx) const override
       {
+        static thread_local IndexArray s_dofs;
         const auto& mesh = getMesh();
+        const auto& ctx = mesh.getContext();
+        const auto& comm = ctx.getCommunicator();
         const auto& shard = mesh.getShard();
-        const auto& fes = getLocal();
-        const auto idx = mesh.getLocalIndex(d, globalIdx);
-        IndexArray local;
-        if (idx)
+        const auto localIdx = mesh.getLocalIndex(d, globalIdx);
+        boost::optional<IndexArray> send;
+        if (localIdx)
         {
-          if (!shard.isGhost(d, *idx))
-            local = fes.getDOFs(d, *idx);
+          const Index& owner = shard.getOwner(d).at(*localIdx);
+          assert(comm.rank() >= 0);
+          if (owner == static_cast<Index>(comm.rank()))
+            send = m_fes.getDOFs(*localIdx, globalIdx);
         }
-        auto res = boost::mpi::all_reduce(
-            mesh.getContext().getCommunicator(), local,
-            [](auto const& a, auto const& b) { return a.size() > 0 ? a : b; });
-        assert(res.size() > 0);
-        auto& dofs = (m_dofs[d][globalIdx] = std::move(res));
-        for (auto& dof : dofs)
+        auto recv =
+          boost::mpi::all_reduce(
+              comm, send, [](const auto& a, const auto& b) { return a ? a : b; });
+        assert(recv);
+        s_dofs = *recv;
+        for (auto& dof : s_dofs)
           dof = getGlobalIndex(dof);
-        return dofs;
+        return s_dofs;
       }
 
       Index getGlobalIndex(const std::pair<size_t, Index>& p, Index localDof) const override
       {
         const auto& [d, globalIdx] = p;
         const auto& mesh = getMesh();
+        const auto& ctx = mesh.getContext();
+        const auto& comm = ctx.getCommunicator();
         const auto& shard = mesh.getShard();
-        const auto& fes = getLocal();
-        const auto idx = mesh.getLocalIndex(d, globalIdx);
-        boost::optional<Index> local;
-        if (idx)
+        const auto& fes = getShard();
+        const auto localIdx = mesh.getLocalIndex(d, globalIdx);
+        boost::optional<Index> send;
+        if (localIdx)
         {
-          if (!shard.isGhost(d, *idx))
-            local = fes.getGlobalIndex({ d, *idx }, localDof);
+          const Index& owner = shard.getOwner(d).at(*localIdx);
+          assert(comm.rank() >= 0);
+          if (owner == static_cast<Index>(comm.rank()))
+            send = fes.getGlobalIndex({ d, *localIdx }, localDof);
         }
-        auto res = boost::mpi::all_reduce(
-            mesh.getContext().getCommunicator(), local,
-            [](auto const& a, auto const& b) { return a ? a : b; });
-        assert(res);
-        return *res;
+        auto recv =
+          boost::mpi::all_reduce(
+              comm, send, [](const auto& a, const auto& b) { return a ? a : b; });
+        assert(recv);
+        return *recv;
       }
 
       template <class FunctionDerived>
@@ -185,16 +429,10 @@ namespace Rodin::Variational
         return Mapping<FunctionDerived>(*mesh.getPolytope(d, globalIdx), v);
       }
 
-      template <class FunctionDerived>
-      auto getMapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v) const
-      {
-        return Mapping<FunctionDerived>(polytope, v);
-      }
-
       template <class CallableType>
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
-        return typename FESType::InverseMapping(v);
+        return typename FESType::template InverseMapping<CallableType>(v);
       }
 
       template <class CallableType>
@@ -206,10 +444,16 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const MeshType> m_mesh;
       FESType m_fes;
-      size_t m_offset;
 
-      mutable std::vector<FlatMap<Index, IndexArray>> m_dofs;
+      size_t m_offset;
+      size_t m_owned;
+      IndexBimap m_local_to_global;
   };
+}
+
+namespace Rodin::MPI
+{
+  using P1 = Variational::P1<Real, Geometry::Mesh<Context::MPI>>;
 }
 
 #endif

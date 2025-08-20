@@ -15,15 +15,5 @@
 
 #include "ForwardDecls.h"
 
-namespace Rodin::Solver
-{
-  template <>
-  class AppleAccelerateLDLT<Math::SparseMatrix<Real>, Math::Vector<Real>> final
-    : public SolverBase<Math::SparseMatrix<Real>, Math::Vector<Real>>
-  {
-
-  };
-}
-
 #endif
 #endif

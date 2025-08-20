@@ -7,13 +7,10 @@
 #ifndef RODIN_VARIATIONAL_POW_H
 #define RODIN_VARIATIONAL_POW_H
 
-#include <cmath>
-
 #include <Rodin/Math/Common.h>
 
 #include "ForwardDecls.h"
 
-#include "RangeShape.h"
 #include "Function.h"
 #include "RealFunction.h"
 
@@ -74,29 +71,18 @@ namespace Rodin::Variational
           m_p(std::move(other.m_p))
       {}
 
-      inline
+      template <class ... Args>
       constexpr
-      Pow& traceOf(Geometry::Attribute attr)
+      Pow& traceOf(const Args& ... args)
       {
-        assert(m_s);
-        m_s->traceOf(attr);
+        m_s->traceOf(args...);
         return *this;
       }
 
-      inline
       constexpr
-      Pow& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        assert(m_s);
-        m_s->traceOf(attrs);
-        return *this;
-      }
-
-      inline
-      constexpr
-      auto getValue(const Geometry::Point& p) const
-      {
-        return Math::pow(getBase().getValue(p), getExponent());
+        return Math::pow(this->getBase().getValue(p), getExponent());
       }
 
       const BaseType& getBase() const
@@ -109,7 +95,7 @@ namespace Rodin::Variational
         return m_p;
       }
 
-      inline Pow* copy() const noexcept override
+      Pow* copy() const noexcept override
       {
         return new Pow(*this);
       }

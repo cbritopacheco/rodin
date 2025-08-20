@@ -27,16 +27,16 @@ namespace Rodin::Variational
    * @ingroup DivSpecializations
    * @brief Divergence of a P1 GridFunction
    */
-  template <class FES, class Derived>
-  class DivBase<GridFunction<FES>, Derived>
-    : public ScalarFunctionBase<typename FormLanguage::Traits<FES>::ScalarType, DivBase<GridFunction<FES>, Derived>>
+  template <class FES, class Data, class Derived>
+  class DivBase<GridFunction<FES, Data>, Derived>
+    : public ScalarFunctionBase<typename FormLanguage::Traits<FES>::ScalarType, DivBase<GridFunction<FES, Data>, Derived>>
   {
     public:
       using FESType = FES;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using OperandType = GridFunction<FES>;
+      using OperandType = GridFunction<FES, Data>;
 
       /// Parent class
       using Parent = ScalarFunctionBase<ScalarType, DivBase<OperandType, Derived>>;
@@ -68,7 +68,7 @@ namespace Rodin::Variational
 
       ScalarType getValue(const Geometry::Point& p) const
       {
-        ScalarType out;
+        static thread_local ScalarType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -76,23 +76,23 @@ namespace Rodin::Variational
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          interpolate(out, p);
+          this->interpolate(s_out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          interpolate(out, *inclusion);
+          this->interpolate(s_out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          interpolate(out, *restriction);
+          this->interpolate(s_out, *restriction);
         }
         else
         {
           assert(false);
         }
-        return out;
+        return s_out;
       }
 
       constexpr

@@ -9,6 +9,7 @@
 
 #include <Eigen/SparseCholesky>
 
+#include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
@@ -24,13 +25,20 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for SimplicialLLT
+   */
+  template <class LinearSystem>
+  SimplicialLLT(Variational::ProblemBase<LinearSystem>&) -> SimplicialLLT<LinearSystem>;
+
+  /**
    * @ingroup SimplicialLLTSpecializations
    * @brief A direct sparse LLT Cholesky factorizations for use with
    * Math::SparseMatrix<Real> and Math::Vector<Real>.
    */
   template <class Scalar>
-  class SimplicialLLT<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class SimplicialLLT<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -39,13 +47,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      SimplicialLLT(ProblemType& pb)
+      SimplicialLLT(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -57,12 +67,11 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        x = m_solver.compute(A).solve(b);
+        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
-      inline
       SimplicialLLT* copy() const noexcept override
       {
         return new SimplicialLLT(*this);
@@ -71,14 +80,6 @@ namespace Rodin::Solver
     private:
       Eigen::SimplicialLLT<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for SimplicialLLT
-   */
-  template <class Scalar>
-  SimplicialLLT(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> SimplicialLLT<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

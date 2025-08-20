@@ -110,8 +110,7 @@ namespace Rodin::Geometry
   }
 
   void Mesh<Context::Local>::save(
-      const boost::filesystem::path& filename,
-      IO::FileFormat fmt, size_t precision) const
+      const boost::filesystem::path& filename, IO::FileFormat fmt) const
   {
     std::ofstream ofs(filename.c_str());
     if (!ofs)
@@ -120,7 +119,6 @@ namespace Rodin::Geometry
         << "Failed to open " << filename << " for writing."
         << Alert::Raise;
     }
-    ofs.precision(precision);
     switch (fmt)
     {
       case IO::FileFormat::MFEM:
@@ -345,7 +343,7 @@ namespace Rodin::Geometry
     {
       auto g = getGeometry(dimension, idx);
       const size_t sdim = getSpaceDimension();
-      const size_t n = Polytope::getVertexCount(g);
+      const size_t n = Polytope::Traits(g).getVertexCount();
       Math::PointMatrix pm(sdim, n);
       const auto& polytope = getConnectivity().getPolytope(dimension, idx);
       assert(n == static_cast<size_t>(polytope.size()));
@@ -504,52 +502,6 @@ namespace Rodin::Geometry
     return totalMeasure;
   }
 
-  CCL Mesh<Context::Local>::ccl(
-      std::function<bool(const Polytope&, const Polytope&)> p,
-      size_t d,
-      const FlatSet<Attribute>& attrs) const
-  {
-    FlatSet<Index> visited;
-    visited.reserve(getPolytopeCount(d));
-    std::deque<Index> searchQueue;
-    std::deque<FlatSet<Index>> res;
-
-    // Perform the labelling
-    for (auto it = getPolytope(d); it; ++it)
-    {
-      const Index i = it->getIndex();
-      if (!visited.count(i))
-      {
-        if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-        {
-          res.push_back({});
-          searchQueue.push_back(i);
-        }
-        while (searchQueue.size() > 0)
-        {
-          const Index idx = searchQueue.back();
-          auto el = getPolytope(d, idx);
-          searchQueue.pop_back();
-          auto result = visited.insert(idx);
-          const Boolean inserted = result.second;
-          if (inserted)
-          {
-            res.back().insert(idx);
-            for (auto adj = el->getAdjacent(); adj; ++adj)
-            {
-              if (p(*el, *adj))
-              {
-                if (attrs.size() == 0 || attrs.count(adj->getAttribute()))
-                  searchQueue.push_back(adj->getIndex());
-              }
-            }
-          }
-        }
-      }
-    }
-    return res;
-  }
-
   size_t Mesh<Context::Local>::getPolytopeCount(size_t dimension) const
   {
     return m_connectivity.getCount(dimension);
@@ -696,7 +648,7 @@ namespace Rodin::Geometry
   Mesh<Context::Local> Mesh<Context::Local>::UniformGrid(Polytope::Type g, const Array<size_t>& dimensions)
   {
     Builder build;
-    const size_t dim = Polytope::getGeometryDimension(g);
+    const size_t dim = Polytope::Traits(g).getDimension();
     switch (g)
     {
       case Polytope::Type::Point:
@@ -907,7 +859,7 @@ namespace Rodin::Geometry
     };
   }
 
-  std::optional<Point> MeshBase::inclusion(const Point& p) const
+  Optional<Point> MeshBase::inclusion(const Point& p) const
   {
     const auto& polytope = p.getPolytope();
     if (!polytope.getMesh().isSubMesh())
@@ -918,24 +870,18 @@ namespace Rodin::Geometry
     const auto& ancestors = submesh.getAncestors();
     const size_t d = polytope.getDimension();
     Index i = polytope.getIndex();
-    i = submesh.getPolytopeMap(d).left.at(i).get_right();
+    i = submesh.getPolytopeMap(d).left.at(i);
     auto it = ancestors.begin();
     while (it != ancestors.end())
     {
       if (it->get() == *this)
       {
-        auto pit = this->getPolytope(d, i);
-        std::unique_ptr<Polytope> parentPolytope(pit.release());
-        return Point(
-            std::move(*parentPolytope),
-            this->getPolytopeTransformation(d, i),
-            std::cref(p.getReferenceCoordinates()),
-            p.getPhysicalCoordinates());
+        return Point(*this->getPolytope(d, i), p.getReferenceCoordinates(), p.getPhysicalCoordinates());
       }
       else if (it->get().isSubMesh())
       {
         const auto& parentMesh = it->get().asSubMesh();
-        i = parentMesh.getPolytopeMap(d).left.at(i).get_right();
+        i = parentMesh.getPolytopeMap(d).left.at(i);
       }
       else
       {

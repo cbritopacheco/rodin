@@ -12,7 +12,7 @@
 
 #include "Rodin/Alert.h"
 #include "Rodin/FormLanguage/Base.h"
-
+#include "Rodin/Math/Traits.h"
 
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -163,40 +163,6 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, Boolean>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Integer>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Real>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Complex>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Vector>::Value)
-        {
-          return getLHS().getRangeShape().product(getRHS().getRangeShape());
-        }
-        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Matrix>::Value)
-        {
-          return getLHS().getRangeShape().product(getRHS().getRangeShape());
-        }
-        else
-        {
-          assert(false);
-          return { 0, 0 };
-        }
-      }
-
-      constexpr
       Mult& traceOf(Geometry::Attribute attr)
       {
         m_lhs->traceOf(attr);
@@ -219,47 +185,9 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        return this->object(getLHS().getValue(p)) * this->object(getRHS().getValue(p));
-      }
-
-      constexpr
-      void getValue(Math::Vector<Real>& out, const Geometry::Point& p) const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, Real> && std::is_same_v<RHSRangeType, Math::Vector<Real>>)
-        {
-          getRHS().getDerived().getValue(out, p);
-          out *= getLHS().getValue(p);
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<Real>> && std::is_same_v<RHSRangeType, Real>)
-        {
-          getLHS().getDerived().getValue(out, p);
-          out *= getRHS().getValue(p);
-        }
-        else
-        {
-          out = getValue(p);
-        }
-      }
-
-      constexpr
-      void getValue(Math::Matrix<Real>& out, const Geometry::Point& p) const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, Real> && std::is_same_v<RHSRangeType, Math::Matrix<Real>>)
-        {
-          getRHS().getValue(out, p);
-          out *= getLHS().getValue(p);
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<Real>> && std::is_same_v<RHSRangeType, Real>)
-        {
-          getLHS().getValue(out, p);
-          out *= getRHS().getValue(p);
-        }
-        else
-        {
-          out = getValue(p);
-        }
+        return this->object(this->getLHS().getValue(p)) * this->object(this->getRHS().getValue(p));
       }
 
       Mult* copy() const noexcept override
@@ -318,14 +246,14 @@ namespace Rodin::Variational
 
   template <class LHSDerived>
   auto
-  operator*(const FunctionBase<LHSDerived>& lhs, std::reference_wrapper<const Math::Matrix<Real>> rhs)
+  operator*(const FunctionBase<LHSDerived>& lhs, const Math::Matrix<Real>& rhs)
   {
     return Mult(lhs, MatrixFunction(rhs));
   }
 
   template <class LHSDerived>
   auto
-  operator*(std::reference_wrapper<const Math::Matrix<Real>> lhs, const FunctionBase<LHSDerived>& rhs)
+  operator*(const Math::Matrix<Real>& lhs, const FunctionBase<LHSDerived>& rhs)
   {
     return Mult(MatrixFunction(lhs), rhs);
   }
@@ -384,40 +312,6 @@ namespace Rodin::Variational
       }
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, Boolean>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Integer>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Real>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Complex>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Vector>::Value)
-        {
-          return getLHS().getRangeShape().product(getRHS().getRangeShape());
-        }
-        else if constexpr (Utility::IsSpecialization<LHSRangeType, Math::Matrix>::Value)
-        {
-          return getLHS().getRangeShape().product(getRHS().getRangeShape());
-        }
-        else
-        {
-          assert(false);
-          return { 0, 0 };
-        }
-      }
-
-      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
@@ -454,7 +348,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getBasis(size_t local) const
+      decltype(auto) getBasis(size_t local) const
       {
         const auto& p = getPoint();
         return this->object(getLHS().getValue(p)) * this->object(getRHS().getBasis(local));
@@ -485,12 +379,17 @@ namespace Rodin::Variational
   template <class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   constexpr
   auto
-  operator*(
-      const typename FormLanguage::Traits<FES>::ScalarType& lhs,
-      const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  operator*(const Real& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
-    using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
-    return Mult(ScalarFunction<ScalarType>(lhs), rhs);
+    return Mult(RealFunction(lhs), rhs);
+  }
+
+  template <class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  constexpr
+  auto
+  operator*(const Complex& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  {
+    return Mult(ComplexFunction(lhs), rhs);
   }
 
   /**
@@ -553,30 +452,6 @@ namespace Rodin::Variational
       }
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
-        {
-          return getRHS().getRangeShape();
-        }
-        else if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
-        {
-          return getLHS().getRangeShape();
-        }
-        else if constexpr (
-            std::is_same_v<LHSRangeType, Math::Vector<ScalarType>> ||
-            std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
-        {
-          return getLHS().getRangeShape().product(getRHS().getRangeShape());
-        }
-        else
-        {
-          assert(false);
-          return { 0, 0 };
-        }
-      }
-
-      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
@@ -614,10 +489,10 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getBasis(size_t local) const
+      decltype(auto) getBasis(size_t local) const
       {
         const auto& p = getPoint();
-        return this->object(getLHS().getBasis(local)) * this->object(getRHS().getValue(p));
+        return this->object(this->getLHS().getBasis(local)) * this->object(this->getRHS().getValue(p));
       }
 
       Mult* copy() const noexcept override
@@ -645,12 +520,17 @@ namespace Rodin::Variational
   template <class LHSDerived, class FES, ShapeFunctionSpaceType Space>
   constexpr
   auto
-  operator*(
-      const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
-      const typename FormLanguage::Traits<FES>::ScalarType& rhs)
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const Real& rhs)
   {
-    using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
-    return Mult(lhs, ScalarFunction<ScalarType>(rhs));
+    return Mult(lhs, RealFunction(rhs));
+  }
+
+  template <class LHSDerived, class FES, ShapeFunctionSpaceType Space>
+  constexpr
+  auto
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const Complex& rhs)
+  {
+    return Mult(lhs, ComplexFunction(rhs));
   }
 
   template <class LHS, class RHSNumber>
@@ -681,7 +561,7 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
         return getRHS().getRegion();
       }
@@ -762,7 +642,7 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
         return m_rhs->getRegion();
       }

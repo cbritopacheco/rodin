@@ -7,54 +7,44 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
-#ifdef RODIN_USE_OPENMP
-#include <omp.h>
-#endif
-
-#include <cmath>
 #include <utility>
 #include <fstream>
 #include <functional>
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
-#include "Rodin/Configure.h"
-#include "Rodin/Math.h"
-#include "Rodin/Alert.h"
-#include "Rodin/QF/GenericPolytopeQuadrature.h"
-
-#include "Rodin/Threads/ThreadPool.h"
-
+#include "Rodin/Geometry/Types.h"
 #include "Rodin/Geometry/Point.h"
-#include "Rodin/Geometry/SubMesh.h"
+#include "Rodin/Geometry/Region.h"
+#include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Geometry/PolytopeIterator.h"
+
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Rodin/IO/ForwardDecls.h"
-#include "Rodin/IO/MFEM.h"
-#include "Rodin/IO/MEDIT.h"
 #include "Rodin/IO/EnSight6.h"
+#include "Rodin/IO/MEDIT.h"
+#include "Rodin/IO/MFEM.h"
 
 #include "ForwardDecls.h"
 
 #include "Function.h"
-#include "Component.h"
-#include "Restriction.h"
-#include "LazyEvaluator.h"
-#include "ScalarFunction.h"
-#include "VectorFunction.h"
-#include "MatrixFunction.h"
-#include "FiniteElementSpace.h"
+
 
 namespace Rodin::FormLanguage
 {
-  template <class FES, class Derived>
-  struct Traits<Variational::GridFunctionBase<FES, Derived>>
+  template <class Derived, class FES, class Data>
+  struct Traits<Variational::GridFunctionBase<Derived, FES, Data>>
   {
     using FESType = FES;
-    using MeshType = typename Traits<FESType>::MeshType;
-    using RangeType = typename Traits<FESType>::RangeType;
-    using ElementType = typename Traits<FESType>::ElementType;
-    using ContextType = typename Traits<FESType>::ContextType;
-    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+    using DataType = Data;
+  };
+
+  template <class FES, class Data>
+  struct Traits<Variational::GridFunction<FES, Data>>
+  {
+    using FESType = FES;
+    using DataType = Data;
   };
 }
 
@@ -66,6 +56,70 @@ namespace Rodin::Variational
    * @see GridFunction
    */
 
+  template <class StrictType>
+  class GridFunctionBaseReference
+    : public FunctionBase<GridFunctionBaseReference<StrictType>>
+  {
+    public:
+      using Parent = FunctionBase<GridFunctionBaseReference<StrictType>>;
+
+      /**
+       * @brief R-Values are not allowed.
+       */
+      GridFunctionBaseReference(StrictType&&) = delete;
+
+      /**
+       * @brief Prevent implicit copies.
+       */
+      GridFunctionBaseReference(const StrictType& ref) = delete;
+
+      /**
+       * @brief Constructs the LazyEvaluator object from a constant reference
+       * the data-full object.
+       */
+      explicit
+      constexpr
+      GridFunctionBaseReference(std::reference_wrapper<const StrictType> ref)
+        : m_ref(ref)
+      {}
+
+      /**
+       * @brief Copy constructor.
+       */
+      constexpr
+      GridFunctionBaseReference(const GridFunctionBaseReference& other)
+        : Parent(other),
+          m_ref(other.m_ref)
+      {}
+
+      /**
+       * @brief Move constructor.
+       */
+      constexpr
+      GridFunctionBaseReference(GridFunctionBaseReference&& other)
+        : Parent(std::move(other)),
+          m_ref(std::move(other.m_ref))
+      {}
+
+      GridFunctionBaseReference& operator=(const GridFunctionBaseReference&) = delete;
+
+      GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
+
+      constexpr
+      decltype(auto) getValue(const Geometry::Point& p) const
+      {
+        return m_ref.get().getValue(p);
+      }
+
+      GridFunctionBaseReference* copy() const noexcept final override
+      {
+        return new GridFunctionBaseReference(*this);
+      }
+
+    private:
+      std::reference_wrapper<const StrictType> m_ref;
+  };
+
   /**
    * @brief Abstract base class for GridFunction objects.
    *
@@ -73,30 +127,23 @@ namespace Rodin::Variational
    * GridFunction object. It provides a common interface for the manipulation
    * of its data and weights, as well as projection utilities and convenience
    * functions.
-   *
-   * @section gridfunction-data-layout Data layout
-   *
-   * The data of the GridFunctionBase object can be accessed via a call to @ref
-   * getData(). The i-th column of the returned Math::Matrix object corresponds
-   * to the value of the grid function at the global i-th degree of freedom in
-   * the finite element space. Furthermore, the following conditions are
-   * satisfied:
-   * ```
-   *  const auto& data = gf.getData();
-   *  assert(data.rows() == gf.getFiniteElementSpace().getVectorDimension());
-   *  assert(data.cols() == gf.getFiniteElementSpace().getSize());
-   * ```
    */
-  template <class FES, class Derived>
-  class GridFunctionBase : public LazyEvaluator<GridFunctionBase<FES, Derived>>
+  template <
+    class Derived,
+    class FES = typename FormLanguage::Traits<Derived>::FESType,
+    class Data = typename FormLanguage::Traits<Derived>::DataType>
+  class GridFunctionBase
+    : public GridFunctionBaseReference<GridFunctionBase<Derived, FES, Data>>
   {
     public:
       using FESType = FES;
 
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using DataType = Data;
 
       /// Range type of value
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
       /// Type of mesh on which the finite element space is built
       using MeshType = Geometry::Mesh<Context::Local>;
@@ -107,69 +154,308 @@ namespace Rodin::Variational
       /// Type of finite element
       using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
 
-      using DataType = Math::Matrix<ScalarType>;
-
-      using WeightVectorType = Math::Vector<ScalarType>;
-
       /// Parent class
-      using Parent = LazyEvaluator<GridFunctionBase<FESType, Derived>>;
+      using Parent =
+        GridFunctionBaseReference<GridFunctionBase<Derived, FESType, Data>>;
 
-      static_assert(std::is_same_v<RangeType, ScalarType> ||
-                    std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+      static_assert(
+          std::is_same_v<RangeType, ScalarType> ||
+          std::is_same_v<RangeType, Math::Vector<ScalarType>>);
 
       GridFunctionBase(const FES& fes)
         : Parent(std::cref(*this)),
-          m_fes(fes),
-          m_data(fes.getVectorDimension(), fes.getSize())
-      {
-        m_data.setZero();
-      }
+          m_fes(std::cref(fes))
+      {}
 
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(std::cref(*this)),
-          m_fes(other.m_fes),
-          m_data(other.m_data),
-          m_weights(other.m_weights)
+          m_fes(other.m_fes)
       {}
 
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(std::cref(*this)),
-          m_fes(std::move(other.m_fes)),
-          m_data(std::move(other.m_data)),
-          m_weights(std::move(other.m_weights))
+          m_fes(std::move(other.m_fes))
       {}
+
+      virtual ~GridFunctionBase() = default;
 
       GridFunctionBase& operator=(GridFunctionBase&& other)
       {
         m_fes = std::move(other.m_fes);
-        m_data = std::move(other.m_data);
-        m_weights = std::move(other.m_weights);
         return *this;
       }
 
       GridFunctionBase& operator=(const GridFunctionBase&) = delete;
 
-      /**
-       * @brief Searches for the maximum value in the grid function data.
-       * @returns Maximum value in grid function.
-       *
-       * This function will compute the maximum value in the grid function
-       * data array.
-       *
-       * @section Complexity
-       * The operation is linear in the size of the number of entries in the
-       * underlying matrix.
-       */
       constexpr
-      ScalarType max() const
+      auto x() const
       {
-        return m_data.maxCoeff();
+        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+        assert(m_fes.get().getVectorDimension() >= 1);
+        return Component(static_cast<Derived&>(*this), 0);
       }
 
       constexpr
-      ScalarType max(Index& idx) const
+      auto y() const
       {
-        return m_data.maxCoeff(&idx);
+        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+        assert(m_fes.get().getVectorDimension() >= 2);
+        return Component(static_cast<Derived&>(*this), 1);
+      }
+
+      constexpr
+      auto z() const
+      {
+        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+        assert(m_fes.get().getVectorDimension() >= 3);
+        return Component(static_cast<Derived&>(*this), 2);
+      }
+
+      constexpr
+      Derived& setData(const DataType& data, size_t offset = 0)
+      {
+        return static_cast<Derived&>(*this).setData(data, offset);
+      }
+
+      /**
+       * @brief Returns a constant reference to the GridFunction data.
+       */
+      constexpr
+      auto& getData()
+      {
+        return static_cast<Derived&>(*this).getData();
+      }
+
+      /**
+       * @brief Returns a constant reference to the GridFunction data.
+       */
+      constexpr
+      const DataType& getData() const
+      {
+        return static_cast<const Derived&>(*this).getData();
+      }
+
+      constexpr
+      const FES& getFiniteElementSpace() const
+      {
+        return m_fes.get();
+      }
+
+      constexpr
+      size_t getSize() const
+      {
+        return m_fes.get().getSize();
+      }
+
+      constexpr
+      size_t getDimension() const
+      {
+        return m_fes.get().getVectorDimension();
+      }
+
+      Derived& load(
+          const boost::filesystem::path& filename,
+          IO::FileFormat fmt = IO::FileFormat::MFEM)
+      {
+        std::ifstream input(filename.c_str());
+        if (!input)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to open input file stream." << Alert::NewLine
+            << "Filename: \"" << filename << "\"" << Alert::NewLine
+            << "Please check if the file exists and is accessible."
+            << Alert::Raise;
+        }
+
+        switch (fmt)
+        {
+          case IO::FileFormat::MFEM:
+          {
+            IO::GridFunctionLoader<IO::FileFormat::MFEM, FESType, DataType>(
+              static_cast<Derived&>(*this)).load(input);
+            break;
+          }
+          case IO::FileFormat::MEDIT:
+          {
+            IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES, DataType>(
+              static_cast<Derived&>(*this)).load(input);
+            break;
+          }
+          default:
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Unsupported file format for loading GridFunction." << Alert::NewLine
+              << "Format: \"" << fmt << "\""
+              << Alert::Raise;
+          }
+        }
+        return static_cast<Derived&>(*this);
+      }
+
+      void save(
+          const boost::filesystem::path& filename,
+          IO::FileFormat fmt = IO::FileFormat::MFEM) const
+      {
+        std::ofstream output(filename.c_str());
+        if (!output)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to open output file stream." << Alert::NewLine
+            << "Filename: \"" << filename << "\"" << Alert::NewLine
+            << "Please check if the path is valid and writable."
+            << Alert::Raise;
+        }
+
+        switch (fmt)
+        {
+          case IO::FileFormat::MFEM:
+          {
+            IO::GridFunctionPrinter<IO::FileFormat::MFEM, FESType, DataType>(
+              static_cast<const Derived&>(*this)).print(output);
+            break;
+          }
+          case IO::FileFormat::MEDIT:
+          {
+            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FESType, DataType>(
+              static_cast<const Derived&>(*this)).print(output);
+            break;
+          }
+          case IO::FileFormat::ENSIGHT6:
+          {
+            IO::GridFunctionPrinter<IO::FileFormat::ENSIGHT6, FESType, DataType>(
+              static_cast<const Derived&>(*this)).print(output);
+            break;
+          }
+          default:
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Unsupported file format for saving GridFunction." << Alert::NewLine
+              << "Format: \"" << fmt << "\""
+              << Alert::Raise;
+          }
+        }
+        output.close();
+      }
+
+      /**
+       * @brief Gets the interpolated value at the point.
+       */
+      decltype(auto) getValue(const Geometry::Point& p) const
+      {
+        static thread_local RangeType s_out;
+        const auto& polytope = p.getPolytope();
+        const auto& polytopeMesh = polytope.getMesh();
+        const auto& fes = m_fes.get();
+        const auto& fesMesh = fes.getMesh();
+        if (polytopeMesh == fesMesh)
+        {
+          static_cast<const Derived&>(*this).interpolate(s_out, p);
+        }
+        else if (const auto inclusion = fesMesh.inclusion(p))
+        {
+          static_cast<const Derived&>(*this).interpolate(s_out, *inclusion);
+        }
+        else if (fesMesh.isSubMesh())
+        {
+          const auto& submesh = fesMesh.asSubMesh();
+          const auto restriction = submesh.restriction(p);
+          if (restriction)
+          {
+            static_cast<const Derived&>(*this).interpolate(s_out, *restriction);
+          }
+          else
+          {
+            assert(false);
+          }
+        }
+        else
+        {
+          assert(false);
+        }
+        return s_out;
+      }
+
+      /**
+       * @brief Interpolates the GridFunction at the given point.
+       *
+       * @note Can be overriden.
+       */
+      constexpr
+      void interpolate(RangeType& res, const Geometry::Point& p) const
+      {
+        static_cast<const Derived&>(*this).interpolate(res, p);
+      }
+
+      void project(const std::pair<size_t, Index>& p, const RangeType& v)
+      {
+        static_cast<Derived&>(*this).project(p,
+            [&](RangeType& out, const Geometry::Point& pt){ out = v; });
+      }
+
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
+      template <class Function>
+      void project(const std::pair<size_t, Index>& p, const Function& fn)
+      {
+        static_cast<Derived&>(*this).project(fn, p);
+      }
+
+      template <class T>
+      Derived& operator=(const T& v)
+      {
+        return static_cast<Derived&>(*this).project(v);
+      }
+
+      template <class T>
+      Derived& project(const T& fn)
+      {
+        return static_cast<Derived&>(*this).project(
+            Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
+      }
+
+      template <class T>
+      Derived& project(const Geometry::Region& region, const T& fn)
+      {
+        return static_cast<Derived&>(*this).project(region, fn,
+            [](const Geometry::Polytope&) { return true; });
+      }
+
+      template <class T>
+      Derived& project(
+          const Geometry::Region& region, const T& fn, const Geometry::Attribute& attr)
+      {
+        return static_cast<Derived&>(*this).project(region, fn,
+            [&](const Geometry::Polytope& polytope)
+            { return polytope.getAttribute() == attr; });
+      }
+
+      template <class T>
+      Derived& project(
+          const Geometry::Region& region,
+          const T& fn, const FlatSet<Geometry::Attribute>& attrs)
+      {
+        return static_cast<Derived&>(*this).project(region, fn,
+            [&](const Geometry::Polytope& polytope)
+            { return attrs.size() == 0 || attrs.count(polytope.getAttribute()); });
+      }
+
+      template <class Pred>
+      Derived& project(const Geometry::Region& region, const RangeType& fn, const Pred& pred)
+      {
+        return static_cast<Derived&>(*this).project(
+            region,
+            [&](const Geometry::Point&) -> decltype(auto)
+            { static thread_local RangeType s_out; s_out = fn; return s_out; }, pred);
+      }
+
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
+      template <class Function, class Pred>
+      Derived& project(const Geometry::Region& region, const Function& fn, const Pred& pred)
+      {
+        return static_cast<Derived&>(*this).project(region, fn, pred);
       }
 
       /**
@@ -186,1051 +472,379 @@ namespace Rodin::Variational
       constexpr
       ScalarType min() const
       {
-        return m_data.minCoeff();
+        Index _unused;
+        return static_cast<const Derived&>(*this).min(_unused);
       }
 
+      /**
+       * @brief Searches for the maximum value in the grid function data.
+       * @returns Maximum value in grid function.
+       *
+       * This function will compute the maximum value in the grid function
+       * data array.
+       *
+       * @section Complexity
+       * The operation is linear in the size of the number of entries in the
+       * underlying matrix.
+       */
       constexpr
-      ScalarType min(Index& idx) const
+      ScalarType max() const
       {
-        return m_data.minCoeff(&idx);
-      }
-
-      constexpr
-      Index argmax() const
-      {
-        Index idx = 0;
-        m_data.maxCoeff(&idx);
-        return idx;
+        Index _unused;
+        return static_cast<const Derived&>(*this).max(_unused);
       }
 
       constexpr
       Index argmin() const
       {
         Index idx = 0;
-        m_data.minCoeff(&idx);
+        static_cast<const Derived&>(*this).min(idx);
         return idx;
       }
 
-      Derived& normalize()
-      {
-        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>,
-            "GridFunction must be vector valued.");
-        for (size_t i = 0; i < getSize(); i++)
-          getData().col(i).normalize();
-        return static_cast<Derived&>(*this);
-      }
-
-      Derived& stableNormalize()
-      {
-        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>,
-            "GridFunction must be vector valued.");
-        for (size_t i = 0; i < getSize(); i++)
-          getData().col(i).stableNormalize();
-        return static_cast<Derived&>(*this);
-      }
-
       constexpr
-      size_t getDimension() const
+      Index argmax() const
       {
-        return getFiniteElementSpace().getVectorDimension();
-      }
-
-      constexpr
-      auto x() const
-      {
-        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
-        assert(getFiniteElementSpace().getVectorDimension() >= 1);
-        return Component(*this, 0);
-      }
-
-      constexpr
-      auto y() const
-      {
-        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
-        assert(getFiniteElementSpace().getVectorDimension() >= 2);
-        return Component(*this, 1);
-      }
-
-      constexpr
-      auto z() const
-      {
-        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
-        assert(getFiniteElementSpace().getVectorDimension() >= 3);
-        return Component(*this, 2);
-      }
-
-      constexpr
-      size_t getSize() const
-      {
-        return getFiniteElementSpace().getSize();
-      }
-
-
-      Derived& setZero()
-      {
-        m_data.setZero();
-        if (m_weights)
-          m_weights->setZero();
-        return static_cast<Derived&>(*this);
+        Index idx;
+        static_cast<const Derived&>(*this).max(idx);
+        return idx;
       }
 
       /**
-       * @brief Bulk assigns the value to the whole data array.
+       * @note CRTP function to be overriden in Derived class.
        */
-      Derived& operator=(const RangeType& v)
+      constexpr
+      ScalarType min(Index& idx) const
       {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          m_data.setConstant(v);
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          assert(m_data.cols() >= 0);
-          for (size_t i = 0; i < static_cast<size_t>(m_data.cols()); i++)
-            m_data.col(i) = v;
-        }
-        else
-        {
-          assert(false);
-        }
-        return static_cast<Derived&>(*this);
-      }
-
-      Derived& operator=(std::function<RangeType(const Geometry::Point&)> fn)
-      {
-        return project(fn);
-      }
-
-      Derived& operator=(std::function<void(RangeType&, const Geometry::Point&)> fn)
-      {
-        return project(fn);
+        return static_cast<const Derived&>(*this).min(idx);
       }
 
       /**
-       * @brief Projection of a function.
+       * @note CRTP function to be overriden in Derived class.
        */
-      template <class NestedDerived>
-      Derived& operator=(const FunctionBase<NestedDerived>& fn)
+      constexpr
+      ScalarType max(Index& idx) const
       {
-        return project(fn);
+        return static_cast<const Derived&>(*this).max(idx);
       }
 
       /**
-       * @brief Addition of a scalar value.
+       * @note CRTP function to be overriden in Derived class.
+       */
+      ScalarType& operator[](Index global)
+      {
+        return static_cast<Derived&>(*this).operator[](global);
+      }
+
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
+      const ScalarType& operator[](Index global) const
+      {
+        return static_cast<const Derived&>(*this).operator[](global);
+      }
+
+      /**
+       * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator+=(const ScalarType& rhs)
       {
-        static_assert(std::is_same_v<RangeType, ScalarType>);
-        m_data = m_data.array() + rhs;
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).operator+=(rhs);
       }
 
       /**
-       * @brief Substraction of a scalar value.
+       * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator-=(const ScalarType& rhs)
       {
-        static_assert(std::is_same_v<RangeType, ScalarType>);
-        m_data = m_data.array() - rhs;
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).operator-=(rhs);
       }
 
       /**
-       * @brief Multiplication by a scalar value.
+       * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator*=(const ScalarType& rhs)
       {
-        m_data = m_data.array() * rhs;
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).operator*=(rhs);
       }
 
       /**
-       * @brief Division by a scalar value.
+       * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator/=(const ScalarType& rhs)
       {
-        m_data = m_data.array() / rhs;
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).operator/=(rhs);
       }
 
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
       Derived& operator+=(const GridFunctionBase& rhs)
       {
-        if (this == &rhs)
-        {
-          operator*=(2);
-        }
-        else
-        {
-          assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          m_data = m_data.array() + rhs.m_data.array();
-        }
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).operator+=(rhs);
       }
 
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
       Derived& operator-=(const GridFunctionBase& rhs)
       {
-        if (this == &rhs)
-        {
-          m_data.setZero();
-        }
-        else
-        {
-          assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          m_data = m_data.array() - rhs.m_data.array();
-        }
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).operator-=(rhs);
       }
 
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
       Derived& operator*=(const GridFunctionBase& rhs)
       {
-        if (this == &rhs)
-        {
-          m_data = m_data.array() * m_data.array();
-        }
-        else
-        {
-          assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          m_data = m_data.array() * rhs.m_data.array();
-        }
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).operator*=(rhs);
       }
 
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
       Derived& operator/=(const GridFunctionBase& rhs)
       {
-        if (this == &rhs)
-        {
-          m_data.setOnes();
-        }
-        else
-        {
-          assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          m_data = m_data.array() / rhs.m_data.array();
-        }
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).operator/=(rhs);
       }
 
-      /**
-       * @brief Projects a scalar valued function on the region of the mesh
-       * with the given attribute.
-       * @param[in] fn Scalar valued function
-       * @param[in] attr Attribute
-       */
-      auto& project(
-          std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
+    private:
+      std::reference_wrapper<const FESType> m_fes;
+  };
+
+  template <class FES>
+  class GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>> final
+    : public GridFunctionBase<
+        GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
+  {
+    public:
+      using FESType = FES;
+
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using DataType = Math::Vector<ScalarType>;
+
+      using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
+
+      using Parent::operator=;
+      using Parent::project;
+      using Parent::min;
+      using Parent::max;
+
+      GridFunction(const FESType& fes)
+        : Parent(fes)
       {
-        return project(fn, FlatSet<Geometry::Attribute>{ attr });
+        auto& data = this->getData();
+        data.resize(fes.getSize());
+        data.setZero();
       }
 
-      auto& project(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
+      GridFunction(const GridFunction& other)
+        : Parent(other)
+      {}
+
+      GridFunction(GridFunction&& other)
+        : Parent(std::move(other))
+      {}
+
+      GridFunction& operator=(GridFunction&& other)
       {
-        return project(fn, FlatSet<Geometry::Attribute>{ attr });
+        Parent::operator=(std::move(other));
+        return *this;
       }
 
-      auto& project(
-          std::function<RangeType(const Geometry::Point&)> fn,
-          const FlatSet<Geometry::Attribute>& attrs = {})
+      virtual ~GridFunction() = default;
+
+      constexpr
+      ScalarType min(Index& idx) const
       {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return project(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return project(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      auto& project(
-          std::function<void(RangeType&, const Geometry::Point&)> fn,
-          const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return project(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return project(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      template <class NestedDerived>
-      Derived& project(const FunctionBase<NestedDerived>& fn)
-      {
-        return project(fn, FlatSet<Geometry::Attribute>{});
-      }
-
-      /**
-       * @brief Projects a FunctionBase instance
-       *
-       * This function will project a FunctionBase instance on the
-       * domain elements with the given attribute.
-       *
-       * It is a convenience function to call
-       * project(const FunctionBase&, const FlatSet<Geometry::Atribute>&) with one
-       * attribute.
-       */
-      template <class NestedDerived>
-      Derived& project(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
-      {
-        return project(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      /**
-       * @brief Projects a FunctionBase instance on the grid function.
-       *
-       * This function will project a FunctionBase instance on the
-       * domain elements with the given attributes. If the attribute set is
-       * empty, this function will project over all elements in the mesh.
-       */
-      template <class NestedDerived>
-      Derived& project(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
-      {
-        const auto& fes = getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        const size_t d = mesh.getDimension();
-        std::vector<Real> ns(fes.getSize(), 0);
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-#ifdef RODIN_MULTITHREADED
-#ifdef RODIN_USE_OPENMP
-          // OpenMP parallel region: each thread gets its own local storage.
-          #pragma omp parallel
-          {
-            // Each thread creates its own copy of the function object.
-            std::unique_ptr<FunctionBase<NestedDerived>> local_fn(fn.copy());
-
-            // Reserve local storage based on an estimate of entries per thread.
-            const size_t capacity = fes.getSize() / omp_get_num_threads();
-            std::vector<Index> local_is;
-            local_is.reserve(capacity);
-            std::vector<ScalarType> local_vs;
-            local_vs.reserve(capacity);
-
-            // Parallelize the loop over the cells.
-            #pragma omp for schedule(dynamic)
-            for (Index i = 0; i < mesh.getCellCount(); ++i)
-            {
-              auto it = mesh.getCell(i);
-              const auto& polytope = *it;
-              if (attrs.empty() || attrs.count(polytope.getAttribute()))
-              {
-                const auto& cellIndex = polytope.getIndex();
-                const auto& fe = fes.getFiniteElement(d, cellIndex);
-                const auto& trans = mesh.getPolytopeTransformation(d, cellIndex);
-                for (size_t local = 0; local < fe.getCount(); ++local)
-                {
-                  // Create the geometry point and compute function value.
-                  const Geometry::Point p(polytope, trans, fe.getNode(local));
-                  local_is.push_back(fes.getGlobalIndex({ d, cellIndex }, local));
-                  local_vs.push_back(local_fn->getValue(p));
-                }
-              }
-            } // End of omp-for
-
-            // In a single (critical) section, update the shared global arrays.
-            #pragma omp critical
-            {
-              for (Index j = 0; j < local_is.size(); ++j)
-              {
-                const Index global = local_is[j];
-                // Update m_data with a new weighted average.
-                m_data(global) = (local_vs[j] + ns[global] * m_data(global)) / (ns[global] + 1);
-                ns[global] += 1;
-              }
-            }
-          }
-#else
-          // Fallback multi-threading implementation using ThreadPool.
-          auto& threadPool = Threads::getGlobalThreadPool();
-          auto loop =
-            [&](const Index start, const Index end)
-            {
-              const size_t capacity = fes.getSize() / threadPool.getThreadCount();
-              std::vector<Index> is;
-              is.reserve(capacity);
-              std::vector<ScalarType> vs;
-              vs.reserve(capacity);
-              std::unique_ptr<FunctionBase<NestedDerived>> fnt(fn.copy());
-              for (Index i = start; i < end; ++i)
-              {
-                const auto it = mesh.getCell(i);
-                const auto& polytope = *it;
-                if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-                {
-                  const auto& i = polytope.getIndex();
-                  const auto& fe = fes.getFiniteElement(d, i);
-                  const auto& trans = mesh.getPolytopeTransformation(d, i);
-                  for (size_t local = 0; local < fe.getCount(); local++)
-                  {
-                    const Geometry::Point p(polytope, trans, fe.getNode(local));
-                    assert(m_data.rows() == 1);
-                    is.push_back(fes.getGlobalIndex({ d, i }, local));
-                    vs.push_back(fnt->getValue(p));
-                  }
-                }
-              }
-              assert(is.size() == vs.size());
-              m_mutex.lock();
-              for (Index i = 0; i < is.size(); i++)
-              {
-                const Index global = is[i];
-                m_data(global) =
-                  (vs[i] + ns[global] * m_data(global)) / (ns[global] + 1);
-                ns[global] += 1;
-              }
-              m_mutex.unlock();
-            };
-          threadPool.pushLoop(0, mesh.getCellCount(), loop);
-          threadPool.waitForTasks();
-#endif
-#else
-          // Single-threaded version.
-          for (auto it = mesh.getCell(); !it.end(); ++it)
-          {
-            const auto& polytope = *it;
-            if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-            {
-              const auto& i = polytope.getIndex();
-              const auto& fe = fes.getFiniteElement(d, i);
-              const auto& trans = mesh.getPolytopeTransformation(d, i);
-              for (size_t local = 0; local < fe.getCount(); local++)
-              {
-                const Geometry::Point p(polytope, trans, fe.getNode(local));
-                const Index global = fes.getGlobalIndex({ d, i }, local);
-                assert(m_data.rows() == 1);
-                m_data(global) =
-                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1);
-                ns[global] += 1;
-              }
-            }
-          }
-#endif
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          Math::Vector<ScalarType> value;
-          for (auto it = mesh.getCell(); !it.end(); ++it)
-          {
-            const auto& polytope = *it;
-            if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-            {
-              const auto& i = polytope.getIndex();
-              const auto& fe = fes.getFiniteElement(d, i);
-              const auto& trans = mesh.getPolytopeTransformation(d, i);
-              for (size_t local = 0; local < fe.getCount(); local++)
-              {
-                const Geometry::Point p(polytope, trans, fe.getNode(local));
-                const Index global = fes.getGlobalIndex({ d, i }, local);
-                fn.getDerived().getValue(value, p);
-                m_data.col(global) =
-                  (value + ns[global] * m_data.col(global)) / (ns[global] + 1);
-                ns[global] += 1;
-              }
-            }
-          }
-        }
-        else
-        {
-          assert(false);
-        }
-        return static_cast<Derived&>(*this);
-      }
-
-      auto& projectOnBoundary(
-          std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      auto& projectOnBoundary(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      auto& projectOnBoundary(
-          std::function<RangeType(const Geometry::Point&)> fn,
-          const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnBoundary(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return projectOnBoundary(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      auto& projectOnBoundary(
-          std::function<void(RangeType&, const Geometry::Point&)> fn,
-          const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnBoundary(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return projectOnBoundary(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn)
-      {
-        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
-      {
-        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
-      {
-        const auto& fes = getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        const size_t d = mesh.getDimension() - 1;
-        std::vector<Real> ns(fes.getSize(), 0);
-        for (auto it = mesh.getBoundary(); !it.end(); ++it)
-        {
-          const auto& polytope = *it;
-          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-          {
-            const auto& i = polytope.getIndex();
-            const auto& fe = fes.getFiniteElement(d, i);
-            const auto& trans = mesh.getPolytopeTransformation(d, i);
-            for (size_t local = 0; local < fe.getCount(); local++)
-            {
-              const Geometry::Point p(polytope, trans, fe.getNode(local));
-              const Index global = fes.getGlobalIndex({ d, i }, local);
-              if constexpr (std::is_same_v<RangeType, ScalarType>)
-              {
-                assert(m_data.rows() == 1);
-                m_data(global) =
-                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1);
-              }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-              {
-                m_data.col(global) =
-                  (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1);
-              }
-              else
-              {
-                assert(false);
-              }
-              ns[global] += 1;
-            }
-          }
-        }
-        return static_cast<Derived&>(*this);
-      }
-
-      auto& projectOnFaces(
-          std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      auto& projectOnFaces(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      auto& projectOnFaces(
-          std::function<RangeType(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnFaces(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return projectOnFaces(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      auto& projectOnFaces(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnFaces(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return projectOnFaces(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn)
-      {
-        return static_cast<Derived&>(*this).projectOnFaces(fn, FlatSet<Geometry::Attribute>{});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
-      {
-        return projectOnFaces(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnFaces(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
-      {
-        const auto& fes = getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        const size_t d = mesh.getDimension() - 1;
-        std::vector<Real> ns(fes.getSize(), 0);
-        for (auto it = mesh.getFace(); !it.end(); ++it)
-        {
-          const auto& polytope = *it;
-          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-          {
-            const auto& i = polytope.getIndex();
-            const auto& fe = fes.getFiniteElement(d, i);
-            const auto& trans = mesh.getPolytopeTransformation(d, i);
-            for (size_t local = 0; local < fe.getCount(); local++)
-            {
-              const Geometry::Point p(polytope, trans, fe.getNode(local));
-              const Index global = fes.getGlobalIndex({ d, i }, local);
-              if constexpr (std::is_same_v<RangeType, ScalarType>)
-              {
-                assert(m_data.rows() == 1);
-                m_data(global) =
-                  (fn.getValue(p) + ns[global] * m_data(global)) / (ns[global] + 1);
-              }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-              {
-                m_data.col(global) =
-                  (fn.getValue(p) + ns[global] * m_data.col(global)) / (ns[global] + 1);
-              }
-              else
-              {
-                assert(false);
-              }
-              ns[global] += 1;
-            }
-          }
-        }
-        return static_cast<Derived&>(*this);
-      }
-
-      auto& projectOnInterfaces(
-          std::function<RangeType(const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      auto& projectOnInterfaces(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, Geometry::Attribute attr)
-      {
-        return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{ attr });
-      }
-
-      auto& projectOnInterfaces(
-          std::function<RangeType(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnInterfaces(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return projectOnInterfaces(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      auto& projectOnInterfaces(
-          std::function<void(RangeType&, const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          return projectOnInterfaces(ScalarFunction(fn));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          return projectOnInterfaces(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
-        }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnInterfaces(const FunctionBase<NestedDerived>& fn)
-      {
-        return static_cast<Derived&>(*this).projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnInterfaces(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
-      {
-        return projectOnInterfaces(fn, FlatSet<Geometry::Attribute>{attr});
-      }
-
-      template <class NestedDerived>
-      Derived& projectOnInterfaces(
-          const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
-      {
-        const auto& fes = getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        const size_t d = mesh.getDimension() - 1;
-        for (auto it = mesh.getInterface(); !it.end(); ++it)
-        {
-          const auto& polytope = *it;
-          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
-          {
-            const auto& i = polytope.getIndex();
-            const auto& fe = fes.getFiniteElement(d, i);
-            const auto& trans = mesh.getPolytopeTransformation(d, i);
-            for (size_t local = 0; local < fe.getCount(); local++)
-            {
-              const Geometry::Point p(polytope, trans, fe.getNode(local));
-              if constexpr (std::is_same_v<RangeType, ScalarType>)
-              {
-                assert(m_data.rows() == 1);
-                m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
-              }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-              {
-                m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
-              }
-              else
-              {
-                assert(false);
-              }
-            }
-          }
-        }
-        return static_cast<Derived&>(*this);
-      }
-
-      Derived& load(
-          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
-      {
-        std::ifstream input(filename.c_str());
-        if (!input)
-        {
-          Alert::Exception()
-            << "Failed to open " << filename << " for reading."
-            << Alert::Raise;
-        }
-
-        switch (fmt)
-        {
-          case IO::FileFormat::MFEM:
-          {
-            IO::GridFunctionLoader<IO::FileFormat::MFEM, FES> loader(static_cast<Derived&>(*this));
-            loader.load(input);
-            break;
-          }
-          case IO::FileFormat::MEDIT:
-          {
-            IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES> loader(static_cast<Derived&>(*this));
-            loader.load(input);
-            break;
-          }
-          default:
-          {
-            Alert::Exception()
-              << "Loading from \"" << fmt << "\" format unsupported."
-              << Alert::Raise;
-          }
-        }
-        return static_cast<Derived&>(*this);
-      }
-
-      void save(
-          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM,
-          size_t precision = RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION) const
-      {
-        std::ofstream output(filename.c_str());
-        if (!output)
-        {
-          Alert::Exception()
-            << "Failed to open " << filename << " for writing."
-            << Alert::Raise;
-        }
-
-        output.precision(precision);
-        switch (fmt)
-        {
-          case IO::FileFormat::MFEM:
-          {
-            IO::GridFunctionPrinter<IO::FileFormat::MFEM, FES> printer(static_cast<const Derived&>(*this));
-            printer.print(output);
-            break;
-          }
-          case IO::FileFormat::MEDIT:
-          {
-            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FES> printer(static_cast<const Derived&>(*this));
-            printer.print(output);
-            break;
-          }
-          case IO::FileFormat::ENSIGHT6:
-          {
-            IO::GridFunctionPrinter<IO::FileFormat::ENSIGHT6, FES> printer(static_cast<const Derived&>(*this));
-            printer.print(output);
-            break;
-          }
-          default:
-          {
-            Alert::Exception()
-              << "Saving to \"" << fmt << "\" format unsupported."
-              << Alert::Raise;
-          }
-        }
-        output.close();
+        return this->getData().minCoeff(&idx);
       }
 
       constexpr
-      const FES& getFiniteElementSpace() const
+      ScalarType max(Index& idx) const
       {
-        return m_fes.get();
+        return this->getData().maxCoeff(&idx);
+      }
+
+      ScalarType& operator[](Index global)
+      {
+        return this->getData()[global];
+      }
+
+      const ScalarType& operator[](Index global) const
+      {
+        return this->getData()[global];
+      }
+
+      GridFunction& operator+=(const ScalarType& rhs)
+      {
+        static_assert(std::is_same_v<RangeType, ScalarType>);
+        this->getData() += rhs;
+        return *this;
+      }
+
+      GridFunction& operator-=(const ScalarType& rhs)
+      {
+        static_assert(std::is_same_v<RangeType, ScalarType>);
+        this->getData() -= rhs;
+        return *this;
+      }
+
+      GridFunction& operator*=(const ScalarType& rhs)
+      {
+        this->getData() *= rhs;
+        return *this;
+      }
+
+      GridFunction& operator/=(const ScalarType& rhs)
+      {
+        auto& data = this->getData();
+        data = data.array() / rhs;
+        return static_cast<GridFunction&>(*this);
+      }
+
+      GridFunction& operator+=(const GridFunction& rhs)
+      {
+        assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        this->getData().array() += rhs.getData().array();
+        return *this;
+      }
+
+      GridFunction& operator-=(const GridFunction& rhs)
+      {
+        assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        this->getData().array() -= rhs.getData().array();
+        return *this;
+      }
+
+      GridFunction& operator*=(const GridFunction& rhs)
+      {
+        this->getData().array() *= rhs.getData().array();
+        return *this;
+      }
+
+      GridFunction& operator/=(const GridFunction& rhs)
+      {
+        this->getData().array() /= rhs.getData().array();
+        return *this;
       }
 
       /**
-       * @brief Returns a constant reference to the GridFunction data.
+       * @brief Interpolates the GridFunction at the given point.
+       *
+       * @note Can be overriden.
        */
-      template <class Matrix>
       constexpr
-      Derived& setData(Matrix&& data) const
+      void interpolate(RangeType& res, const Geometry::Point& p) const
       {
-        m_data = std::forward<Matrix>(data);
-        return static_cast<Derived&>(*this).setData(data);
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index  i = polytope.getIndex();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const size_t count = fe.getCount();
+        for (Index local = 0; local < count; ++local)
+        {
+          const auto mapping = fes.getInverseMapping({ d, i }, fe.getBasis(local));
+          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
+          if (local == 0)
+            res = k; // Initializes the result (resizes)
+          else
+            res += k; // Accumulates the result (does not resize)
+        }
       }
 
-      /**
-       * @brief Returns a constant reference to the GridFunction data.
-       */
+      template <class Function, class Pred>
+      GridFunction& project(
+          const Geometry::Region& region, const Function& v, const Pred& pred)
+      {
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+
+        Geometry::PolytopeIterator it;
+        switch (region)
+        {
+          case Geometry::Region::Cells:
+          {
+            it = mesh.getCell();
+            break;
+          }
+          case Geometry::Region::Faces:
+          {
+            it = mesh.getFace();
+            break;
+          }
+          case Geometry::Region::Boundary:
+          {
+            it = mesh.getBoundary();
+            break;
+          }
+          case Geometry::Region::Interface:
+          {
+            it = mesh.getInterface();
+            break;
+          }
+        }
+
+        while (it)
+        {
+          const auto& polytope = *it;
+          if (pred(polytope))
+            this->project({ polytope.getDimension(), polytope.getIndex() }, v);
+          ++it;
+        }
+
+        return *this;
+      }
+
+      template <class Function>
+      void project(const std::pair<size_t, Index>& p, const Function& fn)
+      {
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& [d, i] = p;
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto mapping = fes.getMapping({ d, i }, fn);
+        for (Index local = 0; local < fe.getCount(); local++)
+        {
+          const Index global = fes.getGlobalIndex({ d, i }, local);
+          this->operator[](global) = fe.getLinearForm(local)(mapping);
+        }
+      }
+
+      GridFunction& setData(const DataType& data, size_t offset = 0)
+      {
+        const auto sz = this->getFiniteElementSpace().getSize();
+        assert(offset + sz <= data.size());
+        this->getData() = data.segment(offset, sz);
+        return *this;
+      }
+
       constexpr
       auto& getData()
       {
         return m_data;
       }
 
-      /**
-       * @brief Returns a constant reference to the GridFunction data.
-       */
       constexpr
       const DataType& getData() const
       {
         return m_data;
       }
 
-      constexpr
-      std::optional<WeightVectorType>& getWeights()
-      {
-        return m_weights;
-      }
-
-      constexpr
-      const std::optional<WeightVectorType>& getWeights() const
-      {
-        return m_weights;
-      }
-
-      /**
-       * @brief Computes the weights from the data.
-       * @note CRTP function to be overriden in Derived class.
-       */
-      Derived& setWeights()
-      {
-        return static_cast<Derived&>(*this).setWeights();
-      }
-
-      /**
-       * @brief Sets the weights in the GridFunction object and computes the
-       * values at all the degrees of freedom.
-       * @note CRTP function to be overriden in Derived class.
-       */
-      template <class Vector>
-      Derived& setWeights(const Vector& weights)
-      {
-        return static_cast<Derived&>(*this).setWeights(weights);
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getFiniteElementSpace().getVectorDimension(), 1 };
-      }
-
-      template <class Value>
-      Derived& setValue(const std::pair<size_t, Index>& p, size_t local, Value&& v)
-      {
-        return setValue(getFiniteElementSpace().getGlobalIndex(p, local), std::forward<Value>(v));
-      }
-
-      template <class Value>
-      Derived& setValue(Index global, Value&& v)
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(m_data.size() >= 0);
-          assert(global < static_cast<size_t>(m_data.size()));
-          m_data.coeffRef(global) = std::forward<Value>(v);
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          assert(m_data.cols() >= 0);
-          assert(global < static_cast<size_t>(m_data.cols()));
-          m_data.col(global) = std::forward<Value>(v);
-        }
-        else
-        {
-          assert(false);
-        }
-        return static_cast<Derived&>(*this);
-      }
-
-      /**
-       * @brief Gets the value at the given polytope on the local degree of
-       * freedom.
-       */
-      auto getValue(const std::pair<size_t, Index>& p, size_t local) const
-      {
-        return getValue(getFiniteElementSpace().getGlobalIndex(p, local));
-      }
-
-
-      /**
-       * @brief Gets the value of the GridFunction at the global degree of
-       * freedom index.
-       */
-      auto getValue(Index global) const
-      {
-        if constexpr (std::is_same_v<RangeType, ScalarType>)
-        {
-          assert(m_data.size() >= 0);
-          assert(global < static_cast<size_t>(m_data.size()));
-          return m_data.coeff(global);
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector<ScalarType>>)
-        {
-          assert(m_data.cols() >= 0);
-          assert(global < static_cast<size_t>(m_data.cols()));
-          return m_data.col(global);
-        }
-        else
-        {
-          assert(false);
-          return void();
-        }
-      }
-
-      constexpr
-      RangeType getValue(const Geometry::Point& p) const
-      {
-        RangeType res;
-        getValue(res, p);
-        return res;
-      }
-
-      /**
-       * @brief Gets the interpolated value at the point.
-       */
-      void getValue(RangeType& res, const Geometry::Point& p) const
-      {
-        const auto& polytope = p.getPolytope();
-        const auto& polytopeMesh = polytope.getMesh();
-        const auto& fes = m_fes.get();
-        const auto& fesMesh = fes.getMesh();
-        if (polytopeMesh == fesMesh)
-        {
-          interpolate(res, p);
-        }
-        else if (const auto inclusion = fesMesh.inclusion(p))
-        {
-          interpolate(res, *inclusion);
-        }
-        else if (fesMesh.isSubMesh())
-        {
-          const auto& submesh = fesMesh.asSubMesh();
-          const auto restriction = submesh.restriction(p);
-          if (restriction)
-          {
-            interpolate(res, *restriction);
-          }
-          else
-          {
-            assert(false);
-          }
-        }
-        else
-        {
-          assert(false);
-        }
-      }
-
-      /**
-       * @brief Interpolates the GridFunction at the given point.
-       * @note CRTP function to be overriden in Derived class.
-       */
-      constexpr
-      void interpolate(RangeType& res, const Geometry::Point& p) const
-      {
-        static_cast<const Derived&>(*this).interpolate(res, p);
-      }
-
     private:
-      std::reference_wrapper<const FESType> m_fes;
       DataType m_data;
-      std::optional<WeightVectorType> m_weights;
-      mutable Threads::Mutex m_mutex;
   };
+
+  template <class FES>
+  GridFunction(const FES& fes)
+    -> GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
+
+  template <class FES, class Data>
+  GridFunction(const FES& fes, Data&& data)
+    -> GridFunction<FES, Data>;
 }
 
 #endif

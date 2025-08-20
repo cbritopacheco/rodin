@@ -3,15 +3,10 @@
 
 #include "PETSc/ForwardDecls.h"
 
-#include "PETSc/Math/Vector.h"
-#include "PETSc/Math/Matrix.h"
-#include "PETSc/Math/LinearSystem.h"
-
-#include "PETSc/Assembly/Sequential.h"
-#include "PETSc/Assembly/Multithreaded.h"
-
-#include "PETSc/Solver/CG.h"
-
-#include "PETSc/FormLanguage/Traits.h"
+#include "PETSc/IO.h"
+#include "PETSc/Math.h"
+#include "PETSc/Solver.h"
+#include "PETSc/Assembly.h"
+#include "PETSc/Variational.h"
 
 #endif

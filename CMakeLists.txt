@@ -82,7 +82,12 @@ option(BUILD_SHARED_LIBS              "Build using shared libraries"            
 
 if (RODIN_MULTITHREADED)
   set(RODIN_THREAD_SAFE ON CACHE BOOL "" FORCE)
+  set(RODIN_USE_OPENMP ON CACHE BOOL "" FORCE)
   set(Boost_USE_MULTITHREADED ON)
+else()
+  set(RODIN_THREAD_SAFE OFF CACHE BOOL "" FORCE)
+  set(RODIN_USE_OPENMP OFF CACHE BOOL "" FORCE)
+  # set(Boost_USE_MULTITHREADED OFF)
 endif()
 
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
@@ -138,27 +143,16 @@ if (RODIN_CODE_COVERAGE)
 endif()
 
 if (RODIN_BUILD_SRC)
-  # set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
   # ---- Find and build dependencies -----------------------------------------
-  # ---- PThreads ----
-  set(THREADS_PREFER_PTHREAD_FLAG ON)
-  find_package(Threads REQUIRED)
-  add_subdirectory(third-party/BS_thread_pool)
-
-  if (RODIN_USE_OPENMP)
-    find_package(OpenMP REQUIRED)
-  endif()
-
   # ---- Boost ----
   add_compile_definitions(PRIVATE BOOST_ASIO_HAS_STD_INVOKE_RESULT=1)
-  # set(Boost_USE_STATIC_LIBS        OFF)
-  # set(Boost_USE_STATIC_RUNTIME     OFF)
 
   find_package(Boost 1.74 REQUIRED
     COMPONENTS
     system
     filesystem
     serialization
+    headers
     )
   include_directories(${Boost_INCLUDE_DIRS})
 

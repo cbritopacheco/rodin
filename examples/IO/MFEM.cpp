@@ -24,7 +24,7 @@ int main(int, char** argv)
   GridFunction gf(fes);
 
   RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
-  gf.project(c);
+  gf = c;
 
   mesh.save("miaow.mesh");
   gf.save("miaow.gf");

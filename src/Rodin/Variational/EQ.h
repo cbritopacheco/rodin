@@ -8,7 +8,6 @@
 #define RODIN_VARIATIONAL_EQ_H
 
 #include "ForwardDecls.h"
-#include "GridFunction.h"
 #include "BooleanFunction.h"
 
 namespace Rodin::Variational
@@ -49,28 +48,25 @@ namespace Rodin::Variational
           m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      inline
       const auto& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      inline
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        return getLHS().getValue(p) == getRHS().getValue(p);
+        return this->getLHS().getValue(p) == this->getRHS().getValue(p);
       }
 
-      inline EQ* copy() const noexcept final override
+      EQ* copy() const noexcept final override
       {
         return new EQ(*this);
       }
@@ -85,7 +81,6 @@ namespace Rodin::Variational
     -> EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  inline
   constexpr
   auto
   operator==(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
@@ -94,7 +89,6 @@ namespace Rodin::Variational
   }
 
   template <class RHSDerived>
-  inline
   constexpr
   auto
   operator==(Boolean lhs, const FunctionBase<RHSDerived>& rhs)
@@ -103,7 +97,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSDerived>
-  inline
   constexpr
   auto
   operator==(const FunctionBase<LHSDerived>& lhs, Boolean rhs)

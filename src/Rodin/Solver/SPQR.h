@@ -31,12 +31,19 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for SPQR
+   */
+  template <class LinearSystem>
+  SPQR(Variational::ProblemBase<LinearSystem>&) -> SPQR<LinearSystem>;
+
+  /**
    * @ingroup SPQRSpecializations
    * @brief SPQR for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class SPQR<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class SPQR<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -45,13 +52,15 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      SPQR(ProblemType& pb)
+      SPQR(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -65,10 +74,10 @@ namespace Rodin::Solver
 
       ~SPQR() = default;
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        m_solver.compute(A);
-        x = m_solver.solve(b);
+        m_solver.compute(axb.getOperator());
+        axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
       SPQR& setTolerance(Real tol)
@@ -91,14 +100,6 @@ namespace Rodin::Solver
     private:
       Eigen::SPQR<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for SPQR
-   */
-  template <class Scalar>
-  SPQR(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> SPQR<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

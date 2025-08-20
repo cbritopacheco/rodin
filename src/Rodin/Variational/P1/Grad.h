@@ -4,74 +4,47 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_P1_GRADIENT_H
-#define RODIN_VARIATIONAL_P1_GRADIENT_H
+#ifndef RODIN_VARIATIONAL_P1_GRAD_H
+#define RODIN_VARIATIONAL_P1_GRAD_H
 
-#include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Variational/Grad.h"
-
+#include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
-#include "GridFunction.h"
-
-namespace Rodin::FormLanguage
-{
-  template <class Range, class Mesh>
-  struct Traits<Variational::Grad<Variational::GridFunction<Variational::P1<Range, Mesh>>>>
-  {
-    using FESType = Variational::P1<Range, Mesh>;
-
-    using OperandType = Variational::GridFunction<FESType>;
-
-    using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
-
-    using RangeType = Math::Vector<ScalarType>;
-  };
-
-  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Grad<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
-  {
-    using FESType = Variational::P1<Range, Mesh>;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-
-    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
-
-    using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
-
-    using RangeType = Math::Vector<ScalarType>;
-  };
-}
+#include "ForwardDecls.h"
 
 namespace Rodin::Variational
 {
   /**
-   * @ingroup GradSpecializations
-   * @brief Gradient of a P1 GridFunction
+   * @defgroup GradSpecializations Grad Template Specializations
+   * @brief Template specializations of the Grad class.
+   * @see Grad
    */
-  template <class Range, class Mesh>
-  class Grad<GridFunction<P1<Range, Mesh>>> final
-    : public GradBase<GridFunction<P1<Range, Mesh>>, Grad<GridFunction<P1<Range, Mesh>>>>
+
+  /**
+   * @brief Base class for Grad classes.
+   */
+  template <class Operand, class Derived>
+  class GradBase;
+
+  template <class Scalar, class Mesh, class Data>
+  class Grad<GridFunction<P1<Scalar, Mesh>, Data>> final
+    : public GradBase<GridFunction<P1<Scalar, Mesh>, Data>, Grad<GridFunction<P1<Scalar, Mesh>, Data>>>
   {
     public:
-      using FESType = P1<Range, Mesh>;
+      using FESType = P1<Scalar, Mesh>;
 
-      using RangeType = Range;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
-      /**
-       * @brief Constructs the gradient of an @f$ \mathbb{P}^1 @f$ function
-       * @f$ u @f$.
-       * @param[in] u P1 GridFunction
-       */
       Grad(const OperandType& u)
         : Parent(u)
       {}
@@ -108,7 +81,7 @@ namespace Rodin::Variational
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
             const auto rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-            interpolate(out, np);
+            this->interpolate(out, np);
             return;
           }
           else
@@ -133,7 +106,7 @@ namespace Rodin::Variational
                 {
                   const auto rc = tracePolytope->getTransformation().inverse(pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-                  interpolate(out, np);
+                  this->interpolate(out, np);
                   return;
                 }
               }
@@ -145,20 +118,23 @@ namespace Rodin::Variational
         }
         else // Evaluating on a cell
         {
+          static thread_local SpatialVectorType s_res;
+
+          s_res.resize(d);
+          s_res.setZero();
+
           assert(d == mesh.getDimension());
           const auto& gf = this->getOperand();
           const auto& fes = gf.getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          SpatialVectorType grad(d);
-          SpatialVectorType res(d);
-          res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            fe.getGradient(local)(grad, rc);
-            res += gf.getValue(fes.getGlobalIndex({d, i}, local)) * grad;
+            const auto& basis = fe.getBasis(local);
+            basis.getGradient()(rc);
+            s_res += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
           }
-          out = p.getJacobianInverse().transpose() * res;
+          out = p.getJacobianInverse().transpose() * s_res;
         }
       }
 
@@ -169,26 +145,22 @@ namespace Rodin::Variational
   };
 
   /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for Grad of a P1 GridFunction
-   */
-  template <class Number, class Mesh>
-  Grad(const GridFunction<P1<Number, Mesh>>&) -> Grad<GridFunction<P1<Number, Mesh>>>;
-
-  /**
    * @ingroup GradSpecializations
-   * @brief Gradient of a P1 ShapeFunction
+   * @brief Gradient of a ShapeFunction
    */
-  template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType SpaceType>
-  class Grad<ShapeFunction<NestedDerived, P1<Number, Mesh>, SpaceType>> final
-    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Number, Mesh>, SpaceType>>>
+  template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType SpaceType>
+  class Grad<ShapeFunction<NestedDerived, P1<Scalar, Mesh>, SpaceType>> final
+    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Scalar, Mesh>, SpaceType>>>
   {
     public:
       /// Finite element space type
-      using FESType = P1<Number, Mesh>;
+      using FESType = P1<Scalar, Mesh>;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      using ScalarType = Number;
+      /// Type of scalar values in the finite element space
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using RangeType = Math::Vector<ScalarType>;
 
       /// Operand type
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
@@ -198,17 +170,22 @@ namespace Rodin::Variational
 
       Grad(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
-          m_u(u)
+          m_u(u),
+          m_p(nullptr)
       {}
 
       Grad(const Grad& other)
         : Parent(other),
-          m_u(other.m_u)
+          m_u(other.m_u),
+          m_p(other.m_p),
+          m_gradient(other.m_gradient)
       {}
 
       Grad(Grad&& other)
         : Parent(std::move(other)),
-          m_u(std::move(other.m_u))
+          m_u(std::move(other.m_u)),
+          m_p(std::exchange(other.m_p, nullptr)),
+          m_gradient(std::move(other.m_gradient))
       {}
 
       constexpr
@@ -224,12 +201,6 @@ namespace Rodin::Variational
       }
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(), 1 };
-      }
-
-      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
@@ -237,24 +208,35 @@ namespace Rodin::Variational
 
       const Geometry::Point& getPoint() const
       {
-        return m_p.value().get();
+        assert(m_p);
+        return *m_p;
       }
 
       Grad& setPoint(const Geometry::Point& p)
       {
-        m_p = p;
+        if (m_p == &p)
+          return *this;
+        m_p = &p;
+        const auto& polytope = p.getPolytope();
+        const auto& rc = p.getReferenceCoordinates();
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const size_t count = fe.getCount();
+        m_gradient.resize(count);
+        for (size_t local = 0; local < count; local++)
+        {
+          const auto& basis = fe.getBasis(local);
+          m_gradient[local] = basis.getGradient()(rc);
+        }
         return *this;
       }
 
+      constexpr
       auto getBasis(size_t local) const
       {
-        const auto& p = m_p.value().get();
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& rc = p.getReferenceCoordinates();
-        return p.getJacobianInverse().transpose() * this->object(fe.getGradient(local)(rc));
+        return getPoint().getJacobianInverse().transpose() * m_gradient[local];
       }
 
       Grad* copy() const noexcept override
@@ -265,13 +247,9 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const OperandType> m_u;
 
-      std::optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      const Geometry::Point* m_p;
+      std::vector<Math::SpatialVector<ScalarType>> m_gradient;
   };
-
-  template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Grad(const ShapeFunction<NestedDerived, P1<Number, Mesh>, Space>&)
-    -> Grad<ShapeFunction<NestedDerived, P1<Number, Mesh>, Space>>;
 }
 
 #endif
-

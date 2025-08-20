@@ -26,13 +26,20 @@ namespace Rodin::Solver
    */
 
   /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for BiCGSTAB
+   */
+  template <class LinearSystem>
+  BiCGSTAB(Variational::ProblemBase<LinearSystem>&) -> BiCGSTAB<LinearSystem>;
+
+  /**
    * @ingroup BiCGSTABSpecializations
    * @brief Conjugate gradient solver for self-adjoint problems, for use with
    * Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class BiCGSTAB<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>> final
-    : public SolverBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>
+  class BiCGSTAB<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
+    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -41,16 +48,18 @@ namespace Rodin::Solver
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using ProblemType = Variational::ProblemBase<OperatorType, VectorType, ScalarType>;
+      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
-      using Parent = SolverBase<OperatorType, VectorType, ScalarType>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
+      using Parent = SolverBase<LinearSystemType>;
 
       using Parent::solve;
 
       /**
        * @brief Constructs the BiCGSTAB object with default parameters.
        */
-      BiCGSTAB(ProblemType& pb)
+      BiCGSTAB(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
@@ -64,7 +73,7 @@ namespace Rodin::Solver
 
       ~BiCGSTAB() = default;
 
-      BiCGSTAB& setTolerance(double tol)
+      BiCGSTAB& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
@@ -76,13 +85,13 @@ namespace Rodin::Solver
         return *this;
       }
 
-      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      void solve(LinearSystemType& axb) override
       {
-        m_solver.compute(A);
-        x = m_solver.solve(b);
+        m_solver.compute(axb.getOperator());
+        axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      bool success() const
+      Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
@@ -95,14 +104,6 @@ namespace Rodin::Solver
     private:
       Eigen::BiCGSTAB<OperatorType> m_solver;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD for BiCGSTAB
-   */
-  template <class Scalar>
-  BiCGSTAB(Variational::ProblemBase<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>&)
-    -> BiCGSTAB<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
 }
 
 #endif

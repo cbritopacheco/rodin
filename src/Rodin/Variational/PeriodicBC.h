@@ -72,15 +72,17 @@ namespace Rodin::Variational
    * @tparam ValueDerived Type of value
    *
    */
-  template <class FES>
-  class PeriodicBC<TrialFunction<FES>, IndexMap<IndexSet>> final
+  template <class Solution, class FES>
+  class PeriodicBC<TrialFunction<Solution, FES>, IndexMap<IndexSet>> final
     : public PeriodicBCBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
       using FESType = FES;
 
+      using SolutionType = Solution;
+
       /// Operand type
-      using OperandType = TrialFunction<FESType>;
+      using OperandType = TrialFunction<SolutionType, FESType>;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
@@ -174,9 +176,9 @@ namespace Rodin::Variational
    * @tparam FES Type of finite element space
    * @tparam ValueDerived Derived type of FunctionBase
    */
-  template <class FES>
-  PeriodicBC(const TrialFunction<FES>&, const IndexMap<IndexSet>&)
-    -> PeriodicBC<TrialFunction<FES>, IndexMap<IndexSet>>;
+  template <class Solution, class FES>
+  PeriodicBC(const TrialFunction<Solution, FES>&, const IndexMap<IndexSet>&)
+    -> PeriodicBC<TrialFunction<Solution, FES>, IndexMap<IndexSet>>;
 }
 
 #endif

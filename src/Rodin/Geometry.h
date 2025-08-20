@@ -18,5 +18,6 @@
 #include "Geometry/Polytope.h"
 #include "Geometry/PolytopeTransformation.h"
 #include "Geometry/IsoparametricTransformation.h"
+#include "Geometry/BalancedCompactPartitioner.h"
 
 #endif

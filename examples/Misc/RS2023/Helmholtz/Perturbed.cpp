@@ -6,6 +6,7 @@
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
@@ -139,7 +140,6 @@ int main(int, char**)
 
   GridFunction diff(vh);
   diff = chi * Pow(u0 - u_e, 2);
-  diff.setWeights();
 
   GridFunction indicator(vh);
   indicator = chi;

@@ -6,23 +6,22 @@
 
 namespace Rodin::FormLanguage
 {
-  template <class FESType>
-  struct Traits<Variational::TestFunction<FESType>>
+  template <class FES>
+  struct Traits<Variational::TestFunction<FES>>
   {
-    using FES = FESType;
+    using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TestSpace;
   };
 }
 
 namespace Rodin::Variational
 {
-  template <class FESType>
-  class TestFunction final
-    : public ShapeFunction<TestFunction<FESType>, FESType, TestSpace>
+  template <class FES>
+  class TestFunction
+    : public ShapeFunction<TestFunction<FES>, FES, TestSpace>
   {
     public:
-      using FES = FESType;
-
+      using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = TestSpace;
 
       using Parent = ShapeFunction<TestFunction<FESType>, FESType, TestSpace>;
@@ -46,7 +45,6 @@ namespace Rodin::Variational
 
       void operator=(TestFunction&&) = delete;
 
-      inline
       constexpr
       auto x() const
       {
@@ -54,7 +52,6 @@ namespace Rodin::Variational
         return Component(*this, 0);
       }
 
-      inline
       constexpr
       auto y() const
       {
@@ -62,7 +59,6 @@ namespace Rodin::Variational
         return Component(*this, 1);
       }
 
-      inline
       constexpr
       auto z() const
       {
@@ -70,14 +66,13 @@ namespace Rodin::Variational
         return Component(*this, 2);
       }
 
-      inline
       constexpr
       const TestFunction& getLeaf() const
       {
         return *this;
       }
 
-      inline TestFunction* copy() const noexcept override
+      TestFunction* copy() const noexcept override
       {
         return new TestFunction(*this);
       }

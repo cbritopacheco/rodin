@@ -8,6 +8,7 @@
 #include <chrono>
 #include <fstream>
 #include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 
@@ -221,7 +222,6 @@ void run(int id, const std::vector<Data>& grid)
 
     GridFunction diff(vh);
     diff = chi * Pow(u0 - ue, 2);
-    diff.setWeights();
     const Real error = sqrt(Integral(diff).compute());
 
     // Alert::Success() << "L2 Error: " << error

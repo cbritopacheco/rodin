@@ -4,18 +4,37 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_GRADIENT_H
-#define RODIN_VARIATIONAL_GRADIENT_H
+#ifndef RODIN_VARIATIONAL_GRAD_H
+#define RODIN_VARIATIONAL_GRAD_H
 
 #include "ForwardDecls.h"
 
-#include "GridFunction.h"
-#include "TestFunction.h"
-#include "TrialFunction.h"
 #include "VectorFunction.h"
 
 namespace Rodin::FormLanguage
-{}
+{
+  template <class FES, class Data>
+  struct Traits<Variational::Grad<Variational::GridFunction<FES, Data>>>
+  {
+    using FESType = FES;
+
+    using OperandType = Variational::GridFunction<FESType, Data>;
+
+    using RangeType = Math::Vector<typename FormLanguage::Traits<FESType>::ScalarType>;
+  };
+
+  template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<
+    Variational::Grad<Variational::ShapeFunction<NestedDerived, FES, Space>>>
+  {
+    using FESType = FES;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
+
+    using RangeType = Math::Vector<typename FormLanguage::Traits<FESType>::ScalarType>;
+  };
+}
 
 namespace Rodin::Variational
 {
@@ -33,12 +52,11 @@ namespace Rodin::Variational
 
   /**
    * @ingroup GradSpecializations
-   * @brief Gradient of a P1 GridFunction
    */
-  template <class FES, class Derived>
-  class GradBase<GridFunction<FES>, Derived>
+  template <class FES, class Data, class Derived>
+  class GradBase<GridFunction<FES, Data>, Derived>
     : public VectorFunctionBase<
-        typename FormLanguage::Traits<FES>::ScalarType, GradBase<GridFunction<FES>, Derived>>
+        typename FormLanguage::Traits<FES>::ScalarType, GradBase<GridFunction<FES, Data>, Derived>>
   {
     public:
       using FESType = FES;
@@ -47,15 +65,10 @@ namespace Rodin::Variational
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       using Parent = VectorFunctionBase<ScalarType, GradBase<OperandType, Derived>>;
 
-      /**
-       * @brief Constructs the gradient of a @f$ \mathbb{P}_1 @f$ function @f$
-       * u @f$.
-       * @param[in] u P1 GridFunction
-       */
       GradBase(const OperandType& u)
         : m_u(u)
       {
@@ -84,15 +97,9 @@ namespace Rodin::Variational
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      SpatialVectorType getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        SpatialVectorType out;
-        getValue(out, p);
-        return out;
-      }
-
-      void getValue(SpatialVectorType& out, const Geometry::Point& p) const
-      {
+        static thread_local SpatialVectorType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -100,22 +107,23 @@ namespace Rodin::Variational
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          interpolate(out, p);
+          this->interpolate(s_out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          interpolate(out, *inclusion);
+          this->interpolate(s_out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          interpolate(out, *restriction);
+          this->interpolate(s_out, *restriction);
         }
         else
         {
           assert(false);
         }
+        return s_out;
       }
 
       /**
@@ -144,6 +152,21 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const OperandType> m_u;
   };
+
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for Grad of a GridFunction
+   */
+  template <class FES, class Data>
+  Grad(const GridFunction<FES, Data>&) -> Grad<GridFunction<FES, Data>>;
+
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for Grad of a ShapeFunction
+   */
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  Grad(const ShapeFunction<NestedDerived, FES, Space>&)
+    -> Grad<ShapeFunction<NestedDerived, FES, Space>>;
 }
 
 #endif

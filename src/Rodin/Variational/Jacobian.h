@@ -8,9 +8,6 @@
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
 #include "ForwardDecls.h"
-#include "GridFunction.h"
-#include "ShapeFunction.h"
-#include "VectorFunction.h"
 #include "MatrixFunction.h"
 
 namespace Rodin::Variational
@@ -31,10 +28,10 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of a P1 GridFunction
    */
-  template <class FES, class Derived>
-  class JacobianBase<GridFunction<FES>, Derived>
+  template <class FES, class Data, class Derived>
+  class JacobianBase<GridFunction<FES, Data>, Derived>
     : public MatrixFunctionBase<
-        typename FormLanguage::Traits<FES>::ScalarType, JacobianBase<GridFunction<FES>, Derived>>
+        typename FormLanguage::Traits<FES>::ScalarType, JacobianBase<GridFunction<FES, Data>, Derived>>
   {
     public:
       using FESType = FES;
@@ -43,7 +40,7 @@ namespace Rodin::Variational
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
-      using OperandType = GridFunction<FESType>;
+      using OperandType = GridFunction<FESType, Data>;
 
       using Parent =
         MatrixFunctionBase<ScalarType, JacobianBase<OperandType, Derived>>;
@@ -85,15 +82,9 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      SpatialMatrixType getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
-        SpatialMatrixType out;
-        getValue(out, p);
-        return out;
-      }
-
-      void getValue(SpatialMatrixType& out, const Geometry::Point& p) const
-      {
+        static thread_local SpatialMatrixType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -101,22 +92,23 @@ namespace Rodin::Variational
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          interpolate(out, p);
+          this->interpolate(s_out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          interpolate(out, *inclusion);
+          this->interpolate(s_out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          interpolate(out, *restriction);
+          this->interpolate(s_out, *restriction);
         }
         else
         {
           assert(false);
         }
+        return s_out;
       }
 
       constexpr

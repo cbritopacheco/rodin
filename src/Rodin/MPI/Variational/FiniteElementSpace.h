@@ -15,10 +15,11 @@ namespace Rodin::Variational
     : public FiniteElementSpaceBase
   {
     public:
-      /// Parent class
+      using MeshType = Geometry::Mesh<Context::MPI>;
+
       using Parent = FiniteElementSpaceBase;
 
-      using MeshType = Geometry::Mesh<Context::MPI>;
+      using Parent::getGlobalIndex;
 
       Index getGlobalIndex(Index i) const
       {

@@ -7,30 +7,41 @@
 #ifndef RODIN_ASSEMBLY_SEQUENTIAL_H
 #define RODIN_ASSEMBLY_SEQUENTIAL_H
 
+#include "Rodin/Context/Local.h"
+
+#include "Rodin/Tuple.h"
+
+#include "Rodin/Math/Traits.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
-#include "Rodin/Variational/BilinearForm.h"
 
-#include "Rodin/Utility/Repeat.h"
+#include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Region.h"
+
+#include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
-#include "AssemblyBase.h"
 
-namespace Rodin::Assembly::Internal
+namespace Rodin::Assembly
 {
-  class SequentialIteration
+  template <>
+  class SequentialIteration<Geometry::Mesh<Context::Local>>
   {
     public:
       using MeshType = Geometry::Mesh<Context::Local>;
 
-      SequentialIteration(const MeshType& mesh, Variational::Integrator::Region);
+      SequentialIteration(const MeshType& mesh, const Geometry::Region&);
 
       Geometry::PolytopeIterator getIterator() const;
 
     private:
       std::reference_wrapper<const MeshType> m_mesh;
-      Variational::Integrator::Region m_region;
+      Geometry::Region m_region;
   };
+
+  SequentialIteration(
+      const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
+    -> SequentialIteration<Geometry::Mesh<Context::Local>>;
 }
 
 namespace Rodin::Assembly
@@ -82,7 +93,7 @@ namespace Rodin::Assembly
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          Internal::SequentialIteration seq(mesh, lfi.getRegion());
+          SequentialIteration seq(mesh, lfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
@@ -108,14 +119,14 @@ namespace Rodin::Assembly
    * @brief Sequential assembly of the Math::SparseMatrix associated to a
    * BilinearFormBase object.
    */
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class Sequential<
     Math::Matrix<
       typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Variational::BilinearForm<
-      TrialFES, TestFES,
+      Solution, TrialFES, TestFES,
       Math::Matrix<
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -126,7 +137,7 @@ namespace Rodin::Assembly
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
         Variational::BilinearForm<
-          TrialFES, TestFES,
+          Solution, TrialFES, TestFES,
           Math::Matrix<
             typename FormLanguage::Dot<
               typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -144,7 +155,7 @@ namespace Rodin::Assembly
 
       using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -172,7 +183,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::SequentialIteration seq(mesh, bfi.getRegion());
+          SequentialIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
@@ -182,7 +193,7 @@ namespace Rodin::Assembly
               const auto& cols = input.getTrialFES().getDOFs(it.getDimension(), it->getIndex());
               for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
                 for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
-                  res(rows(l), cols(m)) += bfi.integrate(m, l);
+                  res(rows(l), cols(m)) += Math::conj(bfi.integrate(m, l));
             }
           }
         }
@@ -190,8 +201,8 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::SequentialIteration trialseq(mesh, bfi.getTrialRegion());
-          Internal::SequentialIteration testseq(mesh, bfi.getTestRegion());
+          SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+          SequentialIteration testseq(mesh, bfi.getTestRegion());
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
             if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
@@ -205,7 +216,7 @@ namespace Rodin::Assembly
                   const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
                   for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
                     for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
-                      res(rows(l), cols(m)) += bfi.integrate(m, l);
+                      res(rows(l), cols(m)) += Math::conj(bfi.integrate(m, l));
                 }
               }
             }
@@ -223,14 +234,14 @@ namespace Rodin::Assembly
    * @brief Sequential assembly of the Math::SparseMatrix associated to a
    * BilinearFormBase object.
    */
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class Sequential<
     Math::SparseMatrix<
       typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
     Variational::BilinearForm<
-      TrialFES, TestFES,
+      Solution, TrialFES, TestFES,
       Math::SparseMatrix<
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -241,7 +252,7 @@ namespace Rodin::Assembly
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
         Variational::BilinearForm<
-          TrialFES, TestFES,
+          Solution, TrialFES, TestFES,
           Math::SparseMatrix<
             typename FormLanguage::Dot<
               typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -255,7 +266,7 @@ namespace Rodin::Assembly
 
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -281,7 +292,7 @@ namespace Rodin::Assembly
         Sequential<
           std::vector<Eigen::Triplet<ScalarType>>,
           Variational::BilinearForm<
-            TrialFES, TestFES,
+            Solution, TrialFES, TestFES,
             std::vector<Eigen::Triplet<ScalarType>>>> assembly;
         assembly.execute(triplets, {
           input.getTrialFES(), input.getTestFES(),
@@ -296,13 +307,13 @@ namespace Rodin::Assembly
       }
   };
 
-  template <class TrialFES, class TestFES>
+  template <class Solution, class TrialFES, class TestFES>
   class Sequential<
     std::vector<Eigen::Triplet<
       typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
-    Variational::BilinearForm<TrialFES, TestFES,
+    Variational::BilinearForm<Solution, TrialFES, TestFES,
       std::vector<Eigen::Triplet<
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -312,7 +323,7 @@ namespace Rodin::Assembly
           typename FormLanguage::Dot<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
-        Variational::BilinearForm<TrialFES, TestFES,
+        Variational::BilinearForm<Solution, TrialFES, TestFES,
           std::vector<Eigen::Triplet<
             typename FormLanguage::Dot<
               typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -326,11 +337,14 @@ namespace Rodin::Assembly
 
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
-      using BilinearFormType = Variational::BilinearForm<TrialFES, TestFES, OperatorType>;
+      using BilinearFormType =
+        Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
-      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+      using LocalBilinearFormIntegratorBaseType =
+        Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
+      using GlobalBilinearFormIntegratorBaseType =
+        Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -357,7 +371,7 @@ namespace Rodin::Assembly
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          Internal::SequentialIteration seq(mesh, bfi.getRegion());
+          SequentialIteration seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
@@ -369,7 +383,7 @@ namespace Rodin::Assembly
               {
                 for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                 {
-                  const ScalarType s = bfi.integrate(m, l);
+                  const ScalarType s = Math::conj(bfi.integrate(m, l));
                   if (s != ScalarType(0))
                     res.emplace_back(rows(l), cols(m), s);
                 }
@@ -381,12 +395,12 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          Internal::SequentialIteration testseq(mesh, bfi.getTestRegion());
+          SequentialIteration testseq(mesh, bfi.getTestRegion());
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
             if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
             {
-              Internal::SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+              SequentialIteration trialseq(mesh, bfi.getTrialRegion());
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
                 if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
@@ -398,7 +412,7 @@ namespace Rodin::Assembly
                   {
                     for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                     {
-                      const ScalarType s = bfi.integrate(m, l);
+                      const ScalarType s = Math::conj(bfi.integrate(m, l));
                       if (s != ScalarType(0))
                         res.emplace_back(rows(l), cols(m), s);
                     }
@@ -416,13 +430,13 @@ namespace Rodin::Assembly
       }
   };
 
-  template <class ... TrialFES, class ... TestFES>
+  template <class ... Solution, class ... TrialFES, class ... TestFES>
   class Sequential<
     std::vector<Eigen::Triplet<Real>>,
-    Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>> final
+    Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>> final
       : public AssemblyBase<
           std::vector<Eigen::Triplet<Real>>,
-          Tuple<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>>
+          Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>>
   {
     public:
       using ScalarType = Real;
@@ -430,7 +444,7 @@ namespace Rodin::Assembly
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
       using TupleType =
-        Tuple<Variational::BilinearForm<TrialFES, TestFES, OperatorType>...>;
+        Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>...>;
 
       using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -456,7 +470,7 @@ namespace Rodin::Assembly
       {
         using AssemblyTuple =
           Tuple<Sequential<std::vector<Eigen::Triplet<Real>>,
-          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>...>;
+          Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>...>;
 
         AssemblyTuple assembly;
 
@@ -495,19 +509,19 @@ namespace Rodin::Assembly
       }
   };
 
-  template <class ... TrialFES, class ... TestFES>
+  template <class ... Solution, class ... TrialFES, class ... TestFES>
   class Sequential<
     Math::SparseMatrix<Real>,
-    Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>...>> final
+    Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Real>>...>> final
       : public AssemblyBase<
           Math::SparseMatrix<Real>,
-          Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>...>>
+          Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Real>>...>>
     {
       public:
         using Parent =
           AssemblyBase<
             Math::SparseMatrix<Real>,
-            Tuple<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix<Real>>...>>;
+            Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Real>>...>>;
 
         using InputType = typename Parent::InputType;
 
@@ -528,7 +542,7 @@ namespace Rodin::Assembly
           Sequential<
             std::vector<Eigen::Triplet<Real>>,
             Tuple<
-              Variational::BilinearForm<TrialFES, TestFES,
+              Variational::BilinearForm<Solution, TrialFES, TestFES,
               std::vector<Eigen::Triplet<Real>>>...>> assembly;
           res.resize(input.getRows(), input.getColumns());
           std::vector<Eigen::Triplet<Real>> triplets;
@@ -601,6 +615,78 @@ namespace Rodin::Assembly
           return new Sequential(*this);
         }
     };
+
+
+  template <class Scalar, class Solution, class FES, class ValueDerived>
+  class Sequential<
+    IndexMap<Scalar>,
+    Variational::DirichletBC<
+      Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>> final
+    : public AssemblyBase<
+        IndexMap<Scalar>,
+        Variational::DirichletBC<
+          Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
+  {
+    public:
+      using FESType = FES;
+
+      using TrialFunctionType = Variational::TrialFunction<Solution, FES>;
+
+      using ValueType = Variational::FunctionBase<ValueDerived>;
+
+      using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
+
+      using Parent = AssemblyBase<IndexMap<Scalar>, DirichletBCType>;
+
+      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
+
+      using InputType = typename Parent::InputType;
+
+      Sequential() = default;
+
+      Sequential(const Sequential& other)
+        : Parent(other)
+      {}
+
+      Sequential(Sequential&& other)
+        : Parent(std::move(other))
+      {}
+
+      void execute(IndexMap<Scalar>& res, const InputType& input) const override
+      {
+        const auto& u = input.getOperand();
+        const auto& essBdr = input.getEssentialBoundary();
+        const auto& value = input.getValue();
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t faceCount = mesh.getFaceCount();
+        const size_t faceDim = mesh.getDimension() - 1;
+        res.clear();
+        for (Index i = 0; i < faceCount; i++)
+        {
+          if (mesh.isBoundary(i))
+          {
+            if (essBdr.size() == 0 || essBdr.count(mesh.getAttribute(faceDim, i)))
+            {
+              const auto& fe = fes.getFiniteElement(faceDim, i);
+              const auto& mapping = fes.getMapping({ faceDim, i }, value);
+              for (Index local = 0; local < fe.getCount(); local++)
+              {
+                const Index global = fes.getGlobalIndex({ faceDim, i }, local);
+                auto find = res.find(global);
+                if (find == res.end())
+                  res.insert(find, std::pair{ global, fe.getLinearForm(local)(mapping) });
+              }
+            }
+          }
+        }
+      }
+
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+  };
 }
 
 #endif

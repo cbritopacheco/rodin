@@ -1,13 +1,13 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 
-#include <set>
 #include <memory>
 
+#include "Rodin/Geometry/Types.h"
+#include "Rodin/Geometry/Region.h"
 #include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
-#include "ShapeFunction.h"
 #include "Integrator.h"
 
 namespace Rodin::Variational
@@ -29,8 +29,9 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the object given a TrialFunction and a TestFunction.
        */
-      template <class TrialFES, class TestFES>
-      BilinearFormIntegratorBase(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
+      template <class Solution, class TrialFES, class TestFES>
+      BilinearFormIntegratorBase(
+          const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
         : m_u(u.copy()), m_v(v.copy())
       {}
 
@@ -146,13 +147,13 @@ namespace Rodin::Variational
        * Specifies the material reference over which the integration should
        * take place.
        */
-      LocalBilinearFormIntegratorBase& over(Geometry::Attribute attr)
+      LocalBilinearFormIntegratorBase& over(const Geometry::Attribute& attr)
       {
         return over(FlatSet<Geometry::Attribute>{attr});
       }
 
       template <class A1, class A2, class ... As>
-      LocalBilinearFormIntegratorBase& over(A1 a1, A2 a2, As... attrs)
+      LocalBilinearFormIntegratorBase& over(const A1& a1, const A2& a2, const As&... attrs)
       {
         return over(FlatSet<Geometry::Attribute>{a1, a2, attrs...});
       }
@@ -177,7 +178,7 @@ namespace Rodin::Variational
 
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
-      virtual Integrator::Region getRegion() const = 0;
+      virtual Geometry::Region getRegion() const = 0;
 
       virtual
       LocalBilinearFormIntegratorBase* copy() const noexcept override = 0;
@@ -263,9 +264,9 @@ namespace Rodin::Variational
 
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
-      virtual Integrator::Region getTrialRegion() const = 0;
+      virtual Geometry::Region getTrialRegion() const = 0;
 
-      virtual Integrator::Region getTestRegion() const = 0;
+      virtual Geometry::Region getTestRegion() const = 0;
 
       virtual
       GlobalBilinearFormIntegratorBase* copy() const noexcept override = 0;

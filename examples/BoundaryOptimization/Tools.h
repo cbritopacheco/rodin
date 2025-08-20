@@ -15,9 +15,7 @@ namespace Rodin::Examples::BoundaryOptimization
     std::vector<Geometry::Point> cs;
     for (auto it = tf.getFiniteElementSpace().getMesh().getVertex(); !it.end(); ++it)
     {
-      const Geometry::Point p(*it, it->getTransformation(),
-          Geometry::Polytope::getVertices(
-            Geometry::Polytope::Type::Point).col(0), it->getCoordinates());
+      const Geometry::Point p(*it, Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0), it->getCoordinates());
       const Real tp = tf(p);
       if (tp > 1e-12 && (tp / tc) > (1 - 1e-12))
       {
@@ -55,10 +53,11 @@ namespace Rodin::Examples::BoundaryOptimization
     const size_t per = mesh.getPerimeter();
     const size_t D = mesh.getDimension();
     auto ccl = mesh.ccl(
+        D - 1,
         [](const Geometry::Polytope& p1, const Geometry::Polytope& p2)
         {
           return p1.getAttribute() == p2.getAttribute();
-        }, D - 1, attrs );
+        }, attrs);
     size_t ccs = ccl.getCount();
 
     for (const auto& cc : ccl)

@@ -8,23 +8,13 @@
 #define RODIN_VARIATIONAL_INTEGRAL_H
 
 #include <cassert>
-#include <set>
 #include <utility>
 
-#include "Rodin/FormLanguage/Base.h"
+#include "Rodin/Geometry/Region.h"
 
-#include "Dot.h"
 #include "Function.h"
-#include "LinearForm.h"
 #include "ForwardDecls.h"
-#include "GridFunction.h"
-#include "TestFunction.h"
-#include "TrialFunction.h"
-#include "FiniteElement.h"
-#include "MatrixFunction.h"
-#include "QuadratureRule.h"
-#include "LinearFormIntegrator.h"
-#include "BilinearFormIntegrator.h"
+#include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
@@ -108,9 +98,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Cells;
+        return Geometry::Region::Cells;
       }
 
       Integral* copy() const noexcept override
@@ -166,9 +156,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Cells;
+        return Geometry::Region::Cells;
       }
 
       Integral* copy() const noexcept override
@@ -189,13 +179,13 @@ namespace Rodin::Variational
    * @ingroup IntegralSpecializations
    * @brief Integration of a GridFunction object.
    */
-  template <class FES>
-  class Integral<GridFunction<FES>> final
-    : public QuadratureRule<GridFunction<FES>>
+  template <class FES, class Data>
+  class Integral<GridFunction<FES, Data>> final
+    : public QuadratureRule<GridFunction<FES, Data>>
   {
     public:
       /// Type of integrand
-      using IntegrandType = GridFunction<FES>;
+      using IntegrandType = GridFunction<FES, Data>;
 
       /// Parent class
       using Parent = QuadratureRule<IntegrandType>;
@@ -217,9 +207,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      Integrator::Region getRegion() const override
+      Geometry::Region getRegion() const override
       {
-        return Integrator::Region::Cells;
+        return Geometry::Region::Cells;
       }
 
       Integral* copy() const noexcept override
@@ -228,8 +218,8 @@ namespace Rodin::Variational
       }
   };
 
-  template <class FES>
-  Integral(const GridFunction<FES>&) -> Integral<GridFunction<FES>>;
+  template <class FES, class Data>
+  Integral(const GridFunction<FES, Data>&) -> Integral<GridFunction<FES, Data>>;
 }
 
 #endif

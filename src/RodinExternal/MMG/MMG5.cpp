@@ -19,7 +19,7 @@ namespace Rodin::External::MMG
     : m_ridgeDetection(true)
   {}
 
-  MMG5_pMesh MMG5::createMesh(size_t version, size_t dim, std::optional<size_t> spaceDim)
+  MMG5_pMesh MMG5::createMesh(size_t version, size_t dim, Optional<size_t> spaceDim)
   {
     MMG5_pMesh res;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Mesh,
@@ -554,7 +554,7 @@ namespace Rodin::External::MMG
       for (const auto& c : ptr->getRequiredVertices())
       {
         assert(c >= 0);
-        assert(c <= res->na);
+        assert(c <= res->np);
         res->point[c + 1].tag |= MG_REQ;
         res->point[c + 1].tag &= ~MG_NUL;
       }
@@ -638,7 +638,7 @@ namespace Rodin::External::MMG
       if (src->edge[i].tag & MG_GEO)
         build.ridge(i - 1);
       if (src->edge[i].tag & MG_REQ)
-        build.requiredEdge(i);
+        build.requiredEdge(i - 1);
     }
     // Add triangles
     build.reserve(2, src->nt);

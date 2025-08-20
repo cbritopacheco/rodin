@@ -1,8 +1,6 @@
-#include "Rodin/Alert/MemberFunctionException.h"
+#include "Polytope.h"
 
 #include "SubMesh.h"
-
-#include "Polytope.h"
 
 namespace Rodin::Geometry
 {
@@ -36,7 +34,7 @@ namespace Rodin::Geometry
     return m_parent.get();
   }
 
-  std::optional<Point> SubMesh<Context::Local>::restriction(const Point& p) const
+  Optional<Point> SubMesh<Context::Local>::restriction(const Point& p) const
   {
     const auto& polytope = p.getPolytope();
     const size_t d = polytope.getDimension();
@@ -71,12 +69,8 @@ namespace Rodin::Geometry
         // Could not find Polytope(d, i) in the SubMesh to parent Mesh map.
         return {};
       }
-      i = find->get_left();
+      i = find->second;
     }
-    std::unique_ptr<Polytope> childPolytope(getPolytope(d, i).release());
-    return Point(
-        std::move(*childPolytope),
-        getPolytopeTransformation(d, i),
-        std::cref(p.getReferenceCoordinates()), p.getPhysicalCoordinates());
+    return Point(*getPolytope(d, i), p.getReferenceCoordinates(), p.getPhysicalCoordinates());
   }
 }

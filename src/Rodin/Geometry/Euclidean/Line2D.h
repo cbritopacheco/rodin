@@ -66,7 +66,7 @@ namespace Rodin::Geometry::Euclidean
      */
     inline
     constexpr
-    std::optional<T> operator()(T x) const;
+    Optional<T> operator()(T x) const;
 
     /**
      * Evaluates a point \f$ (x, y) \f$ by the following function:
@@ -124,15 +124,15 @@ namespace Rodin::Geometry::Euclidean
      */
     inline
     constexpr
-    std::optional<T> slope() const;
+    Optional<T> slope() const;
 
     inline
     constexpr
-    std::optional<T> xIntercept() const;
+    Optional<T> xIntercept() const;
 
     inline
     constexpr
-    std::optional<T> yIntercept() const;
+    Optional<T> yIntercept() const;
 
     inline
     constexpr
@@ -163,7 +163,7 @@ namespace Rodin::Geometry::Euclidean
      */
     inline
     constexpr
-    std::optional<Point2D<T>> intersect(const Line2D<T>& other) const;
+    Optional<Point2D<T>> intersect(const Line2D<T>& other) const;
 
     /**
      * Returns the intersection point(s) between the line and the specified
@@ -197,7 +197,7 @@ namespace Rodin::Geometry::Euclidean
      */
     inline
     constexpr
-    std::optional<LineSegment2D<T>> connect(const Circle<T>& other) const;
+    Optional<LineSegment2D<T>> connect(const Circle<T>& other) const;
 
     /**
      * Computes the distance between parallel lines.

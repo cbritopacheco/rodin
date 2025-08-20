@@ -8,7 +8,6 @@
 #define RODIN_VARIATIONAL_AND_H
 
 #include "ForwardDecls.h"
-#include "GridFunction.h"
 #include "BooleanFunction.h"
 
 namespace Rodin::Variational
@@ -34,6 +33,10 @@ namespace Rodin::Variational
 
       using Parent = BooleanFunctionBase<AND<LHSType, RHSType>>;
 
+      using Parent::traceOf;
+
+      using Parent::operator();
+
       AND(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
@@ -49,28 +52,25 @@ namespace Rodin::Variational
           m_rhs(std::move(other.m_rhs))
       {}
 
-      inline
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      inline
       const auto& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      inline
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return getLHS().getValue(p) && getRHS().getValue(p);
       }
 
-      inline AND* copy() const noexcept final override
+      AND* copy() const noexcept final override
       {
         return new AND(*this);
       }
@@ -85,7 +85,6 @@ namespace Rodin::Variational
     -> AND<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  inline
   constexpr
   auto
   operator&&(const BooleanFunctionBase<LHSDerived>& lhs, const BooleanFunctionBase<RHSDerived>& rhs)
@@ -94,7 +93,6 @@ namespace Rodin::Variational
   }
 
   template <class RHSDerived>
-  inline
   constexpr
   auto
   operator&&(Boolean lhs, const BooleanFunctionBase<RHSDerived>& rhs)
@@ -103,7 +101,6 @@ namespace Rodin::Variational
   }
 
   template <class LHSDerived>
-  inline
   constexpr
   auto
   operator&&(const BooleanFunctionBase<LHSDerived>& lhs, Boolean rhs)

@@ -5,7 +5,6 @@
 #include <boost/type_index.hpp>
 
 #include <Eigen/Core>
-#include <unsupported/Eigen/CXX11/Tensor>
 
 #include "Rodin/Types.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -19,7 +18,7 @@ namespace Rodin::FormLanguage
    * @see Traits
    */
 
-  template <class ... Args>
+  template <class T, class Enable = void>
   struct Traits;
 }
 

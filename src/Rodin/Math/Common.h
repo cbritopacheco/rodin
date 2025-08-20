@@ -12,7 +12,6 @@
 #include <Eigen/Core>
 
 #include "Rodin/Types.h"
-#include "Rodin/FormLanguage/Traits.h"
 
 namespace Rodin::Math
 {
@@ -93,6 +92,12 @@ namespace Rodin::Math
   Boolean isNaN(const T& x)
   {
     return std::isnan(x);
+  }
+
+  constexpr
+  Boolean isNaN(const Complex& x)
+  {
+    return std::isnan(x.real()) || std::isnan(x.imag());
   }
 
   /**
@@ -197,6 +202,12 @@ namespace Rodin::Math
     return std::numeric_limits<T>::quiet_NaN();
   }
 
+  constexpr
+  Complex nan()
+  {
+    return Complex(nan<Real>(), nan<Real>());
+  }
+
   template <class LHS, class RHS>
   constexpr
   auto sum(const LHS& lhs, const RHS& rhs)
@@ -241,76 +252,15 @@ namespace Rodin::Math
   constexpr
   Complex dot(const Complex& lhs, const Complex& rhs)
   {
-    return conj(lhs) * rhs;
+    return lhs * conj(rhs);
   }
 
   template <class LHSDerived, class RHSDerived>
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
-    using LHS = Eigen::MatrixBase<LHSDerived>;
-    using RHS = Eigen::MatrixBase<RHSDerived>;
-    if constexpr (LHS::IsVectorAtCompileTime)
-    {
-      static_assert(RHS::IsVectorAtCompileTime);
-      return lhs.dot(rhs);
-    }
-    else
-    {
-      return (lhs.conjugate().array() * rhs.array()).rowwise().sum().colwise().sum().value();
-    }
+    return (lhs.array() * rhs.conjugate().array()).sum();
   }
-}
-
-namespace Rodin::FormLanguage
-{
-  template <>
-  struct Traits<Real>
-  {
-    using ScalarType = Real;
-  };
-
-  template <>
-  struct Traits<Complex>
-  {
-    using ScalarType = Complex;
-  };
-
-  template <class LHS, class RHS>
-  struct Sum
-  {
-    using Type = decltype(Math::sum(std::declval<LHS>(), std::declval<RHS>()));
-  };
-
-  template <class LHS, class RHS>
-  struct Minus
-  {
-    using Type = decltype(Math::minus(std::declval<LHS>(), std::declval<RHS>()));
-  };
-
-  template <class Operand>
-  struct UnaryMinus
-  {
-    using Type = decltype(Math::minus(std::declval<Operand>()));
-  };
-
-  template <class LHS, class RHS>
-  struct Mult
-  {
-    using Type = decltype(Math::mult(std::declval<LHS>(), std::declval<RHS>()));
-  };
-
-  template <class LHS, class RHS>
-  struct Division
-  {
-    using Type = decltype(Math::division(std::declval<LHS>(), std::declval<RHS>()));
-  };
-
-  template <class LHS, class RHS>
-  struct Dot
-  {
-    using Type = decltype(Math::dot(std::declval<LHS>(), std::declval<RHS>()));
-  };
 }
 
 #endif

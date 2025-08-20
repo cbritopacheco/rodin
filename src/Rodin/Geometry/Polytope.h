@@ -44,6 +44,145 @@ namespace Rodin::Geometry
         Wedge
       };
 
+      struct Traits
+      {
+        public:
+          constexpr Traits(Type g)
+            : m_g(g)
+          {}
+
+          constexpr
+          bool isSimplex()
+          {
+            switch (m_g)
+            {
+              case Type::Point:
+              case Type::Segment:
+              case Type::Triangle:
+              case Type::Tetrahedron:
+                return true;
+              case Type::Quadrilateral:
+              case Type::Wedge:
+                return false;
+            }
+            assert(false);
+            return false;
+          }
+
+          constexpr
+          size_t getDimension()
+          {
+            switch (m_g)
+            {
+              case Type::Point:
+                return 0;
+              case Type::Segment:
+                return 1;
+              case Type::Triangle:
+              case Type::Quadrilateral:
+                return 2;
+              case Type::Tetrahedron:
+              case Type::Wedge:
+                return 3;
+            }
+            assert(false);
+            return 0;
+          }
+
+          constexpr
+          size_t getVertexCount()
+          {
+            switch (m_g)
+            {
+              case Type::Point:
+                return 1;
+              case Type::Segment:
+                return 2;
+              case Type::Triangle:
+                return 3;
+              case Type::Quadrilateral:
+              case Type::Tetrahedron:
+                return 4;
+              case Type::Wedge:
+                return 6;
+            }
+            assert(false);
+            return 0;
+          }
+
+          const Math::SpatialPoint& getVertex(size_t i) const
+          {
+            switch (m_g)
+            {
+              case Type::Point:
+              {
+                static thread_local const Math::SpatialPoint s_node{{ 0 }};
+                return s_node;
+              }
+              case Type::Segment:
+              {
+                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
+                {
+                  Math::SpatialPoint{{ 0 }},
+                  Math::SpatialPoint{{ 1 }}
+                };
+                return s_nodes[i];
+              }
+              case Type::Triangle:
+              {
+                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
+                {
+                  Math::SpatialPoint{{ 0, 0 }},
+                  Math::SpatialPoint{{ 1, 0 }},
+                  Math::SpatialPoint{{ 0, 1 }}
+                };
+                return s_nodes[i];
+              }
+              case Type::Quadrilateral:
+              {
+                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
+                {
+                  Math::SpatialPoint{{ 0, 0 }},
+                  Math::SpatialPoint{{ 1, 0 }},
+                  Math::SpatialPoint{{ 0, 1 }},
+                  Math::SpatialPoint{{ 1, 1 }}
+                };
+                return s_nodes[i];
+              }
+              case Type::Tetrahedron:
+              {
+                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
+                {
+                  Math::SpatialPoint{{ 0, 0, 0 }},
+                  Math::SpatialPoint{{ 1, 0, 0 }},
+                  Math::SpatialPoint{{ 0, 1, 0 }},
+                  Math::SpatialPoint{{ 0, 0, 1 }}
+                };
+                return s_nodes[i];
+              }
+              case Type::Wedge:
+              {
+                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
+                {
+                  Math::SpatialPoint{{ 0, 0, 0 }},
+                  Math::SpatialPoint{{ 1, 0, 0 }},
+                  Math::SpatialPoint{{ 0, 1, 0 }},
+                  Math::SpatialPoint{{ 0, 0, 1 }},
+                  Math::SpatialPoint{{ 1, 0, 1 }},
+                  Math::SpatialPoint{{ 0, 1, 1 }}
+                };
+                return s_nodes[i];
+              }
+            }
+            assert(false);
+            static thread_local const Math::SpatialPoint s_null;
+            return s_null;
+          }
+
+        private:
+          const Type m_g;
+      };
+
       /**
        * @brief Iterable of possible polytope geometry types.
        */
@@ -57,81 +196,21 @@ namespace Rodin::Geometry
         Type::Wedge
       };
 
-      static const Math::PointMatrix& getVertices(Polytope::Type g);
-
-      static auto getVertex(size_t i, Polytope::Type g)
-      {
-        return getVertices(g).col(i);
-      }
-
-      constexpr
-      static size_t getVertexCount(Polytope::Type g)
-      {
-        switch (g)
-        {
-          case Type::Point:
-            return 1;
-          case Type::Segment:
-            return 2;
-          case Type::Triangle:
-            return 3;
-          case Type::Quadrilateral:
-          case Type::Tetrahedron:
-            return 4;
-          case Type::Wedge:
-            return 6;
-        }
-        assert(false);
-        return 0;
-      }
-
-      constexpr
-      static size_t getGeometryDimension(Polytope::Type g)
-      {
-        switch (g)
-        {
-          case Type::Point:
-            return 0;
-          case Type::Segment:
-            return 1;
-          case Type::Triangle:
-          case Type::Quadrilateral:
-            return 2;
-          case Type::Tetrahedron:
-          case Type::Wedge:
-            return 3;
-        }
-        assert(false);
-        return 0;
-      }
-
-      constexpr
-      static bool isSimplex(Polytope::Type g)
-      {
-        switch (g)
-        {
-          case Type::Point:
-          case Type::Segment:
-          case Type::Triangle:
-          case Type::Tetrahedron:
-            return true;
-          case Type::Quadrilateral:
-          case Type::Wedge:
-            return false;
-        }
-        assert(false);
-        return false;
-      }
-
       /**
        * @brief Consructs a polytope of dimension @f$ d @f$ and index @f$ i @f$
        * belonging to the given mesh.
        */
-      Polytope(size_t dimension, Index index, const MeshBase& mesh);
+      Polytope(size_t dimension, Index index, const MeshBase& mesh)
+        : m_dimension(dimension), m_index(index), m_mesh(mesh)
+      {}
 
       Polytope(const Polytope&) = default;
 
       Polytope(Polytope&&) = default;
+
+      Polytope& operator=(const Polytope&) = default;
+
+      Polytope& operator=(Polytope&&) = default;
 
       virtual ~Polytope() = default;
 
@@ -196,10 +275,8 @@ namespace Rodin::Geometry
       Polytope& setAttribute();
 
     private:
-      static const GeometryIndexed<Math::PointMatrix> s_vertices;
-
-      const size_t m_dimension;
-      const Index m_index;
+      size_t m_dimension;
+      Index m_index;
       std::reference_wrapper<const MeshBase> m_mesh;
   };
 
@@ -300,7 +377,7 @@ namespace Rodin::Geometry
         return getCoordinates()(i);
       }
 
-      Eigen::Map<const Math::SpatialVector<Real>> getCoordinates() const;
+      Eigen::Map<const Math::SpatialPoint> getCoordinates() const;
 
       constexpr
       Type getGeometry() const

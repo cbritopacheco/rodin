@@ -166,26 +166,6 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
-        {
-          static_assert(std::is_same_v<RHSRangeType, ScalarType>);
-          return { 1, 1 };
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
-        {
-          static_assert(std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>);
-          return getOperand().getRangeShape();
-        }
-        else
-        {
-          assert(false);
-          return { 0, 0 };
-        }
-      }
-
       const auto& getKernel() const
       {
         return m_kernel.get();
@@ -197,119 +177,78 @@ namespace Rodin::Variational
         return *m_u;
       }
 
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();
         const auto& operand = getOperand();
         const auto& mesh = p.getPolytope().getMesh();
-        if (m_qf.has_value())
+        assert(false);
+        if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
         {
-          if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
-          {
-            ScalarType res = 0;
-            for (auto it = mesh.getCell(); it; ++it)
-            {
-              const auto& polytope = *it;
-              const auto& qf = m_qf.value()(polytope);
-              const auto& trans = polytope.getTransformation();
-              for (size_t i = 0; i < qf.getSize(); i++)
-              {
-                const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
-                res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
-              }
-            }
-            return res;
-          }
-          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
-          {
-            Math::Vector<ScalarType> res;
-            getValue(res, p);
-            return res;
-          }
-          else
-          {
-            assert(false);
-            return void();
-          }
-        }
-        else
-        {
-          if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
-          {
-            ScalarType res = 0;
-            for (auto it = mesh.getCell(); it; ++it)
-            {
-              const auto& polytope = *it;
-              const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
-              const auto& trans = polytope.getTransformation();
-              for (size_t i = 0; i < qf.getSize(); i++)
-              {
-                const Geometry::Point y(polytope, trans, std::cref(qf.getPoint(i)));
-                res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
-              }
-            }
-            return res;
-          }
-          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
-          {
-            Math::Vector<ScalarType> res;
-            getValue(res, p);
-            return res;
-          }
-          else
-          {
-            assert(false);
-            return void();
-          }
-        }
-      }
-
-      void getValue(Math::Vector<ScalarType>& res, const Geometry::Point& p) const
-      {
-        const auto& kernel = getKernel();
-        const auto& operand = getOperand();
-        const auto& mesh = p.getPolytope().getMesh();
-        res.resize(getRangeShape().height());
-        res.setZero();
-        Math::Matrix<ScalarType> kxy;
-        if (m_qf.has_value())
-        {
+          ScalarType res = 0;
           for (auto it = mesh.getCell(); it; ++it)
           {
             const auto& polytope = *it;
-            const auto& qf = m_qf.value()(polytope);
-            const auto& trans = polytope.getTransformation();
+            const auto& qf = *m_qf;
             for (size_t i = 0; i < qf.getSize(); i++)
             {
-              const Geometry::Point y(polytope, trans, std::cref(qf.getPoint(i)));
-              kernel(kxy, p, y);
-              res += qf.getWeight(i) * y.getDistortion() * kxy * operand(y);
+              const Geometry::Point y(polytope, std::ref(qf.getPoint(i)));
+              res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
             }
           }
+          return res;
+        }
+        else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+        {
+          Math::Vector<ScalarType> res;
+          assert(false);
+          return res;
         }
         else
         {
-          for (auto it = mesh.getCell(); it; ++it)
-          {
-            const auto& polytope = *it;
-            const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
-            const auto& trans = polytope.getTransformation();
-            for (size_t i = 0; i < qf.getSize(); i++)
-            {
-              const Geometry::Point y(polytope, trans, std::cref(qf.getPoint(i)));
-              kernel(kxy, p, y);
-              res += qf.getWeight(i) * y.getDistortion() * kxy * operand(y);
-            }
-          }
+          assert(false);
+          return void();
         }
       }
 
-      Potential& setQuadratureFormula(
-          const std::function<const QF::QuadratureFormulaBase&(const Geometry::Polytope&)>& qf)
-      {
-        m_qf.emplace(qf);
-        return *this;
-      }
+      // void getValue(Math::Vector<ScalarType>& res, const Geometry::Point& p) const
+      // {
+      //   const auto& kernel = getKernel();
+      //   const auto& operand = getOperand();
+      //   const auto& mesh = p.getPolytope().getMesh();
+      //   assert(false);
+      //   // res.resize(getRangeShape().height());
+      //   res.setZero();
+      //   Math::Matrix<ScalarType> kxy;
+      //   if (m_qf.has_value())
+      //   {
+      //     for (auto it = mesh.getCell(); it; ++it)
+      //     {
+      //       const auto& polytope = *it;
+      //       const auto& qf = m_qf.value()(polytope);
+      //       for (size_t i = 0; i < qf.getSize(); i++)
+      //       {
+      //         const Geometry::Point y(polytope, qf.getPoint(i));
+      //         kernel(kxy, p, y);
+      //         res += qf.getWeight(i) * y.getDistortion() * kxy * operand(y);
+      //       }
+      //     }
+      //   }
+      //   else
+      //   {
+      //     for (auto it = mesh.getCell(); it; ++it)
+      //     {
+      //       const auto& polytope = *it;
+      //       const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
+      //       for (size_t i = 0; i < qf.getSize(); i++)
+      //       {
+      //         const Geometry::Point y(polytope, qf.getPoint(i));
+      //         kernel(kxy, p, y);
+      //         res += qf.getWeight(i) * y.getDistortion() * kxy * operand(y);
+      //       }
+      //     }
+      //   }
+      // }
 
       const auto& getQuadratureFormula() const
       {
@@ -324,8 +263,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const KernelType> m_kernel;
       std::unique_ptr<OperandType> m_u;
-      std::optional<
-        std::function<const QF::QuadratureFormulaBase&(const Geometry::Polytope&)>> m_qf;
+      std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
   };
 
   /**
@@ -413,29 +351,9 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
-      Integrator::Region getRegion() const
+      Geometry::Region getRegion() const
       {
-        return Integrator::Region::Cells;
-      }
-
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
-        {
-          static_assert(std::is_same_v<RHSRangeType, ScalarType>);
-          return { 1, 1 };
-        }
-        else if constexpr (std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>)
-        {
-          static_assert(std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>);
-          return getOperand().getRangeShape();
-        }
-        else
-        {
-          assert(false);
-          return { 0, 0 };
-        }
+        return Geometry::Region::Cells;
       }
 
       Potential* copy() const noexcept override
@@ -500,9 +418,9 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      Integrator::Region getTestRegion() const override
+      Geometry::Region getTestRegion() const override
       {
-        return Integrator::Region::Cells;
+        return Geometry::Region::Cells;
       }
 
       Integral* copy() const noexcept override

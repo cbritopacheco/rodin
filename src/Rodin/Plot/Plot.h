@@ -158,7 +158,7 @@ namespace Rodin::Plot
       FigureMap       m_figures;
       WindowHandle    m_initWindow;
       SDL_GLContext   m_glContext;
-      std::optional<Magnum::Platform::GLContext>  m_context;
+      Optional<Magnum::Platform::GLContext>  m_context;
 
       GUI::Cursor  m_arrowCursor,
                    m_ibeamCursor,

@@ -7,11 +7,9 @@
 #ifndef RODIN_VARIATIONAL_FINITEELEMENT_H
 #define RODIN_VARIATIONAL_FINITEELEMENT_H
 
-#include <unordered_map>
+#include <boost/serialization/access.hpp>
 
-#include "Rodin/Math/Matrix.h"
 #include "Rodin/Geometry/Polytope.h"
-#include "Rodin/Geometry/PolytopeTransformation.h"
 
 #include "ForwardDecls.h"
 
@@ -29,6 +27,8 @@ namespace Rodin::Variational
   class FiniteElementBase
   {
     public:
+      using ScalarType = typename FormLanguage::Traits<Derived>::ScalarType;
+
       constexpr
       FiniteElementBase()
         : m_g(Geometry::Polytope::Type::Point)
@@ -49,23 +49,28 @@ namespace Rodin::Variational
         : m_g(std::move(other.m_g))
       {}
 
-      virtual ~FiniteElementBase() = default;
-
       constexpr
       FiniteElementBase& operator=(const FiniteElementBase& other)
       {
-        m_g = other.m_g;
-        return *this;
+        if (this != &other)
+        {
+          m_g = other.m_g;
+        }
+        return static_cast<Derived&>(*this);
       }
 
       constexpr
       FiniteElementBase& operator=(FiniteElementBase&& other)
       {
-        m_g = std::move(other.m_g);
-        return *this;
+        if (this != &other)
+        {
+          m_g = std::move(other.m_g);
+        }
+        return static_cast<Derived&>(*this);
       }
 
-      inline
+      virtual ~FiniteElementBase() = default;
+
       constexpr
       Geometry::Polytope::Type getGeometry() const
       {
@@ -76,7 +81,6 @@ namespace Rodin::Variational
        * @brief Gets the number of degrees of freedom in the finite element.
        * @note CRTP method to be overriden in Derived class.
        */
-      inline
       constexpr
       size_t getCount() const
       {
@@ -86,30 +90,18 @@ namespace Rodin::Variational
       /**
        * @brief Gets the i-th degree of freedom on the finite element.
        */
-      inline
       constexpr
-      auto getNode(size_t i) const
+      const Math::SpatialVector<Real>& getNode(size_t i) const
       {
-        return getNodes().col(i);
-      }
-
-      /**
-       * @note CRTP method to be overriden in Derived class.
-       */
-      inline
-      constexpr
-      const Math::PointMatrix& getNodes() const
-      {
-        return static_cast<const Derived&>(*this).getNodes();
+        return static_cast<const Derived&>(*this).getNode(i);
       }
 
       /**
        * @brief Gets the i-th basis function of the finite element.
        * @note CRTP method to be overriden in Derived class.
        */
-      inline
       constexpr
-      const auto& getBasis(size_t i) const
+      decltype(auto) getBasis(size_t i) const
       {
         return static_cast<const Derived&>(*this).getBasis(i);
       }
@@ -118,18 +110,22 @@ namespace Rodin::Variational
        * @brief Gets the i-th linear function on the finite element.
        * @note CRTP method to be overriden in Derived class.
        */
-      inline
       constexpr
-      const auto& getLinearForm(size_t i) const
+      decltype(auto) getLinearForm(size_t i) const
       {
         return static_cast<const Derived&>(*this).getLinearForm(i);
       }
 
-      inline
       constexpr
       size_t getOrder() const
       {
         return static_cast<const Derived&>(*this).getOrder();
+      }
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
+        ar & m_g;
       }
 
     private:

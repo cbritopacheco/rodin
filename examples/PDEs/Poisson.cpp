@@ -7,6 +7,7 @@
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
@@ -16,49 +17,27 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  // Build a mesh
   Mesh mesh;
-  // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
-  mesh.load("SphereTetra.mesh", IO::FileFormat::MEDIT);
-  // mesh.scale(1.0 / 31);
-  // mesh.getConnectivity().compute(1, 2);
-  mesh.save("Poisson.geo", IO::FileFormat::ENSIGHT6);
-  mesh.save("Poisson.mesh", IO::FileFormat::MFEM);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.getConnectivity().compute(1, 2);
 
-  // Functions
-  P1 vh(mesh, 3);
+  P1 vh(mesh);
 
-  GridFunction gf(vh);
-  gf = [](Math::Vector<Real>& x, const Point& p)
-  {
-    x.resize(3);
-    // x[0] = -p.x() * p.z();
-    // x[1] = -p.y() * p.z();
-    // x[2] = 1 - p.z() * p.z();
-    x[0] = -p.y();
-    x[1] = p.x();
-    x[2] = 0.0;
-  };
-  gf.save("Poisson.vct", IO::FileFormat::ENSIGHT6);
-  gf.save("Poisson.gf", IO::FileFormat::MFEM);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
 
-  // ScalarFunction f(1.0);
+  RealFunction f = 1;
 
-  // TrialFunction u(vh);
-  // TestFunction  v(vh);
+  // Apply Dirichlet conditions on the entire boundary.
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+  CG(poisson).solve();
 
-  // // Define problem
-  // Problem poisson(u, v);
-  // poisson = Integral(Grad(u), Grad(v))
-  //         - Integral(f, v)
-  //         + DirichletBC(u, Zero());
-
-  // // Solve
-  // CG(poisson).solve();
-
-  // // Save solution
-  // u.getSolution().save("Poisson.gf");
-  // mesh.save("Poisson.mesh");
+  // Save solution
+  u.getSolution().save("Poisson.gf");
+  mesh.save("Poisson.mesh");
 
   return 0;
 }

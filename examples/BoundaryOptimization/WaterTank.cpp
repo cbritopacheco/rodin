@@ -5,10 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
-#include <Rodin/Threads/ThreadPool.h>
 
 #include <chrono>
 
@@ -40,8 +40,8 @@ static Real ellA = 1e-5;
 
 using RealFES = P1<Real>;
 using VectorFES = P1<Math::Vector<Real>>;
-using RealGridFunction = GridFunction<RealFES>;
-using VectorGridFunction = GridFunction<VectorFES>;
+using RealGridFunction = GridFunction<RealFES, Math::Vector<Real>>;
+using VectorGridFunction = GridFunction<VectorFES, Math::Vector<Real>>;
 using ShapeGradient = VectorGridFunction;
 
 int main(int, char**)
@@ -298,7 +298,6 @@ int main(int, char**)
     Alert::Info() << "Computing objective..." << Alert::Raise;
     RealGridFunction j(sfes);
     j = 0.5 * Pow(Frobenius(u.getSolution()), 2) / mesh.getVolume();
-    j.setWeights();
 
     const Real J = Integral(j).compute();
     const Real area = mesh.getPerimeter(Support);
@@ -341,7 +340,6 @@ int main(int, char**)
       Alert::Info() << "Computing conormal..." << Alert::Raise;
       GridFunction conormal(dvfes);
       conormal = Grad(dist);
-      conormal.stableNormalize();
 
       conormal.getFiniteElementSpace().getMesh().save("Conormal.mesh");
       conormal.save("Conormal.gf");
@@ -379,7 +377,7 @@ int main(int, char**)
     try
     {
       GridFunction workaround(sfes);
-      workaround.projectOnBoundary(dist);
+      workaround.project(Region::Boundary, dist);
       mesh = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                         .split(Support, { Support, Gamma })
                                         .split(Gamma, { Support, Gamma })

@@ -7,8 +7,13 @@
 #ifndef RODIN_VARIATIONAL_AVERAGE_H
 #define RODIN_VARIATIONAL_AVERAGE_H
 
+#include <algorithm>
+
+#include "Rodin/Types.h"
+#include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Point.h"
+
 #include "ForwardDecls.h"
-#include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
@@ -20,6 +25,10 @@ namespace Rodin::Variational
       using OperandType = FunctionBase<FunctionDerived>;
 
       using Parent = FunctionBase<Average<FunctionBase<FunctionDerived>>>;
+
+      using Parent::traceOf;
+
+      using Parent::operator();
 
       constexpr
       Average(const OperandType& op)
@@ -39,54 +48,13 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      RangeShape getRangeShape() const
-      {
-        return getOperand().getRangeShape();
-      }
-
-      constexpr
       const auto& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
-      constexpr
-      Average& traceOf(Geometry::Attribute attr)
-      {
-        return *this;
-      }
-
-      constexpr
-      Average& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        return *this;
-      }
-
-      template <class T>
-      void getValue(T& res, const Geometry::Point& p) const
-      {
-        assert(p.getPolytope().isFace());
-        const auto& face = p.getPolytope();
-        const size_t d = face.getDimension();
-        const auto& mesh = face.getMesh();
-        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex() );
-        assert(inc.size() == 2);
-        const Index idx1 = *inc.begin();
-        const Index idx2 = *std::next(inc.begin());
-        const auto it1 = mesh.getPolytope(d + 1, idx1);
-        const auto it2 = mesh.getPolytope(d + 1, idx2);
-        const auto& pc = p.getPhysicalCoordinates();
-        const Math::SpatialVector<Real> rc1 = it1->getTransformation().inverse(pc);
-        const Math::SpatialVector<Real> rc2 = it2->getTransformation().inverse(pc);
-        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
-        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
-        getOperand().getValue(res, p1);
-        res += getOperand().getValue(p2);
-        res *= 0.5;
-      }
-
-      auto getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         assert(p.getPolytope().isFace());
         const auto& face = p.getPolytope();
@@ -163,13 +131,6 @@ namespace Rodin::Variational
   //     const auto& getLeaf() const
   //     {
   //       return getOperand().getLeaf();
-  //     }
-
-  //     inline
-  //     constexpr
-  //     RangeShape getRangeShape() const
-  //     {
-  //       return getOperand().getRangeShape();
   //     }
 
   //     inline

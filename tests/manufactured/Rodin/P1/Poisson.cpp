@@ -6,9 +6,10 @@
  */
 #include <gtest/gtest.h>
 
-#include "Rodin/Test/Random.h"
+#include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Solver/CG.h"
+#include "Rodin/Test/Random.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -19,7 +20,7 @@ using namespace Rodin::Test::Random;
 
 
 /**
- * @brief Manufactured solutions for the Poisson problem using P1 spaces.
+ * @brief Manufactured solutions for the Poisson problem.
  *
  * The system is given by:
  * @f[
@@ -107,7 +108,6 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -166,7 +166,6 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -213,7 +212,6 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -257,7 +255,6 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -304,7 +301,6 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -351,7 +347,6 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -398,7 +393,6 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -450,7 +444,6 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -507,7 +500,6 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -579,7 +571,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - sol), 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -642,7 +633,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -725,7 +715,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -788,7 +777,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -849,7 +837,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -912,7 +899,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -979,7 +965,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -1046,7 +1031,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -1106,7 +1090,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -1158,7 +1141,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
-    diff.setWeights();
 
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
@@ -1196,7 +1178,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     auto solution = F::x + F::y;
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -1233,7 +1214,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     auto solution = F::x*(1-F::x) + F::y*(1-F::y);
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -1274,7 +1254,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     auto solution = A*B;
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -1312,7 +1291,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     auto solution = sin(pi*F::x)*sinh(pi*F::y);
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -1350,7 +1328,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     auto solution = sin(2*pi*F::x)*sin(2*pi*F::y);
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -1388,7 +1365,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     auto solution = sin(pi*F::x)*cos(pi*F::y);
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -1426,7 +1402,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     auto solution = cos(pi*F::x)-cos(pi*F::y);
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -1467,7 +1442,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -1508,7 +1482,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution()-solution), 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -1549,7 +1522,6 @@ namespace Rodin::Tests::Manufactured::Poisson
     P1 sh(mesh);
     GridFunction diff(sh);
     diff = Pow(Frobenius(u.getSolution()-solution), 2);
-    diff.setWeights();
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -1584,14 +1556,12 @@ namespace Rodin::Tests::Manufactured::Poisson
     GridFunction diff(sh);
     {
       diff = Pow(Re(u.getSolution()) - Re(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
 
     {
       diff = Pow(Im(u.getSolution()) - Im(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
@@ -1619,14 +1589,12 @@ namespace Rodin::Tests::Manufactured::Poisson
     GridFunction diff(sh);
     {
       diff = Pow(Re(u.getSolution()) - Re(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
 
     {
       diff = Pow(Im(u.getSolution()) - Im(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
@@ -1655,14 +1623,12 @@ namespace Rodin::Tests::Manufactured::Poisson
     GridFunction diff(sh);
     {
       diff = Pow(Re(u.getSolution()) - Re(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
 
     {
       diff = Pow(Im(u.getSolution()) - Im(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
@@ -1701,14 +1667,12 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     {
       diff = Pow(Re(u.getSolution()) - Re(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
 
     {
       diff = Pow(Im(u.getSolution()) - Im(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
@@ -1758,14 +1722,12 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     {
       diff = Pow(Re(u.getSolution()) - Re(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
 
     {
       diff = Pow(Im(u.getSolution()) - Im(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
@@ -1811,14 +1773,12 @@ namespace Rodin::Tests::Manufactured::Poisson
     GridFunction diff(sh);
     {
       diff = Pow(Re(u.getSolution()) - Re(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }
 
     {
       diff = Pow(Im(u.getSolution()) - Im(solution), 2);
-      diff.setWeights();
       const Real error = Integral(diff).compute();
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
     }

@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
 
@@ -58,7 +59,6 @@ int main(int, char**)
   Potential sl(K, f);
   GridFunction u(fes);
   u = sl;
-  u.setWeights();
   u.save("u.gf");
 
   Alert::Info() << Integral(u).compute() << Alert::Raise;
@@ -67,7 +67,6 @@ int main(int, char**)
   GridFunction fn(fes);
   fn = f;
   fn.save("f.gf");
-  fn.setWeights();
   Alert::Info() << Integral(fn).compute() << Alert::Raise;
 
   return 0;

@@ -1,26 +1,26 @@
 #ifndef RODIN_PETSC_MATH_MATRIX_H
 #define RODIN_PETSC_MATH_MATRIX_H
 
+#include <boost/mpi/communicator.hpp>
+#include <mpi.h>
 #include <petsc.h>
+#include <petscmat.h>
+#include <petscsystypes.h>
 
-#include "Rodin/Math/ForwardDecls.h"
-#include "Rodin/Math/Matrix.h"
+#include "Rodin/FormLanguage/Traits.h"
 
-namespace Rodin::Math
+namespace Rodin::PETSc::Math
 {
-  template <class Scalar>
-  void axpy(::Mat& y, Scalar alpha, const ::Mat& x, MatStructure str)
-  {
-    PetscErrorCode ierr;
-    ierr = MatAXPY(y, alpha, x, str);
-    assert(ierr == PETSC_SUCCESS);
-  }
+  using Matrix = ::Mat;
+}
 
-  template <class Scalar>
-  void axpy(::Mat& y, Scalar alpha, const ::Mat& x)
+namespace Rodin::FormLanguage
+{
+  template <>
+  struct Traits<::Mat>
   {
-    axpy(y, alpha, x, DIFFERENT_NONZERO_PATTERN);
-  }
+    using ScalarType = PetscScalar;
+  };
 }
 
 #endif

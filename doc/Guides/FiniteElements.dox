@@ -1,0 +1,127 @@
+/**
+  @page fem-ciarlet Ciarlet’s definition of a finite element
+  @brief The Ciarlet triplet @f$ (K, P, \mathcal{N}) @f$
+
+  @m_keywords{Ciarlet,Finite Element,FE,Polytope}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section fem-ciarlet-intro Introduction
+
+  In the finite element method, each “element” is described by a reference
+  geometric polytope, a space of local shape functions on that polytope, and
+  a unisolvent set of degrees of freedom.  The classical formulation is due to
+  Ciarlet.
+
+  @section fem-ciarlet-definition Ciarlet’s Definition
+
+  A finite element is the triple
+  @f[ (K, P, \mathcal{N}) @f]
+  where:
+
+  - @f$ K @f$ is the <strong>reference polytope</strong>, a closed, bounded
+    convex polytope in @f$ \mathbb{R}^d @f$ with nonempty interior.
+  - @f$ P @f$ is the <strong>space of shape functions</strong>, a finite-dimensional
+    subspace of @f$ C^0(K) @f$, typically a polynomial space
+    @f$ \mathbb{P}_k(K) @f$.
+  - @f$ \mathcal{N} @f$ is the <strong>set of degrees of freedom</strong>,
+    a unisolvent family of linear functionals
+    @f$ \ell_i : P \to \mathbb{R} @f$ satisfying
+    @f[
+      \bigl[\,p \in P,\; \ell_i(p)=0\;\forall\,i\,\bigr]
+      \;\Longrightarrow\;
+      p \equiv 0.
+    @f]
+
+  Unisolvence of @f$ \mathcal{N} @f$ means the evaluation map
+  @f[
+    P \;\longrightarrow\; \mathbb{R}^N,
+    \quad
+    p \;\mapsto\; \bigl(\ell_1(p),\dots,\ell_N(p)\bigr)
+  @f]
+  is an isomorphism.
+
+  @section fem-ciarlet-interpolation Local Interpolation Operator
+
+  Given a Ciarlet element @f$(K,P,\mathcal{N})@f$ with
+  @f$\mathcal{N}=\{\ell_1,\dots,\ell_N\}@f$, let
+  @f$\{\varphi_1,\dots,\varphi_N\}\subset P@f$ be its dual basis:
+  @f$\ell_j(\varphi_i)=\delta_{ij}@f$.  Then the **local interpolation operator**
+  @f[
+    \mathcal{I} : C^0(K)\;\longrightarrow\;P,
+    \quad
+    \mathcal{I}[v]
+    = \sum_{i=1}^N \ell_i(v)\,\varphi_i,
+  @f]
+  satisfies for all @f$v\in C^0(K)@f$ and all @f$i@f$,
+  @f[
+    \ell_i\bigl(\mathcal{I}[v]\bigr)
+    = \ell_i(v),
+    \quad
+    \mathcal{I}[p]=p\ \forall p\in P.
+  @f]
+
+  @section fem-ciarlet-pk Lagrange @f$P_k@f$ Elements
+
+  On a reference polytope @f$K@f$, the degree-@f$k@f$ Lagrange element is
+  the Ciarlet triple
+  @f[ (K,\;P_k(K),\;\mathcal{N}_k)\,, @f]
+  where:
+
+  - @f$P_k(K)=\mathbb{P}_k(K)@f$, the space of scalar polynomials of total degree ≤ @f$k@f$.
+  - @f$\mathcal{N}_k=\{\ell_a\}_{a=1}^N@f$, with each
+    @f$\ell_a(p)=p(\xi_a)@f$ evaluation at the Lagrange node
+    @f$\xi_a\in K@f$.
+
+  When assembling over a mesh, continuity is enforced by gluing all local basis
+  functions that share the same global node on:
+
+  - **Vertices** (for @f$ k \ge 1 @f$)
+  - **Edge-nodes** (for @f$k \ge 2 @f$)
+  - **Face-nodes** (for @f$k \ge 3 @f$ in 3D)
+  - **Interior-nodes** (for higher @f$k@f$)
+
+  yielding a globally @f$C^0@f$-conforming piecewise-@f$P_k@f$ space.
+
+  @section fem-ciarlet-rt Raviart–Thomas @f$RT_k@f$ Elements
+
+  On @f$K@f$, the Raviart–Thomas element of order @f$k@f$ is
+  @f[ (K,\;P_{RT_k}(K),\;\mathcal{N}_{RT_k}) @f]
+  with:
+
+  - @f$P_{RT_k}(K)=\mathbb{P}_k(K)^d\oplus\{\xi\,q(\xi):q\in\mathbb{P}_k(K)\}@f$.
+  - @f$\mathcal{N}_{RT_k}@f$ given by
+    - For each facet @f$F@f$ and all @f$q\in\mathbb{P}_k(F)@f$,
+      @f[ \ell_{F,q}(\mathbf{v})
+          = \int_F (\mathbf{v}\cdot\mathbf{n})\,q \,dS. @f]
+    - If @f$k\ge1@f$, for each @f$\mathbf{r}\in\mathbb{P}_{k-1}(K)^d@f$,
+      @f[ \ell_{K,\mathbf{r}}(\mathbf{v})
+          = \int_K \mathbf{v}\cdot\mathbf{r} \,dV. @f]
+
+  These DOFs enforce normal‐continuity across faces, yielding an
+  @f$H(\mathrm{div})@f$–conforming global space.
+
+  @section fem-ciarlet-nd Nédélec (First Kind) @f$ND_k@f$ Elements
+
+  On @f$K@f$, the Nédélec edge element of order @f$k@f$ (first kind) is
+  @f[ (K,\;P_{ND_k}(K),\;\mathcal{N}_{ND_k}) @f]
+  with:
+
+  - @f$P_{ND_k}(K)
+       = \mathbb{P}_k(K)^d \oplus \{\xi\times\mathbf{q}(\xi):\mathbf{q}\in\mathbb{P}_k(K)^d\}@f$.
+  - @f$\mathcal{N}_{ND_k}@f$ given by
+    - For each edge @f$E@f$ and all @f$q\in\mathbb{P}_k(E)@f$,
+      @f[ \ell_{E,q}(\mathbf{v})
+          = \int_E (\mathbf{v}\cdot\mathbf{t})\,q \,ds. @f]
+    - If @f$k\ge1@f$, for each face @f$F@f$ and all
+      @f$\mathbf{r}\in\mathbb{P}_{k-1}(F)^d@f$,
+      @f[ \ell_{F,\mathbf{r}}(\mathbf{v})
+          = \int_F (\mathbf{n}\times\mathbf{v})\cdot\mathbf{r} \,dS. @f]
+
+  These DOFs enforce tangential‐continuity across edges, yielding an
+  @f$H(\mathrm{curl})@f$–conforming global space.
+
+  @m_footernavigation
+  */
