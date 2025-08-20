@@ -126,7 +126,7 @@ namespace Rodin::Geometry
         res.setZero();
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
-          const auto basis = m_fe.getBasis(local);
+          const auto& basis = m_fe.getBasis(local);
           for (size_t i = 0; i < rdim; i++)
           {
             const auto derivative = basis.template getDerivative<1>(i);

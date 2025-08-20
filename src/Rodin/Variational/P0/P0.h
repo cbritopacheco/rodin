@@ -99,77 +99,61 @@ namespace Rodin::Variational
         public FiniteElementSpaceMappingBase<Mapping<Callable>>
       {
         public:
-          using FunctionType = Callable;
+          using CallableType = Callable;
 
-          Mapping(const Geometry::Polytope& polytope, const FunctionType& v)
-            : m_polytope(polytope), m_v(v)
+          template <class Function>
+          Mapping(const Geometry::Polytope& polytope, Function&& v)
+            : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
           Mapping(const Mapping&) = default;
 
-          auto operator()(const Math::SpatialPoint& r) const
+          decltype(auto) operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
-            return m_v.get()(p);
-          }
-
-          template <class T>
-          auto operator()(T& res, const Math::SpatialPoint& r) const
-          {
-            const Geometry::Point p(m_polytope, r);
-            return m_v.get()(res, p);
-          }
-
-          constexpr
-          const FunctionType& getFunction() const
-          {
-            return m_v.get();
+            return m_v(p);
           }
 
         private:
           Geometry::Polytope m_polytope;
-          std::reference_wrapper<const FunctionType> m_v;
+          CallableType m_v;
       };
 
-      template <class CallableType>
+      template <class Function>
+      Mapping(const Geometry::Polytope&, Function&&)
+        -> Mapping<Function>;
+
+      template <class Callable>
       class InverseMapping :
-        public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
+        public FiniteElementSpaceInverseMappingBase<InverseMapping<Callable>>
       {
         public:
-          using FunctionType = CallableType;
+          using CallableType = Callable;
 
           /**
            * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
-          InverseMapping(const FunctionType& v)
-            : m_v(v)
+          template <class Function>
+          InverseMapping(Function&& v)
+            : m_v(std::forward<Function>(v))
           {}
 
           InverseMapping(const InverseMapping&) = default;
 
           constexpr
-          auto operator()(const Geometry::Point& p) const
+          decltype(auto) operator()(const Geometry::Point& p) const
           {
-            return m_v.get()(p.getReferenceCoordinates());
-          }
-
-          template <class T>
-          auto operator()(T& res, const Geometry::Point& p) const
-          {
-            return m_v.get()(res, p.getReferenceCoordinates());
-          }
-
-          constexpr
-          const FunctionType& getFunction() const
-          {
-            return m_v.get();
+            return m_v(p.getReferenceCoordinates());
           }
 
         private:
-          std::reference_wrapper<const FunctionType> m_v;
+          CallableType m_v;
       };
+
+      template <class Function>
+      InverseMapping(Function&&) -> InverseMapping<Function>;
 
       P0(const MeshType& mesh)
         : m_mesh(mesh)
@@ -244,13 +228,13 @@ namespace Rodin::Variational
       {
         const auto [d, i] = idx;
         const auto& mesh = getMesh();
-        return Mapping<Function>(*mesh.getPolytope(d, i), v);
+        return Mapping(*mesh.getPolytope(d, i), v);
       }
 
       template <class Function>
       auto getMapping(const Geometry::Polytope& polytope, const Function& v) const
       {
-        return Mapping<Function>(polytope, v);
+        return Mapping(polytope, v);
       }
 
       /**
@@ -262,13 +246,13 @@ namespace Rodin::Variational
       template <class Function>
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const Function& v) const
       {
-        return InverseMapping<Function>(v);
+        return InverseMapping(v);
       }
 
       template <class Function>
       auto getInverseMapping(const Geometry::Polytope& polytope, const Function& v) const
       {
-        return InverseMapping<Function>(v);
+        return InverseMapping(v);
       }
 
     private:

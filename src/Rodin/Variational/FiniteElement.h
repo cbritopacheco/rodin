@@ -101,7 +101,7 @@ namespace Rodin::Variational
        * @note CRTP method to be overriden in Derived class.
        */
       constexpr
-      auto getBasis(size_t i) const
+      decltype(auto) getBasis(size_t i) const
       {
         return static_cast<const Derived&>(*this).getBasis(i);
       }
@@ -111,7 +111,7 @@ namespace Rodin::Variational
        * @note CRTP method to be overriden in Derived class.
        */
       constexpr
-      auto getLinearForm(size_t i) const
+      decltype(auto) getLinearForm(size_t i) const
       {
         return static_cast<const Derived&>(*this).getLinearForm(i);
       }

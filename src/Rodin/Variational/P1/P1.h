@@ -94,10 +94,11 @@ namespace Rodin::Variational
       class Mapping : public FiniteElementSpaceMappingBase<Mapping<Callable>>
       {
         public:
-          using FunctionType = Callable;
+          using CallableType = Callable;
 
-          Mapping(const Geometry::Polytope& polytope, const FunctionType& v)
-            : m_polytope(polytope), m_v(v)
+          template <class Function>
+          Mapping(const Geometry::Polytope& polytope, Function&& v)
+            : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
           Mapping(const Mapping&) = default;
@@ -105,19 +106,17 @@ namespace Rodin::Variational
           decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
-            return m_v.get()(p);
-          }
-
-          constexpr
-          const FunctionType& getFunction() const
-          {
-            return m_v.get();
+            return m_v(p);
           }
 
         private:
           Geometry::Polytope m_polytope;
-          std::reference_wrapper<const FunctionType> m_v;
+          CallableType m_v;
       };
+
+      template <class Function>
+      Mapping(const Geometry::Polytope&, Function&&)
+        -> Mapping<Function>;
 
       /**
        * @brief Inverse mapping for the scalar/complex P1 space.
@@ -127,15 +126,16 @@ namespace Rodin::Variational
         : public FiniteElementSpaceInverseMappingBase<InverseMapping<Callable>>
       {
         public:
-          using FunctionType = Callable;
+          using CallableType = Callable;
 
           /**
            * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
-          InverseMapping(const FunctionType& v)
-            : m_v(v)
+          template <class Function>
+          InverseMapping(Function&& v)
+            : m_v(std::forward<Function>(v))
           {}
 
           InverseMapping(const InverseMapping&) = default;
@@ -143,18 +143,15 @@ namespace Rodin::Variational
           constexpr
           decltype(auto) operator()(const Geometry::Point& p) const
           {
-            return m_v.get()(p.getReferenceCoordinates());
-          }
-
-          constexpr
-          const FunctionType& getFunction() const
-          {
-            return m_v;
+            return m_v(p.getReferenceCoordinates());
           }
 
         private:
-          std::reference_wrapper<const FunctionType> m_v;
+          CallableType m_v;
       };
+
+      template <class Function>
+      InverseMapping(Function&&) -> InverseMapping<Function>;
 
       P1(const MeshType& mesh)
         : m_mesh(mesh)
@@ -277,11 +274,11 @@ namespace Rodin::Variational
        * \tau @f$ element @f$ R @f$.
        */
       template <class Callable>
-      auto getMapping(const std::pair<size_t, Index>& idx, const Callable& v) const
+      auto getMapping(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
         const auto& [d, i] = idx;
         const auto& mesh = getMesh();
-        return Mapping<Callable>(*mesh.getPolytope(d, i), v);
+        return Mapping(*mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**
@@ -291,9 +288,9 @@ namespace Rodin::Variational
        * @param[in] v Callable type
        */
       template <class Callable>
-      auto getInverseMapping(const std::pair<size_t, Index>& idx, const Callable& v) const
+      auto getInverseMapping(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
-        return InverseMapping<Callable>(v);
+        return InverseMapping(std::forward<Callable>(v));
       }
 
     private:
@@ -356,10 +353,11 @@ namespace Rodin::Variational
         public FiniteElementSpaceMappingBase<Mapping<Callable>>
       {
         public:
-          using FunctionType = Callable;
+          using CallableType = Callable;
 
-          Mapping(const Geometry::Polytope& polytope, const FunctionType& v)
-            : m_polytope(polytope), m_v(v)
+          template <class Function>
+          Mapping(const Geometry::Polytope& polytope, Function&& v)
+            : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
           Mapping(const Mapping&) = default;
@@ -367,34 +365,33 @@ namespace Rodin::Variational
           decltype(auto) operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
-            return m_v.get()(p);
-          }
-
-          constexpr
-          const FunctionType& getFunction() const
-          {
-            return m_v.get();
+            return m_v(p);
           }
 
         private:
           Geometry::Polytope m_polytope;
-          std::reference_wrapper<const FunctionType> m_v;
+          CallableType m_v;
       };
 
-      template <class CallableType>
+      template <class Function>
+      Mapping(const Geometry::Polytope&, Function&&)
+        -> Mapping<Function>;
+
+      template <class Callable>
       class InverseMapping :
-        public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
+        public FiniteElementSpaceInverseMappingBase<InverseMapping<Callable>>
       {
         public:
-          using FunctionType = CallableType;
+          using CallableType = Callable;
 
           /**
            * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
-          InverseMapping(const FunctionType& v)
-            : m_v(v)
+          template <class Function>
+          InverseMapping(Function&& v)
+            : m_v(std::forward<Function>(v))
           {}
 
           InverseMapping(const InverseMapping&) = default;
@@ -402,18 +399,15 @@ namespace Rodin::Variational
           constexpr
           decltype(auto) operator()(const Geometry::Point& p) const
           {
-            return m_v.get()(p.getReferenceCoordinates());
-          }
-
-          constexpr
-          const FunctionType& getFunction() const
-          {
-            return m_v.get();
+            return m_v(p.getReferenceCoordinates());
           }
 
         private:
-          std::reference_wrapper<const FunctionType> m_v;
+          CallableType m_v;
       };
+
+      template <class Function>
+      InverseMapping(Function&&) -> InverseMapping<Function>;
 
       P1(const Geometry::Mesh<ContextType>& mesh, size_t vdim)
         : m_mesh(mesh), m_vdim(vdim)
@@ -588,17 +582,17 @@ namespace Rodin::Variational
       }
 
       template <class Callable>
-      auto getMapping(const std::pair<size_t, Index>& idx, const Callable& v) const
+      auto getMapping(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
         const auto& [d, i] = idx;
         const auto& mesh = getMesh();
-        return Mapping<Callable>(*mesh.getPolytope(d, i), v);
+        return Mapping(*mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
-      template <class CallableType>
-      auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
+      template <class Callable>
+      auto getInverseMapping(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
-        return InverseMapping<CallableType>(v);
+        return InverseMapping(std::forward<Callable>(v));
       }
 
     private:

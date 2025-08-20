@@ -731,7 +731,7 @@ namespace Rodin::Variational
           m_grad.resize(fe.getCount());
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            const auto basis = fe.getBasis(local);
+            const auto& basis = fe.getBasis(local);
             for (size_t j = 0; j < d; j++)
               grad(j) = basis.template getDerivative<1>(j)(rc);
             m_grad[local] = p.getJacobianInverse().transpose() * grad;
@@ -949,7 +949,7 @@ namespace Rodin::Variational
           for (size_t local = 0; local < fe.getCount(); local++)
           {
             m_grad1[local].resize(d);
-            const auto basis = fe.getBasis(local);
+            const auto& basis = fe.getBasis(local);
             for (size_t j = 0; j < d; j++)
               m_grad1[local](j) = basis.template getDerivative<1>(j)(rc);
           }

@@ -58,11 +58,43 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
-      using PolytopeIndex =
-        boost::bimap<
-          boost::bimaps::vector_of<Index>,
-          boost::bimaps::unordered_set_of<IndexArray, IndexArraySymmetricHash, IndexArraySymmetricEquality>
-        >;
+      struct PolytopeIndex
+      {
+        friend class boost::serialization::access;
+
+        public:
+          std::vector<const IndexArray*> left;
+          UnorderedMap<IndexArray, Index, IndexArraySymmetricHash, IndexArraySymmetricEquality> right;
+
+          template <class Archive>
+          void save(Archive& ar, const unsigned int /*version*/) const
+          {
+            ar & right;
+            std::vector<IndexArray> left_keys;
+            left_keys.reserve(left.size());
+            for (const IndexArray* p : left)
+              left_keys.push_back(*p);
+            ar & left_keys;
+          }
+
+          template <class Archive>
+          void load(Archive& ar, const unsigned int /*version*/)
+          {
+            ar & right;
+            std::vector<IndexArray> left_keys;
+            ar & left_keys;
+            left.clear();
+            left.reserve(left_keys.size());
+            for (const auto& k : left_keys)
+            {
+              auto it = right.find(k);
+              assert(it != right.end());
+              left.push_back(&it->first);
+            }
+          }
+
+          BOOST_SERIALIZATION_SPLIT_MEMBER()
+      };
 
       struct SubPolytope
       {

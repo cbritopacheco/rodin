@@ -152,7 +152,7 @@ namespace Rodin::Variational
           {}
 
           constexpr
-          BasisFunction(const BasisFunction&) = default;
+          BasisFunction(const BasisFunction&) = delete;
 
           constexpr
           ReturnType operator()(const Math::SpatialPoint& r) const;
@@ -225,19 +225,350 @@ namespace Rodin::Variational
         return Geometry::Polytope::Traits(this->getGeometry()).getVertex(i);
       }
 
-      constexpr
-      LinearForm getLinearForm(size_t i) const
+      const LinearForm& getLinearForm(size_t i) const
       {
-        return LinearForm(i, this->getGeometry());
+        const Geometry::Polytope::Type g = this->getGeometry();
+        switch (g)
+        {
+          case Geometry::Polytope::Type::Point:
+          {
+            static thread_local LinearForm s_lf(0, g);
+            assert(i == 0);
+            return s_lf;
+          }
+          case Geometry::Polytope::Type::Segment:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local LinearForm s_lf(0, g);
+                return s_lf;
+              }
+              case 1:
+              {
+                static thread_local LinearForm s_lf(1, g);
+                return s_lf;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+          case Geometry::Polytope::Type::Triangle:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local LinearForm s_lf(0, g);
+                return s_lf;
+              }
+              case 1:
+              {
+                static thread_local LinearForm s_lf(1, g);
+                return s_lf;
+              }
+              case 2:
+              {
+                static thread_local LinearForm s_lf(2, g);
+                return s_lf;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+          case Geometry::Polytope::Type::Tetrahedron:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local LinearForm s_lf(0, g);
+                return s_lf;
+              }
+              case 1:
+              {
+                static thread_local LinearForm s_lf(1, g);
+                return s_lf;
+              }
+              case 2:
+              {
+                static thread_local LinearForm s_lf(2, g);
+                return s_lf;
+              }
+              case 3:
+              {
+                static thread_local LinearForm s_lf(3, g);
+                return s_lf;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+          case Geometry::Polytope::Type::Quadrilateral:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local LinearForm s_lf(0, g);
+                return s_lf;
+              }
+              case 1:
+              {
+                static thread_local LinearForm s_lf(1, g);
+                return s_lf;
+              }
+              case 2:
+              {
+                static thread_local LinearForm s_lf(2, g);
+                return s_lf;
+              }
+              case 3:
+              {
+                static thread_local LinearForm s_lf(3, g);
+                return s_lf;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+          case Geometry::Polytope::Type::Wedge:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local LinearForm s_lf(0, g);
+                return s_lf;
+              }
+              case 1:
+              {
+                static thread_local LinearForm s_lf(1, g);
+                return s_lf;
+              }
+              case 2:
+              {
+                static thread_local LinearForm s_lf(2, g);
+                return s_lf;
+              }
+              case 3:
+              {
+                static thread_local LinearForm s_lf(3, g);
+                return s_lf;
+              }
+              case 4:
+              {
+                static thread_local LinearForm s_lf(4, g);
+                return s_lf;
+              }
+              case 5:
+              {
+                static thread_local LinearForm s_lf(5, g);
+                return s_lf;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+        }
+        static thread_local LinearForm s_null(0, g);
+        assert(false);
+        return s_null;
       }
 
-      constexpr
-      BasisFunction getBasis(size_t i) const
+      const BasisFunction& getBasis(size_t i) const
       {
-        return BasisFunction(i, this->getGeometry());
+        const Geometry::Polytope::Type g = this->getGeometry();
+        switch (g)
+        {
+          case Geometry::Polytope::Type::Point:
+          {
+            static thread_local BasisFunction s_basis(0, g);
+            assert(i == 0);
+            return s_basis;
+          }
+          case Geometry::Polytope::Type::Segment:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local BasisFunction s_basis(0, g);
+                return s_basis;
+              }
+              case 1:
+              {
+                static thread_local BasisFunction s_basis(1, g);
+                return s_basis;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+          case Geometry::Polytope::Type::Triangle:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local BasisFunction s_basis(0, g);
+                return s_basis;
+              }
+              case 1:
+              {
+                static thread_local BasisFunction s_basis(1, g);
+                return s_basis;
+              }
+              case 2:
+              {
+                static thread_local BasisFunction s_basis(2, g);
+                return s_basis;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+          case Geometry::Polytope::Type::Tetrahedron:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local BasisFunction s_basis(0, g);
+                return s_basis;
+              }
+              case 1:
+              {
+                static thread_local BasisFunction s_basis(1, g);
+                return s_basis;
+              }
+              case 2:
+              {
+                static thread_local BasisFunction s_basis(2, g);
+                return s_basis;
+              }
+              case 3:
+              {
+                static thread_local BasisFunction s_basis(3, g);
+                return s_basis;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+          case Geometry::Polytope::Type::Quadrilateral:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local BasisFunction s_basis(0, g);
+                return s_basis;
+              }
+              case 1:
+              {
+                static thread_local BasisFunction s_basis(1, g);
+                return s_basis;
+              }
+              case 2:
+              {
+                static thread_local BasisFunction s_basis(2, g);
+                return s_basis;
+              }
+              case 3:
+              {
+                static thread_local BasisFunction s_basis(3, g);
+                return s_basis;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+              break;
+            }
+          }
+          case Geometry::Polytope::Type::Wedge:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local BasisFunction s_basis(0, g);
+                return s_basis;
+              }
+              case 1:
+              {
+                static thread_local BasisFunction s_basis(1, g);
+                return s_basis;
+              }
+              case 2:
+              {
+                static thread_local BasisFunction s_basis(2, g);
+                return s_basis;
+              }
+              case 3:
+              {
+                static thread_local BasisFunction s_basis(3, g);
+                return s_basis;
+              }
+              case 4:
+              {
+                static thread_local BasisFunction s_basis(4, g);
+                return s_basis;
+              }
+              case 5:
+              {
+                static thread_local BasisFunction s_basis(5, g);
+                return s_basis;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+        }
+        static thread_local BasisFunction s_null(0, g);
+        assert(false);
+        return s_null;
       }
 
-      constexpr
       size_t getOrder() const
       {
         switch (this->getGeometry())
@@ -428,7 +759,7 @@ namespace Rodin::Variational
           {}
 
           constexpr
-          BasisFunction(const BasisFunction&) = default;
+          BasisFunction(const BasisFunction&) = delete;
 
           constexpr
           BasisFunction(BasisFunction&&) = default;

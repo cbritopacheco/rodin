@@ -43,8 +43,8 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>::reserve(size_t d, size_t count)
   {
     assert(d < m_connectivity.size());
-    m_index[d].left.resize(count); m_index[d].left.clear();
-    m_index[d].right.rehash(count);
+    m_index[d].left.reserve(count);
+    m_index[d].right.reserve(count);
     m_geometry[d].reserve(count);
     m_connectivity[d][0].reserve(count);
     return *this;
@@ -53,17 +53,20 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>& Connectivity<Context::Local>::nodes(size_t count)
   {
     m_count[0] = count;
+    m_index[0].left.reserve(count);
+    m_index[0].right.reserve(count);
     m_gcount[Geometry::Polytope::Type::Point] = count;
     for (size_t i = 0; i < count; i++)
     {
       const auto p = m_index[0].right.insert({ IndexArray{{ i }}, i });
       assert(p.second);
+      m_index[0].left.push_back(&p.first->first);
     }
     return *this;
   }
 
   Connectivity<Context::Local>&
-  Connectivity<Context::Local>::polytope(Polytope::Type t, const Array<Index>& in)
+  Connectivity<Context::Local>::polytope(Polytope::Type t, const IndexArray& in)
   {
     assert(in.size() > 0);
     const size_t d = Polytope::Traits(t).getDimension();
@@ -72,7 +75,8 @@ namespace Rodin::Geometry
     const auto [it, inserted] = m_index[d].right.insert({ in, m_count[d]});
     if (inserted)
     {
-      m_connectivity[d][0].emplace_back().insert_unique(it->get_right().begin(), it->get_right().end());
+      m_index[d].left.push_back(&it->first);
+      m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
       m_geometry[d].push_back(t);
       m_count[d] += 1;
       m_gcount[t] += 1;
@@ -82,7 +86,7 @@ namespace Rodin::Geometry
   }
 
   Connectivity<Context::Local>&
-  Connectivity<Context::Local>::polytope(Polytope::Type t, Array<Index>&& in)
+  Connectivity<Context::Local>::polytope(Polytope::Type t, IndexArray&& in)
   {
     assert(in.size() > 0);
     const size_t d = Polytope::Traits(t).getDimension();
@@ -91,7 +95,8 @@ namespace Rodin::Geometry
     const auto [it, inserted] = m_index[d].right.insert({ std::move(in), m_count[d] });
     if (inserted)
     {
-      m_connectivity[d][0].emplace_back().insert_unique(it->get_right().begin(), it->get_right().end());
+      m_index[d].left.push_back(&it->first);
+      m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
       m_geometry[d].push_back(t);
       m_count[d] += 1;
       m_gcount[t] += 1;
@@ -113,7 +118,7 @@ namespace Rodin::Geometry
     if (it == m_index[dim].right.end())
       return {};
     else
-      return it->get_left();
+      return it->second;
   }
 
   const Incidence& Connectivity<Context::Local>::getIncidence(size_t d, size_t dp) const
@@ -145,13 +150,12 @@ namespace Rodin::Geometry
 
   size_t Connectivity<Context::Local>::getMeshDimension() const
   {
-      // Start from size() and decrement before comparing to 0
-      for (size_t i = m_count.size(); i-- > 0; )
-      {
-          if (m_count[i] > 0)
-              return i;
-      }
-      return 0;
+    for (size_t i = m_count.size(); i-- > 0; )
+    {
+      if (m_count[i] > 0)
+        return i;
+    }
+    return 0;
   }
 
   Polytope::Type Connectivity<Context::Local>::getGeometry(size_t d, Index idx) const
@@ -162,9 +166,11 @@ namespace Rodin::Geometry
       return m_geometry[d][idx];
   }
 
-  const Array<Index>& Connectivity<Context::Local>::getPolytope(size_t d, Index idx) const
+  const IndexArray& Connectivity<Context::Local>::getPolytope(size_t d, Index idx) const
   {
-    return m_index[d].left.at(idx).get_right();
+    const IndexArray* p = m_index[d].left[idx];
+    assert(p);
+    return *p;
   }
 
   Connectivity<Context::Local>&
@@ -242,13 +248,14 @@ namespace Rodin::Geometry
     for (auto& [geometry, vertices] : subpolytopes)
     {
       auto insert = m_index[d].right.insert({ std::move(vertices), m_count[d] });
-      const PolytopeIndex::right_iterator it = insert.first;
+      const auto it = insert.first;
       const bool inserted = insert.second;
-      const auto& [idx, v] = *it;
+      const auto& [arr, idx] = *it;
       if (inserted)
       {
+        m_connectivity[d][0].emplace_back().insert_unique(arr.begin(), arr.end());
+        m_index[d].left.push_back(&it->first);
         m_geometry[d].push_back(geometry);
-        m_connectivity[d][0].emplace_back().insert_unique(v.begin(), v.end());
       }
       m_count[d] += inserted && !(d == D || d == 0);
       m_gcount[geometry] += inserted && !(d == D || d == 0);
@@ -257,7 +264,6 @@ namespace Rodin::Geometry
     m_connectivity[D][d].push_back(std::move(s));
     return *this;
   }
-
 
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::transpose(size_t d, size_t dp)
@@ -308,7 +314,7 @@ namespace Rodin::Geometry
       std::vector<SubPolytope>& out, Index i, size_t dim) const
   {
     const size_t D = getMeshDimension();
-    const auto& p = m_index[D].left.at(i).get_right();
+    const auto& p = *m_index[D].left[i];
     switch (m_geometry[D][i])
     {
       case Polytope::Type::Point:
