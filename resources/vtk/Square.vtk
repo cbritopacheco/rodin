@@ -1,0 +1,18 @@
+# vtk DataFile Version 3.0
+Square mesh with 2 triangles
+ASCII
+DATASET UNSTRUCTURED_GRID
+
+POINTS 4 double
+0.0 0.0 0.0
+1.0 0.0 0.0
+1.0 1.0 0.0
+0.0 1.0 0.0
+
+CELLS 2 10
+3 0 1 2
+3 2 3 0
+
+CELL_TYPES 2
+5
+5
