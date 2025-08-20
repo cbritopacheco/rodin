@@ -110,3 +110,27 @@ target_link_libraries(RodinVariationalDotTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalDotTest)
 
+add_executable(RodinVariationalComponentTest ComponentTest.cpp)
+target_link_libraries(RodinVariationalComponentTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalComponentTest)
+
+add_executable(RodinVariationalDivTest DivTest.cpp)
+target_link_libraries(RodinVariationalDivTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalDivTest)
+
+add_executable(RodinVariationalBooleanFunctionTest BooleanFunctionTest.cpp)
+target_link_libraries(RodinVariationalBooleanFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalBooleanFunctionTest)
+
