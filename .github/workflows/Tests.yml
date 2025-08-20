@@ -20,7 +20,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         compiler: [gcc-10]
-        build_type: ['Debug']
+        build_type: ['Debug', 'Release']
         multithreaded: ['ON', 'OFF']
       fail-fast: false
     env:
