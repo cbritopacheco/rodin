@@ -114,10 +114,6 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
-      template <class Function>
-      Mapping(const Geometry::Polytope&, Function&&)
-        -> Mapping<Function>;
-
       /**
        * @brief Inverse mapping for the scalar/complex P1 space.
        */
@@ -149,9 +145,6 @@ namespace Rodin::Variational
         private:
           CallableType m_v;
       };
-
-      template <class Function>
-      InverseMapping(Function&&) -> InverseMapping<Function>;
 
       P1(const MeshType& mesh)
         : m_mesh(mesh)
@@ -278,7 +271,7 @@ namespace Rodin::Variational
       {
         const auto& [d, i] = idx;
         const auto& mesh = getMesh();
-        return Mapping(*mesh.getPolytope(d, i), std::forward<Callable>(v));
+        return Mapping<Callable>(*mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**
@@ -290,7 +283,7 @@ namespace Rodin::Variational
       template <class Callable>
       auto getInverseMapping(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
-        return InverseMapping(std::forward<Callable>(v));
+        return InverseMapping<Callable>(std::forward<Callable>(v));
       }
 
     private:
@@ -373,10 +366,6 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
-      template <class Function>
-      Mapping(const Geometry::Polytope&, Function&&)
-        -> Mapping<Function>;
-
       template <class Callable>
       class InverseMapping :
         public FiniteElementSpaceInverseMappingBase<InverseMapping<Callable>>
@@ -405,9 +394,6 @@ namespace Rodin::Variational
         private:
           CallableType m_v;
       };
-
-      template <class Function>
-      InverseMapping(Function&&) -> InverseMapping<Function>;
 
       P1(const Geometry::Mesh<ContextType>& mesh, size_t vdim)
         : m_mesh(mesh), m_vdim(vdim)
@@ -586,13 +572,13 @@ namespace Rodin::Variational
       {
         const auto& [d, i] = idx;
         const auto& mesh = getMesh();
-        return Mapping(*mesh.getPolytope(d, i), std::forward<Callable>(v));
+        return Mapping<Callable>(*mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
       template <class Callable>
       auto getInverseMapping(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
-        return InverseMapping(std::forward<Callable>(v));
+        return InverseMapping<Callable>(std::forward<Callable>(v));
       }
 
     private:

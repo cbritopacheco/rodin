@@ -119,10 +119,6 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
-      template <class Function>
-      Mapping(const Geometry::Polytope&, Function&&)
-        -> Mapping<Function>;
-
       template <class Callable>
       class InverseMapping :
         public FiniteElementSpaceInverseMappingBase<InverseMapping<Callable>>
@@ -151,9 +147,6 @@ namespace Rodin::Variational
         private:
           CallableType m_v;
       };
-
-      template <class Function>
-      InverseMapping(Function&&) -> InverseMapping<Function>;
 
       P0(const MeshType& mesh)
         : m_mesh(mesh)
@@ -224,17 +217,17 @@ namespace Rodin::Variational
        * \tau @f$ element @f$ R @f$.
        */
       template <class Function>
-      auto getMapping(const std::pair<size_t, Index>& idx, const Function& v) const
+      auto getMapping(const std::pair<size_t, Index>& idx, Function&& v) const
       {
         const auto [d, i] = idx;
         const auto& mesh = getMesh();
-        return Mapping(*mesh.getPolytope(d, i), v);
+        return Mapping<Function>(*mesh.getPolytope(d, i), std::forward<Function>(v));
       }
 
       template <class Function>
-      auto getMapping(const Geometry::Polytope& polytope, const Function& v) const
+      auto getMapping(const Geometry::Polytope& polytope, Function&& v) const
       {
-        return Mapping(polytope, v);
+        return Mapping<Function>(polytope, std::forward<Function>(v));
       }
 
       /**
@@ -244,15 +237,15 @@ namespace Rodin::Variational
        * @param[in] v Callable type
        */
       template <class Function>
-      auto getInverseMapping(const std::pair<size_t, Index>& idx, const Function& v) const
+      auto getInverseMapping(const std::pair<size_t, Index>& idx, Function&& v) const
       {
-        return InverseMapping(v);
+        return InverseMapping<Function>(std::forward<Function>(v));
       }
 
       template <class Function>
-      auto getInverseMapping(const Geometry::Polytope& polytope, const Function& v) const
+      auto getInverseMapping(const Geometry::Polytope& polytope, Function&& v) const
       {
-        return InverseMapping(v);
+        return InverseMapping<Function>(std::forward<Function>(v));
       }
 
     private:
