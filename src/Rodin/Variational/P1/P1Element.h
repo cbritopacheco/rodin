@@ -518,8 +518,8 @@ namespace Rodin::Variational
                 assert(false);
                 break;
               }
-              break;
             }
+            break;
           }
           case Geometry::Polytope::Type::Wedge:
           {
