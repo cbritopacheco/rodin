@@ -17,8 +17,6 @@ namespace Rodin::Variational::F
   class X : public RealFunctionBase<X>
   {
     public:
-      using ScalarType = Real;
-
       using Parent = RealFunctionBase<X>;
 
       X() = default;
@@ -31,7 +29,7 @@ namespace Rodin::Variational::F
         : Parent(std::move(other))
       {}
 
-      ScalarType getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return p.x();
       }
@@ -56,8 +54,6 @@ namespace Rodin::Variational::F
   class Y : public RealFunctionBase<Y>
   {
     public:
-      using ScalarType = Real;
-
       using Parent = RealFunctionBase<Y>;
 
       Y() = default;
@@ -70,7 +66,7 @@ namespace Rodin::Variational::F
         : Parent(std::move(other))
       {}
 
-      ScalarType getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return p.y();
       }
@@ -95,8 +91,6 @@ namespace Rodin::Variational::F
   class Z : public RealFunctionBase<Z>
   {
     public:
-      using ScalarType = Real;
-
       using Parent = RealFunctionBase<Z>;
 
       Z() = default;
@@ -109,7 +103,7 @@ namespace Rodin::Variational::F
         : Parent(std::move(other))
       {}
 
-      ScalarType getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
         return p.z();
       }
