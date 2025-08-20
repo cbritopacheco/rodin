@@ -7,13 +7,8 @@
 #ifndef RODIN_VARIATIONAL_REALFUNCTION_H
 #define RODIN_VARIATIONAL_REALFUNCTION_H
 
-#include <map>
-#include <set>
 #include <memory>
-#include <optional>
 #include <type_traits>
-
-#include "Rodin/Geometry/Polytope.h"
 
 #include "ForwardDecls.h"
 
@@ -200,12 +195,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_x(std::move(other.m_x))
       {}
-
-      constexpr
-      const Integer& getValue() const
-      {
-        return m_x;
-      }
 
       constexpr
       Real getValue(const Geometry::Point&) const

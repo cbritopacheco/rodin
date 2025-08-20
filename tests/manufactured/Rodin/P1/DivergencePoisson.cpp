@@ -95,7 +95,7 @@ namespace Rodin::Tests::Manufactured::DivPoisson
     auto ux = F::x;
     auto uy = F::y;
     VectorFunction u_exact{ ux, uy };
-    auto f = RealFunction(2);
+    RealFunction f = 2.0;
 
     TrialFunction u(vh);
     TestFunction  v(vh);
