@@ -17,10 +17,12 @@ namespace Rodin
       virtual ~Copyable() = default;
       
       /**
-       * @brief Creates a deep copy of this object.
+       * @brief Creates a polymorphic copy of this object.
        * @return Pointer to a new instance that is a copy of this object.
        *         The caller is responsible for memory management.
-       * @note This method should not throw exceptions.
+       * @note This method enables polymorphic copy behavior. The copy 
+       *       semantics (shallow vs deep) depend on the concrete implementation.
+       *       This method should not throw exceptions.
        */
       virtual Copyable* copy() const noexcept = 0;
   };
