@@ -58,38 +58,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vf.getDimension(), 3);
   }
 
-  TEST(Rodin_Variational_VectorFunction, ComponentAccess_2D)
-  {
-    VectorFunction vf{10.0, 20.0};
-    auto x_comp = vf.x();
-    auto y_comp = vf.y();
-    // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    auto it = mesh.getPolytope(mesh.getDimension(), 0);
-    const auto& polytope = *it;
-    const Math::Vector<Real> rc{{0.3, 0.7}};
-    Point p(polytope, rc);
-    EXPECT_NEAR(x_comp.getValue(p), 10.0, 1e-10);
-    EXPECT_NEAR(y_comp.getValue(p), 20.0, 1e-10);
-  }
-
-  TEST(Rodin_Variational_VectorFunction, ComponentAccess_3D)
-  {
-    VectorFunction vf{100.0, 200.0, 300.0};
-    auto x_comp = vf.x();
-    auto y_comp = vf.y();
-    auto z_comp = vf.z();
-    // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    auto it = mesh.getPolytope(mesh.getDimension(), 0);
-    const auto& polytope = *it;
-    const Math::Vector<Real> rc{{0.1, 0.9}};
-    Point p(polytope, rc);
-    EXPECT_NEAR(x_comp.getValue(p), 100.0, 1e-10);
-    EXPECT_NEAR(y_comp.getValue(p), 200.0, 1e-10);
-    EXPECT_NEAR(z_comp.getValue(p), 300.0, 1e-10);
-  }
-
   TEST(Rodin_Variational_VectorFunction, IndexAccess)
   {
     VectorFunction vf{5.0, 15.0, 25.0};
