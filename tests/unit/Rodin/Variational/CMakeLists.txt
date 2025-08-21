@@ -198,3 +198,35 @@ target_link_libraries(RodinVariationalCosineTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalCosineTest)
 
+add_executable(RodinVariationalExpTest ExpTest.cpp)
+target_link_libraries(RodinVariationalExpTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalExpTest)
+
+add_executable(RodinVariationalDivisionTest DivisionTest.cpp)
+target_link_libraries(RodinVariationalDivisionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalDivisionTest)
+
+add_executable(RodinVariationalMinusTest MinusTest.cpp)
+target_link_libraries(RodinVariationalMinusTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalMinusTest)
+
+add_executable(RodinVariationalTangentTest TangentTest.cpp)
+target_link_libraries(RodinVariationalTangentTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalTangentTest)
+
