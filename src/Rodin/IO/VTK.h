@@ -106,12 +106,8 @@ namespace Rodin::IO::VTK
         return VTK_QUAD;
       case Geometry::Polytope::Type::Tetrahedron:
         return VTK_TETRA;
-      case Geometry::Polytope::Type::Hexahedron:
-        return VTK_HEXAHEDRON;
       case Geometry::Polytope::Type::Wedge:
         return VTK_WEDGE;
-      case Geometry::Polytope::Type::Pyramid:
-        return VTK_PYRAMID;
     }
     return {};
   }
@@ -132,12 +128,12 @@ namespace Rodin::IO::VTK
         return Geometry::Polytope::Type::Quadrilateral;
       case VTK_TETRA:
         return Geometry::Polytope::Type::Tetrahedron;
-      case VTK_HEXAHEDRON:
-        return Geometry::Polytope::Type::Hexahedron;
       case VTK_WEDGE:
         return Geometry::Polytope::Type::Wedge;
+      case VTK_HEXAHEDRON:
       case VTK_PYRAMID:
-        return Geometry::Polytope::Type::Pyramid;
+        // These types are not currently supported by Rodin
+        return {};
     }
     return {};
   }
@@ -283,11 +279,11 @@ namespace Rodin::IO::VTK
 namespace Rodin::IO
 {
   /**
-   * @brief Template specialization to load VTK format meshes.
+   * @brief Template specialization to load VTKLegacy format meshes.
    * @ingroup MeshLoaderSpecializations
    */
   template <>
-  class MeshLoader<FileFormat::VTK, Context::Local>
+  class MeshLoader<FileFormat::VTKLegacy, Context::Local>
     : public MeshLoaderBase<Context::Local>
   {
     public:
@@ -321,11 +317,11 @@ namespace Rodin::IO
   };
 
   /**
-   * @brief Template specialization to print VTK format meshes.
+   * @brief Template specialization to print VTKLegacy format meshes.
    * @ingroup MeshPrinterSpecializations
    */
   template <>
-  class MeshPrinter<FileFormat::VTK, Context::Local>
+  class MeshPrinter<FileFormat::VTKLegacy, Context::Local>
     : public MeshPrinterBase<Context::Local>
   {
     public:
@@ -350,12 +346,12 @@ namespace Rodin::IO
   };
 
   /**
-   * @brief Template specialization to load VTK format grid functions.
+   * @brief Template specialization to load VTKLegacy format grid functions.
    * @ingroup GridFunctionLoaderSpecializations
    */
   template <class Range>
   class GridFunctionLoader<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
     : public GridFunctionLoaderBase<
@@ -389,16 +385,16 @@ namespace Rodin::IO
   };
 
   /**
-   * @brief Base class for VTK grid function printers.
+   * @brief Base class for VTKLegacy grid function printers.
    */
   template <class FES, class Data>
-  class GridFunctionPrinterBase<FileFormat::VTK, FES, Data>
+  class GridFunctionPrinterBase<FileFormat::VTKLegacy, FES, Data>
     : public Printer<Variational::GridFunction<FES, Data>>
   {
     public:
       using FESType = FES;
 
-      static constexpr FileFormat Format = FileFormat::VTK;
+      static constexpr FileFormat Format = FileFormat::VTKLegacy;
 
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
@@ -431,16 +427,16 @@ namespace Rodin::IO
   };
 
   /**
-   * @brief Template specialization to print VTK format grid functions.
+   * @brief Template specialization to print VTKLegacy format grid functions.
    * @ingroup GridFunctionPrinterSpecializations
    */
   template <class Range>
   class GridFunctionPrinter<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
     : public GridFunctionPrinterBase<
-        FileFormat::VTK,
+        FileFormat::VTKLegacy,
         Variational::P1<Range, Geometry::Mesh<Context::Local>>,
         Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
@@ -453,7 +449,7 @@ namespace Rodin::IO
 
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
-      using Parent = GridFunctionPrinterBase<FileFormat::VTK, FESType, DataType>;
+      using Parent = GridFunctionPrinterBase<FileFormat::VTKLegacy, FESType, DataType>;
 
       using Parent::Parent;
 

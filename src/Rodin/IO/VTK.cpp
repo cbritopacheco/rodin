@@ -37,7 +37,7 @@ namespace Rodin::IO::VTK
 
 namespace Rodin::IO
 {
-  void MeshLoader<FileFormat::VTK, Context::Local>::load(std::istream& is)
+  void MeshLoader<FileFormat::VTKLegacy, Context::Local>::load(std::istream& is)
   {
     readHeader(is);
     readDataset(is);
@@ -74,7 +74,7 @@ namespace Rodin::IO
     getObject() = m_build.finalize();
   }
 
-  void MeshLoader<FileFormat::VTK, Context::Local>::readHeader(std::istream& is)
+  void MeshLoader<FileFormat::VTKLegacy, Context::Local>::readHeader(std::istream& is)
   {
     // Read VTK version header
     std::string line = VTK::skipEmptyLinesAndComments(is, m_currentLineNumber);
@@ -94,7 +94,7 @@ namespace Rodin::IO
     }
   }
 
-  void MeshLoader<FileFormat::VTK, Context::Local>::readDataset(std::istream& is)
+  void MeshLoader<FileFormat::VTKLegacy, Context::Local>::readDataset(std::istream& is)
   {
     std::string line = VTK::skipEmptyLinesAndComments(is, m_currentLineNumber);
     if (line.find("DATASET") != 0)
@@ -108,7 +108,7 @@ namespace Rodin::IO
     }
   }
 
-  void MeshLoader<FileFormat::VTK, Context::Local>::readPoints(std::istream& is)
+  void MeshLoader<FileFormat::VTKLegacy, Context::Local>::readPoints(std::istream& is)
   {
     std::string line = VTK::skipEmptyLinesAndComments(is, m_currentLineNumber);
     
@@ -157,7 +157,7 @@ namespace Rodin::IO
     }
   }
 
-  void MeshLoader<FileFormat::VTK, Context::Local>::readCells(std::istream& is)
+  void MeshLoader<FileFormat::VTKLegacy, Context::Local>::readCells(std::istream& is)
   {
     std::string line = VTK::skipEmptyLinesAndComments(is, m_currentLineNumber);
     
@@ -189,7 +189,7 @@ namespace Rodin::IO
     }
   }
 
-  void MeshLoader<FileFormat::VTK, Context::Local>::readCellTypes(std::istream& is)
+  void MeshLoader<FileFormat::VTKLegacy, Context::Local>::readCellTypes(std::istream& is)
   {
     std::string line = VTK::skipEmptyLinesAndComments(is, m_currentLineNumber);
     
@@ -225,7 +225,7 @@ namespace Rodin::IO
     }
   }
 
-  void MeshPrinter<FileFormat::VTK, Context::Local>::print(std::ostream& os)
+  void MeshPrinter<FileFormat::VTKLegacy, Context::Local>::print(std::ostream& os)
   {
     printHeader(os);
     printDataset(os);
@@ -234,19 +234,19 @@ namespace Rodin::IO
     printCellTypes(os);
   }
 
-  void MeshPrinter<FileFormat::VTK, Context::Local>::printHeader(std::ostream& os)
+  void MeshPrinter<FileFormat::VTKLegacy, Context::Local>::printHeader(std::ostream& os)
   {
     os << "# vtk DataFile Version 3.0\n";
     os << "Rodin Mesh\n";
     os << "ASCII\n";
   }
 
-  void MeshPrinter<FileFormat::VTK, Context::Local>::printDataset(std::ostream& os)
+  void MeshPrinter<FileFormat::VTKLegacy, Context::Local>::printDataset(std::ostream& os)
   {
     os << "DATASET UNSTRUCTURED_GRID\n";
   }
 
-  void MeshPrinter<FileFormat::VTK, Context::Local>::printPoints(std::ostream& os)
+  void MeshPrinter<FileFormat::VTKLegacy, Context::Local>::printPoints(std::ostream& os)
   {
     const auto& mesh = getObject();
     const size_t numVertices = mesh.getVertexCount();
@@ -271,7 +271,7 @@ namespace Rodin::IO
     }
   }
 
-  void MeshPrinter<FileFormat::VTK, Context::Local>::printCells(std::ostream& os)
+  void MeshPrinter<FileFormat::VTKLegacy, Context::Local>::printCells(std::ostream& os)
   {
     const auto& mesh = getObject();
     const size_t dim = mesh.getDimension();
@@ -301,7 +301,7 @@ namespace Rodin::IO
     }
   }
 
-  void MeshPrinter<FileFormat::VTK, Context::Local>::printCellTypes(std::ostream& os)
+  void MeshPrinter<FileFormat::VTKLegacy, Context::Local>::printCellTypes(std::ostream& os)
   {
     const auto& mesh = getObject();
     const size_t dim = mesh.getDimension();
@@ -326,7 +326,7 @@ namespace Rodin::IO
 
   template <class Range>
   void GridFunctionLoader<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>::load(std::istream& is)
   {
@@ -335,7 +335,7 @@ namespace Rodin::IO
 
   template <class Range>
   void GridFunctionLoader<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>::readPointData(std::istream& is)
   {
@@ -369,7 +369,7 @@ namespace Rodin::IO
 
   template <class Range>
   void GridFunctionLoader<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>::readScalars(std::istream& is)
   {
@@ -403,7 +403,7 @@ namespace Rodin::IO
 
   template <class Range>
   void GridFunctionLoader<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>::readVectors(std::istream& is)
   {
@@ -430,7 +430,7 @@ namespace Rodin::IO
 
   template <class Range>
   void GridFunctionPrinter<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>::printPointData(std::ostream& os)
   {
@@ -453,7 +453,7 @@ namespace Rodin::IO
 
   template <class Range>
   void GridFunctionPrinter<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>::printScalars(std::ostream& os)
   {
@@ -470,7 +470,7 @@ namespace Rodin::IO
 
   template <class Range>
   void GridFunctionPrinter<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>::printVectors(std::ostream& os)
   {
@@ -499,12 +499,12 @@ namespace Rodin::IO
 
   // Explicit template instantiations
   template class GridFunctionLoader<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Real, Geometry::Mesh<Context::Local>>,
     Math::Vector<Real>>;
     
   template class GridFunctionPrinter<
-    FileFormat::VTK,
+    FileFormat::VTKLegacy,
     Variational::P1<Real, Geometry::Mesh<Context::Local>>,
     Math::Vector<Real>>;
 }

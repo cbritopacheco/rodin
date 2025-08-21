@@ -43,7 +43,7 @@ namespace Rodin::Tests::Unit
     std::istringstream iss(vtkContent);
 
     Mesh mesh;
-    MeshLoader<FileFormat::VTK, Rodin::Context::Local> loader(mesh);
+    MeshLoader<FileFormat::VTKLegacy, Rodin::Context::Local> loader(mesh);
     
     // This is a basic compilation test
     // The loader should at least parse the header without crashing
@@ -59,8 +59,8 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_IO_VTK, EnumTest)
   {
-    // Test that the VTK enum was added correctly
-    EXPECT_STREQ(toCharString(FileFormat::VTK), "VTK");
+    // Test that the VTKLegacy enum was added correctly
+    EXPECT_STREQ(toCharString(FileFormat::VTKLegacy), "VTKLegacy");
     
     // Test VTK cell type conversions
     auto cellType = VTK::getCellType(Geometry::Polytope::Type::Triangle);
