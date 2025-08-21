@@ -197,20 +197,16 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_IO_MeshPrinter, SanityTest_GMSH_2D_Triangle)
   {
-    // Create a mesh programmatically
-    Mesh mesh;
-    auto builder = mesh.newBuilder();
-    builder.initialize(2, 3);  // 2D space, 3 vertices
-    
-    // Add vertices
-    builder.vertex(0, 0.0, 0.0, 0.0);
-    builder.vertex(1, 1.0, 0.0, 0.0);
-    builder.vertex(2, 0.0, 1.0, 0.0);
-    
-    // Add triangle
-    builder.polytope(Polytope::Type::Triangle, {0, 1, 2}, 1);
-    
-    mesh = builder.finalize();
+    // Create a mesh programmatically using the Builder pattern
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)  // 2D space
+      .nodes(3)       // 3 vertices
+      .vertex({0.0, 0.0})
+      .vertex({1.0, 0.0})
+      .vertex({0.0, 1.0})
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})  // Triangle
+      .finalize();
 
     // Print to GMSH format
     std::stringstream output;

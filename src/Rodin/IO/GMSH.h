@@ -15,6 +15,7 @@
 #include "Rodin/Context.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Types.h"
+#include "Rodin/Geometry/Polytope.h"
 
 #include "ForwardDecls.h"
 #include "MeshLoader.h"

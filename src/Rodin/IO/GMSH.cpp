@@ -110,31 +110,50 @@ namespace Rodin::IO
         << "Failed to parse number of nodes: " << line << Alert::Raise;
     }
     
-    // Read node coordinates
-    size_t spaceDim = 0;
-    for (size_t i = 0; i < numNodes; i++)
+    // Determine space dimension from first node
+    line = GMSH::skipEmptyLines(is, m_currentLineNumber);
+    std::istringstream firstNodeIss(line);
+    int nodeId;
+    Real x, y, z;
+    if (!(firstNodeIss >> nodeId >> x >> y >> z))
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Failed to parse first node: " << line << Alert::Raise;
+    }
+    
+    // Determine space dimension based on coordinates
+    size_t spaceDim = (std::abs(z) > 1e-14) ? 3 : (std::abs(y) > 1e-14) ? 2 : 1;
+    
+    // Initialize builder
+    m_builder.initialize(spaceDim).nodes(numNodes);
+    
+    // Add first vertex
+    if (spaceDim == 3)
+      m_builder.vertex({x, y, z});
+    else if (spaceDim == 2)
+      m_builder.vertex({x, y});
+    else
+      m_builder.vertex({x});
+    
+    // Read remaining nodes
+    for (size_t i = 1; i < numNodes; i++)
     {
       line = GMSH::skipEmptyLines(is, m_currentLineNumber);
       std::istringstream nodeIss(line);
       
-      int nodeId;
-      Real x, y, z;
       if (!(nodeIss >> nodeId >> x >> y >> z))
       {
         Alert::MemberFunctionException(*this, __func__)
           << "Failed to parse node " << i + 1 << ": " << line << Alert::Raise;
       }
       
-      // Determine space dimension from first non-zero coordinate
-      if (i == 0)
-      {
-        spaceDim = (std::abs(z) > 1e-14) ? 3 : (std::abs(y) > 1e-14) ? 2 : 1;
-        m_builder.initialize(spaceDim, numNodes);
-      }
-      
-      // Add vertex (GMSH uses 1-based indexing, convert to 0-based)
-      size_t vertexIdx = nodeId - 1;
-      m_builder.vertex(vertexIdx, x, y, z);
+      // Add vertex
+      if (spaceDim == 3)
+        m_builder.vertex({x, y, z});
+      else if (spaceDim == 2)
+        m_builder.vertex({x, y});
+      else
+        m_builder.vertex({x});
     }
     
     // Read end section
@@ -195,7 +214,7 @@ namespace Rodin::IO
       auto traits = Geometry::Polytope::Traits(polytopeType);
       
       // Read node indices
-      std::vector<size_t> nodeIndices(traits.getVertexCount());
+      std::vector<Index> nodeIndices(traits.getVertexCount());
       for (size_t j = 0; j < nodeIndices.size(); j++)
       {
         int nodeId;
@@ -207,29 +226,18 @@ namespace Rodin::IO
         nodeIndices[j] = nodeId - 1; // Convert to 0-based indexing
       }
       
-      // Determine element dimension and add to mesh
-      auto dimension = traits.getDimension();
-      Attribute attribute = (numTags > 0) ? tags[0] : 1; // Use first tag as attribute
+      // Add polytope to mesh
+      m_builder.polytope(polytopeType, std::move(nodeIndices));
       
-      if (dimension == 0)
+      // Set attribute if specified
+      if (numTags > 0)
       {
-        // Points
-        m_builder.polytope(Geometry::Polytope::Type::Point, nodeIndices, attribute);
-      }
-      else if (dimension == 1)
-      {
-        // Edges/Lines
-        m_builder.polytope(Geometry::Polytope::Type::Segment, nodeIndices, attribute);
-      }
-      else if (dimension == 2)
-      {
-        // Faces
-        m_builder.polytope(polytopeType, nodeIndices, attribute);
-      }
-      else if (dimension == 3)
-      {
-        // Cells
-        m_builder.polytope(polytopeType, nodeIndices, attribute);
+        Attribute attribute = tags[0]; // Use first tag as attribute
+        auto traits = Geometry::Polytope::Traits(polytopeType);
+        size_t dimension = traits.getDimension();
+        // The polytope index will be the current count before we added this one
+        size_t polytopeIndex = m_builder.getConnectivity().getPolytopeCount(dimension) - 1;
+        m_builder.attribute({dimension, polytopeIndex}, attribute);
       }
     }
     
