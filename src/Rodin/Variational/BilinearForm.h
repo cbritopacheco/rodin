@@ -49,13 +49,34 @@ namespace Rodin::Variational
    * @see BilinearForm
    */
 
+  /**
+   * @ingroup RodinVariational
+   * @brief Base class for bilinear form representations.
+   *
+   * BilinearFormBase provides the foundation for representing bilinear forms
+   * @f$ a(u,v) : V \times V \to \mathbb{R} @f$ in finite element computations.
+   * A bilinear form is a function that is linear in both arguments and forms
+   * the basis for defining variational problems.
+   *
+   * @tparam Operator Matrix type for the discrete representation
+   *
+   * ## Mathematical Foundation
+   * A bilinear form @f$ a(u,v) @f$ satisfies:
+   * - **Linearity in first argument**: @f$ a(\alpha u_1 + \beta u_2, v) = \alpha a(u_1,v) + \beta a(u_2,v) @f$
+   * - **Linearity in second argument**: @f$ a(u, \alpha v_1 + \beta v_2) = \alpha a(u,v_1) + \beta a(u,v_2) @f$
+   *
+   * ## Discrete Representation  
+   * The discrete matrix representation satisfies @f$ A_{ij} = a(\phi_j, \psi_i) @f$
+   * where @f$ \phi_j @f$ are trial basis functions and @f$ \psi_i @f$ are test basis functions.
+   */
   template <class Operator>
   class BilinearFormBase : public FormLanguage::Base
   {
     public:
-      using OperatorType =
-        Operator;
+      /// @brief Matrix operator type for the discrete representation
+      using OperatorType = Operator;
 
+      /// @brief Scalar type for matrix entries
       using ScalarType =
         typename FormLanguage::Traits<OperatorType>::ScalarType;
 
