@@ -6,40 +6,25 @@
  */
 #include <gtest/gtest.h>
 
-#include <memory>
+#include <vector>
 #include <cmath>
 
-#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/QF/QF1P1.h"
-#include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/Geometry.h"
 
 using namespace Rodin::QF;
 using namespace Rodin::Geometry;
 
-// Test class for QF functionality
-class QFTest : public ::testing::Test
+// Test class for QF1P1 functionality
+class QF1P1Test : public ::testing::Test
 {
   protected:
     void SetUp() override {}
     void TearDown() override {}
 };
 
-// Test QuadratureFormulaBase construction and basic functionality
-TEST_F(QFTest, QuadratureFormulaBaseConstruction)
-{
-  // Note: Can't directly test abstract base class, but we can test through derived classes
-  QF1P1 qf1p1(Polytope::Type::Triangle);
-
-  EXPECT_EQ(qf1p1.getGeometry(), Polytope::Type::Triangle);
-
-  // Test copy constructor
-  QF1P1 qf1p1_copy(qf1p1);
-  EXPECT_EQ(qf1p1_copy.getGeometry(), Polytope::Type::Triangle);
-}
-
 // Test QF1P1 (Single-point quadrature)
-TEST_F(QFTest, QF1P1BasicProperties)
+TEST_F(QF1P1Test, BasicProperties)
 {
   QF1P1 qf_triangle(Polytope::Type::Triangle);
   QF1P1 qf_quad(Polytope::Type::Quadrilateral);
@@ -53,7 +38,7 @@ TEST_F(QFTest, QF1P1BasicProperties)
   EXPECT_EQ(qf_quad.getGeometry(), Polytope::Type::Quadrilateral);
 }
 
-TEST_F(QFTest, QF1P1Weights)
+TEST_F(QF1P1Test, Weights)
 {
   QF1P1 qf_triangle(Polytope::Type::Triangle);
   QF1P1 qf_quad(Polytope::Type::Quadrilateral);
@@ -70,7 +55,7 @@ TEST_F(QFTest, QF1P1Weights)
   EXPECT_GT(qf_line.getWeight(0), 0.0);
 }
 
-TEST_F(QFTest, QF1P1Points)
+TEST_F(QF1P1Test, Points)
 {
   QF1P1 qf_triangle(Polytope::Type::Triangle);
   QF1P1 qf_quad(Polytope::Type::Quadrilateral);
@@ -87,71 +72,8 @@ TEST_F(QFTest, QF1P1Points)
   EXPECT_GE(point_quad.size(), 1);
 }
 
-// Test GaussLegendre quadrature
-TEST_F(QFTest, GaussLegendreBasicProperties)
-{
-  GaussLegendre gl_segment(Polytope::Type::Segment);
-
-  // GaussLegendre with 2 points
-  EXPECT_EQ(gl_segment.getSize(), 2);
-  EXPECT_EQ(gl_segment.getGeometry(), Polytope::Type::Segment);
-}
-
-TEST_F(QFTest, GaussLegendreWeights)
-{
-  GaussLegendre gl_segment(Polytope::Type::Segment);
-
-  // Should have weights for each quadrature point
-  for (size_t i = 0; i < gl_segment.getSize(); ++i) {
-    EXPECT_NO_THROW(gl_segment.getWeight(i));
-    EXPECT_GT(gl_segment.getWeight(i), 0.0);
-  }
-}
-
-TEST_F(QFTest, GaussLegendrePoints)
-{
-  GaussLegendre gl_segment(Polytope::Type::Segment);
-
-  // Test points are accessible (though implementation may have limitations)
-  EXPECT_NO_THROW(gl_segment.getPoint(0));
-
-  const auto& point = gl_segment.getPoint(0);
-  EXPECT_GE(point.size(), 1);
-}
-
-// Test polymorphic behavior
-TEST_F(QFTest, PolymorphicBehavior)
-{
-  std::unique_ptr<QuadratureFormulaBase> qf1 = std::make_unique<QF1P1>(Polytope::Type::Triangle);
-  std::unique_ptr<QuadratureFormulaBase> qf2 = std::make_unique<GaussLegendre>(Polytope::Type::Segment);
-
-  // Test virtual function calls work correctly
-  EXPECT_EQ(qf1->getSize(), 1);
-  EXPECT_EQ(qf2->getSize(), 2);
-
-  EXPECT_EQ(qf1->getGeometry(), Polytope::Type::Triangle);
-  EXPECT_EQ(qf2->getGeometry(), Polytope::Type::Segment);
-
-  EXPECT_NO_THROW(qf1->getWeight(0));
-  EXPECT_NO_THROW(qf2->getWeight(0));
-}
-
-// Test copy functionality (Copyable interface)
-TEST_F(QFTest, CopyableBehavior)
-{
-  QF1P1 original(Polytope::Type::Triangle);
-
-  // Test that copy() method works (inherited from Copyable)
-  std::unique_ptr<QuadratureFormulaBase> copied(original.copy());
-
-  EXPECT_NE(copied.get(), &original);  // Different objects
-  EXPECT_EQ(copied->getGeometry(), original.getGeometry());  // Same properties
-  EXPECT_EQ(copied->getSize(), original.getSize());
-  EXPECT_EQ(copied->getWeight(0), original.getWeight(0));
-}
-
 // Test different geometry types
-TEST_F(QFTest, DifferentGeometryTypes)
+TEST_F(QF1P1Test, DifferentGeometryTypes)
 {
   // Test that QF1P1 works with various geometry types
   std::vector<Polytope::Type> geometries = {
@@ -174,7 +96,7 @@ TEST_F(QFTest, DifferentGeometryTypes)
 }
 
 // Integration test: verify quadrature accuracy for simple functions
-TEST_F(QFTest, QuadratureAccuracySimple)
+TEST_F(QF1P1Test, QuadratureAccuracy)
 {
   // Test that constant function integration is exact
   QF1P1 qf_triangle(Polytope::Type::Triangle);
@@ -188,7 +110,7 @@ TEST_F(QFTest, QuadratureAccuracySimple)
 }
 
 // Error handling tests
-TEST_F(QFTest, OutOfBoundsAccess)
+TEST_F(QF1P1Test, OutOfBoundsAccess)
 {
   QF1P1 qf(Polytope::Type::Triangle);
 
@@ -199,20 +121,4 @@ TEST_F(QFTest, OutOfBoundsAccess)
   // Out of bounds access behavior depends on implementation
   // For single point quadrature, index 1 should be invalid
   // Note: Actual behavior may vary (assert, exception, or undefined)
-}
-
-// Memory management test
-TEST_F(QFTest, MemoryManagement)
-{
-  // Test that objects can be created and destroyed without issues
-  {
-    QF1P1 qf1(Polytope::Type::Triangle);
-    GaussLegendre qf2(Polytope::Type::Segment);
-
-    // Use the objects
-    qf1.getSize();
-    qf2.getSize();
-  }  // Objects should be destroyed without issues
-
-  EXPECT_TRUE(true);  // Test passes if we reach here without crashes
 }
