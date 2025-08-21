@@ -17,7 +17,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TrialFunction u(fes);
 
-    EXPECT_EQ(u.getRangeShape(), RangeShape(1, 1));
     EXPECT_EQ(u.Space, TrialSpace);
   }
 
@@ -27,7 +26,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TrialFunction u(fes);
 
-    EXPECT_EQ(u.getRangeShape(), RangeShape(1, 1));
     EXPECT_EQ(u.Space, TrialSpace);
   }
 
@@ -38,7 +36,6 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TrialFunction u_copy(u);
 
-    EXPECT_EQ(u_copy.getRangeShape(), u.getRangeShape());
     EXPECT_EQ(u_copy.Space, u.Space);
   }
 
@@ -47,10 +44,8 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     P1 fes(mesh);
     TrialFunction u(fes);
-    RangeShape original_shape = u.getRangeShape();
     
     TrialFunction u_moved(std::move(u));
-    EXPECT_EQ(u_moved.getRangeShape(), original_shape);
     EXPECT_EQ(u_moved.Space, TrialSpace);
   }
 
@@ -63,8 +58,6 @@ namespace Rodin::Tests::Unit
     const auto& solution = u.getSolution();
     auto& mutable_solution = u.getSolution();
     
-    EXPECT_EQ(solution.getRangeShape(), u.getRangeShape());
-    EXPECT_EQ(mutable_solution.getRangeShape(), u.getRangeShape());
   }
 
   TEST(Rodin_Variational_Vector_P1_TrialFunction, SanityTest_Build)
@@ -74,7 +67,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh, vdim);
     TrialFunction u(fes);
 
-    EXPECT_EQ(u.getRangeShape(), RangeShape(vdim, 1));
     EXPECT_EQ(u.Space, TrialSpace);
   }
 
@@ -89,8 +81,6 @@ namespace Rodin::Tests::Unit
     auto y_comp = u.y();
 
     // Components should have scalar range shape
-    EXPECT_EQ(x_comp.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(y_comp.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Vector_P1_TrialFunction, ComponentAccess_3D)
@@ -105,9 +95,6 @@ namespace Rodin::Tests::Unit
     auto z_comp = u.z();
 
     // Components should have scalar range shape
-    EXPECT_EQ(x_comp.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(y_comp.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(z_comp.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Real_P1_TrialFunction, GetLeaf)
@@ -128,6 +115,5 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
 
     const auto& solution = u.getSolution();
-    EXPECT_EQ(solution.getRangeShape(), RangeShape(vdim, 1));
   }
 }

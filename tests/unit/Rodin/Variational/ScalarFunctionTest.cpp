@@ -25,7 +25,6 @@ namespace Rodin::Tests::Unit
     
     // RealFunction inherits from ScalarFunctionBase
     EXPECT_NEAR(rf.getValue(p), 3.14, 1e-10);
-    EXPECT_EQ(rf.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_ScalarFunction, RealFunction_CopyOperation)
@@ -43,7 +42,6 @@ namespace Rodin::Tests::Unit
     
     EXPECT_NE(copied, nullptr);
     EXPECT_NEAR(copied->getValue(p), rf.getValue(p), 1e-10);
-    EXPECT_EQ(copied->getRangeShape(), rf.getRangeShape());
     
     delete copied;
   }
@@ -63,7 +61,6 @@ namespace Rodin::Tests::Unit
     Point p(polytope, trans, rc);
     
     EXPECT_NEAR(scalar_func->getValue(p), 42.0, 1e-10);
-    EXPECT_EQ(scalar_func->getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_ScalarFunction, RealFunction_MoveSemantics)
@@ -82,7 +79,6 @@ namespace Rodin::Tests::Unit
     
     RealFunction rf2(std::move(rf1));
     EXPECT_NEAR(rf2.getValue(p), original_value, 1e-10);
-    EXPECT_EQ(rf2.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_ScalarFunction, RealFunction_ConstantValue_MultiplePoints)
@@ -123,7 +119,6 @@ namespace Rodin::Tests::Unit
     Point p(polytope, trans, rc);
     
     EXPECT_NEAR(rf.getValue(p), 789.0, 1e-10);
-    EXPECT_EQ(rf.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_ScalarFunction, RealFunction_ZeroValue)

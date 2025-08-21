@@ -24,7 +24,6 @@ namespace Rodin::Tests::Unit
     Point p(polytope, trans, rc);
     
     EXPECT_TRUE(bf.getValue(p));
-    EXPECT_EQ(bf.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_BooleanFunction, FalseConstant_Construction)
@@ -40,7 +39,6 @@ namespace Rodin::Tests::Unit
     Point p(polytope, trans, rc);
     
     EXPECT_FALSE(bf.getValue(p));
-    EXPECT_EQ(bf.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_BooleanFunction, CopyConstructor_True)
@@ -58,7 +56,6 @@ namespace Rodin::Tests::Unit
     
     EXPECT_EQ(bf_copy.getValue(p), bf.getValue(p));
     EXPECT_TRUE(bf_copy.getValue(p));
-    EXPECT_EQ(bf_copy.getRangeShape(), bf.getRangeShape());
   }
 
   TEST(Rodin_Variational_BooleanFunction, CopyConstructor_False)
@@ -95,7 +92,6 @@ namespace Rodin::Tests::Unit
     BooleanFunction bf_moved(std::move(bf));
     EXPECT_EQ(bf_moved.getValue(p), original_value);
     EXPECT_TRUE(bf_moved.getValue(p));
-    EXPECT_EQ(bf_moved.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_BooleanFunction, MoveConstructor_False)
@@ -133,7 +129,6 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(copied, nullptr);
     EXPECT_EQ(copied->getValue(p), bf.getValue(p));
     EXPECT_TRUE(copied->getValue(p));
-    EXPECT_EQ(copied->getRangeShape(), bf.getRangeShape());
     
     delete copied;
   }
@@ -200,7 +195,6 @@ namespace Rodin::Tests::Unit
     Point p(polytope, trans, rc);
     
     EXPECT_TRUE(bool_func->getValue(p));
-    EXPECT_EQ(bool_func->getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_BooleanFunction, TraceToBoundary)

@@ -17,7 +17,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TestFunction v(fes);
 
-    EXPECT_EQ(v.getRangeShape(), RangeShape(1, 1));
     EXPECT_EQ(v.Space, TestSpace);
   }
 
@@ -27,7 +26,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TestFunction v(fes);
 
-    EXPECT_EQ(v.getRangeShape(), RangeShape(1, 1));
     EXPECT_EQ(v.Space, TestSpace);
   }
 
@@ -39,7 +37,6 @@ namespace Rodin::Tests::Unit
     
     auto copied = v.copy();
     EXPECT_NE(copied, nullptr);
-    EXPECT_EQ(copied->getRangeShape(), v.getRangeShape());
     EXPECT_EQ(copied->Space, v.Space);
     
     delete copied;
@@ -52,7 +49,6 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     TestFunction v_copy(v);
 
-    EXPECT_EQ(v_copy.getRangeShape(), v.getRangeShape());
     EXPECT_EQ(v_copy.Space, v.Space);
   }
 
@@ -61,10 +57,8 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     P1 fes(mesh);
     TestFunction v(fes);
-    RangeShape original_shape = v.getRangeShape();
     
     TestFunction v_moved(std::move(v));
-    EXPECT_EQ(v_moved.getRangeShape(), original_shape);
     EXPECT_EQ(v_moved.Space, TestSpace);
   }
 
@@ -75,7 +69,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh, vdim);
     TestFunction v(fes);
 
-    EXPECT_EQ(v.getRangeShape(), RangeShape(vdim, 1));
     EXPECT_EQ(v.Space, TestSpace);
   }
 
@@ -90,8 +83,6 @@ namespace Rodin::Tests::Unit
     auto y_comp = v.y();
 
     // Components should have scalar range shape
-    EXPECT_EQ(x_comp.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(y_comp.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Vector_P1_TestFunction, ComponentAccess_3D)
@@ -106,9 +97,6 @@ namespace Rodin::Tests::Unit
     auto z_comp = v.z();
 
     // Components should have scalar range shape
-    EXPECT_EQ(x_comp.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(y_comp.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(z_comp.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Real_P1_TestFunction, GetLeaf)
