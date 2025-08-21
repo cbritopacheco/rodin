@@ -40,26 +40,21 @@ namespace Rodin::Variational
       constexpr
       Tan(const Tan& other)
         : Parent(other),
-          m_operand(other.m_v->copy())
+          m_operand(other.m_operand->copy())
       {}
 
       constexpr
       Tan(Tan&& other)
         : Parent(std::move(other)),
-          m_operand(std::move(other.m_v))
+          m_operand(std::move(other.m_operand))
       {}
 
+      template <class ... Args>
       constexpr
-      Tan& traceOf(Geometry::Attribute attr)
+      Tan& traceOf(Args&& ... args)
       {
-        m_operand->traceOf(attr);
-        return *this;
-      }
-
-      constexpr
-      Tan& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        m_operand->traceOf(attrs);
+        Parent::traceOf(std::forward<Args>(args)...);
+        m_operand->traceOf(std::forward<Args>(args)...);
         return *this;
       }
 
@@ -86,6 +81,12 @@ namespace Rodin::Variational
 
   template <class NestedDerived>
   Tan(const FunctionBase<NestedDerived>&) -> Tan<FunctionBase<NestedDerived>>;
+
+  template <class NestedDerived>
+  auto tan(const FunctionBase<NestedDerived>& f)
+  {
+    return Tan(f);
+  }
 }
 
 #endif
