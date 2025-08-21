@@ -20,10 +20,6 @@
 #include "ForwardDecls.h"
 #include "MeshLoader.h"
 #include "MeshPrinter.h"
-#include "GridFunctionLoader.h"
-#include "GridFunctionPrinter.h"
-
-#include "Rodin/Variational/P1/P1.h"
 
 namespace Rodin::IO::VTK
 {
@@ -343,121 +339,6 @@ namespace Rodin::IO
       void printPoints(std::ostream& os);
       void printCells(std::ostream& os);
       void printCellTypes(std::ostream& os);
-  };
-
-  /**
-   * @brief Template specialization to load VTKLegacy format grid functions.
-   * @ingroup GridFunctionLoaderSpecializations
-   */
-  template <class Range>
-  class GridFunctionLoader<
-    FileFormat::VTKLegacy,
-    Variational::P1<Range, Geometry::Mesh<Context::Local>>,
-    Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
-    : public GridFunctionLoaderBase<
-        Variational::P1<Range, Geometry::Mesh<Context::Local>>,
-        Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
-  {
-    public:
-      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
-
-      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-
-      using DataType = Math::Vector<ScalarType>;
-
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
-
-      using Parent = GridFunctionLoaderBase<FESType, DataType>;
-
-      GridFunctionLoader(ObjectType& gf)
-        : Parent(gf),
-          m_currentLineNumber(0)
-      {}
-
-      void load(std::istream& is) override;
-
-    private:
-      void readPointData(std::istream& is);
-      void readScalars(std::istream& is);
-      void readVectors(std::istream& is);
-
-      size_t m_currentLineNumber;
-  };
-
-  /**
-   * @brief Base class for VTKLegacy grid function printers.
-   */
-  template <class FES, class Data>
-  class GridFunctionPrinterBase<FileFormat::VTKLegacy, FES, Data>
-    : public Printer<Variational::GridFunction<FES, Data>>
-  {
-    public:
-      using FESType = FES;
-
-      static constexpr FileFormat Format = FileFormat::VTKLegacy;
-
-      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
-
-      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
-
-      using DataType = Data;
-
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
-
-      using Parent = Printer<ObjectType>;
-
-      GridFunctionPrinterBase(const ObjectType& gf)
-        : m_gf(gf)
-      {}
-
-      void print(std::ostream& os) override
-      {
-        printPointData(os);
-      }
-
-      const ObjectType& getObject() const override
-      {
-        return m_gf.get();
-      }
-
-      virtual void printPointData(std::ostream& os) = 0;
-
-    private:
-      std::reference_wrapper<const ObjectType> m_gf;
-  };
-
-  /**
-   * @brief Template specialization to print VTKLegacy format grid functions.
-   * @ingroup GridFunctionPrinterSpecializations
-   */
-  template <class Range>
-  class GridFunctionPrinter<
-    FileFormat::VTKLegacy,
-    Variational::P1<Range, Geometry::Mesh<Context::Local>>,
-    Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
-    : public GridFunctionPrinterBase<
-        FileFormat::VTKLegacy,
-        Variational::P1<Range, Geometry::Mesh<Context::Local>>,
-        Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
-  {
-    public:
-      using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
-
-      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-
-      using DataType = Math::Vector<ScalarType>;
-
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
-
-      using Parent = GridFunctionPrinterBase<FileFormat::VTKLegacy, FESType, DataType>;
-
-      using Parent::Parent;
-
-      void printPointData(std::ostream& os) override;
-
-    private:
-      void printScalars(std::ostream& os);
-      void printVectors(std::ostream& os);
   };
 }
 
