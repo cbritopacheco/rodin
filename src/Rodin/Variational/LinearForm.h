@@ -38,23 +38,56 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
+  /**
+   * @ingroup RodinVariational
+   * @brief Base class for linear form representations.
+   *
+   * LinearFormBase provides the foundation for representing linear forms
+   * @f$ l(v) : V \to \mathbb{R} @f$ in finite element computations. A linear
+   * form is a linear functional that maps functions from the function space
+   * @f$ V @f$ to real numbers, typically representing loads, sources, or
+   * boundary data in variational formulations.
+   *
+   * @tparam Vector Vector type for the discrete representation
+   *
+   * ## Mathematical Foundation
+   * A linear form @f$ l(v) @f$ satisfies:
+   * - **Linearity**: @f$ l(\alpha v_1 + \beta v_2) = \alpha l(v_1) + \beta l(v_2) @f$
+   * - **Boundedness**: @f$ |l(v)| \leq C \|v\|_V @f$ for some constant @f$ C @f$
+   *
+   * ## Discrete Representation
+   * The discrete vector representation satisfies @f$ b_i = l(\psi_i) @f$ where
+   * @f$ \psi_i @f$ are test basis functions.
+   *
+   * ## Common Examples
+   * - **Load vector**: @f$ l(v) = \int_\Omega f \cdot v \, dx @f$
+   * - **Neumann boundary**: @f$ l(v) = \int_{\partial\Omega} g \cdot v \, ds @f$
+   * - **Point sources**: @f$ l(v) = \sum_k f_k v(x_k) @f$
+   */
   template <class Vector>
   class LinearFormBase : public FormLanguage::Base
   {
     public:
+      /// @brief Vector type for the discrete representation
       using VectorType = Vector;
 
+      /// @brief Scalar type for vector entries
       using ScalarType = typename FormLanguage::Traits<VectorType>::ScalarType;
 
+      /// @brief Base type for linear form integrators
       using LinearFormIntegratorBaseType = LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief List type for managing integrators
       using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
 
+      /// @brief Parent class type
       using Parent = FormLanguage::Base;
 
       /**
-       * @brief Constructs a linear form with a default constructed vector
-       * which is owned by the LinearFormBase instance.
+       * @brief Constructs a linear form with a default constructed vector.
+       *
+       * Creates a linear form instance with an owned vector that will store
+       * the discrete representation of the linear form after assembly.
        */
       constexpr
       LinearFormBase() = default;

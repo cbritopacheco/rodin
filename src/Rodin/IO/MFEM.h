@@ -27,14 +27,24 @@
 
 namespace Rodin::IO::MFEM
 {
+  /**
+   * @brief Keywords used in MFEM mesh file format.
+   *
+   * These keywords identify different sections of an MFEM mesh file.
+   */
   enum class Keyword
   {
-    dimension,
-    elements,
-    boundary,
-    vertices
+    dimension, ///< Dimension section keyword
+    elements,  ///< Elements section keyword  
+    boundary,  ///< Boundary section keyword
+    vertices   ///< Vertices section keyword
   };
 
+  /**
+   * @brief Converts a keyword enum to its string representation.
+   * @param kw Keyword to convert
+   * @return C-style string representation of the keyword
+   */
   inline
   constexpr
   const char* toCharString(Keyword kw)
@@ -95,6 +105,12 @@ namespace Rodin::IO::MFEM
     return !operator==(str, kw);
   }
 
+  /**
+   * @brief Stream output operator for MFEM keywords.
+   * @param os Output stream
+   * @param kw Keyword to output
+   * @return Reference to the output stream
+   */
   inline
   std::ostream& operator<<(std::ostream& os, Keyword kw)
   {
@@ -102,6 +118,11 @@ namespace Rodin::IO::MFEM
     return os;
   }
 
+  /**
+   * @brief Converts a C-style string to a keyword enum.
+   * @param str String to convert
+   * @return Optional keyword if conversion succeeds, empty otherwise
+   */
   inline
   Optional<Keyword> toKeyword(const char* str)
   {

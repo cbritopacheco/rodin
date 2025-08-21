@@ -111,6 +111,23 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Geometry
 {
+  /**
+   * @defgroup RodinGeometry Geometry Module
+   * @brief Mesh data structures, geometric operations, and computational geometry utilities.
+   *
+   * The Geometry module provides comprehensive support for mesh generation, manipulation,
+   * and geometric computations in finite element analysis. It includes data structures
+   * for representing meshes, connectivity information, geometric transformations, and
+   * algorithms for mesh processing.
+   *
+   * ## Key Components
+   * - **Mesh Data Structures**: Efficient storage and access to mesh topology and geometry
+   * - **Connectivity Management**: Automatic computation of incidence relations @f$ d \to d' @f$
+   * - **Geometric Transformations**: Reference-to-physical element mappings
+   * - **Mesh Generation**: Tools for mesh creation and refinement
+   * - **Partitioning**: Support for mesh decomposition in parallel computing
+   */
+
   class CCL
   {
     public:
@@ -172,8 +189,14 @@ namespace Rodin::Geometry
    */
 
   /**
-  * @brief Abstract base class for Mesh objects.
-  */
+   * @ingroup RodinGeometry
+   * @brief Abstract base class for all mesh implementations.
+   *
+   * MeshBase provides the common interface for all mesh types in Rodin,
+   * defining fundamental operations such as point inclusion testing and
+   * basic mesh properties. All concrete mesh implementations derive from
+   * this base class.
+   */
   class MeshBase
   {
     public:

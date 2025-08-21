@@ -29,33 +29,59 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Math
 {
+  /**
+   * @brief Base class for linear systems of the form @f$ Ax = b @f$.
+   *
+   * This class provides a CRTP (Curiously Recurring Template Pattern) base 
+   * for linear systems where @f$ A @f$ is a matrix operator, @f$ x @f$ is 
+   * the solution vector, and @f$ b @f$ is the right-hand side vector.
+   *
+   * @tparam Matrix Matrix type (e.g., SparseMatrix, Matrix)
+   * @tparam Vector Vector type
+   * @tparam Derived Derived class implementing the CRTP pattern
+   */
   template <class Matrix, class Vector, class Derived>
   class LinearSystemBase
   {
     public:
+      /// Matrix type for the linear operator
       using MatrixType =
         Matrix;
 
+      /// Vector type for solution and right-hand side
       using VectorType =
         Vector;
 
+      /// Default constructor
       constexpr
       LinearSystemBase() = default;
 
+      /// Copy constructor
       constexpr
       LinearSystemBase(const LinearSystemBase& other) = default;
 
+      /// Move constructor
       constexpr
       LinearSystemBase(LinearSystemBase&& other) noexcept = default;
 
+      /// Virtual destructor
       virtual ~LinearSystemBase() = default;
 
+      /// Copy assignment operator
       constexpr
       LinearSystemBase& operator=(const LinearSystemBase& other) = default;
 
+      /// Move assignment operator
       constexpr
       LinearSystemBase& operator=(LinearSystemBase&& other) noexcept = default;
 
+      /**
+       * @brief Eliminates degrees of freedom from the linear system.
+       * @tparam DOFScalar Scalar type for DOF values
+       * @param dofs Map of DOF indices to values to eliminate
+       * @param offset Optional offset for DOF indices
+       * @return Reference to this linear system
+       */
       template <class DOFScalar>
       constexpr
       LinearSystemBase& eliminate(
@@ -64,6 +90,13 @@ namespace Rodin::Math
         return static_cast<Derived&>(*this).eliminate(dofs, offset);
       }
 
+      /**
+       * @brief Merges additional contributions into the linear system.
+       * @tparam DOFScalar Scalar type for DOF values
+       * @param dofs Map of DOF indices to index arrays and vector contributions
+       * @param offset Optional offset for DOF indices
+       * @return Reference to this linear system
+       */
       template <class DOFScalar>
       constexpr
       LinearSystemBase& merge(
@@ -72,36 +105,60 @@ namespace Rodin::Math
         return static_cast<Derived&>(*this).merge(dofs, offset);
       }
 
+      /**
+       * @brief Gets the matrix operator @f$ A @f$ of the linear system.
+       * @return Reference to the matrix operator
+       */
       constexpr
       MatrixType& getOperator()
       {
         return static_cast<Derived&>(*this).getOperator();
       }
 
+      /**
+       * @brief Gets the matrix operator @f$ A @f$ of the linear system.
+       * @return Const reference to the matrix operator
+       */
       constexpr
       const MatrixType& getOperator() const
       {
         return static_cast<const Derived&>(*this).getOperator();
       }
 
+      /**
+       * @brief Gets the right-hand side vector @f$ b @f$ of the linear system.
+       * @return Reference to the right-hand side vector
+       */
       constexpr
       VectorType& getVector()
       {
         return static_cast<Derived&>(*this).getVector();
       }
 
+      /**
+       * @brief Gets the right-hand side vector @f$ b @f$ of the linear system.
+       * @return Const reference to the right-hand side vector
+       */
       constexpr
       const VectorType& getVector() const
       {
         return static_cast<const Derived&>(*this).getVector();
       }
 
+      /**
+       * @brief Gets the solution vector @f$ x @f$ of the linear system.
+       * @return Reference to the solution vector
+       */
       constexpr
       VectorType& getSolution()
       {
         return static_cast<Derived&>(*this).getSolution();
       }
 
+      /**
+       * @brief Gets the solution vector @f$ x @f$ of the linear system.
+       * @return Const reference to the solution vector
+       */
       constexpr
       const VectorType& getSolution() const
       {
@@ -109,26 +166,46 @@ namespace Rodin::Math
       }
   };
 
+  /**
+   * @brief Generic linear system template declaration.
+   * @tparam Matrix Matrix type
+   * @tparam Vector Vector type
+   */
   template <class Matrix, class Vector>
   class LinearSystem;
 
+  /**
+   * @brief Linear system specialization for sparse matrices.
+   *
+   * This specialization handles linear systems @f$ Ax = b @f$ where @f$ A @f$ is a 
+   * sparse matrix. This is commonly used for large systems arising from finite 
+   * element discretizations.
+   *
+   * @tparam MatrixScalar Scalar type for matrix elements
+   * @tparam VectorScalar Scalar type for vector elements
+   */
   template <class MatrixScalar, class VectorScalar>
   class LinearSystem<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>>
     : public LinearSystemBase<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>
   {
     public:
+      /// Sparse matrix type for the linear operator
       using MatrixType =
         Math::SparseMatrix<MatrixScalar>;
 
+      /// Vector type for solution and right-hand side
       using VectorType =
         Math::Vector<VectorScalar>;
 
+      /// Parent class type
       using Parent =
         LinearSystemBase<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>;
 
+      /// Default constructor
       constexpr
       LinearSystem() = default;
 
+      /// Copy constructor
       constexpr
       LinearSystem(const LinearSystem& other)
         : Parent(other),
@@ -137,6 +214,7 @@ namespace Rodin::Math
           m_solution(other.m_solution)
       {}
 
+      /// Move constructor
       constexpr
       LinearSystem(LinearSystem&& other) noexcept
         : Parent(std::move(other)),
@@ -145,6 +223,7 @@ namespace Rodin::Math
           m_solution(std::move(other.m_solution))
       {}
 
+      /// Copy assignment operator
       constexpr
       LinearSystem& operator=(const LinearSystem& other)
       {
@@ -158,6 +237,7 @@ namespace Rodin::Math
         return *this;
       }
 
+      /// Move assignment operator
       constexpr
       LinearSystem& operator=(LinearSystem&& other) noexcept
       {
@@ -171,8 +251,16 @@ namespace Rodin::Math
         return *this;
       }
 
+      /// Virtual destructor
       virtual ~LinearSystem() = default;
 
+      /**
+       * @brief Eliminates degrees of freedom from the sparse linear system.
+       * @tparam DOFScalar Scalar type for DOF values  
+       * @param dofs Map of DOF indices to values to eliminate
+       * @param offset Optional offset for DOF indices
+       * @return Reference to this linear system
+       */
       template <class DOFScalar>
       constexpr
       LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
@@ -394,23 +482,38 @@ namespace Rodin::Math
       VectorType m_solution; ///< The solution vector of the linear system.
   };
 
+  /**
+   * @brief Linear system specialization for dense matrices.
+   *
+   * This specialization handles linear systems @f$ Ax = b @f$ where @f$ A @f$ is a 
+   * dense matrix. This is typically used for smaller systems where the dense 
+   * representation is more efficient.
+   *
+   * @tparam MatrixScalar Scalar type for matrix elements
+   * @tparam VectorScalar Scalar type for vector elements
+   */
   template <class MatrixScalar, class VectorScalar>
   class LinearSystem<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>>
     : public LinearSystemBase<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>
   {
     public:
+      /// Dense matrix type for the linear operator  
       using MatrixType =
         Math::Matrix<MatrixScalar>;
 
+      /// Vector type for solution and right-hand side
       using VectorType =
         Math::Vector<VectorScalar>;
 
+      /// Parent class type
       using Parent =
         LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixScalar, VectorScalar>>;
 
+      /// Default constructor
       constexpr
       LinearSystem() = default;
 
+      /// Copy constructor
       constexpr
       LinearSystem(const LinearSystem& other)
         : Parent(other),
@@ -419,6 +522,7 @@ namespace Rodin::Math
           m_solution(other.m_solution)
       {}
 
+      /// Move constructor  
       constexpr
       LinearSystem(LinearSystem&& other) noexcept
         : Parent(std::move(other)),
@@ -427,6 +531,7 @@ namespace Rodin::Math
           m_solution(std::move(other.m_solution))
       {}
 
+      /// Virtual destructor
       virtual ~LinearSystem() = default;
 
       constexpr

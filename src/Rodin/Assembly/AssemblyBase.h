@@ -16,23 +16,76 @@
 
 namespace Rodin::Assembly
 {
+  /**
+   * @defgroup RodinAssembly Assembly Module
+   * @brief Matrix and vector assembly infrastructure for finite element computations.
+   *
+   * The Assembly module provides the core infrastructure for assembling finite
+   * element matrices and vectors from variational forms. It supports both
+   * sequential and parallel assembly strategies, with specializations for
+   * different operator types and finite element spaces.
+   *
+   * ## Key Features
+   * - **Bilinear Form Assembly**: Efficient assembly of stiffness matrices
+   * - **Linear Form Assembly**: Assembly of load vectors and right-hand sides  
+   * - **Parallel Assembly**: Support for OpenMP-based parallel assembly
+   * - **Template Specialization**: Optimized assembly for different operator types
+   * - **Mixed Formulations**: Support for mixed finite element problems
+   */
+
+  /**
+   * @ingroup RodinAssembly
+   * @brief Base class for bilinear form assembly operations.
+   *
+   * This template specialization handles the assembly of bilinear forms into
+   * matrix operators. It provides the interface for converting variational
+   * forms @f$ a(u,v) @f$ into discrete matrix representations @f$ A @f$ where
+   * @f$ A_{ij} = a(\phi_j, \psi_i) @f$ for trial functions @f$ \phi_j @f$ and
+   * test functions @f$ \psi_i @f$.
+   *
+   * @tparam OperatorType Matrix type for the assembled operator (e.g., sparse matrix)
+   * @tparam Solution Solution variable type 
+   * @tparam TrialFES Trial finite element space type
+   * @tparam TestFES Test finite element space type
+   */
   template <class OperatorType, class Solution, class TrialFES, class TestFES>
   class AssemblyBase<OperatorType, Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>>
     : public FormLanguage::Base
   {
     public:
+      /// @brief Input data type for bilinear form assembly
       using InputType = BilinearFormAssemblyInput<TrialFES, TestFES>;
 
+      /// @brief Default constructor
       AssemblyBase() = default;
 
+      /// @brief Copy constructor
       AssemblyBase(const AssemblyBase&) = default;
 
+      /// @brief Move constructor  
       AssemblyBase(AssemblyBase&&) = default;
 
+      /// @brief Virtual destructor
       virtual ~AssemblyBase() = default;
 
+      /**
+       * @brief Executes the assembly operation.
+       *
+       * @param out Output matrix to store the assembled bilinear form
+       * @param data Assembly input data containing finite element spaces and integration data
+       *
+       * Performs the core assembly operation, computing the matrix entries
+       * @f$ A_{ij} = a(\phi_j, \psi_i) @f$ where @f$ a(\cdot,\cdot) @f$ is
+       * the bilinear form, @f$ \phi_j @f$ are trial basis functions, and
+       * @f$ \psi_i @f$ are test basis functions.
+       */
       virtual void execute(OperatorType& out, const InputType& data) const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy of this assembly object.
+       * 
+       * @return AssemblyBase* Pointer to a new copy of this object
+       */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
@@ -57,23 +110,55 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
+  /**
+   * @ingroup RodinAssembly
+   * @brief Base class for linear form assembly operations.
+   *
+   * This template specialization handles the assembly of linear forms into
+   * vector objects. It provides the interface for converting variational
+   * forms @f$ l(v) @f$ into discrete vector representations @f$ b @f$ where
+   * @f$ b_i = l(\psi_i) @f$ for test functions @f$ \psi_i @f$.
+   *
+   * @tparam VectorType Vector type for the assembled right-hand side
+   * @tparam FES Finite element space type
+   */
   template <class VectorType, class FES>
   class AssemblyBase<VectorType, Variational::LinearForm<FES, VectorType>>
     : public FormLanguage::Base
   {
     public:
+      /// @brief Input data type for linear form assembly
       using InputType = LinearFormAssemblyInput<FES>;
 
+      /// @brief Default constructor
       AssemblyBase() = default;
 
+      /// @brief Copy constructor
       AssemblyBase(const AssemblyBase&) = default;
 
+      /// @brief Move constructor
       AssemblyBase(AssemblyBase&&) = default;
 
+      /// @brief Virtual destructor
       virtual ~AssemblyBase() = default;
 
+      /**
+       * @brief Executes the linear form assembly operation.
+       *
+       * @param out Output vector to store the assembled linear form
+       * @param data Assembly input data containing finite element space and integration data
+       *
+       * Performs the core assembly operation, computing the vector entries
+       * @f$ b_i = l(\psi_i) @f$ where @f$ l(\cdot) @f$ is the linear form
+       * and @f$ \psi_i @f$ are test basis functions.
+       */
       virtual void execute(VectorType& out, const InputType& data) const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy of this assembly object.
+       * 
+       * @return AssemblyBase* Pointer to a new copy of this object
+       */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 

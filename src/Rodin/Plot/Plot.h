@@ -21,7 +21,44 @@
 namespace Rodin::Plot
 {
   /**
-   * @brief Contains the plotting functionalities.
+   * @defgroup RodinPlot Plotting and Visualization Module
+   * @brief Interactive plotting and visualization capabilities for finite element data.
+   *
+   * The Plot module provides comprehensive visualization tools for finite element
+   * analysis results, including mesh visualization, function plotting, and interactive
+   * exploration of numerical solutions. Built on top of the Magnum graphics library,
+   * it offers high-performance rendering suitable for large-scale simulations.
+   *
+   * ## Key Features
+   * - **Mesh Visualization**: Wireframe and solid mesh rendering
+   * - **Function Plotting**: Scalar and vector field visualization
+   * - **Interactive Controls**: Mouse and keyboard interaction for exploration
+   * - **Multiple Backends**: Support for different rendering backends
+   * - **Export Capabilities**: Save visualizations to various image formats
+   */
+
+  /**
+   * @ingroup RodinPlot
+   * @brief Main plotting interface for finite element visualization.
+   *
+   * The Plot class serves as the central interface for creating and managing
+   * visualizations of finite element data. It provides a high-level API for
+   * rendering meshes, functions, and analysis results with interactive controls.
+   *
+   * ## Usage Example
+   * ```cpp
+   * Plot plot;
+   * auto figure = plot.figure();
+   * figure.plot(mesh);
+   * figure.plot(solution);
+   * plot.show();
+   * ```
+   *
+   * ## Technical Details
+   * - Uses OpenGL for hardware-accelerated rendering
+   * - Supports multiple concurrent figure windows
+   * - Provides customizable rendering options and visual styles
+   * - Integrates with Rodin's finite element data structures
    */
   class Plot
   {
@@ -31,27 +68,39 @@ namespace Rodin::Plot
 
     public:
       /**
-       * Represents the possible values of the swap interval for objects of the
-       * Artist::Figure class.
-       * @see setSwapInterval
+       * @brief Buffer swap interval modes for controlling rendering synchronization.
+       *
+       * This enumeration defines the synchronization behavior between buffer
+       * swaps and the display's vertical refresh rate, allowing control over
+       * frame rate and visual quality trade-offs.
        */
       enum SwapInterval
       {
         /**
-        * Updates synchronized with the vertical retrace, except that if the
-        * vertical retrace for the current frame was missed the buffers are
-        * swapped immediately.
-        */
+         * @brief Adaptive vertical synchronization.
+         *
+         * Updates synchronized with the vertical retrace, except that if the
+         * vertical retrace for the current frame was missed the buffers are
+         * swapped immediately. This provides smooth rendering while avoiding
+         * input lag.
+         */
         ADAPTIVE = -1,
 
         /**
-        * Immediate updates.
-        */
+         * @brief Immediate buffer swaps.
+         *
+         * Immediate updates without synchronization. This provides the highest
+         * frame rate but may result in screen tearing.
+         */
         IMMEDIATE = 0,
 
         /**
-        * Updates synchronized with the vertical retrace.
-        */
+         * @brief Vertical synchronization.
+         *
+         * Updates synchronized with the vertical retrace. This eliminates
+         * screen tearing but may introduce input lag and limits frame rate
+         * to the display refresh rate.
+         */
         VSYNC = 1
       };
 
