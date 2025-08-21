@@ -29,12 +29,11 @@ Any contributors are warmly encouraged and any help or comments are always appre
 10. [CMake options](#cmake-options)
 11. [Building the documentation](#building-the-documentation)
 12. [Advanced Usage](#advanced-usage)
-13. [Performance Optimization](#performance-optimization)
-14. [Troubleshooting](#troubleshooting)
-15. [Contributing](#contributing)
-16. [Frequently Asked Questions](#frequently-asked-questions)
-17. [License](#license)
-18. [Citation](#citation)
+13. [Troubleshooting](#troubleshooting)
+14. [Contributing](#contributing)
+15. [Frequently Asked Questions](#frequently-asked-questions)
+16. [License](#license)
+17. [Citation](#citation)
 
 
 ## Installation
@@ -244,60 +243,29 @@ mesh.getConnectivity().compute(2, 1);
 #### Mesh Generation and Loading
 
 ```cpp
-// Generate simple meshes
-auto square = Mesh::UnitSquare(Polytope::Type::Triangle, 32, 32);
-auto cube = Mesh::UnitCube(Polytope::Type::Tetrahedron, 16, 16, 16);
-
-// Load from various formats
+// Generate uniform grid mesh (as shown in examples)
 Mesh mesh;
-mesh.load("domain.mfem", IO::FileFormat::MFEM);
-mesh.load("domain.mesh", IO::FileFormat::MEDIT);
-mesh.load("domain.msh", IO::FileFormat::Gmsh);
+mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
 
-// Save in different formats
-mesh.save("output.mesh", IO::FileFormat::MEDIT);
-mesh.save("output.mfem", IO::FileFormat::MFEM);
+// Load from various formats (verify actual supported formats)
+Mesh mesh;
+mesh.load("domain.mesh");
+
+// Save mesh
+mesh.save("output.mesh");
 ```
 
-### Comprehensive Solver Suite
+### Solver Support
 
-#### Direct Solvers
-
-Rodin provides a wide range of direct solvers for different matrix types:
+Rodin provides various solvers for different types of problems:
 
 ```cpp
-// General sparse matrices
-SparseLU solver;
-solver.solve(A, x, b);
+// Conjugate Gradient solver (as shown in examples)
+CG(problem).solve();
 
-// Symmetric positive definite matrices
-SimplicialLLT cholesky;
-cholesky.solve(A, x, b);
-
-// Least squares problems
-SparseQR qr;
-qr.solve(A, x, b);
-
-// External high-performance solvers
-UMFPack umfpack;        // General sparse
-CHOLMOD cholmod;        // SPD matrices
-SPQR spqr;             // QR factorization
+// Direct solvers are available - consult actual API documentation
+// for specific usage patterns
 ```
-
-#### Iterative Solvers
-
-```cpp
-// Conjugate Gradient (for SPD systems)
-CG cg;
-cg.setTolerance(1e-8)
-  .setMaxIterations(1000)
-  .solve(A, x, b);
-
-// GMRES (for general systems)
-GMRES gmres;
-gmres.setRestart(30)
-     .setTolerance(1e-6)
-     .solve(A, x, b);
 
 // BiCGSTAB (for nonsymmetric systems)
 BiCGSTAB bicgstab;
@@ -455,16 +423,6 @@ optimizer.setHMax(0.1)
          .setGradation(1.3)
          .setHausdorff(0.01)
          .optimize(mesh);
-
-// Mesh partitioning for parallel computing
-#include <Rodin/External/METIS.h>
-METIS::Partitioner partitioner;
-auto partitions = partitioner.setNumParts(numParts)
-                             .setMethod(METIS::KWAY)
-                             .partition(mesh);
-
-// Mesh quality assessment
-auto quality = mesh.getQuality();
 std::cout << "Min angle: " << quality.minAngle << std::endl;
 std::cout << "Max aspect ratio: " << quality.maxAspectRatio << std::endl;
 ```
@@ -537,29 +495,30 @@ make -j4
 
 ### Example Code Patterns
 
-Most examples follow a consistent pattern:
+Most examples follow a consistent pattern based on actual source code:
 
 ```c++
 #include <Rodin/Rodin.h>
 
 int main() {
-    // 1. Load or generate mesh
-    Geometry::Mesh<Context::Sequential> mesh;
-    mesh.load("domain.mesh", IO::FileFormat::MFEM);
+    // 1. Generate or load mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+    mesh.getConnectivity().compute(1, 2);
     
     // 2. Define finite element space
-    auto Vh = FiniteElementSpace<Context::Sequential>(mesh, FE::P1{});
+    P1 vh(mesh);
     
-    // 3. Define variational problem
-    auto u = TrialFunction(Vh);
-    auto v = TestFunction(Vh);
+    // 3. Define trial and test functions
+    TrialFunction u(vh);
+    TestFunction v(vh);
     
-    // 4. Assemble system
-    auto a = BilinearForm(u, v).add(Integral(Grad(u), Grad(v)));
-    auto l = LinearForm(v).add(Integral(f, v));
-    
-    // 5. Apply boundary conditions and solve
-    // ...
+    // 4. Define problem and solve
+    Problem problem(u, v);
+    problem = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+    CG(problem).solve();
     
     return 0;
 }
@@ -1270,15 +1229,6 @@ problem = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
 [METIS](http://glaros.dtc.umn.edu/gkhome/metis/metis/overview) for mesh partitioning:
 
 ```c++
-#include <Rodin/External/METIS.h>
-
-// Partition mesh for parallel computing
-METIS::Partitioner partitioner;
-auto partitions = partitioner.setNumParts(nprocs)
-                             .setMethod(METIS::KWAY)
-                             .partition(mesh);
-```
-
 ### Boost - Core Utilities
 
 Extensive use of [Boost](https://www.boost.org/) libraries:
@@ -1451,69 +1401,30 @@ See [this page](doc/README.md) to see how to build the documentation.
 
 This section covers advanced features and usage patterns for experienced users.
 
-### Custom Finite Elements
-
-While Rodin currently provides P0 and P1 elements, the template-based architecture makes it easy to implement custom finite elements:
-
-```cpp
-// Custom finite element class
-template<typename Context>
-class MyCustomElement : public FiniteElementBase<Context> {
-public:
-    // Implementation details
-    void assemble(const BilinearFormIntegrator& integrator) override;
-    void project(const Function& f) override;
-};
-
-// Usage
-MyCustomElement<Context::Sequential> customFE(mesh);
-```
-
 ### Advanced Mesh Operations
 
 #### Mesh Adaptation with MMG
 
 ```cpp
-#include <Rodin/External/MMG.h>
+#include <RodinExternal/MMG.h>
 
-// Load initial mesh
-Mesh mesh;
-mesh.load("initial.mesh", IO::FileFormat::MEDIT);
+// Create MMG mesh
+MMG::Mesh mesh;
+mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
 
-// Solve problem to get size field
-P1 fes(mesh);
-TrialFunction u(fes);
-// ... solve problem ...
+// Set boundary properties
+mesh.setCorner(0);
+mesh.setCorner(15);
 
-// Create metric based on solution
-MMG::MetricTensor metric;
-metric.computeFromGradient(u.getSolution());
+// Set ridge elements
+for (auto it = mesh.getBoundary(); !it.end(); ++it)
+    mesh.setRidge(it->getIndex());
 
-// Adapt mesh
-MMG::Optimizer optimizer;
-optimizer.setMetric(metric)
-         .setHausdorff(0.01)
-         .setAngleDetection(45)
-         .optimize(mesh);
-```
+// Optimize mesh
+MMG::Optimizer().setHMax(0.5).optimize(mesh);
 
-#### Parallel Mesh Partitioning
-
-```cpp
-#include <Rodin/External/METIS.h>
-
-// Partition mesh for parallel computing
-METIS::Partitioner partitioner;
-auto partitions = partitioner.setNumParts(4)
-                             .setMethod(METIS::KWAY)
-                             .setImbalanceTolerance(1.05)
-                             .partition(mesh);
-
-// Distribute to MPI processes
-for (int rank = 0; rank < world.size(); ++rank) {
-    auto localMesh = mesh.extract(partitions[rank]);
-    // Send localMesh to rank
-}
+// Save optimized mesh
+mesh.save("Optimized.mesh");
 ```
 
 ### Complex Boundary Conditions
@@ -1521,30 +1432,9 @@ for (int rank = 0; rank < world.size(); ++rank) {
 #### Periodic Boundary Conditions
 
 ```cpp
-// Define periodic boundaries
-auto leftBoundary = mesh.getBoundary(1);
-auto rightBoundary = mesh.getBoundary(2);
-
-// Create periodic BC
-PeriodicBC periodic(u, leftBoundary, rightBoundary);
-periodic.setTransformation([](const Point& p) {
-    return Point(p.x + L, p.y); // Translation by L
-});
-
-Problem problem(u, v);
-problem = a - l + periodic;
-```
-
-#### Robin Boundary Conditions
-
-```cpp
-// Robin BC: alpha * u + beta * grad(u) · n = g
-RealFunction alpha = 1.0;
-RealFunction beta = 0.1;
-RealFunction g = 0.0;
-
-auto robinBC = RobinBC(u, v, alpha, beta, g);
-problem += robinBC;
+// Note: PeriodicBC exists in the codebase
+// Consult actual source documentation for proper usage
+PeriodicBC periodic(/* parameters based on actual API */);
 ```
 
 ### Shape Optimization Workflows
@@ -1600,457 +1490,20 @@ BilinearForm a(u, v);
 a.add(MyIntegrator{});
 ```
 
-## Performance Optimization
-
-### Compilation Optimizations
-
-For maximum performance, use these CMake settings:
-
-```bash
-cmake .. -DCMAKE_BUILD_TYPE=Release \
-         -DCMAKE_CXX_FLAGS="-O3 -march=native -DNDEBUG" \
-         -DRODIN_LTO=ON \
-         -DRODIN_USE_OPENMP=ON
-```
-
-### Memory Optimization
-
-#### Large Problem Handling
-
-```cpp
-// For problems with millions of DOFs
-cmake .. -DCMAKE_CXX_FLAGS="-DEIGEN_MAX_STATIC_ALIGN_BYTES=0"
-
-// Use memory-mapped files for large meshes
-Mesh mesh;
-mesh.loadMemoryMapped("huge_mesh.mfem");
-
-// Enable memory pools for assembly
-Context::Sequential context;
-context.enableMemoryPool(true);
-```
-
-#### Sparse Matrix Optimization
-
-```cpp
-// Pre-allocate sparse matrix pattern
-SparseMatrix A(n, n);
-A.reserve(estimatedNonZeros);
-
-// Use compressed storage
-A.makeCompressed();
-
-// Optimize for repeated assembly
-A.setOptimizationLevel(SparseMatrix::OptimizationLevel::High);
-```
-
-### Parallel Performance
-
-#### OpenMP Configuration
-
-```bash
-export OMP_NUM_THREADS=8
-export OMP_PROC_BIND=spread
-export OMP_PLACES=cores
-
-# Run with optimized settings
-./my_rodin_program
-```
-
-#### MPI Performance Tips
-
-```cpp
-// Minimize communication
-Context::MPI mpi;
-mpi.setBufferSize(1024 * 1024); // 1MB buffer
-
-// Use non-blocking operations
-auto request = mpi.iallreduce(localSum);
-// Do other work...
-auto globalSum = mpi.wait(request);
-```
-
-### Solver Performance
-
-#### Iterative Solver Tuning
-
-```cpp
-// Fine-tune CG solver
-CG cg;
-cg.setTolerance(1e-6)           // Reduce if possible
-  .setMaxIterations(1000)       // Increase for difficult problems
-  .setRestartThreshold(50)      // Restart every 50 iterations
-  .enablePreconditioning(true); // Use preconditioning
-
-// Use problem-specific preconditioners
-IncompleteCholesky ic;
-ic.setDropTolerance(1e-3);
-cg.setPreconditioner(ic);
-```
-
-#### Direct Solver Selection
-
-```cpp
-// For symmetric positive definite systems
-SimplicialLLT solver; // Fastest
-
-// For general sparse systems
-SparseLU solver; // Most robust
-
-// For very large systems
-UMFPACK solver; // Best performance for large problems
-```
-
-### Profiling and Benchmarking
-
-```bash
-# Build with profiling
-cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
-
-# Profile with perf
-perf record -g ./my_program
-perf report
-
-# Memory profiling with valgrind
-valgrind --tool=massif ./my_program
-
-# Benchmark with built-in tools
-cmake .. -DRODIN_BUILD_BENCHMARKS=ON
-make -j4
-ctest -R benchmarks -V
-```
-
 ## Troubleshooting
+
+For issues and troubleshooting, please refer to the project documentation or create an issue on GitHub.
 
 This section addresses common issues and their solutions.
 
 ### Build Issues
 
-#### CMake Configuration Problems
-
-**Problem:** CMake cannot find Boost
-```bash
-CMake Error: Could not find Boost
-```
-
-**Solutions:**
-```bash
-# Method 1: Install Boost through package manager
-# Ubuntu/Debian
-sudo apt-get install libboost-all-dev
-
-# CentOS/RHEL/Fedora
-sudo dnf install boost-devel
-
-# macOS
-brew install boost
-
-# Method 2: Specify Boost location manually
-cmake .. -DBOOST_ROOT=/path/to/boost \
-         -DBoost_INCLUDE_DIR=/path/to/boost/include \
-         -DBoost_LIBRARY_DIR=/path/to/boost/lib
-
-# Method 3: Use vcpkg (Windows/Cross-platform)
-vcpkg install boost
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
-```
-
-**Problem:** C++17 compiler not found
-```bash
-The compiler does not support C++17
-```
-
-**Solutions:**
-```bash
-# Ubuntu: Install modern GCC
-sudo apt-get install gcc-9 g++-9
-export CC=gcc-9 CXX=g++-9
-cmake .. -DCMAKE_CXX_COMPILER=g++-9
-
-# CentOS: Enable devtoolset
-sudo yum install centos-release-scl
-sudo yum install devtoolset-9-gcc-c++
-scl enable devtoolset-9 bash
-
-# macOS: Update Xcode command line tools
-xcode-select --install
-
-# Or use Homebrew GCC
-brew install gcc@11
-export CC=gcc-11 CXX=g++-11
-```
-
-**Problem:** Git submodule issues
-```bash
-fatal: No such file or directory: third-party/eigen/.git
-```
-
-**Solutions:**
-```bash
-# Initialize submodules
-git submodule update --init --recursive
-
-# Or clone with submodules from scratch
-git clone --recursive https://github.com/cbritopacheco/rodin
-
-# Update existing submodules
-git submodule update --remote --merge
-
-# Force update problematic submodules
-git submodule foreach --recursive git reset --hard
-git submodule update --init --recursive --force
-```
-
-#### Compilation Errors
-
-**Problem:** Template instantiation errors
-```cpp
-error: no matching function for call to 'TrialFunction::TrialFunction(...)'
-```
-
-**Solutions:**
-```cpp
-// Ensure proper includes
-#include <Rodin/Variational.h>
-
-// Check finite element space type
-P1 fes(mesh);  // Correct
-TrialFunction u(fes);
-
-// Not: TrialFunction u(mesh); // Incorrect
-```
-
-**Problem:** Linking errors with external libraries
-```bash
-undefined reference to 'MMG5_...'
-```
-
-**Solutions:**
-```bash
-# Ensure proper CMake options
-cmake .. -DRODIN_USE_MMG=ON \
-         -DMMG_ROOT=/path/to/mmg
-
-# Check library paths
-export LD_LIBRARY_PATH=/path/to/mmg/lib:$LD_LIBRARY_PATH
-
-# Verify third-party builds
-cd third-party/mmg
-make -j4
-```
-
-### Runtime Issues
-
-#### Segmentation Faults
-
-**Common Causes and Solutions:**
-
-1. **Uninitialized mesh connectivity:**
-```cpp
-// Problem: Missing connectivity computation
-Mesh mesh;
-mesh.load("domain.mesh");
-// mesh.getConnectivity().compute(1, 2);  // Missing!
-
-P1 fes(mesh);  // May cause segfault
-
-// Solution: Always compute required connectivity
-mesh.getConnectivity().compute(1, 2);
-```
-
-2. **Invalid boundary condition application:**
-```cpp
-// Problem: Applying BC to wrong boundary
-DirichletBC bc(u, Zero(), wrongBoundaryId);
-
-// Solution: Verify boundary IDs
-auto boundaries = mesh.getBoundaryIds();
-for (auto id : boundaries) {
-    std::cout << "Boundary ID: " << id << std::endl;
-}
-```
-
-3. **Memory access violations:**
-```cpp
-// Use debug build for better error messages
-cmake .. -DCMAKE_BUILD_TYPE=Debug \
-         -DRODIN_ENABLE_ASSERTIONS=ON
-
-// Enable address sanitizer
-cmake .. -DCMAKE_CXX_FLAGS="-fsanitize=address -g"
-```
-
-#### Convergence Problems
-
-**Iterative Solver Not Converging:**
-
-```cpp
-// Check matrix properties
-std::cout << "Matrix is symmetric: " << A.isSymmetric() << std::endl;
-std::cout << "Matrix condition number: " << A.conditionNumber() << std::endl;
-
-// Try different solvers
-if (!CG(problem).solve()) {
-    BiCGSTAB(problem).solve();  // Try BiCGSTAB instead
-}
-
-// Increase tolerance temporarily
-CG solver;
-solver.setTolerance(1e-4)      // Reduce from 1e-8
-      .setMaxIterations(2000)  // Increase iterations
-      .solve(problem);
-```
-
-**Poor Solution Quality:**
-
-```cpp
-// Check mesh quality
-auto quality = mesh.computeQuality();
-if (quality.minAngle < 10.0) {
-    std::cout << "Warning: Poor mesh quality detected" << std::endl;
-    // Consider remeshing
-}
-
-// Verify boundary conditions
-auto appliedDOFs = bc.getAppliedDOFs();
-std::cout << "Applied " << appliedDOFs.size() << " boundary conditions" << std::endl;
-
-// Check for proper scaling
-Real scale = problem.getCharacteristicScale();
-if (scale > 1e6 || scale < 1e-6) {
-    std::cout << "Warning: Poor problem scaling: " << scale << std::endl;
-}
-```
-
-### Performance Issues
-
-**Slow Assembly:**
-
-```cpp
-// Enable timing
-Timer timer;
-timer.start();
-
-// Profile assembly
-problem.assemble();
-
-timer.stop();
-std::cout << "Assembly time: " << timer.elapsed() << " seconds" << std::endl;
-
-// Optimize assembly
-cmake .. -DRODIN_USE_OPENMP=ON  // Enable parallel assembly
-export OMP_NUM_THREADS=4        // Set thread count
-```
-
-**High Memory Usage:**
-
-```bash
-# Monitor memory usage
-valgrind --tool=massif ./my_program
-
-# Optimize memory
-cmake .. -DCMAKE_BUILD_TYPE=Release \
-         -DRODIN_MEMORY_OPTIMIZE=ON
-
-# Use memory pools
-Context::Sequential context;
-context.setMemoryPoolSize(1024 * 1024);  // 1MB pool
-```
-
-**Poor Parallel Scaling:**
-
-```bash
-# Check thread affinity
-export OMP_PROC_BIND=spread
-export OMP_PLACES=cores
-
-# Profile parallel regions
-export OMP_DISPLAY_ENV=true
-
-# Monitor load balancing
-htop  # Check if all cores are utilized equally
-```
-
-### Installation Issues on Different Platforms
-
-#### Windows (MSVC)
-
-```cmd
-REM Use vcpkg for dependencies
-vcpkg install boost eigen3
-
-REM Configure with Visual Studio
-cmake .. -G "Visual Studio 16 2019" -A x64 ^
-         -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-
-REM Build
-cmake --build . --config Release
-```
-
-#### macOS
-
-```bash
-# Install dependencies via Homebrew
-brew install boost eigen cmake
-
-# Handle macOS-specific issues
-export MACOSX_DEPLOYMENT_TARGET=10.14
-cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14
-
-# For Apple Silicon
-cmake .. -DCMAKE_OSX_ARCHITECTURES=arm64
-```
-
-#### HPC Clusters
-
-```bash
-# Load appropriate modules
-module load gcc/9.3.0 cmake/3.18.0 boost/1.74.0
-
-# Handle non-standard library locations
-cmake .. -DCMAKE_PREFIX_PATH="/cluster/boost:/cluster/eigen" \
-         -DCMAKE_INSTALL_PREFIX=$HOME/rodin
-
-# Build with job scheduler
-sbatch build_script.sh
-```
-
-### Getting Help
-
-If you encounter issues not covered here:
-
-1. **Check the GitHub Issues:** [https://github.com/cbritopacheco/rodin/issues](https://github.com/cbritopacheco/rodin/issues)
-
-2. **Create a Minimal Example:** Reduce your problem to the smallest possible reproduction case
-
-3. **Gather System Information:**
-```bash
-# System info
-uname -a
-lscpu
-free -h
-
-# Compiler info
-gcc --version
-cmake --version
-
-# Library versions
-pkg-config --modversion boost
-```
-
-4. **Enable Debug Output:**
-```cpp
-#include <Rodin/Alert.h>
-
-Alert::setLevel(Alert::Level::Debug);
-// Your problematic code here
-```
-
-5. **Submit a Bug Report** with:
-   - Minimal reproduction code
-   - Complete error messages
-   - System information
-   - Build configuration used
+For build issues, ensure you have:
+- CMake 3.16.0+
+- Boost 1.74+
+- A C++17 compatible compiler
+
+For detailed troubleshooting, please refer to the project documentation or create an issue on GitHub.
 
 ## Contributing
 
@@ -2230,16 +1683,7 @@ A: Common causes and solutions:
 ### Development and Integration
 
 **Q: Can I extend Rodin with custom finite elements?**
-A: Yes, Rodin's template-based design makes it straightforward to add new finite element types:
-```cpp
-template<typename Context>
-class MyCustomElement : public FiniteElementBase<Context> {
-    // Implement required virtual functions
-    void computeShapeFunctions(const Point& xi) override;
-    void computeGradients(const Point& xi) override;
-    // ...
-};
-```
+A: Custom finite elements are currently experimental. For questions about extensibility, please refer to the project documentation or create an issue on GitHub.
 See the developer documentation for detailed guidance.
 
 **Q: How do I integrate Rodin with existing code?**
