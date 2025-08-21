@@ -119,6 +119,11 @@ namespace Rodin::FormLanguage
         return m_list.size();
       }
 
+      constexpr bool empty() const
+      {
+        return m_list.empty();
+      }
+
       constexpr Iterator begin() noexcept
       {
         return Iterator(m_list.begin());

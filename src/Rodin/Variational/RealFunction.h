@@ -62,6 +62,13 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      template <class ... Args>
+      constexpr
+      Derived& traceOf(const Args& ... args)
+      {
+        return static_cast<Derived&>(*this).traceOf(args...);
+      }
+
       virtual RealFunctionBase* copy() const noexcept override = 0;
   };
 
@@ -149,6 +156,12 @@ namespace Rodin::Variational
         return m_x;
       }
 
+      template <class ... Args>
+      RealFunction& traceOf(Args&&... args) noexcept
+      {
+        return *this;
+      }
+
       RealFunction* copy() const noexcept override
       {
         return new RealFunction(*this);
@@ -196,6 +209,12 @@ namespace Rodin::Variational
         return m_x;
       }
 
+      template <class ... Args>
+      RealFunction& traceOf(Args&&... args) noexcept
+      {
+        return *this;
+      }
+
       RealFunction* copy() const noexcept override
       {
         return new RealFunction(*this);
@@ -239,6 +258,12 @@ namespace Rodin::Variational
       Real getValue(const Geometry::Point& v) const
       {
         return m_f(v);
+      }
+
+      template <class ... Args>
+      RealFunction& traceOf(Args&&... args) noexcept
+      {
+        return *this;
       }
 
       RealFunction* copy() const noexcept override

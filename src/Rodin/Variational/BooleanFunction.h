@@ -24,7 +24,6 @@ namespace Rodin::Variational
   {
     public:
       using Parent = FunctionBase<BooleanFunctionBase<Derived>>;
-      using Parent::traceOf;
       using Parent::operator();
 
       BooleanFunctionBase() = default;
@@ -46,6 +45,13 @@ namespace Rodin::Variational
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      template <class ... Args>
+      constexpr
+      Derived& traceOf(const Args& ... args)
+      {
+        return static_cast<Derived&>(*this).traceOf(args...);
       }
 
       virtual BooleanFunctionBase* copy() const noexcept override = 0;
@@ -79,6 +85,13 @@ namespace Rodin::Variational
       Boolean getValue(const Geometry::Point&) const
       {
         return m_v;
+      }
+
+      template <class ... Args>
+      constexpr
+      BooleanFunction& traceOf(const Args& ... args)
+      {
+        return *this;
       }
 
       BooleanFunction* copy() const noexcept final override

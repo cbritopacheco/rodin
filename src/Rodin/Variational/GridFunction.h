@@ -111,6 +111,52 @@ namespace Rodin::Variational
         return m_ref.get().getValue(p);
       }
 
+      constexpr
+      decltype(auto) x() const
+      {
+        return m_ref.get().x();
+      }
+
+      constexpr
+      decltype(auto) y() const
+      {
+        return m_ref.get().y();
+      }
+
+      constexpr
+      decltype(auto) z() const
+      {
+        return m_ref.get().z();
+      }
+
+      template <class DataType>
+      constexpr
+      decltype(auto) setData(const DataType& data, size_t offset = 0)
+      {
+        return m_ref.get().setData(data, offset);
+      }
+
+      /**
+       * @brief Returns a constant reference to the GridFunction data.
+       */
+      constexpr
+      auto& getData()
+      {
+        return m_ref.get().getData();
+      }
+
+      constexpr
+      const auto& getFiniteElementSpace() const
+      {
+        return m_ref.get().getFiniteElementSpace();
+      }
+
+      constexpr
+      size_t getSize() const
+      {
+        return m_ref.get().getSize();
+      }
+
       GridFunctionBaseReference* copy() const noexcept final override
       {
         return new GridFunctionBaseReference(*this);
@@ -192,7 +238,7 @@ namespace Rodin::Variational
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
         assert(m_fes.get().getVectorDimension() >= 1);
-        return Component(static_cast<Derived&>(*this), 0);
+        return Component(static_cast<const Derived&>(*this), 0);
       }
 
       constexpr
@@ -200,7 +246,7 @@ namespace Rodin::Variational
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
         assert(m_fes.get().getVectorDimension() >= 2);
-        return Component(static_cast<Derived&>(*this), 1);
+        return Component(static_cast<const Derived&>(*this), 1);
       }
 
       constexpr
@@ -208,7 +254,7 @@ namespace Rodin::Variational
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
         assert(m_fes.get().getVectorDimension() >= 3);
-        return Component(static_cast<Derived&>(*this), 2);
+        return Component(static_cast<const Derived&>(*this), 2);
       }
 
       constexpr
@@ -682,14 +728,14 @@ namespace Rodin::Variational
       GridFunction& operator+=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
-        this->getData() += rhs;
+        this->getData().array() += rhs;
         return *this;
       }
 
       GridFunction& operator-=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
-        this->getData() -= rhs;
+        this->getData().array() -= rhs;
         return *this;
       }
 
