@@ -34,28 +34,56 @@ namespace Rodin::FormLanguage
 namespace Rodin::Variational
 {
   /**
-   * @brief Base class for functions defined on a mesh.
+   * @ingroup RodinVariational
+   * @brief Base class for functions defined on finite element meshes.
+   *
+   * FunctionBase provides the foundation for representing mathematical functions
+   * defined over geometric domains discretized by finite element meshes. This
+   * includes both analytical functions and discrete finite element functions
+   * (grid functions) that arise in variational formulations.
+   *
+   * @tparam Derived Derived class following CRTP (Curiously Recurring Template Pattern)
+   *
+   * ## Mathematical Foundation
+   * A function @f$ f : \Omega \to \mathbb{R}^n @f$ maps points in the domain 
+   * @f$ \Omega @f$ to values in @f$ \mathbb{R}^n @f$. In finite element analysis,
+   * functions serve various roles:
+   * - **Analytical functions**: Exact solutions, boundary conditions, source terms
+   * - **Discrete functions**: Finite element approximations @f$ u_h = \sum_i u_i \phi_i @f$
+   * - **Test/Trial functions**: Basis functions @f$ \phi_i @f$ spanning finite element spaces
+   *
+   * ## Key Features
+   * - **Domain support**: Functions can be restricted to subdomains or boundaries
+   * - **Trace operations**: Support for function traces on mesh boundaries
+   * - **Point evaluation**: Evaluation at arbitrary points within the domain
+   * - **Polymorphic design**: CRTP enables compile-time polymorphism for efficiency
    */
   template <class Derived>
   class FunctionBase : public FormLanguage::Base
   {
     public:
+      /// @brief Parent class type
       using Parent = FormLanguage::Base;
 
+      /// @brief Domain type for trace operations (set of mesh attributes)
       using TraceDomain = FlatSet<Geometry::Attribute>;
 
+      /// @brief Default constructor
       FunctionBase() = default;
 
+      /// @brief Copy constructor
       FunctionBase(const FunctionBase& other)
         : Parent(other),
           m_traceDomain(other.m_traceDomain)
       {}
 
+      /// @brief Move constructor
       FunctionBase(FunctionBase&& other)
         : Parent(std::move(other)),
           m_traceDomain(std::move(other.m_traceDomain))
       {}
 
+      /// @brief Virtual destructor
       virtual ~FunctionBase() = default;
 
       FunctionBase& operator=(FunctionBase&& other)

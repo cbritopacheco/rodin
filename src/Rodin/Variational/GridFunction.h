@@ -56,6 +56,32 @@ namespace Rodin::Variational
    * @see GridFunction
    */
 
+  /**
+   * @ingroup RodinVariational
+   * @brief Base class for discrete finite element functions.
+   *
+   * GridFunctionBase represents discrete functions defined on finite element
+   * spaces, where the function is represented as a linear combination of basis
+   * functions with scalar coefficients stored in a data vector.
+   *
+   * ## Mathematical Foundation
+   * A grid function represents a discrete finite element approximation:
+   * @f[
+   *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
+   * @f]
+   * where:
+   * - @f$ u_h @f$ is the discrete function
+   * - @f$ u_i @f$ are the degrees of freedom (coefficients)
+   * - @f$ \phi_i @f$ are the finite element basis functions
+   * - @f$ N @f$ is the number of degrees of freedom
+   *
+   * ## Key Features
+   * - **DOF Management**: Automatic handling of degrees of freedom storage
+   * - **Function Evaluation**: Point-wise evaluation via finite element interpolation
+   * - **I/O Support**: Export to various visualization formats (EnSight, MEDIT, MFEM)
+   * - **Space Association**: Strong association with underlying finite element space
+   */
+
   template <class StrictType>
   class GridFunctionBaseReference
     : public FunctionBase<GridFunctionBaseReference<StrictType>>
