@@ -107,6 +107,5 @@ namespace Rodin::Alert
       const char* what() const noexcept override;
   };
 }
-}
 
 #endif

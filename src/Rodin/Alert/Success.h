@@ -79,7 +79,6 @@ namespace Rodin::Alert
       Success(Success&& other);
   };
 }
-}
 
 #endif
 
