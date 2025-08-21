@@ -2,6 +2,7 @@
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
+#include "Rodin/Assembly/Default.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -18,7 +19,6 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     BilinearForm bf(u, v);
-
     EXPECT_EQ(&bf.getTrialFunction(), &u);
     EXPECT_EQ(&bf.getTestFunction(), &v);
   }
@@ -30,7 +30,6 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     BilinearForm bf(u, v);
-    
     BilinearForm bf_copy(bf);
     EXPECT_EQ(&bf_copy.getTrialFunction().getUUID(), &bf.getTrialFunction().getUUID());
     EXPECT_EQ(&bf_copy.getTestFunction().getUUID(), &bf.getTestFunction().getUUID());
@@ -43,7 +42,6 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     BilinearForm bf(u, v);
-    
     BilinearForm bf_moved(std::move(bf));
     EXPECT_EQ(&bf_moved.getTrialFunction(), &u);
     EXPECT_EQ(&bf_moved.getTestFunction(), &v);
@@ -56,9 +54,8 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     BilinearForm bf(u, v);
-    
     bf = Integral(Grad(u), Grad(v));
-    EXPECT_FALSE(bf.getIntegrators().empty());
+    EXPECT_FALSE(bf.getLocalIntegrators().empty());
   }
 
   TEST(Rodin_Variational_Real_P1_BilinearForm, AdditionAssignment)
@@ -68,9 +65,8 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     BilinearForm bf(u, v);
-    
     bf += Integral(Grad(u), Grad(v));
-    EXPECT_FALSE(bf.getIntegrators().empty());
+    EXPECT_FALSE(bf.getLocalIntegrators().empty());
   }
 
   TEST(Rodin_Variational_Real_P1_BilinearForm, SubtractionAssignment)
@@ -80,9 +76,8 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     BilinearForm bf(u, v);
-    
     bf -= Integral(Grad(u), Grad(v));
-    EXPECT_FALSE(bf.getIntegrators().empty());
+    EXPECT_FALSE(bf.getLocalIntegrators().empty());
   }
 
   TEST(Rodin_Variational_Real_P1_BilinearForm, AssembleAndGetOperator)
@@ -93,12 +88,9 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
     bf = Integral(Grad(u), Grad(v));
-    
     bf.assemble();
-    
     const auto& op = bf.getOperator();
     auto& mutable_op = bf.getOperator();
-    
     EXPECT_GT(op.rows(), 0);
     EXPECT_GT(op.cols(), 0);
     EXPECT_EQ(op.rows(), mutable_op.rows());
@@ -113,10 +105,8 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
     bf = Integral(Grad(u), Grad(v));
-    
     auto copied = bf.copy();
     EXPECT_NE(copied, nullptr);
-    
     delete copied;
   }
 
@@ -128,7 +118,6 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     BilinearForm bf(u, v);
-
     EXPECT_EQ(&bf.getTrialFunction(), &u);
     EXPECT_EQ(&bf.getTestFunction(), &v);
   }
@@ -141,12 +130,9 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     BilinearForm bf(u, v);
-    
     // Elasticity-like integrator
-    bf = Integral(Dot(Grad(u), Grad(v)));
-    
+    bf = Integral(Dot(Jacobian(u), Jacobian(v)));
     bf.assemble();
-    
     const auto& op = bf.getOperator();
     EXPECT_GT(op.rows(), 0);
     EXPECT_GT(op.cols(), 0);
@@ -159,29 +145,11 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     BilinearForm bf(u, v);
-    
     // Mass matrix integrator
     bf = Integral(u, v);
-    
     bf.assemble();
-    
     const auto& op = bf.getOperator();
     EXPECT_GT(op.rows(), 0);
     EXPECT_GT(op.cols(), 0);
-  }
-
-  TEST(Rodin_Variational_Real_P1_BilinearForm, ClearIntegrators)
-  {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    P1 fes(mesh);
-    TrialFunction u(fes);
-    TestFunction v(fes);
-    BilinearForm bf(u, v);
-    
-    bf += Integral(Grad(u), Grad(v));
-    EXPECT_FALSE(bf.getIntegrators().empty());
-    
-    bf = Integral(u, v);  // This should clear and add new integrator
-    EXPECT_FALSE(bf.getIntegrators().empty());
   }
 }

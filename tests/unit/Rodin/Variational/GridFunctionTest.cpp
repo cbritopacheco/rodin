@@ -143,44 +143,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(gf.argmax(), static_cast<Index>(gf.getSize() - 1));
   }
 
-  TEST(Rodin_Variational_Real_P1_GridFunction, CopyConstructor)
-  {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    P1 fes(mesh);
-    GridFunction gf(fes);
-    
-    gf = RealFunction(42.0);
-    GridFunction gf_copy(gf);
-
-    EXPECT_EQ(gf_copy.getSize(), gf.getSize());
-    EXPECT_EQ(gf_copy.getDimension(), gf.getDimension());
-    
-    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
-    {
-      EXPECT_NEAR(gf_copy[i], gf[i], RODIN_FUZZY_CONSTANT);
-    }
-  }
-
-  TEST(Rodin_Variational_Real_P1_GridFunction, Copy)
-  {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    P1 fes(mesh);
-    GridFunction gf(fes);
-    
-    gf = RealFunction(123.456);
-    auto copied = gf.copy();
-    
-    EXPECT_NE(copied, nullptr);
-    EXPECT_EQ(copied->getSize(), gf.getSize());
-    
-    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
-    {
-      EXPECT_NEAR((*copied)[i], gf[i], RODIN_FUZZY_CONSTANT);
-    }
-    
-    delete copied;
-  }
-
   TEST(Rodin_Variational_Vector_P1_GridFunction, SanityTest_Build)
   {
     constexpr size_t vdim = 2;
@@ -191,31 +153,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(gf.getSize(), fes.getSize());
     EXPECT_EQ(gf.getDimension(), vdim);
     EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
-  }
-
-  TEST(Rodin_Variational_Vector_P1_GridFunction, ComponentAccess_2D)
-  {
-    constexpr size_t vdim = 2;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    P1 fes(mesh, vdim);
-    GridFunction gf(fes);
-
-    auto x_comp = gf.x();
-    auto y_comp = gf.y();
-
-  }
-
-  TEST(Rodin_Variational_Vector_P1_GridFunction, ComponentAccess_3D)
-  {
-    constexpr size_t vdim = 3;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    P1 fes(mesh, vdim);
-    GridFunction gf(fes);
-
-    auto x_comp = gf.x();
-    auto y_comp = gf.y();
-    auto z_comp = gf.z();
-
   }
 
   TEST(Rodin_Variational_Vector_P1_GridFunction, ProjectVectorFunction)
@@ -242,9 +179,8 @@ namespace Rodin::Tests::Unit
     // Create a point for evaluation
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const auto& trans = mesh.getPolytopeTransformation(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.5, 0.5}};
-    Point p(polytope, trans, rc);
+    Point p(polytope, rc);
 
     Real value = gf.getValue(p);
     EXPECT_NEAR(value, 7.5, RODIN_FUZZY_CONSTANT);

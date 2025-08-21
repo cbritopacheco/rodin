@@ -2,6 +2,7 @@
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
+#include "Rodin/Assembly/Default.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -15,7 +16,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf1{1.0, 2.0};
     VectorFunction vf2{3.0, 4.0};
-    
+
     auto dot_product = Dot(vf1, vf2);
   }
 
@@ -23,17 +24,16 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf1{3.0, 4.0};
     VectorFunction vf2{2.0, 1.0};
-    
+
     auto dot_product = Dot(vf1, vf2);
-    
+
     // Create a simple point for testing
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const auto& trans = mesh.getPolytopeTransformation(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.5, 0.5}};
-    Point p(polytope, trans, rc);
-    
+    Point p(polytope, rc);
+
     Real value = dot_product.getValue(p);
     // (3,4) · (2,1) = 3*2 + 4*1 = 6 + 4 = 10
     EXPECT_NEAR(value, 10.0, 1e-10);
@@ -46,7 +46,7 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh, vdim);
     TrialFunction u(fes);
     TestFunction v(fes);
-    
+
     auto dot_uv = Dot(u, v);
   }
 
@@ -56,7 +56,7 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
-    
+
     auto dot_grads = Dot(Grad(u), Grad(v));
   }
 
@@ -64,12 +64,12 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf1{1.0, 2.0};
     VectorFunction vf2{3.0, 4.0};
-    
+
     auto dot_product = Dot(vf1, vf2);
     auto copied = dot_product.copy();
-    
+
     EXPECT_NE(copied, nullptr);
-    
+
     delete copied;
   }
 
@@ -79,7 +79,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     P1 fes(mesh, vdim);
     TestFunction v(fes);
-    
+
     VectorFunction force{1.0, 2.0};
     auto dot_force_v = Dot(force, v);
   }
@@ -91,11 +91,11 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh, vdim);
     TestFunction v(fes);
     LinearForm lf(v);
-    
+
     VectorFunction force{5.0, 10.0};
     lf = Integral(Dot(force, v));
     lf.assemble();
-    
+
     const auto& vector = lf.getVector();
     EXPECT_GT(vector.size(), 0);
   }
@@ -108,11 +108,11 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     BilinearForm bf(u, v);
-    
+
     // Vector mass matrix: ∫ u · v dx
     bf = Integral(Dot(u, v));
     bf.assemble();
-    
+
     const auto& op = bf.getOperator();
     EXPECT_GT(op.rows(), 0);
     EXPECT_GT(op.cols(), 0);
@@ -122,17 +122,16 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf1{0.0, 0.0};
     VectorFunction vf2{1.0, 2.0};
-    
+
     auto dot_product = Dot(vf1, vf2);
-    
+
     // Create a simple point for testing
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const auto& trans = mesh.getPolytopeTransformation(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.5, 0.5}};
-    Point p(polytope, trans, rc);
-    
+    Point p(polytope, rc);
+
     Real value = dot_product.getValue(p);
     EXPECT_NEAR(value, 0.0, 1e-10);
   }
@@ -141,17 +140,16 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf1{1.0, 0.0};
     VectorFunction vf2{0.0, 1.0};
-    
+
     auto dot_product = Dot(vf1, vf2);
-    
+
     // Create a simple point for testing
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const auto& trans = mesh.getPolytopeTransformation(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.0, 0.0}};
-    Point p(polytope, trans, rc);
-    
+    Point p(polytope, rc);
+
     Real value = dot_product.getValue(p);
     EXPECT_NEAR(value, 0.0, 1e-10);
   }
@@ -160,17 +158,16 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf1{2.0, 3.0};
     VectorFunction vf2{4.0, 6.0};  // 2 * vf1
-    
+
     auto dot_product = Dot(vf1, vf2);
-    
+
     // Create a simple point for testing
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const auto& trans = mesh.getPolytopeTransformation(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.75}};
-    Point p(polytope, trans, rc);
-    
+    Point p(polytope, rc);
+
     Real value = dot_product.getValue(p);
     // (2,3) · (4,6) = 2*4 + 3*6 = 8 + 18 = 26
     EXPECT_NEAR(value, 26.0, 1e-10);
@@ -180,17 +177,16 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf1{1.0, 2.0, 3.0};
     VectorFunction vf2{4.0, 5.0, 6.0};
-    
+
     auto dot_product = Dot(vf1, vf2);
-    
+
     // Create a simple point for testing
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const auto& trans = mesh.getPolytopeTransformation(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.1, 0.9}};
-    Point p(polytope, trans, rc);
-    
+    Point p(polytope, rc);
+
     Real value = dot_product.getValue(p);
     // (1,2,3) · (4,5,6) = 1*4 + 2*5 + 3*6 = 4 + 10 + 18 = 32
     EXPECT_NEAR(value, 32.0, 1e-10);
@@ -200,21 +196,20 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf1{7.5, -2.3};
     VectorFunction vf2{1.2, 4.8};
-    
+
     auto dot_product = Dot(vf1, vf2);
     auto dot_copy(dot_product);
-    
+
     // Create a simple point for testing
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const auto& trans = mesh.getPolytopeTransformation(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.6, 0.4}};
-    Point p(polytope, trans, rc);
-    
+    Point p(polytope, rc);
+
     Real value_orig = dot_product.getValue(p);
     Real value_copy = dot_copy.getValue(p);
-    
+
     EXPECT_NEAR(value_orig, value_copy, 1e-10);
   }
 }

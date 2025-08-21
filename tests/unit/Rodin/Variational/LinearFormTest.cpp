@@ -2,6 +2,7 @@
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
+#include "Rodin/Assembly/Default.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -51,7 +52,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TestFunction v(fes);
     LinearForm lf(v);
-    
     LinearForm lf_moved(std::move(lf));
     EXPECT_EQ(&lf_moved.getTestFunction(), &v);
   }
@@ -62,7 +62,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TestFunction v(fes);
     LinearForm lf(v);
-    
     lf = Integral(v);
     EXPECT_FALSE(lf.getIntegrators().empty());
   }
@@ -73,7 +72,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TestFunction v(fes);
     LinearForm lf(v);
-    
     lf += Integral(v);
     EXPECT_FALSE(lf.getIntegrators().empty());
   }
@@ -84,7 +82,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TestFunction v(fes);
     LinearForm lf(v);
-    
     lf -= Integral(v);
     EXPECT_FALSE(lf.getIntegrators().empty());
   }
@@ -96,12 +93,9 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     LinearForm lf(v);
     lf = Integral(v);
-    
     lf.assemble();
-    
     const auto& vector = lf.getVector();
     auto& mutable_vector = lf.getVector();
-    
     EXPECT_GT(vector.size(), 0);
     EXPECT_EQ(vector.size(), mutable_vector.size());
   }
@@ -113,10 +107,8 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     LinearForm lf(v);
     lf = Integral(v);
-    
     auto copied = lf.copy();
     EXPECT_NE(copied, nullptr);
-    
     delete copied;
   }
 
@@ -127,7 +119,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh, vdim);
     TestFunction v(fes);
     LinearForm lf(v);
-
     EXPECT_EQ(&lf.getTestFunction(), &v);
   }
 
@@ -139,9 +130,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     LinearForm lf(v);
     lf = Integral(Dot(v, VectorFunction{ 1, 1 }));
-    
     lf.assemble();
-    
     const auto& vector = lf.getVector();
     EXPECT_GT(vector.size(), 0);
   }
@@ -152,10 +141,8 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TestFunction v(fes);
     LinearForm lf(v);
-    
     lf += Integral(v);
     EXPECT_FALSE(lf.getIntegrators().empty());
-    
     lf = Integral(v);  // This should clear and add new integrator
     EXPECT_FALSE(lf.getIntegrators().empty());
   }

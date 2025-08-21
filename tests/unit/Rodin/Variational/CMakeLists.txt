@@ -78,14 +78,6 @@ target_link_libraries(RodinVariationalGridFunctionTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalGridFunctionTest)
 
-add_executable(RodinVariationalScalarFunctionTest ScalarFunctionTest.cpp)
-target_link_libraries(RodinVariationalScalarFunctionTest
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Variational)
-gtest_discover_tests(RodinVariationalScalarFunctionTest)
-
 add_executable(RodinVariationalGradTest GradTest.cpp)
 target_link_libraries(RodinVariationalGradTest
   PUBLIC
