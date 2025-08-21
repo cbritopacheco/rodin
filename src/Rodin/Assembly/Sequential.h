@@ -20,6 +20,8 @@
 
 #include "Rodin/Variational/ForwardDecls.h"
 
+#include "Rodin/Assembly/AssemblyBase.h"
+
 #include "ForwardDecls.h"
 
 namespace Rodin::Assembly
