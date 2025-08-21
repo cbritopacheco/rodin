@@ -126,3 +126,75 @@ target_link_libraries(RodinVariationalBooleanFunctionTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalBooleanFunctionTest)
 
+add_executable(RodinVariationalSumTest SumTest.cpp)
+target_link_libraries(RodinVariationalSumTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalSumTest)
+
+add_executable(RodinVariationalMultTest MultTest.cpp)
+target_link_libraries(RodinVariationalMultTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalMultTest)
+
+add_executable(RodinVariationalPowTest PowTest.cpp)
+target_link_libraries(RodinVariationalPowTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalPowTest)
+
+add_executable(RodinVariationalSqrtTest SqrtTest.cpp)
+target_link_libraries(RodinVariationalSqrtTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalSqrtTest)
+
+add_executable(RodinVariationalAbsTest AbsTest.cpp)
+target_link_libraries(RodinVariationalAbsTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalAbsTest)
+
+add_executable(RodinVariationalMinTest MinTest.cpp)
+target_link_libraries(RodinVariationalMinTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalMinTest)
+
+add_executable(RodinVariationalMaxTest MaxTest.cpp)
+target_link_libraries(RodinVariationalMaxTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalMaxTest)
+
+add_executable(RodinVariationalSineTest SineTest.cpp)
+target_link_libraries(RodinVariationalSineTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalSineTest)
+
+add_executable(RodinVariationalCosineTest CosineTest.cpp)
+target_link_libraries(RodinVariationalCosineTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalCosineTest)
+
