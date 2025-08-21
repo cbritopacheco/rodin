@@ -11,14 +11,14 @@ namespace Rodin::Tests::Unit
   {
     public:
       TestCopyable(int value) : m_value(value) {}
-      
+
       TestCopyable* copy() const noexcept override
       {
         return new TestCopyable(m_value);
       }
-      
+
       int getValue() const { return m_value; }
-      
+
     private:
       int m_value;
   };
@@ -28,14 +28,14 @@ namespace Rodin::Tests::Unit
   {
     public:
       TestCopyableWithValue(const std::string& value) : m_value(value) {}
-      
+
       TestCopyableWithValue* copy() const noexcept override
       {
         return new TestCopyableWithValue(m_value);
       }
-      
+
       const std::string& getValue() const { return m_value; }
-      
+
     private:
       std::string m_value;
   };
@@ -46,9 +46,9 @@ namespace Rodin::Tests::Unit
   {
     TestCopyable original(42);
     std::unique_ptr<Copyable> copied(original.copy());
-    
+
     ASSERT_NE(copied.get(), nullptr);
-    
+
     // Downcast to access test-specific methods
     TestCopyable* typedCopy = dynamic_cast<TestCopyable*>(copied.get());
     ASSERT_NE(typedCopy, nullptr);
@@ -59,10 +59,10 @@ namespace Rodin::Tests::Unit
   {
     TestCopyable original(100);
     std::unique_ptr<TestCopyable> copied(original.copy());
-    
+
     ASSERT_NE(copied.get(), nullptr);
     EXPECT_EQ(copied->getValue(), 100);
-    
+
     // Verify they are different objects
     EXPECT_NE(&original, copied.get());
   }
@@ -71,13 +71,13 @@ namespace Rodin::Tests::Unit
   {
     std::unique_ptr<Copyable> original = std::make_unique<TestCopyable>(77);
     std::unique_ptr<Copyable> copied(original->copy());
-    
+
     ASSERT_NE(copied.get(), nullptr);
-    
+
     // Verify polymorphic behavior
     TestCopyable* originalTyped = dynamic_cast<TestCopyable*>(original.get());
     TestCopyable* copiedTyped = dynamic_cast<TestCopyable*>(copied.get());
-    
+
     ASSERT_NE(originalTyped, nullptr);
     ASSERT_NE(copiedTyped, nullptr);
     EXPECT_EQ(originalTyped->getValue(), copiedTyped->getValue());
@@ -87,7 +87,7 @@ namespace Rodin::Tests::Unit
   {
     TestCopyableWithValue original("test_string");
     std::unique_ptr<TestCopyableWithValue> copied(original.copy());
-    
+
     ASSERT_NE(copied.get(), nullptr);
     EXPECT_EQ(copied->getValue(), "test_string");
     EXPECT_NE(&original, copied.get());
@@ -97,7 +97,7 @@ namespace Rodin::Tests::Unit
   {
     TestCopyableWithValue original("");
     std::unique_ptr<TestCopyableWithValue> copied(original.copy());
-    
+
     ASSERT_NE(copied.get(), nullptr);
     EXPECT_EQ(copied->getValue(), "");
   }
@@ -106,7 +106,7 @@ namespace Rodin::Tests::Unit
   {
     // Verify that copy() is declared as noexcept
     TestCopyable original(1);
-    
+
     // This should compile without issues since copy() is noexcept
     EXPECT_NO_THROW({
       std::unique_ptr<TestCopyable> copied(original.copy());

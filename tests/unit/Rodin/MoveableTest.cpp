@@ -11,16 +11,16 @@ namespace Rodin::Tests::Unit
   {
     public:
       TestMoveable(int value) : m_value(value), m_moved(false) {}
-      
+
       Moveable* move() noexcept override
       {
         m_moved = true;
         return this;
       }
-      
+
       int getValue() const { return m_value; }
       bool wasMoved() const { return m_moved; }
-      
+
     private:
       int m_value;
       bool m_moved;
@@ -32,17 +32,17 @@ namespace Rodin::Tests::Unit
     public:
       TestMoveableWithResource(std::unique_ptr<int> resource) 
         : m_resource(std::move(resource)), m_moved(false) {}
-      
+
       Moveable* move() noexcept override
       {
         m_moved = true;
         return this;
       }
-      
+
       int* getResource() const { return m_resource.get(); }
       bool wasMoved() const { return m_moved; }
       bool hasResource() const { return m_resource != nullptr; }
-      
+
     private:
       std::unique_ptr<int> m_resource;
       bool m_moved;
@@ -54,9 +54,9 @@ namespace Rodin::Tests::Unit
   {
     TestMoveable original(42);
     EXPECT_FALSE(original.wasMoved());
-    
+
     Moveable* moved = original.move();
-    
+
     EXPECT_EQ(moved, &original);  // Should return pointer to self
     EXPECT_TRUE(original.wasMoved());
     EXPECT_EQ(original.getValue(), 42);  // Value should remain
@@ -66,12 +66,12 @@ namespace Rodin::Tests::Unit
   {
     std::unique_ptr<Moveable> moveable = std::make_unique<TestMoveable>(99);
     TestMoveable* typedOriginal = dynamic_cast<TestMoveable*>(moveable.get());
-    
+
     ASSERT_NE(typedOriginal, nullptr);
     EXPECT_FALSE(typedOriginal->wasMoved());
-    
+
     Moveable* moved = moveable->move();
-    
+
     EXPECT_EQ(moved, moveable.get());
     EXPECT_TRUE(typedOriginal->wasMoved());
     EXPECT_EQ(typedOriginal->getValue(), 99);
@@ -81,15 +81,15 @@ namespace Rodin::Tests::Unit
   {
     auto resource = std::make_unique<int>(123);
     int* resourcePtr = resource.get();
-    
+
     TestMoveableWithResource original(std::move(resource));
     EXPECT_TRUE(original.hasResource());
     EXPECT_EQ(*original.getResource(), 123);
     EXPECT_EQ(original.getResource(), resourcePtr);
     EXPECT_FALSE(original.wasMoved());
-    
+
     Moveable* moved = original.move();
-    
+
     EXPECT_EQ(moved, &original);
     EXPECT_TRUE(original.wasMoved());
     EXPECT_TRUE(original.hasResource());  // Resource should still be there
@@ -99,12 +99,12 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Moveable, MultipleMoves)
   {
     TestMoveable original(77);
-    
+
     // First move
     Moveable* moved1 = original.move();
     EXPECT_EQ(moved1, &original);
     EXPECT_TRUE(original.wasMoved());
-    
+
     // Second move should still work
     Moveable* moved2 = original.move();
     EXPECT_EQ(moved2, &original);
@@ -115,7 +115,7 @@ namespace Rodin::Tests::Unit
   {
     // Verify that move() is declared as noexcept
     TestMoveable original(1);
-    
+
     // This should compile without issues since move() is noexcept
     EXPECT_NO_THROW({
       Moveable* moved = original.move();
@@ -128,13 +128,13 @@ namespace Rodin::Tests::Unit
     // Test that the caller assumes ownership responsibility
     TestMoveable original(555);
     Moveable* moved = original.move();
-    
+
     // The returned pointer should be the same object
     EXPECT_EQ(moved, &original);
-    
+
     // The object should be marked as moved
     EXPECT_TRUE(original.wasMoved());
-    
+
     // The caller now has responsibility for the object
     // (This is conceptual - in this test we don't actually transfer ownership
     // since we're using stack allocation, but the interface contract is tested)

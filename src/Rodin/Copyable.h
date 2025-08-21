@@ -15,7 +15,7 @@ namespace Rodin
     public:
       /// Virtual destructor for proper cleanup of derived classes
       virtual ~Copyable() = default;
-      
+
       /**
        * @brief Creates a polymorphic copy of this object.
        * @return Pointer to a new instance that is a copy of this object.
