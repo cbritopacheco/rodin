@@ -137,6 +137,31 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum.getValue(p), 6.0, 1e-10);
   }
 
+  TEST(Rodin_Variational_Sum, MixedScalarVector_Components)
+  {
+    RealFunction scalar1(5.0);
+    RealFunction scalar2(3.0);
+    VectorFunction vector1{1.0, 2.0};
+
+    // Test scalar + scalar
+    auto scalar_sum = scalar1 + scalar2;
+
+    // Test that we can access components
+    auto x_comp = vector1.x() + scalar1;
+    auto y_comp = vector1.y() + scalar2;
+
+    // Create a simple point for testing
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{0.0, 1.0}};
+    Point p(polytope, rc);
+
+    EXPECT_NEAR(scalar_sum.getValue(p), 8.0, 1e-10);
+    EXPECT_NEAR(x_comp.getValue(p), 6.0, 1e-10);
+    EXPECT_NEAR(y_comp.getValue(p), 5.0, 1e-10);
+  }
+
   TEST(Rodin_Variational_Sum, AssociativityTest)
   {
     RealFunction f1(10.0);
