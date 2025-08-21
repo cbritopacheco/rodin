@@ -106,6 +106,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns a reference to a vector containing the coordinates in reference space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5ed1b3f5570dab74c12746ccd64aa9e3" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_q_f_1_1_generic_polytope_quadrature.html" class="m-doc">GenericPolytopeQuadrature</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy of this object.</dd>
           </dl>
         </section>
         <section>
@@ -116,6 +120,21 @@
             </h3>
             <p>Returns a reference to a vector containing the coordinates in reference space.</p>
 <aside class="m-note m-info"><h4>Note</h4><p>The reference must be valid throughout the whole lifetime of the program.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a5ed1b3f5570dab74c12746ccd64aa9e3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_q_f_1_1_generic_polytope_quadrature.html" class="m-doc">GenericPolytopeQuadrature</a>* Rodin::<wbr />QF::<wbr />GenericPolytopeQuadrature::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5ed1b3f5570dab74c12746ccd64aa9e3" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy of this object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a new instance that is a copy of this object. The caller is responsible for memory management.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>This method enables polymorphic copy behavior. The copy semantics (shallow vs deep) depend on the concrete implementation. This method should not throw exceptions.</p></aside>
           </div></section>
         </section>
       </div>

@@ -111,6 +111,10 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afc6bebc168854f735ee03d14f1230da9" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy of this object.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solve <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
@@ -203,6 +207,24 @@ $ x $
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="afc6bebc168854f735ee03d14f1230da9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>* Rodin::<wbr />Solver::<wbr />CG&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc6bebc168854f735ee03d14f1230da9" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy of this object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a new instance that is a copy of this object. The caller is responsible for memory management.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>This method enables polymorphic copy behavior. The copy semantics (shallow vs deep) depend on the concrete implementation. This method should not throw exceptions.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a15e7896618ae50e8f86a2bdb8ca2e2e7"><div>
             <h3>
