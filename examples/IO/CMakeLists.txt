@@ -9,3 +9,9 @@ target_link_libraries(RodinIOMFEM
   Rodin::IO
   Rodin::Variational)
 
+add_executable(RodinIOEnSight6 EnSight6.cpp)
+target_link_libraries(RodinIOEnSight6
+  PUBLIC
+  Rodin::IO
+  Rodin::Geometry)
+

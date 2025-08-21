@@ -447,82 +447,10 @@ namespace Rodin::IO
       std::string m_descriptionLine2;
   };
 
-  template <class FES, class Data>
-  class GridFunctionLoaderBase<FileFormat::ENSIGHT6, FES, Data>
-    : public Loader<Variational::GridFunction<FES, Data>>
-  {
-    public:
-      using FESType = FES;
-
-      static constexpr FileFormat Format = FileFormat::ENSIGHT6;
-
-      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
-
-      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
-
-      using DataType = Data;
-
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
-
-      using Parent = Loader<ObjectType>;
-
-      GridFunctionLoaderBase(ObjectType& gf)
-        : m_gf(gf),
-          m_currentLineNumber(0)
-      {}
-
-      void load(std::istream& is) override
-      {
-        readHeader(is);
-        this->readData(is);
-      }
-
-      void readHeader(std::istream& is)
-      {
-        auto line = skipEmptyLines(is);
-        // Parse variable type (scalar, complex, vector)
-        // For now, we'll implement a basic parser that expects the variable type
-      }
-
-      const ObjectType& getObject() const override
-      {
-        return m_gf.get();
-      }
-
-      ObjectType& getObject() override
-      {
-        return m_gf.get();
-      }
-
-      std::istream& getline(std::istream& is, std::string& line)
-      {
-        m_currentLineNumber++;
-        return std::getline(is, line);
-      }
-
-      std::string skipEmptyLines(std::istream& is)
-      {
-        std::string line;
-        while (getline(is, line))
-        {
-          if (!EnSight6::ParseEmptyLine()(line.begin(), line.end()))
-            break;
-        }
-        return line;
-      }
-
-      virtual void readData(std::istream& is) = 0;
-
-    private:
-      std::reference_wrapper<ObjectType> m_gf;
-      size_t m_currentLineNumber;
-  };
-
   template <class FES>
   class GridFunctionLoader<
     FileFormat::ENSIGHT6, FES, typename FormLanguage::Traits<FES>::ScalarType>
-    : public GridFunctionLoaderBase<
-        FileFormat::ENSIGHT6, FES, typename FormLanguage::Traits<FES>::ScalarType>
+    : public GridFunctionLoaderBase<FES, typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
       using FESType = FES;
@@ -537,11 +465,28 @@ namespace Rodin::IO
 
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
-      using Parent = GridFunctionLoaderBase<Format, FESType, DataType>;
+      using Parent = GridFunctionLoaderBase<FESType, DataType>;
 
       using Parent::Parent;
 
-      void readData(std::istream& is) override
+      void load(std::istream& is) override
+      {
+        readHeader(is);
+        readData(is);
+      }
+
+      void readHeader(std::istream& is)
+      {
+        std::string line;
+        while (std::getline(is, line))
+        {
+          if (!EnSight6::ParseEmptyLine()(line.begin(), line.end()))
+            break;
+        }
+        // Parse variable type header - basic implementation
+      }
+
+      void readData(std::istream& is)
       {
         auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
@@ -575,8 +520,7 @@ namespace Rodin::IO
   template <class FES>
   class GridFunctionLoader<
     FileFormat::ENSIGHT6, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
-    : public GridFunctionLoaderBase<
-        FileFormat::ENSIGHT6, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+    : public GridFunctionLoaderBase<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
   {
     public:
       using FESType = FES;
@@ -591,11 +535,28 @@ namespace Rodin::IO
 
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
-      using Parent = GridFunctionLoaderBase<Format, FESType, DataType>;
+      using Parent = GridFunctionLoaderBase<FESType, DataType>;
 
       using Parent::Parent;
 
-      void readData(std::istream& is) override
+      void load(std::istream& is) override
+      {
+        readHeader(is);
+        readData(is);
+      }
+
+      void readHeader(std::istream& is)
+      {
+        std::string line;
+        while (std::getline(is, line))
+        {
+          if (!EnSight6::ParseEmptyLine()(line.begin(), line.end()))
+            break;
+        }
+        // Parse variable type header - basic implementation
+      }
+
+      void readData(std::istream& is)
       {
         auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
