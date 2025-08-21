@@ -62,6 +62,30 @@ target_link_libraries(RodinCastTest
   Rodin::Rodin)
 gtest_discover_tests(RodinCastTest)
 
+add_executable(RodinUtilityTest UtilityTest.cpp)
+target_link_libraries(RodinUtilityTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinUtilityTest)
+
+add_executable(RodinAlertTest AlertTest.cpp)
+target_link_libraries(RodinAlertTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinAlertTest)
+
+add_executable(RodinQFTest QFTest.cpp)
+target_link_libraries(RodinQFTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinQFTest)
+
 add_subdirectory(IO)
 add_subdirectory(Context)
 add_subdirectory(Threads)
