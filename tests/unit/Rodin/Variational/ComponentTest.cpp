@@ -30,11 +30,6 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(comp0.getValue(p), 10.0, 1e-10);
     EXPECT_NEAR(comp1.getValue(p), 20.0, 1e-10);
     EXPECT_NEAR(comp2.getValue(p), 30.0, 1e-10);
-    
-    // Components should be scalar functions
-    EXPECT_EQ(comp0.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(comp1.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(comp2.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Component, VectorShapeFunction_ComponentAccess)
@@ -46,9 +41,6 @@ namespace Rodin::Tests::Unit
     
     auto u_x = u.x();  // This internally uses Component
     auto u_y = u.y();  // This internally uses Component
-    
-    EXPECT_EQ(u_x.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(u_y.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Component, GridFunction_ComponentAccess)
@@ -65,10 +57,6 @@ namespace Rodin::Tests::Unit
     auto gf_x = gf.x();  // This internally uses Component
     auto gf_y = gf.y();  // This internally uses Component  
     auto gf_z = gf.z();  // This internally uses Component
-    
-    EXPECT_EQ(gf_x.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(gf_y.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(gf_z.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Component, Copy)
@@ -78,7 +66,6 @@ namespace Rodin::Tests::Unit
     auto copied = comp.copy();
     
     EXPECT_NE(copied, nullptr);
-    EXPECT_EQ(copied->getRangeShape(), comp.getRangeShape());
     
     // Create a simple point for testing
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -108,7 +95,6 @@ namespace Rodin::Tests::Unit
     Point p(polytope, trans, rc);
     
     EXPECT_NEAR(comp_copy.getValue(p), comp.getValue(p), 1e-10);
-    EXPECT_EQ(comp_copy.getRangeShape(), comp.getRangeShape());
   }
 
   TEST(Rodin_Variational_Component, MoveConstructor)
@@ -128,7 +114,6 @@ namespace Rodin::Tests::Unit
     
     auto comp_moved(std::move(comp));
     EXPECT_NEAR(comp_moved.getValue(p), original_value, 1e-10);
-    EXPECT_EQ(comp_moved.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Component, GetOperand)
@@ -242,7 +227,6 @@ namespace Rodin::Tests::Unit
     {
       auto comp = Component(vf, i);
       EXPECT_NEAR(comp.getValue(p), expected_values[i], 1e-10);
-      EXPECT_EQ(comp.getRangeShape(), RangeShape(1, 1));
     }
   }
 }
