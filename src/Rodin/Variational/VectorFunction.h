@@ -97,7 +97,6 @@ namespace Rodin::Variational
       constexpr
       auto operator()(size_t i) const
       {
-        assert(0 <= i);
         assert(i < getDimension());
         return Component(*this, i);
       }
