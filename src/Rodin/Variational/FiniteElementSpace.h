@@ -15,15 +15,44 @@
 namespace Rodin::Variational
 {
   /**
+   * @ingroup RodinVariational
    * @brief Base class for finite element spaces.
+   *
+   * FiniteElementSpaceBase provides the foundation for defining finite element
+   * spaces @f$ V_h \subset V @f$ where @f$ V @f$ is a function space and
+   * @f$ V_h @f$ is its finite-dimensional approximation. The finite element
+   * space defines the basis functions, degrees of freedom, and mesh association
+   * required for finite element computations.
+   *
+   * ## Mathematical Foundation
+   * A finite element space is characterized by:
+   * - **Mesh**: Geometric discretization @f$ \mathcal{T}_h @f$
+   * - **Element**: Local finite element @f$ (K, P, \Sigma) @f$ where:
+   *   - @f$ K @f$ is the reference element geometry
+   *   - @f$ P @f$ is the polynomial space
+   *   - @f$ \Sigma @f$ is the set of degrees of freedom
+   * - **Global Space**: @f$ V_h = \{v \in V : v|_K \in P_K \text{ for all } K \in \mathcal{T}_h\} @f$
+   *
+   * ## Key Features
+   * - **DOF Management**: Global and local degree of freedom indexing
+   * - **Basis Functions**: Access to shape functions and their derivatives
+   * - **Mesh Association**: Strong coupling with underlying mesh structure
+   * - **Conformity**: Support for @f$ H^1 @f$, @f$ H(\text{div}) @f$, @f$ H(\text{curl}) @f$ spaces
    */
   class FiniteElementSpaceBase
   {
     public:
+      /**
+       * @brief Local degree of freedom indexing structure.
+       *
+       * This structure provides the mapping between local element degrees of
+       * freedom and their global counterparts, essential for assembly operations
+       * that need to map local element contributions to the global system.
+       */
       struct LocalIndex
       {
-        std::pair<size_t, Index> p;
-        Index local;
+        std::pair<size_t, Index> p;  ///< Global index information (dimension, index)
+        Index local;                 ///< Local element index
       };
 
       constexpr
