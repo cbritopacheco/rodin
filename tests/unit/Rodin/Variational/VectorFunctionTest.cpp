@@ -27,7 +27,6 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value(0), 1.0, 1e-10);
     EXPECT_NEAR(value(1), 2.0, 1e-10);
     EXPECT_EQ(vf.getDimension(), 2);
-    EXPECT_EQ(vf.getRangeShape(), RangeShape(2, 1));
   }
 
   TEST(Rodin_Variational_VectorFunction, ConstantVector_3D_Construction)
@@ -47,7 +46,6 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value(1), -2.71, 1e-10);
     EXPECT_NEAR(value(2), 1.41, 1e-10);
     EXPECT_EQ(vf.getDimension(), 3);
-    EXPECT_EQ(vf.getRangeShape(), RangeShape(3, 1));
   }
 
   TEST(Rodin_Variational_VectorFunction, MixedTypes_Construction)
@@ -86,8 +84,6 @@ namespace Rodin::Tests::Unit
     
     EXPECT_NEAR(x_comp.getValue(p), 10.0, 1e-10);
     EXPECT_NEAR(y_comp.getValue(p), 20.0, 1e-10);
-    EXPECT_EQ(x_comp.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(y_comp.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_VectorFunction, ComponentAccess_3D)

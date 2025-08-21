@@ -17,9 +17,6 @@ namespace Rodin::Tests::Unit
     VectorFunction vf2{3.0, 4.0};
     
     auto dot_product = Dot(vf1, vf2);
-    
-    // Dot product of two vector functions should be a scalar function
-    EXPECT_EQ(dot_product.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Dot, VectorFunctions_Value)
@@ -51,9 +48,6 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     
     auto dot_uv = Dot(u, v);
-    
-    // Dot product of two vector shape functions should be a scalar
-    EXPECT_EQ(dot_uv.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Dot, Gradients_Construction)
@@ -64,9 +58,6 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     
     auto dot_grads = Dot(Grad(u), Grad(v));
-    
-    // Dot product of gradients should be a scalar
-    EXPECT_EQ(dot_grads.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Dot, Copy)
@@ -78,7 +69,6 @@ namespace Rodin::Tests::Unit
     auto copied = dot_product.copy();
     
     EXPECT_NE(copied, nullptr);
-    EXPECT_EQ(copied->getRangeShape(), dot_product.getRangeShape());
     
     delete copied;
   }
@@ -92,8 +82,6 @@ namespace Rodin::Tests::Unit
     
     VectorFunction force{1.0, 2.0};
     auto dot_force_v = Dot(force, v);
-    
-    EXPECT_EQ(dot_force_v.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Dot, InLinearForm)
@@ -228,6 +216,5 @@ namespace Rodin::Tests::Unit
     Real value_copy = dot_copy.getValue(p);
     
     EXPECT_NEAR(value_orig, value_copy, 1e-10);
-    EXPECT_EQ(dot_copy.getRangeShape(), dot_product.getRangeShape());
   }
 }

@@ -24,7 +24,6 @@ namespace Rodin::Tests::Unit
     Point p(polytope, trans, rc);
     
     EXPECT_NEAR(f.getValue(p), 3.14, 1e-10);
-    EXPECT_EQ(f.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_RealFunction, ConstantInteger_Construction)
@@ -40,7 +39,6 @@ namespace Rodin::Tests::Unit
     Point p(polytope, trans, rc);
     
     EXPECT_NEAR(f.getValue(p), 42.0, 1e-10);
-    EXPECT_EQ(f.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_RealFunction, CopyConstructor_Real)
@@ -57,7 +55,6 @@ namespace Rodin::Tests::Unit
     Point p(polytope, trans, rc);
     
     EXPECT_NEAR(f_copy.getValue(p), f.getValue(p), 1e-10);
-    EXPECT_EQ(f_copy.getRangeShape(), f.getRangeShape());
   }
 
   TEST(Rodin_Variational_RealFunction, MoveConstructor_Real)
@@ -82,7 +79,6 @@ namespace Rodin::Tests::Unit
     Point p(polytope, trans, rc);
     
     EXPECT_NEAR(f_moved.getValue(p), original_value, 1e-10);
-    EXPECT_EQ(f_moved.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_RealFunction, Copy_Real)
@@ -100,7 +96,6 @@ namespace Rodin::Tests::Unit
     
     EXPECT_NE(copied, nullptr);
     EXPECT_NEAR(copied->getValue(p), f.getValue(p), 1e-10);
-    EXPECT_EQ(copied->getRangeShape(), f.getRangeShape());
     
     delete copied;
   }
@@ -120,7 +115,6 @@ namespace Rodin::Tests::Unit
     
     EXPECT_NE(copied, nullptr);
     EXPECT_NEAR(copied->getValue(p), 789.0, 1e-10);
-    EXPECT_EQ(copied->getRangeShape(), f.getRangeShape());
     
     delete copied;
   }

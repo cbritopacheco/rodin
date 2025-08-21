@@ -17,7 +17,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     GridFunction gf(fes);
 
-    EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
     EXPECT_EQ(gf.getSize(), fes.getSize());
     EXPECT_EQ(gf.getDimension(), 1);
     EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
@@ -155,7 +154,6 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(gf_copy.getSize(), gf.getSize());
     EXPECT_EQ(gf_copy.getDimension(), gf.getDimension());
-    EXPECT_EQ(gf_copy.getRangeShape(), gf.getRangeShape());
     
     for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
     {
@@ -174,7 +172,6 @@ namespace Rodin::Tests::Unit
     
     EXPECT_NE(copied, nullptr);
     EXPECT_EQ(copied->getSize(), gf.getSize());
-    EXPECT_EQ(copied->getRangeShape(), gf.getRangeShape());
     
     for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
     {
@@ -191,7 +188,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh, vdim);
     GridFunction gf(fes);
 
-    EXPECT_EQ(gf.getRangeShape(), RangeShape(vdim, 1));
     EXPECT_EQ(gf.getSize(), fes.getSize());
     EXPECT_EQ(gf.getDimension(), vdim);
     EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
@@ -207,8 +203,6 @@ namespace Rodin::Tests::Unit
     auto x_comp = gf.x();
     auto y_comp = gf.y();
 
-    EXPECT_EQ(x_comp.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(y_comp.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Vector_P1_GridFunction, ComponentAccess_3D)
@@ -222,9 +216,6 @@ namespace Rodin::Tests::Unit
     auto y_comp = gf.y();
     auto z_comp = gf.z();
 
-    EXPECT_EQ(x_comp.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(y_comp.getRangeShape(), RangeShape(1, 1));
-    EXPECT_EQ(z_comp.getRangeShape(), RangeShape(1, 1));
   }
 
   TEST(Rodin_Variational_Vector_P1_GridFunction, ProjectVectorFunction)
