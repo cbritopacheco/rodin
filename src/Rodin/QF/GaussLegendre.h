@@ -25,8 +25,8 @@ namespace Rodin::QF
        * @param g Geometry type
        * @param order Number of Gauss–Legendre points per 1D direction
        */
-      GaussLegendre(Geometry::Polytope::Type g, size_t order, size_t maxIt = 100, Real tol = 1e-14)
-        : Parent(g), m_nx(order), m_ny(order), m_nz(order), m_maxIt(maxIt), m_tol(tol)
+      GaussLegendre(Geometry::Polytope::Type g, size_t order)
+        : Parent(g), m_nx(order), m_ny(order), m_nz(order)
       {
         assert(order >= 1);
         build();
@@ -38,8 +38,8 @@ namespace Rodin::QF
        * @param nx Order in first direction
        * @param ny Order in second direction
        */
-      GaussLegendre(Geometry::Polytope::Type g, size_t nx, size_t ny, size_t maxIt = 100, Real tol = 1e-14)
-        : Parent(g), m_nx(nx), m_ny(ny), m_nz(ny), m_maxIt(maxIt), m_tol(tol)
+      GaussLegendre(Geometry::Polytope::Type g, size_t nx, size_t ny)
+        : Parent(g), m_nx(nx), m_ny(ny), m_nz(ny)
       {
         assert(nx >= 1 && ny >= 1);
         build();
@@ -52,8 +52,8 @@ namespace Rodin::QF
        * @param nv Order in second direction
        * @param nw Order in third direction
        */
-      GaussLegendre(Geometry::Polytope::Type g, size_t nu, size_t nv, size_t nw, size_t maxIt = 100, Real tol = 1e-14)
-        : Parent(g), m_nx(nu), m_ny(nv), m_nz(nw), m_maxIt(maxIt), m_tol(tol)
+      GaussLegendre(Geometry::Polytope::Type g, size_t nu, size_t nv, size_t nw)
+        : Parent(g), m_nx(nu), m_ny(nv), m_nz(nw)
       {
         assert(nu >= 1 && nv >= 1 && nw >= 1);
         build();
@@ -63,8 +63,8 @@ namespace Rodin::QF
        * @brief Construct with default order 2 in all directions.
        * @param g Geometry type
        */
-      GaussLegendre(Geometry::Polytope::Type g, size_t maxIt = 100, Real tol = 1e-14)
-        : Parent(g), m_nx(2), m_ny(2), m_nz(2), m_maxIt(maxIt), m_tol(tol)
+      GaussLegendre(Geometry::Polytope::Type g)
+        : Parent(g), m_nx(2), m_ny(2), m_nz(2)
       {
         build();
       }

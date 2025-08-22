@@ -88,7 +88,7 @@ namespace Rodin::QF
   void GaussLegendre::build_segment(size_t n)
   {
     std::vector<Real> x, w;
-    gl_1d_unit(n, x, w, m_maxIt, m_tol);
+    gl_1d_unit(n, x, w);
     m_points.clear();
     m_points.reserve(n);
     m_weights.resize(n);
@@ -106,8 +106,8 @@ namespace Rodin::QF
   void GaussLegendre::build_quad(size_t nx, size_t ny)
   {
     std::vector<Real> x, wx, y, wy;
-    gl_1d_unit(nx, x, wx, m_maxIt, m_tol);
-    gl_1d_unit(ny, y, wy, m_maxIt, m_tol);
+    gl_1d_unit(nx, x, wx);
+    gl_1d_unit(ny, y, wy);
 
     const size_t N = nx * ny;
     m_points.clear();
@@ -132,8 +132,8 @@ namespace Rodin::QF
   void GaussLegendre::build_tri(size_t nu, size_t nv)
   {
     std::vector<Real> u, wu, v, wv;
-    gl_1d_unit(nu, u, wu, m_maxIt, m_tol);
-    gl_1d_unit(nv, v, wv, m_maxIt, m_tol);
+    gl_1d_unit(nu, u, wu);
+    gl_1d_unit(nv, v, wv);
 
     const size_t N = nu * nv;
     m_points.clear();
@@ -160,9 +160,9 @@ namespace Rodin::QF
   void GaussLegendre::build_tet(size_t nu, size_t nv, size_t nw)
   {
     std::vector<Real> u, wu, v, wv, w, ww;
-    gl_1d_unit(nu, u, wu, m_maxIt, m_tol);
-    gl_1d_unit(nv, v, wv, m_maxIt, m_tol);
-    gl_1d_unit(nw, w, ww, m_maxIt, m_tol);
+    gl_1d_unit(nu, u, wu);
+    gl_1d_unit(nv, v, wv);
+    gl_1d_unit(nw, w, ww);
 
     const size_t N = nu * nv * nw;
     m_points.clear();
@@ -197,9 +197,9 @@ namespace Rodin::QF
   void GaussLegendre::build_wedge(size_t ntri, size_t nz)
   {
     std::vector<Real> u, wu, v, wv, z, wz;
-    gl_1d_unit(ntri, u, wu, m_maxIt, m_tol);
-    gl_1d_unit(ntri, v, wv, m_maxIt, m_tol);
-    gl_1d_unit(nz, z, wz, m_maxIt, m_tol);
+    gl_1d_unit(ntri, u, wu);
+    gl_1d_unit(ntri, v, wv);
+    gl_1d_unit(nz, z, wz);
 
     const size_t N = ntri * ntri * nz;
     m_points.clear();
