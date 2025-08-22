@@ -7,17 +7,13 @@
 #ifndef RODIN_GEOMETRY_POLYTOPE_H
 #define RODIN_GEOMETRY_POLYTOPE_H
 
-#include <set>
 #include <iostream>
 #include <array>
-#include <optional>
 
 #include "Rodin/Configure.h"
 
 #include "Rodin/Array.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Math/Matrix.h"
-#include "Rodin/Threads/Mutable.h"
 
 #include "ForwardDecls.h"
 

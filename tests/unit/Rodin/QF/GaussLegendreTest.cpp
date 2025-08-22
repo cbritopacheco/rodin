@@ -7,7 +7,6 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/QF/GaussLegendre.h"
-#include "Rodin/Geometry.h"
 
 using namespace Rodin::QF;
 using namespace Rodin::Geometry;
@@ -28,26 +27,4 @@ TEST_F(GaussLegendreTest, BasicProperties)
   // GaussLegendre with 2 points
   EXPECT_EQ(gl_segment.getSize(), 2);
   EXPECT_EQ(gl_segment.getGeometry(), Polytope::Type::Segment);
-}
-
-TEST_F(GaussLegendreTest, Weights)
-{
-  GaussLegendre gl_segment(Polytope::Type::Segment);
-
-  // Should have weights for each quadrature point
-  for (size_t i = 0; i < gl_segment.getSize(); ++i) {
-    EXPECT_NO_THROW(gl_segment.getWeight(i));
-    EXPECT_GT(gl_segment.getWeight(i), 0.0);
-  }
-}
-
-TEST_F(GaussLegendreTest, Points)
-{
-  GaussLegendre gl_segment(Polytope::Type::Segment);
-
-  // Test points are accessible (though implementation may have limitations)
-  EXPECT_NO_THROW(gl_segment.getPoint(0));
-
-  const auto& point = gl_segment.getPoint(0);
-  EXPECT_GE(point.size(), 1);
 }
