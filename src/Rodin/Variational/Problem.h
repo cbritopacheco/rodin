@@ -34,49 +34,126 @@
 namespace Rodin::Variational
 {
   /**
+   * @defgroup RodinVariational Variational Module
+   * @brief Variational formulations and finite element problem definitions.
+   *
+   * The Variational module provides the infrastructure for defining and solving
+   * variational problems in finite element analysis. It supports the formulation
+   * of linear and nonlinear problems, boundary conditions, and various finite
+   * element spaces.
+   *
+   * ## Mathematical Foundation
+   * The module implements the standard finite element methodology:
+   * - **Bilinear Forms**: @f$ a(u,v) : V \times V \to \mathbb{R} @f$
+   * - **Linear Forms**: @f$ l(v) : V \to \mathbb{R} @f$ 
+   * - **Weak Formulation**: Find @f$ u \in V @f$ such that @f$ a(u,v) = l(v) @f$ for all @f$ v \in V @f$
+   * - **Discrete System**: @f$ Au = b @f$ where @f$ A_{ij} = a(\phi_j, \psi_i) @f$ and @f$ b_i = l(\psi_i) @f$
+   */
+
+  /**
    * @defgroup ProblemSpecializations Problem Template Specializations
    * @brief Template specializations of the Problem class.
    * @see Problem
    */
 
   /**
+   * @ingroup RodinVariational
    * @brief Abstract base class for variational problems.
+   *
+   * This class provides the foundation for defining and solving variational
+   * problems in finite element analysis. It encapsulates the discrete linear
+   * system @f$ Au = b @f$ arising from the weak formulation of PDEs and provides
+   * a unified interface for assembly and solution operations.
+   *
+   * @tparam LinearSystem Type of linear system (e.g., sparse or dense)
+   *
+   * ## Usage Example
+   * ```cpp
+   * // Define a problem and solve
+   * auto problem = Problem(trialSpace, testSpace);
+   * problem = bilinearForm == linearForm;
+   * problem.assemble();
+   * problem.solve(solver);
+   * ```
    */
   template <class LinearSystem>
   class ProblemBase : public FormLanguage::Base
   {
     public:
+      /// @brief Matrix operator type from linear system traits
       using OperatorType =
         typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
+      /// @brief Vector type from linear system traits
       using VectorType =
         typename FormLanguage::Traits<LinearSystem>::VectorType;
 
+      /// @brief Scalar type from linear system traits  
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
+      /// @brief Problem body type containing bilinear and linear forms
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      /// @brief Default constructor
       ProblemBase() = default;
 
+      /// @brief Move constructor
       ProblemBase(ProblemBase&& other) = default;
 
+      /// @brief Copy constructor
       ProblemBase(const ProblemBase& other) = default;
 
+      /**
+       * @brief Assigns a problem body to this problem.
+       *
+       * @param rhs Problem body containing bilinear and linear forms
+       * @return Reference to this problem instance
+       *
+       * This operator allows setting up the variational problem by assigning
+       * a problem body that contains the bilinear form @f$ a(u,v) @f$ and
+       * linear form @f$ l(v) @f$ defining the weak formulation.
+       */
       virtual ProblemBase& operator=(const ProblemBodyType& rhs) = 0;
 
+      /**
+       * @brief Solves the assembled linear system.
+       *
+       * @param solver Solver instance to use for solving the linear system
+       *
+       * Solves the discrete system @f$ Au = b @f$ using the provided solver.
+       * The problem must be assembled before calling this method.
+       */
       virtual void solve(Solver::SolverBase<LinearSystem>& solver) = 0;
 
       /**
        * @brief Assembles the underlying linear system to solve.
+       *
+       * @return Reference to this problem instance for method chaining
+       *
+       * Assembles the bilinear form into the system matrix @f$ A @f$ and the
+       * linear form into the right-hand side vector @f$ b @f$, creating the
+       * discrete linear system @f$ Au = b @f$.
        */
       virtual ProblemBase& assemble() = 0;
 
+      /**
+       * @brief Gets the assembled linear system.
+       * @return Reference to the linear system
+       */
       virtual LinearSystem& getLinearSystem() = 0;
 
+      /**
+       * @brief Gets the assembled linear system (const version).
+       * @return Const reference to the linear system  
+       */
       virtual const LinearSystem& getLinearSystem() const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy of this problem.
+       * @return Pointer to a new copy of this problem
+       */
       virtual ProblemBase* copy() const noexcept override = 0;
   };
 

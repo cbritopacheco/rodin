@@ -1,3 +1,5 @@
+[![Rodin](doc/Images/README_Header.png)](https://github.com/cbritopacheco/rodin/releases)
+
 # Rodin [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE)
 
 Rodin is a lightweight and modular finite element framework which provides many of the associated functionalities that are needed when implementing shape and topology optimization algorithms. These functionalities range from refining and remeshing the underlying shape, to providing elegant mechanisms to specify and solve variational problems.
@@ -36,13 +38,6 @@ make -j4
 ```
 
 ## Features
-
-### Detailed documentation
-
-Rodin comes with documentation that is built automatically on each merge, hence it's always up to date.
-
-[The documentation can be found here](https://cbritopacheco.github.io/rodin/).
-
 
 ### Embedded form language for FEM modelling
 
@@ -100,12 +95,12 @@ int main(int, char**)
 <table>
   <tr>
     <td align="center">
-      <img src="doc/README/Poisson.png" alt="Poisson.png" style="width:50%;">
+      <img src="doc/readme/poisson.png" alt="poisson.png" style="width:50%;">
     </td>
   </tr>
   <tr>
     <td align="center">
-      Solution of the Poisson equation.
+      solution of the poisson equation.
     </td>
   </tr>
 </table>

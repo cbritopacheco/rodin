@@ -46,28 +46,26 @@ namespace Rodin::Variational
           m_v(std::move(other.m_v))
       {}
 
-      inline
+      template <class ... Args>
       constexpr
-      Sqrt& traceOf(Geometry::Attribute attrs)
+      Sqrt& traceOf(const Args& ... args)
       {
-        m_v.traceOf(attrs);
+        m_v->traceOf(args...);
         return *this;
       }
 
-      inline
       Real getValue(const Geometry::Point& p) const
       {
-        return Math::sqrt(getOperand().getValue(p));
+        return Math::sqrt(this->getOperand().getValue(p));
       }
 
-      inline
       const OperandType& getOperand() const
       {
         assert(m_v);
         return *m_v;
       }
 
-      inline Sqrt* copy() const noexcept override
+      Sqrt* copy() const noexcept override
       {
         return new Sqrt(*this);
       }

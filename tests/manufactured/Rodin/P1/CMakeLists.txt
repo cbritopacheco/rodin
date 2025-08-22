@@ -52,3 +52,14 @@ target_link_libraries(RodinManufacturedLinearElasticity
   Rodin::Solver
   )
 gtest_discover_tests(RodinManufacturedLinearElasticity)
+
+add_executable(RodinManufacturedHelmholtz Helmholtz.cpp)
+target_link_libraries(RodinManufacturedHelmholtz
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedHelmholtz)

@@ -7,17 +7,13 @@
 #ifndef RODIN_GEOMETRY_POLYTOPE_H
 #define RODIN_GEOMETRY_POLYTOPE_H
 
-#include <set>
 #include <iostream>
 #include <array>
-#include <optional>
 
 #include "Rodin/Configure.h"
 
 #include "Rodin/Array.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Math/Matrix.h"
-#include "Rodin/Threads/Mutable.h"
 
 #include "ForwardDecls.h"
 
@@ -26,22 +22,50 @@
 namespace Rodin::Geometry
 {
   /**
-   * @brief Base class for all geometric elements of the mesh.
+   * @ingroup RodinGeometry
+   * @brief Base class for all geometric elements in finite element meshes.
+   *
+   * A Polytope represents a geometric entity in a finite element mesh, ranging
+   * from vertices (0D) to cells (highest dimension). Polytopes are the building
+   * blocks of mesh topology and provide the geometric foundation for finite
+   * element computations.
+   *
+   * ## Mathematical Foundation
+   * In finite element analysis, polytopes represent:
+   * - **Vertices** (0D): Points @f$ p \in \mathbb{R}^d @f$
+   * - **Edges** (1D): Line segments connecting vertices
+   * - **Faces** (2D): Triangular or quadrilateral surfaces  
+   * - **Cells** (3D): Tetrahedral, hexahedral, or other volumetric elements
+   *
+   * ## Supported Element Types
+   * - **Simplicial elements**: Point, Segment, Triangle, Tetrahedron
+   * - **Tensor-product elements**: Quadrilateral, Hexahedron
+   * - **Mixed elements**: Wedge (prismatic) elements
+   *
+   * ## Key Features
+   * - **Type classification**: Automatic detection of simplex vs tensor-product geometry
+   * - **Dimension queries**: Topological and geometric dimension access
+   * - **Connectivity**: Support for incidence relations between polytopes
+   * - **Reference mappings**: Transformations between reference and physical coordinates
    */
   class Polytope
   {
     public:
       /**
-       * @brief The type of the Polytope geometry.
+       * @brief Enumeration of supported polytope geometries.
+       *
+       * This enumeration defines the geometric types supported in Rodin's
+       * finite element framework, covering both simplicial and tensor-product
+       * element families commonly used in numerical analysis.
        */
       enum class Type
       {
-        Point,
-        Segment,
-        Triangle,
-        Quadrilateral,
-        Tetrahedron,
-        Wedge
+        Point,          ///< 0D vertex element
+        Segment,        ///< 1D line element  
+        Triangle,       ///< 2D triangular element (simplex)
+        Quadrilateral,  ///< 2D quadrilateral element (tensor-product)
+        Tetrahedron,    ///< 3D tetrahedral element (simplex)
+        Wedge           ///< 3D prismatic element (mixed)
       };
 
       struct Traits

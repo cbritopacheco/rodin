@@ -63,6 +63,13 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      template <class ... Args>
+      constexpr
+      Derived& traceOf(const Args& ... args)
+      {
+        return static_cast<Derived&>(*this).traceOf(args...);
+      }
+
       /**
        * @brief Gets the number of rows in the matrix
        * @returns Number of rows

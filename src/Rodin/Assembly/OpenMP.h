@@ -28,30 +28,96 @@
 
 namespace Rodin::Assembly
 {
+  /**
+   * @ingroup RodinAssembly
+   * @brief OpenMP-based parallel mesh iteration for multi-threaded assembly.
+   *
+   * OpenMPIteration provides a parallel iteration strategy over mesh elements
+   * using OpenMP threading for assembly operations. This class manages the
+   * distribution of mesh elements across multiple threads while ensuring
+   * thread-safe access to mesh data structures.
+   *
+   * @tparam MeshType Type of mesh to iterate over (specialized for local context)
+   *
+   * ## Parallelization Strategy
+   * The implementation uses OpenMP to parallelize element-wise assembly:
+   * - Each thread processes a subset of mesh elements
+   * - Local contributions are computed independently
+   * - Synchronization occurs only during global assembly
+   */
   template <>
   class OpenMPIteration<Geometry::Mesh<Context::Local>>
   {
     public:
+      /// @brief Mesh type for local execution context
       using MeshType = Geometry::Mesh<Context::Local>;
 
+      /**
+       * @brief Constructs parallel iteration over a mesh region.
+       *
+       * @param mesh Mesh to iterate over
+       * @param region Geometric region defining the iteration domain
+       */
       OpenMPIteration(const MeshType& mesh, const Geometry::Region& region);
 
+      /**
+       * @brief Gets an iterator for a specific thread.
+       *
+       * @param i Thread index
+       * @return PolytopeIterator for the specified thread's element subset
+       */
       Geometry::PolytopeIterator getIterator(Index i) const;
 
+      /**
+       * @brief Gets the topological dimension of elements.
+       * @return Dimension of the polytopes being iterated
+       */
       size_t getDimension() const;
 
+      /**
+       * @brief Gets the total number of elements to process.
+       * @return Total element count in the iteration domain
+       */
       size_t getCount() const;
 
+      /**
+       * @brief Checks if an element should be processed by this iteration.
+       *
+       * @param i Element index
+       * @return true if element should be processed, false otherwise
+       */
       bool filter(Index i) const;
 
     private:
-      std::reference_wrapper<const MeshType> m_mesh;
-      Geometry::Region m_region;
+      std::reference_wrapper<const MeshType> m_mesh;  ///< Reference to the mesh
+      Geometry::Region m_region;                      ///< Region to iterate over
   };
 
+  /// @brief Template argument deduction guide for OpenMPIteration
   OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
     -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
 
+  /**
+   * @ingroup RodinAssembly
+   * @brief OpenMP-based parallel assembly for bilinear forms.
+   *
+   * This class provides a multi-threaded assembly implementation for bilinear
+   * forms @f$ a(u,v) @f$ using OpenMP parallelization. The assembly process
+   * distributes element computations across multiple threads and uses sparse
+   * matrix triplets for thread-safe accumulation.
+   *
+   * @tparam Solution Solution variable type
+   * @tparam TrialFES Trial finite element space type  
+   * @tparam TestFES Test finite element space type
+   *
+   * ## Parallel Assembly Algorithm
+   * 1. **Element Distribution**: Distribute elements across OpenMP threads
+   * 2. **Local Assembly**: Each thread computes local element matrices independently
+   * 3. **Triplet Accumulation**: Store contributions as Eigen triplets for thread safety
+   * 4. **Global Assembly**: Combine triplets into final sparse matrix
+   *
+   * This approach minimizes synchronization overhead while ensuring correctness.
+   */
   template <class Solution, class TrialFES, class TestFES>
   class OpenMP<
     std::vector<Eigen::Triplet<

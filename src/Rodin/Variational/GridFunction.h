@@ -56,6 +56,32 @@ namespace Rodin::Variational
    * @see GridFunction
    */
 
+  /**
+   * @ingroup RodinVariational
+   * @brief Base class for discrete finite element functions.
+   *
+   * GridFunctionBase represents discrete functions defined on finite element
+   * spaces, where the function is represented as a linear combination of basis
+   * functions with scalar coefficients stored in a data vector.
+   *
+   * ## Mathematical Foundation
+   * A grid function represents a discrete finite element approximation:
+   * @f[
+   *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
+   * @f]
+   * where:
+   * - @f$ u_h @f$ is the discrete function
+   * - @f$ u_i @f$ are the degrees of freedom (coefficients)
+   * - @f$ \phi_i @f$ are the finite element basis functions
+   * - @f$ N @f$ is the number of degrees of freedom
+   *
+   * ## Key Features
+   * - **DOF Management**: Automatic handling of degrees of freedom storage
+   * - **Function Evaluation**: Point-wise evaluation via finite element interpolation
+   * - **I/O Support**: Export to various visualization formats (EnSight, MEDIT, MFEM)
+   * - **Space Association**: Strong association with underlying finite element space
+   */
+
   template <class StrictType>
   class GridFunctionBaseReference
     : public FunctionBase<GridFunctionBaseReference<StrictType>>
@@ -109,6 +135,52 @@ namespace Rodin::Variational
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
+      }
+
+      constexpr
+      decltype(auto) x() const
+      {
+        return m_ref.get().x();
+      }
+
+      constexpr
+      decltype(auto) y() const
+      {
+        return m_ref.get().y();
+      }
+
+      constexpr
+      decltype(auto) z() const
+      {
+        return m_ref.get().z();
+      }
+
+      template <class DataType>
+      constexpr
+      decltype(auto) setData(const DataType& data, size_t offset = 0)
+      {
+        return m_ref.get().setData(data, offset);
+      }
+
+      /**
+       * @brief Returns a constant reference to the GridFunction data.
+       */
+      constexpr
+      auto& getData()
+      {
+        return m_ref.get().getData();
+      }
+
+      constexpr
+      const auto& getFiniteElementSpace() const
+      {
+        return m_ref.get().getFiniteElementSpace();
+      }
+
+      constexpr
+      size_t getSize() const
+      {
+        return m_ref.get().getSize();
       }
 
       GridFunctionBaseReference* copy() const noexcept final override
@@ -192,7 +264,7 @@ namespace Rodin::Variational
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
         assert(m_fes.get().getVectorDimension() >= 1);
-        return Component(static_cast<Derived&>(*this), 0);
+        return Component(static_cast<const Derived&>(*this), 0);
       }
 
       constexpr
@@ -200,7 +272,7 @@ namespace Rodin::Variational
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
         assert(m_fes.get().getVectorDimension() >= 2);
-        return Component(static_cast<Derived&>(*this), 1);
+        return Component(static_cast<const Derived&>(*this), 1);
       }
 
       constexpr
@@ -208,7 +280,7 @@ namespace Rodin::Variational
       {
         static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
         assert(m_fes.get().getVectorDimension() >= 3);
-        return Component(static_cast<Derived&>(*this), 2);
+        return Component(static_cast<const Derived&>(*this), 2);
       }
 
       constexpr
@@ -682,14 +754,14 @@ namespace Rodin::Variational
       GridFunction& operator+=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
-        this->getData() += rhs;
+        this->getData().array() += rhs;
         return *this;
       }
 
       GridFunction& operator-=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
-        this->getData() -= rhs;
+        this->getData().array() -= rhs;
         return *this;
       }
 

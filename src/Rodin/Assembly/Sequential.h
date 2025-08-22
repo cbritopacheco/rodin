@@ -20,25 +20,50 @@
 
 #include "Rodin/Variational/ForwardDecls.h"
 
+#include "Rodin/Assembly/AssemblyBase.h"
+
 #include "ForwardDecls.h"
 
 namespace Rodin::Assembly
 {
+  /**
+   * @ingroup RodinAssembly
+   * @brief Sequential mesh iteration for single-threaded assembly.
+   *
+   * SequentialIteration provides a single-threaded iteration strategy over
+   * mesh elements for assembly operations. This class encapsulates the logic
+   * for iterating through mesh polytopes in a specified region in a 
+   * deterministic, sequential order.
+   *
+   * @tparam MeshType Type of mesh to iterate over (specialized for local context)
+   */
   template <>
   class SequentialIteration<Geometry::Mesh<Context::Local>>
   {
     public:
+      /// @brief Mesh type for local execution context
       using MeshType = Geometry::Mesh<Context::Local>;
 
+      /**
+       * @brief Constructs sequential iteration over a mesh region.
+       *
+       * @param mesh Mesh to iterate over
+       * @param region Geometric region defining the iteration domain
+       */
       SequentialIteration(const MeshType& mesh, const Geometry::Region&);
 
+      /**
+       * @brief Gets an iterator for traversing mesh elements.
+       * @return PolytopeIterator for sequential mesh traversal
+       */
       Geometry::PolytopeIterator getIterator() const;
 
     private:
-      std::reference_wrapper<const MeshType> m_mesh;
-      Geometry::Region m_region;
+      std::reference_wrapper<const MeshType> m_mesh;  ///< Reference to the mesh
+      Geometry::Region m_region;                      ///< Region to iterate over
   };
 
+  /// @brief Template argument deduction guide for SequentialIteration
   SequentialIteration(
       const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
     -> SequentialIteration<Geometry::Mesh<Context::Local>>;
@@ -47,8 +72,24 @@ namespace Rodin::Assembly
 namespace Rodin::Assembly
 {
   /**
-   * @brief %Sequential assembly of the Math::Vector associated to a LinearFormBase
-   * object.
+   * @ingroup RodinAssembly
+   * @brief Sequential assembly implementation for linear forms.
+   *
+   * This class provides a single-threaded assembly implementation for linear
+   * forms @f$ l(v) @f$, computing the discrete vector representation
+   * @f$ b_i = l(\psi_i) @f$ by sequentially iterating through mesh elements
+   * and accumulating contributions.
+   *
+   * @tparam FES Finite element space type
+   *
+   * ## Assembly Algorithm
+   * For each element @f$ K @f$ in the mesh:
+   * 1. Retrieve element quadrature rule and basis functions
+   * 2. Compute local element vector @f$ b_K @f$
+   * 3. Accumulate contributions to global vector @f$ b @f$
+   *
+   * The assembly is deterministic and reproducible, making it suitable for
+   * debugging and verification purposes.
    */
   template <class FES>
   class Sequential<
