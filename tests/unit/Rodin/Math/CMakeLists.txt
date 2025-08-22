@@ -39,3 +39,35 @@ target_link_libraries(RodinMathConstantsTest
   GTest::gtest_main
   Rodin::Rodin)
 gtest_discover_tests(RodinMathConstantsTest)
+
+add_executable(RodinMathUnitTest UnitTest.cpp)
+target_link_libraries(RodinMathUnitTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathUnitTest)
+
+add_executable(RodinMathRadTest RadTest.cpp)
+target_link_libraries(RodinMathRadTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathRadTest)
+
+add_executable(RodinMathTraitsTest TraitsTest.cpp)
+target_link_libraries(RodinMathTraitsTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathTraitsTest)
+
+add_executable(RodinMathLinearSystemTest LinearSystemTest.cpp)
+target_link_libraries(RodinMathLinearSystemTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathLinearSystemTest)
