@@ -70,16 +70,7 @@ target_link_libraries(RodinUtilityTest
   Rodin::Rodin)
 gtest_discover_tests(RodinUtilityTest)
 
-add_executable(RodinAlertTest AlertTest.cpp)
-target_link_libraries(RodinAlertTest
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Rodin
-  Rodin::Alert
-  )
-gtest_discover_tests(RodinAlertTest)
-
+add_subdirectory(Alert)
 add_subdirectory(IO)
 add_subdirectory(QF)
 add_subdirectory(Context)
