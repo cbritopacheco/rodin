@@ -72,20 +72,19 @@ namespace Rodin::Models::Distance
         
         // For P1 elements, DOF coordinates are vertex coordinates
         // TODO: For higher order elements, would need shape function evaluation
-        if (dof < vertices.cols())
+        Math::SpatialVector<Real> coord(spaceDim);
+        if (dof < static_cast<Index>(vertices.cols()))
         {
-          Math::SpatialVector<Real> coord(spaceDim);
           for (size_t d = 0; d < spaceDim; ++d)
             coord[d] = vertices(d, dof);
-          return coord;
         }
         else
         {
           // Handle edge/face DOFs for higher order elements
-          Math::SpatialVector<Real> coord(spaceDim);
+          // For now, just return zero coordinates
           coord.setZero();
-          return coord;
         }
+        return coord;
       }
 
       /**
@@ -96,13 +95,12 @@ namespace Rodin::Models::Distance
       {
         std::vector<Index> neighbors;
         const auto& mesh = fes.getMesh();
-        const auto& conn = mesh.getConnectivity();
         const size_t meshDim = mesh.getDimension();
         
         // Get elements containing this DOF
         const auto elements = getDOFElements(fes, dof);
         
-        std::set<Index> neighborSet;
+        FlatSet<Index> neighborSet;
         for (Index elemIdx : elements)
         {
           const auto elemDOFs = getElementDOFs(fes, meshDim, elemIdx);
@@ -226,6 +224,9 @@ namespace Rodin::Models::Distance
         
         // Least squares gradient estimation
         const size_t n = acceptedDOFs.size();
+        if (n == 0)
+          return std::numeric_limits<Real>::infinity();
+          
         Eigen::MatrixXd A(n, spaceDim);
         Eigen::VectorXd b(n);
         
@@ -241,8 +242,17 @@ namespace Rodin::Models::Distance
         const auto AtA = A.transpose() * A;
         const auto Atb = A.transpose() * b;
         
+        // Check if AtA is well-conditioned
+        const Real conditionThreshold = 1e-12;
         Eigen::LDLT<Eigen::MatrixXd> solver(AtA);
         if (solver.info() != Eigen::Success)
+          return std::numeric_limits<Real>::infinity();
+        
+        // Additional condition number check
+        const auto AtA_diag = AtA.diagonal();
+        const Real minDiag = AtA_diag.minCoeff();
+        const Real maxDiag = AtA_diag.maxCoeff();
+        if (minDiag < conditionThreshold || maxDiag / minDiag > 1e12)
           return std::numeric_limits<Real>::infinity();
           
         const Eigen::VectorXd g = solver.solve(Atb);
@@ -363,10 +373,13 @@ namespace Rodin::Models::Distance
         {
           const auto& vertices = mesh.getVertices();
           const size_t spaceDim = mesh.getSpaceDimension();
+          const size_t numVertices = std::min(numDOFs, static_cast<Index>(vertices.cols()));
           
-          for (size_t i = 0; i < std::min(numDOFs, static_cast<size_t>(vertices.cols())); ++i)
+          // Sample a few vertices to estimate typical edge length
+          const size_t maxSamples = std::min(static_cast<size_t>(100), numVertices);
+          for (size_t i = 0; i < maxSamples && i < numVertices; ++i)
           {
-            for (size_t j = i + 1; j < std::min(numDOFs, static_cast<size_t>(vertices.cols())); ++j)
+            for (size_t j = i + 1; j < maxSamples && j < numVertices; ++j)
             {
               Real dist = 0.0;
               for (size_t d = 0; d < spaceDim; ++d)
@@ -375,15 +388,20 @@ namespace Rodin::Models::Distance
                 dist += diff * diff;
               }
               dist = std::sqrt(dist);
-              if (dist > 0)
+              if (dist > 1e-10)  // Avoid degenerate cases
                 minEdgeLength = std::min(minEdgeLength, dist);
             }
             minSpeed = std::min(minSpeed, getSpeed(i));
           }
         }
         
-        const Real dt = (minEdgeLength > 0 && minSpeed > 0) ? 
-                       minEdgeLength / (2.0 * minSpeed) : 0.01;
+        // Set reasonable defaults if estimation fails
+        if (minEdgeLength == std::numeric_limits<Real>::max() || minEdgeLength < 1e-10)
+          minEdgeLength = 1.0;
+        if (minSpeed == std::numeric_limits<Real>::max() || minSpeed < 1e-10)
+          minSpeed = 1.0;
+        
+        const Real dt = minEdgeLength / (4.0 * minSpeed);  // Conservative discretization
         
         // Bucketed priority queues
         std::vector<std::vector<Index>> buckets;
@@ -436,7 +454,10 @@ namespace Rodin::Models::Distance
         }
         
         // Main FMM loop over buckets
-        for (size_t b = 0; b <= maxBucket; ++b)
+        const size_t maxIterations = numDOFs * 10;  // Safety limit
+        size_t iterations = 0;
+        
+        for (size_t b = 0; b <= maxBucket && iterations < maxIterations; ++b)
         {
           if (b >= buckets.size() || buckets[b].empty())
             continue;
@@ -508,6 +529,8 @@ namespace Rodin::Models::Distance
             }
           }
           
+          iterations++;
+          
           // Merge thread-local relaxed nodes and re-bucket
           for (const auto& relaxedNodes : threadLocalRelaxed)
           {
@@ -516,7 +539,7 @@ namespace Rodin::Models::Distance
               const Real newTime = T[v].load();
               const size_t newBucket = quantize(newTime, dt);
               
-              if (newBucket != SIZE_MAX)
+              if (newBucket != SIZE_MAX && newBucket < numDOFs * 100)  // Sanity check
               {
                 maxBucket = std::max(maxBucket, newBucket);
                 if (newBucket >= buckets.size())
