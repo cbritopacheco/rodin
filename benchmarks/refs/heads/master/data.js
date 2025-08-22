@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1755769677160,
+  "lastUpdate": 1755875067267,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -4122,6 +4122,162 @@ window.BENCHMARK_DATA = {
             "value": 51.0075375889949,
             "unit": "ns/iter",
             "extra": "iterations: 11823940\ncpu: 50.99393197191465 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito-Pacheco",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e89ecd3cd545f47e1a9a45bd173b10d21acc42fc",
+          "message": "Develop (#116)\n\n* Update\n\n* Update.\n\n* CI\n\n* CI\n\n* Update\n\n* Update\n\n* Refactor\n\n* Switch to OpenMP for multithreading\n\n* Remove thread pool\n\n* CI\n\n* Refactor\n\n* CI\n\n* CI\n\n* Workon MPI Poisson example\n\n* Will refactor GridFunction\n\n* Refactor\n\n* Update\n\n* Update\n\n* Small include error\n\n* Ownership and ghost\n\n* Fix\n\n* Fix\n\n* Update\n\n* GridFunction refactor (#102)\n\nPETSc\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* Refactor projection (#103)\n\n* Update\n\n* Refactor project and getValue\n\n* CI\n\n* CI\n\n* Add Release test build into matrix\n\n* Remove boost::bimap and fix tests\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* cI\n\n* CI\n\n* Add comprehensive unit tests for Rodin Variational mathematical operations (#105)\n\n* Initial plan\n\n* Add comprehensive unit tests for core Rodin Variational classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive unit tests for additional core Rodin Variational classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Complete comprehensive unit test suite for Rodin Variational classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove any mention of RangeShape\n\n* Remove RangeShape references from DotTest, DivTest, and ComponentTest\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove all remaining RangeShape references from Rodin Variational test files\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix Copilot code\n\n* Add comprehensive unit tests for fundamental mathematical operations in Rodin Variational\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive unit tests for advanced mathematical operations in Rodin Variational\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add tests\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>\n\n* Add comprehensive Doxygen documentation throughout the codebase (#111)\n\n* Initial plan\n\n* Add Doxygen documentation to Math, QF, IO, Solver modules and core types\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add documentation to QF, Models, MPI, and Test modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add documentation to core utility classes - Moveable and GeometryIndexed\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive documentation to FormLanguage, Assembly, Variational, Geometry, and Context modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add documentation to additional Variational, Geometry, and Assembly components\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Complete documentation coverage with FiniteElementSpace and Plot modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix Copyable documentation and add comprehensive docs to Alert and Utility modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix build\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>\n\n* Add Helmholtz manufactured test\n\n* Add comprehensive unit tests for all major Rodin modules and classes (#112)\n\n* Initial plan\n\n* Initial assessment: Identify missing unit tests for src/Rodin classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add unit tests for Copyable, Moveable, FlatSet, Types, and Cast classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix\n\n* Add unit tests for Utility, Alert, and QF classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Put the QF tests inside their own folder\n\n* Split QF tests into separate files by class\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive unit tests for Math, Test, and FormLanguage modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive unit tests for Plot, Models, Solver, and Assembly modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix tests\n\n* Split Alert tests into separate files by class in Alert directory\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive unit tests for Math module classes Unit, Rad, Traits, and LinearSystem\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update README with logo\n\n* Fix tests\n\n* Update logo\n\n* Revert submodules to match develop branch state\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove QF abstract base class from tests\n\n* Fix GaussLegendre\n\n* Add comprehensive unit tests for GaussLegendre class\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix tests\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>\n\n---------\n\nCo-authored-by: Copilot <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>",
+          "timestamp": "2025-08-22T16:58:37+02:00",
+          "tree_id": "2c5d19825e52282c0a2601655b1df56b4fcc7594",
+          "url": "https://github.com/cbritopacheco/rodin/commit/e89ecd3cd545f47e1a9a45bd173b10d21acc42fc"
+        },
+        "date": 1755875061756,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.3121861199999785,
+            "unit": "ns/iter",
+            "extra": "iterations: 1000000000\ncpu: 0.31217555500000005 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.3113048960000242,
+            "unit": "ns/iter",
+            "extra": "iterations: 1000000000\ncpu: 0.31127795300000005 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.3107362349999221,
+            "unit": "ns/iter",
+            "extra": "iterations: 1000000000\ncpu: 0.31071388 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.31117921199995635,
+            "unit": "ns/iter",
+            "extra": "iterations: 1000000000\ncpu: 0.311152066 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 481.459374455153,
+            "unit": "ns/iter",
+            "extra": "iterations: 1456842\ncpu: 481.4127146251961 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 95651.13034013352,
+            "unit": "ns/iter",
+            "extra": "iterations: 7350\ncpu: 95622.45687074827 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 409649.1111758141,
+            "unit": "ns/iter",
+            "extra": "iterations: 1718\ncpu: 409570.4016298024 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 796.2953591791257,
+            "unit": "ns/iter",
+            "extra": "iterations: 884628\ncpu: 796.2496642656573 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 165873.7215249854,
+            "unit": "ns/iter",
+            "extra": "iterations: 4223\ncpu: 165853.4698081932 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 716530.6093591079,
+            "unit": "ns/iter",
+            "extra": "iterations: 983\ncpu: 716486.4170905398 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 183820.407291672,
+            "unit": "ns/iter",
+            "extra": "iterations: 3840\ncpu: 183806.40572916673 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 203497.6049138816,
+            "unit": "ns/iter",
+            "extra": "iterations: 3541\ncpu: 203319.3513131886 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 13563.069442284483,
+            "unit": "ns/iter",
+            "extra": "iterations: 51424\ncpu: 13562.73965463597 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 5485199.9147290755,
+            "unit": "ns/iter",
+            "extra": "iterations: 129\ncpu: 5484146.364341088 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 95023.99837045811,
+            "unit": "ns/iter",
+            "extra": "iterations: 7364\ncpu: 95013.14448669206 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 1760287.4256927664,
+            "unit": "ns/iter",
+            "extra": "iterations: 397\ncpu: 1759944.3576826192 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 8163799.267442544,
+            "unit": "ns/iter",
+            "extra": "iterations: 86\ncpu: 8163384.104651162 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 36830437.315786995,
+            "unit": "ns/iter",
+            "extra": "iterations: 19\ncpu: 36741154.789473675 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 256732133.00001407,
+            "unit": "ns/iter",
+            "extra": "iterations: 3\ncpu: 256707669.99999964 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_16x16",
+            "value": 47.804745918730795,
+            "unit": "ns/iter",
+            "extra": "iterations: 14626757\ncpu: 47.79945185388677 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_32x32",
+            "value": 48.24229571488061,
+            "unit": "ns/iter",
+            "extra": "iterations: 14497776\ncpu: 48.230691245333006 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_64x64",
+            "value": 48.71011829588573,
+            "unit": "ns/iter",
+            "extra": "iterations: 12292228\ncpu: 48.701716727024724 ns\nthreads: 1"
           }
         ]
       }
