@@ -74,6 +74,7 @@
               Reference
               <ul>
                 <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
@@ -81,6 +82,16 @@
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class OperatorType, class Solution, class TrialFES, class TestFES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_operator_type_00_01_variational_1_1_bilinear_forbca9c1861f33a24fefc425d57c7a8686.html" class="m-doc">AssemblyBase&lt;OperatorType, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, OperatorType&gt;&gt;</a>
+            </dt>
+            <dd>Base class for bilinear form assembly operations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class VectorType, class FES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_vector_type_00_01_variational_1_1_linear_form_3_9ceee04a1976155dd6c77da98b793ec0.html" class="m-doc">AssemblyBase&lt;VectorType, Variational::LinearForm&lt;FES, VectorType&gt;&gt;</a>
+            </dt>
+            <dd>Base class for linear form assembly operations.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_1_1_mat_00_01_variational_1_1_bilinear_form_3_01_solu5af45a989f73eff35efbca874c481e5a.html" class="m-doc">OpenMP&lt;::Mat, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, ::Mat&gt;&gt;</a>
@@ -101,6 +112,36 @@
               class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_math_1_1_vector_3_01typename_01_form_language_1_1_tra7ad7cdb45420a21a2adcddc3c15da554.html" class="m-doc">OpenMP&lt;Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;, Variational::LinearForm&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;&gt;</a>
             </dt>
             <dd>OpenMP assembly of the <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a> associated to a LinearForm object.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01std_1_1vector_3_01_eigen_1_1_triplet_3_01typename_01_fda92335c443c81761c5dfd3a06b561ca.html" class="m-doc">OpenMP&lt;std::vector&lt;Eigen::Triplet&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, std::vector&lt;Eigen::Triplet&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;&gt;&gt;</a>
+            </dt>
+            <dd>OpenMP-based parallel assembly for bilinear forms.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_open_m_p_iteration_3_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html" class="m-doc">OpenMPIteration&lt;Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
+            </dt>
+            <dd>OpenMP-based parallel mesh iteration for multi-threaded assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_iteration_3_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html" class="m-doc">SequentialIteration&lt;Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> mesh iteration for single-threaded assembly.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ab16fdb26e75372beeac0e5e57aee22eb">
+              <span class="m-doc-wrap-bumper"><a href="#ab16fdb26e75372beeac0e5e57aee22eb" class="m-doc-self">OpenMPIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
+              const Geometry::Region&amp;) -&gt; OpenMPIteration&lt; Geometry::Mesh&lt; Context::Local &gt; &gt;</span>
+            </dt>
+            <dd>Template argument deduction guide for OpenMPIteration.</dd>
+            <dt id="a77c2bc28c24b9508913a8970c18b641e">
+              <span class="m-doc-wrap-bumper"><a href="#a77c2bc28c24b9508913a8970c18b641e" class="m-doc-self">SequentialIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
+              const Geometry::Region&amp;) -&gt; SequentialIteration&lt; Geometry::Mesh&lt; Context::Local &gt; &gt;</span>
+            </dt>
+            <dd>Template argument deduction guide for <a href="class_rodin_1_1_assembly_1_1_sequential_iteration.html" class="m-doc">SequentialIteration</a>.</dd>
           </dl>
         </section>
       </div>

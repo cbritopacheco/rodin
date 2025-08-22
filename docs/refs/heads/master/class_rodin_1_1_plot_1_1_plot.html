@@ -66,10 +66,12 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_plot.html">Plot</a>::<wbr/></span>Plot <span class="m-thin">class</span>
         </h1>
-        <p>Contains the plotting functionalities.</p>
+        <p>Main plotting interface for finite element visualization.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
+            <li><a href="#autotoc_md26">Usage Example</a></li>
+            <li><a href="#autotoc_md27">Technical Details</a></li>
             <li>
               Reference
               <ul>
@@ -79,6 +81,11 @@
             </li>
           </ul>
         </nav>
+<p>The <a href="class_rodin_1_1_plot_1_1_plot.html" class="m-doc">Plot</a> class serves as the central interface for creating and managing visualizations of finite element data. It provides a high-level API for rendering meshes, functions, and analysis results with interactive controls.</p><section id="autotoc_md26"><h3><a href="#autotoc_md26">Usage Example</a></h3><pre class="m-code"><span class="n">Plot</span><span class="w"> </span><span class="n">plot</span><span class="p">;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">figure</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">.</span><span class="n">figure</span><span class="p">();</span>
+<span class="n">figure</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="n">figure</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">solution</span><span class="p">);</span>
+<span class="n">plot</span><span class="p">.</span><span class="n">show</span><span class="p">();</span></pre></section><section id="autotoc_md27"><h3><a href="#autotoc_md27">Technical Details</a></h3><ul><li>Uses OpenGL for hardware-accelerated rendering</li><li>Supports multiple concurrent figure windows</li><li>Provides customizable rendering options and visual styles</li><li>Integrates with <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s finite element data structures</li></ul></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -87,7 +94,7 @@
               <a href="#a59afafda588e071c6dbcceecf1241d43a9b293fee8577ffd6e0e44036b9a47dea" class="m-doc">IMMEDIATE</a> = 0,
               <a href="#a59afafda588e071c6dbcceecf1241d43a3f12a753fff65114897af8db025ae19a" class="m-doc">VSYNC</a> = 1 }</span>
             </dt>
-            <dd></dd>
+            <dd>Buffer swap interval modes for controlling rendering synchronization.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -135,26 +142,30 @@
             <h3>
               enum Rodin::<wbr />Plot::<wbr />Plot::<wbr /><a href="#a59afafda588e071c6dbcceecf1241d43" class="m-doc-self">SwapInterval</a>
             </h3>
-<p>Represents the possible values of the swap interval for objects of the <a href="class_rodin_1_1_plot_1_1_artist_1_1_figure.html" class="m-doc">Artist::<wbr />Figure</a> class.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="#aa59b50e1abb3a6a90304b50d8ed69a93" class="m-doc">setSwapInterval</a></p></aside>
+            <p>Buffer swap interval modes for controlling rendering synchronization.</p>
+<p>This enumeration defines the synchronization behavior between buffer swaps and the display&#x27;s vertical refresh rate, allowing control over frame rate and visual quality trade-offs.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
                 <tr>
                   <td><a href="#a59afafda588e071c6dbcceecf1241d43ab9a38902726719ccfb53666a37b3357e" class="m-doc-self" id="a59afafda588e071c6dbcceecf1241d43ab9a38902726719ccfb53666a37b3357e">ADAPTIVE</a></td>
                   <td>
-<p>Updates synchronized with the vertical retrace, except that if the vertical retrace for the current frame was missed the buffers are swapped immediately.</p>
+                  <p>Adaptive vertical synchronization.</p>
+<p>Updates synchronized with the vertical retrace, except that if the vertical retrace for the current frame was missed the buffers are swapped immediately. This provides smooth rendering while avoiding input lag.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#a59afafda588e071c6dbcceecf1241d43a9b293fee8577ffd6e0e44036b9a47dea" class="m-doc-self" id="a59afafda588e071c6dbcceecf1241d43a9b293fee8577ffd6e0e44036b9a47dea">IMMEDIATE</a></td>
                   <td>
-<p>Immediate updates.</p>
+                  <p>Immediate buffer swaps.</p>
+<p>Immediate updates without synchronization. This provides the highest frame rate but may result in screen tearing.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#a59afafda588e071c6dbcceecf1241d43a3f12a753fff65114897af8db025ae19a" class="m-doc-self" id="a59afafda588e071c6dbcceecf1241d43a3f12a753fff65114897af8db025ae19a">VSYNC</a></td>
                   <td>
-<p>Updates synchronized with the vertical retrace.</p>
+                  <p>Vertical synchronization.</p>
+<p>Updates synchronized with the vertical retrace. This eliminates screen tearing but may introduce input lag and limits frame rate to the display refresh rate.</p>
                   </td>
                 </tr>
               </tbody>

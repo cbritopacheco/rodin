@@ -74,7 +74,6 @@
               Reference
               <ul>
                 <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
@@ -83,10 +82,30 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;class ...&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_extract.html" class="m-doc">Extract</a>
+            </dt>
+            <dd>Template metafunction for extracting types from tuple structures.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T, class ... Ts&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_extract_3_01_tuple_3_01_t_00_01_ts_8_8_8_01_4_01_4.html" class="m-doc">Extract&lt;Tuple&lt;T, Ts...&gt;&gt;</a>
+            </dt>
+            <dd>Specialization of <a href="struct_rodin_1_1_utility_1_1_extract.html" class="m-doc">Extract</a> for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_make.html" class="m-doc">Make</a>
+            </dt>
+            <dd>Factory template for perfect forwarding construction.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class... Ts&gt;</div>
               struct <a href="struct_rodin_1_1_utility_1_1_overloaded.html" class="m-doc">Overloaded</a>
             </dt>
-            <dd>Helper type for use with visitor pattern.</dd>
+            <dd>Helper type for creating overloaded function objects from lambdas.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Params&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_parameter_pack.html" class="m-doc">ParameterPack</a>
+            </dt>
+            <dd>Template metaprogramming utilities for parameter packs.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class ...&gt;</div>
               struct <a href="struct_rodin_1_1_utility_1_1_product.html" class="m-doc">Product</a>
@@ -103,51 +122,6 @@
             </dt>
             <dd><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> has at least two elements (H1, H2, Hs…).</dd>
           </dl>
-        </section>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
-          <dl class="m-doc">
-            <dt id="a70d53718c88191ddecca0580b2eef9fa">
-              <div class="m-doc-template">template&lt;class F, class... Args&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a70d53718c88191ddecca0580b2eef9fa" class="m-doc-self">For</a>(</span><span class="m-doc-wrap">F&amp;&amp; f,
-              Args &amp;&amp; ... args) <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Performs the application of the function over all the arguments.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t N, class F&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#aca33b1bb8b9d6d091e503107e6b712bd" class="m-doc">ForIndex</a>(</span><span class="m-doc-wrap">F&amp;&amp; f) <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Executes the function N times.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aca33b1bb8b9d6d091e503107e6b712bd"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;size_t N, class F&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Utility::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca33b1bb8b9d6d091e503107e6b712bd" class="m-doc-self">ForIndex</a>(</span><span class="m-doc-wrap">F&amp;&amp; f) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Executes the function N times.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">N</td>
-                  <td>Number of times to execute the function</td>
-                </tr>
-                <tr>
-                  <td>F</td>
-                  <td>Callable type</td>
-                </tr>
-              </tbody>
-            </table>
-<h4 id="autotoc_md14">Utilization</h4><pre class="m-code"><span class="n">Utility</span><span class="o">::</span><span class="n">ForIndex</span><span class="o">&lt;</span><span class="mi">5</span><span class="o">&gt;</span><span class="p">(</span>
-<span class="w">  </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="w"> </span><span class="n">i</span><span class="p">){</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">});</span></pre>
-          </div></section>
         </section>
       </div>
     </div>

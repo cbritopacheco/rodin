@@ -73,15 +73,29 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_copyable.html" class="m-doc">Copyable</a>
+            </dt>
+            <dd>Abstract base class for objects that can be copied.</dd>
+          </dl>
+        </section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_q_f_1_1_gauss_legendre.html" class="m-doc">GaussLegendre</a> <span class="m-label m-flat m-warning">final</span>
+            </dt>
+            <dd>Gauss–Legendre quadrature formula on reference polytopes.</dd>
             <dt>
               class <a href="class_rodin_1_1_q_f_1_1_generic_polytope_quadrature.html" class="m-doc">GenericPolytopeQuadrature</a>
             </dt>
@@ -90,6 +104,14 @@
               class <a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html" class="m-doc">GrundmannMoller</a>
             </dt>
             <dd>Grundmann-Möller Simplex Quadrature.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_q_f_1_1_q_f1_p1.html" class="m-doc">QF1P1</a> <span class="m-label m-flat m-warning">final</span>
+            </dt>
+            <dd>Single-point quadrature formula with degree of exactness 1.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_q_f_1_1_q_f2_p1.html" class="m-doc">QF2P1</a> <span class="m-label m-flat m-warning">final</span>
+            </dt>
+            <dd>Quadrature formula with degree of exactness 1 and 2 points.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -99,6 +121,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ad5978ce3db46b04d9724da1becf98333" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Returns a reference to a vector containing the coordinates in reference space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1deacc5936ed3d655e2da75464fe0d44" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy of this object.</dd>
           </dl>
         </section>
         <section>
@@ -109,6 +135,21 @@
             </h3>
             <p>Returns a reference to a vector containing the coordinates in reference space.</p>
 <aside class="m-note m-info"><h4>Note</h4><p>The reference must be valid throughout the whole lifetime of the program.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a1deacc5936ed3d655e2da75464fe0d44"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>* Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1deacc5936ed3d655e2da75464fe0d44" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy of this object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a new instance that is a copy of this object. The caller is responsible for memory management.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>This method enables polymorphic copy behavior. The copy semantics (shallow vs deep) depend on the concrete implementation. This method should not throw exceptions.</p></aside>
           </div></section>
         </section>
       </div>

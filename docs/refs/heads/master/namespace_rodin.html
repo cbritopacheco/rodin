@@ -75,7 +75,6 @@
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#typedef-members">Typedefs</a></li>
                 <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
@@ -124,6 +123,15 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;class From, class To&gt;</div>
+              class <a href="class_rodin_1_1_cast.html" class="m-doc">Cast</a>
+            </dt>
+            <dd>Template class for type casting operations.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_copyable.html" class="m-doc">Copyable</a>
+            </dt>
+            <dd>Abstract base class for objects that can be copied.</dd>
+            <dt>
               struct <a href="struct_rodin_1_1_index_array_equality.html" class="m-doc">IndexArrayEquality</a>
             </dt>
             <dd>Functor for comparing two index arrays for equality.</dd>
@@ -148,6 +156,10 @@
             </dt>
             <dd>Functor for computing a hash value for an IndexSet.</dd>
             <dt>
+              class <a href="class_rodin_1_1_moveable.html" class="m-doc">Moveable</a>
+            </dt>
+            <dd>Abstract base class for objects that can be moved.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class L, class R&gt;</div>
               class <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>
             </dt>
@@ -164,97 +176,6 @@
             <dd>Specialization of <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> for an empty parameter pack.</dd>
           </dl>
         </section>
-        <section id="typedef-members">
-          <h2><a href="#typedef-members">Typedefs</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class ScalarType&gt;</div>
-              using <a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a> = Eigen::ArrayX&lt;ScalarType&gt;
-            </dt>
-            <dd>Alias for a dynamically sized array.</dd>
-            <dt>
-              using <a href="#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a> = <a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
-            </dt>
-            <dd>Alias for an index array.</dd>
-            <dt id="a1dc165bbe1d2390cd0a21524320cd3eb">
-              using <a href="#a1dc165bbe1d2390cd0a21524320cd3eb" class="m-doc-self">Integer</a> = int
-            </dt>
-            <dd>Standard type for representing integer values.</dd>
-            <dt id="a717a190167959b837148d927a5d380ba">
-              using <a href="#a717a190167959b837148d927a5d380ba" class="m-doc-self">Boolean</a> = bool
-            </dt>
-            <dd>Standard type for representing boolean values.</dd>
-            <dt id="a3ffd74e95952eacd75f04a2b85d61845">
-              using <a href="#a3ffd74e95952eacd75f04a2b85d61845" class="m-doc-self">Float</a> = float
-            </dt>
-            <dd>Standard type for representing (32 bit) floating-point values.</dd>
-            <dt id="ab8fcb63d96106a8bbedccf2848ca861d">
-              using <a href="#ab8fcb63d96106a8bbedccf2848ca861d" class="m-doc-self">Double</a> = double
-            </dt>
-            <dd>Standard type for representing double precision (64 bit) floating-point values.</dd>
-            <dt id="a68df7958495e405a2df133a40d640251">
-              using <a href="#a68df7958495e405a2df133a40d640251" class="m-doc-self">Index</a> = std::size_t
-            </dt>
-            <dd>Standard type for representing indices.</dd>
-            <dt id="a36afbd9801a3c5cba968cdec29036daf">
-              using <a href="#a36afbd9801a3c5cba968cdec29036daf" class="m-doc-self">Real</a> = <a href="#ab8fcb63d96106a8bbedccf2848ca861d" class="m-doc">Double</a>
-            </dt>
-            <dd>Standard type for representing scalar values.</dd>
-            <dt id="a12f84f428d2b3ff138c176f003ef716c">
-              using <a href="#a12f84f428d2b3ff138c176f003ef716c" class="m-doc-self">Complex</a> = std::complex&lt;<a href="#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
-            </dt>
-            <dd>Standard type for representing complex values.</dd>
-            <dt id="abab8a7d6e39a9b421ff10d164ffc3302">
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              using <a href="#abab8a7d6e39a9b421ff10d164ffc3302" class="m-doc-self">List</a> = boost::container::list&lt;T&gt;
-            </dt>
-            <dd>Standard type for representing lists.</dd>
-            <dt id="a672da592edc3a0551b41b89d3ac37f50">
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              using <a href="#a672da592edc3a0551b41b89d3ac37f50" class="m-doc-self">Deque</a> = boost::container::deque&lt;T&gt;
-            </dt>
-            <dd>Standard type for representing deques.</dd>
-            <dt id="a2ec70fb46786fa2f27ae0aa32467fc5c">
-              <div class="m-doc-template">template&lt;class T, class Container = Deque&lt;T&gt;&gt;</div>
-              using <a href="#a2ec70fb46786fa2f27ae0aa32467fc5c" class="m-doc-self">Stack</a> = std::stack&lt;T, Container&gt;
-            </dt>
-            <dd>Standard type for representing stacks.</dd>
-            <dt id="aaa7028d8cff093953627586709836fcb">
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              using <a href="#aaa7028d8cff093953627586709836fcb" class="m-doc-self">FlatSet</a> = boost::container::flat_set&lt;T&gt;
-            </dt>
-            <dd>Standard flat set type.</dd>
-            <dt id="ad4ab17db1cb81a9e71fd86d9474255be">
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              using <a href="#ad4ab17db1cb81a9e71fd86d9474255be" class="m-doc-self">UnorderedSet</a> = boost::unordered_set&lt;T&gt;
-            </dt>
-            <dd>Standard unordered set type.</dd>
-            <dt id="aa4e2542497b9d770faa236c58e485129">
-              <div class="m-doc-template">template&lt;class K, class T&gt;</div>
-              using <a href="#aa4e2542497b9d770faa236c58e485129" class="m-doc-self">Map</a> = boost::container::map&lt;K, T&gt;
-            </dt>
-            <dd>Standard ordered map type.</dd>
-            <dt id="a5f130bd8b1c58b36b367761092cb5d58">
-              <div class="m-doc-template">template&lt;class ... Params&gt;</div>
-              using <a href="#a5f130bd8b1c58b36b367761092cb5d58" class="m-doc-self">UnorderedMap</a> = boost::unordered_map&lt;Params...&gt;
-            </dt>
-            <dd>Standard unordered map type.</dd>
-            <dt id="ac254f6b6b70bc4d0f93b9bd717356963">
-              <div class="m-doc-template">template&lt;class K, class T&gt;</div>
-              using <a href="#ac254f6b6b70bc4d0f93b9bd717356963" class="m-doc-self">FlatMap</a> = boost::container::flat_map&lt;K, T&gt;
-            </dt>
-            <dd>Standard flat map type.</dd>
-            <dt id="ad2973bbf1f33a52a394e09f8a0ed4293">
-              using <a href="#ad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc-self">IndexSet</a> = <a href="#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
-            </dt>
-            <dd>Standard set of indices.</dd>
-            <dt id="a6c5e391ad8021755d9d9f9d5755539cb">
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              using <a href="#a6c5e391ad8021755d9d9f9d5755539cb" class="m-doc-self">IndexMap</a> = <a href="#ac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, T&gt;
-            </dt>
-            <dd>Standard map of indices.</dd>
-          </dl>
-        </section>
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
@@ -269,38 +190,11 @@
               <span class="m-doc-wrap-bumper">static auto <a href="#a74e34a69a39a8bd20e7c0021a10567be" class="m-doc">IndexTuple</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Generates a tuple of indices.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad9581b472b22e3c0f392a86bb92348ab" class="m-doc">operator&quot;&quot;_UZ</a>(</span><span class="m-doc-wrap">unsigned long long x) -&gt; std::size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>User-defined literal for size_t values.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Typedef documentation</h2>
-          <section class="m-doc-details" id="ad1992f32ef98176d3cac1ed3dd4132be"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class ScalarType&gt;
-              </div>
-              using Rodin::<wbr /><a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc-self">Array</a> = Eigen::ArrayX&lt;ScalarType&gt;
-            </h3>
-            <p>Alias for a dynamically sized array.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">ScalarType</td>
-                  <td>The scalar type of the array.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>This template alias defines a standard array type based on Eigen::ArrayX.</p>
-          </div></section>
-          <section class="m-doc-details" id="a3b5d284c6fb7166b753c5664773266cc"><div>
-            <h3>
-              using Rodin::<wbr /><a href="#a3b5d284c6fb7166b753c5664773266cc" class="m-doc-self">IndexArray</a> = <a href="#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
-            </h3>
-            <p>Alias for an index array.</p>
-<p>This alias defines an index array using the standard array type with a predefined index type.</p>
-          </div></section>
         </section>
         <section>
           <h2>Function documentation</h2>
@@ -360,6 +254,30 @@
               </tfoot>
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>First must be less than Last.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ad9581b472b22e3c0f392a86bb92348ab"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::size_t Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9581b472b22e3c0f392a86bb92348ab" class="m-doc-self">operator&quot;&quot;_UZ</a>(</span><span class="m-doc-wrap">unsigned long long x) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>User-defined literal for size_t values.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">x</td>
+                  <td>Unsigned long long value to convert</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>size_t value</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>This provides backward compatibility for the _UZ suffix</p></aside>
           </div></section>
         </section>
       </div>

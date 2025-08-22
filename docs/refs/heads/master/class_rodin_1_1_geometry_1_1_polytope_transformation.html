@@ -73,6 +73,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -261,6 +262,15 @@ K $
 <use x='0' y='0' xlink:href='#eq13-g0-75'/>
 </g>
 </svg>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_copyable.html" class="m-doc">Copyable</a>
+            </dt>
+            <dd>Abstract base class for objects that can be copied.</dd>
+          </dl>
+        </section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
@@ -290,6 +300,10 @@ K $
               <span class="m-doc-wrap-bumper">auto <a href="#a50e0250ae58561e8174a9252cde52f13" class="m-doc">inverse</a>(</span><span class="m-doc-wrap">const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; pc) const -&gt; Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;</span>
             </dt>
             <dd>Computes the reference coordinates of the given physical point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa8c6964e055701ed0dd3ab6b1a3eb71b" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy of this object.</dd>
           </dl>
         </section>
         <section>
@@ -608,6 +622,21 @@ $ p \in \tau $
 <use x='216.867902' y='-2.988792' xlink:href='#eq25-g3-41'/>
 </g>
 </svg></div><p>in reference coordinates.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa8c6964e055701ed0dd3ab6b1a3eb71b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>* Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8c6964e055701ed0dd3ab6b1a3eb71b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy of this object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a new instance that is a copy of this object. The caller is responsible for memory management.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>This method enables polymorphic copy behavior. The copy semantics (shallow vs deep) depend on the concrete implementation. This method should not throw exceptions.</p></aside>
           </div></section>
         </section>
       </div>
