@@ -4,6 +4,8 @@
 #include <stack>
 #include <cstddef>
 #include <complex>
+#include <bitset>
+#include <optional>
 
 #include <boost/unordered_map.hpp>
 #include <boost/container/map.hpp>

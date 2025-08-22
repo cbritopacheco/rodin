@@ -9,6 +9,8 @@
 
 #include "Types.h"
 
+#include <boost/functional/hash.hpp>
+
 namespace Rodin
 {
   /**

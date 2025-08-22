@@ -110,7 +110,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 # ---- Set compile options for all the submodules ----------------------------
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
-rodin_add_compile_options(LANG CXX C OPTIONS -Wno-error=old-style-cast -Wno-error=double-promotion)
+rodin_add_compile_options(LANG CXX C OPTIONS
+  -Wno-error=old-style-cast
+  -Wno-error=double-promotion
+  -Wno-old-style-cast)
 
 add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
 add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)

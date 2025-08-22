@@ -16,6 +16,8 @@ namespace Rodin
   class Moveable
   {
     public:
+      virtual ~Moveable() = default;
+
       /**
        * @brief Moves this object and transfers ownership.
        * @return Pointer to this object after the move operation.

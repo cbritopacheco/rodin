@@ -10,7 +10,6 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
-#include <new>
 #include <type_traits>
 #include <boost/serialization/access.hpp>
 
@@ -33,7 +32,7 @@ namespace Rodin::Geometry
   {
     /// Number of different polytope types
     static constexpr size_t Count = Polytope::Types.size();
-    
+
     /// Storage type for proper alignment
     using Storage = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
 

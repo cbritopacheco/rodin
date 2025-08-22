@@ -30,14 +30,6 @@ namespace Rodin::Test::Utility
   }
 
   template <class Result, class ... Parameters>
-  constexpr void ExpectedResultTable<Result, Parameters...>::emplace_back(
-      Result&& res, Parameters&&... params)
-  {
-    m_table.push_back(ExpectedResult(
-          std::forward<Result>(res), std::forward<Parameters>(params)...));
-  }
-
-  template <class Result, class ... Parameters>
   constexpr bool ExpectedResultTable<Result, Parameters...>::evaluate() const
   {
     bool allPassed = true;
