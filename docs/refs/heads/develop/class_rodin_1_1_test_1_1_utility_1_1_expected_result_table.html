@@ -124,8 +124,9 @@
             </dt>
             <dd>Adds an expected result entry to the table.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ae074525ae620ce06dc8d6e418f3847f1" class="m-doc">emplace_back</a>(</span><span class="m-doc-wrap">Result&amp;&amp; res,
-              Parameters &amp;&amp; ... params) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class R, class ... Ps&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a37eee8a504c090b2260021271a3f755e" class="m-doc">emplace_back</a>(</span><span class="m-doc-wrap">R&amp;&amp; res,
+              Ps &amp;&amp; ... params) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs and adds an expected result entry to the table.</dd>
             <dt>
@@ -181,13 +182,14 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ae074525ae620ce06dc8d6e418f3847f1"><div>
+          <section class="m-doc-details" id="a37eee8a504c090b2260021271a3f755e"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Result, class ... Parameters&gt;
+                template&lt;class R, class ... Ps&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Test::<wbr />Utility::<wbr />ExpectedResultTable&lt;Result, Parameters&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae074525ae620ce06dc8d6e418f3847f1" class="m-doc-self">emplace_back</a>(</span><span class="m-doc-wrap">Result&amp;&amp; res,
-              Parameters &amp;&amp; ... params) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Test::<wbr />Utility::<wbr />ExpectedResultTable&lt;Result, Parameters&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37eee8a504c090b2260021271a3f755e" class="m-doc-self">emplace_back</a>(</span><span class="m-doc-wrap">R&amp;&amp; res,
+              Ps &amp;&amp; ... params) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs and adds an expected result entry to the table.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -201,7 +203,7 @@
                 </tr>
                 <tr>
                   <td>params</td>
-                  <td>Input parameters<br /></td>
+                  <td>Input parameters</td>
                 </tr>
               </tbody>
             </table>
