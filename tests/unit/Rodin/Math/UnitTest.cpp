@@ -33,13 +33,14 @@ TEST_F(UnitTest, Construction)
   // Test value constructor
   TestUnit u1(5.0);
   EXPECT_DOUBLE_EQ(static_cast<Real>(u1), 5.0);
-  
+
   // Test copy constructor
   TestUnit u2(u1);
   EXPECT_DOUBLE_EQ(static_cast<Real>(u2), 5.0);
-  
+
   // Test move constructor
-  TestUnit u3(std::move(TestUnit(3.14)));
+  TestUnit tmp(3.14);
+  TestUnit u3(std::move(tmp));
   EXPECT_DOUBLE_EQ(static_cast<Real>(u3), 3.14);
 }
 
@@ -49,7 +50,7 @@ TEST_F(UnitTest, StaticFactoryMethods)
   // Test One()
   auto one = TestUnit::One();
   EXPECT_DOUBLE_EQ(static_cast<Real>(one), 1.0);
-  
+
   // Test Zero()
   auto zero = TestUnit::Zero();
   EXPECT_DOUBLE_EQ(static_cast<Real>(zero), 0.0);
@@ -60,13 +61,14 @@ TEST_F(UnitTest, AssignmentOperators)
 {
   TestUnit u1(5.0);
   TestUnit u2(10.0);
-  
+
   // Test copy assignment
   u1 = u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(u1), 10.0);
-  
+
   // Test move assignment
-  u1 = std::move(TestUnit(7.5));
+  TestUnit tmp(7.5);
+  u1 = std::move(tmp);
   EXPECT_DOUBLE_EQ(static_cast<Real>(u1), 7.5);
 }
 
@@ -77,30 +79,30 @@ TEST_F(UnitTest, ComparisonOperators)
   TestUnit u2(5.0);
   TestUnit u3(10.0);
   TestUnit u4(2.0);
-  
+
   // Test equality
   EXPECT_TRUE(u1 == u2);
   EXPECT_FALSE(u1 == u3);
-  
+
   // Test inequality
   EXPECT_FALSE(u1 != u2);
   EXPECT_TRUE(u1 != u3);
-  
+
   // Test less than
   EXPECT_TRUE(u4 < u1);
   EXPECT_FALSE(u1 < u4);
   EXPECT_FALSE(u1 < u2);
-  
+
   // Test greater than
   EXPECT_TRUE(u1 > u4);
   EXPECT_FALSE(u4 > u1);
   EXPECT_FALSE(u1 > u2);
-  
+
   // Test less than or equal
   EXPECT_TRUE(u4 <= u1);
   EXPECT_TRUE(u1 <= u2);
   EXPECT_FALSE(u1 <= u4);
-  
+
   // Test greater than or equal
   EXPECT_TRUE(u1 >= u4);
   EXPECT_TRUE(u1 >= u2);
@@ -112,19 +114,19 @@ TEST_F(UnitTest, ArithmeticOperators)
 {
   TestUnit u1(5.0);
   TestUnit u2(3.0);
-  
+
   // Test addition
   auto sum = u1 + u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(sum), 8.0);
-  
+
   // Test subtraction
   auto diff = u1 - u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(diff), 2.0);
-  
+
   // Test multiplication
   auto prod = u1 * u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(prod), 15.0);
-  
+
   // Test division
   auto quot = u1 / u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(quot), 5.0 / 3.0);
@@ -135,15 +137,15 @@ TEST_F(UnitTest, UnaryOperators)
 {
   TestUnit u1(5.0);
   TestUnit u2(-3.0);
-  
+
   // Test unary plus
   auto plus_u1 = +u1;
   EXPECT_DOUBLE_EQ(static_cast<Real>(plus_u1), 5.0);
-  
+
   // Test unary minus
   auto minus_u1 = -u1;
   EXPECT_DOUBLE_EQ(static_cast<Real>(minus_u1), -5.0);
-  
+
   auto minus_u2 = -u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(minus_u2), 3.0);
 }
@@ -153,19 +155,19 @@ TEST_F(UnitTest, CompoundAssignmentOperators)
 {
   TestUnit u1(5.0);
   TestUnit u2(3.0);
-  
+
   // Test +=
   u1 += u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(u1), 8.0);
-  
+
   // Test -=
   u1 -= u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(u1), 5.0);
-  
+
   // Test *=
   u1 *= u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(u1), 15.0);
-  
+
   // Test /=
   u1 /= u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(u1), 5.0);
@@ -175,7 +177,7 @@ TEST_F(UnitTest, CompoundAssignmentOperators)
 TEST_F(UnitTest, TypeConversion)
 {
   TestUnit u1(3.14159);
-  
+
   // Test explicit conversion to underlying type
   Real value = static_cast<Real>(u1);
   EXPECT_DOUBLE_EQ(value, 3.14159);
@@ -191,15 +193,15 @@ TEST_F(UnitTest, DifferentTypes)
       using Parent = Unit<IntUnit, int>;
       using Parent::Parent;
   };
-  
+
   IntUnit iu1(42);
   IntUnit iu2(10);
-  
+
   EXPECT_EQ(static_cast<int>(iu1), 42);
-  
+
   auto sum = iu1 + iu2;
   EXPECT_EQ(static_cast<int>(sum), 52);
-  
+
   // Test with float type
   class FloatUnit : public Unit<FloatUnit, float>
   {
@@ -207,12 +209,12 @@ TEST_F(UnitTest, DifferentTypes)
       using Parent = Unit<FloatUnit, float>;
       using Parent::Parent;
   };
-  
+
   FloatUnit fu1(2.5f);
   FloatUnit fu2(1.5f);
-  
+
   EXPECT_FLOAT_EQ(static_cast<float>(fu1), 2.5f);
-  
+
   auto prod = fu1 * fu2;
   EXPECT_FLOAT_EQ(static_cast<float>(prod), 3.75f);
 }
@@ -224,19 +226,19 @@ TEST_F(UnitTest, EdgeCases)
   TestUnit zero1 = TestUnit::Zero();
   TestUnit zero2(0.0);
   EXPECT_TRUE(zero1 == zero2);
-  
+
   // Test division by zero behavior (undefined, but shouldn't crash)
   TestUnit u1(5.0);
   TestUnit zero(0.0);
   // Note: Division by zero is undefined behavior, but the operation should compile
   auto result = u1 / zero;
   EXPECT_TRUE(std::isinf(static_cast<Real>(result)) || std::isnan(static_cast<Real>(result)));
-  
+
   // Test with very small values
   TestUnit small1(1e-10);
   TestUnit small2(1e-10);
   EXPECT_TRUE(small1 == small2);
-  
+
   // Test with very large values
   TestUnit large1(1e10);
   TestUnit large2(1e10);
