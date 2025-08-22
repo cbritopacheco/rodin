@@ -82,14 +82,18 @@ namespace Rodin::Test::Utility
      * @param entry Expected result entry to add
      */
     constexpr void push_back(const ExpectedResult& entry);
-    
+
     /**
      * @brief Constructs and adds an expected result entry to the table.
      * @param res Expected result value
-     * @param params Input parameters  
+     * @param params Input parameters
      */
-    constexpr void emplace_back(Result&& res, Parameters&&... params);
-    
+    template <class R, class ... Ps>
+    constexpr void emplace_back(R&& res, Ps&&... params)
+    {
+      m_table.push_back(ExpectedResult(std::forward<R>(res), std::forward<Parameters>(params)...));
+    }
+
     /**
      * @brief Evaluates all entries in the table against the model.
      * @return True if all expected results match model outputs, false otherwise

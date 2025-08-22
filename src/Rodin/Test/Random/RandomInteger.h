@@ -32,6 +32,7 @@ namespace Rodin::Test::Random
     RandomInteger& setSeed(unsigned int seed)
     {
       m_gen.seed(seed);
+      return *this;
     }
 
     unsigned int getSeed() const
