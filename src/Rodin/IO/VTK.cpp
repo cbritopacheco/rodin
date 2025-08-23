@@ -7,6 +7,7 @@
 #include "VTK.h"
 
 #include <sstream>
+#include <cmath>
 #include "Rodin/Geometry/Polytope.h"
 
 namespace Rodin::IO::VTK
@@ -40,8 +41,7 @@ namespace Rodin::IO
   {
     readHeader(is);
     readDataset(is);
-    readPoints(is);  // This also sets m_spaceDimension and adds vertices
-    m_build.initialize(m_spaceDimension);
+    readPoints(is);  // This determines m_spaceDimension and adds vertices
     readCells(is);
     readCellTypes(is);
 
@@ -126,10 +126,11 @@ namespace Rodin::IO
       Alert::Exception() << "Unsupported point data type: " << dataType << Alert::Raise;
     }
 
-    // Reserve space for nodes
-    m_build.nodes(m_numPoints);
+    // Store points temporarily to determine space dimension
+    std::vector<Math::SpatialPoint> points;
+    points.reserve(m_numPoints);
 
-    // Read point coordinates and add them to the builder
+    // Read all point coordinates first
     for (size_t i = 0; i < m_numPoints; i++)
     {
       line = VTK::skipEmptyLinesAndComments(is, m_currentLineNumber);
@@ -137,22 +138,40 @@ namespace Rodin::IO
 
       Math::SpatialPoint point(3); // VTK always uses 3D coordinates
       coords >> point(0) >> point(1) >> point(2);
+      points.push_back(std::move(point));
+    }
 
-      // Determine actual space dimension from first point
-      if (i == 0)
-      {
-        m_spaceDimension = 3;
-        // For simplicity, assume 3D unless all z-coordinates are zero
-        // A more sophisticated approach would check all points
-        if (point(2) == 0.0)
-        {
-          m_spaceDimension = 2;
-          if (point(1) == 0.0)
-            m_spaceDimension = 1;
-        }
-      }
+    // Determine space dimension by scanning all points for non-zero coordinates
+    // Use a tolerance for floating point comparison
+    const double tolerance = 1e-12;
+    bool hasNonZeroY = false;
+    bool hasNonZeroZ = false;
 
-      // Add vertex to builder
+    for (const auto& point : points)
+    {
+      if (std::abs(point(1)) > tolerance)
+        hasNonZeroY = true;
+      if (std::abs(point(2)) > tolerance)
+        hasNonZeroZ = true;
+    }
+
+    // Determine space dimension based on which coordinates are used
+    if (hasNonZeroZ)
+      m_spaceDimension = 3;
+    else if (hasNonZeroY)
+      m_spaceDimension = 2;
+    else
+      m_spaceDimension = 1;
+
+    // Initialize the builder with the determined space dimension
+    m_build.initialize(m_spaceDimension);
+
+    // Reserve space for nodes
+    m_build.nodes(m_numPoints);
+
+    // Add vertices to builder
+    for (auto& point : points)
+    {
       m_build.vertex(std::move(point));
     }
   }
