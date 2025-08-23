@@ -81,9 +81,9 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
-        return getOperand().getValue(p).coeff(m_idx);
+        return this->getOperand().getValue(p).coeff(m_idx);
       }
 
       Component* copy() const noexcept override
@@ -143,9 +143,9 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
-        return getOperand().getValue(p).coeff(m_i, m_j);
+        return this->getOperand().getValue(p).coeff(m_i, m_j);
       }
 
 
@@ -216,7 +216,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return m_u.get().getValue(p).coeff(m_idx);
       }
@@ -318,7 +318,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) getBasis(size_t local) const
+      auto getBasis(size_t local) const
       {
         return this->object(this->getOperand().getBasis(local)).coeff(m_idx);
       }

@@ -34,6 +34,7 @@ namespace Rodin::Test::Random
     RandomFloat& setSeed(unsigned int seed)
     {
       m_gen.seed(seed);
+      return *this;
     }
 
     constexpr

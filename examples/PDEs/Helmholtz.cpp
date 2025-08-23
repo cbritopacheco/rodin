@@ -88,37 +88,6 @@ int main(int, char**)
   uRe.save("uRe.gf");
   uIm.save("uIm.gf");
 
-  GridFunction miaow(rh);
-  miaow = [&](const Point& p)
-  {
-    auto x = p.x();
-    auto y = p.y();
-    return
-      (Complex(x, 1)
-         * cos(waveNumber * x)
-         * cos(waveNumber * y)
-         - Complex(2.0 / waveNumber, 0.0)
-         * sin(waveNumber * x)
-         * cos(waveNumber * y)).real();
-  };
-
-  miaow.save("exRe.gf");
-
-  miaow = [&](const Point& p)
-  {
-    auto x = p.x();
-    auto y = p.y();
-    return
-      (Complex(x, 1)
-         * cos(waveNumber * x)
-         * cos(waveNumber * y)
-         - Complex(2.0 / waveNumber, 0.0)
-         * sin(waveNumber * x)
-         * cos(waveNumber * y)).imag();
-  };
-
-  miaow.save("exIm.gf");
-
   mesh.save("Grid.mesh");
 
   return 0;

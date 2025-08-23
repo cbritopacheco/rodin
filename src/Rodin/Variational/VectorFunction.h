@@ -48,8 +48,6 @@ namespace Rodin::Variational
 
       using Parent = FunctionBase<VectorFunctionBase<Scalar, Derived>>;
 
-      using Parent::traceOf;
-
       using Parent::operator();
 
       VectorFunctionBase() = default;
@@ -99,7 +97,6 @@ namespace Rodin::Variational
       constexpr
       auto operator()(size_t i) const
       {
-        assert(0 <= i);
         assert(i < getDimension());
         return Component(*this, i);
       }
@@ -120,6 +117,13 @@ namespace Rodin::Variational
       size_t getDimension() const
       {
         return static_cast<const Derived&>(*this).getDimension();
+      }
+
+      template <class ... Args>
+      constexpr
+      Derived& traceOf(const Args& ... args)
+      {
+        return static_cast<Derived&>(*this).traceOf(args...);
       }
 
       virtual VectorFunctionBase* copy() const noexcept override
@@ -171,8 +175,9 @@ namespace Rodin::Variational
         return m_vector.get().size();
       }
 
+      template <class ... Args>
       constexpr
-      VectorFunction& traceOf(Geometry::Attribute attr)
+      VectorFunction& traceOf(const Args& ... args)
       {
         return *this;
       }
@@ -259,10 +264,11 @@ namespace Rodin::Variational
         return 1 + sizeof...(Values);
       }
 
+      template <class ... Args>
       constexpr
-      VectorFunction& traceOf(Geometry::Attribute attrs)
+      VectorFunction& traceOf(const Args&... attrs)
       {
-        std::apply([&](auto& s) { s.traceOf(attrs); }, m_fs);
+        std::apply([&](auto&... s) { (s.traceOf(attrs...), ...); }, m_fs);
         return *this;
       }
 
@@ -309,6 +315,13 @@ namespace Rodin::Variational
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         return m_f(p);
+      }
+
+      template <class ... Args>
+      constexpr
+      VectorFunction& traceOf(const Args&... attrs)
+      {
+        return *this;
       }
 
       VectorFunction* copy() const noexcept override

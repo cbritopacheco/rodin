@@ -1,8 +1,6 @@
 #ifndef RODIN_MATH_UNIT_H
 #define RODIN_MATH_UNIT_H
 
-#include "Rodin/Types.h"
-
 namespace Rodin::Math
 {
   /**
@@ -14,14 +12,14 @@ namespace Rodin::Math
     public:
       using Type = T;
 
-      static Unit One()
+      static Derived One()
       {
-        return Unit(T(1));
+        return Derived(T(1));
       }
 
-      static Unit Zero()
+      static Derived Zero()
       {
-        return Unit(T(0));
+        return Derived(T(0));
       }
 
       constexpr
@@ -47,63 +45,54 @@ namespace Rodin::Math
         return m_v;
       }
 
-      inline
       constexpr
       bool operator==(const Unit& other) const
       {
         return m_v == other.m_v;
       }
 
-      inline
       constexpr
       bool operator!=(const Unit& other) const
       {
         return !operator==(other);
       }
 
-      inline
       constexpr
       bool operator<(const Unit& other) const
       {
         return m_v < other.m_v;
       }
 
-      inline
       constexpr
       bool operator>(const Unit& other) const
       {
         return m_v > other.m_v;
       }
 
-      inline
       constexpr
       bool operator<=(const Unit& other) const
       {
         return !operator>(other);
       }
 
-      inline
       constexpr
       bool operator>=(const Unit& other) const
       {
         return !operator<(other);
       }
 
-      inline
       constexpr
       auto operator+(const Unit& other) const
       {
         return Unit(m_v + other.m_v);
       }
 
-      inline
       constexpr
       auto operator-(const Unit& other) const
       {
         return Unit(m_v - other.m_v);
       }
 
-      inline
       constexpr
       auto operator*(const Unit& other) const
       {
@@ -111,28 +100,24 @@ namespace Rodin::Math
       }
 
 
-      inline
       constexpr
       auto operator/(const Unit& other) const
       {
         return Unit(m_v / other.m_v);
       }
 
-      inline
       constexpr
       Unit operator+() const
       {
         return *this;
       }
 
-      inline
       constexpr
       Unit operator-() const
       {
         return Unit(-m_v);
       }
 
-      inline
       constexpr
       Unit& operator+=(const Unit& other)
       {
@@ -140,7 +125,6 @@ namespace Rodin::Math
         return *this;
       }
 
-      inline
       constexpr
       Unit& operator-=(const Unit& other)
       {
@@ -148,7 +132,6 @@ namespace Rodin::Math
         return *this;
       }
 
-      inline
       constexpr
       Unit& operator*=(const Unit& other)
       {
@@ -156,7 +139,6 @@ namespace Rodin::Math
         return *this;
       }
 
-      inline
       constexpr
       Unit& operator/=(const Unit& other)
       {
