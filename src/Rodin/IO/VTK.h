@@ -211,7 +211,7 @@ namespace Rodin::IO::VTK
         using boost::spirit::x3::double_;
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
-        
+  
         size_t i = 0;
         Data res{ Math::SpatialPoint(m_sdim) };
         const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
@@ -252,7 +252,7 @@ namespace Rodin::IO::VTK
         const auto get_num_vertices = [&](auto& ctx) { numVertices = _attr(ctx); };
         const auto p1 = uint_[get_num_vertices];
         bool r1 = boost::spirit::x3::phrase_parse(begin, end, p1, space);
-        
+  
         if (!r1)
           return {};
 
@@ -304,7 +304,7 @@ namespace Rodin::IO
       void readCellTypes(std::istream& is);
 
       Rodin::Geometry::Mesh<Rodin::Context::Local>::Builder m_build;
-      
+
       size_t m_currentLineNumber;
       size_t m_spaceDimension;
       size_t m_numPoints;

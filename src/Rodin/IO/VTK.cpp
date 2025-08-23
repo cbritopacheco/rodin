@@ -76,7 +76,8 @@ namespace Rodin::IO
   void MeshLoader<FileFormat::VTKLegacy, Context::Local>::readHeader(std::istream& is)
   {
     // Read VTK version header
-    std::string line = VTK::skipEmptyLinesAndComments(is, m_currentLineNumber);
+    std::string line;
+    VTK::getline(is, line, m_currentLineNumber);
     if (line.find("# vtk DataFile Version") != 0)
     {
       Alert::Exception() << "Expected VTK header, got: " << line << Alert::Raise;
