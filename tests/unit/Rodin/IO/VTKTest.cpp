@@ -23,7 +23,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_IO_VTK, SanityTest_VTK_Simple)
   {
     // Create a simple VTK file content
-    std::string vtkContent = 
+    std::string vtkContent =
       "# vtk DataFile Version 3.0\n"
       "Simple VTK Example\n"
       "ASCII\n"
@@ -47,29 +47,30 @@ namespace Rodin::Tests::Unit
 
     Mesh mesh;
     MeshLoader<FileFormat::VTKLegacy, Rodin::Context::Local> loader(mesh);
-    
+
     // This is a basic compilation test
-    // The loader should at least parse the header without crashing
-    try {
-      loader.load(iss);
-      // If we get here, basic parsing worked
-      EXPECT_TRUE(true);
-    } catch (...) {
-      // For now, we expect some parsing to work
-      EXPECT_TRUE(true);
-    }
+    std::cout << "loading\n";
+    loader.load(iss);
+
+    std::cout << "saving\n";
+    mesh.save("test.mesh", FileFormat::MEDIT);
+    mesh.save("test.vtk", FileFormat::VTKLegacy);
+
+    std::exit(1);
+    // If we get here, basic parsing worked
+    EXPECT_TRUE(true);
   }
 
   TEST(Rodin_IO_VTK, EnumTest)
   {
     // Test that the VTKLegacy enum was added correctly
     EXPECT_STREQ(toCharString(FileFormat::VTKLegacy), "VTKLegacy");
-    
+
     // Test VTK cell type conversions
     auto cellType = VTK::getCellType(Geometry::Polytope::Type::Triangle);
     EXPECT_TRUE(cellType.has_value());
     EXPECT_EQ(*cellType, VTK::VTK_TRIANGLE);
-    
+
     auto geomType = VTK::getGeometry(VTK::VTK_TRIANGLE);
     EXPECT_TRUE(geomType.has_value());
     EXPECT_EQ(*geomType, Geometry::Polytope::Type::Triangle);
@@ -98,7 +99,7 @@ namespace Rodin::Tests::Unit
     std::istringstream iss(vtkContent);
     Mesh mesh;
     MeshLoader<FileFormat::VTKLegacy, Rodin::Context::Local> loader(mesh);
-    
+
     try {
       loader.load(iss);
       EXPECT_TRUE(true);  // Successfully loaded tetrahedron
@@ -130,7 +131,7 @@ namespace Rodin::Tests::Unit
     std::istringstream iss(vtkContent);
     Mesh mesh;
     MeshLoader<FileFormat::VTKLegacy, Rodin::Context::Local> loader(mesh);
-    
+
     try {
       loader.load(iss);
       EXPECT_TRUE(true);  // Successfully loaded quadrilateral
@@ -164,7 +165,7 @@ namespace Rodin::Tests::Unit
     std::istringstream iss(vtkContent);
     Mesh mesh;
     MeshLoader<FileFormat::VTKLegacy, Rodin::Context::Local> loader(mesh);
-    
+
     try {
       loader.load(iss);
       EXPECT_TRUE(true);  // Successfully loaded wedge
@@ -194,7 +195,7 @@ namespace Rodin::Tests::Unit
     std::istringstream iss(vtkContent);
     Mesh mesh;
     MeshLoader<FileFormat::VTKLegacy, Rodin::Context::Local> loader(mesh);
-    
+
     try {
       loader.load(iss);
       EXPECT_TRUE(true);  // Successfully loaded segment
@@ -212,7 +213,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(VTK::getCellType(Geometry::Polytope::Type::Quadrilateral), VTK::VTK_QUAD);
     EXPECT_EQ(VTK::getCellType(Geometry::Polytope::Type::Tetrahedron), VTK::VTK_TETRA);
     EXPECT_EQ(VTK::getCellType(Geometry::Polytope::Type::Wedge), VTK::VTK_WEDGE);
-    
+
     // Test reverse conversions
     EXPECT_EQ(VTK::getGeometry(VTK::VTK_VERTEX), Geometry::Polytope::Type::Point);
     EXPECT_EQ(VTK::getGeometry(VTK::VTK_LINE), Geometry::Polytope::Type::Segment);
@@ -220,7 +221,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(VTK::getGeometry(VTK::VTK_QUAD), Geometry::Polytope::Type::Quadrilateral);
     EXPECT_EQ(VTK::getGeometry(VTK::VTK_TETRA), Geometry::Polytope::Type::Tetrahedron);
     EXPECT_EQ(VTK::getGeometry(VTK::VTK_WEDGE), Geometry::Polytope::Type::Wedge);
-    
+
     // Test unsupported types return empty optional
     EXPECT_FALSE(VTK::getGeometry(VTK::VTK_HEXAHEDRON).has_value());
     EXPECT_FALSE(VTK::getGeometry(VTK::VTK_PYRAMID).has_value());
@@ -249,24 +250,24 @@ namespace Rodin::Tests::Unit
     std::istringstream iss(vtkContent);
     Mesh mesh;
     MeshLoader<FileFormat::VTKLegacy, Rodin::Context::Local> loader(mesh);
-    
+
     try {
       loader.load(iss);
-      
+
       // Now test the printer
       MeshPrinter<FileFormat::VTKLegacy, Rodin::Context::Local> printer(mesh);
       std::ostringstream oss;
       printer.print(oss);
-      
+
       std::string output = oss.str();
-      
+
       // Check that basic VTK header is present
       EXPECT_TRUE(output.find("vtk DataFile") != std::string::npos);
       EXPECT_TRUE(output.find("DATASET UNSTRUCTURED_GRID") != std::string::npos);
       EXPECT_TRUE(output.find("POINTS") != std::string::npos);
       EXPECT_TRUE(output.find("CELLS") != std::string::npos);
       EXPECT_TRUE(output.find("CELL_TYPES") != std::string::npos);
-      
+
     } catch (...) {
       EXPECT_TRUE(true);  // Basic test for now
     }
