@@ -23,6 +23,21 @@ namespace Rodin::Models::Eikonal
 
   /**
    * @brief Fast Marching Method implementation for solving the Eikonal equation.
+   * 
+   * This class implements the Fast Marching Method (FMM) algorithm for solving
+   * the Eikonal equation |∇u| = F where F is the speed function and u represents
+   * the arrival time or distance function.
+   * 
+   * The algorithm works by:
+   * 1. Initializing all points as "Far" with infinite distance
+   * 2. Setting interface/boundary points as "Accepted" with distance 0
+   * 3. Adding immediate neighbors to "Considered" set with computed tentative values
+   * 4. Iteratively processing the "Considered" point with minimum value:
+   *    - Mark it as "Accepted"
+   *    - Update its neighbors with better values if possible
+   * 
+   * @tparam Solution Type of the solution grid function (usually GridFunction)
+   * @tparam SpeedFunction Type of the speed function callable
    */
   template <class Solution, class SpeedFunction>
   class FMM<Solution, SpeedFunction, Context::Local>
@@ -61,11 +76,21 @@ namespace Rodin::Models::Eikonal
 
     public:
 
+      /**
+       * @brief Constructor for the FMM solver.
+       * @param u Reference to the solution grid function
+       * @param speed Speed function that takes a spatial point and returns the speed value
+       */
       template <class Callable>
       FMM(SolutionType& u, Callable&& speed)
-        : m_u(u), m_speed(std::forward<Callable>(speed))
+        : m_u(u), m_speed(std::forward<Callable>(speed)), m_interfacePredicate(nullptr)
       {}
 
+      /**
+       * @brief Set the interface condition using a predicate function.
+       * @param p Predicate function that takes a node index and returns true if it's on the interface
+       * @return Reference to this FMM object for method chaining
+       */
       template <class Pred>
       FMM& setInterface(Pred&& p)
       {
@@ -73,6 +98,15 @@ namespace Rodin::Models::Eikonal
         return *this;
       }
 
+      /**
+       * @brief Solve the Eikonal equation using the Fast Marching Method.
+       * 
+       * This method implements the complete FMM algorithm:
+       * - Initializes all nodes as Far with infinite distance
+       * - Sets interface nodes as Accepted with value 0
+       * - Iteratively processes nodes in order of increasing distance
+       * - Updates neighbors using local Eikonal solver
+       */
       void solve()
       {
         auto& u = m_u.get();
