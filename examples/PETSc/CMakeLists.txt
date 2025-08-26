@@ -1,21 +1,3 @@
-add_executable(PETSc_Seq_Poisson Seq_Poisson.cpp)
-target_link_libraries(PETSc_Seq_Poisson
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  Rodin::Math
-  Rodin::PETSc)
+add_subdirectory(PDEs)
+add_subdirectory(Variational)
 
-
-if (RODIN_USE_MPI)
-  add_executable(PETSc_MPI_Poisson MPI_Poisson.cpp)
-  target_link_libraries(PETSc_MPI_Poisson
-    PUBLIC
-    Rodin::Geometry
-    Rodin::Solver
-    Rodin::Variational
-    Rodin::Math
-    Rodin::MPI
-    Rodin::PETSc)
-endif()

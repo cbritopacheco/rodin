@@ -257,7 +257,14 @@ namespace Rodin::Variational
         return *this;
       }
 
-      GridFunctionBase& operator=(const GridFunctionBase&) = delete;
+      GridFunctionBase& operator=(const GridFunctionBase& other)
+      {
+        if (this != &other)
+        {
+          m_fes = other.m_fes;
+        }
+        return *this;
+      }
 
       constexpr
       auto x() const
@@ -724,6 +731,17 @@ namespace Rodin::Variational
       GridFunction& operator=(GridFunction&& other)
       {
         Parent::operator=(std::move(other));
+        m_data = std::move(other.m_data);
+        return *this;
+      }
+
+      GridFunction& operator=(const GridFunction& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_data = other.m_data;
+        }
         return *this;
       }
 
@@ -775,7 +793,7 @@ namespace Rodin::Variational
       {
         auto& data = this->getData();
         data = data.array() / rhs;
-        return static_cast<GridFunction&>(*this);
+        return *this;
       }
 
       GridFunction& operator+=(const GridFunction& rhs)
