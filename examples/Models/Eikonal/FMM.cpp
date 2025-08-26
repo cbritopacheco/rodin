@@ -4,6 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Geometry/GeometryIndexed.h"
+#include "Rodin/Geometry/Point.h"
 #include <Rodin/Math.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -35,7 +37,7 @@ int main(int, char**)
     std::cout << "Degrees of freedom: " << u.getSize() << std::endl;
 
     // Define speed function (constant speed = 1)
-    auto f = [](const Math::SpatialVector<Real>& p) -> Real { return 1.0; };
+    auto f = [](const Geometry::Point& p) -> Real { return 1.0; };
 
     Models::Eikonal::FMM fmm(u, f);
 
@@ -63,7 +65,7 @@ int main(int, char**)
     Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 24, 24 });
     mesh.scale(2.0 / 23.0);
-    mesh.translate(Math::SpatialVector<Real>{{-1.0, -1.0}});
+    mesh.displace(VectorFunction{ -1.0, -1.0 });
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(0, 0);
     mesh.getConnectivity().compute(0, 1); // For edge-based computations
@@ -74,7 +76,7 @@ int main(int, char**)
     std::cout << "Surface mesh with " << mesh.getVertexCount() << " vertices" << std::endl;
 
     // Define varying speed function (slower in center, faster at edges)
-    auto varying_speed = [](const Math::SpatialVector<Real>& p) -> Real 
+    auto varying_speed = [](const Geometry::Point& p) -> Real
     {
       Real r = p.norm();
       return 0.5 + 1.5 * std::exp(-2.0 * r * r); // Gaussian speed profile

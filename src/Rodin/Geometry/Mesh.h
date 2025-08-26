@@ -111,6 +111,9 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Geometry
 {
+  using VertexCoordinates =
+    Eigen::Map<const Math::SpatialVector<Real>>;
+
   /**
    * @defgroup RodinGeometry Geometry Module
    * @brief Mesh data structures, geometric operations, and computational geometry utilities.
@@ -468,7 +471,7 @@ namespace Rodin::Geometry
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
        */
-      virtual Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index idx) const = 0;
+      virtual VertexCoordinates getVertexCoordinates(Index idx) const = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -505,13 +508,16 @@ namespace Rodin::Geometry
   };
 
   /// Type alias for Mesh<Context::Local>
-  using LocalMesh = Mesh<Context::Local>;
+  using LocalMesh =
+    Mesh<Context::Local>;
 
   /// Index containing the indices of boundary cells.
-  using BoundaryIndex = IndexSet;
+  using BoundaryIndex =
+    IndexSet;
 
   /// Index containing the attribute numbers of the polytopes.
-  using AttributeIndex = PolytopeIndexed<Geometry::Attribute>;
+  using AttributeIndex =
+    PolytopeIndexed<Geometry::Attribute>;
 
   /// Index containing the transformations of the polytopes.
   using TransformationIndex =
@@ -529,8 +535,11 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
-      using Parent = MeshBase;
-      using Context = Context::Local;
+      using Context =
+        Context::Local;
+
+      using Parent =
+        MeshBase;
 
       /**
        * @brief Class used to build Mesh<Context::Local> instances.
@@ -613,7 +622,7 @@ namespace Rodin::Geometry
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const Eigen::Map<const Math::Vector<Real>>& x);
+          Builder& vertex(const VertexCoordinates& x);
 
           /**
            * @brief Adds vertex with coordinates given by the vector.
@@ -1104,7 +1113,7 @@ namespace Rodin::Geometry
         return m_connectivity;
       }
 
-      virtual Eigen::Map<const Math::SpatialVector<Real>> getVertexCoordinates(Index idx) const override;
+      virtual VertexCoordinates getVertexCoordinates(Index idx) const override;
 
       virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 

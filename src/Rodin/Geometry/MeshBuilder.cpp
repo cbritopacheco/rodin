@@ -54,7 +54,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::vertex(const Eigen::Map<const Math::Vector<Real>>& x)
+  Mesh<Context::Local>::Builder::vertex(const VertexCoordinates& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
