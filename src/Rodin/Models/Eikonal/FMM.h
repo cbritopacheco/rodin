@@ -9,13 +9,7 @@
 
 /**
  * @file FMM.h
- * @brief Enhanced Fast Marching Method implementation with support for surface meshes and curved elements
- * 
- * This implementation extends the standard FMM algorithm to handle:
- * - Surface meshes (2D surfaces embedded in 3D space)
- * - Curved elements through geometric transformation infrastructure
- * - Various mesh dimensions (1D curves, 2D surfaces, 3D volumes)
- * - Proper geometric distance calculations using Rodin's geometry framework
+ * @brief Fast marching method on simplicial meshes
  */
 
 #include <queue>
@@ -38,19 +32,7 @@
 namespace Rodin::Models::Eikonal
 {
   /**
-   * @brief Enhanced Fast Marching Method for solving the Eikonal equation
-   * 
-   * This implementation supports:
-   * - Surface meshes: 2D triangular meshes embedded in 3D space
-   * - Volume meshes: 2D and 3D meshes in their natural embedding space  
-   * - Curved elements: Future support through PolytopeTransformation integration
-   * - Variable speed functions: Spatially varying speed/velocity fields
-   * 
-   * Key enhancements over the basic FMM:
-   * 1. Mesh dimension awareness: Handles 1D, 2D, and 3D mesh topologies
-   * 2. Surface mesh support: Correctly computes distances on embedded surfaces
-   * 3. Geometric infrastructure: Uses Rodin's geometry framework for robustness
-   * 4. Extensible design: Ready for curved element integration
+   * @brief Fast marching method for solving the eikonal equation
    */
   template <class Solution, class SpeedFunction>
   class FMM;
@@ -59,11 +41,11 @@ namespace Rodin::Models::Eikonal
   class FMM<Variational::GridFunction<Variational::P1<Real, Geometry::Mesh<Context::Local>>, Data>, SpeedFunction>
   {
     public:
-      using ScalarType        = Real;
-      using Context           = Context::Local;
-      using Mesh              = Geometry::Mesh<Context>;
-      using FES               = Variational::P1<ScalarType, Mesh>;
-      using SolutionType      = Variational::GridFunction<FES, Math::Vector<ScalarType>>;
+      using ScalarType = Real;
+      using Context = Context::Local;
+      using Mesh = Geometry::Mesh<Context>;
+      using FES = Variational::P1<ScalarType, Mesh>;
+      using SolutionType = Variational::GridFunction<FES, Math::Vector<ScalarType>>;
       using SpeedFunctionType = SpeedFunction;
 
       enum class Label : uint8_t
