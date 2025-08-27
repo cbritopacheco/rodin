@@ -172,7 +172,7 @@ if (RODIN_BUILD_SRC)
   add_subdirectory(third-party/eigen EXCLUDE_FROM_ALL)
   unset(BUILD_TESTING)
 
-  find_package (Eigen3 3.3 REQUIRED NO_MODULE
+  find_package (Eigen3 3.4 REQUIRED NO_MODULE
     HINTS
     "${PROJECT_BINARY_DIR}/third-party/eigen"
     "${PROJECT_BINARY_DIR}/third-party/eigen/cmake")
