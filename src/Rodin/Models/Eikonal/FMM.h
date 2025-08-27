@@ -24,10 +24,8 @@
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/PolytopeIterator.h"
-#include "Rodin/Geometry/PolytopeTransformation.h"
 #include "Rodin/Variational/P1/P1.h"
 #include "Rodin/Variational/GridFunction.h"
-#include "Rodin/Variational/QuadratureRule.h"
 
 namespace Rodin::Models::Eikonal
 {
@@ -57,7 +55,7 @@ namespace Rodin::Models::Eikonal
       struct PQItem
       {
         Index nodeIndex;
-        Real  value;
+        Real value;
         bool operator>(const PQItem& other) const { return value > other.value; }
       };
 
@@ -323,9 +321,9 @@ namespace Rodin::Models::Eikonal
 
         // Solve quadratic equation for travel time
         // This formulation works for surfaces embedded in any dimension
-        const Real A = 1 / (a * a) + 1 / (b * b) + 2 * cos_angle / (a * b);
-        const Real B = -2.0 * (ui / (a * a) + uj / (b * b) + (cos_angle / (a * b)) * (ui + uj));
-        const Real C = (ui * ui) / (a * a) + (uj * uj) / (b * b) + 2 * cos_angle * ui * uj / (a * b) - 1.0 / (F * F);
+        const Real A = 1 / (a * a) + 1 / (b * b) - 2 * cos_angle / (a * b);
+        const Real B = -2.0 * (ui / (a * a) + uj / (b * b) - (cos_angle / (a * b)) * (ui + uj));
+        const Real C = (ui * ui) / (a * a) + (uj * uj) / (b * b) - 2 * cos_angle * ui * uj / (a * b) - 1.0 / (F * F);
         assert(!std::isnan(A) && !std::isnan(B) && !std::isnan(C));
 
         const Real disc = B * B - 4 * A * C;
@@ -437,12 +435,12 @@ namespace Rodin::Models::Eikonal
         if (det <= 0 || std::isnan(det))
           return std::numeric_limits<Real>::infinity();
 
-        const Real c11 =  (g22 * g33 - g23*g23);
-        const Real c22 =  (g11 * g33 - g13*g13);
-        const Real c33 =  (g11 * g22 - g12*g12);
-        const Real c12 = -(g12 * g33 - g13*g23);
-        const Real c13 =  (g12 * g23 - g13*g22);
-        const Real c23 = -(g11 * g23 - g12*g13);
+        const Real c11 =  (g22 * g33 - g23 * g23);
+        const Real c22 =  (g11 * g33 - g13 * g13);
+        const Real c33 =  (g11 * g22 - g12 * g12);
+        const Real c12 = -(g12 * g33 - g13 * g23);
+        const Real c13 =  (g12 * g23 - g13 * g22);
+        const Real c23 = -(g11 * g23 - g12 * g13);
 
         const Real inv11 = c11 / det, inv22 = c22 / det, inv33 = c33 / det;
         const Real inv12 = c12 / det, inv13 = c13 / det, inv23 = c23 / det;

@@ -15,6 +15,7 @@
 #include <boost/serialization/access.hpp>
 
 #include "Rodin/Math.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
 #include "Rodin/Configure.h"
 #include "Rodin/Context/Local.h"
@@ -111,9 +112,6 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Geometry
 {
-  using VertexCoordinates =
-    Eigen::Map<const Math::SpatialVector<Real>>;
-
   /**
    * @defgroup RodinGeometry Geometry Module
    * @brief Mesh data structures, geometric operations, and computational geometry utilities.
@@ -471,7 +469,7 @@ namespace Rodin::Geometry
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
        */
-      virtual VertexCoordinates getVertexCoordinates(Index idx) const = 0;
+      virtual Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index idx) const = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -622,7 +620,7 @@ namespace Rodin::Geometry
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const VertexCoordinates& x);
+          Builder& vertex(Eigen::Map<const Math::SpatialPoint> x);
 
           /**
            * @brief Adds vertex with coordinates given by the vector.
@@ -1122,13 +1120,13 @@ namespace Rodin::Geometry
         return m_connectivity;
       }
 
-      virtual VertexCoordinates getVertexCoordinates(Index idx) const override;
+      virtual Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index idx) const override;
 
       virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 
       virtual Mesh& setVertexCoordinates(Index idx, Real xi, size_t i) override;
 
-      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords) override;
+      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialPoint& coords) override;
 
       virtual Mesh& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;

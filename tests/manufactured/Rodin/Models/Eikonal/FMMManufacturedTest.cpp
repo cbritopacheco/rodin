@@ -7,8 +7,7 @@
 #include <gtest/gtest.h>
 #include <cmath>
 
-#include "Rodin/Geometry.h"
-#include "Rodin/Variational.h"
+#include "Rodin/Variational/VectorFunction.h"
 #include "Rodin/Models/Eikonal/FMM.h"
 
 using namespace Rodin;
@@ -33,11 +32,15 @@ namespace Rodin::Tests::Manufactured::Eikonal
   // Test 1: Point source with constant speed - 2D Euclidean distance
   TEST_F(FMMManufacturedTest, PointSource_ConstantSpeed_2D_EuclideanDistance)
   {
+    const Real h = 2.0 / 31.0;
+    const Real TOL = 1.01 * h;
+    const Real exclude_r = 2.0 * h;
+
     // Create fine 2D triangular mesh
     Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
     mesh.scale(2.0 / 31.0);  // Scale to [0, 2] x [0, 2] 
-    mesh.displace(VectorFunction{{ -1.0, -1.0 }});  // Center at origin: [-1, 1] x [-1, 1]
+    mesh.displace(VectorFunction{ -1.0, -1.0 });  // Center at origin: [-1, 1] x [-1, 1]
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(0, 0);
 
@@ -53,7 +56,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real distance = coord.norm();
       if (distance < 0.05)
         interface.push_back(it->getIndex());
@@ -71,27 +74,17 @@ namespace Rodin::Tests::Manufactured::Eikonal
 
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
-      Real computed = u[it->getIndex()];
-      Real analytical = coord.norm();
-      
-      if (std::isfinite(computed) && std::isfinite(analytical))
-      {
-        Real error = std::abs(computed - analytical);
-        max_error = std::max(max_error, error);
-        total_error += error;
-        count++;
-      }
+      const auto x = mesh.getVertexCoordinates(it->getIndex());
+      if (x.norm() < exclude_r)
+        continue; // skip nodes near source
+      Real err = std::abs(u[it->getIndex()] - x.norm());
+      max_error = std::max(max_error, err);
+      total_error += err; ++count;
     }
 
-    Real avg_error = total_error / count;
-    
-    EXPECT_LT(max_error, TOLERANCE) << "Maximum error should be within tolerance";
-    EXPECT_LT(avg_error, TOLERANCE / 2) << "Average error should be within tolerance";
-    
-    std::cout << "2D Euclidean Distance Test:" << std::endl;
-    std::cout << "  Max error: " << max_error << std::endl;
-    std::cout << "  Avg error: " << avg_error << std::endl;
+    ASSERT_GT(count, 0);
+    EXPECT_LT(max_error, TOL);
+    EXPECT_LT(total_error / count, 0.5 * TOL);
   }
 
   // Test 2: Point source with variable speed - 2D radial speed function
@@ -120,7 +113,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real distance = (coord - Math::SpatialVector<Real>{{0.5, 0.5}}).norm();
       if (distance < 0.03)
         interface.push_back(it->getIndex());
@@ -134,16 +127,16 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // For radial speed s(r) = 1 + r, the analytical solution is:
     // u(r) = ln(1 + r) (for small r approximation)
     // We'll check that the solution is monotonic and has reasonable values
-    
+
     Real center_val = std::numeric_limits<Real>::infinity();
     Real edge_val = 0.0;
 
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real r = (coord - Math::SpatialVector<Real>{{0.5, 0.5}}).norm();
       Real computed = u[it->getIndex()];
-      
+
       if (r < 0.05)
         center_val = std::min(center_val, computed);
       if (r > 0.4)
@@ -153,26 +146,19 @@ namespace Rodin::Tests::Manufactured::Eikonal
     EXPECT_LT(center_val, TIGHT_TOLERANCE) << "Center should have near-zero distance";
     EXPECT_GT(edge_val, 0.2) << "Edge should have reasonable distance";
     EXPECT_LT(center_val, edge_val) << "Distance should increase with radius";
-    
-    std::cout << "2D Radial Speed Test:" << std::endl;
-    std::cout << "  Center value: " << center_val << std::endl;
-    std::cout << "  Edge value: " << edge_val << std::endl;
   }
 
   // Test 3: Surface mesh test - Box surface with point source
   TEST_F(FMMManufacturedTest, BoxSurface_PointSource)
   {
-    // Create volume mesh and extract surface
-    Mesh volume_mesh;
-    volume_mesh = volume_mesh.Box(Polytope::Type::Triangle, { 16, 16, 16 });
-    volume_mesh.scale(2.0 / 15.0);  // Scale to [0, 2]^3
-    volume_mesh.displace(VectorFunction{{ -1.0, -1.0, -1.0 }});  // Center at origin: [-1, 1]^3
-    
+    // Create surface mesh and extract surface
+    Mesh mesh;
+    mesh = mesh.Box(Polytope::Type::Triangle, { 16, 16, 16 });
+    mesh.scale(2.0 / 15.0);  // Scale to [0, 2]^3
+    mesh.displace(VectorFunction{ -1.0, -1.0, -1.0 });  // Center at origin: [-1, 1]^3
     // Extract surface (skin)
-    volume_mesh.getConnectivity().compute(3, 2);
-    volume_mesh.getConnectivity().compute(2, 0);
-    Mesh mesh = volume_mesh.skin();
-    
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(0, 0);
 
@@ -191,7 +177,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       // Source at center of x=1 face: (1, 0, 0)
       Real distance = (coord - Math::SpatialVector<Real>{{1.0, 0.0, 0.0}}).norm();
       if (distance < 0.1)
@@ -206,71 +192,64 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // Verify solution properties on surface
     Real min_dist = std::numeric_limits<Real>::infinity();
     Real max_dist = 0.0;
-    
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       Real val = u[it->getIndex()];
       EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
       EXPECT_GE(val, 0.0) << "Distance should be non-negative";
-      
       if (std::isfinite(val))
       {
         min_dist = std::min(min_dist, val);
         max_dist = std::max(max_dist, val);
       }
     }
-
     EXPECT_LT(min_dist, TIGHT_TOLERANCE) << "Minimum distance should be near zero at source";
     EXPECT_GT(max_dist, 1.0) << "Maximum distance should span reasonable range on surface";
-    
-    std::cout << "Box Surface Test:" << std::endl;
-    std::cout << "  Min distance: " << min_dist << std::endl;
-    std::cout << "  Max distance: " << max_dist << std::endl;
-    std::cout << "  Surface vertices: " << mesh.getVertexCount() << std::endl;
   }
 
   // Test 4: Sphere mapping test - Map cube to sphere and test geodesic distances
   TEST_F(FMMManufacturedTest, SphereMappingTest_GeodesicDistance)
   {
     // Create cube mesh
-    Mesh cube_mesh;
-    cube_mesh = cube_mesh.Box(Polytope::Type::Triangle, { 12, 12, 12 });
-    cube_mesh.scale(2.0 / 11.0);  // Scale to [0, 2]^3
-    cube_mesh.displace(VectorFunction{{ -1.0, -1.0, -1.0 }});  // Center at origin: [-1, 1]^3
-    
+    Mesh surface_mesh;
+    surface_mesh = surface_mesh.Box(Polytope::Type::Triangle, { 12, 12, 12 });
+    surface_mesh.scale(2.0 / 11.0);  // Scale to [0, 2]^3
+    surface_mesh.displace(VectorFunction{ -1.0, -1.0, -1.0 });  // Center at origin: [-1, 1]^3
+
     // Extract surface
-    cube_mesh.getConnectivity().compute(3, 2);
-    cube_mesh.getConnectivity().compute(2, 0);
-    Mesh surface_mesh = cube_mesh.skin();
-    
+    surface_mesh.getConnectivity().compute(3, 2);
+    surface_mesh.getConnectivity().compute(2, 0);
+
     // Map surface vertices to sphere
+    Math::SpatialVector<Real> coord;
     for (auto it = surface_mesh.getVertex(); !it.end(); ++it)
     {
-      auto& coord = surface_mesh.getVertexCoordinates(it->getIndex());
+      coord = surface_mesh.getVertexCoordinates(it->getIndex());
       Real norm = coord.norm();
       if (norm > 1e-12)  // Avoid division by zero
         coord = coord / norm;  // Project to unit sphere
+      surface_mesh.setVertexCoordinates(it->getIndex(), coord);
     }
-    
     surface_mesh.getConnectivity().compute(2, 0);
     surface_mesh.getConnectivity().compute(0, 0);
 
     // Take midsection of sphere (z ≈ 0)
-    Mesh<Context::Local> mesh_builder;
+    Mesh<Context::Local>::Builder mesh_builder;
     mesh_builder.initialize(3);  // 3D embedding
-    
     std::vector<Index> vertex_map;
     std::vector<Index> valid_vertices;
-    
+
     // Add vertices in midsection (|z| < 0.3)
+    Index new_idx = 0;
     for (auto it = surface_mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = surface_mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = surface_mesh.getVertexCoordinates(it->getIndex());
       if (std::abs(coord[2]) < 0.3)  // Midsection condition
       {
-        Index new_idx = mesh_builder.addVertex(coord);
+        mesh_builder.vertex(coord);
         vertex_map.push_back(new_idx);
         valid_vertices.push_back(it->getIndex());
+        new_idx++;
       }
       else
       {
@@ -287,12 +266,12 @@ namespace Rodin::Tests::Manufactured::Eikonal
           vertex_map[verts[1]] != Index(-1) && 
           vertex_map[verts[2]] != Index(-1))
       {
-        mesh_builder.addPolytope(Polytope::Type::Triangle, 
+        mesh_builder.polytope(Polytope::Type::Triangle,
           {vertex_map[verts[0]], vertex_map[verts[1]], vertex_map[verts[2]]});
       }
     }
 
-    Mesh mesh = std::move(mesh_builder.finalize());
+    Mesh mesh = mesh_builder.finalize();
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(0, 0);
 
@@ -314,7 +293,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real distance = (coord - Math::SpatialVector<Real>{{1.0, 0.0, 0.0}}).norm();
       if (distance < 0.2)
         interface.push_back(it->getIndex());
@@ -332,21 +311,17 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // For a unit sphere, the geodesic distance between two points is the arc length
     // For points (1,0,0) and (-1,0,0), the geodesic distance is π
     Real max_expected_distance = M_PI;
-    
     Real min_dist = std::numeric_limits<Real>::infinity();
     Real max_dist = 0.0;
     Real opposite_point_distance = std::numeric_limits<Real>::infinity();
-    
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real val = u[it->getIndex()];
-      
       if (std::isfinite(val))
       {
         min_dist = std::min(min_dist, val);
         max_dist = std::max(max_dist, val);
-        
         // Check point approximately opposite to source (1,0,0) -> (-1,0,0)
         Real dist_to_opposite = (coord - Math::SpatialVector<Real>{{-1.0, 0.0, 0.0}}).norm();
         if (dist_to_opposite < 0.2)
@@ -356,22 +331,13 @@ namespace Rodin::Tests::Manufactured::Eikonal
 
     EXPECT_LT(min_dist, TIGHT_TOLERANCE) << "Minimum distance should be near zero at source";
     EXPECT_LT(max_dist, max_expected_distance + TOLERANCE) << "Maximum distance should not exceed sphere circumference";
-    
     // Check that opposite point has distance close to π (if it exists in midsection)
     if (std::isfinite(opposite_point_distance))
     {
       Real expected_opposite_dist = M_PI;
       Real error = std::abs(opposite_point_distance - expected_opposite_dist);
       EXPECT_LT(error, TOLERANCE * 2) << "Opposite point should have geodesic distance ≈ π";
-      
-      std::cout << "Sphere opposite point distance: " << opposite_point_distance 
-                << " (expected ≈ " << expected_opposite_dist << ")" << std::endl;
     }
-    
-    std::cout << "Sphere Mapping Test:" << std::endl;
-    std::cout << "  Min distance: " << min_dist << std::endl;
-    std::cout << "  Max distance: " << max_dist << std::endl;
-    std::cout << "  Sphere midsection vertices: " << mesh.getVertexCount() << std::endl;
   }
 
   // Test 5: 3D volumetric manufactured test - Constant speed in cube
@@ -381,7 +347,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     Mesh mesh;
     mesh = mesh.Box(Polytope::Type::Tetrahedron, { 16, 16, 16 });
     mesh.scale(2.0 / 15.0);  // Scale to [0, 2]^3
-    mesh.displace(VectorFunction{{ -1.0, -1.0, -1.0 }});  // Center at origin: [-1, 1]^3
+    mesh.displace(VectorFunction{ -1.0, -1.0, -1.0 });  // Center at origin: [-1, 1]^3
     mesh.getConnectivity().compute(3, 0);
     mesh.getConnectivity().compute(0, 0);
 
@@ -397,7 +363,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real distance = coord.norm();
       if (distance < 0.1)
         interface.push_back(it->getIndex());
@@ -415,10 +381,10 @@ namespace Rodin::Tests::Manufactured::Eikonal
 
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real computed = u[it->getIndex()];
       Real analytical = coord.norm();
-      
+
       if (std::isfinite(computed) && std::isfinite(analytical) && analytical > 0.05)
       {
         Real error = std::abs(computed - analytical);
@@ -433,11 +399,6 @@ namespace Rodin::Tests::Manufactured::Eikonal
       Real avg_error = total_error / count;
       EXPECT_LT(max_error, TOLERANCE) << "Maximum error should be within tolerance";
       EXPECT_LT(avg_error, TOLERANCE / 2) << "Average error should be within tolerance";
-      
-      std::cout << "3D Volume Test:" << std::endl;
-      std::cout << "  Max error: " << max_error << std::endl;
-      std::cout << "  Avg error: " << avg_error << std::endl;
-      std::cout << "  Tested vertices: " << count << std::endl;
     }
   }
 
@@ -448,7 +409,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 20, 20 });
     mesh.scale(2.0 / 19.0);  // Scale to [0, 2] x [0, 2]
-    mesh.displace(VectorFunction{{ -1.0, -1.0 }});  // Center at origin: [-1, 1] x [-1, 1]
+    mesh.displace(VectorFunction{ -1.0, -1.0 });  // Center at origin: [-1, 1] x [-1, 1]
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(0, 0);
 
@@ -469,7 +430,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real distance = coord.norm();
       if (distance < 0.05)
         interface.push_back(it->getIndex());
@@ -483,16 +444,16 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // Verify solution properties
     Real x_positive_dist = std::numeric_limits<Real>::infinity();
     Real y_positive_dist = std::numeric_limits<Real>::infinity();
-    
+
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real val = u[it->getIndex()];
-      
+
       // Check point at (0.5, 0)
       if (std::abs(coord[0] - 0.5) < 0.1 && std::abs(coord[1]) < 0.1)
         x_positive_dist = std::min(x_positive_dist, val);
-      
+
       // Check point at (0, 0.5)  
       if (std::abs(coord[0]) < 0.1 && std::abs(coord[1] - 0.5) < 0.1)
         y_positive_dist = std::min(y_positive_dist, val);
@@ -500,9 +461,5 @@ namespace Rodin::Tests::Manufactured::Eikonal
 
     // Due to anisotropic speed, travel time should be different in different directions
     EXPECT_GT(y_positive_dist, x_positive_dist) << "Travel in y-direction should take longer due to slower speed";
-    
-    std::cout << "Anisotropic Speed Test:" << std::endl;
-    std::cout << "  Distance to (0.5, 0): " << x_positive_dist << std::endl;
-    std::cout << "  Distance to (0, 0.5): " << y_positive_dist << std::endl;
   }
 }

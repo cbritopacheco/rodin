@@ -303,7 +303,7 @@ namespace Rodin::Geometry
   Eigen::Map<const Math::SpatialVector<Real>> Mesh<Context::Local>::getVertexCoordinates(Index idx) const
   {
     const auto size = static_cast<Eigen::Index>(getSpaceDimension());
-    return { getVertices().data() + getSpaceDimension() * idx, size };
+    return { m_vertices.data() + getSpaceDimension() * idx, size };
   }
 
   const FlatSet<Attribute>& Mesh<Context::Local>::getAttributes(size_t d) const

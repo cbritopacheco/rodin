@@ -7,8 +7,6 @@
 #include <gtest/gtest.h>
 #include <cmath>
 
-#include "Rodin/Geometry.h"
-#include "Rodin/Variational.h"
 #include "Rodin/Models/Eikonal/FMM.h"
 
 using namespace Rodin;
@@ -48,7 +46,7 @@ namespace Rodin::Tests::Unit
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real distance = (coord - Math::SpatialVector<Real>{{0.5, 0.5}}).norm();
       if (distance < 0.05)
         interface.push_back(it->getIndex());
@@ -66,10 +64,10 @@ namespace Rodin::Tests::Unit
 
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real dist_to_center = (coord - Math::SpatialVector<Real>{{0.5, 0.5}}).norm();
       Real dist_to_corner = (coord - Math::SpatialVector<Real>{{0.0, 0.0}}).norm();
-      
+
       if (dist_to_center < 0.1)
         center_val = std::min(center_val, u[it->getIndex()]);
       if (dist_to_corner < 0.1)
@@ -85,15 +83,13 @@ namespace Rodin::Tests::Unit
   TEST_F(FMMTest, SurfaceMesh_Box_Triangle)
   {
     // Create surface mesh using Box function
-    Mesh volume_mesh;
-    volume_mesh = volume_mesh.Box(Polytope::Type::Triangle, { 8, 8, 8 });
-    volume_mesh.scale(1.0 / 7.0);  // Scale to [0,1]^3
-    
+    Mesh mesh;
+    mesh = mesh.Box(Polytope::Type::Triangle, { 8, 8, 8 });
+    mesh.scale(1.0 / 7.0);  // Scale to [0,1]^3
+
     // Extract skin (surface)
-    volume_mesh.getConnectivity().compute(3, 2); // volume to face
-    volume_mesh.getConnectivity().compute(2, 0); // face to vertex
-    Mesh mesh = volume_mesh.skin();
-    
+    mesh.getConnectivity().compute(2, 0); // face to vertex
+
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(0, 0);
 
@@ -112,7 +108,7 @@ namespace Rodin::Tests::Unit
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real distance = (coord - Math::SpatialVector<Real>{{0.0, 0.0, 0.0}}).norm();
       if (distance < 0.1)
         interface.push_back(it->getIndex());
@@ -126,14 +122,14 @@ namespace Rodin::Tests::Unit
     // Verify solution properties
     Real min_dist = std::numeric_limits<Real>::infinity();
     Real max_dist = 0.0;
-    
+
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       Real val = u[it->getIndex()];
       EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
       EXPECT_FALSE(std::isinf(val)) << "Solution should be finite";
       EXPECT_GE(val, 0.0) << "Distance should be non-negative";
-      
+
       min_dist = std::min(min_dist, val);
       max_dist = std::max(max_dist, val);
     }
@@ -147,7 +143,7 @@ namespace Rodin::Tests::Unit
   {
     // Create 3D tetrahedral mesh
     Mesh mesh;
-    mesh = mesh.Box(Polytope::Type::Tetrahedron, { 8, 8, 8 });
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 8, 8, 8 });
     mesh.scale(1.0 / 7.0);  // Scale to [0,1]^3
     mesh.getConnectivity().compute(3, 0);
     mesh.getConnectivity().compute(0, 0);
@@ -193,10 +189,10 @@ namespace Rodin::Tests::Unit
 
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real geometric_dist_to_center = (coord - Math::SpatialVector<Real>{{0.5, 0.5, 0.5}}).norm();
       Real geometric_dist_to_corner = (coord - Math::SpatialVector<Real>{{0.0, 0.0, 0.0}}).norm();
-      
+
       if (geometric_dist_to_center < 0.1)
         center_distance = std::min(center_distance, u[it->getIndex()]);
       if (geometric_dist_to_corner < 0.1)
@@ -233,7 +229,7 @@ namespace Rodin::Tests::Unit
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+      const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real distance = (coord - Math::SpatialVector<Real>{{0.5, 0.5}}).norm();
       if (distance < 0.05)
         interface.push_back(it->getIndex());
@@ -274,15 +270,17 @@ namespace Rodin::Tests::Unit
 
     // Set multiple sources at corners
     std::vector<Index> interface;
-    std::vector<Math::SpatialVector<Real>> source_locations = {
-      {{0.2, 0.2}}, {{0.8, 0.8}}
+    std::vector<Math::SpatialVector<Real>> source_locations =
+    {
+      Math::SpatialVector<Real>{{0.2, 0.2}},
+      Math::SpatialVector<Real>{{0.8, 0.8}}
     };
 
     for (const auto& source : source_locations)
     {
       for (auto it = mesh.getVertex(); !it.end(); ++it)
       {
-        const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+        const auto coord = mesh.getVertexCoordinates(it->getIndex());
         Real distance = (coord - source).norm();
         if (distance < 0.1)
           interface.push_back(it->getIndex());
@@ -309,7 +307,7 @@ namespace Rodin::Tests::Unit
       Real min_nearby_dist = std::numeric_limits<Real>::infinity();
       for (auto it = mesh.getVertex(); !it.end(); ++it)
       {
-        const auto& coord = mesh.getVertexCoordinates(it->getIndex());
+        const auto coord = mesh.getVertexCoordinates(it->getIndex());
         Real geometric_dist = (coord - source).norm();
         if (geometric_dist < 0.15)
           min_nearby_dist = std::min(min_nearby_dist, u[it->getIndex()]);
@@ -339,20 +337,9 @@ namespace Rodin::Tests::Unit
     // Set source
     std::vector<Index> interface = {0};
     fmm.setInterface(std::move(interface));
-    
-    // Should not crash but may produce inf values
-    fmm.solve();
 
-    // Check that algorithm handles invalid speed gracefully
-    bool has_finite_values = false;
-    for (auto it = mesh.getVertex(); !it.end(); ++it)
-    {
-      Real val = u[it->getIndex()];
-      EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
-      if (std::isfinite(val))
-        has_finite_values = true;
-    }
-    // With negative speed, we may get all infinite values, which is acceptable
+    // Will cause assertion failure or exception
+    EXPECT_EXIT(fmm.solve();, ::testing::KilledBySignal(SIGABRT), ".*");
   }
 
   // Test 7: Empty interface handling
