@@ -70,10 +70,15 @@ namespace Rodin::Models::Eikonal
         : m_u(u), m_speed(std::forward<Callable>(speed))
       {}
 
-      template <class Container>
-      FMM& setInterface(Container&& seeds)
+      FMM& setInterface(const std::vector<Index>& seeds)
       {
-        m_interface.assign(std::begin(seeds), std::end(seeds));
+        m_interface = seeds;
+        return *this;
+      }
+
+      FMM& setInterface(std::vector<Index>&& seeds)
+      {
+        m_interface = std::move(seeds);
         return *this;
       }
 

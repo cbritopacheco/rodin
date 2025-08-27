@@ -62,13 +62,21 @@ int main(int, char**)
   // Example 2: Surface mesh with varying speed function
   std::cout << "\n--- Example 2: Surface Mesh with Varying Speed ---" << std::endl;
   {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 24, 24 });
-    mesh.scale(2.0 / 23.0);
-    mesh.displace(VectorFunction{ -1.0, -1.0 });
-    mesh.getConnectivity().compute(2, 0);
-    mesh.getConnectivity().compute(0, 0);
-    mesh.getConnectivity().compute(0, 1); // For edge-based computations
+    Mesh volume;
+    // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 24, 24 });
+    // mesh.scale(2.0 / 23.0);
+    // mesh.displace(VectorFunction{ -1.0, -1.0 });
+    volume.load("../resources/mmg/MechanicalPiece_1.mesh", IO::FileFormat::MEDIT);
+
+    volume.getConnectivity().compute(2, 3);
+    volume.getConnectivity().compute(2, 0);
+    volume.getConnectivity().compute(0, 0);
+    volume.getConnectivity().compute(0, 2);
+    volume.getConnectivity().compute(2, 1); // For edge-based computations
+    volume.getConnectivity().compute(0, 1); // For edge-based computations
+
+    Mesh mesh = volume.skin();
+    mesh.save("skin.mesh", IO::FileFormat::MEDIT);
 
     P1 vh(mesh);
     GridFunction u(vh);
@@ -85,13 +93,22 @@ int main(int, char**)
     Models::Eikonal::FMM fmm(u, varying_speed);
 
     // Set interface: corner point as source
-    std::vector<Index> interface;
-    for (auto it = mesh.getVertex(); !it.end(); ++it)
+    std::set<Index> s;
+    for (auto it = mesh.getFace(); !it.end(); ++it)
     {
-      const auto& coord = mesh.getVertexCoordinates(it->getIndex());
-      if (std::abs(coord.x() + 1.0) < 0.1 && std::abs(coord.y() + 1.0) < 0.1)
-        interface.push_back(it->getIndex());
+      if (it->getAttribute() == 118)
+      {
+        for (const auto& v : it->getVertices())
+          s.insert(v);
+      }
     }
+
+    std::vector<Index> interface;
+    interface.reserve(s.size());
+    for (const auto& v : s)
+      interface.push_back(v);
+
+    std::cout << "Interface size: " << interface.size() << std::endl;
 
     fmm.setInterface(std::move(interface));
     fmm.solve();
