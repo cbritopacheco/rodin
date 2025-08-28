@@ -54,7 +54,7 @@ namespace Rodin::Tests::Unit
 
     ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
 
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // Test that solution is reasonable
@@ -116,7 +116,7 @@ namespace Rodin::Tests::Unit
 
     ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
 
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // Verify solution properties
@@ -171,7 +171,7 @@ namespace Rodin::Tests::Unit
 
     ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
 
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // Verify solution properties
@@ -237,7 +237,7 @@ namespace Rodin::Tests::Unit
 
     ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
 
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // Verify solution is reasonable
@@ -289,7 +289,7 @@ namespace Rodin::Tests::Unit
 
     ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
 
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // Verify solution
@@ -336,7 +336,7 @@ namespace Rodin::Tests::Unit
 
     // Set source
     std::vector<Index> interface = {0};
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
 
     // Will cause assertion failure or exception
     EXPECT_EXIT(fmm.solve();, ::testing::KilledBySignal(SIGABRT), ".*");
@@ -361,7 +361,7 @@ namespace Rodin::Tests::Unit
 
     // Empty interface
     std::vector<Index> interface;
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // All values should remain infinite

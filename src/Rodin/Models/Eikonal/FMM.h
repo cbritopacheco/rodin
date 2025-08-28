@@ -68,15 +68,15 @@ namespace Rodin::Models::Eikonal
         : m_u(u), m_speed(std::forward<Callable>(speed))
       {}
 
-      FMM& setInterface(const std::vector<Index>& seeds)
+      FMM& setFront(const std::vector<Index>& seeds)
       {
-        m_interface = seeds;
+        m_seeds = seeds;
         return *this;
       }
 
-      FMM& setInterface(std::vector<Index>&& seeds)
+      FMM& setFront(std::vector<Index>&& seeds)
       {
-        m_interface = std::move(seeds);
+        m_seeds = std::move(seeds);
         return *this;
       }
 
@@ -99,7 +99,7 @@ namespace Rodin::Models::Eikonal
         PriorityQueue pq;
 
         // Seeds
-        for (Index s : m_interface)
+        for (Index s : m_seeds)
         {
           if (s >= nV)
             continue;
@@ -491,7 +491,7 @@ namespace Rodin::Models::Eikonal
       SpeedFunctionType m_speed;
 
       std::vector<Label> m_labels;
-      std::vector<Index> m_interface;
+      std::vector<Index> m_seeds;
   };
 
   template <class Solution, class SpeedFunction>

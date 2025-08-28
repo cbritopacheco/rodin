@@ -66,7 +66,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
       << "Interface should not be empty";
 
     Models::Eikonal::FMM fmm(u, speed);
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // Verify against analytical solution: u(x,y) = sqrt(x^2 + y^2)
@@ -123,7 +123,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
       << "Interface should not be empty";
 
     Models::Eikonal::FMM fmm(u, speed);
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // For radial speed s(r) = 1 + r, the analytical solution is:
@@ -195,7 +195,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Interface should not be empty";
 
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // Verify solution properties on surface
@@ -269,7 +269,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
 
     EXPECT_FALSE(interface.empty());
 
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // For a unit sphere, the geodesic distance between two points is the arc length
@@ -342,7 +342,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Interface should not be empty";
 
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // Verify against analytical solution: u(x,y,z) = sqrt(x^2 + y^2 + z^2)
@@ -408,7 +408,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Interface should not be empty";
 
-    fmm.setInterface(std::move(interface));
+    fmm.setFront(std::move(interface));
     fmm.solve();
 
     // Verify solution properties
