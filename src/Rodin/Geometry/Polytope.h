@@ -199,7 +199,7 @@ namespace Rodin::Geometry
               }
             }
             assert(false);
-            static thread_local const Math::SpatialPoint s_null;
+            static thread_local const Math::SpatialPoint s_null{{}};
             return s_null;
           }
 
