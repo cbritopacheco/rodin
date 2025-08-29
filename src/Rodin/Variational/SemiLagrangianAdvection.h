@@ -62,8 +62,8 @@ namespace Rodin::Variational
     public:
       using FESType = FES;
       using MeshType = typename FormLanguage::Traits<FES>::MeshType;
-      using GridFunctionType = GridFunction<FES, Math::Vector<ScalarType>>;
-      using VectorFieldType = GridFunction<FES, Math::Vector<ScalarType>>;
+      using GridFunctionType = GridFunction<FES>;
+      using VectorFieldType = GridFunction<FES>;
       using VectorType = Math::Vector<ScalarType>;
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
       using PointType = Geometry::Point;
