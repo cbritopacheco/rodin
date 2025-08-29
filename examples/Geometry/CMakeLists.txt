@@ -44,8 +44,8 @@ target_link_libraries(UniformGrid
   PUBLIC
   Rodin::Geometry)
 
-add_executable(UniformRefinement UniformRefinement.cpp)
-target_link_libraries(UniformRefinement
+add_executable(Box Box.cpp)
+target_link_libraries(Box
   PUBLIC
   Rodin::Geometry)
 

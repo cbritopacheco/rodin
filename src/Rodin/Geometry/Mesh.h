@@ -15,6 +15,7 @@
 #include <boost/serialization/access.hpp>
 
 #include "Rodin/Math.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
 #include "Rodin/Configure.h"
 #include "Rodin/Context/Local.h"
@@ -505,13 +506,16 @@ namespace Rodin::Geometry
   };
 
   /// Type alias for Mesh<Context::Local>
-  using LocalMesh = Mesh<Context::Local>;
+  using LocalMesh =
+    Mesh<Context::Local>;
 
   /// Index containing the indices of boundary cells.
-  using BoundaryIndex = IndexSet;
+  using BoundaryIndex =
+    IndexSet;
 
   /// Index containing the attribute numbers of the polytopes.
-  using AttributeIndex = PolytopeIndexed<Geometry::Attribute>;
+  using AttributeIndex =
+    PolytopeIndexed<Geometry::Attribute>;
 
   /// Index containing the transformations of the polytopes.
   using TransformationIndex =
@@ -529,8 +533,11 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
-      using Parent = MeshBase;
-      using Context = Context::Local;
+      using Context =
+        Context::Local;
+
+      using Parent =
+        MeshBase;
 
       /**
        * @brief Class used to build Mesh<Context::Local> instances.
@@ -613,7 +620,7 @@ namespace Rodin::Geometry
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(const Eigen::Map<const Math::Vector<Real>>& x);
+          Builder& vertex(Eigen::Map<const Math::SpatialPoint> x);
 
           /**
            * @brief Adds vertex with coordinates given by the vector.
@@ -729,10 +736,19 @@ namespace Rodin::Geometry
         return UniformGrid(g, shape);
       }
 
+      static Mesh Box(Polytope::Type g, std::initializer_list<size_t> l)
+      {
+        Array<size_t> shape(l.size());
+        std::copy(l.begin(), l.end(), shape.begin());
+        return Box(g, shape);
+      }
+
       /**
        * @brief Generates a uniform grid for a given geometry.
        */
       static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
+
+      static Mesh Box(Polytope::Type g, const Array<size_t>& shape);
 
       /**
       * @brief Constructs an empty mesh with no cells.
@@ -1104,13 +1120,13 @@ namespace Rodin::Geometry
         return m_connectivity;
       }
 
-      virtual Eigen::Map<const Math::SpatialVector<Real>> getVertexCoordinates(Index idx) const override;
+      virtual Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index idx) const override;
 
       virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 
       virtual Mesh& setVertexCoordinates(Index idx, Real xi, size_t i) override;
 
-      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords) override;
+      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialPoint& coords) override;
 
       virtual Mesh& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;

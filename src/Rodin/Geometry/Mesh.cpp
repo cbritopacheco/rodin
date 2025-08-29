@@ -303,7 +303,7 @@ namespace Rodin::Geometry
   Eigen::Map<const Math::SpatialVector<Real>> Mesh<Context::Local>::getVertexCoordinates(Index idx) const
   {
     const auto size = static_cast<Eigen::Index>(getSpaceDimension());
-    return { getVertices().data() + getSpaceDimension() * idx, size };
+    return { m_vertices.data() + getSpaceDimension() * idx, size };
   }
 
   const FlatSet<Attribute>& Mesh<Context::Local>::getAttributes(size_t d) const
@@ -645,6 +645,43 @@ namespace Rodin::Geometry
     return static_cast<const SubMesh<Context>&>(*this);
   }
 
+  Optional<Point> MeshBase::inclusion(const Point& p) const
+  {
+    const auto& polytope = p.getPolytope();
+    if (!polytope.getMesh().isSubMesh())
+    {
+      return {};
+    }
+    const auto& submesh = polytope.getMesh().asSubMesh();
+    const auto& ancestors = submesh.getAncestors();
+    const size_t d = polytope.getDimension();
+    Index i = polytope.getIndex();
+    i = submesh.getPolytopeMap(d).left.at(i);
+    auto it = ancestors.begin();
+    while (it != ancestors.end())
+    {
+      if (it->get() == *this)
+      {
+        return Point(*this->getPolytope(d, i), p.getReferenceCoordinates(), p.getPhysicalCoordinates());
+      }
+      else if (it->get().isSubMesh())
+      {
+        const auto& parentMesh = it->get().asSubMesh();
+        i = parentMesh.getPolytopeMap(d).left.at(i);
+      }
+      else
+      {
+        // Invalid inclusion.
+        // The SubMesh where the Point belongs to is not a descendant of this Mesh.
+        return {};
+      }
+      ++it;
+    }
+    // Invalid inclusion.
+    // The SubMesh where the Point belongs to is not a descendant of this Mesh.
+    return {};
+  }
+
   Mesh<Context::Local> Mesh<Context::Local>::UniformGrid(Polytope::Type g, const Array<size_t>& dimensions)
   {
     Builder build;
@@ -859,41 +896,488 @@ namespace Rodin::Geometry
     };
   }
 
-  Optional<Point> MeshBase::inclusion(const Point& p) const
+  Mesh<Context::Local>
+  Mesh<Context::Local>::Box(Polytope::Type faceType, const Array<size_t>& n)
   {
-    const auto& polytope = p.getPolytope();
-    if (!polytope.getMesh().isSubMesh())
+    const size_t dim  = Polytope::Traits(faceType).getDimension();
+    const size_t sdim = dim + 1;
+    assert(static_cast<size_t>(n.size()) == sdim);
+
+    Builder build;
+    build.initialize(sdim);
+
+    switch (faceType)
     {
-      return {};
+      // 0D in 1D: endpoints only
+      case Polytope::Type::Point:
+      {
+        const size_t Nx = n.coeff(0);
+        assert(Nx >= 1);
+        build.nodes(2);
+        build.vertex({ Real(0) });
+        build.vertex({ Real(Nx) });
+        return build.finalize();
+      }
+
+      // 1D in 2D: rectangle boundary only
+      case Polytope::Type::Segment:
+      {
+        const size_t Nx = n.coeff(0), Ny = n.coeff(1);
+        assert(Nx >= 1 && Ny >= 1);
+
+        build.nodes(2 * Nx + 2 * Ny);
+
+        for (size_t i = 0; i <= Nx; ++i) { build.vertex({ Real(i), Real(0) }); }
+        for (size_t j = 1; j <= Ny; ++j) { build.vertex({ Real(Nx), Real(j) }); }
+        for (size_t i = Nx; i-- > 0; )  { build.vertex({ Real(i),  Real(Ny) }); }
+        for (size_t j = Ny; j-- > 1; )  { build.vertex({ Real(0),  Real(j)  }); }
+
+        build.reserve(1, 2 * Nx + 2 * Ny);
+
+        // bottom
+        for (size_t i = 0; i < Nx; ++i)
+        {
+          build.polytope(Polytope::Type::Segment, { Index(i), Index(i + 1) });
+        }
+        // right
+        if (Ny >= 1)
+        {
+          build.polytope(Polytope::Type::Segment, { Index(Nx), Index(Nx + 1) });
+          for (size_t j = 0; j + 1 < Ny; ++j)
+          {
+            build.polytope(Polytope::Type::Segment, { Index(Nx + 1 + j), Index(Nx + 1 + j + 1) });
+          }
+        }
+        // top
+        if (Nx >= 1)
+        {
+          build.polytope(Polytope::Type::Segment, { Index(Nx + (Ny ? Ny : 0)), Index(Nx + Ny + 1) });
+          for (size_t t = 0; t + 1 < Nx; ++t)
+          {
+            build.polytope(Polytope::Type::Segment, { Index(Nx + Ny + 1 + t), Index(Nx + Ny + 1 + t + 1) });
+          }
+        }
+        // left
+        if (Ny >= 1)
+        {
+          if (Ny > 1)
+          {
+            build.polytope(Polytope::Type::Segment, { Index(Nx + Ny + (Nx ? Nx : 0)), Index(Nx + Ny + Nx + 1) });
+            for (size_t l = 0; l + 1 < Ny - 1; ++l)
+            {
+              build.polytope(Polytope::Type::Segment, { Index(Nx + Ny + Nx + 1 + l), Index(Nx + Ny + Nx + 1 + l + 1) });
+            }
+            build.polytope(Polytope::Type::Segment, { Index(Nx + Ny + Nx + (Ny - 1)), Index(0) });
+          }
+          else
+          {
+            build.polytope(Polytope::Type::Segment, { Index(Nx + Ny + (Nx ? Nx : 0)), Index(0) });
+          }
+        }
+
+        return build.finalize();
+      }
+
+      // 2D in 3D: triangle surface mesh
+      case Polytope::Type::Triangle:
+      {
+        const size_t Nx = n.coeff(0), Ny = n.coeff(1), Nz = n.coeff(2);
+        assert(Nx >= 1 && Ny >= 1 && Nz >= 1);
+
+        const size_t Lx = Nx + 1, Ly = Ny + 1;
+
+        // vertex counts by blocks
+        const size_t cntZ0 = Lx * Ly;                                  // z=0
+        const size_t cntZN = Lx * Ly;                                  // z=Nz
+        const size_t cntX0 = (Nz >= 2 ? (Nz - 1) * Ly : 0);            // x=0, k=1..Nz-1
+        const size_t cntXN = (Nz >= 2 ? (Nz - 1) * Ly : 0);            // x=Nx, k=1..Nz-1
+        const size_t cntY0 = (Nx >= 2 && Nz >= 2 ? (Nx - 1) * (Nz - 1) : 0); // y=0,  i=1..Nx-1,k=1..Nz-1
+        const size_t cntYN = cntY0;                                    // y=Ny
+
+        // offsets
+        const size_t offZ0 = 0;
+        const size_t offZN = offZ0 + cntZ0;
+        const size_t offX0 = offZN + cntZN;
+        const size_t offXN = offX0 + cntX0;
+        const size_t offY0 = offXN + cntXN;
+        const size_t offYN = offY0 + cntY0;
+
+        build.nodes(offYN + cntYN);
+
+        // emit vertices: z=0
+        for (size_t j = 0; j < Ly; ++j)
+        {
+          for (size_t i = 0; i < Lx; ++i)
+          {
+            build.vertex({ Real(i), Real(j), Real(0) });
+          }
+        }
+        // z=Nz
+        for (size_t j = 0; j < Ly; ++j)
+        {
+          for (size_t i = 0; i < Lx; ++i)
+          {
+            build.vertex({ Real(i), Real(j), Real(Nz) });
+          }
+        }
+        // x=0, k=1..Nz-1
+        if (Nz >= 2)
+        {
+          for (size_t k = 1; k <= Nz - 1; ++k)
+          {
+            for (size_t j = 0; j < Ly; ++j)
+            {
+              build.vertex({ Real(0), Real(j), Real(k) });
+            }
+          }
+        }
+        // x=Nx, k=1..Nz-1
+        if (Nz >= 2)
+        {
+          for (size_t k = 1; k <= Nz - 1; ++k)
+          {
+            for (size_t j = 0; j < Ly; ++j)
+            {
+              build.vertex({ Real(Nx), Real(j), Real(k) });
+            }
+          }
+        }
+        // y=0, i=1..Nx-1, k=1..Nz-1
+        if (Nx >= 2 && Nz >= 2)
+        {
+          for (size_t k = 1; k <= Nz - 1; ++k)
+          {
+            for (size_t i = 1; i <= Nx - 1; ++i)
+            {
+              build.vertex({ Real(i), Real(0), Real(k) });
+            }
+          }
+        }
+        // y=Ny, i=1..Nx-1, k=1..Nz-1
+        if (Nx >= 2 && Nz >= 2)
+        {
+          for (size_t k = 1; k <= Nz - 1; ++k)
+          {
+            for (size_t i = 1; i <= Nx - 1; ++i)
+            {
+              build.vertex({ Real(i), Real(Ny), Real(k) });
+            }
+          }
+        }
+
+        build.reserve(2, 4 * (Ny * Nz + Nx * Nz + Nx * Ny));
+
+        // z = 0  (-z outward) flip winding
+        for (size_t j = 0; j < Ny; ++j)
+        {
+          for (size_t i = 0; i < Nx; ++i)
+          {
+            Index a = Index(offZ0 + (i + 0) + (j + 0) * Lx);
+            Index b = Index(offZ0 + (i + 1) + (j + 0) * Lx);
+            Index c = Index(offZ0 + (i + 1) + (j + 1) * Lx);
+            Index d = Index(offZ0 + (i + 0) + (j + 1) * Lx);
+            build.polytope(Polytope::Type::Triangle, { a, c, b });
+            build.polytope(Polytope::Type::Triangle, { a, d, c });
+          }
+        }
+        // z = Nz (+z outward)
+        for (size_t j = 0; j < Ny; ++j)
+        {
+          for (size_t i = 0; i < Nx; ++i)
+          {
+            Index a = Index(offZN + (i + 0) + (j + 0) * Lx);
+            Index b = Index(offZN + (i + 0) + (j + 1) * Lx);
+            Index c = Index(offZN + (i + 1) + (j + 1) * Lx);
+            Index d = Index(offZN + (i + 1) + (j + 0) * Lx);
+            build.polytope(Polytope::Type::Triangle, { a, b, c });
+            build.polytope(Polytope::Type::Triangle, { a, c, d });
+          }
+        }
+        // x = 0  (-x outward)
+        if (Nz >= 1)
+        {
+          for (size_t j = 0; j < Ny; ++j)
+          {
+            for (size_t k = 0; k < Nz; ++k)
+            {
+              Index a = (k == 0)      ? Index(offZ0 + 0 + (j + 0) * Lx) : Index(offX0 + (k - 1) * Ly + (j + 0));
+              Index b = (k == 0)      ? Index(offZ0 + 0 + (j + 1) * Lx) : Index(offX0 + (k - 1) * Ly + (j + 1));
+              Index c = (k + 1 == Nz) ? Index(offZN + 0 + (j + 1) * Lx) : Index(offX0 + (k + 0) * Ly + (j + 1));
+              Index d = (k + 1 == Nz) ? Index(offZN + 0 + (j + 0) * Lx) : Index(offX0 + (k + 0) * Ly + (j + 0));
+              build.polytope(Polytope::Type::Triangle, { a, b, c });
+              build.polytope(Polytope::Type::Triangle, { a, c, d });
+            }
+          }
+        }
+        // x = Nx (+x outward)
+        if (Nz >= 1)
+        {
+          for (size_t j = 0; j < Ny; ++j)
+          {
+            for (size_t k = 0; k < Nz; ++k)
+            {
+              Index a = (k == 0)      ? Index(offZ0 + Nx + (j + 0) * Lx) : Index(offXN + (k - 1) * Ly + (j + 0));
+              Index b = (k + 1 == Nz) ? Index(offZN + Nx + (j + 0) * Lx) : Index(offXN + (k + 0) * Ly + (j + 0));
+              Index c = (k + 1 == Nz) ? Index(offZN + Nx + (j + 1) * Lx) : Index(offXN + (k + 0) * Ly + (j + 1));
+              Index d = (k == 0)      ? Index(offZ0 + Nx + (j + 1) * Lx) : Index(offXN + (k - 1) * Ly + (j + 1));
+              build.polytope(Polytope::Type::Triangle, { a, b, c });
+              build.polytope(Polytope::Type::Triangle, { a, c, d });
+            }
+          }
+        }
+        // y = 0  (-y outward)
+        if (Nz >= 1)
+        {
+          for (size_t i = 0; i < Nx; ++i)
+          {
+            for (size_t k = 0; k < Nz; ++k)
+            {
+              Index a = (k == 0)      ? Index(offZ0 + (i + 0) + 0 * Lx)
+                                      : (i == 0 ? Index(offX0 + (k - 1) * Ly + 0)
+                                                : (i == Nx ? Index(offXN + (k - 1) * Ly + 0)
+                                                           : Index(offY0 + (k - 1) * (Lx - 2) + (i - 1))));
+              Index b = (k + 1 == Nz) ? Index(offZN + (i + 0) + 0 * Lx)
+                                      : (i == 0 ? Index(offX0 + (k + 0) * Ly + 0)
+                                                : (i == Nx ? Index(offXN + (k + 0) * Ly + 0)
+                                                           : Index(offY0 + (k + 0) * (Lx - 2) + (i - 1))));
+              Index c = (k + 1 == Nz) ? Index(offZN + (i + 1) + 0 * Lx)
+                                      : (i + 1 == Nx ? Index(offXN + (k + 0) * Ly + 0)
+                                                     : Index(offY0 + (k + 0) * (Lx - 2) + (i + 0)));
+              Index d = (k == 0)      ? Index(offZ0 + (i + 1) + 0 * Lx)
+                                      : (i + 1 == Nx ? Index(offXN + (k - 1) * Ly + 0)
+                                                     : Index(offY0 + (k - 1) * (Lx - 2) + (i + 0)));
+              build.polytope(Polytope::Type::Triangle, { a, b, c });
+              build.polytope(Polytope::Type::Triangle, { a, c, d });
+            }
+          }
+        }
+        // y = Ny (+y outward)
+        if (Nz >= 1)
+        {
+          for (size_t i = 0; i < Nx; ++i)
+          {
+            for (size_t k = 0; k < Nz; ++k)
+            {
+              Index a = (k == 0)      ? Index(offZ0 + (i + 0) + Ny * Lx)
+                                      : (i == 0 ? Index(offX0 + (k - 1) * Ly + Ny)
+                                                : (i == Nx ? Index(offXN + (k - 1) * Ly + Ny)
+                                                           : Index(offYN + (k - 1) * (Lx - 2) + (i - 1))));
+              Index b = (k == 0)      ? Index(offZ0 + (i + 1) + Ny * Lx)
+                                      : (i + 1 == Nx ? Index(offXN + (k - 1) * Ly + Ny)
+                                                     : Index(offYN + (k - 1) * (Lx - 2) + (i + 0)));
+              Index c = (k + 1 == Nz) ? Index(offZN + (i + 1) + Ny * Lx)
+                                      : (i + 1 == Nx ? Index(offXN + (k + 0) * Ly + Ny)
+                                                     : Index(offYN + (k + 0) * (Lx - 2) + (i + 0)));
+              Index d = (k + 1 == Nz) ? Index(offZN + (i + 0) + Ny * Lx)
+                                      : (i == 0 ? Index(offX0 + (k + 0) * Ly + Ny)
+                                                : (i == Nx ? Index(offXN + (k + 0) * Ly + Ny)
+                                                           : Index(offYN + (k + 0) * (Lx - 2) + (i - 1))));
+              build.polytope(Polytope::Type::Triangle, { a, b, c });
+              build.polytope(Polytope::Type::Triangle, { a, c, d });
+            }
+          }
+        }
+
+        return build.finalize();
+      }
+
+      // 2D in 3D: quadrilateral surface mesh
+      case Polytope::Type::Quadrilateral:
+      {
+        const size_t Nx = n.coeff(0), Ny = n.coeff(1), Nz = n.coeff(2);
+        assert(Nx >= 1 && Ny >= 1 && Nz >= 1);
+
+        const size_t Lx = Nx + 1, Ly = Ny + 1;
+
+        // vertex counts
+        const size_t cntZ0 = Lx * Ly;
+        const size_t cntZN = Lx * Ly;
+        const size_t cntX0 = (Nz >= 2 ? (Nz - 1) * Ly : 0);
+        const size_t cntXN = (Nz >= 2 ? (Nz - 1) * Ly : 0);
+        const size_t cntY0 = (Nx >= 2 && Nz >= 2 ? (Nx - 1) * (Nz - 1) : 0);
+        const size_t cntYN = cntY0;
+
+        // offsets
+        const size_t offZ0 = 0;
+        const size_t offZN = offZ0 + cntZ0;
+        const size_t offX0 = offZN + cntZN;
+        const size_t offXN = offX0 + cntX0;
+        const size_t offY0 = offXN + cntXN;
+        const size_t offYN = offY0 + cntY0;
+
+        build.nodes(offYN + cntYN);
+
+        // emit vertices
+        for (size_t j = 0; j < Ly; ++j)
+        {
+          for (size_t i = 0; i < Lx; ++i)
+          {
+            build.vertex({ Real(i), Real(j), Real(0) });
+          }
+        }
+        for (size_t j = 0; j < Ly; ++j)
+        {
+          for (size_t i = 0; i < Lx; ++i)
+          {
+            build.vertex({ Real(i), Real(j), Real(Nz) });
+          }
+        }
+        if (Nz >= 2)
+        {
+          for (size_t k = 1; k <= Nz - 1; ++k)
+          {
+            for (size_t j = 0; j < Ly; ++j)
+            {
+              build.vertex({ Real(0), Real(j), Real(k) });
+            }
+          }
+        }
+        if (Nz >= 2)
+        {
+          for (size_t k = 1; k <= Nz - 1; ++k)
+          {
+            for (size_t j = 0; j < Ly; ++j)
+            {
+              build.vertex({ Real(Nx), Real(j), Real(k) });
+            }
+          }
+        }
+        if (Nx >= 2 && Nz >= 2)
+        {
+          for (size_t k = 1; k <= Nz - 1; ++k)
+          {
+            for (size_t i = 1; i <= Nx - 1; ++i)
+            {
+              build.vertex({ Real(i), Real(0), Real(k) });
+            }
+          }
+        }
+        if (Nx >= 2 && Nz >= 2)
+        {
+          for (size_t k = 1; k <= Nz - 1; ++k)
+          {
+            for (size_t i = 1; i <= Nx - 1; ++i)
+            {
+              build.vertex({ Real(i), Real(Ny), Real(k) });
+            }
+          }
+        }
+
+        build.reserve(2, 2 * (Ny * Nz + Nx * Nz + Nx * Ny));
+
+        // z = 0  (−z outward) order (0,0)(1,0)(0,1)(1,1)
+        for (size_t j = 0; j < Ny; ++j)
+        {
+          for (size_t i = 0; i < Nx; ++i)
+          {
+            build.polytope(Polytope::Type::Quadrilateral, {
+              Index(offZ0 + (i + 0) + (j + 0) * Lx),
+              Index(offZ0 + (i + 1) + (j + 0) * Lx),
+              Index(offZ0 + (i + 0) + (j + 1) * Lx),
+              Index(offZ0 + (i + 1) + (j + 1) * Lx)
+            });
+          }
+        }
+
+        // z = Nz (+z outward) order (0,0)(0,1)(1,0)(1,1)
+        for (size_t j = 0; j < Ny; ++j)
+        {
+          for (size_t i = 0; i < Nx; ++i)
+          {
+            build.polytope(Polytope::Type::Quadrilateral, {
+              Index(offZN + (i + 0) + (j + 0) * Lx),
+              Index(offZN + (i + 0) + (j + 1) * Lx),
+              Index(offZN + (i + 1) + (j + 0) * Lx),
+              Index(offZN + (i + 1) + (j + 1) * Lx)
+            });
+          }
+        }
+
+        // x = 0  (−x outward) param (y,z): (0,0)(1,0)(0,1)(1,1)
+        for (size_t j = 0; j < Ny; ++j)
+        {
+          for (size_t k = 0; k < Nz; ++k)
+          {
+            build.polytope(Polytope::Type::Quadrilateral, {
+              Index((k == 0)      ? (offZ0 + 0 + (j + 0) * Lx) : (offX0 + (k - 1) * Ly + (j + 0))),
+              Index((k == 0)      ? (offZ0 + 0 + (j + 1) * Lx) : (offX0 + (k - 1) * Ly + (j + 1))),
+              Index((k + 1 == Nz) ? (offZN + 0 + (j + 0) * Lx) : (offX0 + (k + 0) * Ly + (j + 0))),
+              Index((k + 1 == Nz) ? (offZN + 0 + (j + 1) * Lx) : (offX0 + (k + 0) * Ly + (j + 1)))
+            });
+          }
+        }
+
+        // x = Nx (+x outward) param (y,z): (0,0)(1,0)(0,1)(1,1)
+        for (size_t j = 0; j < Ny; ++j)
+        {
+          for (size_t k = 0; k < Nz; ++k)
+          {
+            build.polytope(Polytope::Type::Quadrilateral, {
+              Index((k == 0)      ? (offZ0 + Nx + (j + 0) * Lx) : (offXN + (k - 1) * Ly + (j + 0))),
+              Index((k + 1 == Nz) ? (offZN + Nx + (j + 0) * Lx) : (offXN + (k + 0) * Ly + (j + 0))),
+              Index((k == 0)      ? (offZ0 + Nx + (j + 1) * Lx) : (offXN + (k - 1) * Ly + (j + 1))),
+              Index((k + 1 == Nz) ? (offZN + Nx + (j + 1) * Lx) : (offXN + (k + 0) * Ly + (j + 1)))
+            });
+          }
+        }
+
+        // y = 0  (−y outward) param (x,z): (0,0)(1,0)(0,1)(1,1)
+        for (size_t i = 0; i < Nx; ++i)
+        {
+          for (size_t k = 0; k < Nz; ++k)
+          {
+            build.polytope(Polytope::Type::Quadrilateral, {
+              Index((k == 0)      ? (offZ0 + (i + 0) + 0 * Lx)
+                                   : (i == 0 ? (offX0 + (k - 1) * Ly + 0)
+                                             : (i == Nx ? (offXN + (k - 1) * Ly + 0)
+                                                        : (offY0 + (k - 1) * (Lx - 2) + (i - 1))))),
+              Index((k == 0)      ? (offZ0 + (i + 1) + 0 * Lx)
+                                   : (i + 1 == Nx ? (offXN + (k - 1) * Ly + 0)
+                                                  : (offY0 + (k - 1) * (Lx - 2) + (i + 0)))),
+              Index((k + 1 == Nz) ? (offZN + (i + 0) + 0 * Lx)
+                                   : (i == 0 ? (offX0 + (k + 0) * Ly + 0)
+                                             : (i == Nx ? (offXN + (k + 0) * Ly + 0)
+                                                        : (offY0 + (k + 0) * (Lx - 2) + (i - 1))))),
+              Index((k + 1 == Nz) ? (offZN + (i + 1) + 0 * Lx)
+                                   : (i + 1 == Nx ? (offXN + (k + 0) * Ly + 0)
+                                                  : (offY0 + (k + 0) * (Lx - 2) + (i + 0))))
+            });
+          }
+        }
+
+        // y = Ny (+y outward) param (x,z): (0,0)(1,0)(0,1)(1,1)
+        for (size_t i = 0; i < Nx; ++i)
+        {
+          for (size_t k = 0; k < Nz; ++k)
+          {
+            build.polytope(Polytope::Type::Quadrilateral, {
+              Index((k == 0)      ? (offZ0 + (i + 0) + Ny * Lx)
+                                   : (i == 0 ? (offX0 + (k - 1) * Ly + Ny)
+                                             : (i == Nx ? (offXN + (k - 1) * Ly + Ny)
+                                                        : (offYN + (k - 1) * (Lx - 2) + (i - 1))))),
+              Index((k == 0)      ? (offZ0 + (i + 1) + Ny * Lx)
+                                   : (i + 1 == Nx ? (offXN + (k - 1) * Ly + Ny)
+                                                  : (offYN + (k - 1) * (Lx - 2) + (i + 0)))),
+              Index((k + 1 == Nz) ? (offZN + (i + 0) + Ny * Lx)
+                                   : (i == 0 ? (offX0 + (k + 0) * Ly + Ny)
+                                             : (i == Nx ? (offXN + (k + 0) * Ly + Ny)
+                                                        : (offYN + (k + 0) * (Lx - 2) + (i - 1))))),
+              Index((k + 1 == Nz) ? (offZN + (i + 1) + Ny * Lx)
+                                   : (i + 1 == Nx ? (offXN + (k + 0) * Ly + Ny)
+                                                  : (offYN + (k + 0) * (Lx - 2) + (i + 0))))
+            });
+          }
+        }
+
+        return build.finalize();
+      }
+
+      default:
+      {
+        assert(false && "Unsupported face type for Box");
+        return build.nodes(0).finalize();
+      }
     }
-    const auto& submesh = polytope.getMesh().asSubMesh();
-    const auto& ancestors = submesh.getAncestors();
-    const size_t d = polytope.getDimension();
-    Index i = polytope.getIndex();
-    i = submesh.getPolytopeMap(d).left.at(i);
-    auto it = ancestors.begin();
-    while (it != ancestors.end())
-    {
-      if (it->get() == *this)
-      {
-        return Point(*this->getPolytope(d, i), p.getReferenceCoordinates(), p.getPhysicalCoordinates());
-      }
-      else if (it->get().isSubMesh())
-      {
-        const auto& parentMesh = it->get().asSubMesh();
-        i = parentMesh.getPolytopeMap(d).left.at(i);
-      }
-      else
-      {
-        // Invalid inclusion.
-        // The SubMesh where the Point belongs to is not a descendant of this Mesh.
-        return {};
-      }
-      ++it;
-    }
-    // Invalid inclusion.
-    // The SubMesh where the Point belongs to is not a descendant of this Mesh.
-    return {};
   }
 }
 

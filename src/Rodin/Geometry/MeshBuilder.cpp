@@ -7,6 +7,7 @@
 #include "Rodin/Alert.h"
 
 #include "Mesh.h"
+#include "Rodin/Math/Vector.h"
 
 namespace Rodin::Geometry
 {
@@ -54,7 +55,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::vertex(const Eigen::Map<const Math::Vector<Real>>& x)
+  Mesh<Context::Local>::Builder::vertex(Eigen::Map<const Math::SpatialPoint> x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));

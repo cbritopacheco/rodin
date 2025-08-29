@@ -172,11 +172,6 @@ if (RODIN_BUILD_SRC)
   add_subdirectory(third-party/eigen EXCLUDE_FROM_ALL)
   unset(BUILD_TESTING)
 
-  find_package (Eigen3 3.3 REQUIRED NO_MODULE
-    HINTS
-    "${PROJECT_BINARY_DIR}/third-party/eigen"
-    "${PROJECT_BINARY_DIR}/third-party/eigen/cmake")
-
   # ---- Spectra ----
   message(STATUS "Configuring Spectra...")
   set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -185,8 +180,6 @@ if (RODIN_BUILD_SRC)
   list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
   add_subdirectory(third-party/spectra EXCLUDE_FROM_ALL)
   unset (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT)
-
-  find_package (Spectra 1.0.1 REQUIRED)
 
   if (RODIN_WITH_PLOT)
     # ---- Magnum ----
