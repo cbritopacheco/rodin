@@ -66,8 +66,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
       << "Interface should not be empty";
 
     Models::Eikonal::FMM fmm(u, speed);
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify against analytical solution: u(x,y) = sqrt(x^2 + y^2)
     Real max_error = 0.0;
@@ -123,8 +122,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
       << "Interface should not be empty";
 
     Models::Eikonal::FMM fmm(u, speed);
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // For radial speed s(r) = 1 + r, the analytical solution is:
     // u(r) = ln(1 + r) (for small r approximation)
@@ -195,8 +193,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify solution properties on surface
     Real min_dist = std::numeric_limits<Real>::infinity();
@@ -269,8 +266,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
 
     EXPECT_FALSE(interface.empty());
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // For a unit sphere, the geodesic distance between two points is the arc length
     // For points (1,0,0) and (-1,0,0), the geodesic distance is π
@@ -342,8 +338,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify against analytical solution: u(x,y,z) = sqrt(x^2 + y^2 + z^2)
     Real total_error = 0.0;
@@ -408,8 +403,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify solution properties
     Real x_positive_dist = std::numeric_limits<Real>::infinity();
@@ -466,8 +460,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Line interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // For a line source along the x-axis, the distance function should be:
     // u(x,y) = |y| for points near the line
@@ -544,8 +537,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Circular ring interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // For a circular ring source, the analytical solution is:
     // u(r) = |r - ring_radius| where r is distance from origin
@@ -638,8 +630,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Boundary interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Analytical solution: u(x,y) = x (distance from left boundary)
     Real total_error = 0.0;
@@ -724,8 +715,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Interior square interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Analytical solution: distance to the nearest point on the square boundary
     Real total_error = 0.0;
@@ -811,8 +801,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Left boundary interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify that travel times are different in different layers
     Real left_travel_time = std::numeric_limits<Real>::infinity();

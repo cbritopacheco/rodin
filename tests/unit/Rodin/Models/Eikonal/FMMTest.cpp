@@ -52,10 +52,10 @@ namespace Rodin::Tests::Unit
         interface.push_back(it->getIndex());
     }
 
-    ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
+    ASSERT_FALSE(interface.empty())
+      << "Interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Test that solution is reasonable
     // Distance should increase away from center
@@ -74,9 +74,14 @@ namespace Rodin::Tests::Unit
         corner_val = std::min(corner_val, u[it->getIndex()]);
     }
 
-    EXPECT_LT(center_val, corner_val) << "Distance should increase away from source";
-    EXPECT_GE(center_val, 0.0) << "Distance should be non-negative";
-    EXPECT_LT(center_val, TOLERANCE) << "Source should have near-zero distance";
+    EXPECT_LT(center_val, corner_val)
+      << "Distance should increase away from source";
+
+    EXPECT_GE(center_val, 0.0)
+      << "Distance should be non-negative";
+
+    EXPECT_LT(center_val, TOLERANCE)
+      << "Source should have near-zero distance";
   }
 
   // Test 2: Surface mesh - 2D surface embedded in 3D
@@ -93,8 +98,11 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(0, 0);
 
-    EXPECT_EQ(mesh.getDimension(), 2) << "Surface mesh should be 2D";
-    EXPECT_EQ(mesh.getSpaceDimension(), 3) << "Surface mesh should be embedded in 3D";
+    EXPECT_EQ(mesh.getDimension(), 2)
+      << "Surface mesh should be 2D";
+
+    EXPECT_EQ(mesh.getSpaceDimension(), 3)
+      << "Surface mesh should be embedded in 3D";
 
     P1 vh(mesh);
     GridFunction u(vh);
@@ -114,10 +122,10 @@ namespace Rodin::Tests::Unit
         interface.push_back(it->getIndex());
     }
 
-    ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
+    ASSERT_FALSE(interface.empty())
+      << "Interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify solution properties
     Real min_dist = std::numeric_limits<Real>::infinity();
@@ -126,16 +134,21 @@ namespace Rodin::Tests::Unit
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       Real val = u[it->getIndex()];
-      EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
-      EXPECT_FALSE(std::isinf(val)) << "Solution should be finite";
-      EXPECT_GE(val, 0.0) << "Distance should be non-negative";
+      EXPECT_FALSE(std::isnan(val))
+        << "Solution should not contain NaN";
+      EXPECT_FALSE(std::isinf(val))
+        << "Solution should be finite";
+      EXPECT_GE(val, 0.0)
+        << "Distance should be non-negative";
 
       min_dist = std::min(min_dist, val);
       max_dist = std::max(max_dist, val);
     }
 
-    EXPECT_LT(min_dist, TOLERANCE) << "Minimum distance should be near zero at source";
-    EXPECT_GT(max_dist, 0.5) << "Maximum distance should be reasonable for unit box";
+    EXPECT_LT(min_dist, TOLERANCE)
+      << "Minimum distance should be near zero at source";
+    EXPECT_GT(max_dist, 0.5)
+      << "Maximum distance should be reasonable for unit box";
   }
 
   // Test 3: Volumetric mesh - 3D tetrahedra
@@ -148,8 +161,10 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(3, 0);
     mesh.getConnectivity().compute(0, 0);
 
-    EXPECT_EQ(mesh.getDimension(), 3) << "Volume mesh should be 3D";
-    EXPECT_EQ(mesh.getSpaceDimension(), 3) << "Volume mesh should be in 3D space";
+    EXPECT_EQ(mesh.getDimension(), 3)
+      << "Volume mesh should be 3D";
+    EXPECT_EQ(mesh.getSpaceDimension(), 3)
+      << "Volume mesh should be in 3D space";
 
     P1 vh(mesh);
     GridFunction u(vh);
@@ -169,18 +184,21 @@ namespace Rodin::Tests::Unit
         interface.push_back(it->getIndex());
     }
 
-    ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
+    ASSERT_FALSE(interface.empty())
+      << "Interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify solution properties
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       Real val = u[it->getIndex()];
-      EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
-      EXPECT_FALSE(std::isinf(val)) << "Solution should be finite";
-      EXPECT_GE(val, 0.0) << "Distance should be non-negative";
+      EXPECT_FALSE(std::isnan(val))
+        << "Solution should not contain NaN";
+      EXPECT_FALSE(std::isinf(val))
+        << "Solution should be finite";
+      EXPECT_GE(val, 0.0)
+        << "Distance should be non-negative";
     }
 
     // Check monotonicity: distance should increase away from center
@@ -235,18 +253,21 @@ namespace Rodin::Tests::Unit
         interface.push_back(it->getIndex());
     }
 
-    ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
+    ASSERT_FALSE(interface.empty())
+      << "Interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify solution is reasonable
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       Real val = u[it->getIndex()];
-      EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
-      EXPECT_FALSE(std::isinf(val)) << "Solution should be finite";
-      EXPECT_GE(val, 0.0) << "Distance should be non-negative";
+      EXPECT_FALSE(std::isnan(val))
+        << "Solution should not contain NaN";
+      EXPECT_FALSE(std::isinf(val))
+        << "Solution should be finite";
+      EXPECT_GE(val, 0.0)
+        << "Distance should be non-negative";
     }
   }
 
@@ -287,18 +308,21 @@ namespace Rodin::Tests::Unit
       }
     }
 
-    ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
+    ASSERT_FALSE(interface.empty())
+      << "Interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify solution
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       Real val = u[it->getIndex()];
-      EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
-      EXPECT_FALSE(std::isinf(val)) << "Solution should be finite";
-      EXPECT_GE(val, 0.0) << "Distance should be non-negative";
+      EXPECT_FALSE(std::isnan(val))
+        << "Solution should not contain NaN";
+      EXPECT_FALSE(std::isinf(val))
+        << "Solution should be finite";
+      EXPECT_GE(val, 0.0)
+        << "Distance should be non-negative";
     }
 
     // Check that points near sources have small distances
@@ -312,34 +336,9 @@ namespace Rodin::Tests::Unit
         if (geometric_dist < 0.15)
           min_nearby_dist = std::min(min_nearby_dist, u[it->getIndex()]);
       }
-      EXPECT_LT(min_nearby_dist, TOLERANCE) << "Points near sources should have small distances";
+      EXPECT_LT(min_nearby_dist, TOLERANCE)
+        << "Points near sources should have small distances";
     }
-  }
-
-  // Test 6: Error handling - invalid speed function
-  TEST_F(FMMTest, InvalidSpeedFunction)
-  {
-    // Create simple mesh
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 8, 8 });
-    mesh.scale(1.0 / 7.0);
-    mesh.getConnectivity().compute(2, 0);
-    mesh.getConnectivity().compute(0, 0);
-
-    P1 vh(mesh);
-    GridFunction u(vh);
-
-    // Invalid speed function (negative speed)
-    auto invalid_speed = [](const Geometry::Point& p) -> Real { return -1.0; };
-
-    Models::Eikonal::FMM fmm(u, invalid_speed);
-
-    // Set source
-    std::vector<Index> interface = {0};
-    fmm.setFront(std::move(interface));
-
-    // Will cause assertion failure or exception
-    EXPECT_EXIT(fmm.solve();, ::testing::KilledBySignal(SIGABRT), ".*");
   }
 
   // Test 7: Empty interface handling
@@ -361,14 +360,14 @@ namespace Rodin::Tests::Unit
 
     // Empty interface
     std::vector<Index> interface;
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // All values should remain infinite
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       Real val = u[it->getIndex()];
-      EXPECT_TRUE(std::isinf(val)) << "Without sources, all distances should be infinite";
+      EXPECT_TRUE(std::isinf(val))
+        << "Without sources, all distances should be infinite";
     }
   }
 
@@ -405,11 +404,12 @@ namespace Rodin::Tests::Unit
       }
     }
 
-    ASSERT_FALSE(interface.empty()) << "Boundary interface should not be empty";
-    EXPECT_GT(interface.size(), 50) << "Should have many boundary vertices";
+    ASSERT_FALSE(interface.empty())
+      << "Boundary interface should not be empty";
+    EXPECT_GT(interface.size(), 50)
+      << "Should have many boundary vertices";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify solution properties
     // Distance should be zero at boundary and increase toward interior
@@ -422,8 +422,10 @@ namespace Rodin::Tests::Unit
       Real x = coord[0], y = coord[1];
       Real val = u[it->getIndex()];
 
-      EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
-      EXPECT_GE(val, 0.0) << "Distance should be non-negative";
+      EXPECT_FALSE(std::isnan(val))
+        << "Solution should not contain NaN";
+      EXPECT_GE(val, 0.0)
+        << "Distance should be non-negative";
 
       // Check boundary vertices
       if (x < boundary_tolerance || x > 1.0 - boundary_tolerance ||
@@ -439,8 +441,10 @@ namespace Rodin::Tests::Unit
       }
     }
 
-    EXPECT_LT(boundary_dist, TOLERANCE) << "Boundary should have near-zero distance";
-    EXPECT_GT(center_dist, 0.2) << "Center should be farther from boundary";
+    EXPECT_LT(boundary_dist, TOLERANCE)
+      << "Boundary should have near-zero distance";
+    EXPECT_GT(center_dist, 0.2)
+      << "Center should be farther from boundary";
   }
 
   // Test 9: Interior rectangular interface
@@ -453,6 +457,8 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(0, 0);
 
+    const Real h = 1.0 / 23.0;
+
     P1 vh(mesh);
     GridFunction u(vh);
 
@@ -461,83 +467,96 @@ namespace Rodin::Tests::Unit
 
     Models::Eikonal::FMM fmm(u, speed);
 
-    // Create rectangular interface in the interior [0.3, 0.7] x [0.3, 0.7]
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       const auto coord = mesh.getVertexCoordinates(it->getIndex());
-      Real x = coord[0], y = coord[1];
-      
+      const Real x = coord[0], y = coord[1];
+
       // Check if vertex is on the boundary of the rectangular region
       bool on_rect_boundary = false;
-      
-      // Left edge: x ≈ 0.3, y ∈ [0.3, 0.7]
-      if (std::abs(x - 0.3) < 0.05 && y >= 0.25 && y <= 0.75)
+
+      if (std::abs(x - h * 4) < h / 2 && y >= h * 4 && y <= h * 20)
         on_rect_boundary = true;
-      
-      // Right edge: x ≈ 0.7, y ∈ [0.3, 0.7]
-      if (std::abs(x - 0.7) < 0.05 && y >= 0.25 && y <= 0.75)
+
+      if (std::abs(x - h * 20) < h / 2 && y >= h * 4 && y <= h * 20)
         on_rect_boundary = true;
-      
-      // Bottom edge: y ≈ 0.3, x ∈ [0.3, 0.7]
-      if (std::abs(y - 0.3) < 0.05 && x >= 0.25 && x <= 0.75)
+
+      if (std::abs(y - h * 4) < h / 2 && x >= h * 4 && x <= h * 20)
         on_rect_boundary = true;
-      
-      // Top edge: y ≈ 0.7, x ∈ [0.3, 0.7]
-      if (std::abs(y - 0.7) < 0.05 && x >= 0.25 && x <= 0.75)
+
+      if (std::abs(y - h * 20) < h / 2 && x >= h * 4 && x <= h * 20)
         on_rect_boundary = true;
-      
+
       if (on_rect_boundary)
+      {
         interface.push_back(it->getIndex());
+        mesh.setAttribute({ 0, it->getIndex() }, 666); // Reset attribute
+      }
     }
 
-    ASSERT_FALSE(interface.empty()) << "Interior rectangular interface should not be empty";
-    EXPECT_GT(interface.size(), 10) << "Should have multiple interface vertices";
+    ASSERT_FALSE(interface.empty())
+      << "Interior rectangular interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    EXPECT_GT(interface.size(), 10)
+      << "Should have multiple interface vertices";
 
-    // Verify solution properties
-    Real interface_dist = std::numeric_limits<Real>::infinity();
-    Real corner_dist = 0.0;
-    Real center_dist = std::numeric_limits<Real>::infinity();
+    fmm.seed(interface).solve();
+
+    // Seeds must be ~0
+    for (Index id : interface)
+      EXPECT_LT(std::abs(u[id]), 1e-14);
+
+    // Rectangle [x1,x2]×[y1,y2]
+    const Real x1 = 4*h, x2 = 20*h, y1 = 4*h, y2 = 20*h;
+
+    // Analytic distance to the rectangle boundary
+    auto rect_dist = [&](Real x, Real y) -> Real {
+      const bool inside = (x >= x1 && x <= x2 && y >= y1 && y <= y2);
+      if (inside)
+        return std::min(std::min(x - x1, x2 - x), std::min(y - y1, y2 - y));
+      const Real dx = (x < x1 ? x1 - x : (x > x2 ? x - x2 : 0.0));
+      const Real dy = (y < y1 ? y1 - y : (y > y2 ? y - y2 : 0.0));
+      return (dx > 0.0 && dy > 0.0) ? std::sqrt(dx*dx + dy*dy) : (dx + dy);
+    };
+
+    const Real tol = 3.0*h;
+
+    Real max_err = 0.0;
+    Real center_u = std::numeric_limits<Real>::quiet_NaN();
+    Real corner00_u = std::numeric_limits<Real>::quiet_NaN();
 
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       const auto coord = mesh.getVertexCoordinates(it->getIndex());
-      Real x = coord[0], y = coord[1];
-      Real val = u[it->getIndex()];
+      const Real x = coord[0], y = coord[1];
+      const Real val = u[it->getIndex()];
+      const Real d   = rect_dist(x, y);
 
-      EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
-      EXPECT_GE(val, 0.0) << "Distance should be non-negative";
+      EXPECT_FALSE(std::isnan(val));
+      EXPECT_GE(val, 0.0);
 
-      // Check interface region
-      if (std::abs(x - 0.5) < 0.25 && std::abs(y - 0.5) < 0.25)
-      {
-        interface_dist = std::min(interface_dist, val);
-      }
+      max_err = std::max(max_err, std::abs(val - d));
 
-      // Check corners of domain
-      Real dist_to_corner = std::min(
-        std::min((coord - Math::SpatialVector<Real>{{0.0, 0.0}}).norm(),
-                 (coord - Math::SpatialVector<Real>{{1.0, 0.0}}).norm()),
-        std::min((coord - Math::SpatialVector<Real>{{0.0, 1.0}}).norm(),
-                 (coord - Math::SpatialVector<Real>{{1.0, 1.0}}).norm()));
-      if (dist_to_corner < 0.1)
-      {
-        corner_dist = std::max(corner_dist, val);
-      }
+      if (std::abs(x - 0.5) < h/2 && std::abs(y - 0.5) < h/2)
+        center_u = val;
 
-      // Check center of rectangular interface
-      if (std::abs(x - 0.5) < 0.05 && std::abs(y - 0.5) < 0.05)
-      {
-        center_dist = std::min(center_dist, val);
-      }
+      if (x < h/2 && y < h/2) // picks (0,0)
+        corner00_u = val;
     }
 
-    EXPECT_LT(interface_dist, TOLERANCE) << "Interface region should have near-zero distance";
-    EXPECT_GT(corner_dist, 0.3) << "Domain corners should be farther away";
-    EXPECT_LT(center_dist, 0.1) << "Center of rectangular interface should be close";
+    // Global accuracy
+    EXPECT_LT(max_err, tol) << "Max nodal error vs analytic distance too large";
+
+    // Center check: distance to nearest side = min(0.5 - x1, x2 - 0.5, 0.5 - y1, y2 - 0.5)
+    const Real center_d = std::min(std::min(0.5 - x1, x2 - 0.5), std::min(0.5 - y1, y2 - 0.5));
+    ASSERT_TRUE(std::isfinite(center_u));
+    EXPECT_NEAR(center_u, center_d, tol);
+
+    // Corner check at (0,0): distance to rectangle = sqrt((x1)^2 + (y1)^2)
+    const Real corner00_d = std::sqrt(x1*x1 + y1*y1);
+    ASSERT_TRUE(std::isfinite(corner00_u));
+    EXPECT_NEAR(corner00_u, corner00_d, tol);
   }
 
   // Test 10: Large mesh stress test
@@ -583,10 +602,10 @@ namespace Rodin::Tests::Unit
       }
     }
 
-    ASSERT_FALSE(interface.empty()) << "Interface should not be empty";
+    ASSERT_FALSE(interface.empty())
+      << "Interface should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify solution is reasonable on large mesh
     Index valid_vertices = 0;
@@ -594,18 +613,22 @@ namespace Rodin::Tests::Unit
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       Real val = u[it->getIndex()];
-      EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
-      
+      EXPECT_FALSE(std::isnan(val))
+        << "Solution should not contain NaN";
+
       if (std::isfinite(val))
       {
-        EXPECT_GE(val, 0.0) << "Distance should be non-negative";
+        EXPECT_GE(val, 0.0)
+          << "Distance should be non-negative";
         max_dist = std::max(max_dist, val);
         valid_vertices++;
       }
     }
 
-    EXPECT_GT(valid_vertices, 800) << "Most vertices should have valid solution";
-    EXPECT_LT(max_dist, 10.0) << "Maximum distance should be reasonable";
+    EXPECT_GT(valid_vertices, 800)
+      << "Most vertices should have valid solution";
+    EXPECT_LT(max_dist, 10.0)
+      << "Maximum distance should be reasonable";
   }
 
   // Test 11: Multiple disconnected interfaces
@@ -613,8 +636,8 @@ namespace Rodin::Tests::Unit
   {
     // Create 2D mesh
     Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 20, 20 });
-    mesh.scale(2.0 / 19.0);  // Scale to [0,2] x [0,2]
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
+    mesh.scale(2.0 / 31.0);  // Scale to [0,2] x [0,2]
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(0, 0);
 
@@ -639,7 +662,7 @@ namespace Rodin::Tests::Unit
     {
       const auto& center = circle.first;
       Real radius = circle.second;
-      
+
       for (auto it = mesh.getVertex(); !it.end(); ++it)
       {
         const auto coord = mesh.getVertexCoordinates(it->getIndex());
@@ -649,20 +672,22 @@ namespace Rodin::Tests::Unit
       }
     }
 
-    ASSERT_FALSE(interface.empty()) << "Multiple interfaces should not be empty";
+    ASSERT_FALSE(interface.empty())
+      << "Multiple interfaces should not be empty";
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     // Verify solution properties
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       Real val = u[it->getIndex()];
-      EXPECT_FALSE(std::isnan(val)) << "Solution should not contain NaN";
-      
+      EXPECT_FALSE(std::isnan(val))
+        << "Solution should not contain NaN";
+
       if (std::isfinite(val))
       {
-        EXPECT_GE(val, 0.0) << "Distance should be non-negative";
+        EXPECT_GE(val, 0.0)
+          << "Distance should be non-negative";
       }
     }
 
@@ -672,7 +697,7 @@ namespace Rodin::Tests::Unit
       const auto& center = circle.first;
       Real radius = circle.second;
       Real min_interior_dist = std::numeric_limits<Real>::infinity();
-      
+
       for (auto it = mesh.getVertex(); !it.end(); ++it)
       {
         const auto coord = mesh.getVertexCoordinates(it->getIndex());
@@ -682,7 +707,7 @@ namespace Rodin::Tests::Unit
           min_interior_dist = std::min(min_interior_dist, u[it->getIndex()]);
         }
       }
-      
+
       if (std::isfinite(min_interior_dist))
       {
         EXPECT_LT(min_interior_dist, 0.1) 

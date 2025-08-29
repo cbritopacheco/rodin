@@ -51,8 +51,7 @@ int main(int, char**)
         interface.push_back(it->getIndex());
     }
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     u.save("eikonal_2d.gf");
     mesh.save("eikonal_2d.mesh");
@@ -110,8 +109,7 @@ int main(int, char**)
 
     std::cout << "Interface size: " << interface.size() << std::endl;
 
-    fmm.setFront(std::move(interface));
-    fmm.solve();
+    fmm.seed(interface).solve();
 
     u.save("eikonal_surface.gf");
     mesh.save("eikonal_surface.mesh");

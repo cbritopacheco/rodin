@@ -68,38 +68,17 @@ namespace Rodin::Models::Eikonal
         : m_u(u), m_speed(std::forward<Callable>(speed))
       {}
 
-      FMM& setFront(const std::vector<Index>& seeds)
-      {
-        m_seeds = seeds;
-        return *this;
-      }
-
-      FMM& setFront(std::vector<Index>&& seeds)
-      {
-        m_seeds = std::move(seeds);
-        return *this;
-      }
-
-      void solve()
+      template <class Seed>
+      FMM& seed(Seed&& seed)
       {
         auto& u = m_u.get();
         const auto& fes = u.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        const int D = mesh.getDimension();
         const auto& conn = mesh.getConnectivity();
-
-        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 0, 0);
-        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 0, D);
-        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, D, 0);
-
         const Index nV = fes.getSize();
         m_labels.assign(nV, Label::Far);
         u = std::numeric_limits<Real>::infinity();
-
-        PriorityQueue pq;
-
-        // Seeds
-        for (Index s : m_seeds)
+        for (Index s : std::forward<Seed>(seed))
         {
           if (s >= nV)
             continue;
@@ -121,15 +100,30 @@ namespace Rodin::Models::Eikonal
               u[nb] = arr;
               assert(!std::isnan(u[nb]));
               m_labels[nb] = Label::Considered;
-              pq.push({ nb, arr });
+              m_pq.push({ nb, arr });
             }
           }
         }
+        return *this;
+      }
+
+      void solve()
+      {
+        auto& u = m_u.get();
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const int D = mesh.getDimension();
+        const auto& conn = mesh.getConnectivity();
+        const Index nV = fes.getSize();
+
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 0, 0);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 0, D);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, D, 0);
 
         // March
-        while (!pq.empty())
+        while (!m_pq.empty())
         {
-          const auto cur = pq.top(); pq.pop();
+          const auto cur = m_pq.top(); m_pq.pop();
           const Index i = cur.nodeIndex;
 
           if (i >= nV)
@@ -156,7 +150,7 @@ namespace Rodin::Models::Eikonal
               u[j] = arr;
               assert(!std::isnan(u[j]));
               if (m_labels[j] == Label::Far) m_labels[j] = Label::Considered;
-              pq.push({ j, arr });
+              m_pq.push({ j, arr });
             }
           }
         }
@@ -490,8 +484,8 @@ namespace Rodin::Models::Eikonal
       std::reference_wrapper<SolutionType> m_u;
       SpeedFunctionType m_speed;
 
+      PriorityQueue m_pq;
       std::vector<Label> m_labels;
-      std::vector<Index> m_seeds;
   };
 
   template <class Solution, class SpeedFunction>
