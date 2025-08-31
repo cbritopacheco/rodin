@@ -172,15 +172,6 @@ if (RODIN_BUILD_SRC)
   add_subdirectory(third-party/eigen EXCLUDE_FROM_ALL)
   unset(BUILD_TESTING)
 
-  # ---- Spectra ----
-  message(STATUS "Configuring Spectra...")
-  set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
-  set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-  set (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT TRUE)
-  list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
-  add_subdirectory(third-party/spectra EXCLUDE_FROM_ALL)
-  unset (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT)
-
   if (RODIN_WITH_PLOT)
     # ---- Magnum ----
     message(STATUS "Configuring Magnum...")
