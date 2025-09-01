@@ -36,7 +36,7 @@ namespace Rodin::Geometry
       virtual size_t getCount(Polytope::Type g) const = 0;
       virtual size_t getMeshDimension() const = 0;
       virtual const Incidence& getIncidence(size_t d, size_t dp) const = 0;
-      virtual const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const = 0;
+      virtual const IndexVector& getIncidence(const std::pair<size_t, size_t> p, Index idx) const = 0;
   };
 
   using SequentialConnectivity = Connectivity<Context::Local>;
@@ -180,7 +180,7 @@ namespace Rodin::Geometry
 
       const Incidence& getIncidence(size_t d, size_t dp) const override;
 
-      const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const override;
+      const IndexVector& getIncidence(const std::pair<size_t, size_t> p, Index idx) const override;
 
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)

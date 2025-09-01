@@ -2,12 +2,13 @@ enable_testing()
 include(GoogleTest)
 
 rodin_add_compile_options(
-  LANG CXX
+  LANG C CXX
   OPTIONS
   -Wall
   -Werror
   -Wextra
   -Wpedantic
+  -Wno-old-style-cast
   -Wno-cast-function-type
   -Wno-unused-parameter
   -Wno-zero-as-null-pointer-constant

@@ -25,7 +25,7 @@ namespace Rodin::Tests::Unit
     connectivity.compute(d, 0);
     EXPECT_EQ(connectivity.getCount(d), 1);
     EXPECT_EQ(connectivity.getIncidence(d, 0).size(), connectivity.getCount(d));
-    EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexSet({0, 1, 2}));
+    EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexVector({0, 1, 2}));
     EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Type::Triangle);
 
     connectivity.compute(d, d);
@@ -33,12 +33,12 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence({d, d}, 0).size(), 0);
 
     connectivity.compute(0, d);
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexSet({ 0 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexSet({ 0 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexSet({ 0 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({ 0 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({ 0 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({ 0 }));
 
     connectivity.compute(d, d - 1);
-    EXPECT_EQ(connectivity.getIncidence({d, d - 1}, 0), IndexSet({ {0, 1, 2} }));
+    EXPECT_EQ(connectivity.getIncidence({d, d - 1}, 0), IndexVector({ {0, 1, 2} }));
 
     d = 1;
     connectivity.compute(d, 0);
@@ -75,8 +75,8 @@ namespace Rodin::Tests::Unit
     connectivity.compute(d, 0);
     EXPECT_EQ(connectivity.getCount(d), 2);
     EXPECT_EQ(connectivity.getIncidence(d, 0).size(), connectivity.getCount(d));
-    EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexSet({0, 1, 2}));
-    EXPECT_EQ(connectivity.getIncidence({d, 0}, 1), IndexSet({1, 2, 3}));
+    EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexVector({0, 1, 2}));
+    EXPECT_EQ(connectivity.getIncidence({d, 0}, 1), IndexVector({1, 2, 3}));
 
     connectivity.compute(d, d);
     EXPECT_EQ(connectivity.getIncidence(d, d).size(), 2);
@@ -84,10 +84,10 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence({d, d}, 1).size(), 1);
 
     connectivity.compute(0, d);
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexSet({ 0 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexSet({ 0, 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexSet({ 0, 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexSet({ 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({ 0 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({ 0, 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({ 0, 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({ 1 }));
 
     connectivity.compute(d, d - 1);
     EXPECT_EQ(connectivity.getIncidence({d, d - 1}, 0).size(), 3);
@@ -122,22 +122,22 @@ namespace Rodin::Tests::Unit
     connectivity.compute(d, 0);
     EXPECT_EQ(connectivity.getCount(d), 3);
     EXPECT_EQ(connectivity.getIncidence(d, 0).size(), connectivity.getCount(d));
-    EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexSet({0, 1, 2}));
-    EXPECT_EQ(connectivity.getIncidence({d, 0}, 1), IndexSet({1, 2, 3}));
-    EXPECT_EQ(connectivity.getIncidence({d, 0}, 2), IndexSet({2, 3, 4}));
+    EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexVector({0, 1, 2}));
+    EXPECT_EQ(connectivity.getIncidence({d, 0}, 1), IndexVector({1, 2, 3}));
+    EXPECT_EQ(connectivity.getIncidence({d, 0}, 2), IndexVector({2, 3, 4}));
 
     connectivity.compute(d, d);
     EXPECT_EQ(connectivity.getIncidence(d, d).size(), 3);
-    EXPECT_EQ(connectivity.getIncidence({d, d}, 0), IndexSet({1, 2}));
-    EXPECT_EQ(connectivity.getIncidence({d, d}, 1), IndexSet({0, 2}));
-    EXPECT_EQ(connectivity.getIncidence({d, d}, 2), IndexSet({0, 1}));
+    EXPECT_EQ(connectivity.getIncidence({d, d}, 0), IndexVector({1, 2}));
+    EXPECT_EQ(connectivity.getIncidence({d, d}, 1), IndexVector({0, 2}));
+    EXPECT_EQ(connectivity.getIncidence({d, d}, 2), IndexVector({0, 1}));
 
     connectivity.compute(0, d);
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexSet({ 0 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexSet({ 0, 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexSet({ 0, 1, 2 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexSet({ 1, 2 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexSet({ 2 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({ 0 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({ 0, 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({ 0, 1, 2 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({ 1, 2 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexVector({ 2 }));
 
     connectivity.compute(d, d - 1);
     EXPECT_EQ(connectivity.getIncidence({d, d - 1}, 0).size(), 3);
@@ -172,11 +172,11 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 2);
 
     connectivity.compute(0, d);
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexSet({ 0 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexSet({ 0, 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexSet({ 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexSet({ 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexSet({ 0, 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({ 0 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({ 0, 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({ 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({ 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexVector({ 0, 1 }));
   }
 
   TEST(Rodin_Geometry_Connectivity, SanityTest2D_9Nodes_Mixed)
@@ -200,15 +200,15 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 4);
 
     connectivity.compute(0, d);
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexSet({ 0, 2, 3 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexSet({ 0, 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexSet({ 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexSet({ 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexSet({ 0, 1, 3 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 5), IndexSet({ 3 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 6), IndexSet({ 2, 3 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 7), IndexSet({ 2 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 8), IndexSet({ 2 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({ 0, 2, 3 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({ 0, 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({ 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({ 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexVector({ 0, 1, 3 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 5), IndexVector({ 3 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 6), IndexVector({ 2, 3 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 7), IndexVector({ 2 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 8), IndexVector({ 2 }));
 
     d = 1;
     connectivity.compute(d, 0);

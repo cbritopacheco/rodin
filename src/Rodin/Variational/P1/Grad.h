@@ -8,6 +8,7 @@
 #define RODIN_VARIATIONAL_P1_GRAD_H
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Grad.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
@@ -79,7 +80,8 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const auto rc = tracePolytope->getTransformation().inverse(pc);
+            Math::SpatialPoint rc;
+            tracePolytope->getTransformation().inverse(rc, pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             this->interpolate(out, np);
             return;
@@ -104,7 +106,8 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const auto rc = tracePolytope->getTransformation().inverse(pc);
+                  Math::SpatialPoint rc;
+                  tracePolytope->getTransformation().inverse(rc, pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   this->interpolate(out, np);
                   return;

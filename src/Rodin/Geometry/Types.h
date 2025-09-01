@@ -14,7 +14,7 @@ namespace Rodin::Geometry
   using Attribute = std::size_t;
 
   /// Represents the incidence of a polytope.
-  using Incidence = std::vector<IndexSet>;
+  using Incidence = std::vector<std::vector<Index>>;
 }
 
 #endif

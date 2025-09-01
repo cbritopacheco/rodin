@@ -109,11 +109,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 
 # ---- Set compile options for all the submodules ----------------------------
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
-rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
-rodin_add_compile_options(LANG CXX C OPTIONS
-  -Wno-error=old-style-cast
-  -Wno-error=double-promotion
-  -Wno-old-style-cast)
+rodin_add_compile_options(LANG C CXX OPTIONS -fcolor-diagnostics)
+rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=double-promotion)
+rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-deprecated-anon-enum-enum-conversion)
 
 add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
 add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)
@@ -167,19 +165,7 @@ if (RODIN_BUILD_SRC)
 
   # ---- Eigen ----
   message(STATUS "Configuring Eigen3...")
-  set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
-  set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-  add_subdirectory(third-party/eigen EXCLUDE_FROM_ALL)
-  unset(BUILD_TESTING)
-
-  # ---- Spectra ----
-  message(STATUS "Configuring Spectra...")
-  set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
-  set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-  set (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT TRUE)
-  list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
-  add_subdirectory(third-party/spectra EXCLUDE_FROM_ALL)
-  unset (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT)
+  find_package(Eigen3 3.4 CONFIG REQUIRED NO_MODULE)
 
   if (RODIN_WITH_PLOT)
     # ---- Magnum ----

@@ -22,22 +22,15 @@ namespace Rodin::Tests::Unit
     Variational::RealP1Element fe(Polytope::Type::Triangle);
     IsoparametricTransformation trans(pm, fe);
 
-    {
-      const auto res = trans.transform(pm.col(0));
-      EXPECT_NEAR((res - pm.col(0)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR((trans.inverse(res) - pm.col(0)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-    }
+    Math::SpatialPoint res;
+    Math::SpatialPoint inv;
 
+    for (size_t i = 0; i < 3; i++)
     {
-      const auto res = trans.transform(pm.col(1));
-      EXPECT_NEAR((res - pm.col(1)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR((trans.inverse(res) - pm.col(1)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-    }
-
-    {
-      const auto res = trans.transform(pm.col(2));
-      EXPECT_NEAR((res - pm.col(2)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR((trans.inverse(res) - pm.col(2)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+      trans.transform(res, pm.col(i));
+      trans.inverse(inv, res);
+      EXPECT_NEAR((res - pm.col(i)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR((inv - pm.col(i)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
     }
   }
 
@@ -54,75 +47,88 @@ namespace Rodin::Tests::Unit
     Variational::RealP1Element fe(Polytope::Type::Triangle);
     IsoparametricTransformation trans(pm, fe);
 
+    Math::SpatialPoint rc(rdim);
+    Math::SpatialPoint res;
+    Math::SpatialPoint inv;
+
     {
-      Math::Vector<Real> rc(rdim);
       rc << 0, 0;
-      const auto res = trans.transform(rc);
+      trans.transform(res, rc);
+      trans.inverse(inv, res);
       EXPECT_NEAR((res - pm.col(0)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR((inv - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
     }
 
     {
-      Math::Vector<Real> rc(rdim);
       rc << 1, 0;
-      const auto res = trans.transform(rc);
+      trans.transform(res, rc);
+      trans.inverse(inv, res);
       EXPECT_NEAR((res - pm.col(1)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR((inv - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
     }
 
     {
-      Math::Vector<Real> rc(rdim);
       rc << 0, 1;
-      const auto res = trans.transform(rc);
+      trans.transform(res, rc);
+      trans.inverse(inv, res);
       EXPECT_NEAR((res - pm.col(2)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR((inv - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
     }
 
     {
-      Math::Vector<Real> rc(rdim);
+      Math::SpatialPoint rc(rdim);
       rc << (1.0 / 3.0), (1.0 / 3.0);
 
-      Math::Vector<Real> pc(sdim);
+      Math::SpatialPoint pc(sdim);
       pc << 0, (1.0 / 3.0);
 
-      const auto res = trans.transform(rc);
+      trans.transform(res, rc);
       EXPECT_NEAR((res - pc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+
+      trans.inverse(inv, res);
+      EXPECT_NEAR((inv - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
     }
 
     {
-      Math::Vector<Real> rc(rdim);
+      Math::SpatialPoint rc(rdim);
       rc << 0.5, 0;
 
-      Math::Vector<Real> pc(sdim);
+      Math::SpatialPoint pc(sdim);
       pc << 0, 0;
-      const auto res = trans.transform(rc);
+
+      trans.transform(res, rc);
       EXPECT_NEAR((res - pc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+
+      trans.inverse(inv, res);
+      EXPECT_NEAR((inv - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
     }
 
     {
-      Math::Vector<Real> rc(rdim);
+      Math::SpatialPoint rc(rdim);
       rc << 0.5, 0.5;
 
-      Math::Vector<Real> pc(sdim);
+      Math::SpatialPoint pc(sdim);
       pc << 0.5, 1;
 
-      const auto res = trans.transform(rc);
+      trans.transform(res, rc);
       EXPECT_NEAR((res - pc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+
+      trans.inverse(inv, res);
+      EXPECT_NEAR((inv - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
     }
 
     {
-      Math::Vector<Real> rc(rdim);
+      Math::SpatialPoint rc(rdim);
       rc << 0.5, 0.5;
 
-      Math::Vector<Real> pc(sdim);
+      Math::SpatialPoint pc(sdim);
       pc << 0.5, 1;
 
-      const auto res = trans.transform(rc);
+      trans.transform(res, rc);
       EXPECT_NEAR((res - pc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+
+      trans.inverse(inv, res);
+      EXPECT_NEAR((inv - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
     }
   }
 }

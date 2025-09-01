@@ -50,7 +50,7 @@ void solve(ProblemType& pb)
   // Solver::UMFPack solver(pb);
   // solver.solve();
   // solver.printStatus();
-  Solver::GMRES solver(pb);
+  Solver::CG solver(pb);
   solver.setMaxIterations(3000);
   solver.setTolerance(1e-12);
   solver.solve();

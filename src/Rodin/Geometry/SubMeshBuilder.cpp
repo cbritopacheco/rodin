@@ -66,10 +66,10 @@ namespace Rodin::Geometry
   }
 
   SubMesh<Context::Local>::Builder&
-  SubMesh<Context::Local>::Builder::include(size_t d, const IndexSet& indices)
+  SubMesh<Context::Local>::Builder::include(size_t d, const IndexVector& indices)
   {
     for (const Index parentIdx : indices)
-      include(d, parentIdx);
+      this->include(d, parentIdx);
     return *this;
   }
 
@@ -106,7 +106,7 @@ namespace Rodin::Geometry
             {
               auto find = m_s2ps[dp].right.find(p);
               if (find != m_s2ps[dp].right.end())
-                cInc[cIdx].insert_unique(find->second);
+                cInc[cIdx].push_back(find->second);
             }
           }
           // Manually set the incidence

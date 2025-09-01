@@ -11,10 +11,8 @@ include (ExternalProject)
 set(RodinExternalMMG_HEADERS
   MMG5.h
   Mesh.h
-  Common.h
-  ISCDProcess.h
   Adapt.h
-  Distancer.h
+  Common.h
   MeshLoader.h
   MeshPrinter.h
   MeshOptimizer.h
@@ -24,11 +22,10 @@ set(RodinExternalMMG_HEADERS
 set(RodinExternalMMG_SRCS
   MMG5.cpp
   Mesh.cpp
-  MeshBuilder.cpp
   Common.cpp
-  ISCDProcess.cpp
   Adapt.cpp
   MeshLoader.cpp
+  MeshBuilder.cpp
   MeshPrinter.cpp
   MeshOptimizer.cpp
   ImplicitDomainMesher.cpp
@@ -70,34 +67,11 @@ add_subdirectory(
 # - Mmg::libmmg3d_a
 # - Mmg::libmmgs_a
 
-# ---- ISCD::Mshdist ----
-ExternalProject_Add(RodinExternalISCDMshdist
-  SOURCE_DIR ${PROJECT_SOURCE_DIR}/third-party/ISCD/Mshdist
-  BINARY_DIR ${PROJECT_BINARY_DIR}/third-party/ISCD/Mshdist
-  CMAKE_ARGS -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-  INSTALL_COMMAND ""
-  COMMENT "ISCD::Mshdist")
-add_dependencies(RodinExternalMMG RodinExternalISCDMshdist)
-
-# ---- ISCD::Advection ----
-ExternalProject_Add(RodinExternalISCDAdvection
-  SOURCE_DIR ${PROJECT_SOURCE_DIR}/third-party/ISCD/Advection
-  BINARY_DIR ${PROJECT_BINARY_DIR}/third-party/ISCD/Advection
-  CMAKE_ARGS -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-  INSTALL_COMMAND ""
-  COMMENT "ISCD::Advection")
-add_dependencies(RodinExternalMMG RodinExternalISCDAdvection)
-
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   set(RODIN_MMG_VERBOSITY_LEVEL 1)
 else()
   set(RODIN_MMG_VERBOSITY_LEVEL -1)
 endif()
-
-set(RODIN_ISCD_MSHDIST_EXECUTABLE
-  ${PROJECT_BINARY_DIR}/third-party/ISCD/Mshdist/mshdist)
-set(RODIN_ISCD_ADVECTION_EXECUTABLE
-  ${PROJECT_BINARY_DIR}/third-party/ISCD/Advection/Advection)
 
 configure_file(Configure.h.in Configure.h @ONLY)
 
@@ -116,7 +90,5 @@ target_link_libraries(RodinExternalMMG
   Rodin::Alert
   Rodin::Geometry
   Rodin::Variational
-  Boost::filesystem
-  Boost::headers
   ${CMAKE_THREAD_LIBS_INIT})
 

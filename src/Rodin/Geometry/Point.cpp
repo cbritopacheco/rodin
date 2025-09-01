@@ -89,12 +89,14 @@ namespace Rodin::Geometry
 
   const Math::SpatialVector<Real>& PointBase::getPhysicalCoordinates() const
   {
+    static thread_local Math::SpatialPoint s_pc;
     if (!m_pc.read().has_value())
     {
       m_pc.write(
           [&](auto& obj)
           {
-            obj.emplace(getPolytope().getTransformation().transform(getReferenceCoordinates()));
+            this->getPolytope().getTransformation().transform(s_pc, this->getReferenceCoordinates());
+            obj.emplace(std::move(s_pc));
           });
     }
     assert(m_pc.read().has_value());
@@ -103,12 +105,14 @@ namespace Rodin::Geometry
 
   const Math::SpatialMatrix<Real>& PointBase::getJacobian() const
   {
+    static thread_local Math::SpatialMatrix<Real> s_jac;
     if (!m_jacobian.read().has_value())
     {
       m_jacobian.write(
           [&](auto& obj)
           {
-            obj.emplace(getPolytope().getTransformation().jacobian(getReferenceCoordinates()));
+            this->getPolytope().getTransformation().jacobian(s_jac, this->getReferenceCoordinates());
+            obj.emplace(std::move(s_jac));
           });
     }
     assert(m_jacobian.read().has_value());

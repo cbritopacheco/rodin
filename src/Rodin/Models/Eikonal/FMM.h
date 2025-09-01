@@ -30,7 +30,7 @@
 namespace Rodin::Models::Eikonal
 {
   /**
-   * @brief Fast marching method for solving the eikonal equation
+   * @brief Fast marching method for solving the Eikonal equation.
    */
   template <class Solution, class SpeedFunction>
   class FMM;

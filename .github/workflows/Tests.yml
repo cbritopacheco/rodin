@@ -40,6 +40,7 @@ jobs:
         run: >-
           sudo apt-get update && sudo apt-get install -y
           lcov
+          libeigen3-dev
           libomp-dev
           libgl1-mesa-dev
           libsdl2-dev
