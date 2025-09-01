@@ -15,6 +15,7 @@
 #include "PolytopeTransformation.h"
 
 #include "ForwardDecls.h"
+#include "Rodin/Math/Vector.h"
 
 namespace Rodin::Geometry
 {
@@ -102,7 +103,7 @@ namespace Rodin::Geometry
         return m_fe.getOrder();
       }
 
-      void transform(const Math::SpatialVector<Real>& rc, Math::SpatialVector<Real>& pc) const override
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t pdim = getPhysicalDimension();
         assert(rc.size() >= 0);
@@ -116,22 +117,22 @@ namespace Rodin::Geometry
         }
       }
 
-      void jacobian(const Math::SpatialVector<Real>& rc, Math::SpatialMatrix<Real>& res) const override
+      void jacobian(Math::SpatialMatrix<Real>& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t rdim = getReferenceDimension();
         assert(rc.size() >= 0);
         assert(static_cast<size_t>(rc.size()) == rdim);
         const size_t pdim = getPhysicalDimension();
-        res.resize(pdim, rdim);
-        res.setZero();
+        pc.resize(pdim, rdim);
+        pc.setZero();
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
           const auto& basis = m_fe.getBasis(local);
           for (size_t i = 0; i < rdim; i++)
           {
             const auto derivative = basis.template getDerivative<1>(i);
-            assert(res.col(i).size() == m_pm.col(local).size());
-            res.col(i).noalias() += m_pm.col(local) * derivative(rc);
+            assert(pc.col(i).size() == m_pm.col(local).size());
+            pc.col(i).noalias() += m_pm.col(local) * derivative(rc);
           }
         }
       }

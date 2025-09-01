@@ -1,6 +1,7 @@
 #ifndef RODIN_VARIATIONAL_P1_DERIVATIVE_H
 #define RODIN_VARIATIONAL_P1_DERIVATIVE_H
 
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Derivative.h"
 
 namespace Rodin::FormLanguage
@@ -94,9 +95,10 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const auto rc = tracePolytope->getTransformation().inverse(pc);
+            Math::SpatialPoint rc;
+            tracePolytope->getTransformation().inverse(rc, pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-            interpolate(out, np);
+            this->interpolate(out, np);
             return;
           }
           else
@@ -119,9 +121,10 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const auto rc = tracePolytope->getTransformation().inverse(pc);
+                  Math::SpatialPoint rc;
+                  tracePolytope->getTransformation().inverse(rc, pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-                  interpolate(out, np);
+                  this->interpolate(out, np);
                   return;
                 }
               }

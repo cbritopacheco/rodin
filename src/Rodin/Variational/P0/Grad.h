@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_P0_GRADIENT_H
 #define RODIN_VARIATIONAL_P0_GRADIENT_H
 
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Grad.h"
 
@@ -101,7 +102,8 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
+            Math::SpatialPoint rc;
+            tracePolytope->getTransformation().inverse(rc, pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -126,7 +128,8 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Math::SpatialVector<Real> rc = tracePolytope->getTransformation().inverse(pc);
+                  Math::SpatialPoint rc;
+                  tracePolytope->getTransformation().inverse(rc, pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;

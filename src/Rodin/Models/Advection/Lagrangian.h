@@ -61,8 +61,6 @@ namespace Rodin::Models::Advection
           {
             static thread_local Math::SpatialPoint s_rc{{}};
             static thread_local Math::SpatialPoint s_pc{{}};
-            static thread_local Math::SpatialVector<Real> s_normal{{}};
-            static thread_local Real s_b;
 
             struct Exit
             {
@@ -87,16 +85,31 @@ namespace Rodin::Models::Advection
             Real tau = dt;
             while (tau > 0)
             {
-              Exit exit;
-              exit.t = std::numeric_limits<Real>::infinity();
-              for (const Index& face : conn.getIncidence(d, d - 1).at(idx))
-              {
-              }
-              assert(std::isfinite(exit));
+              const auto it = mesh.getPolytope(d, idx);
+              const Geometry::Polytope::Type g = it->getGeometry();
 
-              if (tau < exit)
+              const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+              Real exitTime = std::numeric_limits<Real>::infinity();
+              Index face;
+              Index local = 0;
+              for (const Index& f : conn.getIncidence(d, d - 1).at(idx))
               {
-                rk.step(dt, s_rc);
+                const auto& normal = hs.matrix.row(local);
+                const Real& b = hs.vector[local];
+                const Real tf = (b - normal.dot(s_rc)) / normal.dot(vr);
+                assert(tf >= 0);
+                if (tf < exitTime)
+                {
+                  exitTime = tf;
+                  face = f;
+                }
+              }
+              assert(std::isfinite(exitTime));
+
+              if (tau < exitTime)
+              {
+                rk.step(tau, s_rc);
+                tau = 0;
                 break;
               }
               else
@@ -111,11 +124,11 @@ namespace Rodin::Models::Advection
                 {
                   if (cell != idx)
                   {
-                    s_rc = mesh.getPolytopeTransformation(d, cell).inverse(s_pc);
+                    mesh.getPolytopeTransformation(d, cell).inverse(s_rc, s_pc);
                     break;
                   }
                 }
-                tau -= exit;
+                tau -= exitTime;
               }
             }
           }

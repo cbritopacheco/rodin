@@ -165,10 +165,7 @@ if (RODIN_BUILD_SRC)
 
   # ---- Eigen ----
   message(STATUS "Configuring Eigen3...")
-  set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
-  set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-  add_subdirectory(third-party/eigen EXCLUDE_FROM_ALL)
-  unset(BUILD_TESTING)
+  find_package(Eigen3 3.4 CONFIG REQUIRED NO_MODULE)
 
   if (RODIN_WITH_PLOT)
     # ---- Magnum ----

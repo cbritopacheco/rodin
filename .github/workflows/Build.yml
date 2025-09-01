@@ -40,6 +40,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y
           libgl1-mesa-dev
           lcov
+          libeigen3-dev
           libomp-dev
           libsdl2-dev
           libglfw3-dev

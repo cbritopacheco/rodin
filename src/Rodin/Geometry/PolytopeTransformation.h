@@ -90,14 +90,7 @@ namespace Rodin::Geometry
        * @returns A vector of size @f$ s @f$ where @f$ s @f$ represents the
        * physical dimension.
        */
-      Math::SpatialVector<Real> transform(const Math::SpatialVector<Real>& rc) const
-      {
-        Math::SpatialVector<Real> res;
-        transform(rc, res);
-        return res;
-      }
-
-      virtual void transform(const Math::SpatialVector<Real>& rc, Math::SpatialVector<Real>&) const = 0;
+      virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const = 0;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation.
@@ -116,14 +109,7 @@ namespace Rodin::Geometry
        * represents the reference dimension and @f$ s @f$ represents the
        * physical dimension.
        */
-      Math::SpatialMatrix<Real> jacobian(const Math::SpatialVector<Real>& rc) const
-      {
-        Math::SpatialMatrix<Real> res;
-        jacobian(rc, res);
-        return res;
-      }
-
-      virtual void jacobian(const Math::SpatialVector<Real>& rc, Math::SpatialMatrix<Real>& jacobian) const = 0;
+      virtual void jacobian(Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const = 0;
 
       /**
        * @brief Computes the reference coordinates of the given physical point.
@@ -135,15 +121,9 @@ namespace Rodin::Geometry
        * in reference coordinates.
        *
        * @param[in] pc Physical coordinates of the point.
+       * @note Assumes all elements have 0 as reference coordinate.
        */
-      Math::SpatialVector<Real> inverse(const Math::SpatialVector<Real>& pc) const
-      {
-        Math::SpatialVector<Real> res;
-        inverse(pc, res);
-        return res;
-      }
-
-      virtual void inverse(const Math::SpatialVector<Real>& pc, Math::SpatialVector<Real>& rc) const;
+      virtual void inverse(Math::SpatialPoint& rc, const Math::SpatialPoint& pc) const;
 
       template<class Archive>
       void serialize(Archive & ar, const unsigned int)
