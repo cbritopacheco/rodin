@@ -11,6 +11,217 @@
 
 namespace Rodin::Geometry
 {
+  Polytope::Traits::Traits(Type g)
+    : m_g(g)
+  {}
+
+  bool Polytope::Traits::isSimplex()
+  {
+    switch (m_g)
+    {
+      case Type::Point:
+      case Type::Segment:
+      case Type::Triangle:
+      case Type::Tetrahedron:
+        return true;
+      case Type::Quadrilateral:
+      case Type::Wedge:
+        return false;
+    }
+    assert(false);
+    return false;
+  }
+
+  size_t Polytope::Traits::getDimension()
+  {
+    switch (m_g)
+    {
+      case Type::Point:
+        return 0;
+      case Type::Segment:
+        return 1;
+      case Type::Triangle:
+      case Type::Quadrilateral:
+        return 2;
+      case Type::Tetrahedron:
+      case Type::Wedge:
+        return 3;
+    }
+    assert(false);
+    return 0;
+  }
+
+  size_t Polytope::Traits::getVertexCount()
+  {
+    switch (m_g)
+    {
+      case Type::Point:
+        return 1;
+      case Type::Segment:
+        return 2;
+      case Type::Triangle:
+        return 3;
+      case Type::Quadrilateral:
+      case Type::Tetrahedron:
+        return 4;
+      case Type::Wedge:
+        return 6;
+    }
+    assert(false);
+    return 0;
+  }
+
+  const Math::SpatialPoint& Polytope::Traits::getVertex(size_t i) const
+  {
+    switch (m_g)
+    {
+      case Type::Point:
+      {
+        static thread_local const Math::SpatialPoint s_node{{ 0 }};
+        return s_node;
+      }
+      case Type::Segment:
+      {
+        static thread_local const std::vector<Math::SpatialPoint> s_nodes =
+        {
+          Math::SpatialPoint{{ 0 }},
+          Math::SpatialPoint{{ 1 }}
+        };
+        return s_nodes[i];
+      }
+      case Type::Triangle:
+      {
+        static thread_local const std::vector<Math::SpatialPoint> s_nodes =
+        {
+          Math::SpatialPoint{{ 0, 0 }},
+          Math::SpatialPoint{{ 1, 0 }},
+          Math::SpatialPoint{{ 0, 1 }}
+        };
+        return s_nodes[i];
+      }
+      case Type::Quadrilateral:
+      {
+        static thread_local const std::vector<Math::SpatialPoint> s_nodes =
+        {
+          Math::SpatialPoint{{ 0, 0 }},
+          Math::SpatialPoint{{ 1, 0 }},
+          Math::SpatialPoint{{ 0, 1 }},
+          Math::SpatialPoint{{ 1, 1 }}
+        };
+        return s_nodes[i];
+      }
+      case Type::Tetrahedron:
+      {
+        static thread_local const std::vector<Math::SpatialPoint> s_nodes =
+        {
+          Math::SpatialPoint{{ 0, 0, 0 }},
+          Math::SpatialPoint{{ 1, 0, 0 }},
+          Math::SpatialPoint{{ 0, 1, 0 }},
+          Math::SpatialPoint{{ 0, 0, 1 }}
+        };
+        return s_nodes[i];
+      }
+      case Type::Wedge:
+      {
+        static thread_local const std::vector<Math::SpatialPoint> s_nodes =
+        {
+          Math::SpatialPoint{{ 0, 0, 0 }},
+          Math::SpatialPoint{{ 1, 0, 0 }},
+          Math::SpatialPoint{{ 0, 1, 0 }},
+          Math::SpatialPoint{{ 0, 0, 1 }},
+          Math::SpatialPoint{{ 1, 0, 1 }},
+          Math::SpatialPoint{{ 0, 1, 1 }}
+        };
+        return s_nodes[i];
+      }
+    }
+    assert(false);
+    static thread_local const Math::SpatialPoint s_null{{}};
+    return s_null;
+  }
+
+  const Polytope::Traits::HalfSpace& Polytope::Traits::getHalfSpace() const
+  {
+    switch (m_g)
+    {
+      case Type::Point:
+      {
+        static thread_local const HalfSpace s_hs =
+        {
+          Math::SpatialMatrix<Real>{},
+          Math::SpatialVector<Real>{}
+        };
+        return s_hs;
+      }
+      case Type::Segment:
+      {
+        static thread_local const HalfSpace s_hs =
+        {
+          Math::SpatialMatrix<Real>{
+            { 1 },
+            { -1 }},
+          Math::SpatialVector<Real>{{ 1, 0 }}
+        };
+        return s_hs;
+      }
+      case Type::Triangle:
+      {
+        static thread_local const HalfSpace s_hs =
+        {
+          Math::SpatialMatrix<Real>{
+            { -1,  0 },
+            {  0, -1 },
+            {  1,  1 }},
+          Math::SpatialVector<Real>{{ 0, 0, 1 }}
+        };
+        return s_hs;
+      }
+      case Type::Quadrilateral:
+      {
+        static thread_local const HalfSpace s_hs =
+        {
+          Math::SpatialMatrix<Real>{
+            {  0, -1 },
+            {  1,  0 },
+            {  0,  1 },
+            { -1,  0 }},
+          Math::SpatialVector<Real>{{ 0, 1, 1, 0 }}
+        };
+        return s_hs;
+      }
+      case Type::Tetrahedron:
+      {
+        static thread_local const HalfSpace s_hs =
+        {
+          Math::SpatialMatrix<Real>{
+            {  0, -1,  0 },
+            {  0,  0, -1 },
+            { -1,  0,  0 },
+            {  1,  1,  1 }},
+          Math::SpatialVector<Real>{{ 0, 0, 0, 1 }}
+        };
+        return s_hs;
+      }
+      case Type::Wedge:
+      {
+        static thread_local const HalfSpace s_hs =
+        {
+          Math::SpatialMatrix<Real>{
+            {  0,  0, -1 },
+            {  0, -1,  0 },
+            {  1,  1,  0 },
+            { -1,  0,  0 },
+            {  0,  0,  1 }},
+          Math::SpatialVector<Real>{{ 0, 0, 1, 0, 1 }}
+        };
+        return s_hs;
+      }
+    }
+    assert(false);
+    static thread_local const HalfSpace s_null;
+    return s_null;
+  }
+
   std::ostream& operator<<(std::ostream& os, const Polytope::Type& p)
   {
     switch (p)

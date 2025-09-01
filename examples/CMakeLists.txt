@@ -1,6 +1,4 @@
 if (RODIN_BUILD_EXAMPLES)
-  rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-unused-parameter)
-
   add_subdirectory(IO)
   if (RODIN_WITH_PLOT)
     add_subdirectory(Plot)

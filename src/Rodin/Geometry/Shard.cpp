@@ -148,7 +148,7 @@ namespace Rodin::Geometry
           {
             const auto found = m_s2ps[dp].right.find(pNbr);
             if (found != m_s2ps[dp].right.end())
-              cInc[cIdx].insert_unique(found->second);
+              cInc[cIdx].push_back(found->second);
           }
         }
         conn.setIncidence({ d, dp }, std::move(cInc));

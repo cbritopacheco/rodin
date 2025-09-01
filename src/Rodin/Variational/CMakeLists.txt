@@ -40,7 +40,6 @@ set(RodinVariational_HEADERS
   OR.h
   AND.h
   Tangent.h
-  SemiLagrangianAdvection.h
   LinearElasticity/LinearElasticityIntegral.h
   )
 

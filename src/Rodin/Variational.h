@@ -96,8 +96,6 @@
 
 #include "Variational/Potential.h"
 
-#include "Variational/SemiLagrangianAdvection.h"
-
 #include "Variational/F.h"
 
 #endif

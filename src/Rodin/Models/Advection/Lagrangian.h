@@ -61,7 +61,8 @@ namespace Rodin::Models::Advection
           {
             static thread_local Math::SpatialPoint s_rc{{}};
             static thread_local Math::SpatialPoint s_pc{{}};
-            static thread_local ScalarType s_normal{{}};
+            static thread_local Math::SpatialVector<Real> s_normal{{}};
+            static thread_local Real s_b;
 
             struct Exit
             {
@@ -117,6 +118,10 @@ namespace Rodin::Models::Advection
                 tau -= exit;
               }
             }
+          }
+
+          void abcissa()
+          {
           }
 
         private:

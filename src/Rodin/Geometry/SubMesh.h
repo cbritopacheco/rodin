@@ -106,7 +106,7 @@ namespace Rodin::Geometry
 
           Builder& include(size_t d, Index parentIdx);
 
-          Builder& include(size_t d, const IndexSet& indices);
+          Builder& include(size_t d, const IndexVector& indices);
 
           SubMesh finalize();
 
