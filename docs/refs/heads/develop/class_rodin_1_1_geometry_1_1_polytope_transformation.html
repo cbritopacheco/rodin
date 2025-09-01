@@ -289,15 +289,18 @@ K $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a95449a6402d5c2d746b1ec11b5076d03" class="m-doc">transform</a>(</span><span class="m-doc-wrap">const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; rc) const -&gt; Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc">transform</a>(</span><span class="m-doc-wrap">Math::SpatialPoint&amp; pc,
+              const Math::SpatialPoint&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Computes the physical coordinates of the given reference point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a995da8c1276905f7f1578cd55f2123a9" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap">const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; rc) const -&gt; <a href="namespace_rodin_1_1_math.html#a402789b5574468564b86b961636c47b9" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a402789b5574468564b86b961636c47b9" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const Math::SpatialPoint&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Computes the Jacobian matrix of the transformation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a50e0250ae58561e8174a9252cde52f13" class="m-doc">inverse</a>(</span><span class="m-doc-wrap">const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; pc) const -&gt; Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc">inverse</a>(</span><span class="m-doc-wrap">Math::SpatialPoint&amp; rc,
+              const Math::SpatialPoint&amp; pc) const <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Computes the reference coordinates of the given physical point.</dd>
             <dt>
@@ -308,9 +311,10 @@ K $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a95449a6402d5c2d746b1ec11b5076d03"><div>
+          <section class="m-doc-details" id="a1cebe38715f95dd2bcca579a27e476bb"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95449a6402d5c2d746b1ec11b5076d03" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap">const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; rc) const</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap">Math::SpatialPoint&amp; pc,
+              const Math::SpatialPoint&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Computes the physical coordinates of the given reference point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -319,7 +323,11 @@ K $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">rc&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td style="width: 1%">pc</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>rc&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Reference coordinates of the point.</td>
                 </tr>
               </tbody>
@@ -388,9 +396,10 @@ $ r \in K $
 </g>
 </svg></div><p>in physical coordinates.</p>
           </div></section>
-          <section class="m-doc-details" id="a995da8c1276905f7f1578cd55f2123a9"><div>
+          <section class="m-doc-details" id="a551bb1d2930d7c149e9f6f03cfe779b5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#a402789b5574468564b86b961636c47b9" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a995da8c1276905f7f1578cd55f2123a9" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap">const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; rc) const</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a402789b5574468564b86b961636c47b9" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const Math::SpatialPoint&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Computes the Jacobian matrix of the transformation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -565,9 +574,10 @@ $ x : K \rightarrow \tau $
 </g>
 </svg>.</p>
           </div></section>
-          <section class="m-doc-details" id="a50e0250ae58561e8174a9252cde52f13"><div>
+          <section class="m-doc-details" id="ae4ab54f76d7dc9b08ca13f3f1eb1f95d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a50e0250ae58561e8174a9252cde52f13" class="m-doc-self">inverse</a>(</span><span class="m-doc-wrap">const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; pc) const</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc-self">inverse</a>(</span><span class="m-doc-wrap">Math::SpatialPoint&amp; rc,
+              const Math::SpatialPoint&amp; pc) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Computes the reference coordinates of the given physical point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -576,7 +586,11 @@ $ x : K \rightarrow \tau $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">pc&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td style="width: 1%">rc</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>pc&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Physical coordinates of the point.</td>
                 </tr>
               </tbody>
@@ -621,7 +635,7 @@ $ p \in \tau $
 <use x='210.992758' y='-2.988792' xlink:href='#eq25-g1-112'/>
 <use x='216.867902' y='-2.988792' xlink:href='#eq25-g3-41'/>
 </g>
-</svg></div><p>in reference coordinates.</p>
+</svg></div><p>in reference coordinates.</p><aside class="m-note m-info"><h4>Note</h4><p>Assumes all elements have 0 as reference coordinate.</p></aside>
           </div></section>
           <section class="m-doc-details" id="aa8c6964e055701ed0dd3ab6b1a3eb71b"><div>
             <h3>
