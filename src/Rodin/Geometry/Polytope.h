@@ -51,6 +51,18 @@ namespace Rodin::Geometry
         Wedge           ///< 3D prismatic element
       };
 
+      struct Project
+      {
+        public:
+          Project(Type g);
+          void cell(Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+          void boundary(Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+          void face(size_t local, Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+          void vertex(size_t local, Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+        private:
+          const Type m_g;
+      };
+
       struct Traits
       {
         public:
