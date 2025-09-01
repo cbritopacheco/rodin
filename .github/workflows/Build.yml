@@ -82,7 +82,7 @@ jobs:
       - name: Install dependencies
         run: |
             brew update
-            brew install mesalib-glw lcov sdl2 glfw libomp openal-soft vulkan-headers molten-vk suitesparse boost
+            brew install eigen mesalib-glw lcov sdl2 glfw libomp openal-soft vulkan-headers molten-vk suitesparse boost
             brew link --force --overwrite libomp openal-soft
       - name: Configure CMake
         run: >
