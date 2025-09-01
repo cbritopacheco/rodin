@@ -5,7 +5,6 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "Connectivity.h"
-#include <iterator>
 
 namespace Rodin::Geometry
 {
@@ -338,11 +337,11 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::intersection(size_t d, size_t dp, size_t dpp)
   {
-    static thread_local std::vector<uint64_t> s_markJ;
-    static thread_local uint64_t s_epochJ = 1;
+    static thread_local std::vector<size_t> s_markJ;
+    static thread_local size_t s_epochJ = 1;
 
-    static thread_local std::vector<uint64_t> s_markV;
-    static thread_local uint64_t s_epochV = 1;
+    static thread_local std::vector<size_t> s_markV;
+    static thread_local size_t s_epochV = 1;
 
     assert(d >= dp);
     assert(d < m_connectivity.size());
