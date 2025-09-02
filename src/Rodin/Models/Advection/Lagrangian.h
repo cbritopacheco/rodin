@@ -8,35 +8,56 @@
 
 namespace Rodin::Models::Advection
 {
+  struct RK4
+  {
+    template <class T1, class T2, class T, class F, class G, class H>
+    void step(T1& rck, T2& theta, Real dt, const T& rc, const F& f, const G& g) const
+    {
+      static thread_local T1 s_k1, s_k2, s_k3, s_k4;
+      static thread_local T2 s_x1, s_x2, s_x3, s_x4;
+      s_x1 = rc;
+      s_k1 = f(s_x1);
+      s_x2 = rc + 0.5 * dt * s_k1;
+      s_k2 = f(s_x2);
+      s_x3 = rc + 0.5 * dt * s_k2;
+      s_k3 = f(s_x3);
+      s_x4 = rc + dt * s_k3;
+      s_k4 = f(s_x4);
+      rck += (dt / 6) * (s_k1 + 2 * s_k2 + 2 * s_k3 + s_k4);
+      theta += (dt / 6) * (g(s_x1) + 2 * g(s_x2) + 2 * g(s_x3) + g(s_x4));
+    }
+  };
+
   /**
    * @brief Lagrangian variational advection for scalar fields.
-   *
-   * The method solves the advection equation:
-   * @f[
-   * \frac{\partial u}{\partial t} + \beta \cdot \nabla u = 0
-   * @f]
-   * assuming that the velocity field @f$ \beta @f$ is divergence-free.
    */
   template <class Solution, class VectorField, class ... Params>
   class Lagrangian;
 
-  template <class Solution, class VectorField, class RungeKutta>
-  class Flow : public Variational::FunctionBase<Flow<Solution, VectorField, RungeKutta>>
+  template <class Solution, class VectorField, class Divergence, class RungeKutta>
+  class Flow : public Variational::FunctionBase<Flow<Solution, VectorField, Divergence, RungeKutta>>
   {
     public:
       using SolutionType = Solution;
+      using DivergenceType = typename FormLanguage::Traits<Solution>::DivergenceType;
       using VectorFieldType = VectorField;
       using RungeKuttaType = RungeKutta;
 
-      struct Trace
+      struct P
       {
         Real integral;
         Geometry::Point point;
       };
 
 
-      Flow(const SolutionType& u, const VectorFieldType& velocity, const RungeKutta& rk)
-        : m_solution(u),
+      Flow(
+          Real t,
+          const SolutionType& u,
+          const VectorFieldType& velocity,
+          const DivergenceType& div,
+          const RungeKutta& rk)
+        : m_t(t),
+          m_solution(u),
           m_velocity(velocity),
           m_rk(rk)
       {}
@@ -44,20 +65,17 @@ namespace Rodin::Models::Advection
       constexpr
       decltype(auto) getValue(const Geometry::Point& p) const
       {
-        const Trace bt = this->backtrace(p);
+        const auto bt = this->backtrace(p);
         if (bt)
-        {
-          return m_solution.get()(backtrace(p)) * Math::exp(-bt->integral);
-        }
+          return m_solution.get()(this->backtrace(p)) * Math::exp(-bt->integral);
         else
-        {
           return 0;
-        }
       }
 
-      std::optional<Trace> backtrace(const Real& dt, const Geometry::Point& p) const
+      std::optional<Trace> backtrace(const Geometry::Point& p) const
       {
         static thread_local Index s_cellIdx;
+        static thread_local ScalarType s_theta;
         static thread_local Math::SpatialPoint s_rc{{}};
         static thread_local Math::SpatialPoint s_pc{{}};
 
@@ -71,7 +89,7 @@ namespace Rodin::Models::Advection
         s_pc = p.getPhysicalCoordinates();
         s_rc = p.getReferenceCoordinates();
 
-        Real tau = dt;
+        Real tau = m_t;
         while (tau > 0)
         {
           const auto it = mesh.getPolytope(d, s_cellIdx);
@@ -89,9 +107,9 @@ namespace Rodin::Models::Advection
           {
             const auto& normal = hs.matrix.row(local);
             const Real dot = normal.dot(vr);
-            if (dot > 0)
+            if (dot < 0)
             {
-              const Real tf = (hs.vector[local] - normal.dot(s_rc)) / dot;
+              const Real tf = -(hs.vector[local] - normal.dot(s_rc)) / dot;
               assert(tf >= 0);
               if (tf < exitTime)
               {
@@ -102,11 +120,22 @@ namespace Rodin::Models::Advection
             }
           }
 
+          assert(exitTime >= 0);
           assert(std::isfinite(exitTime));
 
           if (tau < exitTime)
           {
-            rk.step(tau, s_rc);
+            const auto f = [&](Math::SpatialPoint& out, const Math::SpatialPoint& rc)
+            {
+              return m_velocity(Geometry::Point(polytope, rc));
+            };
+
+            const auto g = [&](Math::SpatialPoint& out, const Math::SpatialPoint& rc)
+            {
+              return m_velocity(Geometry::Point(polytope, rc));
+            };
+
+            rk.step(s_rc, s_theta, -tau, s_rc, f, g);
             tau = 0;
             break;
           }
@@ -119,7 +148,7 @@ namespace Rodin::Models::Advection
             }
             else
             {
-              rk.step(exit, s_rc);
+              rk.step(s_rc, s_theta, -exitTime, s_rc, f, [](const Math::SpatialPoint&) { return 0; });
               const auto& cells = conn.getIncidence(d - 1, d).at(face);
               assert(cells.size() == 2);
               const Index next = (cells[0] == s_cellIdx) ? cells[1] : cells[0];
@@ -137,6 +166,7 @@ namespace Rodin::Models::Advection
       }
 
     private:
+      const Real m_t;
       std::reference_wrapper<const SolutionType> m_solution;
       std::reference_wrapper<const VectorFieldType> m_velocity;
       std::reference_wrapper<RungeKutta> m_rk;
