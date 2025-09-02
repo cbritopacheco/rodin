@@ -21,14 +21,21 @@ namespace Rodin::Models::Advection
   class Lagrangian;
 
   template <class Solution, class VectorField, class RungeKutta>
-  class Pullback : public Variational::FunctionBase<Pullback<Solution, VectorField, RungeKutta>>
+  class Flow : public Variational::FunctionBase<Flow<Solution, VectorField, RungeKutta>>
   {
     public:
       using SolutionType = Solution;
       using VectorFieldType = VectorField;
       using RungeKuttaType = RungeKutta;
 
-      Pullback(const SolutionType& u, const VectorFieldType& velocity, const RungeKutta& rk)
+      struct Trace
+      {
+        Real integral;
+        Geometry::Point point;
+      };
+
+
+      Flow(const SolutionType& u, const VectorFieldType& velocity, const RungeKutta& rk)
         : m_solution(u),
           m_velocity(velocity),
           m_rk(rk)
@@ -37,29 +44,42 @@ namespace Rodin::Models::Advection
       constexpr
       decltype(auto) getValue(const Geometry::Point& p) const
       {
-        return m_solution.get()(backtrace(p));
+        const Trace bt = this->backtrace(p);
+        if (bt)
+        {
+          return m_solution.get()(backtrace(p)) * Math::exp(-bt->integral);
+        }
+        else
+        {
+          return 0;
+        }
       }
 
-      Geometry::Point backtrace(const Real& dt, const Geometry::Point& p) const
+      std::optional<Trace> backtrace(const Real& dt, const Geometry::Point& p) const
       {
+        static thread_local Index s_cellIdx;
         static thread_local Math::SpatialPoint s_rc{{}};
         static thread_local Math::SpatialPoint s_pc{{}};
 
-        const auto& rk = m_rk;
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const auto& mesh = polytope.getMesh();
+        const auto& polytope0 = p.getPolytope();
+        const auto& mesh = polytope0.getMesh();
+        const size_t d = mesh.getDimension();
         const auto& conn = mesh.getConnectivity();
-        Index cellIdx = polytope.getIndex();
+        const auto& rk = m_rk;
+
+        s_cellIdx = polytope0.getIndex();
         s_pc = p.getPhysicalCoordinates();
         s_rc = p.getReferenceCoordinates();
+
         Real tau = dt;
         while (tau > 0)
         {
-          const Geometry::Point q(*mesh.getPolytope(d, cellIdx), s_rc, s_pc);
+          const auto it = mesh.getPolytope(d, s_cellIdx);
+          const auto& polytope = *it;
+          const Geometry::Point q(polytope, s_rc, s_pc);
           const auto vr = p.getJacobianInverse() * m_velocity(p);
-          const Geometry::Polytope::Type g = mesh.getGeometry(d, cellIdx);
-          const auto& faces = conn.getIncidence(d, d - 1).at(cellIdx);
+          const Geometry::Polytope::Type g = mesh.getGeometry(d, s_cellIdx);
+          const auto& faces = conn.getIncidence(d, d - 1).at(s_cellIdx);
           const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
 
           Real exitTime = std::numeric_limits<Real>::infinity();
@@ -92,20 +112,28 @@ namespace Rodin::Models::Advection
           }
           else
           {
-            rk.step(exit, s_rc);
-
-            const auto& cells = conn.getIncidence(d - 1, d).at(face);
-            assert(cells.size() == 2);
-            const Index next = (cells[0] == cellIdx) ? cells[1] : cells[0];
-            Geometry::Polytope::Project(g).face(local, s_rc, s_rc);
-            mesh.getPolytopeTransformation(d, cellIdx).transform(s_pc, s_rc);
-            mesh.getPolytopeTransformation(d, next).inverse(s_rc, s_pc);
-            Geometry::Polytope::Project(mesh.getGeometry(d, next)).cell(s_rc, s_rc);
-            tau -= exitTime;
-            cellIdx = next;
+            if (mesh.isBoundary(face))
+            {
+              // Boundary reached
+              return {};
+            }
+            else
+            {
+              rk.step(exit, s_rc);
+              const auto& cells = conn.getIncidence(d - 1, d).at(face);
+              assert(cells.size() == 2);
+              const Index next = (cells[0] == s_cellIdx) ? cells[1] : cells[0];
+              Geometry::Polytope::Project(g).face(local, s_rc, s_rc);
+              mesh.getPolytopeTransformation(d, s_cellIdx).transform(s_pc, s_rc);
+              mesh.getPolytopeTransformation(d, next).inverse(s_rc, s_pc);
+              Geometry::Polytope::Project(mesh.getGeometry(d, next)).cell(s_rc, s_rc);
+              tau -= exitTime;
+              s_cellIdx = next;
+            }
           }
         }
-        return Geometry::Point(*mesh.getPolytope(d, cellIdx), s_rc);
+
+        return Geometry::Point(*mesh.getPolytope(d, s_cellIdx), s_rc);
       }
 
     private:
@@ -145,7 +173,7 @@ namespace Rodin::Models::Advection
     private:
       std::reference_wrapper<SolutionType> m_solution;
       VectorFieldType m_velocity;
-      Pullback<SolutionType, VectorFieldType, RungeKutta> m_pullback;
+      Flow<SolutionType, VectorFieldType, RungeKutta> m_pullback;
       RungeKutta m_rk;
   };
 }
