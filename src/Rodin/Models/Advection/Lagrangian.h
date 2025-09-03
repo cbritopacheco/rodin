@@ -1,60 +1,33 @@
 #ifndef RODIN_MODELS_ADVECTION_LAGRANGIAN_H
 #define RODIN_MODELS_ADVECTION_LAGRANGIAN_H
 
+#include <functional>
+
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Math/Vector.h"
-#include <functional>
 
 namespace Rodin::Models::Advection
 {
-  struct RK4
-  {
-    template <class T1, class T2, class T, class F, class G, class H>
-    void step(T1& rck, T2& theta, Real dt, const T& rc, const F& f, const G& g) const
-    {
-      static thread_local T1 s_k1, s_k2, s_k3, s_k4;
-      static thread_local T2 s_x1, s_x2, s_x3, s_x4;
-      s_x1 = rc;
-      s_k1 = f(s_x1);
-      s_x2 = rc + 0.5 * dt * s_k1;
-      s_k2 = f(s_x2);
-      s_x3 = rc + 0.5 * dt * s_k2;
-      s_k3 = f(s_x3);
-      s_x4 = rc + dt * s_k3;
-      s_k4 = f(s_x4);
-      rck += (dt / 6) * (s_k1 + 2 * s_k2 + 2 * s_k3 + s_k4);
-      theta += (dt / 6) * (g(s_x1) + 2 * g(s_x2) + 2 * g(s_x3) + g(s_x4));
-    }
-  };
-
   /**
    * @brief Lagrangian variational advection for scalar fields.
    */
   template <class Solution, class VectorField, class ... Params>
   class Lagrangian;
 
-  template <class Solution, class VectorField, class Divergence, class RungeKutta>
-  class Flow : public Variational::FunctionBase<Flow<Solution, VectorField, Divergence, RungeKutta>>
+  template <class Solution, class VectorField, class RungeKutta>
+  class Flow : public Variational::FunctionBase<Flow<Solution, VectorField, RungeKutta>>
   {
     public:
       using SolutionType = Solution;
-      using DivergenceType = typename FormLanguage::Traits<Solution>::DivergenceType;
       using VectorFieldType = VectorField;
       using RungeKuttaType = RungeKutta;
-
-      struct P
-      {
-        Real integral;
-        Geometry::Point point;
-      };
 
 
       Flow(
           Real t,
           const SolutionType& u,
           const VectorFieldType& velocity,
-          const DivergenceType& div,
           const RungeKutta& rk)
         : m_t(t),
           m_solution(u),
@@ -65,19 +38,20 @@ namespace Rodin::Models::Advection
       constexpr
       decltype(auto) getValue(const Geometry::Point& p) const
       {
-        const auto bt = this->backtrace(p);
+        const auto bt = this->forward(p);
         if (bt)
-          return m_solution.get()(this->backtrace(p)) * Math::exp(-bt->integral);
+          return m_solution.get()(this->forward(p));
         else
           return 0;
       }
 
-      std::optional<Trace> backtrace(const Geometry::Point& p) const
+      std::optional<Geometry::Point> forward(const Geometry::Point& p) const
       {
         static thread_local Index s_cellIdx;
-        static thread_local ScalarType s_theta;
-        static thread_local Math::SpatialPoint s_rc{{}};
-        static thread_local Math::SpatialPoint s_pc{{}};
+        static thread_local Math::SpatialPoint s_rc0{{}};
+        static thread_local Math::SpatialPoint s_pc0{{}};
+        static thread_local Math::SpatialPoint s_rc1{{}};
+        static thread_local Math::SpatialPoint s_pc1{{}};
 
         const auto& polytope0 = p.getPolytope();
         const auto& mesh = polytope0.getMesh();
@@ -86,30 +60,33 @@ namespace Rodin::Models::Advection
         const auto& rk = m_rk;
 
         s_cellIdx = polytope0.getIndex();
-        s_pc = p.getPhysicalCoordinates();
-        s_rc = p.getReferenceCoordinates();
+        s_pc0 = p.getPhysicalCoordinates();
+        s_rc0 = p.getReferenceCoordinates();
 
         Real tau = m_t;
         while (tau > 0)
         {
           const auto it = mesh.getPolytope(d, s_cellIdx);
           const auto& polytope = *it;
-          const Geometry::Point q(polytope, s_rc, s_pc);
-          const auto vr = p.getJacobianInverse() * m_velocity(p);
+          const Geometry::Point q(polytope, s_rc0, s_pc0);
           const Geometry::Polytope::Type g = mesh.getGeometry(d, s_cellIdx);
           const auto& faces = conn.getIncidence(d, d - 1).at(s_cellIdx);
           const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
 
+          decltype(auto) vr = q.getJacobianInverse() * m_velocity(q);
+
           Real exitTime = std::numeric_limits<Real>::infinity();
           Index face;
           Index local;
+
+          assert(faces.size() > 0);
           for (size_t i = 0; i < faces.size(); i++)
           {
-            const auto& normal = hs.matrix.row(local);
+            decltype(auto) normal = hs.matrix.row(i);
             const Real dot = normal.dot(vr);
-            if (dot < 0)
+            if (dot > 0)
             {
-              const Real tf = -(hs.vector[local] - normal.dot(s_rc)) / dot;
+              const Real tf = (hs.vector[i] - normal.dot(s_rc0)) / dot;
               assert(tf >= 0);
               if (tf < exitTime)
               {
@@ -119,23 +96,19 @@ namespace Rodin::Models::Advection
               }
             }
           }
-
           assert(exitTime >= 0);
           assert(std::isfinite(exitTime));
-
           if (tau < exitTime)
           {
-            const auto f = [&](Math::SpatialPoint& out, const Math::SpatialPoint& rc)
-            {
-              return m_velocity(Geometry::Point(polytope, rc));
-            };
+            rk.step(s_rc1, tau, s_rc0,
+                [&](const Math::SpatialPoint& rc)
+                {
+                  const Geometry::Point q(polytope, rc);
+                  return q.getJacobianInverse() * m_velocity(q);
+                });
 
-            const auto g = [&](Math::SpatialPoint& out, const Math::SpatialPoint& rc)
-            {
-              return m_velocity(Geometry::Point(polytope, rc));
-            };
+            s_rc0 = s_rc1;
 
-            rk.step(s_rc, s_theta, -tau, s_rc, f, g);
             tau = 0;
             break;
           }
@@ -148,21 +121,30 @@ namespace Rodin::Models::Advection
             }
             else
             {
-              rk.step(s_rc, s_theta, -exitTime, s_rc, f, [](const Math::SpatialPoint&) { return 0; });
+              rk.step(s_rc1, exitTime, s_rc0,
+                  [&](const Math::SpatialPoint& rc)
+                  {
+                    const Geometry::Point q(polytope, rc);
+                    return q.getJacobianInverse() * m_velocity(q);
+                  });
               const auto& cells = conn.getIncidence(d - 1, d).at(face);
               assert(cells.size() == 2);
               const Index next = (cells[0] == s_cellIdx) ? cells[1] : cells[0];
-              Geometry::Polytope::Project(g).face(local, s_rc, s_rc);
-              mesh.getPolytopeTransformation(d, s_cellIdx).transform(s_pc, s_rc);
-              mesh.getPolytopeTransformation(d, next).inverse(s_rc, s_pc);
-              Geometry::Polytope::Project(mesh.getGeometry(d, next)).cell(s_rc, s_rc);
-              tau -= exitTime;
+              Geometry::Polytope::Project(g).face(local, s_rc1, s_rc1);
+              mesh.getPolytopeTransformation(d, s_cellIdx).transform(s_pc1, s_rc1);
+              mesh.getPolytopeTransformation(d, next).inverse(s_rc1, s_pc1);
+              Geometry::Polytope::Project(mesh.getGeometry(d, next)).cell(s_rc1, s_rc1);
+
+              s_rc0 = s_rc1;
+              s_pc0 = s_pc1;
               s_cellIdx = next;
+
+              tau -= exitTime;
             }
           }
         }
 
-        return Geometry::Point(*mesh.getPolytope(d, s_cellIdx), s_rc);
+        return Geometry::Point(*mesh.getPolytope(d, s_cellIdx), s_rc0);
       }
 
     private:
@@ -197,7 +179,7 @@ namespace Rodin::Models::Advection
         Variational::TrialFunction u(fes);
         Variational::TestFunction v(fes);
         Variational::Problem pb(u, v);
-        pb = Integral(u, v) - Integral(m_pullback, v);
+        pb = Integral(u, v) - Integral(m_solution.get(), Flow(v));
       }
 
     private:
