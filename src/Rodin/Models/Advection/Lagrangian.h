@@ -5,6 +5,7 @@
 #include <functional>
 
 #include "Rodin/Math/RungeKutta/RK4.h"
+#include "Rodin/Math/RootFinding/NewtonRaphson.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Polytope.h"
@@ -40,35 +41,45 @@ namespace Rodin::Models::Advection
       }
   };
 
-  template <class Operand, class VectorField, class Step = Math::RungeKutta::RK4, class BoundaryPolicy = DefaultBoundaryPolicy, class TangentPolicy = DefaultTangentPolicy>
-  class Flow;
+  template <
+    class Operand, class VectorField,
+    class Step = Math::RungeKutta::RK4,
+    class Root = Math::RootFinding::NewtonRaphson<Real>,
+    class BoundaryPolicy = DefaultBoundaryPolicy,
+    class TangentPolicy = DefaultTangentPolicy
+  > class Flow;
 
   template <
     class Derived,
     class FES, Variational::ShapeFunctionSpaceType Space,
     class VectorField,
     class Step,
+    class Root,
     class BoundaryPolicy,
     class TangentPolicy
-    >
-  class Flow<Variational::ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, BoundaryPolicy, TangentPolicy>
+  > class Flow<Variational::ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>
   : public Variational::ShapeFunctionBase<
-      Flow<Variational::ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, BoundaryPolicy, TangentPolicy>, FES, Space>
+      Flow<Variational::ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, Space>
   {
     public:
       using Operand = Variational::ShapeFunctionBase<Derived, FES, Space>;
+      using FESType = FES;
       using VectorFieldType = VectorField;
       using StepType = Step;
+      using RootType = Root;
+      using BoundaryPolicyType = BoundaryPolicy;
+      using TangentPolicyType = TangentPolicy;
       using Parent = Variational::ShapeFunctionBase<
-        Flow<Operand, VectorFieldType, StepType, BoundaryPolicy, TangentPolicy>, FES, Space>;
+        Flow<Operand, VectorFieldType, StepType, RootType, BoundaryPolicy, TangentPolicy>, FES, Space>;
 
-      template <class S, class BP, class TP>
+      template <class S, class R, class BP, class TP>
       Flow(Real t, const Operand& u, const VectorFieldType& velocity,
-            S&& st = S(), BP&& bp = BP(), TP&& tp = TP())
+            S&& st = S(), R&& root = R(), BP&& bp = BP(), TP&& tp = TP())
         : m_t(t),
           m_operand(u.copy()),
           m_velocity(velocity),
           m_step(std::forward<S>(st)),
+          m_root(std::forward<R>(root)),
           m_bp(std::forward<BP>(bp)),
           m_tp(std::forward<TP>(tp)),
           m_p(std::nullopt)
@@ -80,6 +91,7 @@ namespace Rodin::Models::Advection
           m_operand(other.m_operand->copy()),
           m_velocity(other.m_velocity),
           m_step(other.m_step),
+          m_root(other.m_root),
           m_bp(other.m_bp),
           m_tp(other.m_tp),
           m_p(other.m_p)
@@ -91,6 +103,7 @@ namespace Rodin::Models::Advection
           m_operand(std::move(other.m_operand)),
           m_velocity(std::move(other.m_velocity)),
           m_step(std::move(other.m_step)),
+          m_root(std::move(other.m_root)),
           m_bp(std::move(other.m_bp)),
           m_tp(std::move(other.m_tp)),
           m_p(std::exchange(other.m_p, std::nullopt))
@@ -101,13 +114,13 @@ namespace Rodin::Models::Advection
         static thread_local Index s_cellIdx;
         static thread_local Math::SpatialPoint s_rc0{{}};
         static thread_local Math::SpatialPoint s_rc1{{}};
+        static thread_local Math::SpatialPoint s_rc_tau{{}};
         static thread_local Math::SpatialPoint s_pc{{}};
+
         const auto& polytope0 = p.getPolytope();
         const auto& mesh = polytope0.getMesh();
         const size_t cellDim = mesh.getDimension();
         const auto& conn = mesh.getConnectivity();
-
-        s_pc = p.getPhysicalCoordinates();
 
         if (polytope0.getDimension() == cellDim)
         {
@@ -121,8 +134,9 @@ namespace Rodin::Models::Advection
 
           if (mesh.isBoundary(fidx)) // Start on a boundary face
           {
+            assert(adj.size() == 1);
             const Index c = adj[0];
-            mesh.getPolytopeTransformation(cellDim, c).inverse(s_rc1, s_pc);
+            mesh.getPolytopeTransformation(cellDim, c).inverse(s_rc1, p.getPhysicalCoordinates());
             Geometry::Polytope::Project(mesh.getGeometry(cellDim, c)).cell(s_rc0, s_rc1);
             s_cellIdx = c;
           }
@@ -141,9 +155,10 @@ namespace Rodin::Models::Advection
               }
             }
             assert(j0 < faces0.size());
-            mesh.getPolytopeTransformation(cellDim, c0).inverse(s_rc1, s_pc);
+            const auto& pc = p.getPhysicalCoordinates();
+            mesh.getPolytopeTransformation(cellDim, c0).inverse(s_rc1, pc);
             const auto& cell0 = *mesh.getPolytope(cellDim, c0);
-            const Geometry::Point q0(cell0, s_rc1, s_pc);
+            const Geometry::Point q0(cell0, s_rc1, pc);
             const auto a0 = q0.getJacobianInverse() * m_velocity(q0);
             const auto& hs0 =
               Geometry::Polytope::Traits(mesh.getGeometry(cellDim, c0)).getHalfSpace();
@@ -151,7 +166,7 @@ namespace Rodin::Models::Advection
             if (nref0.dot(a0) > 0) // Flow into cell c1
             {
               const Index c1 = adj[1];
-              mesh.getPolytopeTransformation(cellDim, c1).inverse(s_rc1, s_pc);
+              mesh.getPolytopeTransformation(cellDim, c1).inverse(s_rc1, pc);
               Geometry::Polytope::Project(mesh.getGeometry(cellDim, c1)).cell(s_rc0, s_rc1);
               s_cellIdx = c1;
             }
@@ -162,83 +177,126 @@ namespace Rodin::Models::Advection
             }
           }
         }
+        else
+        {
+          assert(false);
+          return {};
+        }
 
         Real tau = m_t;
         while (tau > 0)
         {
           const auto it = mesh.getPolytope(cellDim, s_cellIdx);
-          const auto& polytope = *it;
-          const Geometry::Point q(polytope, s_rc0, s_pc);
-          const auto vr = q.getJacobianInverse() * m_velocity(q);
-          if (vr.squaredNorm() == 0)
-            break;
+          const auto& cell = *it;
           const Geometry::Polytope::Type g = mesh.getGeometry(cellDim, s_cellIdx);
           const auto& faces = conn.getIncidence(cellDim, cellDim - 1).at(s_cellIdx);
           const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
 
-          Real exitTime = std::numeric_limits<Real>::infinity();
-          Index local;
-          bool tangent = true;
-          for (size_t i = 0; i < faces.size(); i++)
+          // Field in reference space
+          const auto vr = [&](const Math::SpatialPoint& rc)
           {
-            decltype(auto) nref = hs.matrix.row(i);
-            const Real denom = nref.dot(vr);
-            if (denom > 0) // Outflow face
+            const Geometry::Point qp(cell, rc);
+            return qp.getJacobianInverse() * m_velocity(qp);
+          };
+
+          std::optional<Real> tmin;
+          Index local = faces.size();
+
+          if constexpr (requires { m_step.dense(s_rc0, tau, vr); })
+          {
+            // Dense-output path (fastest)
+            const auto D = m_step.dense(s_rc0, tau, vr);
+            s_rc_tau = D.X(tau);
+
+            for (size_t i = 0; i < faces.size(); ++i)
             {
-              const Real numer = hs.vector[i] - nref.dot(s_rc0);
-              const Real tf = numer / denom;
-              if (tf < exitTime) // Find minimum exit time
+              const auto nref = hs.matrix.row(i);
+              const Real bf = hs.vector[i];
+
+              const Real g0 = bf - nref.dot(s_rc0);
+              const Real gtau = bf - nref.dot(s_rc_tau);
+              if (g0 * gtau < 0) // root in (0, tau)
               {
-                local = i;
-                exitTime = tf;
-                tangent = false;
-              }
-            }
-          }
-
-          if (tangent) // Tangential flow
-          {
-            if(!m_tp(tau, s_cellIdx, s_rc0))
-              return {};
-          }
-          else // Transversal flow
-          {
-            const Index face = faces[local];
-
-            if (tau < exitTime) // Does not exit cell
-            {
-              m_step.step(
-                s_rc1, tau, s_rc0,
-                [&](const Math::SpatialPoint& rc)
+                const Real t0 = Real(0.5) * tau;
+                auto event = [&](Real& t)
                 {
-                  const Geometry::Point qp(polytope, rc);
-                  return qp.getJacobianInverse() * m_velocity(qp);
-                });
-              s_rc0 = s_rc1;
-              tau = 0;
-              break;
-            }
-            else // Exits cell
-            {
-              s_rc0 += exitTime * vr;
-              if (mesh.isBoundary(face)) // Exits domain
-              {
-                if(!m_bp(tau, s_cellIdx, s_rc0))
-                  return {};
-              }
-              else // Crosses face into adjacent cell
-              {
-                mesh.getPolytopeTransformation(cellDim, s_cellIdx).transform(s_pc, s_rc0);
-                const auto& cells = conn.getIncidence(cellDim - 1, cellDim).at(face);
-                assert(cells.size() == 2);
-                s_cellIdx = (cells[0] == s_cellIdx) ? cells[1] : cells[0];
-                mesh.getPolytopeTransformation(cellDim, s_cellIdx).inverse(s_rc0, s_pc);
-                Geometry::Polytope::Project(mesh.getGeometry(cellDim, s_cellIdx)).cell(s_rc1, s_rc0);
-                s_rc0 = s_rc1;
-                tau -= exitTime;
+                  const auto X = D.X(t);
+                  const auto V = D.V(t);
+                  return std::pair{ bf - nref.dot(X), -nref.dot(V) };
+                };
+                if (auto rt = m_root.solve(event, t0, Real(0), tau))
+                {
+                  const Real t = *rt;
+                  if (!tmin.has_value() || (t < *tmin)) { tmin = t; local = i; }
+                }
               }
             }
           }
+          else
+          {
+            // Fallback: re-integrate for each evaluation
+            m_step.step(s_rc_tau, tau, s_rc0, vr);
+
+            for (size_t i = 0; i < faces.size(); ++i)
+            {
+              const auto nref = hs.matrix.row(i);
+              const Real bf   = hs.vector[i];
+
+              const Real g0 = bf - nref.dot(s_rc0);
+              const Real gtau = bf - nref.dot(s_rc_tau);
+              if (g0 * gtau < 0) // root in (0, tau)
+              {
+                const Real t0 = Real(0.5) * tau;
+                auto event = [&](Real& t)
+                {
+                  m_step.step(s_rc1, t, s_rc0, vr);
+                  const auto V = vr(s_rc1);
+                  return std::pair{ bf - nref.dot(s_rc1), -nref.dot(V) };
+                };
+                if (auto rt = m_root.solve(event, t0, Real(0), tau))
+                {
+                  const Real t = *rt;
+                  if (!tmin.has_value() || (t < *tmin)) { tmin = t; local = i; }
+                }
+              }
+            }
+          }
+
+          // No face will be hit -> advance whole remaining time
+          if (!tmin.has_value())
+          {
+            if (!m_tp(tau, s_cellIdx, s_rc0)) return {};
+            m_step.step(s_rc1, tau, s_rc0, vr);
+            s_rc0 = s_rc1;
+            break;
+          }
+
+          // Hit the closest face at t*
+          const Real  tstar = *tmin;
+          const Index face  = faces[local];
+
+          // Arrive on face (in ref of current cell)
+          m_step.step(s_rc1, tstar, s_rc0, vr);
+          s_rc0 = s_rc1;
+          tau -= tstar;
+
+          if (mesh.isBoundary(face))
+          {
+            // Let boundary policy decide (may update tau/s_cellIdx/s_rc0)
+            if (!m_bp(tau, s_cellIdx, s_rc0))
+              return {};
+            // The policy is responsible for keeping tau > 0 if it wants to continue.
+            continue;
+          }
+
+          // Cell hop
+          mesh.getPolytopeTransformation(cellDim, s_cellIdx).transform(s_pc, s_rc0);
+          const auto& cells = conn.getIncidence(cellDim - 1, cellDim).at(face);
+          assert(cells.size() == 2);
+          s_cellIdx = (cells[0] == s_cellIdx) ? cells[1] : cells[0];
+          mesh.getPolytopeTransformation(cellDim, s_cellIdx).inverse(s_rc0, s_pc);
+          Geometry::Polytope::Project(mesh.getGeometry(cellDim, s_cellIdx)).cell(s_rc1, s_rc0);
+          s_rc0 = s_rc1;
         }
         return Geometry::Point(*mesh.getPolytope(cellDim, s_cellIdx), s_rc0);
       }
@@ -283,6 +341,7 @@ namespace Rodin::Models::Advection
       std::unique_ptr<Operand> m_operand;
       std::reference_wrapper<const VectorFieldType> m_velocity;
       Step m_step;
+      Root m_root;
       BoundaryPolicy m_bp;
       TangentPolicy m_tp;
       std::optional<Geometry::Point> m_p;
