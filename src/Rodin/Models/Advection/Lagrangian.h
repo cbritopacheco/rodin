@@ -15,12 +15,6 @@
 
 namespace Rodin::Models::Advection
 {
-  /**
-   * @brief Lagrangian variational advection for scalar fields.
-   */
-  template <class Solution, class VectorField, class ... Params>
-  class Lagrangian;
-
   class DefaultBoundaryPolicy
   {
     public:
@@ -43,6 +37,7 @@ namespace Rodin::Models::Advection
 
   template <
     class Operand, class VectorField,
+    class Divergence,
     class Step = Math::RungeKutta::RK4,
     class Root = Math::RootFinding::NewtonRaphson<Real>,
     class BoundaryPolicy = DefaultBoundaryPolicy,
@@ -53,36 +48,59 @@ namespace Rodin::Models::Advection
     class Derived,
     class FES, Variational::ShapeFunctionSpaceType Space,
     class VectorField,
+    class Divergence,
     class Step,
     class Root,
     class BoundaryPolicy,
     class TangentPolicy
-  > class Flow<Variational::ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>
+  > class Flow<Variational::ShapeFunctionBase<Derived, FES, Space>, VectorField, Divergence, Step, Root, BoundaryPolicy, TangentPolicy>
   : public Variational::ShapeFunctionBase<
       Flow<Variational::ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, Space>
   {
     public:
-      using Operand = Variational::ShapeFunctionBase<Derived, FES, Space>;
-      using FESType = FES;
-      using VectorFieldType = VectorField;
-      using StepType = Step;
-      using RootType = Root;
-      using BoundaryPolicyType = BoundaryPolicy;
-      using TangentPolicyType = TangentPolicy;
-      using Parent = Variational::ShapeFunctionBase<
-        Flow<Operand, VectorFieldType, StepType, RootType, BoundaryPolicy, TangentPolicy>, FES, Space>;
+      using Operand =
+        Variational::ShapeFunctionBase<Derived, FES, Space>;
 
-      template <class S, class R, class BP, class TP>
-      Flow(Real t, const Operand& u, const VectorFieldType& velocity,
+      using VectorFieldType =
+        VectorField;
+
+      using FESType =
+        FES;
+
+      using DivergenceType =
+        Divergence;
+
+      using StepType =
+        Step;
+
+      using RootType =
+        Root;
+
+      using BoundaryPolicyType =
+        BoundaryPolicy;
+
+      using TangentPolicyType =
+        TangentPolicy;
+
+      using ScalarType =
+        typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using Parent = Variational::ShapeFunctionBase<
+        Flow<Operand, VectorFieldType, DivergenceType, StepType, RootType, BoundaryPolicy, TangentPolicy>, FES, Space>;
+
+      template <class D, class S, class R, class BP, class TP>
+      Flow(const Real& t, const Operand& u, const VectorFieldType& velocity,
+            D&& divergence = [](const Geometry::Point&) { return 0; },
             S&& st = S(), R&& root = R(), BP&& bp = BP(), TP&& tp = TP())
         : m_t(t),
           m_operand(u.copy()),
           m_velocity(velocity),
+          m_divergence(std::forward<D>(divergence)),
           m_step(std::forward<S>(st)),
           m_root(std::forward<R>(root)),
           m_bp(std::forward<BP>(bp)),
           m_tp(std::forward<TP>(tp)),
-          m_p(std::nullopt)
+          m_p(nullptr)
       {}
 
       Flow(const Flow& other)
@@ -90,6 +108,7 @@ namespace Rodin::Models::Advection
           m_t(other.m_t),
           m_operand(other.m_operand->copy()),
           m_velocity(other.m_velocity),
+          m_divergence(other.m_divergence),
           m_step(other.m_step),
           m_root(other.m_root),
           m_bp(other.m_bp),
@@ -102,11 +121,13 @@ namespace Rodin::Models::Advection
           m_t(std::exchange(other.m_t, 0)),
           m_operand(std::move(other.m_operand)),
           m_velocity(std::move(other.m_velocity)),
+          m_divergence(std::move(other.m_divergence)),
           m_step(std::move(other.m_step)),
           m_root(std::move(other.m_root)),
           m_bp(std::move(other.m_bp)),
           m_tp(std::move(other.m_tp)),
-          m_p(std::exchange(other.m_p, std::nullopt))
+          m_p(std::exchange(other.m_p, std::nullopt)),
+          m_trace(std::move(other.m_trace))
       {}
 
       std::optional<Geometry::Point> forward(const Geometry::Point& p) const
@@ -308,9 +329,12 @@ namespace Rodin::Models::Advection
       }
 
       constexpr
-      decltype(auto) getBasis(size_t local) const
+      ScalarType getBasis(size_t local) const
       {
-        return m_operand->getBasis(local);
+        if (m_trace)
+          return m_operand->getBasis(local);
+        else
+          return ScalarType(0);
       }
 
       const Geometry::Point& getPoint() const
@@ -321,7 +345,9 @@ namespace Rodin::Models::Advection
 
       Flow& setPoint(const Geometry::Point& p)
       {
-        m_p = this->forward(p);
+        m_p = &p;
+        m_trace = this->forward(p);
+        m_operand.setPoint(*m_trace);
         return *this;
       }
 
@@ -340,47 +366,79 @@ namespace Rodin::Models::Advection
       const Real m_t;
       std::unique_ptr<Operand> m_operand;
       std::reference_wrapper<const VectorFieldType> m_velocity;
+      DivergenceType m_divergence;
       Step m_step;
       Root m_root;
       BoundaryPolicy m_bp;
       TangentPolicy m_tp;
-      std::optional<Geometry::Point> m_p;
+      const Geometry::Point* m_p;
+      std::optional<Geometry::Point> m_trace;
   };
 
-  template <class FES, class Data, class VectorField, class Step>
-  class Lagrangian<Variational::GridFunction<FES, Data>, VectorField, Step>
+  /**
+   * @brief Lagrangian variational advection for scalar fields.
+   */
+  template <class ... Params>
+  class Lagrangian;
+
+  template <class FES, class Data, class Initial, class VectorField, class Step>
+  class Lagrangian<
+    Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
+    Variational::TestFunction<FES>, Initial, VectorField, Step>
   {
     public:
-      using FESType = FES;
-      using DataType = Data;
-      using VectorFieldType = VectorField;
-      using SolutionType = Variational::GridFunction<FES, Data>;
-      using StepType = Step;
-      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
-      using SolverType = typename Data::SolverType;
+      using FESType =
+        FES;
 
-      template <class Velocity, class RK>
-      Lagrangian(const SolutionType& u, Velocity&& velocity, RK&& rk)
-        : m_solution(u),
+      using DataType =
+        Data;
+
+      using InitialType =
+        Initial;
+
+      using VectorFieldType =
+        VectorField;
+
+      using StepType =
+        Step;
+
+      using SolutionType =
+        Variational::GridFunction<FES, Data>;
+
+      using TrialFunctionType =
+        Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>;
+
+      using TestFunctionType =
+        Variational::TestFunction<FES>;
+
+      template <class U0, class Velocity, class RK = Math::RungeKutta::RK4>
+      Lagrangian(TrialFunctionType& u, TestFunctionType& v, U0&& u0, Velocity&& velocity, RK&& step = RK())
+        : m_u(u), m_v(v),
+          m_initial(std::forward<U0>(u0)),
           m_velocity(std::forward<Velocity>(velocity)),
-          m_rk(std::forward<RK>(rk)),
-          m_pullback(m_solution)
+          m_step(std::forward<RK>(step))
       {}
 
       void step(const Real& dt)
       {
+        const auto& u = m_u.get();
+        const auto& v = m_v.get();
         const auto& fes = m_solution.get().getFiniteElementSpace();
-        Variational::TrialFunction u(fes);
-        Variational::TestFunction v(fes);
         Variational::Problem pb(u, v);
-        pb = Integral(u, v) - Integral(m_solution.get(), Flow(v));
+        pb = Integral(u, v)
+           - Integral(m_solution.get(), Flow(v, m_velocity, dt, m_step))
+           + 
+        pb.assemble();
       }
 
     private:
-      std::reference_wrapper<SolutionType> m_solution;
+      std::reference_wrapper<TrialFunctionType> m_u;
+      std::reference_wrapper<TestFunctionType> m_v;
+
+      InitialType m_initial;
+      SolutionType m_solution;
       VectorFieldType m_velocity;
-      Flow<SolutionType, VectorFieldType, StepType> m_pullback;
-      Step m_rk;
+      StepType m_step;
   };
 }
 
