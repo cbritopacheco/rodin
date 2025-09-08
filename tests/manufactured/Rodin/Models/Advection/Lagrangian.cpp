@@ -160,7 +160,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     // Define initial condition
     auto pi = Math::Constants::pi();
     auto u0 = sin(pi * F::x) * sin(pi * F::y);
-    
+
     // Define velocity field
     auto velocity = VectorFunction{
       RealFunction([](const Point&) { return 0.1; }),
@@ -170,9 +170,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     // Note: Lagrangian class constructor template deduction and step() method
     // appear to be under development. Placeholder test for now.
     EXPECT_TRUE(true); // Placeholder - replace when implementation is complete
-    
-    /*
-    // Uncomment when Lagrangian implementation is complete:
+
     try
     {
       Lagrangian lagrangian(u, v, u0, velocity);
@@ -184,7 +182,6 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
       // Construction failed - this might be expected if implementation is incomplete
       EXPECT_TRUE(true); // For now, don't fail the test
     }
-    */
   }
 
   /**

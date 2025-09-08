@@ -414,6 +414,7 @@ namespace Rodin::Models::Advection
       template <class U0, class Velocity, class RK = Math::RungeKutta::RK4>
       Lagrangian(TrialFunctionType& u, TestFunctionType& v, U0&& u0, Velocity&& velocity, RK&& step = RK())
         : m_u(u), m_v(v),
+          m_t(0),
           m_initial(std::forward<U0>(u0)),
           m_velocity(std::forward<Velocity>(velocity)),
           m_step(std::forward<RK>(step))
@@ -423,23 +424,48 @@ namespace Rodin::Models::Advection
       {
         const auto& u = m_u.get();
         const auto& v = m_v.get();
-        const auto& fes = m_solution.get().getFiniteElementSpace();
+
         Variational::Problem pb(u, v);
-        pb = Integral(u, v)
-           - Integral(m_solution.get(), Flow(v, m_velocity, dt, m_step))
-           + 
+        if (m_t > 0)
+        {
+          pb = Integral(u, v)
+             - Integral(u.getSolution(), Flow(v, m_velocity, dt, m_step));
+        }
+        else
+        {
+          pb = Integral(u, v)
+             - Integral(m_initial, Flow(v, m_velocity, dt, m_step));
+        }
+
         pb.assemble();
+
+        m_t += dt;
       }
 
     private:
       std::reference_wrapper<TrialFunctionType> m_u;
       std::reference_wrapper<TestFunctionType> m_v;
 
+      Real m_t;
       InitialType m_initial;
-      SolutionType m_solution;
       VectorFieldType m_velocity;
       StepType m_step;
   };
+
+  template <class FES, class Data, class Initial, class VectorField, class Step = Math::RungeKutta::RK4>
+  Lagrangian(
+    Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>&,
+    Variational::TestFunction<FES>&,
+    Initial&&,
+    VectorField&&,
+    Step&& step = Step())
+  -> Lagrangian<
+        Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
+        Variational::TestFunction<FES>,
+        Initial,
+        VectorField,
+        Step>;
+
 }
 
 #endif
