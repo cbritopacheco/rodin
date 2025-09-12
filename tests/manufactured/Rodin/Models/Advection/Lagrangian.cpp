@@ -54,64 +54,67 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
    */
   TEST_P(ManufacturedAdvectionTest16x16, ConstantVelocityTranslation_Setup)
   {
-    auto pi = Math::Constants::pi();
-    Mesh mesh = this->getMesh();
+    const auto pi = Math::Constants::pi();
+    const auto& mesh = this->getMesh();
     P1 vh(mesh);
 
-    // Constant velocity field
-    Real vx = 0.5, vy = 0.3;
+    // constant velocity
+    const Real vx = 0.5, vy = 0.3;
     auto velocity = VectorFunction{
       RealFunction([vx](const Point&) { return vx; }),
       RealFunction([vy](const Point&) { return vy; })
     };
 
-    // Initial condition: u₀(x,y) = sin(π*x) * sin(π*y)
+    // u0(x,y) = sin(pi x) sin(pi y)
     auto u0 = sin(pi * F::x) * sin(pi * F::y);
 
-    // Exact solution at time t: u(x,y,t) = sin(π*(x-vx*t)) * sin(π*(y-vy*t))
-    Real t_final = 0.2;
+    // exact at time t: u(x,y,t) = sin(pi(x - vx t)) sin(pi(y - vy t))
+    const Real t_final = 0.2;
     auto u_exact = sin(pi * (F::x - vx * t_final)) * sin(pi * (F::y - vy * t_final));
 
-    // Create trial and test functions
+    // trial / test
     TrialFunction u(vh);
     TestFunction v(vh);
 
-    // Test that Lagrangian can be constructed
-    EXPECT_NO_THROW({
-      Lagrangian lagrangian(u, v, u0, velocity);
-    });
+    // construct Lagrangian object
+    Models::Advection::Lagrangian lagrangian(u, v, u0, velocity);
+    lagrangian.step(0.1);
 
-    // Test evaluation of functions at specific points
-    Math::SpatialVector<Real> test_coords{{ 0.5, 0.5 }};
-    auto polytope = mesh.getPolytope(2, 0);
-    Geometry::Point testPoint(*polytope, test_coords);
-    
-    Real initial_value = u0(testPoint);
-    Real exact_value = u_exact(testPoint);
-    auto vel_value = velocity(testPoint);
-    
-    // Validate mathematical properties
-    EXPECT_TRUE(std::isfinite(initial_value));
-    EXPECT_TRUE(std::isfinite(exact_value));
-    EXPECT_TRUE(std::abs(initial_value) <= 1.0); // sin function is bounded
-    EXPECT_TRUE(std::abs(exact_value) <= 1.0);   // sin function is bounded
-    
-    // Velocity should be constant
-    EXPECT_NEAR(vel_value[0], vx, 1e-10);
-    EXPECT_NEAR(vel_value[1], vy, 1e-10);
-    
-    // Test advection property: u(x,y,t) should equal u₀(x-vx*t, y-vy*t)
-    // At point (0.5, 0.5) and time t_final, the value should equal
-    // the initial condition evaluated at (0.5 - vx*t_final, 0.5 - vy*t_final)
-    Real x_orig = 0.5 - vx * t_final;
-    Real y_orig = 0.5 - vy * t_final;
-    
-    // Only test if the advected point is still in domain [0,1]x[0,1]
-    if (x_orig >= 0.0 && x_orig <= 1.0 && y_orig >= 0.0 && y_orig <= 1.0)
-    {
-      Real expected_value = std::sin(pi * x_orig) * std::sin(pi * y_orig);
-      EXPECT_NEAR(exact_value, expected_value, 1e-10);
-    }
+    // choose a concrete cell and a reference point; then use PHYSICAL coords
+    auto polytope = mesh.getPolytope(mesh.getDimension(), 0);
+    const Math::SpatialVector<Real> rc{{0.5, 0.5}};                  // reference coords
+    Point p(*polytope, rc);
+    const auto pc = p.getPhysicalCoordinates();              // physical coords
+    const Real x = pc[0], y = pc[1];
+
+    // evaluate fields
+    const Real u0_val = u0(p);
+    const Real uex_val = u_exact(p);
+    const auto vval = velocity(p);
+
+    // sanity
+    EXPECT_TRUE(std::isfinite(u0_val));
+    EXPECT_TRUE(std::isfinite(uex_val));
+    EXPECT_LE(std::abs(u0_val), 1.0);
+    EXPECT_LE(std::abs(uex_val), 1.0);
+
+    // velocity is constant
+    EXPECT_NEAR(vval[0], vx, 1e-12);
+    EXPECT_NEAR(vval[1], vy, 1e-12);
+
+    // periodic wrap on [0,1]^2
+    auto wrap01 = [](Real z) {
+      // works for any real z
+      z -= std::floor(z);
+      return z;
+    };
+
+    const Real x0 = wrap01(x - vx * t_final);
+    const Real y0 = wrap01(y - vy * t_final);
+    const Real expected = std::sin(pi * x0) * std::sin(pi * y0);
+
+    // advection identity under periodic BCs
+    EXPECT_NEAR(uex_val, expected, 1e-12);
   }
 
   /**

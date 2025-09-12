@@ -12,6 +12,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/ShapeFunction.h"
+#include "Rodin/Variational/Integral.h"
 
 namespace Rodin::Models::Advection
 {
@@ -36,24 +37,24 @@ namespace Rodin::Models::Advection
   };
 
   template <
-    class Operand, class VectorField,
-    class Divergence,
-    class Step = Math::RungeKutta::RK4,
-    class Root = Math::RootFinding::NewtonRaphson<Real>,
-    class BoundaryPolicy = DefaultBoundaryPolicy,
-    class TangentPolicy = DefaultTangentPolicy
-  > class Flow;
-
-  template <
-    class Derived,
-    class FES, Variational::ShapeFunctionSpaceType Space,
+    class Operand,
     class VectorField,
-    class Divergence,
     class Step,
     class Root,
     class BoundaryPolicy,
     class TangentPolicy
-  > class Flow<Variational::ShapeFunctionBase<Derived, FES, Space>, VectorField, Divergence, Step, Root, BoundaryPolicy, TangentPolicy>
+  > class Flow;
+
+  template <
+    class Derived,
+    class FES,
+    Variational::ShapeFunctionSpaceType Space,
+    class VectorField,
+    class Step,
+    class Root,
+    class BoundaryPolicy,
+    class TangentPolicy
+  > class Flow<Variational::ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>
   : public Variational::ShapeFunctionBase<
       Flow<Variational::ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, Space>
   {
@@ -66,9 +67,6 @@ namespace Rodin::Models::Advection
 
       using FESType =
         FES;
-
-      using DivergenceType =
-        Divergence;
 
       using StepType =
         Step;
@@ -86,16 +84,20 @@ namespace Rodin::Models::Advection
         typename FormLanguage::Traits<FESType>::ScalarType;
 
       using Parent = Variational::ShapeFunctionBase<
-        Flow<Operand, VectorFieldType, DivergenceType, StepType, RootType, BoundaryPolicy, TangentPolicy>, FES, Space>;
+        Flow<Operand, VectorFieldType, StepType, RootType, BoundaryPolicy, TangentPolicy>, FES, Space>;
 
-      template <class D, class S, class R, class BP, class TP>
-      Flow(const Real& t, const Operand& u, const VectorFieldType& velocity,
-            D&& divergence = [](const Geometry::Point&) { return 0; },
-            S&& st = S(), R&& root = R(), BP&& bp = BP(), TP&& tp = TP())
+      template <class S, class R, class BP, class TP>
+      Flow(
+          const Real& t,
+          const Operand& u,
+          const VectorFieldType& velocity,
+          S&& st = Math::RungeKutta::RK4(),
+          R&& root = Math::RootFinding::NewtonRaphson<ScalarType>(),
+          BP&& bp = DefaultBoundaryPolicy(),
+          TP&& tp = DefaultTangentPolicy())
         : m_t(t),
           m_operand(u.copy()),
           m_velocity(velocity),
-          m_divergence(std::forward<D>(divergence)),
           m_step(std::forward<S>(st)),
           m_root(std::forward<R>(root)),
           m_bp(std::forward<BP>(bp)),
@@ -108,7 +110,6 @@ namespace Rodin::Models::Advection
           m_t(other.m_t),
           m_operand(other.m_operand->copy()),
           m_velocity(other.m_velocity),
-          m_divergence(other.m_divergence),
           m_step(other.m_step),
           m_root(other.m_root),
           m_bp(other.m_bp),
@@ -121,7 +122,6 @@ namespace Rodin::Models::Advection
           m_t(std::exchange(other.m_t, 0)),
           m_operand(std::move(other.m_operand)),
           m_velocity(std::move(other.m_velocity)),
-          m_divergence(std::move(other.m_divergence)),
           m_step(std::move(other.m_step)),
           m_root(std::move(other.m_root)),
           m_bp(std::move(other.m_bp)),
@@ -347,7 +347,7 @@ namespace Rodin::Models::Advection
       {
         m_p = &p;
         m_trace = this->forward(p);
-        m_operand.setPoint(*m_trace);
+        m_operand->setPoint(*m_trace);
         return *this;
       }
 
@@ -366,7 +366,6 @@ namespace Rodin::Models::Advection
       const Real m_t;
       std::unique_ptr<Operand> m_operand;
       std::reference_wrapper<const VectorFieldType> m_velocity;
-      DivergenceType m_divergence;
       Step m_step;
       Root m_root;
       BoundaryPolicy m_bp;
@@ -411,30 +410,35 @@ namespace Rodin::Models::Advection
       using TestFunctionType =
         Variational::TestFunction<FES>;
 
-      template <class U0, class Velocity, class RK = Math::RungeKutta::RK4>
-      Lagrangian(TrialFunctionType& u, TestFunctionType& v, U0&& u0, Velocity&& velocity, RK&& step = RK())
-        : m_u(u), m_v(v),
-          m_t(0),
+      template <class U0, class Velocity, class RK>
+      Lagrangian(
+          TrialFunctionType& u,
+          TestFunctionType& v,
+          U0&& u0,
+          Velocity&& velocity)
+        : m_t(0),
+          m_u(u), m_v(v),
           m_initial(std::forward<U0>(u0)),
-          m_velocity(std::forward<Velocity>(velocity)),
-          m_step(std::forward<RK>(step))
+          m_velocity(std::forward<Velocity>(velocity))
       {}
 
       void step(const Real& dt)
       {
-        const auto& u = m_u.get();
-        const auto& v = m_v.get();
+        using namespace Variational;
 
-        Variational::Problem pb(u, v);
+        auto& u = m_u.get();
+        auto& v = m_v.get();
+
+        Problem pb(u, v);
         if (m_t > 0)
         {
           pb = Integral(u, v)
-             - Integral(u.getSolution(), Flow(v, m_velocity, dt, m_step));
+             - Integral(u.getSolution(), Flow(dt, v, m_velocity, m_step));
         }
         else
         {
           pb = Integral(u, v)
-             - Integral(m_initial, Flow(v, m_velocity, dt, m_step));
+             - Integral(m_initial, Flow(dt, v, m_velocity, m_step));
         }
 
         pb.assemble();
@@ -443,28 +447,27 @@ namespace Rodin::Models::Advection
       }
 
     private:
+      Real m_t;
+
       std::reference_wrapper<TrialFunctionType> m_u;
       std::reference_wrapper<TestFunctionType> m_v;
 
-      Real m_t;
       InitialType m_initial;
       VectorFieldType m_velocity;
       StepType m_step;
   };
 
-  template <class FES, class Data, class Initial, class VectorField, class Step = Math::RungeKutta::RK4>
+  template <class FES, class Data, class Initial, class VectorField>
   Lagrangian(
     Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>&,
     Variational::TestFunction<FES>&,
     Initial&&,
-    VectorField&&,
-    Step&& step = Step())
+    VectorField&&)
   -> Lagrangian<
         Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
         Variational::TestFunction<FES>,
         Initial,
-        VectorField,
-        Step>;
+        VectorField>;
 
 }
 
