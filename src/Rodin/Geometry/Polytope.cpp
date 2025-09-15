@@ -383,6 +383,10 @@ namespace Rodin::Geometry
     return getMesh().getVertexCoordinates(getIndex());
   }
 
+  Polytope::Project::Project(Type g)
+    : m_g(g)
+  {}
+
   void Polytope::Project::cell(Math::SpatialPoint& out, const Math::SpatialPoint& rc) const
   {
     assert(rc.size() >= 0);
