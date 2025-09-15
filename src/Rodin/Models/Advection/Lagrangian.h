@@ -12,7 +12,6 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/ShapeFunction.h"
-#include "Rodin/Variational/Integral.h"
 
 namespace Rodin::Models::Advection
 {
@@ -86,22 +85,18 @@ namespace Rodin::Models::Advection
       using Parent = Variational::ShapeFunctionBase<
         Flow<Operand, VectorFieldType, StepType, RootType, BoundaryPolicy, TangentPolicy>, FES, Space>;
 
-      template <class S, class R, class BP, class TP>
-      Flow(
-          const Real& t,
-          const Operand& u,
-          const VectorFieldType& velocity,
-          S&& st = Math::RungeKutta::RK4(),
-          R&& root = Math::RootFinding::NewtonRaphson<ScalarType>(),
-          BP&& bp = DefaultBoundaryPolicy(),
-          TP&& tp = DefaultTangentPolicy())
+      Flow(const Real& t, const Operand& u, const VectorFieldType& vel,
+           const StepType& st = StepType{},
+           const RootType& root = RootType{},
+           const BoundaryPolicyType& bp = BoundaryPolicyType{},
+           const TangentPolicyType& tp = TangentPolicyType{})
         : m_t(t),
           m_operand(u.copy()),
-          m_velocity(velocity),
-          m_step(std::forward<S>(st)),
-          m_root(std::forward<R>(root)),
-          m_bp(std::forward<BP>(bp)),
-          m_tp(std::forward<TP>(tp)),
+          m_velocity(vel),
+          m_step(st),
+          m_root(root),
+          m_bp(bp),
+          m_tp(tp),
           m_p(nullptr)
       {}
 
@@ -374,6 +369,32 @@ namespace Rodin::Models::Advection
       std::optional<Geometry::Point> m_trace;
   };
 
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space, class VectorField>
+  Flow(const Real&,
+       const Variational::ShapeFunctionBase<Derived, FES, Space>&,
+       const VectorField&)
+  -> Flow<
+       Variational::ShapeFunctionBase<Derived, FES, Space>,
+       std::decay_t<VectorField>,
+       Math::RungeKutta::RK4,
+       Math::RootFinding::NewtonRaphson<typename FormLanguage::Traits<FES>::ScalarType>,
+       DefaultBoundaryPolicy,
+       DefaultTangentPolicy>;
+
+  // 4-arg: explicit Step, default Root and policies
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space, class VectorField, class Step>
+  Flow(const Real&,
+       const Variational::ShapeFunctionBase<Derived, FES, Space>&,
+       const VectorField&,
+       const Step&)
+  -> Flow<
+       Variational::ShapeFunctionBase<Derived, FES, Space>,
+       std::decay_t<VectorField>,
+       std::decay_t<Step>,
+       Math::RootFinding::NewtonRaphson<typename FormLanguage::Traits<FES>::ScalarType>,
+       DefaultBoundaryPolicy,
+       DefaultTangentPolicy>;
+
   /**
    * @brief Lagrangian variational advection for scalar fields.
    */
@@ -410,16 +431,24 @@ namespace Rodin::Models::Advection
       using TestFunctionType =
         Variational::TestFunction<FES>;
 
-      template <class U0, class Velocity, class RK>
-      Lagrangian(
-          TrialFunctionType& u,
-          TestFunctionType& v,
-          U0&& u0,
-          Velocity&& velocity)
+      template <class U0, class Velocity>
+      Lagrangian(TrialFunctionType& u, TestFunctionType& v, U0&& u0, Velocity&& velocity)
         : m_t(0),
           m_u(u), m_v(v),
           m_initial(std::forward<U0>(u0)),
-          m_velocity(std::forward<Velocity>(velocity))
+          m_velocity(std::forward<Velocity>(velocity)),
+          m_step(StepType{})
+      {}
+
+      template <class U0, class Velocity>
+      Lagrangian(
+          TrialFunctionType& u, TestFunctionType& v, U0&& u0, Velocity&& velocity,
+          const StepType& step)
+        : m_t(0),
+          m_u(u), m_v(v),
+          m_initial(std::forward<U0>(u0)),
+          m_velocity(std::forward<Velocity>(velocity)),
+          m_step(step)
       {}
 
       void step(const Real& dt)
@@ -459,15 +488,16 @@ namespace Rodin::Models::Advection
 
   template <class FES, class Data, class Initial, class VectorField>
   Lagrangian(
-    Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>&,
-    Variational::TestFunction<FES>&,
-    Initial&&,
-    VectorField&&)
+      Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>&,
+      Variational::TestFunction<FES>&,
+      Initial&&,
+      VectorField&&)
   -> Lagrangian<
-        Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
-        Variational::TestFunction<FES>,
-        Initial,
-        VectorField>;
+         Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
+         Variational::TestFunction<FES>,
+         Initial,
+         VectorField,
+         Math::RungeKutta::RK4>;
 
 }
 
