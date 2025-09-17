@@ -130,7 +130,7 @@ namespace Rodin::Models::Advection
           m_trace(std::move(other.m_trace))
       {}
 
-      std::optional<Geometry::Point> backtrace(const Geometry::Point& p) const
+      std::optional<Geometry::Point> forward(const Geometry::Point& p) const
       {
         static thread_local Index s_cellIdx;
         static thread_local Math::SpatialPoint s_rc0{{}};
@@ -180,7 +180,7 @@ namespace Rodin::Models::Advection
             mesh.getPolytopeTransformation(cellDim, c0).inverse(s_rc1, pc);
             const auto& cell0 = *mesh.getPolytope(cellDim, c0);
             const Geometry::Point q0(cell0, s_rc1, pc);
-            const auto a0 = -q0.getJacobianInverse() * m_velocity(q0);
+            const auto a0 = q0.getJacobianInverse() * m_velocity(q0);
             const auto& hs0 =
               Geometry::Polytope::Traits(mesh.getGeometry(cellDim, c0)).getHalfSpace();
             const auto nref0 = hs0.matrix.row(j0);
@@ -217,7 +217,7 @@ namespace Rodin::Models::Advection
           const auto vr = [&](const Math::SpatialPoint& rc)
           {
             const Geometry::Point qp(cell, rc);
-            return -qp.getJacobianInverse() * m_velocity(qp);
+            return qp.getJacobianInverse() * m_velocity(qp);
           };
 
           std::optional<Real> tmin;
@@ -346,7 +346,7 @@ namespace Rodin::Models::Advection
       Flow& setPoint(const Geometry::Point& p)
       {
         m_p = &p;
-        if (auto tr = this->backtrace(p))
+        if (auto tr = this->forward(p))
         {
           m_trace.emplace(std::move(*tr));   // construct in-place
           m_operand->setPoint(*m_trace);
