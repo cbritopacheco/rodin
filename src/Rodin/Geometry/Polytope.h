@@ -68,8 +68,8 @@ namespace Rodin::Geometry
         public:
           struct HalfSpace
           {
-            Math::SpatialMatrix<Real> matrix;
-            Math::SpatialVector<Real> vector;
+            Math::Matrix<Real> matrix;
+            Math::Vector<Real> vector;
           };
 
           Traits(Type g);

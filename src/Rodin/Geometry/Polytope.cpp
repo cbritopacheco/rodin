@@ -148,86 +148,80 @@ namespace Rodin::Geometry
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{},
-          Math::SpatialVector<Real>{}
+          Math::Matrix<Real>{},
+          Math::Vector<Real>{}
         };
         return s_hs;
       }
-
       case Type::Segment:
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{
+          Math::Matrix<Real>{
             {  1 },
             { -1 }
           },
-          Math::SpatialVector<Real>{{ 1, 0 }}
+          Math::Vector<Real>{{ 1, 0 }}
         };
         return s_hs;
       }
-
       case Type::Triangle:
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{
+          Math::Matrix<Real>{
             { -1,  0 },
             {  0, -1 },
             {  1 / std::sqrt(2.0),  1 / std::sqrt(2.0) }
           },
-          Math::SpatialVector<Real>{{ 0, 0, 1 / std::sqrt(2.0) }}
+          Math::Vector<Real>{{ 0, 0, 1 / std::sqrt(2.0) }}
         };
         return s_hs;
       }
-
       case Type::Quadrilateral:
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{
+          Math::Matrix<Real>{
             {  0, -1 },
             {  1,  0 },
             {  0,  1 },
             { -1,  0 }
           },
-          Math::SpatialVector<Real>{{ 0, 1, 1, 0 }}
+          Math::Vector<Real>{{ 0, 1, 1, 0 }}
         };
         return s_hs;
       }
-
       case Type::Tetrahedron:
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{
+          Math::Matrix<Real>{
             { -1,  0,  0 },
             {  0, -1,  0 },
             {  0,  0, -1 },
             {  1 / std::sqrt(3.0),  1 / std::sqrt(3.0),  1 / std::sqrt(3.0) }
           },
-          Math::SpatialVector<Real>{{ 0, 0, 0, 1 / std::sqrt(3.0) }}
+          Math::Vector<Real>{{ 0, 0, 0, 1 / std::sqrt(3.0) }}
         };
         return s_hs;
       }
-
       case Type::Wedge:
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{
+          Math::Matrix<Real>{
             {  0,  0, -1 },
             { -1,  0,  0 },
             {  0, -1,  0 },
             {  1 / std::sqrt(2.0),  1 / std::sqrt(2.0), 0 },
             {  0,  0,  1 }
           },
-          Math::SpatialVector<Real>{{ 0, 0, 0, 1 / std::sqrt(2.0), 1 }}
+          Math::Vector<Real>{{ 0, 0, 0, 1 / std::sqrt(2.0), 1 }}
         };
         return s_hs;
       }
     }
-
     assert(false);
     static thread_local const HalfSpace s_null;
     return s_null;
