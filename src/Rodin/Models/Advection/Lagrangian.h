@@ -4,12 +4,15 @@
 #include <cstdlib>
 #include <functional>
 
+#include "Rodin/Math/SparseMatrix.h"
+#include "Rodin/Solver/CG.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
 #include "Rodin/Math/RootFinding/NewtonRaphson.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Solver/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
@@ -477,15 +480,15 @@ namespace Rodin::Models::Advection
         if (m_t > 0)
         {
           pb = Integral(u, v)
-             - Integral(u.getSolution(), Flow(dt, v, m_velocity, m_step));
+               - Integral(u.getSolution(), Flow(dt, v, m_velocity, m_step));
         }
         else
         {
           pb = Integral(u, v)
-             - Integral(m_initial, Flow(dt, v, m_velocity, m_step));
+               - Integral(m_initial, Flow(dt, v, m_velocity, m_step));
         }
 
-        pb.assemble();
+        Solver::CG(pb).solve();
 
         m_t += dt;
       }
