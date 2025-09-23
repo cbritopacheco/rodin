@@ -204,6 +204,9 @@ namespace Rodin::Models::Advection
           return {};
         }
 
+        s_rc1.resizeLike(s_rc0);
+        s_rc_tau.resizeLike(s_rc0);
+
         Real tau = m_t;
         while (tau > 0)
         {
@@ -216,8 +219,10 @@ namespace Rodin::Models::Advection
           // Field in reference space
           const auto vr = [&](const Math::SpatialPoint& rc)
           {
+            static thread_local Math::SpatialVector<Real> s_vr;
             const Geometry::Point qp(cell, rc);
-            return qp.getJacobianInverse() * m_velocity(qp);
+            s_vr = qp.getJacobianInverse() * m_velocity(qp);
+            return s_vr;
           };
 
           std::optional<Real> tmin;
