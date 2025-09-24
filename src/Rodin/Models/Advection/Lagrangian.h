@@ -146,10 +146,17 @@ namespace Rodin::Models::Advection
         const size_t cellDim = mesh.getDimension();
         const auto& conn = mesh.getConnectivity();
 
+        std::cout << "forward:\n";
+
+
         if (polytope0.getDimension() == cellDim)
         {
+          std::cout << "  start in cell\n";
           s_cellIdx = polytope0.getIndex();
           s_rc0 = p.getReferenceCoordinates();
+          std::cout << "  rc0 = " << s_rc0.transpose() << "\n";
+          std::cout << "  cellIdx = " << s_cellIdx << "\n";
+          std::cout << "  pc = " << p.getPhysicalCoordinates().transpose() << "\n";
         }
         else if (polytope0.getDimension() == cellDim - 1) // Start on a face
         {
@@ -213,6 +220,7 @@ namespace Rodin::Models::Advection
         Real tau = m_t;
         while (tau > 0)
         {
+          std::cout << " tau = " << tau << "\n";
           const auto it = mesh.getPolytope(cellDim, s_cellIdx);
           const auto& cell = *it;
           const Geometry::Polytope::Type g = mesh.getGeometry(cellDim, s_cellIdx);
@@ -263,29 +271,41 @@ namespace Rodin::Models::Advection
           }
           else
           {
-            // Fallback: re-integrate for each evaluation
+            s_rc_tau = s_rc0;
+            std::cout << "  rc_tau = " << s_rc_tau.transpose() << "\n";
+
             m_step.step(s_rc_tau, tau, s_rc0, vr);
+
+            std::cout << "  rc_tau = " << s_rc_tau.transpose() << "\n";
+            std::cout << "   vr(rc0) = " << vr(s_rc0).transpose() << "\n";
 
             for (size_t i = 0; i < faces.size(); ++i)
             {
               const auto nref = hs.matrix.row(i);
-              const Real bf   = hs.vector[i];
+              const Real bf = hs.vector[i];
 
               const Real g0 = bf - nref.dot(s_rc0);
               const Real gtau = bf - nref.dot(s_rc_tau);
+
               if (g0 * gtau < 0) // root in (0, tau)
               {
                 const Real t0 = Real(0.5) * tau;
-                auto event = [&](Real& t)
+                const auto event = [&](Real& t)
                 {
                   m_step.step(s_rc1, t, s_rc0, vr);
-                  const auto V = vr(s_rc1);
+                  decltype(auto) V = vr(s_rc1);
                   return std::pair{ bf - nref.dot(s_rc1), -nref.dot(V) };
                 };
-                if (auto rt = m_root.solve(event, t0, Real(0), tau))
+
+                if (const auto rt = m_root.solve(event, t0, Real(0), tau))
                 {
+                  std::cout << "Found root at face " << i << "\n";
                   const Real t = *rt;
-                  if (!tmin.has_value() || (t < *tmin)) { tmin = t; local = i; }
+                  if (!tmin.has_value() || (t < *tmin))
+                  {
+                    tmin = t;
+                    local = i;
+                  }
                 }
               }
             }
@@ -300,9 +320,11 @@ namespace Rodin::Models::Advection
             break;
           }
 
+          assert(local < faces.size());
+
           // Hit the closest face at t*
-          const Real  tstar = *tmin;
-          const Index face  = faces[local];
+          const Real tstar = *tmin;
+          const Index face = faces[local];
 
           // Arrive on face (in ref of current cell)
           m_step.step(s_rc1, tstar, s_rc0, vr);
@@ -363,6 +385,7 @@ namespace Rodin::Models::Advection
         {
           m_trace.reset();
         }
+        std::exit(1);
         return *this;
       }
 
@@ -489,6 +512,7 @@ namespace Rodin::Models::Advection
         }
 
         Solver::CG(pb).solve();
+        std::cout << pb.getLinearSystem().getVector().norm() << std::endl;
 
         m_t += dt;
       }

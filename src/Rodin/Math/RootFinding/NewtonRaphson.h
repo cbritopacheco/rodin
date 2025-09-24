@@ -4,16 +4,18 @@
 #include <cmath>
 #include <optional>
 
+#include <iostream>
+
 namespace Rodin::Math::RootFinding
 {
   template <class Scalar>
   class NewtonRaphson
   {
     public:
-      explicit NewtonRaphson(
-          Scalar abs_t_tol = static_cast<Scalar>(1e-12),
-          Scalar rel_t_tol = static_cast<Scalar>(1e-9),
-          Scalar abs_g_tol = static_cast<Scalar>(1e-12),
+      NewtonRaphson(
+          Scalar abs_t_tol = 1e-12,
+          Scalar rel_t_tol = 1e-9,
+          Scalar abs_g_tol = 1e-12,
           std::size_t max_iter = 25)
         : m_abs_t_tol(abs_t_tol),
           m_rel_t_tol(rel_t_tol),
@@ -58,11 +60,11 @@ namespace Rodin::Math::RootFinding
           // Keep the bracket with current sample
           if (g * ga < static_cast<Scalar>(0))
           {
-            b  = t; gb = g;
+            b = t; gb = g;
           }
           else
           {
-            a  = t; ga = g;
+            a = t; ga = g;
           }
 
           // Proposed Newton step
@@ -108,6 +110,7 @@ namespace Rodin::Math::RootFinding
           g_prev  = g;
           have_prev = true;
           t = t_new;
+          std::cout << "  it=" << it << " t=" << t << " g=" << g << " gp=" << gp << "\n";
         }
 
         // No convergence within max_iter
