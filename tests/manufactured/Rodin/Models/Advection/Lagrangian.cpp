@@ -77,7 +77,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
 
     // construct Lagrangian object
     Models::Advection::Lagrangian lagrangian(u, v, u0, velocity);
-    lagrangian.step(0.1);
+    lagrangian.step(1);
 
 
     u.getSolution().save("u0.gf");
