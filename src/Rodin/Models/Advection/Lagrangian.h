@@ -22,8 +22,9 @@ namespace Rodin::Models::Advection
   {
     public:
       constexpr
-      bool operator()(Real&, Index&, Math::SpatialPoint&) const
+      bool operator()(Real& tau, Index&, Math::SpatialPoint&) const
       {
+        tau = 0;
         return false;
       }
   };
@@ -32,7 +33,7 @@ namespace Rodin::Models::Advection
   {
     public:
       constexpr
-      bool operator()(Real&, Index&, Math::SpatialPoint&) const
+      bool operator()(Real& tau, Index&, Math::SpatialPoint&) const
       {
         return true;
       }
@@ -146,17 +147,10 @@ namespace Rodin::Models::Advection
         const size_t cellDim = mesh.getDimension();
         const auto& conn = mesh.getConnectivity();
 
-        std::cout << "forward:\n";
-
-
         if (polytope0.getDimension() == cellDim)
         {
-          std::cout << "  start in cell\n";
           s_cellIdx = polytope0.getIndex();
           s_rc0 = p.getReferenceCoordinates();
-          std::cout << "  rc0 = " << s_rc0.transpose() << "\n";
-          std::cout << "  cellIdx = " << s_cellIdx << "\n";
-          std::cout << "  pc = " << p.getPhysicalCoordinates().transpose() << "\n";
         }
         else if (polytope0.getDimension() == cellDim - 1) // Start on a face
         {
@@ -220,7 +214,6 @@ namespace Rodin::Models::Advection
         Real tau = m_t;
         while (tau > 0)
         {
-          std::cout << " tau = " << tau << "\n";
           const auto it = mesh.getPolytope(cellDim, s_cellIdx);
           const auto& cell = *it;
           const Geometry::Polytope::Type g = mesh.getGeometry(cellDim, s_cellIdx);
@@ -272,34 +265,29 @@ namespace Rodin::Models::Advection
           else
           {
             s_rc_tau = s_rc0;
-            std::cout << "  rc_tau = " << s_rc_tau.transpose() << "\n";
 
             m_step.step(s_rc_tau, tau, s_rc0, vr);
-
-            std::cout << "  rc_tau = " << s_rc_tau.transpose() << "\n";
-            std::cout << "   vr(rc0) = " << vr(s_rc0).transpose() << "\n";
 
             for (size_t i = 0; i < faces.size(); ++i)
             {
               const auto nref = hs.matrix.row(i);
               const Real bf = hs.vector[i];
 
-              const Real g0 = bf - nref.dot(s_rc0);
-              const Real gtau = bf - nref.dot(s_rc_tau);
+              const Real f0 = bf - nref.dot(s_rc0);
+              const Real ftau = bf - nref.dot(s_rc_tau);
 
-              if (g0 * gtau < 0) // root in (0, tau)
+              if (f0 * ftau < 0) // root in (0, tau)
               {
                 const Real t0 = Real(0.5) * tau;
                 const auto event = [&](Real& t)
                 {
                   m_step.step(s_rc1, t, s_rc0, vr);
-                  decltype(auto) V = vr(s_rc1);
-                  return std::pair{ bf - nref.dot(s_rc1), -nref.dot(V) };
+                  decltype(auto) vrv = vr(s_rc1);
+                  return std::pair{ bf - nref.dot(s_rc1), -nref.dot(vrv) };
                 };
 
                 if (const auto rt = m_root.solve(event, t0, Real(0), tau))
                 {
-                  std::cout << "Found root at face " << i << "\n";
                   const Real t = *rt;
                   if (!tmin.has_value() || (t < *tmin))
                   {
@@ -314,7 +302,8 @@ namespace Rodin::Models::Advection
           // No face will be hit -> advance whole remaining time
           if (!tmin.has_value())
           {
-            if (!m_tp(tau, s_cellIdx, s_rc0)) return {};
+            if (!m_tp(tau, s_cellIdx, s_rc0))
+              return {};
             m_step.step(s_rc1, tau, s_rc0, vr);
             s_rc0 = s_rc1;
             break;
@@ -385,7 +374,6 @@ namespace Rodin::Models::Advection
         {
           m_trace.reset();
         }
-        std::exit(1);
         return *this;
       }
 
@@ -503,12 +491,12 @@ namespace Rodin::Models::Advection
         if (m_t > 0)
         {
           pb = Integral(u, v)
-               - Integral(u.getSolution(), Flow(dt, v, m_velocity, m_step));
+             - Integral(u.getSolution(), Flow(dt, v, m_velocity, m_step));
         }
         else
         {
           pb = Integral(u, v)
-               - Integral(m_initial, Flow(dt, v, m_velocity, m_step));
+             - Integral(m_initial, Flow(dt, v, m_velocity, m_step));
         }
 
         Solver::CG(pb).solve();
