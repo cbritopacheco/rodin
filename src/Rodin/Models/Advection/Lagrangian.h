@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <functional>
 
+#include "Rodin/Math/Common.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Solver/CG.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
@@ -15,6 +16,7 @@
 #include "Rodin/Solver/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/ShapeFunction.h"
+#include "Rodin/Variational/BoundaryNormal.h"
 
 namespace Rodin::Models::Advection
 {
@@ -22,9 +24,8 @@ namespace Rodin::Models::Advection
   {
     public:
       constexpr
-      bool operator()(Real& tau, Index&, Math::SpatialPoint&) const
+      bool operator()(Real&, Index&, Math::SpatialPoint&) const
       {
-        tau = 0;
         return false;
       }
   };
@@ -33,7 +34,7 @@ namespace Rodin::Models::Advection
   {
     public:
       constexpr
-      bool operator()(Real& tau, Index&, Math::SpatialPoint&) const
+      bool operator()(Real&, Index&, Math::SpatialPoint&) const
       {
         return true;
       }
@@ -211,7 +212,8 @@ namespace Rodin::Models::Advection
         s_rc1.resizeLike(s_rc0);
         s_rc_tau.resizeLike(s_rc0);
 
-        Real tau = m_t;
+        Real tau = std::abs(m_t);
+        const Real sgn = Math::sgn(m_t);
         while (tau > 0)
         {
           const auto it = mesh.getPolytope(cellDim, s_cellIdx);
@@ -225,7 +227,7 @@ namespace Rodin::Models::Advection
           {
             static thread_local Math::SpatialVector<Real> s_vr;
             const Geometry::Point qp(cell, rc);
-            s_vr = qp.getJacobianInverse() * m_velocity(qp);
+            s_vr = sgn * qp.getJacobianInverse() * m_velocity(qp);
             return s_vr;
           };
 
@@ -487,6 +489,20 @@ namespace Rodin::Models::Advection
         auto& u = m_u.get();
         auto& v = m_v.get();
 
+        BoundaryNormal n(u.getFiniteElementSpace().getMesh());
+
+        const RealFunction vn =
+          [&](const Geometry::Point& p) -> Real
+          {
+            static thread_local Math::SpatialVector<Real> s_n;
+            s_n = n(p);
+            const auto dot = m_velocity(p).dot(s_n);
+            if (dot > 0)
+              return dot;
+            else
+              return 0;
+          };
+
         Problem pb(u, v);
         if (m_t > 0)
         {
@@ -500,6 +516,7 @@ namespace Rodin::Models::Advection
         }
 
         Solver::CG(pb).solve();
+
         std::cout << pb.getLinearSystem().getVector().norm() << std::endl;
 
         m_t += dt;
