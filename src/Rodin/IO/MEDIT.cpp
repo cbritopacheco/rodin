@@ -7,6 +7,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "MEDIT.h"
+#include "Rodin/Array.h"
 
 namespace Rodin::IO
 {
@@ -81,13 +82,13 @@ namespace Rodin::IO
         continue;
       auto kw = MEDIT::ParseKeyword()(line.begin(), line.end());
       if (!kw)
-        continue;
-      auto entity = MEDIT::toKeyword(kw->c_str());
-      if (!entity)
       {
-        Alert::Warning() << "Ignoring unrecognized keyword: " << *kw << Alert::Raise;
+        Alert::Warning() << "Ignoring unrecognized entity: " << line << Alert::Raise;
         continue;
       }
+      auto entity = MEDIT::toKeyword(kw->c_str());
+      if (!entity)
+        continue;
       if (*entity == MEDIT::Keyword::End)
         break;
 
