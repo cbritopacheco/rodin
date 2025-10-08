@@ -21,6 +21,8 @@ namespace Rodin::Variational
     public:
       using ScalarType = Number;
 
+      using ScatterMapType = IndexMap<ScalarType>;
+
       using Parent = Integrator;
 
       template <class FES>
@@ -107,20 +109,30 @@ namespace Rodin::Variational
         return Integrator::Type::Linear;
       }
 
+      void setScatterMap(const ScatterMapType& scatter)
+      {
+        m_scatter = scatter;
+      }
+
+      const ScatterMapType& getScatterMap() const
+      {
+        return m_scatter;
+      }
+
       virtual const Geometry::Polytope& getPolytope() const = 0;
 
       virtual LinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
       virtual ScalarType integrate(size_t local) = 0;
 
-      virtual
-      LinearFormIntegratorBase* copy() const noexcept override = 0;
+      virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
 
       virtual Geometry::Region getRegion() const = 0;
 
     private:
       std::unique_ptr<FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;
+      ScatterMapType m_scatter;
   };
 }
 
