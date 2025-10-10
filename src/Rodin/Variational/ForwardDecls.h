@@ -1074,6 +1074,15 @@ namespace Rodin::Variational
    */
   template <class LinearSystem>
   class ProblemBase;
+
+  template <
+    class Operand,
+    class VectorField,
+    class Step,
+    class Root,
+    class BoundaryPolicy,
+    class TangentPolicy
+  > class Flow;
 }
 
 #endif

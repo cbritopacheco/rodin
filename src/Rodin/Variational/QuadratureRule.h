@@ -5,13 +5,9 @@
 
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
-#include "Dot.h"
-#include "Sum.h"
 #include "ShapeFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
-#include <cmath>
-#include <limits>
 
 namespace Rodin::Variational
 {
@@ -537,6 +533,22 @@ namespace Rodin::Variational
       bool m_set;
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
+  };
+
+  template <
+    class Derived,
+    class FES,
+    ShapeFunctionSpaceType Space,
+    class VectorField,
+    class Step,
+    class Root,
+    class BoundaryPolicy,
+    class TangentPolicy
+  > class QuadratureRule<Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>
+    : public LinearFormIntegratorBase<
+        typename FormLanguage::Traits<
+          Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>::ScalarType>
+  {
   };
 }
 
