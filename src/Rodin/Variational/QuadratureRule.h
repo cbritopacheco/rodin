@@ -534,22 +534,6 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
   };
-
-  template <
-    class Derived,
-    class FES,
-    ShapeFunctionSpaceType Space,
-    class VectorField,
-    class Step,
-    class Root,
-    class BoundaryPolicy,
-    class TangentPolicy
-  > class QuadratureRule<Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>
-    : public LinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>::ScalarType>
-  {
-  };
 }
 
 #endif

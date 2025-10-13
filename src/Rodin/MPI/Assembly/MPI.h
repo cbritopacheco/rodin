@@ -90,7 +90,7 @@ namespace Rodin::Assembly
             {
               const auto& fe = fes.getShard().getFiniteElement(faceDim, i);
               const auto& mapping =
-                fes.getShard().getMapping({ faceDim, i }, value);
+                fes.getShard().getPullback({ faceDim, i }, value);
               for (Index local = 0; local < fe.getCount(); local++)
               {
                 const Index global = fes.getGlobalIndex(

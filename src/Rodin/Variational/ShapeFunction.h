@@ -300,7 +300,7 @@ namespace Rodin::Variational
         const size_t count = fe.getCount();
         m_basis.resize(count);
         for (size_t local = 0; local < count; local++)
-          m_basis[local] = fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
+          m_basis[local] = fes.getPushforward({ d, i }, fe.getBasis(local))(p);
         return *this;
       }
 

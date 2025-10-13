@@ -11,10 +11,14 @@
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
+#include "Rodin/Geometry/Region.h"
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
 #include "Rodin/Math/RootFinding/NewtonRaphson.h"
+
+#include "Rodin/QF/GenericPolytopeQuadrature.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 namespace Rodin::Variational
 {
@@ -369,10 +373,21 @@ namespace Rodin::Variational
         return *this;
       }
 
+      const auto& getTrace() const
+      {
+        return m_trace;
+      }
+
       constexpr
       const auto& getLeaf() const
       {
         return m_operand->getLeaf();
+      }
+
+      const auto& getOperand() const
+      {
+        assert(m_operand);
+        return *m_operand;
       }
 
       virtual Flow* copy() const noexcept override
@@ -419,6 +434,125 @@ namespace Rodin::Variational
     class VVel, class SStep, class RRoot, class BBP, class TTP>
   Flow(const Real&, const ShapeFunctionBase<D,FES,S>&, VVel&&, SStep&&, RRoot&&, BBP&&, TTP&&)
     -> Flow<ShapeFunctionBase<D, FES, S>, VVel, SStep, RRoot, BBP, TTP>;
+
+  template <
+    class Derived,
+    class FES,
+    ShapeFunctionSpaceType Space,
+    class VectorField,
+    class Step,
+    class Root,
+    class BoundaryPolicy,
+    class TangentPolicy
+  > class QuadratureRule<Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>
+    : public LinearFormIntegratorBase<
+        typename FormLanguage::Traits<
+          Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>::ScalarType>
+  {
+    public:
+      using FESType =
+        FES;
+
+      using IntegrandType =
+        Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>;
+
+      using ScalarType =
+        typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
+      using Parent = LinearFormIntegratorBase<ScalarType>;
+
+      QuadratureRule(const IntegrandType& integrand)
+        : Parent(integrand.getLeaf()),
+          m_integrand(integrand.copy()),
+          m_polytope(nullptr)
+      {}
+
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy()),
+          m_polytope(other.m_polytope),
+          m_qf(other.m_qf),
+          m_ps(other.m_ps)
+      {}
+
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand)),
+          m_polytope(std::exchange(other.m_polytope, nullptr)),
+          m_qf(std::move(other.m_qf)),
+          m_ps(std::move(other.m_ps))
+      {}
+
+      ScalarType integrate(size_t local)
+      {
+        return ScalarType(0);
+      }
+
+      QuadratureRule& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_polytope = &polytope;
+        auto& integrand = *m_integrand;
+        auto& scatter = this->getScatter();
+        const auto& fes = integrand.getFiniteElementSpace();
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+        const auto& fe = fes.getFiniteElement(d, idx);
+        const auto& u = integrand.getOperand();
+        m_qf.reset(new QF::GenericPolytopeQuadrature(polytope.getGeometry()));
+        m_ps.clear();
+        m_ps.reserve(m_qf->getSize());
+        for (size_t i = 0; i < m_qf->getSize(); i++)
+          m_ps.emplace_back(polytope, m_qf->getPoint(i));
+        scatter.clear();
+        for (size_t i = 0; i < m_ps.size(); ++i)
+        {
+          const auto& p = m_ps[i];
+          const Real w = m_qf->getWeight(i) * p.getDistortion();
+          m_integrand.setPoint(p);
+          const auto& trace = m_integrand.getTrace();
+          if (!trace)
+            continue;
+          const auto& cell = trace->getPolytope();
+          const size_t cellDim = cell.getDimension();
+          const Index cellIdx = cell.getIndex();
+          decltype(auto) fe = fes.getFiniteElement(cellDim, cellIdx);
+          decltype(auto) up = u.getValue(p);
+          for (size_t local = 0; local < fe.getCount(); ++local)
+          {
+            const Index global = fes.getGlobalIndex({ cellDim, cellIdx }, local);
+            decltype(auto) basis = fe.getBasis(local);
+            decltype(auto) mapping = fes.getInverseMapping({ cellDim, cellIdx }, basis);
+            scatter.push(global, w * up * mapping(*trace));
+          }
+        }
+        return *this;
+      }
+
+      constexpr
+      const IntegrandType& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      const Geometry::Polytope& getPolytope() const override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      virtual Geometry::Region getRegion() const = 0;
+
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<IntegrandType> m_integrand;
+
+      std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
+      std::vector<Geometry::Point> m_ps;
+
+      const Geometry::Polytope* m_polytope;
+  };
 }
 
 #endif

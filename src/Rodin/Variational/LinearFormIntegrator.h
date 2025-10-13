@@ -44,6 +44,36 @@ namespace Rodin::Variational
             return *this;
           }
 
+          size_t size() const
+          {
+            return m_data.size();
+          }
+
+          const Index& getIndex(size_t i) const
+          {
+            return m_data[i].first;
+          }
+
+          const ScalarType& getDOF(size_t i) const
+          {
+            return m_data[i].second;
+          }
+
+          void clear()
+          {
+            m_data.clear();
+          }
+
+          auto begin() const
+          {
+            return m_data.begin();
+          }
+
+          auto end() const
+          {
+            return m_data.end();
+          }
+
         private:
           std::vector<std::pair<Index, ScalarType>> m_data;
       };
@@ -132,15 +162,15 @@ namespace Rodin::Variational
         return Integrator::Type::Linear;
       }
 
-      // void setScatterMap(const ScatterMap& scatter)
-      // {
-      //   m_scatter = scatter;
-      // }
+      Scatter& getScatter()
+      {
+        return m_scatter;
+      }
 
-      // const ScatterMap& getScatterMap() const
-      // {
-      //   return m_scatter;
-      // }
+      const Scatter& getScatter() const
+      {
+        return m_scatter;
+      }
 
       virtual const Geometry::Polytope& getPolytope() const = 0;
 
@@ -155,7 +185,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;
-      // ScatterMap m_scatter;
+      Scatter m_scatter;
   };
 }
 
