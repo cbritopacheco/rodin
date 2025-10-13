@@ -436,7 +436,8 @@ namespace Rodin::Variational
     -> Flow<ShapeFunctionBase<D, FES, S>, VVel, SStep, RRoot, BBP, TTP>;
 
   template <
-    class Derived,
+    class LHSDerived,
+    class RHSDerived,
     class FES,
     ShapeFunctionSpaceType Space,
     class VectorField,
@@ -444,17 +445,22 @@ namespace Rodin::Variational
     class Root,
     class BoundaryPolicy,
     class TangentPolicy
-  > class QuadratureRule<Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>
+  > class QuadratureRule<
+    Dot<
+      FunctionBase<LHSDerived>,
+      Flow<ShapeFunctionBase<RHSDerived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>>
     : public LinearFormIntegratorBase<
         typename FormLanguage::Traits<
-          Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>::ScalarType>
+          Flow<ShapeFunctionBase<RHSDerived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>::ScalarType>
   {
     public:
       using FESType =
         FES;
 
       using IntegrandType =
-        Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>;
+        Dot<
+          FunctionBase<LHSDerived>,
+          Flow<ShapeFunctionBase<RHSDerived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>;
 
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
