@@ -24,26 +24,26 @@
 
 namespace Rodin::FormLanguage
 {
-    template <
-      class Derived,
-      class FES,
-      class VectorField,
-      class Step,
-      class Root,
-      class BoundaryPolicy,
-      class TangentPolicy
-    >
-    struct Traits<
-      Variational::Flow<
-        Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
-        VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>
-    {
-      using FESType = FES;
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TestSpace;
+  template <
+    class Derived,
+    class FES,
+    class VectorField,
+    class Step,
+    class Root,
+    class BoundaryPolicy,
+    class TangentPolicy
+  >
+  struct Traits<
+    Variational::Flow<
+      Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
+      VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>
+  {
+    using FESType = FES;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TestSpace;
 
-      using OperandType =
-        Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
-    };
+    using OperandType =
+      Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
+  };
 }
 
 namespace Rodin::Variational
@@ -187,38 +187,38 @@ namespace Rodin::Variational
           }
           else // Start on an interior face
           {
+            // Start on an interior face
             assert(adj.size() == 2);
             const Index c0 = adj[0];
             const auto& faces0 = conn.getIncidence(cellDim, cellDim - 1).at(c0);
             size_t j0 = faces0.size();
             for (size_t k = 0; k < faces0.size(); ++k)
-            {
-              if (faces0[k] == fidx)
-              {
-                j0 = k;
-                break;
-              }
-            }
+              if (faces0[k] == fidx) { j0 = k; break; }
             assert(j0 < faces0.size());
+
             const auto& pc = p.getPhysicalCoordinates();
             mesh.getPolytopeTransformation(cellDim, c0).inverse(s_rc1, pc);
             const auto& cell0 = *mesh.getPolytope(cellDim, c0);
             const Geometry::Point q0(cell0, s_rc1, pc);
             const auto a0 = q0.getJacobianInverse() * m_velocity(q0);
-            const auto& hs0 =
-              Geometry::Polytope::Traits(mesh.getGeometry(cellDim, c0)).getHalfSpace();
+
+            const auto& hs0 = Geometry::Polytope::Traits(mesh.getGeometry(cellDim, c0)).getHalfSpace();
             const auto nref0 = hs0.matrix.row(j0);
-            if (nref0.dot(a0) > 0) // Flow into cell c1
+
+            // nref0 is inward for c0:
+            //  nref0·a0 > 0  => into c0
+            //  nref0·a0 < 0  => out of c0 => into the other cell
+            if (nref0.dot(a0) > 0) // into c0
+            {
+              Geometry::Polytope::Project(mesh.getGeometry(cellDim, c0)).cell(s_rc0, s_rc1);
+              s_cellIdx = c0;
+            }
+            else // into c1
             {
               const Index c1 = adj[1];
               mesh.getPolytopeTransformation(cellDim, c1).inverse(s_rc1, pc);
               Geometry::Polytope::Project(mesh.getGeometry(cellDim, c1)).cell(s_rc0, s_rc1);
               s_cellIdx = c1;
-            }
-            else // Flow into cell c0
-            {
-              Geometry::Polytope::Project(mesh.getGeometry(cellDim, c0)).cell(s_rc0, s_rc1);
-              s_cellIdx = c0;
             }
           }
         }

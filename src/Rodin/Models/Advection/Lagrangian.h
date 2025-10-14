@@ -14,11 +14,6 @@
 
 #include "Rodin/Variational/BoundaryNormal.h"
 
-// A: force a readable compile-time error
-template<class> struct always_false : std::false_type {};
-template<class T>
-void show_type() { static_assert(always_false<T>::value, "T is here"); }
-
 namespace Rodin::Models::Advection
 {
   /**
