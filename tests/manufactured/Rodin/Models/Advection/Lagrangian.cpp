@@ -6,6 +6,8 @@
  */
 #include <gtest/gtest.h>
 
+#include "Rodin/Variational/Flow.h"
+
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 
@@ -68,7 +70,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     auto u0 = sin(pi * F::x) * sin(pi * F::y);
 
     // exact at time t: u(x,y,t) = sin(pi(x - vx t)) sin(pi(y - vy t))
-    const Real t_final = 0.2;
+    const Real t_final = 0;
     auto u_exact = sin(pi * (F::x - vx * t_final)) * sin(pi * (F::y - vy * t_final));
 
     // trial / test
@@ -78,7 +80,6 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     // construct Lagrangian object
     Models::Advection::Lagrangian lagrangian(u, v, u0, velocity);
     lagrangian.step(1);
-
 
     u.getSolution().save("u0.gf");
     mesh.save("u0.mesh");

@@ -17,8 +17,34 @@
 #include "Rodin/Math/RungeKutta/RK4.h"
 #include "Rodin/Math/RootFinding/NewtonRaphson.h"
 
+#include "Rodin/Variational/ShapeFunction.h"
+
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 #include "Rodin/QF/QuadratureFormula.h"
+
+namespace Rodin::FormLanguage
+{
+    template <
+      class Derived,
+      class FES,
+      class VectorField,
+      class Step,
+      class Root,
+      class BoundaryPolicy,
+      class TangentPolicy
+    >
+    struct Traits<
+      Variational::Flow<
+        Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
+        VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>
+    {
+      using FESType = FES;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TestSpace;
+
+      using OperandType =
+        Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
+    };
+}
 
 namespace Rodin::Variational
 {
@@ -45,19 +71,18 @@ namespace Rodin::Variational
   template <
     class Derived,
     class FES,
-    ShapeFunctionSpaceType Space,
     class VectorField,
     class Step,
     class Root,
     class BoundaryPolicy,
     class TangentPolicy
-  > class Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>
+  > class Flow<ShapeFunctionBase<Derived, FES, TestSpace>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>
   : public ShapeFunctionBase<
-      Flow<ShapeFunctionBase<Derived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, Space>
+      Flow<ShapeFunctionBase<Derived, FES, TestSpace>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, TestSpace>
   {
     public:
       using Operand =
-        ShapeFunctionBase<Derived, FES, Space>;
+        ShapeFunctionBase<Derived, FES, TestSpace>;
 
       using VectorFieldType =
         VectorField;
@@ -82,7 +107,7 @@ namespace Rodin::Variational
 
       using Parent =
         ShapeFunctionBase<
-          Flow<Operand, VectorFieldType, StepType, RootType, BoundaryPolicy, TangentPolicy>, FES, Space>;
+          Flow<Operand, VectorFieldType, StepType, RootType, BoundaryPolicy, TangentPolicy>, FES, TestSpace>;
 
       template <
         class VVel,
@@ -407,20 +432,20 @@ namespace Rodin::Variational
       std::optional<Geometry::Point> m_trace;
   };
 
-  template <class D, class FES, ShapeFunctionSpaceType S, class VVel>
-  Flow(const Real&, const ShapeFunctionBase<D, FES, S>&, VVel&&)
+  template <class D, class FES, class VVel>
+  Flow(const Real&, const ShapeFunctionBase<D, FES, TestSpace>&, VVel&&)
     -> Flow<
-         ShapeFunctionBase<D, FES, S>,
+         ShapeFunctionBase<D, FES, TestSpace>,
          VVel,                       // keep T or T&
          Math::RungeKutta::RK4,      // value default
          Math::RootFinding::NewtonRaphson<typename FormLanguage::Traits<FES>::ScalarType>,
          DefaultBoundaryPolicy,
          DefaultTangentPolicy>;
 
-  template <class D, class FES, ShapeFunctionSpaceType S, class VVel, class SStep>
-  Flow(const Real&, const ShapeFunctionBase<D, FES, S>&, VVel&&, SStep&&)
+  template <class D, class FES, class VVel, class SStep>
+  Flow(const Real&, const ShapeFunctionBase<D, FES, TestSpace>&, VVel&&, SStep&&)
     -> Flow<
-         ShapeFunctionBase<D,FES,S>,
+         ShapeFunctionBase<D, FES, TestSpace>,
          VVel,
          SStep,
          Math::RootFinding::NewtonRaphson<typename FormLanguage::Traits<FES>::ScalarType>,
@@ -428,44 +453,62 @@ namespace Rodin::Variational
          DefaultTangentPolicy>;
 
   template <
-    class D,
-    class FES,
-    ShapeFunctionSpaceType S,
+    class D, class FES,
     class VVel, class SStep, class RRoot, class BBP, class TTP>
-  Flow(const Real&, const ShapeFunctionBase<D,FES,S>&, VVel&&, SStep&&, RRoot&&, BBP&&, TTP&&)
-    -> Flow<ShapeFunctionBase<D, FES, S>, VVel, SStep, RRoot, BBP, TTP>;
+  Flow(const Real&, const ShapeFunctionBase<D, FES, TestSpace>&, VVel&&, SStep&&, RRoot&&, BBP&&, TTP&&)
+    -> Flow<ShapeFunctionBase<D, FES, TestSpace>, VVel, SStep, RRoot, BBP, TTP>;
 
   template <
     class LHSDerived,
     class RHSDerived,
     class FES,
-    ShapeFunctionSpaceType Space,
     class VectorField,
     class Step,
     class Root,
     class BoundaryPolicy,
     class TangentPolicy
   > class QuadratureRule<
-    Dot<
-      FunctionBase<LHSDerived>,
-      Flow<ShapeFunctionBase<RHSDerived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>>
+    ShapeFunctionBase<
+      Dot<
+        FunctionBase<LHSDerived>,
+        ShapeFunctionBase<
+          Flow<
+            ShapeFunctionBase<RHSDerived, FES, TestSpace>,
+            VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, TestSpace>>,
+          FES, TestSpace>>
     : public LinearFormIntegratorBase<
         typename FormLanguage::Traits<
-          Flow<ShapeFunctionBase<RHSDerived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>::ScalarType>
+          ShapeFunctionBase<
+          Dot<
+            FunctionBase<LHSDerived>,
+            ShapeFunctionBase<
+              Flow<
+                ShapeFunctionBase<RHSDerived, FES, TestSpace>,
+                VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, TestSpace>>,
+              FES, TestSpace>>::ScalarType>
   {
     public:
       using FESType =
         FES;
 
+      using LHSType =
+        FunctionBase<LHSDerived>;
+
+      using RHSType =
+        ShapeFunctionBase<
+          Flow<
+            ShapeFunctionBase<RHSDerived, FES, TestSpace>,
+            VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>;
+
       using IntegrandType =
-        Dot<
-          FunctionBase<LHSDerived>,
-          Flow<ShapeFunctionBase<RHSDerived, FES, Space>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>;
+        ShapeFunctionBase<Dot<LHSType, RHSType>, FES, TestSpace>;
 
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
       using Parent = LinearFormIntegratorBase<ScalarType>;
+
+      using Parent::getScatter;
 
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
@@ -476,9 +519,7 @@ namespace Rodin::Variational
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
-          m_polytope(other.m_polytope),
-          m_qf(other.m_qf),
-          m_ps(other.m_ps)
+          m_polytope(other.m_polytope)
       {}
 
       QuadratureRule(QuadratureRule&& other)
@@ -489,12 +530,12 @@ namespace Rodin::Variational
           m_ps(std::move(other.m_ps))
       {}
 
-      ScalarType integrate(size_t local)
+      ScalarType integrate(size_t local) override
       {
         return ScalarType(0);
       }
 
-      QuadratureRule& setPolytope(const Geometry::Polytope& polytope)
+      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_polytope = &polytope;
         auto& integrand = *m_integrand;
@@ -503,7 +544,8 @@ namespace Rodin::Variational
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
         const auto& fe = fes.getFiniteElement(d, idx);
-        const auto& u = integrand.getOperand();
+        const auto& u = integrand.getDerived().getLHS();
+        auto& flow = integrand.getDerived().getRHS().getDerived();
         m_qf.reset(new QF::GenericPolytopeQuadrature(polytope.getGeometry()));
         m_ps.clear();
         m_ps.reserve(m_qf->getSize());
@@ -514,8 +556,8 @@ namespace Rodin::Variational
         {
           const auto& p = m_ps[i];
           const Real w = m_qf->getWeight(i) * p.getDistortion();
-          m_integrand.setPoint(p);
-          const auto& trace = m_integrand.getTrace();
+          flow.setPoint(p);
+          const auto& trace = flow.getTrace();
           if (!trace)
             continue;
           const auto& cell = trace->getPolytope();
@@ -527,7 +569,7 @@ namespace Rodin::Variational
           {
             const Index global = fes.getGlobalIndex({ cellDim, cellIdx }, local);
             decltype(auto) basis = fe.getBasis(local);
-            decltype(auto) mapping = fes.getInverseMapping({ cellDim, cellIdx }, basis);
+            decltype(auto) mapping = fes.getPushforward({ cellDim, cellIdx }, basis);
             scatter.push(global, w * up * mapping(*trace));
           }
         }
@@ -547,7 +589,7 @@ namespace Rodin::Variational
         return *m_polytope;
       }
 
-      virtual Geometry::Region getRegion() const = 0;
+      virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -559,6 +601,26 @@ namespace Rodin::Variational
 
       const Geometry::Polytope* m_polytope;
   };
+
+  template <
+    class LHSDerived, class RHSDerived, class FES,
+    class VectorField, class Step, class Root, class BoundaryPolicy, class TangentPolicy>
+  QuadratureRule(const
+      ShapeFunctionBase<
+        Dot<
+          FunctionBase<LHSDerived>,
+          ShapeFunctionBase<
+            Flow<
+              ShapeFunctionBase<RHSDerived, FES, TestSpace>,
+              VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, TestSpace>>, FES, TestSpace>&)
+  -> QuadratureRule<
+      ShapeFunctionBase<
+        Dot<
+          FunctionBase<LHSDerived>,
+          ShapeFunctionBase<
+            Flow<
+              ShapeFunctionBase<RHSDerived, FES, TestSpace>,
+              VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, TestSpace>>, FES, TestSpace>>;
 }
 
 #endif

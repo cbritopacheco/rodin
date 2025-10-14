@@ -64,6 +64,16 @@ namespace Rodin::Variational
             m_data.clear();
           }
 
+          auto begin()
+          {
+            return m_data.begin();
+          }
+
+          auto end()
+          {
+            return m_data.end();
+          }
+
           auto begin() const
           {
             return m_data.begin();
@@ -86,27 +96,31 @@ namespace Rodin::Variational
       LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
         : Parent(other),
           m_v(other.m_v->copy()),
-          m_attrs(other.m_attrs)
+          m_attrs(other.m_attrs),
+          m_scatter(other.m_scatter)
       {}
 
       template <class OtherNumber>
       LinearFormIntegratorBase(const LinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
           m_v(other.m_v->copy()),
-          m_attrs(other.m_attrs)
+          m_attrs(other.m_attrs),
+          m_scatter(other.m_scatter)
       {}
 
       LinearFormIntegratorBase(LinearFormIntegratorBase&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
-          m_attrs(std::move(other.m_attrs))
+          m_attrs(std::move(other.m_attrs)),
+          m_scatter(std::move(other.m_scatter))
       {}
 
       template <class OtherNumber>
       LinearFormIntegratorBase(LinearFormIntegratorBase<OtherNumber>&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
-          m_attrs(std::move(other.m_attrs))
+          m_attrs(std::move(other.m_attrs)),
+          m_scatter(std::move(other.m_scatter))
       {}
 
       virtual ~LinearFormIntegratorBase() = default;
@@ -162,12 +176,12 @@ namespace Rodin::Variational
         return Integrator::Type::Linear;
       }
 
-      Scatter& getScatter()
+      virtual Scatter& getScatter()
       {
         return m_scatter;
       }
 
-      const Scatter& getScatter() const
+      virtual const Scatter& getScatter() const
       {
         return m_scatter;
       }

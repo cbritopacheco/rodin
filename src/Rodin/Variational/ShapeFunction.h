@@ -7,13 +7,11 @@
 #ifndef RODIN_VARIATIONAL_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_SHAPEFUNCTION_H
 
-#include "Rodin/Alert/Exception.h"
-#include "Rodin/FormLanguage/Base.h"
-#include "Rodin/FormLanguage/Traits.h"
-
 #include "ForwardDecls.h"
 
-#include "FiniteElementSpace.h"
+#include "Rodin/FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Traits.h"
+#include "Rodin/Variational/Traits.h"
 
 namespace Rodin::FormLanguage
 {
@@ -217,6 +215,11 @@ namespace Rodin::Variational
       const FES& getFiniteElementSpace() const
       {
         return m_fes.get();
+      }
+
+      Derived& getDerived() noexcept
+      {
+        return static_cast<Derived&>(*this);
       }
 
       const Derived& getDerived() const noexcept

@@ -7,10 +7,17 @@
 #ifndef RODIN_MODELS_ADVECTION_LAGRANGIAN_H
 #define RODIN_MODELS_ADVECTION_LAGRANGIAN_H
 
+#include "Rodin/Variational/Flow.h"
+
+#include "Rodin/Math/RungeKutta/RK4.h"
 #include "Rodin/Solver/CG.h"
 
-#include "Rodin/Variational/Flow.h"
 #include "Rodin/Variational/BoundaryNormal.h"
+
+// A: force a readable compile-time error
+template<class> struct always_false : std::false_type {};
+template<class T>
+void show_type() { static_assert(always_false<T>::value, "T is here"); }
 
 namespace Rodin::Models::Advection
 {

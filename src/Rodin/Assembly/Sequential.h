@@ -146,10 +146,7 @@ namespace Rodin::Assembly
               for (size_t l = 0; l < static_cast<size_t>(dofs.size()); l++)
                 res(dofs(l)) += lfi.integrate(l);
               for (const auto& [global, v] : lfi.getScatter())
-              {
-                std::cout << "Test\n";
                 res(global) += v;
-              }
             }
           }
         }
