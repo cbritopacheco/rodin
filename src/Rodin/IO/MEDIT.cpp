@@ -188,7 +188,6 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
-            std::swap(data->vertices(2), data->vertices(3));
             m_build.polytope(Geometry::Polytope::Type::Quadrilateral, std::move(data->vertices));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
               m_build.attribute({ 2, i }, data->attribute);
@@ -357,7 +356,7 @@ namespace Rodin::IO
                   case Geometry::Polytope::Type::Quadrilateral:
                   {
                     os << vertices(0) + 1 << ' ' << vertices(1) + 1 << ' '
-                       << vertices(3) + 1 << ' ' << vertices(2) + 1;
+                       << vertices(2) + 1 << ' ' << vertices(3) + 1;
                     break;
                   }
                   case Geometry::Polytope::Type::Wedge:

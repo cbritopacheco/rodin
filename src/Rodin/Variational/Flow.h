@@ -280,6 +280,11 @@ namespace Rodin::Variational
                   const Real t = *rt;
                   if (!tmin.has_value() || (t < *tmin)) { tmin = t; local = i; }
                 }
+                else
+                {
+                  assert(false);
+                  return {};
+                }
               }
             }
           }
@@ -541,9 +546,6 @@ namespace Rodin::Variational
         auto& integrand = *m_integrand;
         auto& scatter = this->getScatter();
         const auto& fes = integrand.getFiniteElementSpace();
-        const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
-        const auto& fe = fes.getFiniteElement(d, idx);
         const auto& u = integrand.getDerived().getLHS();
         auto& flow = integrand.getDerived().getRHS().getDerived();
         m_qf.reset(new QF::GenericPolytopeQuadrature(polytope.getGeometry()));

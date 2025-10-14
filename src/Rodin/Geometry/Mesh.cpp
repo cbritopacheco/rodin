@@ -735,7 +735,9 @@ namespace Rodin::Geometry
           for (size_t j = 0; j < h - 1; j++)
           {
             build.polytope(g, {
-                i + j * w, (i + 1) + j * w , i + (j + 1) * w,  (i + 1) + (j + 1) * w });
+                i + j * w, ( i + 1) + j * w,
+                (i + 1) + (j + 1) * w, i + (j + 1) * w
+            });
           }
         }
 
