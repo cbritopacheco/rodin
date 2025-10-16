@@ -60,7 +60,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     P1 vh(mesh);
 
     // constant velocity
-    const Real vx = 0.5, vy = 0.3;
+    const Real vx = -0.2, vy = 0.5;
     auto velocity = VectorFunction{
       RealFunction([vx](const Point&) { return vx; }),
       RealFunction([vy](const Point&) { return vy; })
@@ -79,7 +79,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
 
     // construct Lagrangian object
     Models::Advection::Lagrangian lagrangian(u, v, u0, velocity);
-    lagrangian.step(1);
+    lagrangian.step(0.1);
 
     u.getSolution().save("u0.gf");
     mesh.save("u0.mesh");

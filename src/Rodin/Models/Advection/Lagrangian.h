@@ -86,12 +86,12 @@ namespace Rodin::Models::Advection
         if (m_t > 0)
         {
           pb = Integral(u, v)
-             - Integral(u.getSolution(), Flow(dt, v, m_velocity, m_step));
+             - Integral(Flow(-dt, u.getSolution(), m_velocity, m_step), v);
         }
         else
         {
           pb = Integral(u, v)
-             - Integral(m_initial, Flow(dt, v, m_velocity, m_step));
+             - Integral(Flow(-dt, m_initial, m_velocity, m_step), v);
         }
 
         Solver::CG(pb).solve();
