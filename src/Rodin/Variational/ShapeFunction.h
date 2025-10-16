@@ -9,6 +9,7 @@
 
 #include "ForwardDecls.h"
 
+#include "Rodin/Geometry/Point.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Variational/Traits.h"
