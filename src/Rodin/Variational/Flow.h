@@ -9,13 +9,13 @@
 
 #include "ForwardDecls.h"
 
+#include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Region.h"
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
-#include "Rodin/Math/RootFinding/NewtonRaphson.h"
 
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 #include "Rodin/Variational/ShapeFunction.h"
@@ -29,14 +29,13 @@ namespace Rodin::FormLanguage
     class FES,
     class VectorField,
     class Step,
-    class Root,
     class BoundaryPolicy,
     class TangentPolicy
   >
   struct Traits<
     Variational::Flow<
       Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
-      VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>
+      VectorField, Step, BoundaryPolicy, TangentPolicy>>
   {
     using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TestSpace;
@@ -70,31 +69,22 @@ namespace Rodin::Variational
 
   template <
     class Derived,
-    class FES,
     class VectorField,
     class Step,
-    class Root,
     class BoundaryPolicy,
-    class TangentPolicy
-  > class Flow<ShapeFunctionBase<Derived, FES, TestSpace>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>
-  : public ShapeFunctionBase<
-      Flow<ShapeFunctionBase<Derived, FES, TestSpace>, VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, TestSpace>
+    class TangentPolicy>
+  class Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy, TangentPolicy>
+    : public FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy, TangentPolicy>>
   {
     public:
       using Operand =
-        ShapeFunctionBase<Derived, FES, TestSpace>;
+        FunctionBase<Derived>;
 
       using VectorFieldType =
         VectorField;
 
-      using FESType =
-        FES;
-
       using StepType =
         Step;
-
-      using RootType =
-        Root;
 
       using BoundaryPolicyType =
         BoundaryPolicy;
@@ -102,27 +92,49 @@ namespace Rodin::Variational
       using TangentPolicyType =
         TangentPolicy;
 
-      using ScalarType =
-        typename FormLanguage::Traits<FESType>::ScalarType;
-
       using Parent =
-        ShapeFunctionBase<
-          Flow<Operand, VectorFieldType, StepType, RootType, BoundaryPolicy, TangentPolicy>, FES, TestSpace>;
+        FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy, TangentPolicy>>;
+
+      class Trace
+      {
+        public:
+          Trace(bool exited, Real time, const Geometry::Point& p)
+            : m_exited(exited), m_time(time), m_point(p)
+          {}
+
+          Real getTime() const
+          {
+            return m_time;
+          }
+
+          const Geometry::Point& getPoint() const
+          {
+            return m_point;
+          }
+
+          bool exited() const
+          {
+            return m_exited;
+          }
+
+        private:
+          bool m_exited;
+          Real m_time;
+          Geometry::Point m_point;
+      };
 
       template <
         class VVel,
-        class S = StepType, class R = RootType,
+        class S = StepType,
         class B = BoundaryPolicy, class T = TangentPolicy>
       Flow(const Real& t,
            const Operand& u,
            VVel&& vel,
-           S&& st=S{}, R&& rt=R{}, B&& bp=B{}, T&& tp=T{})
-        : Parent(u.getFiniteElementSpace()),
-          m_t(t),
+           S&& st=S{}, B&& bp=B{}, T&& tp=T{})
+        : m_t(t),
           m_operand(u.copy()),
           m_velocity(std::forward<VVel>(vel)),
           m_step(std::forward<S>(st)),
-          m_root(std::forward<R>(rt)),
           m_bp(std::forward<B>(bp)),
           m_tp(std::forward<T>(tp)),
           m_p(nullptr)
@@ -134,11 +146,9 @@ namespace Rodin::Variational
           m_operand(other.m_operand->copy()),
           m_velocity(other.m_velocity),
           m_step(other.m_step),
-          m_root(other.m_root),
           m_bp(other.m_bp),
           m_tp(other.m_tp),
-          m_p(other.m_p),
-          m_trace(other.m_trace)
+          m_p(other.m_p)
       {}
 
       Flow(Flow&& other)
@@ -147,509 +157,288 @@ namespace Rodin::Variational
           m_operand(std::move(other.m_operand)),
           m_velocity(std::move(other.m_velocity)),
           m_step(std::move(other.m_step)),
-          m_root(std::move(other.m_root)),
           m_bp(std::move(other.m_bp)),
           m_tp(std::move(other.m_tp)),
-          m_p(std::exchange(other.m_p, nullptr)),
-          m_trace(std::move(other.m_trace))
+          m_p(std::exchange(other.m_p, nullptr))
       {}
 
-std::optional<Geometry::Point> forward(const Geometry::Point& p) const
-{
-  // thread-local scratch
-  static thread_local Index s_cell;
-  static thread_local Math::SpatialPoint rc{{}}, rc1{{}}, rc_tmp{{}}, pc{{}};
-
-  const auto& poly0 = p.getPolytope();
-  const auto& mesh  = poly0.getMesh();
-  const size_t cd   = mesh.getDimension();
-  const auto& conn  = mesh.getConnectivity();
-
-  // ---- locate starting cell / reference coords
-  if (poly0.getDimension() == cd)
-  {
-    s_cell = poly0.getIndex();
-    rc     = p.getReferenceCoordinates();
-  }
-  else if (poly0.getDimension() == cd - 1)
-  {
-    const Index f = poly0.getIndex();
-    const auto& adj = conn.getIncidence(cd - 1, cd).at(f);
-
-    if (mesh.isBoundary(f))
-    {
-      const Index c = adj[0];
-      mesh.getPolytopeTransformation(cd, c).inverse(rc_tmp, p.getPhysicalCoordinates());
-      Geometry::Polytope::Project(mesh.getGeometry(cd, c)).cell(rc, rc_tmp);
-      s_cell = c;
-    }
-    else
-    {
-      const Index c0 = adj[0];
-      mesh.getPolytopeTransformation(cd, c0).inverse(rc_tmp, p.getPhysicalCoordinates());
-      const auto it0   = mesh.getPolytope(cd, c0);
-      const auto& cell0 = *it0;
-      const Geometry::Point q0(cell0, rc_tmp, p.getPhysicalCoordinates());
-      const auto a0 = q0.getJacobianInverse() * m_velocity(q0);
-
-      const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
-      size_t j0 = faces0.size();
-      for (size_t k = 0; k < faces0.size(); ++k)
-        if (faces0[k] == f) { j0 = k; break; }
-      assert(j0 < faces0.size());
-
-      const auto g0  = mesh.getGeometry(cd, c0);
-      const auto& hs = Geometry::Polytope::Traits(g0).getHalfSpace();
-      const auto nref = hs.matrix.row(j0); // outward in ref(c0)
-
-      if (nref.dot(a0) < 0)
+      Trace trace(const Geometry::Point& p) const
       {
-        Geometry::Polytope::Project(g0).cell(rc, rc_tmp);
-        s_cell = c0;
-      }
-      else
-      {
-        const Index c1 = adj[1];
-        mesh.getPolytopeTransformation(cd, c1).inverse(rc_tmp, p.getPhysicalCoordinates());
-        Geometry::Polytope::Project(mesh.getGeometry(cd, c1)).cell(rc, rc_tmp);
-        s_cell = c1;
-      }
-    }
-  }
-  else
-  {
-    return {};
-  }
+        // thread-local scratch
+        static thread_local Index s_cell;
+        static thread_local Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_pc{{}};
 
-  rc1.resizeLike(rc);
-  rc_tmp.resizeLike(rc);
-  pc.resizeLike(p.getPhysicalCoordinates());
+        const auto& poly0 = p.getPolytope();
+        const auto& mesh = poly0.getMesh();
+        const size_t cd = mesh.getDimension();
+        const auto& conn = mesh.getConnectivity();
 
-  Real tau = std::abs(m_t);
-  const Real sgn = Math::sgn(m_t);
+        Real tau = std::abs(m_t);
+        const Real sgn = Math::sgn(m_t);
 
-  // Hysteresis: last crossed local face index in current cell
-  std::optional<size_t> last_face;
-
-  // guards
-  const int HOPS_MAX_ABS = 200000;
-  const int ZERO_HOPS_MAX = 32;    // chained zero-time crossings per event
-  const Real eps_denom = 1e-14;
-  const Real eps_tpos  = 1e-14;
-  const Real eps_g     = 1e-12;    // “on face” tolerance in ref
-  int hops = 0;
-
-  while (tau > 0)
-  {
-    if (++hops > HOPS_MAX_ABS) return {};
-
-    const auto itc = mesh.getPolytope(cd, s_cell);
-    const auto& cell = *itc;
-    const auto g  = mesh.getGeometry(cd, s_cell);
-    const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
-    const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
-
-    const auto vref = [&](const Math::SpatialPoint& r)->const Math::SpatialVector<Real>& {
-      static thread_local Math::SpatialVector<Real> s_v;
-      const Geometry::Point qp(cell, r);
-      s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
-      return s_v;
-    };
-
-    const auto v0 = vref(rc);
-
-    struct Hit { Real t; size_t j; Real ndv; };
-    std::vector<Hit> cand; cand.reserve(faces.size());
-
-    // collect face hits by linear predictor
-    for (size_t i = 0; i < faces.size(); ++i)
-    {
-      if (last_face && i == *last_face) continue;
-
-      const auto n = hs.matrix.row(i);
-      const Real b = hs.vector[i];
-
-      const Real g0 = b - n.dot(rc);      // interior requires g0>0
-      if (g0 <= 0) continue;
-
-      const Real ndv = n.dot(v0);
-      if (ndv <= eps_denom) continue;     // not moving toward that face
-
-      const Real ti = g0 / ndv;
-      if (ti > eps_tpos && ti <= tau)
-        cand.push_back({ti, i, ndv});
-    }
-
-    if (cand.empty())
-    {
-      // advance remaining time in this cell
-      m_step.step(rc1, tau, rc, vref);
-      rc = rc1;
-      break;
-    }
-
-    // pick earliest; tie-break by more transversal
-    auto itmin = std::min_element(cand.begin(), cand.end(),
-                                  [](const Hit& a, const Hit& b){
-                                    if (a.t != b.t) return a.t < b.t;
-                                    return a.ndv > b.ndv;
-                                  });
-    const Real thit = itmin->t;
-    const size_t jhit = itmin->j;
-    const Index face_hit = faces[jhit];
-
-    // advance to the face
-    m_step.step(rc1, thit, rc, vref);
-    rc  = rc1;
-    tau -= thit;
-
-    // same-phys chained crossings at t=0 (vertex/edge events)
-    mesh.getPolytopeTransformation(cd, s_cell).transform(pc, rc); // phys @ face
-
-    // first hop across the hit face if not boundary
-    if (mesh.isBoundary(face_hit))
-    {
-      if (!m_bp(tau, s_cell, rc)) return {};
-      last_face.reset();
-    }
-    else
-    {
-      // interior hop across face_hit
-      const auto& nbrs = conn.getIncidence(cd - 1, cd).at(face_hit);
-      assert(nbrs.size() == 2);
-      s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
-
-      // map same phys point into new cell
-      mesh.getPolytopeTransformation(cd, s_cell).inverse(rc, pc);
-      Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(rc1, rc);
-      rc = rc1;
-
-      // hysteresis: set the opposite face in new cell
-      const auto& faces_new = conn.getIncidence(cd, cd - 1).at(s_cell);
-      last_face.reset();
-      for (size_t i = 0; i < faces_new.size(); ++i)
-        if (faces_new[i] == face_hit) { last_face = i; break; }
-
-      // now repeatedly cross any other face(s) containing this phys point
-      int zero_hops = 0;
-      while (zero_hops++ < ZERO_HOPS_MAX)
-      {
-        // recompute in new cell
-        const auto itz = mesh.getPolytope(cd, s_cell);
-        const auto& cellz = *itz;
-        const auto gz  = mesh.getGeometry(cd, s_cell);
-        const auto& hsz = Geometry::Polytope::Traits(gz).getHalfSpace();
-        const auto& facesz = conn.getIncidence(cd, cd - 1).at(s_cell);
-        const auto vz = [&] (const Math::SpatialPoint& r)->const Math::SpatialVector<Real>& {
-          static thread_local Math::SpatialVector<Real> s_v;
-          const Geometry::Point qp(cellz, r);
-          s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
-          return s_v;
-        };
-        const auto v_on = vz(rc);
-
-        // find *another* face k with |g_k|<=eps_g and n_k·v_on>0, excluding hysteresis face
-        size_t kface = facesz.size();
-        for (size_t i = 0; i < facesz.size(); ++i)
+        // ---- locate starting cell / reference coords
+        if (poly0.getDimension() == cd)
         {
-          if (last_face && i == *last_face) continue;
-          const auto n = hsz.matrix.row(i);
-          const Real b = hsz.vector[i];
-          const Real gi = b - n.dot(rc);
-          if (std::abs(gi) <= eps_g && n.dot(v_on) > eps_denom)
+          s_cell = poly0.getIndex();
+          s_rc = p.getReferenceCoordinates();
+        }
+        else if (poly0.getDimension() == cd - 1)
+        {
+          const Index f = poly0.getIndex();
+          const auto& adj = conn.getIncidence(cd - 1, cd).at(f);
+
+          if (mesh.isBoundary(f))
           {
-            kface = i;
+            const Index c = adj[0];
+            mesh.getPolytopeTransformation(cd, c).inverse(s_rc_tmp, p.getPhysicalCoordinates());
+            Geometry::Polytope::Project(mesh.getGeometry(cd, c)).cell(s_rc, s_rc_tmp);
+            s_cell = c;
+          }
+          else
+          {
+            const Index c0 = adj[0];
+            mesh.getPolytopeTransformation(cd, c0).inverse(s_rc_tmp, p.getPhysicalCoordinates());
+            const auto it0 = mesh.getPolytope(cd, c0);
+            const auto& cell0 = *it0;
+            const Geometry::Point q0(cell0, s_rc_tmp, p.getPhysicalCoordinates());
+            const auto a0 = sgn * (q0.getJacobianInverse() * m_velocity(q0));
+
+            const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
+            size_t j0 = faces0.size();
+            for (size_t k = 0; k < faces0.size(); ++k)
+              if (faces0[k] == f) { j0 = k; break; }
+            assert(j0 < faces0.size());
+
+            const auto g0 = mesh.getGeometry(cd, c0);
+            const auto& hs = Geometry::Polytope::Traits(g0).getHalfSpace();
+            const auto nref = hs.matrix.row(j0); // outward in ref(c0)
+
+            if (nref.dot(a0) < 0)
+            {
+              Geometry::Polytope::Project(g0).cell(s_rc, s_rc_tmp);
+              s_cell = c0;
+            }
+            else
+            {
+              const Index c1 = adj[1];
+              mesh.getPolytopeTransformation(cd, c1).inverse(s_rc_tmp, p.getPhysicalCoordinates());
+              Geometry::Polytope::Project(mesh.getGeometry(cd, c1)).cell(s_rc, s_rc_tmp);
+              s_cell = c1;
+            }
+          }
+        }
+        else
+        {
+          assert(false);
+          return Trace{ true, 0, p };
+        }
+
+        s_rc1.resizeLike(s_rc);
+        s_rc_tmp.resizeLike(s_rc);
+        s_pc.resizeLike(p.getPhysicalCoordinates());
+
+        // Hysteresis: last crossed local face index in current cell
+        std::optional<size_t> last_face;
+
+        // guards
+        const size_t ZERO_HOPS_MAX = 32; // chained zero-time crossings per event
+        const Real eps_denom = 1e-14;
+        const Real eps_tpos  = 1e-14;
+        const Real eps_g     = 1e-12; // “on face” tolerance in ref
+
+        struct Hit
+        {
+          Real t;
+          size_t j;
+          Real ndv;
+        };
+
+        std::vector<Hit> cand;
+
+        while (tau > 0)
+        {
+          const auto itc = mesh.getPolytope(cd, s_cell);
+          const auto& cell = *itc;
+          const auto g = mesh.getGeometry(cd, s_cell);
+          const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
+          const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+
+          const auto vref = [&](const Math::SpatialPoint& r)
+          {
+            static thread_local Math::SpatialVector<Real> s_v;
+            const Geometry::Point qp(cell, r);
+            s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
+            return s_v;
+          };
+
+          cand.clear();
+          cand.reserve(faces.size());
+
+          // collect face hits by linear predictor
+          for (size_t i = 0; i < faces.size(); ++i)
+          {
+            if (last_face && i == *last_face) continue;
+
+            const auto n = hs.matrix.row(i);
+            const Real b = hs.vector[i];
+
+            const Real g0 = b - n.dot(s_rc);
+            if (g0 <= 0) // interior requires g0 > 0
+              continue;
+
+            const Real ndv = n.dot(vref(s_rc));
+            if (ndv <= eps_denom) // not moving toward that face
+              continue;
+
+            const Real ti = g0 / ndv;
+            if (ti > eps_tpos && ti <= tau)
+              cand.push_back({ ti, i, ndv });
+          }
+
+          if (cand.empty())
+          {
+            // advance remaining time in this cell
+            m_step.step(s_rc1, tau, s_rc, vref);
+            s_rc = s_rc1;
             break;
+          }
+
+          // pick earliest; tie-break by more transversal
+          auto itmin =
+            std::min_element(
+              cand.begin(), cand.end(),
+              [](const Hit& a, const Hit& b)
+              {
+                if (a.t != b.t)
+                  return a.t < b.t;
+                else
+                  return a.ndv > b.ndv;
+              });
+
+          const Real thit = itmin->t;
+          const size_t jhit = itmin->j;
+          const Index face_hit = faces[jhit];
+
+          // advance to the face
+          m_step.step(s_rc1, thit, s_rc, vref);
+          s_rc = s_rc1;
+          tau -= thit;
+
+          // same-phys chained crossings at t=0 (vertex/edge events)
+          mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc); // phys @ face
+
+          // first hop across the hit face if not boundary
+          if (mesh.isBoundary(face_hit))
+          {
+            if (!m_bp(tau, s_cell, s_rc))
+              return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
+            last_face.reset();
+          }
+          else
+          {
+            // interior hop across face_hit
+            const auto& nbrs = conn.getIncidence(cd - 1, cd).at(face_hit);
+            assert(nbrs.size() == 2);
+            s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
+
+            // map same phys point into new cell
+            mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
+            Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
+            s_rc = s_rc1;
+
+            // hysteresis: set the opposite face in new cell
+            const auto& faces_new = conn.getIncidence(cd, cd - 1).at(s_cell);
+            last_face.reset();
+            for (size_t i = 0; i < faces_new.size(); ++i)
+            {
+              if (faces_new[i] == face_hit)
+              {
+                last_face = i;
+                break;
+              }
+            }
+
+            // now repeatedly cross any other face(s) containing this phys point
+            size_t zero_hops = 0;
+            while (zero_hops++ < ZERO_HOPS_MAX)
+            {
+              // recompute in new cell
+              const auto itz = mesh.getPolytope(cd, s_cell);
+              const auto& cellz = *itz;
+              const auto gz = mesh.getGeometry(cd, s_cell);
+              const auto& hsz = Geometry::Polytope::Traits(gz).getHalfSpace();
+              const auto& facesz = conn.getIncidence(cd, cd - 1).at(s_cell);
+              const auto vz = [&] (const Math::SpatialPoint& r)
+              {
+                static thread_local Math::SpatialVector<Real> s_v;
+                const Geometry::Point qp(cellz, r);
+                s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
+                return s_v;
+              };
+
+              // find another face k with |g_k| <= eps_g and n_k·v_on > 0, excluding hysteresis face
+              size_t kface = facesz.size();
+              for (size_t i = 0; i < facesz.size(); ++i)
+              {
+                if (last_face && i == *last_face)
+                  continue;
+                const auto n = hsz.matrix.row(i);
+                const Real b = hsz.vector[i];
+                const Real gi = b - n.dot(s_rc);
+                if (std::abs(gi) <= eps_g && n.dot(vz(s_rc)) > eps_denom)
+                {
+                  kface = i;
+                  break;
+                }
+              }
+
+              if (kface == facesz.size())
+                break; // strictly interior now
+
+              // boundary on the same phys point?
+              const Index f2 = facesz[kface];
+              if (mesh.isBoundary(f2))
+              {
+                if (!m_bp(tau, s_cell, s_rc))
+                  return Trace{ true, tau, Geometry::Point(*itz, s_rc) };
+                last_face.reset();
+                break;
+              }
+
+              // hop across kface at t=0
+              mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc);
+              const auto& nbr2 = conn.getIncidence(cd - 1, cd).at(f2);
+              assert(nbr2.size() == 2);
+              s_cell = (nbr2[0] == s_cell) ? nbr2[1] : nbr2[0];
+
+              mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
+              Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
+              s_rc = s_rc1;
+
+              // update hysteresis to the face we just crossed
+              const auto& faces_next = conn.getIncidence(cd, cd - 1).at(s_cell);
+              last_face.reset();
+              for (size_t i = 0; i < faces_next.size(); ++i)
+              {
+                if (faces_next[i] == f2)
+                {
+                  last_face = i;
+                  break;
+                }
+              }
+            }
           }
         }
 
-        if (kface == facesz.size())
-          break; // strictly interior now
-
-        // boundary on the same phys point?
-        const Index f2 = facesz[kface];
-        if (mesh.isBoundary(f2))
-        {
-          if (!m_bp(tau, s_cell, rc)) return {};
-          last_face.reset();
-          break;
-        }
-
-        // hop across kface at t=0
-        mesh.getPolytopeTransformation(cd, s_cell).transform(pc, rc);
-        const auto& nbr2 = conn.getIncidence(cd - 1, cd).at(f2);
-        assert(nbr2.size() == 2);
-        s_cell = (nbr2[0] == s_cell) ? nbr2[1] : nbr2[0];
-
-        mesh.getPolytopeTransformation(cd, s_cell).inverse(rc, pc);
-        Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(rc1, rc);
-        rc = rc1;
-
-        // update hysteresis to the face we just crossed
-        const auto& faces_next = conn.getIncidence(cd, cd - 1).at(s_cell);
-        last_face.reset();
-        for (size_t i = 0; i < faces_next.size(); ++i)
-          if (faces_next[i] == f2) { last_face = i; break; }
-      }
-    }
-  }
-
-  const auto itf = mesh.getPolytope(cd, s_cell);
-  return Geometry::Point(*itf, rc);
-}
-
-      // std::optional<Geometry::Point> forward(const Geometry::Point& p) const
-      // {
-      //   static thread_local Index s_cellIdx;
-      //   static thread_local Math::SpatialPoint s_rc0{{}};
-      //   static thread_local Math::SpatialPoint s_rc1{{}};
-      //   static thread_local Math::SpatialPoint s_rc_tau{{}};
-      //   static thread_local Math::SpatialPoint s_pc{{}};
-
-      //   const auto& polytope0 = p.getPolytope();
-      //   const auto& mesh = polytope0.getMesh();
-      //   const size_t cellDim = mesh.getDimension();
-      //   const auto& conn = mesh.getConnectivity();
-
-      //   if (polytope0.getDimension() == cellDim)
-      //   {
-      //     s_cellIdx = polytope0.getIndex();
-      //     s_rc0 = p.getReferenceCoordinates();
-      //   }
-      //   else if (polytope0.getDimension() == cellDim - 1) // Start on a face
-      //   {
-      //     const Index fidx = polytope0.getIndex();
-      //     const auto& adj = conn.getIncidence(cellDim - 1, cellDim).at(fidx);
-
-      //     if (mesh.isBoundary(fidx)) // Start on a boundary face
-      //     {
-      //       assert(adj.size() == 1);
-      //       const Index c = adj[0];
-      //       mesh.getPolytopeTransformation(cellDim, c).inverse(s_rc1, p.getPhysicalCoordinates());
-      //       Geometry::Polytope::Project(mesh.getGeometry(cellDim, c)).cell(s_rc0, s_rc1);
-      //       s_cellIdx = c;
-      //     }
-      //     else // Start on an interior face
-      //     {
-      //       // Start on an interior face
-      //       assert(adj.size() == 2);
-      //       const Index c0 = adj[0];
-      //       const auto& faces0 = conn.getIncidence(cellDim, cellDim - 1).at(c0);
-      //       size_t j0 = faces0.size();
-      //       for (size_t k = 0; k < faces0.size(); ++k)
-      //         if (faces0[k] == fidx) { j0 = k; break; }
-      //       assert(j0 < faces0.size());
-
-      //       const auto& pc = p.getPhysicalCoordinates();
-      //       mesh.getPolytopeTransformation(cellDim, c0).inverse(s_rc1, pc);
-      //       const auto& cell0 = *mesh.getPolytope(cellDim, c0);
-      //       const Geometry::Point q0(cell0, s_rc1, pc);
-      //       const auto a0 = q0.getJacobianInverse() * m_velocity(q0);
-
-      //       const auto& hs0 = Geometry::Polytope::Traits(mesh.getGeometry(cellDim, c0)).getHalfSpace();
-      //       const auto nref0 = hs0.matrix.row(j0);
-
-      //       // nref0 is inward for c0:
-      //       //  nref0·a0 > 0  => into c0
-      //       //  nref0·a0 < 0  => out of c0 => into the other cell
-      //       if (nref0.dot(a0) > 0) // into c0
-      //       {
-      //         Geometry::Polytope::Project(mesh.getGeometry(cellDim, c0)).cell(s_rc0, s_rc1);
-      //         s_cellIdx = c0;
-      //       }
-      //       else // into c1
-      //       {
-      //         const Index c1 = adj[1];
-      //         mesh.getPolytopeTransformation(cellDim, c1).inverse(s_rc1, pc);
-      //         Geometry::Polytope::Project(mesh.getGeometry(cellDim, c1)).cell(s_rc0, s_rc1);
-      //         s_cellIdx = c1;
-      //       }
-      //     }
-      //   }
-      //   else
-      //   {
-      //     assert(false);
-      //     return {};
-      //   }
-
-      //   s_rc1.resizeLike(s_rc0);
-      //   s_rc_tau.resizeLike(s_rc0);
-
-      //   Real tau = std::abs(m_t);
-      //   const Real sgn = Math::sgn(m_t);
-      //   while (tau > 0)
-      //   {
-      //     const auto it = mesh.getPolytope(cellDim, s_cellIdx);
-      //     const auto& cell = *it;
-      //     const Geometry::Polytope::Type g = mesh.getGeometry(cellDim, s_cellIdx);
-      //     const auto& faces = conn.getIncidence(cellDim, cellDim - 1).at(s_cellIdx);
-      //     const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
-
-      //     // Field in reference space
-      //     const auto vr = [&](const Math::SpatialPoint& rc)
-      //     {
-      //       static thread_local Math::SpatialVector<Real> s_vr;
-      //       const Geometry::Point qp(cell, rc);
-      //       s_vr = sgn * qp.getJacobianInverse() * m_velocity(qp);
-      //       return s_vr;
-      //     };
-
-      //     std::optional<Real> tmin;
-      //     Index local = faces.size();
-
-      //     if constexpr (requires { m_step.dense(s_rc0, tau, vr); })
-      //     {
-      //       // Dense-output path (fastest)
-      //       const auto D = m_step.dense(s_rc0, tau, vr);
-      //       s_rc_tau = D.X(tau);
-
-      //       for (size_t i = 0; i < faces.size(); ++i)
-      //       {
-      //         const auto nref = hs.matrix.row(i);
-      //         const Real bf = hs.vector[i];
-
-      //         const Real g0 = bf - nref.dot(s_rc0);
-      //         const Real gtau = bf - nref.dot(s_rc_tau);
-      //         if (g0 * gtau < 0) // root in (0, tau)
-      //         {
-      //           const Real t0 = Real(0.5) * tau;
-      //           auto event = [&](Real& t)
-      //           {
-      //             const auto X = D.X(t);
-      //             const auto V = D.V(t);
-      //             return std::pair{ bf - nref.dot(X), -nref.dot(V) };
-      //           };
-      //           if (auto rt = m_root.solve(event, t0, Real(0), tau))
-      //           {
-      //             const Real t = *rt;
-      //             if (!tmin.has_value() || (t < *tmin)) { tmin = t; local = i; }
-      //           }
-      //           else
-      //           {
-      //             assert(false);
-      //             return {};
-      //           }
-      //         }
-      //       }
-      //     }
-      //     else
-      //     {
-      //       s_rc_tau = s_rc0;
-
-      //       m_step.step(s_rc_tau, tau, s_rc0, vr);
-
-      //       for (size_t i = 0; i < faces.size(); ++i)
-      //       {
-      //         const auto nref = hs.matrix.row(i);
-      //         const Real bf = hs.vector[i];
-
-      //         const Real f0 = bf - nref.dot(s_rc0);
-      //         const Real ftau = bf - nref.dot(s_rc_tau);
-
-      //         if (f0 * ftau < 0) // root in (0, tau)
-      //         {
-      //           const Real t0 = Real(0.5) * tau;
-      //           const auto event = [&](Real& t)
-      //           {
-      //             m_step.step(s_rc1, t, s_rc0, vr);
-      //             decltype(auto) vrv = vr(s_rc1);
-      //             return std::pair{ bf - nref.dot(s_rc1), -nref.dot(vrv) };
-      //           };
-
-      //           if (const auto rt = m_root.solve(event, t0, Real(0), tau))
-      //           {
-      //             const Real t = *rt;
-      //             if (!tmin.has_value() || (t < *tmin))
-      //             {
-      //               tmin = t;
-      //               local = i;
-      //             }
-      //           }
-      //         }
-      //       }
-      //     }
-
-      //     // No face will be hit -> advance whole remaining time
-      //     if (!tmin.has_value())
-      //     {
-      //       if (!m_tp(tau, s_cellIdx, s_rc0))
-      //         return {};
-      //       m_step.step(s_rc1, tau, s_rc0, vr);
-      //       s_rc0 = s_rc1;
-      //       break;
-      //     }
-
-      //     assert(local < faces.size());
-
-      //     // Hit the closest face at t*
-      //     const Real tstar = *tmin;
-      //     const Index face = faces[local];
-
-      //     // Arrive on face (in ref of current cell)
-      //     m_step.step(s_rc1, tstar, s_rc0, vr);
-      //     s_rc0 = s_rc1;
-      //     tau -= tstar;
-
-      //     if (mesh.isBoundary(face))
-      //     {
-      //       // Let boundary policy decide (may update tau/s_cellIdx/s_rc0)
-      //       if (!m_bp(tau, s_cellIdx, s_rc0))
-      //         return {};
-      //       // The policy is responsible for keeping tau > 0 if it wants to continue.
-      //       continue;
-      //     }
-
-      //     // Cell hop
-      //     mesh.getPolytopeTransformation(cellDim, s_cellIdx).transform(s_pc, s_rc0);
-      //     const auto& cells = conn.getIncidence(cellDim - 1, cellDim).at(face);
-      //     assert(cells.size() == 2);
-      //     s_cellIdx = (cells[0] == s_cellIdx) ? cells[1] : cells[0];
-      //     mesh.getPolytopeTransformation(cellDim, s_cellIdx).inverse(s_rc0, s_pc);
-      //     Geometry::Polytope::Project(mesh.getGeometry(cellDim, s_cellIdx)).cell(s_rc1, s_rc0);
-      //     s_rc0 = s_rc1;
-      //   }
-      //   return Geometry::Point(*mesh.getPolytope(cellDim, s_cellIdx), s_rc0);
-      // }
-
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& polytope) const
-      {
-        return m_operand->getDOFs(polytope);
+        const auto itf = mesh.getPolytope(cd, s_cell);
+        return Trace{ false, tau, Geometry::Point(*itf, s_rc) };
       }
 
       constexpr
-      ScalarType getBasis(size_t local) const
+      auto getValue(const Geometry::Point& p) const
       {
-        if (m_trace)
-          return m_operand->getBasis(local);
-        else
-          return ScalarType(0);
-      }
-
-      const Geometry::Point& getPoint() const
-      {
-        assert(m_p);
-        return *m_p;
-      }
-
-      Flow& setPoint(const Geometry::Point& p)
-      {
-        m_p = &p;
-        if (auto tr = this->forward(p))
-        {
-          m_trace.emplace(std::move(*tr));   // construct in-place
-          m_operand->setPoint(*m_trace);
-        }
-        else
-        {
-          m_trace.reset();
-        }
-        return *this;
-      }
-
-      const auto& getTrace() const
-      {
-        return m_trace;
+        const auto& trace = this->trace(p);
+        return !(trace.exited()) * m_operand->getValue(trace.getPoint());
       }
 
       constexpr
@@ -664,6 +453,26 @@ std::optional<Geometry::Point> forward(const Geometry::Point& p) const
         return *m_operand;
       }
 
+      const auto& getVelocity() const
+      {
+        return m_velocity;
+      }
+
+      const auto& getStep() const
+      {
+        return m_step;
+      }
+
+      const auto& getBoundaryPolicy() const
+      {
+        return m_bp;
+      }
+
+      const auto& getTangentPolicy() const
+      {
+        return m_tp;
+      }
+
       virtual Flow* copy() const noexcept override
       {
         return new Flow(*this);
@@ -674,199 +483,34 @@ std::optional<Geometry::Point> forward(const Geometry::Point& p) const
       std::unique_ptr<Operand> m_operand;
       VectorFieldType m_velocity;
       Step m_step;
-      Root m_root;
       BoundaryPolicy m_bp;
       TangentPolicy m_tp;
       const Geometry::Point* m_p;
-      std::optional<Geometry::Point> m_trace;
   };
 
-  template <class D, class FES, class VVel>
-  Flow(const Real&, const ShapeFunctionBase<D, FES, TestSpace>&, VVel&&)
+  template <class Derived, class Velocity>
+  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&)
     -> Flow<
-         ShapeFunctionBase<D, FES, TestSpace>,
-         VVel,                       // keep T or T&
+         FunctionBase<Derived>,
+         Velocity,                       // keep T or T&
          Math::RungeKutta::RK4,      // value default
-         Math::RootFinding::NewtonRaphson<typename FormLanguage::Traits<FES>::ScalarType>,
          DefaultBoundaryPolicy,
          DefaultTangentPolicy>;
 
-  template <class D, class FES, class VVel, class SStep>
-  Flow(const Real&, const ShapeFunctionBase<D, FES, TestSpace>&, VVel&&, SStep&&)
+  template <class Derived, class Velocity, class Step>
+  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&)
     -> Flow<
-         ShapeFunctionBase<D, FES, TestSpace>,
-         VVel,
-         SStep,
-         Math::RootFinding::NewtonRaphson<typename FormLanguage::Traits<FES>::ScalarType>,
+         FunctionBase<Derived>,
+         Velocity,
+         Step,
          DefaultBoundaryPolicy,
          DefaultTangentPolicy>;
 
   template <
-    class D, class FES,
-    class VVel, class SStep, class RRoot, class BBP, class TTP>
-  Flow(const Real&, const ShapeFunctionBase<D, FES, TestSpace>&, VVel&&, SStep&&, RRoot&&, BBP&&, TTP&&)
-    -> Flow<ShapeFunctionBase<D, FES, TestSpace>, VVel, SStep, RRoot, BBP, TTP>;
-
-  template <
-    class LHSDerived,
-    class RHSDerived,
-    class FES,
-    class VectorField,
-    class Step,
-    class Root,
-    class BoundaryPolicy,
-    class TangentPolicy
-  > class QuadratureRule<
-    ShapeFunctionBase<
-      Dot<
-        FunctionBase<LHSDerived>,
-        ShapeFunctionBase<
-          Flow<
-            ShapeFunctionBase<RHSDerived, FES, TestSpace>,
-            VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, TestSpace>>,
-          FES, TestSpace>>
-    : public LinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          ShapeFunctionBase<
-          Dot<
-            FunctionBase<LHSDerived>,
-            ShapeFunctionBase<
-              Flow<
-                ShapeFunctionBase<RHSDerived, FES, TestSpace>,
-                VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, TestSpace>>,
-              FES, TestSpace>>::ScalarType>
-  {
-    public:
-      using FESType =
-        FES;
-
-      using LHSType =
-        FunctionBase<LHSDerived>;
-
-      using RHSType =
-        ShapeFunctionBase<
-          Flow<
-            ShapeFunctionBase<RHSDerived, FES, TestSpace>,
-            VectorField, Step, Root, BoundaryPolicy, TangentPolicy>>;
-
-      using IntegrandType =
-        ShapeFunctionBase<Dot<LHSType, RHSType>, FES, TestSpace>;
-
-      using ScalarType =
-        typename FormLanguage::Traits<IntegrandType>::ScalarType;
-
-      using Parent = LinearFormIntegratorBase<ScalarType>;
-
-      using Parent::getScatter;
-
-      QuadratureRule(const IntegrandType& integrand)
-        : Parent(integrand.getLeaf()),
-          m_integrand(integrand.copy()),
-          m_polytope(nullptr)
-      {}
-
-      QuadratureRule(const QuadratureRule& other)
-        : Parent(other),
-          m_integrand(other.m_integrand->copy()),
-          m_polytope(other.m_polytope)
-      {}
-
-      QuadratureRule(QuadratureRule&& other)
-        : Parent(std::move(other)),
-          m_integrand(std::move(other.m_integrand)),
-          m_polytope(std::exchange(other.m_polytope, nullptr)),
-          m_qf(std::move(other.m_qf)),
-          m_ps(std::move(other.m_ps))
-      {}
-
-      ScalarType integrate(size_t local) override
-      {
-        return ScalarType(0);
-      }
-
-      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) override
-      {
-        m_polytope = &polytope;
-        auto& integrand = *m_integrand;
-        auto& scatter = this->getScatter();
-        const auto& fes = integrand.getFiniteElementSpace();
-        const auto& u = integrand.getDerived().getLHS();
-        auto& flow = integrand.getDerived().getRHS().getDerived();
-        m_qf.reset(new QF::GenericPolytopeQuadrature(polytope.getGeometry()));
-        m_ps.clear();
-        m_ps.reserve(m_qf->getSize());
-        for (size_t i = 0; i < m_qf->getSize(); i++)
-          m_ps.emplace_back(polytope, m_qf->getPoint(i));
-        scatter.clear();
-        for (size_t i = 0; i < m_ps.size(); ++i)
-        {
-          const auto& p = m_ps[i];
-          const Real w = m_qf->getWeight(i) * p.getDistortion();
-          flow.setPoint(p);
-          const auto& trace = flow.getTrace();
-          if (!trace)
-            continue;
-          const auto& cell = trace->getPolytope();
-          const size_t cellDim = cell.getDimension();
-          const Index cellIdx = cell.getIndex();
-          decltype(auto) fe = fes.getFiniteElement(cellDim, cellIdx);
-          decltype(auto) up = u.getValue(p);
-          for (size_t local = 0; local < fe.getCount(); ++local)
-          {
-            const Index global = fes.getGlobalIndex({ cellDim, cellIdx }, local);
-            decltype(auto) basis = fe.getBasis(local);
-            decltype(auto) mapping = fes.getPushforward({ cellDim, cellIdx }, basis);
-            scatter.push(global, w * up * mapping(*trace));
-          }
-        }
-        return *this;
-      }
-
-      constexpr
-      const IntegrandType& getIntegrand() const
-      {
-        assert(m_integrand);
-        return *m_integrand;
-      }
-
-      const Geometry::Polytope& getPolytope() const override
-      {
-        assert(m_polytope);
-        return *m_polytope;
-      }
-
-      virtual Geometry::Region getRegion() const override = 0;
-
-      virtual QuadratureRule* copy() const noexcept override = 0;
-
-    private:
-      std::unique_ptr<IntegrandType> m_integrand;
-
-      std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
-      std::vector<Geometry::Point> m_ps;
-
-      const Geometry::Polytope* m_polytope;
-  };
-
-  template <
-    class LHSDerived, class RHSDerived, class FES,
-    class VectorField, class Step, class Root, class BoundaryPolicy, class TangentPolicy>
-  QuadratureRule(const
-      ShapeFunctionBase<
-        Dot<
-          FunctionBase<LHSDerived>,
-          ShapeFunctionBase<
-            Flow<
-              ShapeFunctionBase<RHSDerived, FES, TestSpace>,
-              VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, TestSpace>>, FES, TestSpace>&)
-  -> QuadratureRule<
-      ShapeFunctionBase<
-        Dot<
-          FunctionBase<LHSDerived>,
-          ShapeFunctionBase<
-            Flow<
-              ShapeFunctionBase<RHSDerived, FES, TestSpace>,
-              VectorField, Step, Root, BoundaryPolicy, TangentPolicy>, FES, TestSpace>>, FES, TestSpace>>;
+    class Derived,
+    class Velocity, class Step, class BBP, class TTP>
+  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&, BBP&&, TTP&&)
+    -> Flow<FunctionBase<Derived>, Velocity, Step, BBP, TTP>;
 }
 
 #endif
