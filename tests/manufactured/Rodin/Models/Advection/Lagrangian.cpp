@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Variational/Flow.h"
 
 #include "Rodin/Assembly.h"
@@ -60,7 +61,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     P1 vh(mesh);
 
     // constant velocity
-    const Real vx = 0.5, vy = 0.3;
+    const Real vx = 1.0, vy = 0.5;
     auto velocity = VectorFunction{
       RealFunction([vx](const Point&) { return vx; }),
       RealFunction([vy](const Point&) { return vy; })
@@ -79,7 +80,17 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
 
     // construct Lagrangian object
     Models::Advection::Lagrangian lagrangian(u, v, u0, velocity);
-    lagrangian.step(1);
+    lagrangian.step(0.4);
+
+    P1 vvh(mesh, 2);
+    GridFunction vel(vvh);
+    vel = velocity;
+
+    GridFunction gf0(vh);
+    gf0 = u0;
+    gf0.save("u0_initial.sol", IO::FileFormat::MEDIT);
+    vel.save("velocity.sol", IO::FileFormat::MEDIT);
+    mesh.save("u0_initial.mesh", IO::FileFormat::MEDIT);
 
     u.getSolution().save("u0.gf");
     mesh.save("u0.mesh");

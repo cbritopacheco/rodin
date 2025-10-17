@@ -13,6 +13,7 @@
 #include "Rodin/Solver/CG.h"
 
 #include "Rodin/Variational/BoundaryNormal.h"
+#include "Rodin/Variational/BoundaryIntegral.h"
 
 namespace Rodin::Models::Advection
 {
@@ -86,12 +87,14 @@ namespace Rodin::Models::Advection
         if (m_t > 0)
         {
           pb = Integral(u, v)
-             - Integral(u.getSolution(), Flow(dt, v, m_velocity, m_step));
+             - Integral(u.getSolution(), Flow(dt, v, m_velocity, m_step))
+             ;
         }
         else
         {
           pb = Integral(u, v)
-             - Integral(m_initial, Flow(dt, v, m_velocity, m_step));
+             - Integral(m_initial, Flow(dt, v, m_velocity, m_step))
+             ;
         }
 
         Solver::CG(pb).solve();
