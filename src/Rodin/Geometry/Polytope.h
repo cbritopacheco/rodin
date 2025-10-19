@@ -68,17 +68,17 @@ namespace Rodin::Geometry
         public:
           struct HalfSpace
           {
-            Math::SpatialMatrix<Real> matrix;
-            Math::SpatialVector<Real> vector;
+            Math::Matrix<Real> matrix;
+            Math::Vector<Real> vector;
           };
 
           Traits(Type g);
 
-          bool isSimplex();
+          bool isSimplex() const;
 
-          size_t getDimension();
+          size_t getDimension() const;
 
-          size_t getVertexCount();
+          size_t getVertexCount() const;
 
           const Math::SpatialPoint& getVertex(size_t i) const;
 

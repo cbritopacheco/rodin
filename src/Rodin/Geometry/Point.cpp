@@ -151,7 +151,7 @@ namespace Rodin::Geometry
           }
           case 2:
           {
-            const auto& jac = getJacobian();
+            const auto& jac = this->getJacobian();
             const Real a = jac.coeff(0, 0);
             const Real b = jac.coeff(0, 1);
             const Real c = jac.coeff(1, 0);

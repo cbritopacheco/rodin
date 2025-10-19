@@ -7,13 +7,12 @@
 #ifndef RODIN_VARIATIONAL_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_SHAPEFUNCTION_H
 
-#include "Rodin/Alert/Exception.h"
-#include "Rodin/FormLanguage/Base.h"
-#include "Rodin/FormLanguage/Traits.h"
-
 #include "ForwardDecls.h"
 
-#include "FiniteElementSpace.h"
+#include "Rodin/Geometry/Point.h"
+#include "Rodin/FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Traits.h"
+#include "Rodin/Variational/Traits.h"
 
 namespace Rodin::FormLanguage
 {
@@ -219,6 +218,11 @@ namespace Rodin::Variational
         return m_fes.get();
       }
 
+      Derived& getDerived() noexcept
+      {
+        return static_cast<Derived&>(*this);
+      }
+
       const Derived& getDerived() const noexcept
       {
         return static_cast<const Derived&>(*this);
@@ -300,7 +304,7 @@ namespace Rodin::Variational
         const size_t count = fe.getCount();
         m_basis.resize(count);
         for (size_t local = 0; local < count; local++)
-          m_basis[local] = fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
+          m_basis[local] = fes.getPushforward({ d, i }, fe.getBasis(local))(p);
         return *this;
       }
 

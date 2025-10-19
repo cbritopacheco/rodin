@@ -421,7 +421,7 @@ namespace Rodin::Variational
           RangeType v;
           for (Index local = 0; local < count; ++local)
           {
-            const auto mapping = fes.getInverseMapping({ d, i }, fe.getBasis(local));
+            const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
             mapping(v, p);
             const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
             if (local == 0)
@@ -438,7 +438,7 @@ namespace Rodin::Variational
           RangeType v;
           for (Index local = 0; local < count; ++local)
           {
-            const auto mapping = fes.getInverseMapping({ d, i }, fe.getBasis(local));
+            const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
             mapping(v, p);
             const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
             if (local == 0)
@@ -578,7 +578,7 @@ namespace Rodin::Variational
         if (std::is_same_v<FESMeshContextType, Context::Local>)
         {
           const auto& fe = fes.getFiniteElement(d, i);
-          const auto mapping = fes.getMapping({ d, i }, fn);
+          const auto mapping = fes.getPullback({ d, i }, fn);
           for (Index local = 0; local < fe.getCount(); local++)
           {
             const Index global = fes.getGlobalIndex({ d, i }, local);
@@ -590,7 +590,7 @@ namespace Rodin::Variational
           static_assert(std::is_same_v<FESMeshContextType, Context::MPI>);
           const auto& shard = fes.getShard();
           const auto& fe = shard.getFiniteElement(d, i);
-          const auto mapping = shard.getMapping({ d, i }, fn);
+          const auto mapping = shard.getPullback({ d, i }, fn);
           for (Index local = 0; local < fe.getCount(); local++)
           {
             const Index global =

@@ -191,6 +191,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      Derived& getDerived() noexcept
+      {
+        return static_cast<Derived&>(*this);
+      }
+
       const Derived& getDerived() const noexcept
       {
         return static_cast<const Derived&>(*this);

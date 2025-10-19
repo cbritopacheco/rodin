@@ -246,7 +246,6 @@ namespace Rodin::IO::MEDIT
       {}
 
       template <class Iterator>
-      inline
       Optional<Data> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
@@ -286,7 +285,6 @@ namespace Rodin::IO::MEDIT
       {}
 
       template <class Iterator>
-      inline
       Optional<Data> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
@@ -327,7 +325,6 @@ namespace Rodin::IO::MEDIT
   struct ParseEmptyLine
   {
     template <class Iterator>
-    inline
     bool operator()(Iterator begin, Iterator end) const
     {
       if (begin == end)
@@ -345,7 +342,6 @@ namespace Rodin::IO::MEDIT
   struct ParseKeyword
   {
     template <class Iterator>
-    inline
     Optional<std::string> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
@@ -370,7 +366,6 @@ namespace Rodin::IO::MEDIT
   struct ParseInteger
   {
     template <class Iterator>
-    inline
     Optional<int> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
@@ -394,7 +389,6 @@ namespace Rodin::IO::MEDIT
   struct ParseUnsignedInteger
   {
     template <class Iterator>
-    inline
     Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
@@ -418,7 +412,6 @@ namespace Rodin::IO::MEDIT
   struct ParseMeshVersionFormatted
   {
     template <class Iterator>
-    inline
     Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       static constexpr const char* expected = toCharString(Keyword::MeshVersionFormatted);
@@ -465,7 +458,6 @@ namespace Rodin::IO::MEDIT
   struct ParseDimension
   {
     template <class Iterator>
-    inline
     Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       static constexpr const char* expected = toCharString(Keyword::Dimension);
@@ -731,8 +723,12 @@ namespace Rodin::IO
                              << Alert::Raise;
         }
 
-        for (size_t i = 0; i < gf.getSize(); i++)
-          is >> gf[i];
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t count = mesh.getVertexCount();
+        for (size_t i = 0; i < count; ++i)
+          for (size_t d = 0; d < vdim; ++d)
+            is >> gf[d * count + i];
       }
 
     private:
@@ -842,20 +838,13 @@ namespace Rodin::IO
         const auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        if constexpr (Utility::IsSpecialization<FES, Variational::P1>::Value)
+        for (auto it = mesh.getVertex(); !it.end(); ++it)
         {
-          os << gf.getData().reshaped();
-        }
-        else
-        {
-          for (auto it = mesh.getVertex(); !it.end(); ++it)
-          {
-            const Geometry::Point p(
-                *it,
-                Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
-                it->getCoordinates());
-            os << gf(p) << '\n';
-          }
+          const Geometry::Point p(
+              *it,
+              Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+              it->getCoordinates());
+          os << gf(p) << '\n';
         }
         os << '\n';
       }

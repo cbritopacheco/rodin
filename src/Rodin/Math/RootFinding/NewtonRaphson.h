@@ -10,10 +10,10 @@ namespace Rodin::Math::RootFinding
   class NewtonRaphson
   {
     public:
-      explicit NewtonRaphson(
-          Scalar abs_t_tol = static_cast<Scalar>(1e-12),
-          Scalar rel_t_tol = static_cast<Scalar>(1e-9),
-          Scalar abs_g_tol = static_cast<Scalar>(1e-12),
+      NewtonRaphson(
+          Scalar abs_t_tol = 1e-12,
+          Scalar rel_t_tol = 1e-9,
+          Scalar abs_g_tol = 1e-12,
           std::size_t max_iter = 25)
         : m_abs_t_tol(abs_t_tol),
           m_rel_t_tol(rel_t_tol),
@@ -21,97 +21,113 @@ namespace Rodin::Math::RootFinding
           m_max_iter(max_iter)
       {}
 
-      template <class Event>
-      std::optional<Scalar>
-      solve(const Event& event, Scalar t0, Scalar lo, Scalar hi) const
+      template <class F>
+      std::optional<Scalar> solve(const F& f, Scalar t0, Scalar lo, Scalar hi) const
       {
-        // Require an open interval (lo, hi) and try to keep it
-        Scalar a = lo;
-        Scalar b = hi;
+        // basic interval sanity
+        assert(std::isfinite(lo) && std::isfinite(hi));
+        assert(lo < hi);
 
-        // Ensure initial guess is inside the open interval
+        Scalar a = lo, b = hi;
+
+        // Initial values and bracket check
+        auto fa = f(a);
+        Scalar fav = fa.first;
+
+        auto fb = f(b);
+        Scalar fbv = fb.first;
+
+        // endpoints must be finite
+        assert(std::isfinite(fav) && std::isfinite(fbv));
+
+        // either already bracketed or caller misused the API
+        assert(fav * fbv <= 0); // Root not bracketed at [lo, hi]
+
+        if (!(fav * fbv <= 0))
+          return {};
+
         if (!(t0 > a && t0 < b))
-          t0 = static_cast<Scalar>(0.5) * (a + b);
+          t0 = 0.5 * (a + b);
 
-        // Evaluate at endpoints to establish a bracket (caller already checked sign change)
-        Scalar ta = a; auto pa = event(ta); Scalar ga = pa.first;
-        Scalar tb = b; auto pb = event(tb); Scalar gb = pb.first;
-
-        Scalar t = t0;
-        Scalar t_prev = t;
+        Scalar t = t0, t_prev = t;
         Scalar g_prev = std::numeric_limits<Scalar>::quiet_NaN();
         bool have_prev = false;
 
         for (std::size_t it = 0; it < m_max_iter; ++it)
         {
-          Scalar te = t; auto pg = event(te);
-          Scalar g  = pg.first;
-          Scalar gp = pg.second;
+          const auto ft = f(t);
+          const Scalar fv = ft.first;
+          const Scalar fg = ft.second;
 
-          // Convergence checks (strict)
-          if (std::fabs(g) < m_abs_g_tol)
-            return t;
+          // function and derivative must be finite
+          assert(std::isfinite(fv));
+          assert(std::isfinite(fg) || std::isnan(fg)); // allow NaN to trigger safeguards
+
+          if (std::fabs(fv) < m_abs_g_tol) return t;
+
           const Scalar at = m_abs_t_tol + m_rel_t_tol * std::fabs(t);
           if ((b - a) < at)
-            return static_cast<Scalar>(0.5) * (a + b);
+            return 0.5 * (a + b);
 
-          // Keep the bracket with current sample
-          if (g * ga < static_cast<Scalar>(0))
+          // Maintain bracket using *current* endpoint values
+          if (fv * fav < 0)
           {
-            b  = t; gb = g;
+            b = t;
+            fbv = fv;
           }
           else
           {
-            a  = t; ga = g;
+            a = t;
+            fav = fv;
           }
 
-          // Proposed Newton step
+          if (std::fabs(fav) < m_abs_g_tol)
+            return a;
+
+          if (std::fabs(fbv) < m_abs_g_tol)
+            return b;
+
+          if (fav * fbv > 0)
+            return {};
+
+          // Newton step with scale-aware guard on gp
           Scalar dt;
-          if (std::fabs(gp) > std::numeric_limits<Scalar>::epsilon())
+          const Scalar gp_tol = std::numeric_limits<Scalar>::epsilon() * (static_cast<Scalar>(1) + std::fabs(fg));
+          if (std::fabs(fg) > gp_tol)
           {
-            dt = -g / gp;
+            dt = -fv / fg;
+          }
+          else if (have_prev)
+          {
+            const Scalar denom = (fv - g_prev);
+            if (std::fabs(denom) > gp_tol)
+              dt = -fv * (t - t_prev) / denom; // secant
+            else
+              dt = 0;
           }
           else
           {
-            // Derivative too small → fallback to secant/bisection
-            if (have_prev && (g != g_prev)) // uses !=? forbidden. Avoid equality.
-            {
-              // Use secant only if denominator is not tiny (strict check via ratio)
-              Scalar denom = (g - g_prev);
-              if (std::fabs(denom) > std::numeric_limits<Scalar>::epsilon())
-                dt = -g * (t - t_prev) / denom;
-              else
-                dt = static_cast<Scalar>(0); // will be rejected below, replaced by bisection
-            }
-            else
-            {
-              dt = static_cast<Scalar>(0); // will be rejected below, replaced by bisection
-            }
+            dt = 0;
           }
 
           Scalar t_new = t + dt;
 
-          // Safeguard: keep inside (a, b). If outside or too aggressive, bisect.
-          const Scalar mid = static_cast<Scalar>(0.5) * (a + b);
-          const Scalar half = static_cast<Scalar>(0.5) * (b - a);
-          bool outside = (t_new < a) || (t_new > b);
-          bool too_large = std::fabs(t_new - t) > half;
-          if (outside || too_large)
+          // Safeguard: keep inside (a,b). If outside or too big, bisect.
+          const Scalar mid = 0.5 * (a + b);
+          const Scalar half = 0.5 * (b - a);
+
+          if (t_new <= a || t_new >= b || std::fabs(t_new - t) > half)
             t_new = mid;
 
-          // Stopping on step size (strict)
           if (std::fabs(t_new - t) < at)
             return t_new;
 
-          // Prepare next iteration
-          t_prev  = t;
-          g_prev  = g;
+          t_prev = t;
+          g_prev = fv;
           have_prev = true;
           t = t_new;
         }
-
-        // No convergence within max_iter
-        return std::nullopt;
+        return {};
       }
 
     private:

@@ -5,13 +5,9 @@
 
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
-#include "Dot.h"
-#include "Sum.h"
 #include "ShapeFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
-#include <cmath>
-#include <limits>
 
 namespace Rodin::Variational
 {

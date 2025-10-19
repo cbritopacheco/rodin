@@ -259,6 +259,20 @@ namespace Rodin::Variational
       }
 
       constexpr
+      LHSType& getLHS()
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
+
+      constexpr
+      RHSType& getRHS()
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
+      constexpr
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();

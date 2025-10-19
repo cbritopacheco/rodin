@@ -7,6 +7,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "MEDIT.h"
+#include "Rodin/Array.h"
 
 namespace Rodin::IO
 {
@@ -81,13 +82,13 @@ namespace Rodin::IO
         continue;
       auto kw = MEDIT::ParseKeyword()(line.begin(), line.end());
       if (!kw)
-        continue;
-      auto entity = MEDIT::toKeyword(kw->c_str());
-      if (!entity)
       {
-        Alert::Warning() << "Ignoring unrecognized keyword: " << *kw << Alert::Raise;
+        Alert::Warning() << "Ignoring unrecognized entity: " << line << Alert::Raise;
         continue;
       }
+      auto entity = MEDIT::toKeyword(kw->c_str());
+      if (!entity)
+        continue;
       if (*entity == MEDIT::Keyword::End)
         break;
 
@@ -187,7 +188,6 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
-            std::swap(data->vertices(2), data->vertices(3));
             m_build.polytope(Geometry::Polytope::Type::Quadrilateral, std::move(data->vertices));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
               m_build.attribute({ 2, i }, data->attribute);
@@ -356,7 +356,7 @@ namespace Rodin::IO
                   case Geometry::Polytope::Type::Quadrilateral:
                   {
                     os << vertices(0) + 1 << ' ' << vertices(1) + 1 << ' '
-                       << vertices(3) + 1 << ' ' << vertices(2) + 1;
+                       << vertices(2) + 1 << ' ' << vertices(3) + 1;
                     break;
                   }
                   case Geometry::Polytope::Type::Wedge:
