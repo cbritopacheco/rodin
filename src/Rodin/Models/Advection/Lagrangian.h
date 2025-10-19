@@ -13,6 +13,7 @@
 #include "Rodin/Solver/CG.h"
 
 #include "Rodin/Variational/BoundaryNormal.h"
+#include "Rodin/Variational/BoundaryIntegral.h"
 
 namespace Rodin::Models::Advection
 {

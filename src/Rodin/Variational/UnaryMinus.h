@@ -249,19 +249,7 @@ namespace Rodin::Variational
       UnaryMinus& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_op->setPolytope(polytope);
-        for (auto& [i, v] : this->getScatter())
-          v *= -1;
         return *this;
-      }
-
-      typename Parent::Scatter& getScatter() override
-      {
-        return m_op->getScatter();
-      }
-
-      const typename Parent::Scatter& getScatter() const override
-      {
-        return m_op->getScatter();
       }
 
       ScalarType integrate(size_t local) override

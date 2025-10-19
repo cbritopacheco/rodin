@@ -145,8 +145,6 @@ namespace Rodin::Assembly
               const auto& dofs = input.getFES().getDOFs(d, i);
               for (size_t l = 0; l < static_cast<size_t>(dofs.size()); l++)
                 res(dofs(l)) += lfi.integrate(l);
-              for (const auto& [global, v] : lfi.getScatter())
-                res(global) += v;
             }
           }
         }

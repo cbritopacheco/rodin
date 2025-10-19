@@ -23,71 +23,6 @@ namespace Rodin::Variational
 
       using Parent = Integrator;
 
-      class Scatter
-      {
-        public:
-          Scatter() = default;
-
-          Scatter(const Scatter&) = default;
-
-          Scatter(Scatter&&) = default;
-
-          Scatter& operator=(const Scatter&) = default;
-
-          Scatter& operator=(Scatter&&) = default;
-
-          virtual ~Scatter() = default;
-
-          Scatter& push(Index i, ScalarType v)
-          {
-            m_data.emplace_back(i, v);
-            return *this;
-          }
-
-          size_t size() const
-          {
-            return m_data.size();
-          }
-
-          const Index& getIndex(size_t i) const
-          {
-            return m_data[i].first;
-          }
-
-          const ScalarType& getDOF(size_t i) const
-          {
-            return m_data[i].second;
-          }
-
-          void clear()
-          {
-            m_data.clear();
-          }
-
-          auto begin()
-          {
-            return m_data.begin();
-          }
-
-          auto end()
-          {
-            return m_data.end();
-          }
-
-          auto begin() const
-          {
-            return m_data.begin();
-          }
-
-          auto end() const
-          {
-            return m_data.end();
-          }
-
-        private:
-          std::vector<std::pair<Index, ScalarType>> m_data;
-      };
-
       template <class FES>
       LinearFormIntegratorBase(const TestFunction<FES>& v)
         : m_v(v.copy())
@@ -96,31 +31,27 @@ namespace Rodin::Variational
       LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
         : Parent(other),
           m_v(other.m_v->copy()),
-          m_attrs(other.m_attrs),
-          m_scatter(other.m_scatter)
+          m_attrs(other.m_attrs)
       {}
 
       template <class OtherNumber>
       LinearFormIntegratorBase(const LinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
           m_v(other.m_v->copy()),
-          m_attrs(other.m_attrs),
-          m_scatter(other.m_scatter)
+          m_attrs(other.m_attrs)
       {}
 
       LinearFormIntegratorBase(LinearFormIntegratorBase&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
-          m_attrs(std::move(other.m_attrs)),
-          m_scatter(std::move(other.m_scatter))
+          m_attrs(std::move(other.m_attrs))
       {}
 
       template <class OtherNumber>
       LinearFormIntegratorBase(LinearFormIntegratorBase<OtherNumber>&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
-          m_attrs(std::move(other.m_attrs)),
-          m_scatter(std::move(other.m_scatter))
+          m_attrs(std::move(other.m_attrs))
       {}
 
       virtual ~LinearFormIntegratorBase() = default;
@@ -176,16 +107,6 @@ namespace Rodin::Variational
         return Integrator::Type::Linear;
       }
 
-      virtual Scatter& getScatter()
-      {
-        return m_scatter;
-      }
-
-      virtual const Scatter& getScatter() const
-      {
-        return m_scatter;
-      }
-
       virtual const Geometry::Polytope& getPolytope() const = 0;
 
       virtual LinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
@@ -199,7 +120,6 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;
-      Scatter m_scatter;
   };
 }
 
