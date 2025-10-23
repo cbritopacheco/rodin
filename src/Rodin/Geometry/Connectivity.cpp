@@ -550,10 +550,10 @@ namespace Rodin::Geometry
         else if (dim == 2)
         {
           out.resize(4);
-          out[0] = { Polytope::Type::Triangle, { { p(1), p(2), p(3) } } };
-          out[1] = { Polytope::Type::Triangle, { { p(0), p(3), p(2) } } };
-          out[2] = { Polytope::Type::Triangle, { { p(0), p(1), p(3) } } };
-          out[3] = { Polytope::Type::Triangle, { { p(0), p(2), p(1) } } };
+          out[0] = { Polytope::Type::Triangle, {{ p(0), p(1), p(3) }} };
+          out[1] = { Polytope::Type::Triangle, {{ p(0), p(2), p(1) }} };
+          out[2] = { Polytope::Type::Triangle, {{ p(0), p(3), p(2) }} };
+          out[3] = { Polytope::Type::Triangle, {{ p(1), p(2), p(3) }} };
         }
         else if (dim == 3)
         {

@@ -48,7 +48,9 @@ namespace Rodin::Models::Eikonal
 
       enum class Label : uint8_t
       {
-        Far, Considered, Accepted
+        Far,
+        Considered,
+        Accepted
       };
 
     private:
@@ -192,7 +194,8 @@ namespace Rodin::Models::Eikonal
           const Real s =
             m_speed(Geometry::Point(*vertex, s_dummy, vertex->getCoordinates()));
           const Real F =
-            std::isnan(s) ? std::numeric_limits<Real>::infinity() : std::max(std::numeric_limits<Real>::min(), s);
+            std::isnan(s) ?
+              std::numeric_limits<Real>::infinity() : std::max(std::numeric_limits<Real>::min(), s);
 
           if (std::isnan(F) || F <= 0)
             continue;

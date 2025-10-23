@@ -677,19 +677,25 @@ namespace Rodin::Geometry
         if (local == 0)
         {
           const Real x = std::clamp(rc[0], Real(0), Real(1));
-          out[0] = x; out[1] = Real(0); return;
+          out[0] = x;
+          out[1] = Real(0);
+          return;
         }
+
         if (local == 1)
         {
           const Real dx = rc[0] - Real(1), dy = rc[1];
           Real t = 0.5 * (-dx + dy);
           t = std::clamp(t, Real(0), Real(1));
-          out[0] = Real(1) - t; out[1] = t; return;
+          out[0] = Real(1) - t;
+          out[1] = t;
+          return;
         }
-        {
-          const Real y = std::clamp(rc[1], Real(0), Real(1));
-          out[0] = Real(0); out[1] = y; return;
-        }
+
+        const Real y = std::clamp(rc[1], Real(0), Real(1));
+        out[0] = Real(0);
+        out[1] = Real(1) - y;
+        return;
       }
       case Type::Quadrilateral:
       {

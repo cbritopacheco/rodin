@@ -241,7 +241,7 @@ namespace Rodin::Variational
         std::optional<size_t> last_face;
 
         // guards
-        const size_t ZERO_HOPS_MAX = 32; // chained zero-time crossings per event
+        const size_t ZERO_HOPS_MAX = 1000; // chained zero-time crossings per event
         const Real eps_denom = 1e-14;
         const Real eps_tpos  = 1e-14;
         const Real eps_g     = 1e-12; // “on face” tolerance in ref

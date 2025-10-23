@@ -43,6 +43,7 @@ Real compliance(const GridFunction<FES, Data>& w)
   TestFunction  v(vh);
   BilinearForm  bf(u, v);
   bf = LinearElasticityIntegral(u, v)(lambda, mu);
+  bf.assemble();
   return bf(w, w);
 };
 

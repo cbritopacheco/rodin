@@ -150,7 +150,7 @@ namespace Rodin::External::MMG
           assert(dst->type == MMG5_Scalar);
           assert(src.getFiniteElementSpace().getVectorDimension() == 1);
           const Math::Matrix<Real>& data = src.getData();
-          assert(data.rows() == 1);
+          assert(data.cols() == 1);
           assert(dst->size == 1);
           const size_t n = data.size();
           if (n)
