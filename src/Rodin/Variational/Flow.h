@@ -164,23 +164,9 @@ namespace Rodin::Variational
 
       Trace trace(const Geometry::Point& p) const
       {
-        // guards
-        const size_t ZERO_HOPS_MAX = 1000; // chained zero-time crossings per event
-        const Real eps_denom = 1e-14;
-        const Real eps_tpos  = 1e-14;
-        const Real eps_g     = 1e-12; // “on face” tolerance in ref
-
-        struct Hit
-        {
-          Real t;
-          size_t j;
-          Real ndv;
-        };
-
         // thread-local scratch
         static thread_local Index s_cell;
         static thread_local Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_pc{{}};
-        static thread_local std::vector<Hit> s_cand;
 
         const auto& poly0 = p.getPolytope();
         const auto& mesh = poly0.getMesh();
@@ -253,6 +239,22 @@ namespace Rodin::Variational
 
         // Hysteresis: last crossed local face index in current cell
         std::optional<size_t> last_face;
+
+        // guards
+        const size_t ZERO_HOPS_MAX = 1000; // chained zero-time crossings per event
+        const Real eps_denom = 1e-14;
+        const Real eps_tpos  = 1e-14;
+        const Real eps_g     = 1e-12; // “on face” tolerance in ref
+
+        struct Hit
+        {
+          Real t;
+          size_t j;
+          Real ndv;
+        };
+
+        std::vector<Hit> cand;
+
         while (tau > 0)
         {
           const auto itc = mesh.getPolytope(cd, s_cell);
@@ -269,8 +271,8 @@ namespace Rodin::Variational
             return s_v;
           };
 
-          s_cand.clear();
-          s_cand.reserve(faces.size());
+          cand.clear();
+          cand.reserve(faces.size());
 
           // collect face hits by linear predictor
           for (size_t i = 0; i < faces.size(); ++i)
@@ -290,10 +292,10 @@ namespace Rodin::Variational
 
             const Real ti = g0 / ndv;
             if (ti > eps_tpos && ti <= tau)
-              s_cand.push_back({ ti, i, ndv });
+              cand.push_back({ ti, i, ndv });
           }
 
-          if (s_cand.empty())
+          if (cand.empty())
           {
             // advance remaining time in this cell
             m_step.step(s_rc1, tau, s_rc, vref);
@@ -304,7 +306,7 @@ namespace Rodin::Variational
           // pick earliest; tie-break by more transversal
           auto itmin =
             std::min_element(
-              s_cand.begin(), s_cand.end(),
+              cand.begin(), cand.end(),
               [](const Hit& a, const Hit& b)
               {
                 if (a.t != b.t)
