@@ -40,7 +40,7 @@ namespace Rodin::Models::Advection
         static thread_local Math::SpatialPoint s_rtmp;
         static thread_local Math::SpatialPoint s_xint;
 
-        const Real trace_sign = std::abs(m_dt);
+        const Real trace_sign = Math::sgn(m_dt);
 
         if (tau <= 0)
           return true;
