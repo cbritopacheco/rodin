@@ -1,13 +1,9 @@
 name: Tests
 on:
   push:
-    branches:
-      - master
-      - develop
+    branches: [master, develop]
   pull_request:
-    branches:
-      - master
-      - develop
+    branches: [master, develop]
 
 concurrency:
   group: Tests-${{ github.ref }}
@@ -26,16 +22,19 @@ jobs:
     env:
       MAKEFLAGS: "-j2"
       CTEST_PARALLEL_LEVEL: 2
+
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
           cmake: true
+
       - name: Install dependencies
         run: >-
           sudo apt-get update && sudo apt-get install -y
@@ -50,6 +49,7 @@ jobs:
           libsuitesparse-dev
           libmetis-dev
           libboost1.74-all-dev
+
       - name: Configure CMake
         run: >
           cmake
@@ -65,15 +65,69 @@ jobs:
           -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
           -DRODIN_CODE_COVERAGE=ON
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+
       - name: Build
         run: cmake --build ${{github.workspace}}/build
-      - name: Run tests
-        run: ctest --rerun-failed --output-on-failure --test-dir ${{github.workspace}}/build/tests
+
+      - name: Run tests (full + rerun failed)
+        id: ctest
+        shell: bash
+        run: |
+          set -o pipefail
+          b="${{github.workspace}}/build"
+          tdir="$b/tests"
+
+          # Full run
+          ctest --output-on-failure \
+                --test-dir "$tdir" \
+                --output-log "$b/ctest.full.log" \
+                --output-junit "$b/ctest-full.xml" \
+            | tee "$b/ctest.full.out"
+          ec1=$?
+
+          final=0
+          # Rerun failures if any
+          if [ $ec1 -ne 0 ]; then
+            ctest --rerun-failed --output-on-failure \
+                  --test-dir "$tdir" \
+                  --output-log "$b/ctest.rerun.log" \
+                  --output-junit "$b/ctest-rerun.xml" \
+              | tee "$b/ctest.rerun.out"
+            final=$?
+          fi
+
+          echo "exitcode=$final" >> "$GITHUB_OUTPUT"
+          # Do not fail yet. We want to upload logs first.
+          exit 0
+
+      - name: Upload ctest logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctest-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}-MT${{ matrix.multithreaded }}
+          path: |
+            ${{github.workspace}}/build/ctest.full.log
+            ${{github.workspace}}/build/ctest.full.out
+            ${{github.workspace}}/build/ctest-full.xml
+            ${{github.workspace}}/build/ctest.rerun.log
+            ${{github.workspace}}/build/ctest.rerun.out
+            ${{github.workspace}}/build/ctest-rerun.xml
+          if-no-files-found: ignore
+
+      # Hard stop if tests failed. Coverage will not run.
+      - name: Fail if tests failed
+        if: steps.ctest.outputs.exitcode != '0'
+        run: |
+          echo "ctest failed with exit code ${{ steps.ctest.outputs.exitcode }}"
+          exit 1
+
       - name: Make coverage
+        if: steps.ctest.outputs.exitcode == '0'
         run: cmake --build ${{github.workspace}}/build --target RodinCoverage
+
       - name: Upload coverage to Codecov
+        if: steps.ctest.outputs.exitcode == '0'
         uses: codecov/codecov-action@v5
         with:
           files: ${{github.workspace}}/build/RodinCoverage.info
           token: ${{ secrets.CODECOV_TOKEN }}
-
