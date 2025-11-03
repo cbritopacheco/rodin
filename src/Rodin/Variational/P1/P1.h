@@ -115,7 +115,7 @@ namespace Rodin::Variational
       };
 
       /**
-       * @brief Inverse Pullback for the scalar/complex P1 space.
+       * @brief Pushforward for the scalar/complex P1 space.
        */
       template <class Callable>
       class Pushforward

@@ -136,8 +136,7 @@ namespace Rodin::Variational
           m_velocity(std::forward<VVel>(vel)),
           m_step(std::forward<S>(st)),
           m_bp(std::forward<B>(bp)),
-          m_tp(std::forward<T>(tp)),
-          m_p(nullptr)
+          m_tp(std::forward<T>(tp))
       {}
 
       Flow(const Flow& other)
@@ -147,8 +146,7 @@ namespace Rodin::Variational
           m_velocity(other.m_velocity),
           m_step(other.m_step),
           m_bp(other.m_bp),
-          m_tp(other.m_tp),
-          m_p(other.m_p)
+          m_tp(other.m_tp)
       {}
 
       Flow(Flow&& other)
@@ -158,8 +156,7 @@ namespace Rodin::Variational
           m_velocity(std::move(other.m_velocity)),
           m_step(std::move(other.m_step)),
           m_bp(std::move(other.m_bp)),
-          m_tp(std::move(other.m_tp)),
-          m_p(std::exchange(other.m_p, nullptr))
+          m_tp(std::move(other.m_tp))
       {}
 
       Trace trace(const Geometry::Point& p) const
@@ -438,7 +435,7 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         const auto& trace = this->trace(p);
-        return trace.exited() ? 0 : m_operand->getValue(trace.getPoint());
+        return trace.exited() ? decltype(m_operand->getValue(trace.getPoint())){} : m_operand->getValue(trace.getPoint());
       }
 
       constexpr
@@ -485,7 +482,6 @@ namespace Rodin::Variational
       Step m_step;
       BoundaryPolicy m_bp;
       TangentPolicy m_tp;
-      const Geometry::Point* m_p;
   };
 
   template <class Derived, class Velocity>
