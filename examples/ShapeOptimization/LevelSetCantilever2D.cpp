@@ -7,6 +7,7 @@
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Models/Advection/Lagrangian.h"
 #include "Rodin/Models/Distance/Eikonal.h"
+#include "Rodin/Variational/ForwardDecls.h"
 #include <Rodin/Solver.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
@@ -38,8 +39,8 @@ static constexpr double hmax = 0.05;
 static constexpr double hmin = 0.1 * hmax;
 static constexpr double hausd = 0.5 * hmin;
 static constexpr double ell = 0.4;
-const constexpr Real dt = 4 * (hmax - hmin);
-static constexpr double alpha = dt;
+const constexpr Real dt = 0.5 * (hmax - hmin);
+static constexpr double alpha = 0.1;
 
 // Compliance
 template <class Data>
@@ -123,7 +124,8 @@ int main(int, char**)
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
-    // Solver::CG(hilbert).solve();
+    Solver::CG(hilbert).solve();
+
     auto& dJ = g.getSolution();
     dJ.save("dJ.gf");
     vh.getMesh().save("dJ.mesh");
@@ -136,27 +138,11 @@ int main(int, char**)
     Alert::Info() << "   | Objective: " << obj.back() << Alert::Raise;
     Alert::Info() << "   | Distancing domain." << Alert::Raise;
 
-    TrialFunction dist(sh);
-    Models::Distance::Eikonal(dist.getSolution()).setInterior(interior)
+    GridFunction dist(sh);
+    Models::Distance::Eikonal(dist).setInterior(interior)
                                                  .setInterface(Gamma)
                                                  .solve()
                                                  .sign();
-
-    const Real vx = -0.20;
-    const Real vy =  0.35;
-    const Real dt =  0.025; // small to keep most centroids interior
-
-    auto velocity = VectorFunction{
-      RealFunction([vx](const Point&) { return vx; }),
-      RealFunction([vy](const Point&) { return vy; })
-    };
-
-    auto u0 =
-      sin(Math::Constants::pi() * F::x) * sin(Math::Constants::pi() * F::y);
-
-    dist.getSolution() = u0;
-    dist.getSolution().save("dist.gf");
-    th.save("dist.mesh");
 
     // Advect the level set function
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
@@ -167,11 +153,10 @@ int main(int, char**)
     TrialFunction advect(sh);
     TestFunction test(sh);
 
-    Models::Advection::Lagrangian(advect, test, u0, velocity).step(dt);
+    Models::Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
     th.save("advect.mesh");
     advect.getSolution().save("advect.gf");
-    std::exit(1);
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
@@ -185,7 +170,7 @@ int main(int, char**)
                                     .setAngleDetection(false)
                                     .setBoundaryReference(Gamma)
                                     .setBaseReferences(GammaD)
-                                    .discretize(dist.getSolution());
+                                    .discretize(advect.getSolution());
 
     MMG::Optimizer().setHMax(hmax)
                     .setHMin(hmin)

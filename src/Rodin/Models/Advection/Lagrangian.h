@@ -14,9 +14,102 @@
 
 #include "Rodin/Variational/BoundaryNormal.h"
 #include "Rodin/Variational/BoundaryIntegral.h"
+#include "Rodin/Variational/ProblemBody.h"
+#include <functional>
 
 namespace Rodin::Models::Advection
 {
+  template <class Velocity>
+  class FirstOrderBoundaryPolicy
+  {
+    public:
+      FirstOrderBoundaryPolicy(
+          Real dt,
+          const Geometry::Mesh<Context::Local>& mesh,
+          const Velocity& velocity,
+          Real eps = 1e-12)
+        : m_dt(dt),
+          m_mesh(mesh),
+          m_vel(velocity),
+          m_eps(eps)
+      {}
+
+      bool operator()(Real& tau, Index& cell, Math::SpatialPoint& rref) const
+      {
+        static thread_local Math::Vector<Real> s_nphys_u;
+        static thread_local Math::SpatialPoint s_rtmp;
+        static thread_local Math::SpatialPoint s_xint;
+
+        const Real trace_sign = std::abs(m_dt);
+
+        if (tau <= 0)
+          return true;
+
+        const auto& mesh = m_mesh.get();
+        const size_t cd = mesh.getDimension();
+        const auto g = mesh.getGeometry(cd, cell);
+        const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+
+        size_t jbest = 0;
+        Real gbest = std::numeric_limits<Real>::infinity();
+        for (size_t j = 0; j < static_cast<size_t>(hs.matrix.rows()); ++j)
+        {
+          const auto n = hs.matrix.row(j);
+          const Real b = hs.vector[j];
+          const Real gj = b - n.dot(rref);
+          if (gj < gbest)
+          {
+            gbest = gj;
+            jbest = j;
+          }
+        }
+
+        const auto nref = hs.matrix.row(jbest);
+        const auto itc = mesh.getPolytope(cd, cell);
+        const auto& cellO = *itc;
+        const Geometry::Point qface(cellO, rref);
+
+        const auto Jinv = qface.getJacobianInverse();
+        s_nphys_u = Jinv.transpose() * nref;
+        const Real nlen = s_nphys_u.norm();
+        if (nlen == 0)
+        {
+          tau = 0;
+          return true;
+        }
+
+        const auto nphys = s_nphys_u / nlen;
+        const auto vphys = trace_sign * m_vel(qface);
+        const Real vn = vphys.dot(nphys);
+        const Real h = std::max<Real>(0, vn) * tau;
+        const auto& xface = qface.getPhysicalCoordinates();
+        s_xint = xface + (-h - m_eps) * nphys;
+
+        mesh.getPolytopeTransformation(cd, cell).inverse(s_rtmp, s_xint);
+        Geometry::Polytope::Project(g).cell(s_rtmp, s_rtmp);
+        rref = s_rtmp;
+
+        const Real b = hs.vector[jbest];
+        const Real gcur = b - nref.dot(rref);
+        const Real ndn = nref.dot(nref);
+        if (ndn > 0)
+        {
+          const Real target = std::max(m_eps, gcur + m_eps);
+          const Real alpha = (gcur - target) / ndn;
+          rref += alpha * nref;
+        }
+
+        tau = 0;
+        return true;
+      }
+
+    private:
+      const Real m_dt;
+      std::reference_wrapper<const Geometry::Mesh<Context::Local>> m_mesh;
+      std::reference_wrapper<const Velocity> m_vel;
+      const Real m_eps;
+  };
+
   /**
    * @brief Lagrangian variational advection for scalar fields.
    */
@@ -57,8 +150,8 @@ namespace Rodin::Models::Advection
       Lagrangian(TrialFunctionType& u, TestFunctionType& v, U0&& u0, VVel&& vel, S&& st = S{})
         : m_t(0),
           m_u(u), m_v(v),
-          m_initial(std::forward<U0>(u0)),   // may be value or ref (e.g., U0 = T or T&)
-          m_velocity(std::forward<VVel>(vel)), // T or T&
+          m_initial(std::forward<U0>(u0)),
+          m_velocity(std::forward<VVel>(vel)),
           m_step(std::forward<S>(st))
       {}
 
@@ -69,30 +162,23 @@ namespace Rodin::Models::Advection
         auto& u = m_u.get();
         auto& v = m_v.get();
 
-        BoundaryNormal n(u.getFiniteElementSpace().getMesh());
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
 
-        const RealFunction vn =
-          [&](const Geometry::Point& p) -> Real
-          {
-            static thread_local Math::SpatialVector<Real> s_n;
-            s_n = n(p);
-            const auto dot = m_velocity(p).dot(s_n);
-            if (dot > 0)
-              return dot;
-            else
-              return 0;
-          };
+        const FirstOrderBoundaryPolicy bp(-dt, mesh, m_velocity);
+        const Math::RungeKutta::RK4 step;
+        const DefaultTangentPolicy tp;
 
         Problem pb(u, v);
         if (m_t > 0)
         {
           pb = Integral(u, v)
-             - Integral(Flow(-dt, u.getSolution(), m_velocity, m_step), v);
+             - Integral(Flow(-dt, u.getSolution(), m_velocity, step, bp, tp), v);
         }
         else
         {
           pb = Integral(u, v)
-             - Integral(Flow(-dt, m_initial, m_velocity, m_step), v);
+             - Integral(Flow(-dt, m_initial, m_velocity, step, bp, tp), v);
         }
 
         Solver::CG(pb).solve();

@@ -1,6 +1,7 @@
 add_executable(RodinManufacturedAdvectionLagrangianTest Lagrangian.cpp)
 target_link_libraries(RodinManufacturedAdvectionLagrangianTest
   PUBLIC
+  Rodin::External::MMG
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin

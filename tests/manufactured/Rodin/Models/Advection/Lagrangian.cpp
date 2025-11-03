@@ -8,9 +8,13 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Variational/Flow.h"
 #include "Rodin/Models/Advection/Lagrangian.h"
+
+#include "RodinExternal/MMG.h"
+#include "RodinExternal/MMG/Mesh.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -100,11 +104,12 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
   TEST_P(Mfg32, ConstantVelocity_OneStep_L2Interior)
   {
     auto mesh = this->getMesh();
+
     P1 vh(mesh);
 
     const Real vx = -0.20;
     const Real vy =  0.35;
-    const Real dt =  0.025; // small to keep most centroids interior
+    const Real dt =  0.4; // small to keep most centroids interior
 
     auto velocity = VectorFunction{
       RealFunction([vx](const Point&) { return vx; }),
@@ -120,7 +125,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     Models::Advection::Lagrangian lagrangian(u, v, u0, velocity);
     lagrangian.step(dt);
 
-    const auto& uh = u.getSolution();
+   const auto& uh = u.getSolution();
 
     // tolerances tuned for P1 + SL arrival with RK tracing
     const Real atol = 5e-3;  // absolute L2 on centroids

@@ -456,9 +456,9 @@ namespace Rodin::Variational
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
-          m_polytope(std::move(other.m_polytope)),
           m_qf(std::move(other.m_qf)),
           m_ps(std::move(other.m_ps)),
+          m_polytope(std::move(other.m_polytope)),
           m_set(std::move(other.m_set)),
           m_order(std::move(other.m_order)),
           m_geometry(std::move(other.m_geometry))

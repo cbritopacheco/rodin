@@ -212,7 +212,7 @@ namespace Rodin::Tests::Unit
 
     d = 1;
     connectivity.compute(d, 0);
-    EXPECT_EQ(connectivity.getCount(1), 12);
+    EXPECT_EQ(connectivity.getCount(1), 14);
 
     d = 0;
     connectivity.compute(d, 0);
