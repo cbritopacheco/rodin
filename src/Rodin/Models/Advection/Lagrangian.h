@@ -54,7 +54,7 @@ namespace Rodin::Models::Advection
         Real gbest = std::numeric_limits<Real>::infinity();
         for (size_t j = 0; j < static_cast<size_t>(hs.matrix.rows()); ++j)
         {
-          const auto n = hs.matrix.row(j);
+          const auto n = hs.matrix.row(j).transpose();
           const Real b = hs.vector[j];
           const Real gj = b - n.dot(rref);
           if (gj < gbest)
@@ -64,7 +64,7 @@ namespace Rodin::Models::Advection
           }
         }
 
-        const auto nref = hs.matrix.row(jbest);
+        const auto nref = hs.matrix.row(jbest).transpose();
         const auto itc = mesh.getPolytope(cd, cell);
         const auto& cellO = *itc;
         const Geometry::Point qface(cellO, rref);
