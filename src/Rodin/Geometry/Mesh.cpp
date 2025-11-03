@@ -361,11 +361,8 @@ namespace Rodin::Geometry
   Mesh<Context::Local>::getPolytopeTransformation(size_t dimension, Index idx) const
   {
     assert(dimension < m_transformationIndex.size());
-    if (m_transformationIndex[dimension].read().size() == 0)
-    {
-      m_transformationIndex[dimension].write(
-          [&](auto& obj) { obj.resize(getPolytopeCount(dimension), nullptr); });
-    }
+    m_transformationIndex[dimension].write(
+        [&](auto& obj) { obj.resize(this->getPolytopeCount(dimension), nullptr); });
     assert(0 < m_transformationIndex[dimension].read().size());
     assert(idx < m_transformationIndex[dimension].read().size());
     const auto& transPtr = m_transformationIndex[dimension].read()[idx];
@@ -375,9 +372,8 @@ namespace Rodin::Geometry
     }
     else
     {
-      PolytopeTransformation* trans = getDefaultPolytopeTransformation(dimension, idx);
-      m_transformationIndex[dimension].write(
-          [&](auto& obj) { obj[idx] = trans; });
+      PolytopeTransformation* trans = this->getDefaultPolytopeTransformation(dimension, idx);
+      m_transformationIndex[dimension].write([&](auto& obj) { obj[idx] = trans; });
       return *trans;
     }
   }
