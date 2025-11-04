@@ -164,9 +164,22 @@ namespace Rodin::Variational
 
       Trace trace(const Geometry::Point& p) const
       {
+        struct Hit
+        {
+          Real t;
+          size_t j;
+          Real ndv;
+        };
+
+        const size_t ZERO_HOPS_MAX = 1000; // chained zero-time crossings per event
+        const Real eps_denom = 1e-14;
+        const Real eps_tpos  = 1e-14;
+        const Real eps_g     = 1e-12; // “on face” tolerance in ref
+
         // thread-local scratch
         static thread_local Index s_cell;
         static thread_local Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_pc{{}};
+        static thread_local std::vector<Hit> s_cand;
 
         const auto& poly0 = p.getPolytope();
         const auto& mesh = poly0.getMesh();
@@ -240,25 +253,6 @@ namespace Rodin::Variational
         // Hysteresis: last crossed local face index in current cell
         std::optional<size_t> last_face;
 
-        // guards
-        const size_t ZERO_HOPS_MAX = 1000; // chained zero-time crossings per event
-        const Real eps_denom = 1e-14;
-        const Real eps_tpos  = 1e-14;
-        const Real eps_g     = 1e-12; // “on face” tolerance in ref
-
-        struct Hit
-        {
-          Real t;
-          size_t j;
-          Real ndv;
-        };
-
-        std::vector<Hit> cand;
-
-        std::cout << "Entering loop\n";
-        std::cout << "Tracing from cell " << s_cell << ", rc = " << s_rc.transpose()
-                  << ", tau = " << tau << "\n";
-
         while (tau > 0)
         {
           const auto itc = mesh.getPolytope(cd, s_cell);
@@ -275,11 +269,8 @@ namespace Rodin::Variational
             return s_v;
           };
 
-          cand.clear();
-          cand.reserve(faces.size());
-
-          std::cout << "  In cell " << s_cell << ", rc = " << s_rc.transpose()
-                    << ", tau = " << tau << "\n";
+          s_cand.clear();
+          s_cand.reserve(faces.size());
 
           // collect face hits by linear predictor
           for (size_t i = 0; i < faces.size(); ++i)
@@ -299,10 +290,10 @@ namespace Rodin::Variational
 
             const Real ti = g0 / ndv;
             if (ti > eps_tpos && ti <= tau)
-              cand.push_back({ ti, i, ndv });
+              s_cand.push_back({ ti, i, ndv });
           }
 
-          if (cand.empty())
+          if (s_cand.empty())
           {
             // advance remaining time in this cell
             m_step.step(s_rc1, tau, s_rc, vref);
@@ -310,12 +301,10 @@ namespace Rodin::Variational
             break;
           }
 
-          std::cout << "  Found " << cand.size() << " candidate hits\n";
-
           // pick earliest; tie-break by more transversal
           auto itmin =
             std::min_element(
-              cand.begin(), cand.end(),
+              s_cand.begin(), s_cand.end(),
               [](const Hit& a, const Hit& b)
               {
                 if (a.t != b.t)
@@ -336,8 +325,6 @@ namespace Rodin::Variational
           // same-phys chained crossings at t=0 (vertex/edge events)
           mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc); // phys @ face
 
-          std::cout << "  Hit face " << face_hit << " at t = " << thit
-                    << ", rc = " << s_rc.transpose() << "\n";
           // first hop across the hit face if not boundary
           if (mesh.isBoundary(face_hit))
           {
@@ -370,7 +357,6 @@ namespace Rodin::Variational
             }
 
             // now repeatedly cross any other face(s) containing this phys point
-            std::cout << "  Checking for chained zero-time crossings...\n";
             size_t zero_hops = 0;
             while (zero_hops++ < ZERO_HOPS_MAX)
             {
@@ -387,8 +373,6 @@ namespace Rodin::Variational
                 s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
                 return s_v;
               };
-
-              std::cout << "    222 In cell " << s_cell << ", rc = " << s_rc.transpose() << "\n";
 
               // find another face k with |g_k| <= eps_g and n_k·v_on > 0, excluding hysteresis face
               size_t kface = facesz.size();
@@ -409,8 +393,6 @@ namespace Rodin::Variational
               if (kface == facesz.size())
                 break; // strictly interior now
 
-              std::cout << "    222 Chained hit on face " << facesz[kface] << "\n";
-
               // boundary on the same phys point?
               const Index f2 = facesz[kface];
               if (mesh.isBoundary(f2))
@@ -426,8 +408,6 @@ namespace Rodin::Variational
               const auto& nbr2 = conn.getIncidence(cd - 1, cd).at(f2);
               assert(nbr2.size() == 2);
               s_cell = (nbr2[0] == s_cell) ? nbr2[1] : nbr2[0];
-
-              std::cout << "    222 Hopping to cell " << s_cell << "\n";
 
               mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
               Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
@@ -453,6 +433,10 @@ namespace Rodin::Variational
                   << ", remaining tau = " << tau << "\n";
 
         const auto itf = mesh.getPolytope(cd, s_cell);
+
+        std::cout << "Final s_rc = "  << s_rc.transpose() << "\n";
+        const auto& miaow = *itf;
+        std::cout << "Debug\n";
         return Trace{ false, tau, Geometry::Point(*itf, s_rc) };
       }
 

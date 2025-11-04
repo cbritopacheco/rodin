@@ -36,7 +36,6 @@ namespace Rodin::Models::Advection
 
       bool operator()(Real& tau, Index& cell, Math::SpatialPoint& rref) const
       {
-        std::cout << "FirstOrderBoundaryPolicy called with tau = " << tau << "\n";
         static thread_local Math::Vector<Real> s_nphys_u;
         static thread_local Math::SpatialPoint s_rtmp;
         static thread_local Math::SpatialPoint s_xint;
@@ -70,7 +69,6 @@ namespace Rodin::Models::Advection
         const auto& cellO = *itc;
         const Geometry::Point qface(cellO, rref);
 
-        std::cout << "  Nearest face index: " << jbest << ", gbest = " << gbest << "\n";
         const auto Jinv = qface.getJacobianInverse();
         s_nphys_u = Jinv.transpose() * nref;
         const Real nlen = s_nphys_u.norm();
@@ -80,7 +78,6 @@ namespace Rodin::Models::Advection
           return true;
         }
 
-        std::cout << "  nphys_u = " << s_nphys_u.transpose() << ", nlen = " << nlen << "\n";
         const auto nphys = s_nphys_u / nlen;
         const auto vphys = trace_sign * m_vel(qface);
         const Real vn = vphys.dot(nphys);
@@ -92,8 +89,6 @@ namespace Rodin::Models::Advection
         Geometry::Polytope::Project(g).cell(s_rtmp, s_rtmp);
         rref = s_rtmp;
 
-        std::cout << "  Back-traced foot: xint = " << s_xint.transpose()
-                  << ", rref = " << rref.transpose() << "\n";
         const Real b = hs.vector[jbest];
         const Real gcur = b - nref.dot(rref);
         const Real ndn = nref.dot(nref);
