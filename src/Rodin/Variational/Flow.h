@@ -255,6 +255,10 @@ namespace Rodin::Variational
 
         std::vector<Hit> cand;
 
+        std::cout << "Entering loop\n";
+        std::cout << "Tracing from cell " << s_cell << ", rc = " << s_rc.transpose()
+                  << ", tau = " << tau << "\n";
+
         while (tau > 0)
         {
           const auto itc = mesh.getPolytope(cd, s_cell);
@@ -273,6 +277,9 @@ namespace Rodin::Variational
 
           cand.clear();
           cand.reserve(faces.size());
+
+          std::cout << "  In cell " << s_cell << ", rc = " << s_rc.transpose()
+                    << ", tau = " << tau << "\n";
 
           // collect face hits by linear predictor
           for (size_t i = 0; i < faces.size(); ++i)
@@ -303,6 +310,8 @@ namespace Rodin::Variational
             break;
           }
 
+          std::cout << "  Found " << cand.size() << " candidate hits\n";
+
           // pick earliest; tie-break by more transversal
           auto itmin =
             std::min_element(
@@ -327,6 +336,8 @@ namespace Rodin::Variational
           // same-phys chained crossings at t=0 (vertex/edge events)
           mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc); // phys @ face
 
+          std::cout << "  Hit face " << face_hit << " at t = " << thit
+                    << ", rc = " << s_rc.transpose() << "\n";
           // first hop across the hit face if not boundary
           if (mesh.isBoundary(face_hit))
           {
@@ -359,6 +370,7 @@ namespace Rodin::Variational
             }
 
             // now repeatedly cross any other face(s) containing this phys point
+            std::cout << "  Checking for chained zero-time crossings...\n";
             size_t zero_hops = 0;
             while (zero_hops++ < ZERO_HOPS_MAX)
             {
@@ -375,6 +387,8 @@ namespace Rodin::Variational
                 s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
                 return s_v;
               };
+
+              std::cout << "    222 In cell " << s_cell << ", rc = " << s_rc.transpose() << "\n";
 
               // find another face k with |g_k| <= eps_g and n_k·v_on > 0, excluding hysteresis face
               size_t kface = facesz.size();
@@ -395,6 +409,8 @@ namespace Rodin::Variational
               if (kface == facesz.size())
                 break; // strictly interior now
 
+              std::cout << "    222 Chained hit on face " << facesz[kface] << "\n";
+
               // boundary on the same phys point?
               const Index f2 = facesz[kface];
               if (mesh.isBoundary(f2))
@@ -410,6 +426,8 @@ namespace Rodin::Variational
               const auto& nbr2 = conn.getIncidence(cd - 1, cd).at(f2);
               assert(nbr2.size() == 2);
               s_cell = (nbr2[0] == s_cell) ? nbr2[1] : nbr2[0];
+
+              std::cout << "    222 Hopping to cell " << s_cell << "\n";
 
               mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
               Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
@@ -429,6 +447,10 @@ namespace Rodin::Variational
             }
           }
         }
+
+        std::cout << "Exiting flow trace at cell " << s_cell
+                  << ", rc = " << s_rc.transpose()
+                  << ", remaining tau = " << tau << "\n";
 
         const auto itf = mesh.getPolytope(cd, s_cell);
         return Trace{ false, tau, Geometry::Point(*itf, s_rc) };
