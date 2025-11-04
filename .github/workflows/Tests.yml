@@ -73,41 +73,44 @@ jobs:
         id: ctest
         shell: bash
         run: |
+          # GitHub runs bash with -e. Disable it so failures don't abort this step.
+          set +e
           set -o pipefail
+
           b="${{github.workspace}}/build"
-          tdir="$b/tests"
+          tdir="$b"                     # run CTest from the TOP build dir
           l="$b/ctest-logs"
           mkdir -p "$l"
 
-          # Full run, serial
+          echo "== Full test run =="
           ctest -j 1 --output-on-failure \
                 --test-dir "$tdir" \
                 --output-log "$l/ctest.full.log" \
                 --output-junit "$l/ctest-full.xml" \
             | tee "$l/ctest.full.out"
-          ec1=$?
+          ec1=${PIPESTATUS[0]}
+          echo "full_run_exit_code=$ec1"
 
-          # Show list of failed tests CTest detected
-          if [ -f "$tdir/Testing/Temporary/LastTestsFailed.log" ]; then
-            echo "===== LastTestsFailed.log =====" | tee "$l/LastTestsFailed.log"
-            cat "$tdir/Testing/Temporary/LastTestsFailed.log" | tee -a "$l/LastTestsFailed.log"
+          failed_log="$tdir/Testing/Temporary/LastTestsFailed.log"
+          if [ -f "$failed_log" ]; then
+            echo "===== LastTestsFailed.log (after full run) =====" | tee "$l/LastTestsFailed.log"
+            cat "$failed_log" | tee -a "$l/LastTestsFailed.log"
           fi
 
           final=0
-          if [ $ec1 -ne 0 ]; then
-            # Robust rerun of failures, serial, up to 2 tries each
-            ctest -j 1 \
-                  --rerun-failed --repeat until-pass:2 \
+          if [ "$ec1" -ne 0 ]; then
+            echo "== Rerun failed tests (up to 2 tries) =="
+            ctest -j 1 --rerun-failed --repeat until-pass:2 \
                   --output-on-failure \
                   --test-dir "$tdir" \
                   --output-log "$l/ctest.rerun.log" \
                   --output-junit "$l/ctest-rerun.xml" \
               | tee "$l/ctest.rerun.out"
-            final=$?
+            final=${PIPESTATUS[0]}
+            echo "rerun_exit_code=$final"
           fi
 
           echo "exitcode=$final" >> "$GITHUB_OUTPUT"
-          # Do not fail yet; upload logs first.
           exit 0
 
       - name: Upload ctest logs
@@ -118,7 +121,6 @@ jobs:
           path: ${{github.workspace}}/build/ctest-logs
           if-no-files-found: ignore
 
-      # Stop here if any tests still fail
       - name: Fail if tests failed
         if: steps.ctest.outputs.exitcode != '0'
         run: |
