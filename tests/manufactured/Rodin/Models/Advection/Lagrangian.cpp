@@ -161,9 +161,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     TestFunction  v2(vh);
     {
       Models::Advection::Lagrangian L(u2, v2, u0, velocity);
-      std::cout << "Taking first half step...\n";
       L.step(0.5 * dt);
-      std::cout << "Taking second half step...\n";
       L.step(0.5 * dt);
     }
 

@@ -78,8 +78,8 @@ namespace Rodin::Models::Advection
           return true;
         }
 
-        const auto nphys = s_nphys_u / nlen;
-        const auto vphys = trace_sign * m_vel(qface);
+        const auto nphys = trace_sign * s_nphys_u / nlen;
+        decltype(auto) vphys = m_vel(qface);
         const Real vn = vphys.dot(nphys);
         const Real h = std::max<Real>(0, vn) * tau;
         const auto& xface = qface.getPhysicalCoordinates();

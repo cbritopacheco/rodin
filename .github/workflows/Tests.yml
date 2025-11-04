@@ -1,9 +1,13 @@
 name: Tests
 on:
   push:
-    branches: [master, develop]
+    branches:
+      - master
+      - develop
   pull_request:
-    branches: [master, develop]
+    branches:
+      - master
+      - develop
 
 concurrency:
   group: Tests-${{ github.ref }}
@@ -18,23 +22,21 @@ jobs:
         compiler: [gcc-10]
         build_type: ['Debug', 'Release']
         multithreaded: ['ON', 'OFF']
+        asan: ['ON', 'OFF']
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
-      CTEST_PARALLEL_LEVEL: "1"   # always serial
-
+      CTEST_PARALLEL_LEVEL: 2
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
           cmake: true
-
       - name: Install dependencies
         run: >-
           sudo apt-get update && sudo apt-get install -y
@@ -49,12 +51,12 @@ jobs:
           libsuitesparse-dev
           libmetis-dev
           libboost1.74-all-dev
-
       - name: Configure CMake
         run: >
           cmake
           -B ${{github.workspace}}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_BUILD_DOC=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
@@ -65,77 +67,13 @@ jobs:
           -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
           -DRODIN_CODE_COVERAGE=ON
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
-
       - name: Build
         run: cmake --build ${{github.workspace}}/build
-
-      - name: Run tests (serial full + rerun failed)
-        id: ctest
-        shell: bash
-        run: |
-          # allow failures in this step
-          set +e
-          set -o pipefail
-      
-          b="${{github.workspace}}/build"
-          tdir="$b/tests"               # <-- tests are here
-          l="$b/ctest-logs"
-          mkdir -p "$l"
-      
-          echo "== Discover tests =="
-          ctest -N --test-dir "$tdir" | tee "$l/ctest.discover.txt"
-      
-          echo "== Full test run =="
-          ctest -j 1 --output-on-failure \
-                --test-dir "$tdir" \
-                --output-log "$l/ctest.full.log" \
-                --output-junit "$l/ctest-full.xml" \
-            | tee "$l/ctest.full.out"
-          ec1=${PIPESTATUS[0]}
-          echo "full_run_exit_code=$ec1"
-      
-          failed_log="$tdir/Testing/Temporary/LastTestsFailed.log"
-          if [ -f "$failed_log" ]; then
-            echo "===== LastTestsFailed.log (after full run) =====" | tee "$l/LastTestsFailed.log"
-            cat "$failed_log" | tee -a "$l/LastTestsFailed.log"
-          fi
-      
-          final=0
-          if [ "$ec1" -ne 0 ]; then
-            echo "== Rerun failed tests (up to 2 tries) =="
-            ctest -j 1 --rerun-failed --repeat until-pass:2 \
-                  --output-on-failure \
-                  --test-dir "$tdir" \
-                  --output-log "$l/ctest.rerun.log" \
-                  --output-junit "$l/ctest-rerun.xml" \
-              | tee "$l/ctest.rerun.out"
-            final=${PIPESTATUS[0]}
-            echo "rerun_exit_code=$final"
-          fi
-      
-          echo "exitcode=$final" >> "$GITHUB_OUTPUT"
-          exit 0
-
-      - name: Upload ctest logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ctest-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}-MT${{ matrix.multithreaded }}
-          path: ${{github.workspace}}/build/ctest-logs
-          if-no-files-found: ignore
-
-      - name: Fail if tests failed
-        if: steps.ctest.outputs.exitcode != '0'
-        run: |
-          echo "ctest failed with exit code ${{ steps.ctest.outputs.exitcode }}"
-          exit 1
-
+      - name: Run tests
+        run: ctest --test-dir ${{github.workspace}}/build/tests
       - name: Make coverage
-        if: steps.ctest.outputs.exitcode == '0'
         run: cmake --build ${{github.workspace}}/build --target RodinCoverage
-
       - name: Upload coverage to Codecov
-        if: steps.ctest.outputs.exitcode == '0'
         uses: codecov/codecov-action@v5
         with:
           files: ${{github.workspace}}/build/RodinCoverage.info

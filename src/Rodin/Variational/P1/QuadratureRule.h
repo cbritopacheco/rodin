@@ -675,13 +675,15 @@ namespace Rodin::Variational
       constexpr
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
-          m_integrand(integrand.copy())
+          m_integrand(integrand.copy()),
+          m_set(false)
       {}
 
       constexpr
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
-          m_integrand(other.m_integrand->copy())
+          m_integrand(other.m_integrand->copy()),
+          m_set(false)
       {}
 
       constexpr
@@ -694,7 +696,9 @@ namespace Rodin::Variational
           m_weight(std::move(other.m_weight)),
           m_distortion(std::move(other.m_distortion)),
           m_grad(std::move(other.m_grad)),
-          m_matrix(std::move(other.m_matrix))
+          m_matrix(std::move(other.m_matrix)),
+          m_set(std::move(other.m_set)),
+          m_geometry(std::move(other.m_geometry))
       {}
 
       constexpr
