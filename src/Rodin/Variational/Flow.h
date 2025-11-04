@@ -254,10 +254,9 @@ namespace Rodin::Variational
         // Hysteresis: last crossed local face index in current cell
         std::optional<size_t> last_face;
 
-
-        std::cout << std::this_thread::get_id() << " b\n";
         while (tau > 0)
         {
+          std::cout << std::this_thread::get_id() << " b\n";
           const auto itc = mesh.getPolytope(cd, s_cell);
           const auto& cell = *itc;
           const auto g = mesh.getGeometry(cd, s_cell);
@@ -359,6 +358,8 @@ namespace Rodin::Variational
               }
             }
 
+            std::cout << std::this_thread::get_id() << " e\n";
+
             // now repeatedly cross any other face(s) containing this phys point
             size_t zero_hops = 0;
             while (zero_hops++ < ZERO_HOPS_MAX)
@@ -430,8 +431,6 @@ namespace Rodin::Variational
             }
           }
         }
-
-        std::cout << std::this_thread::get_id() << " e\n";
 
         const auto itf = mesh.getPolytope(cd, s_cell);
         return Trace{ false, tau, Geometry::Point(*itf, s_rc) };
