@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        compiler: [gcc-10, clang-11]
+        compiler: [gcc-10, clang-12]
         build_type: ['Release', 'Debug']
         multithreaded: ['ON', 'OFF']
       fail-fast: false
@@ -92,6 +92,7 @@ jobs:
           -DRODIN_BUILD_DOC=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_SRC=ON
+          -DBoost_NO_BOOST_CMAKE=ON
           -DRODIN_BUILD_EXAMPLES=ON
           -DRODIN_BUILD_MULTITHREADED=${{ matrix.multithreaded }}
       - name: Build
