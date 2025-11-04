@@ -379,6 +379,7 @@ namespace Rodin::Geometry
             ptr = obj[idx] = trans;
           }
         });
+    assert(ptr);
     return *ptr;
   }
 

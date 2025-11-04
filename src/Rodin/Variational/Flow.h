@@ -21,6 +21,7 @@
 #include "Rodin/Variational/ShapeFunction.h"
 
 #include "Rodin/QF/QuadratureFormula.h"
+#include <thread>
 
 namespace Rodin::FormLanguage
 {
@@ -428,22 +429,16 @@ namespace Rodin::Variational
           }
         }
 
-        std::cout << "Exiting flow trace at cell " << s_cell
-                  << ", rc = " << s_rc.transpose()
-                  << ", remaining tau = " << tau << "\n";
-
         const auto itf = mesh.getPolytope(cd, s_cell);
-
-        std::cout << "Final s_rc = "  << s_rc.transpose() << "\n";
-        const auto& miaow = *itf;
-        std::cout << "Debug\n";
         return Trace{ false, tau, Geometry::Point(*itf, s_rc) };
       }
 
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
+        std::cout << std::this_thread::get_id() << " b";
         const auto& trace = this->trace(p);
+        std::cout << std::this_thread::get_id() << " e";
         return trace.exited() ? 0 : m_operand->getValue(trace.getPoint());
       }
 
