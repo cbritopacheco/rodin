@@ -13,9 +13,6 @@
 #include "Rodin/Variational/Flow.h"
 #include "Rodin/Models/Advection/Lagrangian.h"
 
-#include "RodinExternal/MMG.h"
-#include "RodinExternal/MMG/Mesh.h"
-
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
