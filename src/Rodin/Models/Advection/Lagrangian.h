@@ -69,7 +69,7 @@ namespace Rodin::Models::Advection
         const auto& cellO = *itc;
         const Geometry::Point qface(cellO, rref);
 
-        const auto Jinv = qface.getJacobianInverse();
+        const auto& Jinv = qface.getJacobianInverse();
         s_nphys_u = Jinv.transpose() * nref;
         const Real nlen = s_nphys_u.norm();
         if (nlen == 0)
@@ -173,12 +173,12 @@ namespace Rodin::Models::Advection
         if (m_t > 0)
         {
           pb = Integral(u, v)
-             - Integral(Flow(-dt, u.getSolution(), m_velocity), v);
+             - Integral(Flow(-dt, u.getSolution(), m_velocity, step, bp, tp), v);
         }
         else
         {
           pb = Integral(u, v)
-             - Integral(Flow(-dt, m_initial, m_velocity), v);
+             - Integral(Flow(-dt, m_initial, m_velocity, step, bp, tp), v);
         }
 
         Solver::CG(pb).solve();
