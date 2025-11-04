@@ -71,6 +71,9 @@ jobs:
         run: cmake --build ${{github.workspace}}/build
       - name: Run tests
         run: ctest --test-dir ${{github.workspace}}/build/tests
+      - name: Rerun failed tests (verbose)
+        if: failure()
+        run: ctest --test-dir ${{github.workspace}}/build/tests --rerun-failed --output-on-failure
       - name: Make coverage
         run: cmake --build ${{github.workspace}}/build --target RodinCoverage
       - name: Upload coverage to Codecov
