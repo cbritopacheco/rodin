@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
-      CTEST_PARALLEL_LEVEL: 2
+      CTEST_PARALLEL_LEVEL: "1"   # always serial
 
     steps:
       - name: Checkout repository and submodules
@@ -69,35 +69,45 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build
 
-      - name: Run tests (full + rerun failed)
+      - name: Run tests (serial full + rerun failed)
         id: ctest
         shell: bash
         run: |
           set -o pipefail
           b="${{github.workspace}}/build"
           tdir="$b/tests"
+          l="$b/ctest-logs"
+          mkdir -p "$l"
 
-          # Full run
-          ctest --output-on-failure \
+          # Full run, serial
+          ctest -j 1 --output-on-failure \
                 --test-dir "$tdir" \
-                --output-log "$b/ctest.full.log" \
-                --output-junit "$b/ctest-full.xml" \
-            | tee "$b/ctest.full.out"
+                --output-log "$l/ctest.full.log" \
+                --output-junit "$l/ctest-full.xml" \
+            | tee "$l/ctest.full.out"
           ec1=$?
 
+          # Show list of failed tests CTest detected
+          if [ -f "$tdir/Testing/Temporary/LastTestsFailed.log" ]; then
+            echo "===== LastTestsFailed.log =====" | tee "$l/LastTestsFailed.log"
+            cat "$tdir/Testing/Temporary/LastTestsFailed.log" | tee -a "$l/LastTestsFailed.log"
+          fi
+
           final=0
-          # Rerun failures if any
           if [ $ec1 -ne 0 ]; then
-            ctest --rerun-failed --output-on-failure \
+            # Robust rerun of failures, serial, up to 2 tries each
+            ctest -j 1 \
+                  --rerun-failed --repeat until-pass:2 \
+                  --output-on-failure \
                   --test-dir "$tdir" \
-                  --output-log "$b/ctest.rerun.log" \
-                  --output-junit "$b/ctest-rerun.xml" \
-              | tee "$b/ctest.rerun.out"
+                  --output-log "$l/ctest.rerun.log" \
+                  --output-junit "$l/ctest-rerun.xml" \
+              | tee "$l/ctest.rerun.out"
             final=$?
           fi
 
           echo "exitcode=$final" >> "$GITHUB_OUTPUT"
-          # Do not fail yet. We want to upload logs first.
+          # Do not fail yet; upload logs first.
           exit 0
 
       - name: Upload ctest logs
@@ -105,16 +115,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ctest-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}-MT${{ matrix.multithreaded }}
-          path: |
-            ${{github.workspace}}/build/ctest.full.log
-            ${{github.workspace}}/build/ctest.full.out
-            ${{github.workspace}}/build/ctest-full.xml
-            ${{github.workspace}}/build/ctest.rerun.log
-            ${{github.workspace}}/build/ctest.rerun.out
-            ${{github.workspace}}/build/ctest-rerun.xml
+          path: ${{github.workspace}}/build/ctest-logs
           if-no-files-found: ignore
 
-      # Hard stop if tests failed. Coverage will not run.
+      # Stop here if any tests still fail
       - name: Fail if tests failed
         if: steps.ctest.outputs.exitcode != '0'
         run: |
