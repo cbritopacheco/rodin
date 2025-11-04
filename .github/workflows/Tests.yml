@@ -73,15 +73,18 @@ jobs:
         id: ctest
         shell: bash
         run: |
-          # GitHub runs bash with -e. Disable it so failures don't abort this step.
+          # allow failures in this step
           set +e
           set -o pipefail
-
+      
           b="${{github.workspace}}/build"
-          tdir="$b"                     # run CTest from the TOP build dir
+          tdir="$b/tests"               # <-- tests are here
           l="$b/ctest-logs"
           mkdir -p "$l"
-
+      
+          echo "== Discover tests =="
+          ctest -N --test-dir "$tdir" | tee "$l/ctest.discover.txt"
+      
           echo "== Full test run =="
           ctest -j 1 --output-on-failure \
                 --test-dir "$tdir" \
@@ -90,13 +93,13 @@ jobs:
             | tee "$l/ctest.full.out"
           ec1=${PIPESTATUS[0]}
           echo "full_run_exit_code=$ec1"
-
+      
           failed_log="$tdir/Testing/Temporary/LastTestsFailed.log"
           if [ -f "$failed_log" ]; then
             echo "===== LastTestsFailed.log (after full run) =====" | tee "$l/LastTestsFailed.log"
             cat "$failed_log" | tee -a "$l/LastTestsFailed.log"
           fi
-
+      
           final=0
           if [ "$ec1" -ne 0 ]; then
             echo "== Rerun failed tests (up to 2 tries) =="
@@ -109,7 +112,7 @@ jobs:
             final=${PIPESTATUS[0]}
             echo "rerun_exit_code=$final"
           fi
-
+      
           echo "exitcode=$final" >> "$GITHUB_OUTPUT"
           exit 0
 
