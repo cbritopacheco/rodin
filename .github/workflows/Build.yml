@@ -93,6 +93,7 @@ jobs:
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_SRC=ON
           -DBoost_NO_BOOST_CMAKE=OFF
+          -DCMAKE_POLICY_DEFAULT_CMP0167=OLD
           -DBOOST_ROOT="$(brew --prefix boost)"
           -DRODIN_BUILD_EXAMPLES=ON
           -DRODIN_BUILD_MULTITHREADED=${{ matrix.multithreaded }}
