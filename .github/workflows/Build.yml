@@ -95,6 +95,8 @@ jobs:
           -DBoost_NO_BOOST_CMAKE=OFF
           -DCMAKE_POLICY_DEFAULT_CMP0167=OLD
           -DBOOST_ROOT="$(brew --prefix boost)"
+          -DBOOST_INCLUDEDIR="$(brew --prefix boost)/include"
+          -DBOOST_LIBRARYDIR="$(brew --prefix boost)/lib"
           -DRODIN_BUILD_EXAMPLES=ON
           -DRODIN_BUILD_MULTITHREADED=${{ matrix.multithreaded }}
       - name: Build
