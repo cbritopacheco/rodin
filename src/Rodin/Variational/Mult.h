@@ -185,7 +185,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return this->object(this->getLHS().getValue(p)) * this->object(this->getRHS().getValue(p));
       }
@@ -348,7 +348,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) getBasis(size_t local) const
+      auto getBasis(size_t local) const
       {
         const auto& p = getPoint();
         return this->object(getLHS().getValue(p)) * this->object(getRHS().getBasis(local));
@@ -489,7 +489,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) getBasis(size_t local) const
+      auto getBasis(size_t local) const
       {
         const auto& p = getPoint();
         return this->object(this->getLHS().getBasis(local)) * this->object(this->getRHS().getValue(p));

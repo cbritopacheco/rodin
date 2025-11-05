@@ -55,7 +55,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return Math::abs(getOperand().getValue(p));
       }

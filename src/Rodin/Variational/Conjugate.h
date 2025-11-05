@@ -9,6 +9,8 @@
 
 #include "ForwardDecls.h"
 
+#include "Rodin/Math/Common.h"
+
 #include "Function.h"
 #include "ShapeFunction.h"
 
@@ -58,7 +60,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return Math::conj(this->object(getOperand().getValue(p)));
       }

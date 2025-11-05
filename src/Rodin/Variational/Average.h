@@ -54,7 +54,7 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         static thread_local Math::SpatialPoint rc1;
         static thread_local Math::SpatialPoint rc2;

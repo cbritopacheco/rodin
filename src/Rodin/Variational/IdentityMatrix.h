@@ -50,7 +50,7 @@ namespace Rodin::Variational
         return m_n;
       }
 
-      decltype(auto) getValue(const Geometry::Point&) const
+      auto getValue(const Geometry::Point&) const
       {
         return Math::Matrix<Real>::Identity(m_n, m_n);
       }

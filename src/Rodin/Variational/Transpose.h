@@ -61,7 +61,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return this->object(getOperand().getValue(p)).transpose();
       }

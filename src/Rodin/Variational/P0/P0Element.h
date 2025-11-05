@@ -274,7 +274,7 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          decltype(auto) operator()(const Math::SpatialVector<ScalarType>& r) const
+          auto operator()(const Math::SpatialVector<ScalarType>& r) const
           {
             const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
             return Math::Vector<ScalarType>::Zero(vdim);

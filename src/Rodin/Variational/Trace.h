@@ -64,7 +64,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return this->getOperand().getValue(p).trace();
       }
@@ -156,7 +156,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) getBasis(size_t local) const
+      auto getBasis(size_t local) const
       {
         return this->getOperand().getBasis(local).transpose();
       }

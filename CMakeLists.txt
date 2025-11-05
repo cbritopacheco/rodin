@@ -216,7 +216,7 @@ if (RODIN_BUILD_SRC)
 
   # ---- Eigen ----
   message(STATUS "Configuring Eigen3...")
-  find_package(Eigen3 3.3 CONFIG REQUIRED NO_MODULE)
+  find_package(Eigen3 CONFIG REQUIRED NO_MODULE)
 
   if (RODIN_WITH_PLOT)
     # ---- Magnum ----

@@ -138,19 +138,19 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) x() const
+      auto x() const
       {
         return m_ref.get().x();
       }
 
       constexpr
-      decltype(auto) y() const
+      auto y() const
       {
         return m_ref.get().y();
       }
 
       constexpr
-      decltype(auto) z() const
+      auto z() const
       {
         return m_ref.get().z();
       }

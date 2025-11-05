@@ -127,7 +127,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point&) const
+      const auto& getValue(const Geometry::Point&) const
       {
         return m_matrix;
       }

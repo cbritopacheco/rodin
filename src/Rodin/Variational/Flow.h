@@ -440,7 +440,8 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         const auto& trace = this->trace(p);
-        return trace.exited() ? 0 : m_operand->getValue(trace.getPoint());
+        const bool b = !trace.exited();
+        return b * m_operand->getValue(trace.getPoint());
       }
 
       constexpr

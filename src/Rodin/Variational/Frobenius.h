@@ -51,7 +51,7 @@ namespace Rodin::Variational
           m_v(std::move(other.m_v))
       {}
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         if constexpr (std::is_same_v<OperandRangeType, Real>)
         {
