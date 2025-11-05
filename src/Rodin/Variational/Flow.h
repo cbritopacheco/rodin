@@ -177,13 +177,9 @@ namespace Rodin::Variational
         const Real eps_g     = 1e-12; // “on face” tolerance in ref
 
         // thread-local scratch
-        // static thread_local Index s_cell;
-        // static thread_local Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_pc{{}};
-        // static thread_local std::vector<Hit> s_cand;
-
-        Index s_cell;
-        Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_pc{{}};
-        std::vector<Hit> s_cand;
+        static thread_local Index s_cell;
+        static thread_local Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_pc{{}};
+        static thread_local std::vector<Hit> s_cand;
 
         const auto& poly0 = p.getPolytope();
         const auto& mesh = poly0.getMesh();
@@ -266,8 +262,7 @@ namespace Rodin::Variational
 
           const auto vref = [&](const Math::SpatialPoint& r)
           {
-            // static thread_local Math::SpatialVector<Real> s_v;
-            Math::SpatialVector<Real> s_v;
+            static thread_local Math::SpatialVector<Real> s_v;
             const Geometry::Point qp(cell, r);
             s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
             return s_v;
@@ -376,8 +371,7 @@ namespace Rodin::Variational
               const auto& facesz = conn.getIncidence(cd, cd - 1).at(s_cell);
               const auto vz = [&] (const Math::SpatialPoint& r)
               {
-                // static thread_local Math::SpatialVector<Real> s_v;
-                Math::SpatialVector<Real> s_v;
+                static thread_local Math::SpatialVector<Real> s_v;
                 const Geometry::Point qp(cellz, r);
                 s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
                 return s_v;
