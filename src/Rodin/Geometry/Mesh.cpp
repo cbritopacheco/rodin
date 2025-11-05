@@ -373,15 +373,17 @@ namespace Rodin::Geometry
     m_transformationIndex[dimension].write([&](auto& vec)
     {
       // Ensure the vector is big enough before indexing
-      if (vec.size() < count) {
+      if (vec.size() < count)
+      {
         // Make sure we don't shrink accidentally; fill new entries with nullptr
         vec.resize(count, nullptr);
       }
 
       // Safe to index now
-      PolytopeTransformation*& slot = vec[idx];
+      PolytopeTransformation* slot = vec[idx];
 
-      if (!slot) {
+      if (!slot)
+      {
         // Create under lock so only one thread allocates
         PolytopeTransformation* created =
             this->getDefaultPolytopeTransformation(dimension, idx);
