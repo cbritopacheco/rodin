@@ -19,14 +19,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        compiler: [gcc-11]
+        compiler: [gcc-14]
         build_type: ['Debug', 'Release']
         multithreaded: ['ON', 'OFF']
         asan: ['ON', 'OFF']
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
-      CTEST_PARALLEL_LEVEL: 2
+      CTEST_PARALLEL_LEVEL: 1
+      OMP_NUM_THREADS: 2
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
