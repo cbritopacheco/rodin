@@ -275,7 +275,12 @@ namespace Rodin::Variational
           // collect face hits by linear predictor
           for (size_t i = 0; i < faces.size(); ++i)
           {
-            if (last_face && i == *last_face) continue;
+            assert(last_face);
+            if (last_face)
+            {
+              if (i == *last_face)
+                continue;
+            }
 
             const auto n = hs.matrix.row(i);
             const Real b = hs.vector[i];
