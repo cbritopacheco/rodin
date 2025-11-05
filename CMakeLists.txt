@@ -125,25 +125,25 @@ endif()
 set(_SAN_COMPILE "")
 set(_SAN_LINK    "")
 
-if(RODIN_WITH_ASAN)
+if(RODIN_USE_ASAN)
   list(APPEND _SAN_COMPILE -fsanitize=address -fno-omit-frame-pointer
                            -fsanitize-address-use-after-scope)
   list(APPEND _SAN_LINK    -fsanitize=address)
 endif()
 
-if(RODIN_WITH_UBSAN)
+if(RODIN_USE_UBSAN)
   list(APPEND _SAN_COMPILE -fsanitize=undefined)
   list(APPEND _SAN_LINK    -fsanitize=undefined)
   # Optional hard fail:
   # list(APPEND _SAN_COMPILE -fno-sanitize-recover=undefined)
 endif()
 
-if(RODIN_WITH_TSAN)
+if(RODIN_USE_TSAN)
   list(APPEND _SAN_COMPILE -fsanitize=thread)
   list(APPEND _SAN_LINK    -fsanitize=thread)
 endif()
 
-if(RODIN_WITH_MSAN)
+if(RODIN_USE_MSAN)
   list(APPEND _SAN_COMPILE -fsanitize=memory -fsanitize-memory-track-origins=2
                            -fno-omit-frame-pointer)
   list(APPEND _SAN_LINK    -fsanitize=memory)
@@ -151,6 +151,7 @@ endif()
 
 # Apply globally (affects all following targets)
 if(_SAN_COMPILE)
+  message(STATUS "Enabling sanitizers with compile options: ${_SAN_COMPILE}")
   add_compile_options(${_SAN_COMPILE})
 endif()
 if(_SAN_LINK)
