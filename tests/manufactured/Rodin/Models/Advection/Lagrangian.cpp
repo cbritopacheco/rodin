@@ -148,6 +148,10 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     auto u0 = sin(Math::Constants::pi() * F::x)
             * sin(Math::Constants::pi() * F::y);
 
+    std::cout << "Comparing one full step vs two half steps..." << std::endl;
+
+    std::cout << "  One full step..." << std::endl;
+
     // one full step
     TrialFunction u1(vh);
     TestFunction  v1(vh);
@@ -155,6 +159,8 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
       Models::Advection::Lagrangian L(u1, v1, u0, velocity);
       L.step(dt);
     }
+
+    std::cout << "  Two half steps..." << std::endl;
 
     // two half steps
     TrialFunction u2(vh);
@@ -164,6 +170,8 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
       L.step(0.5 * dt);
       L.step(0.5 * dt);
     }
+
+    std::cout << "  Comparing solutions at interior centroids..." << std::endl;
 
     // compare u1 and u2 at interior centroids
     const auto& uh1 = u1.getSolution();
@@ -176,6 +184,9 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     size_t n = 0;
 
     auto inside01 = [](Real z) { return z >= 0.0 && z <= 1.0; };
+
+    std::cout << "  Looping over cells..." << std::endl;
+
 
     for (Index c = 0; c < mesh.getPolytopeCount(cd); ++c)
     {
@@ -199,6 +210,8 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
       den2 += 0.5 * (a * a + b * b);
       ++n;
     }
+
+    std::cout << "  Finished looping over cells." << std::endl;
 
     ASSERT_GT(n, 0u);
     const Real rel = std::sqrt(num2) / (den2 > 0 ? std::sqrt(den2) : 1.0);
