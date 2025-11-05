@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        compiler: [gcc-10]
+        compiler: [gcc-11]
         build_type: ['Debug', 'Release']
         multithreaded: ['ON', 'OFF']
         asan: ['ON', 'OFF']
