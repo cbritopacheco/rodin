@@ -22,7 +22,7 @@ jobs:
         compiler: [gcc-14]
         build_type: ['Debug', 'Release']
         multithreaded: ['ON', 'OFF']
-        asan: ['ON', 'OFF']
+        sanitizer: ['ON', 'OFF']
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
@@ -57,7 +57,8 @@ jobs:
           cmake
           -B ${{github.workspace}}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DRODIN_USE_ASAN=${{ matrix.asan }}
+          -DRODIN_USE_ASAN=${{ matrix.sanitizer }}
+          -DRODIN_USE_UBSAN=${{ matrix.sanitizer }}
           -DRODIN_BUILD_DOC=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
