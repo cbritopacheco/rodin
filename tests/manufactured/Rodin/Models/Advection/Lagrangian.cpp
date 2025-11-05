@@ -150,16 +150,6 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
 
     std::cout << "Comparing one full step vs two half steps..." << std::endl;
 
-    std::cout << "  One full step..." << std::endl;
-
-    // one full step
-    TrialFunction u1(vh);
-    TestFunction  v1(vh);
-    {
-      Models::Advection::Lagrangian L(u1, v1, u0, velocity);
-      L.step(dt);
-    }
-
     std::cout << "  Two half steps..." << std::endl;
 
     // two half steps
@@ -171,6 +161,16 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
       L.step(0.5 * dt);
       std::cout << "    Second half step..." << std::endl;
       L.step(0.5 * dt);
+    }
+
+    std::cout << "  One full step..." << std::endl;
+
+    // one full step
+    TrialFunction u1(vh);
+    TestFunction  v1(vh);
+    {
+      Models::Advection::Lagrangian L(u1, v1, u0, velocity);
+      L.step(dt);
     }
 
     std::cout << "  Comparing solutions at interior centroids..." << std::endl;
