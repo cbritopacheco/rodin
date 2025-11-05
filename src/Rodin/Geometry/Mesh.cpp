@@ -360,27 +360,40 @@ namespace Rodin::Geometry
   const PolytopeTransformation&
   Mesh<Context::Local>::getPolytopeTransformation(size_t dimension, Index idx) const
   {
+    // Basic sanity
     assert(dimension < m_transformationIndex.size());
-    PolytopeTransformation* ptr = nullptr;
-    m_transformationIndex[dimension].write(
-        [&](auto& obj)
-        {
-          obj.resize(this->getPolytopeCount(dimension), nullptr);
-          assert(0 < obj.size());
-          assert(idx < obj.size());
-          const auto& transPtr = obj[idx];
-          if (transPtr)
-          {
-            ptr = transPtr;
-          }
-          else
-          {
-            PolytopeTransformation* trans = this->getDefaultPolytopeTransformation(dimension, idx);
-            ptr = obj[idx] = trans;
-          }
-        });
-    assert(ptr);
-    return *ptr;
+
+    // The number of (dimension)-polytopes is stable for the lifetime of the mesh
+    const size_t count = this->getPolytopeCount(dimension);
+    assert(idx < count);
+
+    PolytopeTransformation* out = nullptr;
+
+    // Single critical section: resize-if-needed + read/create/publish + return
+    m_transformationIndex[dimension].write([&](auto& vec)
+    {
+      // Ensure the vector is big enough before indexing
+      if (vec.size() < count) {
+        // Make sure we don't shrink accidentally; fill new entries with nullptr
+        vec.resize(count, nullptr);
+      }
+
+      // Safe to index now
+      PolytopeTransformation*& slot = vec[idx];
+
+      if (!slot) {
+        // Create under lock so only one thread allocates
+        PolytopeTransformation* created =
+            this->getDefaultPolytopeTransformation(dimension, idx);
+        // Publish the pointer while still holding the lock
+        slot = created;
+      }
+
+      out = slot;
+    });
+
+    assert(out != nullptr);
+    return *out;
   }
 
   Real Mesh<Context::Local>::getVolume() const

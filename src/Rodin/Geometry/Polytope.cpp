@@ -324,8 +324,8 @@ namespace Rodin::Geometry
     const size_t d = getDimension();
     const auto& mesh = m_mesh.get();
     const auto& conn = mesh.getConnectivity();
-    const auto& inc = conn.getIncidence(d, d);
     RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d);
+    const auto& inc = conn.getIncidence(d, d);
     const auto& adj = inc.at(getIndex());
     return PolytopeIterator(
         d, getMesh(), IteratorIndexGenerator(adj.begin(), adj.end()));
