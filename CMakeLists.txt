@@ -202,7 +202,6 @@ if (RODIN_BUILD_SRC)
 
   find_package(Boost 1.74 REQUIRED
     COMPONENTS
-    system
     filesystem
     serialization
     headers
