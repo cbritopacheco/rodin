@@ -12,6 +12,7 @@
 #include <boost/bimap/vector_of.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/split_member.hpp>
 
 #include "Rodin/Array.h"
 #include "Rodin/Context/Local.h"
