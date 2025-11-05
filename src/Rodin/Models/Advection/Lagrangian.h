@@ -173,7 +173,7 @@ namespace Rodin::Models::Advection
         if (m_t > 0)
         {
           pb = Integral(u, v)
-             - Integral(Flow(-dt, m_initial, m_velocity, step, bp, tp), v);
+             - Integral(Flow(-dt, u.getSolution(), m_velocity, step, bp, tp), v);
         }
         else
         {
