@@ -202,6 +202,7 @@ namespace Rodin::Variational
 
           if (mesh.isBoundary(f))
           {
+            assert(adj.size() > 0);
             const Index c = adj[0];
             mesh.getPolytopeTransformation(cd, c).inverse(s_rc_tmp, p.getPhysicalCoordinates());
             Geometry::Polytope::Project(mesh.getGeometry(cd, c)).cell(s_rc, s_rc_tmp);
@@ -209,6 +210,7 @@ namespace Rodin::Variational
           }
           else
           {
+            assert(adj.size() > 0);
             const Index c0 = adj[0];
             mesh.getPolytopeTransformation(cd, c0).inverse(s_rc_tmp, p.getPhysicalCoordinates());
             const auto it0 = mesh.getPolytope(cd, c0);
@@ -233,6 +235,7 @@ namespace Rodin::Variational
             }
             else
             {
+              assert(adj.size() > 1);
               const Index c1 = adj[1];
               mesh.getPolytopeTransformation(cd, c1).inverse(s_rc_tmp, p.getPhysicalCoordinates());
               Geometry::Polytope::Project(mesh.getGeometry(cd, c1)).cell(s_rc, s_rc_tmp);
@@ -280,9 +283,13 @@ namespace Rodin::Variational
                 continue;
             }
 
+            assert(i < hs.matrix.rows());
             const auto n = hs.matrix.row(i);
+
+            assert(i < hs.vector.size());
             const Real b = hs.vector[i];
 
+            assert(n.size() == s_rc.size());
             const Real g0 = b - n.dot(s_rc);
             if (g0 <= 0) // interior requires g0 > 0
               continue;
@@ -318,6 +325,7 @@ namespace Rodin::Variational
 
           const Real thit = itmin->t;
           const size_t jhit = itmin->j;
+          assert(jhit < faces.size());
           const Index face_hit = faces[jhit];
 
           // advance to the face
@@ -384,7 +392,9 @@ namespace Rodin::Variational
                 if (last_face && i == *last_face)
                   continue;
                 const auto n = hsz.matrix.row(i);
+                assert(i < hsz.vector.size());
                 const Real b = hsz.vector[i];
+                assert(n.size() == s_rc.size());
                 const Real gi = b - n.dot(s_rc);
                 if (std::abs(gi) <= eps_g && n.dot(vz(s_rc)) > eps_denom)
                 {
@@ -397,6 +407,7 @@ namespace Rodin::Variational
                 break; // strictly interior now
 
               // boundary on the same phys point?
+              assert(kface < facesz.size());
               const Index f2 = facesz[kface];
               if (mesh.isBoundary(f2))
               {
