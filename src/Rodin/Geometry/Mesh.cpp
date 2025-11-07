@@ -389,6 +389,10 @@ namespace Rodin::Geometry
         vec[idx] = created;
         out = created;
       }
+      else
+      {
+        out = vec[idx];
+      }
     });
 
     assert(out != nullptr);
