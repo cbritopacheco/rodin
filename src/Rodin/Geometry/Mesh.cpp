@@ -380,18 +380,15 @@ namespace Rodin::Geometry
       }
 
       // Safe to index now
-      PolytopeTransformation* slot = vec[idx];
-
-      if (!slot)
+      if (!vec[idx])
       {
         // Create under lock so only one thread allocates
         PolytopeTransformation* created =
             this->getDefaultPolytopeTransformation(dimension, idx);
         // Publish the pointer while still holding the lock
-        slot = created;
+        vec[idx] = created;
+        out = created;
       }
-
-      out = slot;
     });
 
     assert(out != nullptr);
