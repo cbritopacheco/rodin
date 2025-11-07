@@ -243,12 +243,14 @@ namespace Rodin::Math
     return lhs / rhs;
   }
 
+  inline
   constexpr
   Real dot(const Real& lhs, const Real& rhs)
   {
     return lhs * rhs;
   }
 
+  inline
   constexpr
   Complex dot(const Complex& lhs, const Complex& rhs)
   {

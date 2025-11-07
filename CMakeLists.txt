@@ -151,10 +151,14 @@ endif()
 
 # Apply globally (affects all following targets)
 if(_SAN_COMPILE)
+  list(APPEND _SAN_COMPILE -fno-inline -fno-inline-functions
+                           -fno-omit-frame-pointer -fno-optimize-sibling-calls)
   message(STATUS "Enabling sanitizers with compile options: ${_SAN_COMPILE}")
   add_compile_options(${_SAN_COMPILE})
 endif()
 if(_SAN_LINK)
+  list(APPEND _SAN_LINK -fno-inline -fno-inline-functions
+                        -fno-omit-frame-pointer -fno-optimize-sibling-calls)
   add_link_options(${_SAN_LINK})
 endif()
 

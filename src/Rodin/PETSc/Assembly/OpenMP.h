@@ -92,47 +92,57 @@ namespace Rodin::Assembly
           const PetscInt dim = PetscInt(seq.getDimension());
           const PetscInt cnt = PetscInt(seq.getCount());
 
+          // one dense buffer per thread, merged once
+          std::vector<std::vector<PetscScalar>> chunks(static_cast<size_t>(tc));
+
 #pragma omp parallel num_threads(tc)
           {
-            // thread-local accumulator
-            std::vector<PetscScalar> local(n, PetscScalar(0));
-            auto integrator = std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>>(lfi.copy());
+            const int tid = omp_get_thread_num();
+            auto integrator =
+              std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>>(lfi.copy());
 
-#pragma omp for nowait
+            std::vector<PetscScalar> local(static_cast<size_t>(n), PetscScalar(0));
+
+#pragma omp for
             for (PetscInt i = 0; i < cnt; ++i)
             {
-              if (seq.filter(i) &&
-                 (attrs.empty() || attrs.count(mesh.getAttribute(dim, i))))
-              {
-                auto it = seq.getIterator(i);
-                integrator->setPolytope(*it);
-                const auto& dofs = input.getFES().getDOFs(dim, i);
-                for (size_t k = 0; k < dofs.size(); ++k)
-                {
-                  local[dofs[k]] += PetscScalar(integrator->integrate(k));
-                }
-              }
+              if (!seq.filter(i)) continue;
+              if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, i))) continue;
+
+              auto it = seq.getIterator(i);
+              integrator->setPolytope(*it);
+
+              const auto& dofs = input.getFES().getDOFs(dim, i);
+              for (size_t k = 0; k < dofs.size(); ++k)
+                local[dofs[k]] += PetscScalar(integrator->integrate(k));
             }
 
-#pragma omp critical
+            chunks[static_cast<size_t>(tid)] = std::move(local);
+
+#pragma omp barrier
+#pragma omp single
             {
-              for (PetscInt idx = 0; idx < n; ++idx)
+              // single serial flush to PETSc, avoids long critical sections
+              for (auto& v : chunks)
               {
-                if (local[idx] != PetscScalar(0))
+                for (PetscInt idx = 0; idx < n; ++idx)
                 {
-                  ierr = VecSetValue(res, idx, local[idx], ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
+                  const PetscScalar val = v[static_cast<size_t>(idx)];
+                  if (val != PetscScalar(0))
+                  {
+                    PetscErrorCode e = VecSetValue(res, idx, val, ADD_VALUES);
+                    assert(e == PETSC_SUCCESS);
+                  }
                 }
               }
             }
           } // end parallel
         }
 
-        ierr = VecAssemblyBegin(res);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = VecAssemblyEnd(res);
-        assert(ierr == PETSC_SUCCESS);
+        PetscErrorCode ierr2 = VecAssemblyBegin(res);
+        assert(ierr2 == PETSC_SUCCESS);
+        ierr2 = VecAssemblyEnd(res);
+        assert(ierr2 == PETSC_SUCCESS);
       }
 
       OpenMP* copy() const noexcept override
@@ -229,54 +239,59 @@ namespace Rodin::Assembly
           const PetscInt dim = PetscInt(seq.getDimension());
           const PetscInt cnt = PetscInt(seq.getCount());
 
+          // per-thread triplet chunks, merged once
+          std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
+
 #pragma omp parallel num_threads(tc)
           {
-            std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
-            local.reserve(cnt);
+            const int tid = omp_get_thread_num();
             auto integrator =
-              std::unique_ptr<Variational::LocalBilinearFormIntegratorBase<PetscScalar>>(
-                  bfi.copy());
+              std::unique_ptr<Variational::LocalBilinearFormIntegratorBase<PetscScalar>>(bfi.copy());
+            std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+            local.reserve(static_cast<size_t>(cnt));
 
-#pragma omp for nowait
+#pragma omp for
             for (PetscInt i = 0; i < cnt; ++i)
             {
-              if (seq.filter(i) &&
-                 (attrs.empty() || attrs.count(mesh.getAttribute(dim, i))))
-              {
-                auto it = seq.getIterator(i);
-                integrator->setPolytope(*it);
-                const auto& rows = input.getTestFES().getDOFs(dim, i);
-                const auto& cols = input.getTrialFES().getDOFs(dim, i);
-                for (size_t r = 0; r < rows.size(); ++r)
+              if (!seq.filter(i)) continue;
+              if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, i))) continue;
+
+              auto it = seq.getIterator(i);
+              integrator->setPolytope(*it);
+
+              const auto& rows = input.getTestFES().getDOFs(dim, i);
+              const auto& cols = input.getTrialFES().getDOFs(dim, i);
+              for (size_t r = 0; r < rows.size(); ++r)
+                for (size_t c = 0; c < cols.size(); ++c)
                 {
-                  for (size_t c = 0; c < cols.size(); ++c)
-                  {
-                    const PetscScalar v = integrator->integrate(c, r);
-                    if (v != PetscScalar(0))
-                    {
-                      local.emplace_back(rows[r], cols[c], v);
-                    }
-                  }
+                  const PetscScalar v = Math::conj(integrator->integrate(c, r));
+                  if (v != PetscScalar(0))
+                    local.emplace_back(rows[r], cols[c], v);
+                }
+            }
+
+            chunks[static_cast<size_t>(tid)] = std::move(local);
+
+#pragma omp barrier
+#pragma omp single
+            {
+              // single serial flush to PETSc
+              for (auto& buf : chunks)
+              {
+                for (auto& [i,j,v] : buf)
+                {
+                  PetscErrorCode e = MatSetValue(res, i, j, v, ADD_VALUES);
+                  assert(e == PETSC_SUCCESS);
                 }
               }
             }
-
-#pragma omp critical
-            {
-              for (auto& [i,j,v] : local)
-              {
-                ierr = MatSetValue(res, i, j, v, ADD_VALUES);
-                assert(ierr == PETSC_SUCCESS);
-              }
-            }
-          }
+          } // end parallel
         }
 
-        ierr = MatAssemblyBegin(res, MAT_FINAL_ASSEMBLY);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatAssemblyEnd(res, MAT_FINAL_ASSEMBLY);
-        assert(ierr == PETSC_SUCCESS);
+        PetscErrorCode ierr2 = MatAssemblyBegin(res, MAT_FINAL_ASSEMBLY);
+        assert(ierr2 == PETSC_SUCCESS);
+        ierr2 = MatAssemblyEnd(res, MAT_FINAL_ASSEMBLY);
+        assert(ierr2 == PETSC_SUCCESS);
       }
 
       OpenMP* copy() const noexcept override
@@ -295,4 +310,4 @@ namespace Rodin::PETSc::Assembly
   using OpenMP = Rodin::Assembly::OpenMP<LinearAlgebraType, Operand>;
 }
 
-#endif // RODIN_ASSEMBLY_OpenMP_PETSC_H
+#endif // RODIN_ASSEMBLY_OPENMP_PETSC_H

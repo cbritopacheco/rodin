@@ -261,19 +261,22 @@ namespace Rodin::Variational
 
       constexpr
       ShapeFunction(const FESType& fes)
-        : Parent(fes)
+        : Parent(fes),
+          m_p(nullptr)
       {}
 
       constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
-          m_basis(other.m_basis)
+          m_basis(other.m_basis),
+          m_p(nullptr)
       {}
 
       constexpr
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
-          m_basis(std::move(other.m_basis))
+          m_basis(std::move(other.m_basis)),
+          m_p(std::exchange(other.m_p, nullptr))
       {}
 
       constexpr
@@ -311,6 +314,7 @@ namespace Rodin::Variational
       constexpr
       const RangeType& getBasis(size_t local) const
       {
+        assert(local < m_basis.size());
         return m_basis[local];
       }
 
