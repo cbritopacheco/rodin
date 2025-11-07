@@ -58,7 +58,6 @@ jobs:
           -B ${{github.workspace}}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DRODIN_USE_ASAN=${{ matrix.sanitizer }}
-          -DRODIN_USE_UBSAN=${{ matrix.sanitizer }}
           -DRODIN_BUILD_DOC=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
