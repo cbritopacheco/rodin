@@ -28,7 +28,6 @@ namespace Rodin::Geometry
     struct Slot
     {
       std::atomic<PolytopeTransformation*> ptr{nullptr};
-      std::once_flag init;
       std::unique_ptr<PolytopeTransformation> owner;
 
       template <class Archive>
@@ -95,7 +94,6 @@ namespace Rodin::Geometry
 
     void initialize(size_t meshDim)
     {
-      std::lock_guard<std::mutex> g(m_mutex);
       m_dimensions.resize(meshDim + 1);
     }
 
@@ -115,11 +113,11 @@ namespace Rodin::Geometry
       const size_t d   = p.first;
       const Index  raw = p.second;
 
-      assert(d < m_dimensions.size());
       assert(raw >= 0);
       const size_t idx = static_cast<size_t>(raw);
       assert(idx < count);
 
+      assert(d < m_dimensions.size());
       auto& dim = m_dimensions[d];
       std::unique_lock<std::shared_mutex> wr(dim.mutex);
       if (dim.slots.size() < count)
@@ -138,42 +136,42 @@ namespace Rodin::Geometry
       const size_t d   = p.first;
       const Index  raw = p.second;
 
-      assert(d < m_dimensions.size());
       assert(raw >= 0);
       const size_t idx = static_cast<size_t>(raw);
-      assert(idx < count);
 
+      assert(d < m_dimensions.size());
       auto& dim = m_dimensions[d];
 
+      // Fast path: read under shared lock
       {
         std::shared_lock<std::shared_mutex> rd(dim.mutex);
         if (idx < dim.slots.size())
         {
+          assert(idx < count);
           const Slot& s = dim.slots[idx];
           if (auto* q = s.ptr.load(std::memory_order_acquire)) return *q;
         }
       }
 
+      // Slow path: exclusive lock, ensure size, init in-place
       {
         std::unique_lock<std::shared_mutex> wr(dim.mutex);
+
         if (dim.slots.size() < count)
           dim.slots.resize(count);
-      }
 
-      assert(idx < dim.slots.size());
-      Slot& s = dim.slots[idx];
-      std::call_once(s.init, [&]{
-        if (!s.ptr.load(std::memory_order_relaxed))
+        assert(idx < dim.slots.size());
+        Slot& s = dim.slots[idx];
+        PolytopeTransformation* q = s.ptr.load(std::memory_order_relaxed);
+        if (!q)
         {
           auto up = factory(d, static_cast<Index>(idx));
           s.owner = std::move(up);
-          s.ptr.store(s.owner.get(), std::memory_order_release);
+          q = s.owner.get();
+          s.ptr.store(q, std::memory_order_release);
         }
-      });
-
-      PolytopeTransformation* out = s.ptr.load(std::memory_order_acquire);
-      assert(out && "PolytopeTransformation construction failed");
-      return *out;
+        return *q; // still under wr; safe
+      }
     }
 
     void clear()
@@ -208,7 +206,6 @@ namespace Rodin::Geometry
 
   private:
     mutable std::vector<Dimension> m_dimensions;
-    mutable std::mutex m_mutex;
   };
 } // namespace Rodin::Geometry
 

@@ -98,7 +98,7 @@ namespace Rodin::Geometry
 
         auto& dim = m_dimensions.at(d);
         std::unique_lock<std::shared_mutex> wr(dim.mutex);
-        if (dim.slots.size() < idx)
+        if (dim.slots.size() <= idx)
           dim.slots.resize(idx + 1, RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
         assert(idx < dim.slots.size());
         dim.slots[idx] = attr;
