@@ -403,8 +403,7 @@ namespace Rodin::External::MMG
         res->edge[i].a = vertices[0] + 1;
         res->edge[i].b = vertices[1] + 1;
         res->edge[i].ref = face.getAttribute();
-        if (it->getAttribute() != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-          res->edge[i].tag |= MG_REF + MG_BDY;
+        res->edge[i].tag |= MG_REF + MG_BDY;
       }
 
       // Copy triangles with correct orientation
@@ -479,9 +478,7 @@ namespace Rodin::External::MMG
         res->edge[i].a = vertices[0] + 1;
         res->edge[i].b = vertices[1] + 1;
         res->edge[i].ref = segment.getAttribute();
-
-        if (it->getAttribute() != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-          res->edge[i].tag |= MG_REF;
+        res->edge[i].tag |= MG_REF;
       }
 
       // Copy triangles

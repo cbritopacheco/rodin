@@ -36,7 +36,6 @@ namespace Rodin::Geometry
     : m_sdim(other.m_sdim),
       m_vertices(other.m_vertices),
       m_connectivity(other.m_connectivity),
-      m_attributeIndex(other.m_attributeIndex),
       m_attributes(other.m_attributes)
   {}
 
@@ -44,9 +43,8 @@ namespace Rodin::Geometry
     : m_sdim(std::move(other.m_sdim)),
       m_vertices(std::move(other.m_vertices)),
       m_connectivity(std::move(other.m_connectivity)),
-      m_attributeIndex(std::move(other.m_attributeIndex)),
-      m_transformationIndex(std::move(other.m_transformationIndex)),
-      m_attributes(std::move(other.m_attributes))
+      m_attributes(std::move(other.m_attributes)),
+      m_transformations(std::move(other.m_transformations))
   {}
 
   Mesh<Context::Local>& Mesh<Context::Local>::operator=(Mesh&& other)
@@ -55,23 +53,9 @@ namespace Rodin::Geometry
     m_sdim = std::move(other.m_sdim);
     m_vertices = std::move(other.m_vertices);
     m_connectivity = std::move(other.m_connectivity);
-    m_attributeIndex = std::move(other.m_attributeIndex);
-    m_transformationIndex = std::move(other.m_transformationIndex);
+    m_transformations = std::move(other.m_transformations);
     m_attributes = std::move(other.m_attributes);
     return *this;
-  }
-
-  Mesh<Context::Local>::~Mesh()
-  {
-    for (auto& mt : m_transformationIndex)
-    {
-      mt.write(
-          [](auto& obj)
-          {
-            for (PolytopeTransformation* ptr : obj)
-              delete ptr;
-          });
-    }
   }
 
   Mesh<Context::Local>&
@@ -306,11 +290,6 @@ namespace Rodin::Geometry
     return { m_vertices.data() + getSpaceDimension() * idx, size };
   }
 
-  const FlatSet<Attribute>& Mesh<Context::Local>::getAttributes(size_t d) const
-  {
-    return m_attributes[d];
-  }
-
   size_t Mesh<Context::Local>::getDimension() const
   {
     return m_connectivity.getMeshDimension();
@@ -321,10 +300,12 @@ namespace Rodin::Geometry
     return m_sdim;
   }
 
-  Mesh<Context::Local>& Mesh<Context::Local>::setPolytopeTransformation(
+  Mesh<Context::Local>&
+  Mesh<Context::Local>::setPolytopeTransformation(
       const std::pair<size_t, Index> p, PolytopeTransformation* trans)
   {
-    m_transformationIndex[p.first].write([&](auto& obj) { obj[p.second] = trans; });
+    const size_t d = p.first;
+    m_transformations.set(p, this->getPolytopeCount(d), std::unique_ptr<PolytopeTransformation>(trans));
     return *this;
   }
 
@@ -358,45 +339,14 @@ namespace Rodin::Geometry
   }
 
   const PolytopeTransformation&
-  Mesh<Context::Local>::getPolytopeTransformation(size_t dimension, Index idx) const
+  Mesh<Context::Local>::getPolytopeTransformation(size_t d, Index i) const
   {
-    // Basic sanity
-    assert(dimension < m_transformationIndex.size());
-
-    // The number of (dimension)-polytopes is stable for the lifetime of the mesh
-    const size_t count = this->getPolytopeCount(dimension);
-    assert(idx < count);
-
-    PolytopeTransformation* out = nullptr;
-
-    // Single critical section: resize-if-needed + read/create/publish + return
-    m_transformationIndex[dimension].write([&](auto& vec)
-    {
-      // Ensure the vector is big enough before indexing
-      if (vec.size() < count)
-      {
-        // Make sure we don't shrink accidentally; fill new entries with nullptr
-        vec.resize(count, nullptr);
-      }
-
-      // Safe to index now
-      if (!vec[idx])
-      {
-        // Create under lock so only one thread allocates
-        PolytopeTransformation* created =
-            this->getDefaultPolytopeTransformation(dimension, idx);
-        // Publish the pointer while still holding the lock
-        vec[idx] = created;
-        out = created;
-      }
-      else
-      {
-        out = vec[idx];
-      }
-    });
-
-    assert(out != nullptr);
-    return *out;
+    const size_t count = this->getPolytopeCount(d);
+    return m_transformations.get({ d, i }, count,
+        [this](size_t dim, Index idx)
+        {
+          return std::unique_ptr<PolytopeTransformation>(this->getDefaultPolytopeTransformation(dim, idx));
+        });
   }
 
   Real Mesh<Context::Local>::getVolume() const
@@ -632,19 +582,14 @@ namespace Rodin::Geometry
 
   Attribute Mesh<Context::Local>::getAttribute(size_t dimension, Index index) const
   {
-    auto it = m_attributeIndex.find(dimension, index);
-    if (it == m_attributeIndex.end(dimension))
-      return RODIN_DEFAULT_POLYTOPE_ATTRIBUTE;
-    else
-      return it->second;
+    return m_attributes.get({ dimension, index }, this->getPolytopeCount(dimension));
   }
 
   Mesh<Context::Local>&
   Mesh<Context::Local>::setAttribute(const std::pair<size_t, Index>& p, Attribute attr)
   {
-    const auto [dimension, index] = p;
-    m_attributeIndex.track(p, attr);
-    m_attributes.at(dimension).insert(attr);
+    const size_t dimension = p.first;
+    m_attributes.set(p, this->getPolytopeCount(dimension), attr);
     return *this;
   }
 

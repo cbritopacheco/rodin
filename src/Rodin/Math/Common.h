@@ -94,6 +94,7 @@ namespace Rodin::Math
     return std::isnan(x);
   }
 
+  inline
   constexpr
   Boolean isNaN(const Complex& x)
   {

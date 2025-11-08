@@ -7,40 +7,28 @@
 #ifndef RODIN_GEOMETRY_MESH_H
 #define RODIN_GEOMETRY_MESH_H
 
-#include <set>
-#include <string>
 #include <deque>
 
 #include <boost/filesystem.hpp>
 #include <boost/serialization/access.hpp>
 
-#include "Rodin/Math.h"
-#include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
-#include "Rodin/Configure.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Context/Local.h"
-#include "Rodin/Threads/Mutable.h"
 #include "Rodin/IO/ForwardDecls.h"
-#include "Rodin/Utility/IsSpecialization.h"
+#include "Rodin/Geometry/AttributeIndex.h"
+#include "Rodin/Variational/ForwardDecls.h"
 
 #include "Rodin/Serialization/Array.h"
-#include "Rodin/Serialization/Vector.h"
-#include "Rodin/Serialization/FlatSet.h"
 #include "Rodin/Serialization/EigenMatrix.h"
-#include "Rodin/Serialization/UnorderedMap.h"
-
-#include "Rodin/Variational/Traits.h"
-#include "Rodin/Variational/ForwardDecls.h"
-#include "Rodin/Variational/P1/ForwardDecls.h"
 
 #include "ForwardDecls.h"
 #include "Connectivity.h"
 #include "Point.h"
 #include "Polytope.h"
-#include "PolytopeCount.h"
-#include "PolytopeIndexed.h"
 #include "PolytopeIterator.h"
 #include "PolytopeTransformation.h"
+#include "PolytopeTransformationIndex.h"
 
 /**
  * @ingroup RodinDirectives
@@ -509,18 +497,6 @@ namespace Rodin::Geometry
   using LocalMesh =
     Mesh<Context::Local>;
 
-  /// Index containing the indices of boundary cells.
-  using BoundaryIndex =
-    IndexSet;
-
-  /// Index containing the attribute numbers of the polytopes.
-  using AttributeIndex =
-    PolytopeIndexed<Geometry::Attribute>;
-
-  /// Index containing the transformations of the polytopes.
-  using TransformationIndex =
-    std::vector<Threads::Mutable<std::vector<PolytopeTransformation*>>>;
-
   /**
    *
    * @ingroup MeshTypes
@@ -696,7 +672,7 @@ namespace Rodin::Geometry
 
           Builder& setAttributeIndex(AttributeIndex&& attrIndex);
 
-          Builder& setTransformationIndex(TransformationIndex&& transIndex);
+          Builder& setTransformationIndex(PolytopeTransformationIndex&& transIndex);
 
           Connectivity<Context>& getConnectivity()
           {
@@ -715,10 +691,8 @@ namespace Rodin::Geometry
           Math::PointMatrix m_vertices;
           Connectivity<Context> m_connectivity;
 
-          AttributeIndex m_attributeIndex;
-          TransformationIndex m_transformationIndex;
-
-          std::vector<FlatSet<Attribute>> m_attributes;
+          AttributeIndex m_attributes;
+          PolytopeTransformationIndex m_transformations;
       };
 
       /**
@@ -772,7 +746,7 @@ namespace Rodin::Geometry
       */
       Mesh(Mesh&& other);
 
-      virtual ~Mesh();
+      virtual ~Mesh() = default;
 
       Mesh& operator=(const Mesh& other) = delete;
 
@@ -814,8 +788,7 @@ namespace Rodin::Geometry
 
       virtual void flush() override
       {
-        for (auto& mt : m_transformationIndex)
-          mt.write([](auto& obj) { obj.clear(); });
+        m_transformations.clear();
       }
 
       /**
@@ -1051,12 +1024,12 @@ namespace Rodin::Geometry
 
       const AttributeIndex& getAttributeIndex() const
       {
-        return m_attributeIndex;
+        return m_attributes;
       }
 
-      const TransformationIndex& getTransformationIndex() const
+      const PolytopeTransformationIndex& getPolytopeTransformationIndex() const
       {
-        return m_transformationIndex;
+        return m_transformations;
       }
 
       const Math::PointMatrix& getVertices() const
@@ -1134,7 +1107,7 @@ namespace Rodin::Geometry
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const override;
 
-      const FlatSet<Attribute>& getAttributes(size_t d) const;
+      virtual PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
 
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)
@@ -1142,14 +1115,10 @@ namespace Rodin::Geometry
         ar & m_sdim;
         ar & m_vertices;
         ar & m_connectivity;
-        ar & m_attributeIndex;
-        ar & m_transformationIndex;
+        ar & m_transformations;
         ar & m_attributes;
         ar & m_context;
       }
-
-    protected:
-      virtual PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
 
     private:
       size_t m_sdim;
@@ -1157,10 +1126,8 @@ namespace Rodin::Geometry
       Math::PointMatrix m_vertices;
       Connectivity<Context> m_connectivity;
 
-      AttributeIndex m_attributeIndex;
-      mutable TransformationIndex m_transformationIndex;
-
-      std::vector<FlatSet<Attribute>> m_attributes;
+      AttributeIndex m_attributes;
+      PolytopeTransformationIndex m_transformations;
 
       Context m_context;
   };

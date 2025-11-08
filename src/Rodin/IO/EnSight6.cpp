@@ -62,7 +62,7 @@ namespace Rodin::IO
     IndexSet attributes;
     for (size_t d = 0; d <= mesh.getDimension(); d++)
     {
-      const auto& as = mesh.getAttributes(d);
+      const auto as = mesh.getAttributeIndex().getAttributes(d);
       attributes.insert(as.begin(), as.end());
     }
 

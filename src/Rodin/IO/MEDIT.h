@@ -8,12 +8,13 @@
 #define RODIN_IO_MEDIT_H
 
 #include <iomanip>
+#include <unordered_map>
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
 
+#include "Rodin/Geometry/AttributeIndex.h"
 #include "Rodin/Types.h"
-#include "Rodin/Alert.h"
-#include "Rodin/Context.h"
+#include "Rodin/Context/Local.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Types.h"
 
@@ -22,6 +23,7 @@
 #include "MeshPrinter.h"
 #include "GridFunctionLoader.h"
 #include "GridFunctionPrinter.h"
+#include "Rodin/Variational/P1/ForwardDecls.h"
 
 namespace Rodin::IO::MEDIT
 {
@@ -253,7 +255,7 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         size_t i = 0;
-        Data res{ Array<Index>(m_n), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
+        Data res{ Array<Index>(m_n), ~Geometry::Attribute(0) };
         const auto get_vertex = [&](auto& ctx) { assert(i < m_n); res.vertices(i++) = _attr(ctx); };
         const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
         const auto p = uint_[get_vertex] >> repeat(m_n - 1)[uint_[get_vertex]] >> uint_[get_attribute];
@@ -293,7 +295,7 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         size_t i = 0;
-        Data res{ Math::SpatialPoint(m_sdim), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE };
+        Data res{ Math::SpatialPoint(m_sdim), ~Geometry::Attribute(0) };
         const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
         const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
         const auto p = double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];
