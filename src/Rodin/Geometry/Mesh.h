@@ -22,6 +22,8 @@
 #include "Rodin/Serialization/Array.h"
 #include "Rodin/Serialization/EigenMatrix.h"
 
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 #include "Connectivity.h"
 #include "Point.h"

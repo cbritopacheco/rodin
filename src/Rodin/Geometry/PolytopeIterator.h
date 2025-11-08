@@ -10,8 +10,6 @@
 #include <memory>
 #include <utility>
 
-#include "Rodin/Threads/Unsafe.h"
-
 #include "ForwardDecls.h"
 
 #include "Polytope.h"
@@ -35,19 +33,16 @@ namespace Rodin::Geometry
 
       PolytopeIteratorBase& operator=(PolytopeIteratorBase&&) = default;
 
-      inline
       operator bool() const
       {
         return !end();
       }
 
-      inline
       bool end() const
       {
         return getIndexGenerator().end();
       }
 
-      inline
       Derived& operator++()
       {
         ++getIndexGenerator();
@@ -55,87 +50,48 @@ namespace Rodin::Geometry
         return static_cast<Derived&>(*this);
       }
 
-      inline
       const T& operator*() const noexcept
       {
-        if (!m_polytope.read() || m_dirty.read())
-        {
-          T* polytope = generate();
-          m_polytope.write(
-              [&](auto& obj)
-              {
-                obj.reset(polytope);
-              });
-        }
-        m_dirty.write(
-            [](auto& obj)
-            {
-              obj = false;
-            });
-        return *(m_polytope.read());
+        if (!m_polytope || m_dirty)
+          m_polytope.reset(this->generate());
+        m_dirty = false;
+        return *(m_polytope);
       }
 
-      inline
       const T* operator->() const noexcept
       {
-        if (!m_polytope.read() || m_dirty.read())
-        {
-          T* polytope = generate();
-          m_polytope.write(
-              [&](auto& obj)
-              {
-                obj.reset(polytope);
-              });
-        }
-        m_dirty.write(
-            [](auto& obj)
-            {
-              obj = false;
-            });
-        return m_polytope.read().get();
+        if (!m_polytope || m_dirty)
+          m_polytope.reset(this->generate());
+        m_dirty = false;
+        return m_polytope.get();
       }
 
-      inline
       T* release()
       {
-        if (!m_polytope.read() || m_dirty.read())
-        {
+        if (!m_polytope || m_dirty)
           return generate();
-        }
         else
-        {
-          T* polytope = nullptr;
-          m_polytope.write(
-              [&](auto& obj)
-              {
-                polytope = obj.release();
-              });
-          return polytope;
-        }
+          return m_polytope.release();
       }
 
-      inline
       constexpr
       size_t getDimension() const
       {
         return m_dimension;
       }
 
-      inline
       const MeshBase& getMesh() const
       {
         assert(m_mesh);
         return m_mesh->get();
       }
 
-      inline
       const IndexGeneratorBase& getIndexGenerator() const
       {
         assert(m_gen);
         return *m_gen;
       }
 
-      inline
       IndexGeneratorBase& getIndexGenerator()
       {
         assert(m_gen);
@@ -148,8 +104,8 @@ namespace Rodin::Geometry
       size_t m_dimension;
       Optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
-      mutable Threads::Unsafe<bool> m_dirty;
-      mutable Threads::Unsafe<std::unique_ptr<T>> m_polytope;
+      mutable bool m_dirty;
+      mutable std::unique_ptr<T> m_polytope;
   };
 
   /**
@@ -172,7 +128,6 @@ namespace Rodin::Geometry
 
       PolytopeIterator(PolytopeIterator&& other) = default;
 
-      inline
       PolytopeIterator& operator=(PolytopeIterator&& other)
       {
         Parent::operator=(std::move(other));

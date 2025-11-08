@@ -16,7 +16,6 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Copyable.h"
-#include "Rodin/Threads/Unsafe.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
@@ -65,13 +64,7 @@ namespace Rodin::FormLanguage
        */
       Base()
         : m_uuid(s_id++)
-      {
-        m_objs.write(
-            [](auto& obj)
-            {
-              obj.reserve(8);
-            });
-      }
+      {}
 
       /**
        * @brief Copy constructor.
@@ -153,7 +146,7 @@ namespace Rodin::FormLanguage
         {
           using R = typename std::remove_reference_t<T>;
           const R* res = new R(std::forward<T>(obj));
-          m_objs.write([&](auto& obj){ obj.emplace_back(res); });
+          m_objs.emplace_back(res);
           return *res;
         }
       }
@@ -174,7 +167,7 @@ namespace Rodin::FormLanguage
        */
       void clear()
       {
-        m_objs.write([](auto& obj){ obj.clear(); });
+        m_objs.clear();
       }
 
       /**
@@ -190,7 +183,7 @@ namespace Rodin::FormLanguage
       thread_local static UUID s_id;
 
       const size_t m_uuid;
-      mutable Threads::Unsafe<std::vector<std::shared_ptr<const void>>> m_objs;
+      mutable std::vector<std::shared_ptr<const void>> m_objs;
   };
 }
 

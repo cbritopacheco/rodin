@@ -17,7 +17,6 @@
 #include "Rodin/Array.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
-#include "Rodin/Threads/Mutable.h"
 
 #include "Polytope.h"
 #include "ForwardDecls.h"
