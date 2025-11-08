@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::FiniteElementSpaceMappingBase class | Rodin</title>
+  <title>Rodin::Variational::FiniteElementSpacePullbackBase class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -65,9 +65,9 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;class Derived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>FiniteElementSpaceMappingBase <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>FiniteElementSpacePullbackBase <span class="m-thin">class</span>
         </h1>
-        <p>Base class for mappings taking functions defined on mesh elements to reference elements.</p>
+        <p>Base class for mappings taking functions defined on physical elements to reference elements.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -205,7 +205,7 @@ $ x : K
 <use x='30.683916' y='0' xlink:href='#eq7-g0-33'/>
 <use x='45.959948' y='0' xlink:href='#eq7-g1-28'/>
 </g>
-</svg> is the polytope transformation.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_finite_element_space_inverse_mapping_base.html" class="m-doc">FiniteElementSpaceInverseMappingBase</a></p></aside>
+</svg> is the polytope transformation.</p><aside class="m-note m-default"><h4>See also</h4><p>FiniteElementSpaceInverseMappingBase</p></aside>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -222,7 +222,7 @@ $ x : K
               <div class="m-doc-template">
                 template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementSpaceMappingBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49cf467bafa27137d28c3a232812c593" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const</span></span>
+              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementSpacePullbackBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49cf467bafa27137d28c3a232812c593" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const Math::SpatialVector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const</span></span>
             </h3>
             <p>Evaluates the mapped function on the reference coordinates.</p>
 <p>For the given function <svg class="m-math" style="width: 4.755em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 45.649288 11.955168">
