@@ -1,50 +1,51 @@
-// /*
-//  *          Copyright Carlos BRITO PACHECO 2021 - 2022.
-//  * Distributed under the Boost Software License, Version 1.0.
-//  *       (See accompanying file LICENSE or copy at
-//  *          https://www.boost.org/LICENSE_1_0.txt)
-//  */
-// #include <gtest/gtest.h>
-// 
-// #include "Rodin/Geometry.h"
-// 
-// using namespace Rodin;
-// using namespace Rodin::Geometry;
-// 
-// // ==================== Basic Construction Tests ====================
-// 
-// TEST(Geometry_Point, BasicConstruction_2D_Triangle)
-// {
-//   // Create a simple 2D triangular mesh
-//   Mesh mesh;
-//   mesh.initialize(Polytope::Type::Triangle, 2);
-// 
-//   mesh.getConnectivity().reserve(1, {{1, 3}});
-// 
-//   mesh.insert(Vertex({0.0, 0.0}));  // v0
-//   mesh.insert(Vertex({1.0, 0.0}));  // v1
-//   mesh.insert(Vertex({0.0, 1.0}));  // v2
-// 
-//   mesh.insert(Triangle({0, 1, 2}));  // triangle
-// 
-//   mesh.getConnectivity().compute();
-// 
-//   // Get the first triangle polytope
-//   auto it = mesh.polytope(Region::Closure::Cells).begin();
-//   Polytope tri = *it;
-// 
-//   // Create a point at the barycenter in reference coordinates
-//   Math::SpatialVector<Real> rc(2);
-//   rc << 1.0/3.0, 1.0/3.0;
-// 
-//   Point p(tri, rc);
-// 
-//   // Verify basic properties
-//   EXPECT_EQ(p.getDimension(PointBase::Coordinates::Physical), 2);
-//   EXPECT_EQ(p.getDimension(PointBase::Coordinates::Reference), 2);
-//   EXPECT_EQ(&p.getPolytope().getMesh(), &mesh);
-// }
-// 
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#include <gtest/gtest.h>
+
+#include "Rodin/Context/Local.h"
+#include "Rodin/Geometry.h"
+#include "Rodin/Geometry/ForwardDecls.h"
+
+using namespace Rodin;
+using namespace Rodin::Geometry;
+
+// ==================== Basic Construction Tests ====================
+
+TEST(Geometry_Point, BasicConstruction_2D_Triangle)
+{
+  // Create a simple 2D triangular mesh
+  Mesh mesh;
+  Mesh<Context::Local>::Builder builder;
+  builder.initialize(2).nodes(3);
+
+  builder.vertex({0.0, 0.0});  // v0
+  builder.vertex({1.0, 0.0});  // v1
+  builder.vertex({0.0, 1.0});  // v2
+
+  builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
+
+  mesh = builder.finalize();
+
+  // Get the first triangle polytope
+  auto it = mesh.getCell();
+
+  Polytope tri = *it;
+
+  // Create a point at the barycenter in reference coordinates
+  Math::SpatialVector<Real> rc(2);
+  rc << 1.0 / 3.0, 1.0 / 3.0;
+
+  Point p(tri, rc);
+
+  // Verify basic properties
+  EXPECT_EQ(p.getDimension(PointBase::Coordinates::Physical), 2);
+  EXPECT_EQ(p.getDimension(PointBase::Coordinates::Reference), 2);
+}
+
 // TEST(Geometry_Point, BasicConstruction_3D_Tetrahedron)
 // {
 //   // Create a simple 3D tetrahedral mesh
