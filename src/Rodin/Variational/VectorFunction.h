@@ -119,13 +119,6 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getDimension();
       }
 
-      template <class ... Args>
-      constexpr
-      Derived& traceOf(const Args& ... args)
-      {
-        return static_cast<Derived&>(*this).traceOf(args...);
-      }
-
       virtual VectorFunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
@@ -175,9 +168,8 @@ namespace Rodin::Variational
         return m_vector.get().size();
       }
 
-      template <class ... Args>
       constexpr
-      VectorFunction& traceOf(const Args& ... args)
+      VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         return *this;
       }
@@ -317,9 +309,8 @@ namespace Rodin::Variational
         return m_f(p);
       }
 
-      template <class ... Args>
       constexpr
-      VectorFunction& traceOf(const Args&... attrs)
+      VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         return *this;
       }

@@ -81,11 +81,11 @@ namespace Rodin::Variational
           }
           case 2:
           {
-            return r.y() * (1 - r.x());
+            return r.x() * r.y();
           }
           case 3:
           {
-            return r.x() * r.y();
+            return r.y() * (1 - r.x());
           }
           default: [[unlikely]]
           {
@@ -298,11 +298,11 @@ namespace Rodin::Variational
             {
               if (m_i == 0)
               {
-                return -r.y();
+                return r.y();
               }
               else if (m_i == 1)
               {
-                return 1 - r.x();
+                return r.x();
               }
               else [[unlikely]]
               {
@@ -314,11 +314,11 @@ namespace Rodin::Variational
             {
               if (m_i == 0)
               {
-                return r.y();
+                return -r.y();
               }
               else if (m_i == 1)
               {
-                return r.x();
+                return 1 - r.x();
               }
               else [[unlikely]]
               {

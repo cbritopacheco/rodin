@@ -1,9 +1,0 @@
-#ifndef RODIN_SERIALIZATION_MESHSERIALIZATION_H
-#define RODIN_SERIALIZATION_MESHSERIALIZATION_H
-
-namespace boost::serialization
-{
-}
-
-#endif
-

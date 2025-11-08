@@ -436,9 +436,9 @@ namespace Rodin::Geometry
       case Polytope::Type::Point:
       {
         assert(dim == 0);
-        assert(p.size()  == 0);
+        assert(p.size() == 1);
         out.resize(1);
-        out[0] = { Polytope::Type::Point, { { i } } };
+        out[0] = { Polytope::Type::Point, { { p(0) } } };
         return;
       }
       case Polytope::Type::Segment:
@@ -448,7 +448,6 @@ namespace Rodin::Geometry
         if (dim == 0)
         {
           out.resize(2);
-          out[0].geometry = Polytope::Type::Point;
           out[0] = { Polytope::Type::Point, { { p(0) } } };
           out[1] = { Polytope::Type::Point, { { p(1) } } };
         }
@@ -510,9 +509,9 @@ namespace Rodin::Geometry
         {
           out.resize(4);
           out[0] = { Polytope::Type::Segment, { { p(0), p(1) } } };
-          out[1] = { Polytope::Type::Segment, { { p(1), p(3) } } };
-          out[2] = { Polytope::Type::Segment, { { p(3), p(2) } } };
-          out[3] = { Polytope::Type::Segment, { { p(2), p(0) } } };
+          out[1] = { Polytope::Type::Segment, { { p(1), p(2) } } };
+          out[2] = { Polytope::Type::Segment, { { p(2), p(3) } } };
+          out[3] = { Polytope::Type::Segment, { { p(3), p(0) } } };
         }
         else if (dim == 2)
         {
@@ -543,18 +542,18 @@ namespace Rodin::Geometry
           out.resize(6);
           out[0] = { Polytope::Type::Segment, { { p(0), p(1) } } };
           out[1] = { Polytope::Type::Segment, { { p(0), p(2) } } };
-          out[2] = { Polytope::Type::Segment, { { p(1), p(2) } } };
-          out[3] = { Polytope::Type::Segment, { { p(1), p(3) } } };
-          out[4] = { Polytope::Type::Segment, { { p(2), p(3) } } };
-          out[5] = { Polytope::Type::Segment, { { p(3), p(0) } } };
+          out[2] = { Polytope::Type::Segment, { { p(0), p(3) } } };
+          out[3] = { Polytope::Type::Segment, { { p(1), p(2) } } };
+          out[4] = { Polytope::Type::Segment, { { p(1), p(3) } } };
+          out[5] = { Polytope::Type::Segment, { { p(2), p(3) } } };
         }
         else if (dim == 2)
         {
           out.resize(4);
-          out[0] = { Polytope::Type::Triangle, { { p(0), p(1), p(3) } } };
-          out[1] = { Polytope::Type::Triangle, { { p(0), p(1), p(2) } } };
-          out[2] = { Polytope::Type::Triangle, { { p(0), p(2), p(3) } } };
-          out[3] = { Polytope::Type::Triangle, { { p(1), p(2), p(3) } } };
+          out[0] = { Polytope::Type::Triangle, {{ p(0), p(1), p(3) }} };
+          out[1] = { Polytope::Type::Triangle, {{ p(0), p(2), p(1) }} };
+          out[2] = { Polytope::Type::Triangle, {{ p(0), p(3), p(2) }} };
+          out[3] = { Polytope::Type::Triangle, {{ p(1), p(2), p(3) }} };
         }
         else if (dim == 3)
         {
@@ -585,24 +584,24 @@ namespace Rodin::Geometry
         else if (dim == 1)
         {
           out.resize(9);
-          out[0] = { Polytope::Type::Segment, { { p(0), p(1) } } };
-          out[1] = { Polytope::Type::Segment, { { p(0), p(2) } } };
-          out[2] = { Polytope::Type::Segment, { { p(0), p(3) } } };
-          out[3] = { Polytope::Type::Segment, { { p(1), p(2) } } };
-          out[4] = { Polytope::Type::Segment, { { p(1), p(4) } } };
-          out[5] = { Polytope::Type::Segment, { { p(2), p(5) } } };
-          out[6] = { Polytope::Type::Segment, { { p(3), p(4) } } };
-          out[7] = { Polytope::Type::Segment, { { p(3), p(5) } } };
-          out[8] = { Polytope::Type::Segment, { { p(4), p(5) } } };
+          out[0] = { Polytope::Type::Segment, {{ p(0), p(1) }} };
+          out[1] = { Polytope::Type::Segment, {{ p(1), p(2) }} };
+          out[2] = { Polytope::Type::Segment, {{ p(2), p(0) }} };
+          out[3] = { Polytope::Type::Segment, {{ p(3), p(4) }} };
+          out[4] = { Polytope::Type::Segment, {{ p(4), p(5) }} };
+          out[5] = { Polytope::Type::Segment, {{ p(5), p(3) }} };
+          out[6] = { Polytope::Type::Segment, {{ p(0), p(3) }} };
+          out[7] = { Polytope::Type::Segment, {{ p(1), p(4) }} };
+          out[8] = { Polytope::Type::Segment, {{ p(2), p(5) }} };
         }
         else if (dim == 2)
         {
           out.resize(5);
-          out[0] = { Polytope::Type::Triangle, { { p(0), p(1), p(2) } } };
-          out[1] = { Polytope::Type::Quadrilateral, { { p(0), p(1), p(3), p(4) } } };
-          out[2] = { Polytope::Type::Quadrilateral, { { p(1), p(2), p(4), p(5) } } };
-          out[3] = { Polytope::Type::Quadrilateral, { { p(2), p(0), p(5), p(3) } } };
-          out[4] = { Polytope::Type::Triangle, { { p(3), p(4), p(5) } } };
+          out[0] = { Polytope::Type::Triangle,     { { p(0), p(2), p(1) } } };
+          out[1] = { Polytope::Type::Quadrilateral,{ { p(0), p(1), p(4), p(3) } } };
+          out[2] = { Polytope::Type::Quadrilateral,{ { p(1), p(2), p(5), p(4) } } };
+          out[3] = { Polytope::Type::Quadrilateral,{ { p(2), p(0), p(3), p(5) } } };
+          out[4] = { Polytope::Type::Triangle,     { { p(3), p(4), p(5) } } };
         }
         else if (dim == 3)
         {

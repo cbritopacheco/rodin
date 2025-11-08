@@ -52,7 +52,7 @@ namespace Rodin::Variational
        * @brief Mapping for the scalar/complex P1 space.
        */
       template <class FunctionDerived>
-      class Mapping : public FiniteElementSpaceMappingBase<Mapping<FunctionDerived>>
+      class Mapping : public FiniteElementSpacePullbackBase<Mapping<FunctionDerived>>
       {
         public:
           using FunctionType = FunctionBase<FunctionDerived>;
@@ -92,7 +92,7 @@ namespace Rodin::Variational
        * @brief Inverse mapping for the scalar/complex P1 space.
        */
       template <class CallableType>
-      class InverseMapping : public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
+      class InverseMapping : public FiniteElementSpacePushforwardBase<InverseMapping<CallableType>>
       {
         public:
           using FunctionType = CallableType;
@@ -422,7 +422,7 @@ namespace Rodin::Variational
       }
 
       template <class FunctionDerived>
-      auto getMapping(const std::pair<size_t, Index>& p, const FunctionBase<FunctionDerived>& v) const
+      auto getPullback(const std::pair<size_t, Index>& p, const FunctionBase<FunctionDerived>& v) const
       {
         const auto& [d, globalIdx] = p;
         const auto& mesh = getMesh();
@@ -430,13 +430,13 @@ namespace Rodin::Variational
       }
 
       template <class CallableType>
-      auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
+      auto getPushforward(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
         return typename FESType::template InverseMapping<CallableType>(v);
       }
 
       template <class CallableType>
-      auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
+      auto getPushforward(const Geometry::Polytope& polytope, const CallableType& v) const
       {
         return typename FESType::InverseMapping(v);
       }

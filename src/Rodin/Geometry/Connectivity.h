@@ -7,14 +7,13 @@
 #ifndef RODIN_GEOMETRY_CONNECTIVITY_H
 #define RODIN_GEOMETRY_CONNECTIVITY_H
 
-#include <set>
 #include <vector>
-#include <iostream>
-#include <unordered_map>
 #include <boost/bimap.hpp>
 #include <boost/bimap/vector_of.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/split_member.hpp>
+#include "Rodin/Serialization/UnorderedMap.h"
 
 #include "Rodin/Array.h"
 #include "Rodin/Context/Local.h"

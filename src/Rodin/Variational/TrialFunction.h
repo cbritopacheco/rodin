@@ -84,6 +84,12 @@ namespace Rodin::Variational
       }
 
       constexpr
+      decltype(auto) getBasis(size_t local) const
+      {
+        return m_ref.get().getBasis(local);
+      }
+
+      constexpr
       const auto& getSolution() const
       {
         return m_ref.get().getSolution();

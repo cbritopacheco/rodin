@@ -5,13 +5,9 @@
 
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
-#include "Dot.h"
-#include "Sum.h"
 #include "ShapeFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
-#include <cmath>
-#include <limits>
 
 namespace Rodin::Variational
 {
@@ -40,12 +36,13 @@ namespace Rodin::Variational
       using Parent = FormLanguage::Base;
 
       QuadratureRule(const IntegrandType& f)
-        : m_integrand(f.copy())
+        : m_integrand(f.copy()),
+          m_polytope(nullptr)
       {}
 
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
-          m_polytope(other.m_polytope),
+          m_polytope(nullptr),
           m_integrand(other.m_integrand->copy()),
           m_qfgg(other.m_qfgg),
           m_qf(other.m_qf)
@@ -53,7 +50,7 @@ namespace Rodin::Variational
 
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
-          m_polytope(std::move(other.m_polytope)),
+          m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_integrand(std::move(other.m_integrand)),
           m_qfgg(std::move(other.m_qfgg)),
           m_qf(std::move(other.m_qf))
@@ -61,12 +58,13 @@ namespace Rodin::Variational
 
       const Geometry::Polytope& getPolytope() const
       {
-        return m_polytope.value().get();
+        assert(m_polytope);
+        return *m_polytope;
       }
 
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope)
       {
-        m_polytope = polytope;
+        m_polytope = &polytope;
         if (!m_qf)
         {
           m_qfgg.emplace(polytope.getGeometry());
@@ -115,8 +113,9 @@ namespace Rodin::Variational
       }
 
     private:
-      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       std::unique_ptr<IntegrandType> m_integrand;
+
+      const Geometry::Polytope* m_polytope;
       Optional<const QF::GenericPolytopeQuadrature> m_qfgg;
       Optional<std::reference_wrapper<const QF::QuadratureFormulaBase>> m_qf;
       Optional<ScalarType> m_value;
@@ -326,16 +325,18 @@ namespace Rodin::Variational
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
-          m_polytope(other.m_polytope),
-          m_set(false)
+          m_qf(nullptr),
+          m_polytope(nullptr),
+          m_set(false),
+          m_order(0)
       {}
 
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
-          m_polytope(std::move(other.m_polytope)),
           m_qf(std::move(other.m_qf)),
           m_ps(std::move(other.m_ps)),
+          m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::move(other.m_set)),
           m_order(std::move(other.m_order)),
           m_geometry(std::move(other.m_geometry))
@@ -460,9 +461,9 @@ namespace Rodin::Variational
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
-          m_polytope(std::move(other.m_polytope)),
           m_qf(std::move(other.m_qf)),
           m_ps(std::move(other.m_ps)),
+          m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::move(other.m_set)),
           m_order(std::move(other.m_order)),
           m_geometry(std::move(other.m_geometry))

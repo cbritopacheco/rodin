@@ -328,19 +328,13 @@ namespace Rodin::External::MMG
     MMG5::setParameters(mmgMesh);
     const bool isSurface = ls.getFiniteElementSpace().getMesh().isSurface();
     const size_t meshDim = mesh.getDimension();
-    const auto& attributeIndex = mesh.getAttributeIndex();
-    FlatSet<Geometry::Attribute> attrs;
 
+    FlatSet<Geometry::Attribute> attrs;
     if (m_meshTheSurface)
-    {
-      for (auto it = attributeIndex.begin(meshDim - 1); it != attributeIndex.end(meshDim - 1); ++it)
-        attrs.insert(it->second);
-    }
+      attrs = mesh.getAttributeIndex().getAttributes(meshDim - 1);
     else
-    {
-      for (auto it = attributeIndex.begin(meshDim); it != attributeIndex.end(meshDim); ++it)
-        attrs.insert(it->second);
-    }
+      attrs = mesh.getAttributeIndex().getAttributes(meshDim);
+
     generateUniqueSplit(attrs);
 
     ReturnCode retcode = MMG5_STRONGFAILURE;

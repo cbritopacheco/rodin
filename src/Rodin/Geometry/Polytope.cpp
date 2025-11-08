@@ -2,7 +2,7 @@
 
 #include "Rodin/Configure.h"
 
-#include "Rodin/Variational/QuadratureRule.h"
+#include "Rodin/QF/GenericPolytopeQuadrature.h"
 
 #include "Mesh.h"
 #include "PolytopeTransformation.h"
@@ -15,7 +15,7 @@ namespace Rodin::Geometry
     : m_g(g)
   {}
 
-  bool Polytope::Traits::isSimplex()
+  bool Polytope::Traits::isSimplex() const
   {
     switch (m_g)
     {
@@ -32,7 +32,7 @@ namespace Rodin::Geometry
     return false;
   }
 
-  size_t Polytope::Traits::getDimension()
+  size_t Polytope::Traits::getDimension() const
   {
     switch (m_g)
     {
@@ -51,7 +51,7 @@ namespace Rodin::Geometry
     return 0;
   }
 
-  size_t Polytope::Traits::getVertexCount()
+  size_t Polytope::Traits::getVertexCount() const
   {
     switch (m_g)
     {
@@ -73,6 +73,7 @@ namespace Rodin::Geometry
 
   const Math::SpatialPoint& Polytope::Traits::getVertex(size_t i) const
   {
+    assert(i < getVertexCount());
     switch (m_g)
     {
       case Type::Point:
@@ -105,8 +106,8 @@ namespace Rodin::Geometry
         {
           Math::SpatialPoint{{ 0, 0 }},
           Math::SpatialPoint{{ 1, 0 }},
-          Math::SpatialPoint{{ 0, 1 }},
-          Math::SpatialPoint{{ 1, 1 }}
+          Math::SpatialPoint{{ 1, 1 }},
+          Math::SpatialPoint{{ 0, 1 }}
         };
         return s_nodes[i];
       }
@@ -148,86 +149,95 @@ namespace Rodin::Geometry
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{},
-          Math::SpatialVector<Real>{}
+          Math::Matrix<Real>{},
+          Math::Vector<Real>{}
         };
         return s_hs;
       }
-
       case Type::Segment:
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{
-            {  1 },
-            { -1 }
-          },
-          Math::SpatialVector<Real>{{ 1, 0 }}
+          // local 0: x=0  -> -x <= 0
+          // local 1: x=1  ->  x <= 1
+          Math::Matrix<Real>{{ -1 }, { 1 }},
+          Math::Vector<Real>{{ 0, 1 }}
         };
         return s_hs;
       }
-
       case Type::Triangle:
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{
-            { -1,  0 },
+          // local 0: y=0                ->  -y <= 0
+          // local 1: x+y=1              ->  (x+y)/√2 <= 1/√2
+          // local 2: x=0                ->  -x <= 0
+          Math::Matrix<Real>{
             {  0, -1 },
-            {  1 / std::sqrt(2.0),  1 / std::sqrt(2.0) }
+            {  1 / std::sqrt(2.0),  1 / std::sqrt(2.0) },
+            { -1,  0 }
           },
-          Math::SpatialVector<Real>{{ 0, 0, 1 / std::sqrt(2.0) }}
+          Math::Vector<Real>{{ 0, 1 / std::sqrt(2.0), 0 }}
         };
         return s_hs;
       }
-
       case Type::Quadrilateral:
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{
+          // local 0: y=0   -> -y <= 0
+          // local 1: x=1   ->  x <= 1
+          // local 2: y=1   ->  y <= 1
+          // local 3: x=0   -> -x <= 0
+          Math::Matrix<Real>{
             {  0, -1 },
             {  1,  0 },
             {  0,  1 },
             { -1,  0 }
           },
-          Math::SpatialVector<Real>{{ 0, 1, 1, 0 }}
+          Math::Vector<Real>{{ 0, 1, 1, 0 }}
         };
         return s_hs;
       }
-
       case Type::Tetrahedron:
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{
-            { -1,  0,  0 },
+          // local 0: y=0   -> -y <= 0
+          // local 1: z=0   -> -z <= 0
+          // local 2: x=0   -> -x <= 0
+          // local 3: x+y+z=1 -> (x+y+z)/√3 <= 1/√3
+          Math::Matrix<Real>{
             {  0, -1,  0 },
             {  0,  0, -1 },
+            { -1,  0,  0 },
             {  1 / std::sqrt(3.0),  1 / std::sqrt(3.0),  1 / std::sqrt(3.0) }
           },
-          Math::SpatialVector<Real>{{ 0, 0, 0, 1 / std::sqrt(3.0) }}
+          Math::Vector<Real>{{ 0, 0, 0, 1 / std::sqrt(3.0) }}
         };
         return s_hs;
       }
-
       case Type::Wedge:
       {
         static thread_local const HalfSpace s_hs =
         {
-          Math::SpatialMatrix<Real>{
+          // local 0: z=0                ->  -z <= 0
+          // local 1: y=0                ->  -y <= 0
+          // local 2: x+y=1              ->  (x+y)/√2 <= 1/√2
+          // local 3: x=0                ->  -x <= 0
+          // local 4: z=1                ->   z <= 1
+          Math::Matrix<Real>{
             {  0,  0, -1 },
-            { -1,  0,  0 },
             {  0, -1,  0 },
             {  1 / std::sqrt(2.0),  1 / std::sqrt(2.0), 0 },
+            { -1,  0,  0 },
             {  0,  0,  1 }
           },
-          Math::SpatialVector<Real>{{ 0, 0, 0, 1 / std::sqrt(2.0), 1 }}
+          Math::Vector<Real>{{ 0, 0, 1 / std::sqrt(2.0), 0, 1 }}
         };
         return s_hs;
       }
     }
-
     assert(false);
     static thread_local const HalfSpace s_null;
     return s_null;
@@ -314,8 +324,8 @@ namespace Rodin::Geometry
     const size_t d = getDimension();
     const auto& mesh = m_mesh.get();
     const auto& conn = mesh.getConnectivity();
-    const auto& inc = conn.getIncidence(d, d);
     RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d);
+    const auto& inc = conn.getIncidence(d, d);
     const auto& adj = inc.at(getIndex());
     return PolytopeIterator(
         d, getMesh(), IteratorIndexGenerator(adj.begin(), adj.end()));
@@ -383,6 +393,10 @@ namespace Rodin::Geometry
     return getMesh().getVertexCoordinates(getIndex());
   }
 
+  Polytope::Project::Project(Type g)
+    : m_g(g)
+  {}
+
   void Polytope::Project::cell(Math::SpatialPoint& out, const Math::SpatialPoint& rc) const
   {
     assert(rc.size() >= 0);
@@ -394,8 +408,6 @@ namespace Rodin::Geometry
     {
       case Type::Point:
       {
-        assert(out.size() == 1);
-        out[0] = 0;
         return;
       }
       case Type::Segment:
@@ -474,8 +486,6 @@ namespace Rodin::Geometry
     {
       case Type::Point:
       {
-        assert(out.size() == 1);
-        out[0] = 0;
         return;
       }
       case Type::Segment:
@@ -653,7 +663,6 @@ namespace Rodin::Geometry
       case Type::Point:
       {
         assert(local == 0);
-        out[0] = 0;
         return;
       }
       case Type::Segment:
@@ -668,41 +677,44 @@ namespace Rodin::Geometry
         if (local == 0)
         {
           const Real x = std::clamp(rc[0], Real(0), Real(1));
-          out[0] = x; out[1] = Real(0); return;
+          out[0] = x;
+          out[1] = Real(0);
+          return;
         }
+
         if (local == 1)
         {
           const Real dx = rc[0] - Real(1), dy = rc[1];
           Real t = 0.5 * (-dx + dy);
           t = std::clamp(t, Real(0), Real(1));
-          out[0] = Real(1) - t; out[1] = t; return;
+          out[0] = Real(1) - t;
+          out[1] = t;
+          return;
         }
-        {
-          const Real y = std::clamp(rc[1], Real(0), Real(1));
-          out[0] = Real(0); out[1] = y; return;
-        }
+
+        const Real y = std::clamp(rc[1], Real(0), Real(1));
+        out[0] = Real(0);
+        out[1] = Real(1) - y;
+        return;
       }
       case Type::Quadrilateral:
       {
         assert(local < 4);
-        if (local == 0)
-        {
+        if (local == 0) {                    // y = 0,  (0,0) → (1,0)
           const Real x = std::clamp(rc[0], Real(0), Real(1));
           out[0] = x; out[1] = Real(0); return;
         }
-        if (local == 1)
-        {
+        if (local == 1) {                    // x = 1,  (1,0) → (1,1)
           const Real y = std::clamp(rc[1], Real(0), Real(1));
           out[0] = Real(1); out[1] = y; return;
         }
-        if (local == 2)
-        {
+        if (local == 2) {                    // y = 1,  (1,1) → (0,1)
           const Real x = std::clamp(rc[0], Real(0), Real(1));
-          out[0] = x; out[1] = Real(1); return;
+          out[0] = Real(1) - x; out[1] = Real(1); return;
         }
-        {
+        {                                    // x = 0,  (0,1) → (0,0)
           const Real y = std::clamp(rc[1], Real(0), Real(1));
-          out[0] = Real(0); out[1] = y; return;
+          out[0] = Real(0); out[1] = Real(1) - y; return;
         }
       }
       case Type::Tetrahedron:

@@ -1,153 +1,226 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2025.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_MODELS_ADVECTION_LAGRANGIAN_H
 #define RODIN_MODELS_ADVECTION_LAGRANGIAN_H
 
-#include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/Point.h"
-#include "Rodin/Math/Vector.h"
+#include "Rodin/Variational/Flow.h"
+
+#include "Rodin/Math/RungeKutta/RK4.h"
+#include "Rodin/Solver/CG.h"
+
+#include "Rodin/Variational/BoundaryNormal.h"
+#include "Rodin/Variational/BoundaryIntegral.h"
+#include "Rodin/Variational/ProblemBody.h"
 #include <functional>
 
 namespace Rodin::Models::Advection
 {
-  /**
-   * @brief Lagrangian variational advection for scalar fields.
-   *
-   * The method solves the advection equation:
-   * @f[
-   * \frac{\partial u}{\partial t} + \beta \cdot \nabla u = 0
-   * @f]
-   * assuming that the velocity field @f$ \beta @f$ is divergence-free.
-   */
-  template <class Solution, class VectorField, class ... Params>
-  class Lagrangian;
-
-  template <class Solution, class VectorField, class RungeKutta>
-  class Pullback : public Variational::FunctionBase<Pullback<Solution, VectorField, RungeKutta>>
+  template <class Velocity>
+  class FirstOrderBoundaryPolicy
   {
     public:
-      using SolutionType = Solution;
-      using VectorFieldType = VectorField;
-      using RungeKuttaType = RungeKutta;
-
-      Pullback(const SolutionType& u, const VectorFieldType& velocity, const RungeKutta& rk)
-        : m_solution(u),
-          m_velocity(velocity),
-          m_rk(rk)
+      FirstOrderBoundaryPolicy(
+          Real dt,
+          const Geometry::Mesh<Context::Local>& mesh,
+          const Velocity& velocity,
+          Real eps = 1e-12)
+        : m_dt(dt),
+          m_mesh(mesh),
+          m_vel(velocity),
+          m_eps(eps)
       {}
 
-      constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      bool operator()(Real& tau, Index& cell, Math::SpatialPoint& rref) const
       {
-        return m_solution.get()(backtrace(p));
-      }
+        static thread_local Math::Vector<Real> s_nphys_u;
+        static thread_local Math::SpatialPoint s_rtmp;
+        static thread_local Math::SpatialPoint s_xint;
 
-      Geometry::Point backtrace(const Real& dt, const Geometry::Point& p) const
-      {
-        static thread_local Math::SpatialPoint s_rc{{}};
-        static thread_local Math::SpatialPoint s_pc{{}};
+        const Real trace_sign = std::abs(m_dt);
 
-        const auto& rk = m_rk;
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const auto& mesh = polytope.getMesh();
-        const auto& conn = mesh.getConnectivity();
-        Index cellIdx = polytope.getIndex();
-        s_pc = p.getPhysicalCoordinates();
-        s_rc = p.getReferenceCoordinates();
-        Real tau = dt;
-        while (tau > 0)
+        if (tau <= 0)
+          return true;
+
+        const auto& mesh = m_mesh.get();
+        const size_t cd = mesh.getDimension();
+        const auto g = mesh.getGeometry(cd, cell);
+        const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+
+        size_t jbest = 0;
+        Real gbest = std::numeric_limits<Real>::infinity();
+        for (size_t j = 0; j < static_cast<size_t>(hs.matrix.rows()); ++j)
         {
-          const Geometry::Point q(*mesh.getPolytope(d, cellIdx), s_rc, s_pc);
-          const auto vr = p.getJacobianInverse() * m_velocity(p);
-          const Geometry::Polytope::Type g = mesh.getGeometry(d, cellIdx);
-          const auto& faces = conn.getIncidence(d, d - 1).at(cellIdx);
-          const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
-
-          Real exitTime = std::numeric_limits<Real>::infinity();
-          Index face;
-          Index local;
-          for (size_t i = 0; i < faces.size(); i++)
+          const auto n = hs.matrix.row(j).transpose();
+          const Real b = hs.vector[j];
+          const Real gj = b - n.dot(rref);
+          if (gj < gbest)
           {
-            const auto& normal = hs.matrix.row(local);
-            const Real dot = normal.dot(vr);
-            if (dot > 0)
-            {
-              const Real tf = (hs.vector[local] - normal.dot(s_rc)) / dot;
-              assert(tf >= 0);
-              if (tf < exitTime)
-              {
-                local = i;
-                face = faces[i];
-                exitTime = tf;
-              }
-            }
-          }
-
-          assert(std::isfinite(exitTime));
-
-          if (tau < exitTime)
-          {
-            rk.step(tau, s_rc);
-            tau = 0;
-            break;
-          }
-          else
-          {
-            rk.step(exit, s_rc);
-
-            const auto& cells = conn.getIncidence(d - 1, d).at(face);
-            assert(cells.size() == 2);
-            const Index next = (cells[0] == cellIdx) ? cells[1] : cells[0];
-            Geometry::Polytope::Project(g).face(local, s_rc, s_rc);
-            mesh.getPolytopeTransformation(d, cellIdx).transform(s_pc, s_rc);
-            mesh.getPolytopeTransformation(d, next).inverse(s_rc, s_pc);
-            Geometry::Polytope::Project(mesh.getGeometry(d, next)).cell(s_rc, s_rc);
-            tau -= exitTime;
-            cellIdx = next;
+            gbest = gj;
+            jbest = j;
           }
         }
-        return Geometry::Point(*mesh.getPolytope(d, cellIdx), s_rc);
+
+        const auto nref = hs.matrix.row(jbest).transpose();
+        const auto itc = mesh.getPolytope(cd, cell);
+        const auto& cellO = *itc;
+        const Geometry::Point qface(cellO, rref);
+
+        const auto& Jinv = qface.getJacobianInverse();
+        s_nphys_u = Jinv.transpose() * nref;
+        const Real nlen = s_nphys_u.norm();
+        if (nlen == 0)
+        {
+          tau = 0;
+          return true;
+        }
+
+        const auto nphys = trace_sign * s_nphys_u / nlen;
+        decltype(auto) vphys = m_vel(qface);
+        const Real vn = vphys.dot(nphys);
+        const Real h = std::max<Real>(0, vn) * tau;
+        const auto& xface = qface.getPhysicalCoordinates();
+        s_xint = xface + (-h - m_eps) * nphys;
+
+        mesh.getPolytopeTransformation(cd, cell).inverse(s_rtmp, s_xint);
+        Geometry::Polytope::Project(g).cell(s_rtmp, s_rtmp);
+        rref = s_rtmp;
+
+        const Real b = hs.vector[jbest];
+        const Real gcur = b - nref.dot(rref);
+        const Real ndn = nref.dot(nref);
+        if (ndn > 0)
+        {
+          const Real target = std::max(m_eps, gcur + m_eps);
+          const Real alpha = (gcur - target) / ndn;
+          rref += alpha * nref;
+        }
+
+        tau = 0;
+        return true;
       }
 
     private:
-      std::reference_wrapper<const SolutionType> m_solution;
-      std::reference_wrapper<const VectorFieldType> m_velocity;
-      std::reference_wrapper<RungeKutta> m_rk;
+      const Real m_dt;
+      std::reference_wrapper<const Geometry::Mesh<Context::Local>> m_mesh;
+      std::reference_wrapper<const Velocity> m_vel;
+      const Real m_eps;
   };
 
-  template <class FES, class Data, class VectorField, class RungeKutta>
-  class Lagrangian<Variational::GridFunction<FES, Data>, VectorField, RungeKutta>
+  /**
+   * @brief Lagrangian variational advection for scalar fields.
+   */
+  template <class ... Params>
+  class Lagrangian;
+
+  template <class FES, class Data, class Initial, class VectorField, class Step>
+  class Lagrangian<
+    Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
+    Variational::TestFunction<FES>, Initial, VectorField, Step>
   {
     public:
-      using FESType = FES;
-      using DataType = Data;
-      using VectorFieldType = VectorField;
-      using SolutionType = Variational::GridFunction<FES, Data>;
-      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
-      using SolverType = typename Data::SolverType;
+      using FESType =
+        FES;
 
-      template <class Velocity, class RK>
-      Lagrangian(const SolutionType& u, Velocity&& velocity, RK&& rk)
-        : m_solution(u),
-          m_velocity(std::forward<Velocity>(velocity)),
-          m_rk(std::forward<RK>(rk)),
-          m_pullback(m_solution)
+      using DataType =
+        Data;
+
+      using InitialType =
+        Initial;
+
+      using VectorFieldType =
+        VectorField;
+
+      using StepType =
+        Step;
+
+      using SolutionType =
+        Variational::GridFunction<FES, Data>;
+
+      using TrialFunctionType =
+        Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>;
+
+      using TestFunctionType =
+        Variational::TestFunction<FES>;
+
+      template <class U0, class VVel, class S = StepType>
+      Lagrangian(TrialFunctionType& u, TestFunctionType& v, U0&& u0, VVel&& vel, S&& st = S{})
+        : m_t(0),
+          m_u(u), m_v(v),
+          m_initial(std::forward<U0>(u0)),
+          m_velocity(std::forward<VVel>(vel)),
+          m_step(std::forward<S>(st))
       {}
 
       void step(const Real& dt)
       {
-        const auto& fes = m_solution.get().getFiniteElementSpace();
-        Variational::TrialFunction u(fes);
-        Variational::TestFunction v(fes);
-        Variational::Problem pb(u, v);
-        pb = Integral(u, v) - Integral(m_pullback, v);
+        using namespace Variational;
+
+        auto& u = m_u.get();
+        auto& v = m_v.get();
+
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+
+        const FirstOrderBoundaryPolicy bp(-dt, mesh, m_velocity);
+        const Math::RungeKutta::RK4 step;
+        const DefaultTangentPolicy tp;
+
+        Problem pb(u, v);
+        if (m_t > 0)
+        {
+          pb = Integral(u, v)
+             - Integral(Flow(-dt, u.getSolution(), m_velocity, step, bp, tp), v);
+        }
+        else
+        {
+          pb = Integral(u, v)
+             - Integral(Flow(-dt, m_initial, m_velocity, step, bp, tp), v);
+        }
+
+        Solver::CG(pb).solve();
+
+        m_t += dt;
       }
 
     private:
-      std::reference_wrapper<SolutionType> m_solution;
+      Real m_t;
+
+      std::reference_wrapper<TrialFunctionType> m_u;
+      std::reference_wrapper<TestFunctionType> m_v;
+
+      InitialType m_initial;
       VectorFieldType m_velocity;
-      Pullback<SolutionType, VectorFieldType, RungeKutta> m_pullback;
-      RungeKutta m_rk;
+      StepType m_step;
   };
+
+  template <class FES, class Data, class Initial, class VVel>
+  Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>&,
+             Variational::TestFunction<FES>&,
+             Initial&&,
+             VVel&&)
+  -> Lagrangian<
+       Variational::TrialFunction<Variational::GridFunction<FES,Data>,FES>,
+       Variational::TestFunction<FES>,
+       Initial,
+       VVel,
+       Math::RungeKutta::RK4>;
+
+  template <class FES, class Data, class Initial, class VVel, class SStep>
+  Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>,FES>&,
+             Variational::TestFunction<FES>&,
+             Initial&&,
+             VVel&&,
+             SStep&&)
+  -> Lagrangian<
+       Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
+       Variational::TestFunction<FES>,
+       Initial,
+       VVel,
+       SStep>;
 }
 
 #endif

@@ -15,24 +15,19 @@ namespace Rodin::Geometry
   Mesh<Context::Local>::Builder::initialize(size_t sdim)
   {
     m_sdim = sdim;
-
-    m_attributes.resize(m_sdim + 1);
-
-    // Emplace empty connectivity objects
     m_connectivity.initialize(m_sdim);
-
-    // Set indexes
-    m_attributeIndex.initialize(m_sdim);
-
-    m_transformationIndex.resize(sdim + 1);
+    m_attributes.initialize(m_sdim);
+    m_transformations.initialize(m_sdim);
     return *this;
   }
 
   Mesh<Context::Local>::Builder& Mesh<Context::Local>::Builder::nodes(size_t n)
   {
     m_nodes = 0;
-    m_vertices.resize(m_sdim, n);
     m_connectivity.nodes(n);
+    m_vertices.resize(m_sdim, n);
+    m_attributes.resize(0, n);
+    m_transformations.resize(0, n);
     return *this;
   }
 
@@ -90,8 +85,7 @@ namespace Rodin::Geometry
   Mesh<Context::Local>::Builder&
   Mesh<Context::Local>::Builder::attribute(const std::pair<size_t, Index>& p, Attribute attr)
   {
-    m_attributeIndex.track(p, attr);
-    m_attributes.at(p.first).insert(attr);
+    m_attributes.set(p, attr);
     return *this;
   }
 
@@ -115,27 +109,21 @@ namespace Rodin::Geometry
     if (count > 0)
     {
       m_connectivity.reserve(d, count);
-      m_attributeIndex.reserve(d, count);
-      m_transformationIndex[d].write([&](auto& obj){ obj.reserve(count); });
+      m_attributes.resize(d, count);
+      m_transformations.resize(d, count);
     }
     return *this;
   }
 
   Mesh<Context::Local> Mesh<Context::Local>::Builder::finalize()
   {
-    for (auto& attrs : m_attributes)
-    {
-      if (attrs.size() == 0)
-        attrs.insert(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-    }
-
     Mesh res;
     res.m_sdim = m_sdim;
     res.m_vertices = std::move(m_vertices);
-    res.m_attributes = std::move(m_attributes);
     res.m_connectivity = std::move(m_connectivity);
-    res.m_attributeIndex = std::move(m_attributeIndex);
-    res.m_transformationIndex = std::move(m_transformationIndex);
+    res.m_attributes = std::move(m_attributes);
+    res.m_transformations = std::move(m_transformations);
+
     return res;
   }
 
@@ -163,14 +151,15 @@ namespace Rodin::Geometry
   Mesh<Context::Local>::Builder&
   Mesh<Context::Local>::Builder::setAttributeIndex(AttributeIndex&& attrs)
   {
-    m_attributeIndex = std::move(attrs);
+    m_attributes = std::move(attrs);
     return *this;
   }
 
   Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::setTransformationIndex(TransformationIndex&& transformations)
+  Mesh<Context::Local>::Builder::setTransformationIndex(
+      PolytopeTransformationIndex&& transformations)
   {
-    m_transformationIndex = std::move(transformations);
+    m_transformations = std::move(transformations);
     return *this;
   }
 }

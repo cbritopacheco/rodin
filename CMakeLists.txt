@@ -78,17 +78,11 @@ option(RODIN_LTO                      "Compile with link time optimization"     
 option(RODIN_FEATURE_SUMMARY          "Print Rodin feature summary"               ON)
 option(RODIN_THREAD_SAFE              "Enforces thread-safety."                   OFF)
 option(RODIN_MULTITHREADED            "Utilizes multithreading capabalities."     ON)
+option(RODIN_USE_ASAN                 "Enable AddressSanitizer"                   OFF)
+option(RODIN_USE_UBSAN                "Enable UndefinedBehaviorSanitizer"         OFF)
+option(RODIN_USE_TSAN                 "Enable ThreadSanitizer"                    OFF)
+option(RODIN_USE_MSAN                 "Enable MemorySanitizer (Linux)"            OFF)
 option(BUILD_SHARED_LIBS              "Build using shared libraries"              OFF)
-
-if (RODIN_MULTITHREADED)
-  set(RODIN_THREAD_SAFE ON CACHE BOOL "" FORCE)
-  set(RODIN_USE_OPENMP ON CACHE BOOL "" FORCE)
-  set(Boost_USE_MULTITHREADED ON)
-else()
-  set(RODIN_THREAD_SAFE OFF CACHE BOOL "" FORCE)
-  set(RODIN_USE_OPENMP OFF CACHE BOOL "" FORCE)
-  # set(Boost_USE_MULTITHREADED OFF)
-endif()
 
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
 set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
@@ -108,9 +102,71 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 
 # ---- Set compile options for all the submodules ----------------------------
+
+# Incompatibilities
+if(RODIN_WITH_TSAN AND (RODIN_WITH_ASAN OR RODIN_WITH_UBSAN OR RODIN_WITH_MSAN))
+  message(FATAL_ERROR "TSan must be used alone.")
+endif()
+if(RODIN_WITH_MSAN AND (RODIN_WITH_ASAN OR RODIN_WITH_UBSAN OR RODIN_WITH_TSAN))
+  message(FATAL_ERROR "MSan must be used alone.")
+endif()
+
+if (RODIN_MULTITHREADED)
+  set(RODIN_THREAD_SAFE ON CACHE BOOL "" FORCE)
+  set(RODIN_USE_OPENMP ON CACHE BOOL "" FORCE)
+  set(Boost_USE_MULTITHREADED ON)
+else()
+  set(RODIN_THREAD_SAFE OFF CACHE BOOL "" FORCE)
+  set(RODIN_USE_OPENMP OFF CACHE BOOL "" FORCE)
+  # set(Boost_USE_MULTITHREADED OFF)
+endif()
+
+# Compose flags once, then apply to all targets defined after this point
+set(_SAN_COMPILE "")
+set(_SAN_LINK    "")
+
+if(RODIN_USE_ASAN)
+  list(APPEND _SAN_COMPILE -fsanitize=address -fno-omit-frame-pointer
+                           -fsanitize-address-use-after-scope)
+  list(APPEND _SAN_LINK    -fsanitize=address)
+endif()
+
+if(RODIN_USE_UBSAN)
+  list(APPEND _SAN_COMPILE -fsanitize=undefined)
+  list(APPEND _SAN_LINK    -fsanitize=undefined)
+  # Optional hard fail:
+  # list(APPEND _SAN_COMPILE -fno-sanitize-recover=undefined)
+endif()
+
+if(RODIN_USE_TSAN)
+  list(APPEND _SAN_COMPILE -fsanitize=thread)
+  list(APPEND _SAN_LINK    -fsanitize=thread)
+endif()
+
+if(RODIN_USE_MSAN)
+  list(APPEND _SAN_COMPILE -fsanitize=memory -fsanitize-memory-track-origins=2
+                           -fno-omit-frame-pointer)
+  list(APPEND _SAN_LINK    -fsanitize=memory)
+endif()
+
+# Apply globally (affects all following targets)
+if(_SAN_COMPILE)
+  list(APPEND _SAN_COMPILE -fno-inline -fno-inline-functions
+                           -fno-omit-frame-pointer -fno-optimize-sibling-calls)
+  message(STATUS "Enabling sanitizers with compile options: ${_SAN_COMPILE}")
+  add_compile_options(${_SAN_COMPILE})
+endif()
+if(_SAN_LINK)
+  list(APPEND _SAN_LINK -fno-inline -fno-inline-functions
+                        -fno-omit-frame-pointer -fno-optimize-sibling-calls)
+  add_link_options(${_SAN_LINK})
+endif()
+
+
+
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 rodin_add_compile_options(LANG C CXX OPTIONS -fcolor-diagnostics)
-rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=double-promotion)
+rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=double-promotion -Wno-error=maybe-uninitialized)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-deprecated-anon-enum-enum-conversion)
 
 add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
@@ -150,7 +206,6 @@ if (RODIN_BUILD_SRC)
 
   find_package(Boost 1.74 REQUIRED
     COMPONENTS
-    system
     filesystem
     serialization
     headers
@@ -165,7 +220,7 @@ if (RODIN_BUILD_SRC)
 
   # ---- Eigen ----
   message(STATUS "Configuring Eigen3...")
-  find_package(Eigen3 3.4 CONFIG REQUIRED NO_MODULE)
+  find_package(Eigen3 CONFIG REQUIRED NO_MODULE)
 
   if (RODIN_WITH_PLOT)
     # ---- Magnum ----

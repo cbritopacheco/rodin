@@ -108,7 +108,6 @@ namespace Rodin::Variational
           assert(m_qf->getSize() == 1);
           m_p.emplace(polytope, m_qf->getPoint(0));
           m_weight = m_qf->getWeight(0);
-          m_distortion = m_p->getDistortion();
           const auto& rc = m_qf->getPoint(0);
           const size_t d = polytope.getDimension();
           const Index idx = polytope.getIndex();
@@ -119,6 +118,10 @@ namespace Rodin::Variational
           for (size_t i = 0; i < fe.getCount(); i++)
             m_basis[i] = fe.getBasis(i)(rc);
         }
+        assert(m_p);
+        auto& p = *m_p;
+        p.setPolytope(polytope);
+        m_distortion = p.getDistortion();
         return *this;
       }
 
@@ -285,17 +288,18 @@ namespace Rodin::Variational
           assert(m_qf->getSize() == 1);
           m_p.emplace(polytope, m_qf->getPoint(0));
           m_weight = m_qf->getWeight(0);
-          m_distortion = m_p->getDistortion();
           m_basis.resize(fe.getCount());
           for (size_t local = 0; local < fe.getCount(); local++)
             m_basis[local] = fe.getBasis(local)(m_qf->getPoint(0));
           m_dot.resize(fe.getCount());
         }
+        assert(m_p);
         auto& p = *m_p;
         p.setPolytope(polytope);
         s_v = f(p);
         for (size_t local = 0; local < fe.getCount(); local++)
           m_dot[local] = Math::dot(s_v, m_basis[local]);
+        m_distortion = p.getDistortion();
         return *this;
       }
 
@@ -466,6 +470,7 @@ namespace Rodin::Variational
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
         const auto& rc = m_qf->getPoint(0);
+        assert(m_p);
         const auto& p = *m_p;
         if (trialfes == testfes)
         {
@@ -670,13 +675,15 @@ namespace Rodin::Variational
       constexpr
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
-          m_integrand(integrand.copy())
+          m_integrand(integrand.copy()),
+          m_set(false)
       {}
 
       constexpr
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
-          m_integrand(other.m_integrand->copy())
+          m_integrand(other.m_integrand->copy()),
+          m_set(false)
       {}
 
       constexpr
@@ -689,7 +696,9 @@ namespace Rodin::Variational
           m_weight(std::move(other.m_weight)),
           m_distortion(std::move(other.m_distortion)),
           m_grad(std::move(other.m_grad)),
-          m_matrix(std::move(other.m_matrix))
+          m_matrix(std::move(other.m_matrix)),
+          m_set(std::move(other.m_set)),
+          m_geometry(std::move(other.m_geometry))
       {}
 
       constexpr
@@ -715,7 +724,6 @@ namespace Rodin::Variational
           assert(m_qf->getSize() == 1);
           m_p.emplace(polytope, m_qf->getPoint(0));
           m_weight = m_qf->getWeight(0);
-          m_distortion = m_p->getDistortion();
           const size_t d = polytope.getDimension();
           const auto& integrand = getIntegrand();
           const auto& lhs = integrand.getLHS();
@@ -745,6 +753,10 @@ namespace Rodin::Variational
           }
           m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
         }
+        assert(m_p);
+        auto& p = *m_p;
+        p.setPolytope(polytope);
+        m_distortion = m_p->getDistortion();
         return *this;
       }
 
@@ -942,7 +954,6 @@ namespace Rodin::Variational
           assert(m_qf->getSize() == 1);
           m_p.emplace(polytope, m_qf->getPoint(0));
           m_weight = m_qf->getWeight(0);
-          m_distortion = m_p->getDistortion();
           m_matrix.resize(fe.getCount(), fe.getCount());
           m_grad1.resize(fe.getCount());
           const auto& rc = m_qf->getPoint(0);
@@ -982,6 +993,9 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+
+        m_distortion = p.getDistortion();
+
         return *this;
       }
 

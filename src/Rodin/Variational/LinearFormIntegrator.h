@@ -113,8 +113,7 @@ namespace Rodin::Variational
 
       virtual ScalarType integrate(size_t local) = 0;
 
-      virtual
-      LinearFormIntegratorBase* copy() const noexcept override = 0;
+      virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
 
       virtual Geometry::Region getRegion() const = 0;
 

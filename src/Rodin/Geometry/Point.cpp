@@ -27,7 +27,7 @@ namespace Rodin::Geometry
 
   bool PointBase::operator<(const PointBase& p) const
   {
-    assert(getDimension() == p.getDimension());
+    assert(this->getDimension() == p.getDimension());
     const auto& lhs = getCoordinates(Coordinates::Physical);
     const auto& rhs = p.getCoordinates(Coordinates::Physical);
     for (int i = 0; i < lhs.size() - 1; i++)
@@ -66,11 +66,11 @@ namespace Rodin::Geometry
   PointBase& PointBase::setPolytope(const Polytope& polytope)
   {
     m_polytope = polytope;
-    m_pc.write([](auto& obj) { obj.reset(); });
-    m_jacobian.write([](auto& obj) { obj.reset(); });
-    m_jacobianInverse.write([](auto& obj) { obj.reset(); });
-    m_jacobianDeterminant.write([](auto& obj) { obj.reset(); });
-    m_distortion.write([](auto& obj) { obj.reset(); });
+    m_pc.reset();
+    m_jacobian.reset();
+    m_jacobianInverse.reset();
+    m_jacobianDeterminant.reset();
+    m_distortion.reset();
     return *this;
   }
 
@@ -90,40 +90,32 @@ namespace Rodin::Geometry
   const Math::SpatialVector<Real>& PointBase::getPhysicalCoordinates() const
   {
     static thread_local Math::SpatialPoint s_pc;
-    if (!m_pc.read().has_value())
+    if (!m_pc)
     {
-      m_pc.write(
-          [&](auto& obj)
-          {
-            this->getPolytope().getTransformation().transform(s_pc, this->getReferenceCoordinates());
-            obj.emplace(std::move(s_pc));
-          });
+      this->getPolytope().getTransformation().transform(s_pc, this->getReferenceCoordinates());
+      return m_pc.emplace(std::move(s_pc));
     }
-    assert(m_pc.read().has_value());
-    return m_pc.read().value();
+    assert(m_pc);
+    return *m_pc;
   }
 
   const Math::SpatialMatrix<Real>& PointBase::getJacobian() const
   {
-    static thread_local Math::SpatialMatrix<Real> s_jac;
-    if (!m_jacobian.read().has_value())
+    if (!m_jacobian)
     {
-      m_jacobian.write(
-          [&](auto& obj)
-          {
-            this->getPolytope().getTransformation().jacobian(s_jac, this->getReferenceCoordinates());
-            obj.emplace(std::move(s_jac));
-          });
+      auto& jac = m_jacobian.emplace();
+      this->getPolytope().getTransformation().jacobian(jac, this->getReferenceCoordinates());
+      return jac;
     }
-    assert(m_jacobian.read().has_value());
-    return m_jacobian.read().value();
+    assert(m_jacobian);
+    return *m_jacobian;
   }
 
   const Math::SpatialMatrix<Real>& PointBase::getJacobianInverse() const
   {
-    if (!m_jacobianInverse.read().has_value())
+    if (!m_jacobianInverse)
     {
-      const auto& polytope = getPolytope();
+      const auto& polytope = this->getPolytope();
       const size_t rdim = Polytope::Traits(polytope.getGeometry()).getDimension();
       const size_t sdim = polytope.getMesh().getSpaceDimension();
       assert(rdim <= sdim);
@@ -133,53 +125,32 @@ namespace Rodin::Geometry
         {
           case 1:
           {
-            Math::SpatialMatrix<Real> inv(1, 1);
-            inv.coeffRef(0, 0) = 1 / getJacobian().coeff(0, 0);
-            m_jacobianDeterminant.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(getJacobian().coeff(0, 0));
-                });
-            assert(m_jacobianDeterminant.read().has_value());
-            m_jacobianInverse.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(std::move(inv));
-                });
-            assert(m_jacobianInverse.read().has_value());
-            return m_jacobianInverse.read().value();
+            const auto& jac = this->getJacobian();
+            const auto& det = m_jacobianDeterminant.emplace(jac.coeff(0, 0));
+            auto& inv = m_jacobianInverse.emplace(1, 1);
+            inv.coeffRef(0, 0) = 1 / det;
+            return inv;
           }
           case 2:
           {
-            const auto& jac = getJacobian();
+            const auto& jac = this->getJacobian();
             const Real a = jac.coeff(0, 0);
             const Real b = jac.coeff(0, 1);
             const Real c = jac.coeff(1, 0);
             const Real d = jac.coeff(1, 1);
-            const Real det = a * d - b * c;
+            const auto& det = m_jacobianDeterminant.emplace(a * d - b * c);
             assert(det != 0);
-            m_jacobianDeterminant.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(det);
-                });
-            assert(m_jacobianDeterminant.read().has_value());
-            Math::SpatialMatrix<Real> inv(2, 2);
+
+            auto& inv = m_jacobianInverse.emplace(2, 2);
             inv.coeffRef(0, 0) = d / det;
             inv.coeffRef(0, 1) = -b / det;
             inv.coeffRef(1, 0) = -c / det;
             inv.coeffRef(1, 1) = a / det;
-            m_jacobianInverse.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(std::move(inv));
-                });
-            assert(m_jacobianInverse.read().has_value());
-            return m_jacobianInverse.read().value();
+            return inv;
           }
           case 3:
           {
-            const auto& jac = getJacobian();
+            const auto& jac = this->getJacobian();
             const Real a = jac.coeff(0, 0);
             const Real b = jac.coeff(0, 1);
             const Real c = jac.coeff(0, 2);
@@ -198,16 +169,10 @@ namespace Rodin::Geometry
             const Real G = b * f - c * e;
             const Real H = - (a * f  - c * d);
             const Real I = a * e - b * d;
-
-            const Real det = a * A + b * B + c * C;
-            m_jacobianDeterminant.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(det);
-                });
-            assert(m_jacobianDeterminant.read().has_value());
+            const auto& det = m_jacobianDeterminant.emplace(a * A + b * B + c * C);
             assert(det != 0);
-            Math::SpatialMatrix<Real> inv(3, 3);
+
+            auto& inv = m_jacobianInverse.emplace(3, 3);
             inv.coeffRef(0, 0) = A / det;
             inv.coeffRef(0, 1) = D / det;
             inv.coeffRef(0, 2) = G / det;
@@ -217,46 +182,29 @@ namespace Rodin::Geometry
             inv.coeffRef(2, 0) = C / det;
             inv.coeffRef(2, 1) = F / det;
             inv.coeffRef(2, 2) = I / det;
-            m_jacobianInverse.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(std::move(inv));
-                });
-            assert(m_jacobianInverse.read().has_value());
-            return m_jacobianInverse.read().value();
+            return inv;
           }
           default:
           {
-            m_jacobianInverse.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(getJacobian().inverse());
-                });
-            assert(m_jacobianInverse.read().has_value());
-            return m_jacobianInverse.read().value();
+            return m_jacobianInverse.emplace(this->getJacobian().inverse());
           }
         }
       }
       else
       {
-        m_jacobianInverse.write(
-            [&](auto& obj)
-            {
-              obj.emplace(getJacobian().completeOrthogonalDecomposition().pseudoInverse());
-            });
-        assert(m_jacobianInverse.read().has_value());
-        return m_jacobianInverse.read().value();
+        return m_jacobianInverse.emplace(
+            this->getJacobian().completeOrthogonalDecomposition().pseudoInverse());
       }
     }
-    assert(m_jacobianInverse.read().has_value());
-    return m_jacobianInverse.read().value();
+    assert(m_jacobianInverse);
+    return *m_jacobianInverse;
   }
 
   Real PointBase::getJacobianDeterminant() const
   {
-    if (!m_jacobianDeterminant.read().has_value())
+    if (!m_jacobianDeterminant)
     {
-      const auto& jac = getJacobian();
+      const auto& jac = this->getJacobian();
       const auto rows = jac.rows();
       const auto cols = jac.cols();
       if (rows == cols)
@@ -265,13 +213,7 @@ namespace Rodin::Geometry
         {
           case 1:
           {
-            m_jacobianDeterminant.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(jac.coeff(0, 0));
-                });
-            assert(m_jacobianDeterminant.read().has_value());
-            return m_jacobianDeterminant.read().value();
+            return m_jacobianDeterminant.emplace(jac.coeff(0, 0));
           }
           case 2:
           {
@@ -279,13 +221,7 @@ namespace Rodin::Geometry
             const Real b = jac.coeff(0, 1);
             const Real c = jac.coeff(1, 0);
             const Real d = jac.coeff(1, 1);
-            m_jacobianDeterminant.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(a * d - b * c);
-                });
-            assert(m_jacobianDeterminant.read().has_value());
-            return m_jacobianDeterminant.read().value();
+            return m_jacobianDeterminant.emplace(a * d - b * c);
           }
           case 3:
           {
@@ -301,84 +237,49 @@ namespace Rodin::Geometry
             const Real A = e * i - f * h;
             const Real B = -(d * i - f * g);
             const Real C = d * h - e * g;
-            m_jacobianDeterminant.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(a * A + b * B + c * C);
-                });
-            assert(m_jacobianDeterminant.read().has_value());
-            return m_jacobianDeterminant.read().value();
+            return m_jacobianDeterminant.emplace(a * A + b * B + c * C);
           }
           default:
           {
-            m_jacobianDeterminant.write(
-                [&](auto& obj)
-                {
-                  obj.emplace(jac.determinant());
-                });
-            assert(m_jacobianDeterminant.read().has_value());
-            return m_jacobianDeterminant.read().value();
+            return m_jacobianDeterminant.emplace(jac.determinant());
           }
         }
       }
       else
       {
-        m_jacobianDeterminant.write(
-            [&](auto& obj)
-            {
-              obj.emplace(Math::sqrt((jac.transpose() * jac).determinant()));
-            });
-        assert(m_jacobianDeterminant.read().has_value());
-        return m_jacobianDeterminant.read().value();
+        return m_jacobianDeterminant.emplace(Math::sqrt((jac.transpose() * jac).determinant()));
       }
     }
-    assert(m_jacobianDeterminant.read().has_value());
-    return m_jacobianDeterminant.read().value();
+    assert(m_jacobianDeterminant);
+    return *m_jacobianDeterminant;
   }
 
   Real PointBase::getDistortion() const
   {
-    if (!m_distortion.read().has_value())
+    if (!m_distortion)
     {
-      const auto& jac = getJacobian();
+      const auto& jac = this->getJacobian();
       const auto rows = jac.rows();
       const auto cols = jac.cols();
       if (rows == cols)
       {
-        m_distortion.write(
-            [&](auto& obj)
-            {
-              obj.emplace(getJacobianDeterminant());
-            });
-        assert(m_distortion.read().has_value());
-        return m_distortion.read().value();
+        return m_distortion.emplace(this->getJacobianDeterminant());
       }
       else
       {
         if (jac.rows() == 2 && jac.cols() == 1)
         {
-          m_distortion.write(
-              [&](auto& obj)
-              {
-                obj.emplace(Math::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
-              });
-          assert(m_distortion.read().has_value());
-          return m_distortion.read().value();
+          return m_distortion.emplace(
+              Math::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
         }
         else
         {
-          m_distortion.write(
-              [&](auto& obj)
-              {
-                obj.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
-              });
-          assert(m_distortion.read().has_value());
-          return m_distortion.read().value();
+          return m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
         }
       }
     }
-    assert(m_distortion.read().has_value());
-    return m_distortion.read().value();
+    assert(m_distortion);
+    return *m_distortion;
   }
 
   size_t PointBase::getDimension(Coordinates coords) const

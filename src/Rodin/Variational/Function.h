@@ -149,14 +149,14 @@ namespace Rodin::Variational
       constexpr
       Derived& traceOf(const Geometry::Attribute& attr)
       {
-        return static_cast<Derived&>(*this).traceOf(FlatSet<Geometry::Attribute>{ attr });
+        return this->traceOf(FlatSet<Geometry::Attribute>{ attr });
       }
 
       template <class A1, class A2, class ... As>
       constexpr
       Derived& traceOf(const A1& a1, const A2& a2, const As& ... as)
       {
-        return static_cast<Derived&>(*this).traceOf(FlatSet<Geometry::Attribute>{ a1, a2, as... });
+        return this->traceOf(FlatSet<Geometry::Attribute>{ a1, a2, as... });
       }
 
       constexpr
@@ -189,6 +189,11 @@ namespace Rodin::Variational
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      Derived& getDerived() noexcept
+      {
+        return static_cast<Derived&>(*this);
       }
 
       const Derived& getDerived() const noexcept
