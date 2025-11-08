@@ -162,8 +162,6 @@ if(_SAN_LINK)
   add_link_options(${_SAN_LINK})
 endif()
 
-
-
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 rodin_add_compile_options(LANG C CXX OPTIONS -fcolor-diagnostics)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=double-promotion -Wno-error=maybe-uninitialized)
