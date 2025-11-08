@@ -1,6 +1,7 @@
 #ifndef RODIN_GEOMETRY_ATTRIBUTEINDEX_H
 #define RODIN_GEOMETRY_ATTRIBUTEINDEX_H
 
+#include <mutex>
 #include <vector>
 #include <shared_mutex>
 

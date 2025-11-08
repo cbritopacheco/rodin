@@ -2,13 +2,13 @@
 #define RODIN_GEOMETRY_POLYTOPETRANSFORMATIONINDEX_H
 
 #include <atomic>
-#include <cassert>
 #include <deque>
-#include <memory>
 #include <mutex>
-#include <shared_mutex>
-#include <utility>
+#include <memory>
 #include <vector>
+#include <cassert>
+#include <utility>
+#include <shared_mutex>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/deque.hpp>
