@@ -1354,7 +1354,7 @@ namespace Rodin::Tests::Unit
 
     // Create a structured grid with many triangles
     Mesh<Context::Local>::Builder builder;
-    builder.initialize(mdim);
+    builder.initialize(mdim).nodes(n_rows * n_cols + (n_rows + 1) * (n_cols + 1));
 
     // Add vertices
     for (size_t i = 0; i <= n_rows; ++i)

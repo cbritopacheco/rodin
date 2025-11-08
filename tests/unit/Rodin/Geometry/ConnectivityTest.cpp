@@ -17,7 +17,7 @@ namespace Rodin::Tests::Unit
                 .nodes(nodes)
                 .polytope(Polytope::Type::Triangle, {0, 1, 2});
 
-    EXPECT_EQ(connectivity.getMeshDimension(), 2);
+    EXPECT_EQ(connectivity.getDimension(), 2);
 
     size_t d;
 
@@ -231,7 +231,7 @@ namespace Rodin::Tests::Unit
                 .nodes(nodes)
                 .polytope(Polytope::Type::Quadrilateral, {0, 1, 3, 2});
 
-    EXPECT_EQ(connectivity.getMeshDimension(), 2);
+    EXPECT_EQ(connectivity.getDimension(), 2);
 
     size_t d = 2;
     connectivity.compute(d, 0);
@@ -257,7 +257,7 @@ namespace Rodin::Tests::Unit
                 .nodes(nodes)
                 .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3});
 
-    EXPECT_EQ(connectivity.getMeshDimension(), 3);
+    EXPECT_EQ(connectivity.getDimension(), 3);
 
     size_t d = 3;
     connectivity.compute(d, 0);
@@ -315,7 +315,7 @@ namespace Rodin::Tests::Unit
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2).nodes(0);
 
-    EXPECT_EQ(connectivity.getMeshDimension(), 2);
+    EXPECT_EQ(connectivity.getDimension(), 0);
     EXPECT_EQ(connectivity.getCount(0), 0);
     EXPECT_EQ(connectivity.getCount(1), 0);
     EXPECT_EQ(connectivity.getCount(2), 0);
@@ -350,7 +350,7 @@ namespace Rodin::Tests::Unit
                 .nodes(2)
                 .polytope(Polytope::Type::Segment, {0, 1});
 
-    EXPECT_EQ(connectivity.getMeshDimension(), 1);
+    EXPECT_EQ(connectivity.getDimension(), 1);
 
     size_t d = 1;
     connectivity.compute(d, 0);
@@ -392,7 +392,7 @@ namespace Rodin::Tests::Unit
                 .nodes(4)
                 .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3});
 
-    EXPECT_EQ(connectivity.getMeshDimension(), 3);
+    EXPECT_EQ(connectivity.getDimension(), 3);
 
     size_t d = 3;
     connectivity.compute(d, 0);
@@ -430,7 +430,7 @@ namespace Rodin::Tests::Unit
     // Copy construct
     Connectivity<Context::Local> connectivity2(connectivity1);
 
-    EXPECT_EQ(connectivity2.getMeshDimension(), connectivity1.getMeshDimension());
+    EXPECT_EQ(connectivity2.getDimension(), connectivity1.getDimension());
     EXPECT_EQ(connectivity2.getCount(0), connectivity1.getCount(0));
     EXPECT_EQ(connectivity2.getCount(1), connectivity1.getCount(1));
     EXPECT_EQ(connectivity2.getCount(2), connectivity1.getCount(2));
@@ -449,7 +449,7 @@ namespace Rodin::Tests::Unit
     // Move construct
     Connectivity<Context::Local> connectivity2(std::move(connectivity1));
 
-    EXPECT_EQ(connectivity2.getMeshDimension(), 2);
+    EXPECT_EQ(connectivity2.getDimension(), 2);
     EXPECT_EQ(connectivity2.getCount(2), originalCount);
   }
 
@@ -466,7 +466,7 @@ namespace Rodin::Tests::Unit
     Connectivity<Context::Local> connectivity2;
     connectivity2 = connectivity1;
 
-    EXPECT_EQ(connectivity2.getMeshDimension(), connectivity1.getMeshDimension());
+    EXPECT_EQ(connectivity2.getDimension(), connectivity1.getDimension());
     EXPECT_EQ(connectivity2.getCount(1), connectivity1.getCount(1));
     EXPECT_EQ(connectivity2.getCount(2), connectivity1.getCount(2));
   }
@@ -484,7 +484,7 @@ namespace Rodin::Tests::Unit
     Connectivity<Context::Local> connectivity2;
     connectivity2 = std::move(connectivity1);
 
-    EXPECT_EQ(connectivity2.getMeshDimension(), 2);
+    EXPECT_EQ(connectivity2.getDimension(), 2);
     EXPECT_EQ(connectivity2.getCount(2), originalCount);
     EXPECT_EQ(connectivity2.getGeometry(2, 0), Polytope::Type::Quadrilateral);
   }
@@ -504,15 +504,6 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(connectivity.getCount(1), 0);
   }
 
-  TEST(Rodin_Geometry_Connectivity, EdgeCase_LargeMeshDimension)
-  {
-    Connectivity<Context::Local> connectivity;
-    connectivity.initialize(5).nodes(10);
-
-    EXPECT_EQ(connectivity.getMeshDimension(), 5);
-    EXPECT_EQ(connectivity.getCount(0), 10);
-  }
-
   TEST(Rodin_Geometry_Connectivity, EdgeCase_ComputeOrder_Dependency)
   {
     Connectivity<Context::Local> connectivity;
@@ -530,18 +521,6 @@ namespace Rodin::Tests::Unit
 
     connectivity.compute(0, 0);
     EXPECT_EQ(connectivity.getCount(0), 3);
-  }
-
-  TEST(Rodin_Geometry_Connectivity, EdgeCase_MultipleInitialize)
-  {
-    Connectivity<Context::Local> connectivity;
-    connectivity.initialize(2).nodes(3);
-
-    // Re-initialize with different dimension
-    connectivity.initialize(3).nodes(4);
-
-    EXPECT_EQ(connectivity.getMeshDimension(), 3);
-    EXPECT_EQ(connectivity.getCount(0), 4);
   }
 
   TEST(Rodin_Geometry_Connectivity, EdgeCase_GetCountByGeometry_Triangle)

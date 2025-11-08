@@ -292,7 +292,7 @@ namespace Rodin::Geometry
 
   size_t Mesh<Context::Local>::getDimension() const
   {
-    return m_connectivity.getMeshDimension();
+    return m_connectivity.getDimension();
   }
 
   size_t Mesh<Context::Local>::getSpaceDimension() const
