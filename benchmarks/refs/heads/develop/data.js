@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1756768725806,
+  "lastUpdate": 1762616742468,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -35242,6 +35242,162 @@ window.BENCHMARK_DATA = {
             "value": 48.36635254448212,
             "unit": "ns/iter",
             "extra": "iterations: 12703231\ncpu: 48.354715032734426 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito-Pacheco",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "31a6bd4f3697984fc09c1e8848d34ad60548a1e4",
+          "message": "Advection (#122)\n\n* Initial plan\n\n* Initial planning for semi-Lagrangian advection implementation\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Implement core SemiLagrangianAdvection class with RK integrators\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Simplify SemiLagrangianAdvection implementation with correct Rodin APIs\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update\n\n* Change connectivity API\n\n* Remove uint\n\n* Update Eigen commit\n\n* Update transformation API and remove Eigen\n\n* Update\n\n* Remove ISCD\n\n* CI\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Add comprehensive unit and manufactured tests for Lagrangian and Flow advection classes (#121)\n\n* Initial plan\n\n* Implement manufactured tests for Lagrangian and Flow advection classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix\n\n* Separate unit tests from manufactured tests and add comprehensive test suite\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update\n\n* Update\n\n* Fix compilation\n\n* Change to backtrace\n\n* Switch to forward\n\n* Update\n\n* Update\n\n* Testing\n\n* Solve with CG\n\n* Debugging\n\n* Update\n\n* Update\n\n* Update\n\n* Fix MEDIT reading\n\n* Add scatter functionality\n\n* Restructure\n\n* Rename Mapping to Pullback and InverseMapping to Pushforward\n\n* Test\n\n* It kinda works\n\n* Correct orientations\n\n* Update\n\n* Update\n\n* Switch to arrival form\n\n* Remove scatter\n\n* Manufactured tests\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: cbritopacheco <carlos.brito524@gmail.com>\n\n* Update\n\n* Update\n\n* LevelSetCantilever works again !\n\n* Fix debug build\n\n* Correct sign\n\n* Add guard against race conditions\n\n* Guard polytope transformations\n\n* Revert \"Correct sign\"\n\nThis reverts commit 5aa124aeae7eff758d5af8e7320b3d6383737957.\n\n* Enhance test command with rerun and output options\n\nUpdated test command to include rerun-failed and output-on-failure options.\n\n* Refactor GitHub Actions test workflow\n\nUpdated the GitHub Actions workflow to simplify branch definitions and enhance test execution with detailed logging and rerun capabilities.\n\n* Change test execution to serial and update logs\n\nUpdated the test workflow to run tests serially and adjust logging paths.\n\n* Refactor GitHub Actions test workflow\n\nUpdated test workflow to improve logging and error handling.\n\n* Fix test directory and improve error handling\n\nUpdated test directory path and modified error handling for test execution.\n\n* Update tests\n\n* Instrument failing tests\n\n* Debug CI\n\n* Debug CI\n\n* Debug CI\n\n* Debug CI\n\n* Debug CI\n\n* Sanitize addresses\n\n* Update clang-12 in build\n\n* Debug CI\n\n* Debug CI\n\n* Add rerun step for failed tests in CI workflow\n\nAdded a step to rerun failed tests with verbose output.\n\n* Enable verbose output for rerun failed tests\n\n* Fix CMakeLists.txt so it uses sanitizers\n\n* Debug CI\n\n* Update compiler version from gcc-10 to gcc-11\n\n* Make explicit last face check\n\n* Change test workflow\n\n* CI\n\n* CI\n\n* Update compiler version in Build.yml\n\n* Enable Boost CMake integration in Build.yml\n\n* Remove clang-12 from build matrix in Build.yml\n\n* Add CMAKE_POLICY_DEFAULT_CMP0167 to build config\n\n* Add Boost include and library directories to Build.yml\n\n* Update\n\n* Clean up CMake options in Build.yml\n\nRemoved Boost-related CMake configurations.\n\n* Update sanitizer option in Tests.yml\n\nReplaced 'asan' with 'sanitizer' in the workflow configuration.\n\n* Eigen3 build and also remove decltype\n\n* Add CMake policy version minimum to Build.yml\n\n* add include\n\n* update\n\n* Update\n\n* CI\n\n* CI\n\n* Update\n\n* CI\n\n* Update\n\n* Add asserts\n\n* Memory leak shenanigans\n\n* Update\n\n* Fix TSAN errors\n\n* Remove duplicate code check\n\n* Rework Attribute and Transformation index\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>",
+          "timestamp": "2025-11-08T16:40:26+01:00",
+          "tree_id": "e4c224c24906925f078f92eaf8d3b4e0336aa204",
+          "url": "https://github.com/cbritopacheco/rodin/commit/31a6bd4f3697984fc09c1e8848d34ad60548a1e4"
+        },
+        "date": 1762616736586,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.31640652772657996,
+            "unit": "ns/iter",
+            "extra": "iterations: 2241005197\ncpu: 0.31637485042387437 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.3109948625852561,
+            "unit": "ns/iter",
+            "extra": "iterations: 2246842733\ncpu: 0.3109793817509702 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.3110928839817439,
+            "unit": "ns/iter",
+            "extra": "iterations: 2251286423\ncpu: 0.31107148066339124 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.3123381544298886,
+            "unit": "ns/iter",
+            "extra": "iterations: 2248830087\ncpu: 0.3123274906629262 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 645.4740656066996,
+            "unit": "ns/iter",
+            "extra": "iterations: 1103149\ncpu: 645.4130829108306 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 132240.4914720016,
+            "unit": "ns/iter",
+            "extra": "iterations: 5394\ncpu: 132222.19243603997 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 549027.6800630516,
+            "unit": "ns/iter",
+            "extra": "iterations: 1269\ncpu: 548961.7943262407 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 1093.0557699449337,
+            "unit": "ns/iter",
+            "extra": "iterations: 646280\ncpu: 1092.9983691279326 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 228924.31033355,
+            "unit": "ns/iter",
+            "extra": "iterations: 3058\ncpu: 228886.2318508829 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 1016249.2485465453,
+            "unit": "ns/iter",
+            "extra": "iterations: 688\ncpu: 1016211.3255813946 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 256548.66397058597,
+            "unit": "ns/iter",
+            "extra": "iterations: 2720\ncpu: 256505.53602941203 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 250756.21287305004,
+            "unit": "ns/iter",
+            "extra": "iterations: 2781\ncpu: 250742.79647608785 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 13627.301722461942,
+            "unit": "ns/iter",
+            "extra": "iterations: 51438\ncpu: 13626.182569306742 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 6108288.852174056,
+            "unit": "ns/iter",
+            "extra": "iterations: 115\ncpu: 6107940.469565219 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 110200.86877258557,
+            "unit": "ns/iter",
+            "extra": "iterations: 6363\ncpu: 110196.47870501321 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2084540.9437869063,
+            "unit": "ns/iter",
+            "extra": "iterations: 338\ncpu: 2084372.5266272197 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9231978.818182336,
+            "unit": "ns/iter",
+            "extra": "iterations: 77\ncpu: 9230911.558441529 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 48133928.454547,
+            "unit": "ns/iter",
+            "extra": "iterations: 11\ncpu: 48124152.36363647 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 301057023.9999879,
+            "unit": "ns/iter",
+            "extra": "iterations: 2\ncpu: 301024872.49999934 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_16x16",
+            "value": 49.62956430698641,
+            "unit": "ns/iter",
+            "extra": "iterations: 13799877\ncpu: 49.62615869692152 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_32x32",
+            "value": 49.401273842330035,
+            "unit": "ns/iter",
+            "extra": "iterations: 13473410\ncpu: 49.38989639593824 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_64x64",
+            "value": 50.17010199278538,
+            "unit": "ns/iter",
+            "extra": "iterations: 12108700\ncpu: 50.16730895967354 ns\nthreads: 1"
           }
         ]
       }
