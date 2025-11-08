@@ -16,6 +16,11 @@
 #include "Rodin/Utility.h"
 #include "Rodin/Utility/Zip.h"
 #include "Rodin/Utility/Product.h"
+#include "Rodin/Utility/Repeat.h"
+#include "Rodin/Utility/UnwrapReference.h"
+#include "Rodin/Utility/HasTypeMember.h"
+#include "Rodin/Utility/HasValueMember.h"
+#include "Rodin/Utility/Extract.h"
 #include "Rodin/Pair.h"
 #include "Rodin/Tuple.h"
 
@@ -402,4 +407,245 @@ TEST_F(UtilityProductTest, ProductWithRodinPair)
     Rodin::Pair<float, double>, Rodin::Pair<float, char>
   >;
   EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for IsOneOf functionality
+// -----------------------------------------------------------------------------
+class UtilityRepeatTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+TEST_F(UtilityRepeatTest, RepeatZeroTimes)
+{
+  using ResultType = Repeat<0, int>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<>>));
+}
+
+TEST_F(UtilityRepeatTest, RepeatOnce)
+{
+  using ResultType = Repeat<1, int>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<int>>));
+}
+
+TEST_F(UtilityRepeatTest, RepeatTwice)
+{
+  using ResultType = Repeat<2, double>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<double, double>>));
+}
+
+TEST_F(UtilityRepeatTest, RepeatThreeTimes)
+{
+  using ResultType = Repeat<3, char>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<char, char, char>>));
+}
+
+TEST_F(UtilityRepeatTest, RepeatFiveTimes)
+{
+  using ResultType = Repeat<5, bool>::Type;
+  using ExpectedType = Rodin::Tuple<bool, bool, bool, bool, bool>;
+  EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
+}
+
+TEST_F(UtilityRepeatTest, RepeatWithComplexType)
+{
+  using ResultType = Repeat<3, std::string>::Type;
+  using ExpectedType = Rodin::Tuple<std::string, std::string, std::string>;
+  EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for UnwrapReference functionality
+// -----------------------------------------------------------------------------
+class UtilityUnwrapReferenceTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+TEST_F(UtilityUnwrapReferenceTest, NonReferenceWrapper)
+{
+  using ResultType = UnwrapReference<int>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, int>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, UnwrapReferenceWrapper)
+{
+  using ResultType = UnwrapReference<std::reference_wrapper<int>>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, int&>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, UnwrapConstReferenceWrapper)
+{
+  using ResultType = UnwrapReference<std::reference_wrapper<const int>>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, const int&>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, ConstTypeNoWrapper)
+{
+  using ResultType = UnwrapReference<const double>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, const double>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, UnwrapRefDecay)
+{
+  using ResultType = UnwrapRefDecay<std::reference_wrapper<int>>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, int&>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, UnwrapRefDecayWithConst)
+{
+  using ResultType = UnwrapRefDecay<const std::reference_wrapper<int>>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, int&>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, UnwrapRefDecayPlainType)
+{
+  using ResultType = UnwrapRefDecay<const int&>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, int>));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for HasTypeMember functionality
+// -----------------------------------------------------------------------------
+class UtilityHasTypeMemberTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+    
+    struct WithType { using Type = int; };
+    struct WithoutType { int value; };
+    struct WithNestedType { using Type = std::string; };
+};
+
+TEST_F(UtilityHasTypeMemberTest, TypeWithTypeMember)
+{
+  EXPECT_TRUE((HasTypeMember<WithType>::Value));
+}
+
+TEST_F(UtilityHasTypeMemberTest, TypeWithoutTypeMember)
+{
+  EXPECT_FALSE((HasTypeMember<WithoutType>::Value));
+}
+
+TEST_F(UtilityHasTypeMemberTest, PrimitiveType)
+{
+  EXPECT_FALSE((HasTypeMember<int>::Value));
+  EXPECT_FALSE((HasTypeMember<double>::Value));
+}
+
+TEST_F(UtilityHasTypeMemberTest, TypeWithNestedType)
+{
+  EXPECT_TRUE((HasTypeMember<WithNestedType>::Value));
+}
+
+TEST_F(UtilityHasTypeMemberTest, StdTypes)
+{
+  EXPECT_FALSE((HasTypeMember<std::string>::Value));
+  EXPECT_FALSE((HasTypeMember<std::vector<int>>::Value));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for HasValueMember functionality
+// -----------------------------------------------------------------------------
+class UtilityHasValueMemberTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+    
+    struct WithValue { using Value = int; };
+    struct WithoutValue { int data; };
+    struct WithStaticValue { static constexpr int Value = 42; };
+};
+
+TEST_F(UtilityHasValueMemberTest, TypeWithValueMember)
+{
+  EXPECT_TRUE((HasValueMember<WithValue>::Value));
+}
+
+TEST_F(UtilityHasValueMemberTest, TypeWithoutValueMember)
+{
+  EXPECT_FALSE((HasValueMember<WithoutValue>::Value));
+}
+
+TEST_F(UtilityHasValueMemberTest, PrimitiveType)
+{
+  EXPECT_FALSE((HasValueMember<int>::Value));
+  EXPECT_FALSE((HasValueMember<double>::Value));
+}
+
+TEST_F(UtilityHasValueMemberTest, TypeWithStaticValue)
+{
+  // HasValueMember checks for a type member, not a static value
+  // So this should be FALSE since WithStaticValue has a static const, not a type
+  EXPECT_FALSE((HasValueMember<WithStaticValue>::Value));
+}
+
+TEST_F(UtilityHasValueMemberTest, StdTypes)
+{
+  EXPECT_FALSE((HasValueMember<std::string>::Value));
+  EXPECT_FALSE((HasValueMember<std::vector<int>>::Value));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for Extract functionality
+// -----------------------------------------------------------------------------
+class UtilityExtractTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+    
+    template<typename T>
+    struct AddConst { using Type = const T; };
+    
+    template<typename T>
+    struct AddPointer { using Type = T*; };
+    
+    template<typename T>
+    struct Identity { using Type = T; };
+};
+
+TEST_F(UtilityExtractTest, ExtractWithIdentity)
+{
+  using OriginalTuple = Rodin::Tuple<int, double, char>;
+  using ResultType = Extract<OriginalTuple>::Type<Identity>;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<int, double, char>>));
+}
+
+TEST_F(UtilityExtractTest, ExtractWithAddConst)
+{
+  using OriginalTuple = Rodin::Tuple<int, double, char>;
+  using ResultType = Extract<OriginalTuple>::Type<AddConst>;
+  using ExpectedType = Rodin::Tuple<const int, const double, const char>;
+  EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
+}
+
+TEST_F(UtilityExtractTest, ExtractWithAddPointer)
+{
+  using OriginalTuple = Rodin::Tuple<int, double, char>;
+  using ResultType = Extract<OriginalTuple>::Type<AddPointer>;
+  using ExpectedType = Rodin::Tuple<int*, double*, char*>;
+  EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
+}
+
+TEST_F(UtilityExtractTest, ExtractSingleElement)
+{
+  using OriginalTuple = Rodin::Tuple<int>;
+  using ResultType = Extract<OriginalTuple>::Type<AddConst>;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<const int>>));
+}
+
+TEST_F(UtilityExtractTest, ExtractMultipleElements)
+{
+  using OriginalTuple = Rodin::Tuple<int, float, double, char, bool>;
+  using ResultType = Extract<OriginalTuple>::Type<AddPointer>;
+  using ExpectedType = Rodin::Tuple<int*, float*, double*, char*, bool*>;
+  EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
 }
