@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1755875067267,
+  "lastUpdate": 1762619944078,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -4278,6 +4278,162 @@ window.BENCHMARK_DATA = {
             "value": 48.71011829588573,
             "unit": "ns/iter",
             "extra": "iterations: 12292228\ncpu: 48.701716727024724 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito-Pacheco",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2dd8afaa0ccc67a2bbd76096a5c379b7e08110ae",
+          "message": "Develop (#124)\n\n* Update\n\n* Update.\n\n* CI\n\n* CI\n\n* Update\n\n* Update\n\n* Refactor\n\n* Switch to OpenMP for multithreading\n\n* Remove thread pool\n\n* CI\n\n* Refactor\n\n* CI\n\n* CI\n\n* Workon MPI Poisson example\n\n* Will refactor GridFunction\n\n* Refactor\n\n* Update\n\n* Update\n\n* Small include error\n\n* Ownership and ghost\n\n* Fix\n\n* Fix\n\n* Update\n\n* GridFunction refactor (#102)\n\nPETSc\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* Refactor projection (#103)\n\n* Update\n\n* Refactor project and getValue\n\n* CI\n\n* CI\n\n* Add Release test build into matrix\n\n* Remove boost::bimap and fix tests\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* cI\n\n* CI\n\n* Add comprehensive unit tests for Rodin Variational mathematical operations (#105)\n\n* Initial plan\n\n* Add comprehensive unit tests for core Rodin Variational classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive unit tests for additional core Rodin Variational classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Complete comprehensive unit test suite for Rodin Variational classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove any mention of RangeShape\n\n* Remove RangeShape references from DotTest, DivTest, and ComponentTest\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove all remaining RangeShape references from Rodin Variational test files\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix Copilot code\n\n* Add comprehensive unit tests for fundamental mathematical operations in Rodin Variational\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive unit tests for advanced mathematical operations in Rodin Variational\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add tests\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>\n\n* Add comprehensive Doxygen documentation throughout the codebase (#111)\n\n* Initial plan\n\n* Add Doxygen documentation to Math, QF, IO, Solver modules and core types\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add documentation to QF, Models, MPI, and Test modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add documentation to core utility classes - Moveable and GeometryIndexed\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive documentation to FormLanguage, Assembly, Variational, Geometry, and Context modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add documentation to additional Variational, Geometry, and Assembly components\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Complete documentation coverage with FiniteElementSpace and Plot modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix Copyable documentation and add comprehensive docs to Alert and Utility modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix build\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>\n\n* Add Helmholtz manufactured test\n\n* Add comprehensive unit tests for all major Rodin modules and classes (#112)\n\n* Initial plan\n\n* Initial assessment: Identify missing unit tests for src/Rodin classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add unit tests for Copyable, Moveable, FlatSet, Types, and Cast classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix\n\n* Add unit tests for Utility, Alert, and QF classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Put the QF tests inside their own folder\n\n* Split QF tests into separate files by class\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive unit tests for Math, Test, and FormLanguage modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive unit tests for Plot, Models, Solver, and Assembly modules\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix tests\n\n* Split Alert tests into separate files by class in Alert directory\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive unit tests for Math module classes Unit, Rad, Traits, and LinearSystem\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update README with logo\n\n* Fix tests\n\n* Update logo\n\n* Revert submodules to match develop branch state\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove QF abstract base class from tests\n\n* Fix GaussLegendre\n\n* Add comprehensive unit tests for GaussLegendre class\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix tests\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>\n\n* Add logo to mainpage\n\n* Remove FMM from Distance\n\n* Comprehensive FMM test suite with boundary/interior interfaces and analytical validation (#118)\n\n* Initial plan\n\n* Implement Fast Marching Method algorithm and create example\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Complete FMM implementation with documentation and validation\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Correct copilots implementation\n\n* Update git submodules to develop branch versions\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Enhance FMM with surface mesh and curved element support\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix formatting\n\n* Doc\n\n* Test on actual surface\n\n* Update submodules\n\n* CI\n\n* CI\n\n* CI\n\n* Add Box mesh generation function\n\n* Implement comprehensive FMM tests for surface meshes and volumetric domains\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix sign\n\n* Fix some tests\n\n* Fix tests\n\n* Rename setInterface to setFront\n\n* Add comprehensive additional FMM tests for boundary and interior interfaces\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update versions\n\n* Fix tests\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>\n\n* Advection (#120)\n\n* Initial plan\n\n* Initial planning for semi-Lagrangian advection implementation\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Implement core SemiLagrangianAdvection class with RK integrators\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Simplify SemiLagrangianAdvection implementation with correct Rodin APIs\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update\n\n* Change connectivity API\n\n* Remove uint\n\n* Update Eigen commit\n\n* Update transformation API and remove Eigen\n\n* Update\n\n* Remove ISCD\n\n* CI\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Advection (#122)\n\n* Initial plan\n\n* Initial planning for semi-Lagrangian advection implementation\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Implement core SemiLagrangianAdvection class with RK integrators\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Simplify SemiLagrangianAdvection implementation with correct Rodin APIs\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update\n\n* Change connectivity API\n\n* Remove uint\n\n* Update Eigen commit\n\n* Update transformation API and remove Eigen\n\n* Update\n\n* Remove ISCD\n\n* CI\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Add comprehensive unit and manufactured tests for Lagrangian and Flow advection classes (#121)\n\n* Initial plan\n\n* Implement manufactured tests for Lagrangian and Flow advection classes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix\n\n* Separate unit tests from manufactured tests and add comprehensive test suite\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update\n\n* Update\n\n* Fix compilation\n\n* Change to backtrace\n\n* Switch to forward\n\n* Update\n\n* Update\n\n* Testing\n\n* Solve with CG\n\n* Debugging\n\n* Update\n\n* Update\n\n* Update\n\n* Fix MEDIT reading\n\n* Add scatter functionality\n\n* Restructure\n\n* Rename Mapping to Pullback and InverseMapping to Pushforward\n\n* Test\n\n* It kinda works\n\n* Correct orientations\n\n* Update\n\n* Update\n\n* Switch to arrival form\n\n* Remove scatter\n\n* Manufactured tests\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: cbritopacheco <carlos.brito524@gmail.com>\n\n* Update\n\n* Update\n\n* LevelSetCantilever works again !\n\n* Fix debug build\n\n* Correct sign\n\n* Add guard against race conditions\n\n* Guard polytope transformations\n\n* Revert \"Correct sign\"\n\nThis reverts commit 5aa124aeae7eff758d5af8e7320b3d6383737957.\n\n* Enhance test command with rerun and output options\n\nUpdated test command to include rerun-failed and output-on-failure options.\n\n* Refactor GitHub Actions test workflow\n\nUpdated the GitHub Actions workflow to simplify branch definitions and enhance test execution with detailed logging and rerun capabilities.\n\n* Change test execution to serial and update logs\n\nUpdated the test workflow to run tests serially and adjust logging paths.\n\n* Refactor GitHub Actions test workflow\n\nUpdated test workflow to improve logging and error handling.\n\n* Fix test directory and improve error handling\n\nUpdated test directory path and modified error handling for test execution.\n\n* Update tests\n\n* Instrument failing tests\n\n* Debug CI\n\n* Debug CI\n\n* Debug CI\n\n* Debug CI\n\n* Debug CI\n\n* Sanitize addresses\n\n* Update clang-12 in build\n\n* Debug CI\n\n* Debug CI\n\n* Add rerun step for failed tests in CI workflow\n\nAdded a step to rerun failed tests with verbose output.\n\n* Enable verbose output for rerun failed tests\n\n* Fix CMakeLists.txt so it uses sanitizers\n\n* Debug CI\n\n* Update compiler version from gcc-10 to gcc-11\n\n* Make explicit last face check\n\n* Change test workflow\n\n* CI\n\n* CI\n\n* Update compiler version in Build.yml\n\n* Enable Boost CMake integration in Build.yml\n\n* Remove clang-12 from build matrix in Build.yml\n\n* Add CMAKE_POLICY_DEFAULT_CMP0167 to build config\n\n* Add Boost include and library directories to Build.yml\n\n* Update\n\n* Clean up CMake options in Build.yml\n\nRemoved Boost-related CMake configurations.\n\n* Update sanitizer option in Tests.yml\n\nReplaced 'asan' with 'sanitizer' in the workflow configuration.\n\n* Eigen3 build and also remove decltype\n\n* Add CMake policy version minimum to Build.yml\n\n* add include\n\n* update\n\n* Update\n\n* CI\n\n* CI\n\n* Update\n\n* CI\n\n* Update\n\n* Add asserts\n\n* Memory leak shenanigans\n\n* Update\n\n* Fix TSAN errors\n\n* Remove duplicate code check\n\n* Rework Attribute and Transformation index\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: Copilot <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>",
+          "timestamp": "2025-11-08T17:34:04+01:00",
+          "tree_id": "8906a3c13401ba6fb58c6c95cf43500a4ec65316",
+          "url": "https://github.com/cbritopacheco/rodin/commit/2dd8afaa0ccc67a2bbd76096a5c379b7e08110ae"
+        },
+        "date": 1762619938386,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.3153591902971267,
+            "unit": "ns/iter",
+            "extra": "iterations: 2245454795\ncpu: 0.3152596291745878 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.31234609559209187,
+            "unit": "ns/iter",
+            "extra": "iterations: 2252783918\ncpu: 0.31232773697383964 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.31088495975577624,
+            "unit": "ns/iter",
+            "extra": "iterations: 2251278227\ncpu: 0.3108531209545606 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.31089847694293377,
+            "unit": "ns/iter",
+            "extra": "iterations: 2246949113\ncpu: 0.31086803032552696 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 641.3901953926425,
+            "unit": "ns/iter",
+            "extra": "iterations: 1112171\ncpu: 641.3126488642484 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 127975.215954727,
+            "unit": "ns/iter",
+            "extra": "iterations: 5478\ncpu: 127959.38170865268 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 551076.9836193472,
+            "unit": "ns/iter",
+            "extra": "iterations: 1282\ncpu: 551057.4071762874 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 1091.0262697592862,
+            "unit": "ns/iter",
+            "extra": "iterations: 644315\ncpu: 1090.9487129742433 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 228943.65073649338,
+            "unit": "ns/iter",
+            "extra": "iterations: 3055\ncpu: 228934.37806873996 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 1015785.9417758624,
+            "unit": "ns/iter",
+            "extra": "iterations: 687\ncpu: 1015688.2969432295 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 252811.615939409,
+            "unit": "ns/iter",
+            "extra": "iterations: 2773\ncpu: 252787.38297872368 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 247632.0967974136,
+            "unit": "ns/iter",
+            "extra": "iterations: 2779\ncpu: 247614.35624325337 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 13748.564427528832,
+            "unit": "ns/iter",
+            "extra": "iterations: 50972\ncpu: 13747.054422035619 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 6100748.461538652,
+            "unit": "ns/iter",
+            "extra": "iterations: 117\ncpu: 6099642.564102575 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 110111.89264382298,
+            "unit": "ns/iter",
+            "extra": "iterations: 6362\ncpu: 110100.47154982724 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2083560.7232141923,
+            "unit": "ns/iter",
+            "extra": "iterations: 336\ncpu: 2083403.6874999981 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9141984.519481134,
+            "unit": "ns/iter",
+            "extra": "iterations: 77\ncpu: 9141381.870129874 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 47401676.0833346,
+            "unit": "ns/iter",
+            "extra": "iterations: 12\ncpu: 47393665.00000012 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 302751461.50000864,
+            "unit": "ns/iter",
+            "extra": "iterations: 2\ncpu: 302691462.9999986 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_16x16",
+            "value": 50.2721693391228,
+            "unit": "ns/iter",
+            "extra": "iterations: 13828299\ncpu: 50.267201482988 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_32x32",
+            "value": 50.3806530686313,
+            "unit": "ns/iter",
+            "extra": "iterations: 13471356\ncpu: 50.370834161015516 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_64x64",
+            "value": 50.969683668246276,
+            "unit": "ns/iter",
+            "extra": "iterations: 12167732\ncpu: 50.959217050474244 ns\nthreads: 1"
           }
         ]
       }
