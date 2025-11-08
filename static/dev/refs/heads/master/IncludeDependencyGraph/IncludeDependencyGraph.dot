@@ -432,11 +432,11 @@ strict digraph "" {
 	"Rodin/Geometry/PolytopeTransformationIndex.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=9,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=17,
+		weight=15,
 		width=2];
 	"Rodin/Geometry/Mesh.h" -> "Rodin/Geometry/PolytopeTransformationIndex.h";
 	"Rodin/Variational/P1/P1.h"	[colorscheme=spectral9,
@@ -846,21 +846,21 @@ strict digraph "" {
 	"Rodin/Plot.h"	[colorscheme=spectral9,
 		fillcolor=7,
 		fixedsize=true,
-		fontsize=13,
+		fontsize=14,
 		height=3,
 		shape=circle,
 		style=filled,
-		weight=39,
+		weight=44,
 		width=3];
 	"Rodin/Plot/Plot.h"	[colorscheme=spectral9,
 		fillcolor=7,
 		fixedsize=true,
 		fontsize=13,
-		height=2,
+		height=3,
 		shape=circle,
 		style=filled,
-		weight=38,
-		width=2];
+		weight=43,
+		width=3];
 	"Rodin/Plot.h" -> "Rodin/Plot/Plot.h";
 	"Rodin/Plot/Configuration.h"	[colorscheme=spectral9,
 		fillcolor=9,
@@ -896,11 +896,11 @@ strict digraph "" {
 		fillcolor=7,
 		fixedsize=true,
 		fontsize=13,
-		height=2,
+		height=3,
 		shape=circle,
 		style=filled,
-		weight=38,
-		width=2];
+		weight=41,
+		width=3];
 	"Rodin/Plot/Plot.h" -> "Rodin/Plot/Artist/Figure.h";
 	"Rodin/QF.h"	[colorscheme=spectral9,
 		fillcolor=6,
@@ -1743,7 +1743,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=15,
+		weight=14,
 		width=2];
 	"Rodin/Variational/ShapeFunction.h" -> "Rodin/Variational/Traits.h";
 	"Rodin/Variational/TrialFunction.h" -> "Rodin/Variational/ForwardDecls.h";
@@ -2757,7 +2757,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=21,
+		weight=19,
 		width=2];
 	"Rodin/PETSc.h" -> "Rodin/PETSc/Solver.h";
 	"Rodin/PETSc/Assembly.h"	[colorscheme=spectral9,
@@ -2827,7 +2827,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=20,
+		weight=18,
 		width=2];
 	"Rodin/PETSc/Solver.h" -> "Rodin/PETSc/Solver/CG.h";
 	"Rodin/PETSc/Solver/KSP.h"	[colorscheme=spectral9,
@@ -2837,7 +2837,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=19,
+		weight=20,
 		width=2];
 	"Rodin/PETSc/Solver.h" -> "Rodin/PETSc/Solver/KSP.h";
 	"Rodin/PETSc/Assembly/Sequential.h"	[colorscheme=spectral9,
@@ -3398,31 +3398,31 @@ strict digraph "" {
 	"Rodin/Plot/Backend/Bases/BaseFigure.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=6,
+		fontsize=7,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=5,
+		weight=7,
 		width=2];
 	"Rodin/Plot/Artist/Figure.h" -> "Rodin/Plot/Backend/Bases/BaseFigure.h";
 	"Rodin/Plot/Artist/Figure.hpp"	[colorscheme=spectral9,
 		fillcolor=7,
 		fixedsize=true,
 		fontsize=13,
-		height=2,
+		height=3,
 		shape=circle,
 		style=filled,
-		weight=38,
-		width=2];
+		weight=41,
+		width=3];
 	"Rodin/Plot/Artist/Figure.h" -> "Rodin/Plot/Artist/Figure.hpp";
 	"Rodin/Plot/Backend/Event.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=6,
+		fontsize=7,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=4,
+		weight=6,
 		width=2];
 	"Rodin/Plot/Backend/Event/MouseEvent.h"	[colorscheme=spectral9,
 		fillcolor=8,
@@ -3561,13 +3561,13 @@ strict digraph "" {
 	"Rodin/Plot/Backend/Bases/BaseFigure.h" -> "Rodin/Plot/Common.h";
 	"Rodin/Plot/Backend/Bases/BaseFigure.h" -> "Rodin/Plot/Backend/Event.h";
 	"Rodin/Plot/Backend/Bases/BaseAxes.h"	[colorscheme=spectral9,
-		fillcolor=8,
+		fillcolor=7,
 		fixedsize=true,
 		fontsize=10,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=23,
+		weight=25,
 		width=2];
 	"Rodin/Plot/Backend/Bases/BaseAxes.h" -> "Rodin/Types.h";
 	"Rodin/Plot/Backend/Bases/BaseAxes.h" -> "Rodin/Plot/ForwardDecls.h";
@@ -3616,12 +3616,12 @@ strict digraph "" {
 	"Rodin/Plot/Artist/Axes/Axes2D.h"	[colorscheme=spectral9,
 		fillcolor=7,
 		fixedsize=true,
-		fontsize=12,
-		height=2,
+		fontsize=13,
+		height=3,
 		shape=circle,
 		style=filled,
-		weight=36,
-		width=2];
+		weight=41,
+		width=3];
 	"Rodin/Plot/Artist/Figure.hpp" -> "Rodin/Plot/Artist/Axes/Axes2D.h";
 	"Rodin/Plot/Artist/Axes/Axes2D.h" -> "Rodin/Plot/ForwardDecls.h";
 	"Rodin/Plot/Artist/Axes/Axes2D.h" -> "Rodin/Plot/Backend/Renderer/Camera2D.h";
@@ -3630,12 +3630,12 @@ strict digraph "" {
 	"Rodin/Plot/Artist/Axes/Axes2D.hpp"	[colorscheme=spectral9,
 		fillcolor=7,
 		fixedsize=true,
-		fontsize=12,
-		height=2,
+		fontsize=13,
+		height=3,
 		shape=circle,
 		style=filled,
-		weight=37,
-		width=2];
+		weight=41,
+		width=3];
 	"Rodin/Plot/Artist/Axes/Axes2D.h" -> "Rodin/Plot/Artist/Axes/Axes2D.hpp";
 	"Rodin/Plot/Artist/Axis/Axis.h"	[colorscheme=spectral9,
 		fillcolor=9,
@@ -4143,11 +4143,11 @@ strict digraph "" {
 	"Rodin/Geometry/IdentityTransformation.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=9,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=17,
+		weight=15,
 		width=2];
 	"Rodin/Geometry/IdentityTransformation.h" -> "Rodin/Geometry/PolytopeTransformation.h";
 	"Rodin/Geometry/PolytopeCount.h"	[colorscheme=spectral9,
@@ -4630,7 +4630,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=21,
+		weight=19,
 		width=2];
 	"Rodin/Serialization/Export.h" -> "Rodin/Geometry/IsoparametricTransformation.h";
 	"Rodin/Serialization/Export.h" -> "Rodin/Variational/P1/P1Element.h";
