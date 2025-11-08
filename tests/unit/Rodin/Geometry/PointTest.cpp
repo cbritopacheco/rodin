@@ -62,8 +62,6 @@ TEST(Geometry_Point, BasicConstruction_3D_Tetrahedron)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   // Get the tetrahedron polytope
   auto it = mesh.getCell();
   Polytope tet = *it;
@@ -94,7 +92,6 @@ TEST(Geometry_Point, CopyConstruction)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -123,8 +120,6 @@ TEST(Geometry_Point, MoveConstruction)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -159,8 +154,6 @@ TEST(Geometry_Point, CoordinateAccess_XYZ)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tet = *it;
 
@@ -194,8 +187,6 @@ TEST(Geometry_Point, CoordinateAccess_AsVector)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tri = *it;
 
@@ -224,8 +215,6 @@ TEST(Geometry_Point, GetPhysicalCoordinates)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tri = *it;
 
@@ -253,8 +242,6 @@ TEST(Geometry_Point, GetReferenceCoordinates)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -285,8 +272,6 @@ TEST(Geometry_Point, NormCalculations)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -319,8 +304,6 @@ TEST(Geometry_Point, Norm_3D)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tet = *it;
 
@@ -348,8 +331,6 @@ TEST(Geometry_Point, GetJacobian_2D)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -382,8 +363,6 @@ TEST(Geometry_Point, GetJacobianDeterminant_2D)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tri = *it;
 
@@ -409,8 +388,6 @@ TEST(Geometry_Point, GetJacobianInverse_2D)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -450,8 +427,6 @@ TEST(Geometry_Point, GetDistortion_2D)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tri = *it;
 
@@ -479,8 +454,6 @@ TEST(Geometry_Point, LexicographicalComparison)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -510,8 +483,6 @@ TEST(Geometry_Point, SetPolytope)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -544,8 +515,6 @@ TEST(Geometry_Point, AdditionWithVector)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tri = *it;
 
@@ -575,8 +544,6 @@ TEST(Geometry_Point, SubtractionWithVector)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -608,8 +575,6 @@ TEST(Geometry_Point, AdditionOfPoints)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tri = *it;
 
@@ -639,8 +604,6 @@ TEST(Geometry_Point, SubtractionOfPoints)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tri = *it;
 
@@ -669,8 +632,6 @@ TEST(Geometry_Point, ScalarMultiplication)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -706,8 +667,6 @@ TEST(Geometry_Point, EdgeCase_PointAtVertex)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tri = *it;
 
@@ -733,8 +692,6 @@ TEST(Geometry_Point, EdgeCase_PointOnEdge)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -765,8 +722,6 @@ TEST(Geometry_Point, 3D_JacobianDeterminant)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tet = *it;
 
@@ -793,8 +748,6 @@ TEST(Geometry_Point, 3D_JacobianInverse)
   builder.polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tet = *it;
@@ -838,8 +791,6 @@ TEST(Geometry_Point, ConstructionWithPhysicalCoordinates)
 
   mesh = builder.finalize();
 
-  mesh.getConnectivity().compute();
-
   auto it = mesh.getCell();
   Polytope tri = *it;
 
@@ -870,8 +821,6 @@ TEST(Geometry_Point, GetPolytope_ValidReference)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
-  mesh.getConnectivity().compute();
 
   auto it = mesh.getCell();
   Polytope tri = *it;
