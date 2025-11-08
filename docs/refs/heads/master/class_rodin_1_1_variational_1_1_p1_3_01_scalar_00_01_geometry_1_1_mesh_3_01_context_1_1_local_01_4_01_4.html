@@ -159,14 +159,14 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_inverse_mapping.html" class="m-doc">InverseMapping</a>
+              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a>
             </dt>
-            <dd>Inverse mapping for the scalar/complex <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> space.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> for the scalar/complex <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_mapping.html" class="m-doc">Mapping</a>
+              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pushforward.html" class="m-doc">Pushforward</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_mapping.html" class="m-doc">Mapping</a> for the scalar/complex <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> space.</dd>
+            <dd>Inverse <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> for the scalar/complex <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> space.</dd>
             <dt id="a56808c86c123d70341266761d0bc71d4">
               using <a href="#a56808c86c123d70341266761d0bc71d4" class="m-doc-self">RangeType</a> = ScalarType
             </dt>
@@ -254,16 +254,16 @@ $ (d, i) $
 </svg>-polytope.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#acfc978dd65f6e66298819c2ef82b1d49" class="m-doc">getMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">auto <a href="#aa4c6deb5102cf131a1c5ede7203ac033" class="m-doc">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               Callable&amp;&amp; v) const -&gt; auto</span>
             </dt>
-            <dd>Returns the mapping of the function from the physical element to the reference element.</dd>
+            <dd>Returns the <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> of the function from the physical element to the reference element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a25302ff50f3216062b99c28eb7f1425d" class="m-doc">getInverseMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">auto <a href="#a2bb691029e9f76c7cca068caf5272566" class="m-doc">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               Callable&amp;&amp; v) const -&gt; auto</span>
             </dt>
-            <dd>Returns the inverse mapping of the function from the physical element to the reference element.</dd>
+            <dd>Returns the inverse <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> of the function from the physical element to the reference element.</dd>
           </dl>
         </section>
         <section>
@@ -436,16 +436,16 @@ $ (d, i) $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="acfc978dd65f6e66298819c2ef82b1d49"><div>
+          <section class="m-doc-details" id="aa4c6deb5102cf131a1c5ede7203ac033"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
                 template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P1&lt;Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfc978dd65f6e66298819c2ef82b1d49" class="m-doc-self">getMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P1&lt;Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa4c6deb5102cf131a1c5ede7203ac033" class="m-doc-self">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               Callable&amp;&amp; v) const</span></span>
             </h3>
-            <p>Returns the mapping of the function from the physical element to the reference element.</p>
+            <p>Returns the <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> of the function from the physical element to the reference element.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -477,7 +477,7 @@ $ \tau \in \mathcal{T}_h $
 <use x='21.030739' y='0' xlink:href='#eq7-g0-84'/>
 <use x='27.542053' y='1.793263' xlink:href='#eq7-g1-104'/>
 </g>
-</svg> in the mesh, the finite element space is generated by the bijective mapping:</p><div class="m-math"><svg style="width: 10.311em; height: 1.245em;" viewBox="144.776394 -11.955168 98.990225 11.955168">
+</svg> in the mesh, the finite element space is generated by the bijective <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a>:</p><div class="m-math"><svg style="width: 10.311em; height: 1.245em;" viewBox="144.776394 -11.955168 98.990225 11.955168">
 <title>
 \[
  \psi_\tau : \mathbb{P}_1(\tau) \rightarrow \mathbb{P}_1(R)
@@ -554,16 +554,16 @@ $ R $
 </g>
 </svg>.</p>
           </div></section>
-          <section class="m-doc-details" id="a25302ff50f3216062b99c28eb7f1425d"><div>
+          <section class="m-doc-details" id="a2bb691029e9f76c7cca068caf5272566"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
                 template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P1&lt;Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a25302ff50f3216062b99c28eb7f1425d" class="m-doc-self">getInverseMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P1&lt;Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bb691029e9f76c7cca068caf5272566" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               Callable&amp;&amp; v) const</span></span>
             </h3>
-            <p>Returns the inverse mapping of the function from the physical element to the reference element.</p>
+            <p>Returns the inverse <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> of the function from the physical element to the reference element.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
