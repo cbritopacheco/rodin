@@ -12,8 +12,7 @@
 // New containers: boost::unordered::unordered_map (namespace boost::unordered)
 #include <boost/unordered/unordered_map.hpp>
 
-// Since Boost 1.84, serialization for the *new* containers lives here:
-#if BOOST_VERSION >= 108400
+#if BOOST_VERSION < 108400
   #include <boost/serialization/boost_unordered_map.hpp>
 #endif
 
