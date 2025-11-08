@@ -2,6 +2,7 @@
 #define RODIN_SERIALIZATION_UNORDEREDMAP_H
 
 #include <boost/unordered_map.hpp>
+#include <boost/serialization/version.hpp>
 #include <boost/serialization/unordered_map.hpp>
 
 #if BOOST_VERSION < 108400
