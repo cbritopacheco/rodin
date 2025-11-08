@@ -69,3 +69,11 @@ target_link_libraries(RodinGeometryPolytopeTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryPolytopeTest)
+
+add_executable(RodinGeometryPointTest PointTest.cpp)
+target_link_libraries(RodinGeometryPointTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryPointTest)
