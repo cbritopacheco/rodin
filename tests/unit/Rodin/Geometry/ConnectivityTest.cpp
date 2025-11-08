@@ -218,4 +218,93 @@ namespace Rodin::Tests::Unit
     connectivity.compute(d, 0);
     EXPECT_EQ(connectivity.getCount(0), 9);
   }
+
+  // Additional comprehensive tests
+
+  TEST(Rodin_Geometry_Connectivity, Quadrilateral_2D)
+  {
+    constexpr const size_t meshDim = 2;
+    constexpr const size_t nodes = 4;
+
+    Connectivity<Context::Local> connectivity;
+    connectivity.initialize(meshDim)
+                .nodes(nodes)
+                .polytope(Polytope::Type::Quadrilateral, {0, 1, 3, 2});
+
+    EXPECT_EQ(connectivity.getMeshDimension(), 2);
+
+    size_t d = 2;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 1);
+    EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Type::Quadrilateral);
+
+    d = 1;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 4);
+
+    d = 0;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 4);
+  }
+
+  TEST(Rodin_Geometry_Connectivity, Tetrahedron_3D)
+  {
+    constexpr const size_t meshDim = 3;
+    constexpr const size_t nodes = 4;
+
+    Connectivity<Context::Local> connectivity;
+    connectivity.initialize(meshDim)
+                .nodes(nodes)
+                .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3});
+
+    EXPECT_EQ(connectivity.getMeshDimension(), 3);
+
+    size_t d = 3;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 1);
+    EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Type::Tetrahedron);
+
+    d = 2;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 4);
+
+    d = 1;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 6);
+
+    d = 0;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 4);
+  }
+
+  TEST(Rodin_Geometry_Connectivity, EmptyMesh)
+  {
+    Connectivity<Context::Local> connectivity;
+    connectivity.initialize(2).nodes(0);
+    
+    size_t d = 2;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 0);
+  }
+
+  TEST(Rodin_Geometry_Connectivity, MultipleComputeCalls)
+  {
+    constexpr const size_t meshDim = 2;
+    constexpr const size_t nodes = 3;
+
+    Connectivity<Context::Local> connectivity;
+    connectivity.initialize(meshDim)
+                .nodes(nodes)
+                .polytope(Polytope::Type::Triangle, {0, 1, 2});
+
+    size_t d = 2;
+    connectivity.compute(d, 0);
+    size_t count1 = connectivity.getCount(d);
+    
+    // Compute again, should be idempotent
+    connectivity.compute(d, 0);
+    size_t count2 = connectivity.getCount(d);
+    
+    EXPECT_EQ(count1, count2);
+  }
 }
