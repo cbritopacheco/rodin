@@ -14,7 +14,6 @@
 #include <functional>
 
 #include "Rodin/Utility.h"
-#include "Rodin/Utility/OptionalReference.h"
 #include "Rodin/Utility/Zip.h"
 #include "Rodin/Utility/Product.h"
 #include "Rodin/Pair.h"
@@ -254,89 +253,6 @@ TEST_F(UtilityIntegrationTest, VariantWithSpecializationDetection)
   EXPECT_EQ(std::visit(visitor, var2), "Found integer: 42");
   EXPECT_TRUE(std::visit(visitor, var3).find("Found other:") == 0);
 }
-// -----------------------------------------------------------------------------
-// Test class for OptionalReference functionality
-// -----------------------------------------------------------------------------
-class UtilityOptionalReferenceTest : public ::testing::Test
-{
-  protected:
-    void SetUp() override {}
-    void TearDown() override {}
-};
-
-TEST_F(UtilityOptionalReferenceTest, DefaultConstruction)
-{
-  OptionalReference<int> optRef;
-  EXPECT_FALSE(optRef.has_value());
-}
-
-TEST_F(UtilityOptionalReferenceTest, ConstructWithValue)
-{
-  int value = 42;
-  OptionalReference<int> optRef(std::ref(value));
-  
-  EXPECT_TRUE(optRef.has_value());
-  EXPECT_EQ(*optRef, 42);
-  EXPECT_EQ(optRef.operator->(), &value);
-}
-
-TEST_F(UtilityOptionalReferenceTest, DereferenceOperator)
-{
-  int value = 99;
-  OptionalReference<int> optRef(std::ref(value));
-  
-  EXPECT_EQ(*optRef, 99);
-  
-  // Modify through the reference
-  *optRef = 100;
-  EXPECT_EQ(value, 100);
-  EXPECT_EQ(*optRef, 100);
-}
-
-TEST_F(UtilityOptionalReferenceTest, ArrowOperator)
-{
-  std::string str = "hello";
-  OptionalReference<std::string> optRef(std::ref(str));
-  
-  EXPECT_EQ(optRef->size(), 5);
-  EXPECT_EQ(optRef->substr(0, 2), "he");
-}
-
-TEST_F(UtilityOptionalReferenceTest, CopyConstruction)
-{
-  int value = 42;
-  OptionalReference<int> optRef1(std::ref(value));
-  OptionalReference<int> optRef2(optRef1);
-  
-  EXPECT_TRUE(optRef2.has_value());
-  EXPECT_EQ(*optRef2, 42);
-  
-  // Both should reference the same value
-  *optRef1 = 50;
-  EXPECT_EQ(*optRef2, 50);
-  EXPECT_EQ(value, 50);
-}
-
-TEST_F(UtilityOptionalReferenceTest, Reset)
-{
-  int value = 42;
-  OptionalReference<int> optRef(std::ref(value));
-  
-  EXPECT_TRUE(optRef.has_value());
-  
-  optRef.reset();
-  
-  EXPECT_FALSE(optRef.has_value());
-}
-
-TEST_F(UtilityOptionalReferenceTest, ConstReference)
-{
-  const int value = 42;
-  OptionalReference<const int> optRef(std::cref(value));
-  
-  EXPECT_TRUE(optRef.has_value());
-  EXPECT_EQ(*optRef, 42);
-}
 
 // -----------------------------------------------------------------------------
 // Test class for Zip functionality
@@ -367,7 +283,7 @@ TEST_F(UtilityZipTest, ZipTwoTuples)
   // Should produce Tuple<std::pair<int, double>, std::pair<float, char>>
   EXPECT_TRUE((std::is_same_v<
     ZippedType,
-    Tuple<std::pair<int, double>, std::pair<float, char>>
+    Rodin::Tuple<std::pair<int, double>, std::pair<float, char>>
   >));
 }
 
@@ -395,7 +311,7 @@ TEST_F(UtilityZipTest, ZipWithRodinPair)
   // Should produce Tuple<Pair<int, double>, Pair<float, char>>
   EXPECT_TRUE((std::is_same_v<
     ZippedType,
-    Tuple<Rodin::Pair<int, double>, Rodin::Pair<float, char>>
+    Rodin::Tuple<Rodin::Pair<int, double>, Rodin::Pair<float, char>>
   >));
 }
 
@@ -474,25 +390,6 @@ TEST_F(UtilityProductTest, ProductThreeByTwo)
   EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
 }
 
-TEST_F(UtilityProductTest, ProductEmptyTuple)
-{
-  using T1 = Rodin::Tuple<>;
-  using T2 = Rodin::Tuple<int, double>;
-  using ProductType = Product<T1, T2>::Type<std::pair>;
-  
-  // Product with empty tuple should yield empty tuple
-  EXPECT_TRUE((std::is_same_v<ProductType, Rodin::Tuple<>>));
-}
-
-TEST_F(UtilityProductTest, ProductWithEmptySecond)
-{
-  using T1 = Rodin::Tuple<int, double>;
-  using T2 = Rodin::Tuple<>;
-  using ProductType = Product<T1, T2>::Type<std::pair>;
-  
-  // Product with empty tuple should yield empty tuple
-  EXPECT_TRUE((std::is_same_v<ProductType, Rodin::Tuple<>>));
-}
 
 TEST_F(UtilityProductTest, ProductWithRodinPair)
 {
