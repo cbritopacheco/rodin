@@ -19,13 +19,16 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        compiler: [gcc-10]
+        compiler: [gcc-14]
         build_type: ['Debug', 'Release']
         multithreaded: ['ON', 'OFF']
+        asan: ['ON', 'OFF']
+        ubsan: ['ON', 'OFF']
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
-      CTEST_PARALLEL_LEVEL: 2
+      CTEST_PARALLEL_LEVEL: 1
+      OMP_NUM_THREADS: 2
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
@@ -40,6 +43,7 @@ jobs:
         run: >-
           sudo apt-get update && sudo apt-get install -y
           lcov
+          libeigen3-dev
           libomp-dev
           libgl1-mesa-dev
           libsdl2-dev
@@ -54,6 +58,8 @@ jobs:
           cmake
           -B ${{github.workspace}}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_USE_ASAN=${{ matrix.asan }}
+          -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
@@ -68,6 +74,9 @@ jobs:
         run: cmake --build ${{github.workspace}}/build
       - name: Run tests
         run: ctest --test-dir ${{github.workspace}}/build/tests
+      - name: Rerun failed tests (verbose)
+        if: failure()
+        run: ctest --test-dir ${{github.workspace}}/build/tests --rerun-failed -V --output-on-failure
       - name: Make coverage
         run: cmake --build ${{github.workspace}}/build --target RodinCoverage
       - name: Upload coverage to Codecov
@@ -75,4 +84,3 @@ jobs:
         with:
           files: ${{github.workspace}}/build/RodinCoverage.info
           token: ${{ secrets.CODECOV_TOKEN }}
-

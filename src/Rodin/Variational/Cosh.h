@@ -54,7 +54,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return Math::cosh(m_operand->getValue(p));
       }

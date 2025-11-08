@@ -21,10 +21,3 @@ target_link_libraries(MeshOptimization
   PUBLIC
   Rodin::Geometry
   Rodin::External::MMG)
-
-add_executable(DomainDistancing DomainDistancing.cpp)
-target_link_libraries(DomainDistancing
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Variational
-  Rodin::External::MMG)

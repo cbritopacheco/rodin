@@ -7,6 +7,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "MEDIT.h"
+#include "Rodin/Alert/Warning.h"
 
 namespace Rodin::IO
 {
@@ -67,6 +68,8 @@ namespace Rodin::IO
           << "Failed to parse dimension of mesh." << Alert::Raise;
       }
     }
+
+    m_build.initialize(m_spaceDimension);
   }
 
   void MeshLoader<FileFormat::MEDIT, Context::Local>::readEntities(std::istream& is)
@@ -81,13 +84,13 @@ namespace Rodin::IO
         continue;
       auto kw = MEDIT::ParseKeyword()(line.begin(), line.end());
       if (!kw)
-        continue;
-      auto entity = MEDIT::toKeyword(kw->c_str());
-      if (!entity)
       {
-        Alert::Warning() << "Ignoring unrecognized keyword: " << *kw << Alert::Raise;
+        Alert::Warning() << "Ignoring unrecognized entity: " << line << Alert::Raise;
         continue;
       }
+      auto entity = MEDIT::toKeyword(kw->c_str());
+      if (!entity)
+        continue;
       if (*entity == MEDIT::Keyword::End)
         break;
 
@@ -122,8 +125,7 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             m_build.vertex(std::move(data->vertex));
-            if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-              m_build.attribute({ 0, i }, data->attribute);
+            m_build.attribute({ 0, i }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -144,8 +146,7 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             m_build.polytope(Geometry::Polytope::Type::Segment, std::move(data->vertices));
-            if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-              m_build.attribute({ 1, i }, data->attribute);
+            m_build.attribute({ 1, i }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -166,8 +167,7 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             m_build.polytope(Geometry::Polytope::Type::Triangle, std::move(data->vertices));
-            if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-              m_build.attribute({ 2, i }, data->attribute);
+            m_build.attribute({ 2, i }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -187,10 +187,8 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
-            std::swap(data->vertices(2), data->vertices(3));
             m_build.polytope(Geometry::Polytope::Type::Quadrilateral, std::move(data->vertices));
-            if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-              m_build.attribute({ 2, i }, data->attribute);
+            m_build.attribute({ 2, i }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -211,8 +209,7 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             m_build.polytope(Geometry::Polytope::Type::Wedge, std::move(data->vertices));
-            if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-              m_build.attribute({ 3, i }, data->attribute);
+            m_build.attribute({ 3, i }, data->attribute);
           }
           continue;
         }
@@ -233,8 +230,7 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             m_build.polytope(Geometry::Polytope::Type::Tetrahedron, std::move(data->vertices));
-            if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-              m_build.attribute({ 3, i }, data->attribute);
+            m_build.attribute({ 3, i }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -249,9 +245,8 @@ namespace Rodin::IO
   {
     readVersion(is);
     readDimension(is);
-    m_build.initialize(m_spaceDimension);
     readEntities(is);
-    getObject() = m_build.finalize();
+    this->getObject() = m_build.finalize();
   }
 
   void MeshPrinter<FileFormat::MEDIT, Context::Local>::printDimension(std::ostream& os)
@@ -356,7 +351,7 @@ namespace Rodin::IO
                   case Geometry::Polytope::Type::Quadrilateral:
                   {
                     os << vertices(0) + 1 << ' ' << vertices(1) + 1 << ' '
-                       << vertices(3) + 1 << ' ' << vertices(2) + 1;
+                       << vertices(2) + 1 << ' ' << vertices(3) + 1;
                     break;
                   }
                   case Geometry::Polytope::Type::Wedge:

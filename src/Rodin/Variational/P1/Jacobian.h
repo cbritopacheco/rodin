@@ -89,9 +89,10 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const auto rc = tracePolytope->getTransformation().inverse(pc);
+            Math::SpatialPoint rc;
+            tracePolytope->getTransformation().inverse(rc, pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-            interpolate(out, np);
+            this->interpolate(out, np);
             return;
           }
           else
@@ -104,7 +105,7 @@ namespace Rodin::Variational
               Alert::MemberFunctionException(*this, __func__)
                 << "No trace domain provided: "
                 << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
-                << ". Grad at an interface with no trace domain is undefined."
+                << ". Jacobian at an interface with no trace domain is undefined."
                 << Alert::Raise;
             }
             else
@@ -114,9 +115,10 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const auto rc = tracePolytope->getTransformation().inverse(pc);
+                  Math::SpatialPoint rc;
+                  tracePolytope->getTransformation().inverse(rc, pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-                  interpolate(out, np);
+                  this->interpolate(out, np);
                   return;
                 }
               }

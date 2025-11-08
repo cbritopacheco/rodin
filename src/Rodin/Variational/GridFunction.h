@@ -138,19 +138,19 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) x() const
+      auto x() const
       {
         return m_ref.get().x();
       }
 
       constexpr
-      decltype(auto) y() const
+      auto y() const
       {
         return m_ref.get().y();
       }
 
       constexpr
-      decltype(auto) z() const
+      auto z() const
       {
         return m_ref.get().z();
       }
@@ -257,7 +257,14 @@ namespace Rodin::Variational
         return *this;
       }
 
-      GridFunctionBase& operator=(const GridFunctionBase&) = delete;
+      GridFunctionBase& operator=(const GridFunctionBase& other)
+      {
+        if (this != &other)
+        {
+          m_fes = other.m_fes;
+        }
+        return *this;
+      }
 
       constexpr
       auto x() const
@@ -724,6 +731,17 @@ namespace Rodin::Variational
       GridFunction& operator=(GridFunction&& other)
       {
         Parent::operator=(std::move(other));
+        m_data = std::move(other.m_data);
+        return *this;
+      }
+
+      GridFunction& operator=(const GridFunction& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_data = other.m_data;
+        }
         return *this;
       }
 
@@ -775,7 +793,7 @@ namespace Rodin::Variational
       {
         auto& data = this->getData();
         data = data.array() / rhs;
-        return static_cast<GridFunction&>(*this);
+        return *this;
       }
 
       GridFunction& operator+=(const GridFunction& rhs)
@@ -820,7 +838,7 @@ namespace Rodin::Variational
         const size_t count = fe.getCount();
         for (Index local = 0; local < count; ++local)
         {
-          const auto mapping = fes.getInverseMapping({ d, i }, fe.getBasis(local));
+          const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
           const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
           if (local == 0)
             res = k; // Initializes the result (resizes)
@@ -878,7 +896,7 @@ namespace Rodin::Variational
         const auto& fes = this->getFiniteElementSpace();
         const auto& [d, i] = p;
         const auto& fe = fes.getFiniteElement(d, i);
-        const auto mapping = fes.getMapping({ d, i }, fn);
+        const auto mapping = fes.getPullback({ d, i }, fn);
         for (Index local = 0; local < fe.getCount(); local++)
         {
           const Index global = fes.getGlobalIndex({ d, i }, local);

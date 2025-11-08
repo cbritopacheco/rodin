@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "MFEM.h"
+#include "Rodin/Geometry/AttributeIndex.h"
 
 namespace Rodin::IO::MFEM
 {
@@ -69,7 +70,7 @@ namespace Rodin::IO
     Geometry::Connectivity<Context::Local> connectivity;
     connectivity.initialize(m_dimension);
 
-    Geometry::PolytopeIndexed<Geometry::Attribute> attrs;
+    Geometry::AttributeIndex attrs;
     attrs.initialize(m_dimension);
 
     std::string line;
@@ -108,7 +109,7 @@ namespace Rodin::IO
               << " count on line " << m_currentLineNumber << "."
               << Alert::Raise;
           }
-          attrs.reserve(m_dimension - 1, *count);
+          attrs.resize(m_dimension - 1, *count);
           for (size_t i = 0; i < *count; i++)
           {
             MFEM::getline(is, line, m_currentLineNumber);
@@ -123,7 +124,7 @@ namespace Rodin::IO
             if (g->geometry == Geometry::Polytope::Type::Quadrilateral)
               std::swap(g->vertices(2), g->vertices(3));
             connectivity.polytope(g->geometry, std::move(g->vertices));
-            attrs.track({ m_dimension - 1, i }, g->attribute);
+            attrs.set({ m_dimension - 1, i }, g->attribute);
           }
           continue;
         }
@@ -138,7 +139,7 @@ namespace Rodin::IO
               << " count on line " << m_currentLineNumber << "."
               << Alert::Raise;
           }
-          attrs.reserve(m_dimension, *count);
+          attrs.resize(m_dimension, *count);
           for (size_t i = 0; i < *count; i++)
           {
             MFEM::getline(is, line, m_currentLineNumber);
@@ -150,10 +151,8 @@ namespace Rodin::IO
                 << m_currentLineNumber << "."
                 << Alert::Raise;
             }
-            if (g->geometry == Geometry::Polytope::Type::Quadrilateral)
-              std::swap(g->vertices(2), g->vertices(3));
             connectivity.polytope(g->geometry, std::move(g->vertices));
-            attrs.track({ m_dimension, i }, g->attribute);
+            attrs.set({ m_dimension, i }, g->attribute);
           }
           continue;
         }
@@ -168,6 +167,7 @@ namespace Rodin::IO
               << " count on line " << m_currentLineNumber << "."
               << Alert::Raise;
           }
+          attrs.resize(0, *count);
           connectivity.nodes(*count);
           MFEM::getline(is, line, m_currentLineNumber);
           auto vdim = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
@@ -232,7 +232,7 @@ namespace Rodin::IO
     readHeader(is);
     readDimension(is);
     readMesh(is);
-    getObject() = m_build.finalize();
+    this->getObject() = m_build.finalize();
   }
 
   void MeshPrinter<FileFormat::MFEM, Context::Local>::print(std::ostream &os)
@@ -289,7 +289,7 @@ namespace Rodin::IO
         }
         case Geometry::Polytope::Type::Quadrilateral:
         {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(3) << ' ' << vertices(2);
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
           break;
         }
         case Geometry::Polytope::Type::Tetrahedron:
@@ -345,7 +345,7 @@ namespace Rodin::IO
         }
         case Geometry::Polytope::Type::Quadrilateral:
         {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(3) << ' ' << vertices(2);
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
           break;
         }
         case Geometry::Polytope::Type::Wedge:

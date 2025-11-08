@@ -95,7 +95,7 @@ int main(int, char**)
 <table>
   <tr>
     <td align="center">
-      <img src="doc/readme/poisson.png" alt="poisson.png" style="width:50%;">
+      <img src="doc/README/poisson.png" alt="poisson.png" style="width:50%;">
     </td>
   </tr>
   <tr>

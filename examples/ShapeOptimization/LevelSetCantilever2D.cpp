@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/Models/Advection/Lagrangian.h"
+#include "Rodin/Models/Distance/Eikonal.h"
+#include "Rodin/Variational/ForwardDecls.h"
 #include <Rodin/Solver.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
@@ -20,7 +24,7 @@ using namespace Rodin::Variational;
 using FES = VectorP1<Mesh<Context::Local>>;
 
 // Define interior and exterior for level set discretization
-static constexpr Attribute Interior = 1, Exterior = 2;
+static constexpr Attribute interior = 1, exterior = 2;
 
 // Define boundary attributes
 static constexpr Attribute Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
@@ -35,8 +39,8 @@ static constexpr double hmax = 0.05;
 static constexpr double hmin = 0.1 * hmax;
 static constexpr double hausd = 0.5 * hmin;
 static constexpr double ell = 0.4;
-const constexpr Real dt = 4 * (hmax - hmin);
-static constexpr double alpha = dt;
+const constexpr Real dt = 0.5 * (hmax - hmin);
+static constexpr double alpha = 0.1;
 
 // Compliance
 template <class Data>
@@ -61,7 +65,7 @@ int main(int, char**)
 
   MMG::Optimizer().setHMax(hmax).setHMin(hmin).optimize(th);
 
-  th.save("Omega0.mesh");
+  th.save("Omega0.mesh", IO::FileFormat::MEDIT);
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Optimization loop
@@ -70,11 +74,12 @@ int main(int, char**)
   for (size_t i = 0; i < maxIt; i++)
   {
     th.getConnectivity().compute(1, 2);
+    th.getConnectivity().compute(0, 0);
 
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
-    SubMesh trimmed = th.trim(Exterior);
+    SubMesh trimmed = th.trim(exterior);
     trimmed.save("Omega.mesh");
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
@@ -101,11 +106,11 @@ int main(int, char**)
 
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
-    jac.traceOf(Interior);
+    jac.traceOf(interior);
     auto e = 0.5 * (jac + jac.T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = FaceNormal(th);
-    n.traceOf(Interior);
+    n.traceOf(interior);
 
     GridFunction miaow(shInt);
     miaow = Dot(Ae, e);
@@ -113,28 +118,31 @@ int main(int, char**)
 
     // Hilbert extension-regularization procedure
     TrialFunction g(vh);
-    TestFunction  w(vh);
+    TestFunction w(vh);
     Problem hilbert(g, w);
     hilbert = Integral(alpha * alpha * Jacobian(g), Jacobian(w))
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     Solver::CG(hilbert).solve();
+
     auto& dJ = g.getSolution();
     dJ.save("dJ.gf");
     vh.getMesh().save("dJ.mesh");
 
     // Update objective
-    double objective = compliance(u.getSolution()) + ell * th.getArea(Interior);
+    double objective = compliance(u.getSolution()) + ell * th.getArea(interior);
     obj.push_back(objective);
     fObj << objective << "\n";
     fObj.flush();
     Alert::Info() << "   | Objective: " << obj.back() << Alert::Raise;
     Alert::Info() << "   | Distancing domain." << Alert::Raise;
 
-    P1 dh(th);
-    auto dist = MMG::Distancer(dh).setInteriorDomain(Interior)
-                                  .distance(th);
+    GridFunction dist(sh);
+    Models::Distance::Eikonal(dist).setInterior(interior)
+                                                 .setInterface(Gamma)
+                                                 .solve()
+                                                 .sign();
 
     // Advect the level set function
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
@@ -142,13 +150,19 @@ int main(int, char**)
     norm = Frobenius(dJ);
     dJ /= norm.max();
 
-    MMG::Advect(dist, dJ).step(dt);
+    TrialFunction advect(sh);
+    TestFunction test(sh);
+
+    Models::Advection::Lagrangian(advect, test, dist, dJ).step(dt);
+
+    th.save("advect.mesh");
+    advect.getSolution().save("advect.gf");
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
 
-    th = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
-                                    .split(Exterior, {Interior, Exterior})
+    th = MMG::ImplicitDomainMesher().split(interior, {interior, exterior})
+                                    .split(exterior, {interior, exterior})
                                     .setRMC(1e-6)
                                     .setHMax(hmax)
                                     .setHMin(hmin)
@@ -156,7 +170,7 @@ int main(int, char**)
                                     .setAngleDetection(false)
                                     .setBoundaryReference(Gamma)
                                     .setBaseReferences(GammaD)
-                                    .discretize(dist);
+                                    .discretize(advect.getSolution());
 
     MMG::Optimizer().setHMax(hmax)
                     .setHMin(hmin)

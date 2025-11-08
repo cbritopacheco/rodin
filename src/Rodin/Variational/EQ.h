@@ -61,7 +61,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return this->getLHS().getValue(p) == this->getRHS().getValue(p);
       }

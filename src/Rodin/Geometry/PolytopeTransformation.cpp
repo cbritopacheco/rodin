@@ -9,19 +9,27 @@
 
 namespace Rodin::Geometry
 {
-  void PolytopeTransformation::inverse(const Math::SpatialVector<Real>& pc, Math::SpatialVector<Real>& rc) const
+  void PolytopeTransformation::inverse(Math::SpatialVector<Real>& rc, const Math::SpatialVector<Real>& pc) const
   {
+    static thread_local Math::SpatialVector<Real> s_zero;
+    static thread_local Math::SpatialVector<Real> s_pc0;
+    static thread_local Math::SpatialMatrix<Real> s_jac;
+
     const size_t pdim = getPhysicalDimension();
     const size_t rdim = getReferenceDimension();
+
     assert(pc.size() >= 0);
     assert(static_cast<size_t>(pc.size()) == pdim);
-    // All elements have 0 as reference coordinate
-    Math::SpatialVector<Real> rc0 = Math::SpatialVector<Real>::Zero(rdim);
-    Math::SpatialVector<Real> pc0 = transform(rc0);
-    Math::SpatialMatrix<Real> jac = jacobian(rc0);
+
+    s_zero.resize(rdim);
+    s_zero.setZero();
+
+    this->transform(s_pc0, s_zero);
+    this->jacobian(s_jac, s_zero);
+
     if (rdim == pdim)
-      rc = rc0 + jac.partialPivLu().solve(pc - pc0);
+      rc = s_jac.partialPivLu().solve(pc - s_pc0);
     else
-      rc = rc0 + (jac.transpose() * jac).partialPivLu().solve(jac.transpose() * (pc - pc0));
+      rc = (s_jac.transpose() * s_jac).partialPivLu().solve(s_jac.transpose() * (pc - s_pc0));
   }
 }

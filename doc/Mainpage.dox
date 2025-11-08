@@ -2,7 +2,6 @@
   @mainpage Rodin
 * *Modern C++20 finite element method and shape optimization framework.*
 
-
   @section what-is-rodin What is Rodin?
 
   Rodin is a lightweight and modular finite element framework which provides
@@ -10,6 +9,8 @@
   shape and topology optimization algorithms. These functionalities range from
   refining and remeshing the underlying shape, to providing elegant mechanisms
   to specify and solve variational problems.
+
+  @image html Images/Logo_Inverse.png width=210px
 
   It is named after the French sculptor [Auguste
   Rodin](https://en.wikipedia.org/wiki/Auguste_Rodin), considered the founder

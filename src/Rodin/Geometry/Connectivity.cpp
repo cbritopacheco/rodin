@@ -76,7 +76,9 @@ namespace Rodin::Geometry
     if (inserted)
     {
       m_index[d].left.push_back(&it->first);
-      m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
+      auto& v = m_connectivity[d][0].emplace_back();
+      for (const Index& j : it->first)
+        v.push_back(j);
       m_geometry[d].push_back(t);
       m_count[d] += 1;
       m_gcount[t] += 1;
@@ -96,7 +98,9 @@ namespace Rodin::Geometry
     if (inserted)
     {
       m_index[d].left.push_back(&it->first);
-      m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
+      auto& v = m_connectivity[d][0].emplace_back();
+      for (const Index& j : it->first)
+        v.push_back(j);
       m_geometry[d].push_back(t);
       m_count[d] += 1;
       m_gcount[t] += 1;
@@ -128,7 +132,7 @@ namespace Rodin::Geometry
     return m_connectivity[d][dp];
   }
 
-  const IndexSet& Connectivity<Context::Local>::getIncidence(
+  const IndexVector& Connectivity<Context::Local>::getIncidence(
       const std::pair<size_t, size_t> p, Index idx) const
   {
     const auto& [d, dp] = p;
@@ -240,11 +244,11 @@ namespace Rodin::Geometry
   {
     static thread_local std::vector<SubPolytope> subpolytopes;
 
-    IndexSet s;
+    std::vector<Index> s;
     const size_t D = getMeshDimension();
     assert(d > 0);
     assert(d < D);
-    getSubPolytopes(subpolytopes, i, d);
+    this->getSubPolytopes(subpolytopes, i, d);
     for (auto& [geometry, vertices] : subpolytopes)
     {
       auto insert = m_index[d].right.insert({ std::move(vertices), m_count[d] });
@@ -253,13 +257,16 @@ namespace Rodin::Geometry
       const auto& [arr, idx] = *it;
       if (inserted)
       {
-        m_connectivity[d][0].emplace_back().insert_unique(arr.begin(), arr.end());
+        auto& v = m_connectivity[d][0].emplace_back();
+        v.reserve(arr.size());
+        for (const Index& j : arr)
+          v.push_back(j);
         m_index[d].left.push_back(&it->first);
         m_geometry[d].push_back(geometry);
       }
       m_count[d] += inserted && !(d == D || d == 0);
       m_gcount[geometry] += inserted && !(d == D || d == 0);
-      s.insert(idx);
+      s.push_back(idx);
     }
     m_connectivity[D][d].push_back(std::move(s));
     return *this;
@@ -268,15 +275,61 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::transpose(size_t d, size_t dp)
   {
+    static thread_local std::vector<size_t> s_mark;
+    static thread_local size_t s_epoch = 1;
+
     assert(d < dp);
     assert(d < m_connectivity.size());
-    assert(dp < m_connectivity[d].size());
-    m_connectivity[d][dp].resize(m_count[d]);
-    for (Index j = 0; j < m_count[dp]; j++)
+    assert(dp < m_connectivity.size());
+    assert(d < m_connectivity[d].size());
+    assert(dp < m_connectivity[dp].size());
+
+    const Index n_dst = m_count[d];
+    const Index n_src = m_count[dp];
+
+    m_connectivity[d][dp].assign(n_dst, {});
+
+    std::vector<size_t> counts(n_dst, 0);
+    for (Index j = 0; j < n_src; ++j)
     {
       for (Index i : m_connectivity[dp][d][j])
-        m_connectivity[d][dp][i].insert(j);
+        ++counts[i];
     }
+
+    for (Index i = 0; i < n_dst; ++i)
+      m_connectivity[d][dp][i].reserve(counts[i]);
+
+    for (Index j = 0; j < n_src; ++j)
+    {
+      for (Index i : m_connectivity[dp][d][j])
+        m_connectivity[d][dp][i].push_back(j);
+    }
+
+    if (s_mark.size() < static_cast<size_t>(n_src))
+      s_mark.assign(n_src, 0);
+
+    for (Index i = 0; i < n_dst; ++i)
+    {
+      if (++s_epoch == 0)
+      {
+        std::fill(s_mark.begin(), s_mark.end(), 0);
+        s_epoch = 1;
+      }
+
+      auto& v = m_connectivity[d][dp][i];
+      size_t write = 0;
+      for (size_t r = 0; r < v.size(); ++r)
+      {
+        const Index j = v[r];
+        if (s_mark[j] != s_epoch)
+        {
+            s_mark[j] = s_epoch;
+            v[write++] = j;
+        }
+      }
+      v.resize(write);
+    }
+
     m_dirty[d][dp] = false;
     return *this;
   }
@@ -284,28 +337,91 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::intersection(size_t d, size_t dp, size_t dpp)
   {
+    static thread_local std::vector<size_t> s_markJ;
+    static thread_local size_t s_epochJ = 1;
+
+    static thread_local std::vector<size_t> s_markV;
+    static thread_local size_t s_epochV = 1;
+
     assert(d >= dp);
-    m_connectivity[d][dp].resize(m_count[d]);
-    for (Index i = 0; i < m_count[d]; i++)
+    assert(d < m_connectivity.size());
+    assert(dp < m_connectivity.size());
+    assert(dpp < m_connectivity.size());
+    assert(d < m_connectivity[d].size());
+    assert(dp < m_connectivity[dp].size());
+    assert(dpp < m_connectivity[dpp].size());
+    assert(0 < m_connectivity[d].size());
+    assert(0 < m_connectivity[dp].size());
+
+    const Index n_d  = m_count[d];
+    const Index n_dp = m_count[dp];
+    const Index n_0  = m_count[0];
+
+    m_connectivity[d][dp].assign(n_d, {});
+
+    if (s_markJ.size() < static_cast<size_t>(n_dp))
+      s_markJ.assign(n_dp, 0);
+
+    if (s_markV.size() < static_cast<size_t>(n_0))
+      s_markV.assign(n_0, 0);
+
+    for (Index i = 0; i < n_d; ++i)
     {
-      assert(i < m_connectivity[d][dpp].size());
-      for (Index k : m_connectivity[d][dpp][i])
+      auto& out = m_connectivity[d][dp][i];
+
+      ++s_epochJ;
+      if (s_epochJ == 0)
       {
-        assert(k < m_connectivity[dpp][dp].size());
-        for (Index j : m_connectivity[dpp][dp][k])
+        std::fill(s_markJ.begin(), s_markJ.end(), 0);
+        s_epochJ = 1;
+      }
+
+      ++s_epochV;
+      if (s_epochV == 0)
+      {
+        std::fill(s_markV.begin(), s_markV.end(), 0);
+        s_epochV = 1;
+      }
+
+      // mark vertices of i
+      const auto& d0i = m_connectivity[d][0][i];
+      for (Index v : d0i)
+        s_markV[v] = s_epochV;
+
+      // traverse via dpp
+      const auto& idpp = m_connectivity[d][dpp][i];
+      for (Index k : idpp)
+      {
+        const auto& kdps = m_connectivity[dpp][dp][k];
+        for (Index j : kdps)
         {
-          assert(i < m_connectivity[d][0].size());
-          assert(j < m_connectivity[dp][0].size());
-          const auto& d0i = m_connectivity[d][0][i];
-          const auto& d0j = m_connectivity[dp][0][j];
-          if ((d == dp && i != j) ||
-              (d > dp && std::includes(d0i.begin(), d0i.end(), d0j.begin(), d0j.end())))
+          if (s_markJ[j] == s_epochJ)
+            continue;  // already added for this i
+          if (d == dp && i == j)
+            continue;  // exclude self
+
+          bool subset = true;
+          if (d > dp)
           {
-            m_connectivity[d][dp][i].insert(j);
+            const auto& d0j = m_connectivity[dp][0][j];
+            for (Index v : d0j)
+            {
+              if (s_markV[v] != s_epochV)
+              {
+                subset = false;
+                break;
+              }
+            }
+          }
+          if (d == dp || subset)
+          {
+            s_markJ[j] = s_epochJ;
+            out.push_back(j); // preserve discovery order
           }
         }
       }
     }
+
     m_dirty[d][dp] = false;
     return *this;
   }
@@ -320,9 +436,9 @@ namespace Rodin::Geometry
       case Polytope::Type::Point:
       {
         assert(dim == 0);
-        assert(p.size()  == 0);
+        assert(p.size() == 1);
         out.resize(1);
-        out[0] = { Polytope::Type::Point, { { i } } };
+        out[0] = { Polytope::Type::Point, { { p(0) } } };
         return;
       }
       case Polytope::Type::Segment:
@@ -332,7 +448,6 @@ namespace Rodin::Geometry
         if (dim == 0)
         {
           out.resize(2);
-          out[0].geometry = Polytope::Type::Point;
           out[0] = { Polytope::Type::Point, { { p(0) } } };
           out[1] = { Polytope::Type::Point, { { p(1) } } };
         }
@@ -394,9 +509,9 @@ namespace Rodin::Geometry
         {
           out.resize(4);
           out[0] = { Polytope::Type::Segment, { { p(0), p(1) } } };
-          out[1] = { Polytope::Type::Segment, { { p(1), p(3) } } };
-          out[2] = { Polytope::Type::Segment, { { p(3), p(2) } } };
-          out[3] = { Polytope::Type::Segment, { { p(2), p(0) } } };
+          out[1] = { Polytope::Type::Segment, { { p(1), p(2) } } };
+          out[2] = { Polytope::Type::Segment, { { p(2), p(3) } } };
+          out[3] = { Polytope::Type::Segment, { { p(3), p(0) } } };
         }
         else if (dim == 2)
         {
@@ -427,18 +542,18 @@ namespace Rodin::Geometry
           out.resize(6);
           out[0] = { Polytope::Type::Segment, { { p(0), p(1) } } };
           out[1] = { Polytope::Type::Segment, { { p(0), p(2) } } };
-          out[2] = { Polytope::Type::Segment, { { p(1), p(2) } } };
-          out[3] = { Polytope::Type::Segment, { { p(1), p(3) } } };
-          out[4] = { Polytope::Type::Segment, { { p(2), p(3) } } };
-          out[5] = { Polytope::Type::Segment, { { p(3), p(0) } } };
+          out[2] = { Polytope::Type::Segment, { { p(0), p(3) } } };
+          out[3] = { Polytope::Type::Segment, { { p(1), p(2) } } };
+          out[4] = { Polytope::Type::Segment, { { p(1), p(3) } } };
+          out[5] = { Polytope::Type::Segment, { { p(2), p(3) } } };
         }
         else if (dim == 2)
         {
           out.resize(4);
-          out[0] = { Polytope::Type::Triangle, { { p(0), p(1), p(3) } } };
-          out[1] = { Polytope::Type::Triangle, { { p(0), p(1), p(2) } } };
-          out[2] = { Polytope::Type::Triangle, { { p(0), p(2), p(3) } } };
-          out[3] = { Polytope::Type::Triangle, { { p(1), p(2), p(3) } } };
+          out[0] = { Polytope::Type::Triangle, {{ p(0), p(1), p(3) }} };
+          out[1] = { Polytope::Type::Triangle, {{ p(0), p(2), p(1) }} };
+          out[2] = { Polytope::Type::Triangle, {{ p(0), p(3), p(2) }} };
+          out[3] = { Polytope::Type::Triangle, {{ p(1), p(2), p(3) }} };
         }
         else if (dim == 3)
         {
@@ -469,24 +584,24 @@ namespace Rodin::Geometry
         else if (dim == 1)
         {
           out.resize(9);
-          out[0] = { Polytope::Type::Segment, { { p(0), p(1) } } };
-          out[1] = { Polytope::Type::Segment, { { p(0), p(2) } } };
-          out[2] = { Polytope::Type::Segment, { { p(0), p(3) } } };
-          out[3] = { Polytope::Type::Segment, { { p(1), p(2) } } };
-          out[4] = { Polytope::Type::Segment, { { p(1), p(4) } } };
-          out[5] = { Polytope::Type::Segment, { { p(2), p(5) } } };
-          out[6] = { Polytope::Type::Segment, { { p(3), p(4) } } };
-          out[7] = { Polytope::Type::Segment, { { p(3), p(5) } } };
-          out[8] = { Polytope::Type::Segment, { { p(4), p(5) } } };
+          out[0] = { Polytope::Type::Segment, {{ p(0), p(1) }} };
+          out[1] = { Polytope::Type::Segment, {{ p(1), p(2) }} };
+          out[2] = { Polytope::Type::Segment, {{ p(2), p(0) }} };
+          out[3] = { Polytope::Type::Segment, {{ p(3), p(4) }} };
+          out[4] = { Polytope::Type::Segment, {{ p(4), p(5) }} };
+          out[5] = { Polytope::Type::Segment, {{ p(5), p(3) }} };
+          out[6] = { Polytope::Type::Segment, {{ p(0), p(3) }} };
+          out[7] = { Polytope::Type::Segment, {{ p(1), p(4) }} };
+          out[8] = { Polytope::Type::Segment, {{ p(2), p(5) }} };
         }
         else if (dim == 2)
         {
           out.resize(5);
-          out[0] = { Polytope::Type::Triangle, { { p(0), p(1), p(2) } } };
-          out[1] = { Polytope::Type::Quadrilateral, { { p(0), p(1), p(3), p(4) } } };
-          out[2] = { Polytope::Type::Quadrilateral, { { p(1), p(2), p(4), p(5) } } };
-          out[3] = { Polytope::Type::Quadrilateral, { { p(2), p(0), p(5), p(3) } } };
-          out[4] = { Polytope::Type::Triangle, { { p(3), p(4), p(5) } } };
+          out[0] = { Polytope::Type::Triangle,     { { p(0), p(2), p(1) } } };
+          out[1] = { Polytope::Type::Quadrilateral,{ { p(0), p(1), p(4), p(3) } } };
+          out[2] = { Polytope::Type::Quadrilateral,{ { p(1), p(2), p(5), p(4) } } };
+          out[3] = { Polytope::Type::Quadrilateral,{ { p(2), p(0), p(3), p(5) } } };
+          out[4] = { Polytope::Type::Triangle,     { { p(3), p(4), p(5) } } };
         }
         else if (dim == 3)
         {

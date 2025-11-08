@@ -80,7 +80,7 @@ namespace Rodin::Variational
           m_d(std::move(other.m_d))
       {}
 
-      decltype(auto) getValue(const Geometry::Point&) const
+      auto getValue(const Geometry::Point&) const
       {
         return VectorType::Zero(m_d);
       }

@@ -97,7 +97,8 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const auto rc = tracePolytope->getTransformation().inverse(pc);
+            Math::SpatialPoint rc;
+            tracePolytope->getTransformation().inverse(rc, pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
@@ -122,7 +123,8 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const auto rc = tracePolytope->getTransformation().inverse(pc);
+                  Math::SpatialPoint rc;
+                  tracePolytope->getTransformation().inverse(rc, pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;

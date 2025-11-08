@@ -7,18 +7,14 @@
 #include <boost/spirit/home/x3.hpp>
 
 #include "Rodin/Types.h"
-#include "Rodin/Alert.h"
-#include "Rodin/Context.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Geometry/Types.h"
 
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
-#include "MeshLoader.h"
 #include "MeshPrinter.h"
-#include "GridFunctionLoader.h"
 #include "GridFunctionPrinter.h"
+#include "Rodin/Utility/IsSpecialization.h"
 
 namespace Rodin::IO::EnSight6
 {
@@ -333,63 +329,38 @@ namespace Rodin::IO
         const auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        const size_t vdim = fes.getVectorDimension();
         os << std::setprecision(5) << std::scientific;
         size_t count = 0;
-        if constexpr (Utility::IsSpecialization<FES, Variational::P1>::Value)
+        using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+        RangeType v;
+        for (auto it = mesh.getVertex(); !it.end(); ++it)
         {
-          const auto& data = gf.getData();
-          while (count < fes.getSize())
+          const Geometry::Point p(
+            *it,
+            Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+            it->getCoordinates()
+          );
+
+          v = gf(p);
+
+          if constexpr (std::is_same_v<RangeType, Real>)
           {
-            Real x0 = 0.0, x1 = 0.0, x2 = 0.0;
-            if (vdim > 0) x0 = data[count];
-            if (vdim > 1) x1 = data[count + 1];
-            if (vdim > 2) x2 = data[count + 2];
-
-            // Always write three components: X, Y, Z
-            os << std::setw(12) << x0
-               << std::setw(12) << x1
-               << std::setw(12) << x2;
-
-            count += 3;
-            // os << std::setw(12) << data[i];
-            if (count % 6 == 0)
+            os << std::setw(12) << v;
+            if (++count % 6 == 0)
               os << '\n';
           }
-        }
-        else
-        {
-          using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
-          RangeType v;
-          for (auto it = mesh.getVertex(); !it.end(); ++it)
+          else if constexpr (Utility::IsSpecialization<RangeType, Math::Vector>::Value)
           {
-            const Geometry::Point p(
-              *it,
-              Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
-              it->getCoordinates()
-            );
-
-            v = gf(p);
-
-            if constexpr (std::is_same_v<RangeType, Real>)
+            for (size_t j = 0; j < v.size(); ++j)
             {
-              os << std::setw(12) << v;
+              os << std::setw(12) << v[j];
               if (++count % 6 == 0)
                 os << '\n';
             }
-            else if constexpr (Utility::IsSpecialization<RangeType, Math::Vector>::Value)
-            {
-              for (size_t j = 0; j < v.size(); ++j)
-              {
-                os << std::setw(12) << v[j];
-                if (++count % 6 == 0)
-                  os << '\n';
-              }
-            }
-            else
-            {
-              assert(false);
-            }
+          }
+          else
+          {
+            assert(false);
           }
         }
 

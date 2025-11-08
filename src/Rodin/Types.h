@@ -92,6 +92,10 @@ namespace Rodin
   /// @ingroup RodinTypes
   using IndexSet = FlatSet<Index>;
 
+  /// Standard vector of indices.
+  /// @ingroup RodinTypes
+  using IndexVector = std::vector<Index>;
+
   /// Standard map of indices to arbitrary types.
   /// @ingroup RodinTypes
   template <class T>

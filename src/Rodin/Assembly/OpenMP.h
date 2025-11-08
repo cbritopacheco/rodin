@@ -1,5 +1,5 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2025.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
@@ -179,56 +179,62 @@ namespace Rodin::Assembly
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
-        const size_t capacity = input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
+        const size_t capacity =
+          input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
         res.clear();
         res.reserve(capacity);
+
         const auto& mesh = input.getTestFES().getMesh();
+
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
           OpenMPIteration seq(mesh, bfi.getRegion());
           const Index d = seq.getDimension();
           const Index count = seq.getCount();
-          const int tc = m_threadCount.has_value() ? m_threadCount.value() : omp_get_max_threads();
+          const int tc =
+            m_threadCount.has_value() ? static_cast<int>(m_threadCount.value()) : omp_get_max_threads();
+
+          std::vector<OperatorType> chunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
           {
-            // one integrator + triplet buffer per thread
+            const int tid = omp_get_thread_num();
             std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(bfi.copy());
             OperatorType local;
-            local.reserve(capacity / tc);
+            local.reserve(capacity / std::max(1, tc));
 
-#pragma omp for nowait
+#pragma omp for
             for (Index i = 0; i < count; ++i)
             {
-              if (seq.filter(i))
-              {
-                if (attrs.empty() || attrs.count(mesh.getAttribute(d, i)))
-                {
-                  auto it = seq.getIterator(i);
-                  integrator->setPolytope(*it);
+              if (!seq.filter(i)) continue;
+              if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, i))) continue;
 
-                  const auto& rows = input.getTestFES().getDOFs(d, i);
-                  const auto& cols = input.getTrialFES().getDOFs(d, i);
-                  for (size_t r = 0; r < rows.size(); ++r)
-                  {
-                    for (size_t c = 0; c < cols.size(); ++c)
-                    {
-                      const ScalarType s = Math::conj(integrator->integrate(c, r));
-                      if (s != ScalarType(0))
-                        local.emplace_back(rows(r), cols(c), s);
-                    }
-                  }
+              auto it = seq.getIterator(i);
+              integrator->setPolytope(*it);
+
+              const auto& rows = input.getTestFES().getDOFs(d, i);
+              const auto& cols = input.getTrialFES().getDOFs(d, i);
+              for (size_t r = 0; r < rows.size(); ++r)
+                for (size_t c = 0; c < cols.size(); ++c)
+                {
+                  const ScalarType s = Math::conj(integrator->integrate(c, r));
+                  if (s != ScalarType(0))
+                    local.emplace_back(rows(r), cols(c), s);
                 }
-              }
             }
 
-#pragma omp critical
+            chunks[static_cast<size_t>(tid)] = std::move(local);
+
+#pragma omp barrier
+#pragma omp single
             {
-              res.insert(
-                res.end(),
-                std::make_move_iterator(local.begin()),
-                std::make_move_iterator(local.end()));
+              for (auto& v : chunks)
+              {
+                res.insert(res.end(),
+                           std::make_move_iterator(v.begin()),
+                           std::make_move_iterator(v.end()));
+              }
             }
           } // end parallel
         }
@@ -414,8 +420,10 @@ namespace Rodin::Assembly
         res.setZero();
 
         const auto& mesh = input.getTestFES().getMesh();
-        const int tc = m_threadCount.has_value() ? m_threadCount.value() : omp_get_max_threads();
+        const int tc =
+          m_threadCount.has_value() ? static_cast<int>(m_threadCount.value()) : omp_get_max_threads();
 
+        // --- Local contributions ---
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
@@ -423,20 +431,21 @@ namespace Rodin::Assembly
           const Index d     = seq.getDimension();
           const Index count = seq.getCount();
 
+          std::vector<OperatorType> chunks(static_cast<size_t>(tc));
+
 #pragma omp parallel num_threads(tc)
           {
+            const int tid = omp_get_thread_num();
             auto lbfi = std::unique_ptr<LocalBilinearFormIntegratorBaseType>(bfi.copy());
             OperatorType local;
             local.resize(res.rows(), res.cols());
             local.setZero();
 
-#pragma omp for nowait
+#pragma omp for
             for (Index i = 0; i < count; ++i)
             {
               if (!seq.filter(i)) continue;
-              if (!attrs.empty() &&
-                  !attrs.count(mesh.getAttribute(d, i)))
-                continue;
+              if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, i))) continue;
 
               auto it = seq.getIterator(i);
               lbfi->setPolytope(*it);
@@ -448,11 +457,14 @@ namespace Rodin::Assembly
                   local(rows(r), cols(c)) += Math::conj(lbfi->integrate(c, r));
             }
 
-#pragma omp critical
+            chunks[static_cast<size_t>(tid)] = std::move(local);
+
+#pragma omp barrier
+#pragma omp single
             {
-              res += local;
+              for (auto& M : chunks) res += M;
             }
-          }
+          } // end parallel
         }
 
         // --- Global (coupling) contributions ---
@@ -461,48 +473,50 @@ namespace Rodin::Assembly
           const auto& testAttrs  = bfi.getTestAttributes();
           const auto& trialAttrs = bfi.getTrialAttributes();
           OpenMPIteration testseq(mesh, bfi.getTestRegion());
-          const Index d = testseq.getDimension();
+          const Index d     = testseq.getDimension();
           const Index count = testseq.getCount();
+
+          std::vector<OperatorType> chunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
           {
+            const int tid = omp_get_thread_num();
             auto gbfi = std::unique_ptr<GlobalBilinearFormIntegratorBaseType>(bfi.copy());
             OperatorType local;
             local.resize(res.rows(), res.cols());
             local.setZero();
 
-#pragma omp for nowait
+#pragma omp for
             for (Index i = 0; i < count; ++i)
             {
-              if (testseq.filter(i))
+              if (!testseq.filter(i)) continue;
+              if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(d, i))) continue;
+
+              auto teIt = testseq.getIterator(i);
+              SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
+
+              for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
-                if (testAttrs.empty() || testAttrs.count(mesh.getAttribute(d, i)))
-                {
-                  auto teIt = testseq.getIterator(i);
-                  SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
+                if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute())) continue;
 
-                  for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
-                  {
-                    if (trialAttrs.empty() || trialAttrs.count(trIt->getAttribute()))
-                    {
-                      gbfi->setPolytope(*trIt, *teIt);
+                gbfi->setPolytope(*trIt, *teIt);
 
-                      const auto& rows = input.getTestFES().getDOFs(d, teIt->getIndex());
-                      const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
-                      for (size_t r = 0; r < rows.size(); ++r)
-                        for (size_t c = 0; c < cols.size(); ++c)
-                          local(rows(r), cols(c)) += Math::conj(gbfi->integrate(c, r));
-                    }
-                  }
-                }
+                const auto& rows = input.getTestFES().getDOFs(d, teIt->getIndex());
+                const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
+                for (size_t r = 0; r < rows.size(); ++r)
+                  for (size_t c = 0; c < cols.size(); ++c)
+                    local(rows(r), cols(c)) += Math::conj(gbfi->integrate(c, r));
               }
             }
 
-#pragma omp critical
+            chunks[static_cast<size_t>(tid)] = std::move(local);
+
+#pragma omp barrier
+#pragma omp single
             {
-              res += local;
+              for (auto& M : chunks) res += M;
             }
-          }
+          } // end parallel
         }
       }
 
@@ -565,7 +579,8 @@ namespace Rodin::Assembly
         res.setZero();
 
         const auto& mesh = input.getFES().getMesh();
-        const int tc = static_cast<int>(getThreadCount());
+        const int tc =
+          m_threadCount.has_value() ? static_cast<int>(m_threadCount.value()) : omp_get_max_threads();
 
         for (auto& lfi : input.getLFIs())
         {
@@ -574,36 +589,39 @@ namespace Rodin::Assembly
           const Index d = seq.getDimension();
           const Index count = seq.getCount();
 
+          std::vector<VectorType> chunks(static_cast<size_t>(tc));
+
 #pragma omp parallel num_threads(tc)
           {
+            const int tid = omp_get_thread_num();
             auto integrator =
               std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>>(lfi.copy());
             VectorType local;
             local.resize(res.size());
             local.setZero();
 
-#pragma omp for nowait
+#pragma omp for
             for (Index i = 0; i < count; ++i)
             {
-              if (seq.filter(i))
-              {
-                if (attrs.empty() || attrs.count(mesh.getAttribute(d, i)))
-                {
-                  auto it = seq.getIterator(i);
-                  integrator->setPolytope(*it);
+              if (!seq.filter(i)) continue;
+              if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, i))) continue;
 
-                  const auto& dofs = input.getFES().getDOFs(d, i);
-                  for (size_t k = 0; k < dofs.size(); ++k)
-                    local(dofs(k)) += integrator->integrate(k);
-                }
-              }
+              auto it = seq.getIterator(i);
+              integrator->setPolytope(*it);
+
+              const auto& dofs = input.getFES().getDOFs(d, i);
+              for (size_t k = 0; k < dofs.size(); ++k)
+                local(dofs(k)) += integrator->integrate(k);
             }
 
-#pragma omp critical
+            chunks[static_cast<size_t>(tid)] = std::move(local);
+
+#pragma omp barrier
+#pragma omp single
             {
-              res += local;
+              for (auto& v : chunks) res += v;
             }
-          }
+          } // end parallel
         }
       }
 
@@ -673,40 +691,44 @@ namespace Rodin::Assembly
         const auto& mesh = fes.getMesh();
         const size_t faceDim = mesh.getDimension() - 1;
         const size_t faceCount = mesh.getFaceCount();
-        const size_t threadCount =
-          m_threadCount.has_value() ? m_threadCount.value() : omp_get_max_threads();
+        const int tc =
+          m_threadCount.has_value() ? static_cast<int>(m_threadCount.value()) : omp_get_max_threads();
+
         res.clear();
+        std::vector<IndexMap<Scalar>> chunks(static_cast<size_t>(tc));
 
-#pragma omp parallel num_threads(threadCount)
+#pragma omp parallel num_threads(tc)
         {
-          IndexMap<Scalar> partial;
+          const int tid = omp_get_thread_num();
+          IndexMap<Scalar> local;
 
-#pragma omp for nowait
+#pragma omp for
           for (Index i = 0; i < faceCount; ++i)
           {
-            if (mesh.isBoundary(i))
+            if (!mesh.isBoundary(i)) continue;
+            if (!essBdr.empty() && !essBdr.count(mesh.getAttribute(faceDim, i))) continue;
+
+            const auto& fe = fes.getFiniteElement(faceDim, i);
+            const auto& mapping = fes.getPullback({ faceDim, i }, value);
+            for (Index k = 0; k < fe.getCount(); ++k)
             {
-              if (essBdr.size() == 0 || essBdr.count(mesh.getAttribute(faceDim, i)))
-              {
-                const auto& fe = fes.getFiniteElement(faceDim, i);
-                const auto& mapping =
-                  fes.getMapping({ faceDim, i }, value);
-                for (Index local = 0; local < fe.getCount(); local++)
-                {
-                  const Index global = fes.getGlobalIndex({ faceDim, i }, local);
-                  auto find = partial.find(global);
-                  if (find == partial.end())
-                    partial.insert(find, std::pair{ global, fe.getLinearForm(local)(mapping) });
-                }
-              }
+              const Index g = fes.getGlobalIndex({ faceDim, i }, k);
+              auto it = local.find(g);
+              if (it == local.end())
+                local.insert(it, std::pair{ g, fe.getLinearForm(k)(mapping) });
             }
           }
 
-#pragma omp critical
+          chunks[static_cast<size_t>(tid)] = std::move(local);
+
+#pragma omp barrier
+#pragma omp single
           {
-            res.insert(boost::container::ordered_unique_range, partial.begin(), partial.end());
+            // ordered merge guarded by implicit single barrier
+            for (auto& partial : chunks)
+              res.insert(boost::container::ordered_unique_range, partial.begin(), partial.end());
           }
-        }
+        } // end parallel
       }
 
       size_t getThreadCount() const noexcept
@@ -731,5 +753,3 @@ namespace Rodin::Assembly
 }
 
 #endif
-
-

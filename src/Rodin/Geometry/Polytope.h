@@ -13,6 +13,7 @@
 #include "Rodin/Configure.h"
 
 #include "Rodin/Array.h"
+#include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
 
 #include "ForwardDecls.h"
@@ -29,24 +30,6 @@ namespace Rodin::Geometry
    * from vertices (0D) to cells (highest dimension). Polytopes are the building
    * blocks of mesh topology and provide the geometric foundation for finite
    * element computations.
-   *
-   * ## Mathematical Foundation
-   * In finite element analysis, polytopes represent:
-   * - **Vertices** (0D): Points @f$ p \in \mathbb{R}^d @f$
-   * - **Edges** (1D): Line segments connecting vertices
-   * - **Faces** (2D): Triangular or quadrilateral surfaces  
-   * - **Cells** (3D): Tetrahedral, hexahedral, or other volumetric elements
-   *
-   * ## Supported Element Types
-   * - **Simplicial elements**: Point, Segment, Triangle, Tetrahedron
-   * - **Tensor-product elements**: Quadrilateral, Hexahedron
-   * - **Mixed elements**: Wedge (prismatic) elements
-   *
-   * ## Key Features
-   * - **Type classification**: Automatic detection of simplex vs tensor-product geometry
-   * - **Dimension queries**: Topological and geometric dimension access
-   * - **Connectivity**: Support for incidence relations between polytopes
-   * - **Reference mappings**: Transformations between reference and physical coordinates
    */
   class Polytope
   {
@@ -61,147 +44,45 @@ namespace Rodin::Geometry
       enum class Type
       {
         Point,          ///< 0D vertex element
-        Segment,        ///< 1D line element  
-        Triangle,       ///< 2D triangular element (simplex)
-        Quadrilateral,  ///< 2D quadrilateral element (tensor-product)
-        Tetrahedron,    ///< 3D tetrahedral element (simplex)
-        Wedge           ///< 3D prismatic element (mixed)
+        Segment,        ///< 1D line element
+        Triangle,       ///< 2D triangular element
+        Quadrilateral,  ///< 2D quadrilateral element
+        Tetrahedron,    ///< 3D tetrahedral element
+        Wedge           ///< 3D prismatic element
+      };
+
+      struct Project
+      {
+        public:
+          Project(Type g);
+          void cell(Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+          void boundary(Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+          void face(size_t local, Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+          void vertex(size_t local, Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+        private:
+          const Type m_g;
       };
 
       struct Traits
       {
         public:
-          constexpr Traits(Type g)
-            : m_g(g)
-          {}
-
-          constexpr
-          bool isSimplex()
+          struct HalfSpace
           {
-            switch (m_g)
-            {
-              case Type::Point:
-              case Type::Segment:
-              case Type::Triangle:
-              case Type::Tetrahedron:
-                return true;
-              case Type::Quadrilateral:
-              case Type::Wedge:
-                return false;
-            }
-            assert(false);
-            return false;
-          }
+            Math::Matrix<Real> matrix;
+            Math::Vector<Real> vector;
+          };
 
-          constexpr
-          size_t getDimension()
-          {
-            switch (m_g)
-            {
-              case Type::Point:
-                return 0;
-              case Type::Segment:
-                return 1;
-              case Type::Triangle:
-              case Type::Quadrilateral:
-                return 2;
-              case Type::Tetrahedron:
-              case Type::Wedge:
-                return 3;
-            }
-            assert(false);
-            return 0;
-          }
+          Traits(Type g);
 
-          constexpr
-          size_t getVertexCount()
-          {
-            switch (m_g)
-            {
-              case Type::Point:
-                return 1;
-              case Type::Segment:
-                return 2;
-              case Type::Triangle:
-                return 3;
-              case Type::Quadrilateral:
-              case Type::Tetrahedron:
-                return 4;
-              case Type::Wedge:
-                return 6;
-            }
-            assert(false);
-            return 0;
-          }
+          bool isSimplex() const;
 
-          const Math::SpatialPoint& getVertex(size_t i) const
-          {
-            switch (m_g)
-            {
-              case Type::Point:
-              {
-                static thread_local const Math::SpatialPoint s_node{{ 0 }};
-                return s_node;
-              }
-              case Type::Segment:
-              {
-                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
-                {
-                  Math::SpatialPoint{{ 0 }},
-                  Math::SpatialPoint{{ 1 }}
-                };
-                return s_nodes[i];
-              }
-              case Type::Triangle:
-              {
-                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
-                {
-                  Math::SpatialPoint{{ 0, 0 }},
-                  Math::SpatialPoint{{ 1, 0 }},
-                  Math::SpatialPoint{{ 0, 1 }}
-                };
-                return s_nodes[i];
-              }
-              case Type::Quadrilateral:
-              {
-                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
-                {
-                  Math::SpatialPoint{{ 0, 0 }},
-                  Math::SpatialPoint{{ 1, 0 }},
-                  Math::SpatialPoint{{ 0, 1 }},
-                  Math::SpatialPoint{{ 1, 1 }}
-                };
-                return s_nodes[i];
-              }
-              case Type::Tetrahedron:
-              {
-                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
-                {
-                  Math::SpatialPoint{{ 0, 0, 0 }},
-                  Math::SpatialPoint{{ 1, 0, 0 }},
-                  Math::SpatialPoint{{ 0, 1, 0 }},
-                  Math::SpatialPoint{{ 0, 0, 1 }}
-                };
-                return s_nodes[i];
-              }
-              case Type::Wedge:
-              {
-                static thread_local const std::vector<Math::SpatialPoint> s_nodes =
-                {
-                  Math::SpatialPoint{{ 0, 0, 0 }},
-                  Math::SpatialPoint{{ 1, 0, 0 }},
-                  Math::SpatialPoint{{ 0, 1, 0 }},
-                  Math::SpatialPoint{{ 0, 0, 1 }},
-                  Math::SpatialPoint{{ 1, 0, 1 }},
-                  Math::SpatialPoint{{ 0, 1, 1 }}
-                };
-                return s_nodes[i];
-              }
-            }
-            assert(false);
-            static thread_local const Math::SpatialPoint s_null;
-            return s_null;
-          }
+          size_t getDimension() const;
+
+          size_t getVertexCount() const;
+
+          const Math::SpatialPoint& getVertex(size_t i) const;
+
+          const HalfSpace& getHalfSpace() const;
 
         private:
           const Type m_g;

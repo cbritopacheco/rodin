@@ -230,3 +230,11 @@ target_link_libraries(RodinVariationalTangentTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalTangentTest)
 
+add_executable(RodinVariationalFlowTest FlowTest.cpp)
+target_link_libraries(RodinVariationalFlowTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalFlowTest)
