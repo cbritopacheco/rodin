@@ -15,17 +15,17 @@ using namespace Rodin::Geometry;
 
 TEST(Geometry_Point, BasicConstruction_2D_Triangle)
 {
-  // Create a simple 2D triangular mesh
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));  // v0
-  mesh.insert(Vertex({1.0, 0.0}));  // v1
-  mesh.insert(Vertex({0.0, 1.0}));  // v2
-
-  mesh.insert(Triangle({0, 1, 2}));  // triangle
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -47,18 +47,18 @@ TEST(Geometry_Point, BasicConstruction_2D_Triangle)
 
 TEST(Geometry_Point, BasicConstruction_3D_Tetrahedron)
 {
-  // Create a simple 3D tetrahedral mesh
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Tetrahedron, 3);
-
-  mesh.getConnectivity().reserve(1, {{1, 4}});
-
-  mesh.insert(Vertex({0.0, 0.0, 0.0}));  // v0
-  mesh.insert(Vertex({1.0, 0.0, 0.0}));  // v1
-  mesh.insert(Vertex({0.0, 1.0, 0.0}));  // v2
-  mesh.insert(Vertex({0.0, 0.0, 1.0}));  // v3
-
-  mesh.insert(Tetrahedron({0, 1, 2, 3}));
+  constexpr const size_t sdim = 3;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(4)
+    .vertex({0.0, 0.0, 0.0})
+    .vertex({1.0, 0.0, 0.0})
+    .vertex({0.0, 1.0, 0.0})
+    .vertex({0.0, 0.0, 1.0})
+    .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -81,14 +81,17 @@ TEST(Geometry_Point, BasicConstruction_3D_Tetrahedron)
 
 TEST(Geometry_Point, CopyConstruction)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -109,14 +112,17 @@ TEST(Geometry_Point, CopyConstruction)
 
 TEST(Geometry_Point, MoveConstruction)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -141,15 +147,18 @@ TEST(Geometry_Point, MoveConstruction)
 
 TEST(Geometry_Point, CoordinateAccess_XYZ)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Tetrahedron, 3);
-  mesh.getConnectivity().reserve(1, {{1, 4}});
-
-  mesh.insert(Vertex({0.0, 0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 0.0, 1.0}));
-  mesh.insert(Tetrahedron({0, 1, 2, 3}));
+  constexpr const size_t sdim = 3;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(4)
+    .vertex({0.0, 0.0, 0.0})
+    .vertex({1.0, 0.0, 0.0})
+    .vertex({0.0, 1.0, 0.0})
+    .vertex({0.0, 0.0, 1.0})
+    .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -175,14 +184,17 @@ TEST(Geometry_Point, CoordinateAccess_XYZ)
 
 TEST(Geometry_Point, CoordinateAccess_AsVector)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({2.0, 0.0}));
-  mesh.insert(Vertex({0.0, 2.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({2.0, 0.0})
+    .vertex({0.0, 2.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -203,14 +215,17 @@ TEST(Geometry_Point, CoordinateAccess_AsVector)
 
 TEST(Geometry_Point, GetPhysicalCoordinates)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({3.0, 0.0}));
-  mesh.insert(Vertex({0.0, 3.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({3.0, 0.0})
+    .vertex({0.0, 3.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -231,14 +246,17 @@ TEST(Geometry_Point, GetPhysicalCoordinates)
 
 TEST(Geometry_Point, GetReferenceCoordinates)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -261,21 +279,24 @@ TEST(Geometry_Point, GetReferenceCoordinates)
 
 TEST(Geometry_Point, NormCalculations)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({4.0, 0.0}));
-  mesh.insert(Vertex({0.0, 3.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({4.0, 0.0})
+    .vertex({0.0, 3.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
   auto it = mesh.polytope(Region::Closure::Cells).begin();
   Polytope tri = *it;
 
-  // Point at physical (3, 4) should have norm 5
+  // Point at physical (3, 0)
   Math::SpatialVector<Real> rc(2);
   rc << 0.75, 0.0;
 
@@ -291,22 +312,25 @@ TEST(Geometry_Point, NormCalculations)
 
 TEST(Geometry_Point, Norm_3D)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Tetrahedron, 3);
-  mesh.getConnectivity().reserve(1, {{1, 4}});
-
-  mesh.insert(Vertex({0.0, 0.0, 0.0}));
-  mesh.insert(Vertex({2.0, 0.0, 0.0}));
-  mesh.insert(Vertex({0.0, 2.0, 0.0}));
-  mesh.insert(Vertex({0.0, 0.0, 2.0}));
-  mesh.insert(Tetrahedron({0, 1, 2, 3}));
+  constexpr const size_t sdim = 3;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(4)
+    .vertex({0.0, 0.0, 0.0})
+    .vertex({2.0, 0.0, 0.0})
+    .vertex({0.0, 2.0, 0.0})
+    .vertex({0.0, 0.0, 2.0})
+    .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
   auto it = mesh.polytope(Region::Closure::Cells).begin();
   Polytope tet = *it;
 
-  // Point at (1, 1, 1) should have norm sqrt(3)
+  // Point at (1, 0, 0)
   Math::SpatialVector<Real> rc(3);
   rc << 0.5, 0.0, 0.0;
 
@@ -320,14 +344,17 @@ TEST(Geometry_Point, Norm_3D)
 
 TEST(Geometry_Point, GetJacobian_2D)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -351,14 +378,17 @@ TEST(Geometry_Point, GetJacobian_2D)
 
 TEST(Geometry_Point, GetJacobianDeterminant_2D)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({2.0, 0.0}));
-  mesh.insert(Vertex({0.0, 2.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({2.0, 0.0})
+    .vertex({0.0, 2.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -377,14 +407,17 @@ TEST(Geometry_Point, GetJacobianDeterminant_2D)
 
 TEST(Geometry_Point, GetJacobianInverse_2D)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -415,14 +448,17 @@ TEST(Geometry_Point, GetJacobianInverse_2D)
 
 TEST(Geometry_Point, GetDistortion_2D)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -443,14 +479,17 @@ TEST(Geometry_Point, GetDistortion_2D)
 
 TEST(Geometry_Point, LexicographicalComparison)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({2.0, 0.0}));
-  mesh.insert(Vertex({0.0, 2.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({2.0, 0.0})
+    .vertex({0.0, 2.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -472,14 +511,17 @@ TEST(Geometry_Point, LexicographicalComparison)
 
 TEST(Geometry_Point, SetPolytope)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -490,7 +532,6 @@ TEST(Geometry_Point, SetPolytope)
   rc << 0.5, 0.5;
 
   Point p(tri, rc);
-  Real x_orig = p.x();
 
   // Set to same polytope
   p.setPolytope(tri);
@@ -503,14 +544,17 @@ TEST(Geometry_Point, SetPolytope)
 
 TEST(Geometry_Point, AdditionWithVector)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -533,14 +577,17 @@ TEST(Geometry_Point, AdditionWithVector)
 
 TEST(Geometry_Point, SubtractionWithVector)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -563,14 +610,17 @@ TEST(Geometry_Point, SubtractionWithVector)
 
 TEST(Geometry_Point, AdditionOfPoints)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -592,14 +642,17 @@ TEST(Geometry_Point, AdditionOfPoints)
 
 TEST(Geometry_Point, SubtractionOfPoints)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -621,14 +674,17 @@ TEST(Geometry_Point, SubtractionOfPoints)
 
 TEST(Geometry_Point, ScalarMultiplication)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -655,14 +711,17 @@ TEST(Geometry_Point, ScalarMultiplication)
 
 TEST(Geometry_Point, EdgeCase_PointAtVertex)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -681,14 +740,17 @@ TEST(Geometry_Point, EdgeCase_PointAtVertex)
 
 TEST(Geometry_Point, EdgeCase_PointOnEdge)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({2.0, 0.0}));
-  mesh.insert(Vertex({0.0, 2.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({2.0, 0.0})
+    .vertex({0.0, 2.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -709,15 +771,18 @@ TEST(Geometry_Point, EdgeCase_PointOnEdge)
 
 TEST(Geometry_Point, 3D_JacobianDeterminant)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Tetrahedron, 3);
-  mesh.getConnectivity().reserve(1, {{1, 4}});
-
-  mesh.insert(Vertex({0.0, 0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 0.0, 1.0}));
-  mesh.insert(Tetrahedron({0, 1, 2, 3}));
+  constexpr const size_t sdim = 3;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(4)
+    .vertex({0.0, 0.0, 0.0})
+    .vertex({1.0, 0.0, 0.0})
+    .vertex({0.0, 1.0, 0.0})
+    .vertex({0.0, 0.0, 1.0})
+    .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -736,15 +801,18 @@ TEST(Geometry_Point, 3D_JacobianDeterminant)
 
 TEST(Geometry_Point, 3D_JacobianInverse)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Tetrahedron, 3);
-  mesh.getConnectivity().reserve(1, {{1, 4}});
-
-  mesh.insert(Vertex({0.0, 0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 0.0, 1.0}));
-  mesh.insert(Tetrahedron({0, 1, 2, 3}));
+  constexpr const size_t sdim = 3;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(4)
+    .vertex({0.0, 0.0, 0.0})
+    .vertex({1.0, 0.0, 0.0})
+    .vertex({0.0, 1.0, 0.0})
+    .vertex({0.0, 0.0, 1.0})
+    .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -779,14 +847,17 @@ TEST(Geometry_Point, 3D_JacobianInverse)
 
 TEST(Geometry_Point, ConstructionWithPhysicalCoordinates)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
@@ -810,14 +881,17 @@ TEST(Geometry_Point, ConstructionWithPhysicalCoordinates)
 
 TEST(Geometry_Point, GetPolytope_ValidReference)
 {
-  Mesh mesh;
-  mesh.initialize(Polytope::Type::Triangle, 2);
-  mesh.getConnectivity().reserve(1, {{1, 3}});
-
-  mesh.insert(Vertex({0.0, 0.0}));
-  mesh.insert(Vertex({1.0, 0.0}));
-  mesh.insert(Vertex({0.0, 1.0}));
-  mesh.insert(Triangle({0, 1, 2}));
+  constexpr const size_t sdim = 2;
+  
+  Mesh mesh =
+    Mesh<Context::Local>::Builder()
+    .initialize(sdim)
+    .nodes(3)
+    .vertex({0.0, 0.0})
+    .vertex({1.0, 0.0})
+    .vertex({0.0, 1.0})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .finalize();
 
   mesh.getConnectivity().compute();
 
