@@ -100,7 +100,7 @@ int main(int, char**)
   </tr>
   <tr>
     <td align="center">
-      solution of the poisson equation.
+      Solution of the Poisson equation in 2D.
     </td>
   </tr>
 </table>
