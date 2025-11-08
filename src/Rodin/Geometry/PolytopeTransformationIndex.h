@@ -111,10 +111,8 @@ namespace Rodin::Geometry
              std::unique_ptr<PolytopeTransformation> obj)
     {
       const size_t d   = p.first;
-      const Index  raw = p.second;
+      const Index  idx = p.second;
 
-      assert(raw >= 0);
-      const size_t idx = static_cast<size_t>(raw);
       assert(idx < count);
 
       assert(d < m_dimensions.size());
@@ -134,10 +132,7 @@ namespace Rodin::Geometry
     get(const std::pair<size_t, Index>& p, size_t count, const Factory& factory) const
     {
       const size_t d   = p.first;
-      const Index  raw = p.second;
-
-      assert(raw >= 0);
-      const size_t idx = static_cast<size_t>(raw);
+      const Index  idx = p.second;
 
       assert(d < m_dimensions.size());
       auto& dim = m_dimensions[d];
@@ -165,7 +160,7 @@ namespace Rodin::Geometry
         PolytopeTransformation* q = s.ptr.load(std::memory_order_relaxed);
         if (!q)
         {
-          auto up = factory(d, static_cast<Index>(idx));
+          auto up = factory(d, idx);
           s.owner = std::move(up);
           q = s.owner.get();
           s.ptr.store(q, std::memory_order_release);
