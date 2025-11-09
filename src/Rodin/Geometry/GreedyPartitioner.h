@@ -31,6 +31,9 @@ namespace Rodin::Geometry
   class GreedyPartitioner : public Partitioner
   {
     public:
+      /**
+       * @brief Type of mesh used by this partitioner.
+       */
       using MeshType = Geometry::Mesh<Context::Local>;
 
       /**
