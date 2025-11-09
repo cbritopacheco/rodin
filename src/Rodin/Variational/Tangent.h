@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_TANGENT_H
 #define RODIN_VARIATIONAL_TANGENT_H
 
+/**
+ * @file Tangent.h
+ * @brief Tangent trigonometric function operator for scalar functions.
+ */
+
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -18,6 +23,24 @@ namespace Rodin::Variational
    * @defgroup TanSpecializations Tan Template Specializations
    * @brief Template specializations of the Tan class.
    * @see Tan
+   */
+
+  /**
+   * @brief Tangent function operator for real-valued scalar functions.
+   *
+   * Applies the tangent function pointwise to a given function:
+   * @f[
+   *    \text{Tan}(f)(x) = \tan(f(x)) = \frac{\sin(f(x))}{\cos(f(x))}
+   * @f]
+   *
+   * Common applications include:
+   * - Trigonometric identities in manufactured solutions
+   * - Nonlinear trigonometric problems
+   * - Angle computations
+   *
+   * @note Undefined when @f$ \cos(f(x)) = 0 @f$ (at odd multiples of @f$ \pi/2 @f$).
+   * @note Always returns a real-valued function for real input.
+   * @see Sin, Cos
    */
 
   /**

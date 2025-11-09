@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_COS_H
 #define RODIN_VARIATIONAL_COS_H
 
+/**
+ * @file Cosine.h
+ * @brief Cosine trigonometric function operator for scalar functions.
+ */
+
 #include "Rodin/Math/Common.h"
 
 #include "ForwardDecls.h"
@@ -19,6 +24,24 @@ namespace Rodin::Variational
    * @defgroup CosSpecializations Cos Template Specializations
    * @brief Template specializations of the Cos class.
    * @see Cos
+   */
+
+  /**
+   * @brief Cosine function operator for real-valued scalar functions.
+   *
+   * Applies the cosine function pointwise to a given function:
+   * @f[
+   *    \text{Cos}(f)(x) = \cos(f(x))
+   * @f]
+   *
+   * Common applications include:
+   * - Periodic boundary conditions
+   * - Wave equations and harmonic oscillators
+   * - Fourier series representations
+   * - Trigonometric manufactured solutions
+   *
+   * @note Always returns a real-valued function for real input.
+   * @see Sin, Tan, Cosh
    */
 
   /**

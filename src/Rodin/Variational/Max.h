@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_MAX_H
 #define RODIN_VARIATIONAL_MAX_H
 
+/**
+ * @file
+ * @brief Maximum function operations.
+ */
+
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RealFunction.h"
@@ -21,6 +26,26 @@ namespace Rodin::Variational
 
   /**
    * @ingroup MaxSpecializations
+   * @brief Represents the maximum operation between two functions.
+   *
+   * This class represents the pointwise maximum of two functions:
+   * @f[
+   *    \text{Max}(f, g)(x) = \max(f(x), g(x))
+   * @f]
+   *
+   * For scalar functions, this computes the maximum value at each point.
+   * For vector or matrix functions, the operation is applied componentwise.
+   *
+   * Common applications include:
+   * - Positive part functions: @f$ \max(f, 0) @f$
+   * - Barrier methods and penalty functions
+   * - Non-smooth optimization problems
+   * - Contact and friction problems in mechanics
+   *
+   * @tparam LHSDerived Type of the left operand function
+   * @tparam RHSDerived Type of the right operand function
+   *
+   * @see Min, FunctionBase
    */
   template <class LHSDerived, class RHSDerived>
   class Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final

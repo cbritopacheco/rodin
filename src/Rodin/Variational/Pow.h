@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_POW_H
 #define RODIN_VARIATIONAL_POW_H
 
+/**
+ * @file
+ * @brief Power (exponentiation) operations for functions.
+ */
+
 #include <Rodin/Math/Common.h>
 
 #include "ForwardDecls.h"
@@ -26,12 +31,21 @@ namespace Rodin::Variational
    * @ingroup PowSpecializations
    * @brief Represents the power function.
    *
-   * This class represents the function @f$ f : \mathbb{R} \rightarrow
-   * \mathbb{R} @f$ defined by the exponentiation of a base value @f$ x \in
-   * \mathbb{R} @f$ to the power @f$ p @f$:
-   * @f$
-   *  f(x) = x^p \ .
-   * @f$
+   * This class represents the exponentiation operation applied to a function:
+   * @f[
+   *  \text{Pow}(f, p)(x) = f(x)^p
+   * @f]
+   *
+   * The base function @f$ f @f$ must be scalar-valued, and the exponent @f$ p @f$
+   * is a compile-time constant. The result is always a real-valued scalar function.
+   *
+   * @tparam BaseDerived Type of the base function
+   * @tparam Number Type of the exponent (must be arithmetic)
+   *
+   * @note Common use cases include quadratic functions (@f$ p = 2 @f$), cubic
+   * functions (@f$ p = 3 @f$), and fractional powers for regularization.
+   *
+   * @see RealFunctionBase, Sqrt, Exp
    */
   template <class BaseDerived, class Number>
   class Pow<FunctionBase<BaseDerived>, Number> final

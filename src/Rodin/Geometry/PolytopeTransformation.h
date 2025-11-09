@@ -7,6 +7,11 @@
 #ifndef RODIN_GEOMETRY_TRANSFORMATION_H
 #define RODIN_GEOMETRY_TRANSFORMATION_H
 
+/**
+ * @file
+ * @brief Base class for polytope geometric transformations.
+ */
+
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/assume_abstract.hpp>
@@ -22,109 +27,170 @@
 namespace Rodin::Geometry
 {
   /**
-   * @brief Represents the transformation function of a simplex, taking
-   * reference coordinates to physical coordinates.
+   * @brief Abstract base class for polytope geometric transformations.
    *
-   * Let @f$ \tau @f$ denote a polytope in a triangulation @f$ \mathcal{T}_h
-   * @f$ which has an associated reference element @f$ K @f$, This class
-   * represents the transformation @f$ x : K \subset \mathbb{R}^k \rightarrow
-   * \tau \subset \mathbb{R}^s @f$ of a reference point @f$ r @f$ into a
-   * physical point @f$ p @f$:
+   * This class represents the transformation function that maps reference
+   * coordinates to physical coordinates for a polytope in a mesh.
+   *
+   * # Mathematical Foundation
+   *
+   * Let @f$ \tau @f$ denote a polytope in a triangulation @f$ \mathcal{T}_h @f$
+   * with an associated reference element @f$ K @f$. This class represents the
+   * transformation:
+   * @f[
+   *    x : K \subset \mathbb{R}^k \rightarrow \tau \subset \mathbb{R}^s
+   * @f]
+   * that maps a reference point @f$ r \in K @f$ to a physical point @f$ p \in \tau @f$:
    * @f[
    *    p = x(r)
    * @f]
-   * Here, @f$ k @f$ and @f$ s @f$ represent the reference and physical
-   * dimensions, @f$ p \in \tau @f$ denotes the physical coordinates of the
-   * point, while @f$ x : K \rightarrow \tau @f$ represents the transformation
-   * taking reference coordinates @f$ r \in K @f$, for a reference geometry @f$
-   * K @f$.
+   * where:
+   * - @f$ k @f$ is the reference dimension (topological dimension of @f$ K @f$)
+   * - @f$ s @f$ is the physical dimension (spatial dimension of @f$ \tau @f$)
+   * - @f$ K @f$ is the reference element
+   * - @f$ \tau @f$ is the physical element
    *
-   * @see @ref Geometry::Point "Point"
+   * # Implementations
+   *
+   * Concrete implementations include:
+   * - IdentityTransformation: @f$ x(r) = r @f$ (identity map)
+   * - IsoparametricTransformation: Uses finite element basis functions
+   *
+   * # Thread Safety
+   *
+   * Transformation objects are immutable after construction and are thread-safe
+   * for concurrent read access. The transform(), jacobian(), and inverse()
+   * methods can be called concurrently from multiple threads.
+   *
+   * @see IdentityTransformation, IsoparametricTransformation, Point
    */
   class PolytopeTransformation : public Copyable
   {
     friend class boost::serialization::access;
 
     public:
+      /**
+       * @brief Constructs a transformation with given dimensions.
+       * @param[in] rdim Reference dimension @f$ k @f$
+       * @param[in] pdim Physical dimension @f$ s @f$
+       */
       constexpr
       PolytopeTransformation(size_t rdim, size_t pdim)
         : m_rdim(rdim), m_pdim(pdim)
       {}
 
+      /**
+       * @brief Copy constructor.
+       */
       constexpr
       PolytopeTransformation(const PolytopeTransformation&) = default;
 
+      /**
+       * @brief Move constructor.
+       */
       constexpr
       PolytopeTransformation(PolytopeTransformation&&) = default;
 
+      /**
+       * @brief Move assignment operator.
+       */
       PolytopeTransformation& operator=(PolytopeTransformation&&) = default;
 
+      /**
+       * @brief Virtual destructor.
+       */
       virtual ~PolytopeTransformation() = default;
 
+      /**
+       * @brief Gets the reference dimension @f$ k @f$.
+       * @returns Reference dimension (topological dimension of reference element)
+       */
       constexpr
       size_t getReferenceDimension() const
       {
         return m_rdim;
       }
 
+      /**
+       * @brief Gets the physical dimension @f$ s @f$.
+       * @returns Physical dimension (spatial dimension of physical element)
+       */
       constexpr
       size_t getPhysicalDimension() const
       {
         return m_pdim;
       }
 
+      /**
+       * @brief Gets the polynomial order of the transformation.
+       * @returns Polynomial order
+       *
+       * For linear transformations, returns 1. For higher-order geometric
+       * approximations (e.g., quadratic elements), returns the appropriate order.
+       */
       virtual size_t getOrder() const = 0;
 
+      /**
+       * @brief Gets the polynomial order of the Jacobian.
+       * @returns Polynomial order of the Jacobian matrix entries
+       *
+       * For linear transformations, returns 0 (constant Jacobian). For higher-order
+       * transformations, returns the order of the derivative.
+       */
       virtual size_t getJacobianOrder() const = 0;
 
       /**
-       * @brief Computes the physical coordinates of the given reference point.
+       * @brief Computes the physical coordinates from reference coordinates.
+       * @param[out] pc Physical coordinates @f$ p @f$ (resized automatically)
+       * @param[in] rc Reference coordinates @f$ r \in K @f$
        *
-       * Given @f$ r \in K @f$, computes the point:
+       * Computes:
        * @f[
-       *    p = x(r)
+       *    pc = x(rc)
        * @f]
-       * in physical coordinates.
-       *
-       * @param[in] rc Reference coordinates of the point.
-       * @returns A vector of size @f$ s @f$ where @f$ s @f$ represents the
-       * physical dimension.
+       * The output vector is resized to the physical dimension @f$ s @f$.
        */
       virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const = 0;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation.
+       * @param[out] jacobian Jacobian matrix @f$ \mathbf{J}_x @f$ (resized automatically)
+       * @param[in] rc Reference coordinates @f$ r \in K @f$
        *
-       * Given @f$ r \in K @f$, computes the Jacobian matrix:
+       * Computes the Jacobian matrix:
        * @f[
        *  \mathbf{J}_x (r) = \begin{bmatrix}
-       * \dfrac{\partial x_1}{\partial r_1} & \ldots & \dfrac{\partial x_s}{\partial r_k}\\
+       * \dfrac{\partial x_1}{\partial r_1} & \ldots & \dfrac{\partial x_1}{\partial r_k}\\
        * \vdots & \ddots & \vdots\\
        * \dfrac{\partial x_s}{\partial r_1} & \ldots & \dfrac{\partial x_s}{\partial r_k}
-       * \end{bmatrix} ,
+       * \end{bmatrix}
        * @f]
-       * for the given transformation @f$ x : K \rightarrow \tau @f$.
+       * for the transformation @f$ x : K \rightarrow \tau @f$.
        *
-       * @returns A matrix of dimensions @f$ s \times k @f$ where @f$ k @f$
-       * represents the reference dimension and @f$ s @f$ represents the
-       * physical dimension.
+       * The output matrix is resized to @f$ s \times k @f$ where @f$ k @f$ is
+       * the reference dimension and @f$ s @f$ is the physical dimension.
        */
       virtual void jacobian(Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const = 0;
 
       /**
-       * @brief Computes the reference coordinates of the given physical point.
+       * @brief Computes the reference coordinates from physical coordinates.
+       * @param[out] rc Reference coordinates @f$ r @f$ (resized automatically)
+       * @param[in] pc Physical coordinates @f$ p \in \tau @f$
        *
-       * Given @f$ p \in \tau @f$, computes the point:
+       * Computes the inverse transformation:
        * @f[
-       *    r = x^{-1}(p)
+       *    rc = x^{-1}(pc)
        * @f]
-       * in reference coordinates.
        *
-       * @param[in] pc Physical coordinates of the point.
-       * @note Assumes all elements have 0 as reference coordinate.
+       * @note Default implementation assumes the reference element has origin at 0.
+       * Override for more complex inverse transformations.
        */
       virtual void inverse(Math::SpatialPoint& rc, const Math::SpatialPoint& pc) const;
 
+      /**
+       * @brief Serialization method for Boost.Serialization.
+       * @param[in,out] ar Archive object
+       */
       template<class Archive>
       void serialize(Archive & ar, const unsigned int)
       {
@@ -132,11 +198,17 @@ namespace Rodin::Geometry
         ar & m_pdim;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this transformation.
+       * @returns Pointer to a new transformation object
+       *
+       * Derived classes must implement this to return a copy of their specific type.
+       */
       virtual PolytopeTransformation* copy() const noexcept override = 0;
 
     private:
-      size_t m_rdim;
-      size_t m_pdim;
+      size_t m_rdim; ///< Reference dimension @f$ k @f$
+      size_t m_pdim; ///< Physical dimension @f$ s @f$
   };
 }
 

@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_COMPLEXFUNCTION_H
 #define RODIN_VARIATIONAL_COMPLEXFUNCTION_H
 
+/**
+ * @file ComplexFunction.h
+ * @brief Complex-valued scalar functions.
+ */
+
 #include <memory>
 #include <type_traits>
 
@@ -22,6 +27,19 @@ namespace Rodin::Variational
    * @see ComplexFunction
    */
 
+  /**
+   * @brief Base class for complex-valued scalar functions.
+   *
+   * Represents functions @f$ f: \Omega \to \mathbb{C} @f$ where @f$ \mathbb{C} @f$ 
+   * denotes the field of complex numbers. Complex functions can be:
+   * - Constructed from real and imaginary parts
+   * - Decomposed using Re() and Im() operations
+   * - Conjugated using Conjugate() operation
+   *
+   * @tparam Derived The derived class type (CRTP pattern)
+   *
+   * @see ComplexFunction, Re, Im, Conjugate
+   */
   template <class Derived>
   class ComplexFunctionBase : public ScalarFunctionBase<Complex, ComplexFunctionBase<Derived>>
   {

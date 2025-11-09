@@ -7,6 +7,15 @@
 #ifndef RODIN_VARIATIONAL_DOT_H
 #define RODIN_VARIATIONAL_DOT_H
 
+/**
+ * @file
+ * @brief Dot product (inner product) operations for functions and shape functions.
+ *
+ * This file provides dot product operations for vector and matrix-valued functions:
+ * - Vector dot product: @f$ \mathbf{u} \cdot \mathbf{v} = \sum_i u_i v_i @f$
+ * - Matrix Frobenius inner product: @f$ A : B = \sum_{ij} A_{ij} B_{ij} @f$
+ */
+
 #include <Eigen/Core>
 
 #include "Rodin/Types.h"
@@ -100,11 +109,30 @@ namespace Rodin::Variational
   /**
    * @defgroup DotSpecializations Dot Template Specializations
    * @brief Template specializations of the Dot class.
+   *
+   * Provides dot product (inner product) operations for:
+   * - Function × Function → Real-valued function
+   * - Function × ShapeFunction → Real-valued shape function  
+   * - ShapeFunction × Function → Real-valued shape function
+   * - ShapeFunction × ShapeFunction → Bilinear form entry
+   *
    * @see Dot
    */
 
   /**
    * @ingroup DotSpecializations
+   * @brief Dot product between two functions.
+   *
+   * Represents the inner product:
+   * @f[
+   *    (f \cdot g)(x) = f(x) \cdot g(x)
+   * @f]
+   * For vectors: @f$ \mathbf{u} \cdot \mathbf{v} = \sum_i u_i v_i @f$
+   *
+   * For matrices: @f$ A : B = \sum_{ij} A_{ij} B_{ij} @f$ (Frobenius inner product)
+   *
+   * @tparam LHSDerived Type of the first function
+   * @tparam RHSDerived Type of the second function
    */
   template <class LHSDerived, class RHSDerived>
   class Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
@@ -183,20 +211,28 @@ namespace Rodin::Variational
       std::unique_ptr<FunctionBase<RHSDerived>> m_rhs;
   };
 
+  /**
+   * @brief Deduction guide for Dot product of two functions.
+   */
   template <class LHSDerived, class RHSDerived>
   Dot(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
    * @ingroup DotSpecializations
-   * @brief Dot product between a FunctionBase and a ShapeFunctionBase.
+   * @brief Dot product between a function and a shape function.
    *
    * Represents the mathematical expression:
    * @f[
-   *   \Lambda : A(u)
+   *   (\Lambda \cdot u)(x) = \Lambda(x) \cdot u(x)
    * @f]
-   * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$, @f$ \Lambda \in
-   * \mathbb{R}^{p \times q} @f$.
+   * with @f$ \Lambda @f$ a function and @f$ u @f$ a shape function.
+   * For matrices: @f$ A : B @f$ denotes the Frobenius inner product.
+   *
+   * @tparam LHSDerived Type of the function
+   * @tparam RHSDerived Type of the shape function
+   * @tparam FES Finite element space type
+   * @tparam Space Shape function space (Trial or Test)
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   class Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>> final
@@ -316,20 +352,27 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /**
+   * @brief Deduction guide for Dot product of function and shape function.
+   */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   Dot(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, Space>&)
     -> Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
   /**
    * @ingroup DotSpecializations
-   * @brief Dot product between a FunctionBase and a ShapeFunctionBase.
+   * @brief Dot product between a shape function and a function.
    *
    * Represents the mathematical expression:
    * @f[
-   *    A(u) : \Lambda
+   *    (u \cdot \Lambda)(x) = u(x) \cdot \Lambda(x)
    * @f]
-   * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$, @f$ \Lambda \in
-   * \mathbb{R}^{p \times q} @f$.
+   * with @f$ u @f$ a shape function and @f$ \Lambda @f$ a function.
+   *
+   * @tparam LHSDerived Type of the shape function
+   * @tparam RHSDerived Type of the function
+   * @tparam FES Finite element space type
+   * @tparam Space Shape function space (Trial or Test)
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   class Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
@@ -435,18 +478,27 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /**
+   * @brief Deduction guide for Dot product of shape function and function.
+   */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   Dot(const ShapeFunctionBase<LHSDerived, FES, Space>&, const FunctionBase<RHSDerived>&)
     -> Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
   /**
    * @ingroup DotSpecializations
-   * @brief Represents the dot product of trial and test operators.
+   * @brief Dot product of trial and test shape functions for bilinear forms.
    *
-   * Constructs an instance representing the following expression:
+   * Represents the inner product in a bilinear form:
    * @f[
-   *    A(u) : B(v)
+   *    (u, v) \mapsto u(x) : v(x)
    * @f]
+   * Used in assembling bilinear forms @f$ a(u, v) @f$.
+   *
+   * @tparam LHSDerived Type of the trial shape function
+   * @tparam TrialFES Trial finite element space type
+   * @tparam RHSDerived Type of the test shape function
+   * @tparam TestFES Test finite element space type
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class Dot<
@@ -534,11 +586,26 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_test;
   };
 
+  /**
+   * @brief Deduction guide for Dot product of trial and test shape functions.
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Dot(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&,
       const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
   -> Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>;
 
+  /**
+   * @ingroup DotSpecializations
+   * @brief Dot product of a potential with a test shape function.
+   *
+   * Used for integral operators involving potentials in boundary element methods.
+   *
+   * @tparam KernelType Type of the kernel function
+   * @tparam LHSDerived Type of the potential's shape function
+   * @tparam TrialFES Trial finite element space type
+   * @tparam RHSDerived Type of the test shape function
+   * @tparam TestFES Test finite element space type
+   */
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class Dot<
       Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
@@ -593,6 +660,9 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /**
+   * @brief Deduction guide for Dot product of potential and test shape function.
+   */
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Dot(const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>&,
       const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)

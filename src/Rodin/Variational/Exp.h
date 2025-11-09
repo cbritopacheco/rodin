@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_EXP_H
 #define RODIN_VARIATIONAL_EXP_H
 
+/**
+ * @file
+ * @brief Exponential function operations.
+ */
+
 #include "Rodin/Math/Common.h"
 
 #include "ForwardDecls.h"
@@ -23,6 +28,24 @@ namespace Rodin::Variational
 
   /**
    * @ingroup ExpSpecializations
+   * @brief Exponential function operation.
+   *
+   * This class represents the exponential operation applied to a scalar function:
+   * @f[
+   *    \text{Exp}(f)(x) = e^{f(x)}
+   * @f]
+   *
+   * The input function must be scalar-valued (real or complex). The result is
+   * always a real-valued scalar function when the input is real.
+   *
+   * Common applications include:
+   * - Growth and decay models
+   * - Softmax functions in optimization
+   * - Barrier functions in interior point methods
+   *
+   * @tparam NestedDerived Type of the operand function
+   *
+   * @see RealFunctionBase, Pow
    */
   template <class NestedDerived>
   class Exp<FunctionBase<NestedDerived>>

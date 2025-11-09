@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_COSH_H
 #define RODIN_VARIATIONAL_COSH_H
 
+/**
+ * @file Cosh.h
+ * @brief Hyperbolic cosine function operator for scalar functions.
+ */
+
 #include "Rodin/Math/Common.h"
 
 #include "ForwardDecls.h"
@@ -19,6 +24,25 @@ namespace Rodin::Variational
    * @defgroup CoshSpecializations Cosh Template Specializations
    * @brief Template specializations of the Cosh class.
    * @see Cosh
+   */
+
+  /**
+   * @brief Hyperbolic cosine function operator for real-valued scalar functions.
+   *
+   * Applies the hyperbolic cosine function pointwise to a given function:
+   * @f[
+   *    \text{Cosh}(f)(x) = \cosh(f(x)) = \frac{e^{f(x)} + e^{-f(x)}}{2}
+   * @f]
+   *
+   * Common applications include:
+   * - Solutions to hyperbolic PDEs
+   * - Catenary curves and hanging cables
+   * - Temperature distributions in infinite domains
+   * - Exact solutions with exponential behavior
+   *
+   * @note Always returns a real-valued function for real input.
+   * @note Always positive: @f$ \cosh(x) \geq 1 @f$ for all real @f$ x @f$.
+   * @see Sinh, Cos
    */
 
   /**

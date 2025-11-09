@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_SIN_H
 #define RODIN_VARIATIONAL_SIN_H
 
+/**
+ * @file Sine.h
+ * @brief Sine trigonometric function operator for scalar functions.
+ */
+
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -18,6 +23,24 @@ namespace Rodin::Variational
    * @defgroup SinSpecializations Sin Template Specializations
    * @brief Template specializations of the Sin class.
    * @see Sin
+   */
+
+  /**
+   * @brief Sine function operator for real-valued scalar functions.
+   *
+   * Applies the sine function pointwise to a given function:
+   * @f[
+   *    \text{Sin}(f)(x) = \sin(f(x))
+   * @f]
+   *
+   * Common applications include:
+   * - Periodic boundary conditions
+   * - Wave equations and vibration problems
+   * - Fourier series representations
+   * - Trigonometric manufactured solutions
+   *
+   * @note Always returns a real-valued function for real input.
+   * @see Cos, Tan, Sinh
    */
 
   /**
