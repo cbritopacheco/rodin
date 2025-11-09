@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Problem body containing bilinear and linear forms.
+ */
+
 #ifndef RODIN_VARIATIONAL_PROBLEMBODY_H
 #define RODIN_VARIATIONAL_PROBLEMBODY_H
 

@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Linear elasticity formulations and operators.
+ */
+
 #ifndef RODIN_VARIATIONAL_LINEARELASTICITY_H
 #define RODIN_VARIATIONAL_LINEARELASTICITY_H
 

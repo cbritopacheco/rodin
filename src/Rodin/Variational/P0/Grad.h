@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Gradient operator for P0 elements.
+ */
+
 #ifndef RODIN_VARIATIONAL_P0_GRADIENT_H
 #define RODIN_VARIATIONAL_P0_GRADIENT_H
 

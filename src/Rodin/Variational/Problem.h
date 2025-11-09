@@ -7,6 +7,12 @@
 #ifndef RODIN_VARIATIONAL_PROBLEM_H
 #define RODIN_VARIATIONAL_PROBLEM_H
 
+/**
+ * @file
+ * @brief See class documentation below.
+ */
+
+
 #include <functional>
 #include <boost/mp11.hpp>
 

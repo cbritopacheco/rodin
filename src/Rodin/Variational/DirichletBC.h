@@ -7,6 +7,12 @@
 #ifndef RODIN_VARIATIONAL_DIRICHLETBC_H
 #define RODIN_VARIATIONAL_DIRICHLETBC_H
 
+/**
+ * @file
+ * @brief See class documentation below.
+ */
+
+
 #include <set>
 #include <variant>
 

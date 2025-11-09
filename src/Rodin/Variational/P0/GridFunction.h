@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Grid function specialization for P0 elements.
+ */
+
 #ifndef RODIN_VARIATIONAL_P0_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_P0_GRIDFUNCTION_H
 

@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Pk finite element of arbitrary order k.
+ */
+
 #ifndef RODIN_VARIATIONAL_PK_PKELEMENT_H
 #define RODIN_VARIATIONAL_PK_PKELEMENT_H
 

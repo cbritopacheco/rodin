@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Base class for integrators in finite element assembly.
+ */
+
 #ifndef RODIN_VARIATIONAL_INTEGRATOR_H
 #define RODIN_VARIATIONAL_INTEGRATOR_H
 

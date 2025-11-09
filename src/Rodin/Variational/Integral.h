@@ -7,6 +7,12 @@
 #ifndef RODIN_VARIATIONAL_INTEGRAL_H
 #define RODIN_VARIATIONAL_INTEGRAL_H
 
+/**
+ * @file
+ * @brief See class documentation below.
+ */
+
+
 #include <cassert>
 #include <utility>
 

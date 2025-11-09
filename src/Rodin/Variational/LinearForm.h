@@ -7,6 +7,12 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORM_H
 #define RODIN_VARIATIONAL_LINEARFORM_H
 
+/**
+ * @file
+ * @brief See class documentation below.
+ */
+
+
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/FormLanguage/Traits.h"
 

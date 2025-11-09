@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief P0 finite element implementation.
+ */
+
 #ifndef RODIN_VARIATIONAL_P0_P0ELEMENT_H
 #define RODIN_VARIATIONAL_P0_P0ELEMENT_H
 

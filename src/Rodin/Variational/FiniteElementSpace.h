@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Abstract base class for finite element spaces.
+ */
+
 #ifndef RODIN_VARIATIONAL_FINITEELEMENTSPACE_H
 #define RODIN_VARIATIONAL_FINITEELEMENTSPACE_H
 

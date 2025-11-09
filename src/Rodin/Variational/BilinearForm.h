@@ -7,6 +7,12 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
+/**
+ * @file
+ * @brief See class documentation below.
+ */
+
+
 #include "Rodin/Math/Traits.h"
 #include "Rodin/Math/SparseMatrix.h"
 

@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Exception for test function mismatches in forms.
+ */
+
 #ifndef RODIN_VARIATIONAL_EXCEPTIONS_TESTFUNCTIONMISMATCHEXCEPTION_H
 #define RODIN_VARIATIONAL_EXCEPTIONS_TESTFUNCTIONMISMATCHEXCEPTION_H
 
