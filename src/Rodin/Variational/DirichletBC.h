@@ -9,7 +9,132 @@
 
 /**
  * @file
- * @brief See class documentation below.
+ * @brief Dirichlet (essential) boundary conditions for finite element problems.
+ *
+ * This file provides facilities for imposing Dirichlet boundary conditions,
+ * also known as essential boundary conditions, which prescribe solution values
+ * on portions of the domain boundary.
+ *
+ * # Mathematical Foundation
+ *
+ * A Dirichlet boundary condition specifies the value of the solution on a
+ * boundary subset @f$ \Gamma_D \subset \partial\Omega @f$:
+ * @f[
+ *   u = g \quad \text{on } \Gamma_D
+ * @f]
+ * where @f$ g @f$ is a given function representing the prescribed boundary value.
+ *
+ * ## Implementation in FEM
+ * In the discrete setting, Dirichlet conditions are enforced by:
+ * 1. Identifying DOFs associated with boundary vertices/edges/faces in @f$ \Gamma_D @f$
+ * 2. Setting these DOFs to match the prescribed values @f$ g(x_i) @f$
+ * 3. Modifying the linear system to preserve these constraints
+ *
+ * ## Types of Boundary Conditions
+ * - **Homogeneous**: @f$ u = 0 @f$ on @f$ \Gamma_D @f$
+ * - **Inhomogeneous**: @f$ u = g(x) @f$ on @f$ \Gamma_D @f$ for non-zero @f$ g @f$
+ * - **Component-wise**: Different values for different components (vector problems)
+ *
+ * # Usage Examples
+ *
+ * ## Homogeneous Dirichlet BC (Zero Boundary)
+ * @code{.cpp}
+ * using namespace Rodin;
+ * using namespace Rodin::Variational;
+ *
+ * P1 Vh(mesh);
+ * TrialFunction u(Vh);
+ * TestFunction  v(Vh);
+ *
+ * // Poisson with u = 0 on entire boundary
+ * Problem problem(u, v);
+ * problem = Integral(Grad(u), Grad(v))
+ *         - Integral(f * v)
+ *         + DirichletBC(u, 0.0);  // Homogeneous BC
+ *
+ * problem.solve(solver);
+ * @endcode
+ *
+ * ## Inhomogeneous Dirichlet BC (Non-Zero Function)
+ * @code{.cpp}
+ * // Boundary value function
+ * auto g = ScalarFunction([](const Math::SpatialPoint& x) {
+ *   return std::sin(x(0)) * std::cos(x(1));
+ * });
+ *
+ * Problem problem(u, v);
+ * problem = Integral(Grad(u), Grad(v))
+ *         - Integral(f * v)
+ *         + DirichletBC(u, g);  // Inhomogeneous BC: u = g on boundary
+ *
+ * problem.solve(solver);
+ * @endcode
+ *
+ * ## Selective Boundary Conditions (Specific Attributes)
+ * @code{.cpp}
+ * // Apply BC only on boundary regions with specific attributes
+ * std::set<int> boundaryAttrs = {1, 2, 3};  // Bottom, left, right walls
+ *
+ * Problem problem(u, v);
+ * problem = Integral(Grad(u), Grad(v))
+ *         - Integral(f * v)
+ *         + DirichletBC(u, 0.0).on(boundaryAttrs);
+ *
+ * problem.solve(solver);
+ * @endcode
+ *
+ * ## Vector-Valued Dirichlet BC (Elasticity)
+ * @code{.cpp}
+ * // 2D elasticity with vector displacement
+ * P1 Vh(mesh, 2);  // 2-component space
+ *
+ * TrialFunction u(Vh);  // Displacement vector
+ * TestFunction  v(Vh);
+ *
+ * // Prescribed displacement on boundary
+ * auto g = VectorFunction([](const Math::SpatialPoint& x) {
+ *   return Math::Vector2D(0.0, -0.1);  // Downward displacement
+ * });
+ *
+ * Problem problem(u, v);
+ * problem = /* elasticity bilinear form */
+ *         + DirichletBC(u, g);  // Vector BC
+ *
+ * problem.solve(solver);
+ * @endcode
+ *
+ * ## Component-Wise BC (Mixed Conditions)
+ * @code{.cpp}
+ * // Fix only x-component, leave y-component free
+ * Problem problem(u, v);
+ * problem = /* bilinear form */
+ *         + DirichletBC(Component(u, 0), 0.0);  // u_x = 0
+ *         // u_y is free (natural/Neumann BC)
+ *
+ * problem.solve(solver);
+ * @endcode
+ *
+ * ## Time-Dependent BC
+ * @code{.cpp}
+ * // Time-varying boundary condition
+ * double t = 0.0;  // Current time
+ *
+ * auto g = ScalarFunction([&t](const Math::SpatialPoint& x) {
+ *   return std::sin(t) * x(0);  // Captures time variable
+ * });
+ *
+ * // In time stepping loop:
+ * for (t = 0; t < T; t += dt) {
+ *   Problem problem(u, v);
+ *   problem = /* form */
+ *           + DirichletBC(u, g);  // BC depends on current t
+ *
+ *   problem.solve(solver);
+ * }
+ * @endcode
+ *
+ * @see PeriodicBC, Problem, TrialFunction
+ * @see ScalarFunction, VectorFunction, Component
  */
 
 

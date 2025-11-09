@@ -7,7 +7,78 @@
 
 /**
  * @file
- * @brief Grid function for discrete finite element solutions.
+ * @brief Grid functions for representing discrete finite element solutions.
+ *
+ * This file defines the GridFunction class, which represents discrete functions
+ * on finite element spaces. Grid functions are the primary way to represent
+ * solutions to finite element problems in Rodin.
+ *
+ * # Mathematical Foundation
+ *
+ * A grid function @f$ u_h @f$ represents a discrete approximation in a finite
+ * element space @f$ V_h @f$, expressed as a linear combination of basis functions:
+ * @f[
+ *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
+ * @f]
+ * where:
+ * - @f$ u_i @f$ are the degrees of freedom (DOF coefficients)
+ * - @f$ \phi_i @f$ are the finite element basis functions
+ * - @f$ N = \dim(V_h) @f$ is the number of degrees of freedom
+ *
+ * # Key Features
+ *
+ * - **DOF Storage**: Automatically manages the coefficient vector
+ * - **Interpolation**: Point-wise evaluation via FE interpolation
+ * - **I/O**: Export to EnSight, MEDIT, MFEM formats
+ * - **Arithmetic**: Supports addition, scaling, inner products
+ * - **FE Space**: Strongly typed association with finite element space
+ *
+ * # Usage Example
+ *
+ * ## Creating and Using Grid Functions
+ * @code{.cpp}
+ * // Define finite element space
+ * P1 Vh(mesh);
+ *
+ * // Create grid function for the solution
+ * GridFunction<P1> u(Vh);
+ *
+ * // Set degrees of freedom
+ * u.setDOFs(coefficients);
+ *
+ * // Evaluate at a point
+ * auto value = u({0.5, 0.5});
+ *
+ * // Export for visualization
+ * u.save("solution.case");  // EnSight format
+ * @endcode
+ *
+ * ## Arithmetic Operations
+ * @code{.cpp}
+ * GridFunction<P1> u(Vh), v(Vh);
+ *
+ * // Linear combinations
+ * auto w = 2.0 * u + 3.0 * v;
+ *
+ * // Inner product
+ * double ip = Integral(u * v).compute();
+ *
+ * // Norm
+ * double norm = std::sqrt(Integral(u * u).compute());
+ * @endcode
+ *
+ * ## Accessing Solution from Problem
+ * @code{.cpp}
+ * Problem problem(u, v);
+ * problem = Integral(Grad(u), Grad(v)) - Integral(f * v);
+ * problem.solve(solver);
+ *
+ * // Get solution as grid function
+ * GridFunction<P1>& solution = problem.getSolution();
+ * solution.save("output.case");
+ * @endcode
+ *
+ * @see Problem, FiniteElementSpace, P0, P1
  */
 
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
