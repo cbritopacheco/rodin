@@ -4,6 +4,18 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file UnaryMinus.h
+ * @brief Negation operator for functions, shape functions, and integrators.
+ *
+ * Provides the unary minus operator (-) for negating functions, shape functions,
+ * and form integrators. For a function @f$ f @f$, the negation is:
+ * @f[
+ *   (-f)(x) = -f(x)
+ * @f]
+ */
+
 #ifndef RODIN_VARIATIONAL_UNARYMINUS_H
 #define RODIN_VARIATIONAL_UNARYMINUS_H
 
@@ -36,6 +48,12 @@ namespace Rodin::Variational
 
   /**
    * @ingroup UnaryMinusSpecializations
+   * @brief Negation of a function.
+   *
+   * Represents the negation:
+   * @f[
+   *   (-f)(x) = -f(x)
+   * @f]
    */
   template <class NestedDerived>
   class UnaryMinus<FunctionBase<NestedDerived>> final
@@ -72,6 +90,11 @@ namespace Rodin::Variational
         return *m_op;
       }
 
+      /**
+       * @brief Evaluates the negated function at a point.
+       * @param p Point at which to evaluate
+       * @returns Negated function value @f$ -f(p) @f$
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -103,9 +126,17 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_op;
   };
 
+  /**
+   * @brief Deduction guide for UnaryMinus of FunctionBase.
+   */
   template <class NestedDerived>
   UnaryMinus(const FunctionBase<NestedDerived>&) -> UnaryMinus<FunctionBase<NestedDerived>>;
 
+  /**
+   * @brief Applies unary minus to a function.
+   * @param op Function to negate
+   * @returns Negated function
+   */
   template <class NestedDerived>
   constexpr
   auto operator-(const FunctionBase<NestedDerived>& op)
@@ -113,6 +144,16 @@ namespace Rodin::Variational
     return UnaryMinus(op);
   }
 
+  /**
+   * @ingroup UnaryMinusSpecializations
+   * @brief Negation of a shape function.
+   *
+   * Represents the negation:
+   * @f[
+   *   (-u)_i = -u_i
+   * @f]
+   * where @f$ u_i @f$ are the basis functions.
+   */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   class UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>> final
     : public ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>>
@@ -155,6 +196,11 @@ namespace Rodin::Variational
         return getOperand().getLeaf();
       }
 
+      /**
+       * @brief Gets the number of degrees of freedom on an element.
+       * @param element Polytope element
+       * @returns Number of DOFs
+       */
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
@@ -173,6 +219,11 @@ namespace Rodin::Variational
         return m_operand->getPoint();
       }
 
+      /**
+       * @brief Evaluates the negated basis function.
+       * @param local Local DOF index
+       * @returns Negated basis function value @f$ -u_i @f$
+       */
       constexpr
       auto getBasis(size_t local) const
       {
@@ -192,11 +243,19 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
+  /**
+   * @brief Deduction guide for UnaryMinus of ShapeFunctionBase.
+   */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   UnaryMinus(const ShapeFunctionBase<NestedDerived, FES, Space>&)
     -> UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>;
 
 
+  /**
+   * @brief Applies unary minus to a shape function.
+   * @param op Shape function to negate
+   * @returns Negated shape function
+   */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   constexpr
   auto operator-(const ShapeFunctionBase<NestedDerived, FES, Space>& op)
@@ -204,6 +263,10 @@ namespace Rodin::Variational
     return UnaryMinus(op);
   }
 
+  /**
+   * @ingroup UnaryMinusSpecializations
+   * @brief Negation of a linear form integrator.
+   */
   template <class Number>
   class UnaryMinus<LinearFormIntegratorBase<Number>> final
     : public LinearFormIntegratorBase<Number>
@@ -252,6 +315,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Integrates the negated linear form.
+       * @param local Local DOF index
+       * @returns Negated integral value
+       */
       ScalarType integrate(size_t local) override
       {
         return -m_op->integrate(local);
@@ -266,16 +334,28 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_op;
   };
 
+  /**
+   * @brief Deduction guide for UnaryMinus of LinearFormIntegratorBase.
+   */
   template <class Number>
   UnaryMinus(const LinearFormIntegratorBase<Number>&)
     -> UnaryMinus<LinearFormIntegratorBase<Number>>;
 
+  /**
+   * @brief Applies unary minus to a linear form integrator.
+   * @param lfi Linear form integrator to negate
+   * @returns Negated linear form integrator
+   */
   template <class Number>
   UnaryMinus<LinearFormIntegratorBase<Number>> operator-(const LinearFormIntegratorBase<Number>& lfi)
   {
     return UnaryMinus(lfi);
   }
 
+  /**
+   * @ingroup UnaryMinusSpecializations
+   * @brief Negation of a list of linear form integrators.
+   */
   template <class Number>
   class UnaryMinus<FormLanguage::List<LinearFormIntegratorBase<Number>>>
     : public FormLanguage::List<LinearFormIntegratorBase<Number>>
@@ -309,10 +389,18 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @brief Deduction guide for UnaryMinus of List<LinearFormIntegratorBase>.
+   */
   template <class Number>
   UnaryMinus(const FormLanguage::List<LinearFormIntegratorBase<Number>>&)
     -> UnaryMinus<FormLanguage::List<LinearFormIntegratorBase<Number>>>;
 
+  /**
+   * @brief Applies unary minus to a list of linear form integrators.
+   * @param op List to negate
+   * @returns Negated integrator list
+   */
   template <class Number>
   UnaryMinus<FormLanguage::List<LinearFormIntegratorBase<Number>>>
   operator-(const FormLanguage::List<LinearFormIntegratorBase<Number>>& op)
@@ -320,6 +408,10 @@ namespace Rodin::Variational
     return UnaryMinus(op);
   }
 
+  /**
+   * @ingroup UnaryMinusSpecializations
+   * @brief Negation of a bilinear form integrator.
+   */
   template <class Number>
   class UnaryMinus<LocalBilinearFormIntegratorBase<Number>>
     : public LocalBilinearFormIntegratorBase<Number>
@@ -368,6 +460,12 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Integrates the negated bilinear form.
+       * @param tr Trial DOF index
+       * @param te Test DOF index
+       * @returns Negated integral value
+       */
       ScalarType integrate(size_t tr, size_t te) override
       {
         return -m_op->integrate(tr, te);
@@ -382,10 +480,18 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_op;
   };
 
+  /**
+   * @brief Deduction guide for UnaryMinus of LocalBilinearFormIntegratorBase.
+   */
   template <class Number>
   UnaryMinus(const LocalBilinearFormIntegratorBase<Number>&)
     -> UnaryMinus<LocalBilinearFormIntegratorBase<Number>>;
 
+  /**
+   * @brief Applies unary minus to a bilinear form integrator.
+   * @param op Bilinear form integrator to negate
+   * @returns Negated bilinear form integrator
+   */
   template <class Number>
   constexpr
   auto
@@ -394,6 +500,10 @@ namespace Rodin::Variational
     return UnaryMinus(op);
   }
 
+  /**
+   * @ingroup UnaryMinusSpecializations
+   * @brief Negation of a list of bilinear form integrators.
+   */
   template <class Number>
   class UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>>
     : public FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>
@@ -430,10 +540,18 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @brief Deduction guide for UnaryMinus of List<LocalBilinearFormIntegratorBase>.
+   */
   template <class Number>
   UnaryMinus(const FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>&)
     -> UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>>;
 
+  /**
+   * @brief Applies unary minus to a list of bilinear form integrators.
+   * @param op List to negate
+   * @returns Negated integrator list
+   */
   template <class Number>
   constexpr
   auto

@@ -4,6 +4,24 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file Mult.h
+ * @brief Multiplication operations for functions, shape functions, and integrators.
+ *
+ * Provides operator* overloads for computing products between functions,
+ * shape functions, numbers, and integrators. Supports:
+ * - Scalar × function/shape function
+ * - Function × function (scalar, vector, or matrix products)
+ * - Function × shape function (left or right multiplication)
+ * - Number × integrator (scaling)
+ *
+ * For functions @f$ f @f$ and @f$ g @f$:
+ * @f[
+ *   (f \cdot g)(x) = f(x) \cdot g(x)
+ * @f]
+ */
+
 #ifndef RODIN_VARIATIONAL_MULT_H
 #define RODIN_VARIATIONAL_MULT_H
 
@@ -132,6 +150,12 @@ namespace Rodin::Variational
   /**
    * @ingroup MultSpecializations
    * @brief Multiplication of two FunctionBase instances.
+   *
+   * Computes the pointwise product:
+   * @f[
+   *   (f \cdot g)(x) = f(x) \cdot g(x)
+   * @f]
+   * Supports scalar, vector, and matrix multiplications depending on operand types.
    */
   template <class LHSDerived, class RHSDerived>
   class Mult<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
@@ -184,6 +208,11 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      /**
+       * @brief Evaluates the product at a point.
+       * @param p Point at which to evaluate
+       * @returns Product value @f$ f(p) \cdot g(p) @f$
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -200,10 +229,19 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /**
+   * @brief Deduction guide for Mult of two FunctionBase instances.
+   */
   template <class LHSDerived, class RHSDerived>
   Mult(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> Mult<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
+  /**
+   * @brief Multiplies two functions.
+   * @param lhs Left function
+   * @param rhs Right function
+   * @returns Product function @f$ f \cdot g @f$
+   */
   template <class LHSDerived, class RHSDerived>
   constexpr
   auto
@@ -212,6 +250,12 @@ namespace Rodin::Variational
     return Mult(lhs, rhs);
   }
 
+  /**
+   * @brief Multiplies a real number by a function (scalar multiplication).
+   * @param lhs Scalar multiplier
+   * @param rhs Function to scale
+   * @returns Scaled function @f$ c \cdot f @f$
+   */
   template <class RHSDerived>
   constexpr
   auto
@@ -220,6 +264,12 @@ namespace Rodin::Variational
     return Mult(RealFunction(lhs), rhs);
   }
 
+  /**
+   * @brief Multiplies a complex number by a function (scalar multiplication).
+   * @param lhs Complex multiplier
+   * @param rhs Function to scale
+   * @returns Scaled function @f$ z \cdot f @f$
+   */
   template <class RHSDerived>
   constexpr
   auto
@@ -228,6 +278,12 @@ namespace Rodin::Variational
     return Mult(ComplexFunction(lhs), rhs);
   }
 
+  /**
+   * @brief Multiplies a function by a real number (scalar multiplication).
+   * @param lhs Function to scale
+   * @param rhs Scalar multiplier
+   * @returns Scaled function @f$ f \cdot c @f$
+   */
   template <class LHSDerived>
   constexpr
   auto
@@ -236,6 +292,12 @@ namespace Rodin::Variational
     return Mult(lhs, RealFunction(rhs));
   }
 
+  /**
+   * @brief Multiplies a function by a complex number (scalar multiplication).
+   * @param lhs Function to scale
+   * @param rhs Complex multiplier
+   * @returns Scaled function @f$ f \cdot z @f$
+   */
   template <class LHSDerived>
   constexpr
   auto
