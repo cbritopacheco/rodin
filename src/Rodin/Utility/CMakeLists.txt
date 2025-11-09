@@ -10,6 +10,7 @@ set(RodinUtility_SRCS Cast.cpp)
 # add_library(RodinUtility ${RodinUtility_SRCS} ${RodinUtility_HEADERS})
 add_library(RodinUtility INTERFACE)
 add_library(Rodin::Utility ALIAS RodinUtility)
+set_target_properties(RodinUtility PROPERTIES EXPORT_NAME Utility)
 
 target_include_directories(RodinUtility
   INTERFACE

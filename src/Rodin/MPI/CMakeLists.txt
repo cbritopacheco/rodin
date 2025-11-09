@@ -19,6 +19,7 @@ set(RodinMPI_SRCS
 
 add_library(RodinMPI ${RodinMPI_HEADERS} ${RodinMPI_SRCS})
 add_library(Rodin::MPI ALIAS RodinMPI)
+set_target_properties(RodinMPI PROPERTIES EXPORT_NAME MPI)
 
 target_include_directories(RodinMPI
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)

@@ -15,6 +15,7 @@ set(RodinScotch_SRCS
 add_library(RodinScotch
   ${RodinScotch_HEADERS} ${RodinScotch_SRCS})
 add_library(Rodin::Scotch ALIAS RodinScotch)
+set_target_properties(RodinScotch PROPERTIES EXPORT_NAME Scotch)
 
 target_include_directories(RodinScotch
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)

@@ -10,6 +10,7 @@ set(RodinSolver_SRCS
 # add_library(RodinSolver ${RodinSolver_SRCS} ${RodinSolver_HEADERS})
 add_library(RodinSolver INTERFACE)
 add_library(Rodin::Solver ALIAS RodinSolver)
+set_target_properties(RodinSolver PROPERTIES EXPORT_NAME Solver)
 
 # ---- OpenMP ----------------------------------------------------------------
 if (RODIN_USE_OPENMP)

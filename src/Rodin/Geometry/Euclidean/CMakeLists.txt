@@ -29,6 +29,7 @@ endif()
 
 add_library(RodinGeometryEuclidean INTERFACE)
 add_library(Rodin::Core::Geometry ALIAS RodinCore)
+set_target_properties(RodinGeometryEuclidean PROPERTIES EXPORT_NAME Geometry::Euclidean)
 target_sources(RodinGeometryEuclidean
   INTERFACE
   ${RodinGeometryEuclidean_SRCS}

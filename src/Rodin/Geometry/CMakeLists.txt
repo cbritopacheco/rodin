@@ -24,6 +24,7 @@ set(RodinGeometry_SRCS
 
 add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})
 add_library(Rodin::Geometry ALIAS RodinGeometry)
+set_target_properties(RodinGeometry PROPERTIES EXPORT_NAME Geometry)
 
 target_link_libraries(RodinGeometry
   PUBLIC
