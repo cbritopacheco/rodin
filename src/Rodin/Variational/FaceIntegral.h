@@ -7,6 +7,23 @@
 #ifndef RODIN_VARIATIONAL_FACEINTEGRAL_H
 #define RODIN_VARIATIONAL_FACEINTEGRAL_H
 
+/**
+ * @file
+ * @brief Face integrals for interior and boundary faces.
+ *
+ * This file defines integrals over faces (codimension-1 entities) in a mesh.
+ * Face integrals appear in:
+ * - Discontinuous Galerkin (DG) methods
+ * - Interior penalty methods
+ * - Flux-based formulations
+ * - Interface conditions
+ *
+ * For a face @f$ F @f$ between elements @f$ K^+ @f$ and @f$ K^- @f$:
+ * @f[
+ *   \int_F f \, ds
+ * @f]
+ */
+
 #include <memory>
 #include <utility>
 

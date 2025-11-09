@@ -1,5 +1,32 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_FACENORMAL_H
 #define RODIN_VARIATIONAL_FACENORMAL_H
+
+/**
+ * @file
+ * @brief Outward unit normal vector on mesh faces.
+ *
+ * This file defines the outward unit normal vector @f$ \mathbf{n} @f$ on interior
+ * and boundary faces of a mesh. For interior faces, the orientation depends on
+ * the choice of "positive" and "negative" sides of the face.
+ *
+ * ## Mathematical Definition
+ * The face normal @f$ \mathbf{n} @f$ is perpendicular to the face and satisfies:
+ * @f[
+ *   \|\mathbf{n}\| = 1
+ * @f]
+ *
+ * ## Usage
+ * Face normals are essential in:
+ * - Discontinuous Galerkin (DG) methods
+ * - Interior penalty methods
+ * - Flux computations across element interfaces
+ */
 
 #include <Eigen/Geometry>
 

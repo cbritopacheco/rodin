@@ -7,6 +7,23 @@
 #ifndef RODIN_VARIATIONAL_INTERFACEINTEGRAL_H
 #define RODIN_VARIATIONAL_INTERFACEINTEGRAL_H
 
+/**
+ * @file
+ * @brief Interface integrals for discontinuous methods.
+ *
+ * This file defines integrals over interior interfaces between mesh elements.
+ * Interface integrals are crucial in:
+ * - Discontinuous Galerkin (DG) formulations
+ * - Interior penalty DG (IPDG) methods
+ * - Multidomain problems with interface conditions
+ * - Flux computation across element boundaries
+ *
+ * For an interface @f$ \Gamma @f$ between elements @f$ K^+ @f$ and @f$ K^- @f$:
+ * @f[
+ *   \int_\Gamma f \, ds
+ * @f]
+ */
+
 #include <utility>
 
 #include "Rodin/Geometry/Region.h"

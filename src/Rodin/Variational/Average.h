@@ -7,6 +7,19 @@
 #ifndef RODIN_VARIATIONAL_AVERAGE_H
 #define RODIN_VARIATIONAL_AVERAGE_H
 
+/**
+ * @file
+ * @brief Average operator for discontinuous functions across interfaces.
+ *
+ * This file defines the average operator @f$ \{\!\!\{ \cdot \}\!\!\} @f$ used in
+ * discontinuous Galerkin (DG) methods. For a function @f$ u @f$ on an interface
+ * between two elements, the average is:
+ * @f[
+ *   \{\!\!\{ u \}\!\!\} = \frac{u^+ + u^-}{2}
+ * @f]
+ * where @f$ u^+ @f$ and @f$ u^- @f$ denote the values from each side of the interface.
+ */
+
 #include <algorithm>
 
 #include "Rodin/Types.h"

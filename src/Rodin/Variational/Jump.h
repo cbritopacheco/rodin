@@ -7,6 +7,24 @@
 #ifndef RODIN_VARIATIONAL_JUMP_H
 #define RODIN_VARIATIONAL_JUMP_H
 
+/**
+ * @file
+ * @brief Jump operator for discontinuous functions across interfaces.
+ *
+ * This file defines the jump operator @f$ [\![ \cdot ]\!] @f$ used in
+ * discontinuous Galerkin (DG) methods. For a function @f$ u @f$ on an interface
+ * between two elements, the jump is:
+ * @f[
+ *   [\![ u ]\!] = u^+ - u^-
+ * @f]
+ * where @f$ u^+ @f$ and @f$ u^- @f$ denote the values from each side of the interface.
+ *
+ * For vector fields with a normal @f$ \mathbf{n} @f$:
+ * @f[
+ *   [\![ \mathbf{u} ]\!] = \mathbf{u}^+ \cdot \mathbf{n}^+ + \mathbf{u}^- \cdot \mathbf{n}^-
+ * @f]
+ */
+
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
 

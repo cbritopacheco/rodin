@@ -7,6 +7,15 @@
 #ifndef RODIN_VARIATIONAL_RESTRICTION_H
 #define RODIN_VARIATIONAL_RESTRICTION_H
 
+/**
+ * @file
+ * @brief Restriction operators for functions on subdomains.
+ *
+ * This file contains utilities for restricting functions to specific regions
+ * or boundaries of the domain. Currently empty but reserved for future
+ * implementation of restriction operators.
+ */
+
 #include <set>
 
 namespace Rodin::Variational

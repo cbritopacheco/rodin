@@ -1,5 +1,26 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_BOUNDARYNORMAL_H
 #define RODIN_VARIATIONAL_BOUNDARYNORMAL_H
+
+/**
+ * @file
+ * @brief Outward unit normal vector on domain boundaries.
+ *
+ * This file defines the outward unit normal vector @f$ \mathbf{n} @f$ on the
+ * boundary @f$ \partial\Omega @f$ of a domain. The normal satisfies @f$ \|\mathbf{n}\| = 1 @f$
+ * and points outward from the domain.
+ *
+ * ## Usage in Variational Forms
+ * Boundary normals appear naturally in:
+ * - Neumann boundary conditions: @f$ \nabla u \cdot \mathbf{n} = g @f$
+ * - Natural boundary conditions in weak formulations
+ * - Flux computations
+ */
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/SubMesh.h"

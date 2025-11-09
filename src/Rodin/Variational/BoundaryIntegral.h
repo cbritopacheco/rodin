@@ -7,6 +7,18 @@
 #ifndef RODIN_VARIATIONAL_BOUNDARYINTEGRAL_H
 #define RODIN_VARIATIONAL_BOUNDARYINTEGRAL_H
 
+/**
+ * @file
+ * @brief Boundary integrals for variational formulations.
+ *
+ * This file defines boundary integrals over @f$ \partial\Omega @f$, the boundary
+ * of a domain. These integrals are essential for:
+ * - Neumann boundary conditions: @f$ \int_{\partial\Omega} g \cdot v \, ds @f$
+ * - Robin boundary conditions: @f$ \int_{\partial\Omega} (u + \nabla u \cdot \mathbf{n}) v \, ds @f$
+ * - Natural boundary conditions in weak formulations
+ * - Flux computations
+ */
+
 #include <utility>
 
 #include "ForwardDecls.h"

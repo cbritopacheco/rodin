@@ -7,6 +7,16 @@
 #ifndef RODIN_VARIATIONAL_TRACE_H
 #define RODIN_VARIATIONAL_TRACE_H
 
+/**
+ * @file
+ * @brief Matrix trace and function trace operators.
+ *
+ * This file defines two types of trace operations:
+ * 1. **Matrix trace**: For a square matrix @f$ A @f$, @f$ \text{tr}(A) = \sum_i A_{ii} @f$
+ * 2. **Function trace**: Restriction of functions to lower-dimensional manifolds
+ *    (e.g., boundary traces)
+ */
+
 #include "ForwardDecls.h"
 
 #include "ShapeFunction.h"
