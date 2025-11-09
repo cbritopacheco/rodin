@@ -4,6 +4,15 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file ShapeFunction.h
+ * @brief Base class for finite element shape functions and basis functions.
+ *
+ * This file defines the ShapeFunctionBase and ShapeFunction classes, which 
+ * provide the foundation for representing finite element basis functions in
+ * both trial and test spaces. These classes form the core of the finite element
+ * discretization in Rodin's variational framework.
+ */
 #ifndef RODIN_VARIATIONAL_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_SHAPEFUNCTION_H
 
@@ -58,35 +67,83 @@ namespace Rodin::FormLanguage
 namespace Rodin::Variational
 {
   /**
-  * @defgroup ShapeFunctionSpecializations ShapeFunction Template Specializations
-  * @brief Template specializations of the ShapeFunction class.
-  * @see ShapeFunction
-  */
+   * @defgroup ShapeFunctionSpecializations ShapeFunction Template Specializations
+   * @brief Template specializations of the ShapeFunction class.
+   * @see ShapeFunction
+   */
 
+  /**
+   * @brief Type trait to check if a type is a TrialFunction.
+   * @tparam T Type to check
+   */
   template <class T>
   struct IsTrialFunction
   {
+    /// @brief Value is true only if T is a TrialFunction specialization
     static constexpr Boolean Value = false;
   };
 
+  /// @brief Specialization for TrialFunction types
   template <class Solution, class FES>
   struct IsTrialFunction<TrialFunction<Solution, FES>>
   {
     static constexpr Boolean Value = true;
   };
 
+  /**
+   * @brief Type trait to check if a type is a TestFunction.
+   * @tparam T Type to check
+   */
   template <class T>
   struct IsTestFunction
   {
+    /// @brief Value is true only if T is a TestFunction specialization
     static constexpr Boolean Value = false;
   };
 
+  /// @brief Specialization for TestFunction types
   template <class FES>
   struct IsTestFunction<TestFunction<FES>>
   {
     static constexpr Boolean Value = true;
   };
 
+  /**
+   * @ingroup RodinVariational
+   * @brief Base class for shape functions in finite element spaces.
+   *
+   * ShapeFunctionBase provides the foundation for representing finite element
+   * basis functions (shape functions) in both trial and test spaces. Shape 
+   * functions are the building blocks of finite element approximations.
+   *
+   * ## Mathematical Foundation
+   * In the finite element method, functions are approximated using a linear
+   * combination of basis functions (shape functions):
+   * @f[
+   *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
+   * @f]
+   * where:
+   * - @f$ \phi_i(x) @f$ are the shape functions
+   * - @f$ u_i @f$ are the degrees of freedom (coefficients)
+   * - @f$ N @f$ is the number of basis functions
+   *
+   * Shape functions have specific properties:
+   * - **Local support**: Each @f$ \phi_i @f$ is non-zero only on elements adjacent to node @f$ i @f$
+   * - **Partition of unity**: @f$ \sum_{i=1}^N \phi_i(x) = 1 @f$ for all @f$ x @f$
+   * - **Nodal property**: For Lagrange elements, @f$ \phi_i(x_j) = \delta_{ij} @f$
+   *
+   * ## Usage
+   * ShapeFunctionBase is a CRTP base class. Derived classes include:
+   * - TrialFunction: Represents @f$ u @f$ in the trial space
+   * - TestFunction: Represents @f$ v @f$ in the test space
+   * - Various operators: Grad, Div, Curl, etc.
+   *
+   * @tparam Derived Derived class (CRTP pattern)
+   * @tparam FES Finite element space type
+   * @tparam SpaceType Either TrialSpace or TestSpace
+   *
+   * @see TrialFunction, TestFunction
+   */
   template <
     class Derived,
     class FES = typename FormLanguage::Traits<Derived>::FESType,
@@ -94,26 +151,43 @@ namespace Rodin::Variational
   class ShapeFunctionBase : public FormLanguage::Base
   {
     public:
+      /// @brief Finite element space type
       using FESType = FES;
+      
+      /// @brief Space type (trial or test)
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
+      /// @brief Scalar type from the finite element space
       using ScalarType =
         typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Parent class type
       using Parent =
         FormLanguage::Base;
 
+      /**
+       * @brief Constructs a shape function in the given finite element space.
+       * @param[in] fes Finite element space
+       */
       constexpr
       ShapeFunctionBase(const FES& fes)
         : m_fes(fes)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Shape function to copy
+       */
       constexpr
       ShapeFunctionBase(const ShapeFunctionBase& other)
         : Parent(other),
           m_fes(other.m_fes)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Shape function to move
+       */
       constexpr
       ShapeFunctionBase(ShapeFunctionBase&& other)
         : Parent(std::move(other)),
@@ -121,8 +195,8 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief Indicates whether the shape function is part of a %Trial or %Test
-       * function expression.
+       * @brief Indicates whether the shape function is part of a trial or test space.
+       * @returns The space type (TrialSpace or TestSpace)
        */
       constexpr
       ShapeFunctionSpaceType getSpaceType() const
@@ -130,21 +204,37 @@ namespace Rodin::Variational
         return Space;
       }
 
+      /**
+       * @brief Gets the x-component of a vector-valued shape function.
+       * @returns Component expression representing the x-component
+       */
       auto x() const
       {
         return Component(*this, 0);
       }
 
+      /**
+       * @brief Gets the y-component of a vector-valued shape function.
+       * @returns Component expression representing the y-component
+       */
       auto y() const
       {
         return Component(*this, 1);
       }
 
+      /**
+       * @brief Gets the z-component of a vector-valued shape function.
+       * @returns Component expression representing the z-component
+       */
       auto z() const
       {
         return Component(*this, 2);
       }
 
+      /**
+       * @brief Gets the transpose of a matrix-valued shape function.
+       * @returns Transpose expression
+       */
       constexpr
       auto T() const
       {
