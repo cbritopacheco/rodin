@@ -92,6 +92,7 @@ jobs:
           brew update
           brew install \
             boost \
+            boost-mpi \
             eigen \
             libomp \
             open-mpi \
