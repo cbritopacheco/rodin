@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1762647244781,
+  "lastUpdate": 1762701385826,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -36022,6 +36022,162 @@ window.BENCHMARK_DATA = {
             "value": 52.50443068833316,
             "unit": "ns/iter",
             "extra": "iterations: 11985948\ncpu: 52.50133831716943 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "198982749+Copilot@users.noreply.github.com",
+            "name": "Copilot",
+            "username": "Copilot"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "de679c1e930f32c183bef547aa4f4c215ca33c26",
+          "message": "Add complete CMake installation support for first library release (#126)\n\n* Initial plan\n\n* Add complete CMake installation support for library release\n\n- Add install commands for all missing library modules (Solver, Math, Test, PETSc, Scotch, MPI, Plot, Geometry/Euclidean)\n- Fix RodinConfig.cmake.in to find all required dependencies (Boost, Threads, OpenMP)\n- Fix include directory paths for proper installation\n- Fix INTERFACE library targets to use generator expressions\n- Add termcolor headers installation for Alert module\n- Comment out RodinExternalMMG from export (depends on bundled MMG)\n- Verified installation and linking with external test project\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive documentation for first release\n\n- Create INSTALL.md with detailed installation instructions\n- Create RELEASE_CHECKLIST.md for GitHub release preparation\n- Update README.md with installation section and link to INSTALL.md\n- Document all CMake configuration options\n- Add troubleshooting section\n- Include usage examples for linking against installed library\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add GitHub Copilot instructions for repository (#128)\n\n* Initial plan\n\n* Add GitHub Copilot instructions for repository\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix exported CMake target names to use Rodin::Module format\n\nSet EXPORT_NAME property on all library targets to export as Rodin::Geometry,\nRodin::Variational, etc. instead of Rodin::RodinGeometry, Rodin::RodinVariational.\nThis makes the target names cleaner and more consistent with user expectations.\n\nUpdated INSTALL.md to reflect the corrected target names in documentation and examples.\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* CI for MPI and PETSC\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* Enable MPI and PETSc in Build workflow\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* Move resources installation path to share/Rodin/resources/\n\nChanged installation destination from share/resources/ to share/Rodin/resources/\nto better organize the installed files under the Rodin namespace.\n\nUpdated INSTALL.md to reflect the new resources path.\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>",
+          "timestamp": "2025-11-09T16:09:46+01:00",
+          "tree_id": "badc427097f327c0e6444439ec8a8defdbf0bbc8",
+          "url": "https://github.com/cbritopacheco/rodin/commit/de679c1e930f32c183bef547aa4f4c215ca33c26"
+        },
+        "date": 1762701379812,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.3184000951082911,
+            "unit": "ns/iter",
+            "extra": "iterations: 1991649939\ncpu: 0.3183877711554009 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.3148044427862672,
+            "unit": "ns/iter",
+            "extra": "iterations: 2251889928\ncpu: 0.3147807697819235 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.3107618977903897,
+            "unit": "ns/iter",
+            "extra": "iterations: 2251939488\ncpu: 0.3107500426761023 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.3109109647810574,
+            "unit": "ns/iter",
+            "extra": "iterations: 2251765384\ncpu: 0.3108975237715086 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 622.5832930684843,
+            "unit": "ns/iter",
+            "extra": "iterations: 1123809\ncpu: 622.5553710639442 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 125558.02566884199,
+            "unit": "ns/iter",
+            "extra": "iterations: 5532\ncpu: 125548.89497469265 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 550589.9177657256,
+            "unit": "ns/iter",
+            "extra": "iterations: 1289\ncpu: 550550.603568658 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 1111.763091072769,
+            "unit": "ns/iter",
+            "extra": "iterations: 627355\ncpu: 1111.6940424480558 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 224677.05080385314,
+            "unit": "ns/iter",
+            "extra": "iterations: 3110\ncpu: 224673.56270096483 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 975231.4335180264,
+            "unit": "ns/iter",
+            "extra": "iterations: 722\ncpu: 975160.0567867038 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 256580.1369812781,
+            "unit": "ns/iter",
+            "extra": "iterations: 2723\ncpu: 256571.0870363567 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 245938.5565001829,
+            "unit": "ns/iter",
+            "extra": "iterations: 2823\ncpu: 245925.24512929498 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 13569.326656664876,
+            "unit": "ns/iter",
+            "extra": "iterations: 51323\ncpu: 13568.874403288984 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 6146820.704347904,
+            "unit": "ns/iter",
+            "extra": "iterations: 115\ncpu: 6146541.173913055 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 110743.73097568723,
+            "unit": "ns/iter",
+            "extra": "iterations: 6334\ncpu: 110732.68740132629 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2098222.2835821416,
+            "unit": "ns/iter",
+            "extra": "iterations: 335\ncpu: 2098038.220895526 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9200102.565789562,
+            "unit": "ns/iter",
+            "extra": "iterations: 76\ncpu: 9199593.98684209 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 42826119.53846509,
+            "unit": "ns/iter",
+            "extra": "iterations: 13\ncpu: 42823085.153846234 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 301590231.99999523,
+            "unit": "ns/iter",
+            "extra": "iterations: 2\ncpu: 301540961.49999887 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_16x16",
+            "value": 52.09354702354889,
+            "unit": "ns/iter",
+            "extra": "iterations: 13233986\ncpu: 52.073120071307244 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_32x32",
+            "value": 52.04980777066145,
+            "unit": "ns/iter",
+            "extra": "iterations: 13074747\ncpu: 52.04816858024071 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_64x64",
+            "value": 52.60759881728713,
+            "unit": "ns/iter",
+            "extra": "iterations: 11876743\ncpu: 52.60495019552076 ns\nthreads: 1"
           }
         ]
       }
