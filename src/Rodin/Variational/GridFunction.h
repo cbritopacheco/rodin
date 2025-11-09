@@ -39,17 +39,27 @@
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Traits specialization for GridFunctionBase.
+   */
   template <class Derived, class FES, class Data>
   struct Traits<Variational::GridFunctionBase<Derived, FES, Data>>
   {
+    /// @brief Finite element space type
     using FESType = FES;
+    /// @brief Data storage type
     using DataType = Data;
   };
 
+  /**
+   * @brief Traits specialization for GridFunction.
+   */
   template <class FES, class Data>
   struct Traits<Variational::GridFunction<FES, Data>>
   {
+    /// @brief Finite element space type
     using FESType = FES;
+    /// @brief Data storage type
     using DataType = Data;
   };
 }

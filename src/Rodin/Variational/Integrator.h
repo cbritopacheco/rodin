@@ -17,15 +17,25 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @ingroup RodinVariational
+   * @brief Base class for integrators in finite element assembly.
+   *
+   * Integrators compute element-level contributions for forms (bilinear or linear).
+   */
   class Integrator : public FormLanguage::Base
   {
     public:
+      /// @brief Parent class type
       using Parent = FormLanguage::Base;
 
+      /**
+       * @brief Integrator type enumeration.
+       */
       enum class Type
       {
-        Linear,
-        Bilinear
+        Linear,   ///< Linear form integrator
+        Bilinear  ///< Bilinear form integrator
       };
 
       Integrator() = default;

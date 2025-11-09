@@ -137,9 +137,10 @@ namespace Rodin::Variational
   class FiniteElementSpace : public FiniteElementSpaceBase
   {
     public:
-      /// Parent class
+      /// @brief Parent class type
       using Parent = FiniteElementSpaceBase;
 
+      /// @brief Mesh type for this finite element space
       using MeshType = Mesh;
 
       constexpr
