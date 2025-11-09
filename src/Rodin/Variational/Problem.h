@@ -172,39 +172,51 @@ namespace Rodin::Variational
   class ProblemUVBase : public ProblemBase<LinearSystem>
   {
     public:
+      /// @brief Trial function type
       using TrialFunctionType =
         U;
 
+      /// @brief Test function type
       using TestFunctionType =
         V;
 
+      /// @brief Linear system type for the discrete problem
       using LinearSystemType =
         LinearSystem;
 
+      /// @brief Solver base type
       using SolverBaseType =
         Solver::SolverBase<LinearSystem>;
 
+      /// @brief Solution type from trial function traits
       using SolutionType =
         typename FormLanguage::Traits<TrialFunctionType>::SolutionType;
 
+      /// @brief Trial finite element space type
       using TrialFESType =
         typename FormLanguage::Traits<U>::FESType;
 
+      /// @brief Test finite element space type
       using TestFESType =
         typename FormLanguage::Traits<V>::FESType;
 
+      /// @brief Matrix operator type
       using OperatorType =
         typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
+      /// @brief Vector type for right-hand side
       using VectorType =
         typename FormLanguage::Traits<LinearSystem>::VectorType;
 
+      /// @brief Scalar type for numerical values
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
+      /// @brief Scalar type from trial finite element space
       using TrialFESScalarType =
         typename FormLanguage::Traits<TrialFESType>::ScalarType;
 
+      /// @brief Scalar type from test finite element space
       using TestFESScalarType =
         typename FormLanguage::Traits<TestFESType>::ScalarType;
 

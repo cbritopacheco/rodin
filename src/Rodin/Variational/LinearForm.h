@@ -28,16 +28,25 @@
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Traits specialization for LinearFormBase.
+   */
   template <class Vector>
   struct Traits<Variational::LinearFormBase<Vector>>
   {
+    /// @brief Vector type for discrete representation
     using VectorType = Vector;
   };
 
+  /**
+   * @brief Traits specialization for LinearForm.
+   */
   template <class FES, class Vector>
   struct Traits<Variational::LinearForm<FES, Vector>>
   {
+    /// @brief Finite element space type
     using FESType = FES;
+    /// @brief Vector type for discrete representation
     using VectorType = Vector;
   };
 }
@@ -98,18 +107,31 @@ namespace Rodin::Variational
       constexpr
       LinearFormBase() = default;
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Linear form to copy from
+       */
       constexpr
       LinearFormBase(const LinearFormBase& other)
         : Parent(other),
           m_lfis(other.m_lfis)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Linear form to move from
+       */
       constexpr
       LinearFormBase(LinearFormBase&& other)
         : Parent(std::move(other)),
           m_lfis(std::move(other.m_lfis))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Linear form to copy from
+       * @returns Reference to this instance
+       */
       LinearFormBase& operator=(const LinearFormBase& other)
       {
         if (this != &other)
@@ -120,6 +142,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Linear form to move from
+       * @returns Reference to this instance
+       */
       LinearFormBase& operator=(LinearFormBase&& other) noexcept
       {
         if (this != &other)

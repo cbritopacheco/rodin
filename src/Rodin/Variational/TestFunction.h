@@ -17,10 +17,15 @@
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Traits specialization for TestFunction.
+   */
   template <class FES>
   struct Traits<Variational::TestFunction<FES>>
   {
+    /// @brief Finite element space type
     using FESType = FES;
+    /// @brief Space type identifier (Test space)
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TestSpace;
   };
 }

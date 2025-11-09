@@ -19,12 +19,18 @@
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Traits specialization for TrialFunction.
+   */
   template <class Solution, class FES>
   struct Traits<Variational::TrialFunction<Solution, FES>>
   {
+    /// @brief Finite element space type
     using FESType = FES;
+    /// @brief Space type identifier (Trial space)
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TrialSpace;
 
+    /// @brief Solution storage type
     using SolutionType = Solution;
   };
 }

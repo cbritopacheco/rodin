@@ -31,18 +31,29 @@
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Traits specialization for BilinearFormBase.
+   */
   template <class Operator>
   struct Traits<Variational::BilinearFormBase<Operator>>
   {
+    /// @brief Matrix operator type
     using OperatorType = Operator;
   };
 
+  /**
+   * @brief Traits specialization for BilinearForm.
+   */
   template <class Solution, class TrialFES, class TestFES, class Operator>
   struct Traits<Variational::BilinearForm<Solution, TrialFES, TestFES, Operator>>
   {
+    /// @brief Solution type for trial function
     using SolutionType = Solution;
+    /// @brief Trial finite element space type
     using TrialFESType = TrialFES;
+    /// @brief Test finite element space type
     using TestFESType = TestFES;
+    /// @brief Matrix operator type
     using OperatorType = Operator;
   };
 }
@@ -86,18 +97,23 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<OperatorType>::ScalarType;
 
+      /// @brief Parent class type
       using Parent =
         FormLanguage::Base;
 
+      /// @brief Local bilinear form integrator base type
       using LocalBilinearFormIntegratorBaseType =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Global bilinear form integrator base type
       using GlobalBilinearFormIntegratorBaseType =
         GlobalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief List type for local bilinear form integrators
       using LocalBilinearFormIntegratorBaseListType =
         FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
 
+      /// @brief List type for global bilinear form integrators
       using GlobalBilinearFormIntegratorBaseListType =
         FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
