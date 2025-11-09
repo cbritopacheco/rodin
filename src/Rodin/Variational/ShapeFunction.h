@@ -253,7 +253,8 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the number of degrees of freedom for the given polytope.
-       * @param[in] polytope Polytope
+       * @param[in] polytope Polytope (element) for which to count DOFs
+       * @returns Number of degrees of freedom
        * @note CRTP function to be overriden in the Derived class.
        */
       constexpr
@@ -262,12 +263,23 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getDOFs(polytope);
       }
 
+      /**
+       * @brief Gets the current evaluation point.
+       * @returns Reference to the point
+       * @note CRTP function to be overriden in the Derived class.
+       */
       constexpr
       const Geometry::Point& getPoint() const
       {
         return static_cast<const Derived&>(*this).getPoint();
       }
 
+      /**
+       * @brief Sets the evaluation point for the shape function.
+       * @param[in] p Point at which to evaluate
+       * @returns Reference to the derived object
+       * @note CRTP function to be overriden in the Derived class.
+       */
       constexpr
       Derived& setPoint(const Geometry::Point& p)
       {
@@ -275,9 +287,9 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets an expression which yields the shape function basis at the
-       * given point.
-       * @param[in] p Point where the shape function basis will be calculated
+       * @brief Gets the basis function at the specified local index.
+       * @param[in] local Local index of the basis function
+       * @returns Expression representing the basis function
        * @note CRTP function to be overriden in the Derived class.
        */
       constexpr
@@ -287,10 +299,11 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Call operator to get an expression which yields the shape
-       * function basis at the given point.
+       * @brief Call operator to get the basis function at the specified index.
+       * @param[in] local Local index of the basis function
+       * @returns Expression representing the basis function
        *
-       * Synonym to getBasis(size_t).
+       * This is a synonym for getBasis(size_t).
        */
       constexpr
       decltype(auto) operator()(size_t local) const
@@ -299,8 +312,8 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets the finite element space to which the shape function
-       * belongs to.
+       * @brief Gets the finite element space to which the shape function belongs.
+       * @returns Const reference to the finite element space
        */
       constexpr
       const FES& getFiniteElementSpace() const
@@ -308,16 +321,28 @@ namespace Rodin::Variational
         return m_fes.get();
       }
 
+      /**
+       * @brief Gets the derived object (mutable).
+       * @returns Reference to derived object
+       */
       Derived& getDerived() noexcept
       {
         return static_cast<Derived&>(*this);
       }
 
+      /**
+       * @brief Gets the derived object (const).
+       * @returns Const reference to derived object
+       */
       const Derived& getDerived() const noexcept
       {
         return static_cast<const Derived&>(*this);
       }
 
+      /**
+       * @brief Creates a polymorphic copy of the shape function.
+       * @returns Pointer to newly allocated copy
+       */
       virtual ShapeFunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
@@ -328,25 +353,41 @@ namespace Rodin::Variational
   };
 
   /**
-  * @ingroup ShapeFunctionSpecializations
-  * @brief ShapeFunction
-  */
+   * @ingroup ShapeFunctionSpecializations
+   * @brief Intermediate shape function class for CRTP derivation.
+   *
+   * This class provides an intermediate layer in the ShapeFunction hierarchy,
+   * allowing for further specialization while maintaining the common interface.
+   * It is used as a base for specific shape function implementations like
+   * TestFunction and TrialFunction.
+   *
+   * @tparam Derived Final derived class
+   * @tparam FES Finite element space type
+   * @tparam Space Space type (trial or test)
+   */
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
   class ShapeFunction
     : public ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>
   {
     public:
+      /// @brief Finite element space type
       using FESType = FES;
+      
+      /// @brief Space type (trial or test)
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar type from the finite element space
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Range type from the finite element space
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Parent class type
       using Parent =
         ShapeFunctionBase<
           ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>;
 
+      /// @brief Default constructor is deleted
       ShapeFunction() = delete;
 
       constexpr

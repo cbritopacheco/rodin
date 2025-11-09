@@ -4,6 +4,18 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Jump.h
+ * @brief Jump operator for interface discontinuities in DG methods.
+ *
+ * This file defines the Jump class, which computes the jump (difference) in
+ * function values across element interfaces. This operator is fundamental for
+ * Discontinuous Galerkin (DG) formulations where functions are allowed to be
+ * discontinuous at element boundaries.
+ *
+ * @note This file contains placeholder code that is currently commented out.
+ *       The Jump operator implementation is under development.
+ */
 #ifndef RODIN_VARIATIONAL_JUMP_H
 #define RODIN_VARIATIONAL_JUMP_H
 
@@ -12,6 +24,44 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @ingroup RodinVariational
+   * @brief Jump operator for computing interface jumps.
+   *
+   * The Jump operator computes the jump (discontinuity) in a function's value
+   * across an interface (face) between two adjacent elements:
+   * @f[
+   *   [\![u]\!] = u^+ - u^-
+   * @f]
+   * where @f$ u^+ @f$ and @f$ u^- @f$ denote the values from the two sides
+   * of the interface (with a chosen orientation).
+   *
+   * ## Mathematical Foundation
+   * In Discontinuous Galerkin (DG) methods, functions are allowed to be
+   * discontinuous across element interfaces. The jump operator captures this
+   * discontinuity and is used in:
+   * - **Interior Penalty terms**: @f$ \int_{\Gamma_h} [\![u]\!] \cdot [\![v]\!] \, ds @f$
+   * - **Consistency terms**: @f$ \int_{\Gamma_h} \{\!\{\nabla u\}\!\} \cdot [\![v]\!] \, ds @f$
+   * - **Flux terms**: @f$ \int_{\Gamma_h} [\![u]\!] \cdot \{\!\{\nabla v\}\!\} \, ds @f$
+   *
+   * where @f$ \Gamma_h @f$ denotes the set of interior faces.
+   *
+   * ## Convention
+   * The sign of the jump depends on the chosen normal direction:
+   * - For scalar functions: @f$ [\![u]\!] = u^+ n^+ + u^- n^- @f$
+   * - For vector functions: @f$ [\![u]\!] = u^+ \otimes n^+ + u^- \otimes n^- @f$
+   *
+   * ## Usage Example (when implemented)
+   * ```cpp
+   * // DG interior penalty term
+   * auto penalty = InterfaceIntegral(Jump(u), Jump(v));
+   * ```
+   *
+   * @note This class is currently under development. The implementation is
+   *       commented out pending completion.
+   *
+   * @see Average
+   */
   // template <class Derived, class FES, ShapeFunctionSpaceType Space>
   // class Jump<ShapeFunctionBase<Derived, FES, Space>> final
   //   : public ShapeFunctionBase<Jump<ShapeFunctionBase<Derived, FES, Space>>>
