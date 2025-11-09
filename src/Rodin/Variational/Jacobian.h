@@ -4,6 +4,41 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Jacobian.h
+ * @brief Jacobian matrix operator for vector-valued functions.
+ *
+ * This file defines the Jacobian class, which computes the Jacobian matrix
+ * (matrix of all first-order partial derivatives) of vector-valued functions
+ * in variational formulations.
+ *
+ * ## Mathematical Foundation
+ * For a vector-valued function @f$ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^n @f$,
+ * the Jacobian matrix is defined as:
+ * @f[
+ *   J_{ij} = \frac{\partial u_i}{\partial x_j}
+ * @f]
+ * resulting in an @f$ n \times d @f$ matrix.
+ *
+ * ## Special Cases
+ * - When @f$ n = d @f$, the determinant @f$ \det(J) @f$ appears in change of variables
+ * - For @f$ d = n = 2,3 @f$, related to deformation gradient in mechanics
+ * - Transpose @f$ J^T @f$ gives the gradient of components
+ *
+ * ## Applications
+ * - Nonlinear elasticity: deformation gradient tensor
+ * - Fluid dynamics: velocity gradient tensor
+ * - Differential geometry: metric tensor computations
+ * - Coordinate transformations
+ *
+ * ## Usage Example
+ * ```cpp
+ * // Displacement gradient for elasticity
+ * P1 Vh(mesh, mesh.getSpaceDimension());
+ * GridFunction<P1> u(Vh);
+ * auto F = Jacobian(u);  // Deformation gradient F = ∇u
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_JACOBIAN_H
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
@@ -19,7 +54,14 @@ namespace Rodin::Variational
    */
 
   /**
-   * @brief Base class for Jacobian classes.
+   * @ingroup RodinVariational
+   * @brief Base class for Jacobian matrix operator implementations.
+   *
+   * JacobianBase provides the foundation for computing Jacobian matrices of
+   * vector-valued functions.
+   *
+   * @tparam Operand Type of the vector function
+   * @tparam Derived Derived class (CRTP pattern)
    */
   template <class Operand, class Derived>
   class JacobianBase;

@@ -1,3 +1,41 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file Derivative.h
+ * @brief Directional derivative operator for scalar functions.
+ *
+ * This file defines the Derivative class, which computes directional derivatives
+ * of scalar functions. This generalizes the gradient concept to derivatives
+ * in specific directions.
+ *
+ * ## Mathematical Foundation
+ * The directional derivative of a function @f$ u @f$ in direction @f$ \mathbf{v} @f$ is:
+ * @f[
+ *   D_{\mathbf{v}} u = \nabla u \cdot \mathbf{v} = \lim_{h \to 0} \frac{u(x + h\mathbf{v}) - u(x)}{h}
+ * @f]
+ *
+ * ## Coordinate Derivatives
+ * Special cases are partial derivatives:
+ * - @f$ \frac{\partial u}{\partial x_i} = D_{\mathbf{e}_i} u @f$
+ * where @f$ \mathbf{e}_i @f$ is the @f$ i @f$-th coordinate direction.
+ *
+ * ## Applications
+ * - Normal derivatives: @f$ \frac{\partial u}{\partial n} = \nabla u \cdot \mathbf{n} @f$
+ * - Material derivatives in fluid dynamics
+ * - Characteristic methods for PDEs
+ * - Shape sensitivity analysis
+ *
+ * ## Usage Example
+ * ```cpp
+ * // Normal derivative on boundary
+ * auto n = BoundaryNormal();
+ * auto normal_deriv = Derivative(u, n);  // ∂u/∂n = ∇u·n
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_DERIVATIVE_H
 #define RODIN_VARIATIONAL_DERIVATIVE_H
 
@@ -22,7 +60,14 @@ namespace Rodin::FormLanguage
 namespace Rodin::Variational
 {
   /**
-   * @brief Base class for Grad classes.
+   * @ingroup RodinVariational
+   * @brief Base class for directional derivative operators.
+   *
+   * DerivativeBase provides the foundation for computing directional derivatives
+   * of scalar functions in specified directions.
+   *
+   * @tparam Operand Type of the function being differentiated
+   * @tparam Derived Derived class (CRTP pattern)
    */
   template <class Operand, class Derived>
   class DerivativeBase;
