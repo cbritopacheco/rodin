@@ -43,12 +43,15 @@ target_link_libraries(RodinPETSc
   PUBLIC
   Rodin::Geometry
   Rodin::Alert
-  Rodin::MPI
   Rodin::Math
   Rodin::Variational
   Rodin::Assembly
   Rodin::FormLanguage
   PETSc::PETSc)
+
+if (RODIN_USE_MPI)
+  target_link_libraries(RodinPETSc PUBLIC Rodin::MPI)
+endif()
 
 if (RODIN_USE_OPENMP)
   find_package(OpenMP REQUIRED)
