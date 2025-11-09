@@ -7,6 +7,15 @@
 #ifndef RODIN_VARIATIONAL_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_SHAPEFUNCTION_H
 
+/**
+ * @file
+ * @brief Shape functions for finite element basis functions.
+ *
+ * This file defines the base classes for shape functions in Rodin's variational
+ * framework. Shape functions represent the finite element basis functions that
+ * are used to approximate trial and test functions in variational formulations.
+ */
+
 #include "ForwardDecls.h"
 
 #include "Rodin/Geometry/Point.h"
@@ -63,30 +72,76 @@ namespace Rodin::Variational
   * @see ShapeFunction
   */
 
+  /**
+   * @brief Type trait to identify trial functions.
+   * @tparam T Type to check
+   */
   template <class T>
   struct IsTrialFunction
   {
-    static constexpr Boolean Value = false;
+    static constexpr Boolean Value = false;  ///< False for non-trial functions
   };
 
+  /**
+   * @brief Type trait specialization for trial functions.
+   */
   template <class Solution, class FES>
   struct IsTrialFunction<TrialFunction<Solution, FES>>
   {
-    static constexpr Boolean Value = true;
+    static constexpr Boolean Value = true;  ///< True for trial functions
   };
 
+  /**
+   * @brief Type trait to identify test functions.
+   * @tparam T Type to check
+   */
   template <class T>
   struct IsTestFunction
   {
-    static constexpr Boolean Value = false;
+    static constexpr Boolean Value = false;  ///< False for non-test functions
   };
 
+  /**
+   * @brief Type trait specialization for test functions.
+   */
   template <class FES>
   struct IsTestFunction<TestFunction<FES>>
   {
-    static constexpr Boolean Value = true;
+    static constexpr Boolean Value = true;  ///< True for test functions
   };
 
+  /**
+   * @ingroup RodinVariational
+   * @brief Base class for shape functions in variational formulations.
+   *
+   * ShapeFunctionBase provides the foundation for representing finite element
+   * basis functions. These are the building blocks for approximating trial and
+   * test functions in the finite element method.
+   *
+   * ## Mathematical Foundation
+   *
+   * Shape functions (or basis functions) @f$ \phi_i @f$ satisfy:
+   * - **Local support**: Each @f$ \phi_i @f$ is non-zero only on a small number of elements
+   * - **Partition of unity**: @f$ \sum_i \phi_i(x) = 1 @f$ for certain elements
+   * - **Interpolation property**: For nodal elements, @f$ \phi_i(x_j) = \delta_{ij} @f$
+   *
+   * The finite element approximation is:
+   * @f[
+   *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
+   * @f]
+   *
+   * ## Space Types
+   *
+   * Shape functions can be either:
+   * - **Trial functions**: Represent the unknown solution @f$ u @f$
+   * - **Test functions**: Represent the test function @f$ v @f$
+   *
+   * @tparam Derived Derived class (CRTP pattern)
+   * @tparam FES Finite element space type
+   * @tparam SpaceType Trial or test space identifier
+   *
+   * @see TrialFunction, TestFunction, FiniteElementSpace
+   */
   template <
     class Derived,
     class FES = typename FormLanguage::Traits<Derived>::FESType,
@@ -94,26 +149,41 @@ namespace Rodin::Variational
   class ShapeFunctionBase : public FormLanguage::Base
   {
     public:
+      /// @brief Finite element space type
       using FESType = FES;
+      
+      /// @brief Trial or test space identifier
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
+      /// @brief Scalar type for computations
       using ScalarType =
         typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Parent class type
       using Parent =
         FormLanguage::Base;
 
+      /**
+       * @brief Constructs shape function on a finite element space.
+       * @param[in] fes Finite element space
+       */
       constexpr
       ShapeFunctionBase(const FES& fes)
         : m_fes(fes)
       {}
 
+      /**
+       * @brief Copy constructor.
+       */
       constexpr
       ShapeFunctionBase(const ShapeFunctionBase& other)
         : Parent(other),
           m_fes(other.m_fes)
       {}
 
+      /**
+       * @brief Move constructor.
+       */
       constexpr
       ShapeFunctionBase(ShapeFunctionBase&& other)
         : Parent(std::move(other)),
@@ -121,8 +191,8 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief Indicates whether the shape function is part of a %Trial or %Test
-       * function expression.
+       * @brief Gets the space type (trial or test).
+       * @returns Space type identifier
        */
       constexpr
       ShapeFunctionSpaceType getSpaceType() const
@@ -130,16 +200,28 @@ namespace Rodin::Variational
         return Space;
       }
 
+      /**
+       * @brief Gets the x-component.
+       * @returns Component expression for x-coordinate
+       */
       auto x() const
       {
         return Component(*this, 0);
       }
 
+      /**
+       * @brief Gets the y-component.
+       * @returns Component expression for y-coordinate
+       */
       auto y() const
       {
         return Component(*this, 1);
       }
 
+      /**
+       * @brief Gets the z-component.
+       * @returns Component expression for z-coordinate
+       */
       auto z() const
       {
         return Component(*this, 2);
