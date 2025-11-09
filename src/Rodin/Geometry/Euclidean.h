@@ -7,7 +7,11 @@
 #ifndef RODIN_GEOMETRY_EUCLIDEAN_H
 #define RODIN_GEOMETRY_EUCLIDEAN_H
 
+/**
+ * @file
+ * @brief Euclidean geometry utilities for the Rodin::Geometry module.
+ */
+
 #include "Euclidean/Common.h"
 
 #endif
-
