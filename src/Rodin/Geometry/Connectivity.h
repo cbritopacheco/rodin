@@ -30,11 +30,20 @@ namespace Rodin::Geometry
   {
     public:
       virtual Polytope::Type getGeometry(size_t d, Index idx) const = 0;
+
       virtual const Array<Index>& getPolytope(size_t d, Index idx) const = 0;
+
       virtual size_t getCount(size_t dim) const = 0;
+
       virtual size_t getCount(Polytope::Type g) const = 0;
-      virtual size_t getMeshDimension() const = 0;
+
+      /**
+       * @brief Returns the topological dimension.
+       */
+      virtual size_t getDimension() const = 0;
+
       virtual const Incidence& getIncidence(size_t d, size_t dp) const = 0;
+
       virtual const IndexVector& getIncidence(const std::pair<size_t, size_t> p, Index idx) const = 0;
   };
 
@@ -111,6 +120,10 @@ namespace Rodin::Geometry
 
       Connectivity& operator=(Connectivity&&) = default;
 
+      /**
+       * @brief Initializes the connectivity for a mesh of given maximal
+       * dimension.
+       */
       Connectivity& initialize(size_t maximalDimension);
 
       /**
@@ -171,7 +184,7 @@ namespace Rodin::Geometry
 
       size_t getCount(Polytope::Type g) const override;
 
-      size_t getMeshDimension() const override;
+      size_t getDimension() const override;
 
       Polytope::Type getGeometry(size_t d, Index idx) const override;
 

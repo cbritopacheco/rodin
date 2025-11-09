@@ -10,8 +10,19 @@
 #include <string>
 #include <vector>
 #include <type_traits>
+#include <optional>
+#include <functional>
 
 #include "Rodin/Utility.h"
+#include "Rodin/Utility/Zip.h"
+#include "Rodin/Utility/Product.h"
+#include "Rodin/Utility/Repeat.h"
+#include "Rodin/Utility/UnwrapReference.h"
+#include "Rodin/Utility/HasTypeMember.h"
+#include "Rodin/Utility/HasValueMember.h"
+#include "Rodin/Utility/Extract.h"
+#include "Rodin/Pair.h"
+#include "Rodin/Tuple.h"
 
 using namespace Rodin::Utility;
 
@@ -246,4 +257,395 @@ TEST_F(UtilityIntegrationTest, VariantWithSpecializationDetection)
   EXPECT_EQ(std::visit(visitor, var1), "Found vector with 3 elements");
   EXPECT_EQ(std::visit(visitor, var2), "Found integer: 42");
   EXPECT_TRUE(std::visit(visitor, var3).find("Found other:") == 0);
+}
+
+// -----------------------------------------------------------------------------
+// Test class for Zip functionality
+// -----------------------------------------------------------------------------
+class UtilityZipTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+TEST_F(UtilityZipTest, ZipTwoSingleElementTuples)
+{
+  using T1 = Rodin::Tuple<int>;
+  using T2 = Rodin::Tuple<double>;
+  using ZippedType = Zip<T1, T2>::Type<std::pair>;
+  
+  // Should produce Tuple<std::pair<int, double>>
+  EXPECT_TRUE((std::is_same_v<ZippedType, Rodin::Tuple<std::pair<int, double>>>));
+}
+
+TEST_F(UtilityZipTest, ZipTwoTuples)
+{
+  using T1 = Rodin::Tuple<int, float>;
+  using T2 = Rodin::Tuple<double, char>;
+  using ZippedType = Zip<T1, T2>::Type<std::pair>;
+  
+  // Should produce Tuple<std::pair<int, double>, std::pair<float, char>>
+  EXPECT_TRUE((std::is_same_v<
+    ZippedType,
+    Rodin::Tuple<std::pair<int, double>, std::pair<float, char>>
+  >));
+}
+
+TEST_F(UtilityZipTest, ZipThreeElementTuples)
+{
+  using T1 = Rodin::Tuple<int, float, char>;
+  using T2 = Rodin::Tuple<double, long, bool>;
+  using ZippedType = Zip<T1, T2>::Type<std::pair>;
+  
+  using ExpectedType = Rodin::Tuple<
+    std::pair<int, double>,
+    std::pair<float, long>,
+    std::pair<char, bool>
+  >;
+  
+  EXPECT_TRUE((std::is_same_v<ZippedType, ExpectedType>));
+}
+
+TEST_F(UtilityZipTest, ZipWithRodinPair)
+{
+  using T1 = Rodin::Tuple<int, float>;
+  using T2 = Rodin::Tuple<double, char>;
+  using ZippedType = Zip<T1, T2>::Type<Rodin::Pair>;
+  
+  // Should produce Tuple<Pair<int, double>, Pair<float, char>>
+  EXPECT_TRUE((std::is_same_v<
+    ZippedType,
+    Rodin::Tuple<Rodin::Pair<int, double>, Rodin::Pair<float, char>>
+  >));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for Product functionality
+// -----------------------------------------------------------------------------
+class UtilityProductTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+TEST_F(UtilityProductTest, ProductSingleElements)
+{
+  using T1 = Rodin::Tuple<int>;
+  using T2 = Rodin::Tuple<double>;
+  using ProductType = Product<T1, T2>::Type<std::pair>;
+  
+  // Should produce Tuple<std::pair<int, double>>
+  EXPECT_TRUE((std::is_same_v<ProductType, Rodin::Tuple<std::pair<int, double>>>));
+}
+
+TEST_F(UtilityProductTest, ProductOneByTwo)
+{
+  using T1 = Rodin::Tuple<int>;
+  using T2 = Rodin::Tuple<double, char>;
+  using ProductType = Product<T1, T2>::Type<std::pair>;
+  
+  // Should produce Tuple<std::pair<int, double>, std::pair<int, char>>
+  using ExpectedType = Rodin::Tuple<std::pair<int, double>, std::pair<int, char>>;
+  EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
+}
+
+TEST_F(UtilityProductTest, ProductTwoByTwo)
+{
+  using T1 = Rodin::Tuple<int, float>;
+  using T2 = Rodin::Tuple<double, char>;
+  using ProductType = Product<T1, T2>::Type<std::pair>;
+  
+  // Should produce Tuple<
+  //   std::pair<int, double>, std::pair<int, char>,
+  //   std::pair<float, double>, std::pair<float, char>
+  // >
+  using ExpectedType = Rodin::Tuple<
+    std::pair<int, double>, std::pair<int, char>,
+    std::pair<float, double>, std::pair<float, char>
+  >;
+  EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
+}
+
+TEST_F(UtilityProductTest, ProductTwoByThree)
+{
+  using T1 = Rodin::Tuple<int, float>;
+  using T2 = Rodin::Tuple<double, char, bool>;
+  using ProductType = Product<T1, T2>::Type<std::pair>;
+  
+  using ExpectedType = Rodin::Tuple<
+    std::pair<int, double>, std::pair<int, char>, std::pair<int, bool>,
+    std::pair<float, double>, std::pair<float, char>, std::pair<float, bool>
+  >;
+  EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
+}
+
+TEST_F(UtilityProductTest, ProductThreeByTwo)
+{
+  using T1 = Rodin::Tuple<int, float, char>;
+  using T2 = Rodin::Tuple<double, bool>;
+  using ProductType = Product<T1, T2>::Type<std::pair>;
+  
+  using ExpectedType = Rodin::Tuple<
+    std::pair<int, double>, std::pair<int, bool>,
+    std::pair<float, double>, std::pair<float, bool>,
+    std::pair<char, double>, std::pair<char, bool>
+  >;
+  EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
+}
+
+
+TEST_F(UtilityProductTest, ProductWithRodinPair)
+{
+  using T1 = Rodin::Tuple<int, float>;
+  using T2 = Rodin::Tuple<double, char>;
+  using ProductType = Product<T1, T2>::Type<Rodin::Pair>;
+  
+  using ExpectedType = Rodin::Tuple<
+    Rodin::Pair<int, double>, Rodin::Pair<int, char>,
+    Rodin::Pair<float, double>, Rodin::Pair<float, char>
+  >;
+  EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for IsOneOf functionality
+// -----------------------------------------------------------------------------
+class UtilityRepeatTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+TEST_F(UtilityRepeatTest, RepeatZeroTimes)
+{
+  using ResultType = Repeat<0, int>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<>>));
+}
+
+TEST_F(UtilityRepeatTest, RepeatOnce)
+{
+  using ResultType = Repeat<1, int>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<int>>));
+}
+
+TEST_F(UtilityRepeatTest, RepeatTwice)
+{
+  using ResultType = Repeat<2, double>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<double, double>>));
+}
+
+TEST_F(UtilityRepeatTest, RepeatThreeTimes)
+{
+  using ResultType = Repeat<3, char>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<char, char, char>>));
+}
+
+TEST_F(UtilityRepeatTest, RepeatFiveTimes)
+{
+  using ResultType = Repeat<5, bool>::Type;
+  using ExpectedType = Rodin::Tuple<bool, bool, bool, bool, bool>;
+  EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
+}
+
+TEST_F(UtilityRepeatTest, RepeatWithComplexType)
+{
+  using ResultType = Repeat<3, std::string>::Type;
+  using ExpectedType = Rodin::Tuple<std::string, std::string, std::string>;
+  EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for UnwrapReference functionality
+// -----------------------------------------------------------------------------
+class UtilityUnwrapReferenceTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+TEST_F(UtilityUnwrapReferenceTest, NonReferenceWrapper)
+{
+  using ResultType = UnwrapReference<int>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, int>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, UnwrapReferenceWrapper)
+{
+  using ResultType = UnwrapReference<std::reference_wrapper<int>>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, int&>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, UnwrapConstReferenceWrapper)
+{
+  using ResultType = UnwrapReference<std::reference_wrapper<const int>>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, const int&>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, ConstTypeNoWrapper)
+{
+  using ResultType = UnwrapReference<const double>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, const double>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, UnwrapRefDecay)
+{
+  using ResultType = UnwrapRefDecay<std::reference_wrapper<int>>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, int&>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, UnwrapRefDecayWithConst)
+{
+  using ResultType = UnwrapRefDecay<const std::reference_wrapper<int>>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, int&>));
+}
+
+TEST_F(UtilityUnwrapReferenceTest, UnwrapRefDecayPlainType)
+{
+  using ResultType = UnwrapRefDecay<const int&>::Type;
+  EXPECT_TRUE((std::is_same_v<ResultType, int>));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for HasTypeMember functionality
+// -----------------------------------------------------------------------------
+class UtilityHasTypeMemberTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+    
+    struct WithType { using Type = int; };
+    struct WithoutType { int value; };
+    struct WithNestedType { using Type = std::string; };
+};
+
+TEST_F(UtilityHasTypeMemberTest, TypeWithTypeMember)
+{
+  EXPECT_TRUE((HasTypeMember<WithType>::Value));
+}
+
+TEST_F(UtilityHasTypeMemberTest, TypeWithoutTypeMember)
+{
+  EXPECT_FALSE((HasTypeMember<WithoutType>::Value));
+}
+
+TEST_F(UtilityHasTypeMemberTest, PrimitiveType)
+{
+  EXPECT_FALSE((HasTypeMember<int>::Value));
+  EXPECT_FALSE((HasTypeMember<double>::Value));
+}
+
+TEST_F(UtilityHasTypeMemberTest, TypeWithNestedType)
+{
+  EXPECT_TRUE((HasTypeMember<WithNestedType>::Value));
+}
+
+TEST_F(UtilityHasTypeMemberTest, StdTypes)
+{
+  EXPECT_FALSE((HasTypeMember<std::string>::Value));
+  EXPECT_FALSE((HasTypeMember<std::vector<int>>::Value));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for HasValueMember functionality
+// -----------------------------------------------------------------------------
+class UtilityHasValueMemberTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+    
+    struct WithValue { using Value = int; };
+    struct WithoutValue { int data; };
+    struct WithStaticValue { static constexpr int Value = 42; };
+};
+
+TEST_F(UtilityHasValueMemberTest, TypeWithValueMember)
+{
+  EXPECT_TRUE((HasValueMember<WithValue>::Value));
+}
+
+TEST_F(UtilityHasValueMemberTest, TypeWithoutValueMember)
+{
+  EXPECT_FALSE((HasValueMember<WithoutValue>::Value));
+}
+
+TEST_F(UtilityHasValueMemberTest, PrimitiveType)
+{
+  EXPECT_FALSE((HasValueMember<int>::Value));
+  EXPECT_FALSE((HasValueMember<double>::Value));
+}
+
+TEST_F(UtilityHasValueMemberTest, TypeWithStaticValue)
+{
+  // HasValueMember checks for a type member, not a static value
+  // So this should be FALSE since WithStaticValue has a static const, not a type
+  EXPECT_FALSE((HasValueMember<WithStaticValue>::Value));
+}
+
+TEST_F(UtilityHasValueMemberTest, StdTypes)
+{
+  EXPECT_FALSE((HasValueMember<std::string>::Value));
+  EXPECT_FALSE((HasValueMember<std::vector<int>>::Value));
+}
+
+// -----------------------------------------------------------------------------
+// Test class for Extract functionality
+// -----------------------------------------------------------------------------
+class UtilityExtractTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override {}
+    void TearDown() override {}
+    
+    template<typename T>
+    struct AddConst { using Type = const T; };
+    
+    template<typename T>
+    struct AddPointer { using Type = T*; };
+    
+    template<typename T>
+    struct Identity { using Type = T; };
+};
+
+TEST_F(UtilityExtractTest, ExtractWithIdentity)
+{
+  using OriginalTuple = Rodin::Tuple<int, double, char>;
+  using ResultType = Extract<OriginalTuple>::Type<Identity>;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<int, double, char>>));
+}
+
+TEST_F(UtilityExtractTest, ExtractWithAddConst)
+{
+  using OriginalTuple = Rodin::Tuple<int, double, char>;
+  using ResultType = Extract<OriginalTuple>::Type<AddConst>;
+  using ExpectedType = Rodin::Tuple<const int, const double, const char>;
+  EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
+}
+
+TEST_F(UtilityExtractTest, ExtractWithAddPointer)
+{
+  using OriginalTuple = Rodin::Tuple<int, double, char>;
+  using ResultType = Extract<OriginalTuple>::Type<AddPointer>;
+  using ExpectedType = Rodin::Tuple<int*, double*, char*>;
+  EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
+}
+
+TEST_F(UtilityExtractTest, ExtractSingleElement)
+{
+  using OriginalTuple = Rodin::Tuple<int>;
+  using ResultType = Extract<OriginalTuple>::Type<AddConst>;
+  EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<const int>>));
+}
+
+TEST_F(UtilityExtractTest, ExtractMultipleElements)
+{
+  using OriginalTuple = Rodin::Tuple<int, float, double, char, bool>;
+  using ResultType = Extract<OriginalTuple>::Type<AddPointer>;
+  using ExpectedType = Rodin::Tuple<int*, float*, double*, char*, bool*>;
+  EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
 }

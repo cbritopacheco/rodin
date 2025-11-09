@@ -109,13 +109,39 @@ namespace Rodin::Geometry
         : m_dimension(dimension), m_index(index), m_mesh(mesh)
       {}
 
-      Polytope(const Polytope&) = default;
+      Polytope(const Polytope& other)
+        : m_dimension(other.m_dimension),
+          m_index(other.m_index),
+          m_mesh(other.m_mesh)
+      {}
 
-      Polytope(Polytope&&) = default;
+      Polytope(Polytope&& other)
+        : m_dimension(std::exchange(other.m_dimension, 0)),
+          m_index(std::exchange(other.m_index, 0)),
+          m_mesh(std::move(other.m_mesh))
+      {}
 
-      Polytope& operator=(const Polytope&) = default;
+      Polytope& operator=(const Polytope& other)
+      {
+        if (this != &other)
+        {
+          m_dimension = other.m_dimension;
+          m_index = other.m_index;
+          m_mesh = other.m_mesh;
+        }
+        return *this;
+      }
 
-      Polytope& operator=(Polytope&&) = default;
+      Polytope& operator=(Polytope&& other)
+      {
+        if (this != &other)
+        {
+          m_dimension = std::exchange(other.m_dimension, 0);
+          m_index = std::exchange(other.m_index, 0);
+          m_mesh = std::move(other.m_mesh);
+        }
+        return *this;
+      }
 
       virtual ~Polytope() = default;
 

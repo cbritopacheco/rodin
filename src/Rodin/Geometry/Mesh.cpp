@@ -292,7 +292,7 @@ namespace Rodin::Geometry
 
   size_t Mesh<Context::Local>::getDimension() const
   {
-    return m_connectivity.getMeshDimension();
+    return m_connectivity.getDimension();
   }
 
   size_t Mesh<Context::Local>::getSpaceDimension() const
@@ -515,42 +515,50 @@ namespace Rodin::Geometry
 
   CellIterator Mesh<Context::Local>::getCell() const
   {
+    assert(this->getCellCount() > 0);
     return getCell(0);
   }
 
   FaceIterator Mesh<Context::Local>::getFace() const
   {
+    assert(this->getFaceCount() > 0);
     return getFace(0);
   }
 
   VertexIterator Mesh<Context::Local>::getVertex() const
   {
+    assert(this->getVertexCount() > 0);
     return getVertex(0);
   }
 
   PolytopeIterator Mesh<Context::Local>::getPolytope(size_t dimension) const
   {
+    assert(this->getPolytopeCount(dimension) > 0);
     return getPolytope(dimension, 0);
   }
 
   CellIterator Mesh<Context::Local>::getCell(Index idx) const
   {
-    return CellIterator(*this, BoundedIndexGenerator(idx, getCellCount()));
+    return CellIterator(
+        *this, BoundedIndexGenerator(idx, this->getCellCount()));
   }
 
   FaceIterator Mesh<Context::Local>::getFace(Index idx) const
   {
-    return FaceIterator(*this, BoundedIndexGenerator(idx, getFaceCount()));
+    return FaceIterator(
+        *this, BoundedIndexGenerator(idx, this->getFaceCount()));
   }
 
   VertexIterator Mesh<Context::Local>::getVertex(Index idx) const
   {
-    return VertexIterator(*this, BoundedIndexGenerator(idx, getVertexCount()));
+    return VertexIterator(
+        *this, BoundedIndexGenerator(idx, this->getVertexCount()));
   }
 
   PolytopeIterator Mesh<Context::Local>::getPolytope(size_t dimension, Index idx) const
   {
-    return PolytopeIterator(dimension, *this, BoundedIndexGenerator(idx, getPolytopeCount(dimension)));
+    return PolytopeIterator(
+        dimension, *this, BoundedIndexGenerator(idx, this->getPolytopeCount(dimension)));
   }
 
   bool Mesh<Context::Local>::isInterface(Index faceIdx) const

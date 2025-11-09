@@ -249,5 +249,49 @@ namespace Rodin::Tests::Unit
       }
     }
   }
-}
 
+
+  // Additional comprehensive tests
+
+  TEST(Rodin_Geometry_Mesh, MultipleTriangles)
+  {
+    constexpr const size_t sdim = 2;
+
+    Mesh mesh =
+      Mesh<Context::Local>::Builder()
+      .initialize(sdim)
+      .nodes(5)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .vertex({1, 1})
+      .vertex({0.5, 0.5})
+      .polytope(Polytope::Type::Triangle, {0, 1, 4})
+      .polytope(Polytope::Type::Triangle, {1, 3, 4})
+      .polytope(Polytope::Type::Triangle, {3, 2, 4})
+      .polytope(Polytope::Type::Triangle, {2, 0, 4})
+      .finalize();
+
+    EXPECT_EQ(mesh.getVertexCount(), 5);
+    EXPECT_EQ(mesh.getCellCount(), 4);
+  }
+
+  TEST(Rodin_Geometry_Mesh, 3D_Tetrahedron)
+  {
+    constexpr const size_t sdim = 3;
+
+    Mesh mesh =
+      Mesh<Context::Local>::Builder()
+      .initialize(sdim)
+      .nodes(4)
+      .vertex({0, 0, 0})
+      .vertex({1, 0, 0})
+      .vertex({0, 1, 0})
+      .vertex({0, 0, 1})
+      .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+      .finalize();
+
+    EXPECT_EQ(mesh.getVertexCount(), 4);
+    EXPECT_EQ(mesh.getCellCount(), 1);
+  }
+}

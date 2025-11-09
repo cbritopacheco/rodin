@@ -152,7 +152,7 @@ namespace Rodin::Geometry
     return m_gcount[g];
   }
 
-  size_t Connectivity<Context::Local>::getMeshDimension() const
+  size_t Connectivity<Context::Local>::getDimension() const
   {
     for (size_t i = m_count.size(); i-- > 0; )
     {
@@ -190,7 +190,9 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::compute(size_t d, size_t dp)
   {
-    const size_t D = getMeshDimension();
+    if (getCount(0) == 0)
+      return *this;
+    const size_t D = getDimension();
     if (d == D && dp == 0)
       return *this;
     if (m_dirty[D][D])
@@ -227,7 +229,7 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::build(size_t d)
   {
-    const size_t D = getMeshDimension();
+    const size_t D = getDimension();
     assert(d > 0);
     assert(d < D);
     assert(!m_dirty[D][0]);
@@ -245,7 +247,7 @@ namespace Rodin::Geometry
     static thread_local std::vector<SubPolytope> subpolytopes;
 
     std::vector<Index> s;
-    const size_t D = getMeshDimension();
+    const size_t D = getDimension();
     assert(d > 0);
     assert(d < D);
     this->getSubPolytopes(subpolytopes, i, d);
@@ -429,7 +431,7 @@ namespace Rodin::Geometry
   void Connectivity<Context::Local>::getSubPolytopes(
       std::vector<SubPolytope>& out, Index i, size_t dim) const
   {
-    const size_t D = getMeshDimension();
+    const size_t D = getDimension();
     const auto& p = *m_index[D].left[i];
     switch (m_geometry[D][i])
     {
