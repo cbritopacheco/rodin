@@ -1,6 +1,8 @@
-#include <boost/serialization/optional.hpp>
-#include <boost/dynamic_bitset.hpp>
 #include <memory>
+#include <boost/dynamic_bitset.hpp>
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_free.hpp>
+#include <boost/serialization/optional.hpp>
 
 #include "Mesh.h"
 #include "Rodin/Geometry/Polytope.h"

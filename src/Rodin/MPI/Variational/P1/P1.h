@@ -2,8 +2,11 @@
 #define RODIN_MPI_VARIATIONAL_P1_P1_H
 
 #include <mpi.h>
-#include <boost/serialization/optional.hpp>
 #include <sys/mman.h>
+
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_free.hpp>
+#include <boost/serialization/optional.hpp>
 
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/MPI/Variational/FiniteElementSpace.h"
