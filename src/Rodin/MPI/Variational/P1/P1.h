@@ -158,7 +158,7 @@ namespace Rodin::Variational
             assert(dofs.size() == 1);
             const Index local = dofs[0];
             const Index global = dofIdx + m_offset;
-            const auto [it, inserted] = m_local_to_global.right.insert({ global, local });
+            const auto [it, inserted] = m_local_to_global.right.emplace(global, local);
             assert(inserted);
             dofIdx++;
 
