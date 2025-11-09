@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file VectorFunction.h
+ * @brief Vector-valued functions for variational formulations.
+ *
+ * This file defines VectorFunctionBase and VectorFunction for representing
+ * functions mapping points to vectors: @f$ \mathbf{f}: \Omega \to \mathbb{R}^d @f$.
+ * These are used for vector fields such as velocity, displacement, or force fields.
+ */
 #ifndef RODIN_VARIATIONAL_VECTORFUNCTION_H
 #define RODIN_VARIATIONAL_VECTORFUNCTION_H
 
@@ -39,30 +47,61 @@ namespace Rodin::Variational
 
   /**
    * @brief Base class for vector-valued functions defined on a mesh.
+   *
+   * VectorFunctionBase extends FunctionBase to represent vector-valued functions:
+   * @f[
+   *    \mathbf{f}: \Omega \to \mathbb{R}^d
+   * @f]
+   * where @f$ d @f$ is the dimension of the vector space.
+   *
+   * These functions are fundamental in finite element analysis for representing:
+   * - **Vector fields**: Velocity @f$ \mathbf{v}(x) @f$, displacement @f$ \mathbf{u}(x) @f$
+   * - **Force fields**: Body forces, surface tractions
+   * - **Gradients**: @f$ \nabla u @f$ for scalar fields
+   * - **Fluxes**: Heat flux, mass flux
+   *
+   * @tparam Scalar The scalar component type (typically Real or Complex)
+   * @tparam Derived The derived class following CRTP pattern
+   *
+   * ## Component Access
+   * Vector components can be accessed via:
+   * - Index notation: `f(i)` for the i-th component
+   * - Coordinate accessors: `f.x()`, `f.y()`, `f.z()` for first three components
+   *
+   * @see FunctionBase, RealFunction, MatrixFunction
    */
   template <class Scalar, class Derived>
   class VectorFunctionBase : public FunctionBase<VectorFunctionBase<Scalar, Derived>>
   {
     public:
+      /// @brief Type of scalar components
       using ScalarType = Scalar;
 
+      /// @brief Parent class type
       using Parent = FunctionBase<VectorFunctionBase<Scalar, Derived>>;
 
+      /// @brief Import operator() from parent
       using Parent::operator();
 
+      /// @brief Default constructor
       VectorFunctionBase() = default;
 
+      /// @brief Copy constructor
+      /// @param[in] other Vector function to copy from
       VectorFunctionBase(const VectorFunctionBase& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor
+      /// @param[in] other Vector function to move from
       VectorFunctionBase(VectorFunctionBase&& other)
         : Parent(std::move(other))
       {}
 
       /**
-       * @brief Convenience function to access the 1st component of the
-       * vector.
+       * @brief Convenience accessor for the x-component (first component).
+       * @returns Component function for index 0
+       * @pre getDimension() >= 1
        */
       constexpr
       auto x() const
@@ -72,8 +111,9 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Convenience function to access the 2nd component of the
-       * vector.
+       * @brief Convenience accessor for the y-component (second component).
+       * @returns Component function for index 1
+       * @pre getDimension() >= 2
        */
       constexpr
       auto y() const
@@ -82,6 +122,11 @@ namespace Rodin::Variational
         return operator()(1);
       }
 
+      /**
+       * @brief Convenience accessor for the z-component (third component).
+       * @returns Component function for index 2
+       * @pre getDimension() >= 3
+       */
       constexpr
       auto z() const
       {
@@ -90,9 +135,15 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Access the ith component of the vector function.
-       * @returns Object of type Component<VectorFunctionBase> representing
-       * the ith component of the VectorFunction.
+       * @brief Accesses the i-th component of the vector function.
+       *
+       * Returns a scalar function representing the specified component:
+       * @f$ f_i(x) = (\mathbf{f}(x))_i @f$
+       *
+       * @param[in] i Component index (0-based)
+       * @returns Component function object
+       * @pre i < getDimension()
+       * @see Component
        */
       constexpr
       auto operator()(size_t i) const

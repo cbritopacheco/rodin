@@ -4,6 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file RealFunction.h
+ * @brief Real-valued scalar functions for variational formulations.
+ *
+ * This file defines RealFunctionBase and RealFunction, representing functions
+ * mapping points to real numbers: @f$ f: \Omega \to \mathbb{R} @f$.
+ */
 #ifndef RODIN_VARIATIONAL_REALFUNCTION_H
 #define RODIN_VARIATIONAL_REALFUNCTION_H
 
@@ -32,36 +39,84 @@ namespace Rodin::Variational
    * @see RealFunction
    */
 
+  /**
+   * @brief Base class for real-valued scalar functions.
+   *
+   * RealFunctionBase extends ScalarFunctionBase with Real as the scalar type,
+   * representing functions @f$ f: \Omega \to \mathbb{R} @f$. This is the most
+   * common function type in finite element analysis, used for scalar fields like
+   * temperature, pressure, or concentration.
+   *
+   * @tparam Derived The derived class following CRTP pattern
+   *
+   * ## Usage Examples
+   * ```
+   * // Constant real function
+   * RealFunction<Real> f(3.14);
+   *
+   * // Lambda-based function
+   * RealFunction<std::function<Real(const Geometry::Point&)>> g(
+   *   [](const Geometry::Point& p) { return p.x() * p.y(); }
+   * );
+   * ```
+   *
+   * @see ScalarFunctionBase, RealFunction
+   */
   template <class Derived>
   class RealFunctionBase : public ScalarFunctionBase<Real, RealFunctionBase<Derived>>
   {
     public:
+      /// @brief Type of scalar values (Real)
       using ScalarType = Real;
 
+      /// @brief Parent class type
       using Parent = ScalarFunctionBase<ScalarType, RealFunctionBase<Derived>>;
 
+      /// @brief Import traceOf methods from parent
       using Parent::traceOf;
 
+      /// @brief Import operator() from parent
       using Parent::operator();
 
+      /// @brief Default constructor
       RealFunctionBase() = default;
 
+      /// @brief Copy constructor
+      /// @param[in] other Function to copy from
       RealFunctionBase(const RealFunctionBase& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor
+      /// @param[in] other Function to move from
       RealFunctionBase(RealFunctionBase&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief Virtual destructor
       virtual ~RealFunctionBase() = default;
 
+      /**
+       * @brief Evaluates the function at a point.
+       *
+       * CRTP method delegating to derived class implementation.
+       *
+       * @param[in] p Point at which to evaluate
+       * @returns Real value at the point
+       */
       constexpr
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /**
+       * @brief Sets the trace domain for the function.
+       *
+       * @tparam Args Variadic template for trace domain specification
+       * @param[in] args Arguments specifying the trace domain
+       * @returns Reference to derived object (for method chaining)
+       */
       template <class ... Args>
       constexpr
       Derived& traceOf(const Args& ... args)
@@ -69,6 +124,10 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).traceOf(args...);
       }
 
+      /**
+       * @brief Creates a polymorphic copy of the function.
+       * @returns Pointer to newly allocated copy
+       */
       virtual RealFunctionBase* copy() const noexcept override = 0;
   };
 

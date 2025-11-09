@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Function.h
+ * @brief Base class hierarchy for functions in variational formulations.
+ *
+ * This file defines the fundamental FunctionBase template, which serves as the
+ * foundation for all function types (scalar, vector, matrix) in Rodin's
+ * variational formulation framework.
+ */
 #ifndef RODIN_VARIATIONAL_FUNCTION_H
 #define RODIN_VARIATIONAL_FUNCTION_H
 
@@ -95,7 +103,11 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the function on a Point belonging to the mesh.
        *
-       * This calls the function get getValue(const Geometry::Point&).
+       * This operator provides convenient function call syntax for evaluation.
+       * Delegates to the derived class's getValue() method via CRTP.
+       *
+       * @param[in] p Point at which to evaluate the function
+       * @returns Function value at the given point
        */
       constexpr
       decltype(auto) operator()(const Geometry::Point& p) const
@@ -103,34 +115,72 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /**
+       * @brief Extracts the i-th component of the function.
+       *
+       * For vector or matrix-valued functions, this returns a scalar function
+       * representing the specified component.
+       *
+       * @param[in] i Component index
+       * @returns Component function object
+       * @see Component
+       */
       auto operator()(size_t i) const
       {
         return Component(*this, i);
       }
 
+      /**
+       * @brief Extracts the (i,j)-th component of a matrix function.
+       *
+       * @param[in] i Row index
+       * @param[in] j Column index
+       * @returns Component function object
+       * @see Component
+       */
       auto operator()(size_t i, size_t j) const
       {
         return Component(*this, i, j);
       }
 
+      /**
+       * @brief Convenience accessor for the first component (x-component).
+       * @returns Component function for index 0
+       */
       constexpr
       auto x() const
       {
         return Component(*this, 0);
       }
 
+      /**
+       * @brief Convenience accessor for the second component (y-component).
+       * @returns Component function for index 1
+       */
       constexpr
       auto y() const
       {
         return Component(*this, 1);
       }
 
+      /**
+       * @brief Convenience accessor for the third component (z-component).
+       * @returns Component function for index 2
+       */
       constexpr
       auto z() const
       {
         return Component(*this, 2);
       }
 
+      /**
+       * @brief Returns the transpose of the function.
+       *
+       * For matrix-valued functions @f$ A(x) @f$, returns @f$ A^T(x) @f$.
+       *
+       * @returns Transposed function object
+       * @see Transpose
+       */
       constexpr
       auto T() const
       {
@@ -138,13 +188,15 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Sets an attribute which will be interpreted as the domain to
-       * trace.
+       * @brief Sets a single attribute as the trace domain.
        *
        * Convenience function to call traceOf(FlatSet<int>) with only one
-       * attribute.
+       * attribute. The trace operation restricts function evaluation to the
+       * specified boundary or interface regions.
        *
+       * @param[in] attr Mesh attribute defining the trace domain
        * @returns Reference to self (for method chaining)
+       * @see getTraceDomain
        */
       constexpr
       Derived& traceOf(const Geometry::Attribute& attr)
@@ -152,6 +204,14 @@ namespace Rodin::Variational
         return this->traceOf(FlatSet<Geometry::Attribute>{ attr });
       }
 
+      /**
+       * @brief Sets multiple attributes as the trace domain.
+       *
+       * @param[in] a1 First attribute
+       * @param[in] a2 Second attribute
+       * @param[in] as Additional attributes (variadic)
+       * @returns Reference to self (for method chaining)
+       */
       template <class A1, class A2, class ... As>
       constexpr
       Derived& traceOf(const A1& a1, const A2& a2, const As& ... as)
@@ -159,6 +219,17 @@ namespace Rodin::Variational
         return this->traceOf(FlatSet<Geometry::Attribute>{ a1, a2, as... });
       }
 
+      /**
+       * @brief Sets a set of attributes as the trace domain.
+       *
+       * The trace domain specifies regions (typically boundaries or interfaces)
+       * where the function should be evaluated via continuous extension from
+       * adjacent elements.
+       *
+       * @param[in] attr Set of mesh attributes defining the trace domain
+       * @returns Reference to self (for method chaining)
+       * @see getTraceDomain
+       */
       constexpr
       Derived& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
