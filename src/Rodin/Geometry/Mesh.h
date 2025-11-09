@@ -105,9 +105,17 @@
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Traits specialization for Mesh types.
+   * @tparam Context Execution context (e.g., Context::Local, Context::MPI)
+   *
+   * Provides compile-time information about mesh type properties for the
+   * form language system.
+   */
   template <class Context>
   struct Traits<Geometry::Mesh<Context>>
   {
+    /// The execution context type
     using ContextType = Context;
   };
 }
@@ -741,6 +749,13 @@ namespace Rodin::Geometry
       virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
 
+      /**
+       * @brief Gets the execution context of the mesh.
+       * @returns Reference to the context object
+       *
+       * The context determines whether the mesh is local, distributed, or
+       * uses another execution model.
+       */
       virtual const Context::Base& getContext() const = 0;
   };
 
@@ -915,14 +930,39 @@ namespace Rodin::Geometry
            */
           Mesh finalize();
 
+          /**
+           * @brief Sets the vertex coordinates (copy).
+           * @param[in] vertices Point matrix containing vertex coordinates
+           * @returns Reference to this builder
+           */
           Builder& setVertices(const Math::PointMatrix& vertices);
 
+          /**
+           * @brief Sets the vertex coordinates (move).
+           * @param[in] vertices Point matrix containing vertex coordinates
+           * @returns Reference to this builder
+           */
           Builder& setVertices(Math::PointMatrix&& vertices);
 
+          /**
+           * @brief Sets the mesh connectivity.
+           * @param[in] connectivity Connectivity object to move into the mesh
+           * @returns Reference to this builder
+           */
           Builder& setConnectivity(Connectivity<Context>&& connectivity);
 
+          /**
+           * @brief Sets the attribute index.
+           * @param[in] attrIndex Attribute index object to move into the mesh
+           * @returns Reference to this builder
+           */
           Builder& setAttributeIndex(AttributeIndex&& attrIndex);
 
+          /**
+           * @brief Sets the transformation index.
+           * @param[in] transIndex Transformation index object to move into the mesh
+           * @returns Reference to this builder
+           */
           Builder& setTransformationIndex(PolytopeTransformationIndex&& transIndex);
 
           Connectivity<Context>& getConnectivity()

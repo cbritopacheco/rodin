@@ -303,20 +303,77 @@ namespace Rodin::Geometry
        */
       Connectivity& build(size_t d);
 
+      /**
+       * @brief Extracts local connectivity for a specific polytope.
+       * @param[in] i Polytope index
+       * @param[in] d Dimension of the polytope
+       * @returns Reference to this connectivity object
+       */
       Connectivity& local(size_t i, size_t d);
 
+      /**
+       * @brief Computes connectivity between dimensions.
+       * @param[in] d Source dimension
+       * @param[in] dp Target dimension
+       * @returns Reference to this connectivity object
+       *
+       * Computes the incidence relation from polytopes of dimension @p d
+       * to polytopes of dimension @p dp.
+       */
       Connectivity& compute(size_t d, size_t dp);
 
+      /**
+       * @brief Transposes a connectivity relation.
+       * @param[in] d First dimension
+       * @param[in] dp Second dimension
+       * @returns Reference to this connectivity object
+       *
+       * Given connectivity from dimension @p d to @p dp, computes the
+       * transpose relation from @p dp to @p d.
+       */
       Connectivity& transpose(size_t d, size_t dp);
 
+      /**
+       * @brief Computes connectivity through intersection of two relations.
+       * @param[in] d Source dimension
+       * @param[in] dp Intermediate dimension
+       * @param[in] dpp Target dimension
+       * @returns Reference to this connectivity object
+       *
+       * Computes connectivity from @p d to @p dpp via @p dp, i.e.,
+       * the composition of @f$ d \to dp @f$ and @f$ dp \to dpp @f$.
+       */
       Connectivity& intersection(size_t d, size_t dp, size_t dpp);
 
+      /**
+       * @brief Gets all sub-polytopes of a given polytope.
+       * @param[out] out Vector to store sub-polytopes
+       * @param[in] i Polytope index
+       * @param[in] d Polytope dimension
+       */
       void getSubPolytopes(std::vector<SubPolytope>& out, Index i, size_t d) const;
 
+      /**
+       * @brief Gets the index mapping for a given dimension.
+       * @param[in] dim Dimension
+       * @returns Reference to the polytope index map for the dimension
+       */
       const PolytopeIndex& getIndexMap(size_t dim) const;
 
+      /**
+       * @brief Gets the index for a polytope defined by a set of vertices.
+       * @param[in] dim Dimension of the polytope
+       * @param[in] key Array of vertex indices defining the polytope
+       * @returns Optional index if found, empty otherwise
+       */
       const Optional<Index> getIndex(size_t dim, const IndexArray& key) const;
 
+      /**
+       * @brief Sets the incidence relation for a dimension pair.
+       * @param[in] p Dimension pair (from, to)
+       * @param[in] inc Incidence relation to set
+       * @returns Reference to this connectivity object
+       */
       Connectivity& setIncidence(const std::pair<size_t, size_t>& p, Incidence&& inc);
 
       size_t getCount(size_t dim) const override;
