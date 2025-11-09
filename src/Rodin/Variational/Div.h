@@ -11,14 +11,129 @@
  * @file
  * @brief Divergence operator for vector-valued functions.
  *
- * This file defines the divergence operator which maps vector fields to scalar
- * fields. For a vector field @f$ \mathbf{u} = (u_1, u_2, \ldots, u_d) @f$, the
- * divergence is:
+ * This file defines the divergence operator @f$ \nabla \cdot @f$ which maps
+ * vector fields to scalar fields. The divergence measures the "outflow" or
+ * "expansion" of a vector field at each point.
+ *
+ * # Mathematical Foundation
+ *
+ * For a vector field @f$ \mathbf{u} = (u_1, u_2, \ldots, u_d): \Omega \rightarrow \mathbb{R}^d @f$,
+ * the divergence is the scalar field:
  * @f[
  *   \nabla \cdot \mathbf{u} = \frac{\partial u_1}{\partial x_1} +
  *                              \frac{\partial u_2}{\partial x_2} + \cdots +
- *                              \frac{\partial u_d}{\partial x_d}
+ *                              \frac{\partial u_d}{\partial x_d} = \mathrm{tr}(\nabla \mathbf{u})
  * @f]
+ *
+ * The divergence is the trace of the Jacobian matrix.
+ *
+ * ## Properties
+ * - **Linearity**: @f$ \nabla \cdot (a\mathbf{u} + b\mathbf{v}) = a\nabla \cdot \mathbf{u} + b\nabla \cdot \mathbf{v} @f$
+ * - **Product rule**: @f$ \nabla \cdot (f\mathbf{u}) = f\nabla \cdot \mathbf{u} + \nabla f \cdot \mathbf{u} @f$
+ * - **Divergence theorem**: @f$ \int_\Omega \nabla \cdot \mathbf{u} \, dx = \int_{\partial\Omega} \mathbf{u} \cdot \mathbf{n} \, ds @f$
+ *
+ * # Applications
+ * - **Incompressibility constraint**: @f$ \nabla \cdot \mathbf{u} = 0 @f$ (Stokes, Navier-Stokes)
+ * - **Conservation laws**: Mass, momentum, energy conservation
+ * - **Elasticity**: Volumetric strain @f$ \varepsilon_v = \nabla \cdot \mathbf{u} @f$
+ * - **Maxwell equations**: @f$ \nabla \cdot \mathbf{E} = \rho / \varepsilon_0 @f$
+ *
+ * # Usage Examples
+ *
+ * ## Incompressible Flow (Stokes/Navier-Stokes)
+ * @code{.cpp}
+ * using namespace Rodin;
+ * using namespace Rodin::Variational;
+ *
+ * // Velocity space (vector) and pressure space (scalar)
+ * P1 Vh(mesh, 2);  // Velocity
+ * P0 Qh(mesh);     // Pressure
+ *
+ * TrialFunction u(Vh), p(Qh);  // Velocity and pressure
+ * TestFunction  v(Vh), q(Qh);
+ *
+ * // Incompressibility constraint: div(u) = 0
+ * Problem problem(u, v, p, q);
+ * problem = Integral(Grad(u), Grad(v))      // Viscous term
+ *         - Integral(p * Div(v))             // Pressure gradient
+ *         - Integral(q * Div(u));            // Incompressibility
+ *
+ * problem.solve(solver);
+ * @endcode
+ *
+ * ## Mixed Poisson (Darcy Flow)
+ * @code{.cpp}
+ * // Darcy's law: u = -K·grad p, div(u) = f
+ * P0 Vh(mesh, 2);  // Flux (vector)
+ * P0 Qh(mesh);     // Pressure (scalar)
+ *
+ * TrialFunction u(Vh), p(Qh);
+ * TestFunction  v(Vh), q(Qh);
+ *
+ * // Permeability
+ * double K = 1.0;
+ *
+ * Problem problem(u, v, p, q);
+ * problem = Integral((1.0/K) * Dot(u, v))    // Constitutive law
+ *         + Integral(Div(v) * p)              // Flux-pressure coupling
+ *         + Integral(q * Div(u))              // Mass conservation
+ *         - Integral(q * f);                  // Source term
+ *
+ * problem.solve(solver);
+ * @endcode
+ *
+ * ## Volumetric Strain in Elasticity
+ * @code{.cpp}
+ * // Linear elasticity with volumetric/deviatoric decomposition
+ * P1 Vh(mesh, 3);  // 3D displacement
+ *
+ * TrialFunction u(Vh);
+ * TestFunction  v(Vh);
+ *
+ * // Volumetric strain: epsilon_v = div(u)
+ * double lambda = 1.0, mu = 1.0;
+ *
+ * Problem problem(u, v);
+ * problem = Integral(lambda * Div(u) * Div(v))  // Volumetric energy
+ *         + Integral(/* deviatoric terms */);
+ *
+ * problem.solve(solver);
+ * @endcode
+ *
+ * ## Verifying Divergence-Free Solution
+ * @code{.cpp}
+ * // Check incompressibility of computed velocity field
+ * P1 Vh(mesh, 2);
+ * GridFunction<P1> u(Vh);  // Velocity solution
+ *
+ * // Compute L2 norm of div(u)
+ * auto div_u = Div(u);
+ * double div_norm = std::sqrt(Integral(div_u * div_u).compute());
+ *
+ * std::cout << "||div(u)||_L2 = " << div_norm << std::endl;
+ * // Should be near zero for incompressible flow
+ * @endcode
+ *
+ * ## Divergence Theorem Verification
+ * @code{.cpp}
+ * // Verify: int(div u) dx = int(u·n) ds
+ * P1 Vh(mesh, 2);
+ * GridFunction<P1> u(Vh);
+ *
+ * // Volume integral of divergence
+ * double volume_integral = Integral(Div(u)).compute();
+ *
+ * // Boundary integral of normal flux
+ * auto n = BoundaryNormal();
+ * double boundary_integral = BoundaryIntegral(Dot(u, n)).compute();
+ *
+ * std::cout << "Volume: " << volume_integral << std::endl;
+ * std::cout << "Boundary: " << boundary_integral << std::endl;
+ * // Should be approximately equal
+ * @endcode
+ *
+ * @see Grad, Trace, Jacobian
+ * @see Integral, BoundaryIntegral, Problem
  */
 
 #include "ForwardDecls.h"
