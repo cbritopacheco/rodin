@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_SINH_H
 #define RODIN_VARIATIONAL_SINH_H
 
+/**
+ * @file Sinh.h
+ * @brief Hyperbolic sine function operator for scalar functions.
+ */
+
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -18,6 +23,24 @@ namespace Rodin::Variational
    * @defgroup SinhSpecializations Sinh Template Specializations
    * @brief Template specializations of the Sinh class.
    * @see Sinh
+   */
+
+  /**
+   * @brief Hyperbolic sine function operator for real-valued scalar functions.
+   *
+   * Applies the hyperbolic sine function pointwise to a given function:
+   * @f[
+   *    \text{Sinh}(f)(x) = \sinh(f(x)) = \frac{e^{f(x)} - e^{-f(x)}}{2}
+   * @f]
+   *
+   * Common applications include:
+   * - Solutions to hyperbolic PDEs
+   * - Catenary curves and hanging cables
+   * - Heat transfer in semi-infinite domains
+   * - Exact solutions with exponential growth/decay
+   *
+   * @note Always returns a real-valued function for real input.
+   * @see Cosh, Sin
    */
 
   /**
