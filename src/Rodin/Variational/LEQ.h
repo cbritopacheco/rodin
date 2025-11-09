@@ -7,6 +7,15 @@
 #ifndef RODIN_VARIATIONAL_LEQ_H
 #define RODIN_VARIATIONAL_LEQ_H
 
+/**
+ * @file
+ * @brief Less-than-or-equal comparison operator for functions.
+ *
+ * This file defines the less-than-or-equal operator @f$ \leq @f$ for
+ * comparing functions. The result is a Boolean-valued function that evaluates
+ * to true where @f$ f(x) \leq g(x) @f$ and false otherwise.
+ */
+
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 

@@ -7,6 +7,15 @@
 #ifndef RODIN_VARIATIONAL_LT_H
 #define RODIN_VARIATIONAL_LT_H
 
+/**
+ * @file
+ * @brief Less-than comparison operator for functions.
+ *
+ * This file defines the less-than operator @f$ < @f$ for comparing functions.
+ * The result is a Boolean-valued function that evaluates to true where
+ * @f$ f(x) < g(x) @f$ and false otherwise.
+ */
+
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 

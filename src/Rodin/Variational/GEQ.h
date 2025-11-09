@@ -7,6 +7,15 @@
 #ifndef RODIN_VARIATIONAL_GEQ_H
 #define RODIN_VARIATIONAL_GEQ_H
 
+/**
+ * @file
+ * @brief Greater-than-or-equal comparison operator for functions.
+ *
+ * This file defines the greater-than-or-equal operator @f$ \geq @f$ for
+ * comparing functions. The result is a Boolean-valued function that evaluates
+ * to true where @f$ f(x) \geq g(x) @f$ and false otherwise.
+ */
+
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 

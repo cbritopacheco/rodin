@@ -7,6 +7,15 @@
 #ifndef RODIN_VARIATIONAL_EQ_H
 #define RODIN_VARIATIONAL_EQ_H
 
+/**
+ * @file
+ * @brief Equality comparison operator for functions.
+ *
+ * This file defines the equality operator @f$ == @f$ for comparing functions.
+ * The result is a Boolean-valued function that evaluates to true where the
+ * operands are equal and false otherwise.
+ */
+
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 
@@ -20,7 +29,26 @@ namespace Rodin::Variational
 
   /**
    * @ingroup EQSpecializations
-   * @brief Logical EQ operator between two instances of FunctionBase
+   * @brief Equality comparison operator between two functions.
+   *
+   * Represents the equality test @f$ f == g @f$ which evaluates to a Boolean
+   * function:
+   * @f[
+   *   (f == g)(x) = \begin{cases}
+   *     \text{true} & \text{if } f(x) = g(x) \\
+   *     \text{false} & \text{otherwise}
+   *   \end{cases}
+   * @f]
+   *
+   * This is useful for:
+   * - Defining indicator functions
+   * - Implementing conditional logic in variational forms
+   * - Creating characteristic functions of regions
+   *
+   * @tparam LHSDerived Type of left-hand side function
+   * @tparam RHSDerived Type of right-hand side function
+   *
+   * @see GT, LT, GEQ, LEQ, AND, OR
    */
   template <class LHSDerived, class RHSDerived>
   class EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final

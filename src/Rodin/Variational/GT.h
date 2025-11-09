@@ -7,6 +7,15 @@
 #ifndef RODIN_VARIATIONAL_GT_H
 #define RODIN_VARIATIONAL_GT_H
 
+/**
+ * @file
+ * @brief Greater-than comparison operator for functions.
+ *
+ * This file defines the greater-than operator @f$ > @f$ for comparing functions.
+ * The result is a Boolean-valued function that evaluates to true where
+ * @f$ f(x) > g(x) @f$ and false otherwise.
+ */
+
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 

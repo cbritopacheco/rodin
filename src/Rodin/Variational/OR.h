@@ -7,6 +7,18 @@
 #ifndef RODIN_VARIATIONAL_OR_H
 #define RODIN_VARIATIONAL_OR_H
 
+/**
+ * @file
+ * @brief Logical OR operator for Boolean functions.
+ *
+ * This file defines the logical OR operator @f$ \vee @f$ for Boolean-valued
+ * functions. For functions @f$ f, g: \Omega \rightarrow \{\text{true}, \text{false}\} @f$:
+ * @f[
+ *   (f \vee g)(x) = f(x) \vee g(x)
+ * @f]
+ * The result is true if either operand is true.
+ */
+
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 

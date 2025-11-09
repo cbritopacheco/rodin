@@ -1,5 +1,25 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_DIV_H
 #define RODIN_VARIATIONAL_DIV_H
+
+/**
+ * @file
+ * @brief Divergence operator for vector-valued functions.
+ *
+ * This file defines the divergence operator which maps vector fields to scalar
+ * fields. For a vector field @f$ \mathbf{u} = (u_1, u_2, \ldots, u_d) @f$, the
+ * divergence is:
+ * @f[
+ *   \nabla \cdot \mathbf{u} = \frac{\partial u_1}{\partial x_1} +
+ *                              \frac{\partial u_2}{\partial x_2} + \cdots +
+ *                              \frac{\partial u_d}{\partial x_d}
+ * @f]
+ */
 
 #include "ForwardDecls.h"
 
@@ -12,20 +32,38 @@
 namespace Rodin::Variational
 {
   /**
-    * @defgroup DivSpecializations Div Template Specializations
-    * @brief Template specializations of the Div class.
-    * @see Div
-    */
+   * @defgroup DivSpecializations Div Template Specializations
+   * @brief Template specializations of the Div class.
+   * @see Div
+   */
 
   /**
-   * @brief Base class for Div classes.
+   * @ingroup RodinVariational
+   * @brief Base class for divergence operators.
+   *
+   * @tparam Operand Type of the operand (vector-valued function)
+   * @tparam Derived Derived class type (CRTP pattern)
    */
   template <class Operand, class Derived>
   class DivBase;
 
   /**
    * @ingroup DivSpecializations
-   * @brief Divergence of a P1 GridFunction
+   * @brief Divergence of a GridFunction.
+   *
+   * Computes the divergence @f$ \nabla \cdot \mathbf{u} @f$ of a vector-valued
+   * grid function @f$ \mathbf{u} @f$. The result is a scalar-valued function.
+   *
+   * ## Mathematical Definition
+   * For a vector field @f$ \mathbf{u}: \Omega \rightarrow \mathbb{R}^d @f$:
+   * @f[
+   *   \text{div}(\mathbf{u}) = \nabla \cdot \mathbf{u} =
+   *   \sum_{i=1}^d \frac{\partial u_i}{\partial x_i}
+   * @f]
+   *
+   * @tparam FES Finite element space type
+   * @tparam Data Data storage type
+   * @tparam Derived Derived class type
    */
   template <class FES, class Data, class Derived>
   class DivBase<GridFunction<FES, Data>, Derived>
