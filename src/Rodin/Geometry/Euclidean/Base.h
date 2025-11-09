@@ -7,6 +7,11 @@
 #ifndef RODIN_GEOMETRY_EUCLIDEAN_H
 #define RODIN_GEOMETRY_EUCLIDEAN_H
 
+/**
+ * @file
+ * @brief Base class for Euclidean geometric objects using CRTP pattern.
+ */
+
 #include <utility>
 #include <type_traits>
 
@@ -16,10 +21,28 @@
 
 namespace Rodin::Geometry::Euclidean
 {
+  /**
+   * @brief Base class for Euclidean geometric objects using CRTP.
+   *
+   * This class serves as the base for all Euclidean geometry classes,
+   * providing a common interface through the Curiously Recurring Template
+   * Pattern (CRTP).
+   *
+   * @tparam Derived The derived class type
+   * @tparam T Scalar type (e.g., float, double)
+   *
+   * @note This is an abstract base class with no functionality, serving
+   * only to establish the type hierarchy for Euclidean geometric objects.
+   *
+   * @see Point2D, Circle, Line2D, LineSegment2D, Rectangle
+   */
   template <class Derived, class T>
   class Base
   {
     public:
+      /**
+       * @brief Virtual destructor for polymorphic behavior.
+       */
       virtual ~Base() = default;
   };
 }

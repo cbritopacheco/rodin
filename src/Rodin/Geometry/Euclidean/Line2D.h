@@ -7,6 +7,11 @@
 #ifndef RODIN_GEOMETRY_EUCLIDEAN_LINE2D_H
 #define RODIN_GEOMETRY_EUCLIDEAN_LINE2D_H
 
+/**
+ * @file
+ * @brief Infinite line in 2D Euclidean space.
+ */
+
 #include <variant>
 #include <optional>
 
@@ -16,13 +21,27 @@
 namespace Rodin::Geometry::Euclidean
 {
   /**
-  * Represents a two-dimensional line in general form.
-  * A line \f$ L \f$ is defined as the set of all points \f$ (x, y) \f$ which
-  * satisfy the equation:
-  * \f[
-  * ax + by - c = 0
-  * \f]
-  */
+   * @brief Infinite line in 2D Euclidean space.
+   *
+   * Represents a two-dimensional line in general form.
+   * A line @f$ L @f$ is defined as the set of all points @f$ (x, y) @f$ which
+   * satisfy the equation:
+   * @f[
+   *   ax + by - c = 0
+   * @f]
+   *
+   * @tparam T Scalar type (e.g., float, double)
+   *
+   * # Special Cases
+   *
+   * - **Vertical line**: @f$ a \neq 0, b = 0 @f$ (equation: @f$ x = c/a @f$)
+   * - **Horizontal line**: @f$ a = 0, b \neq 0 @f$ (equation: @f$ y = c/b @f$)
+   * - **Slope-intercept form**: @f$ y = mx + k @f$ where @f$ m = -a/b @f$, @f$ k = c/b @f$
+   *
+   * @warning The behavior is undefined if @f$ a = 0 @f$ and @f$ b = 0 @f$.
+   *
+   * @see Point2D, Circle, LineSegment2D
+   */
   template <class T>
   class Line2D : public Base<Line2D<T>, T>
   {
