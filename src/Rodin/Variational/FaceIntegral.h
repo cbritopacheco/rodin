@@ -4,6 +4,40 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file FaceIntegral.h
+ * @brief Face integral classes for discontinuous Galerkin methods.
+ *
+ * This file defines the FaceIntegral classes which represent integrals over
+ * mesh faces (element interfaces) in discontinuous Galerkin (DG) formulations.
+ * Face integrals are crucial for coupling elements in DG methods where
+ * solutions are discontinuous across element boundaries.
+ *
+ * ## Mathematical Foundation
+ * Face integrals compute:
+ * @f[
+ *   \int_{\mathcal{F}_h} f(x) \, ds
+ * @f]
+ * where @f$ \mathcal{F}_h @f$ is the set of all mesh faces (both interior
+ * and boundary faces).
+ *
+ * ## Discontinuous Galerkin Context
+ * In DG methods, face integrals handle:
+ * - **Numerical fluxes**: Coupling between elements
+ * - **Jump terms**: @f$ \int_{\mathcal{F}_h} [\![u]\!] \cdot [\![v]\!] \, ds @f$
+ * - **Average terms**: @f$ \int_{\mathcal{F}_h} \{\!\{u\}\!\} \cdot [\![v]\!] \, ds @f$
+ * - **Penalty terms**: Interior penalty for stability
+ *
+ * ## Usage Example
+ * ```cpp
+ * // Interior penalty DG method
+ * auto penalty = FaceIntegral(Jump(u), Jump(v));
+ * auto consistency = FaceIntegral(Average(Grad(u)), Jump(v));
+ * auto symmetry = FaceIntegral(Jump(u), Average(Grad(v)));
+ * ```
+ *
+ * @see InterfaceIntegral, BoundaryIntegral, Jump, Average
+ */
 #ifndef RODIN_VARIATIONAL_FACEINTEGRAL_H
 #define RODIN_VARIATIONAL_FACEINTEGRAL_H
 

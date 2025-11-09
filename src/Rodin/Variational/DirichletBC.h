@@ -4,6 +4,38 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file DirichletBC.h
+ * @brief Dirichlet boundary condition implementation.
+ *
+ * This file defines classes for imposing Dirichlet (essential) boundary
+ * conditions in finite element problems. Dirichlet conditions prescribe the
+ * solution values on specified boundaries.
+ *
+ * ## Mathematical Foundation
+ * A Dirichlet boundary condition specifies:
+ * @f[
+ *   u = g \quad \text{on} \quad \Gamma_D
+ * @f]
+ * where @f$ u @f$ is the solution, @f$ g @f$ is the prescribed boundary value,
+ * and @f$ \Gamma_D @f$ is a portion of the domain boundary.
+ *
+ * ## Implementation
+ * Dirichlet conditions are typically enforced by:
+ * 1. Identifying boundary degrees of freedom
+ * 2. Setting their values to @f$ g @f$
+ * 3. Modifying the system matrix and right-hand side
+ *
+ * ## Usage Example
+ * ```cpp
+ * // Homogeneous Dirichlet BC (u = 0 on boundary)
+ * auto bc = DirichletBC(u, Zero());
+ * 
+ * // Inhomogeneous Dirichlet BC
+ * auto g = [](const Point& p) { return sin(p.x()); };
+ * auto bc = DirichletBC(u, g).on(1);  // On boundary attribute 1
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_DIRICHLETBC_H
 #define RODIN_VARIATIONAL_DIRICHLETBC_H
 

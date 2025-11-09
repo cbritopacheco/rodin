@@ -4,6 +4,48 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file InterfaceIntegral.h
+ * @brief Interface integral classes for interior element faces.
+ *
+ * This file defines the InterfaceIntegral classes which represent integrals
+ * over interior mesh faces (interfaces between elements) in discontinuous
+ * Galerkin formulations. Interface integrals specifically exclude boundary
+ * faces, focusing on element-to-element coupling.
+ *
+ * ## Mathematical Foundation
+ * Interface integrals compute:
+ * @f[
+ *   \int_{\Gamma_h} f(x) \, ds
+ * @f]
+ * where @f$ \Gamma_h @f$ is the set of interior faces (excluding the domain
+ * boundary @f$ \partial\Omega @f$).
+ *
+ * ## Discontinuous Galerkin Context
+ * Interface integrals are fundamental to DG methods, enabling:
+ * - **Element coupling**: Connect discontinuous solutions across elements
+ * - **Flux consistency**: Ensure conservative numerical fluxes
+ * - **Stability**: Add necessary stabilization terms
+ *
+ * ## Interior Penalty Method
+ * A typical IP-DG formulation includes:
+ * @f[
+ *   a(u,v) = \int_\Omega \nabla u \cdot \nabla v \, dx
+ *          - \int_{\Gamma_h} \{\!\{\nabla u\}\!\} \cdot [\![v]\!] \, ds
+ *          - \int_{\Gamma_h} \{\!\{\nabla v\}\!\} \cdot [\![u]\!] \, ds
+ *          + \int_{\Gamma_h} \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] \, ds
+ * @f]
+ *
+ * ## Usage Example
+ * ```cpp
+ * // Interior penalty terms (only on interior faces)
+ * auto penalty = InterfaceIntegral(sigma / h * Jump(u), Jump(v));
+ * auto consistency = InterfaceIntegral(Average(Grad(u)), Jump(v));
+ * auto symmetry = InterfaceIntegral(Jump(u), Average(Grad(v)));
+ * ```
+ *
+ * @see FaceIntegral, BoundaryIntegral, Jump, Average
+ */
 #ifndef RODIN_VARIATIONAL_INTERFACEINTEGRAL_H
 #define RODIN_VARIATIONAL_INTERFACEINTEGRAL_H
 

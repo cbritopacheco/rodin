@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file BilinearForm.h
+ * @brief Bilinear form classes for finite element assembly.
+ *
+ * This file defines the BilinearForm classes which represent bilinear forms
+ * @f$ a(u,v) @f$ in variational formulations. Bilinear forms are assembled into
+ * matrices and form the left-hand side of finite element systems.
+ */
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 

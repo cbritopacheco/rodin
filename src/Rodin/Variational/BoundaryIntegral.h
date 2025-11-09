@@ -4,6 +4,38 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file BoundaryIntegral.h
+ * @brief Boundary integral classes for variational formulations.
+ *
+ * This file defines the BoundaryIntegral classes which represent integrals
+ * over the domain boundary in finite element formulations. Boundary integrals
+ * are essential for imposing natural (Neumann) boundary conditions and
+ * boundary terms in weak formulations.
+ *
+ * ## Mathematical Foundation
+ * Boundary integrals compute:
+ * @f[
+ *   \int_{\partial\Omega} f(x) \, ds
+ * @f]
+ * where @f$ \partial\Omega @f$ is the domain boundary and @f$ ds @f$ is the
+ * surface measure.
+ *
+ * ## Applications
+ * - **Neumann boundary conditions**: @f$ \int_{\Gamma_N} g \cdot v \, ds @f$
+ * - **Robin boundary conditions**: @f$ \int_{\Gamma_R} (\alpha u - \beta) v \, ds @f$
+ * - **Weak boundary terms**: Integration by parts produces boundary integrals
+ * - **Flux calculations**: Computing normal fluxes across boundaries
+ *
+ * ## Usage Example
+ * ```cpp
+ * // Neumann BC: ∫_Γ g·v ds
+ * auto neumann = BoundaryIntegral(g, v).on(2);  // On boundary attribute 2
+ * 
+ * // Robin BC: ∫_Γ (αu - β)v ds
+ * auto robin = BoundaryIntegral(alpha * u - beta, v).on(3);
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_BOUNDARYINTEGRAL_H
 #define RODIN_VARIATIONAL_BOUNDARYINTEGRAL_H
 

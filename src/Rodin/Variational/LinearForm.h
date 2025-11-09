@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file LinearForm.h
+ * @brief Linear form classes for finite element assembly.
+ *
+ * This file defines the LinearForm classes which represent linear functionals
+ * @f$ l(v) @f$ in variational formulations. Linear forms are assembled into
+ * vectors and form the right-hand side of finite element systems.
+ */
 #ifndef RODIN_VARIATIONAL_LINEARFORM_H
 #define RODIN_VARIATIONAL_LINEARFORM_H
 
