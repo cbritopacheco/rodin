@@ -1,5 +1,34 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_QUADRATURERULE_H
+
+/**
+ * @file
+ * @brief Numerical quadrature rules for finite element integration.
+ *
+ * This file defines quadrature rules for approximating integrals over mesh
+ * elements. A quadrature rule approximates an integral as:
+ * @f[
+ *   \int_K f \, dx \approx \sum_{q=1}^{n_q} w_q f(x_q)
+ * @f]
+ * where @f$ x_q @f$ are quadrature points and @f$ w_q @f$ are weights.
+ *
+ * ## Accuracy
+ * Quadrature rules are characterized by their degree of exactness: a rule of
+ * degree @f$ d @f$ integrates polynomials of degree @f$ \leq d @f$ exactly.
+ *
+ * ## Element Types
+ * Different rules exist for:
+ * - Simplices (triangles, tetrahedra): Gauss-Jacobi rules
+ * - Tensor products (quads, hexahedra): Gauss-Legendre product rules
+ *
+ * @see RodinQuadrature, GenericPolytopeQuadrature
+ */
 
 #include "ForwardDecls.h"
 

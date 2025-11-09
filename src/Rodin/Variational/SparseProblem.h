@@ -4,8 +4,33 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_DENSEPROBLEM_H
-#define RODIN_VARIATIONAL_DENSEPROBLEM_H
+#ifndef RODIN_VARIATIONAL_SPARSEPROBLEM_H
+#define RODIN_VARIATIONAL_SPARSEPROBLEM_H
+
+/**
+ * @file
+ * @brief Sparse linear system problem for finite element methods.
+ *
+ * This file defines the SparseProblem class which assembles finite element
+ * problems into sparse matrix representations using `Math::SparseMatrix` and
+ * `Math::Vector`. Sparse problems are the standard choice for FEM because:
+ * - Finite element matrices are naturally sparse
+ * - Memory efficiency for large-scale problems
+ * - Fast assembly and solve times
+ *
+ * ## Sparsity Pattern
+ * The sparsity of the system matrix @f$ A @f$ reflects the mesh connectivity:
+ * - @f$ A_{ij} \neq 0 @f$ only if basis functions @f$ \phi_i @f$ and @f$ \phi_j @f$ overlap
+ * - For FEM, typically @f$ O(N) @f$ non-zeros in @f$ N \times N @f$ matrix
+ *
+ * ## When to Use
+ * SparseProblem is the default choice for:
+ * - Standard finite element problems
+ * - Large-scale simulations
+ * - Most practical applications
+ *
+ * @see DenseProblem, Problem
+ */
 
 #include "Problem.h"
 

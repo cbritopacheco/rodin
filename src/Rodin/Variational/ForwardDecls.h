@@ -7,6 +7,15 @@
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
+/**
+ * @file
+ * @brief Forward declarations for the Variational module.
+ *
+ * This file contains forward declarations of all major classes and templates
+ * in the Variational module to enable incomplete types and reduce compilation
+ * dependencies.
+ */
+
 namespace Rodin::Variational
 {
   /**

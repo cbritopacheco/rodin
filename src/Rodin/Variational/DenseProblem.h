@@ -7,6 +7,28 @@
 #ifndef RODIN_VARIATIONAL_DENSEPROBLEM_H
 #define RODIN_VARIATIONAL_DENSEPROBLEM_H
 
+/**
+ * @file
+ * @brief Dense linear system problem for finite element methods.
+ *
+ * This file defines the DenseProblem class which assembles finite element
+ * problems into dense matrix representations using `Math::Matrix` and
+ * `Math::Vector`. Dense problems are suitable for:
+ * - Small-scale problems where memory is not a concern
+ * - Testing and verification
+ * - Problems with full matrices (e.g., after certain preconditioners)
+ *
+ * ## When to Use
+ * Use DenseProblem when:
+ * - The number of DOFs is small (@f$ < 1000 @f$)
+ * - The system matrix is expected to be full
+ * - Memory usage is not a concern
+ *
+ * For large-scale problems, prefer SparseProblem.
+ *
+ * @see SparseProblem, Problem
+ */
+
 #include "Problem.h"
 
 namespace Rodin::Variational
