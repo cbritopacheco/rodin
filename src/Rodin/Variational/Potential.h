@@ -7,6 +7,28 @@
 #ifndef RODIN_VARIATIONAL_POTENTIAL_H
 #define RODIN_VARIATIONAL_POTENTIAL_H
 
+/**
+ * @file
+ * @brief Potential operators for integral equations.
+ *
+ * This file defines potential operators that arise in boundary integral
+ * equations and potential theory. For a kernel @f$ K(x,y) @f$ and density
+ * @f$ \rho(y) @f$, the potential is:
+ * @f[
+ *   u(x) = \int_\Omega K(x,y) \rho(y) \, dy
+ * @f]
+ *
+ * ## Common Kernels
+ * - **Single layer**: @f$ K(x,y) = \frac{1}{|x-y|} @f$ (3D Laplace)
+ * - **Double layer**: @f$ K(x,y) = \frac{\partial}{\partial n_y}\frac{1}{|x-y|} @f$
+ * - **Heat kernel**: @f$ K(x,y,t) = \frac{1}{(4\pi t)^{d/2}} e^{-|x-y|^2/(4t)} @f$
+ *
+ * ## Applications
+ * - Boundary element methods (BEM)
+ * - Green's function methods
+ * - Integral equation formulations
+ */
+
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/QF/QuadratureFormula.h"

@@ -7,6 +7,25 @@
 #ifndef RODIN_VARIATIONAL_PERIODICBC_H
 #define RODIN_VARIATIONAL_PERIODICBC_H
 
+/**
+ * @file
+ * @brief Periodic boundary conditions.
+ *
+ * This file defines periodic boundary conditions where the solution values
+ * on one boundary are constrained to match those on an opposite boundary.
+ * Mathematically, for boundaries @f$ \Gamma_1 @f$ and @f$ \Gamma_2 @f$:
+ * @f[
+ *   u(x + \mathbf{p}) = u(x) \quad \forall x \in \Gamma_1
+ * @f]
+ * where @f$ \mathbf{p} @f$ is the periodicity vector.
+ *
+ * ## Applications
+ * - Periodic domains (e.g., unit cells in materials)
+ * - Crystalline structures
+ * - Periodic boundary value problems
+ * - Homogenization problems
+ */
+
 #include <set>
 #include <variant>
 

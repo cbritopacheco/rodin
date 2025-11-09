@@ -7,6 +7,24 @@
 #ifndef RODIN_VARIATIONAL_FLOW_H
 #define RODIN_VARIATIONAL_FLOW_H
 
+/**
+ * @file
+ * @brief Flow and transport operators for advection-dominated problems.
+ *
+ * This file defines flow operators that follow characteristic curves defined
+ * by a velocity field. For a vector field @f$ \mathbf{b} @f$ and time @f$ t @f$,
+ * the flow map @f$ \Phi_t @f$ satisfies:
+ * @f[
+ *   \frac{d\Phi_t(x)}{dt} = \mathbf{b}(\Phi_t(x)), \quad \Phi_0(x) = x
+ * @f]
+ *
+ * ## Applications
+ * - Advection-diffusion equations
+ * - Transport problems
+ * - Convection-dominated PDEs
+ * - Lagrangian-Eulerian methods
+ */
+
 #include "ForwardDecls.h"
 
 #include "Rodin/FormLanguage/Traits.h"

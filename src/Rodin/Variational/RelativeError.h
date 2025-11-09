@@ -1,5 +1,28 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_RELATIVEERROR_H
 #define RODIN_VARIATIONAL_RELATIVEERROR_H
+
+/**
+ * @file
+ * @brief Relative error computation utilities for finite element solutions.
+ *
+ * This file provides utilities to compute the relative error between a computed
+ * finite element solution and an exact (analytical) solution. The relative error
+ * in a norm @f$ \|\cdot\| @f$ is defined as:
+ * @f[
+ *   \text{RelErr} = \frac{\|u_h - u_{exact}\|}{\|u_{exact}\|}
+ * @f]
+ *
+ * ## Supported Norms
+ * - **L1**: @f$ \|f\|_{L^1} = \int_\Omega |f| \, dx @f$
+ * - **L2**: @f$ \|f\|_{L^2} = \sqrt{\int_\Omega |f|^2 \, dx} @f$
+ * - **L∞**: @f$ \|f\|_{L^\infty} = \max_{x \in \Omega} |f(x)| @f$
+ */
 
 #include "GridFunction.h"
 
