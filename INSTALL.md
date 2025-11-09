@@ -128,8 +128,8 @@ add_executable(my_app main.cpp)
 
 # Link against Rodin libraries
 target_link_libraries(my_app PRIVATE
-  Rodin::RodinGeometry
-  Rodin::RodinVariational
+  Rodin::Geometry
+  Rodin::Variational
 )
 ```
 
@@ -229,28 +229,32 @@ When you `find_package(Rodin)`, the following targets become available:
 
 ### Core Targets
 - `Rodin::Rodin` - Main interface library
-- `Rodin::RodinGeometry` - Mesh and geometry functionality
-- `Rodin::RodinVariational` - Variational formulations
-- `Rodin::RodinSolver` - Solver interfaces
-- `Rodin::RodinMath` - Mathematical utilities
-- `Rodin::RodinIO` - Input/output functionality
-- `Rodin::RodinQF` - Quadrature formulas
-- `Rodin::RodinAssembly` - Assembly routines
-- `Rodin::RodinFormLanguage` - Form language support
+- `Rodin::Geometry` - Mesh and geometry functionality
+- `Rodin::Variational` - Variational formulations
+- `Rodin::Solver` - Solver interfaces
+- `Rodin::Math` - Mathematical utilities
+- `Rodin::IO` - Input/output functionality
+- `Rodin::QF` - Quadrature formulas
+- `Rodin::Assembly` - Assembly routines
+- `Rodin::FormLanguage` - Form language support
 
 ### Utility Targets
-- `Rodin::RodinAlert` - Logging and alerts
-- `Rodin::RodinUtility` - General utilities
-- `Rodin::RodinContext` - Execution context
-- `Rodin::RodinThreads` - Threading support
-- `Rodin::RodinSerialization` - Serialization support
-- `Rodin::RodinTest` - Testing utilities
+- `Rodin::Alert` - Logging and alerts
+- `Rodin::Utility` - General utilities
+- `Rodin::Context` - Execution context
+- `Rodin::Threads` - Threading support
+- `Rodin::Serialization` - Serialization support
+- `Rodin::Test` - Testing utilities
+
+### Model Targets
+- `Rodin::Models::Eikonal` - Eikonal equation models
+- `Rodin::Models::Advection` - Advection models
 
 ### Optional Targets (when enabled)
-- `Rodin::RodinPlot` - Plotting (requires `RODIN_WITH_PLOT=ON`)
-- `Rodin::RodinPETSc` - PETSc integration (requires `RODIN_USE_PETSC=ON`)
-- `Rodin::RodinScotch` - Scotch integration (requires `RODIN_USE_SCOTCH=ON`)
-- `Rodin::RodinMPI` - MPI support (requires `RODIN_USE_MPI=ON`)
+- `Rodin::Plot` - Plotting (requires `RODIN_WITH_PLOT=ON`)
+- `Rodin::PETSc` - PETSc integration (requires `RODIN_USE_PETSC=ON`)
+- `Rodin::Scotch` - Scotch integration (requires `RODIN_USE_SCOTCH=ON`)
+- `Rodin::MPI` - MPI support (requires `RODIN_USE_MPI=ON`)
 
 ## Troubleshooting
 

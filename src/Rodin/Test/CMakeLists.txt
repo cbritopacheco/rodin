@@ -11,6 +11,7 @@ set(RodinTest_SRCS
 
 add_library(RodinTest INTERFACE)
 add_library(Rodin::Test ALIAS RodinTest)
+set_target_properties(RodinTest PROPERTIES EXPORT_NAME Test)
 
 foreach(_file IN LISTS RodinTest_SRCS RodinTest_HEADERS)
   target_sources(RodinTest INTERFACE

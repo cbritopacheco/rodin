@@ -7,6 +7,7 @@ set(RodinFormLanguage_SRCS Base.cpp)
 
 add_library(RodinFormLanguage ${RodinFormLanguage_SRCS} ${RodinFormLanguage_HEADERS})
 add_library(Rodin::FormLanguage ALIAS RodinFormLanguage)
+set_target_properties(RodinFormLanguage PROPERTIES EXPORT_NAME FormLanguage)
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinFormLanguage

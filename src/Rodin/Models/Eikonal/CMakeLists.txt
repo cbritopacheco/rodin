@@ -7,6 +7,7 @@ set(RodinModelsEikonal_SRCS
 
 add_library(RodinModelsEikonal INTERFACE)
 add_library(Rodin::Models::Eikonal ALIAS RodinModelsEikonal)
+set_target_properties(RodinModelsEikonal PROPERTIES EXPORT_NAME Models::Eikonal)
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinModelsEikonal

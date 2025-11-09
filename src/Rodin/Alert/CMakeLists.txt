@@ -20,6 +20,7 @@ set(RodinAlert_SRCS
 
 add_library(RodinAlert ${RodinAlert_SRCS} ${RodinAlert_HEADERS})
 add_library(Rodin::Alert ALIAS RodinAlert)
+set_target_properties(RodinAlert PROPERTIES EXPORT_NAME Alert)
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinAlert

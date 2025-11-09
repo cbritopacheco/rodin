@@ -49,6 +49,7 @@ set(RodinPlot_SRCS
 
 add_library(RodinPlot ${RodinPlot_SRCS} ${RodinPlot_HEADERS} )
 add_library(Rodin::Plot ALIAS RodinPlot)
+set_target_properties(RodinPlot PROPERTIES EXPORT_NAME Plot)
 
 target_include_directories(RodinPlot
   INTERFACE

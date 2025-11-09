@@ -32,6 +32,7 @@ set(RodinPETSc_SRCS
 
 add_library(RodinPETSc ${RodinPETSc_HEADERS} ${RodinPETSc_SRCS})
 add_library(Rodin::PETSc ALIAS RodinPETSc)
+set_target_properties(RodinPETSc PROPERTIES EXPORT_NAME PETSc)
 
 target_include_directories(RodinPETSc
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
