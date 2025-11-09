@@ -4,6 +4,15 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Problem.h
+ * @brief Variational problem classes for finite element systems.
+ *
+ * This file defines the Problem classes which encapsulate complete finite element
+ * problems including bilinear forms, linear forms, boundary conditions, and
+ * solution methods. Problems represent the discrete system @f$ Au = b @f$ arising
+ * from weak formulations.
+ */
 #ifndef RODIN_VARIATIONAL_PROBLEM_H
 #define RODIN_VARIATIONAL_PROBLEM_H
 

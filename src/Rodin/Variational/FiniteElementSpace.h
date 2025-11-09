@@ -4,6 +4,44 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file FiniteElementSpace.h
+ * @brief Finite element space classes and infrastructure.
+ *
+ * This file defines the FiniteElementSpace classes which represent discrete
+ * function spaces @f$ V_h @f$ used in finite element approximations. The finite
+ * element space defines the polynomial degree, mesh association, DOF mapping,
+ * and conformity properties of the approximation.
+ *
+ * ## Mathematical Foundation
+ * A finite element space @f$ V_h @f$ is defined by the triple @f$ (K, P, \Sigma) @f$:
+ * - @f$ K @f$: Reference element geometry (triangle, tetrahedron, etc.)
+ * - @f$ P @f$: Polynomial space (@f$ \mathbb{P}_k @f$, @f$ \mathbb{Q}_k @f$, etc.)
+ * - @f$ \Sigma @f$: Set of degrees of freedom (nodal values, moments, etc.)
+ *
+ * ## Conformity
+ * Different conforming spaces for different problems:
+ * - **H¹-conforming**: Continuous functions (standard Lagrange elements)
+ * - **H(div)-conforming**: Normal component continuous (Raviart-Thomas, BDM)
+ * - **H(curl)-conforming**: Tangential component continuous (Nédélec)
+ * - **L²-spaces**: Discontinuous (DG methods)
+ *
+ * ## DOF Management
+ * The finite element space manages:
+ * - Global DOF numbering: unique index for each basis function
+ * - Local-to-global mapping: relates element DOFs to global DOFs
+ * - Boundary DOFs: identification for boundary condition application
+ *
+ * ## Usage Example
+ * ```cpp
+ * // Create P1 space (continuous piecewise linear)
+ * P1 Vh(mesh);
+ * std::cout << "DOFs: " << Vh.getGlobalSize() << std::endl;
+ * 
+ * // Vector-valued space for elasticity
+ * P1 Wh(mesh, mesh.getSpaceDimension());
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_FINITEELEMENTSPACE_H
 #define RODIN_VARIATIONAL_FINITEELEMENTSPACE_H
 

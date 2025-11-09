@@ -4,6 +4,30 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file ProblemBody.h
+ * @brief Problem body class managing integrators and boundary conditions.
+ *
+ * This file defines the ProblemBody class, which manages the collection of
+ * integrators (bilinear and linear forms) and boundary conditions that
+ * comprise a variational problem. The ProblemBody serves as a container
+ * and coordinator for all components of a finite element formulation.
+ *
+ * ## Role in Problem Assembly
+ * ProblemBody acts as an intermediate layer that:
+ * 1. Collects all bilinear form integrators (matrix terms)
+ * 2. Collects all linear form integrators (load vector terms)
+ * 3. Manages essential (Dirichlet) boundary conditions
+ * 4. Manages periodic boundary conditions
+ * 5. Coordinates the assembly process
+ *
+ * ## Design Pattern
+ * The separation of ProblemBody from Problem follows the Bridge pattern,
+ * allowing:
+ * - Shared state between different problem types
+ * - Flexible composition of problem components
+ * - Independent evolution of assembly and solution strategies
+ */
 #ifndef RODIN_VARIATIONAL_PROBLEMBODY_H
 #define RODIN_VARIATIONAL_PROBLEMBODY_H
 
@@ -26,7 +50,15 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Represents the body of a variational problem.
+   * @ingroup RodinVariational
+   * @brief Base class representing the body of a variational problem.
+   *
+   * ProblemBodyBase manages all integrators and boundary conditions for a
+   * variational problem, providing a unified interface for problem assembly.
+   * It serves as the container for all mathematical components of the
+   * discrete system.
+   *
+   * @tparam Scalar Scalar type for problem coefficients
    */
   template <class Scalar>
   class ProblemBodyBase : public FormLanguage::Base
