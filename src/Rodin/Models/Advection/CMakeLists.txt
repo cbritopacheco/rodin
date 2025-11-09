@@ -7,6 +7,7 @@ set(RodinModelsAdvection_SRCS
 
 add_library(RodinModelsAdvection INTERFACE)
 add_library(Rodin::Models::Advection ALIAS RodinModelsAdvection)
+set_target_properties(RodinModelsAdvection PROPERTIES EXPORT_NAME Models::Advection)
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinModelsAdvection

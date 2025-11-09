@@ -3,6 +3,7 @@ set(RodinSerialization_HEADERS EigenMatrix.h)
 set(RodinSerialization_SRCS )
 add_library(RodinSerialization INTERFACE)
 add_library(Rodin::Serialization ALIAS RodinSerialization)
+set_target_properties(RodinSerialization PROPERTIES EXPORT_NAME Serialization)
 
 target_link_libraries(RodinSerialization INTERFACE Boost::serialization)
 

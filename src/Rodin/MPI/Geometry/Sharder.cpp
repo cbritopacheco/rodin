@@ -1,8 +1,9 @@
-#include <boost/multi_array.hpp>
 #include <cassert>
+#include <boost/multi_array.hpp>
 
 #include "Rodin/Serialization/BitSet.h"
 #include "Rodin/Serialization/FlatMap.h"
+#include "Rodin/Serialization/FlatSet.h"
 
 #include "Sharder.h"
 
@@ -119,7 +120,15 @@ namespace Rodin::Geometry
     for (size_t d = 0; d < cellDim + 1; d++)
     {
       for (size_t i = 0; i < mesh.getPolytopeCount(d); i++)
-        sbs[owner[d][i]].getHalo(d).insert({ local[d][i], std::move(halo[d][i]) });
+      {
+        if (!visited[d][i])
+          continue;
+        auto& hm = sbs[owner[d][i]].getHalo(d);
+        const size_t k = local[d][i];
+        auto [it, inserted] = hm.try_emplace(k, std::move(halo[d][i]));
+        if (!inserted)
+          it->second.insert(halo[d][i].begin(), halo[d][i].end());
+      }
     }
 
     m_shards.resize(numShards);

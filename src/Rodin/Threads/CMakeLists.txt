@@ -1,5 +1,6 @@
 add_library(RodinThreads INTERFACE)
 add_library(Rodin::Threads ALIAS RodinThreads)
+set_target_properties(RodinThreads PROPERTIES EXPORT_NAME Threads)
 
 target_include_directories(RodinThreads
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)

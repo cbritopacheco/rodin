@@ -78,9 +78,10 @@ configure_file(Configure.h.in Configure.h @ONLY)
 target_include_directories(RodinExternalMMG
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-  PUBLIC
-  ${PROJECT_SOURCE_DIR}/third-party/mmg/src
-  ${PROJECT_SOURCE_DIR}/third-party/mmg/include)
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third-party/mmg/src>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third-party/mmg/include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/RodinExternal/MMG>
+)
 target_link_libraries(RodinExternalMMG
   PUBLIC
   Mmg::libmmg_a
@@ -92,3 +93,17 @@ target_link_libraries(RodinExternalMMG
   Rodin::Variational
   ${CMAKE_THREAD_LIBS_INIT})
 
+# Note: RodinExternalMMG is not exported because it depends on MMG which is built
+# from source. Users who want MMG support should build Rodin from source.
+# install(TARGETS RodinExternalMMG
+#   EXPORT       RodinTargets
+#   RUNTIME      DESTINATION ${RODIN_INSTALL_BINARY_PATH}
+#   LIBRARY      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+#   ARCHIVE      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+#   INCLUDES     DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/RodinExternal/MMG
+# )
+
+# rodin_install_headers(
+#   DIRECTORIES .
+#   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RodinExternal/MMG
+# )

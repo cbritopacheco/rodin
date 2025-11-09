@@ -49,6 +49,7 @@ set(RodinPlot_SRCS
 
 add_library(RodinPlot ${RodinPlot_SRCS} ${RodinPlot_HEADERS} )
 add_library(Rodin::Plot ALIAS RodinPlot)
+set_target_properties(RodinPlot PROPERTIES EXPORT_NAME Plot)
 
 target_include_directories(RodinPlot
   INTERFACE
@@ -70,3 +71,15 @@ target_link_libraries(RodinPlot
   MagnumIntegration::Eigen
   )
 
+install(TARGETS RodinPlot
+  EXPORT       RodinTargets
+  RUNTIME      DESTINATION ${RODIN_INSTALL_BINARY_PATH}
+  LIBRARY      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  ARCHIVE      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  INCLUDES     DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin/Plot
+)
+
+rodin_install_headers(
+  DIRECTORIES .
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Plot
+)

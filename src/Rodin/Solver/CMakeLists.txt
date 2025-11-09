@@ -10,6 +10,7 @@ set(RodinSolver_SRCS
 # add_library(RodinSolver ${RodinSolver_SRCS} ${RodinSolver_HEADERS})
 add_library(RodinSolver INTERFACE)
 add_library(Rodin::Solver ALIAS RodinSolver)
+set_target_properties(RodinSolver PROPERTIES EXPORT_NAME Solver)
 
 # ---- OpenMP ----------------------------------------------------------------
 if (RODIN_USE_OPENMP)
@@ -49,3 +50,15 @@ target_link_libraries(RodinSolver
   INTERFACE
   Eigen3::Eigen)
 
+install(TARGETS RodinSolver
+  EXPORT       RodinTargets
+  RUNTIME      DESTINATION ${RODIN_INSTALL_BINARY_PATH}
+  LIBRARY      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  ARCHIVE      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  INCLUDES     DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin/Solver
+)
+
+rodin_install_headers(
+  DIRECTORIES .
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Solver
+)

@@ -1,8 +1,12 @@
-#include <boost/serialization/optional.hpp>
+#include <memory>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_free.hpp>
+#include <boost/serialization/optional.hpp>
 
 #include "Mesh.h"
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Geometry/PolytopeTransformation.h"
 
 namespace Rodin::Geometry
 {
@@ -396,7 +400,8 @@ namespace Rodin::Geometry
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
   }
 
-  const PolytopeTransformation& MPIMesh::getPolytopeTransformation(size_t dimension, Index globalIdx) const
+  const PolytopeTransformation& MPIMesh::getPolytopeTransformation(
+      size_t dimension, Index globalIdx) const
   {
     auto idx = getLocalIndex(dimension, globalIdx);
     const auto& comm = m_context.getCommunicator();
@@ -407,14 +412,10 @@ namespace Rodin::Geometry
       if (shard.isOwned(dimension, *idx))
         local = shard.getPolytopeTransformation(dimension, *idx).copy();
     }
-    auto res = boost::mpi::all_reduce(comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
+    auto res = boost::mpi::all_reduce(
+        comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
     assert(res);
-    m_transformationIndex[dimension].write(
-        [&](auto& obj)
-        {
-          assert(res);
-          obj[globalIdx] = res;
-        });
+    m_transformations.set({ dimension, globalIdx }, std::unique_ptr<PolytopeTransformation>(local));
     return *res;
   }
 
@@ -429,7 +430,8 @@ namespace Rodin::Geometry
       if (shard.isOwned(dimension, *idx))
         local = shard.getGeometry(dimension, *idx);
     }
-    auto res = boost::mpi::all_reduce(comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
+    auto res = boost::mpi::all_reduce(
+        comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
     assert(res);
     return *res;
   }
@@ -445,7 +447,8 @@ namespace Rodin::Geometry
       if (shard.isOwned(dimension, *idx))
         local = shard.getAttribute(dimension, *idx);
     }
-    auto res = boost::mpi::all_reduce(comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
+    auto res = boost::mpi::all_reduce(
+        comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
     assert(res);
     return *res;
   }
@@ -509,7 +512,8 @@ namespace Rodin::Geometry
     }
     assert(local.size() >= 0);
     assert(static_cast<size_t>(local.size()) == getSpaceDimension());
-    auto res = boost::mpi::all_reduce(comm, local, [](auto const& a, auto const& b) { return a.size() > 0 ? a : b; });
+    auto res = boost::mpi::all_reduce(
+        comm, local, [](auto const& a, auto const& b) { return a.size() > 0 ? a : b; });
     const auto& coords = (m_vertices[globalIdx] = res);
     return { coords.data(), static_cast<Eigen::Index>(coords.size()) };
   }

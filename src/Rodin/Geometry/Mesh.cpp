@@ -305,7 +305,8 @@ namespace Rodin::Geometry
       const std::pair<size_t, Index> p, PolytopeTransformation* trans)
   {
     const size_t d = p.first;
-    m_transformations.set(p, this->getPolytopeCount(d), std::unique_ptr<PolytopeTransformation>(trans));
+    m_transformations.set(
+        p, this->getPolytopeCount(d), std::unique_ptr<PolytopeTransformation>(trans));
     return *this;
   }
 
@@ -515,25 +516,21 @@ namespace Rodin::Geometry
 
   CellIterator Mesh<Context::Local>::getCell() const
   {
-    assert(this->getCellCount() > 0);
     return getCell(0);
   }
 
   FaceIterator Mesh<Context::Local>::getFace() const
   {
-    assert(this->getFaceCount() > 0);
     return getFace(0);
   }
 
   VertexIterator Mesh<Context::Local>::getVertex() const
   {
-    assert(this->getVertexCount() > 0);
     return getVertex(0);
   }
 
   PolytopeIterator Mesh<Context::Local>::getPolytope(size_t dimension) const
   {
-    assert(this->getPolytopeCount(dimension) > 0);
     return getPolytope(dimension, 0);
   }
 

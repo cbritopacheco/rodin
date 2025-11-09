@@ -19,13 +19,27 @@ Any contributors are warmly encouraged and any help or comments are always appre
 
 ## Table of Contents
 
-1. [Building the project](#building-the-project)
-2. [Features](#features)
-3. [Third-Party integrations](#third-party-integrations)
+1. [Installation](#installation)
+2. [Building the project](#building-the-project)
+3. [Features](#features)
+4. [Third-Party integrations](#third-party-integrations)
 5. [Requirements](#requirements)
 6. [CMake options](#cmake-options)
 7. [Building the documentation](#building-the-documentation)
 
+## Installation
+
+For detailed installation instructions, including system requirements, CMake configuration options, and usage examples, please see **[INSTALL.md](INSTALL.md)**.
+
+Quick install:
+```bash
+git clone --recursive https://github.com/cbritopacheco/rodin.git
+cd rodin
+mkdir build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
+make -j4
+sudo make install
+```
 
 ## Building the project
 

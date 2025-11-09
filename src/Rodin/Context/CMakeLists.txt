@@ -5,6 +5,7 @@ set(RodinContext_SRCS Sequential.cpp)
 # add_library(RodinContext ${RodinContext_SRCS} ${RodinContext_HEADERS})
 add_library(RodinContext INTERFACE)
 add_library(Rodin::Context ALIAS RodinContext)
+set_target_properties(RodinContext PROPERTIES EXPORT_NAME Context)
 
 target_include_directories(RodinContext
   INTERFACE

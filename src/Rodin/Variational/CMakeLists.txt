@@ -53,6 +53,7 @@ set(RodinVariational_SRCS
 add_library(RodinVariational
   ${RodinVariational_SRCS} ${RodinVariational_HEADERS})
 add_library(Rodin::Variational ALIAS RodinVariational)
+set_target_properties(RodinVariational PROPERTIES EXPORT_NAME Variational)
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinVariational

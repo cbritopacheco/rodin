@@ -17,6 +17,7 @@ set(RodinQF_SRCS
 add_library(RodinQF
   ${RodinQF_SRCS} ${RodinQF_HEADERS})
 add_library(Rodin::QF ALIAS RodinQF)
+set_target_properties(RodinQF PROPERTIES EXPORT_NAME QF)
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinQF

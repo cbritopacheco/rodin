@@ -15,6 +15,7 @@ set(RodinScotch_SRCS
 add_library(RodinScotch
   ${RodinScotch_HEADERS} ${RodinScotch_SRCS})
 add_library(Rodin::Scotch ALIAS RodinScotch)
+set_target_properties(RodinScotch PROPERTIES EXPORT_NAME Scotch)
 
 target_include_directories(RodinScotch
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
@@ -25,3 +26,16 @@ target_link_libraries(RodinScotch
   Rodin::Geometry
   Rodin::Alert
   Scotch::Scotch)
+
+install(TARGETS RodinScotch
+  EXPORT       RodinTargets
+  RUNTIME      DESTINATION ${RODIN_INSTALL_BINARY_PATH}
+  LIBRARY      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  ARCHIVE      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  INCLUDES     DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin/Scotch
+)
+
+rodin_install_headers(
+  DIRECTORIES .
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Scotch
+)

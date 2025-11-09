@@ -18,6 +18,7 @@ set(RodinIO_SRCS
   GridFunctionLoader.cpp)
 add_library(RodinIO ${RodinIO_SRCS} ${RodinIO_HEADERS})
 add_library(Rodin::IO ALIAS RodinIO)
+set_target_properties(RodinIO PROPERTIES EXPORT_NAME IO)
 
 target_link_libraries(RodinIO
   PUBLIC

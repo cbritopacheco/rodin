@@ -5,6 +5,7 @@ set(RodinAssembly_SRCS Sequential.cpp)
 add_library(RodinAssembly
   ${RodinAssembly_SRCS} ${RodinAssembly_HEADERS})
 add_library(Rodin::Assembly ALIAS RodinAssembly)
+set_target_properties(RodinAssembly PROPERTIES EXPORT_NAME Assembly)
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinAssembly

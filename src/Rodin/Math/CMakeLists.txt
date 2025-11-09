@@ -24,6 +24,7 @@ endif()
 # add_library(RodinMath ${RodinMath_SRCS} ${RodinMath_HEADERS})
 add_library(RodinMath INTERFACE)
 add_library(Rodin::Math ALIAS RodinMath)
+set_target_properties(RodinMath PROPERTIES EXPORT_NAME Math)
 
 # ---- Link targets ----------------------------------------------------------
 target_link_libraries(RodinMath

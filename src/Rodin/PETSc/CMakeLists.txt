@@ -32,6 +32,7 @@ set(RodinPETSc_SRCS
 
 add_library(RodinPETSc ${RodinPETSc_HEADERS} ${RodinPETSc_SRCS})
 add_library(Rodin::PETSc ALIAS RodinPETSc)
+set_target_properties(RodinPETSc PROPERTIES EXPORT_NAME PETSc)
 
 target_include_directories(RodinPETSc
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
@@ -42,15 +43,30 @@ target_link_libraries(RodinPETSc
   PUBLIC
   Rodin::Geometry
   Rodin::Alert
-  Rodin::MPI
   Rodin::Math
   Rodin::Variational
   Rodin::Assembly
   Rodin::FormLanguage
   PETSc::PETSc)
 
+if (RODIN_USE_MPI)
+  target_link_libraries(RodinPETSc PUBLIC Rodin::MPI)
+endif()
+
 if (RODIN_USE_OPENMP)
   find_package(OpenMP REQUIRED)
   target_link_libraries(RodinPETSc PUBLIC OpenMP::OpenMP_CXX)
 endif()
 
+install(TARGETS RodinPETSc
+  EXPORT       RodinTargets
+  RUNTIME      DESTINATION ${RODIN_INSTALL_BINARY_PATH}
+  LIBRARY      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  ARCHIVE      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  INCLUDES     DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin/PETSc
+)
+
+rodin_install_headers(
+  DIRECTORIES .
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/PETSc
+)

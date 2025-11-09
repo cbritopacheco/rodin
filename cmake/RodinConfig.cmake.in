@@ -3,5 +3,12 @@
 include(CMakeFindDependencyMacro)
 
 find_dependency(Eigen3 3.4 REQUIRED)
+find_dependency(Boost 1.74 REQUIRED COMPONENTS filesystem serialization)
+find_dependency(Threads REQUIRED)
+
+# Find optional dependencies if they were used during build
+if(@RODIN_USE_OPENMP@)
+  find_dependency(OpenMP REQUIRED)
+endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/RodinTargets.cmake")

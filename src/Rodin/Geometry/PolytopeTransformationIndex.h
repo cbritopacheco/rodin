@@ -107,6 +107,24 @@ namespace Rodin::Geometry
     }
 
     void set(const std::pair<size_t, Index>& p,
+             std::unique_ptr<PolytopeTransformation> obj)
+    {
+      const size_t d   = p.first;
+      const Index  idx = p.second;
+
+      assert(d < m_dimensions.size());
+      auto& dim = m_dimensions[d];
+      std::unique_lock<std::shared_mutex> wr(dim.mutex);
+      if (dim.slots.size() <= idx)
+        dim.slots.resize(idx + 1);
+
+      assert(idx < dim.slots.size());
+      Slot& s = dim.slots[idx];
+      s.owner = std::move(obj);
+      s.ptr.store(s.owner.get(), std::memory_order_release);
+    }
+
+    void set(const std::pair<size_t, Index>& p,
              size_t count,
              std::unique_ptr<PolytopeTransformation> obj)
     {
