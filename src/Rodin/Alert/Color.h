@@ -7,25 +7,46 @@
 #ifndef RODIN_ALERT_COLOR_H
 #define RODIN_ALERT_COLOR_H
 
+/**
+ * @file
+ * @brief Terminal color definitions and utilities.
+ */
+
 #include <ostream>
 #include <termcolor/termcolor.hpp>
 
 namespace Rodin::Alert
 {
+  /**
+   * @brief 16-color terminal color enumeration.
+   * @ingroup AlertModule
+   *
+   * Enumeration of standard 16 terminal colors for text formatting.
+   * These colors are widely supported across different terminal emulators.
+   */
   enum class Color16
   {
-    Red,
-    Green,
-    Blue,
-    Yellow,
-    Magenta,
-    Cyan,
-    Gray,
-    White,
-    BrightGray,
-    BrightWhite
+    Red,          ///< Red color
+    Green,        ///< Green color
+    Blue,         ///< Blue color
+    Yellow,       ///< Yellow color
+    Magenta,      ///< Magenta color
+    Cyan,         ///< Cyan color
+    Gray,         ///< Gray color
+    White,        ///< White color
+    BrightGray,   ///< Bright gray color
+    BrightWhite   ///< Bright white color
   };
 
+  /**
+   * @brief Stream insertion operator for Color16.
+   * @ingroup AlertModule
+   * @param os Output stream to write to
+   * @param c The color to apply
+   * @return Reference to the output stream
+   *
+   * Applies the specified color to the output stream using termcolor library.
+   */
   inline
   std::ostream& operator<<(std::ostream& os, Color16 c)
   {

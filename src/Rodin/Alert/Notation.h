@@ -1,6 +1,11 @@
 #ifndef RODIN_ALERT_NOTATION_H
 #define RODIN_ALERT_NOTATION_H
 
+/**
+ * @file
+ * @brief Mathematical and special notation formatting.
+ */
+
 #include "Text.h"
 
 namespace Rodin::Alert

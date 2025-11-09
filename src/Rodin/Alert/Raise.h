@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_RAISE_H
 #define RODIN_ALERT_RAISE_H
 
+/**
+ * @file
+ * @brief Exception raising utilities.
+ */
+
 namespace Rodin::Alert
 {
   /**

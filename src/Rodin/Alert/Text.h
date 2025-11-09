@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_TEXT_H
 #define RODIN_ALERT_TEXT_H
 
+/**
+ * @file
+ * @brief Text styling and formatting for terminal output.
+ */
+
 #include <string>
 #include <cstdint>
 #include <cstdlib>

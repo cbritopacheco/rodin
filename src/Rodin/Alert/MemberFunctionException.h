@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_MEMBERFUNCTIONEXCEPTION_H
 #define RODIN_ALERT_MEMBERFUNCTIONEXCEPTION_H
 
+/**
+ * @file
+ * @brief Member function exception handling.
+ */
+
 #include <boost/type_index.hpp>
 #include <boost/current_function.hpp>
 

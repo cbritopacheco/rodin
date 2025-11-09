@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_SUCCESS_H
 #define RODIN_ALERT_SUCCESS_H
 
+/**
+ * @file
+ * @brief Success messages with green-colored output.
+ */
+
 #define RODIN_ALERT_SUCCESS_PREFIX "Success"
 
 #include "Message.h"

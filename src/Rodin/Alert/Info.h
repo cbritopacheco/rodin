@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_INFO_H
 #define RODIN_ALERT_INFO_H
 
+/**
+ * @file
+ * @brief Informational messages with blue-colored output.
+ */
+
 #define RODIN_ALERT_INFO_PREFIX "Info"
 
 #include "Message.h"

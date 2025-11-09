@@ -8,6 +8,15 @@
 #define RODIN_ALERT_EXCEPTION_H
 
 /**
+ * @file
+ * @brief Exception handling with formatted error messages.
+ *
+ * This file defines the Exception class which provides comprehensive exception
+ * handling with colored terminal output and formatted error messages. Exceptions
+ * are displayed with red coloring and support stream-like message composition.
+ */
+
+/**
  * @defgroup AlertModule Alert
  * @brief Alert and exception handling system for Rodin.
  *

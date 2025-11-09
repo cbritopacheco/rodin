@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_MEMBERFUNCTIONwarning_H
 #define RODIN_ALERT_MEMBERFUNCTIONwarning_H
 
+/**
+ * @file
+ * @brief Member function warning handling.
+ */
+
 #include <boost/type_index.hpp>
 #include <boost/current_function.hpp>
 

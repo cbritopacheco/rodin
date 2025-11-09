@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_MESSAGE_H
 #define RODIN_ALERT_MESSAGE_H
 
+/**
+ * @file
+ * @brief Base message class for formatted terminal output.
+ */
+
 #include <string>
 #include <sstream>
 #include <cstdint>

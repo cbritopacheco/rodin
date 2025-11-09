@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_NEWLINE_H
 #define RODIN_ALERT_NEWLINE_H
 
+/**
+ * @file
+ * @brief Newline handling for formatted messages.
+ */
+
 #include <ostream>
 
 namespace Rodin::Alert

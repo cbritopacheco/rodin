@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_CLASSEXCEPTION_H
 #define RODIN_ALERT_CLASSEXCEPTION_H
 
+/**
+ * @file
+ * @brief Class-specific exception handling.
+ */
+
 #include <boost/type_index.hpp>
 
 #include "Exception.h"

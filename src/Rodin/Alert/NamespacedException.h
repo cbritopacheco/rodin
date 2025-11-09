@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_NAMESPACEDEXCEPTION_H
 #define RODIN_ALERT_NAMESPACEDEXCEPTION_H
 
+/**
+ * @file
+ * @brief Namespace-specific exception handling.
+ */
+
 #include "Exception.h"
 #include "Identifier.h"
 

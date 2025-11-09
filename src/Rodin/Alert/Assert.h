@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_ASSERT_H
 #define RODIN_ALERT_ASSERT_H
 
+/**
+ * @file
+ * @brief Assertion utilities for runtime checks.
+ */
+
 #include "MemberFunctionException.h"
 
 

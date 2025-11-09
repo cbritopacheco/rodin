@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_FORWARDDECLS_H
 #define RODIN_ALERT_FORWARDDECLS_H
 
+/**
+ * @file
+ * @brief Forward declarations for the Alert module.
+ */
+
 #include <cstdlib>
 
 namespace Rodin::Alert

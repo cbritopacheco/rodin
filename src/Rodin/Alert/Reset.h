@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_RESET_H
 #define RODIN_ALERT_RESET_H
 
+/**
+ * @file
+ * @brief Terminal formatting reset utilities.
+ */
+
 #include <ostream>
 #include <termcolor/termcolor.hpp>
 

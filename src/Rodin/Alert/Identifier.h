@@ -1,6 +1,11 @@
 #ifndef RODIN_ALERT_IDENTIFIER_H
 #define RODIN_ALERT_IDENTIFIER_H
 
+/**
+ * @file
+ * @brief Identifier formatting for error messages.
+ */
+
 #include "Text.h"
 
 namespace Rodin::Alert

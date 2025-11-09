@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_COLOR_H
 #define RODIN_ALERT_COLOR_H
 
+/**
+ * @file
+ * @brief Bold text formatting utility.
+ */
+
 namespace Rodin::Alert
 {
   struct BoldT {};

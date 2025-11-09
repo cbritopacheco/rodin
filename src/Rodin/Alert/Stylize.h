@@ -7,6 +7,11 @@
 #ifndef RODIN_ALERT_STYLIZE_H
 #define RODIN_ALERT_STYLIZE_H
 
+/**
+ * @file
+ * @brief Text stylization utilities for terminal output.
+ */
+
 #include <ostream>
 #include <termcolor/termcolor.hpp>
 
