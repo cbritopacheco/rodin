@@ -1,5 +1,35 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
+
+/**
+ * @file
+ * @brief Base classes for bilinear form integrators.
+ *
+ * This file defines the base infrastructure for bilinear form integrators,
+ * which are the building blocks for assembling bilinear forms @f$ a(u,v) @f$.
+ * Integrators specify how to compute local element contributions to the
+ * global system matrix.
+ *
+ * ## Mathematical Foundation
+ * A bilinear form integrator computes element-level contributions:
+ * @f[
+ *   A^K_{ij} = a^K(\phi_j, \psi_i)
+ * @f]
+ * which are then assembled into the global matrix @f$ A @f$.
+ *
+ * ## Types of Integrators
+ * - **Domain integrators**: @f$ \int_K f \, dx @f$
+ * - **Boundary integrators**: @f$ \int_{\partial K} g \, ds @f$
+ * - **Interface integrators**: For DG methods
+ *
+ * @see BilinearForm, LocalBilinearFormIntegratorBase
+ */
 
 #include <memory>
 

@@ -7,6 +7,33 @@
 #ifndef RODIN_VARIATIONAL_JACOBIAN_H
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
+/**
+ * @file
+ * @brief Jacobian matrix for vector-valued functions.
+ *
+ * This file defines the Jacobian operator which computes the matrix of all
+ * first-order partial derivatives. For a vector function
+ * @f$ \mathbf{u}: \Omega \rightarrow \mathbb{R}^n @f$, the Jacobian is:
+ * @f[
+ *   J(\mathbf{u}) = \begin{pmatrix}
+ *     \frac{\partial u_1}{\partial x_1} & \cdots & \frac{\partial u_1}{\partial x_d} \\
+ *     \vdots & \ddots & \vdots \\
+ *     \frac{\partial u_n}{\partial x_1} & \cdots & \frac{\partial u_n}{\partial x_d}
+ *   \end{pmatrix}
+ * @f]
+ *
+ * ## Mathematical Properties
+ * - For scalar functions, the Jacobian is the gradient (row vector)
+ * - The determinant @f$ \det(J) @f$ appears in change of variables
+ * - The transpose @f$ J^T @f$ is often used in weak formulations
+ *
+ * ## Applications
+ * - Nonlinear elasticity: deformation gradient
+ * - Fluid mechanics: velocity gradient tensor
+ * - Change of variables in integrals
+ * - Newton's method for nonlinear systems
+ */
+
 #include "ForwardDecls.h"
 #include "MatrixFunction.h"
 

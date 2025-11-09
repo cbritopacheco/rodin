@@ -1,5 +1,34 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_DERIVATIVE_H
 #define RODIN_VARIATIONAL_DERIVATIVE_H
+
+/**
+ * @file
+ * @brief Directional derivative operator for functions.
+ *
+ * This file defines the directional derivative operator which computes the
+ * derivative of a function in a specified direction. For a function
+ * @f$ u: \Omega \rightarrow \mathbb{R} @f$ and direction @f$ \mathbf{d} @f$:
+ * @f[
+ *   \frac{\partial u}{\partial \mathbf{d}} = \nabla u \cdot \mathbf{d}
+ * @f]
+ *
+ * For a specific coordinate direction @f$ x_i @f$:
+ * @f[
+ *   \frac{\partial u}{\partial x_i}
+ * @f]
+ *
+ * ## Applications
+ * - Computing derivatives along specific axes
+ * - Sensitivity analysis
+ * - Shape derivatives in optimization
+ * - Computing tangential derivatives
+ */
 
 #include <cassert>
 #include <cstdlib>

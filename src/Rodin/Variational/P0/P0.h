@@ -7,6 +7,14 @@
 #ifndef RODIN_VARIATIONAL_P0_P0_H
 #define RODIN_VARIATIONAL_P0_P0_H
 
+/**
+ * @file
+ * @brief P0 (piecewise constant) finite element space implementation.
+ *
+ * This file implements the P0 finite element space where functions are
+ * constant on each element. This is the simplest finite element space.
+ */
+
 #include <boost/multi_array.hpp>
 
 #include "Rodin/Types.h"

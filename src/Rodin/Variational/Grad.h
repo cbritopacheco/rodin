@@ -7,6 +7,33 @@
 #ifndef RODIN_VARIATIONAL_GRAD_H
 #define RODIN_VARIATIONAL_GRAD_H
 
+/**
+ * @file
+ * @brief Gradient operator for scalar and vector functions.
+ *
+ * This file defines the gradient operator @f$ \nabla @f$ which computes spatial
+ * derivatives of functions. For a scalar function @f$ u: \Omega \rightarrow \mathbb{R} @f$:
+ * @f[
+ *   \nabla u = \left(\frac{\partial u}{\partial x_1}, \frac{\partial u}{\partial x_2}, \ldots, \frac{\partial u}{\partial x_d}\right)
+ * @f]
+ *
+ * For a vector function @f$ \mathbf{u}: \Omega \rightarrow \mathbb{R}^n @f$, the gradient
+ * is the Jacobian matrix:
+ * @f[
+ *   \nabla \mathbf{u} = \begin{pmatrix}
+ *     \frac{\partial u_1}{\partial x_1} & \cdots & \frac{\partial u_1}{\partial x_d} \\
+ *     \vdots & \ddots & \vdots \\
+ *     \frac{\partial u_n}{\partial x_1} & \cdots & \frac{\partial u_n}{\partial x_d}
+ *   \end{pmatrix}
+ * @f]
+ *
+ * ## Applications
+ * - Poisson equation: @f$ -\nabla \cdot (\nabla u) = f @f$
+ * - Diffusion problems
+ * - Gradient-based optimization
+ * - Strain tensors in mechanics
+ */
+
 #include "ForwardDecls.h"
 
 #include "VectorFunction.h"

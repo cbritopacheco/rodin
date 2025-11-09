@@ -7,6 +7,15 @@
 #ifndef RODIN_VARIATIONAL_P1_P1_H
 #define RODIN_VARIATIONAL_P1_P1_H
 
+/**
+ * @file
+ * @brief P1 (piecewise linear) finite element space implementation.
+ *
+ * This file implements the P1 finite element space where functions are
+ * continuous and piecewise linear on each element. This is the most common
+ * finite element space for elliptic PDEs.
+ */
+
 #include <boost/multi_array.hpp>
 #include <functional>
 

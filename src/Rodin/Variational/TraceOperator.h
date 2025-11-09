@@ -7,6 +7,29 @@
 #ifndef RODIN_VARIATIONAL_COMPOSITION_H
 #define RODIN_VARIATIONAL_COMPOSITION_H
 
+/**
+ * @file
+ * @brief Trace operator for restricting functions to boundaries and interfaces.
+ *
+ * This file defines the TraceOperator which restricts functions from a domain
+ * to lower-dimensional manifolds (boundaries, interfaces). For a function
+ * @f$ u: \Omega \rightarrow \mathbb{R} @f$, the trace is:
+ * @f[
+ *   \gamma(u) = u|_{\Gamma}
+ * @f]
+ * where @f$ \Gamma \subset \partial\Omega @f$ is a boundary or interface.
+ *
+ * ## Trace Theorems
+ * For functions in Sobolev spaces:
+ * - If @f$ u \in H^1(\Omega) @f$, then @f$ \gamma(u) \in H^{1/2}(\partial\Omega) @f$
+ * - The trace operator is bounded and surjective
+ *
+ * ## Applications
+ * - Boundary conditions
+ * - Interface continuity in DG methods
+ * - Coupling bulk and surface equations
+ */
+
 #include <functional>
 
 #include "ForwardDecls.h"
