@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_GEOMETRYINDEXED_H
 #define RODIN_VARIATIONAL_GEOMETRYINDEXED_H
 
+/**
+ * @file
+ * @brief Container for mapping polytope types to associated data.
+ */
+
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -25,7 +30,23 @@ namespace Rodin::Geometry
    * compile-time knowledge of the number of polytope types to provide 
    * O(1) access with minimal memory overhead.
    *
+   * # Usage Example
+   * @code{.cpp}
+   * // Store quadrature orders for each polytope type
+   * GeometryIndexed<int> quadratureOrders = {
+   *   {Polytope::Type::Point, 1},
+   *   {Polytope::Type::Segment, 2},
+   *   {Polytope::Type::Triangle, 3},
+   *   {Polytope::Type::Quadrilateral, 4},
+   *   {Polytope::Type::Tetrahedron, 5},
+   *   {Polytope::Type::Wedge, 6}
+   * };
+   * int order = quadratureOrders[Polytope::Type::Triangle]; // Returns 3
+   * @endcode
+   *
    * @tparam T Type of data to associate with each polytope type
+   *
+   * @see Polytope::Type
    */
   template <class T>
   class GeometryIndexed
