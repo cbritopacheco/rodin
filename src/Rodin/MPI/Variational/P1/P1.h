@@ -197,7 +197,7 @@ namespace Rodin::Variational
             assert(i);
             const auto& dofs = m_fes.getDOFs(0, *i);
             assert(dofs.size() == 1);
-            const auto [it, inserted] = m_local_to_global.right.insert({ global, dofs[0] });
+            const auto [it, inserted] = m_local_to_global.right.emplace(global, dofs[0]);
             assert(inserted);
           }
         }
@@ -238,7 +238,7 @@ namespace Rodin::Variational
               const Index global = dofIdx + m_offset;
               s_send.push_back(global);
 
-              const auto [it, inserted] = m_local_to_global.right.insert({ global, local });
+              const auto [it, inserted] = m_local_to_global.right.emplace(global, local);
               assert(inserted);
 
               dofIdx++;
@@ -282,7 +282,7 @@ namespace Rodin::Variational
             assert(dofs.size() == global.size());
             for (size_t k = 0; k < global.size(); k++)
             {
-              const auto [it, inserted] = m_local_to_global.right.insert({ global[k], dofs[k] });
+              const auto [it, inserted] = m_local_to_global.right.emplace(global[k], dofs[k]);
               assert(inserted);
             }
           }
