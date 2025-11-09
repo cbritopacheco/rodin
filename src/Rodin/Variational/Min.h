@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_Min_H
 #define RODIN_VARIATIONAL_Min_H
 
+/**
+ * @file
+ * @brief Minimum function operations.
+ */
+
 #include <cmath>
 
 #include "ForwardDecls.h"
@@ -23,7 +28,25 @@ namespace Rodin::Variational
 
   /**
    * @ingroup MinSpecializations
-   * @brief Represents the minimum between two arguments.
+   * @brief Represents the minimum operation between two functions.
+   *
+   * This class represents the pointwise minimum of two functions:
+   * @f[
+   *    \text{Min}(f, g)(x) = \min(f(x), g(x))
+   * @f]
+   *
+   * For scalar functions, this computes the minimum value at each point.
+   * For vector or matrix functions, the operation is applied componentwise.
+   *
+   * Common applications include:
+   * - Truncation and clamping operations
+   * - Complementarity conditions
+   * - Non-smooth optimization problems
+   *
+   * @tparam LHSDerived Type of the left operand function
+   * @tparam RHSDerived Type of the right operand function
+   *
+   * @see Max, FunctionBase
    */
   template <class LHSDerived, class RHSDerived>
   class Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final

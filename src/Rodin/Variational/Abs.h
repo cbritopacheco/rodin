@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_ABS_H
 #define RODIN_VARIATIONAL_ABS_H
 
+/**
+ * @file
+ * @brief Absolute value operations for functions.
+ */
+
 #include "Rodin/Math/Common.h"
 
 #include "ForwardDecls.h"
@@ -23,6 +28,18 @@ namespace Rodin::Variational
 
   /**
    * @ingroup AbsSpecializations
+   * @brief Absolute value operation for functions.
+   *
+   * This class represents the absolute value operation applied to a function:
+   * - Scalar: @f$ |\text{Abs}(f)|  (x) = |f(x)| @f$
+   * - Vector: @f$ \|\text{Abs}(\mathbf{f})\|(x) = \|\mathbf{f}(x)\| @f$ (Euclidean norm)
+   * - Matrix: @f$ \|\text{Abs}(A)\|_F(x) = \|A(x)\|_F @f$ (Frobenius norm)
+   *
+   * The result is always a real-valued scalar function.
+   *
+   * @tparam NestedDerived Type of the operand function
+   *
+   * @see RealFunctionBase
    */
   template <class NestedDerived>
   class Abs<FunctionBase<NestedDerived>>

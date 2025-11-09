@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_SQRT_H
 #define RODIN_VARIATIONAL_SQRT_H
 
+/**
+ * @file
+ * @brief Square root operations for functions.
+ */
+
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -22,6 +27,21 @@ namespace Rodin::Variational
 
   /**
    * @ingroup SqrtSpecializations
+   * @brief Square root operation for functions.
+   *
+   * This class represents the square root operation applied to a scalar function:
+   * @f[
+   *    \text{Sqrt}(f)(x) = \sqrt{f(x)}
+   * @f]
+   *
+   * The input function must be real-valued and non-negative for real results.
+   * The result is always a real-valued scalar function.
+   *
+   * @tparam NestedDerived Type of the operand function
+   *
+   * @note For vector or matrix functions, consider using the Frobenius norm first.
+   *
+   * @see RealFunctionBase, Frobenius
    */
   template <class NestedDerived>
   class Sqrt<FunctionBase<NestedDerived>> final
