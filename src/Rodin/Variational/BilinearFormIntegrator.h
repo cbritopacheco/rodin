@@ -1,3 +1,18 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file BilinearFormIntegrator.h
+ * @brief Base classes for bilinear form integrators.
+ *
+ * This file defines the abstract base classes for bilinear form integrators,
+ * which are responsible for computing local contributions to the global system
+ * matrix in finite element assembly. Integrators represent specific terms in
+ * the weak formulation involving both trial and test functions.
+ */
 #ifndef RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 
@@ -13,21 +28,52 @@
 namespace Rodin::Variational
 {
   /**
+   * @ingroup RodinVariational
    * @brief Abstract base class for bilinear form integrators.
    *
-   * This class provides the base functionality for bilinear form integrator
-   * objects.
+   * BilinearFormIntegratorBase provides the foundation for implementing specific
+   * bilinear form terms in variational formulations. A bilinear form integrator
+   * computes the local element matrix contributions:
+   * @f[
+   *   A^K_{ij} = \int_K a(\phi_j, \psi_i) \, dx
+   * @f]
+   * where @f$ \phi_j @f$ are trial basis functions and @f$ \psi_i @f$ are test
+   * basis functions on element @f$ K @f$.
+   *
+   * ## Role in Assembly
+   * During finite element assembly:
+   * 1. The integrator is called for each element in the mesh
+   * 2. Local element matrices are computed using quadrature
+   * 3. Local matrices are assembled into the global system matrix
+   *
+   * ## Common Bilinear Forms
+   * - **Mass matrix**: @f$ \int_K u \cdot v \, dx @f$
+   * - **Stiffness matrix**: @f$ \int_K \nabla u \cdot \nabla v \, dx @f$
+   * - **Advection**: @f$ \int_K (\beta \cdot \nabla u) v \, dx @f$
+   * - **Reaction**: @f$ \int_K c \, u \cdot v \, dx @f$
+   *
+   * @tparam Number Scalar type for matrix entries
+   * @tparam Derived Derived integrator class (CRTP pattern)
+   *
+   * @see LinearFormIntegratorBase, BilinearForm
    */
   template <class Number, class Derived>
   class BilinearFormIntegratorBase : public Integrator
   {
     public:
+      /// @brief Scalar type for matrix entries
       using ScalarType = Number;
 
+      /// @brief Parent class type
       using Parent = Integrator;
 
       /**
-       * @brief Constructs the object given a TrialFunction and a TestFunction.
+       * @brief Constructs a bilinear form integrator.
+       * @param[in] u Trial function
+       * @param[in] v Test function
+       *
+       * Creates an integrator that will compute contributions involving both
+       * the trial function @f$ u @f$ and test function @f$ v @f$.
        */
       template <class Solution, class TrialFES, class TestFES>
       BilinearFormIntegratorBase(
@@ -37,6 +83,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor.
+       * @param[in] other Integrator to copy
        */
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
         : Parent(other),
@@ -44,7 +91,8 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief Copy constructor.
+       * @brief Copy constructor from different scalar type.
+       * @param[in] other Integrator to copy
        */
       template <class OtherNumber, class OtherDerived>
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase<OtherNumber, OtherDerived>& other)
@@ -54,6 +102,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param[in] other Integrator to move
        */
       BilinearFormIntegratorBase(BilinearFormIntegratorBase&& other)
         : Parent(std::move(other)),
@@ -61,7 +110,8 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief Move constructor.
+       * @brief Move constructor from different scalar type.
+       * @param[in] other Integrator to move
        */
       template <class OtherNumber, class OtherDerived>
       BilinearFormIntegratorBase(BilinearFormIntegratorBase<OtherNumber, OtherDerived>&& other)
@@ -69,16 +119,22 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v))
       {}
 
+      /// @brief Virtual destructor
       virtual
       ~BilinearFormIntegratorBase() = default;
 
+      /**
+       * @brief Gets the integrator type.
+       * @returns Integrator::Type::Bilinear
+       */
       Integrator::Type getType() const final override
       {
         return Integrator::Type::Bilinear;
       }
 
       /**
-       * @brief Gets a constant reference to trial function object.
+       * @brief Gets the trial function.
+       * @returns Const reference to the trial function
        */
       const FormLanguage::Base& getTrialFunction() const
       {
@@ -87,7 +143,8 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets a constant reference to test function object.
+       * @brief Gets the test function.
+       * @returns Const reference to the test function
        */
       const FormLanguage::Base& getTestFunction() const
       {
@@ -95,6 +152,10 @@ namespace Rodin::Variational
         return *m_v;
       }
 
+      /**
+       * @brief Creates a copy of this integrator.
+       * @returns Pointer to newly allocated copy
+       */
       virtual
       BilinearFormIntegratorBase* copy() const noexcept override = 0;
 
