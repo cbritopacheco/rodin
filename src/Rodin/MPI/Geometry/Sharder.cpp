@@ -1,8 +1,9 @@
-#include <boost/multi_array.hpp>
 #include <cassert>
+#include <boost/multi_array.hpp>
 
 #include "Rodin/Serialization/BitSet.h"
 #include "Rodin/Serialization/FlatMap.h"
+#include "Rodin/Serialization/FlatSet.h"
 
 #include "Sharder.h"
 
