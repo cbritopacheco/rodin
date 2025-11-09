@@ -91,7 +91,7 @@ This will install:
 - **Libraries** to `${CMAKE_INSTALL_PREFIX}/lib`
 - **Headers** to `${CMAKE_INSTALL_PREFIX}/include/Rodin`
 - **CMake config files** to `${CMAKE_INSTALL_PREFIX}/lib/cmake/Rodin`
-- **Resources** to `${CMAKE_INSTALL_PREFIX}/share/resources`
+- **Resources** to `${CMAKE_INSTALL_PREFIX}/share/Rodin/resources`
 
 ### User-local Installation
 
