@@ -77,25 +77,35 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a></p></aside>
+<p>Provides dot product (inner product) operations for:</p><ul><li><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> × <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> → Real-valued function</li><li><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> × <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> → Real-valued shape function<br /></li><li><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> × <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> → Real-valued shape function</li><li><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> × <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> → Bilinear form entry</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a></p></aside>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_function_base_3_01_r_h_s_derived_01_4_01_4.html" class="m-doc">Rodin::Variational::Dot&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between two functions.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_dot_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_shape_funct237a477ee65ff4ab432ba6554614093c.html" class="m-doc">Rodin::Variational::Dot&lt;FunctionBase&lt;LHSDerived&gt;, ShapeFunctionBase&lt;RHSDerived, FES, Space&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> and a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between a function and a shape function.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_dot_3_01_shape_function_base_3_01_l_h_s_derived_00_01_f_e_s_00_01a8af04005d12ad69de6cc5ba7eb4eca.html" class="m-doc">Rodin::Variational::Dot&lt;ShapeFunctionBase&lt;LHSDerived, FES, Space&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> and a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between a shape function and a function.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_dot_3_01_shape_function_base_3_01_l_h_s_derived_00_01_trial_f_e_c05da362fa61f70432d39f64e867babe.html" class="m-doc">Rodin::Variational::Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;</a>
             </dt>
-            <dd>Represents the dot product of trial and test operators.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product of trial and test shape functions for bilinear forms.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_potential_3_01_kernel_type_00_01_shape_function_base_3_78431fcae5a6c2c5512c397dae8fdcfc.html" class="m-doc">Rodin::Variational::Dot&lt;Potential&lt;KernelType, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product of a potential with a test shape function.</dd>
           </dl>
         </section>
       </div>

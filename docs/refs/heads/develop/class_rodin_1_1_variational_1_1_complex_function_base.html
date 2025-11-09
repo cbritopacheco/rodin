@@ -64,28 +64,80 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_complex_function_8h.html">&lt;Rodin/Variational/ComplexFunction.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ComplexFunctionBase <span class="m-thin">class</span>
         </h1>
-        <p>Base class for scalar-valued functions defined on a mesh.</p>
+        <p>Base class for complex-valued scalar functions.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Derived</td>
+              <td>The derived class type (CRTP pattern)</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+<p>Base class for scalar-valued functions defined on a mesh.</p><p>Represents functions <svg class="m-math" style="width: 5.482em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 52.625249 10.626798">
+<title>
+$ f: \Omega \to \mathbb{C} $
+</title>
+<defs>
+<path id='eq1-g0-67' d='M7.854545-8.021918C7.854545-8.225156 7.854545-8.416438 7.651308-8.416438C7.639352-8.416438 7.460025-8.416438 7.436115-8.201245C7.400249-7.866501 7.12528-7.866501 7.041594-7.866501C6.623163-7.866501 6.204732-8.045828 5.965629-8.153425C5.355915-8.416438 4.841843-8.416438 4.65056-8.416438C2.654047-8.416438 .442341-7.161146 .442341-4.100623C.442341-1.052055 2.606227 .227148 4.674471 .227148C5.308095 .227148 6.156912 .095641 7.029639-.430386C7.579577-.777086 8.18929-1.374844 8.18929-1.542217S8.009963-1.78132 7.938232-1.78132C7.854545-1.78132 7.806725-1.745455 7.687173-1.613948C6.993773-.824907 5.929763-.3467 4.865753-.3467C3.012702-.3467 2.546451-2.223661 2.546451-4.076712C2.546451-6.43188 3.407223-7.998007 4.686426-7.998007C5.583064-7.998007 7.017684-7.12528 7.424159-5.858032C7.460025-5.750436 7.49589-5.630884 7.651308-5.630884C7.854545-5.630884 7.854545-5.822167 7.854545-6.025405V-8.021918ZM7.436115-6.790535C7.292653-6.993773 7.137235-7.149191 6.838356-7.460025C6.898132-7.44807 6.993773-7.44807 7.053549-7.44807C7.185056-7.44807 7.340473-7.47198 7.436115-7.531756V-6.790535ZM3.19203-7.723039C2.917061-7.44807 2.12802-6.419925 2.12802-4.076712C2.12802-2.893151 2.307347-1.243337 3.383313-.382565C1.422665-1.016189 .860772-2.630137 .860772-4.088667C.860772-6.288418 2.068244-7.352428 3.19203-7.734994V-7.723039Z'/>
+<path id='eq1-g1-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq1-g3-10' d='M7.914321-1.865006H7.651308C7.591532-1.554172 7.531756-1.243337 7.436115-.992279C7.376339-.800996 7.340473-.705355 6.647073-.705355H5.702615C5.846077-1.374844 6.192777-1.948692 6.682939-2.689913C7.244832-3.56264 7.79477-4.435367 7.79477-5.427646C7.79477-7.07746 6.216687-8.416438 4.220174-8.416438C2.211706-8.416438 .645579-7.065504 .645579-5.427646C.645579-4.447323 1.183562-3.58655 1.745455-2.713823C2.247572-1.936737 2.606227-1.374844 2.737733-.705355H1.793275C1.099875-.705355 1.06401-.800996 1.004234-.980324C.908593-1.231382 .848817-1.578082 .789041-1.865006H.526027L.908593 0H2.761644C3.024658 0 3.048568 0 3.048568-.215193C3.048568-1.06401 2.666002-2.10411 2.426899-2.713823C2.080199-3.658281 1.75741-4.531009 1.75741-5.439601C1.75741-7.280697 3.036613-8.177335 4.220174-8.177335S6.682939-7.280697 6.682939-5.439601C6.682939-4.531009 6.348194-3.634371 6.01345-2.749689C5.810212-2.175841 5.391781-1.075965 5.391781-.227148C5.391781 0 5.427646 0 5.69066 0H7.531756L7.914321-1.865006Z'/>
+<path id='eq1-g3-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
+<path id='eq1-g2-102' d='M5.332005-4.805978C5.571108-4.805978 5.66675-4.805978 5.66675-5.033126C5.66675-5.152677 5.571108-5.152677 5.355915-5.152677H4.387547C4.614695-6.38406 4.782067-7.232877 4.877709-7.615442C4.94944-7.902366 5.200498-8.177335 5.511333-8.177335C5.762391-8.177335 6.01345-8.069738 6.133001-7.962142C5.66675-7.914321 5.523288-7.567621 5.523288-7.364384C5.523288-7.12528 5.702615-6.981818 5.929763-6.981818C6.168867-6.981818 6.527522-7.185056 6.527522-7.639352C6.527522-8.141469 6.025405-8.416438 5.499377-8.416438C4.985305-8.416438 4.483188-8.033873 4.244085-7.567621C4.028892-7.149191 3.90934-6.718804 3.634371-5.152677H2.833375C2.606227-5.152677 2.486675-5.152677 2.486675-4.937484C2.486675-4.805978 2.558406-4.805978 2.797509-4.805978H3.56264C3.347447-3.694147 2.857285-.992279 2.582316 .286924C2.379078 1.327024 2.199751 2.199751 1.601993 2.199751C1.566127 2.199751 1.219427 2.199751 1.004234 1.972603C1.613948 1.924782 1.613948 1.398755 1.613948 1.3868C1.613948 1.147696 1.43462 1.004234 1.207472 1.004234C.968369 1.004234 .609714 1.207472 .609714 1.661768C.609714 2.175841 1.135741 2.438854 1.601993 2.438854C2.82142 2.438854 3.323537 .251059 3.455044-.3467C3.670237-1.267248 4.25604-4.447323 4.315816-4.805978H5.332005Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g2-102'/>
+<use x='10.367266' y='0' xlink:href='#eq1-g3-58'/>
+<use x='16.939757' y='0' xlink:href='#eq1-g3-10'/>
+<use x='28.714905' y='0' xlink:href='#eq1-g1-33'/>
+<use x='43.990937' y='0' xlink:href='#eq1-g0-67'/>
+</g>
+</svg> where <svg class="m-math" style="width: 0.899em; height: 0.858em; vertical-align: -0.000em;" viewBox="0 -8.235778 8.634312 8.235778">
+<title>
+$ \mathbb{C} $
+</title>
+<defs>
+<path id='eq2-g0-67' d='M7.854545-8.021918C7.854545-8.225156 7.854545-8.416438 7.651308-8.416438C7.639352-8.416438 7.460025-8.416438 7.436115-8.201245C7.400249-7.866501 7.12528-7.866501 7.041594-7.866501C6.623163-7.866501 6.204732-8.045828 5.965629-8.153425C5.355915-8.416438 4.841843-8.416438 4.65056-8.416438C2.654047-8.416438 .442341-7.161146 .442341-4.100623C.442341-1.052055 2.606227 .227148 4.674471 .227148C5.308095 .227148 6.156912 .095641 7.029639-.430386C7.579577-.777086 8.18929-1.374844 8.18929-1.542217S8.009963-1.78132 7.938232-1.78132C7.854545-1.78132 7.806725-1.745455 7.687173-1.613948C6.993773-.824907 5.929763-.3467 4.865753-.3467C3.012702-.3467 2.546451-2.223661 2.546451-4.076712C2.546451-6.43188 3.407223-7.998007 4.686426-7.998007C5.583064-7.998007 7.017684-7.12528 7.424159-5.858032C7.460025-5.750436 7.49589-5.630884 7.651308-5.630884C7.854545-5.630884 7.854545-5.822167 7.854545-6.025405V-8.021918ZM7.436115-6.790535C7.292653-6.993773 7.137235-7.149191 6.838356-7.460025C6.898132-7.44807 6.993773-7.44807 7.053549-7.44807C7.185056-7.44807 7.340473-7.47198 7.436115-7.531756V-6.790535ZM3.19203-7.723039C2.917061-7.44807 2.12802-6.419925 2.12802-4.076712C2.12802-2.893151 2.307347-1.243337 3.383313-.382565C1.422665-1.016189 .860772-2.630137 .860772-4.088667C.860772-6.288418 2.068244-7.352428 3.19203-7.734994V-7.723039Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-67'/>
+</g>
+</svg> denotes the field of complex numbers. Complex functions can be:</p><ul><li>Constructed from real and imaginary parts</li><li>Decomposed using Re() and Im() operations</li><li>Conjugated using Conjugate() operation</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>, <a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>, <a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a>, <a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase&lt;Complex, ComplexFunctionBase&lt;Derived&gt;&gt;</a>
+            </dt>
+            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0129b30567b4f5f5913dcb007b84b933" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+            <dd>Creates a polymorphic copy of the function.</dd>
           </dl>
         </section>
         <section>
@@ -97,16 +149,16 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>* Rodin::<wbr />Variational::<wbr />ComplexFunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0129b30567b4f5f5913dcb007b84b933" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <p>Creates a polymorphic copy of the function.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object.</td>
+                  <td>Pointer to a newly allocated copy</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+<aside class="m-note m-info"><h4>Note</h4><p>Caller is responsible for managing the returned pointer</p></aside>
           </div></section>
         </section>
       </div>

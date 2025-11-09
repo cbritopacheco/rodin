@@ -86,10 +86,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md31">Range Deduction Rules</a></li>
+            <li><a href="#autotoc_md85">Range Deduction Rules</a></li>
             <li>
               Reference
               <ul>
+                <li><a href="#related">Related</a></li>
               </ul>
             </li>
           </ul>
@@ -116,7 +117,7 @@
 <use x='209.119823' y='-.913201' xlink:href='#eq1-g2-72'/>
 <use x='217.751456' y='-.913201' xlink:href='#eq1-g2-83'/>
 </g>
-</svg></div><p>which represents the usual arithmetic addition of two operands.</p><section id="autotoc_md31"><h3><a href="#autotoc_md31">Range Deduction Rules</a></h3><p>The rule for deducing the range of a <a href="class_rodin_1_1_variational_1_1_sum.html" class="m-doc">Sum</a> object, denoted <svg class="m-math" style="width: 10.223em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 98.139667 11.955168">
+</svg></div><p>which represents the usual arithmetic addition of two operands.</p><section id="autotoc_md85"><h3><a href="#autotoc_md85">Range Deduction Rules</a></h3><p>The rule for deducing the range of a <a href="class_rodin_1_1_variational_1_1_sum.html" class="m-doc">Sum</a> object, denoted <svg class="m-math" style="width: 10.223em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 98.139667 11.955168">
 <title>
 $
  \texttt{Range}[\text{LHS} + \text{RHS}]$
@@ -222,6 +223,209 @@ $
 <use x='250.463145' y='-2.988792' xlink:href='#eq3-g0-82'/>
 </g>
 </svg></div><aside class="m-note m-default"><h4>See also</h4><p><a href="group___sum_specializations.html" class="m-doc">Sum Template Specializations</a></p></aside></section>
+        <section id="related">
+          <h2><a href="#related">Related</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2f2ca97697b061a96417e64e220536a8" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp; rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Addition operator for two functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a28d47236b5cc88b9ede0e8b4488dc7c0" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Addition of function and scalar.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class RHSDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad0145e1dad505492ea1d0564f90ebb84" class="m-doc">operator+</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lhs,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp; rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Addition of scalar and function.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6bc215ef4512b34eb956838ecf2cf512" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Addition of function and complex scalar.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class RHSDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a484688cc5033810782ff91381d5f48c6" class="m-doc">operator+</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> lhs,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp; rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Addition of complex scalar and function.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a2f2ca97697b061a96417e64e220536a8"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LHS, class RHS&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f2ca97697b061a96417e64e220536a8" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Addition operator for two functions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>Left operand function</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>Right operand function</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_sum.html" class="m-doc">Sum</a> object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a28d47236b5cc88b9ede0e8b4488dc7c0"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LHS, class RHS&gt;
+                template&lt;class LHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28d47236b5cc88b9ede0e8b4488dc7c0" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rhs) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Addition of function and scalar.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> operand</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>Real scalar</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_sum.html" class="m-doc">Sum</a> object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad0145e1dad505492ea1d0564f90ebb84"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LHS, class RHS&gt;
+                template&lt;class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0145e1dad505492ea1d0564f90ebb84" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lhs,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Addition of scalar and function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>Real scalar</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> operand</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_sum.html" class="m-doc">Sum</a> object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6bc215ef4512b34eb956838ecf2cf512"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LHS, class RHS&gt;
+                template&lt;class LHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6bc215ef4512b34eb956838ecf2cf512" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> rhs) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Addition of function and complex scalar.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> operand</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>Complex scalar</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_sum.html" class="m-doc">Sum</a> object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a484688cc5033810782ff91381d5f48c6"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LHS, class RHS&gt;
+                template&lt;class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a484688cc5033810782ff91381d5f48c6" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> lhs,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Addition of complex scalar and function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>Complex scalar</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> operand</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_sum.html" class="m-doc">Sum</a> object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

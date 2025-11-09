@@ -65,8 +65,23 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Cell <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_8h.html">&lt;Rodin/Geometry/Polytope.h&gt;</a></div>
         </h1>
-        <p>Class for representing polytopes of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</p>
+        <p>Represents a cell (highest-dimensional element) in a mesh.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Cells are polytopes of maximal dimension in the mesh:</p><ul><li>Tetrahedra in 3D meshes</li><li>Triangles or quadrilaterals in 2D meshes<br /></li><li>Segments in 1D meshes</li></ul><p>Cells form the basis for finite element computations and define the computational domain.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>, <a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a></p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -75,6 +90,58 @@
             </dt>
             <dd>Base class for all geometric elements in finite element meshes.</dd>
           </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a51546c692743ae5537f3a2554a850efb">
+              using <a href="#a51546c692743ae5537f3a2554a850efb" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a747e99de2320d880a83f447afc174c8f" class="m-doc">Cell</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh)</span>
+            </dt>
+            <dd>Constructs a cell with given index.</dd>
+            <dt id="aa5af55ae72f882de75d6680d384cc8a4">
+              <span class="m-doc-wrap-bumper"><a href="#aa5af55ae72f882de75d6680d384cc8a4" class="m-doc-self">Cell</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a98ed67befc7acaa81602bd18f9dff747">
+              <span class="m-doc-wrap-bumper"><a href="#a98ed67befc7acaa81602bd18f9dff747" class="m-doc-self">Cell</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a747e99de2320d880a83f447afc174c8f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Cell::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a747e99de2320d880a83f447afc174c8f" class="m-doc-self">Cell</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh)</span></span>
+            </h3>
+            <p>Constructs a cell with given index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">index&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Index of the cell in the mesh</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference to the containing mesh</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

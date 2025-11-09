@@ -65,8 +65,9 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Vertex <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_8h.html">&lt;Rodin/Geometry/Polytope.h&gt;</a></div>
         </h1>
-        <p>Represents a vertex of the mesh.</p>
+        <p>Represents a vertex (0-dimensional element) in a mesh.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -74,11 +75,14 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+<p>Vertices are the fundamental building blocks of the mesh, representing points in space with associated coordinates. They serve as:</p><ul><li>Degrees of freedom locations for P1 finite elements</li><li>Endpoints for edges and corners for higher-dimensional elements</li><li>Spatial anchors for the mesh geometry</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>, <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a></p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -88,26 +92,175 @@
             <dd>Base class for all geometric elements in finite element meshes.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a51546c692743ae5537f3a2554a850efb">
+              using <a href="#a51546c692743ae5537f3a2554a850efb" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a0900e510663c223ea8ad2ed0d46ce925" class="m-doc">Vertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh)</span>
+            </dt>
+            <dd>Constructs a vertex with given index.</dd>
+            <dt id="a27c6dea77428aac8a993665b68e94845">
+              <span class="m-doc-wrap-bumper"><a href="#a27c6dea77428aac8a993665b68e94845" class="m-doc-self">Vertex</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="af8a4ce6e2796488eabc85722cc484a40">
-              <span class="m-doc-wrap-bumper">auto <a href="#af8a4ce6e2796488eabc85722cc484a40" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af8a4ce6e2796488eabc85722cc484a40" class="m-doc">x</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Acess the 1st-coordinate of the vertex.</dd>
-            <dt id="a8439f99c0c6a5366e4b01a22c1a21386">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8439f99c0c6a5366e4b01a22c1a21386" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dd>Gets the x-coordinate (first coordinate).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8439f99c0c6a5366e4b01a22c1a21386" class="m-doc">y</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Acess the 2nd-coordinate of the vertex.</dd>
-            <dt id="ad401d038a4eca871937708925ae57727">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad401d038a4eca871937708925ae57727" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dd>Gets the y-coordinate (second coordinate).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad401d038a4eca871937708925ae57727" class="m-doc">z</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Acess the 3rd-coordinate of the vertex.</dd>
-            <dt id="a984b60ebb60699abe85cce103526338b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a984b60ebb60699abe85cce103526338b" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dd>Gets the z-coordinate (third coordinate).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a984b60ebb60699abe85cce103526338b" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Acess the ith-coordinate of the vertex.</dd>
+            <dd>Gets the i-th coordinate.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7d5be504d7cc9d73e3efc61a834f787d" class="m-doc">getCoordinates</a>(</span><span class="m-doc-wrap">) const -&gt; Eigen::Map&lt;const Math::SpatialPoint&gt;</span>
+            </dt>
+            <dd>Gets the vertex coordinates as a vector.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0f86e468dfa519dd49fac724b9c61c89" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the geometry type (always <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> for vertices).</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0900e510663c223ea8ad2ed0d46ce925"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Vertex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0900e510663c223ea8ad2ed0d46ce925" class="m-doc-self">Vertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh)</span></span>
+            </h3>
+            <p>Constructs a vertex with given index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">index&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Index of the vertex in the mesh</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference to the containing mesh</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af8a4ce6e2796488eabc85722cc484a40"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />Vertex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af8a4ce6e2796488eabc85722cc484a40" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the x-coordinate (first coordinate).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>x-coordinate value</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8439f99c0c6a5366e4b01a22c1a21386"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />Vertex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8439f99c0c6a5366e4b01a22c1a21386" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the y-coordinate (second coordinate).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>y-coordinate value</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad401d038a4eca871937708925ae57727"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />Vertex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad401d038a4eca871937708925ae57727" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the z-coordinate (third coordinate).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>z-coordinate value</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a984b60ebb60699abe85cce103526338b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />Vertex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a984b60ebb60699abe85cce103526338b" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+            </h3>
+            <p>Gets the i-th coordinate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Coordinate index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>i-th coordinate value</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7d5be504d7cc9d73e3efc61a834f787d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Eigen::Map&lt;const Math::SpatialPoint&gt; Rodin::<wbr />Geometry::<wbr />Vertex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d5be504d7cc9d73e3efc61a834f787d" class="m-doc-self">getCoordinates</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the vertex coordinates as a vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Eigen map to the coordinate vector</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0f86e468dfa519dd49fac724b9c61c89"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a> Rodin::<wbr />Geometry::<wbr />Vertex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f86e468dfa519dd49fac724b9c61c89" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the geometry type (always <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> for vertices).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7a2a3cd5946cfd317eb99c3d32e35e2d4c" class="m-doc">Polytope::<wbr />Type::<wbr />Point</a></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

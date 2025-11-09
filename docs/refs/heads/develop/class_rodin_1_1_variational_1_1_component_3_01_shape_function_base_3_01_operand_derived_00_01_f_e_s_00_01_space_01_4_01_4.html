@@ -64,10 +64,30 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_component_8h.html">&lt;Rodin/Variational/Component.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class OperandDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Represents the component (or entry) of a vectorial <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</p>
+        <p>Extracts a component from a vector-valued <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">OperandDerived</td>
+              <td>Type of the shape function</td>
+            </tr>
+            <tr>
+              <td>FES</td>
+              <td>Finite element space type</td>
+            </tr>
+            <tr>
+              <td>Space</td>
+              <td>Trial or test function space</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -81,6 +101,7 @@
             </li>
           </ul>
         </nav>
+<p>Extracts a scalar component from vector trial or test functions in finite element formulations.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -94,16 +115,44 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a299cd584f1d3a3f821c90dfa927cede2">
-              <span class="m-doc-wrap-bumper"><a href="#a299cd584f1d3a3f821c90dfa927cede2" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">OperandType</a>&amp; u,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a299cd584f1d3a3f821c90dfa927cede2" class="m-doc">Component</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">OperandType</a>&amp; u,
               size_t component)</span>
             </dt>
-            <dd>Constructs the component object from a <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> and its component index.</dd>
+            <dd>Constructs component extractor for <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab140ff331f7bdeb1ce78d512143d5986" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the component index.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the underlying shape function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc">getLeaf</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the leaf (underlying trial/test function).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a41b3cd864cb7e194caa422ca3b66070f" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets number of degrees of freedom on a polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ad254d10c93568e5a3448c10112e47a" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;</span>
+            </dt>
+            <dd>Gets the current evaluation point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a47ba97b17377cb9d4991c05826b82e59" class="m-doc">setPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp;</span>
+            </dt>
+            <dd>Sets the evaluation point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f47a104973d43f1c328e9c411af0286" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the basis function value for local DOF.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a35c2f7b7677fadde216975422ee6755e" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -112,6 +161,177 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a299cd584f1d3a3f821c90dfa927cede2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt;&lt;OperandDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a299cd584f1d3a3f821c90dfa927cede2" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">OperandType</a>&amp; u,
+              size_t component)</span></span>
+            </h3>
+            <p>Constructs component extractor for <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>Vector-valued trial or test function</td>
+                </tr>
+                <tr>
+                  <td>component</td>
+                  <td>Zero-based component index</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab140ff331f7bdeb1ce78d512143d5986"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt;&lt;OperandDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab140ff331f7bdeb1ce78d512143d5986" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the component index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> index</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1ffbdba2b29eb6f63414bd575f12f63a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt;&lt;OperandDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the underlying shape function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the operand</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac5287464c39ed377af81f8543e4ff376"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt;&lt;OperandDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the leaf (underlying trial/test function).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the leaf function</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a41b3cd864cb7e194caa422ca3b66070f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt;&lt;OperandDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41b3cd864cb7e194caa422ca3b66070f" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets number of degrees of freedom on a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh polytope</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Number of DOFs</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2ad254d10c93568e5a3448c10112e47a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; Rodin::<wbr />Variational::<wbr />Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt;&lt;OperandDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ad254d10c93568e5a3448c10112e47a" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the current evaluation point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the point</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a47ba97b17377cb9d4991c05826b82e59"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; Rodin::<wbr />Variational::<wbr />Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt;&lt;OperandDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a47ba97b17377cb9d4991c05826b82e59" class="m-doc-self">setPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span></span>
+            </h3>
+            <p>Sets the evaluation point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point to evaluate at</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4f47a104973d43f1c328e9c411af0286"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt;&lt;OperandDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f47a104973d43f1c328e9c411af0286" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the basis function value for local DOF.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">local</td>
+                  <td>Local DOF index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Scalar basis function value</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a35c2f7b7677fadde216975422ee6755e"><div>
             <h3>
               <div class="m-doc-template">

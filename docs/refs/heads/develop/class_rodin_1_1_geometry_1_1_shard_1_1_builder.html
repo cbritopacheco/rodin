@@ -65,8 +65,279 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>::<wbr/></span>Builder <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_shard_8h.html">&lt;Rodin/Geometry/Shard.h&gt;</a></div>
         </h1>
-        <p>Class used to build <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">SubMesh&lt;Context::<wbr />Local&gt;</a> instances.</p>
+        <p><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a> for constructing <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> instances.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Provides a fluent interface for incrementally building shards from parent meshes with precise control over ownership and ghost polytopes.</p>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a127ac7aab5c87bd7df242644885320ac">
+              <span class="m-doc-wrap-bumper"><a href="#a127ac7aab5c87bd7df242644885320ac" class="m-doc-self">Builder</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7a635a5f3a3edabcd23521d5a8e8e68d" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context</a>&gt;&amp; parent) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
+            </dt>
+            <dd>Initializes builder with parent mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a27061edd5637eaf56d5ffda1e4e78f8e" class="m-doc">include</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; flags) -&gt; std::pair&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a>&gt;</span>
+            </dt>
+            <dd>Includes a polytope with specified flags.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aeb6108585130c4fd75d0750f344ce406" class="m-doc">finalize</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></span>
+            </dt>
+            <dd>Finalizes construction and returns the shard.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9fd3bd8730c34b9a46474d5c992375ce" class="m-doc">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp;</span>
+            </dt>
+            <dd>Gets polytope map for a dimension (const).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3a0c0cc3ccdeca4e84fb59be966e3605" class="m-doc">getPolytopeCount</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; size_t</span>
+            </dt>
+            <dd>Gets polytope count for a dimension.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a89e80c33e7d3157dbd3f3d2bdd33394c" class="m-doc">getOwner</a>(</span><span class="m-doc-wrap">size_t d) -&gt; <a href="group___rodin_types.html#gac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets owner map for a dimension (mutable).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5478c913b134ca4450519653c556ec49" class="m-doc">getHalo</a>(</span><span class="m-doc-wrap">size_t d) -&gt; <a href="group___rodin_types.html#gac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets halo map for a dimension (mutable).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af19f4126571b0d3f02004d8221c51031" class="m-doc">getOwner</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="group___rodin_types.html#gac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets owner map for a dimension (const).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5054765871fbe2025f843aa03f1ad998" class="m-doc">getHalo</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="group___rodin_types.html#gac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets halo map for a dimension (const).</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a7a635a5f3a3edabcd23521d5a8e8e68d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7a635a5f3a3edabcd23521d5a8e8e68d" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context</a>&gt;&amp; parent)</span></span>
+            </h3>
+            <p>Initializes builder with parent mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">parent&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Parent mesh to extract shard from</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a27061edd5637eaf56d5ffda1e4e78f8e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::pair&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a>&gt; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a27061edd5637eaf56d5ffda1e4e78f8e" class="m-doc-self">include</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; flags)</span></span>
+            </h3>
+            <p>Includes a polytope with specified flags.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, parent index)</td>
+                </tr>
+                <tr>
+                  <td>flags&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Ownership flags (Owned or Ghost)</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (local index, was newly added)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aeb6108585130c4fd75d0750f344ce406"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb6108585130c4fd75d0750f344ce406" class="m-doc-self">finalize</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Finalizes construction and returns the shard.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Newly constructed <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9fd3bd8730c34b9a46474d5c992375ce"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fd3bd8730c34b9a46474d5c992375ce" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
+            </h3>
+            <p>Gets polytope map for a dimension (const).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> index mapping</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3a0c0cc3ccdeca4e84fb59be966e3605"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a0c0cc3ccdeca4e84fb59be966e3605" class="m-doc-self">getPolytopeCount</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
+            </h3>
+            <p>Gets polytope count for a dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Number of polytopes</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a89e80c33e7d3157dbd3f3d2bdd33394c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a89e80c33e7d3157dbd3f3d2bdd33394c" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+            </h3>
+            <p>Gets owner map for a dimension (mutable).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Map from ghost index to owning process</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5478c913b134ca4450519653c556ec49"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5478c913b134ca4450519653c556ec49" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+            </h3>
+            <p>Gets halo map for a dimension (mutable).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Map from owned index to processes needing it</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af19f4126571b0d3f02004d8221c51031"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af19f4126571b0d3f02004d8221c51031" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
+            </h3>
+            <p>Gets owner map for a dimension (const).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Map from ghost index to owning process</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5054765871fbe2025f843aa03f1ad998"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5054765871fbe2025f843aa03f1ad998" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
+            </h3>
+            <p>Gets halo map for a dimension (const).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Map from owned index to processes needing it</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

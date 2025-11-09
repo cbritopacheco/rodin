@@ -86,6 +86,71 @@
             </dt>
             <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all objects in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> system.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class MatrixXpr&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of.html" class="m-doc">RangeOf</a>
+            </dt>
+            <dd>Type trait to deduce the mathematical range type of an expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_boolean_01_4.html" class="m-doc">RangeOf&lt;Boolean&gt;</a>
+            </dt>
+            <dd>Range type for Boolean values.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_complex_01_4.html" class="m-doc">RangeOf&lt;Complex&gt;</a>
+            </dt>
+            <dd>Range type for Complex values.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, int Rows, int Options, int MaxRows, int MaxCols&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_eigen_1_1_matrix_3_01_scalar_00_01_rows_00_011_02623a597dc3a0022393643b8b041765.html" class="m-doc">RangeOf&lt;Eigen::Matrix&lt;Scalar, Rows, 1, Options, MaxRows, MaxCols&gt;&gt;</a>
+            </dt>
+            <dd>Range type for Eigen column vectors.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_eigen_1_1_matrix_3_01_scalar_00_01_rows_00_01_cf9d8867b63003b19b94e35f02c798bd7.html" class="m-doc">RangeOf&lt;Eigen::Matrix&lt;Scalar, Rows, Cols, Options, MaxRows, MaxCols&gt;&gt;</a>
+            </dt>
+            <dd>Range type for Eigen matrices.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_integer_01_4.html" class="m-doc">RangeOf&lt;Integer&gt;</a>
+            </dt>
+            <dd>Range type for Integer values.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_real_01_4.html" class="m-doc">RangeOf&lt;Real&gt;</a>
+            </dt>
+            <dd>Range type for Real values.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_variational_1_1_function_base_3_01_derived_01_4_01_4.html" class="m-doc">RangeOf&lt;Variational::FunctionBase&lt;Derived&gt;&gt;</a>
+            </dt>
+            <dd>Range type for FunctionBase.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_variational_1_1_shape_function_base_3_01_derive3809fe9cae3a47d32df2a10b6ad6ada2.html" class="m-doc">RangeOf&lt;Variational::ShapeFunctionBase&lt;Derived, FES, Space&gt;&gt;</a>
+            </dt>
+            <dd>Range type for ShapeFunctionBase.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_result_of.html" class="m-doc">ResultOf</a>
+            </dt>
+            <dd>Type trait to deduce the result type of an expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_result_of_3_01_variational_1_1_function_base_3_01_derived_01_4_01_4.html" class="m-doc">ResultOf&lt;Variational::FunctionBase&lt;Derived&gt;&gt;</a>
+            </dt>
+            <dd>Specialization of <a href="struct_rodin_1_1_form_language_1_1_result_of.html" class="m-doc">ResultOf</a> for FunctionBase.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_result_of_3_01_variational_1_1_shape_function_base_3_01_derivb416579babca9182c69f032ad2495e16.html" class="m-doc">ResultOf&lt;Variational::ShapeFunctionBase&lt;Derived, FES, Space&gt;&gt;</a>
+            </dt>
+            <dd>Specialization of <a href="struct_rodin_1_1_form_language_1_1_result_of.html" class="m-doc">ResultOf</a> for ShapeFunctionBase.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_geometry_1_1_mesh_3_01_context_01_4_01_4.html" class="m-doc">Traits&lt;Geometry::Mesh&lt;Context&gt;&gt;</a>
+            </dt>
+            <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for Mesh types.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LHS, class RHSDerived&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_potential_3_01_l_h_s_00_01_variat369c2379ec45f137e06e96aea6819d49.html" class="m-doc">Traits&lt;Variational::Potential&lt;LHS, Variational::FunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
             </dt>

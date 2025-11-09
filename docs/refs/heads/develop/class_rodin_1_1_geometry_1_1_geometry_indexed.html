@@ -64,10 +64,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_indexed_8h.html">&lt;Rodin/Geometry/GeometryIndexed.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>GeometryIndexed <span class="m-thin">class</span>
         </h1>
-        <p>Container that maps polytope types to associated data.</p>
+        <p>Template container indexed by polytope geometry types.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -75,13 +76,14 @@
           <tbody>
             <tr>
               <td style="width: 1%">T</td>
-              <td>Type of data to associate with each polytope type</td>
+              <td>Type of values to store</td>
             </tr>
           </tbody>
         </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
+            <li><a href="#autotoc_md35">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +93,16 @@
             </li>
           </ul>
         </nav>
-<p>This class provides an efficient mapping from polytope geometry types (<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>, Segment, Triangle, etc.) to arbitrary data of type T. It uses compile-time knowledge of the number of polytope types to provide O(1) access with minimal memory overhead.</p>
+<p>Container that maps polytope types to associated data.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_geometry_indexed_8h.html" class="m-doc">GeometryIndexed.h</a></p></aside><p>This class provides an efficient mapping from polytope geometry types (<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>, Segment, Triangle, etc.) to arbitrary data of type T. It uses compile-time knowledge of the number of polytope types to provide O(1) access with minimal memory overhead.</p><section id="autotoc_md35"><h2><a href="#autotoc_md35">Usage Example</a></h2><pre class="m-code"><span class="c1">// Store quadrature orders for each polytope type</span>
+<span class="n">GeometryIndexed</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">quadratureOrders</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Point</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Segment</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Quadrilateral</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Wedge</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">}</span>
+<span class="p">};</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">quadratureOrders</span><span class="p">[</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">];</span><span class="w"> </span><span class="c1">// Returns 3</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a></p></aside></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
