@@ -36,3 +36,16 @@ target_sources(RodinGeometryEuclidean
 
 # ---- Link targets ----------------------------------------------------------
 target_link_libraries(RodinGeometryEuclidean PUBLIC Eigen3::Eigen)
+
+install(TARGETS RodinGeometryEuclidean
+  EXPORT       RodinTargets
+  RUNTIME      DESTINATION ${RODIN_INSTALL_BINARY_PATH}
+  LIBRARY      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  ARCHIVE      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
+  INCLUDES     DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin/Geometry/Euclidean
+)
+
+rodin_install_headers(
+  DIRECTORIES .
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Geometry/Euclidean
+)

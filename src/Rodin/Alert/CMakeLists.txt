@@ -42,3 +42,10 @@ rodin_install_headers(
   DIRECTORIES .
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Alert
 )
+
+# Install termcolor headers
+install(
+  DIRECTORY ${PROJECT_SOURCE_DIR}/third-party/termcolor/include/
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Alert/termcolor/include
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+)
