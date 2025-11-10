@@ -130,19 +130,38 @@ namespace Rodin::Variational
         : Parent(prod)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy
+       */
       Integral(const Integral& other)
         : Parent(other)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move from
+       */
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
 
+      /**
+       * @brief Gets the integration region.
+       * @return Region::Cells indicating integration over mesh elements
+       *
+       * Domain integrals are computed over all cells @f$ K \in \mathcal{T}_h @f$
+       * in the mesh.
+       */
       Geometry::Region getRegion() const override
       {
         return Geometry::Region::Cells;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy
+       */
       Integral* copy() const noexcept override
       {
         return new Integral(*this);
