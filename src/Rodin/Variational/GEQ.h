@@ -4,6 +4,32 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file GEQ.h
+ * @brief Greater-than-or-equal comparison operator for functions.
+ *
+ * This file defines the GEQ class, which implements the greater-than-or-equal
+ * comparison operation between functions. This operator creates a boolean
+ * function indicating where one function is at least as large as another.
+ *
+ * ## Mathematical Foundation
+ * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the GEQ operator:
+ * @f[
+ *   (f \geq g)(x) = \begin{cases} 1 & \text{if } f(x) \geq g(x) \\ 0 & \text{otherwise} \end{cases}
+ * @f]
+ *
+ * ## Applications
+ * - Non-negative region indicators: @f$ \mathbb{1}_{u \geq 0} @f$
+ * - Constraint satisfaction checking
+ * - Admissible set definitions
+ * - Complementarity conditions
+ *
+ * ## Usage Example
+ * ```cpp
+ * auto u = /* some function */;
+ * auto non_negative = (u >= 0.0);  // Boolean: true where u is non-negative
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_GEQ_H
 #define RODIN_VARIATIONAL_GEQ_H
 
