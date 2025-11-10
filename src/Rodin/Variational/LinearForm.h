@@ -100,18 +100,33 @@ namespace Rodin::Variational
       constexpr
       LinearFormBase() = default;
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Linear form to copy
+       *
+       * Creates a copy including all integrators defining the linear form.
+       */
       constexpr
       LinearFormBase(const LinearFormBase& other)
         : Parent(other),
           m_lfis(other.m_lfis)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Linear form to move from
+       */
       constexpr
       LinearFormBase(LinearFormBase&& other)
         : Parent(std::move(other)),
           m_lfis(std::move(other.m_lfis))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Linear form to copy
+       * @return Reference to this linear form
+       */
       LinearFormBase& operator=(const LinearFormBase& other)
       {
         if (this != &other)
@@ -122,6 +137,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Linear form to move from
+       * @return Reference to this linear form
+       */
       LinearFormBase& operator=(LinearFormBase&& other) noexcept
       {
         if (this != &other)
@@ -132,18 +152,37 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Gets the list of integrators.
+       * @return Reference to the list of linear form integrators
+       *
+       * Linear form integrators define contributions to the right-hand side:
+       * @f$ b_i = \sum_{\text{integrators}} \int \text{integrand}(\psi_i) \, dx @f$
+       */
       constexpr
       LinearFormIntegratorBaseListType& getIntegrators()
       {
         return m_lfis;
       }
 
+      /**
+       * @brief Gets the list of integrators (const version).
+       * @return Const reference to the list of linear form integrators
+       */
       constexpr
       const LinearFormIntegratorBaseListType& getIntegrators() const
       {
         return m_lfis;
       }
 
+      /**
+       * @brief Adds an integrator to this linear form.
+       * @param[in] lfi Linear form integrator to add
+       * @return Reference to this linear form for method chaining
+       *
+       * Adds a contribution @f$ l_i(v) @f$ to the linear form:
+       * @f$ l(v) = l_1(v) + l_2(v) + \ldots @f$
+       */
       constexpr
       LinearFormBase& operator+=(const LinearFormIntegratorBaseType& lfi)
       {
@@ -153,6 +192,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Adds a list of integrators to this linear form.
+       * @param[in] lfis List of linear form integrators to add
+       * @return Reference to this linear form for method chaining
+       */
       constexpr
       LinearFormBase& operator+=(const LinearFormIntegratorBaseListType& lfis)
       {
@@ -160,6 +204,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Subtracts an integrator from this linear form.
+       * @param[in] lfi Linear form integrator to subtract
+       * @return Reference to this linear form for method chaining
+       *
+       * Subtracts a contribution: @f$ l(v) = l(v) - l_i(v) @f$
+       */
       constexpr
       LinearFormBase& operator-=(const LinearFormIntegratorBaseType& lfi)
       {
@@ -169,6 +220,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Subtracts a list of integrators from this linear form.
+       * @param[in] lfis List of linear form integrators to subtract
+       * @return Reference to this linear form for method chaining
+       */
       constexpr
       LinearFormBase& operator-=(const LinearFormIntegratorBaseListType& lfis)
       {
@@ -176,6 +232,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Assigns an integrator to this linear form.
+       * @param[in] lfi Linear form integrator to assign
+       * @return Reference to this linear form
+       *
+       * Replaces all existing integrators with a single new integrator.
+       */
       constexpr
       LinearFormBase& operator=(const LinearFormIntegratorBaseType& lfi)
       {

@@ -149,13 +149,16 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the assembled linear system.
-       * @return Reference to the linear system
+       * @return Reference to the linear system @f$ Au = b @f$
+       *
+       * Provides access to the assembled discrete system consisting of the
+       * system matrix @f$ A @f$ and right-hand side vector @f$ b @f$.
        */
       virtual LinearSystem& getLinearSystem() = 0;
 
       /**
        * @brief Gets the assembled linear system (const version).
-       * @return Const reference to the linear system  
+       * @return Const reference to the linear system @f$ Au = b @f$
        */
       virtual const LinearSystem& getLinearSystem() const = 0;
 
