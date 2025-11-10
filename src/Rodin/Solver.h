@@ -7,22 +7,6 @@
 #ifndef RODIN_SOLVER_H
 #define RODIN_SOLVER_H
 
-/**
- * @file Solver.h
- * @brief Main header for the Solver module
- *
- * This file includes all solver implementations available in Rodin. The Solver
- * module provides various algorithms for solving linear systems @f$ Ax = b @f$
- * that arise from finite element discretizations.
- *
- * Available solver categories:
- * - **Direct solvers**: Factorization-based methods (LU, Cholesky, QR)
- * - **Iterative solvers**: Krylov subspace methods (CG, BiCGSTAB, GMRES)
- * - **Specialized solvers**: Least-squares and problem-specific algorithms
- *
- * @see Rodin::Solver namespace for all solver classes
- */
-
 #include "Solver/Solver.h"
 
 #include "Solver/LDLT.h"
