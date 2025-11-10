@@ -7,6 +7,21 @@
 #ifndef RODIN_VARIATIONAL_P0_P0ELEMENT_H
 #define RODIN_VARIATIONAL_P0_P0ELEMENT_H
 
+/**
+ * @file
+ * @brief P0 (piecewise constant) finite element implementation.
+ *
+ * This file provides the P0Element class template for piecewise constant
+ * finite elements. P0 elements have:
+ * - One degree of freedom per element (at the barycenter)
+ * - Constant basis function: @f$ \phi(x) = 1 @f$
+ * - Zero gradient: @f$ \nabla \phi = 0 @f$
+ *
+ * P0 elements are commonly used in discontinuous Galerkin (DG) methods,
+ * mixed finite element formulations, and as test spaces for finite volume
+ * schemes.
+ */
+
 #include "Rodin/Types.h"
 
 #include "Rodin/Math/Traits.h"
@@ -45,6 +60,18 @@ namespace Rodin::Variational
   /**
    * @ingroup FiniteElements
    * @ingroup P0ElementSpecializations
+   * @brief Piecewise constant (degree 0) scalar Lagrange element.
+   *
+   * The P0Element represents a piecewise constant finite element with:
+   * - **DOF count**: 1 per element (located at barycenter)
+   * - **Basis function**: @f$ \phi(x) = 1 @f$ for all @f$ x @f$ in element
+   * - **Derivatives**: @f$ \nabla \phi = 0 @f$ (constant function has zero gradient)
+   *
+   * P0 elements are discontinuous across element interfaces, making them
+   * suitable for DG methods, flux computations, and element-wise constant
+   * approximations.
+   *
+   * @tparam Scalar Type of scalar range (e.g., Real, Complex)
    */
   template <class Scalar>
   class P0Element final : public FiniteElementBase<P0Element<Scalar>>
@@ -189,7 +216,16 @@ namespace Rodin::Variational
   /**
    * @ingroup FiniteElements
    * @ingroup P0ElementSpecializations
-   * @brief Degree 1 vector Lagrange element
+   * @brief Piecewise constant (degree 0) vector Lagrange element.
+   *
+   * Vector-valued P0 element with:
+   * - **DOF count**: @f$ d @f$ per element (one for each vector component)
+   * - **Basis functions**: @f$ \boldsymbol{\phi}_i(x) = \mathbf{e}_i @f$ (unit vectors)
+   * - **Derivatives**: @f$ \nabla \boldsymbol{\phi}_i = \mathbf{0} @f$ (zero gradient)
+   *
+   * Used for vector-valued DG approximations (e.g., velocity in compressible flow).
+   *
+   * @tparam Scalar Type of scalar components
    */
   template <class Scalar>
   class P0Element<Math::Vector<Scalar>> final

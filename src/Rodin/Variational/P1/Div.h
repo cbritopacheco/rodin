@@ -7,6 +7,23 @@
 #ifndef RODIN_VARIATIONAL_P1_DIV_H
 #define RODIN_VARIATIONAL_P1_DIV_H
 
+/**
+ * @file
+ * @brief Divergence operator specialization for P1 vector functions.
+ *
+ * This file provides specialized implementations of the divergence operator
+ * for P1 vector-valued GridFunctions and ShapeFunctions.
+ *
+ * For P1 elements, the divergence is computed as:
+ * @f[
+ *   \nabla \cdot \mathbf{u}|_K = \sum_{i=1}^{n_v} \sum_{j=1}^d u_{i,j} \frac{\partial \phi_i}{\partial x_j}
+ * @f]
+ * where @f$ \phi_i @f$ are P1 basis functions and @f$ u_{i,j} @f$ are DOF values.
+ *
+ * Since P1 basis gradients are constant on each element, the divergence is
+ * also piecewise constant.
+ */
+
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Div.h"
 
@@ -37,7 +54,18 @@ namespace Rodin::Variational
 {
   /**
    * @ingroup DivSpecializations
-   * @brief Divient of a P1 GridFunction
+   * @brief Divergence of a P1 vector GridFunction.
+   *
+   * Computes @f$ \nabla \cdot \mathbf{u} @f$ for vector-valued P1 functions.
+   * The divergence is piecewise constant on each element:
+   * @f[
+   *   (\nabla \cdot \mathbf{u})|_K = \sum_{i=1}^{n_v} \mathbf{u}_i \cdot \nabla \phi_i
+   * @f]
+   *
+   * Applications include:
+   * - Incompressibility constraint: @f$ \nabla \cdot \mathbf{v} = 0 @f$
+   * - Mass conservation in fluid mechanics
+   * - Continuity equation
    */
   template <class Scalar, class Data, class Mesh>
   class Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>> final
@@ -59,9 +87,11 @@ namespace Rodin::Variational
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
       /**
-       * @brief Constructs the Divient of an @f$ \mathbb{P}^1 @f$ function
-       * @f$ u @f$.
-       * @param[in] u P1 GridFunction
+       * @brief Constructs the divergence of a P1 vector function.
+       * @param[in] u P1 vector GridFunction to differentiate
+       *
+       * Creates divergence operator @f$ \nabla \cdot \mathbf{u} @f$ where
+       * @f$ \mathbf{u} \in [\mathbb{P}^1]^d @f$.
        */
       Div(const OperandType& u)
         : Parent(u)
@@ -175,6 +205,14 @@ namespace Rodin::Variational
 
   /**
    * @ingroup DivSpecializations
+   * @brief Divergence of a P1 vector ShapeFunction.
+   *
+   * Represents @f$ \nabla \cdot \mathbf{v} @f$ for P1 test/trial functions.
+   * Used in weak formulations like:
+   * @f[
+   *   \int_\Omega p (\nabla \cdot \mathbf{v}) \, dx
+   * @f]
+   * for pressure-velocity coupling in Stokes/Navier-Stokes equations.
    */
   template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
   class Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>> final
@@ -191,8 +229,10 @@ namespace Rodin::Variational
       using ScalarType = Number;
 
       /**
-       * @brief Constructs Div object
-       * @param[in] u ShapeFunction to be differentiated
+       * @brief Constructs divergence of P1 ShapeFunction.
+       * @param[in] u ShapeFunction to differentiate
+       *
+       * Creates @f$ \nabla \cdot \mathbf{u} @f$ for use in bilinear forms.
        */
       Div(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
