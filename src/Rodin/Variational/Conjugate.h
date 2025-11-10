@@ -71,11 +71,19 @@ namespace Rodin::Variational
         : m_v(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Conjugate to copy
+       */
       Conjugate(const Conjugate& other)
         : Parent(other),
           m_v(other.m_v->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Conjugate to move
+       */
       Conjugate(Conjugate&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v))

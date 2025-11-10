@@ -44,11 +44,19 @@ namespace Rodin::Variational
         : m_n(n)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Identity matrix to copy
+       */
       IdentityMatrix(const IdentityMatrix& other)
         : MatrixFunctionBase(other),
           m_n(other.m_n)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Identity matrix to move
+       */
       IdentityMatrix(IdentityMatrix&& other)
         : MatrixFunctionBase(std::move(other)),
           m_n(other.m_n)
@@ -82,6 +90,10 @@ namespace Rodin::Variational
         return Math::Matrix<Real>::Identity(m_n, m_n);
       }
 
+      /**
+       * @brief Creates a polymorphic copy of the identity matrix.
+       * @return Pointer to copy
+       */
       IdentityMatrix* copy() const noexcept override
       {
         return new IdentityMatrix(*this);
