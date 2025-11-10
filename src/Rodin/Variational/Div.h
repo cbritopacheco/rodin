@@ -99,6 +99,15 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
+      /**
+       * @brief Evaluates the divergence at a point.
+       * @param[in] p Point at which to evaluate
+       * @return Divergence value @f$ \nabla \cdot \mathbf{u}(p) @f$
+       *
+       * Computes the divergence by summing the partial derivatives:
+       * @f$ \nabla \cdot \mathbf{u} = \sum_{i=1}^d \frac{\partial u_i}{\partial x_i} @f$
+       * Handles mesh inclusion and submesh restrictions automatically.
+       */
       ScalarType getValue(const Geometry::Point& p) const
       {
         static thread_local ScalarType s_out;
@@ -128,6 +137,10 @@ namespace Rodin::Variational
         return s_out;
       }
 
+      /**
+       * @brief Gets the operand grid function.
+       * @return Reference to the vector-valued grid function
+       */
       constexpr
       const OperandType& getOperand() const
       {
@@ -135,7 +148,12 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Interpolation function to be overriden in Derived type.
+       * @brief Interpolates the divergence at a point (to be overridden in derived class).
+       * @param[out] out Output scalar for divergence result
+       * @param[in] p Point at which to interpolate
+       *
+       * This virtual function is overridden in derived classes (e.g., P1::Div)
+       * to provide finite element-specific divergence computation.
        */
       constexpr
       void interpolate(ScalarType& out, const Geometry::Point& p) const

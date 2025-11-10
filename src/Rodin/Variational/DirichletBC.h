@@ -83,35 +83,45 @@ namespace Rodin::Variational
       /**
        * @brief Assembles the Dirichlet boundary condition.
        *
-       * This method computes the global degree of freedom map associated to
-       * the Dirichlet boundary. In other words, it computes the IndexMap which
-       * has a keys the global indices of the DOFs, and as values @f$ \ell_i
-       * @f$ the
-       * @f[
-       *  \ell_i(\mathrm{Value}), \quad i = 1, \ldots, n
-       * @f]
-       * where @f$ \ell_i @f$ is the i-th linear form on the associated finite
-       * element space.
+       * Computes the global DOF map for the Dirichlet boundary by evaluating
+       * the prescribed value at each boundary DOF. The result is a map
+       * @f$ \{(i, g(x_i))\} @f$ where @f$ i @f$ is the global DOF index and
+       * @f$ g(x_i) @f$ is the prescribed value at that DOF.
        */
       virtual void assemble() = 0;
 
       /**
-       * @brief Gets the global degree of freedom map.
+       * @brief Gets the map of constrained DOFs and their values.
+       * @return Map from global DOF index to prescribed value
+       *
+       * Returns the assembled DOF map containing pairs @f$ (i, g_i) @f$ where
+       * @f$ i @f$ is the global DOF index and @f$ g_i @f$ is the prescribed
+       * boundary value.
        */
       virtual const DOFs& getDOFs() const = 0;
 
+      /**
+       * @brief Checks if this is a component-wise boundary condition.
+       * @return True if BC applies to a single component of a vector function
+       */
       virtual bool isComponent() const = 0;
 
       /**
-       * @brief Gets the associated operand.
+       * @brief Gets the operand (trial function) of the BC.
+       * @return Reference to the trial function being constrained
        */
       virtual const FormLanguage::Base& getOperand() const = 0;
 
       /**
-       * @brief Gets the associated value.
+       * @brief Gets the prescribed boundary value.
+       * @return Reference to the function defining the BC value
        */
       virtual const FormLanguage::Base& getValue() const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy of this BC.
+       * @return Pointer to a new copy
+       */
       virtual DirichletBCBase* copy() const noexcept override = 0;
   };
 

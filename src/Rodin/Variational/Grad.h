@@ -145,12 +145,28 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
+      /**
+       * @brief Gets the spatial dimension of the gradient.
+       * @return Dimension of the spatial domain
+       *
+       * Returns the number of spatial dimensions @f$ d @f$ where the gradient
+       * @f$ \nabla u \in \mathbb{R}^d @f$.
+       */
       constexpr
       size_t getDimension() const
       {
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
+      /**
+       * @brief Evaluates the gradient at a point.
+       * @param[in] p Point at which to evaluate
+       * @return Gradient vector @f$ \nabla u(p) @f$
+       *
+       * Computes the gradient by interpolating the basis function gradients
+       * weighted by the degrees of freedom. Handles mesh inclusion and
+       * submesh restrictions automatically.
+       */
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         static thread_local SpatialVectorType s_out;
@@ -181,7 +197,12 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Interpolation function to be overriden in Derived type.
+       * @brief Interpolates the gradient at a point (to be overridden in derived class).
+       * @param[out] out Output vector for gradient result
+       * @param[in] p Point at which to interpolate
+       *
+       * This virtual function is overridden in derived classes (e.g., P1::Grad)
+       * to provide finite element-specific gradient interpolation.
        */
       constexpr
       void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
@@ -189,6 +210,10 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
+      /**
+       * @brief Gets the operand grid function.
+       * @return Reference to the grid function being differentiated
+       */
       constexpr
       const OperandType& getOperand() const
       {
