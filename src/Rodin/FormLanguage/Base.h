@@ -57,6 +57,13 @@ namespace Rodin::FormLanguage
     using ObjectTable = std::vector<std::shared_ptr<const void>>;
 
     public:
+      /**
+       * @brief Type alias for unique object identifiers.
+       *
+       * UUID (Universally Unique Identifier) is used to uniquely identify
+       * each FormLanguage::Base instance during its lifetime. The identifier
+       * is assigned during construction and remains constant.
+       */
       using UUID = size_t;
 
       /**
