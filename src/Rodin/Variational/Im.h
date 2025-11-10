@@ -47,11 +47,19 @@ namespace Rodin::Variational
         : m_operand(f.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Im object to copy
+       */
       Im(const Im& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Im object to move from
+       */
       Im(Im&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
@@ -78,6 +86,10 @@ namespace Rodin::Variational
         return getOperand().getValue(p).imag();
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a new Im object
+       */
       Im* copy() const noexcept override
       {
         return new Im(*this);
