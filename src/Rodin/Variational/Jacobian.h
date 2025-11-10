@@ -88,16 +88,19 @@ namespace Rodin::Variational
         MatrixFunctionBase<ScalarType, JacobianBase<OperandType, Derived>>;
 
       /**
-       * @brief Constructs the Jacobianient of a @f$ \mathbb{P}_1 @f$ function
-       * @f$ u @f$.
-       * @param[in] u P1 GridFunction
+       * @brief Constructs the Jacobian of a P1 grid function.
+       * @param[in] u P1 GridFunction to differentiate
+       *
+       * Creates the Jacobian matrix operator @f$ J(\mathbf{u}) @f$ where
+       * @f$ J_{ij} = \frac{\partial u_i}{\partial x_j} @f$.
        */
       JacobianBase(const OperandType& u)
         : m_u(u)
       {}
 
       /**
-       * @brief Copy constructor
+       * @brief Copy constructor.
+       * @param[in] other Jacobian to copy
        */
       JacobianBase(const JacobianBase& other)
         : Parent(other),
@@ -105,25 +108,49 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief Move constructor
+       * @brief Move constructor.
+       * @param[in] other Jacobian to move from
        */
       JacobianBase(JacobianBase&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u))
       {}
 
+      /**
+       * @brief Gets the number of rows in the Jacobian matrix.
+       * @return Number of components in the vector function
+       *
+       * For a vector function @f$ \mathbf{u}: \mathbb{R}^d \to \mathbb{R}^m @f$,
+       * the Jacobian has @f$ m @f$ rows.
+       */
       constexpr
       size_t getRows() const
       {
         return getOperand().getFiniteElementSpace().getVectorDimension();
       }
 
+      /**
+       * @brief Gets the number of columns in the Jacobian matrix.
+       * @return Spatial dimension of the domain
+       *
+       * For a vector function @f$ \mathbf{u}: \mathbb{R}^d \to \mathbb{R}^m @f$,
+       * the Jacobian has @f$ d @f$ columns.
+       */
       constexpr
       size_t getColumns() const
       {
         return getOperand().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
+      /**
+       * @brief Evaluates the Jacobian matrix at a point.
+       * @param[in] p Point at which to evaluate
+       * @return Jacobian matrix @f$ J(\mathbf{u})(p) @f$
+       *
+       * Computes the Jacobian by assembling partial derivatives:
+       * @f$ J_{ij}(p) = \frac{\partial u_i}{\partial x_j}(p) @f$
+       * Handles mesh inclusion and submesh restrictions automatically.
+       */
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         static thread_local SpatialMatrixType s_out;
@@ -153,6 +180,10 @@ namespace Rodin::Variational
         return s_out;
       }
 
+      /**
+       * @brief Gets the operand grid function.
+       * @return Reference to the vector-valued grid function
+       */
       constexpr
       const OperandType& getOperand() const
       {
@@ -160,7 +191,12 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Interpolation function to be overriden in Derived type.
+       * @brief Interpolates the Jacobian at a point (to be overridden in derived class).
+       * @param[out] out Output matrix for Jacobian result
+       * @param[in] p Point at which to interpolate
+       *
+       * This virtual function is overridden in derived classes (e.g., P1::Jacobian)
+       * to provide finite element-specific Jacobian computation.
        */
       constexpr
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
@@ -169,7 +205,8 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Copy function to be overriden in Derived type.
+       * @brief Creates a polymorphic copy (to be overridden in derived class).
+       * @return Pointer to a new copy
        */
       JacobianBase* copy() const noexcept override
       {

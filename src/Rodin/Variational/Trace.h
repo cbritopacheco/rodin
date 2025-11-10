@@ -76,32 +76,54 @@ namespace Rodin::Variational
       using Parent = FunctionBase<Trace<OperandType>>;
 
       /**
-       * @brief Constructs the Trace of the given matrix
-       * @param[in] m Square matrix
+       * @brief Constructs the trace of a matrix function.
+       * @param[in] m Square matrix function
+       *
+       * Creates the trace operator @f$ \text{tr}(A) = \sum_{i=1}^n A_{ii} @f$
+       * for a square matrix @f$ A @f$.
        */
       constexpr
       Trace(const OperandType& m)
         : m_operand(m.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Trace to copy
+       */
       constexpr
       Trace(const Trace& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Trace to move from
+       */
       constexpr
       Trace(Trace&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /**
+       * @brief Evaluates the trace at a point.
+       * @param[in] p Point at which to evaluate
+       * @return Trace value @f$ \text{tr}(A(p)) = \sum_i A_{ii}(p) @f$
+       *
+       * Computes the sum of diagonal entries of the matrix at the given point.
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return this->getOperand().getValue(p).trace();
       }
 
+      /**
+       * @brief Gets the operand matrix function.
+       * @return Reference to the matrix being traced
+       */
       constexpr
       const OperandType& getOperand() const
       {
@@ -109,6 +131,11 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
+      /**
+       * @brief Sets the trace domain (implementation-specific).
+       * @param[in] args Arguments forwarded to operand's traceOf method
+       * @return Reference to this trace operator
+       */
       template <class ... Args>
       constexpr
       Trace& traceOf(const Args& ... args)
@@ -117,6 +144,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this trace operator.
+       * @return Pointer to a new copy
+       */
       Trace* copy() const noexcept override
       {
         return new Trace(*this);
