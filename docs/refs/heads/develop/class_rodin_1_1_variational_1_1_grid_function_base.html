@@ -64,6 +64,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_grid_function_8h.html">&lt;Rodin/Variational/GridFunction.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FESType, class Data = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::DataType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GridFunctionBase <span class="m-thin">class</span>
         </h1>
@@ -76,6 +77,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -117,17 +119,76 @@
             <dd>Parent class.</dd>
           </dl>
         </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>(</span><span class="m-doc-wrap">const FES&amp; fes)</span>
+            </dt>
+            <dd>Constructs a grid function on the given finite element space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a80e8a60379f5407c59ad0cf5f7273e44" class="m-doc">GridFunctionBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a57f95bb4685a802ec509471381c7c25b" class="m-doc">GridFunctionBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a6ab9def81a5a105dfded770e0452996a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6ab9def81a5a105dfded770e0452996a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a52b2a6e2f898ab31632b6ccfe5fea5ee" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
-            <dd>Returns a constant reference to the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> data.</dd>
-            <dt id="a0b208ee6b78fed255912b1f596d7177a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0b208ee6b78fed255912b1f596d7177a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const -&gt; const DataType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dd>Move assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4107a9064ab310b5d2fa87a878625ae0" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
-            <dd>Returns a constant reference to the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> data.</dd>
+            <dd>Copy assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a20a02eeff14d68d1c188d8f2386dc91d" class="m-doc">x</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Extracts the x-component of a vector-valued grid function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9de13de57bb32fb45b61d857a716cb3a" class="m-doc">y</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Extracts the y-component of a vector-valued grid function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acbf3185432eb4f4bdaa34d7ecd729535" class="m-doc">z</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Extracts the z-component of a vector-valued grid function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3c0409f55497ff28ac68da355f3f64aa" class="m-doc">setData</a>(</span><span class="m-doc-wrap">const DataType&amp; data,
+              size_t offset = 0) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets the DOF data vector.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6ab9def81a5a105dfded770e0452996a" class="m-doc">getData</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the DOF data vector.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0b208ee6b78fed255912b1f596d7177a" class="m-doc">getData</a>(</span><span class="m-doc-wrap">) const -&gt; const DataType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the DOF data vector (const version).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4758cdb6b0d7f09e6719a7bfa884e86e" class="m-doc">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const -&gt; const FES&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the associated finite element space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3677f5a27ad4efb8d5567634bf0940e9" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the number of degrees of freedom.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad8f738241426a32d95c3696395698d3" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the vector dimension of the grid function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aece46f87b2f217e4c695daac0549b9ea" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>) -&gt; Derived&amp;</span>
+            </dt>
+            <dd>Loads grid function data from a file.</dd>
             <dt id="a475059e0c5d98a64868dd42f48abb39d">
               <span class="m-doc-wrap-bumper">auto <a href="#a475059e0c5d98a64868dd42f48abb39d" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; decltype(auto)</span>
             </dt>
@@ -210,6 +271,457 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a64a561bef7097744a37d7cc40c37c66c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64a561bef7097744a37d7cc40c37c66c" class="m-doc-self">GridFunctionBase</a>(</span><span class="m-doc-wrap">const FES&amp; fes)</span></span>
+            </h3>
+            <p>Constructs a grid function on the given finite element space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fes&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Finite element space</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Creates a grid function associated with the given FE space. The DOF vector is sized according to the space dimension.</p>
+          </div></section>
+          <section class="m-doc-details" id="a80e8a60379f5407c59ad0cf5f7273e44"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80e8a60379f5407c59ad0cf5f7273e44" class="m-doc-self">GridFunctionBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to copy</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a57f95bb4685a802ec509471381c7c25b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a57f95bb4685a802ec509471381c7c25b" class="m-doc-self">GridFunctionBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to move from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a52b2a6e2f898ab31632b6ccfe5fea5ee"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52b2a6e2f898ab31632b6ccfe5fea5ee" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to move from</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4107a9064ab310b5d2fa87a878625ae0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4107a9064ab310b5d2fa87a878625ae0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to copy</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a20a02eeff14d68d1c188d8f2386dc91d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20a02eeff14d68d1c188d8f2386dc91d" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Extracts the x-component of a vector-valued grid function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> operator for the first component</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For vector-valued functions <svg class="m-math" style="width: 8.105em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 77.807268 12.309385">
+<title>
+$ \mathbf{u} = (u_x, u_y, u_z) $
+</title>
+<defs>
+<path id='eq1-g1-120' d='M3.993026-3.180075C3.642341-3.092403 3.626401-2.781569 3.626401-2.749689C3.626401-2.574346 3.761893-2.454795 3.937235-2.454795S4.383562-2.590286 4.383562-2.933001C4.383562-3.387298 3.881445-3.514819 3.58655-3.514819C3.211955-3.514819 2.909091-3.251806 2.725778-2.940971C2.550436-3.363387 2.13599-3.514819 1.809215-3.514819C.940473-3.514819 .454296-2.518555 .454296-2.295392C.454296-2.223661 .510087-2.191781 .573848-2.191781C.669489-2.191781 .68543-2.231631 .70934-2.327273C.892653-2.909091 1.370859-3.291656 1.785305-3.291656C2.096139-3.291656 2.247572-3.068493 2.247572-2.781569C2.247572-2.622167 2.15193-2.255542 2.088169-2.000498C2.032379-1.769365 1.857036-1.060025 1.817186-.908593C1.705604-.478207 1.41868-.143462 1.060025-.143462C1.028144-.143462 .820922-.143462 .653549-.255044C1.020174-.342715 1.020174-.67746 1.020174-.68543C1.020174-.868742 .876712-.980324 .70137-.980324C.486177-.980324 .255044-.797011 .255044-.494147C.255044-.127522 .645579 .079701 1.052055 .079701C1.474471 .079701 1.769365-.239103 1.912827-.494147C2.088169-.103611 2.454795 .079701 2.83736 .079701C3.706102 .079701 4.184309-.916563 4.184309-1.139726C4.184309-1.219427 4.120548-1.243337 4.064757-1.243337C3.969116-1.243337 3.953176-1.187547 3.929265-1.107846C3.769863-.573848 3.315567-.143462 2.8533-.143462C2.590286-.143462 2.399004-.318804 2.399004-.653549C2.399004-.812951 2.446824-.996264 2.558406-1.44259C2.614197-1.681694 2.789539-2.383064 2.82939-2.534496C2.940971-2.948941 3.219925-3.291656 3.57858-3.291656C3.618431-3.291656 3.825654-3.291656 3.993026-3.180075Z'/>
+<path id='eq1-g1-121' d='M4.128518-3.004732C4.160399-3.116314 4.160399-3.132254 4.160399-3.188045C4.160399-3.387298 4.000996-3.435118 3.905355-3.435118C3.865504-3.435118 3.682192-3.427148 3.57858-3.219925C3.56264-3.180075 3.490909-2.893151 3.451059-2.725778L2.972852-.812951C2.964882-.789041 2.622167-.143462 2.040349-.143462C1.649813-.143462 1.514321-.430386 1.514321-.789041C1.514321-1.251308 1.785305-1.960648 1.968618-2.422914C2.048319-2.622167 2.072229-2.693898 2.072229-2.83736C2.072229-3.275716 1.721544-3.514819 1.354919-3.514819C.565878-3.514819 .239103-2.391034 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.239601 .494147-2.319303C.70137-3.012702 1.044085-3.291656 1.331009-3.291656C1.45056-3.291656 1.522291-3.211955 1.522291-3.028643C1.522291-2.86127 1.458531-2.677958 1.40274-2.534496C1.075965-1.689664 .940473-1.283188 .940473-.908593C.940473-.127522 1.530262 .079701 2.000498 .079701C2.375093 .079701 2.646077-.087671 2.83736-.270984C2.725778 .175342 2.646077 .486177 2.343213 .868742C2.080199 1.195517 1.761395 1.40274 1.40274 1.40274C1.267248 1.40274 .964384 1.378829 .804981 1.139726C1.227397 1.107846 1.259278 .749191 1.259278 .70137C1.259278 .510087 1.115816 .406476 .948443 .406476C.773101 .406476 .494147 .541968 .494147 .932503C.494147 1.307098 .836862 1.625903 1.40274 1.625903C2.215691 1.625903 3.132254 .972354 3.371357 .00797L4.128518-3.004732Z'/>
+<path id='eq1-g1-122' d='M1.155666-.6934C1.44259-.988294 1.530262-1.075965 2.231631-1.657783C2.319303-1.729514 2.87721-2.191781 3.092403-2.399004C3.594521-2.893151 3.905355-3.331507 3.905355-3.419178C3.905355-3.490909 3.841594-3.514819 3.785803-3.514819C3.706102-3.514819 3.698132-3.498879 3.618431-3.379328C3.371357-3.012702 3.196015-2.948941 3.052553-2.948941C2.901121-2.948941 2.805479-3.012702 2.646077-3.172105C2.438854-3.371357 2.279452-3.514819 2.024408-3.514819C1.3868-3.514819 .988294-2.797509 .988294-2.582316C.988294-2.574346 .988294-2.486675 1.115816-2.486675C1.195517-2.486675 1.211457-2.518555 1.243337-2.606227C1.346949-2.83736 1.689664-2.917061 1.928767-2.917061C2.11208-2.917061 2.303362-2.86924 2.494645-2.81345C2.82939-2.725778 2.901121-2.725778 3.084433-2.725778C2.917061-2.550436 2.693898-2.327273 2.080199-1.825156C1.745455-1.546202 1.41071-1.275218 1.195517-1.067995C.605729-.486177 .350685-.095641 .350685-.01594C.350685 .055791 .406476 .079701 .470237 .079701C.549938 .079701 .565878 .055791 .605729 0C.765131-.239103 1.012204-.486177 1.315068-.486177C1.498381-.486177 1.578082-.414446 1.729514-.263014C1.984558-.01594 2.12802 .079701 2.359153 .079701C3.188045 .079701 3.690162-.908593 3.690162-1.155666C3.690162-1.227397 3.634371-1.259278 3.57061-1.259278C3.482939-1.259278 3.466999-1.211457 3.435118-1.131756C3.283686-.73325 2.84533-.518057 2.446824-.518057C2.295392-.518057 2.12005-.557908 1.880946-.621669C1.546202-.70934 1.466501-.70934 1.346949-.70934C1.267248-.70934 1.219427-.70934 1.155666-.6934Z'/>
+<path id='eq1-g2-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq1-g2-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq1-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g0-117' d='M4.220174-5.284184V-4.770112C4.961395-4.770112 5.045081-4.770112 5.045081-4.303861V-1.960648C5.045081-1.052055 4.507098-.32279 3.574595-.32279C2.677958-.32279 2.630137-.621669 2.630137-1.279203V-5.379826L.502117-5.284184V-4.770112C1.243337-4.770112 1.327024-4.770112 1.327024-4.303861V-1.470486C1.327024-.274969 2.12802 .071731 3.407223 .071731C3.694147 .071731 4.578829 .071731 5.092902-.896638H5.104857V.071731L7.173101 0V-.514072C6.43188-.514072 6.348194-.514072 6.348194-.980324V-5.379826L4.220174-5.284184Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-117'/>
+<use x='10.792809' y='0' xlink:href='#eq1-g3-61'/>
+<use x='23.21829' y='0' xlink:href='#eq1-g3-40'/>
+<use x='27.770616' y='0' xlink:href='#eq1-g2-117'/>
+<use x='34.433056' y='1.793263' xlink:href='#eq1-g1-120'/>
+<use x='39.698087' y='0' xlink:href='#eq1-g2-59'/>
+<use x='44.942245' y='0' xlink:href='#eq1-g2-117'/>
+<use x='51.604685' y='1.793263' xlink:href='#eq1-g1-121'/>
+<use x='56.574528' y='0' xlink:href='#eq1-g2-59'/>
+<use x='61.818687' y='0' xlink:href='#eq1-g2-117'/>
+<use x='68.481126' y='1.793263' xlink:href='#eq1-g1-122'/>
+<use x='73.254942' y='0' xlink:href='#eq1-g3-41'/>
+</g>
+</svg>, returns <svg class="m-math" style="width: 1.191em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 11.429338 6.940636">
+<title>
+$ u_x $
+</title>
+<defs>
+<path id='eq2-g0-120' d='M3.993026-3.180075C3.642341-3.092403 3.626401-2.781569 3.626401-2.749689C3.626401-2.574346 3.761893-2.454795 3.937235-2.454795S4.383562-2.590286 4.383562-2.933001C4.383562-3.387298 3.881445-3.514819 3.58655-3.514819C3.211955-3.514819 2.909091-3.251806 2.725778-2.940971C2.550436-3.363387 2.13599-3.514819 1.809215-3.514819C.940473-3.514819 .454296-2.518555 .454296-2.295392C.454296-2.223661 .510087-2.191781 .573848-2.191781C.669489-2.191781 .68543-2.231631 .70934-2.327273C.892653-2.909091 1.370859-3.291656 1.785305-3.291656C2.096139-3.291656 2.247572-3.068493 2.247572-2.781569C2.247572-2.622167 2.15193-2.255542 2.088169-2.000498C2.032379-1.769365 1.857036-1.060025 1.817186-.908593C1.705604-.478207 1.41868-.143462 1.060025-.143462C1.028144-.143462 .820922-.143462 .653549-.255044C1.020174-.342715 1.020174-.67746 1.020174-.68543C1.020174-.868742 .876712-.980324 .70137-.980324C.486177-.980324 .255044-.797011 .255044-.494147C.255044-.127522 .645579 .079701 1.052055 .079701C1.474471 .079701 1.769365-.239103 1.912827-.494147C2.088169-.103611 2.454795 .079701 2.83736 .079701C3.706102 .079701 4.184309-.916563 4.184309-1.139726C4.184309-1.219427 4.120548-1.243337 4.064757-1.243337C3.969116-1.243337 3.953176-1.187547 3.929265-1.107846C3.769863-.573848 3.315567-.143462 2.8533-.143462C2.590286-.143462 2.399004-.318804 2.399004-.653549C2.399004-.812951 2.446824-.996264 2.558406-1.44259C2.614197-1.681694 2.789539-2.383064 2.82939-2.534496C2.940971-2.948941 3.219925-3.291656 3.57858-3.291656C3.618431-3.291656 3.825654-3.291656 3.993026-3.180075Z'/>
+<path id='eq2-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g1-117'/>
+<use x='6.66244' y='1.793263' xlink:href='#eq2-g0-120'/>
+</g>
+</svg>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9de13de57bb32fb45b61d857a716cb3a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9de13de57bb32fb45b61d857a716cb3a" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Extracts the y-component of a vector-valued grid function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> operator for the second component</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For vector-valued functions <svg class="m-math" style="width: 8.105em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 77.807268 12.309385">
+<title>
+$ \mathbf{u} = (u_x, u_y, u_z) $
+</title>
+<defs>
+<path id='eq3-g1-120' d='M3.993026-3.180075C3.642341-3.092403 3.626401-2.781569 3.626401-2.749689C3.626401-2.574346 3.761893-2.454795 3.937235-2.454795S4.383562-2.590286 4.383562-2.933001C4.383562-3.387298 3.881445-3.514819 3.58655-3.514819C3.211955-3.514819 2.909091-3.251806 2.725778-2.940971C2.550436-3.363387 2.13599-3.514819 1.809215-3.514819C.940473-3.514819 .454296-2.518555 .454296-2.295392C.454296-2.223661 .510087-2.191781 .573848-2.191781C.669489-2.191781 .68543-2.231631 .70934-2.327273C.892653-2.909091 1.370859-3.291656 1.785305-3.291656C2.096139-3.291656 2.247572-3.068493 2.247572-2.781569C2.247572-2.622167 2.15193-2.255542 2.088169-2.000498C2.032379-1.769365 1.857036-1.060025 1.817186-.908593C1.705604-.478207 1.41868-.143462 1.060025-.143462C1.028144-.143462 .820922-.143462 .653549-.255044C1.020174-.342715 1.020174-.67746 1.020174-.68543C1.020174-.868742 .876712-.980324 .70137-.980324C.486177-.980324 .255044-.797011 .255044-.494147C.255044-.127522 .645579 .079701 1.052055 .079701C1.474471 .079701 1.769365-.239103 1.912827-.494147C2.088169-.103611 2.454795 .079701 2.83736 .079701C3.706102 .079701 4.184309-.916563 4.184309-1.139726C4.184309-1.219427 4.120548-1.243337 4.064757-1.243337C3.969116-1.243337 3.953176-1.187547 3.929265-1.107846C3.769863-.573848 3.315567-.143462 2.8533-.143462C2.590286-.143462 2.399004-.318804 2.399004-.653549C2.399004-.812951 2.446824-.996264 2.558406-1.44259C2.614197-1.681694 2.789539-2.383064 2.82939-2.534496C2.940971-2.948941 3.219925-3.291656 3.57858-3.291656C3.618431-3.291656 3.825654-3.291656 3.993026-3.180075Z'/>
+<path id='eq3-g1-121' d='M4.128518-3.004732C4.160399-3.116314 4.160399-3.132254 4.160399-3.188045C4.160399-3.387298 4.000996-3.435118 3.905355-3.435118C3.865504-3.435118 3.682192-3.427148 3.57858-3.219925C3.56264-3.180075 3.490909-2.893151 3.451059-2.725778L2.972852-.812951C2.964882-.789041 2.622167-.143462 2.040349-.143462C1.649813-.143462 1.514321-.430386 1.514321-.789041C1.514321-1.251308 1.785305-1.960648 1.968618-2.422914C2.048319-2.622167 2.072229-2.693898 2.072229-2.83736C2.072229-3.275716 1.721544-3.514819 1.354919-3.514819C.565878-3.514819 .239103-2.391034 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.239601 .494147-2.319303C.70137-3.012702 1.044085-3.291656 1.331009-3.291656C1.45056-3.291656 1.522291-3.211955 1.522291-3.028643C1.522291-2.86127 1.458531-2.677958 1.40274-2.534496C1.075965-1.689664 .940473-1.283188 .940473-.908593C.940473-.127522 1.530262 .079701 2.000498 .079701C2.375093 .079701 2.646077-.087671 2.83736-.270984C2.725778 .175342 2.646077 .486177 2.343213 .868742C2.080199 1.195517 1.761395 1.40274 1.40274 1.40274C1.267248 1.40274 .964384 1.378829 .804981 1.139726C1.227397 1.107846 1.259278 .749191 1.259278 .70137C1.259278 .510087 1.115816 .406476 .948443 .406476C.773101 .406476 .494147 .541968 .494147 .932503C.494147 1.307098 .836862 1.625903 1.40274 1.625903C2.215691 1.625903 3.132254 .972354 3.371357 .00797L4.128518-3.004732Z'/>
+<path id='eq3-g1-122' d='M1.155666-.6934C1.44259-.988294 1.530262-1.075965 2.231631-1.657783C2.319303-1.729514 2.87721-2.191781 3.092403-2.399004C3.594521-2.893151 3.905355-3.331507 3.905355-3.419178C3.905355-3.490909 3.841594-3.514819 3.785803-3.514819C3.706102-3.514819 3.698132-3.498879 3.618431-3.379328C3.371357-3.012702 3.196015-2.948941 3.052553-2.948941C2.901121-2.948941 2.805479-3.012702 2.646077-3.172105C2.438854-3.371357 2.279452-3.514819 2.024408-3.514819C1.3868-3.514819 .988294-2.797509 .988294-2.582316C.988294-2.574346 .988294-2.486675 1.115816-2.486675C1.195517-2.486675 1.211457-2.518555 1.243337-2.606227C1.346949-2.83736 1.689664-2.917061 1.928767-2.917061C2.11208-2.917061 2.303362-2.86924 2.494645-2.81345C2.82939-2.725778 2.901121-2.725778 3.084433-2.725778C2.917061-2.550436 2.693898-2.327273 2.080199-1.825156C1.745455-1.546202 1.41071-1.275218 1.195517-1.067995C.605729-.486177 .350685-.095641 .350685-.01594C.350685 .055791 .406476 .079701 .470237 .079701C.549938 .079701 .565878 .055791 .605729 0C.765131-.239103 1.012204-.486177 1.315068-.486177C1.498381-.486177 1.578082-.414446 1.729514-.263014C1.984558-.01594 2.12802 .079701 2.359153 .079701C3.188045 .079701 3.690162-.908593 3.690162-1.155666C3.690162-1.227397 3.634371-1.259278 3.57061-1.259278C3.482939-1.259278 3.466999-1.211457 3.435118-1.131756C3.283686-.73325 2.84533-.518057 2.446824-.518057C2.295392-.518057 2.12005-.557908 1.880946-.621669C1.546202-.70934 1.466501-.70934 1.346949-.70934C1.267248-.70934 1.219427-.70934 1.155666-.6934Z'/>
+<path id='eq3-g2-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq3-g2-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq3-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq3-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq3-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq3-g0-117' d='M4.220174-5.284184V-4.770112C4.961395-4.770112 5.045081-4.770112 5.045081-4.303861V-1.960648C5.045081-1.052055 4.507098-.32279 3.574595-.32279C2.677958-.32279 2.630137-.621669 2.630137-1.279203V-5.379826L.502117-5.284184V-4.770112C1.243337-4.770112 1.327024-4.770112 1.327024-4.303861V-1.470486C1.327024-.274969 2.12802 .071731 3.407223 .071731C3.694147 .071731 4.578829 .071731 5.092902-.896638H5.104857V.071731L7.173101 0V-.514072C6.43188-.514072 6.348194-.514072 6.348194-.980324V-5.379826L4.220174-5.284184Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-117'/>
+<use x='10.792809' y='0' xlink:href='#eq3-g3-61'/>
+<use x='23.21829' y='0' xlink:href='#eq3-g3-40'/>
+<use x='27.770616' y='0' xlink:href='#eq3-g2-117'/>
+<use x='34.433056' y='1.793263' xlink:href='#eq3-g1-120'/>
+<use x='39.698087' y='0' xlink:href='#eq3-g2-59'/>
+<use x='44.942245' y='0' xlink:href='#eq3-g2-117'/>
+<use x='51.604685' y='1.793263' xlink:href='#eq3-g1-121'/>
+<use x='56.574528' y='0' xlink:href='#eq3-g2-59'/>
+<use x='61.818687' y='0' xlink:href='#eq3-g2-117'/>
+<use x='68.481126' y='1.793263' xlink:href='#eq3-g1-122'/>
+<use x='73.254942' y='0' xlink:href='#eq3-g3-41'/>
+</g>
+</svg>, returns <svg class="m-math" style="width: 1.160em; height: 0.884em; vertical-align: -0.350em;" viewBox="0 -5.147373 11.13415 8.490382">
+<title>
+$ u_y $
+</title>
+<defs>
+<path id='eq4-g0-121' d='M4.128518-3.004732C4.160399-3.116314 4.160399-3.132254 4.160399-3.188045C4.160399-3.387298 4.000996-3.435118 3.905355-3.435118C3.865504-3.435118 3.682192-3.427148 3.57858-3.219925C3.56264-3.180075 3.490909-2.893151 3.451059-2.725778L2.972852-.812951C2.964882-.789041 2.622167-.143462 2.040349-.143462C1.649813-.143462 1.514321-.430386 1.514321-.789041C1.514321-1.251308 1.785305-1.960648 1.968618-2.422914C2.048319-2.622167 2.072229-2.693898 2.072229-2.83736C2.072229-3.275716 1.721544-3.514819 1.354919-3.514819C.565878-3.514819 .239103-2.391034 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.239601 .494147-2.319303C.70137-3.012702 1.044085-3.291656 1.331009-3.291656C1.45056-3.291656 1.522291-3.211955 1.522291-3.028643C1.522291-2.86127 1.458531-2.677958 1.40274-2.534496C1.075965-1.689664 .940473-1.283188 .940473-.908593C.940473-.127522 1.530262 .079701 2.000498 .079701C2.375093 .079701 2.646077-.087671 2.83736-.270984C2.725778 .175342 2.646077 .486177 2.343213 .868742C2.080199 1.195517 1.761395 1.40274 1.40274 1.40274C1.267248 1.40274 .964384 1.378829 .804981 1.139726C1.227397 1.107846 1.259278 .749191 1.259278 .70137C1.259278 .510087 1.115816 .406476 .948443 .406476C.773101 .406476 .494147 .541968 .494147 .932503C.494147 1.307098 .836862 1.625903 1.40274 1.625903C2.215691 1.625903 3.132254 .972354 3.371357 .00797L4.128518-3.004732Z'/>
+<path id='eq4-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g1-117'/>
+<use x='6.66244' y='1.793263' xlink:href='#eq4-g0-121'/>
+</g>
+</svg>.</p>
+          </div></section>
+          <section class="m-doc-details" id="acbf3185432eb4f4bdaa34d7ecd729535"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbf3185432eb4f4bdaa34d7ecd729535" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Extracts the z-component of a vector-valued grid function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> operator for the third component</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For vector-valued functions <svg class="m-math" style="width: 8.105em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 77.807268 12.309385">
+<title>
+$ \mathbf{u} = (u_x, u_y, u_z) $
+</title>
+<defs>
+<path id='eq5-g1-120' d='M3.993026-3.180075C3.642341-3.092403 3.626401-2.781569 3.626401-2.749689C3.626401-2.574346 3.761893-2.454795 3.937235-2.454795S4.383562-2.590286 4.383562-2.933001C4.383562-3.387298 3.881445-3.514819 3.58655-3.514819C3.211955-3.514819 2.909091-3.251806 2.725778-2.940971C2.550436-3.363387 2.13599-3.514819 1.809215-3.514819C.940473-3.514819 .454296-2.518555 .454296-2.295392C.454296-2.223661 .510087-2.191781 .573848-2.191781C.669489-2.191781 .68543-2.231631 .70934-2.327273C.892653-2.909091 1.370859-3.291656 1.785305-3.291656C2.096139-3.291656 2.247572-3.068493 2.247572-2.781569C2.247572-2.622167 2.15193-2.255542 2.088169-2.000498C2.032379-1.769365 1.857036-1.060025 1.817186-.908593C1.705604-.478207 1.41868-.143462 1.060025-.143462C1.028144-.143462 .820922-.143462 .653549-.255044C1.020174-.342715 1.020174-.67746 1.020174-.68543C1.020174-.868742 .876712-.980324 .70137-.980324C.486177-.980324 .255044-.797011 .255044-.494147C.255044-.127522 .645579 .079701 1.052055 .079701C1.474471 .079701 1.769365-.239103 1.912827-.494147C2.088169-.103611 2.454795 .079701 2.83736 .079701C3.706102 .079701 4.184309-.916563 4.184309-1.139726C4.184309-1.219427 4.120548-1.243337 4.064757-1.243337C3.969116-1.243337 3.953176-1.187547 3.929265-1.107846C3.769863-.573848 3.315567-.143462 2.8533-.143462C2.590286-.143462 2.399004-.318804 2.399004-.653549C2.399004-.812951 2.446824-.996264 2.558406-1.44259C2.614197-1.681694 2.789539-2.383064 2.82939-2.534496C2.940971-2.948941 3.219925-3.291656 3.57858-3.291656C3.618431-3.291656 3.825654-3.291656 3.993026-3.180075Z'/>
+<path id='eq5-g1-121' d='M4.128518-3.004732C4.160399-3.116314 4.160399-3.132254 4.160399-3.188045C4.160399-3.387298 4.000996-3.435118 3.905355-3.435118C3.865504-3.435118 3.682192-3.427148 3.57858-3.219925C3.56264-3.180075 3.490909-2.893151 3.451059-2.725778L2.972852-.812951C2.964882-.789041 2.622167-.143462 2.040349-.143462C1.649813-.143462 1.514321-.430386 1.514321-.789041C1.514321-1.251308 1.785305-1.960648 1.968618-2.422914C2.048319-2.622167 2.072229-2.693898 2.072229-2.83736C2.072229-3.275716 1.721544-3.514819 1.354919-3.514819C.565878-3.514819 .239103-2.391034 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.239601 .494147-2.319303C.70137-3.012702 1.044085-3.291656 1.331009-3.291656C1.45056-3.291656 1.522291-3.211955 1.522291-3.028643C1.522291-2.86127 1.458531-2.677958 1.40274-2.534496C1.075965-1.689664 .940473-1.283188 .940473-.908593C.940473-.127522 1.530262 .079701 2.000498 .079701C2.375093 .079701 2.646077-.087671 2.83736-.270984C2.725778 .175342 2.646077 .486177 2.343213 .868742C2.080199 1.195517 1.761395 1.40274 1.40274 1.40274C1.267248 1.40274 .964384 1.378829 .804981 1.139726C1.227397 1.107846 1.259278 .749191 1.259278 .70137C1.259278 .510087 1.115816 .406476 .948443 .406476C.773101 .406476 .494147 .541968 .494147 .932503C.494147 1.307098 .836862 1.625903 1.40274 1.625903C2.215691 1.625903 3.132254 .972354 3.371357 .00797L4.128518-3.004732Z'/>
+<path id='eq5-g1-122' d='M1.155666-.6934C1.44259-.988294 1.530262-1.075965 2.231631-1.657783C2.319303-1.729514 2.87721-2.191781 3.092403-2.399004C3.594521-2.893151 3.905355-3.331507 3.905355-3.419178C3.905355-3.490909 3.841594-3.514819 3.785803-3.514819C3.706102-3.514819 3.698132-3.498879 3.618431-3.379328C3.371357-3.012702 3.196015-2.948941 3.052553-2.948941C2.901121-2.948941 2.805479-3.012702 2.646077-3.172105C2.438854-3.371357 2.279452-3.514819 2.024408-3.514819C1.3868-3.514819 .988294-2.797509 .988294-2.582316C.988294-2.574346 .988294-2.486675 1.115816-2.486675C1.195517-2.486675 1.211457-2.518555 1.243337-2.606227C1.346949-2.83736 1.689664-2.917061 1.928767-2.917061C2.11208-2.917061 2.303362-2.86924 2.494645-2.81345C2.82939-2.725778 2.901121-2.725778 3.084433-2.725778C2.917061-2.550436 2.693898-2.327273 2.080199-1.825156C1.745455-1.546202 1.41071-1.275218 1.195517-1.067995C.605729-.486177 .350685-.095641 .350685-.01594C.350685 .055791 .406476 .079701 .470237 .079701C.549938 .079701 .565878 .055791 .605729 0C.765131-.239103 1.012204-.486177 1.315068-.486177C1.498381-.486177 1.578082-.414446 1.729514-.263014C1.984558-.01594 2.12802 .079701 2.359153 .079701C3.188045 .079701 3.690162-.908593 3.690162-1.155666C3.690162-1.227397 3.634371-1.259278 3.57061-1.259278C3.482939-1.259278 3.466999-1.211457 3.435118-1.131756C3.283686-.73325 2.84533-.518057 2.446824-.518057C2.295392-.518057 2.12005-.557908 1.880946-.621669C1.546202-.70934 1.466501-.70934 1.346949-.70934C1.267248-.70934 1.219427-.70934 1.155666-.6934Z'/>
+<path id='eq5-g2-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq5-g2-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq5-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq5-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq5-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq5-g0-117' d='M4.220174-5.284184V-4.770112C4.961395-4.770112 5.045081-4.770112 5.045081-4.303861V-1.960648C5.045081-1.052055 4.507098-.32279 3.574595-.32279C2.677958-.32279 2.630137-.621669 2.630137-1.279203V-5.379826L.502117-5.284184V-4.770112C1.243337-4.770112 1.327024-4.770112 1.327024-4.303861V-1.470486C1.327024-.274969 2.12802 .071731 3.407223 .071731C3.694147 .071731 4.578829 .071731 5.092902-.896638H5.104857V.071731L7.173101 0V-.514072C6.43188-.514072 6.348194-.514072 6.348194-.980324V-5.379826L4.220174-5.284184Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-117'/>
+<use x='10.792809' y='0' xlink:href='#eq5-g3-61'/>
+<use x='23.21829' y='0' xlink:href='#eq5-g3-40'/>
+<use x='27.770616' y='0' xlink:href='#eq5-g2-117'/>
+<use x='34.433056' y='1.793263' xlink:href='#eq5-g1-120'/>
+<use x='39.698087' y='0' xlink:href='#eq5-g2-59'/>
+<use x='44.942245' y='0' xlink:href='#eq5-g2-117'/>
+<use x='51.604685' y='1.793263' xlink:href='#eq5-g1-121'/>
+<use x='56.574528' y='0' xlink:href='#eq5-g2-59'/>
+<use x='61.818687' y='0' xlink:href='#eq5-g2-117'/>
+<use x='68.481126' y='1.793263' xlink:href='#eq5-g1-122'/>
+<use x='73.254942' y='0' xlink:href='#eq5-g3-41'/>
+</g>
+</svg>, returns <svg class="m-math" style="width: 1.139em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 10.938123 6.940636">
+<title>
+$ u_z $
+</title>
+<defs>
+<path id='eq6-g0-122' d='M1.155666-.6934C1.44259-.988294 1.530262-1.075965 2.231631-1.657783C2.319303-1.729514 2.87721-2.191781 3.092403-2.399004C3.594521-2.893151 3.905355-3.331507 3.905355-3.419178C3.905355-3.490909 3.841594-3.514819 3.785803-3.514819C3.706102-3.514819 3.698132-3.498879 3.618431-3.379328C3.371357-3.012702 3.196015-2.948941 3.052553-2.948941C2.901121-2.948941 2.805479-3.012702 2.646077-3.172105C2.438854-3.371357 2.279452-3.514819 2.024408-3.514819C1.3868-3.514819 .988294-2.797509 .988294-2.582316C.988294-2.574346 .988294-2.486675 1.115816-2.486675C1.195517-2.486675 1.211457-2.518555 1.243337-2.606227C1.346949-2.83736 1.689664-2.917061 1.928767-2.917061C2.11208-2.917061 2.303362-2.86924 2.494645-2.81345C2.82939-2.725778 2.901121-2.725778 3.084433-2.725778C2.917061-2.550436 2.693898-2.327273 2.080199-1.825156C1.745455-1.546202 1.41071-1.275218 1.195517-1.067995C.605729-.486177 .350685-.095641 .350685-.01594C.350685 .055791 .406476 .079701 .470237 .079701C.549938 .079701 .565878 .055791 .605729 0C.765131-.239103 1.012204-.486177 1.315068-.486177C1.498381-.486177 1.578082-.414446 1.729514-.263014C1.984558-.01594 2.12802 .079701 2.359153 .079701C3.188045 .079701 3.690162-.908593 3.690162-1.155666C3.690162-1.227397 3.634371-1.259278 3.57061-1.259278C3.482939-1.259278 3.466999-1.211457 3.435118-1.131756C3.283686-.73325 2.84533-.518057 2.446824-.518057C2.295392-.518057 2.12005-.557908 1.880946-.621669C1.546202-.70934 1.466501-.70934 1.346949-.70934C1.267248-.70934 1.219427-.70934 1.155666-.6934Z'/>
+<path id='eq6-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g1-117'/>
+<use x='6.66244' y='1.793263' xlink:href='#eq6-g0-122'/>
+</g>
+</svg>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3c0409f55497ff28ac68da355f3f64aa"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c0409f55497ff28ac68da355f3f64aa" class="m-doc-self">setData</a>(</span><span class="m-doc-wrap">const DataType&amp; data,
+              size_t offset = 0) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets the DOF data vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">data&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>DOF data to set</td>
+                </tr>
+                <tr>
+                  <td>offset&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Starting offset in the data vector</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Copies the provided data into the internal DOF vector starting at the specified offset.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6ab9def81a5a105dfded770e0452996a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ab9def81a5a105dfded770e0452996a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the DOF data vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the DOF data</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Provides access to the coefficient vector <svg class="m-math" style="width: 0.778em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.47198 5.313399">
+<title>
+$ \mathbf{u} $
+</title>
+<defs>
+<path id='eq7-g0-117' d='M4.220174-5.284184V-4.770112C4.961395-4.770112 5.045081-4.770112 5.045081-4.303861V-1.960648C5.045081-1.052055 4.507098-.32279 3.574595-.32279C2.677958-.32279 2.630137-.621669 2.630137-1.279203V-5.379826L.502117-5.284184V-4.770112C1.243337-4.770112 1.327024-4.770112 1.327024-4.303861V-1.470486C1.327024-.274969 2.12802 .071731 3.407223 .071731C3.694147 .071731 4.578829 .071731 5.092902-.896638H5.104857V.071731L7.173101 0V-.514072C6.43188-.514072 6.348194-.514072 6.348194-.980324V-5.379826L4.220174-5.284184Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-117'/>
+</g>
+</svg> containing the degrees of freedom.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0b208ee6b78fed255912b1f596d7177a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const DataType&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b208ee6b78fed255912b1f596d7177a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the DOF data vector (const version).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Const reference to the DOF data</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4758cdb6b0d7f09e6719a7bfa884e86e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const FES&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4758cdb6b0d7f09e6719a7bfa884e86e" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the associated finite element space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the finite element space</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3677f5a27ad4efb8d5567634bf0940e9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3677f5a27ad4efb8d5567634bf0940e9" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the number of degrees of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Total number of DOFs</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aad8f738241426a32d95c3696395698d3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the vector dimension of the grid function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of components (1 for scalar, d for vector-valued)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For scalar functions, returns 1. For vector-valued functions, returns the space dimension.</p>
+          </div></section>
+          <section class="m-doc-details" id="aece46f87b2f217e4c695daac0549b9ea"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aece46f87b2f217e4c695daac0549b9ea" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>)</span></span>
+            </h3>
+            <p>Loads grid function data from a file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Path to the file to load</td>
+                </tr>
+                <tr>
+                  <td>fmt&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>File format (default: MFEM)</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Reads DOF data from a file in the specified format. Supported formats include MFEM, EnSight, and MEDIT.</p>
+          </div></section>
           <section class="m-doc-details" id="a86092c214e872b8e109dce71824c1255"><div>
             <h3>
               <div class="m-doc-template">

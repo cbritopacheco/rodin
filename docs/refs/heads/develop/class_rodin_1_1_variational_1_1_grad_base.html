@@ -64,10 +64,27 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_grad_8h.html">&lt;Rodin/Variational/Grad.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GradBase <span class="m-thin">class</span>
         </h1>
-        <p>Base class for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> classes.</p>
+        <p>Base class for gradient operator implementations.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Operand</td>
+              <td>Type of the function being differentiated</td>
+            </tr>
+            <tr>
+              <td>Derived</td>
+              <td>Derived class (CRTP pattern)</td>
+            </tr>
+          </tbody>
+        </table>
+<p>Base class for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> classes.</p><p><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a> provides the foundation for computing gradients of different function types (grid functions, shape functions, etc.).</p>
       </div>
     </div>
   </div>

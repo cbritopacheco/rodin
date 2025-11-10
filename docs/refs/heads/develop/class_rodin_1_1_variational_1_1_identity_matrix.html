@@ -201,6 +201,14 @@ $ n $
               <span class="m-doc-wrap-bumper"><a href="#a5e441269e7d017d3fc36c6b3f901c4fe" class="m-doc">IdentityMatrix</a>(</span><span class="m-doc-wrap">size_t n)</span>
             </dt>
             <dd>Constructs the identity matrix function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a0504b30ca07dfd822aa584393719fe90" class="m-doc">IdentityMatrix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_identity_matrix.html" class="m-doc">IdentityMatrix</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a33cf744edf46688bd31378329e34726a" class="m-doc">IdentityMatrix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_identity_matrix.html" class="m-doc">IdentityMatrix</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -221,7 +229,7 @@ $ n $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a20190ff8b1cfe094b7546a70780e8320" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_identity_matrix.html" class="m-doc">IdentityMatrix</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Creates a polymorphic copy of the function.</dd>
+            <dd>Creates a polymorphic copy of the identity matrix.</dd>
           </dl>
         </section>
         <section>
@@ -252,6 +260,40 @@ $ n \times n $
 <use x='21.59943' y='0' xlink:href='#eq4-g1-110'/>
 </g>
 </svg></td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0504b30ca07dfd822aa584393719fe90"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />IdentityMatrix::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0504b30ca07dfd822aa584393719fe90" class="m-doc-self">IdentityMatrix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_identity_matrix.html" class="m-doc">IdentityMatrix</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Identity matrix to copy</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a33cf744edf46688bd31378329e34726a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />IdentityMatrix::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33cf744edf46688bd31378329e34726a" class="m-doc-self">IdentityMatrix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_identity_matrix.html" class="m-doc">IdentityMatrix</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Identity matrix to move</td>
                 </tr>
               </tbody>
             </table>
@@ -334,12 +376,12 @@ $ I_n $
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_identity_matrix.html" class="m-doc">IdentityMatrix</a>* Rodin::<wbr />Variational::<wbr />IdentityMatrix::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20190ff8b1cfe094b7546a70780e8320" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Creates a polymorphic copy of the function.</p>
+            <p>Creates a polymorphic copy of the identity matrix.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to newly allocated copy</td>
+                  <td>Pointer to copy</td>
                 </tr>
               </tfoot>
             </table>

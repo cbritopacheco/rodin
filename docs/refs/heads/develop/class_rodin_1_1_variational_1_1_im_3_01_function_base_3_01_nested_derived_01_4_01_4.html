@@ -110,6 +110,14 @@
               <span class="m-doc-wrap-bumper"><a href="#a35866d85a9949d98eb9a629f3f763eb3" class="m-doc">Im</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">OperandType</a>&amp; f)</span>
             </dt>
             <dd>Constructs <a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a> from a complex function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3a67e5d640b0e028e57fd0236644df41" class="m-doc">Im</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a48a07e8093b172f88dce65d8b9e7370e" class="m-doc">Im</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -126,7 +134,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad021447437fece6f35d9d874859b7f63" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Creates a polymorphic copy of the function.</dd>
+            <dd>Creates a polymorphic copy.</dd>
           </dl>
         </section>
         <section>
@@ -147,6 +155,46 @@
                 <tr>
                   <td style="width: 1%">f&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Complex-valued function operand</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3a67e5d640b0e028e57fd0236644df41"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Im&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a67e5d640b0e028e57fd0236644df41" class="m-doc-self">Im</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a> object to copy</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a48a07e8093b172f88dce65d8b9e7370e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Im&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a48a07e8093b172f88dce65d8b9e7370e" class="m-doc-self">Im</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a> object to move from</td>
                 </tr>
               </tbody>
             </table>
@@ -249,12 +297,12 @@ $ f(p) = u(p) + iv(p) $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a>* Rodin::<wbr />Variational::<wbr />Im&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad021447437fece6f35d9d874859b7f63" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Creates a polymorphic copy of the function.</p>
+            <p>Creates a polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to newly allocated copy</td>
+                  <td>Pointer to a new <a href="class_rodin_1_1_variational_1_1_im.html" class="m-doc">Im</a> object</td>
                 </tr>
               </tfoot>
             </table>

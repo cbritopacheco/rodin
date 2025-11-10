@@ -64,22 +64,27 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Derived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_shape_function_8h.html">&lt;Rodin/Variational/ShapeFunction.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ShapeFunction <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</p>
+        <p>Intermediate shape function class for CRTP derivation.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
           </thead>
           <tbody>
             <tr>
-              <td style="width: 1%">FES</td>
-              <td>Type of finite element space</td>
+              <td style="width: 1%">Derived</td>
+              <td>Final derived class</td>
+            </tr>
+            <tr>
+              <td>FES</td>
+              <td>Finite element space type</td>
             </tr>
             <tr>
               <td>Space</td>
-              <td>Type of shape function space (<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a> or <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>)</td>
+              <td>Space type (trial or test)</td>
             </tr>
           </tbody>
         </table>
@@ -90,20 +95,62 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> class, please see <a href="group___shape_function_specializations.html" class="m-doc">ShapeFunction Template Specializations</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="group___shape_function_specializations.html" class="m-doc">ShapeFunction Template Specializations</a></p></aside>
+<aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> class, please see <a href="group___shape_function_specializations.html" class="m-doc">ShapeFunction Template Specializations</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="group___shape_function_specializations.html" class="m-doc">ShapeFunction Template Specializations</a></p></aside><p>This class provides an intermediate layer in the <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> hierarchy, allowing for further specialization while maintaining the common interface. It is used as a base for specific shape function implementations like <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a> and <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::SpaceType&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">::<wbr />FESType</a>, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::SpaceType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase&lt;ShapeFunction&lt;Derived, FES, Space&gt;, FES, Space&gt;</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aeb764ef99b9fe43949b7e3d34f279e53">
+              using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
+            </dt>
+            <dd>Finite element space type.</dd>
+            <dt id="acdf431ab4381f783f82b9086cc8b6752">
+              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
+            </dt>
+            <dd>Scalar type from the finite element space.</dd>
+            <dt id="a5c7fc1cee1343f294d68ab9388bbfe78">
+              using <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc-self">RangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::RangeType
+            </dt>
+            <dd>Range type from the finite element space.</dd>
+            <dt id="ab8d0882eafbd3fa0bff32cb8d9614d38">
+              using <a href="#ab8d0882eafbd3fa0bff32cb8d9614d38" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;Derived, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+          <dl class="m-doc">
+            <dt id="aa1144f1bd47edfc66987067264668fc7">
+              static <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc-self">SpaceType</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Space type (trial or test)</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="ac35bc808e17d69b70c0fdf979785a105">
+              <span class="m-doc-wrap-bumper"><a href="#ac35bc808e17d69b70c0fdf979785a105" class="m-doc-self">ShapeFunction</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Default constructor is deleted.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -112,7 +159,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a37ff49b67176abaccb4f95617f049228" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+            <dd>Creates a polymorphic copy of the shape function.</dd>
           </dl>
         </section>
         <section>
@@ -120,20 +167,19 @@
           <section class="m-doc-details" id="a37ff49b67176abaccb4f95617f049228"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Derived, class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+                template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>* Rodin::<wbr />Variational::<wbr />ShapeFunction&lt;Derived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37ff49b67176abaccb4f95617f049228" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <p>Creates a polymorphic copy of the shape function.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object.</td>
+                  <td>Pointer to newly allocated copy</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
         </section>
       </div>
