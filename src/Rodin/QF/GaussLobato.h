@@ -1,4 +1,9 @@
-// GaussLobatto.h
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_QF_GAUSSLOBATTO_H
 #define RODIN_VARIATIONAL_QF_GAUSSLOBATTO_H
 
@@ -12,49 +17,147 @@ namespace Rodin::QF
 {
   /**
    * @ingroup RodinQuadrature
-   * @brief Gauss–Lobatto quadrature on reference polytopes.
+   * @brief Gauss-Lobatto quadrature formula on reference polytopes.
    *
-   * 1D rule on [0,1] includes endpoints. Higher-D via tensor products
-   * on quads / wedges and Duffy transform on triangles / tetrahedra.
+   * The Gauss-Lobatto quadrature rule is similar to Gauss-Legendre
+   * quadrature but includes the endpoints of the integration interval.
+   * In one dimension on the interval @f$ [0,1] @f$, the quadrature points
+   * include both @f$ 0 @f$ and @f$ 1 @f$, with interior points being the
+   * zeros of the derivative of the Legendre polynomial @f$ P'_{n-1}(x) @f$.
+   *
+   * ## Mathematical Foundation
+   *
+   * The 1D Gauss-Lobatto rule with @f$ n @f$ points is exact for polynomials
+   * of degree up to @f$ 2n-3 @f$. The weights @f$ w_i @f$ and points
+   * @f$ x_i @f$ satisfy:
+   * @f[
+   *   \int_0^1 f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
+   * @f]
+   *
+   * ## Higher Dimensions
+   *
+   * For tensor-product geometries (quadrilaterals, wedges), the rule is
+   * constructed via tensor products of 1D Gauss-Lobatto rules. For simplicial
+   * geometries (triangles, tetrahedra), the Duffy transformation is applied:
+   * - Triangle: @f$ (r,s) = (u, (1-u)v) @f$ with Jacobian @f$ (1-u) @f$
+   * - Tetrahedron: @f$ (r,s,t) = (u, (1-u)v, (1-u)(1-v)w) @f$ with Jacobian
+   *   @f$ (1-u)^2(1-v) @f$
+   *
+   * ## Supported Geometries
+   * - Point
+   * - Segment
+   * - Triangle
+   * - Quadrilateral
+   * - Tetrahedron
+   * - Wedge
+   *
+   * @note Requires at least @f$ n \geq 2 @f$ points per direction for proper
+   * Lobatto quadrature (to include both endpoints).
    */
   class GaussLobatto final : public QuadratureFormulaBase
   {
     public:
+      /// Parent class type
       using Parent = QuadratureFormulaBase;
 
-      // Uniform order (points per 1D); requires n>=2 for Lobatto.
+      /**
+       * @brief Constructs Gauss-Lobatto quadrature with uniform order.
+       * @param g Geometry type
+       * @param order Number of Gauss-Lobatto points per 1D direction
+       *
+       * Creates a quadrature rule with the same order in all coordinate
+       * directions. Requires @f$ \text{order} \geq 2 @f$.
+       */
       GaussLobatto(Geometry::Polytope::Type g, size_t order)
         : Parent(g), m_nx(order), m_ny(order), m_nz(order)
       { assert(order >= 2); build(); }
 
-      // Separate 2D orders
+      /**
+       * @brief Constructs Gauss-Lobatto quadrature with separate 2D orders.
+       * @param g Geometry type
+       * @param nx Order in first direction
+       * @param ny Order in second direction
+       *
+       * Allows different orders in each coordinate direction for 2D geometries.
+       * Requires @f$ nx, ny \geq 2 @f$.
+       */
       GaussLobatto(Geometry::Polytope::Type g, size_t nx, size_t ny)
         : Parent(g), m_nx(nx), m_ny(ny), m_nz(ny)
       { assert(nx>=2 && ny>=2); build(); }
 
-      // Separate 3D orders
+      /**
+       * @brief Constructs Gauss-Lobatto quadrature with separate 3D orders.
+       * @param g Geometry type
+       * @param nu Order in first direction
+       * @param nv Order in second direction
+       * @param nw Order in third direction
+       *
+       * Allows different orders in each coordinate direction for 3D geometries.
+       * Requires @f$ nu, nv, nw \geq 2 @f$.
+       */
       GaussLobatto(Geometry::Polytope::Type g, size_t nu, size_t nv, size_t nw)
         : Parent(g), m_nx(nu), m_ny(nv), m_nz(nw)
       { assert(nu>=2 && nv>=2 && nw>=2); build(); }
 
-      // Default: 2 points per 1D
+      /**
+       * @brief Constructs Gauss-Lobatto quadrature with default order 2.
+       * @param g Geometry type
+       *
+       * Uses 2 points per direction, which is the minimum for Lobatto quadrature.
+       */
       GaussLobatto(Geometry::Polytope::Type g)
         : Parent(g), m_nx(2), m_ny(2), m_nz(2)
       { build(); }
 
+      /**
+       * @brief Gets the number of quadrature points.
+       * @return Total number of quadrature points
+       */
       size_t getSize() const override { return m_points.size(); }
 
+      /**
+       * @brief Gets the coordinates of the i-th quadrature point.
+       * @param i Index of the quadrature point
+       * @return Reference to the point coordinates in reference space
+       */
       const Math::SpatialVector<Real>& getPoint(size_t i) const override
       { return m_points[i]; }
 
+      /**
+       * @brief Gets the weight of the i-th quadrature point.
+       * @param i Index of the quadrature point
+       * @return Weight @f$ w_i @f$ associated with the point
+       */
       Real getWeight(size_t i) const override
       { return m_weights.coeff(i); }
 
+      /**
+       * @brief Creates a copy of this quadrature formula.
+       * @return Pointer to a new GaussLobatto instance
+       */
       GaussLobatto* copy() const noexcept override
       { return new GaussLobatto(*this); }
 
     private:
-      // 1D Gauss–Lobatto nodes/weights on [0,1]
+      /**
+       * @brief Computes 1D Gauss-Lobatto nodes and weights on [0,1].
+       * @param n Number of quadrature points (must be at least 2)
+       * @param x01 Output vector for quadrature point coordinates
+       * @param w01 Output vector for quadrature weights
+       * @param maxIt Maximum Newton iterations for finding interior nodes (default: 100)
+       * @param tol Convergence tolerance for Newton iteration (default: 1e-14)
+       *
+       * Computes the @f$ n @f$ Gauss-Lobatto quadrature nodes and weights
+       * on the unit interval @f$ [0,1] @f$. The endpoints @f$ x_1 = 0 @f$
+       * and @f$ x_n = 1 @f$ are included. Interior nodes @f$ x_i @f$ for
+       * @f$ i = 2, \ldots, n-1 @f$ are found as zeros of the derivative
+       * @f$ P'_{n-1}(x) @f$ of the Legendre polynomial using Newton's method.
+       *
+       * The weights are computed using:
+       * @f[
+       *   w_i = \frac{2}{n(n-1) [P_{n-1}(x_i)]^2}
+       * @f]
+       */
       static void gll_1d_unit(size_t n, std::vector<Real>& x01, std::vector<Real>& w01,
                               size_t maxIt = 100, Real tol = 1e-14)
       {
@@ -144,6 +247,12 @@ namespace Rodin::QF
         }
       }
 
+      /**
+       * @brief Builds the quadrature rule for the selected geometry.
+       *
+       * Dispatches to the appropriate geometry-specific builder based on
+       * the polytope type.
+       */
       void build()
       {
         switch (getGeometry())
@@ -157,6 +266,11 @@ namespace Rodin::QF
         }
       }
 
+      /**
+       * @brief Builds quadrature for a point (0D).
+       *
+       * Creates a single quadrature point at the origin with weight 1.
+       */
       void build_point()
       {
         m_points.clear();
@@ -166,6 +280,13 @@ namespace Rodin::QF
         m_weights[0]=1.0;
       }
 
+      /**
+       * @brief Builds 1D Gauss-Lobatto quadrature on a segment.
+       * @param n Number of quadrature points
+       *
+       * Constructs @f$ n @f$ Gauss-Lobatto points on the reference segment
+       * @f$ [0,1] @f$ including both endpoints.
+       */
       void build_segment(size_t n)
       {
         std::vector<Real> x,w; gll_1d_unit(n,x,w);
@@ -177,6 +298,15 @@ namespace Rodin::QF
         }
       }
 
+      /**
+       * @brief Builds Gauss-Lobatto quadrature on a quadrilateral.
+       * @param nx Number of points in first direction
+       * @param ny Number of points in second direction
+       *
+       * Constructs a tensor-product quadrature rule on the reference
+       * quadrilateral @f$ [0,1] \times [0,1] @f$ using 1D Gauss-Lobatto
+       * rules in each direction. Total number of points: @f$ nx \times ny @f$.
+       */
       void build_quad(size_t nx, size_t ny)
       {
         std::vector<Real> x,wx,y,wy;
@@ -192,6 +322,19 @@ namespace Rodin::QF
           }
       }
 
+      /**
+       * @brief Builds Gauss-Lobatto quadrature on a triangle.
+       * @param nu Number of points in first parametric direction
+       * @param nv Number of points in second parametric direction
+       *
+       * Uses the Duffy transformation to map tensor-product Gauss-Lobatto
+       * points to the reference triangle. The transformation is:
+       * @f[
+       *   (r,s) = (u, (1-u)v)
+       * @f]
+       * with Jacobian @f$ (1-u) @f$. The reference triangle has vertices
+       * at @f$ (0,0) @f$, @f$ (1,0) @f$, and @f$ (0,1) @f$ with area 1/2.
+       */
       void build_tri(size_t nu, size_t nv)
       {
         // Duffy with 1D GLL in each param:
@@ -211,6 +354,20 @@ namespace Rodin::QF
           }
       }
 
+      /**
+       * @brief Builds Gauss-Lobatto quadrature on a tetrahedron.
+       * @param nu Number of points in first parametric direction
+       * @param nv Number of points in second parametric direction
+       * @param nw Number of points in third parametric direction
+       *
+       * Uses the 3D Duffy transformation to map tensor-product Gauss-Lobatto
+       * points to the reference tetrahedron. The transformation is:
+       * @f[
+       *   (r,s,t) = (u, (1-u)v, (1-u)(1-v)w)
+       * @f]
+       * with Jacobian @f$ (1-u)^2(1-v) @f$. The reference tetrahedron has
+       * volume 1/6.
+       */
       void build_tet(size_t nu, size_t nv, size_t nw)
       {
         // 3D Duffy with 1D GLL:
@@ -232,6 +389,17 @@ namespace Rodin::QF
             }
       }
 
+      /**
+       * @brief Builds Gauss-Lobatto quadrature on a wedge (prism).
+       * @param ntri Number of points for the triangular cross-section
+       * @param nz Number of points in the extrusion direction
+       *
+       * Constructs a quadrature rule on the reference wedge by combining:
+       * - A Duffy-transformed triangular rule (using @p ntri points)
+       * - A 1D Gauss-Lobatto rule in the extrusion direction (using @p nz points)
+       *
+       * The reference wedge has volume 1/2.
+       */
       void build_wedge(size_t ntri, size_t nz)
       {
         // triangle (Duffy with GLL) × segment (GLL)
@@ -252,9 +420,9 @@ namespace Rodin::QF
             }
       }
 
-      size_t m_nx{2}, m_ny{2}, m_nz{2};
-      std::vector<Math::SpatialVector<Real>> m_points;
-      Math::Vector<Real> m_weights;
+      size_t m_nx{2}, m_ny{2}, m_nz{2}; ///< Number of points per direction
+      std::vector<Math::SpatialVector<Real>> m_points; ///< Quadrature point coordinates
+      Math::Vector<Real> m_weights; ///< Quadrature weights
   };
 }
 

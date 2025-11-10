@@ -13,27 +13,66 @@ namespace Rodin::QF
   /**
    * @defgroup RodinQuadrature Quadrature formulae
    * @brief Quadrature formulae utilized by Rodin
+   *
+   * The QF (Quadrature Formula) module provides numerical integration rules
+   * for computing integrals over reference polytopes. These quadrature rules
+   * approximate integrals by weighted sums:
+   * @f[
+   *   \int_K f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
+   * @f]
+   * where @f$ K @f$ is a reference polytope, @f$ x_i @f$ are quadrature points,
+   * and @f$ w_i @f$ are associated weights.
+   *
    * @see QuadratureFormulaBase
    */
 
   /**
    * @brief Abstract base class for quadrature formulas.
+   * @ingroup RodinQuadrature
+   *
+   * QuadratureFormulaBase defines the interface for all quadrature formulas
+   * in Rodin. A quadrature formula consists of a set of points (nodes) and
+   * associated weights that approximate integrals over a reference polytope.
+   *
+   * Each quadrature formula is associated with a specific polytope geometry
+   * and provides methods to query:
+   * - The number of quadrature points
+   * - The coordinates of each point in the reference element
+   * - The weight associated with each point
+   *
+   * Concrete implementations include Gauss-Legendre, Gauss-Lobatto,
+   * Grundmann-Möller, and other specialized rules for various polytope types.
    */
   class QuadratureFormulaBase : public Copyable
   {
     public:
+      /**
+       * @brief Constructs a quadrature formula for the given geometry type.
+       * @param g The polytope geometry (e.g., triangle, tetrahedron, etc.)
+       */
       constexpr
       QuadratureFormulaBase(Geometry::Polytope::Type g)
         : m_geometry(g)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Another quadrature formula to copy from
+       */
       constexpr
       QuadratureFormulaBase(const QuadratureFormulaBase& other)
         : m_geometry(other.m_geometry)
       {}
 
+      /**
+       * @brief Virtual destructor.
+       */
       virtual ~QuadratureFormulaBase() = default;
 
+      /**
+       * @brief Gets the polytope geometry for this quadrature formula.
+       * @return The geometry type (e.g., Point, Segment, Triangle, etc.)
+       */
       inline
       constexpr
       Geometry::Polytope::Type getGeometry() const
@@ -41,23 +80,40 @@ namespace Rodin::QF
         return m_geometry;
       }
 
+      /**
+       * @brief Gets the number of quadrature points.
+       * @return The total number of quadrature points in this formula
+       */
       virtual size_t getSize() const = 0;
 
+      /**
+       * @brief Gets the weight associated with the i-th quadrature point.
+       * @param i Index of the quadrature point
+       * @return Weight @f$ w_i @f$ for the i-th point
+       */
       virtual Real getWeight(size_t i) const = 0;
 
       /**
-       * @brief Returns a reference to a vector containing the coordinates in
-       * reference space.
+       * @brief Gets the coordinates of the i-th quadrature point.
+       * @param i Index of the quadrature point
+       * @return Reference to the coordinates @f$ x_i @f$ in reference space
        *
-       * @note The reference must be valid throughout the whole lifetime of the
-       * program.
+       * @note The returned reference must remain valid for the lifetime
+       * of the quadrature formula object.
        */
       virtual const Math::SpatialVector<Real>& getPoint(size_t i) const = 0;
 
+      /**
+       * @brief Creates a copy of this quadrature formula.
+       * @return Pointer to a new dynamically allocated copy
+       *
+       * @note The caller is responsible for managing the lifetime of the
+       * returned pointer.
+       */
       virtual QuadratureFormulaBase* copy() const noexcept override = 0;
 
     private:
-      Geometry::Polytope::Type m_geometry;
+      Geometry::Polytope::Type m_geometry; ///< Polytope geometry type
   };
 }
 
