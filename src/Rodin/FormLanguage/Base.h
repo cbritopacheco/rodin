@@ -152,7 +152,14 @@ namespace Rodin::FormLanguage
       }
 
       /**
-       * @brief Returns the same object.
+       * @brief Forwards non-plain objects unchanged.
+       * @tparam T Type of object (must not be a plain object type)
+       * @param[in] obj Object to forward
+       * @return Forwarded object
+       *
+       * This overload handles non-plain object types (such as scalars, references,
+       * or expression templates) by forwarding them directly without storage.
+       * It is selected via SFINAE when T is not a plain object.
        */
       template <class T, typename =
         std::enable_if_t<!FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value>>
@@ -163,7 +170,14 @@ namespace Rodin::FormLanguage
       }
 
       /**
-       * @brief Destructs the objects stored.
+       * @brief Clears all stored objects, releasing their memory.
+       *
+       * Destroys all objects that were stored via the object() method,
+       * freeing the associated memory. This is useful for managing
+       * temporary object lifetimes explicitly.
+       *
+       * @note After calling clear(), any references obtained from previous
+       * object() calls become invalid.
        */
       void clear()
       {
@@ -171,11 +185,14 @@ namespace Rodin::FormLanguage
       }
 
       /**
-       * @brief Copies the object and returns a non-owning pointer to the
-       * copied object.
-       * @returns Non-owning pointer to the copied object.
-       * @note CRTP function to be overriden in the Derived class.
+       * @brief Creates a polymorphic copy of this object.
+       * @return Non-owning pointer to the copied object
        *
+       * Pure virtual function that must be implemented by derived classes
+       * to support polymorphic copying. The returned pointer is non-owning;
+       * the caller is responsible for managing its lifetime.
+       *
+       * @note This is a CRTP function to be overridden in derived classes.
        */
       virtual Base* copy() const noexcept override = 0;
 
