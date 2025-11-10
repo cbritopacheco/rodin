@@ -55,20 +55,37 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Sin<FunctionBase<NestedDerived>>>;
 
+      /**
+       * @brief Constructs sine of a function.
+       * @param v Function to apply sine to
+       */
       Sin(const OperandType& v)
         : m_operand(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Sin object to copy from
+       */
       Sin(const Sin& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Sin object to move from
+       */
       Sin(Sin&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /**
+       * @brief Restricts operand to a single attribute.
+       * @param attr Mesh attribute for trace restriction
+       * @returns Reference to this object
+       */
       constexpr
       Sin& traceOf(Geometry::Attribute attr)
       {
@@ -76,6 +93,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Restricts operand to multiple attributes.
+       * @param attrs Set of mesh attributes for trace restriction
+       * @returns Reference to this object
+       */
       constexpr
       Sin& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -83,6 +105,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates sine at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ \sin(f(p)) @f$
+       */
       Real getValue(const Geometry::Point& p) const
       {
         return Math::sin(getOperand().getValue(p));
