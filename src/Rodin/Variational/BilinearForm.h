@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file BilinearForm.h
+ * @brief Bilinear form classes for finite element assembly.
+ *
+ * This file defines the BilinearForm classes which represent bilinear forms
+ * @f$ a(u,v) @f$ in variational formulations. Bilinear forms are assembled into
+ * matrices and form the left-hand side of finite element systems.
+ */
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
@@ -96,12 +104,20 @@ namespace Rodin::Variational
         FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
       /**
-       * @brief Constructs a linear form with a default constructed vector
-       * which is owned by the LinearFormBase instance.
+       * @brief Default constructor creating an empty bilinear form.
+       *
+       * Constructs a bilinear form with no integrators. Integrators must be
+       * added separately to define the bilinear form @f$ a(u,v) @f$.
        */
       constexpr
       BilinearFormBase() = default;
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Bilinear form to copy
+       *
+       * Creates a copy including all local and global integrators.
+       */
       constexpr
       BilinearFormBase(const BilinearFormBase& other)
         : Parent(other),
@@ -109,6 +125,10 @@ namespace Rodin::Variational
           m_gbfis(other.m_gbfis)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Bilinear form to move from
+       */
       constexpr
       BilinearFormBase(BilinearFormBase&& other)
         : Parent(std::move(other)),
@@ -116,24 +136,47 @@ namespace Rodin::Variational
           m_gbfis(std::move(other.m_gbfis))
       {}
 
+      /**
+       * @brief Gets the list of local integrators.
+       * @return Reference to the list of local element integrators
+       *
+       * Local integrators operate element-by-element, contributing to matrix
+       * entries through local assembly:
+       * @f$ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx @f$
+       */
       constexpr
       LocalBilinearFormIntegratorBaseListType& getLocalIntegrators()
       {
         return m_lbfis;
       }
 
+      /**
+       * @brief Gets the list of local integrators (const version).
+       * @return Const reference to the list of local element integrators
+       */
       constexpr
       const LocalBilinearFormIntegratorBaseListType& getLocalIntegrators() const
       {
         return m_lbfis;
       }
 
+      /**
+       * @brief Gets the list of global integrators.
+       * @return Reference to the list of global integrators
+       *
+       * Global integrators operate on the entire global matrix, typically used
+       * for non-local operators or constraint enforcement.
+       */
       constexpr
       GlobalBilinearFormIntegratorBaseListType& getGlobalIntegrators()
       {
         return m_gbfis;
       }
 
+      /**
+       * @brief Gets the list of global integrators (const version).
+       * @return Const reference to the list of global integrators
+       */
       constexpr
       const GlobalBilinearFormIntegratorBaseListType& getGlobalIntegrators() const
       {

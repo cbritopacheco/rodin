@@ -55,20 +55,37 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Sinh<FunctionBase<NestedDerived>>>;
 
+      /**
+       * @brief Constructs hyperbolic sine operator from a function.
+       * @param v Function to apply sinh to
+       */
       Sinh(const OperandType& v)
         : m_operand(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Sinh operator to copy
+       */
       Sinh(const Sinh& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Sinh operator to move
+       */
       Sinh(Sinh&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /**
+       * @brief Restricts sinh operator to a trace.
+       * @param attr Attribute to restrict to
+       * @return Reference to this sinh operator
+       */
       constexpr
       Sinh& traceOf(Geometry::Attribute attr)
       {
@@ -76,6 +93,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Restricts sinh operator to multiple trace attributes.
+       * @param attrs Set of attributes to restrict to
+       * @return Reference to this sinh operator
+       */
       constexpr
       Sinh& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -83,17 +105,30 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates @f$ \sinh(f(p)) @f$ at a point.
+       * @param p Point at which to evaluate
+       * @return Hyperbolic sine of operand function value
+       */
       Real getValue(const Geometry::Point& p) const
       {
         return Math::sinh(getOperand().getValue(p));
       }
 
+      /**
+       * @brief Gets the operand function.
+       * @return Reference to operand function
+       */
       const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this sinh operator.
+       * @return Pointer to copy
+       */
       Sinh* copy() const noexcept override
       {
         return new Sinh(*this);

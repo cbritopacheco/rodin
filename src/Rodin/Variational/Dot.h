@@ -159,20 +159,38 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
+      /**
+       * @brief Constructs dot product of two functions.
+       * @param lhs Left function operand
+       * @param rhs Right function operand
+       */
       Dot(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Dot product to copy
+       */
       Dot(const Dot& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Dot product to move from
+       */
       Dot(Dot&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /**
+       * @brief Restricts evaluation to specified mesh attributes.
+       * @param args Attribute arguments for trace restriction
+       * @returns Reference to this object
+       */
       template <class ... Args>
       Dot& traceOf(const Args& ... args)
       {
@@ -181,6 +199,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Gets the left function operand.
+       * @returns Reference to first function
+       */
       constexpr
       const LHSType& getLHS() const
       {
@@ -188,6 +210,10 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
+      /**
+       * @brief Gets the right function operand.
+       * @returns Reference to second function
+       */
       constexpr
       const RHSType& getRHS() const
       {
@@ -195,12 +221,21 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      /**
+       * @brief Evaluates dot product at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ f(p) \cdot g(p) @f$ (scalar result)
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getValue(p)));
       }
 
+      /**
+       * @brief Polymorphic copy.
+       * @returns Pointer to a copy of this object
+       */
       Dot* copy() const noexcept override
       {
         return new Dot(*this);

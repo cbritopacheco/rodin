@@ -4,6 +4,15 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Problem.h
+ * @brief Variational problem classes for finite element systems.
+ *
+ * This file defines the Problem classes which encapsulate complete finite element
+ * problems including bilinear forms, linear forms, boundary conditions, and
+ * solution methods. Problems represent the discrete system @f$ Au = b @f$ arising
+ * from weak formulations.
+ */
 #ifndef RODIN_VARIATIONAL_PROBLEM_H
 #define RODIN_VARIATIONAL_PROBLEM_H
 
@@ -140,13 +149,16 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the assembled linear system.
-       * @return Reference to the linear system
+       * @return Reference to the linear system @f$ Au = b @f$
+       *
+       * Provides access to the assembled discrete system consisting of the
+       * system matrix @f$ A @f$ and right-hand side vector @f$ b @f$.
        */
       virtual LinearSystem& getLinearSystem() = 0;
 
       /**
        * @brief Gets the assembled linear system (const version).
-       * @return Const reference to the linear system  
+       * @return Const reference to the linear system @f$ Au = b @f$
        */
       virtual const LinearSystem& getLinearSystem() const = 0;
 

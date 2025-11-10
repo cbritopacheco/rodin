@@ -4,6 +4,35 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file GT.h
+ * @brief Greater-than comparison operator for functions.
+ *
+ * This file defines the GT class, which implements the greater-than comparison
+ * operation between functions. This operator creates a boolean function that
+ * indicates where one function exceeds another.
+ *
+ * ## Mathematical Foundation
+ * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the greater-than operator:
+ * @f[
+ *   (f > g)(x) = \begin{cases} 1 & \text{if } f(x) > g(x) \\ 0 & \text{otherwise} \end{cases}
+ * @f]
+ *
+ * ## Applications
+ * - Indicator functions for regions: @f$ \mathbb{1}_{u > 0} @f$
+ * - Contact problems: identify contact/separation zones
+ * - Adaptive mesh refinement: flag elements where error exceeds tolerance
+ * - Phase field methods: distinguish phases
+ *
+ * ## Usage Example
+ * ```cpp
+ * auto u = /* some function */;
+ * auto positive_region = (u > 0.0);  // Boolean: true where u is positive
+ * 
+ * // Adaptive refinement indicator
+ * auto refine_flag = (error_estimate > tolerance);
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_GT_H
 #define RODIN_VARIATIONAL_GT_H
 

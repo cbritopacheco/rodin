@@ -52,20 +52,37 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Sqrt<FunctionBase<NestedDerived>>>;
 
+      /**
+       * @brief Constructs square root of a function.
+       * @param v Function to take square root of (must be non-negative)
+       */
       Sqrt(const OperandType& v)
         : m_v(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Sqrt object to copy from
+       */
       Sqrt(const Sqrt& other)
         : Parent(other),
           m_v(other.m_v->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Sqrt object to move from
+       */
       Sqrt(Sqrt&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v))
       {}
 
+      /**
+       * @brief Restricts operand to a trace domain.
+       * @param args Arguments for trace restriction
+       * @returns Reference to this object
+       */
       template <class ... Args>
       constexpr
       Sqrt& traceOf(const Args& ... args)
@@ -74,17 +91,30 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates square root at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ \sqrt{f(p)} @f$
+       */
       Real getValue(const Geometry::Point& p) const
       {
         return Math::sqrt(this->getOperand().getValue(p));
       }
 
+      /**
+       * @brief Gets the operand function.
+       * @returns Reference to the function being operated on
+       */
       const OperandType& getOperand() const
       {
         assert(m_v);
         return *m_v;
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to new Sqrt object
+       */
       Sqrt* copy() const noexcept override
       {
         return new Sqrt(*this);

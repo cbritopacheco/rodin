@@ -1,3 +1,52 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file QuadratureRule.h
+ * @brief Quadrature rule classes for numerical integration.
+ *
+ * This file defines the QuadratureRule classes which implement numerical
+ * quadrature (integration) rules for evaluating integrals over mesh elements.
+ * Quadrature rules are fundamental to finite element assembly.
+ *
+ * ## Mathematical Foundation
+ * A quadrature rule approximates an integral as a weighted sum:
+ * @f[
+ *   \int_K f(x) \, dx \approx \sum_{i=1}^{n_q} w_i f(x_i)
+ * @f]
+ * where:
+ * - @f$ x_i @f$ are quadrature points
+ * - @f$ w_i @f$ are quadrature weights
+ * - @f$ n_q @f$ is the number of quadrature points
+ *
+ * ## Accuracy
+ * A quadrature rule is exact for polynomials up to degree @f$ p @f$ if:
+ * @f[
+ *   \int_K q(x) \, dx = \sum_{i=1}^{n_q} w_i q(x_i) \quad \forall q \in \mathbb{P}_p
+ * @f]
+ *
+ * ## Common Quadrature Rules
+ * - **Gauss-Legendre**: Optimal for polynomial integrands
+ * - **Gauss-Lobatto**: Includes element vertices
+ * - **Vertex quadrature**: Simple but low accuracy
+ * - **Midpoint rule**: Single point at element center
+ *
+ * ## Applications in FEM
+ * - Evaluating stiffness matrix entries: @f$ A_{ij} = \int_K \nabla \phi_i \cdot \nabla \phi_j \, dx @f$
+ * - Evaluating load vector entries: @f$ b_i = \int_K f \phi_i \, dx @f$
+ * - Computing functionals and error norms
+ *
+ * ## Usage Example
+ * ```cpp
+ * // Quadrature rule automatically selected based on element type
+ * auto qr = QuadratureRule(integrand);
+ * qr.setPolytope(element);
+ * Real integral_value = qr.compute();
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_QUADRATURERULE_H
 
@@ -20,7 +69,11 @@ namespace Rodin::Variational
    */
 
   /**
-   * @brief Quadrature rule on polytope for any function defined on the mesh.
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Quadrature rule for integrating functions on mesh polytopes.
+   *
+   * QuadratureRule manages the numerical integration of functions over mesh
+   * elements using appropriate quadrature formulas for each polytope type.
    */
   template <class FunctionDerived>
   class QuadratureRule<FunctionBase<FunctionDerived>> final

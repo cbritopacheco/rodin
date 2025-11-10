@@ -56,20 +56,37 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Cos<FunctionBase<NestedDerived>>>;
 
+      /**
+       * @brief Constructs cosine operator for a function.
+       * @param v Function to apply cosine to
+       */
       Cos(const OperandType& v)
         : m_operand(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Cosine operator to copy
+       */
       Cos(const Cos& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Cosine operator to move from
+       */
       Cos(Cos&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /**
+       * @brief Restricts evaluation to specified mesh attributes.
+       * @param args Attribute arguments for trace restriction
+       * @returns Reference to this object
+       */
       template <class ... Args>
       constexpr
       Cos& traceOf(const Args& ... args)
@@ -78,17 +95,30 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates cosine at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ \cos(f(p)) @f$
+       */
       Real getValue(const Geometry::Point& p) const
       {
         return Math::cos(getOperand().getValue(p));
       }
 
+      /**
+       * @brief Gets the operand function.
+       * @returns Reference to the function @f$ f @f$
+       */
       const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
+      /**
+       * @brief Polymorphic copy.
+       * @returns Pointer to a copy of this object
+       */
       Cos* copy() const noexcept override
       {
         return new Cos(*this);

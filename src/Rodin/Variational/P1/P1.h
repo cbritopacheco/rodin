@@ -146,15 +146,30 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /**
+       * @brief Constructs a P1 finite element space on the given mesh.
+       * @param[in] mesh Mesh on which to build the finite element space
+       *
+       * Creates the P1 space with one degree of freedom per vertex. The total
+       * number of DOFs equals the number of mesh vertices.
+       */
       P1(const MeshType& mesh)
         : m_mesh(mesh)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other P1 space to copy
+       */
       P1(const P1& other)
         : Parent(other),
           m_mesh(other.m_mesh)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other P1 space to move from
+       */
       P1(P1&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh))
@@ -162,6 +177,11 @@ namespace Rodin::Variational
 
       virtual ~P1() = default;
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other P1 space to move from
+       * @return Reference to this P1 space
+       */
       P1& operator=(P1&& other)
       {
         if (this != &other)
@@ -172,6 +192,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other P1 space to copy
+       * @return Reference to this P1 space
+       */
       P1& operator=(const P1& other)
       {
         if (this != &other)
@@ -182,6 +207,15 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Gets the finite element associated with a polytope.
+       * @param[in] d Dimension of the polytope
+       * @param[in] i Index of the polytope
+       * @return Reference to the P1 element for this polytope type
+       *
+       * Returns the appropriate P1 element based on the polytope geometry
+       * (point, segment, triangle, quadrilateral, tetrahedron, or wedge).
+       */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         const auto g = getMesh().getGeometry(d, i);
@@ -223,26 +257,62 @@ namespace Rodin::Variational
         return s_null;
       }
 
+      /**
+       * @brief Gets the total number of degrees of freedom.
+       * @return Number of DOFs (equals number of vertices)
+       *
+       * For P1 spaces, the number of DOFs equals the number of mesh vertices
+       * since each vertex has one DOF.
+       */
       size_t getSize() const override
       {
         return m_mesh.get().getVertexCount();
       }
 
+      /**
+       * @brief Gets the vector dimension of the space.
+       * @return Vector dimension (1 for scalar P1)
+       *
+       * Returns the number of components per DOF. For scalar P1, this is 1.
+       * Vector-valued P1 spaces have dimension equal to the space dimension.
+       */
       size_t getVectorDimension() const override
       {
         return 1;
       }
 
+      /**
+       * @brief Gets the underlying mesh.
+       * @return Reference to the mesh
+       */
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
 
+      /**
+       * @brief Gets the global DOF indices for a polytope.
+       * @param[in] d Dimension of the polytope
+       * @param[in] i Index of the polytope
+       * @return Array of global DOF indices
+       *
+       * For P1, returns the vertex indices of the polytope, which are
+       * the global DOF indices.
+       */
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         return getMesh().getConnectivity().getPolytope(d, i);
       }
 
+      /**
+       * @brief Converts local to global DOF index.
+       * @param[in] idx Pair of (dimension, polytope index)
+       * @param[in] local Local DOF index within the polytope
+       * @return Global DOF index
+       *
+       * Maps the local DOF index (vertex number within element) to the
+       * global DOF index (global vertex number).
+       */
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto& [d, i] = idx;

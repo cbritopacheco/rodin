@@ -47,11 +47,19 @@ namespace Rodin::Variational
         : m_operand(f.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Re object to copy
+       */
       Re(const Re& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Re object to move from
+       */
       Re(Re&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
@@ -78,6 +86,10 @@ namespace Rodin::Variational
         return getOperand().getValue(p).real();
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a new Re object
+       */
       Re* copy() const noexcept override
       {
         return new Re(*this);

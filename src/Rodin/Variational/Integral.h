@@ -4,6 +4,46 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Integral.h
+ * @brief Domain integral classes for variational formulations.
+ *
+ * This file defines the Integral classes which represent domain integrals
+ * in finite element formulations. These integrals form the basis for defining
+ * bilinear and linear forms in the weak formulation.
+ *
+ * ## Mathematical Foundation
+ * Domain integrals compute:
+ * @f[
+ *   \int_\Omega f(x) \, dx
+ * @f]
+ * where @f$ \Omega @f$ is the computational domain and @f$ f @f$ is the integrand.
+ *
+ * ## Bilinear Form Integrals
+ * For bilinear forms @f$ a(u,v) @f$:
+ * @f[
+ *   a(u,v) = \int_\Omega A(u) : B(v) \, dx
+ * @f]
+ * where @f$ A @f$ and @f$ B @f$ are operators on trial and test functions.
+ *
+ * ## Linear Form Integrals
+ * For linear forms @f$ l(v) @f$:
+ * @f[
+ *   l(v) = \int_\Omega f \cdot v \, dx
+ * @f]
+ *
+ * ## Usage Examples
+ * ```cpp
+ * // Stiffness matrix: ∫ ∇u·∇v dx
+ * auto stiffness = Integral(Grad(u), Grad(v));
+ * 
+ * // Mass matrix: ∫ u·v dx
+ * auto mass = Integral(u, v);
+ * 
+ * // Load vector: ∫ f·v dx
+ * auto load = Integral(f, v);
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_INTEGRAL_H
 #define RODIN_VARIATIONAL_INTEGRAL_H
 
@@ -90,19 +130,38 @@ namespace Rodin::Variational
         : Parent(prod)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy
+       */
       Integral(const Integral& other)
         : Parent(other)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move from
+       */
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
 
+      /**
+       * @brief Gets the integration region.
+       * @return Region::Cells indicating integration over mesh elements
+       *
+       * Domain integrals are computed over all cells @f$ K \in \mathcal{T}_h @f$
+       * in the mesh.
+       */
       Geometry::Region getRegion() const override
       {
         return Geometry::Region::Cells;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy
+       */
       Integral* copy() const noexcept override
       {
         return new Integral(*this);

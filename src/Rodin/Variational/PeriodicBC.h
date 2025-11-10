@@ -4,6 +4,40 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file PeriodicBC.h
+ * @brief Periodic boundary condition implementation.
+ *
+ * This file defines classes for imposing periodic boundary conditions in
+ * finite element problems. Periodic conditions enforce that the solution
+ * values match across opposite boundaries of the domain.
+ *
+ * ## Mathematical Foundation
+ * A periodic boundary condition specifies:
+ * @f[
+ *   u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
+ * @f]
+ * where @f$ \Gamma_- @f$ and @f$ \Gamma_+ @f$ are matching boundary pairs
+ * separated by periodicity vector @f$ L @f$.
+ *
+ * ## Applications
+ * - Crystal lattice simulations
+ * - Unit cell problems in homogenization
+ * - Fluid flow in periodic geometries
+ * - Wave propagation in periodic media
+ *
+ * ## Implementation
+ * Periodic conditions are enforced by:
+ * 1. Identifying matching DOF pairs on opposite boundaries
+ * 2. Constraining one DOF to equal its periodic partner
+ * 3. Eliminating dependent DOFs from the system
+ *
+ * ## Usage Example
+ * ```cpp
+ * // Periodic BC between boundaries 1 and 2
+ * auto pbc = PeriodicBC(u).from(1).to(2);
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_PERIODICBC_H
 #define RODIN_VARIATIONAL_PERIODICBC_H
 
@@ -40,23 +74,39 @@ namespace Rodin::Variational
       using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
 
       /**
-       * @brief Assembles the Peridodic boundary condition.
+       * @brief Assembles the periodic boundary condition.
        *
+       * Computes the DOF constraints enforcing periodicity across specified
+       * boundaries. Creates relationships between DOFs on opposite periodic
+       * boundaries such that they share the same value.
        */
       virtual void assemble() = 0;
 
       /**
-       * @brief Gets the global degree of freedom map.
+       * @brief Gets the map of periodic DOF constraints.
+       * @return Map containing DOF relationships for periodicity
+       *
+       * Returns pairs of DOF indices and constraint coefficients defining
+       * the periodic relationships between degrees of freedom.
        */
       virtual const DOFs& getDOFs() const = 0;
 
       /**
-       * @brief Gets the associated operand.
+       * @brief Gets the operand (trial function) of the periodic BC.
+       * @return Reference to the trial function being constrained
        */
       virtual const FormLanguage::Base& getOperand() const = 0;
 
+      /**
+       * @brief Checks if this is a component-wise periodic BC.
+       * @return True if BC applies to a single component
+       */
       virtual Boolean isComponent() const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy of this periodic BC.
+       * @return Pointer to a new copy
+       */
       virtual PeriodicBCBase* copy() const noexcept override = 0;
   };
 

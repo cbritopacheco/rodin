@@ -57,32 +57,57 @@ namespace Rodin::Variational
       using Parent::operator();
 
 
+      /**
+       * @brief Constructs absolute value of a function.
+       * @param v Function to take absolute value of
+       */
       Abs(const OperandType& v)
         : m_v(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Abs object to copy from
+       */
       Abs(const Abs& other)
         : Parent(other),
           m_v(other.m_v->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Abs object to move from
+       */
       Abs(Abs&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v))
       {}
 
+      /**
+       * @brief Evaluates absolute value at a point.
+       * @param p Point at which to evaluate
+       * @returns For scalars: @f$ |f(p)| @f$, for vectors: @f$ \|\mathbf{f}(p)\| @f$, for matrices: @f$ \|A(p)\|_F @f$
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return Math::abs(getOperand().getValue(p));
       }
 
+      /**
+       * @brief Gets the operand function.
+       * @returns Reference to the function being operated on
+       */
       const OperandType& getOperand() const
       {
         assert(m_v);
         return *m_v;
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to new Abs object
+       */
       Abs* copy() const noexcept override
       {
         return new Abs(*this);

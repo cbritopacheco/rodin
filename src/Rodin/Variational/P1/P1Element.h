@@ -7,6 +7,21 @@
 #ifndef RODIN_VARIATIONAL_P1_P1ELEMENT_H
 #define RODIN_VARIATIONAL_P1_P1ELEMENT_H
 
+/**
+ * @file
+ * @brief P1 (piecewise linear) finite element implementation.
+ *
+ * This file provides the P1Element class template for continuous piecewise
+ * linear finite elements. P1 elements have:
+ * - One DOF per vertex
+ * - Linear basis functions: @f$ \phi_i(x_j) = \delta_{ij} @f$ (Lagrange property)
+ * - Constant gradient per element: @f$ \nabla \phi_i|_K = \text{const} @f$
+ *
+ * P1 elements are the most common finite elements, providing first-order
+ * convergence (@f$ O(h) @f$ for L² norm, @f$ O(h^2) @f$ for energy norm) and
+ * forming the foundation for many FEM applications.
+ */
+
 #include <utility>
 
 #include <boost/serialization/access.hpp>
@@ -44,7 +59,17 @@ namespace Rodin::Variational
   /**
    * @ingroup FiniteElements
    * @ingroup P1ElementSpecializations
-   * @brief Degree 1 scalar Lagrange element
+   * @brief Continuous piecewise linear (degree 1) scalar Lagrange element.
+   *
+   * The P1Element provides a first-order finite element with:
+   * - **DOF count**: One per vertex (@f$ n_v @f$ total)
+   * - **Basis functions**: Linear functions satisfying @f$ \phi_i(x_j) = \delta_{ij} @f$
+   * - **Gradient**: Constant on each element, @f$ \nabla \phi_i|_K = \text{const} @f$
+   * - **Continuity**: Global C⁰ continuity across element interfaces
+   *
+   * P1 elements provide first-order convergence and are the standard choice
+   * for elliptic PDEs like Poisson's equation @f$ -\Delta u = f @f$.
+   *
    * @tparam Scalar Type of scalar range (e.g., Real, Complex)
    */
   template <class Scalar>
@@ -597,7 +622,18 @@ namespace Rodin::Variational
   /**
    * @ingroup FiniteElements
    * @ingroup P1ElementSpecializations
-   * @brief Degree 1 vector Lagrange element
+   * @brief Continuous piecewise linear (degree 1) vector Lagrange element.
+   *
+   * Vector-valued P1 element with:
+   * - **DOF count**: @f$ d \cdot n_v @f$ where @f$ d @f$ is vector dimension, @f$ n_v @f$ is vertex count
+   * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j @f$
+   * - **Jacobian**: @f$ \mathbf{J}_{i,j} = \partial u_i/\partial x_j @f$ constant per element
+   * - **Continuity**: C⁰ continuous vector field
+   *
+   * Used for elasticity, fluid mechanics, and vector-valued PDEs. Each component
+   * uses P1 interpolation independently.
+   *
+   * @tparam Scalar Type of scalar components
    */
   template <class Scalar>
   class P1Element<Math::Vector<Scalar>> final
