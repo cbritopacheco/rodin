@@ -27,10 +27,8 @@
  * - Basis functions: Lagrange nodal basis @f$ \phi_i(x_j) = \delta_{ij} @f$
  *
  * ## Usage Example
- * ```cpp
- * Mesh mesh;
- * // Load mesh
  *
+ * ```cpp
  * P1 Vh(mesh);           // Define P1 space
  * TrialFunction u(Vh);   // P1 trial function
  * TestFunction v(Vh);    // P1 test function
