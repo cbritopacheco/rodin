@@ -276,16 +276,31 @@ namespace Rodin::Variational
           std::is_same_v<RangeType, ScalarType> ||
           std::is_same_v<RangeType, Math::Vector<ScalarType>>);
 
+      /**
+       * @brief Constructs a grid function on the given finite element space.
+       * @param[in] fes Finite element space
+       *
+       * Creates a grid function associated with the given FE space. The DOF
+       * vector is sized according to the space dimension.
+       */
       GridFunctionBase(const FES& fes)
         : Parent(std::cref(*this)),
           m_fes(std::cref(fes))
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Grid function to copy
+       */
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(std::cref(*this)),
           m_fes(other.m_fes)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Grid function to move from
+       */
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(std::cref(*this)),
           m_fes(std::move(other.m_fes))
@@ -293,12 +308,22 @@ namespace Rodin::Variational
 
       virtual ~GridFunctionBase() = default;
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Grid function to move from
+       * @return Reference to this grid function
+       */
       GridFunctionBase& operator=(GridFunctionBase&& other)
       {
         m_fes = std::move(other.m_fes);
         return *this;
       }
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Grid function to copy
+       * @return Reference to this grid function
+       */
       GridFunctionBase& operator=(const GridFunctionBase& other)
       {
         if (this != &other)
@@ -308,6 +333,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Extracts the x-component of a vector-valued grid function.
+       * @return Component operator for the first component
+       *
+       * For vector-valued functions @f$ \mathbf{u} = (u_x, u_y, u_z) @f$,
+       * returns @f$ u_x @f$.
+       */
       constexpr
       auto x() const
       {
@@ -316,6 +348,13 @@ namespace Rodin::Variational
         return Component(static_cast<const Derived&>(*this), 0);
       }
 
+      /**
+       * @brief Extracts the y-component of a vector-valued grid function.
+       * @return Component operator for the second component
+       *
+       * For vector-valued functions @f$ \mathbf{u} = (u_x, u_y, u_z) @f$,
+       * returns @f$ u_y @f$.
+       */
       constexpr
       auto y() const
       {
@@ -324,6 +363,13 @@ namespace Rodin::Variational
         return Component(static_cast<const Derived&>(*this), 1);
       }
 
+      /**
+       * @brief Extracts the z-component of a vector-valued grid function.
+       * @return Component operator for the third component
+       *
+       * For vector-valued functions @f$ \mathbf{u} = (u_x, u_y, u_z) @f$,
+       * returns @f$ u_z @f$.
+       */
       constexpr
       auto z() const
       {
@@ -332,6 +378,15 @@ namespace Rodin::Variational
         return Component(static_cast<const Derived&>(*this), 2);
       }
 
+      /**
+       * @brief Sets the DOF data vector.
+       * @param[in] data DOF data to set
+       * @param[in] offset Starting offset in the data vector
+       * @return Reference to this grid function
+       *
+       * Copies the provided data into the internal DOF vector starting at
+       * the specified offset.
+       */
       constexpr
       Derived& setData(const DataType& data, size_t offset = 0)
       {
@@ -339,7 +394,11 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a constant reference to the GridFunction data.
+       * @brief Gets the DOF data vector.
+       * @return Reference to the DOF data
+       *
+       * Provides access to the coefficient vector @f$ \mathbf{u} @f$ containing
+       * the degrees of freedom.
        */
       constexpr
       auto& getData()
@@ -348,7 +407,8 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a constant reference to the GridFunction data.
+       * @brief Gets the DOF data vector (const version).
+       * @return Const reference to the DOF data
        */
       constexpr
       const DataType& getData() const
@@ -356,24 +416,48 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getData();
       }
 
+      /**
+       * @brief Gets the associated finite element space.
+       * @return Reference to the finite element space
+       */
       constexpr
       const FES& getFiniteElementSpace() const
       {
         return m_fes.get();
       }
 
+      /**
+       * @brief Gets the number of degrees of freedom.
+       * @return Total number of DOFs
+       */
       constexpr
       size_t getSize() const
       {
         return m_fes.get().getSize();
       }
 
+      /**
+       * @brief Gets the vector dimension of the grid function.
+       * @return Number of components (1 for scalar, d for vector-valued)
+       *
+       * For scalar functions, returns 1. For vector-valued functions,
+       * returns the space dimension.
+       */
       constexpr
       size_t getDimension() const
       {
         return m_fes.get().getVectorDimension();
       }
 
+      /**
+       * @brief Loads grid function data from a file.
+       * @param[in] filename Path to the file to load
+       * @param[in] fmt File format (default: MFEM)
+       * @return Reference to this grid function
+       *
+       * Reads DOF data from a file in the specified format. Supported formats
+       * include MFEM, EnSight, and MEDIT.
+       */
       Derived& load(
           const boost::filesystem::path& filename,
           IO::FileFormat fmt = IO::FileFormat::MFEM)
