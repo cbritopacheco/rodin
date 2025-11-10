@@ -4,6 +4,48 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file GridFunction.h
+ * @brief Grid function class for representing FEM solutions.
+ *
+ * This file defines the GridFunction class, which represents functions defined
+ * on a finite element mesh by their degrees of freedom. Grid functions are the
+ * discrete representation of solutions in finite element analysis.
+ *
+ * ## Mathematical Foundation
+ * A grid function represents a function @f$ u_h \in V_h @f$ by its coefficients:
+ * @f[
+ *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
+ * @f]
+ * where:
+ * - @f$ u_i @f$ are the degrees of freedom (stored in the grid function)
+ * - @f$ \phi_i @f$ are the basis functions from the finite element space
+ * - @f$ N @f$ is the number of DOFs
+ *
+ * ## Features
+ * - **Storage**: Manages coefficient vector for FEM solutions
+ * - **Evaluation**: Point-wise evaluation using basis function interpolation
+ * - **I/O**: Export to visualization formats (VTK, MEDIT, etc.)
+ * - **Operations**: Arithmetic operations, norms, projections
+ * - **Assignment**: Can be set from functions or expressions
+ *
+ * ## Usage Examples
+ * ```cpp
+ * P1 Vh(mesh);
+ * GridFunction<P1> u(Vh);  // Create grid function
+ * 
+ * // Set from analytical function
+ * u = [](const Point& p) { return sin(p.x()) * cos(p.y()); };
+ * 
+ * // Evaluate at a point
+ * Real value = u(point);
+ * 
+ * // Export for visualization
+ * u.save("solution.vtu");
+ * ```
+ *
+ * @see TrialFunction, FiniteElementSpace
+ */
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
