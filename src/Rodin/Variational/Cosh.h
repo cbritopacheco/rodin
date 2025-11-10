@@ -57,20 +57,37 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Cosh<FunctionBase<NestedDerived>>>;
 
+      /**
+       * @brief Constructs hyperbolic cosine operator from a function.
+       * @param v Function to apply cosh to
+       */
       Cosh(const OperandType& v)
         : m_operand(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Cosh operator to copy
+       */
       Cosh(const Cosh& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Cosh operator to move
+       */
       Cosh(Cosh&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /**
+       * @brief Restricts cosh operator to a trace.
+       * @param args Trace restriction arguments
+       * @return Reference to this cosh operator
+       */
       template <class ... Args>
       Cosh& traceOf(const Args& ... args)
       {
@@ -78,17 +95,30 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates @f$ \cosh(f(p)) @f$ at a point.
+       * @param p Point at which to evaluate
+       * @return Hyperbolic cosine of operand function value
+       */
       auto getValue(const Geometry::Point& p) const
       {
         return Math::cosh(m_operand->getValue(p));
       }
 
+      /**
+       * @brief Gets the operand function.
+       * @return Reference to operand function
+       */
       const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this cosh operator.
+       * @return Pointer to copy
+       */
       Cosh* copy() const noexcept override
       {
         return new Cosh(*this);

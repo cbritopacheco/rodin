@@ -55,23 +55,40 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Tan<FunctionBase<NestedDerived>>>;
 
+      /**
+       * @brief Constructs tangent operator from a function.
+       * @param v Function to apply tangent to
+       */
       constexpr
       Tan(const OperandType& v)
         : m_operand(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Tangent operator to copy
+       */
       constexpr
       Tan(const Tan& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Tangent operator to move
+       */
       constexpr
       Tan(Tan&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /**
+       * @brief Restricts tangent operator to a trace.
+       * @param args Trace restriction arguments
+       * @return Reference to this tangent operator
+       */
       template <class ... Args>
       constexpr
       Tan& traceOf(Args&& ... args)
@@ -81,17 +98,30 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates @f$ \tan(f(p)) @f$ at a point.
+       * @param p Point at which to evaluate
+       * @return Tangent of operand function value
+       */
       Real getValue(const Geometry::Point& p) const
       {
         return Math::tan(getOperand().getValue(p));
       }
 
+      /**
+       * @brief Gets the operand function.
+       * @return Reference to operand function
+       */
       const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this tangent operator.
+       * @return Pointer to copy
+       */
       Tan* copy() const noexcept
       override
       {
