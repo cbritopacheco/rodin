@@ -26,7 +26,6 @@
  *
  * ## Usage Example
  * ```cpp
- * auto u = /* some function */;
  * auto positive_region = (u > 0.0);  // Boolean: true where u is positive
  * 
  * // Adaptive refinement indicator

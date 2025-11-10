@@ -29,7 +29,6 @@
  *
  * ## Usage Example
  * ```cpp
- * auto u = /* some function */;
  * auto is_zero = (u == 0.0);  // Boolean function, true where u equals zero
  * ```
  */

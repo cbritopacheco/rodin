@@ -37,7 +37,6 @@
  *
  * ## Usage Example
  * ```cpp
- * Mesh mesh = /* ... */;
  * FaceNormal n(mesh);
  * 
  * // DG numerical flux on interior faces

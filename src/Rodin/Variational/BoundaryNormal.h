@@ -35,7 +35,6 @@
  *
  * ## Usage Example
  * ```cpp
- * Mesh mesh = /* ... */;
  * BoundaryNormal n(mesh);
  * 
  * // Neumann BC: ∫_Γ g(n·∇u) v ds

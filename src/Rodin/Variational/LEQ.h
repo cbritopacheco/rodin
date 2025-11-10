@@ -26,7 +26,6 @@
  *
  * ## Usage Example
  * ```cpp
- * auto u = /* some function */;
  * auto bounded_region = (u <= 1.0);  // Boolean: true where u ≤ 1
  * ```
  */

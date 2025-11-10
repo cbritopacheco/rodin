@@ -21,19 +21,16 @@ endif()
 # ---- SuiteSparse -----------------------------------------------------------
 if (RODIN_USE_UMFPACK)
   find_package(SuiteSparse REQUIRED COMPONENTS UMFPACK)
-  target_sources(RodinSolver INTERFACE UMFPack.h)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::UMFPACK)
 endif()
 
 if (RODIN_USE_SPQR)
   find_package(SuiteSparse REQUIRED COMPONENTS SPQR)
-  target_sources(RodinSolver INTERFACE SPQR.h)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::SPQR)
 endif()
 
 if (RODIN_USE_CHOLMOD)
   find_package(SuiteSparse REQUIRED COMPONENTS CHOLMOD)
-  target_sources(RodinSolver INTERFACE CHOLMOD.h)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::CHOLMOD)
 endif()
 

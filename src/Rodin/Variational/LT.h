@@ -26,7 +26,6 @@
  *
  * ## Usage Example
  * ```cpp
- * auto u = /* some function */;
  * auto negative_region = (u < 0.0);  // Boolean: true where u is negative
  * ```
  */

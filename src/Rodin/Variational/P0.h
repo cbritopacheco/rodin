@@ -26,7 +26,6 @@
  *
  * ## Usage Example
  * ```cpp
- * Mesh mesh = /* ... */;
  * P0 Vh(mesh);           // Define P0 space
  * GridFunction<P0> u(Vh); // P0 grid function
  * ```

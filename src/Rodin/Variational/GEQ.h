@@ -26,7 +26,6 @@
  *
  * ## Usage Example
  * ```cpp
- * auto u = /* some function */;
  * auto non_negative = (u >= 0.0);  // Boolean: true where u is non-negative
  * ```
  */
