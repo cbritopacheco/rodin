@@ -63,21 +63,29 @@ namespace Rodin::Variational
       using Parent = RealFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>;
 
       /**
-       * @brief Constructs the power object
-       * @param[in] s Base value
-       * @param[in] p Power
+       * @brief Constructs the power operation.
+       * @param s Base function @f$ f @f$
+       * @param p Exponent @f$ p @f$
        */
       constexpr
       Pow(const BaseType& s, ExponentType p)
         : m_s(s.copy()), m_p(p)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Pow object to copy from
+       */
       constexpr
       Pow(const Pow& other)
         : Parent(other),
           m_s(other.m_s->copy()), m_p(other.m_p)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Pow object to move from
+       */
       constexpr
       Pow(Pow&& other)
         : Parent(std::move(other)),
@@ -85,6 +93,11 @@ namespace Rodin::Variational
           m_p(std::move(other.m_p))
       {}
 
+      /**
+       * @brief Restricts base to a trace domain.
+       * @param args Arguments for trace restriction
+       * @returns Reference to this object
+       */
       template <class ... Args>
       constexpr
       Pow& traceOf(const Args& ... args)
@@ -93,6 +106,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates power at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ f(p)^{\text{exponent}} @f$
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
