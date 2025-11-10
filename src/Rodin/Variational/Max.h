@@ -58,20 +58,38 @@ namespace Rodin::Variational
 
       using Parent = FunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
+      /**
+       * @brief Constructs maximum operator for two functions.
+       * @param a First function
+       * @param b Second function
+       */
       Max(const LHSType& a, const RHSType& b)
         : m_lhs(a.copy()), m_rhs(b.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Max operator to copy
+       */
       Max(const Max& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Max operator to move from
+       */
       Max(Max&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /**
+       * @brief Restricts evaluation to specified mesh attributes.
+       * @param args Attribute arguments for trace restriction
+       * @returns Reference to this object
+       */
       template <class ... Args>
       constexpr
       Max& traceOf(const Args& ... args)
@@ -81,6 +99,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates maximum at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ \max(f(p), g(p)) @f$
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -92,18 +115,30 @@ namespace Rodin::Variational
           return lhs;
       }
 
+      /**
+       * @brief Gets the left operand function.
+       * @returns Reference to first function
+       */
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /**
+       * @brief Gets the right operand function.
+       * @returns Reference to second function
+       */
       const auto& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
+      /**
+       * @brief Polymorphic copy.
+       * @returns Pointer to a copy of this object
+       */
       virtual Max* copy() const noexcept override
       {
         return new Max(*this);
@@ -132,23 +167,41 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Max<FunctionBase<NestedDerived>, RHSType>>;
 
+      /**
+       * @brief Constructs maximum operator for function and scalar.
+       * @param a Function operand
+       * @param b Scalar constant operand
+       */
       constexpr
       Max(const LHSType& a, const RHSType& b)
         : m_lhs(a.copy()), m_rhs(b)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Max operator to copy
+       */
       constexpr
       Max(const Max& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Max operator to move from
+       */
       constexpr
       Max(Max&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /**
+       * @brief Restricts evaluation to specified mesh attributes.
+       * @param args Attribute arguments for trace restriction
+       * @returns Reference to this object
+       */
       template <class ... Args>
       constexpr
       Max& traceOf(const Args& ... args)
@@ -157,6 +210,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates maximum at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ \max(f(p), c) @f$ where @f$ c @f$ is the scalar constant
+       */
       constexpr
       Real getValue(const Geometry::Point& p) const
       {
@@ -168,17 +226,29 @@ namespace Rodin::Variational
           return lhs;
       }
 
+      /**
+       * @brief Gets the function operand.
+       * @returns Reference to the function
+       */
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /**
+       * @brief Gets the scalar operand.
+       * @returns Scalar constant value
+       */
       const auto& getRHS() const
       {
         return m_rhs;
       }
 
+      /**
+       * @brief Polymorphic copy.
+       * @returns Pointer to a copy of this object
+       */
       virtual Max* copy() const noexcept override
       {
         return new Max(*this);
