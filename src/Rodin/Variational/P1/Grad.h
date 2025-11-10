@@ -7,6 +7,17 @@
 #ifndef RODIN_VARIATIONAL_P1_GRAD_H
 #define RODIN_VARIATIONAL_P1_GRAD_H
 
+/**
+ * @file
+ * @brief Gradient operator specialization for P1 (piecewise linear) functions.
+ *
+ * For P1 functions, the gradient is constant on each element:
+ * @f[
+ *   \nabla u|_K = \sum_{i=1}^{n+1} u_i \nabla \phi_i
+ * @f]
+ * where @f$ \phi_i @f$ are the P1 basis functions and @f$ n @f$ is the spatial dimension.
+ */
+
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Grad.h"
@@ -46,24 +57,40 @@ namespace Rodin::Variational
 
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
+      /**
+       * @brief Constructs the gradient of a P1 function @f$ u @f$.
+       * @param[in] u P1 GridFunction (piecewise linear)
+       *
+       * @note The gradient is constant on each element for P1 functions.
+       */
       Grad(const OperandType& u)
         : Parent(u)
       {}
 
       /**
-       * @brief Copy constructor
+       * @brief Copy constructor.
+       * @param[in] other Grad object to copy
        */
       Grad(const Grad& other)
         : Parent(other)
       {}
 
       /**
-       * @brief Move constructor
+       * @brief Move constructor.
+       * @param[in] other Grad object to move from
        */
       Grad(Grad&& other)
         : Parent(std::move(other))
       {}
 
+      /**
+       * @brief Interpolates the gradient at a given point.
+       * @param[out] out Output spatial vector for gradient
+       * @param[in] p Point at which to evaluate gradient
+       *
+       * Computes @f$ \nabla u(p) @f$ using P1 basis function gradients.
+       * Handles evaluation on faces by projecting to adjacent cells.
+       */
       void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
