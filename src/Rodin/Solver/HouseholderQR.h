@@ -4,6 +4,38 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file HouseholderQR.h
+ * @brief Householder QR decomposition for dense matrices.
+ *
+ * This header provides the HouseholderQR solver class for dense matrices,
+ * implementing QR decomposition using Householder reflections.
+ *
+ * ## Algorithm
+ * The solver computes:
+ * @f[
+ *   A = QR
+ * @f]
+ * where @f$ Q @f$ is orthogonal and @f$ R @f$ is upper triangular, using
+ * Householder reflections for numerical stability.
+ *
+ * ## Applicability
+ * - General dense matrices
+ * - Overdetermined least-squares problems
+ * - Small to medium-sized systems
+ * - When numerical stability is important
+ *
+ * ## Usage Example
+ * ```cpp
+ * Problem problem(u, v);
+ * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
+ * 
+ * Solver::HouseholderQR solver(problem);
+ * solver.solve();
+ * ```
+ *
+ * @see HouseholderQR for the solver implementation
+ */
 #ifndef RODIN_SOLVER_HOUSEHOLDERQR_H
 #define RODIN_SOLVER_HOUSEHOLDERQR_H
 
