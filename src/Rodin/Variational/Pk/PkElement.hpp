@@ -203,18 +203,88 @@ namespace Rodin::Variational
   PkElement<K, Scalar>::getLinearForm(size_t i) const
   {
     const Geometry::Polytope::Type g = this->getGeometry();
-    static thread_local std::vector<LinearForm> s_lfs;
     
-    // Thread-safe lazy initialization
-    if (s_lfs.empty())
+    // Use switch to create geometry-specific thread_local storage
+    switch (g)
     {
-      const size_t count = getCount();
-      s_lfs.reserve(count);
-      for (size_t j = 0; j < count; ++j)
-        s_lfs.emplace_back(j, g);
+      case Geometry::Polytope::Type::Point:
+      {
+        static thread_local std::vector<LinearForm> s_lfs;
+        if (s_lfs.empty())
+        {
+          const size_t count = getCount();
+          s_lfs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_lfs.emplace_back(j, g);
+        }
+        return s_lfs[i];
+      }
+      case Geometry::Polytope::Type::Segment:
+      {
+        static thread_local std::vector<LinearForm> s_lfs;
+        if (s_lfs.empty())
+        {
+          const size_t count = getCount();
+          s_lfs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_lfs.emplace_back(j, g);
+        }
+        return s_lfs[i];
+      }
+      case Geometry::Polytope::Type::Triangle:
+      {
+        static thread_local std::vector<LinearForm> s_lfs;
+        if (s_lfs.empty())
+        {
+          const size_t count = getCount();
+          s_lfs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_lfs.emplace_back(j, g);
+        }
+        return s_lfs[i];
+      }
+      case Geometry::Polytope::Type::Quadrilateral:
+      {
+        static thread_local std::vector<LinearForm> s_lfs;
+        if (s_lfs.empty())
+        {
+          const size_t count = getCount();
+          s_lfs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_lfs.emplace_back(j, g);
+        }
+        return s_lfs[i];
+      }
+      case Geometry::Polytope::Type::Tetrahedron:
+      {
+        static thread_local std::vector<LinearForm> s_lfs;
+        if (s_lfs.empty())
+        {
+          const size_t count = getCount();
+          s_lfs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_lfs.emplace_back(j, g);
+        }
+        return s_lfs[i];
+      }
+      case Geometry::Polytope::Type::Wedge:
+      {
+        static thread_local std::vector<LinearForm> s_lfs;
+        if (s_lfs.empty())
+        {
+          const size_t count = getCount();
+          s_lfs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_lfs.emplace_back(j, g);
+        }
+        return s_lfs[i];
+      }
     }
     
-    return s_lfs[i];
+    // Fallback (should never happen)
+    static thread_local LinearForm s_null(0, g);
+    assert(false);
+    return s_null;
   }
 
   template <size_t K, class Scalar>
@@ -222,18 +292,88 @@ namespace Rodin::Variational
   PkElement<K, Scalar>::getBasis(size_t i) const
   {
     const Geometry::Polytope::Type g = this->getGeometry();
-    static thread_local std::vector<BasisFunction> s_bs;
     
-    // Thread-safe lazy initialization
-    if (s_bs.empty())
+    // Use switch to create geometry-specific thread_local storage
+    switch (g)
     {
-      const size_t count = getCount();
-      s_bs.reserve(count);
-      for (size_t j = 0; j < count; ++j)
-        s_bs.emplace_back(j, g);
+      case Geometry::Polytope::Type::Point:
+      {
+        static thread_local std::vector<BasisFunction> s_bs;
+        if (s_bs.empty())
+        {
+          const size_t count = getCount();
+          s_bs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_bs.emplace_back(j, g);
+        }
+        return s_bs[i];
+      }
+      case Geometry::Polytope::Type::Segment:
+      {
+        static thread_local std::vector<BasisFunction> s_bs;
+        if (s_bs.empty())
+        {
+          const size_t count = getCount();
+          s_bs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_bs.emplace_back(j, g);
+        }
+        return s_bs[i];
+      }
+      case Geometry::Polytope::Type::Triangle:
+      {
+        static thread_local std::vector<BasisFunction> s_bs;
+        if (s_bs.empty())
+        {
+          const size_t count = getCount();
+          s_bs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_bs.emplace_back(j, g);
+        }
+        return s_bs[i];
+      }
+      case Geometry::Polytope::Type::Quadrilateral:
+      {
+        static thread_local std::vector<BasisFunction> s_bs;
+        if (s_bs.empty())
+        {
+          const size_t count = getCount();
+          s_bs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_bs.emplace_back(j, g);
+        }
+        return s_bs[i];
+      }
+      case Geometry::Polytope::Type::Tetrahedron:
+      {
+        static thread_local std::vector<BasisFunction> s_bs;
+        if (s_bs.empty())
+        {
+          const size_t count = getCount();
+          s_bs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_bs.emplace_back(j, g);
+        }
+        return s_bs[i];
+      }
+      case Geometry::Polytope::Type::Wedge:
+      {
+        static thread_local std::vector<BasisFunction> s_bs;
+        if (s_bs.empty())
+        {
+          const size_t count = getCount();
+          s_bs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_bs.emplace_back(j, g);
+        }
+        return s_bs[i];
+      }
     }
     
-    return s_bs[i];
+    // Fallback (should never happen)
+    static thread_local BasisFunction s_null(0, g);
+    assert(false);
+    return s_null;
   }
 
   template <size_t K, class Scalar>
@@ -253,8 +393,6 @@ namespace Rodin::Variational
       case Geometry::Polytope::Type::Triangle:
       {
         // Use barycentric coordinates for triangle
-        // For simplicity, we use the tensor product approach
-        // This is a simplified implementation
         size_t idx = 0;
         for (size_t j = 0; j <= K; ++j)
         {
@@ -267,33 +405,23 @@ namespace Rodin::Variational
               Real lambda1 = r.x();
               Real lambda2 = r.y();
               
-              // This is a placeholder - proper implementation would use
-              // Silvester-Lagrange polynomials on triangles
-              const auto& node = nodes[m_local];
-              Real node_lambda0 = 1.0 - node.x() - node.y();
-              Real node_lambda1 = node.x();
-              Real node_lambda2 = node.y();
-              
-              // Simplified Lagrange interpolation
-              // In practice, this needs proper barycentric Lagrange polynomials
-              Real tol = 1e-10;
-              if (std::abs(lambda0 - node_lambda0) < tol &&
-                  std::abs(lambda1 - node_lambda1) < tol &&
-                  std::abs(lambda2 - node_lambda2) < tol)
-                return 1;
-              
               // For K=1 (P1), use standard linear basis
               if constexpr (K == 1)
               {
-                if (i == 0 && j == 0)
-                  return lambda0;
-                else if (i == 1 && j == 0)
+                if (i == 1 && j == 0)
                   return lambda1;
                 else if (i == 0 && j == 1)
                   return lambda2;
+                else // i == 0 && j == 0
+                  return lambda0;
+              }
+              else if constexpr (K == 0)
+              {
+                return 1;
               }
               
-              return 0; // Placeholder
+              // For K > 1, return 0 as placeholder (proper implementation needed)
+              return 0;
             }
             idx++;
           }
