@@ -64,6 +64,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_solver_2_forward_decls_8h.html">&lt;Rodin/Solver/ForwardDecls.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class EigenSolverType, class OperatorType, class VectorType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>EigenSolver <span class="m-thin">class</span>
         </h1>
@@ -74,16 +75,20 @@
           </thead>
           <tbody>
             <tr>
-              <td style="width: 1%">OperatorType</td>
-              <td>Type of operator for the left hand side</td>
+              <td style="width: 1%">EigenSolverType</td>
+              <td>Type of the underlying Eigen solver</td>
+            </tr>
+            <tr>
+              <td>OperatorType</td>
+              <td>Type of operator (matrix)</td>
             </tr>
             <tr>
               <td>VectorType</td>
-              <td>Type of vector for the right hand side</td>
+              <td>Type of vector</td>
             </tr>
           </tbody>
         </table>
-<aside class="m-note m-default"><h4>See also</h4><p>EigenSolverSpecializations</p></aside>
+<p>This class provides a uniform interface to various Eigen solver types.</p>
       </div>
     </div>
   </div>

@@ -70,9 +70,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md251">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md252">Applications</a></li>
-            <li><a href="#autotoc_md253">Usage Example</a></li>
+            <li><a href="#autotoc_md288">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md289">Applications</a></li>
+            <li><a href="#autotoc_md290">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -82,7 +82,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the OR class, which implements the logical OR operation between boolean-valued functions. This operator is used for combining logical conditions in variational formulations.</p><section id="autotoc_md251"><h3><a href="#autotoc_md251">Mathematical Foundation</a></h3><p>For boolean functions <svg class="m-math" style="width: 8.603em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 82.588312 11.955168">
+<p>This file defines the OR class, which implements the logical OR operation between boolean-valued functions. This operator is used for combining logical conditions in variational formulations.</p><section id="autotoc_md288"><h3><a href="#autotoc_md288">Mathematical Foundation</a></h3><p>For boolean functions <svg class="m-math" style="width: 8.603em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 82.588312 11.955168">
 <title>
 $ p, q : \Omega \to \{0,1\} $
 </title>
@@ -177,7 +177,7 @@ $ p, q : \Omega \to \{0,1\} $
 <use x='220.629989' y='-5.798537' xlink:href='#eq2-g5-115'/>
 <use x='225.280549' y='-5.798537' xlink:href='#eq2-g5-101'/>
 </g>
-</svg></div></section><section id="autotoc_md252"><h3><a href="#autotoc_md252">Applications</a></h3><ul><li>Combining region indicators</li><li>Logical conditions for adaptive methods</li><li>Piecewise function definitions based on multiple criteria</li></ul></section><section id="autotoc_md253"><h3><a href="#autotoc_md253">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">      </span><span class="c1">// Boolean condition</span>
+</svg></div></section><section id="autotoc_md289"><h3><a href="#autotoc_md289">Applications</a></h3><ul><li>Combining region indicators</li><li>Logical conditions for adaptive methods</li><li>Piecewise function definitions based on multiple criteria</li></ul></section><section id="autotoc_md290"><h3><a href="#autotoc_md290">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">      </span><span class="c1">// Boolean condition</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">      </span><span class="c1">// Another condition</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">combined</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">q</span><span class="p">;</span><span class="w">  </span><span class="c1">// True if either condition holds</span></pre></section>
         <section id="namespaces">

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin/Solver/SparseQR.h file | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_d906c76e88cb4d166858d6593797cfbe.html">Solver</a>/</span>SparseQR.h <span class="m-thin">file</span>
+        </h1>
+        <p>Sparse QR factorization with column pivoting.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#autotoc_md173">Algorithm</a></li>
+            <li><a href="#autotoc_md174">Applicability</a></li>
+            <li><a href="#autotoc_md175">Usage Example</a></li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This header provides the SparseQR solver class, which implements QR decomposition with numerical column pivoting for sparse matrices.</p><section id="autotoc_md173"><h3><a href="#autotoc_md173">Algorithm</a></h3><p>The solver computes:</p><div class="m-math"><svg style="width: 5.414em; height: 1.093em;" viewBox="168.285236 -10.493961 51.972519 10.493973">
+<title>
+\[
+  AP = QR
+\]
+</title>
+<defs>
+<path id='eq1-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq1-g0-80' d='M3.53873-3.801743H5.547198C7.197011-3.801743 8.846824-5.021171 8.846824-6.38406C8.846824-7.316563 8.057783-8.16538 6.551432-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .669489 0 .74122 0C.968369 0 1.207472-.02391 1.43462-.02391H2.833375C3.060523-.02391 3.311582 0 3.53873 0C3.634371 0 3.765878 0 3.765878-.227148C3.765878-.3467 3.658281-.3467 3.478954-.3467C2.761644-.3467 2.749689-.430386 2.749689-.549938C2.749689-.609714 2.761644-.6934 2.773599-.753176L3.53873-3.801743ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.204732C7.10137-7.81868 7.84259-7.531756 7.84259-6.635118C7.84259-6.324284 7.687173-5.308095 7.137235-4.758157C6.933998-4.542964 6.360149-4.088667 5.272229-4.088667H3.58655L4.399502-7.352428Z'/>
+<path id='eq1-g0-81' d='M5.092902-.071731C7.149191-.896638 8.679452-3.072478 8.679452-5.236364C8.679452-7.208966 7.388294-8.416438 5.71457-8.416438C3.156164-8.416438 .573848-5.66675 .573848-2.905106C.573848-1.028144 1.817186 .251059 3.550685 .251059C3.957161 .251059 4.351681 .191283 4.734247 .071731C4.662516 .789041 4.662516 .848817 4.662516 1.075965C4.662516 1.422665 4.662516 2.319303 5.618929 2.319303C7.041594 2.319303 7.567621 .083686 7.567621 .011955S7.519801-.107597 7.460025-.107597C7.388294-.107597 7.364384-.047821 7.328518 .083686C7.065504 .836862 6.443836 1.267248 5.917808 1.267248C5.308095 1.267248 5.152677 .848817 5.092902-.071731ZM2.940971-.131507C1.996513-.454296 1.542217-1.446575 1.542217-2.546451C1.542217-3.383313 1.853051-4.97335 2.642092-6.180822C3.526775-7.543711 4.710336-8.153425 5.642839-8.153425C6.886177-8.153425 7.723039-7.149191 7.723039-5.595019C7.723039-4.710336 7.304608-1.745455 5.057036-.430386C4.99726-1.0401 4.829888-1.75741 4.040847-1.75741C3.395268-1.75741 2.84533-1.111831 2.84533-.526027C2.84533-.394521 2.893151-.215193 2.940971-.131507ZM4.758157-.274969C4.327771-.083686 3.957161-.011955 3.622416-.011955C3.502864-.011955 3.084433-.011955 3.084433-.537983C3.084433-.968369 3.502864-1.518306 4.040847-1.518306C4.638605-1.518306 4.770112-1.111831 4.770112-.514072C4.770112-.442341 4.770112-.3467 4.758157-.274969Z'/>
+<path id='eq1-g0-82' d='M4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H5.881943C6.910087-7.81868 7.675218-7.507846 7.675218-6.575342C7.675218-5.965629 7.364384-4.208219 4.961395-4.208219H3.610461L4.399502-7.352428ZM6.06127-4.064757C7.543711-4.387547 8.703362-5.34396 8.703362-6.372105C8.703362-7.304608 7.758904-8.16538 6.097136-8.16538H2.857285C2.618182-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.594271-7.81868 2.82142-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682C1.769365-.466252 1.745455-.3467 .920548-.3467C.645579-.3467 .561893-.3467 .561893-.119552C.561893 0 .6934 0 .729265 0C.944458 0 1.195517-.02391 1.422665-.02391H2.833375C3.048568-.02391 3.299626 0 3.514819 0C3.610461 0 3.741968 0 3.741968-.227148C3.741968-.3467 3.634371-.3467 3.455044-.3467C2.725778-.3467 2.725778-.442341 2.725778-.561893C2.725778-.573848 2.725778-.657534 2.749689-.753176L3.550685-3.969116H4.985305C6.121046-3.969116 6.336239-3.251806 6.336239-2.857285C6.336239-2.677958 6.216687-2.211706 6.133001-1.900872C6.001494-1.350934 5.965629-1.219427 5.965629-.992279C5.965629-.143462 6.659029 .251059 7.460025 .251059C8.428394 .251059 8.846824-.932503 8.846824-1.099875C8.846824-1.183562 8.787049-1.219427 8.715318-1.219427C8.619676-1.219427 8.595766-1.147696 8.571856-1.052055C8.284932-.203238 7.79477 .011955 7.49589 .011955S7.005729-.119552 7.005729-.657534C7.005729-.944458 7.149191-2.032379 7.161146-2.092154C7.220922-2.534496 7.220922-2.582316 7.220922-2.677958C7.220922-3.550685 6.515567-3.921295 6.06127-4.064757Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='168.285236' y='-2.324596' xlink:href='#eq1-g0-65'/>
+<use x='177.060583' y='-2.324596' xlink:href='#eq1-g0-80'/>
+<use x='189.55251' y='-2.324596' xlink:href='#eq1-g1-61'/>
+<use x='201.977991' y='-2.324596' xlink:href='#eq1-g0-81'/>
+<use x='211.249239' y='-2.324596' xlink:href='#eq1-g0-82'/>
+</g>
+</svg></div><p>where <svg class="m-math" style="width: 0.955em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.171098 8.169366">
+<title>
+$ P $
+</title>
+<defs>
+<path id='eq2-g0-80' d='M3.53873-3.801743H5.547198C7.197011-3.801743 8.846824-5.021171 8.846824-6.38406C8.846824-7.316563 8.057783-8.16538 6.551432-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .669489 0 .74122 0C.968369 0 1.207472-.02391 1.43462-.02391H2.833375C3.060523-.02391 3.311582 0 3.53873 0C3.634371 0 3.765878 0 3.765878-.227148C3.765878-.3467 3.658281-.3467 3.478954-.3467C2.761644-.3467 2.749689-.430386 2.749689-.549938C2.749689-.609714 2.761644-.6934 2.773599-.753176L3.53873-3.801743ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.204732C7.10137-7.81868 7.84259-7.531756 7.84259-6.635118C7.84259-6.324284 7.687173-5.308095 7.137235-4.758157C6.933998-4.542964 6.360149-4.088667 5.272229-4.088667H3.58655L4.399502-7.352428Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-80'/>
+</g>
+</svg> is a permutation matrix, <svg class="m-math" style="width: 0.966em; height: 1.093em; vertical-align: -0.243em;" viewBox="0 -8.169366 9.271248 10.493973">
+<title>
+$ Q $
+</title>
+<defs>
+<path id='eq3-g0-81' d='M5.092902-.071731C7.149191-.896638 8.679452-3.072478 8.679452-5.236364C8.679452-7.208966 7.388294-8.416438 5.71457-8.416438C3.156164-8.416438 .573848-5.66675 .573848-2.905106C.573848-1.028144 1.817186 .251059 3.550685 .251059C3.957161 .251059 4.351681 .191283 4.734247 .071731C4.662516 .789041 4.662516 .848817 4.662516 1.075965C4.662516 1.422665 4.662516 2.319303 5.618929 2.319303C7.041594 2.319303 7.567621 .083686 7.567621 .011955S7.519801-.107597 7.460025-.107597C7.388294-.107597 7.364384-.047821 7.328518 .083686C7.065504 .836862 6.443836 1.267248 5.917808 1.267248C5.308095 1.267248 5.152677 .848817 5.092902-.071731ZM2.940971-.131507C1.996513-.454296 1.542217-1.446575 1.542217-2.546451C1.542217-3.383313 1.853051-4.97335 2.642092-6.180822C3.526775-7.543711 4.710336-8.153425 5.642839-8.153425C6.886177-8.153425 7.723039-7.149191 7.723039-5.595019C7.723039-4.710336 7.304608-1.745455 5.057036-.430386C4.99726-1.0401 4.829888-1.75741 4.040847-1.75741C3.395268-1.75741 2.84533-1.111831 2.84533-.526027C2.84533-.394521 2.893151-.215193 2.940971-.131507ZM4.758157-.274969C4.327771-.083686 3.957161-.011955 3.622416-.011955C3.502864-.011955 3.084433-.011955 3.084433-.537983C3.084433-.968369 3.502864-1.518306 4.040847-1.518306C4.638605-1.518306 4.770112-1.111831 4.770112-.514072C4.770112-.442341 4.770112-.3467 4.758157-.274969Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-81'/>
+</g>
+</svg> is orthogonal, and <svg class="m-math" style="width: 0.938em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.008515 8.169366">
+<title>
+$ R $
+</title>
+<defs>
+<path id='eq4-g0-82' d='M4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H5.881943C6.910087-7.81868 7.675218-7.507846 7.675218-6.575342C7.675218-5.965629 7.364384-4.208219 4.961395-4.208219H3.610461L4.399502-7.352428ZM6.06127-4.064757C7.543711-4.387547 8.703362-5.34396 8.703362-6.372105C8.703362-7.304608 7.758904-8.16538 6.097136-8.16538H2.857285C2.618182-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.594271-7.81868 2.82142-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682C1.769365-.466252 1.745455-.3467 .920548-.3467C.645579-.3467 .561893-.3467 .561893-.119552C.561893 0 .6934 0 .729265 0C.944458 0 1.195517-.02391 1.422665-.02391H2.833375C3.048568-.02391 3.299626 0 3.514819 0C3.610461 0 3.741968 0 3.741968-.227148C3.741968-.3467 3.634371-.3467 3.455044-.3467C2.725778-.3467 2.725778-.442341 2.725778-.561893C2.725778-.573848 2.725778-.657534 2.749689-.753176L3.550685-3.969116H4.985305C6.121046-3.969116 6.336239-3.251806 6.336239-2.857285C6.336239-2.677958 6.216687-2.211706 6.133001-1.900872C6.001494-1.350934 5.965629-1.219427 5.965629-.992279C5.965629-.143462 6.659029 .251059 7.460025 .251059C8.428394 .251059 8.846824-.932503 8.846824-1.099875C8.846824-1.183562 8.787049-1.219427 8.715318-1.219427C8.619676-1.219427 8.595766-1.147696 8.571856-1.052055C8.284932-.203238 7.79477 .011955 7.49589 .011955S7.005729-.119552 7.005729-.657534C7.005729-.944458 7.149191-2.032379 7.161146-2.092154C7.220922-2.534496 7.220922-2.582316 7.220922-2.677958C7.220922-3.550685 6.515567-3.921295 6.06127-4.064757Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-82'/>
+</g>
+</svg> is upper triangular. The left-looking algorithm proceeds column by column.</p></section><section id="autotoc_md174"><h3><a href="#autotoc_md174">Applicability</a></h3><ul><li>General sparse matrices (no symmetry required)</li><li>Rank-deficient systems</li><li>Least-squares problems</li><li>Overdetermined systems</li><li>Systems where LU factorization is numerically unstable</li></ul></section><section id="autotoc_md175"><h3><a href="#autotoc_md175">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+
+<span class="n">Solver</span><span class="o">::</span><span class="n">SparseQR</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p>SparseQR for the solver implementation</p></aside></section>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::Solver</a></dt>
+            <dd>Module for linear algebra systems.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_sparse_q_r_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3_ab3e54da199dec02e1727180b786c442.html" class="m-doc">Rodin::Solver::SparseQR&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Sparse QR factorization with numerical column pivoting.</dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
