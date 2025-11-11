@@ -13,12 +13,35 @@
  *
  * This file provides the PkElement class template for continuous piecewise
  * polynomial finite elements of arbitrary degree k. Pk elements have:
- * - Lagrange basis functions of degree k
- * - DOFs at Lagrange nodes (vertices, edge points, face points, volume points)
- * - Polynomial gradient of degree k-1
+ * - **Lagrange basis functions** of degree k: @f$ \phi_i(x_j) = \delta_{ij} @f$
+ * - **DOFs** at Lagrange nodes: vertices, edge points, face points, volume points
+ * - **Polynomial gradient** of degree k-1: @f$ \nabla \phi_i @f$ is a polynomial of degree k-1
+ * - **Continuity**: C⁰ continuous across element interfaces
  *
- * Pk elements provide k-th order convergence and generalize P0 (k=0) and
- * P1 (k=1) elements.
+ * ## Supported Geometries
+ * - **Point**: 1 DOF (trivial element)
+ * - **Segment**: (K+1) DOFs - uniformly spaced nodes on [0,1]
+ * - **Triangle**: (K+1)(K+2)/2 DOFs - barycentric Lagrange nodes
+ * - **Quadrilateral**: (K+1)² DOFs - tensor product of segment nodes
+ * - **Tetrahedron**: (K+1)(K+2)(K+3)/6 DOFs - barycentric Lagrange nodes
+ * - **Wedge**: (K+1)·(K+1)(K+2)/2 DOFs - tensor product of triangle and segment
+ *
+ * ## Convergence Properties
+ * Pk elements provide k-th order convergence for smooth solutions:
+ * - L² error: @f$ O(h^{k+1}) @f$
+ * - H¹ error (energy norm): @f$ O(h^k) @f$
+ *
+ * ## Special Cases
+ * - `PkElement<0, Scalar>` is equivalent to P0Element (piecewise constant)
+ * - `PkElement<1, Scalar>` is equivalent to P1Element (piecewise linear)
+ *
+ * ## Implementation Details
+ * - **Lagrange polynomials**: Classical formulas for 1D: @f$ L_i^K(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} @f$
+ * - **Barycentric coordinates**: For simplices (triangles, tetrahedra), uses barycentric Lagrange basis
+ * - **Tensor products**: For structured elements (quadrilaterals, wedges), uses tensor product of lower-dimensional bases
+ * - **Thread-local caching**: Geometry-specific caching prevents cross-contamination between element types
+ *
+ * @see P0Element, P1Element
  */
 
 #include <cstddef>
@@ -74,16 +97,52 @@ namespace Rodin::Variational
    * @ingroup PkElementSpecializations
    * @brief Continuous piecewise polynomial (degree k) scalar Lagrange element.
    *
-   * The PkElement provides a k-th order finite element with:
-   * - **DOF count**: Depends on geometry and degree k
-   * - **Basis functions**: Lagrange polynomials of degree k satisfying @f$ \phi_i(x_j) = \delta_{ij} @f$
-   * - **Gradient**: Polynomial of degree k-1
+   * The PkElement provides a k-th order finite element with Lagrange basis functions.
+   *
+   * ## Mathematical Properties
+   * - **DOF count**: Depends on geometry and polynomial degree K
+   *   - Segment: K+1
+   *   - Triangle: (K+1)(K+2)/2
+   *   - Quadrilateral: (K+1)²
+   *   - Tetrahedron: (K+1)(K+2)(K+3)/6
+   *   - Wedge: (K+1)·(K+1)(K+2)/2
+   * - **Basis functions**: Lagrange polynomials of degree K satisfying the Lagrange property:
+   *   @f$ \phi_i(x_j) = \delta_{ij} @f$ where @f$ x_j @f$ are the Lagrange nodes
+   * - **Gradient**: Polynomial of degree K-1
+   * - **Partition of unity**: @f$ \sum_{i=1}^{n} \phi_i(x) = 1 @f$ for all @f$ x @f$
    * - **Continuity**: Global C⁰ continuity across element interfaces
    *
-   * Pk elements provide k-th order convergence for smooth solutions.
+   * ## Convergence Rates
+   * For smooth solutions, Pk elements provide k-th order convergence:
+   * - **L² norm**: @f$ \|u - u_h\|_{L^2} = O(h^{k+1}) @f$
+   * - **H¹ norm (energy)**: @f$ \|u - u_h\|_{H^1} = O(h^k) @f$
    *
-   * @tparam K Polynomial degree
-   * @tparam Scalar Type of scalar range (e.g., Real, Complex)
+   * ## Basis Function Construction
+   * - **1D (Segment)**: Classical Lagrange interpolation @f$ L_i^K(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} @f$
+   * - **2D/3D Simplices**: Barycentric Lagrange polynomials @f$ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} @f$
+   * - **Tensor Products**: For quadrilaterals and wedges, tensor product of lower-dimensional bases
+   *
+   * ## Usage Example
+   * ```cpp
+   * // P3 element on triangle - 10 DOFs
+   * RealPkElement<3> p3_tri(Polytope::Type::Triangle);
+   * std::cout << p3_tri.getCount() << std::endl;  // Output: 10
+   *
+   * // Evaluate basis function at a point
+   * Math::Vector<Real> pt{{0.25, 0.25}};
+   * Real value = p3_tri.getBasis(0)(pt);
+   *
+   * // Get gradient of basis function
+   * auto grad = p3_tri.getBasis(0).getGradient()(pt);
+   * ```
+   *
+   * @tparam K Polynomial degree (0, 1, 2, 3, ...). Higher degrees provide better approximation
+   *           for smooth functions but increase computational cost.
+   * @tparam Scalar Type of scalar range (e.g., Real, Complex<Real>)
+   *
+   * @see PkElement<K, Math::Vector<Scalar>> for vector-valued version
+   * @see P0Element for K=0 specialization
+   * @see P1Element for K=1 specialization
    */
   template <size_t K, class Scalar>
   class PkElement final : public FiniteElementBase<PkElement<K, Scalar>>
@@ -102,11 +161,21 @@ namespace Rodin::Variational
       using RangeType = ScalarType;
 
       /**
-       * @brief Represents a linear form of a Pk scalar element.
+       * @brief Evaluates linear form at a given function/vector field.
+       *
+       * A linear form represents the evaluation functional at a Lagrange node.
+       * For a scalar function v, this returns v(x_i) where x_i is the i-th Lagrange node.
+       *
+       * The linear form is used in assembling the right-hand side of finite element systems.
        */
       class LinearForm
       {
         public:
+          /**
+           * @brief Constructs a linear form for the i-th degree of freedom.
+           * @param i Index of the degree of freedom (0 to getCount()-1)
+           * @param g Geometry type of the element
+           */
           constexpr
           LinearForm(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
@@ -115,6 +184,12 @@ namespace Rodin::Variational
           constexpr
           LinearForm(const LinearForm&) = default;
 
+          /**
+           * @brief Evaluates the linear form on a function/vector field.
+           * @tparam T Type of the function/field to evaluate
+           * @param v Function or vector field to evaluate at the node
+           * @return Value of v at the i-th Lagrange node
+           */
           template <class T>
           ScalarType operator()(const T& v) const
           {
@@ -123,22 +198,52 @@ namespace Rodin::Variational
           }
 
         private:
-          const size_t m_i;
-          const Geometry::Polytope::Type m_g;
+          const size_t m_i;              ///< Index of the degree of freedom
+          const Geometry::Polytope::Type m_g;  ///< Geometry type
       };
 
       /**
-       * @brief Represents a basis function of a Pk scalar element.
+       * @brief Represents a Lagrange basis function of degree K.
+       *
+       * A basis function φ_i satisfies the Lagrange property:
+       * @f$ \phi_i(x_j) = \delta_{ij} @f$ where x_j are the Lagrange nodes.
+       *
+       * The basis functions form a partition of unity: @f$ \sum_i \phi_i(x) = 1 @f$.
+       *
+       * ## Evaluation Methods
+       * - `operator()(point)`: Evaluates the basis function at a spatial point
+       * - `getDerivative<Order>(i)`: Gets the partial derivative of order `Order` w.r.t. coordinate i
+       * - `getGradient()`: Gets the gradient function (vector of first-order partial derivatives)
+       *
+       * ## Implementation
+       * The basis functions are constructed using:
+       * - **Segments**: Classical Lagrange interpolation
+       * - **Triangles/Tetrahedra**: Barycentric Lagrange polynomials
+       * - **Quadrilaterals/Wedges**: Tensor product of lower-dimensional bases
        */
       class BasisFunction
       {
         public:
-          using ReturnType = ScalarType;
+          using ReturnType = ScalarType;  ///< Type returned by basis function evaluation
 
+          /**
+           * @brief Represents a partial derivative of a basis function.
+           *
+           * Computes @f$ \frac{\partial^{Order} \phi}{\partial x_i^{Order}} @f$ where
+           * φ is the basis function and x_i is a spatial coordinate.
+           *
+           * @tparam Order Order of differentiation (1 for first derivative, 2 for second, etc.)
+           */
           template <size_t Order>
           class DerivativeFunction
           {
             public:
+              /**
+               * @brief Constructs a derivative function.
+               * @param i Coordinate index for differentiation (0 for x, 1 for y, 2 for z)
+               * @param local Local index of the basis function
+               * @param g Geometry type
+               */
               constexpr
               DerivativeFunction(size_t i, size_t local, Geometry::Polytope::Type g)
                 : m_i(i), m_local(local), m_g(g)
@@ -147,20 +252,36 @@ namespace Rodin::Variational
               constexpr
               DerivativeFunction(const DerivativeFunction&) = default;
 
+              /**
+               * @brief Evaluates the derivative at a spatial point.
+               * @param r Reference point in the element
+               * @return Value of the derivative at point r
+               */
               constexpr
               ReturnType operator()(const Math::SpatialPoint& r) const;
 
             private:
-              const size_t m_i;
-              const size_t m_local;
-              const Geometry::Polytope::Type m_g;
+              const size_t m_i;      ///< Coordinate index for differentiation
+              const size_t m_local;  ///< Local basis function index
+              const Geometry::Polytope::Type m_g;  ///< Geometry type
           };
 
+          /**
+           * @brief Represents the gradient of a basis function.
+           *
+           * The gradient is the vector of first-order partial derivatives:
+           * @f$ \nabla \phi = \left( \frac{\partial \phi}{\partial x}, \frac{\partial \phi}{\partial y}, \frac{\partial \phi}{\partial z} \right) @f$
+           */
           class GradientFunction
           {
             public:
-              using ReturnType = Math::SpatialVector<ScalarType>;
+              using ReturnType = Math::SpatialVector<ScalarType>;  ///< Gradient vector type
 
+              /**
+               * @brief Constructs a gradient function.
+               * @param local Local index of the basis function
+               * @param g Geometry type
+               */
               constexpr
               GradientFunction(size_t local, Geometry::Polytope::Type g)
                 : m_local(local), m_g(g)
@@ -169,6 +290,11 @@ namespace Rodin::Variational
               constexpr
               GradientFunction(const GradientFunction&) = default;
 
+              /**
+               * @brief Evaluates the gradient at a spatial point.
+               * @param r Reference point in the element
+               * @return Gradient vector at point r
+               */
               const ReturnType& operator()(const Math::SpatialPoint& r) const
               {
                 static thread_local ReturnType s_out;
@@ -180,10 +306,15 @@ namespace Rodin::Variational
               }
 
             private:
-              const size_t m_local;
-              const Geometry::Polytope::Type m_g;
+              const size_t m_local;  ///< Local basis function index
+              const Geometry::Polytope::Type m_g;  ///< Geometry type
           };
 
+          /**
+           * @brief Constructs a basis function.
+           * @param local Local index of the basis function (0 to getCount()-1)
+           * @param g Geometry type
+           */
           constexpr
           BasisFunction(size_t local, Geometry::Polytope::Type g)
             : m_local(local), m_g(g)
@@ -192,9 +323,20 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(const BasisFunction&) = default;
 
+          /**
+           * @brief Evaluates the basis function at a spatial point.
+           * @param r Reference point in the element (typically in [0,1]^d)
+           * @return Value of basis function at point r
+           */
           constexpr
           ReturnType operator()(const Math::SpatialPoint& r) const;
 
+          /**
+           * @brief Gets the derivative function of specified order.
+           * @tparam Order Order of differentiation
+           * @param i Coordinate index (0=x, 1=y, 2=z)
+           * @return Derivative function object
+           */
           template <size_t Order>
           constexpr
           DerivativeFunction<Order> getDerivative(size_t i) const
@@ -202,6 +344,10 @@ namespace Rodin::Variational
             return DerivativeFunction<Order>(i, m_local, m_g);
           }
 
+          /**
+           * @brief Gets the gradient function.
+           * @return Gradient function object
+           */
           constexpr
           GradientFunction getGradient() const
           {
@@ -209,30 +355,53 @@ namespace Rodin::Variational
           }
 
         private:
-          const size_t m_local;
-          const Geometry::Polytope::Type m_g;
+          const size_t m_local;  ///< Local basis function index
+          const Geometry::Polytope::Type m_g;  ///< Geometry type
       };
 
+      /**
+       * @brief Default constructor. Creates a Pk element on a Point geometry.
+       */
       PkElement()
         : Parent(Geometry::Polytope::Type::Point)
       {}
 
+      /**
+       * @brief Constructs a Pk element for the specified geometry.
+       * @param geometry Type of element geometry (Segment, Triangle, Quadrilateral, etc.)
+       *
+       * Initializes the element and builds the Lagrange nodes for the specified geometry.
+       * The number and positions of nodes depend on both the geometry and polynomial degree K.
+       */
       PkElement(Geometry::Polytope::Type geometry)
         : Parent(geometry)
       {
         buildNodes();
       }
 
+      /**
+       * @brief Copy constructor.
+       * @param other Element to copy from
+       */
       constexpr
       PkElement(const PkElement& other)
         : Parent(other), m_nodes(other.m_nodes)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Element to move from
+       */
       constexpr
       PkElement(PkElement&& other)
         : Parent(std::move(other)), m_nodes(std::move(other.m_nodes))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       * @param other Element to copy from
+       * @return Reference to this element
+       */
       constexpr
       PkElement& operator=(const PkElement& other)
       {
@@ -241,6 +410,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param other Element to move from
+       * @return Reference to this element
+       */
       constexpr
       PkElement& operator=(PkElement&& other)
       {
@@ -251,27 +425,65 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
-       * @returns Number of degrees of freedom
+       *
+       * The DOF count depends on geometry and polynomial degree K:
+       * - Segment: K+1
+       * - Triangle: (K+1)(K+2)/2
+       * - Quadrilateral: (K+1)²
+       * - Tetrahedron: (K+1)(K+2)(K+3)/6
+       * - Wedge: (K+1)·(K+1)(K+2)/2
+       *
+       * @return Number of degrees of freedom
        */
       constexpr
       size_t getCount() const;
 
+      /**
+       * @brief Gets the spatial coordinates of the i-th Lagrange node.
+       * @param i Node index (0 to getCount()-1)
+       * @return Reference coordinates of the node (typically in [0,1]^d)
+       *
+       * Lagrange nodes are the interpolation points where the basis functions
+       * satisfy φ_i(x_j) = δ_ij. Their positions are determined by the polynomial
+       * degree and geometry type.
+       */
       constexpr
       const Math::SpatialPoint& getNode(size_t i) const
       {
         return m_nodes[i];
       }
 
+      /**
+       * @brief Gets the linear form (evaluation functional) for the i-th DOF.
+       * @param i DOF index (0 to getCount()-1)
+       * @return Linear form object that evaluates functions at the i-th node
+       */
       const LinearForm& getLinearForm(size_t i) const;
 
+      /**
+       * @brief Gets the i-th basis function.
+       * @param i Basis function index (0 to getCount()-1)
+       * @return Basis function object
+       *
+       * The basis functions satisfy the Lagrange property and form a partition of unity.
+       */
       const BasisFunction& getBasis(size_t i) const;
 
+      /**
+       * @brief Gets the polynomial order of the element.
+       * @return Polynomial degree K
+       */
       constexpr
       size_t getOrder() const
       {
         return K;
       }
 
+      /**
+       * @brief Serializes the element (for boost::serialization).
+       * @param ar Archive to serialize to/from
+       * @param version Serialization version
+       */
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {
@@ -279,9 +491,16 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Builds the Lagrange nodes for the element geometry.
+       *
+       * Constructs the positions of DOF nodes based on the geometry type and
+       * polynomial degree. Uses uniform spacing for segments, barycentric
+       * coordinates for simplices, and tensor products for structured elements.
+       */
       void buildNodes();
 
-      std::vector<Math::SpatialPoint> m_nodes;
+      std::vector<Math::SpatialPoint> m_nodes;  ///< Lagrange node positions
   };
 
   /**
@@ -289,17 +508,47 @@ namespace Rodin::Variational
    * @ingroup PkElementSpecializations
    * @brief Continuous piecewise polynomial (degree k) vector Lagrange element.
    *
-   * Vector-valued Pk element with:
-   * - **DOF count**: @f$ d \times @f$ (number of scalar DOFs) where @f$ d @f$ is vector dimension
-   * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j @f$
-   * - **Jacobian**: @f$ \mathbf{J}_{i,j} = \partial u_i/\partial x_j @f$
-   * - **Continuity**: C⁰ continuous vector field
+   * Vector-valued Pk element for approximating vector fields (e.g., displacement, velocity).
    *
-   * Used for elasticity, fluid mechanics, and vector-valued PDEs. Each component
-   * uses Pk interpolation independently.
+   * ## Mathematical Properties
+   * - **DOF count**: @f$ d \times n_s @f$ where:
+   *   - @f$ d @f$ is the vector dimension (vdim)
+   *   - @f$ n_s @f$ is the number of scalar DOFs for the underlying Pk element
+   * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,c}(x) = \phi_i(x) \mathbf{e}_c @f$ where:
+   *   - @f$ \phi_i(x) @f$ is the scalar Pk basis function
+   *   - @f$ \mathbf{e}_c @f$ is the unit vector in direction c
+   * - **Jacobian**: @f$ J_{ij} = \frac{\partial u_i}{\partial x_j} @f$ where @f$ \mathbf{u} @f$ is the vector field
+   * - **Continuity**: C⁰ continuous vector field (each component is C⁰ continuous)
+   *
+   * ## Component Structure
+   * Each vector basis function is non-zero in only one component:
+   * - Basis function `i*vdim + c` has value @f$ \phi_i(x) @f$ in component c, zero elsewhere
+   * - This allows efficient assembly and clear physical interpretation
+   *
+   * ## Applications
+   * - **Linear elasticity**: Displacement field @f$ \mathbf{u}(x) @f$
+   * - **Fluid mechanics**: Velocity field @f$ \mathbf{v}(x) @f$
+   * - **Electromagnetics**: Electric field @f$ \mathbf{E}(x) @f$
+   * - **General vector PDEs**: Any vector-valued unknown
+   *
+   * ## Usage Example
+   * ```cpp
+   * // 2D vector P2 element on triangle - 6 nodes × 2 components = 12 DOFs
+   * VectorPkElement<2> vec_p2(2, Polytope::Type::Triangle);
+   * std::cout << vec_p2.getCount() << std::endl;  // Output: 12
+   *
+   * // Evaluate vector basis function
+   * Math::Vector<Real> pt{{0.25, 0.25}};
+   * auto vec_value = vec_p2.getBasis(0)(pt);  // Returns a 2D vector
+   *
+   * // Get Jacobian matrix
+   * auto jac = vec_p2.getBasis(0).getJacobian()(pt);  // Returns 2×2 matrix
+   * ```
    *
    * @tparam K Polynomial degree
-   * @tparam Scalar Type of scalar components
+   * @tparam Scalar Type of scalar components (e.g., Real, Complex<Real>)
+   *
+   * @see PkElement<K, Scalar> for scalar-valued version
    */
   template <size_t K, class Scalar>
   class PkElement<K, Math::Vector<Scalar>> final

@@ -113,13 +113,31 @@ namespace Rodin::Variational
       };
 
       /**
-       * @brief Represents a basis function of a P0 scalar element.
+       * @brief Represents the constant basis function of a P0 scalar element.
+       *
+       * For P0 elements, the basis function is simply @f$ \phi(x) = 1 @f$ for all x
+       * in the element. This represents a piecewise constant approximation.
+       *
+       * ## Properties
+       * - **Value**: @f$ \phi(x) = 1 @f$ everywhere in the element
+       * - **Derivatives**: @f$ \frac{\partial \phi}{\partial x_i} = 0 @f$ (constant has zero gradient)
+       * - **Partition of unity**: Trivially satisfied (single basis function equals 1)
+       *
+       * P0 basis functions are discontinuous across element boundaries, making them
+       * suitable for discontinuous Galerkin (DG) methods and flux-based formulations.
        */
       class BasisFunction
       {
         public:
-          using ReturnType = Scalar;
+          using ReturnType = Scalar;  ///< Scalar return type
 
+          /**
+           * @brief Represents a derivative of the P0 basis function (always zero).
+           *
+           * Since P0 elements are piecewise constant, all derivatives are zero.
+           *
+           * @tparam Order Order of differentiation (1, 2, ...)
+           */
           template <size_t Order>
           class DerivativeFunction
           {
@@ -130,6 +148,11 @@ namespace Rodin::Variational
               constexpr
               DerivativeFunction(const DerivativeFunction&) = default;
 
+              /**
+               * @brief Evaluates the derivative (always returns 0).
+               * @param r Spatial point (unused, as derivative is zero everywhere)
+               * @return Zero (constant function has zero derivative)
+               */
               constexpr
               ReturnType operator()(const Math::SpatialVector<Real>& r) const
               {
