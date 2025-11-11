@@ -202,8 +202,10 @@ namespace Rodin::Variational
       lambda[1] = r.x();
       lambda[2] = r.y();
       
-      // Indices: k = K - i - j
-      size_t indices[3] = {i, j, K - i - j};
+      // Node (i,j) corresponds to Cartesian (i/K, j/K)
+      // which has barycentric (lambda0=(K-i-j)/K, lambda1=i/K, lambda2=j/K)
+      // So basis (i,j) should be L_i^K(lambda1) * L_j^K(lambda2) * L_(K-i-j)^K(lambda0)
+      size_t indices[3] = {K - i - j, i, j};  // Reordered to match lambda[0], lambda[1], lambda[2]
       
       // Compute product of generalized Lagrange polynomials
       Scalar result = 1;
@@ -244,7 +246,7 @@ namespace Rodin::Variational
       // dλ2/dx = 0,  dλ2/dy = 1
       Real dlambda[3][2] = {{-1, -1}, {1, 0}, {0, 1}};
       
-      size_t indices[3] = {i, j, K - i - j};
+      size_t indices[3] = {K - i - j, i, j};  // Reordered to match lambda[0], lambda[1], lambda[2]
       
       // Use product rule: d/dx[f*g*h] = f'*g*h + f*g'*h + f*g*h'
       Scalar result = 0;
@@ -314,7 +316,10 @@ namespace Rodin::Variational
       lambda[2] = r.y();
       lambda[3] = r.z();
       
-      size_t indices[4] = {i, j, k, K - i - j - k};
+      // Node (i,j,k) corresponds to Cartesian (i/K, j/K, k/K)
+      // which has barycentric (lambda0=(K-i-j-k)/K, lambda1=i/K, lambda2=j/K, lambda3=k/K)
+      // So basis (i,j,k) should be L_i^K(lambda1) * L_j^K(lambda2) * L_k^K(lambda3) * L_(K-i-j-k)^K(lambda0)
+      size_t indices[4] = {K - i - j - k, i, j, k};  // Reordered to match lambda[0], lambda[1], lambda[2], lambda[3]
       
       Scalar result = 1;
       for (size_t dim = 0; dim < 4; ++dim)
@@ -351,7 +356,7 @@ namespace Rodin::Variational
       lambda[1] = r.x();
       lambda[2] = r.y();
       
-      size_t tri_indices[3] = {i, j, K - i - j};
+      size_t tri_indices[3] = {K - i - j, i, j};  // Reordered to match lambda[0], lambda[1], lambda[2]
       
       Scalar tri_result = 1;
       for (size_t dim = 0; dim < 3; ++dim)
@@ -395,7 +400,7 @@ namespace Rodin::Variational
       //              dλ3/dx = 0,  dλ3/dy = 0,  dλ3/dz = 1
       Real dlambda[4][3] = {{-1, -1, -1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
       
-      size_t indices[4] = {i, j, k, K - i - j - k};
+      size_t indices[4] = {K - i - j - k, i, j, k};  // Reordered to match lambda[0], lambda[1], lambda[2], lambda[3]
       
       Scalar result = 0;
       
