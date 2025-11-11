@@ -25,13 +25,13 @@ namespace Rodin::Math::RungeKutta
    * Given a time step @f$ \Delta t @f$ and current state @f$ q_n @f$, the
    * method computes @f$ q_{n+1} @f$ using four stages:
    * @f[
-   *   \begin{align}
+   *   \begin{aligned}
    *   k_1 &= f(q_n) \\
    *   k_2 &= f(q_n + 0.5 \Delta t \, k_1) \\
    *   k_3 &= f(q_n + 0.5 \Delta t \, k_2) \\
    *   k_4 &= f(q_n + \Delta t \, k_3) \\
    *   q_{n+1} &= q_n + \frac{\Delta t}{6} (k_1 + 2k_2 + 2k_3 + k_4)
-   *   \end{align}
+   *   \end{aligned}
    * @f]
    *
    * ## Properties
