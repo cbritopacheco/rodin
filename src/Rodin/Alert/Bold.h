@@ -9,8 +9,21 @@
 
 namespace Rodin::Alert
 {
+  /**
+   * @brief Empty tag type for bold text formatting.
+   * @ingroup AlertModule
+   *
+   * Tag type used to indicate bold text formatting in the Alert system.
+   * This is typically used internally by the Text class attribute system.
+   */
   struct BoldT {};
 
+  /**
+   * @brief Instance of BoldT tag type.
+   * @ingroup AlertModule
+   *
+   * Constant instance of the BoldT tag type for convenient usage.
+   */
   static constexpr BoldT Bold;
 }
 

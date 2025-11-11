@@ -12,10 +12,35 @@
 
 namespace Rodin::Alert
 {
+  /**
+   * @brief Empty tag type for enabling terminal color output.
+   * @ingroup AlertModule
+   *
+   * Tag type used to enable colored output in terminal streams.
+   * When streamed to an output stream, it activates the termcolor
+   * library's colorization for subsequent output.
+   */
   struct StylizeT {};
 
+  /**
+   * @brief Instance of StylizeT tag type.
+   * @ingroup AlertModule
+   *
+   * Constant instance of the StylizeT tag type for convenient usage.
+   * Use this to enable colored terminal output.
+   */
   static constexpr StylizeT Stylize;
 
+  /**
+   * @brief Stream insertion operator for StylizeT.
+   * @ingroup AlertModule
+   * @param os The output stream to write to.
+   * @param The Stylize tag (unused).
+   * @return Reference to the output stream.
+   *
+   * Enables terminal colorization for the output stream using the
+   * termcolor library.
+   */
   inline
   std::ostream& operator<<(std::ostream& os, const StylizeT&)
   {

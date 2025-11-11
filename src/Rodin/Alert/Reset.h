@@ -12,6 +12,14 @@
 
 namespace Rodin::Alert
 {
+  /**
+   * @brief Empty tag type for resetting terminal formatting.
+   * @ingroup AlertModule
+   *
+   * Tag type used to reset all terminal text formatting and colors
+   * back to default. This includes clearing any colors, bold, italic,
+   * underline, and other attributes previously applied.
+   */
   struct ResetT
   {
     constexpr
@@ -30,8 +38,25 @@ namespace Rodin::Alert
     ResetT& operator=(ResetT&&) = default;
   };
 
+  /**
+   * @brief Instance of ResetT tag type.
+   * @ingroup AlertModule
+   *
+   * Constant instance of the ResetT tag type for convenient usage.
+   * Use this to reset terminal formatting to default.
+   */
   static constexpr ResetT Reset;
 
+  /**
+   * @brief Stream insertion operator for ResetT.
+   * @ingroup AlertModule
+   * @param os The output stream to write to.
+   * @param The Reset tag (unused).
+   * @return Reference to the output stream.
+   *
+   * Resets all terminal formatting and colors to default using the
+   * termcolor library.
+   */
   inline
   std::ostream& operator<<(std::ostream& os, const ResetT&)
   {
