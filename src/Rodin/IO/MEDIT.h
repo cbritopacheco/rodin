@@ -239,27 +239,52 @@ namespace Rodin::IO::MEDIT
     return res;
   }
 
+  /**
+   * @brief Solution data types in MEDIT solution files.
+   *
+   * Identifies the type of solution data stored in .sol files.
+   */
   enum SolutionType
   {
-    Real = 1,
-    Vector = 2,
-    Tensor = 3
+    Real = 1,    ///< Scalar (real-valued) solution
+    Vector = 2,  ///< Vector-valued solution
+    Tensor = 3   ///< Tensor-valued solution
   };
 
+  /**
+   * @brief Parser for mesh entities (elements) in MEDIT format.
+   * @internal
+   *
+   * Parses element connectivity and attribute information.
+   */
   class ParseEntity
   {
     public:
+      /**
+       * @brief Parsed entity data.
+       */
       struct Data
       {
-        Array<Index> vertices;
-        Geometry::Attribute attribute;
+        Array<Index> vertices;       ///< Vertex indices defining the entity
+        Geometry::Attribute attribute;  ///< Entity attribute (material ID)
       };
 
+      /**
+       * @brief Constructs an entity parser for @p n vertices.
+       * @param[in] n Number of vertices in the entity
+       */
       constexpr
       ParseEntity(size_t n)
         : m_n(n)
       {}
 
+      /**
+       * @brief Parses entity data from an iterator range.
+       * @tparam Iterator Iterator type
+       * @param[in] begin Start of input range
+       * @param[in] end End of input range
+       * @returns Optional entity data if parsing succeeds, empty otherwise
+       */
       template <class Iterator>
       Optional<Data> operator()(Iterator begin, Iterator end) const
       {
