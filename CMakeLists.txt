@@ -5,6 +5,11 @@ cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0076 NEW)
 
+# Use modern Boost finding mechanism (CMake 3.30+)
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 # Prohibit in-source builds
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are prohibited.")
