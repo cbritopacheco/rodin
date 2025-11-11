@@ -13,6 +13,19 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @brief Forward declaration of base class for printing grid functions.
+   *
+   * GridFunctionPrinterBase provides the foundation for writing finite element
+   * solution data in different file formats. Specialized implementations exist
+   * for each supported file format.
+   *
+   * @tparam Fmt File format to use for printing
+   * @tparam FES Finite element space type
+   * @tparam Data Data storage type (typically a vector type)
+   *
+   * @see GridFunctionPrinter
+   */
   template <FileFormat Fmt, class FES, class Data>
   class GridFunctionPrinterBase;
 }

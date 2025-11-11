@@ -27,34 +27,47 @@
 
 namespace Rodin::IO::MEDIT
 {
+  /**
+   * @brief Keywords used in MEDIT mesh and solution file formats.
+   *
+   * These keywords identify different sections in MEDIT files (.mesh and .sol).
+   * The MEDIT format is a text-based format used by the MMG remeshing software.
+   *
+   * @see <a href="https://www.ljll.math.upmc.fr/frey/logiciels/Docmedit.dir/index.html">MEDIT Format Specification</a>
+   */
   enum class Keyword
   {
-    MeshVersionFormatted,
-    Dimension,
-    Vertices,
-    Triangles,
-    Quadrilaterals,
-    Tetrahedra,
-    Wedges,
-    Corners,
-    Ridges,
-    Edges,
-    SolAtVertices,
-    SolAtEdges,
-    SolAtTriangles,
-    SolAtQuadrilaterals,
-    SolAtTetrahedra,
-    SolAtPentahedra,
-    SolAtHexahedra,
-    RequiredVertices,
-    RequiredEdges,
-    Normals,
-    NormalAtVertices,
-    Tangents,
-    TangentAtVertices,
-    End
+    MeshVersionFormatted,  ///< Format version declaration
+    Dimension,             ///< Spatial dimension
+    Vertices,              ///< Vertex coordinates section
+    Triangles,             ///< Triangle elements section
+    Quadrilaterals,        ///< Quadrilateral elements section
+    Tetrahedra,            ///< Tetrahedral elements section
+    Wedges,                ///< Wedge (prism) elements section
+    Corners,               ///< Corner vertices section
+    Ridges,                ///< Ridge edges section
+    Edges,                 ///< Edge elements section
+    SolAtVertices,         ///< Solution at vertices
+    SolAtEdges,            ///< Solution at edges
+    SolAtTriangles,        ///< Solution at triangles
+    SolAtQuadrilaterals,   ///< Solution at quadrilaterals
+    SolAtTetrahedra,       ///< Solution at tetrahedra
+    SolAtPentahedra,       ///< Solution at pentahedra
+    SolAtHexahedra,        ///< Solution at hexahedra
+    RequiredVertices,      ///< Required vertices section
+    RequiredEdges,         ///< Required edges section
+    Normals,               ///< Normal vectors section
+    NormalAtVertices,      ///< Normals at vertices
+    Tangents,              ///< Tangent vectors section
+    TangentAtVertices,     ///< Tangents at vertices
+    End                    ///< End of file marker
   };
 
+  /**
+   * @brief Converts a MEDIT keyword enum to its string representation.
+   * @param[in] kw Keyword to convert
+   * @returns C-style string representation of the keyword
+   */
   inline
   constexpr
   const char* toCharString(Keyword kw)
@@ -226,27 +239,52 @@ namespace Rodin::IO::MEDIT
     return res;
   }
 
+  /**
+   * @brief Solution data types in MEDIT solution files.
+   *
+   * Identifies the type of solution data stored in .sol files.
+   */
   enum SolutionType
   {
-    Real = 1,
-    Vector = 2,
-    Tensor = 3
+    Real = 1,    ///< Scalar (real-valued) solution
+    Vector = 2,  ///< Vector-valued solution
+    Tensor = 3   ///< Tensor-valued solution
   };
 
+  /**
+   * @brief Parser for mesh entities (elements) in MEDIT format.
+   * @internal
+   *
+   * Parses element connectivity and attribute information.
+   */
   class ParseEntity
   {
     public:
+      /**
+       * @brief Parsed entity data.
+       */
       struct Data
       {
-        Array<Index> vertices;
-        Geometry::Attribute attribute;
+        Array<Index> vertices;       ///< Vertex indices defining the entity
+        Geometry::Attribute attribute;  ///< Entity attribute (material ID)
       };
 
+      /**
+       * @brief Constructs an entity parser for @p n vertices.
+       * @param[in] n Number of vertices in the entity
+       */
       constexpr
       ParseEntity(size_t n)
         : m_n(n)
       {}
 
+      /**
+       * @brief Parses entity data from an iterator range.
+       * @tparam Iterator Iterator type
+       * @param[in] begin Start of input range
+       * @param[in] end End of input range
+       * @returns Optional entity data if parsing succeeds, empty otherwise
+       */
       template <class Iterator>
       Optional<Data> operator()(Iterator begin, Iterator end) const
       {

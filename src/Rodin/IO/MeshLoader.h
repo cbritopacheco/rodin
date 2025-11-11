@@ -24,23 +24,62 @@ namespace Rodin::IO
    */
 
   /**
-   * @brief Base class for mesh loader objects.
+   * @brief Base class for loading meshes from files or streams.
+   *
+   * MeshLoaderBase provides the foundation for loading mesh data in different
+   * file formats. It extends the generic Loader class to handle mesh-specific
+   * operations and manages the mesh object being populated.
+   *
+   * @tparam Context Context type (e.g., Context::Local for sequential execution)
+   *
+   * Specialized loaders for specific file formats should derive from this class
+   * and implement the load(std::istream&) method to parse their respective formats.
+   *
+   * ## Usage Example
+   * ```cpp
+   * Mesh<Context::Local> mesh;
+   * MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+   * loader.load("mesh.mfem");
+   * ```
+   *
+   * @see Loader, MeshPrinter
    */
   template <class Context>
   class MeshLoaderBase : public IO::Loader<Rodin::Geometry::Mesh<Context>>
   {
     public:
+      /**
+       * @brief Context type for the mesh (e.g., sequential or parallel).
+       */
       using ContextType = Context;
 
+      /**
+       * @brief Type of mesh object being loaded.
+       */
       using ObjectType = Geometry::Mesh<ContextType>;
 
+      /**
+       * @brief Parent Loader class type.
+       */
       using Parent = IO::Loader<ObjectType>;
 
+      /**
+       * @brief Constructs a mesh loader for the given mesh object.
+       * @param[in,out] mesh Mesh object to be populated with loaded data
+       *
+       * The mesh is stored by reference and will be modified during loading.
+       */
       MeshLoaderBase(ObjectType& mesh)
         : m_mesh(mesh)
       {}
 
     protected:
+      /**
+       * @brief Gets a reference to the mesh being loaded.
+       * @returns Reference to the mesh object
+       *
+       * Provides access to the mesh for derived classes to populate during loading.
+       */
       ObjectType& getObject() override
       {
         return m_mesh.get();

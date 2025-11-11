@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_IO_ENSIGHT6_H
 #define RODIN_IO_ENSIGHT6_H
 
@@ -18,22 +24,36 @@
 
 namespace Rodin::IO::EnSight6
 {
+  /**
+   * @brief Keywords used in EnSight6 file format.
+   *
+   * These keywords identify different sections and data organization in
+   * EnSight6 geometry and result files. EnSight6 is a format used for
+   * post-processing and visualization.
+   *
+   * @see <a href="https://www.ensight.com">EnSight</a>
+   */
   enum class Keyword
   {
-    node,
-    id,
-    off,
-    given,
-    assign,
-    ignore,
-    element,
-    coordinates,
-    part,
-    block,
-    iblanked,
-    per
+    node,         ///< Node (vertex) data
+    id,           ///< Node/element ID specification
+    off,          ///< ID mode off
+    given,        ///< IDs are explicitly given
+    assign,       ///< Assign IDs automatically
+    ignore,       ///< Ignore ID information
+    element,      ///< Element data
+    coordinates,  ///< Coordinate data section
+    part,         ///< Part definition
+    block,        ///< Block data organization
+    iblanked,     ///< Blanking information
+    per           ///< Per-node or per-element data
   };
 
+  /**
+   * @brief Converts an EnSight6 keyword to its string representation.
+   * @param[in] kw Keyword to convert
+   * @returns C-style string representation
+   */
   inline
   constexpr
   const char* toCharString(Keyword kw)
@@ -68,6 +88,12 @@ namespace Rodin::IO::EnSight6
     return nullptr;
   }
 
+  /**
+   * @brief Stream output operator for EnSight6 keywords.
+   * @param[in,out] os Output stream
+   * @param[in] kw Keyword to output
+   * @returns Reference to the output stream
+   */
   inline
   std::ostream& operator<<(std::ostream& os, Keyword kw)
   {
@@ -75,25 +101,37 @@ namespace Rodin::IO::EnSight6
     return os;
   }
 
+  /**
+   * @brief Element types in EnSight6 format.
+   *
+   * Identifies the different element geometries supported by EnSight6.
+   * The naming follows EnSight conventions where the number indicates
+   * the node count (e.g., bar2 = 2-node line, tria3 = 3-node triangle).
+   */
   enum class ElementType
   {
-    point,
-    bar2,
-    bar3,
-    tria3,
-    tria6,
-    quad4,
-    quad8,
-    tetra4,
-    tetra10,
-    pyramid5,
-    pyramid13,
-    hexa8,
-    hexa20,
-    penta6,
-    penta15,
+    point,      ///< Point (0D)
+    bar2,       ///< 2-node line segment (linear)
+    bar3,       ///< 3-node line segment (quadratic)
+    tria3,      ///< 3-node triangle (linear)
+    tria6,      ///< 6-node triangle (quadratic)
+    quad4,      ///< 4-node quadrilateral (linear)
+    quad8,      ///< 8-node quadrilateral (quadratic)
+    tetra4,     ///< 4-node tetrahedron (linear)
+    tetra10,    ///< 10-node tetrahedron (quadratic)
+    pyramid5,   ///< 5-node pyramid (linear)
+    pyramid13,  ///< 13-node pyramid (quadratic)
+    hexa8,      ///< 8-node hexahedron (linear)
+    hexa20,     ///< 20-node hexahedron (quadratic)
+    penta6,     ///< 6-node pentahedron/wedge (linear)
+    penta15,    ///< 15-node pentahedron/wedge (quadratic)
   };
 
+  /**
+   * @brief Converts an EnSight6 element type to its string representation.
+   * @param[in] kw Element type to convert
+   * @returns C-style string representation
+   */
   inline
   constexpr
   const char* toCharString(ElementType kw)
@@ -134,6 +172,12 @@ namespace Rodin::IO::EnSight6
     return nullptr;
   }
 
+  /**
+   * @brief Stream output operator for EnSight6 element types.
+   * @param[in,out] os Output stream
+   * @param[in] kw Element type to output
+   * @returns Reference to the output stream
+   */
   inline
   std::ostream& operator<<(std::ostream& os, ElementType kw)
   {
@@ -141,6 +185,11 @@ namespace Rodin::IO::EnSight6
     return os;
   }
 
+  /**
+   * @brief Converts Rodin polytope type to EnSight6 element type.
+   * @param[in] t Rodin polytope type
+   * @returns Optional EnSight6 element type, empty if not supported
+   */
   inline
   constexpr
   Optional<ElementType> getGeometry(Geometry::Polytope::Type t)
@@ -166,13 +215,23 @@ namespace Rodin::IO::EnSight6
     return {};
   }
 
+  /**
+   * @brief Variable types in EnSight6 result files.
+   *
+   * Identifies the type of solution variable being output.
+   */
   enum class VariableType
   {
-    scalar,
-    complex,
-    vector
+    scalar,   ///< Scalar field (e.g., temperature, pressure)
+    complex,  ///< Complex-valued field
+    vector    ///< Vector field (e.g., velocity, displacement)
   };
 
+  /**
+   * @brief Converts a variable type to its string representation.
+   * @param[in] kw Variable type to convert
+   * @returns C-style string representation
+   */
   inline
   constexpr
   const char* toCharString(VariableType kw)
@@ -189,6 +248,12 @@ namespace Rodin::IO::EnSight6
     return nullptr;
   }
 
+  /**
+   * @brief Stream output operator for variable types.
+   * @param[in,out] os Output stream
+   * @param[in] kw Variable type to output
+   * @returns Reference to the output stream
+   */
   inline
   std::ostream& operator<<(std::ostream& os, VariableType kw)
   {
@@ -196,15 +261,45 @@ namespace Rodin::IO::EnSight6
     return os;
   }
 
+  /**
+   * @brief Data location specification in EnSight6 format.
+   *
+   * Indicates whether variable data is defined at nodes or elements.
+   */
   enum class Location
   {
-    node,
-    element
+    node,     ///< Data defined at nodes (vertices)
+    element   ///< Data defined at elements (cells)
   };
 }
 
 namespace Rodin::IO
 {
+  /**
+   * @ingroup PrinterSpecializations
+   * @brief Specialization for printing sequential meshes in EnSight6 format.
+   *
+   * This printer writes mesh data in the EnSight6 geometry file format, which
+   * is widely used for post-processing and visualization in engineering applications.
+   *
+   * ## EnSight6 Format
+   * The format uses ASCII text and includes:
+   * - Description line
+   * - Node ID specification
+   * - Element ID specification  
+   * - Coordinate data (X, Y, Z components)
+   * - Element connectivity by type
+   *
+   * ## Usage Example
+   * ```cpp
+   * const Mesh<Context::Local>& mesh = getMesh();
+   * MeshPrinter<FileFormat::ENSIGHT6, Context::Local> printer(mesh);
+   * std::ofstream file("mesh.geo");
+   * printer.print(file);
+   * ```
+   *
+   * @see MeshLoader
+   */
   template <>
   class MeshPrinter<FileFormat::ENSIGHT6, Context::Local>
     : public MeshPrinterBase<Context::Local>
