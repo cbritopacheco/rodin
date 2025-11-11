@@ -27,34 +27,47 @@
 
 namespace Rodin::IO::MEDIT
 {
+  /**
+   * @brief Keywords used in MEDIT mesh and solution file formats.
+   *
+   * These keywords identify different sections in MEDIT files (.mesh and .sol).
+   * The MEDIT format is a text-based format used by the MMG remeshing software.
+   *
+   * @see <a href="https://www.ljll.math.upmc.fr/frey/logiciels/Docmedit.dir/index.html">MEDIT Format Specification</a>
+   */
   enum class Keyword
   {
-    MeshVersionFormatted,
-    Dimension,
-    Vertices,
-    Triangles,
-    Quadrilaterals,
-    Tetrahedra,
-    Wedges,
-    Corners,
-    Ridges,
-    Edges,
-    SolAtVertices,
-    SolAtEdges,
-    SolAtTriangles,
-    SolAtQuadrilaterals,
-    SolAtTetrahedra,
-    SolAtPentahedra,
-    SolAtHexahedra,
-    RequiredVertices,
-    RequiredEdges,
-    Normals,
-    NormalAtVertices,
-    Tangents,
-    TangentAtVertices,
-    End
+    MeshVersionFormatted,  ///< Format version declaration
+    Dimension,             ///< Spatial dimension
+    Vertices,              ///< Vertex coordinates section
+    Triangles,             ///< Triangle elements section
+    Quadrilaterals,        ///< Quadrilateral elements section
+    Tetrahedra,            ///< Tetrahedral elements section
+    Wedges,                ///< Wedge (prism) elements section
+    Corners,               ///< Corner vertices section
+    Ridges,                ///< Ridge edges section
+    Edges,                 ///< Edge elements section
+    SolAtVertices,         ///< Solution at vertices
+    SolAtEdges,            ///< Solution at edges
+    SolAtTriangles,        ///< Solution at triangles
+    SolAtQuadrilaterals,   ///< Solution at quadrilaterals
+    SolAtTetrahedra,       ///< Solution at tetrahedra
+    SolAtPentahedra,       ///< Solution at pentahedra
+    SolAtHexahedra,        ///< Solution at hexahedra
+    RequiredVertices,      ///< Required vertices section
+    RequiredEdges,         ///< Required edges section
+    Normals,               ///< Normal vectors section
+    NormalAtVertices,      ///< Normals at vertices
+    Tangents,              ///< Tangent vectors section
+    TangentAtVertices,     ///< Tangents at vertices
+    End                    ///< End of file marker
   };
 
+  /**
+   * @brief Converts a MEDIT keyword enum to its string representation.
+   * @param[in] kw Keyword to convert
+   * @returns C-style string representation of the keyword
+   */
   inline
   constexpr
   const char* toCharString(Keyword kw)
