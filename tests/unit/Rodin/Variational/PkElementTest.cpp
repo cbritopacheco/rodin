@@ -1382,4 +1382,395 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 120);
     EXPECT_EQ(k.getOrder(), 3);
   }
+
+  // ========================================================================
+  // Extended tests for Complex PkElement (additional mathematical properties)
+  // ========================================================================
+
+  // Test Complex P0 consistency
+  TEST(Rodin_Variational_ComplexPkElement, P0_Consistency)
+  {
+    ComplexPkElement<0> pk0(Polytope::Type::Segment);
+    ComplexP0Element p0(Polytope::Type::Segment);
+    
+    EXPECT_EQ(pk0.getCount(), p0.getCount());
+    EXPECT_EQ(pk0.getOrder(), p0.getOrder());
+    
+    // Test basis function values match
+    RandomFloat gen(0.0, 1.0);
+    for (size_t i = 0; i < 5; i++)
+    {
+      const auto& x = gen();
+      Math::Vector<Real> p{{x}};
+      
+      Complex pk_val = pk0.getBasis(0)(p);
+      Complex p0_val = p0.getBasis(0)(p);
+      EXPECT_NEAR(std::abs(pk_val - p0_val), 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test Complex P1 consistency
+  TEST(Rodin_Variational_ComplexPkElement, P1_Consistency)
+  {
+    ComplexPkElement<1> pk1(Polytope::Type::Segment);
+    ComplexP1Element p1(Polytope::Type::Segment);
+    
+    EXPECT_EQ(pk1.getCount(), p1.getCount());
+    EXPECT_EQ(pk1.getOrder(), p1.getOrder());
+    
+    // Test basis function values match
+    RandomFloat gen(0.0, 1.0);
+    for (size_t trial = 0; trial < 10; trial++)
+    {
+      const auto& x = gen();
+      Math::Vector<Real> p{{x}};
+      
+      for (size_t i = 0; i < pk1.getCount(); i++)
+      {
+        Complex pk_val = pk1.getBasis(i)(p);
+        Complex p1_val = p1.getBasis(i)(p);
+        EXPECT_NEAR(std::abs(pk_val - p1_val), 0.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // Test Complex P4 partition of unity on Triangle
+  TEST(Rodin_Variational_ComplexPkElement, PartitionOfUnity_P4_Triangle)
+  {
+    constexpr size_t n = 20;
+    RandomFloat gen(0.0, 1.0);
+    ComplexPkElement<4> k(Polytope::Type::Triangle);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      Math::Vector<Real> p{{x, y}};
+      
+      Complex sum(0.0, 0.0);
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(std::abs(sum - Complex(1.0, 0.0)), 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test Complex P5 partition of unity on Quadrilateral
+  TEST(Rodin_Variational_ComplexPkElement, PartitionOfUnity_P5_Quadrilateral)
+  {
+    constexpr size_t n = 20;
+    RandomFloat gen(0.0, 1.0);
+    ComplexPkElement<5> k(Polytope::Type::Quadrilateral);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen();
+      Math::Vector<Real> p{{x, y}};
+      
+      Complex sum(0.0, 0.0);
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(std::abs(sum - Complex(1.0, 0.0)), 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test Complex P3 Lagrange property on Tetrahedron
+  TEST(Rodin_Variational_ComplexPkElement, LagrangeProperty_P3_Tetrahedron)
+  {
+    ComplexPkElement<3> k(Polytope::Type::Tetrahedron);
+    
+    for (size_t i = 0; i < k.getCount(); i++)
+    {
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        const auto& node = k.getNode(j);
+        Complex expected = (i == j) ? Complex(1.0, 0.0) : Complex(0.0, 0.0);
+        Complex value = k.getBasis(i)(node);
+        EXPECT_NEAR(std::abs(value - expected), 0.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // Test Complex higher orders DOF counting
+  TEST(Rodin_Variational_ComplexPkElement, DOFCount_HigherOrders)
+  {
+    EXPECT_EQ(ComplexPkElement<4>(Polytope::Type::Segment).getCount(), 5);
+    EXPECT_EQ(ComplexPkElement<5>(Polytope::Type::Segment).getCount(), 6);
+    EXPECT_EQ(ComplexPkElement<6>(Polytope::Type::Segment).getCount(), 7);
+    EXPECT_EQ(ComplexPkElement<4>(Polytope::Type::Triangle).getCount(), 15);
+    EXPECT_EQ(ComplexPkElement<4>(Polytope::Type::Quadrilateral).getCount(), 25);
+  }
+
+  // Test Complex linear reproduction
+  TEST(Rodin_Variational_ComplexPkElement, LinearReproduction_P2_Segment)
+  {
+    ComplexPkElement<2> k(Polytope::Type::Segment);
+    RandomFloat gen(0.0, 1.0);
+    
+    for (size_t trial = 0; trial < 10; trial++)
+    {
+      // Random linear function: f(x) = a + b*x
+      Complex a(gen(), gen());
+      Complex b(gen(), gen());
+      
+      // Test interpolation at a random point
+      const auto& x = gen();
+      Math::Vector<Real> p{{x}};
+      
+      Complex expected = a + b * x;
+      Complex interpolated(0.0, 0.0);
+      
+      for (size_t i = 0; i < k.getCount(); i++)
+      {
+        const auto& node = k.getNode(i);
+        Complex f_at_node = a + b * node.x();
+        interpolated += f_at_node * k.getBasis(i)(p);
+      }
+      
+      EXPECT_NEAR(std::abs(interpolated - expected), 0.0, 1e-10);
+    }
+  }
+
+  // Test Complex symmetry properties
+  TEST(Rodin_Variational_ComplexPkElement, BasisSymmetry_P3_Segment)
+  {
+    ComplexPkElement<3> k(Polytope::Type::Segment);
+    
+    // For P3 on segment, basis functions should have symmetry
+    // φ_0(x) at x should equal φ_3(1-x) at (1-x)
+    RandomFloat gen(0.0, 1.0);
+    
+    for (size_t trial = 0; trial < 10; trial++)
+    {
+      const auto& x = gen();
+      Math::Vector<Real> p1{{x}};
+      Math::Vector<Real> p2{{1.0 - x}};
+      
+      Complex val1 = k.getBasis(0)(p1);
+      Complex val2 = k.getBasis(3)(p2);
+      
+      EXPECT_NEAR(std::abs(val1 - val2), 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // ========================================================================
+  // Extended tests for Vector PkElement (additional mathematical properties)
+  // ========================================================================
+
+  // Test Vector P3 partition of unity on Triangle  
+  TEST(Rodin_Variational_VectorPkElement, PartitionOfUnity_P3_Triangle)
+  {
+    constexpr size_t vdim = 2;
+    constexpr size_t n = 20;
+    RandomFloat gen(0.0, 1.0);
+    VectorPkElement<3> k(vdim, Polytope::Type::Triangle);
+    RealPkElement<3> scalar_k(Polytope::Type::Triangle);
+    
+    // For vector elements, each scalar basis function appears vdim times
+    // The partition of unity should hold for the underlying scalar basis
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      Math::Vector<Real> p{{x, y}};
+      
+      // Check that scalar basis functions (summed across components) sum to 1
+      Real scalar_sum = 0.0;
+      for (size_t node_idx = 0; node_idx < scalar_k.getCount(); node_idx++)
+      {
+        scalar_sum += scalar_k.getBasis(node_idx)(p);
+      }
+      EXPECT_NEAR(scalar_sum, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test Vector P2 Lagrange property on Quadrilateral
+  TEST(Rodin_Variational_VectorPkElement, LagrangeProperty_P2_Quadrilateral)
+  {
+    constexpr size_t vdim = 2;
+    VectorPkElement<2> k(vdim, Polytope::Type::Quadrilateral);
+    RealPkElement<2> scalar_k(Polytope::Type::Quadrilateral);
+    
+    // Test Lagrange property: each vector basis should be 1 in one component at one node
+    for (size_t node_idx = 0; node_idx < scalar_k.getCount(); node_idx++)
+    {
+      const auto& node = scalar_k.getNode(node_idx);
+      
+      for (size_t component = 0; component < vdim; component++)
+      {
+        size_t local = node_idx * vdim + component;
+        const auto& vec_basis = k.getBasis(local)(node);
+        
+        for (size_t c = 0; c < vdim; c++)
+        {
+          if (c == component)
+          {
+            EXPECT_NEAR(std::abs(vec_basis(c) - 1.0), 0.0, RODIN_FUZZY_CONSTANT);
+          }
+          else
+          {
+            EXPECT_NEAR(std::abs(vec_basis(c)), 0.0, RODIN_FUZZY_CONSTANT);
+          }
+        }
+      }
+    }
+  }
+
+  // Test Vector higher orders on Tetrahedron
+  TEST(Rodin_Variational_VectorPkElement, HigherOrder_P4_Tetrahedron)
+  {
+    constexpr size_t vdim = 3;
+    VectorPkElement<4> k(vdim, Polytope::Type::Tetrahedron);
+    
+    // P4 on Tetrahedron: (k+1)(k+2)(k+3)/6 = 5*6*7/6 = 35 scalar DOFs
+    EXPECT_EQ(k.getCount(), 35 * vdim);
+    EXPECT_EQ(k.getOrder(), 4);
+  }
+
+  // Test Vector basis sparsity in components
+  TEST(Rodin_Variational_VectorPkElement, ComponentSparsity_P2_Segment)
+  {
+    constexpr size_t vdim = 3;
+    VectorPkElement<2> k(vdim, Polytope::Type::Segment);
+    
+    RandomFloat gen(0.0, 1.0);
+    
+    for (size_t trial = 0; trial < 10; trial++)
+    {
+      const auto& x = gen();
+      Math::Vector<Real> p{{x}};
+      
+      // Each vector basis function should have only one non-zero component
+      for (size_t i = 0; i < k.getCount(); i++)
+      {
+        const auto& basis_val = k.getBasis(i)(p);
+        size_t active_comp = i % vdim;
+        
+        size_t non_zero_count = 0;
+        for (size_t c = 0; c < vdim; c++)
+        {
+          if (c == active_comp)
+          {
+            // This component should match the underlying scalar basis
+            // (non-zero in general)
+            if (std::abs(basis_val(c)) > RODIN_FUZZY_CONSTANT)
+              non_zero_count++;
+          }
+          else
+          {
+            // Other components should be zero
+            EXPECT_NEAR(std::abs(basis_val(c)), 0.0, RODIN_FUZZY_CONSTANT);
+          }
+        }
+        
+        // Exactly one component should be non-zero (the active one)
+        EXPECT_EQ(non_zero_count, 1);
+      }
+    }
+  }
+
+  // Test Vector gradient consistency
+  TEST(Rodin_Variational_VectorPkElement, GradientConsistency_P3_Segment)
+  {
+    constexpr size_t vdim = 2;
+    VectorPkElement<3> k(vdim, Polytope::Type::Segment);
+    
+    RandomFloat gen(0.0, 1.0);
+    
+    for (size_t trial = 0; trial < 5; trial++)
+    {
+      const auto& x = gen();
+      Math::Vector<Real> p{{x}};
+      
+      for (size_t i = 0; i < k.getCount(); i++)
+      {
+        // Check that Jacobian is computed correctly
+        const auto& jac = k.getBasis(i).getJacobian()(p);
+        
+        // Jacobian should match component-wise derivatives
+        for (size_t c = 0; c < vdim; c++)
+        {
+          for (size_t d = 0; d < 1; d++) // 1D spatial dimension
+          {
+            Real deriv = k.getBasis(i).template getDerivative<1>(c, d)(p);
+            EXPECT_NEAR(std::abs(jac(c, d) - deriv), 0.0, RODIN_FUZZY_CONSTANT);
+          }
+        }
+      }
+    }
+  }
+
+  // Test Vector DOF count on all geometries with higher orders
+  TEST(Rodin_Variational_VectorPkElement, DOFCount_AllGeometries_P5)
+  {
+    constexpr size_t vdim = 3;
+    
+    // P5 Segment: 6 scalar DOFs
+    EXPECT_EQ(VectorPkElement<5>(vdim, Polytope::Type::Segment).getCount(), 6 * vdim);
+    
+    // P5 Triangle: (k+1)(k+2)/2 = 6*7/2 = 21 scalar DOFs
+    EXPECT_EQ(VectorPkElement<5>(vdim, Polytope::Type::Triangle).getCount(), 21 * vdim);
+    
+    // P5 Quadrilateral: (k+1)^2 = 36 scalar DOFs
+    EXPECT_EQ(VectorPkElement<5>(vdim, Polytope::Type::Quadrilateral).getCount(), 36 * vdim);
+    
+    // P5 Tetrahedron: (k+1)(k+2)(k+3)/6 = 6*7*8/6 = 56 scalar DOFs
+    EXPECT_EQ(VectorPkElement<5>(vdim, Polytope::Type::Tetrahedron).getCount(), 56 * vdim);
+  }
+
+  // Test Vector linear field reproduction
+  TEST(Rodin_Variational_VectorPkElement, LinearReproduction_P2_Segment)
+  {
+    constexpr size_t vdim = 2;
+    VectorPkElement<2> k(vdim, Polytope::Type::Segment);
+    RealPkElement<2> scalar_k(Polytope::Type::Segment);
+    
+    RandomFloat gen(0.0, 1.0);
+    
+    for (size_t trial = 0; trial < 5; trial++)
+    {
+      // Define a linear vector field: v(x) = [a0 + b0*x, a1 + b1*x]
+      Real a0 = gen(), b0 = gen();
+      Real a1 = gen(), b1 = gen();
+      
+      // Test interpolation at random point
+      const auto& x = gen();
+      Math::Vector<Real> test_pt{{x}};
+      
+      Math::Vector<Real> expected(vdim);
+      expected(0) = a0 + b0 * x;
+      expected(1) = a1 + b1 * x;
+      
+      Math::Vector<Real> interpolated(vdim);
+      interpolated.setZero();
+      
+      for (size_t node_idx = 0; node_idx < scalar_k.getCount(); node_idx++)
+      {
+        const auto& node = scalar_k.getNode(node_idx);
+        Real nx = node.x();
+        
+        // Vector field values at nodes
+        Math::Vector<Real> v_at_node(vdim);
+        v_at_node(0) = a0 + b0 * nx;
+        v_at_node(1) = a1 + b1 * nx;
+        
+        // Add contributions from all vector basis functions at this node
+        for (size_t c = 0; c < vdim; c++)
+        {
+          size_t local = node_idx * vdim + c;
+          const auto& basis_val = k.getBasis(local)(test_pt);
+          interpolated += v_at_node(c) * basis_val;
+        }
+      }
+      
+      for (size_t c = 0; c < vdim; c++)
+      {
+        EXPECT_NEAR(std::abs(interpolated(c) - expected(c)), 0.0, 1e-10);
+      }
+    }
+  }
 }
