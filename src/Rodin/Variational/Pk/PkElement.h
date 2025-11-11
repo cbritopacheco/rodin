@@ -7,6 +7,10 @@
 #ifndef RODIN_VARIATIONAL_PK_PKELEMENT_H
 #define RODIN_VARIATIONAL_PK_PKELEMENT_H
 
+#include <cstddef>
+
+#include "Rodin/Variational/FiniteElement.h"
+
 /**
  * @ingroup RodinDirectives
  * @brief Indicates the maximum vector dimension a PkElement

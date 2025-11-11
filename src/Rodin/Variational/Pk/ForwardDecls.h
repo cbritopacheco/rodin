@@ -15,6 +15,7 @@ namespace Rodin::Variational
 {
   /**
    * @brief Degree k Lagrange element
+   * @tparam K Polynomial degree
    * @tparam Range Range value type
    *
    * @note For an overview of all the possible specializations of the
@@ -22,7 +23,7 @@ namespace Rodin::Variational
    *
    * @see PkElementSpecializations
    */
-  template <class Range>
+  template <size_t K, class Range>
   class PkElement;
 }
 
