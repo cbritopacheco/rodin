@@ -188,7 +188,8 @@ namespace Rodin::Variational
       constexpr
       const Math::SpatialVector<Real>& getNode(size_t i) const
       {
-        return s_nodes[this->getGeometry()][i];
+        assert(i == 0); // P0 element has only one node
+        return s_nodes[this->getGeometry()];
       }
 
       constexpr
