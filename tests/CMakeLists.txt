@@ -23,6 +23,7 @@ rodin_add_compile_options(
   -Wno-error=zero-as-null-pointer-constant
   -Wno-error=deprecated-anon-enum-enum-conversion
   -Wno-error=deprecated-builtins
+  -Wno-error=array-bounds
   )
 
 if (RODIN_BUILD_UNIT_TESTS)

@@ -1,9 +1,20 @@
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
+// Disable strict aliasing and array-bounds warnings from Eigen for tests
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 #include "Rodin/Variational/Pk/PkElement.h"
 #include "Rodin/Variational/P0/P0Element.h"
 #include "Rodin/Variational/P1/P1Element.h"
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 using namespace Rodin;
 using namespace Rodin::IO;

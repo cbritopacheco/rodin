@@ -213,12 +213,10 @@ namespace Rodin::Variational
           const Geometry::Polytope::Type m_g;
       };
 
-      constexpr
       PkElement()
         : Parent(Geometry::Polytope::Type::Point)
       {}
 
-      constexpr
       PkElement(Geometry::Polytope::Type geometry)
         : Parent(geometry)
       {
@@ -281,7 +279,6 @@ namespace Rodin::Variational
       }
 
     private:
-      constexpr
       void buildNodes();
 
       std::vector<Math::SpatialPoint> m_nodes;

@@ -193,7 +193,6 @@ namespace Rodin::Variational
   }
 
   template <size_t K, class Scalar>
-  constexpr
   void PkElement<K, Scalar>::buildNodes()
   {
     Internal::generateLagrangeNodes<K>(m_nodes, this->getGeometry());
@@ -241,13 +240,6 @@ namespace Rodin::Variational
   constexpr
   Scalar PkElement<K, Scalar>::BasisFunction::operator()(const Math::SpatialPoint& r) const
   {
-    // Get nodes for this element
-    PkElement<K, Scalar> elem(m_g);
-    const auto& nodes = elem.m_nodes;
-    
-    if (m_local >= nodes.size())
-      return Math::nan<Scalar>();
-    
     switch (m_g)
     {
       case Geometry::Polytope::Type::Point:
@@ -277,7 +269,6 @@ namespace Rodin::Variational
               
               // This is a placeholder - proper implementation would use
               // Silvester-Lagrange polynomials on triangles
-              Scalar result = 1;
               const auto& node = nodes[m_local];
               Real node_lambda0 = 1.0 - node.x() - node.y();
               Real node_lambda1 = node.x();
@@ -314,6 +305,11 @@ namespace Rodin::Variational
         // Tensor product of 1D Lagrange basis
         size_t j_idx = m_local / (K + 1);
         size_t i_idx = m_local % (K + 1);
+        
+        // Initialize to ensure no uninitialized warnings
+        const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
+        if (dim < 2)
+          return Math::nan<Scalar>();
         
         return Internal::evaluateLagrange1D<K, Scalar>(i_idx, r.x()) *
                Internal::evaluateLagrange1D<K, Scalar>(j_idx, r.y());
