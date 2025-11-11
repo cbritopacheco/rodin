@@ -183,6 +183,293 @@ namespace Rodin::Variational
       }
       return result;
     }
+
+    /**
+     * @brief Evaluates Lagrange basis for triangle using barycentric coordinates.
+     * 
+     * For a triangle with barycentric coordinates (λ0, λ1, λ2), the Pk Lagrange
+     * basis function associated with node (i, j, k) where i+j+k=K is:
+     * φ_{i,j,k}(λ) = L_i^K(λ0) * L_j^K(λ1) * L_k^K(λ2)
+     * 
+     * where L_n^K(λ) = ∏_{m=0}^{n-1} (K*λ - m) / (n - m) for n > 0, and L_0^K = 1
+     */
+    template <size_t K, class Scalar>
+    constexpr Scalar evaluateLagrangeTriangle(size_t i, size_t j, const Math::SpatialPoint& r)
+    {
+      // Barycentric coordinates: λ0 = 1 - x - y, λ1 = x, λ2 = y
+      Real lambda[3];
+      lambda[0] = 1.0 - r.x() - r.y();
+      lambda[1] = r.x();
+      lambda[2] = r.y();
+      
+      // Indices: k = K - i - j
+      size_t indices[3] = {i, j, K - i - j};
+      
+      // Compute product of generalized Lagrange polynomials
+      Scalar result = 1;
+      for (size_t dim = 0; dim < 3; ++dim)
+      {
+        size_t n = indices[dim];
+        if (n == 0)
+          continue;
+        
+        Scalar L_n = 1;
+        for (size_t m = 0; m < n; ++m)
+        {
+          L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+          L_n /= static_cast<Real>(m + 1);
+        }
+        result *= L_n;
+      }
+      
+      return result;
+    }
+
+    /**
+     * @brief Evaluates derivative of Lagrange basis for triangle.
+     */
+    template <size_t K, class Scalar>
+    constexpr Scalar evaluateLagrangeTriangleDerivative(
+        size_t i, size_t j, size_t deriv_dim, const Math::SpatialPoint& r)
+    {
+      // Barycentric coordinates: λ0 = 1 - x - y, λ1 = x, λ2 = y
+      Real lambda[3];
+      lambda[0] = 1.0 - r.x() - r.y();
+      lambda[1] = r.x();
+      lambda[2] = r.y();
+      
+      // Derivatives of barycentric coordinates w.r.t. x and y
+      // dλ0/dx = -1, dλ0/dy = -1
+      // dλ1/dx = 1,  dλ1/dy = 0
+      // dλ2/dx = 0,  dλ2/dy = 1
+      Real dlambda[3][2] = {{-1, -1}, {1, 0}, {0, 1}};
+      
+      size_t indices[3] = {i, j, K - i - j};
+      
+      // Use product rule: d/dx[f*g*h] = f'*g*h + f*g'*h + f*g*h'
+      Scalar result = 0;
+      
+      for (size_t d = 0; d < 3; ++d)
+      {
+        // Compute derivative contribution from dimension d
+        Scalar term = dlambda[d][deriv_dim];
+        
+        for (size_t dim = 0; dim < 3; ++dim)
+        {
+          size_t n = indices[dim];
+          
+          if (dim == d && n > 0)
+          {
+            // Derivative of L_n^K(λ_d)
+            Scalar dL_n = 0;
+            for (size_t p = 0; p < n; ++p)
+            {
+              Scalar prod = static_cast<Real>(K);
+              for (size_t m = 0; m < n; ++m)
+              {
+                if (m != p)
+                {
+                  prod *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+                  prod /= static_cast<Real>(m + 1);
+                }
+              }
+              prod /= static_cast<Real>(p + 1);
+              dL_n += prod;
+            }
+            term *= dL_n;
+          }
+          else
+          {
+            // Regular L_n^K(λ_dim)
+            if (n == 0)
+              continue;
+            
+            Scalar L_n = 1;
+            for (size_t m = 0; m < n; ++m)
+            {
+              L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+              L_n /= static_cast<Real>(m + 1);
+            }
+            term *= L_n;
+          }
+        }
+        
+        result += term;
+      }
+      
+      return result;
+    }
+
+    /**
+     * @brief Evaluates Lagrange basis for tetrahedron using barycentric coordinates.
+     */
+    template <size_t K, class Scalar>
+    constexpr Scalar evaluateLagrangeTetrahedron(
+        size_t i, size_t j, size_t k, const Math::SpatialPoint& r)
+    {
+      // Barycentric coordinates: λ0 = 1-x-y-z, λ1 = x, λ2 = y, λ3 = z
+      Real lambda[4];
+      lambda[0] = 1.0 - r.x() - r.y() - r.z();
+      lambda[1] = r.x();
+      lambda[2] = r.y();
+      lambda[3] = r.z();
+      
+      size_t indices[4] = {i, j, k, K - i - j - k};
+      
+      Scalar result = 1;
+      for (size_t dim = 0; dim < 4; ++dim)
+      {
+        size_t n = indices[dim];
+        if (n == 0)
+          continue;
+        
+        Scalar L_n = 1;
+        for (size_t m = 0; m < n; ++m)
+        {
+          L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+          L_n /= static_cast<Real>(m + 1);
+        }
+        result *= L_n;
+      }
+      
+      return result;
+    }
+
+    /**
+     * @brief Evaluates Lagrange basis for wedge (tensor product of triangle and segment).
+     */
+    template <size_t K, class Scalar>
+    constexpr Scalar evaluateLagrangeWedge(
+        size_t i, size_t j, size_t k, const Math::SpatialPoint& r)
+    {
+      // Wedge is a tensor product: triangle (x,y) × segment (z)
+      // For indices (i,j) on triangle with i+j≤K, and k on segment
+      
+      // Triangle part using barycentric coordinates
+      Real lambda[3];
+      lambda[0] = 1.0 - r.x() - r.y();
+      lambda[1] = r.x();
+      lambda[2] = r.y();
+      
+      size_t tri_indices[3] = {i, j, K - i - j};
+      
+      Scalar tri_result = 1;
+      for (size_t dim = 0; dim < 3; ++dim)
+      {
+        size_t n = tri_indices[dim];
+        if (n == 0)
+          continue;
+        
+        Scalar L_n = 1;
+        for (size_t m = 0; m < n; ++m)
+        {
+          L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+          L_n /= static_cast<Real>(m + 1);
+        }
+        tri_result *= L_n;
+      }
+      
+      // Segment part (1D Lagrange)
+      Scalar seg_result = evaluateLagrange1D<K, Scalar>(k, r.z());
+      
+      return tri_result * seg_result;
+    }
+
+    /**
+     * @brief Evaluates derivative of Lagrange basis for tetrahedron.
+     */
+    template <size_t K, class Scalar>
+    constexpr Scalar evaluateLagrangeTetrahedronDerivative(
+        size_t i, size_t j, size_t k, size_t deriv_dim, const Math::SpatialPoint& r)
+    {
+      // Barycentric coordinates: λ0 = 1-x-y-z, λ1 = x, λ2 = y, λ3 = z
+      Real lambda[4];
+      lambda[0] = 1.0 - r.x() - r.y() - r.z();
+      lambda[1] = r.x();
+      lambda[2] = r.y();
+      lambda[3] = r.z();
+      
+      // Derivatives: dλ0/dx = -1, dλ0/dy = -1, dλ0/dz = -1
+      //              dλ1/dx = 1,  dλ1/dy = 0,  dλ1/dz = 0
+      //              dλ2/dx = 0,  dλ2/dy = 1,  dλ2/dz = 0
+      //              dλ3/dx = 0,  dλ3/dy = 0,  dλ3/dz = 1
+      Real dlambda[4][3] = {{-1, -1, -1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+      
+      size_t indices[4] = {i, j, k, K - i - j - k};
+      
+      Scalar result = 0;
+      
+      for (size_t d = 0; d < 4; ++d)
+      {
+        Scalar term = dlambda[d][deriv_dim];
+        
+        for (size_t dim = 0; dim < 4; ++dim)
+        {
+          size_t n = indices[dim];
+          
+          if (dim == d && n > 0)
+          {
+            // Derivative of L_n^K
+            Scalar dL_n = 0;
+            for (size_t p = 0; p < n; ++p)
+            {
+              Scalar prod = static_cast<Real>(K);
+              for (size_t m = 0; m < n; ++m)
+              {
+                if (m != p)
+                {
+                  prod *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+                  prod /= static_cast<Real>(m + 1);
+                }
+              }
+              prod /= static_cast<Real>(p + 1);
+              dL_n += prod;
+            }
+            term *= dL_n;
+          }
+          else
+          {
+            if (n == 0)
+              continue;
+            
+            Scalar L_n = 1;
+            for (size_t m = 0; m < n; ++m)
+            {
+              L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+              L_n /= static_cast<Real>(m + 1);
+            }
+            term *= L_n;
+          }
+        }
+        
+        result += term;
+      }
+      
+      return result;
+    }
+
+    /**
+     * @brief Evaluates derivative of Lagrange basis for wedge.
+     */
+    template <size_t K, class Scalar>
+    constexpr Scalar evaluateLagrangeWedgeDerivative(
+        size_t i, size_t j, size_t k, size_t deriv_dim, const Math::SpatialPoint& r)
+    {
+      if (deriv_dim < 2)
+      {
+        // Derivative w.r.t. x or y (triangle part)
+        Scalar tri_deriv = evaluateLagrangeTriangleDerivative<K, Scalar>(i, j, deriv_dim, r);
+        Scalar seg_val = evaluateLagrange1D<K, Scalar>(k, r.z());
+        return tri_deriv * seg_val;
+      }
+      else
+      {
+        // Derivative w.r.t. z (segment part)
+        Scalar tri_val = evaluateLagrangeTriangle<K, Scalar>(i, j, r);
+        Scalar seg_deriv = evaluateLagrange1DDerivative<K, Scalar>(k, r.z());
+        return tri_val * seg_deriv;
+      }
+    }
   }
 
   template <size_t K, class Scalar>
@@ -393,6 +680,7 @@ namespace Rodin::Variational
       case Geometry::Polytope::Type::Triangle:
       {
         // Use barycentric coordinates for triangle
+        // Node ordering: (i,j) with i+j≤K, ordered by j then i
         size_t idx = 0;
         for (size_t j = 0; j <= K; ++j)
         {
@@ -400,28 +688,7 @@ namespace Rodin::Variational
           {
             if (idx == m_local)
             {
-              // Lagrange basis on triangle using area coordinates
-              Real lambda0 = 1.0 - r.x() - r.y();
-              Real lambda1 = r.x();
-              Real lambda2 = r.y();
-              
-              // For K=1 (P1), use standard linear basis
-              if constexpr (K == 1)
-              {
-                if (i == 1 && j == 0)
-                  return lambda1;
-                else if (i == 0 && j == 1)
-                  return lambda2;
-                else // i == 0 && j == 0
-                  return lambda0;
-              }
-              else if constexpr (K == 0)
-              {
-                return 1;
-              }
-              
-              // For K > 1, return 0 as placeholder (proper implementation needed)
-              return 0;
+              return Internal::evaluateLagrangeTriangle<K, Scalar>(i, j, r);
             }
             idx++;
           }
@@ -443,11 +710,45 @@ namespace Rodin::Variational
                Internal::evaluateLagrange1D<K, Scalar>(j_idx, r.y());
       }
       case Geometry::Polytope::Type::Tetrahedron:
+      {
+        // Node ordering: (i,j,k) with i+j+k≤K, ordered by k, then j, then i
+        size_t idx = 0;
+        for (size_t k = 0; k <= K; ++k)
+        {
+          for (size_t j = 0; j <= K - k; ++j)
+          {
+            for (size_t i = 0; i <= K - j - k; ++i)
+            {
+              if (idx == m_local)
+              {
+                return Internal::evaluateLagrangeTetrahedron<K, Scalar>(i, j, k, r);
+              }
+              idx++;
+            }
+          }
+        }
+        return Math::nan<Scalar>();
+      }
       case Geometry::Polytope::Type::Wedge:
       {
-        // Placeholder for 3D elements
-        // Proper implementation would use 3D Lagrange polynomials
-        return 0;
+        // Node ordering: triangle nodes (i,j) with i+j≤K, then segment node k
+        // Ordered by k, then j, then i
+        size_t idx = 0;
+        for (size_t k = 0; k <= K; ++k)
+        {
+          for (size_t j = 0; j <= K; ++j)
+          {
+            for (size_t i = 0; i <= K - j; ++i)
+            {
+              if (idx == m_local)
+              {
+                return Internal::evaluateLagrangeWedge<K, Scalar>(i, j, k, r);
+              }
+              idx++;
+            }
+          }
+        }
+        return Math::nan<Scalar>();
       }
     }
     
@@ -479,31 +780,17 @@ namespace Rodin::Variational
         }
         case Geometry::Polytope::Type::Triangle:
         {
-          // For K=1 (P1 element), use analytical derivatives
-          if constexpr (K == 1)
+          // Find the (i,j) indices for this local DOF
+          size_t idx = 0;
+          for (size_t j = 0; j <= K; ++j)
           {
-            size_t idx = 0;
-            for (size_t j = 0; j <= K; ++j)
+            for (size_t i = 0; i <= K - j; ++i)
             {
-              for (size_t i = 0; i <= K - j; ++i)
+              if (idx == m_local)
               {
-                if (idx == m_local)
-                {
-                  if (i == 0 && j == 0) // lambda0 = 1 - x - y
-                  {
-                    return (m_i == 0) ? -1 : -1;
-                  }
-                  else if (i == 1 && j == 0) // lambda1 = x
-                  {
-                    return (m_i == 0) ? 1 : 0;
-                  }
-                  else if (i == 0 && j == 1) // lambda2 = y
-                  {
-                    return (m_i == 0) ? 0 : 1;
-                  }
-                }
-                idx++;
+                return Internal::evaluateLagrangeTriangleDerivative<K, Scalar>(i, j, m_i, r);
               }
+              idx++;
             }
           }
           return 0;
@@ -527,9 +814,44 @@ namespace Rodin::Variational
           return 0;
         }
         case Geometry::Polytope::Type::Tetrahedron:
+        {
+          // Find (i,j,k) indices for this local DOF
+          size_t idx = 0;
+          for (size_t k = 0; k <= K; ++k)
+          {
+            for (size_t j = 0; j <= K - k; ++j)
+            {
+              for (size_t i = 0; i <= K - j - k; ++i)
+              {
+                if (idx == m_local)
+                {
+                  return Internal::evaluateLagrangeTetrahedronDerivative<K, Scalar>(i, j, k, m_i, r);
+                }
+                idx++;
+              }
+            }
+          }
+          return 0;
+        }
         case Geometry::Polytope::Type::Wedge:
         {
-          return 0; // Placeholder
+          // Find (i,j,k) indices for this local DOF
+          size_t idx = 0;
+          for (size_t k = 0; k <= K; ++k)
+          {
+            for (size_t j = 0; j <= K; ++j)
+            {
+              for (size_t i = 0; i <= K - j; ++i)
+              {
+                if (idx == m_local)
+                {
+                  return Internal::evaluateLagrangeWedgeDerivative<K, Scalar>(i, j, k, m_i, r);
+                }
+                idx++;
+              }
+            }
+          }
+          return 0;
         }
       }
       return 0;

@@ -714,4 +714,412 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealPkElement<5>(Polytope::Type::Segment).getOrder(), 5);
     EXPECT_EQ(RealPkElement<6>(Polytope::Type::Segment).getOrder(), 6);
   }
+
+  // ========================================================================
+  // Tests for Triangle elements (as requested)
+  // ========================================================================
+
+  // Test P2 triangle Lagrange property
+  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P2_Triangle)
+  {
+    RealPkElement<2> k(Polytope::Type::Triangle);
+    
+    // Test Lagrange property at nodes: φᵢ(xⱼ) = δᵢⱼ
+    for (size_t i = 0; i < k.getCount(); i++)
+    {
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        const auto& node = k.getNode(j);
+        Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(k.getBasis(i)(node), expected, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // Test P2 triangle partition of unity
+  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P2_Triangle)
+  {
+    constexpr size_t n = 50;
+    RandomFloat gen(0.0, 1.0);
+    RealPkElement<2> k(Polytope::Type::Triangle);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x); // Ensure x + y ≤ 1
+      Math::Vector<Real> p{{x, y}};
+      
+      Real sum = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test P3 triangle Lagrange property
+  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P3_Triangle)
+  {
+    RealPkElement<3> k(Polytope::Type::Triangle);
+    
+    for (size_t i = 0; i < k.getCount(); i++)
+    {
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        const auto& node = k.getNode(j);
+        Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(k.getBasis(i)(node), expected, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // Test P3 triangle partition of unity
+  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P3_Triangle)
+  {
+    constexpr size_t n = 50;
+    RandomFloat gen(0.0, 1.0);
+    RealPkElement<3> k(Polytope::Type::Triangle);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      Math::Vector<Real> p{{x, y}};
+      
+      Real sum = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test P4 triangle partition of unity
+  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P4_Triangle)
+  {
+    constexpr size_t n = 50;
+    RandomFloat gen(0.0, 1.0);
+    RealPkElement<4> k(Polytope::Type::Triangle);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      Math::Vector<Real> p{{x, y}};
+      
+      Real sum = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test P2 triangle derivative consistency
+  TEST(Rodin_Variational_RealPkElement, DerivativeConsistency_P2_Triangle)
+  {
+    RealPkElement<2> k(Polytope::Type::Triangle);
+    
+    constexpr size_t n = 20;
+    RandomFloat gen(0.0, 1.0);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      Math::Vector<Real> p{{x, y}};
+      
+      // Derivatives should sum to zero (constant function property)
+      Real sum_dx = 0, sum_dy = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum_dx += k.getBasis(j).getDerivative<1>(0)(p);
+        sum_dy += k.getBasis(j).getDerivative<1>(1)(p);
+      }
+      EXPECT_NEAR(sum_dx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(sum_dy, 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test P2 triangle linear reproduction
+  TEST(Rodin_Variational_RealPkElement, LinearReproduction_P2_Triangle)
+  {
+    RealPkElement<2> k(Polytope::Type::Triangle);
+    
+    constexpr size_t n = 20;
+    RandomFloat gen(-1.0, 1.0);
+    
+    for (size_t trial = 0; trial < 5; trial++)
+    {
+      Real a = gen();
+      Real b = gen();
+      Real c = gen();
+      
+      for (size_t i = 0; i < n; i++)
+      {
+        const auto& x = gen() * 0.5 + 0.25;
+        const auto& y = gen() * 0.5 * (1.0 - x);
+        Math::Vector<Real> p{{x, y}};
+        
+        Real f_exact = a + b * x + c * y;
+        
+        Real f_interp = 0;
+        for (size_t j = 0; j < k.getCount(); j++)
+        {
+          const auto& node = k.getNode(j);
+          Real f_node = a + b * node.x() + c * node.y();
+          f_interp += f_node * k.getBasis(j)(p);
+        }
+        
+        EXPECT_NEAR(f_interp, f_exact, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // ========================================================================
+  // Tests for Tetrahedron elements (as requested)
+  // ========================================================================
+
+  // Test P2 tetrahedron Lagrange property
+  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P2_Tetrahedron)
+  {
+    RealPkElement<2> k(Polytope::Type::Tetrahedron);
+    
+    for (size_t i = 0; i < k.getCount(); i++)
+    {
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        const auto& node = k.getNode(j);
+        Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(k.getBasis(i)(node), expected, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // Test P2 tetrahedron partition of unity
+  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P2_Tetrahedron)
+  {
+    constexpr size_t n = 50;
+    RandomFloat gen(0.0, 1.0);
+    RealPkElement<2> k(Polytope::Type::Tetrahedron);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      const auto& z = gen() * (1.0 - x - y);
+      Math::Vector<Real> p{{x, y, z}};
+      
+      Real sum = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test P3 tetrahedron Lagrange property
+  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P3_Tetrahedron)
+  {
+    RealPkElement<3> k(Polytope::Type::Tetrahedron);
+    
+    for (size_t i = 0; i < k.getCount(); i++)
+    {
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        const auto& node = k.getNode(j);
+        Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(k.getBasis(i)(node), expected, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // Test P3 tetrahedron partition of unity
+  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P3_Tetrahedron)
+  {
+    constexpr size_t n = 50;
+    RandomFloat gen(0.0, 1.0);
+    RealPkElement<3> k(Polytope::Type::Tetrahedron);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      const auto& z = gen() * (1.0 - x - y);
+      Math::Vector<Real> p{{x, y, z}};
+      
+      Real sum = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test P2 tetrahedron derivative consistency
+  TEST(Rodin_Variational_RealPkElement, DerivativeConsistency_P2_Tetrahedron)
+  {
+    RealPkElement<2> k(Polytope::Type::Tetrahedron);
+    
+    constexpr size_t n = 20;
+    RandomFloat gen(0.0, 1.0);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      const auto& z = gen() * (1.0 - x - y);
+      Math::Vector<Real> p{{x, y, z}};
+      
+      Real sum_dx = 0, sum_dy = 0, sum_dz = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum_dx += k.getBasis(j).getDerivative<1>(0)(p);
+        sum_dy += k.getBasis(j).getDerivative<1>(1)(p);
+        sum_dz += k.getBasis(j).getDerivative<1>(2)(p);
+      }
+      EXPECT_NEAR(sum_dx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(sum_dy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(sum_dz, 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // ========================================================================
+  // Tests for Wedge elements (as requested)
+  // ========================================================================
+
+  // Test P2 wedge Lagrange property
+  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P2_Wedge)
+  {
+    RealPkElement<2> k(Polytope::Type::Wedge);
+    
+    for (size_t i = 0; i < k.getCount(); i++)
+    {
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        const auto& node = k.getNode(j);
+        Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(k.getBasis(i)(node), expected, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // Test P2 wedge partition of unity
+  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P2_Wedge)
+  {
+    constexpr size_t n = 50;
+    RandomFloat gen(0.0, 1.0);
+    RealPkElement<2> k(Polytope::Type::Wedge);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      const auto& z = gen();
+      Math::Vector<Real> p{{x, y, z}};
+      
+      Real sum = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test P3 wedge Lagrange property
+  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P3_Wedge)
+  {
+    RealPkElement<3> k(Polytope::Type::Wedge);
+    
+    for (size_t i = 0; i < k.getCount(); i++)
+    {
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        const auto& node = k.getNode(j);
+        Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(k.getBasis(i)(node), expected, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // Test P3 wedge partition of unity
+  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P3_Wedge)
+  {
+    constexpr size_t n = 50;
+    RandomFloat gen(0.0, 1.0);
+    RealPkElement<3> k(Polytope::Type::Wedge);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      const auto& z = gen();
+      Math::Vector<Real> p{{x, y, z}};
+      
+      Real sum = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test P2 wedge derivative consistency
+  TEST(Rodin_Variational_RealPkElement, DerivativeConsistency_P2_Wedge)
+  {
+    RealPkElement<2> k(Polytope::Type::Wedge);
+    
+    constexpr size_t n = 20;
+    RandomFloat gen(0.0, 1.0);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen() * (1.0 - x);
+      const auto& z = gen();
+      Math::Vector<Real> p{{x, y, z}};
+      
+      Real sum_dx = 0, sum_dy = 0, sum_dz = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum_dx += k.getBasis(j).getDerivative<1>(0)(p);
+        sum_dy += k.getBasis(j).getDerivative<1>(1)(p);
+        sum_dz += k.getBasis(j).getDerivative<1>(2)(p);
+      }
+      EXPECT_NEAR(sum_dx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(sum_dy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(sum_dz, 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test higher orders DOF count for triangle
+  TEST(Rodin_Variational_RealPkElement, DOFCount_HigherOrders_Triangle)
+  {
+    EXPECT_EQ(RealPkElement<4>(Polytope::Type::Triangle).getCount(), 15);
+    EXPECT_EQ(RealPkElement<5>(Polytope::Type::Triangle).getCount(), 21);
+    EXPECT_EQ(RealPkElement<6>(Polytope::Type::Triangle).getCount(), 28);
+  }
+
+  // Test higher orders DOF count for tetrahedron
+  TEST(Rodin_Variational_RealPkElement, DOFCount_HigherOrders_Tetrahedron)
+  {
+    EXPECT_EQ(RealPkElement<4>(Polytope::Type::Tetrahedron).getCount(), 35);
+    EXPECT_EQ(RealPkElement<5>(Polytope::Type::Tetrahedron).getCount(), 56);
+    EXPECT_EQ(RealPkElement<6>(Polytope::Type::Tetrahedron).getCount(), 84);
+  }
+
+  // Test higher orders DOF count for wedge
+  TEST(Rodin_Variational_RealPkElement, DOFCount_HigherOrders_Wedge)
+  {
+    // Wedge: (k+1) * (k+1)(k+2)/2
+    EXPECT_EQ(RealPkElement<4>(Polytope::Type::Wedge).getCount(), 75);  // 5 * 5*6/2 = 5 * 15 = 75
+    EXPECT_EQ(RealPkElement<5>(Polytope::Type::Wedge).getCount(), 126); // 6 * 6*7/2 = 6 * 21 = 126
+  }
 }
