@@ -1125,4 +1125,261 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealPkElement<4>(Polytope::Type::Wedge).getCount(), 75);  // 5 * 5*6/2 = 5 * 15 = 75
     EXPECT_EQ(RealPkElement<5>(Polytope::Type::Wedge).getCount(), 126); // 6 * 6*7/2 = 6 * 21 = 126
   }
+
+  // ========================================================================
+  // Tests for Complex-valued PkElement (as requested)
+  // ========================================================================
+
+  // Test Complex P2 element basic functionality
+  TEST(Rodin_Variational_ComplexPkElement, SanityTest_P2_Segment)
+  {
+    ComplexPkElement<2> k(Polytope::Type::Segment);
+    
+    // P2 element on Segment should have 3 DOFs
+    EXPECT_EQ(k.getCount(), 3);
+    EXPECT_EQ(k.getOrder(), 2);
+    
+    // Test Lagrange property with complex values
+    for (size_t i = 0; i < k.getCount(); i++)
+    {
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        const auto& node = k.getNode(j);
+        Complex expected = (i == j) ? Complex(1.0, 0.0) : Complex(0.0, 0.0);
+        Complex value = k.getBasis(i)(node);
+        EXPECT_NEAR(std::abs(value - expected), 0.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // Test Complex P3 partition of unity
+  TEST(Rodin_Variational_ComplexPkElement, PartitionOfUnity_P3_Segment)
+  {
+    constexpr size_t n = 20;
+    RandomFloat gen(0.0, 1.0);
+    ComplexPkElement<3> k(Polytope::Type::Segment);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      Math::Vector<Real> p{{x}};
+      
+      Complex sum(0.0, 0.0);
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(std::abs(sum - Complex(1.0, 0.0)), 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test Complex P2 on Triangle
+  TEST(Rodin_Variational_ComplexPkElement, LagrangeProperty_P2_Triangle)
+  {
+    ComplexPkElement<2> k(Polytope::Type::Triangle);
+    
+    // Test Lagrange property
+    for (size_t i = 0; i < k.getCount(); i++)
+    {
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        const auto& node = k.getNode(j);
+        Complex expected = (i == j) ? Complex(1.0, 0.0) : Complex(0.0, 0.0);
+        Complex value = k.getBasis(i)(node);
+        EXPECT_NEAR(std::abs(value - expected), 0.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // Test Complex P2 partition of unity on Quadrilateral
+  TEST(Rodin_Variational_ComplexPkElement, PartitionOfUnity_P2_Quadrilateral)
+  {
+    constexpr size_t n = 20;
+    RandomFloat gen(0.0, 1.0);
+    ComplexPkElement<2> k(Polytope::Type::Quadrilateral);
+    
+    for (size_t i = 0; i < n; i++)
+    {
+      const auto& x = gen();
+      const auto& y = gen();
+      Math::Vector<Real> p{{x, y}};
+      
+      Complex sum(0.0, 0.0);
+      for (size_t j = 0; j < k.getCount(); j++)
+      {
+        sum += k.getBasis(j)(p);
+      }
+      EXPECT_NEAR(std::abs(sum - Complex(1.0, 0.0)), 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test Complex DOF count consistency
+  TEST(Rodin_Variational_ComplexPkElement, DOFCount_Consistency)
+  {
+    EXPECT_EQ(ComplexPkElement<2>(Polytope::Type::Segment).getCount(), 3);
+    EXPECT_EQ(ComplexPkElement<3>(Polytope::Type::Segment).getCount(), 4);
+    EXPECT_EQ(ComplexPkElement<2>(Polytope::Type::Triangle).getCount(), 6);
+    EXPECT_EQ(ComplexPkElement<3>(Polytope::Type::Triangle).getCount(), 10);
+    EXPECT_EQ(ComplexPkElement<2>(Polytope::Type::Quadrilateral).getCount(), 9);
+  }
+
+  // ========================================================================
+  // Tests for Vector-valued PkElement (as requested)
+  // ========================================================================
+
+  // Test Vector P2 element basic functionality
+  TEST(Rodin_Variational_VectorPkElement, SanityTest_P2_Segment_2D)
+  {
+    constexpr size_t vdim = 2;
+    VectorPkElement<2> k(vdim, Polytope::Type::Segment);
+    
+    // P2 element on Segment with vdim=2 should have 3*2=6 DOFs
+    EXPECT_EQ(k.getCount(), 6);
+    EXPECT_EQ(k.getOrder(), 2);
+    
+    // Check that nodes match scalar version
+    RealPkElement<2> scalar_k(Polytope::Type::Segment);
+    for (size_t i = 0; i < scalar_k.getCount(); i++)
+    {
+      const auto& vec_node = k.getNode(i * vdim);
+      const auto& scalar_node = scalar_k.getNode(i);
+      EXPECT_NEAR((vec_node - scalar_node).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // Test Vector P3 element with 3D vectors
+  TEST(Rodin_Variational_VectorPkElement, SanityTest_P3_Segment_3D)
+  {
+    constexpr size_t vdim = 3;
+    VectorPkElement<3> k(vdim, Polytope::Type::Segment);
+    
+    // P3 element on Segment with vdim=3 should have 4*3=12 DOFs
+    EXPECT_EQ(k.getCount(), 12);
+    EXPECT_EQ(k.getOrder(), 3);
+  }
+
+  // Test Vector P2 basis function structure
+  TEST(Rodin_Variational_VectorPkElement, BasisStructure_P2_Segment)
+  {
+    constexpr size_t vdim = 2;
+    VectorPkElement<2> k(vdim, Polytope::Type::Segment);
+    RealPkElement<2> scalar_k(Polytope::Type::Segment);
+    
+    // Test that vector basis functions have correct component structure
+    for (size_t node_idx = 0; node_idx < scalar_k.getCount(); node_idx++)
+    {
+      const auto& node = scalar_k.getNode(node_idx);
+      
+      for (size_t component = 0; component < vdim; component++)
+      {
+        size_t local = node_idx * vdim + component;
+        const auto& vec_basis = k.getBasis(local)(node);
+        
+        // Only the corresponding component should be non-zero
+        for (size_t c = 0; c < vdim; c++)
+        {
+          if (c == component)
+          {
+            // This component should match the scalar basis
+            EXPECT_NEAR(std::abs(vec_basis(c) - scalar_k.getBasis(node_idx)(node)), 0.0, RODIN_FUZZY_CONSTANT);
+          }
+          else
+          {
+            // Other components should be zero
+            EXPECT_NEAR(std::abs(vec_basis(c)), 0.0, RODIN_FUZZY_CONSTANT);
+          }
+        }
+      }
+    }
+  }
+
+  // Test Vector P2 on Triangle
+  TEST(Rodin_Variational_VectorPkElement, SanityTest_P2_Triangle_2D)
+  {
+    constexpr size_t vdim = 2;
+    VectorPkElement<2> k(vdim, Polytope::Type::Triangle);
+    
+    // P2 element on Triangle with vdim=2 should have 6*2=12 DOFs
+    EXPECT_EQ(k.getCount(), 12);
+    EXPECT_EQ(k.getOrder(), 2);
+  }
+
+  // Test Vector P2 on Quadrilateral
+  TEST(Rodin_Variational_VectorPkElement, SanityTest_P2_Quadrilateral_2D)
+  {
+    constexpr size_t vdim = 2;
+    VectorPkElement<2> k(vdim, Polytope::Type::Quadrilateral);
+    
+    // P2 element on Quadrilateral with vdim=2 should have 9*2=18 DOFs
+    EXPECT_EQ(k.getCount(), 18);
+    EXPECT_EQ(k.getOrder(), 2);
+  }
+
+  // Test Vector P2 on Tetrahedron  
+  TEST(Rodin_Variational_VectorPkElement, SanityTest_P2_Tetrahedron_3D)
+  {
+    constexpr size_t vdim = 3;
+    VectorPkElement<2> k(vdim, Polytope::Type::Tetrahedron);
+    
+    // P2 element on Tetrahedron with vdim=3 should have 10*3=30 DOFs
+    EXPECT_EQ(k.getCount(), 30);
+    EXPECT_EQ(k.getOrder(), 2);
+  }
+
+  // Test Vector P2 Jacobian computation
+  TEST(Rodin_Variational_VectorPkElement, JacobianTest_P2_Segment)
+  {
+    constexpr size_t vdim = 2;
+    VectorPkElement<2> k(vdim, Polytope::Type::Segment);
+    
+    RandomFloat gen(0.0, 1.0);
+    
+    for (size_t trial = 0; trial < 5; trial++)
+    {
+      const auto& x = gen();
+      Math::Vector<Real> p{{x}};
+      
+      for (size_t i = 0; i < k.getCount(); i++)
+      {
+        const auto& jac = k.getBasis(i).getJacobian()(p);
+        
+        // Jacobian should have shape (vdim, spatial_dim)
+        EXPECT_EQ(jac.rows(), vdim);
+        EXPECT_EQ(jac.cols(), 1); // Segment is 1D
+      }
+    }
+  }
+
+  // Test Vector DOF count consistency
+  TEST(Rodin_Variational_VectorPkElement, DOFCount_Consistency)
+  {
+    EXPECT_EQ(VectorPkElement<2>(2, Polytope::Type::Segment).getCount(), 6);   // 3 nodes * 2 components
+    EXPECT_EQ(VectorPkElement<3>(2, Polytope::Type::Segment).getCount(), 8);   // 4 nodes * 2 components
+    EXPECT_EQ(VectorPkElement<2>(3, Polytope::Type::Segment).getCount(), 9);   // 3 nodes * 3 components
+    EXPECT_EQ(VectorPkElement<2>(2, Polytope::Type::Triangle).getCount(), 12); // 6 nodes * 2 components
+    EXPECT_EQ(VectorPkElement<2>(3, Polytope::Type::Triangle).getCount(), 18); // 6 nodes * 3 components
+  }
+
+  // Test higher-order vector elements
+  TEST(Rodin_Variational_VectorPkElement, HigherOrder_P4_Segment)
+  {
+    constexpr size_t vdim = 3;
+    VectorPkElement<4> k(vdim, Polytope::Type::Segment);
+    
+    // P4 element on Segment with vdim=3 should have 5*3=15 DOFs
+    EXPECT_EQ(k.getCount(), 15);
+    EXPECT_EQ(k.getOrder(), 4);
+  }
+
+  // Test vector P3 on higher-dimensional elements
+  TEST(Rodin_Variational_VectorPkElement, P3_Wedge_3D)
+  {
+    constexpr size_t vdim = 3;
+    VectorPkElement<3> k(vdim, Polytope::Type::Wedge);
+    
+    // P3 element on Wedge: (k+1) * (k+1)(k+2)/2 = 4 * 4*5/2 = 4 * 10 = 40 scalar DOFs
+    // With vdim=3: 40*3 = 120 total DOFs
+    EXPECT_EQ(k.getCount(), 120);
+    EXPECT_EQ(k.getOrder(), 3);
+  }
 }
