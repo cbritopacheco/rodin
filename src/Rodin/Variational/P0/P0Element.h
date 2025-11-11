@@ -17,6 +17,30 @@
  * - Constant basis function: @f$ \phi(x) = 1 @f$
  * - Zero gradient: @f$ \nabla \phi = 0 @f$
  *
+ * ## Supported Specializations
+ *
+ * **Scalar P0Element<Scalar>:**
+ * - Works with Real and Complex scalar types
+ * - Single DOF at element barycenter
+ * - Constant value throughout element
+ *
+ * **Vector P0Element<Math::Vector<Scalar>>:**
+ * - Component-wise constant vector fields
+ * - @f$ d @f$ DOFs per element (one per vector component)
+ * - Basis functions: @f$ \boldsymbol{\phi}_i = \mathbf{e}_j @f$ where @f$ j = i \mod d @f$
+ *
+ * ## Usage Example
+ * @code
+ * using namespace Rodin::Variational;
+ *
+ * // Scalar P0 element (real or complex)
+ * RealP0Element p0_real(Polytope::Type::Triangle);
+ * ComplexP0Element p0_complex(Polytope::Type::Triangle);
+ *
+ * // Vector P0 element (2D)
+ * VectorP0Element p0_vec(2, Polytope::Type::Triangle);  // 2 DOFs
+ * @endcode
+ *
  * P0 elements are commonly used in discontinuous Galerkin (DG) methods,
  * mixed finite element formulations, and as test spaces for finite volume
  * schemes.
@@ -243,11 +267,18 @@ namespace Rodin::Variational
    * @brief Piecewise constant (degree 0) vector Lagrange element.
    *
    * Vector-valued P0 element with:
-   * - **DOF count**: @f$ d @f$ per element (one for each vector component)
-   * - **Basis functions**: @f$ \boldsymbol{\phi}_i(x) = \mathbf{e}_i @f$ (unit vectors)
+   * - **DOF count**: @f$ d @f$ per element (one for each vector component at barycenter)
+   * - **Basis functions**: @f$ \boldsymbol{\phi}_i(x) = \mathbf{e}_j @f$ where @f$ j = i \mod d @f$ (unit vectors)
    * - **Derivatives**: @f$ \nabla \boldsymbol{\phi}_i = \mathbf{0} @f$ (zero gradient)
+   * - **Structure**: Component-wise constant, with each basis having one non-zero component
    *
-   * Used for vector-valued DG approximations (e.g., velocity in compressible flow).
+   * Used for vector-valued DG approximations (e.g., velocity in compressible flow, element-wise
+   * constant vector fields).
+   *
+   * ## Example
+   * For a 2D element with vdim=2:
+   * - @f$ \boldsymbol{\phi}_0(x) = (1, 0)^T @f$ - constant in x-direction
+   * - @f$ \boldsymbol{\phi}_1(x) = (0, 1)^T @f$ - constant in y-direction
    *
    * @tparam Scalar Type of scalar components
    */
@@ -266,6 +297,11 @@ namespace Rodin::Variational
       /// Type of range
       using RangeType = Math::Vector<Scalar>;
 
+      /**
+       * @brief Represents a linear form (evaluation functional) for vector P0 elements.
+       *
+       * Evaluates a vector field at the barycenter and extracts a specific component.
+       */
       class LinearForm
       {
         public:
@@ -285,6 +321,12 @@ namespace Rodin::Variational
           constexpr
           LinearForm(LinearForm&&) = default;
 
+          /**
+           * @brief Evaluates the linear form on a vector field.
+           * @tparam T Type of the input vector field
+           * @param v Vector field to evaluate
+           * @return Component value at the barycenter
+           */
           template <class T>
           constexpr
           decltype(auto) operator()(const T& v) const
@@ -294,28 +336,64 @@ namespace Rodin::Variational
           }
 
         private:
-          const size_t m_local;
-          const Geometry::Polytope::Type m_g;
+          const size_t m_local;         ///< Local DOF index
+          const Geometry::Polytope::Type m_g;  ///< Geometry type
       };
 
+      /**
+       * @brief Represents a piecewise constant vector basis function.
+       *
+       * Each basis function is a constant unit vector in one component direction:
+       * @f$ \boldsymbol{\phi}_i(x) = \mathbf{e}_j @f$ where @f$ j = i \mod d @f$.
+       */
       class BasisFunction
       {
         public:
+          using ReturnType = Math::Vector<ScalarType>;  ///< Vector return type
+
+          /**
+           * @brief Represents a derivative of the vector P0 basis function (always zero).
+           *
+           * Since P0 elements are piecewise constant, all derivatives are zero for all components.
+           *
+           * @tparam Order Order of differentiation (1, 2, ...)
+           */
           template <size_t Order>
           class DerivativeFunction
           {
             public:
+              /**
+               * @brief Constructs a derivative function.
+               * @param i Vector component index (0 to vdim-1)
+               * @param j Spatial coordinate index for differentiation (0=x, 1=y, 2=z)
+               * @param vdim Vector dimension
+               * @param local Local DOF index
+               * @param g Geometry type
+               */
               constexpr
-              DerivativeFunction() = default;
+              DerivativeFunction(size_t i, size_t j, size_t vdim, size_t local, Geometry::Polytope::Type g)
+                : m_i(i), m_j(j), m_vdim(vdim), m_local(local), m_g(g)
+              {}
 
               constexpr
               DerivativeFunction(const DerivativeFunction&) = default;
 
+              /**
+               * @brief Evaluates the derivative (always returns 0).
+               * @param rc Spatial point (unused, as derivative is zero everywhere)
+               * @return Zero (constant function has zero derivative)
+               */
               constexpr
               ScalarType operator()(const Math::SpatialVector<Real>& rc) const
               {
                 return ScalarType(0);
               }
+
+            private:
+              const size_t m_i, m_j;    ///< Component and coordinate indices
+              const size_t m_vdim;      ///< Vector dimension
+              const size_t m_local;     ///< Local DOF index
+              const Geometry::Polytope::Type m_g;  ///< Geometry type
           };
 
           constexpr
@@ -334,22 +412,39 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          auto operator()(const Math::SpatialVector<ScalarType>& r) const
+          /**
+           * @brief Evaluates the vector basis function at a spatial point.
+           * @param r Spatial point (unused, as basis is constant)
+           * @return Constant unit vector: e_j where j = local % vdim
+           */
+          const ReturnType& operator()(const Math::SpatialVector<ScalarType>& r) const
           {
+            static thread_local ReturnType s_out;
             const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
-            return Math::Vector<ScalarType>::Zero(vdim);
+            s_out.resize(vdim);
+            s_out.setZero();
+            s_out.coeffRef(m_local % vdim) = ScalarType(1);
+            return s_out;
           }
 
+          /**
+           * @brief Gets the derivative function (always zero for P0).
+           * @tparam Order Order of differentiation
+           * @param i Vector component index
+           * @param j Spatial coordinate index
+           * @return Derivative function (returns zero)
+           */
           template <size_t Order>
           constexpr
           DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
           {
-            return DerivativeFunction<Order>(i, m_local, m_g);
+            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
+            return DerivativeFunction<Order>(i, j, vdim, m_local, m_g);
           }
 
         private:
-          const size_t m_local;
-          const Geometry::Polytope::Type m_g;
+          const size_t m_local;         ///< Local DOF index
+          const Geometry::Polytope::Type m_g;  ///< Geometry type
       };
 
       P0Element() = default;
