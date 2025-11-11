@@ -250,7 +250,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ae3f888ef045bce80c82c08a1d2454fb8" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+            <dd>Creates a polymorphic copy of this object.</dd>
           </dl>
         </section>
         <section>
@@ -262,16 +262,16 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>* Rodin::<wbr />Variational::<wbr />Potential&lt;LHS, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FES, SpaceType&gt;, FES, SpaceType&gt;&gt;&lt;LHS, RHSDerived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae3f888ef045bce80c82c08a1d2454fb8" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object.</td>
+                  <td>Non-owning pointer to the copied object</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
           </div></section>
         </section>
       </div>

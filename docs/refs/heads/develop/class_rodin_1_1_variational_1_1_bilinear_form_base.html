@@ -83,8 +83,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md81">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md82">Discrete Representation</a></li>
+            <li><a href="#autotoc_md148">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md149">Discrete Representation</a></li>
             <li>
               Reference
               <ul>
@@ -127,7 +127,7 @@ $ a(u,v) : V \times V \to \mathbb{R} $
 <use x='79.921744' y='0' xlink:href='#eq1-g1-33'/>
 <use x='95.197776' y='0' xlink:href='#eq1-g0-82'/>
 </g>
-</svg> in finite element computations. A bilinear form is a function that is linear in both arguments and forms the basis for defining variational problems.</p><section id="autotoc_md81"><h3><a href="#autotoc_md81">Mathematical Foundation</a></h3><p>A bilinear form <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
+</svg> in finite element computations. A bilinear form is a function that is linear in both arguments and forms the basis for defining variational problems.</p><section id="autotoc_md148"><h3><a href="#autotoc_md148">Mathematical Foundation</a></h3><p>A bilinear form <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
 <title>
 $ a(u,v) $
 </title>
@@ -247,7 +247,7 @@ $ a(u, \alpha v_1 + \beta v_2) = \alpha a(u,v_1) + \beta a(u,v_2) $
 <use x='187.918539' y='1.793263' xlink:href='#eq4-g1-50'/>
 <use x='192.650854' y='0' xlink:href='#eq4-g2-41'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md82"><h3><a href="#autotoc_md82">Discrete Representation</a></h3><p>The discrete matrix representation satisfies <svg class="m-math" style="width: 7.769em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 74.582506 12.309385">
+</svg></li></ul></section><section id="autotoc_md149"><h3><a href="#autotoc_md149">Discrete Representation</a></h3><p>The discrete matrix representation satisfies <svg class="m-math" style="width: 7.769em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 74.582506 12.309385">
 <title>
 $ A_{ij} = a(\phi_j, \psi_i) $
 </title>
@@ -454,7 +454,7 @@ $ U_h $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#acd8ed87ef4efe52bc3071888c96ef2eb" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+            <dd>Creates a polymorphic copy of this object.</dd>
           </dl>
         </section>
         <section>
@@ -799,16 +799,16 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>* Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd8ed87ef4efe52bc3071888c96ef2eb" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object.</td>
+                  <td>Non-owning pointer to the copied object</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
           </div></section>
         </section>
       </div>

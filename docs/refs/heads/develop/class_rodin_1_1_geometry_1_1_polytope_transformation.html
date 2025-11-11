@@ -71,9 +71,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md63">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md64">Implementations</a></li>
-            <li><a href="#autotoc_md65">Thread Safety</a></li>
+            <li><a href="#autotoc_md83">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md84">Implementations</a></li>
+            <li><a href="#autotoc_md85">Thread Safety</a></li>
             <li>
               Reference
               <ul>
@@ -85,7 +85,7 @@
             </li>
           </ul>
         </nav>
-<p>This class represents the transformation function that maps reference coordinates to physical coordinates for a polytope in a mesh.</p><section id="autotoc_md63"><h2><a href="#autotoc_md63">Mathematical Foundation</a></h2><p>Let <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
+<p>This class represents the transformation function that maps reference coordinates to physical coordinates for a polytope in a mesh.</p><section id="autotoc_md83"><h2><a href="#autotoc_md83">Mathematical Foundation</a></h2><p>Let <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
 <title>
 $ \tau $
 </title>
@@ -257,7 +257,7 @@ $ \tau $
 <g id='eq13-page1'>
 <use x='0' y='0' xlink:href='#eq13-g0-28'/>
 </g>
-</svg> is the physical element</li></ul></section><section id="autotoc_md64"><h2><a href="#autotoc_md64">Implementations</a></h2><p>Concrete implementations include:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_identity_transformation.html" class="m-doc">IdentityTransformation</a>: <svg class="m-math" style="width: 4.448em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 42.703996 11.955168">
+</svg> is the physical element</li></ul></section><section id="autotoc_md84"><h2><a href="#autotoc_md84">Implementations</a></h2><p>Concrete implementations include:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_identity_transformation.html" class="m-doc">IdentityTransformation</a>: <svg class="m-math" style="width: 4.448em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 42.703996 11.955168">
 <title>
 $ x(r) = r $
 </title>
@@ -276,7 +276,7 @@ $ x(r) = r $
 <use x='24.678041' y='0' xlink:href='#eq14-g1-61'/>
 <use x='37.103522' y='0' xlink:href='#eq14-g0-114'/>
 </g>
-</svg> (identity map)</li><li><a href="class_rodin_1_1_geometry_1_1_isoparametric_transformation.html" class="m-doc">IsoparametricTransformation</a>: Uses finite element basis functions</li></ul></section><section id="autotoc_md65"><h2><a href="#autotoc_md65">Thread Safety</a></h2><p>Transformation objects are immutable after construction and are thread-safe for concurrent read access. The <a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc">transform()</a>, <a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc">jacobian()</a>, and <a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc">inverse()</a> methods can be called concurrently from multiple threads.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_identity_transformation.html" class="m-doc">IdentityTransformation</a>, <a href="class_rodin_1_1_geometry_1_1_isoparametric_transformation.html" class="m-doc">IsoparametricTransformation</a>, <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></p></aside></section>
+</svg> (identity map)</li><li><a href="class_rodin_1_1_geometry_1_1_isoparametric_transformation.html" class="m-doc">IsoparametricTransformation</a>: Uses finite element basis functions</li></ul></section><section id="autotoc_md85"><h2><a href="#autotoc_md85">Thread Safety</a></h2><p>Transformation objects are immutable after construction and are thread-safe for concurrent read access. The <a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc">transform()</a>, <a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc">jacobian()</a>, and <a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc">inverse()</a> methods can be called concurrently from multiple threads.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_identity_transformation.html" class="m-doc">IdentityTransformation</a>, <a href="class_rodin_1_1_geometry_1_1_isoparametric_transformation.html" class="m-doc">IsoparametricTransformation</a>, <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -366,18 +366,18 @@ $ s $
             </dt>
             <dd>Gets the polynomial order of the Jacobian.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc">transform</a>(</span><span class="m-doc-wrap">Math::SpatialPoint&amp; pc,
-              const Math::SpatialPoint&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Computes the physical coordinates from reference coordinates.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a402789b5574468564b86b961636c47b9" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
-              const Math::SpatialPoint&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Computes the Jacobian matrix of the transformation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc">inverse</a>(</span><span class="m-doc-wrap">Math::SpatialPoint&amp; rc,
-              const Math::SpatialPoint&amp; pc) const <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc">inverse</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc) const <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Computes the reference coordinates from physical coordinates.</dd>
             <dt>
@@ -516,8 +516,8 @@ $ s $
           </div></section>
           <section class="m-doc-details" id="a1cebe38715f95dd2bcca579a27e476bb"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap">Math::SpatialPoint&amp; pc,
-              const Math::SpatialPoint&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Computes the physical coordinates from reference coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -599,7 +599,7 @@ $ s $
           <section class="m-doc-details" id="a551bb1d2930d7c149e9f6f03cfe779b5"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a402789b5574468564b86b961636c47b9" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
-              const Math::SpatialPoint&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Computes the Jacobian matrix of the transformation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -793,8 +793,8 @@ $ s $
           </div></section>
           <section class="m-doc-details" id="ae4ab54f76d7dc9b08ca13f3f1eb1f95d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc-self">inverse</a>(</span><span class="m-doc-wrap">Math::SpatialPoint&amp; rc,
-              const Math::SpatialPoint&amp; pc) const <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc-self">inverse</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Computes the reference coordinates from physical coordinates.</p>
             <table class="m-table m-fullwidth m-flat">

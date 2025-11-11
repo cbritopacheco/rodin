@@ -72,12 +72,20 @@
             <li>
               Reference
               <ul>
+                <li><a href="#groups">Modules</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>The <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> module provides a comprehensive framework for expressing variational forms, mathematical expressions, and finite element operations using a high-level, expressive domain-specific language. This module forms the foundation for <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s symbolic computation capabilities.</p>
+        <section id="groups">
+          <h2><a href="#groups">Modules</a></h2>
+          <dl class="m-doc">
+            <dt>module <a href="group___traits_specializations.html" class="m-doc">Traits Template Specializations</a></dt>
+            <dd>Template specializations of the <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> class.</dd>
+          </dl>
+        </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -85,6 +93,39 @@
               class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Rodin::FormLanguage::Base</a>
             </dt>
             <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all objects in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> system.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_debug.html" class="m-doc">Rodin::FormLanguage::Debug</a>
+            </dt>
+            <dd>Template for debugging form language types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_plain_object.html" class="m-doc">Rodin::FormLanguage::IsPlainObject</a>
+            </dt>
+            <dd>Type trait to identify Eigen plain object types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_plain_object_3_01_eigen_1_1_plain_object_base_3_01_derived_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::IsPlainObject&lt;Eigen::PlainObjectBase&lt;Derived&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for Eigen::PlainObjectBase types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">Rodin::FormLanguage::List</a>
+            </dt>
+            <dd>Container for polymorphic form language objects.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Rodin::FormLanguage::List::Iterator</a>
+            </dt>
+            <dd>Forward iterator for non-const <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">Rodin::FormLanguage::List::ConstIterator</a>
+            </dt>
+            <dd>Forward iterator for const <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Args&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::FormLanguage::Traits</a>
+            </dt>
+            <dd>Type traits for form language objects.</dd>
           </dl>
         </section>
       </div>

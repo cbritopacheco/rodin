@@ -75,18 +75,29 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List&lt;LinearFormIntegratorBase&lt;Number&gt;&gt;</a>
+            </dt>
+            <dd>Container for polymorphic form language objects.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aa98bdf80ce33fd0b66f16e77b54c7433" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_unary_minus.html" class="m-doc">UnaryMinus</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+            <dd>Creates a polymorphic copy of this list.</dd>
           </dl>
         </section>
         <section>
@@ -98,16 +109,16 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_unary_minus.html" class="m-doc">UnaryMinus</a>* Rodin::<wbr />Variational::<wbr />UnaryMinus&lt;FormLanguage::<wbr />List&lt;LinearFormIntegratorBase&lt;Number&gt;&gt;&gt;&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa98bdf80ce33fd0b66f16e77b54c7433" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <p>Creates a polymorphic copy of this list.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object.</td>
+                  <td>Non-owning pointer to the copied list</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+<p>Implements the <a href="class_rodin_1_1_copyable.html" class="m-doc">Copyable</a> interface, creating a deep copy of the list and all its elements.</p>
           </div></section>
         </section>
       </div>

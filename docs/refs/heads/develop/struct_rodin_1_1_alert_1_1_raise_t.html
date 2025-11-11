@@ -66,8 +66,8 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>RaiseT <span class="m-thin">struct</span>
         </h1>
-        <p>Empty class tag type to raise an Alert.</p>
-<p><a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> is an empty class tag type to specify that a derived object of Alert should be raised.</p>
+        <p>Empty tag type for raising an Alert message.</p>
+<p>Tag type used to trigger the raising (output) of an Alert message. When streamed into a <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> object using operator&lt;&lt;, it causes the message to be displayed and potentially triggers other actions (such as program termination for <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> types).</p><p>Example usage: <code class="m-code"><span class="n">Exception</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;An error occurred&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></code></p>
       </div>
     </div>
   </div>

@@ -86,6 +86,51 @@
             </dt>
             <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all objects in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> system.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;typename&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_debug.html" class="m-doc">Debug</a>
+            </dt>
+            <dd>Template for debugging form language types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_division.html" class="m-doc">Division</a>
+            </dt>
+            <dd>Type trait for deducing the result type of division.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">Dot</a>
+            </dt>
+            <dd>Type trait for deducing the result type of dot product.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_eigen_object.html" class="m-doc">IsEigenObject</a>
+            </dt>
+            <dd>Type trait to check if a type is an Eigen object.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_plain_object.html" class="m-doc">IsPlainObject</a>
+            </dt>
+            <dd>Type trait to identify Eigen plain object types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_plain_object_3_01_eigen_1_1_plain_object_base_3_01_derived_01_4_01_4.html" class="m-doc">IsPlainObject&lt;Eigen::PlainObjectBase&lt;Derived&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for Eigen::PlainObjectBase types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>
+            </dt>
+            <dd>Container for polymorphic form language objects.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_minus.html" class="m-doc">Minus</a>
+            </dt>
+            <dd>Type trait for deducing the result type of subtraction.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_mult.html" class="m-doc">Mult</a>
+            </dt>
+            <dd>Type trait for deducing the result type of multiplication.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class MatrixXpr&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_range_of.html" class="m-doc">RangeOf</a>
             </dt>
@@ -146,10 +191,40 @@
             </dt>
             <dd>Specialization of <a href="struct_rodin_1_1_form_language_1_1_result_of.html" class="m-doc">ResultOf</a> for ShapeFunctionBase.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_sum.html" class="m-doc">Sum</a>
+            </dt>
+            <dd>Type trait for deducing the result type of addition.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Args&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a>
+            </dt>
+            <dd>Type traits for form language objects.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_boolean_01_4.html" class="m-doc">Traits&lt;Boolean&gt;</a>
+            </dt>
+            <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for Boolean type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_complex_01_4.html" class="m-doc">Traits&lt;Complex&gt;</a>
+            </dt>
+            <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for Complex type.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Context&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_geometry_1_1_mesh_3_01_context_01_4_01_4.html" class="m-doc">Traits&lt;Geometry::Mesh&lt;Context&gt;&gt;</a>
             </dt>
             <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for Mesh types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_integer_01_4.html" class="m-doc">Traits&lt;Integer&gt;</a>
+            </dt>
+            <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for Integer type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_real_01_4.html" class="m-doc">Traits&lt;Real&gt;</a>
+            </dt>
+            <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for Real type.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHS, class RHSDerived&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_potential_3_01_l_h_s_00_01_variat369c2379ec45f137e06e96aea6819d49.html" class="m-doc">Traits&lt;Variational::Potential&lt;LHS, Variational::FunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
@@ -160,6 +235,11 @@
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_potential_3_01_l_h_s_00_01_variat77d2ad9b9b9474b6cd9535f743d596e4.html" class="m-doc">Traits&lt;Variational::Potential&lt;LHS, Variational::ShapeFunctionBase&lt;Variational::ShapeFunction&lt;RHSDerived, FES, Space&gt;&gt;&gt;&gt;</a>
             </dt>
             <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> for Potential.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Operand&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_unary_minus.html" class="m-doc">UnaryMinus</a>
+            </dt>
+            <dd>Type trait for deducing the result type of unary negation.</dd>
           </dl>
         </section>
       </div>

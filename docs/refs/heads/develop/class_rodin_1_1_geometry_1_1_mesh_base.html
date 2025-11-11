@@ -71,8 +71,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md43">Inheritance Hierarchy</a></li>
-            <li><a href="#autotoc_md44">Thread Safety</a></li>
+            <li><a href="#autotoc_md63">Inheritance Hierarchy</a></li>
+            <li><a href="#autotoc_md64">Thread Safety</a></li>
             <li>
               Reference
               <ul>
@@ -83,7 +83,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> provides the common interface for all mesh types in <a href="namespace_rodin.html" class="m-doc">Rodin</a>, defining fundamental operations such as:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> access through iterators</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> I/O operations</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> queries</li></ul><section id="autotoc_md43"><h2><a href="#autotoc_md43">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a>: Sequential (non-distributed) meshes</li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">SubMesh&lt;Context::<wbr />Local&gt;</a>: Submeshes representing subregions</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md44"><h2><a href="#autotoc_md44">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>, <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></p></aside></section>
+<p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> provides the common interface for all mesh types in <a href="namespace_rodin.html" class="m-doc">Rodin</a>, defining fundamental operations such as:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> access through iterators</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> I/O operations</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> queries</li></ul><section id="autotoc_md63"><h2><a href="#autotoc_md63">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a>: Sequential (non-distributed) meshes</li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">SubMesh&lt;Context::<wbr />Local&gt;</a>: Submeshes representing subregions</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md64"><h2><a href="#autotoc_md64">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>, <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></p></aside></section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
@@ -320,7 +320,7 @@
             </dt>
             <dd>Gets a constant reference to the mesh connectivity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a83636bc9b6e9a7ccdcf7bd9d8707f660" class="m-doc">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; Eigen::Map&lt;const Math::SpatialPoint&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a83636bc9b6e9a7ccdcf7bd9d8707f660" class="m-doc">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; Eigen::Map&lt;const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the space coordinates of the vertex at the given index.</dd>
             <dt>
@@ -331,7 +331,7 @@
             <dd>Sets the space coordinate of the vertex at the given index for the given coordinate index.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a8ad0b7ba078bbd7ac8bf10c2c8b3e239" class="m-doc">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
-              const Math::SpatialPoint&amp; coords) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; coords) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Sets the space coordinate of the vertex at the given index for the given coordinate index.</dd>
             <dt>
@@ -1415,7 +1415,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="a83636bc9b6e9a7ccdcf7bd9d8707f660"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">Eigen::Map&lt;const Math::SpatialPoint&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83636bc9b6e9a7ccdcf7bd9d8707f660" class="m-doc-self">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">Eigen::Map&lt;const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83636bc9b6e9a7ccdcf7bd9d8707f660" class="m-doc-self">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the space coordinates of the vertex at the given index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1487,7 +1487,7 @@ $ (0, 5, 10) $
           <section class="m-doc-details" id="a8ad0b7ba078bbd7ac8bf10c2c8b3e239"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ad0b7ba078bbd7ac8bf10c2c8b3e239" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
-              const Math::SpatialPoint&amp; coords) <span class="m-label m-warning">pure virtual</span></span></span>
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; coords) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets the space coordinate of the vertex at the given index for the given coordinate index.</p>
             <table class="m-table m-fullwidth m-flat">

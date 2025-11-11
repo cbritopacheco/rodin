@@ -67,6 +67,77 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>MeshPrinter <span class="m-thin">class</span>
         </h1>
         <p>Class used to print objects of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer&lt;MMG::Mesh&gt;</a>
+            </dt>
+            <dd>Base template for printing objects to streams.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Prints object to an output stream.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac9d6bd71c9896bd37bf8a0f6622dc5e4" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets a const reference to the object being printed.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a2504fad917ab72c2e27e762f99fa6583"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />External::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Prints object to an output stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Output stream to write to</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This pure virtual method must be implemented by derived classes to write the object data to the provided stream.</p>
+          </div></section>
+          <section class="m-doc-details" id="ac9d6bd71c9896bd37bf8a0f6622dc5e4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9d6bd71c9896bd37bf8a0f6622dc5e4" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets a const reference to the object being printed.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Const reference to the object</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This method provides read-only access to the object being written. Derived classes must implement this to return their internal object reference.</p>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

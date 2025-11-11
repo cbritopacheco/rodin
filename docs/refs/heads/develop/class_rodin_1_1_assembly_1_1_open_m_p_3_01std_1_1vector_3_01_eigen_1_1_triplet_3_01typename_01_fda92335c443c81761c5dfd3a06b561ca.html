@@ -90,10 +90,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md2">Parallel Assembly Algorithm</a></li>
+            <li><a href="#autotoc_md8">Parallel Assembly Algorithm</a></li>
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -119,7 +120,17 @@ $ a(u,v) $
 <use x='22.603868' y='0' xlink:href='#eq1-g0-118'/>
 <use x='28.692087' y='0' xlink:href='#eq1-g1-41'/>
 </g>
-</svg> using OpenMP parallelization. The assembly process distributes element computations across multiple threads and uses sparse matrix triplets for thread-safe accumulation.</p><section id="autotoc_md2"><h3><a href="#autotoc_md2">Parallel Assembly Algorithm</a></h3><ol><li><strong>Element Distribution</strong>: Distribute elements across OpenMP threads</li><li><strong>Local <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: Each thread computes local element matrices independently</li><li><strong>Triplet Accumulation</strong>: Store contributions as Eigen triplets for thread safety</li><li><strong>Global <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: Combine triplets into final sparse matrix</li></ol><p>This approach minimizes synchronization overhead while ensuring correctness.</p></section>
+</svg> using OpenMP parallelization. The assembly process distributes element computations across multiple threads and uses sparse matrix triplets for thread-safe accumulation.</p><section id="autotoc_md8"><h3><a href="#autotoc_md8">Parallel Assembly Algorithm</a></h3><ol><li><strong>Element Distribution</strong>: Distribute elements across OpenMP threads</li><li><strong>Local <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: Each thread computes local element matrices independently</li><li><strong>Triplet Accumulation</strong>: Store contributions as Eigen triplets for thread safety</li><li><strong>Global <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: Combine triplets into final sparse matrix</li></ol><p>This approach minimizes synchronization overhead while ensuring correctness.</p></section>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;std::vector&lt;Eigen::Triplet&lt;FormLanguage::Dot&lt;FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, std::vector&lt;Eigen::Triplet&lt;FormLanguage::Dot&lt;FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Base class template for assembly operations.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">

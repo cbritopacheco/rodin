@@ -87,20 +87,29 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">Prefix</a>&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a>&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message&lt;ExceptionPrefix&gt;</a>
             </dt>
-            <dd>Base class for objects which represents output messages.</dd>
+            <dd>Forward declaration of the <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> template class.</dd>
           </dl>
         </section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> T, <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">FuncName</a>&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> T&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_class_exception.html" class="m-doc">ClassException</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class that automatically includes the class name.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> T, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">FuncName</a>&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">MemberFunctionException</a>
             </dt>
             <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> type for errors occurring in member functions.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_namespaced_exception.html" class="m-doc">NamespacedException</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class that automatically includes the namespace name.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -124,7 +133,7 @@
             </dt>
             <dd>Constructs an <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> with a specific output stream.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac18f0d2e03372cc0620efd911f87b57d" class="m-doc">Exception</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac18f0d2e03372cc0620efd911f87b57d" class="m-doc">Exception</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -137,11 +146,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a02597c91458745158ac9d93726bcac0c" class="m-doc">raise</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a02597c91458745158ac9d93726bcac0c" class="m-doc">raise</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Raises the exception to the user.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#abf843cbb29dec939d0731e491bab6f70" class="m-doc">what</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">char</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abf843cbb29dec939d0731e491bab6f70" class="m-doc">what</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">char</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the exception message.</dd>
           </dl>
@@ -174,7 +183,7 @@
           </div></section>
           <section class="m-doc-details" id="ac18f0d2e03372cc0620efd911f87b57d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac18f0d2e03372cc0620efd911f87b57d" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac18f0d2e03372cc0620efd911f87b57d" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -208,14 +217,14 @@
           </div></section>
           <section class="m-doc-details" id="a02597c91458745158ac9d93726bcac0c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">void</a> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02597c91458745158ac9d93726bcac0c" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">void</a> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02597c91458745158ac9d93726bcac0c" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Raises the exception to the user.</p>
 <p>Outputs a formatted error message to the configured stream and terminates the program by calling std::abort(). The message includes the exception prefix and any accumulated message content.</p>
           </div></section>
           <section class="m-doc-details" id="abf843cbb29dec939d0731e491bab6f70"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">char</a>* Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf843cbb29dec939d0731e491bab6f70" class="m-doc-self">what</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">char</a>* Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf843cbb29dec939d0731e491bab6f70" class="m-doc-self">what</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the exception message.</p>
             <table class="m-table m-fullwidth m-flat">

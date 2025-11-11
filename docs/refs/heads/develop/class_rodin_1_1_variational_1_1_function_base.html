@@ -83,8 +83,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md135">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md136">Key Features</a></li>
+            <li><a href="#autotoc_md202">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md203">Key Features</a></li>
             <li>
               Reference
               <ul>
@@ -97,7 +97,7 @@
             </li>
           </ul>
         </nav>
-<p>Base class for functions defined on finite element meshes.</p><p>Instances of <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> will always have the <a href="#a880e867925a2f06a1f23051b890dd0aa" class="m-doc">getValue()</a> method defined, which enables the evaluation of any function on some mesh element.</p><p><a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> provides the foundation for representing mathematical functions defined over geometric domains discretized by finite element meshes. This includes both analytical functions and discrete finite element functions (grid functions) that arise in variational formulations.</p><section id="autotoc_md135"><h3><a href="#autotoc_md135">Mathematical Foundation</a></h3><p>A function <svg class="m-math" style="width: 6.017em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 57.763451 10.626798">
+<p>Base class for functions defined on finite element meshes.</p><p>Instances of <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> will always have the <a href="#a880e867925a2f06a1f23051b890dd0aa" class="m-doc">getValue()</a> method defined, which enables the evaluation of any function on some mesh element.</p><p><a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> provides the foundation for representing mathematical functions defined over geometric domains discretized by finite element meshes. This includes both analytical functions and discrete finite element functions (grid functions) that arise in variational formulations.</p><section id="autotoc_md202"><h3><a href="#autotoc_md202">Mathematical Foundation</a></h3><p>A function <svg class="m-math" style="width: 6.017em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 57.763451 10.626798">
 <title>
 $ f : \Omega \to \mathbb{R}^n $
 </title>
@@ -174,7 +174,7 @@ $ \phi_i $
 <use x='0' y='0' xlink:href='#eq5-g1-30'/>
 <use x='6.928102' y='1.793263' xlink:href='#eq5-g0-105'/>
 </g>
-</svg> spanning finite element spaces</li></ul></section><section id="autotoc_md136"><h3><a href="#autotoc_md136">Key Features</a></h3><ul><li><strong>Domain support</strong>: Functions can be restricted to subdomains or boundaries</li><li><strong><a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a> operations</strong>: Support for function traces on mesh boundaries</li><li><strong>Point evaluation</strong>: Evaluation at arbitrary points within the domain</li><li><strong>Polymorphic design</strong>: CRTP enables compile-time polymorphism for efficiency</li></ul></section>
+</svg> spanning finite element spaces</li></ul></section><section id="autotoc_md203"><h3><a href="#autotoc_md203">Key Features</a></h3><ul><li><strong>Domain support</strong>: Functions can be restricted to subdomains or boundaries</li><li><strong><a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a> operations</strong>: Support for function traces on mesh boundaries</li><li><strong>Point evaluation</strong>: Evaluation at arbitrary points within the domain</li><li><strong>Polymorphic design</strong>: CRTP enables compile-time polymorphism for efficiency</li></ul></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -571,7 +571,7 @@ $ \phi_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad29a755240e4c6938395b937a1c4a132" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+            <dd>Creates a polymorphic copy of this object.</dd>
           </dl>
         </section>
         <section>
@@ -883,16 +883,16 @@ $ A^T(x) $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>* Rodin::<wbr />Variational::<wbr />FunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad29a755240e4c6938395b937a1c4a132" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object.</td>
+                  <td>Non-owning pointer to the copied object</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
           </div></section>
         </section>
       </div>

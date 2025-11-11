@@ -70,9 +70,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md147">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md148">Applications</a></li>
-            <li><a href="#autotoc_md149">Usage Example</a></li>
+            <li><a href="#autotoc_md214">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md215">Applications</a></li>
+            <li><a href="#autotoc_md216">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -81,7 +81,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the GT class, which implements the greater-than comparison operation between functions. This operator creates a boolean function that indicates where one function exceeds another.</p><section id="autotoc_md147"><h3><a href="#autotoc_md147">Mathematical Foundation</a></h3><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
+<p>This file defines the GT class, which implements the greater-than comparison operation between functions. This operator creates a boolean function that indicates where one function exceeds another.</p><section id="autotoc_md214"><h3><a href="#autotoc_md214">Mathematical Foundation</a></h3><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
 <title>
 $ f, g : \Omega \to \mathbb{R} $
 </title>
@@ -164,7 +164,7 @@ $ f, g : \Omega \to \mathbb{R} $
 <use x='243.555676' y='-5.798537' xlink:href='#eq2-g4-115'/>
 <use x='248.206235' y='-5.798537' xlink:href='#eq2-g4-101'/>
 </g>
-</svg></div></section><section id="autotoc_md148"><h3><a href="#autotoc_md148">Applications</a></h3><ul><li>Indicator functions for regions: <svg class="m-math" style="width: 2.537em; height: 1.097em; vertical-align: -0.240em;" viewBox="0 -8.235778 24.357972 10.53216">
+</svg></div></section><section id="autotoc_md215"><h3><a href="#autotoc_md215">Applications</a></h3><ul><li>Indicator functions for regions: <svg class="m-math" style="width: 2.537em; height: 1.097em; vertical-align: -0.240em;" viewBox="0 -8.235778 24.357972 10.53216">
 <title>
 $ \mathbb{1}_{u &gt; 0} $
 </title>
@@ -180,7 +180,7 @@ $ \mathbb{1}_{u &gt; 0} $
 <use x='13.537282' y='1.793263' xlink:href='#eq3-g1-62'/>
 <use x='20.123789' y='1.793263' xlink:href='#eq3-g2-48'/>
 </g>
-</svg></li><li>Contact problems: identify contact/separation zones</li><li>Adaptive mesh refinement: flag elements where error exceeds tolerance</li><li>Phase field methods: distinguish phases</li></ul></section><section id="autotoc_md149"><h3><a href="#autotoc_md149">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">positive_region</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean: true where u is positive</span>
+</svg></li><li>Contact problems: identify contact/separation zones</li><li>Adaptive mesh refinement: flag elements where error exceeds tolerance</li><li>Phase field methods: distinguish phases</li></ul></section><section id="autotoc_md216"><h3><a href="#autotoc_md216">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">positive_region</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean: true where u is positive</span>
 
 <span class="c1">// Adaptive refinement indicator</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">refine_flag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">error_estimate</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">tolerance</span><span class="p">);</span></pre></section>

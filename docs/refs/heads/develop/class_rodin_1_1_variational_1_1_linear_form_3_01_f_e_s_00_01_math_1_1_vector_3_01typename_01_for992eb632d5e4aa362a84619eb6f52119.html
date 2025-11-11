@@ -183,7 +183,7 @@ $ u $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a98af4418f38b06b768f5b750f4e80e22" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+            <dd>Creates a polymorphic copy of this object.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab7934b9b67b0dd13b8d5fc35d70d3c07" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp;</span>
             </dt>
@@ -318,16 +318,16 @@ $ L(u) $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>* Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98af4418f38b06b768f5b750f4e80e22" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object.</td>
+                  <td>Non-owning pointer to the copied object</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ab7934b9b67b0dd13b8d5fc35d70d3c07"><div>
             <h3>

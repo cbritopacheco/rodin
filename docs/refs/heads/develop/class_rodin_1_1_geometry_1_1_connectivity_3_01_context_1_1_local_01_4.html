@@ -72,10 +72,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md19">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md20">Usage</a></li>
-            <li><a href="#autotoc_md21">Storage Efficiency</a></li>
-            <li><a href="#autotoc_md22">Thread Safety</a></li>
+            <li><a href="#autotoc_md39">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md40">Usage</a></li>
+            <li><a href="#autotoc_md41">Storage Efficiency</a></li>
+            <li><a href="#autotoc_md42">Thread Safety</a></li>
             <li>
               Reference
               <ul>
@@ -102,7 +102,7 @@ $ d \rightarrow d&#x27; $
 <use x='24.679554' y='0' xlink:href='#eq1-g2-100'/>
 <use x='30.762247' y='-4.338437' xlink:href='#eq1-g0-48'/>
 </g>
-</svg> between polytopes</li><li><a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> types for all polytopes</li></ul><section id="autotoc_md19"><h2><a href="#autotoc_md19">Mathematical Foundation</a></h2><p>For a mesh with topological dimension <svg class="m-math" style="width: 1.046em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.044475 8.169366">
+</svg> between polytopes</li><li><a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> types for all polytopes</li></ul><section id="autotoc_md39"><h2><a href="#autotoc_md39">Mathematical Foundation</a></h2><p>For a mesh with topological dimension <svg class="m-math" style="width: 1.046em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.044475 8.169366">
 <title>
 $ D $
 </title>
@@ -181,7 +181,7 @@ $ d&#x27; $
 <use x='0' y='0' xlink:href='#eq6-g1-100'/>
 <use x='6.082693' y='-4.338437' xlink:href='#eq6-g0-48'/>
 </g>
-</svg>-dimensional polytopes.</p></section><section id="autotoc_md20"><h2><a href="#autotoc_md20">Usage</a></h2><p><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> must be computed before use: <code class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"> </span><span class="c1">// Compute face-to-cell incidence</span></code></p></section><section id="autotoc_md21"><h2><a href="#autotoc_md21">Storage Efficiency</a></h2><p>The implementation is based on the efficient connectivity storage scheme described in <a href="citelist.html#CITEREF_logg2009efficient" class="m-doc">[7]</a>, which minimizes memory usage while enabling fast queries.</p></section><section id="autotoc_md22"><h2><a href="#autotoc_md22">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> objects are not thread-safe during construction. Once finalized, read-only access is thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a></p></aside></section>
+</svg>-dimensional polytopes.</p></section><section id="autotoc_md40"><h2><a href="#autotoc_md40">Usage</a></h2><p><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> must be computed before use: <code class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"> </span><span class="c1">// Compute face-to-cell incidence</span></code></p></section><section id="autotoc_md41"><h2><a href="#autotoc_md41">Storage Efficiency</a></h2><p>The implementation is based on the efficient connectivity storage scheme described in <a href="citelist.html#CITEREF_logg2009efficient" class="m-doc">[7]</a>, which minimizes memory usage while enabling fast queries.</p></section><section id="autotoc_md42"><h2><a href="#autotoc_md42">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> objects are not thread-safe during construction. Once finalized, read-only access is thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

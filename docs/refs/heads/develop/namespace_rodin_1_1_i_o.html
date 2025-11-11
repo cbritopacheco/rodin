@@ -75,6 +75,7 @@
               <ul>
                 <li><a href="#nested-classes">Classes</a></li>
                 <li><a href="#enum-members">Enums</a></li>
+                <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
@@ -83,15 +84,95 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> template for grid functions with specific file format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_f56c2f78720844daa893ee3a38efa37e.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, Variational::P1&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for loading P1 grid functions from MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase</a>
+            </dt>
+            <dd>Base class for loading grid functions from files or streams.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer</a> template for grid functions with specific file format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_f_e_m_00_01_f_e_s_00_01_mata6ca80a751fa9ee6d15bb619b9a7f426.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::MFEM, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Final specialization for printing grid functions with vector data in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>
+            </dt>
+            <dd>Forward declaration of base class for printing grid functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class Context, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base_3_01_file_format_1_1_m_f_e_m_00_01_variationa37e9447436a2f9407877d38ac61d3fb4.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MFEM, Variational::P0&lt;Range, Geometry::Mesh&lt;Context&gt;&gt;, Data&gt;</a>
+            </dt>
+            <dd>Base class for printing P0 (piecewise constant) grid functions in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class Context, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base_3_01_file_format_1_1_m_f_e_m_00_01_variationaedccd52c51bf01fc65681ec61a592148.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MFEM, Variational::P1&lt;Range, Geometry::Mesh&lt;Context&gt;&gt;, Data&gt;</a>
+            </dt>
+            <dd>Base class for printing P1 (continuous Lagrange) grid functions in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a>
+            </dt>
+            <dd>Base template for loading objects from files or streams.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class Trait&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html" class="m-doc">MeshLoader</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> template for meshes with specific file format and context.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html" class="m-doc">MeshLoader&lt;IO::FileFormat::MEDIT, Context::Local&gt;</a>
             </dt>
             <dd>Specialization for loading Sequential meshes in the MEDIT file format.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html" class="m-doc">MeshLoader&lt;IO::FileFormat::MFEM, Context::Local&gt;</a>
+            </dt>
+            <dd>Specialization for loading sequential meshes in MFEM format.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Context&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase</a>
             </dt>
-            <dd>Base class for mesh loader objects.</dd>
+            <dd>Base class for loading meshes from files or streams.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class Trait&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer</a> template for meshes with specific file format and context.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_e_n_s_i_g_h_t6_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::ENSIGHT6, Context::Local&gt;</a>
+            </dt>
+            <dd>Specialization for printing sequential meshes in EnSight6 format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::MFEM, Context::Local&gt;</a>
+            </dt>
+            <dd>Specialization for printing sequential meshes in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" class="m-doc">MeshPrinterBase</a>
+            </dt>
+            <dd>Base class for printing meshes to streams or files.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer</a>
+            </dt>
+            <dd>Base template for printing objects to streams.</dd>
           </dl>
         </section>
         <section id="enum-members">
@@ -103,7 +184,21 @@
               <a href="#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">MEDIT</a>,
               <a href="#a610845e6f56e545283af144cbbb99cfea6aac387f34d5c0cad7b1137d9806ca37" class="m-doc">ENSIGHT6</a> }</span>
             </dt>
-            <dd>Enumeration class for different file formats.</dd>
+            <dd>Enumeration of supported file formats for mesh and grid function I/O.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afc78e179d8b3d40a65bf40473c28a6dc" class="m-doc">toCharString</a>(</span><span class="m-doc-wrap"><a href="#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> fmt) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Converts a FileFormat enum value to its string representation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad0f93b34d031c8b01811ac194b93bee1" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              <a href="#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> fmt) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream output operator for FileFormat enum.</dd>
           </dl>
         </section>
         <section>
@@ -112,36 +207,93 @@
             <h3>
               enum class Rodin::<wbr />IO::<wbr /><a href="#a610845e6f56e545283af144cbbb99cfe" class="m-doc-self">FileFormat</a>
             </h3>
-            <p>Enumeration class for different file formats.</p>
+            <p>Enumeration of supported file formats for mesh and grid function I/O.</p>
+<p>This enum identifies the different file formats that can be used for reading and writing meshes and grid functions in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
                 <tr>
                   <td><a href="#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc-self" id="a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af">MFEM</a></td>
                   <td>
-                  <p>MFEM file format.</p>
+                  <p>MFEM mesh format - native format for MFEM library.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#a610845e6f56e545283af144cbbb99cfead8e85cdb6ef83caac7fa35c22dda2153" class="m-doc-self" id="a610845e6f56e545283af144cbbb99cfead8e85cdb6ef83caac7fa35c22dda2153">GMSH</a></td>
                   <td>
-                  <p>GMSH file format.</p>
+                  <p>GMSH mesh format - popular open-source mesh generator format.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc-self" id="a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def">MEDIT</a></td>
                   <td>
-                  <p>MEDIT file format.</p>
+                  <p>MEDIT mesh format - used by MMG remeshing software.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#a610845e6f56e545283af144cbbb99cfea6aac387f34d5c0cad7b1137d9806ca37" class="m-doc-self" id="a610845e6f56e545283af144cbbb99cfea6aac387f34d5c0cad7b1137d9806ca37">ENSIGHT6</a></td>
                   <td>
-                  <p>EnSight6 file format.</p>
+                  <p>EnSight6 format - widely used in post-processing and visualization.</p>
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="afc78e179d8b3d40a65bf40473c28a6dc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const char* Rodin::<wbr />IO::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc78e179d8b3d40a65bf40473c28a6dc" class="m-doc-self">toCharString</a>(</span><span class="m-doc-wrap"><a href="#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> fmt) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Converts a FileFormat enum value to its string representation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fmt&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>File format enum value</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>C-style string name of the format, or nullptr if invalid</td>
+                </tr>
+              </tfoot>
+            </table>
+<h5 id="autotoc_md97">Example</h5><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">toCharString</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span><span class="w">  </span><span class="c1">// Returns &quot;MFEM&quot;</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="ad0f93b34d031c8b01811ac194b93bee1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />IO::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0f93b34d031c8b01811ac194b93bee1" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              <a href="#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> fmt)</span></span>
+            </h3>
+            <p>Stream output operator for FileFormat enum.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Output stream</td>
+                </tr>
+                <tr>
+                  <td>fmt&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>File format to output</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Writes the string representation of the file format to the stream.</p><h5 id="autotoc_md98">Example</h5><pre class="m-code"><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">;</span><span class="w">  </span><span class="c1">// Outputs &quot;MEDIT&quot;</span></pre>
           </div></section>
         </section>
       </div>

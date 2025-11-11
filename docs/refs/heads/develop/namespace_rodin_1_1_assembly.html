@@ -83,6 +83,11 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>
+            </dt>
+            <dd>Base class template for assembly operations.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class OperatorType, class Solution, class TrialFES, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_operator_type_00_01_variational_1_1_bilinear_forbca9c1861f33a24fefc425d57c7a8686.html" class="m-doc">AssemblyBase&lt;OperatorType, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, OperatorType&gt;&gt;</a>
             </dt>
@@ -92,6 +97,56 @@
               class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_vector_type_00_01_variational_1_1_linear_form_3_9ceee04a1976155dd6c77da98b793ec0.html" class="m-doc">AssemblyBase&lt;VectorType, Variational::LinearForm&lt;FES, VectorType&gt;&gt;</a>
             </dt>
             <dd>Base class for linear form assembly operations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_bilinear_form_assembly_input.html" class="m-doc">BilinearFormAssemblyInput</a>
+            </dt>
+            <dd>Input data for bilinear form assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_bilinear_form_tuple_assembly_input.html" class="m-doc">BilinearFormTupleAssemblyInput</a>
+            </dt>
+            <dd>Input data for tuple of bilinear forms assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Default</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Default</a> assembly strategy selector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_local_01_4.html" class="m-doc">Default&lt;Context::Local&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Default</a> assembly strategy for local context without OpenMP.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_local_00_01_context_1_1_local_01_4.html" class="m-doc">Default&lt;Context::Local, Context::Local&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Default</a> assembly strategy for mixed local contexts without OpenMP.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Solution, class FES, class Value&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_dirichlet_b_c_assembly_input.html" class="m-doc">DirichletBCAssemblyInput</a>
+            </dt>
+            <dd>Input data for Dirichlet boundary condition assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_generic.html" class="m-doc">Generic</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_generic.html" class="m-doc">Generic</a> problem assembly implementation.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class TrialFunction, class TestFunction&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_generic_3_01_linear_system_00_01_variational_1_1_problem_3_01_linea2fb55a8ed9da93c956192260d68e1dd1.html" class="m-doc">Generic&lt;LinearSystem, Variational::Problem&lt;LinearSystem, TrialFunction, TestFunction&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_generic.html" class="m-doc">Generic</a> assembly implementation for complete variational problems.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_linear_form_assembly_input.html" class="m-doc">LinearFormAssemblyInput</a>
+            </dt>
+            <dd>Input data for linear form assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_linear_form_tuple_assembly_input.html" class="m-doc">LinearFormTupleAssemblyInput</a>
+            </dt>
+            <dd>Input data for tuple of linear forms assembly.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_1_1_mat_00_01_variational_1_1_bilinear_form_3_01_solu5af45a989f73eff35efbca874c481e5a.html" class="m-doc">OpenMP&lt;::Mat, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, ::Mat&gt;&gt;</a>
@@ -123,6 +178,21 @@
             </dt>
             <dd>OpenMP-based parallel mesh iteration for multi-threaded assembly.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class ProblemBody, class TrialFunction, class TestFunction&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_problem_assembly_input.html" class="m-doc">ProblemAssemblyInput</a>
+            </dt>
+            <dd>Input data for complete problem assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> (single-threaded) assembly implementation.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_iteration.html" class="m-doc">SequentialIteration</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> mesh iteration strategy.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_sequential_iteration_3_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html" class="m-doc">SequentialIteration&lt;Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
             </dt>
@@ -132,6 +202,16 @@
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a933637521ce9bf627bf7cd437fdb2689" class="m-doc">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const TrialFES&amp;,
+              const TestFES&amp;,
+              <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;decltype(std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType&gt;()*std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;())&gt;,
+              &amp;,
+              <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;decltype(std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType&gt;()*std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;())&gt;,
+              &amp;) -&gt; BilinearFormAssemblyInput&lt; TrialFES, TestFES &gt;</span>
+            </dt>
+            <dd>Template argument deduction guide for <a href="class_rodin_1_1_assembly_1_1_bilinear_form_assembly_input.html" class="m-doc">BilinearFormAssemblyInput</a>.</dd>
             <dt id="ab16fdb26e75372beeac0e5e57aee22eb">
               <span class="m-doc-wrap-bumper"><a href="#ab16fdb26e75372beeac0e5e57aee22eb" class="m-doc-self">OpenMPIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
               const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp;) -&gt; OpenMPIteration&lt; Geometry::Mesh&lt; Context::Local &gt; &gt;</span>
@@ -143,6 +223,24 @@
             </dt>
             <dd>Template argument deduction guide for <a href="class_rodin_1_1_assembly_1_1_sequential_iteration.html" class="m-doc">SequentialIteration</a>.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a933637521ce9bf627bf7cd437fdb2689"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a933637521ce9bf627bf7cd437fdb2689" class="m-doc-self">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const TrialFES&amp;,
+              const TestFES&amp;,
+              <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;decltype(std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType&gt;()*std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;())&gt;,
+              &amp;,
+              <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;decltype(std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType&gt;()*std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;())&gt;,
+              &amp;) -&gt; BilinearFormAssemblyInput&lt; TrialFES, TestFES &gt;</span></span>
+            </h3>
+            <p>Template argument deduction guide for <a href="class_rodin_1_1_assembly_1_1_bilinear_form_assembly_input.html" class="m-doc">BilinearFormAssemblyInput</a>.</p>
+          </div></section>
         </section>
       </div>
     </div>
