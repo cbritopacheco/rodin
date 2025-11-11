@@ -466,14 +466,39 @@ namespace Rodin::Assembly
       std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;  ///< Boundary attributes
   };
 
+  /**
+   * @ingroup RodinAssembly
+   * @brief Input data for complete problem assembly.
+   *
+   * This class encapsulates all data required to assemble a complete variational
+   * problem into a linear system. It stores references to the problem body
+   * (containing all forms and boundary conditions), trial function, and test
+   * function.
+   *
+   * The problem body contains:
+   * - Local and global bilinear form integrators
+   * - Linear form integrators
+   * - Dirichlet boundary conditions
+   * - Periodic boundary conditions
+   * - Pre-assembled bilinear and linear forms
+   *
+   * @tparam ProblemBody Type of problem body containing forms and BCs
+   * @tparam TrialFunction Trial function type
+   * @tparam TestFunction Test function type
+   */
   template <class ProblemBody, class TrialFunction, class TestFunction>
   class ProblemAssemblyInput
   {
     public:
+      /// @brief Problem body type
       using ProblemBodyType = ProblemBody;
 
       /**
-       * @param[in,out] body Reference to the problem body.
+       * @brief Constructs problem assembly input.
+       *
+       * @param body Problem body containing all variational forms and boundary conditions
+       * @param trialFunction Trial function for the problem
+       * @param testFunction Test function for the problem
        */
       ProblemAssemblyInput(
           ProblemBody& body, const TrialFunction& trialFunction, const TestFunction& testFunction)
@@ -482,25 +507,37 @@ namespace Rodin::Assembly
           m_testFunction(testFunction)
       {}
 
+      /**
+       * @brief Gets the problem body.
+       * @return Reference to problem body
+       */
       ProblemBody& getProblemBody() const
       {
         return m_body.get();
       }
 
+      /**
+       * @brief Gets the trial function.
+       * @return Reference to trial function
+       */
       const TrialFunction& getTrialFunction() const
       {
         return m_trialFunction.get();
       }
 
+      /**
+       * @brief Gets the test function.
+       * @return Reference to test function
+       */
       const TestFunction& getTestFunction() const
       {
         return m_testFunction.get();
       }
 
     private:
-      std::reference_wrapper<ProblemBody> m_body;
-      std::reference_wrapper<const TrialFunction> m_trialFunction;
-      std::reference_wrapper<const TestFunction> m_testFunction;
+      std::reference_wrapper<ProblemBody> m_body;                           ///< Problem body reference
+      std::reference_wrapper<const TrialFunction> m_trialFunction;          ///< Trial function reference
+      std::reference_wrapper<const TestFunction> m_testFunction;            ///< Test function reference
   };
 }
 
