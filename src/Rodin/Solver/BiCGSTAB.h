@@ -4,6 +4,39 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file BiCGSTAB.h
+ * @brief Bi-conjugate gradient stabilized solver for non-symmetric systems.
+ *
+ * This header provides the BiCGSTAB solver class, an iterative method for
+ * solving non-symmetric linear systems with better convergence properties
+ * than the standard Bi-Conjugate Gradient method.
+ *
+ * ## Algorithm
+ * BiCGSTAB solves:
+ * @f[
+ *   Ax = b
+ * @f]
+ * for non-symmetric matrices @f$ A @f$. It combines BiCG with stabilization
+ * to avoid the irregular convergence patterns often seen in BiCG.
+ *
+ * ## Applicability
+ * - Non-symmetric sparse matrices
+ * - Large systems where direct solvers are expensive
+ * - Convection-dominated problems
+ * - Advection-diffusion equations
+ *
+ * ## Usage Example
+ * ```cpp
+ * Problem problem(u, v);
+ * problem = Integral(Grad(u), Grad(v)) + Integral(beta * Grad(u), v) - Integral(f, v);
+ * 
+ * Solver::BiCGSTAB solver(problem);
+ * solver.setTolerance(1e-10).setMaxIterations(1000).solve();
+ * ```
+ *
+ * @see BiCGSTAB for the solver implementation
+ */
 #ifndef RODIN_SOLVER_BiCGSTAB_H
 #define RODIN_SOLVER_BiCGSTAB_H
 

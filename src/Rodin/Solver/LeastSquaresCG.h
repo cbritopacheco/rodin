@@ -4,6 +4,37 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file LeastSquaresCG.h
+ * @brief Least-squares conjugate gradient solver.
+ *
+ * This header provides the LeastSquaresCG solver class for solving least-squares
+ * problems using the conjugate gradient method applied to the normal equations.
+ *
+ * ## Algorithm
+ * Solves the least-squares problem:
+ * @f[
+ *   \min_x \|Ax - b\|^2
+ * @f]
+ * by applying CG to the normal equations @f$ A^TAx = A^Tb @f$.
+ *
+ * ## Applicability
+ * - Overdetermined systems (more equations than unknowns)
+ * - Rectangular matrices
+ * - Least-squares fitting problems
+ * - Problems where @f$ A^TA @f$ is well-conditioned
+ *
+ * ## Usage Example
+ * ```cpp
+ * Problem problem(u, v);
+ * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
+ * 
+ * Solver::LeastSquaresCG solver(problem);
+ * solver.setTolerance(1e-10).setMaxIterations(1000).solve();
+ * ```
+ *
+ * @see LeastSquaresCG for the solver implementation
+ */
 #ifndef RODIN_SOLVER_LEASTSQUARESCG_H
 #define RODIN_SOLVER_LEASTSQUARESCG_H
 
