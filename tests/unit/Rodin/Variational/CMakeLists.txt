@@ -6,6 +6,14 @@ target_link_libraries(RodinVariationalP1ElementTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalP1ElementTest)
 
+add_executable(RodinVariationalP0ElementTest P0ElementTest.cpp)
+target_link_libraries(RodinVariationalP0ElementTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalP0ElementTest)
+
 add_executable(RodinVariationalP1Test P1Test.cpp)
 target_link_libraries(RodinVariationalP1Test
   PUBLIC
