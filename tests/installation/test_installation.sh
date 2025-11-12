@@ -122,7 +122,15 @@ echo "=========================================="
 echo "Step 5: Configuring test project..."
 echo "=========================================="
 
-cmake . -DCMAKE_PREFIX_PATH="${INSTALL_DIR}"
+# Platform-specific CMake configuration for test project
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # On macOS, ensure proper SDK configuration to avoid header path issues
+  CMAKE_TEST_FLAGS="-DCMAKE_OSX_DEPLOYMENT_TARGET=12.0"
+else
+  CMAKE_TEST_FLAGS=""
+fi
+
+cmake . -DCMAKE_PREFIX_PATH="${INSTALL_DIR}" ${CMAKE_TEST_FLAGS}
 
 if [ $? -ne 0 ]; then
   echo "✗ FAILED: CMake configuration failed"
