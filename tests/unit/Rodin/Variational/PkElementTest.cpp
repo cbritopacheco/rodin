@@ -2171,8 +2171,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealP1Element(Polytope::Type::Triangle).getCount(), 3);
     EXPECT_EQ(RealP1Element(Polytope::Type::Quadrilateral).getCount(), 4);
     EXPECT_EQ(RealP1Element(Polytope::Type::Tetrahedron).getCount(), 4);
-    EXPECT_EQ(VectorP1Element<Real>(2, Polytope::Type::Segment).getCount(), 4);
-    EXPECT_EQ(VectorP1Element<Real>(3, Polytope::Type::Triangle).getCount(), 9);
+    EXPECT_EQ(VectorP1Element<Real>(Polytope::Type::Segment, 2).getCount(), 4);
+    EXPECT_EQ(VectorP1Element<Real>(Polytope::Type::Triangle, 3).getCount(), 9);
     
     // Pk Elements (Segment): K+1
     EXPECT_EQ(RealPkElement<2>(Polytope::Type::Segment).getCount(), 3);
@@ -2195,8 +2195,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealPkElement<3>(Polytope::Type::Tetrahedron).getCount(), 20);
     
     // Vector Pk Elements
-    EXPECT_EQ(PkElement<2, Math::Vector<Real>>(2, Polytope::Type::Segment).getCount(), 6);
-    EXPECT_EQ(PkElement<3, Math::Vector<Real>>(3, Polytope::Type::Triangle).getCount(), 30);
+    EXPECT_EQ(PkElement<2, Math::Vector<Real>>(Polytope::Type::Segment, 2).getCount(), 6);
+    EXPECT_EQ(PkElement<3, Math::Vector<Real>>(Polytope::Type::Triangle, 3).getCount(), 30);
   }
 
   TEST(FinalTest_Integration, AllElementsAllTypes_OrderProperty)
