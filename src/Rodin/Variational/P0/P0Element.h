@@ -178,7 +178,7 @@ namespace Rodin::Variational
                * @return Zero (constant function has zero derivative)
                */
               constexpr
-              ReturnType operator()(const Math::SpatialVector<Real>& r) const
+              ReturnType operator()(const Math::SpatialVector<Real>&) const
               {
                 return 0;
               }
@@ -191,7 +191,7 @@ namespace Rodin::Variational
           BasisFunction(const BasisFunction&) = default;
 
           constexpr
-          ReturnType operator()(const Math::SpatialVector<Real>& r) const
+          ReturnType operator()(const Math::SpatialVector<Real>&) const
           {
             return 1;
           }
@@ -290,7 +290,7 @@ namespace Rodin::Variational
 
     public:
       /// Parent class
-      using Parent = FiniteElementBase<P0Element>;
+      using Parent = FiniteElementBase<P0Element<Math::Vector<Scalar>>>;
 
       using ScalarType = Scalar;
 
@@ -307,12 +307,12 @@ namespace Rodin::Variational
         public:
           constexpr
           LinearForm()
-            : m_local(0), m_g(Geometry::Polytope::Type::Point)
+            : m_vdim(0), m_local(0), m_g(Geometry::Polytope::Type::Point)
           {}
 
           constexpr
-          LinearForm(size_t local, Geometry::Polytope::Type g)
-            : m_local(local), m_g(g)
+          LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
+            : m_vdim(vdim), m_local(local), m_g(g)
           {}
 
           constexpr
@@ -331,13 +331,15 @@ namespace Rodin::Variational
           constexpr
           decltype(auto) operator()(const T& v) const
           {
-            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
-            return v(P0Element<ScalarType>(m_g).getNode(m_local / vdim)).coeff(m_local % vdim);
+            // Single scalar P0 DOF at barycenter, shared by all components
+            const auto& x = P0Element<ScalarType>(m_g).getNode(0);
+            return v(x).coeff(m_local % m_vdim);
           }
 
         private:
-          const size_t m_local;         ///< Local DOF index
-          const Geometry::Polytope::Type m_g;  ///< Geometry type
+          const size_t m_vdim;               ///< Vector dimension
+          const size_t m_local;              ///< Local DOF index
+          const Geometry::Polytope::Type m_g;///< Geometry type
       };
 
       /**
@@ -384,7 +386,7 @@ namespace Rodin::Variational
                * @return Zero (constant function has zero derivative)
                */
               constexpr
-              ScalarType operator()(const Math::SpatialVector<Real>& rc) const
+              ScalarType operator()(const Math::SpatialVector<Real>&) const
               {
                 return ScalarType(0);
               }
@@ -398,12 +400,12 @@ namespace Rodin::Variational
 
           constexpr
           BasisFunction()
-            : m_local(0), m_g(Geometry::Polytope::Type::Point)
+            : m_vdim(0), m_local(0), m_g(Geometry::Polytope::Type::Point)
           {}
 
           constexpr
-          BasisFunction(size_t local, Geometry::Polytope::Type g)
-            : m_local(local), m_g(g)
+          BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
+            : m_vdim(vdim), m_local(local), m_g(g)
           {}
 
           constexpr
@@ -417,13 +419,12 @@ namespace Rodin::Variational
            * @param r Spatial point (unused, as basis is constant)
            * @return Constant unit vector: e_j where j = local % vdim
            */
-          const ReturnType& operator()(const Math::SpatialVector<ScalarType>& r) const
+          const ReturnType& operator()(const Math::SpatialVector<ScalarType>&) const
           {
             static thread_local ReturnType s_out;
-            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
-            s_out.resize(vdim);
+            s_out.resize(m_vdim);
             s_out.setZero();
-            s_out.coeffRef(m_local % vdim) = ScalarType(1);
+            s_out.coeffRef(m_local % m_vdim) = ScalarType(1);
             return s_out;
           }
 
@@ -438,55 +439,111 @@ namespace Rodin::Variational
           constexpr
           DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
           {
-            const size_t vdim = Geometry::Polytope::Traits(m_g).getDimension();
-            return DerivativeFunction<Order>(i, j, vdim, m_local, m_g);
+            return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
           }
 
         private:
-          const size_t m_local;         ///< Local DOF index
-          const Geometry::Polytope::Type m_g;  ///< Geometry type
+          const size_t m_vdim;               ///< Vector dimension
+          const size_t m_local;              ///< Local DOF index
+          const Geometry::Polytope::Type m_g;///< Geometry type
       };
 
-      P0Element() = default;
+      P0Element()
+        : Parent(Geometry::Polytope::Type::Point)
+        , m_vdim(0)
+      {}
 
+      /**
+       * @brief Constructor with geometry, defaulting vdim to spatial dimension.
+       *
+       * Keeps backward compatibility with previous behaviour.
+       */
       constexpr
       P0Element(Geometry::Polytope::Type geometry)
-        : Parent(geometry)
+        : P0Element(geometry, Geometry::Polytope::Traits(geometry).getDimension())
       {}
+
+      /**
+       * @brief Constructor with explicit vector dimension.
+       *
+       * @param geometry Polytope geometry type
+       * @param vdim     Vector dimension (number of components)
+       */
+      constexpr
+      P0Element(Geometry::Polytope::Type geometry, size_t vdim)
+        : Parent(geometry)
+        , m_vdim(vdim)
+      {
+        const size_t count = getCount();
+        m_lfs.reserve(count);
+        m_bs.reserve(count);
+        for (size_t i = 0; i < count; ++i)
+        {
+          m_lfs.emplace_back(vdim, i, geometry);
+          m_bs.emplace_back(vdim, i, geometry);
+        }
+      }
 
       constexpr
       P0Element(const P0Element& other)
         : Parent(other)
+        , m_vdim(other.m_vdim)
+        , m_lfs(other.m_lfs)
+        , m_bs(other.m_bs)
       {}
 
       constexpr
       P0Element(P0Element&& other)
         : Parent(std::move(other))
+        , m_vdim(std::exchange(other.m_vdim, 0))
+        , m_lfs(std::move(other.m_lfs))
+        , m_bs(std::move(other.m_bs))
       {}
+
+      constexpr
+      P0Element& operator=(const P0Element& other)
+      {
+        Parent::operator=(other);
+        m_vdim = other.m_vdim;
+        m_lfs  = other.m_lfs;
+        m_bs   = other.m_bs;
+        return *this;
+      }
+
+      constexpr
+      P0Element& operator=(P0Element&& other)
+      {
+        Parent::operator=(std::move(other));
+        m_vdim = std::exchange(other.m_vdim, 0);
+        m_lfs  = std::move(other.m_lfs);
+        m_bs   = std::move(other.m_bs);
+        return *this;
+      }
 
       constexpr
       size_t getCount() const
       {
-        return Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        // One DOF per vector component (all share the same barycenter)
+        return m_vdim;
       }
 
       constexpr
       auto getLinearForm(size_t local) const
       {
-        return LinearForm(local, this->getGeometry());
+        return m_lfs[local];
       }
 
       constexpr
       BasisFunction getBasis(size_t local) const
       {
-        return BasisFunction(local, this->getGeometry());
+        return m_bs[local];
       }
 
       constexpr
-      const Math::SpatialVector<Real>& getNode(size_t local) const
+      const Math::SpatialVector<Real>& getNode(size_t) const
       {
-        const size_t vdim = Geometry::Polytope::Traits(this->getGeometry()).getDimension();
-        return P0Element<ScalarType>(this->getGeometry()).getNode(local / vdim);
+        // All vector DOFs are located at the same barycenter
+        return P0Element<ScalarType>(this->getGeometry()).getNode(0);
       }
 
       constexpr
@@ -494,6 +551,12 @@ namespace Rodin::Variational
       {
         return 0;
       }
+
+    private:
+      size_t m_vdim;                        ///< Vector dimension
+
+      std::vector<LinearForm>  m_lfs;       ///< Linear forms per DOF
+      std::vector<BasisFunction> m_bs;      ///< Basis functions per DOF
   };
 }
 
