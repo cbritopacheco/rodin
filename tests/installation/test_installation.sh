@@ -20,15 +20,22 @@ echo "Install directory: ${INSTALL_DIR}"
 echo "Test project directory: ${TEST_PROJECT_DIR}"
 echo ""
 
-# Step 1: Initialize submodules
+# Step 1: Initialize submodules (if not already initialized)
 echo "=========================================="
-echo "Step 1: Initializing submodules..."
+echo "Step 1: Checking submodules..."
 echo "=========================================="
 
 cd "${REPO_ROOT}"
-git submodule update --init --recursive
 
-echo "✓ Submodules initialized"
+# Check if submodules are already initialized
+if [ -z "$(ls -A third-party/corrade 2>/dev/null)" ]; then
+  echo "Initializing submodules..."
+  git submodule update --init --recursive
+  echo "✓ Submodules initialized"
+else
+  echo "✓ Submodules already initialized"
+fi
+
 echo ""
 
 # Step 2: Build and install Rodin
@@ -39,13 +46,21 @@ echo "=========================================="
 mkdir -p "${BUILD_DIR}"
 cd "${BUILD_DIR}"
 
+# Detect OS for platform-specific CMake options
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  CMAKE_EXTRA_FLAGS="-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+else
+  CMAKE_EXTRA_FLAGS=""
+fi
+
 cmake .. \
   -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
   -DCMAKE_BUILD_TYPE=Release \
   -DRODIN_BUILD_EXAMPLES=OFF \
   -DRODIN_BUILD_UNIT_TESTS=OFF \
   -DRODIN_BUILD_MANUFACTURED_TESTS=OFF \
-  -DRODIN_BUILD_BENCHMARKS=OFF
+  -DRODIN_BUILD_BENCHMARKS=OFF \
+  ${CMAKE_EXTRA_FLAGS}
 
 # Detect number of processors (cross-platform)
 if command -v nproc &> /dev/null; then
