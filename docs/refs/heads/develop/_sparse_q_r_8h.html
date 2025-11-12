@@ -70,9 +70,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md173">Algorithm</a></li>
-            <li><a href="#autotoc_md174">Applicability</a></li>
-            <li><a href="#autotoc_md175">Usage Example</a></li>
+            <li><a href="#autotoc_md193">Algorithm</a></li>
+            <li><a href="#autotoc_md194">Applicability</a></li>
+            <li><a href="#autotoc_md195">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -82,7 +82,7 @@
             </li>
           </ul>
         </nav>
-<p>This header provides the SparseQR solver class, which implements QR decomposition with numerical column pivoting for sparse matrices.</p><section id="autotoc_md173"><h3><a href="#autotoc_md173">Algorithm</a></h3><p>The solver computes:</p><div class="m-math"><svg style="width: 5.414em; height: 1.093em;" viewBox="168.285236 -10.493961 51.972519 10.493973">
+<p>This header provides the SparseQR solver class, which implements QR decomposition with numerical column pivoting for sparse matrices.</p><section id="autotoc_md193"><h3><a href="#autotoc_md193">Algorithm</a></h3><p>The solver computes:</p><div class="m-math"><svg style="width: 5.414em; height: 1.093em;" viewBox="168.285236 -10.493961 51.972519 10.493973">
 <title>
 \[
   AP = QR
@@ -132,7 +132,7 @@ $ R $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-82'/>
 </g>
-</svg> is upper triangular. The left-looking algorithm proceeds column by column.</p></section><section id="autotoc_md174"><h3><a href="#autotoc_md174">Applicability</a></h3><ul><li>General sparse matrices (no symmetry required)</li><li>Rank-deficient systems</li><li>Least-squares problems</li><li>Overdetermined systems</li><li>Systems where LU factorization is numerically unstable</li></ul></section><section id="autotoc_md175"><h3><a href="#autotoc_md175">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> is upper triangular. The left-looking algorithm proceeds column by column.</p></section><section id="autotoc_md194"><h3><a href="#autotoc_md194">Applicability</a></h3><ul><li>General sparse matrices (no symmetry required)</li><li>Rank-deficient systems</li><li>Least-squares problems</li><li>Overdetermined systems</li><li>Systems where LU factorization is numerically unstable</li></ul></section><section id="autotoc_md195"><h3><a href="#autotoc_md195">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">SparseQR</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>

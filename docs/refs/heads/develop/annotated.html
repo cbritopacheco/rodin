@@ -343,16 +343,33 @@
                   <li class="m-doc-collapsible collapsed">
                     <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_models_1_1_advection.html" class="m-doc">Advection</a> <span class="m-doc">Module which provides models for the resolution of unsteady advection equations.</span>
                     <ul class="m-doc">
+                      <li>class <a href="class_rodin_1_1_models_1_1_advection_1_1_first_order_boundary_policy.html" class="m-doc">FirstOrderBoundaryPolicy</a> <span class="m-doc">First-order boundary policy for <a href="class_rodin_1_1_models_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection.</span></li>
                       <li>class <a href="class_rodin_1_1_models_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> <span class="m-doc"><a href="class_rodin_1_1_models_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> variational advection for scalar fields.</span></li>
+                      <li>class <a href="class_rodin_1_1_models_1_1_advection_1_1_lagrangian_3_01_variational_1_1_trial_function_3_01_var5103e61f217c2f7f2aada0908c756ab9.html" class="m-doc">Lagrangian&lt;Variational::TrialFunction&lt;Variational::GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;</a> <span class="m-doc"><a href="class_rodin_1_1_models_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection specialization for trial/test function formulation.</span></li>
                     </ul>
                   </li>
                   <li class="m-doc-collapsible collapsed">
                     <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_models_1_1_distance.html" class="m-doc">Distance</a> <span class="m-doc">Module which provides models for computation of the distance function.</span>
                     <ul class="m-doc">
+                      <li>class <a href="class_rodin_1_1_models_1_1_distance_1_1_base.html" class="m-doc">Base</a> <span class="m-doc"><a href="class_rodin_1_1_models_1_1_distance_1_1_base.html" class="m-doc">Base</a> class for distance function computation models using CRTP.</span></li>
+                      <li>class <a href="class_rodin_1_1_models_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> <span class="m-doc"><a href="namespace_rodin_1_1_models_1_1_distance.html" class="m-doc">Distance</a> function computation using the <a href="class_rodin_1_1_models_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> equation.</span></li>
                       <li>class <a href="class_rodin_1_1_models_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> <span class="m-doc"><a href="class_rodin_1_1_models_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> approximation to the distance function.</span></li>
-                      <li>class <a href="class_rodin_1_1_models_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> <span class="m-doc"><a href="class_rodin_1_1_models_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> normalization for a level set function. <a href="citelist.html#CITEREF_rvachev1974methods" class="m-doc">[9]</a> <a href="citelist.html#CITEREF_rvachev2001transfinite" class="m-doc">[8]</a>.</span></li>
+                      <li>class <a href="class_rodin_1_1_models_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> <span class="m-doc"><a href="class_rodin_1_1_models_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> normalization for a level set function.</span></li>
                       <li>class <a href="class_rodin_1_1_models_1_1_distance_1_1_signed_poisson.html" class="m-doc">SignedPoisson</a> <span class="m-doc"><a href="class_rodin_1_1_models_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> approximation to the signed distance function.</span></li>
-                      <li>class <a href="class_rodin_1_1_models_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a> <span class="m-doc">Spalding-Tucker normalization for a level set function. <a href="citelist.html#CITEREF_belyaev2015variational" class="m-doc">[2]</a> <a href="citelist.html#CITEREF_spalding1994calculation" class="m-doc">[10]</a>, <a href="citelist.html#CITEREF_tucker1998assessment" class="m-doc">[11]</a>.</span></li>
+                      <li>class <a href="class_rodin_1_1_models_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a> <span class="m-doc">Spalding-Tucker normalization for a level set function.</span></li>
+                    </ul>
+                  </li>
+                  <li class="m-doc-collapsible collapsed">
+                    <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_models_1_1_eikonal.html" class="m-doc">Eikonal</a> <span class="m-doc">Module which provides solvers for the <a href="namespace_rodin_1_1_models_1_1_eikonal.html" class="m-doc">Eikonal</a> equation.</span>
+                    <ul class="m-doc">
+                      <li>class <a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> <span class="m-doc">Fast marching method for solving the <a href="namespace_rodin_1_1_models_1_1_eikonal.html" class="m-doc">Eikonal</a> equation.</span></li>
+                      <li>class <a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m_3_01_variational_1_1_grid_function_3_01_variationalf573cab4403f3973151c42f581c065d1.html" class="m-doc">FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt;</a> <span class="m-doc"><a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> specialization for P1 finite elements on local meshes.</span></li>
+                    </ul>
+                  </li>
+                  <li class="m-doc-collapsible collapsed">
+                    <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_models_1_1_elasticity.html" class="m-doc">Elasticity</a> <span class="m-doc">Module which provides models for solid mechanics and elasticity.</span>
+                    <ul class="m-doc">
+                      <li>class <a href="class_rodin_1_1_models_1_1_elasticity_1_1_linear_elasticity.html" class="m-doc">LinearElasticity</a> <span class="m-doc">Linear elasticity system for small deformations.</span></li>
                     </ul>
                   </li>
                   <li class="m-doc-collapsible collapsed">

@@ -70,10 +70,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md148">Algorithm</a></li>
-            <li><a href="#autotoc_md149">Convergence</a></li>
-            <li><a href="#autotoc_md150">Applicability</a></li>
-            <li><a href="#autotoc_md151">Usage Example</a></li>
+            <li><a href="#autotoc_md168">Algorithm</a></li>
+            <li><a href="#autotoc_md169">Convergence</a></li>
+            <li><a href="#autotoc_md170">Applicability</a></li>
+            <li><a href="#autotoc_md171">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -83,7 +83,7 @@
             </li>
           </ul>
         </nav>
-<p>This header provides the CG (Conjugate Gradient) solver class, an iterative method for solving linear systems with symmetric positive definite matrices.</p><section id="autotoc_md148"><h3><a href="#autotoc_md148">Algorithm</a></h3><p>The conjugate gradient method solves:</p><div class="m-math"><svg style="width: 3.766em; height: 0.865em;" viewBox="176.196076 -8.302191 36.150849 8.302191">
+<p>This header provides the CG (Conjugate Gradient) solver class, an iterative method for solving linear systems with symmetric positive definite matrices.</p><section id="autotoc_md168"><h3><a href="#autotoc_md168">Algorithm</a></h3><p>The conjugate gradient method solves:</p><div class="m-math"><svg style="width: 3.766em; height: 0.865em;" viewBox="176.196076 -8.302191 36.150849 8.302191">
 <title>
 \[
   Ax = b
@@ -137,7 +137,7 @@ $ \frac{1}{2}x^TAx - b^Tx $
 <use x='54.898151' y='-4.338437' xlink:href='#eq3-g1-84'/>
 <use x='61.502641' y='0' xlink:href='#eq3-g2-120'/>
 </g>
-</svg> using conjugate search directions.</p></section><section id="autotoc_md149"><h3><a href="#autotoc_md149">Convergence</a></h3><p>CG converges in at most <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
+</svg> using conjugate search directions.</p></section><section id="autotoc_md169"><h3><a href="#autotoc_md169">Convergence</a></h3><p>CG converges in at most <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
 <title>
 $ n $
 </title>
@@ -224,7 +224,7 @@ $ A $
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-65'/>
 </g>
-</svg>.</p></section><section id="autotoc_md150"><h3><a href="#autotoc_md150">Applicability</a></h3><ul><li>Symmetric positive definite matrices</li><li>Large sparse systems</li><li>Elliptic PDEs (Poisson, heat equation, elasticity)</li><li>Systems amenable to preconditioning</li></ul></section><section id="autotoc_md151"><h3><a href="#autotoc_md151">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg>.</p></section><section id="autotoc_md170"><h3><a href="#autotoc_md170">Applicability</a></h3><ul><li>Symmetric positive definite matrices</li><li>Large sparse systems</li><li>Elliptic PDEs (Poisson, heat equation, elasticity)</li><li>Systems amenable to preconditioning</li></ul></section><section id="autotoc_md171"><h3><a href="#autotoc_md171">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
