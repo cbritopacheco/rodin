@@ -11,7 +11,7 @@ set(RodinModelsEikonal_HEADERS
 
 # Header-only / interface library
 add_library(RodinModelsEikonal INTERFACE)
-add_library(Rodin::ModelsEikonal ALIAS RodinModelsEikonal)
+add_library(Rodin::Models::Eikonal ALIAS RodinModelsEikonal)
 set_target_properties(RodinModelsEikonal PROPERTIES EXPORT_NAME ModelsEikonal)
 
 # ---- Includes / defs -------------------------------------------------------

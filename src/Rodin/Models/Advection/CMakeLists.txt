@@ -11,7 +11,7 @@ set(RodinModelsAdvection_HEADERS
 
 # Header-only / interface library
 add_library(RodinModelsAdvection INTERFACE)
-add_library(Rodin::ModelsAdvection ALIAS RodinModelsAdvection)
+add_library(Rodin::Models::Advection ALIAS RodinModelsAdvection)
 set_target_properties(RodinModelsAdvection PROPERTIES EXPORT_NAME ModelsAdvection)
 
 # ---- Includes / defs -------------------------------------------------------
