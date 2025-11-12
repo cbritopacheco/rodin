@@ -18,6 +18,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Grad.h"
+#include "Rodin/Variational/ShapeFunction.h"
 
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
@@ -191,12 +192,12 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P0 ShapeFunction
    */
-  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType SpaceType>
-  class Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, SpaceType>> final
-    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, SpaceType>>>
+  template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType SpaceType>
+  class Grad<ShapeFunction<NestedDerived, P0<Scalar, Mesh>, SpaceType>> final
+    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P0<Scalar, Mesh>, SpaceType>>>
   {
     public:
-      using RangeType = Range;
+      using RangeType = Scalar;
 
       using MeshType = Mesh;
 
