@@ -22,6 +22,14 @@ target_link_libraries(RodinVariationalPkElementTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalPkElementTest)
 
+add_executable(RodinVariationalFiniteElementFinalTest FiniteElementFinalTest.cpp)
+target_link_libraries(RodinVariationalFiniteElementFinalTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalFiniteElementFinalTest)
+
 add_executable(RodinVariationalP1Test P1Test.cpp)
 target_link_libraries(RodinVariationalP1Test
   PUBLIC
