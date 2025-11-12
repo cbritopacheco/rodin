@@ -31,26 +31,57 @@ namespace Rodin::Models::Eikonal
 {
   /**
    * @brief Fast marching method for solving the Eikonal equation.
+   *
+   * The Fast Marching Method (FMM) is an efficient algorithm for solving
+   * the Eikonal equation @f$ |\nabla u| = F(x) @f$ on unstructured meshes.
+   * It propagates a wavefront from initial seed points, updating arrival
+   * times in a manner that ensures causality.
+   *
+   * @tparam Solution Solution type (typically a GridFunction)
+   * @tparam SpeedFunction Type of the speed function @f$ F(x) @f$
    */
   template <class Solution, class SpeedFunction>
   class FMM;
 
+  /**
+   * @brief FMM specialization for P1 finite elements on local meshes.
+   *
+   * This specialization implements the Fast Marching Method for piecewise
+   * linear (P1) finite elements on local (non-distributed) meshes.
+   *
+   * @tparam Data Data storage type for the solution
+   * @tparam SpeedFunction Type of the speed function
+   */
   template <class Data, class SpeedFunction>
   class FMM<Variational::GridFunction<Variational::P1<Real, Geometry::Mesh<Context::Local>>, Data>, SpeedFunction>
   {
     public:
+      /// Scalar type for computations
       using ScalarType = Real;
+      /// Computation context (local, non-distributed)
       using Context = Context::Local;
+      /// Mesh type
       using Mesh = Geometry::Mesh<Context>;
+      /// Finite element space type (P1)
       using FES = Variational::P1<ScalarType, Mesh>;
+      /// Solution type: grid function storing arrival times
       using SolutionType = Variational::GridFunction<FES, Math::Vector<ScalarType>>;
+      /// Speed function type
       using SpeedFunctionType = SpeedFunction;
 
+      /**
+       * @brief Label for mesh vertices during FMM propagation.
+       *
+       * Vertices are classified into three states:
+       * - Far: Not yet visited
+       * - Considered: In priority queue, being considered
+       * - Accepted: Finalized arrival time
+       */
       enum class Label : uint8_t
       {
-        Far,
-        Considered,
-        Accepted
+        Far,         ///< Vertex not yet visited
+        Considered,  ///< Vertex in priority queue
+        Accepted     ///< Vertex with finalized arrival time
       };
 
     private:
@@ -65,11 +96,30 @@ namespace Rodin::Models::Eikonal
         std::priority_queue<PQItem, std::vector<PQItem>, std::greater<PQItem>>;
 
     public:
+      /**
+       * @brief Constructs a Fast Marching Method solver.
+       *
+       * @tparam Callable Type of the speed function (deduced)
+       * @param[in,out] u Grid function to store the solution (arrival times)
+       * @param[in] speed Speed function @f$ F(x) @f$ defining propagation velocity
+       */
       template <class Callable>
       FMM(SolutionType& u, Callable&& speed)
         : m_u(u), m_speed(std::forward<Callable>(speed))
       {}
 
+      /**
+       * @brief Seeds the FMM with initial points.
+       *
+       * Seeds are the starting vertices where the arrival time is set to zero.
+       * The method will propagate from these points throughout the domain.
+       *
+       * @tparam Seed Type of seed container (e.g., std::vector<Index>)
+       * @param[in] seed Container of vertex indices to use as seeds
+       * @return Reference to this FMM object for method chaining
+       *
+       * @note This method must be called before solve().
+       */
       template <class Seed>
       FMM& seed(Seed&& seed)
       {
@@ -109,6 +159,22 @@ namespace Rodin::Models::Eikonal
         return *this;
       }
 
+      /**
+       * @brief Solves the Eikonal equation using the Fast Marching Method.
+       *
+       * Propagates the solution from seed points throughout the domain by
+       * repeatedly accepting the vertex with the smallest arrival time from
+       * the priority queue and updating its neighbors.
+       *
+       * ## Algorithm
+       * 1. Initialize: seed points have time 0, all others have time ∞
+       * 2. Extract vertex with minimum arrival time from priority queue
+       * 3. Mark it as Accepted
+       * 4. Update arrival times of neighboring vertices
+       * 5. Repeat until priority queue is empty
+       *
+       * @note The seed() method must be called before solve().
+       */
       void solve()
       {
         auto& u = m_u.get();
@@ -491,6 +557,11 @@ namespace Rodin::Models::Eikonal
       std::vector<Label> m_labels;
   };
 
+  /**
+   * @brief Deduction guide for FMM constructor.
+   *
+   * Allows template argument deduction when constructing FMM objects.
+   */
   template <class Solution, class SpeedFunction>
   FMM(Solution& u, SpeedFunction&& speed) -> FMM<Solution, SpeedFunction>;
 }
