@@ -883,7 +883,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      P1Element(size_t vdim, Geometry::Polytope::Type geometry)
+      P1Element(Geometry::Polytope::Type geometry, size_t vdim)
         : Parent(geometry), m_vdim(vdim)
       {
         const size_t count = this->getCount();

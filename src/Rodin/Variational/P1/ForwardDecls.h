@@ -56,7 +56,8 @@ namespace Rodin::Variational
   /**
    * @brief Alias for P1Element<Math::Vector<Real>>
    */
-  using VectorP1Element = P1Element<Math::Vector<Real>>;
+  template <class Scalar>
+  using VectorP1Element = P1Element<Math::Vector<Scalar>>;
 
   using RealVectorP1Element = P1Element<Math::Vector<Real>>;
 }
