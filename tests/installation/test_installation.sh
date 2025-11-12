@@ -124,8 +124,14 @@ echo "=========================================="
 
 # Platform-specific CMake configuration for test project
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  # On macOS, ensure proper SDK configuration to avoid header path issues
+  # On macOS with Xcode 16, we need to ensure proper SDK configuration
+  # Let CMake auto-detect the SDK and set deployment target
   CMAKE_TEST_FLAGS="-DCMAKE_OSX_DEPLOYMENT_TARGET=12.0"
+  
+  # Also ensure we're not using any problematic inherited flags
+  export CXXFLAGS=""
+  export CFLAGS=""
+  export LDFLAGS=""
 else
   CMAKE_TEST_FLAGS=""
 fi
