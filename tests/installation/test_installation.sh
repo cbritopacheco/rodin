@@ -101,6 +101,21 @@ fi
 echo "✓ Installation structure verified"
 echo ""
 
+# Check if we should skip test project (e.g., for macOS with Xcode 16 issues)
+if [ "${SKIP_TEST_PROJECT}" = "1" ]; then
+  echo "=========================================="
+  echo "Skipping test project (SKIP_TEST_PROJECT=1)"
+  echo "=========================================="
+  echo ""
+  echo "✓ Installation verified (build and install successful)"
+  echo "✓ Test project skipped due to platform limitations"
+  echo ""
+  echo "=========================================="
+  echo "✓ Installation test completed!"
+  echo "=========================================="
+  exit 0
+fi
+
 # Step 4: Create test project
 echo "=========================================="
 echo "Step 4: Creating test project..."
