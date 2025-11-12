@@ -2,7 +2,7 @@
 #include "Rodin/Test/Random.h"
 
 #include <complex>
-#include "Rodin/Variational/P0/P0Element.h"
+#include "Rodin/Variational/P0.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;

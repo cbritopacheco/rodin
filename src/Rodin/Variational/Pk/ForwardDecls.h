@@ -39,10 +39,16 @@ namespace Rodin::Variational
   using ComplexPkElement = PkElement<K, Complex>;
 
   /**
-   * @brief Convenience alias for vector-valued Pk element
+   * @brief Convenience alias for real vector-valued Pk element
    */
   template <size_t K>
   using VectorPkElement = PkElement<K, Math::Vector<Real>>;
+
+  /**
+   * @brief Convenience alias for complex vector-valued Pk element
+   */
+  template <size_t K>
+  using ComplexVectorPkElement = PkElement<K, Math::Vector<Complex>>;
 }
 
 #endif

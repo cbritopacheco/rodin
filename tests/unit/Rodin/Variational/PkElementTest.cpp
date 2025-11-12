@@ -11,9 +11,7 @@
 #include <complex>
 #include "Rodin/Variational/P0.h"
 #include "Rodin/Variational/P1.h"
-#include "Rodin/Variational/Pk/PkElement.h"
-#include "Rodin/Variational/P0/P0Element.h"
-#include "Rodin/Variational/P1/P1Element.h"
+#include "Rodin/Variational/Pk.h"
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop

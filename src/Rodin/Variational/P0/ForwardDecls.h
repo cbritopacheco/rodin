@@ -60,7 +60,18 @@ namespace Rodin::Variational
   /**
    * @brief Alias for P0Element<Math::Vector<Real>>
    */
-  using VectorP0Element = P0Element<Math::Vector<Real>>;
+  template <class Scalar>
+  using VectorP0Element = P0Element<Math::Vector<Scalar>>;
+
+  /**
+   * @brief Alias for real vector P0Element
+   */
+  using RealVectorP0Element = VectorP0Element<Real>;
+
+  /**
+   * @brief Alias for complex vector P0Element
+   */
+  using ComplexVectorP0Element = VectorP0Element<Complex>;
 }
 
 #endif
