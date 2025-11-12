@@ -2216,5 +2216,5 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealPkElement<4>(Polytope::Type::Segment).getOrder(), 4);
     EXPECT_EQ(RealPkElement<5>(Polytope::Type::Segment).getOrder(), 5);
     EXPECT_EQ(RealPkElement<6>(Polytope::Type::Segment).getOrder(), 6);
-}
+  }
 }
