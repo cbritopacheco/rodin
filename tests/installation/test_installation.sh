@@ -47,7 +47,16 @@ cmake .. \
   -DRODIN_BUILD_MANUFACTURED_TESTS=OFF \
   -DRODIN_BUILD_BENCHMARKS=OFF
 
-make -j$(nproc)
+# Detect number of processors (cross-platform)
+if command -v nproc &> /dev/null; then
+  NPROC=$(nproc)
+elif command -v sysctl &> /dev/null; then
+  NPROC=$(sysctl -n hw.ncpu)
+else
+  NPROC=2
+fi
+
+make -j${NPROC}
 make install
 
 echo "✓ Installation complete"

@@ -78,6 +78,9 @@ jobs:
         run: |
           brew update
           brew install boost eigen libomp
+          
+      - name: Link libomp
+        run: |
           brew link --force --overwrite libomp
           
       - name: Run installation test
