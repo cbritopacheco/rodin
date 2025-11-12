@@ -2079,7 +2079,7 @@ namespace Rodin::Tests::Unit
 
   TEST(FinalTest_PkElement_Vector, ComponentStructure_P2_2D_Segment)
   {
-    PkElement<2, Math::Vector<Real>> elem(2, Polytope::Type::Segment);
+    PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, 2);
     EXPECT_EQ(elem.getCount(), 6);  // 3 nodes × 2 components
     
     Math::Vector<Real> p{{0.5}};
@@ -2103,7 +2103,7 @@ namespace Rodin::Tests::Unit
 
   TEST(FinalTest_PkElement_Vector, QuadraticVectorFieldReproduction_P2_Segment)
   {
-    PkElement<2, Math::Vector<Real>> elem(2, Polytope::Type::Segment);
+    PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, 2);
     
     // Test quadratic vector field v(x) = [1+2x+3x^2, 4+5x+6x^2]
     // At nodes: x=0: [1,4], x=0.5: [1.75,6.5], x=1: [6,15]
@@ -2135,7 +2135,7 @@ namespace Rodin::Tests::Unit
   {
     // P3 on Triangle with 3D vectors
     {
-      PkElement<3, Math::Vector<Real>> elem(3, Polytope::Type::Triangle);
+      PkElement<3, Math::Vector<Real>> elem(Polytope::Type::Triangle, 3);
       EXPECT_EQ(elem.getCount(), 30);  // 10 nodes × 3 components
       
       Math::Vector<Real> p{{0.3, 0.4}};

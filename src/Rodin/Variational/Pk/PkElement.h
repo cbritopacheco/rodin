@@ -741,7 +741,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      PkElement(size_t vdim, Geometry::Polytope::Type geometry)
+      PkElement(Geometry::Polytope::Type geometry, size_t vdim)
         : Parent(geometry), m_vdim(vdim)
       {
         const size_t count = this->getCount();
