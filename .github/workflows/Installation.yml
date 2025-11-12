@@ -94,12 +94,8 @@ jobs:
           echo "OpenMP location:"
           brew --prefix libomp
           
-      - name: Run installation test (build and install only)
-        run: |
-          # On macOS with Xcode 16, skip test project compilation due to known header path issues
-          # The library builds and installs successfully; downstream usage works with proper SDK configuration
-          export SKIP_TEST_PROJECT=1
-          bash tests/installation/test_installation.sh
+      - name: Run installation test
+        run: bash tests/installation/test_installation.sh
         
       - name: Archive installation artifacts on failure
         if: failure()
