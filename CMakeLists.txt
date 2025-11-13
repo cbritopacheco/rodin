@@ -5,6 +5,11 @@ cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0076 NEW)
 
+# Use modern Boost finding mechanism (CMake 3.30+)
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 # Prohibit in-source builds
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are prohibited.")
@@ -166,6 +171,7 @@ rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 rodin_add_compile_options(LANG C CXX OPTIONS -fcolor-diagnostics)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=double-promotion -Wno-error=maybe-uninitialized)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-deprecated-anon-enum-enum-conversion)
+rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=array-bounds)
 
 add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
 add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)

@@ -29,17 +29,112 @@ Any contributors are warmly encouraged and any help or comments are always appre
 
 ## Installation
 
-For detailed installation instructions, including system requirements, CMake configuration options, and usage examples, please see **[INSTALL.md](INSTALL.md)**.
+Rodin can be easily installed from source on Linux and macOS systems.
 
-Quick install:
+### Prerequisites
+
+**Required:**
+- CMake 3.16.0+
+- C++20 compatible compiler (GCC 12+, Clang 14+, or AppleClang)
+- Boost 1.74+
+- Eigen3
+
+**Optional:**
+- OpenMP (for parallel execution)
+- SuiteSparse (for additional linear solvers)
+- MPI (for distributed computing)
+
+### Quick Install
+
 ```bash
+# Clone repository with submodules
 git clone --recursive https://github.com/cbritopacheco/rodin.git
 cd rodin
+
+# Configure and build
 mkdir build && cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release
 make -j4
+
+# Install (may require sudo for system-wide installation)
 sudo make install
 ```
+
+### User-Local Installation
+
+For installation without sudo (recommended for development):
+
+```bash
+# Configure with local prefix
+mkdir build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release
+make -j4
+make install
+
+# Add to your shell profile (~/.bashrc or ~/.zshrc)
+export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
+```
+
+### Verifying Installation
+
+After installation, you can verify it works by creating a simple test project:
+
+**CMakeLists.txt:**
+```cmake
+cmake_minimum_required(VERSION 3.16)
+project(MyRodinProject CXX)
+set(CMAKE_CXX_STANDARD 20)
+
+find_package(Rodin REQUIRED)
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE Rodin::Geometry Rodin::Variational Rodin::Solver)
+```
+
+**main.cpp:**
+```cpp
+#include <Rodin/Solver.h>
+#include <Rodin/Geometry.h>
+#include <Rodin/Variational.h>
+
+using namespace Rodin;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
+
+int main() {
+  Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {8, 8});
+  P1 Vh(mesh);
+  std::cout << "Rodin installation verified!" << std::endl;
+  return 0;
+}
+```
+
+Then build and run:
+```bash
+mkdir build && cd build
+cmake ..
+make
+./my_app
+```
+
+### Platform-Specific Notes
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
+```
+
+**macOS (Homebrew):**
+```bash
+brew install cmake boost eigen libomp
+```
+
+### Troubleshooting
+
+- **CMake can't find Rodin:** Ensure `CMAKE_PREFIX_PATH` includes your installation directory
+- **Linker errors:** Make sure all required dependencies (Boost, Eigen) are installed
+- **Compiler errors:** Verify you're using a C++20 compatible compiler
+
+For detailed installation instructions, advanced configuration options, and troubleshooting, see **[INSTALL.md](INSTALL.md)**.
 
 ## Building the project
 

@@ -1,4 +1,4 @@
-# ---- Add main targets ------------------------------------------------------
+# ---- Top-level Rodin umbrella target (header-only aggregator) -------------
 set(Rodin_HEADERS
   Array.h
   Math.h
@@ -7,30 +7,39 @@ set(Rodin_HEADERS
   Plot.h
   Solver.h
   Variational.h
-  )
-
-# ---- Set compile options for all the submodules ----------------------------
-rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-unused-parameter)
+)
 
 add_library(Rodin INTERFACE)
 add_library(Rodin::Rodin ALIAS Rodin)
 
-foreach(_h IN LISTS Rodin_HEADERS Configure.h)
+target_compile_definitions(Rodin
+  INTERFACE _LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
+
+# Expose public headers for IDEs when building from source
+foreach(_h IN LISTS Rodin_HEADERS)
   target_sources(Rodin INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${_h}>
   )
 endforeach()
 
-target_link_libraries(Rodin INTERFACE Eigen3::Eigen)
+# Configure generated header
+configure_file(Configure.h.in ${CMAKE_CURRENT_BINARY_DIR}/Configure.h @ONLY)
 
-configure_file(Configure.h.in Configure.h @ONLY)
-
+# Use only the **root** include dir in the interface; DO NOT export .../include/Rodin
 target_include_directories(Rodin
   INTERFACE
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>          # e.g. src/Rodin/Math.h reachable as <Rodin/Math.h>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>          # for generated Configure.h
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>      # installs headers under include/Rodin/**
+)
 
+# Link header-only deps via interface
+target_link_libraries(Rodin INTERFACE Eigen3::Eigen)
+
+# Local compile options
+rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-unused-parameter)
+
+# Submodules
 add_subdirectory(QF)
 add_subdirectory(Math)
 add_subdirectory(IO)
@@ -67,16 +76,16 @@ if (RODIN_USE_MPI)
   add_subdirectory(MPI)
 endif()
 
+# Install target — note: NO INCLUDES DESTINATION to subfolders
 install(TARGETS Rodin
-  EXPORT        RodinTargets
-  INCLUDES      DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin
+  EXPORT RodinTargets
 )
 
+# Install headers on disk under include/Rodin/**
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
-  DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
- )
-
+)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Configure.h"
-  DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin
 )

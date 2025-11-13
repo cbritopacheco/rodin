@@ -1,8 +1,15 @@
 @PACKAGE_INIT@
 
+# Use modern Boost finding mechanism (CMake 3.30+)
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 include(CMakeFindDependencyMacro)
 
-find_dependency(Eigen3 3.4 REQUIRED)
+# Eigen3 - We originally developed with 3.4, but newer versions (e.g., 5.x) are compatible
+# Note: Not specifying version to allow flexibility with system installations
+find_dependency(Eigen3 REQUIRED)
 find_dependency(Boost 1.74 REQUIRED COMPONENTS filesystem serialization)
 find_dependency(Threads REQUIRED)
 
