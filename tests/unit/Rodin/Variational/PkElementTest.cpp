@@ -2108,8 +2108,12 @@ namespace Rodin::Tests::Unit
         // Component c matches scalar basis, others are zero
         EXPECT_NEAR(val(c), scalar_val, RODIN_FUZZY_CONSTANT);
         for (size_t j = 0; j < vdim; ++j)
+        {
           if (j != c)
+          {
             EXPECT_NEAR(val(j), 0.0, RODIN_FUZZY_CONSTANT);
+          }
+        }
       }
     }
   }
