@@ -70,10 +70,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md348">Sparse Matrix Storage</a></li>
-            <li><a href="#autotoc_md349">Sparsity Pattern</a></li>
-            <li><a href="#autotoc_md350">Advantages</a></li>
-            <li><a href="#autotoc_md351">Usage Example</a></li>
+            <li><a href="#autotoc_md372">Sparse Matrix Storage</a></li>
+            <li><a href="#autotoc_md373">Sparsity Pattern</a></li>
+            <li><a href="#autotoc_md374">Advantages</a></li>
+            <li><a href="#autotoc_md375">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -83,7 +83,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the SparseProblem class, a specialization of the Problem class that uses sparse matrix storage for efficient handling of large-scale finite element systems. Sparse storage is the standard choice for most FEM problems as system matrices are typically very sparse.</p><section id="autotoc_md348"><h3><a href="#autotoc_md348">Sparse Matrix Storage</a></h3><p>For a typical FEM problem with <svg class="m-math" style="width: 1.107em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.622614 8.169366">
+<p>This file defines the SparseProblem class, a specialization of the Problem class that uses sparse matrix storage for efficient handling of large-scale finite element systems. Sparse storage is the standard choice for most FEM problems as system matrices are typically very sparse.</p><section id="autotoc_md372"><h3><a href="#autotoc_md372">Sparse Matrix Storage</a></h3><p>For a typical FEM problem with <svg class="m-math" style="width: 1.107em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.622614 8.169366">
 <title>
 $ N $
 </title>
@@ -127,7 +127,7 @@ $ O(N) $
 <use x='13.823574' y='0' xlink:href='#eq3-g0-78'/>
 <use x='24.446184' y='0' xlink:href='#eq3-g1-41'/>
 </g>
-</svg> memory (for 2D/3D problems)</li></ul></section><section id="autotoc_md349"><h3><a href="#autotoc_md349">Sparsity Pattern</a></h3><p>The sparsity pattern is determined by the mesh connectivity:</p><div class="m-math"><svg style="width: 22.965em; height: 1.213em;" viewBox="84.037414 -11.645211 220.467669 11.645211">
+</svg> memory (for 2D/3D problems)</li></ul></section><section id="autotoc_md373"><h3><a href="#autotoc_md373">Sparsity Pattern</a></h3><p>The sparsity pattern is determined by the mesh connectivity:</p><div class="m-math"><svg style="width: 22.965em; height: 1.213em;" viewBox="84.037414 -11.645211 220.467669 11.645211">
 <title>
 \[
   A_{ij} \neq 0 \iff \text{DOFs } i \text{ and } j \text{ share an element}
@@ -191,7 +191,7 @@ $ O(N) $
 <use x='295.204465' y='-3.343009' xlink:href='#eq4-g5-110'/>
 <use x='301.182049' y='-3.343009' xlink:href='#eq4-g5-116'/>
 </g>
-</svg></div></section><section id="autotoc_md350"><h3><a href="#autotoc_md350">Advantages</a></h3><ul><li>Memory efficient for large problems</li><li>Faster matrix-vector products</li><li>Enables iterative solvers (CG, GMRES, etc.)</li><li>Essential for 3D problems</li></ul></section><section id="autotoc_md351"><h3><a href="#autotoc_md351">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></div></section><section id="autotoc_md374"><h3><a href="#autotoc_md374">Advantages</a></h3><ul><li>Memory efficient for large problems</li><li>Faster matrix-vector products</li><li>Enables iterative solvers (CG, GMRES, etc.)</li><li>Essential for 3D problems</li></ul></section><section id="autotoc_md375"><h3><a href="#autotoc_md375">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 

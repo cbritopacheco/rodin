@@ -625,7 +625,7 @@
         </g>
         </svg>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0_3_01_range_00_01_mesh_01_4_00_01_data_01_4_01_4.html" class="m-doc">Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Gradient of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</span></li>
-                  <li>class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p0_3_01_range3b40dd150d4ebb29e99edfc00d66e3b5.html" class="m-doc">Grad&lt;ShapeFunction&lt;NestedDerived, P0&lt;Range, Mesh&gt;, SpaceType&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Gradient of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p0_3_01_scala14dc53fe8f114e59fedbe90976bcdf8f.html" class="m-doc">Grad&lt;ShapeFunction&lt;NestedDerived, P0&lt;Scalar, Mesh&gt;, SpaceType&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Gradient of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_scalacde5300190b44b3a7a99aef6fcfa52a3.html" class="m-doc">Grad&lt;ShapeFunction&lt;NestedDerived, P1&lt;Scalar, Mesh&gt;, SpaceType&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Gradient of a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a> <span class="m-doc">Base class for gradient operator implementations.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_grad_base_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_00_01_derived_01_4.html" class="m-doc">GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a> <span class="m-doc">Gradient operator for grid functions.</span></li>
@@ -724,11 +724,27 @@
                   <li class="m-doc-collapsible collapsed">
                     <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a> <span class="m-doc">Degree 0 Lagrange element.</span>
                     <ul class="m-doc">
-                      <li>class <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_basis_function.html" class="m-doc">BasisFunction</a> <span class="m-doc">Represents a basis function of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> scalar element.</span></li>
+                      <li class="m-doc-collapsible collapsed">
+                        <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_basis_function.html" class="m-doc">BasisFunction</a> <span class="m-doc">Represents the constant basis function of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> scalar element.</span>
+                        <ul class="m-doc">
+                          <li>class <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a> <span class="m-doc">Represents a derivative of the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> basis function (always zero).</span></li>
+                        </ul>
+                      </li>
                       <li>class <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_linear_form.html" class="m-doc">LinearForm</a> <span class="m-doc">Represents a linear form of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> scalar element.</span></li>
                     </ul>
                   </li>
-                  <li>class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">P0Element&lt;Math::Vector&lt;Scalar&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Piecewise constant (degree 0) vector Lagrange element.</span></li>
+                  <li class="m-doc-collapsible collapsed">
+                    <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">P0Element&lt;Math::Vector&lt;Scalar&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Piecewise constant (degree 0) vector Lagrange element.</span>
+                    <ul class="m-doc">
+                      <li class="m-doc-collapsible collapsed">
+                        <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">BasisFunction</a> <span class="m-doc">Represents a piecewise constant vector basis function.</span>
+                        <ul class="m-doc">
+                          <li>class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_vector_3_01_scalar_01_4_01_4_1_1_basis_bfc7b0dfb8d168e3a08dddba5690129c.html" class="m-doc">DerivativeFunction</a> <span class="m-doc">Represents a derivative of the vector <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> basis function (always zero).</span></li>
+                        </ul>
+                      </li>
+                      <li>class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_vector_3_01_scalar_01_4_01_4_1_1_linear_form.html" class="m-doc">LinearForm</a> <span class="m-doc">Represents a linear form (evaluation functional) for vector <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> elements.</span></li>
+                    </ul>
+                  </li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <span class="m-doc">Degree 1 Lagrange finite element space.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_vector_3_01_scalar_01_4_00_01_geometry_1_1_mesh1bec4295b5ef87ce8dc41ffd22c1afa3.html" class="m-doc">P1&lt;Math::Vector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Vector valued Lagrange finite element space.</span></li>
                   <li class="m-doc-collapsible collapsed">
@@ -741,14 +757,33 @@
                   <li class="m-doc-collapsible collapsed">
                     <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a> <span class="m-doc">Degree 1 Lagrange element.</span>
                     <ul class="m-doc">
-                      <li>class <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a> <span class="m-doc">Represents a basis function of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> scalar element.</span></li>
+                      <li class="m-doc-collapsible collapsed">
+                        <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a> <span class="m-doc">Represents a piecewise linear basis function of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> scalar element.</span>
+                        <ul class="m-doc">
+                          <li>class <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a> <span class="m-doc">Represents a partial derivative of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> basis function.</span></li>
+                          <li>class <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">GradientFunction</a> <span class="m-doc">Represents the gradient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> basis function.</span></li>
+                        </ul>
+                      </li>
                       <li>class <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_linear_form.html" class="m-doc">LinearForm</a> <span class="m-doc">Represents a linear form of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> scalar element.</span></li>
                     </ul>
                   </li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">P1Element&lt;Math::Vector&lt;Scalar&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Continuous piecewise linear (degree 1) vector Lagrange element.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s_01_4_2a9e6d75de7ed6b1898c3fa8d377abc3.html" class="m-doc">PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Represents a Peridodic boundary condition on a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a> <span class="m-doc">Abstract base class for a periodic boundary condition.</span></li>
-                  <li>class <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a> <span class="m-doc">Degree k Lagrange element.</span></li>
+                  <li class="m-doc-collapsible collapsed">
+                    <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a> <span class="m-doc">Degree k Lagrange element.</span>
+                    <ul class="m-doc">
+                      <li class="m-doc-collapsible collapsed">
+                        <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function.html" class="m-doc">BasisFunction</a> <span class="m-doc">Represents a Lagrange basis function of degree K.</span>
+                        <ul class="m-doc">
+                          <li>class <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a> <span class="m-doc">Represents a partial derivative of a basis function.</span></li>
+                          <li>class <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">GradientFunction</a> <span class="m-doc">Represents the gradient of a basis function.</span></li>
+                        </ul>
+                      </li>
+                      <li>class <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_linear_form.html" class="m-doc">LinearForm</a> <span class="m-doc">Evaluates linear form at a given function/vector field.</span></li>
+                    </ul>
+                  </li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_pk_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">PkElement&lt;K, Math::Vector&lt;Scalar&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Continuous piecewise polynomial (degree k) vector Lagrange element.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_potential_3_01_l_h_s_00_01_shape_function_base_3_01_shape_functi4145b7b2aff814bfaf9999814be99c57.html" class="m-doc">Potential&lt;LHS, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FES, SpaceType&gt;, FES, SpaceType&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc"></span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a> <span class="m-doc">Represents the power function.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html" class="m-doc">Pow&lt;FunctionBase&lt;BaseDerived&gt;, Number&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Represents the power function.</span></li>
