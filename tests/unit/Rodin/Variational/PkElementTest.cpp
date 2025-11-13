@@ -2079,25 +2079,38 @@ namespace Rodin::Tests::Unit
 
   TEST(FinalTest_PkElement_Vector, ComponentStructure_P2_2D_Segment)
   {
-    PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, 2);
-    EXPECT_EQ(elem.getCount(), 6);  // 3 nodes × 2 components
+    constexpr size_t vdim = 2;
+    PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+    PkElement<2, Real> scalar_elem(Polytope::Type::Segment);
+
+    EXPECT_EQ(elem.getCount(), scalar_elem.getCount() * vdim);
 
     Math::Vector<Real> p{{0.5}};
 
-    // Each basis function should have only one non-zero component
-    for (size_t i = 0; i < 6; i++)
+    for (size_t i = 0; i < scalar_elem.getCount(); ++i)
     {
-      const auto& val = elem.getBasis(i)(p);
-      EXPECT_EQ(val.size(), 2);
+      Real scalar_val = scalar_elem.getBasis(i)(p);
 
-      size_t component = i % 2;
-      size_t num_nonzero = 0;
-      for (size_t j = 0; j < 2; j++)
+      for (size_t c = 0; c < vdim; ++c)
       {
-        if (std::abs(val(j)) > RODIN_FUZZY_CONSTANT)
-          num_nonzero++;
+        size_t local = i * vdim + c;
+
+        const auto& val = elem.getBasis(local)(p);
+        EXPECT_EQ(val.size(), vdim);
+
+        // At most one non-zero component
+        size_t num_nonzero = 0;
+        for (size_t j = 0; j < vdim; ++j)
+          if (std::abs(val(j)) > RODIN_FUZZY_CONSTANT)
+            num_nonzero++;
+        EXPECT_LE(num_nonzero, 1u);
+
+        // Component c matches scalar basis, others are zero
+        EXPECT_NEAR(val(c), scalar_val, RODIN_FUZZY_CONSTANT);
+        for (size_t j = 0; j < vdim; ++j)
+          if (j != c)
+            EXPECT_NEAR(val(j), 0.0, RODIN_FUZZY_CONSTANT);
       }
-      EXPECT_EQ(num_nonzero, 1);  // Only one component should be non-zero
     }
   }
 
@@ -2105,18 +2118,24 @@ namespace Rodin::Tests::Unit
   {
     PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, 2);
 
-    // Test quadratic vector field v(x) = [1+2x+3x^2, 4+5x+6x^2]
-    // At nodes: x=0: [1,4], x=0.5: [2.75,7.5], x=1: [6,15]
+    auto v = [](Real x)
+    {
+      return Math::Vector<Real>{
+        { 1.0 + 2.0 * x + 3.0 * x * x,  // first component
+          4.0 + 5.0 * x + 6.0 * x * x } // second component
+      };
+    };
+
+    // Nodes: x = 0, 0.5, 1
     std::vector<Math::Vector<Real>> node_values = {
-      Math::Vector<Real>{{1.0, 4.0}},
-      Math::Vector<Real>{{2.75, 7.5}},
-      Math::Vector<Real>{{6.0, 15.0}}
+      v(0.0),
+      v(0.5),
+      v(1.0)
     };
 
     Math::Vector<Real> p{{0.3}};
-    Math::Vector<Real> exact{{1.87, 7.84}};  // [1+0.6+0.27, 4+1.5+0.54]
+    Math::Vector<Real> exact = v(p(0));
 
-    // Interpolate
     Math::Vector<Real> interpolated = Math::Vector<Real>::Zero(2);
     for (size_t node = 0; node < 3; node++)
     {
