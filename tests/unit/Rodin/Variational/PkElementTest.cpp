@@ -821,7 +821,7 @@ namespace Rodin::Tests::Unit
 
   // Test P2 triangle derivative consistency
   // TODO: Fix derivative computation for barycentric elements
-  TEST(Rodin_Variational_RealPkElement, DISABLED_DerivativeConsistency_P2_Triangle)
+  TEST(Rodin_Variational_RealPkElement, DerivativeConsistency_P2_Triangle)
   {
     RealPkElement<2> k(Polytope::Type::Triangle);
 
@@ -965,7 +965,7 @@ namespace Rodin::Tests::Unit
 
   // Test P2 tetrahedron derivative consistency
   // TODO: Fix derivative computation for barycentric elements
-  TEST(Rodin_Variational_RealPkElement, DISABLED_DerivativeConsistency_P2_Tetrahedron)
+  TEST(Rodin_Variational_RealPkElement, DerivativeConsistency_P2_Tetrahedron)
   {
     RealPkElement<2> k(Polytope::Type::Tetrahedron);
 
@@ -1076,7 +1076,7 @@ namespace Rodin::Tests::Unit
 
   // Test P2 wedge derivative consistency
   // TODO: Fix derivative computation for barycentric elements
-  TEST(Rodin_Variational_RealPkElement, DISABLED_DerivativeConsistency_P2_Wedge)
+  TEST(Rodin_Variational_RealPkElement, DerivativeConsistency_P2_Wedge)
   {
     RealPkElement<2> k(Polytope::Type::Wedge);
 
@@ -1945,8 +1945,8 @@ namespace Rodin::Tests::Unit
     RealPkElement<2> elem(Polytope::Type::Segment);
 
     // Test quadratic function f(x) = 1 + 2*x + 3*x^2
-    // Values at nodes: x=0: f=1, x=0.5: f=1.75, x=1: f=6
-    Real f0 = 1.0, f1 = 1.75, f2 = 6.0;
+    // Values at nodes: x=0: f=1, x=0.5: f=2.75, x=1: f=6
+    Real f0 = 1.0, f1 = 2.75, f2 = 6.0;
 
     Math::Vector<Real> p{{0.3}};
     Real exact = 1.0 + 2.0 * 0.3 + 3.0 * 0.3 * 0.3;  // 1.87
@@ -2106,10 +2106,10 @@ namespace Rodin::Tests::Unit
     PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, 2);
 
     // Test quadratic vector field v(x) = [1+2x+3x^2, 4+5x+6x^2]
-    // At nodes: x=0: [1,4], x=0.5: [1.75,6.5], x=1: [6,15]
+    // At nodes: x=0: [1,4], x=0.5: [2.75,7.5], x=1: [6,15]
     std::vector<Math::Vector<Real>> node_values = {
       Math::Vector<Real>{{1.0, 4.0}},
-      Math::Vector<Real>{{1.75, 6.5}},
+      Math::Vector<Real>{{2.75, 7.5}},
       Math::Vector<Real>{{6.0, 15.0}}
     };
 
@@ -2199,7 +2199,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, 6);
 
     count = PkElement<3, Math::Vector<Real>>(Polytope::Type::Segment, 3).getCount();
-    EXPECT_EQ(count, 30);
+    EXPECT_EQ(count, 12);
   }
 
   TEST(FinalTest_Integration, AllElementsAllTypes_OrderProperty)
