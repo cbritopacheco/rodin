@@ -511,4 +511,115 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(interpolated(0), 2.0, RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(interpolated(1), 3.0, RODIN_FUZZY_CONSTANT);
   }
+
+  // ========================================================================
+  // NEW COMPREHENSIVE TESTS FOR P0ELEMENT VECTOR DIMENSIONS
+  // ========================================================================
+
+  TEST(FinalTest_P0Element_Vector, VectorDimensions_1D_2D_3D_AllGeometries)
+  {
+    // Test vdim=1, 2, 3 on Segment
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        VectorP0Element<Real> elem(Polytope::Type::Segment, vdim);
+        EXPECT_EQ(elem.getCount(), vdim);
+        EXPECT_EQ(elem.getOrder(), 0);
+
+        Math::Vector<Real> p{{0.5}};
+        for (size_t i = 0; i < vdim; i++)
+        {
+          const auto& val = elem.getBasis(i)(p);
+          EXPECT_EQ(val.size(), vdim);
+          for (size_t j = 0; j < vdim; j++)
+          {
+            if (i == j)
+              EXPECT_NEAR(val(j), 1.0, RODIN_FUZZY_CONSTANT);
+            else
+              EXPECT_NEAR(val(j), 0.0, RODIN_FUZZY_CONSTANT);
+          }
+        }
+      }
+    }
+
+    // Test vdim=1, 2, 3 on Triangle
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        VectorP0Element<Real> elem(Polytope::Type::Triangle, vdim);
+        EXPECT_EQ(elem.getCount(), vdim);
+      }
+    }
+
+    // Test vdim=1, 2, 3 on Quadrilateral
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        VectorP0Element<Real> elem(Polytope::Type::Quadrilateral, vdim);
+        EXPECT_EQ(elem.getCount(), vdim);
+      }
+    }
+
+    // Test vdim=1, 2, 3 on Tetrahedron
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        VectorP0Element<Real> elem(Polytope::Type::Tetrahedron, vdim);
+        EXPECT_EQ(elem.getCount(), vdim);
+      }
+    }
+
+    // Test vdim=1, 2, 3 on Wedge
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        VectorP0Element<Real> elem(Polytope::Type::Wedge, vdim);
+        EXPECT_EQ(elem.getCount(), vdim);
+      }
+    }
+  }
+
+  TEST(FinalTest_P0Element_Vector, PartitionOfUnity_AllVectorDimensions)
+  {
+    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
+                      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+                      Polytope::Type::Wedge})
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        VectorP0Element<Real> elem(geom, vdim);
+        
+        // Create appropriate test point based on geometry
+        Math::Vector<Real> p;
+        switch (geom)
+        {
+          case Polytope::Type::Segment:
+            p = Math::Vector<Real>{{0.5}};
+            break;
+          case Polytope::Type::Triangle:
+          case Polytope::Type::Quadrilateral:
+            p = Math::Vector<Real>{{0.3, 0.3}};
+            break;
+          case Polytope::Type::Tetrahedron:
+          case Polytope::Type::Wedge:
+            p = Math::Vector<Real>{{0.25, 0.25, 0.25}};
+            break;
+          default:
+            continue;
+        }
+
+        // Each component should have partition of unity
+        std::vector<Real> sum_per_component(vdim, 0.0);
+        for (size_t i = 0; i < elem.getCount(); i++)
+        {
+          const auto& val = elem.getBasis(i)(p);
+          for (size_t j = 0; j < vdim; j++)
+            sum_per_component[j] += val(j);
+        }
+
+        for (size_t j = 0; j < vdim; j++)
+          EXPECT_NEAR(sum_per_component[j], 1.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
 }

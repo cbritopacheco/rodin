@@ -600,4 +600,209 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(interpolated(0), exact(0), RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(interpolated(1), exact(1), RODIN_FUZZY_CONSTANT);
   }
+
+  // ========================================================================
+  // NEW COMPREHENSIVE TESTS FOR P1ELEMENT
+  // ========================================================================
+
+  // Test P1 element on Wedge geometry (3D prismatic element)
+  TEST(Rodin_Variational_RealP1Element, SanityTest_3D_Reference_Wedge)
+  {
+    RealP1Element k(Polytope::Type::Wedge);
+
+    // Wedge has 6 vertices, so 6 DOFs
+    EXPECT_EQ(k.getCount(), 6);
+
+    // Check order
+    EXPECT_EQ(k.getOrder(), 2);  // Wedge is tensor product, so order 2
+
+    // Test Lagrange property at vertices
+    // Bottom triangle vertices: (0,0,0), (1,0,0), (0,1,0)
+    // Top triangle vertices: (0,0,1), (1,0,1), (0,1,1)
+    {
+      EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{0, 0, 0}}), 1, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(1)(Math::Vector<Real>{{0, 0, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(2)(Math::Vector<Real>{{0, 0, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(3)(Math::Vector<Real>{{0, 0, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(4)(Math::Vector<Real>{{0, 0, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(5)(Math::Vector<Real>{{0, 0, 0}}), 0, RODIN_FUZZY_CONSTANT);
+    }
+
+    {
+      EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{1, 0, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(1)(Math::Vector<Real>{{1, 0, 0}}), 1, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(2)(Math::Vector<Real>{{1, 0, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(3)(Math::Vector<Real>{{1, 0, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(4)(Math::Vector<Real>{{1, 0, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(5)(Math::Vector<Real>{{1, 0, 0}}), 0, RODIN_FUZZY_CONSTANT);
+    }
+
+    {
+      EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{0, 1, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(1)(Math::Vector<Real>{{0, 1, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(2)(Math::Vector<Real>{{0, 1, 0}}), 1, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(3)(Math::Vector<Real>{{0, 1, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(4)(Math::Vector<Real>{{0, 1, 0}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(5)(Math::Vector<Real>{{0, 1, 0}}), 0, RODIN_FUZZY_CONSTANT);
+    }
+
+    // Test top triangle vertices
+    {
+      EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{0, 0, 1}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(1)(Math::Vector<Real>{{0, 0, 1}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(2)(Math::Vector<Real>{{0, 0, 1}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(3)(Math::Vector<Real>{{0, 0, 1}}), 1, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(4)(Math::Vector<Real>{{0, 0, 1}}), 0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(k.getBasis(5)(Math::Vector<Real>{{0, 0, 1}}), 0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_RealP1Element, PartitionOfUnity_Wedge)
+  {
+    constexpr size_t n = 25;
+    RandomFloat gen(0.0, 1.0);
+    RealP1Element k(Polytope::Type::Wedge);
+
+    for (size_t i = 0; i < n; i++)
+    {
+      // Generate random point inside wedge
+      Real s = gen();
+      Real t = gen() * (1 - s);  // Ensure s + t <= 1
+      Real r = gen();
+      Math::Vector<Real> p{{s, t, r}};
+
+      Real sum = 0;
+      for (size_t j = 0; j < k.getCount(); j++)
+        sum += k.getBasis(j)(p);
+
+      EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_RealP1Element, DerivativeTest_3D_Reference_Wedge)
+  {
+    RealP1Element k(Polytope::Type::Wedge);
+    Math::Vector<Real> p{{0.25, 0.25, 0.5}};
+
+    // Test that derivatives are accessible and well-defined
+    // Note: Wedge is a tensor product element, so derivatives are not
+    // necessarily constant in all directions
+    for (size_t i = 0; i < k.getCount(); i++)
+    {
+      auto deriv_x = k.getBasis(i).getDerivative<1>(0);
+      auto deriv_y = k.getBasis(i).getDerivative<1>(1);
+      auto deriv_z = k.getBasis(i).getDerivative<1>(2);
+
+      // Just verify derivatives can be computed without error
+      Real dx = deriv_x(p);
+      Real dy = deriv_y(p);
+      Real dz = deriv_z(p);
+
+      // Derivatives should be finite
+      EXPECT_TRUE(std::isfinite(dx));
+      EXPECT_TRUE(std::isfinite(dy));
+      EXPECT_TRUE(std::isfinite(dz));
+    }
+  }
+
+  // Test vector P1 element with explicit vector dimensions
+  TEST(FinalTest_P1Element_Vector, VectorDimensions_1D_2D_3D_Segment)
+  {
+    // Test vdim=1 (scalar-like)
+    {
+      VectorP1Element<Real> elem(Polytope::Type::Segment, 1);
+      EXPECT_EQ(elem.getCount(), 2);  // 1 component × 2 nodes
+
+      Math::Vector<Real> p{{0.5}};
+      const auto& val = elem.getBasis(0)(p);
+      EXPECT_EQ(val.size(), 1);
+      EXPECT_NEAR(val(0), 0.5, RODIN_FUZZY_CONSTANT);
+    }
+
+    // Test vdim=2
+    {
+      VectorP1Element<Real> elem(Polytope::Type::Segment, 2);
+      EXPECT_EQ(elem.getCount(), 4);  // 2 components × 2 nodes
+
+      Math::Vector<Real> p{{0.5}};
+      const auto& val0 = elem.getBasis(0)(p);  // First component, first node
+      EXPECT_EQ(val0.size(), 2);
+      EXPECT_NEAR(val0(0), 0.5, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(val0(1), 0.0, RODIN_FUZZY_CONSTANT);
+
+      const auto& val1 = elem.getBasis(1)(p);  // Second component, first node
+      EXPECT_NEAR(val1(0), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(val1(1), 0.5, RODIN_FUZZY_CONSTANT);
+    }
+
+    // Test vdim=3
+    {
+      VectorP1Element<Real> elem(Polytope::Type::Segment, 3);
+      EXPECT_EQ(elem.getCount(), 6);  // 3 components × 2 nodes
+
+      Math::Vector<Real> p{{0.5}};
+      for (size_t i = 0; i < 3; i++)
+      {
+        const auto& val = elem.getBasis(i)(p);
+        EXPECT_EQ(val.size(), 3);
+        for (size_t j = 0; j < 3; j++)
+        {
+          if (i == j)
+            EXPECT_NEAR(val(j), 0.5, RODIN_FUZZY_CONSTANT);
+          else
+            EXPECT_NEAR(val(j), 0.0, RODIN_FUZZY_CONSTANT);
+        }
+      }
+    }
+  }
+
+  TEST(FinalTest_P1Element_Vector, VectorDimensions_Triangle)
+  {
+    // Test vdim=1 on Triangle
+    {
+      VectorP1Element<Real> elem(Polytope::Type::Triangle, 1);
+      EXPECT_EQ(elem.getCount(), 3);  // 1 component × 3 nodes
+    }
+
+    // Test vdim=2 on Triangle
+    {
+      VectorP1Element<Real> elem(Polytope::Type::Triangle, 2);
+      EXPECT_EQ(elem.getCount(), 6);  // 2 components × 3 nodes
+    }
+
+    // Test vdim=3 on Triangle
+    {
+      VectorP1Element<Real> elem(Polytope::Type::Triangle, 3);
+      EXPECT_EQ(elem.getCount(), 9);  // 3 components × 3 nodes
+    }
+  }
+
+  TEST(FinalTest_P1Element_Vector, VectorDimensions_Tetrahedron)
+  {
+    // Test vdim=3 on Tetrahedron (typical 3D case)
+    VectorP1Element<Real> elem(Polytope::Type::Tetrahedron, 3);
+    EXPECT_EQ(elem.getCount(), 12);  // 3 components × 4 nodes
+
+    Math::Vector<Real> p{{0.25, 0.25, 0.25}};
+    Real sum_per_component[3] = {0, 0, 0};
+
+    for (size_t i = 0; i < elem.getCount(); i++)
+    {
+      const auto& val = elem.getBasis(i)(p);
+      EXPECT_EQ(val.size(), 3);
+      for (size_t j = 0; j < 3; j++)
+        sum_per_component[j] += val(j);
+    }
+
+    // Each component should sum to 1 (partition of unity)
+    for (size_t j = 0; j < 3; j++)
+      EXPECT_NEAR(sum_per_component[j], 1.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(FinalTest_P1Element_Vector, VectorDimensions_Wedge)
+  {
+    // Test vdim=3 on Wedge
+    VectorP1Element<Real> elem(Polytope::Type::Wedge, 3);
+    EXPECT_EQ(elem.getCount(), 18);  // 3 components × 6 nodes
+  }
 }

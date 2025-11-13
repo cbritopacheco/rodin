@@ -2241,4 +2241,419 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealPkElement<5>(Polytope::Type::Segment).getOrder(), 5);
     EXPECT_EQ(RealPkElement<6>(Polytope::Type::Segment).getOrder(), 6);
   }
+
+  // ========================================================================
+  // NEW COMPREHENSIVE TESTS FOR PKELEMENT K=0 THROUGH K=6
+  // ========================================================================
+
+  TEST(FinalTest_PkElement_Comprehensive, PkElement_K0_AllGeometries)
+  {
+    // Comprehensive tests for PkElement<0> across all geometries
+    // K=0 should behave identically to P0Element
+    
+    for (auto geom : {Polytope::Type::Point, Polytope::Type::Segment,
+                      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+                      Polytope::Type::Tetrahedron, Polytope::Type::Wedge})
+    {
+      RealPkElement<0> pk(geom);
+      RealP0Element p0(geom);
+
+      // Same DOF count
+      EXPECT_EQ(pk.getCount(), p0.getCount());
+      EXPECT_EQ(pk.getCount(), 1);
+
+      // Same order
+      EXPECT_EQ(pk.getOrder(), p0.getOrder());
+      EXPECT_EQ(pk.getOrder(), 0);
+
+      // Test basis function values
+      Math::Vector<Real> p;
+      switch (geom)
+      {
+        case Polytope::Type::Point:
+          p = Math::Vector<Real>{{0}};
+          break;
+        case Polytope::Type::Segment:
+          p = Math::Vector<Real>{{0.5}};
+          break;
+        case Polytope::Type::Triangle:
+        case Polytope::Type::Quadrilateral:
+          p = Math::Vector<Real>{{0.3, 0.3}};
+          break;
+        case Polytope::Type::Tetrahedron:
+        case Polytope::Type::Wedge:
+          p = Math::Vector<Real>{{0.25, 0.25, 0.25}};
+          break;
+      }
+
+      EXPECT_NEAR(pk.getBasis(0)(p), p0.getBasis(0)(p), RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(pk.getBasis(0)(p), 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(FinalTest_PkElement_Comprehensive, PkElement_K1_AllGeometries)
+  {
+    // Comprehensive tests for PkElement<1> across all geometries
+    // K=1 should behave identically to P1Element
+    
+    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
+                      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+                      Polytope::Type::Wedge})
+    {
+      RealPkElement<1> pk(geom);
+      RealP1Element p1(geom);
+
+      // Same DOF count
+      EXPECT_EQ(pk.getCount(), p1.getCount());
+
+      // Same order
+      EXPECT_EQ(pk.getOrder(), p1.getOrder());
+
+      // Test partition of unity
+      Math::Vector<Real> p;
+      switch (geom)
+      {
+        case Polytope::Type::Segment:
+          p = Math::Vector<Real>{{0.5}};
+          break;
+        case Polytope::Type::Triangle:
+        case Polytope::Type::Quadrilateral:
+          p = Math::Vector<Real>{{0.3, 0.3}};
+          break;
+        case Polytope::Type::Tetrahedron:
+        case Polytope::Type::Wedge:
+          p = Math::Vector<Real>{{0.25, 0.25, 0.25}};
+          break;
+        default:
+          continue;
+      }
+
+      Real sum_pk = 0;
+      Real sum_p1 = 0;
+      for (size_t i = 0; i < pk.getCount(); i++)
+      {
+        sum_pk += pk.getBasis(i)(p);
+        sum_p1 += p1.getBasis(i)(p);
+      }
+      EXPECT_NEAR(sum_pk, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(sum_p1, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(FinalTest_PkElement_Comprehensive, PkElement_K2_to_K6_Segment)
+  {
+    // Comprehensive test of PkElement for K=2,3,4,5,6 on Segment
+    constexpr size_t n = 20;
+    RandomFloat gen(0.0, 1.0);
+
+    for (size_t K : {2, 3, 4, 5, 6})
+    {
+      // Test partition of unity
+      for (size_t i = 0; i < n; i++)
+      {
+        Math::Vector<Real> p{{gen()}};
+        Real sum = 0;
+
+        switch (K)
+        {
+          case 2:
+          {
+            RealPkElement<2> elem(Polytope::Type::Segment);
+            for (size_t j = 0; j < elem.getCount(); j++)
+              sum += elem.getBasis(j)(p);
+            break;
+          }
+          case 3:
+          {
+            RealPkElement<3> elem(Polytope::Type::Segment);
+            for (size_t j = 0; j < elem.getCount(); j++)
+              sum += elem.getBasis(j)(p);
+            break;
+          }
+          case 4:
+          {
+            RealPkElement<4> elem(Polytope::Type::Segment);
+            for (size_t j = 0; j < elem.getCount(); j++)
+              sum += elem.getBasis(j)(p);
+            break;
+          }
+          case 5:
+          {
+            RealPkElement<5> elem(Polytope::Type::Segment);
+            for (size_t j = 0; j < elem.getCount(); j++)
+              sum += elem.getBasis(j)(p);
+            break;
+          }
+          case 6:
+          {
+            RealPkElement<6> elem(Polytope::Type::Segment);
+            for (size_t j = 0; j < elem.getCount(); j++)
+              sum += elem.getBasis(j)(p);
+            break;
+          }
+        }
+
+        EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  TEST(FinalTest_PkElement_Comprehensive, PkElement_K2_to_K6_Triangle)
+  {
+    // Test PkElement for K=2,3,4,5,6 on Triangle
+    constexpr size_t n = 15;
+    RandomFloat gen(0.0, 1.0);
+
+    for (size_t K : {2, 3, 4, 5, 6})
+    {
+      for (size_t i = 0; i < n; i++)
+      {
+        Real s = gen();
+        Real t = gen() * (1 - s);
+        Math::Vector<Real> p{{s, t}};
+        Real sum = 0;
+
+        switch (K)
+        {
+          case 2:
+          {
+            RealPkElement<2> elem(Polytope::Type::Triangle);
+            EXPECT_EQ(elem.getCount(), 6);
+            for (size_t j = 0; j < elem.getCount(); j++)
+              sum += elem.getBasis(j)(p);
+            break;
+          }
+          case 3:
+          {
+            RealPkElement<3> elem(Polytope::Type::Triangle);
+            EXPECT_EQ(elem.getCount(), 10);
+            for (size_t j = 0; j < elem.getCount(); j++)
+              sum += elem.getBasis(j)(p);
+            break;
+          }
+          case 4:
+          {
+            RealPkElement<4> elem(Polytope::Type::Triangle);
+            EXPECT_EQ(elem.getCount(), 15);
+            for (size_t j = 0; j < elem.getCount(); j++)
+              sum += elem.getBasis(j)(p);
+            break;
+          }
+          case 5:
+          {
+            RealPkElement<5> elem(Polytope::Type::Triangle);
+            EXPECT_EQ(elem.getCount(), 21);
+            for (size_t j = 0; j < elem.getCount(); j++)
+              sum += elem.getBasis(j)(p);
+            break;
+          }
+          case 6:
+          {
+            RealPkElement<6> elem(Polytope::Type::Triangle);
+            EXPECT_EQ(elem.getCount(), 28);
+            for (size_t j = 0; j < elem.getCount(); j++)
+              sum += elem.getBasis(j)(p);
+            break;
+          }
+        }
+
+        EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  TEST(FinalTest_PkElement_Comprehensive, PkElement_K2_to_K6_AllGeometries_DOFCount)
+  {
+    // Verify DOF counts for all K values and geometries
+
+    // Segment: K+1
+    EXPECT_EQ(RealPkElement<0>(Polytope::Type::Segment).getCount(), 1);
+    EXPECT_EQ(RealPkElement<1>(Polytope::Type::Segment).getCount(), 2);
+    EXPECT_EQ(RealPkElement<2>(Polytope::Type::Segment).getCount(), 3);
+    EXPECT_EQ(RealPkElement<3>(Polytope::Type::Segment).getCount(), 4);
+    EXPECT_EQ(RealPkElement<4>(Polytope::Type::Segment).getCount(), 5);
+    EXPECT_EQ(RealPkElement<5>(Polytope::Type::Segment).getCount(), 6);
+    EXPECT_EQ(RealPkElement<6>(Polytope::Type::Segment).getCount(), 7);
+
+    // Triangle: (K+1)(K+2)/2
+    EXPECT_EQ(RealPkElement<0>(Polytope::Type::Triangle).getCount(), 1);
+    EXPECT_EQ(RealPkElement<1>(Polytope::Type::Triangle).getCount(), 3);
+    EXPECT_EQ(RealPkElement<2>(Polytope::Type::Triangle).getCount(), 6);
+    EXPECT_EQ(RealPkElement<3>(Polytope::Type::Triangle).getCount(), 10);
+    EXPECT_EQ(RealPkElement<4>(Polytope::Type::Triangle).getCount(), 15);
+    EXPECT_EQ(RealPkElement<5>(Polytope::Type::Triangle).getCount(), 21);
+    EXPECT_EQ(RealPkElement<6>(Polytope::Type::Triangle).getCount(), 28);
+
+    // Quadrilateral: (K+1)^2
+    EXPECT_EQ(RealPkElement<0>(Polytope::Type::Quadrilateral).getCount(), 1);
+    EXPECT_EQ(RealPkElement<1>(Polytope::Type::Quadrilateral).getCount(), 4);
+    EXPECT_EQ(RealPkElement<2>(Polytope::Type::Quadrilateral).getCount(), 9);
+    EXPECT_EQ(RealPkElement<3>(Polytope::Type::Quadrilateral).getCount(), 16);
+    EXPECT_EQ(RealPkElement<4>(Polytope::Type::Quadrilateral).getCount(), 25);
+    EXPECT_EQ(RealPkElement<5>(Polytope::Type::Quadrilateral).getCount(), 36);
+    EXPECT_EQ(RealPkElement<6>(Polytope::Type::Quadrilateral).getCount(), 49);
+
+    // Tetrahedron: (K+1)(K+2)(K+3)/6
+    EXPECT_EQ(RealPkElement<0>(Polytope::Type::Tetrahedron).getCount(), 1);
+    EXPECT_EQ(RealPkElement<1>(Polytope::Type::Tetrahedron).getCount(), 4);
+    EXPECT_EQ(RealPkElement<2>(Polytope::Type::Tetrahedron).getCount(), 10);
+    EXPECT_EQ(RealPkElement<3>(Polytope::Type::Tetrahedron).getCount(), 20);
+    EXPECT_EQ(RealPkElement<4>(Polytope::Type::Tetrahedron).getCount(), 35);
+    EXPECT_EQ(RealPkElement<5>(Polytope::Type::Tetrahedron).getCount(), 56);
+    EXPECT_EQ(RealPkElement<6>(Polytope::Type::Tetrahedron).getCount(), 84);
+
+    // Wedge: (K+1)·(K+1)(K+2)/2
+    EXPECT_EQ(RealPkElement<0>(Polytope::Type::Wedge).getCount(), 1);
+    EXPECT_EQ(RealPkElement<1>(Polytope::Type::Wedge).getCount(), 6);
+    EXPECT_EQ(RealPkElement<2>(Polytope::Type::Wedge).getCount(), 18);
+    EXPECT_EQ(RealPkElement<3>(Polytope::Type::Wedge).getCount(), 40);
+    EXPECT_EQ(RealPkElement<4>(Polytope::Type::Wedge).getCount(), 75);
+    EXPECT_EQ(RealPkElement<5>(Polytope::Type::Wedge).getCount(), 126);
+    EXPECT_EQ(RealPkElement<6>(Polytope::Type::Wedge).getCount(), 196);
+  }
+
+  TEST(FinalTest_PkElement_Comprehensive, VectorPkElement_AllVectorDimensions)
+  {
+    // Test vector PkElement with vdim=1,2,3 for various K values
+    
+    // K=0, vdim=1,2,3 on Segment
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        PkElement<0, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+        EXPECT_EQ(elem.getCount(), vdim * 1);
+      }
+    }
+
+    // K=1, vdim=1,2,3 on Segment
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        PkElement<1, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+        EXPECT_EQ(elem.getCount(), vdim * 2);
+      }
+    }
+
+    // K=2, vdim=1,2,3 on Triangle
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Triangle, vdim);
+        EXPECT_EQ(elem.getCount(), vdim * 6);
+      }
+    }
+
+    // K=3, vdim=1,2,3 on Tetrahedron
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        PkElement<3, Math::Vector<Real>> elem(Polytope::Type::Tetrahedron, vdim);
+        EXPECT_EQ(elem.getCount(), vdim * 20);
+      }
+    }
+  }
+
+  TEST(FinalTest_PkElement_Comprehensive, PkElement_LagrangeProperty_AllOrders_Segment)
+  {
+    // Test Lagrange property for all K values on Segment
+    // phi_i(node_j) = delta_ij
+    
+    for (size_t K : {0, 1, 2, 3, 4, 5, 6})
+    {
+      switch (K)
+      {
+        case 0:
+        {
+          RealPkElement<0> elem(Polytope::Type::Segment);
+          const auto& node = elem.getNode(0);
+          EXPECT_NEAR(elem.getBasis(0)(node), 1.0, RODIN_FUZZY_CONSTANT);
+          break;
+        }
+        case 1:
+        {
+          RealPkElement<1> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& node = elem.getNode(i);
+            for (size_t j = 0; j < elem.getCount(); j++)
+            {
+              Real expected = (i == j) ? 1.0 : 0.0;
+              EXPECT_NEAR(elem.getBasis(j)(node), expected, RODIN_FUZZY_CONSTANT);
+            }
+          }
+          break;
+        }
+        case 2:
+        {
+          RealPkElement<2> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& node = elem.getNode(i);
+            for (size_t j = 0; j < elem.getCount(); j++)
+            {
+              Real expected = (i == j) ? 1.0 : 0.0;
+              EXPECT_NEAR(elem.getBasis(j)(node), expected, RODIN_FUZZY_CONSTANT);
+            }
+          }
+          break;
+        }
+        case 3:
+        {
+          RealPkElement<3> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& node = elem.getNode(i);
+            for (size_t j = 0; j < elem.getCount(); j++)
+            {
+              Real expected = (i == j) ? 1.0 : 0.0;
+              EXPECT_NEAR(elem.getBasis(j)(node), expected, RODIN_FUZZY_CONSTANT);
+            }
+          }
+          break;
+        }
+        case 4:
+        {
+          RealPkElement<4> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& node = elem.getNode(i);
+            for (size_t j = 0; j < elem.getCount(); j++)
+            {
+              Real expected = (i == j) ? 1.0 : 0.0;
+              EXPECT_NEAR(elem.getBasis(j)(node), expected, RODIN_FUZZY_CONSTANT);
+            }
+          }
+          break;
+        }
+        case 5:
+        {
+          RealPkElement<5> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& node = elem.getNode(i);
+            for (size_t j = 0; j < elem.getCount(); j++)
+            {
+              Real expected = (i == j) ? 1.0 : 0.0;
+              EXPECT_NEAR(elem.getBasis(j)(node), expected, RODIN_FUZZY_CONSTANT);
+            }
+          }
+          break;
+        }
+        case 6:
+        {
+          RealPkElement<6> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& node = elem.getNode(i);
+            for (size_t j = 0; j < elem.getCount(); j++)
+            {
+              Real expected = (i == j) ? 1.0 : 0.0;
+              EXPECT_NEAR(elem.getBasis(j)(node), expected, RODIN_FUZZY_CONSTANT);
+            }
+          }
+          break;
+        }
+      }
+    }
+  }
 }
