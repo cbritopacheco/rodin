@@ -277,7 +277,7 @@ namespace Rodin::Variational
         if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
           fe = P1Element<RHSRangeType>(geometry);
         else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
-          fe = P1Element<RHSRangeType>(fes.getVectorDimension(), geometry);
+          fe = P1Element<RHSRangeType>(geometry, fes.getVectorDimension());
         else
           assert(false);
         if (recompute)

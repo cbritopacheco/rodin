@@ -539,10 +539,10 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Point),
-              ElementType(1, Geometry::Polytope::Type::Point),
-              ElementType(2, Geometry::Polytope::Type::Point),
-              ElementType(3, Geometry::Polytope::Type::Point)
+              ElementType(Geometry::Polytope::Type::Point, 0),
+              ElementType(Geometry::Polytope::Type::Point, 1),
+              ElementType(Geometry::Polytope::Type::Point, 2),
+              ElementType(Geometry::Polytope::Type::Point, 3)
             };
             return s_elements[m_vdim];
           }
@@ -550,10 +550,10 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Segment),
-              ElementType(1, Geometry::Polytope::Type::Segment),
-              ElementType(2, Geometry::Polytope::Type::Segment),
-              ElementType(3, Geometry::Polytope::Type::Segment)
+              ElementType(Geometry::Polytope::Type::Segment, 0),
+              ElementType(Geometry::Polytope::Type::Segment, 1),
+              ElementType(Geometry::Polytope::Type::Segment, 2),
+              ElementType(Geometry::Polytope::Type::Segment, 3)
             };
             return s_elements[m_vdim];
           }
@@ -561,10 +561,10 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Triangle),
-              ElementType(1, Geometry::Polytope::Type::Triangle),
-              ElementType(2, Geometry::Polytope::Type::Triangle),
-              ElementType(3, Geometry::Polytope::Type::Triangle)
+              ElementType(Geometry::Polytope::Type::Triangle, 0),
+              ElementType(Geometry::Polytope::Type::Triangle, 1),
+              ElementType(Geometry::Polytope::Type::Triangle, 2),
+              ElementType(Geometry::Polytope::Type::Triangle, 3)
             };
             return s_elements[m_vdim];
           }
@@ -572,10 +572,10 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Quadrilateral),
-              ElementType(1, Geometry::Polytope::Type::Quadrilateral),
-              ElementType(2, Geometry::Polytope::Type::Quadrilateral),
-              ElementType(3, Geometry::Polytope::Type::Quadrilateral)
+              ElementType(Geometry::Polytope::Type::Quadrilateral, 0),
+              ElementType(Geometry::Polytope::Type::Quadrilateral, 1),
+              ElementType(Geometry::Polytope::Type::Quadrilateral, 2),
+              ElementType(Geometry::Polytope::Type::Quadrilateral, 3)
             };
             return s_elements[m_vdim];
           }
@@ -583,10 +583,10 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Tetrahedron),
-              ElementType(1, Geometry::Polytope::Type::Tetrahedron),
-              ElementType(2, Geometry::Polytope::Type::Tetrahedron),
-              ElementType(3, Geometry::Polytope::Type::Tetrahedron)
+              ElementType(Geometry::Polytope::Type::Tetrahedron, 0),
+              ElementType(Geometry::Polytope::Type::Tetrahedron, 1),
+              ElementType(Geometry::Polytope::Type::Tetrahedron, 2),
+              ElementType(Geometry::Polytope::Type::Tetrahedron, 3)
             };
             return s_elements[m_vdim];
           }
@@ -594,16 +594,16 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Wedge),
-              ElementType(1, Geometry::Polytope::Type::Wedge),
-              ElementType(2, Geometry::Polytope::Type::Wedge),
-              ElementType(3, Geometry::Polytope::Type::Wedge)
+              ElementType(Geometry::Polytope::Type::Wedge, 0),
+              ElementType(Geometry::Polytope::Type::Wedge, 1),
+              ElementType(Geometry::Polytope::Type::Wedge, 2),
+              ElementType(Geometry::Polytope::Type::Wedge, 3)
             };
             return s_elements[m_vdim];
           }
         }
         assert(false);
-        static thread_local ElementType s_null(0, Geometry::Polytope::Type::Point);
+        static thread_local ElementType s_null(Geometry::Polytope::Type::Point, 0);
         return s_null;
       }
 

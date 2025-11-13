@@ -55,7 +55,8 @@ set(RodinVariational_SRCS
   P0/P0Element.cpp
   P1/P1.cpp
   P1/P1Element.cpp
-)
+  Pk/PkElement.cpp
+  )
 
 add_library(RodinVariational
   ${RodinVariational_SRCS}

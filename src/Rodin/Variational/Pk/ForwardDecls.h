@@ -25,6 +25,30 @@ namespace Rodin::Variational
    */
   template <size_t K, class Range>
   class PkElement;
+
+  /**
+   * @brief Convenience alias for real-valued Pk element
+   */
+  template <size_t K>
+  using RealPkElement = PkElement<K, Real>;
+
+  /**
+   * @brief Convenience alias for complex-valued Pk element
+   */
+  template <size_t K>
+  using ComplexPkElement = PkElement<K, Complex>;
+
+  /**
+   * @brief Convenience alias for real vector-valued Pk element
+   */
+  template <size_t K>
+  using VectorPkElement = PkElement<K, Math::Vector<Real>>;
+
+  /**
+   * @brief Convenience alias for complex vector-valued Pk element
+   */
+  template <size_t K>
+  using ComplexVectorPkElement = PkElement<K, Math::Vector<Complex>>;
 }
 
 #endif
