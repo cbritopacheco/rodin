@@ -805,4 +805,369 @@ namespace Rodin::Tests::Unit
     VectorP1Element<Real> elem(Polytope::Type::Wedge, 3);
     EXPECT_EQ(elem.getCount(), 18);  // 3 components × 6 nodes
   }
+
+  // ========================================================================
+  // LINEARFORM TESTS FOR P1ELEMENT
+  // ========================================================================
+
+  TEST(FinalTest_P1Element_LinearForm, ScalarLinearForm_AllGeometries)
+  {
+    // Test LinearForm evaluation for P1 elements across all geometries
+    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
+                      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+                      Polytope::Type::Wedge})
+    {
+      RealP1Element elem(geom);
+      
+      // Linear function to interpolate
+      auto f = [geom](const Math::SpatialPoint& x) -> Real {
+        switch (geom)
+        {
+          case Polytope::Type::Segment:
+            return 1.0 + 2.0 * x.x();
+          case Polytope::Type::Triangle:
+          case Polytope::Type::Quadrilateral:
+            return 1.0 + 2.0 * x.x() + 3.0 * x.y();
+          case Polytope::Type::Tetrahedron:
+          case Polytope::Type::Wedge:
+            return 1.0 + 2.0 * x.x() + 3.0 * x.y() + 4.0 * x.z();
+          default:
+            return 0.0;
+        }
+      };
+      
+      // Evaluate linear forms at nodes
+      std::vector<Real> dof_values(elem.getCount());
+      for (size_t i = 0; i < elem.getCount(); i++)
+        dof_values[i] = elem.getLinearForm(i)(f);
+      
+      // Verify values are correct at nodes
+      for (size_t i = 0; i < elem.getCount(); i++)
+      {
+        const auto& node = elem.getNode(i);
+        EXPECT_NEAR(dof_values[i], f(node), RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  TEST(FinalTest_P1Element_LinearForm, VectorLinearForm_AllVectorDimensions)
+  {
+    // Test LinearForm for vector P1 elements
+    for (size_t vdim : {1, 2, 3})
+    {
+      VectorP1Element<Real> elem(Polytope::Type::Segment, vdim);
+      
+      // Vector function to interpolate
+      auto f = [vdim](const Math::SpatialPoint& x) {
+        Math::Vector<Real> v(vdim);
+        for (size_t i = 0; i < vdim; i++)
+          v(i) = (i + 1) * (1.0 + x.x());
+        return v;
+      };
+      
+      // Evaluate all linear forms
+      std::vector<Real> dof_values(elem.getCount());
+      for (size_t i = 0; i < elem.getCount(); i++)
+        dof_values[i] = elem.getLinearForm(i)(f);
+      
+      // Verify correctness
+      for (size_t local = 0; local < elem.getCount(); local++)
+      {
+        size_t node_idx = local / vdim;
+        size_t comp_idx = local % vdim;
+        const auto& node = elem.getNode(local);
+        Math::Vector<Real> f_val = f(node);
+        EXPECT_NEAR(dof_values[local], f_val(comp_idx), RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  // ========================================================================
+  // GRADIENTFUNCTION TESTS FOR P1ELEMENT
+  // ========================================================================
+
+  TEST(FinalTest_P1Element_GradientFunction, GradientConsistency_AllGeometries)
+  {
+    // Test that gradient functions work correctly across geometries
+    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
+                      Polytope::Type::Tetrahedron})
+    {
+      RealP1Element elem(geom);
+      
+      Math::Vector<Real> p;
+      size_t dim = Geometry::Polytope::Traits(geom).getDimension();
+      
+      switch (geom)
+      {
+        case Polytope::Type::Segment:
+          p = Math::Vector<Real>{{0.5}};
+          break;
+        case Polytope::Type::Triangle:
+          p = Math::Vector<Real>{{0.3, 0.4}};
+          break;
+        case Polytope::Type::Tetrahedron:
+          p = Math::Vector<Real>{{0.25, 0.25, 0.25}};
+          break;
+        default:
+          continue;
+      }
+      
+      // For each basis function
+      for (size_t i = 0; i < elem.getCount(); i++)
+      {
+        auto grad_func = elem.getBasis(i).getGradient();
+        const auto& grad_val = grad_func(p);
+        
+        EXPECT_EQ(grad_val.size(), dim);
+        
+        // Verify gradient is consistent with individual derivatives
+        for (size_t j = 0; j < dim; j++)
+        {
+          auto deriv = elem.getBasis(i).getDerivative<1>(j);
+          EXPECT_NEAR(grad_val(j), deriv(p), RODIN_FUZZY_CONSTANT);
+        }
+      }
+    }
+  }
+
+  TEST(FinalTest_P1Element_GradientFunction, GradientPartitionProperty)
+  {
+    // Test that sum of gradients equals zero (partition of unity property)
+    RealP1Element elem(Polytope::Type::Triangle);
+    
+    Math::Vector<Real> p{{0.3, 0.4}};
+    
+    Math::SpatialVector<Real> grad_sum = Math::SpatialVector<Real>::Zero(2);
+    for (size_t i = 0; i < elem.getCount(); i++)
+    {
+      auto grad_func = elem.getBasis(i).getGradient();
+      grad_sum += grad_func(p);
+    }
+    
+    // Sum of gradients should be zero
+    EXPECT_NEAR(grad_sum(0), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(grad_sum(1), 0.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  // ========================================================================
+  // JACOBIANFUNCTION TESTS FOR P1ELEMENT (VECTOR)
+  // ========================================================================
+
+  TEST(FinalTest_P1Element_JacobianFunction, JacobianStructure_AllVectorDimensions)
+  {
+    // Test Jacobian function structure for vector P1 elements
+    for (size_t vdim : {1, 2, 3})
+    {
+      VectorP1Element<Real> elem(Polytope::Type::Segment, vdim);
+      
+      Math::Vector<Real> p{{0.5}};
+      
+      for (size_t local = 0; local < elem.getCount(); local++)
+      {
+        auto jac_func = elem.getBasis(local).getJacobian();
+        const auto& jac = jac_func(p);
+        
+        // Jacobian should be vdim × 1 for segment
+        EXPECT_EQ(jac.rows(), vdim);
+        EXPECT_EQ(jac.cols(), 1);
+        
+        // Verify Jacobian entries match derivatives
+        size_t comp = local % vdim;
+        for (size_t i = 0; i < vdim; i++)
+        {
+          auto deriv = elem.getBasis(local).getDerivative<1>(i, 0);
+          EXPECT_NEAR(jac(i, 0), deriv(p), RODIN_FUZZY_CONSTANT);
+        }
+      }
+    }
+  }
+
+  TEST(FinalTest_P1Element_JacobianFunction, Jacobian2D_Triangle)
+  {
+    // Test Jacobian for 2D vector field on triangle
+    VectorP1Element<Real> elem(Polytope::Type::Triangle, 2);
+    
+    Math::Vector<Real> p{{0.3, 0.4}};
+    
+    for (size_t local = 0; local < elem.getCount(); local++)
+    {
+      auto jac_func = elem.getBasis(local).getJacobian();
+      const auto& jac = jac_func(p);
+      
+      // Jacobian should be 2×2
+      EXPECT_EQ(jac.rows(), 2);
+      EXPECT_EQ(jac.cols(), 2);
+      
+      // Most entries should be zero (sparse structure)
+      size_t comp = local % 2;
+      for (size_t i = 0; i < 2; i++)
+      {
+        for (size_t j = 0; j < 2; j++)
+        {
+          if (i == comp)
+          {
+            // Non-zero entry
+            auto deriv = elem.getBasis(local).getDerivative<1>(i, j);
+            EXPECT_NEAR(jac(i, j), deriv(p), RODIN_FUZZY_CONSTANT);
+          }
+          else
+          {
+            // Should be zero
+            EXPECT_NEAR(jac(i, j), 0.0, RODIN_FUZZY_CONSTANT);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(FinalTest_P1Element_JacobianFunction, Jacobian3D_Tetrahedron)
+  {
+    // Test Jacobian for 3D vector field on tetrahedron
+    VectorP1Element<Real> elem(Polytope::Type::Tetrahedron, 3);
+    
+    Math::Vector<Real> p{{0.25, 0.25, 0.25}};
+    
+    // Test first few DOFs
+    for (size_t local = 0; local < std::min(elem.getCount(), size_t(9)); local++)
+    {
+      auto jac_func = elem.getBasis(local).getJacobian();
+      const auto& jac = jac_func(p);
+      
+      // Jacobian should be 3×3
+      EXPECT_EQ(jac.rows(), 3);
+      EXPECT_EQ(jac.cols(), 3);
+      
+      // Verify structure
+      EXPECT_TRUE(std::isfinite(jac.norm()));
+    }
+  }
+
+  // ========================================================================
+  // INTERPOLATION TESTS FOR P1ELEMENT
+  // ========================================================================
+
+  TEST(FinalTest_P1Element_Interpolation, LinearFunctionInterpolation_AllGeometries)
+  {
+    // Test that P1 element exactly interpolates linear functions
+    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
+                      Polytope::Type::Tetrahedron})
+    {
+      RealP1Element elem(geom);
+      
+      // Linear function
+      auto f = [geom](const Math::SpatialPoint& x) -> Real {
+        switch (geom)
+        {
+          case Polytope::Type::Segment:
+            return 2.0 + 3.0 * x.x();
+          case Polytope::Type::Triangle:
+            return 2.0 + 3.0 * x.x() + 4.0 * x.y();
+          case Polytope::Type::Tetrahedron:
+            return 2.0 + 3.0 * x.x() + 4.0 * x.y() + 5.0 * x.z();
+          default:
+            return 0.0;
+        }
+      };
+      
+      // Get DOF values
+      std::vector<Real> dof_values(elem.getCount());
+      for (size_t i = 0; i < elem.getCount(); i++)
+        dof_values[i] = elem.getLinearForm(i)(f);
+      
+      // Test interpolation at random points
+      RandomFloat gen(0.0, 1.0);
+      for (size_t test = 0; test < 10; test++)
+      {
+        Math::Vector<Real> p;
+        switch (geom)
+        {
+          case Polytope::Type::Segment:
+            p = Math::Vector<Real>{{gen()}};
+            break;
+          case Polytope::Type::Triangle:
+          {
+            Real s = gen();
+            Real t = gen() * (1 - s);
+            p = Math::Vector<Real>{{s, t}};
+            break;
+          }
+          case Polytope::Type::Tetrahedron:
+          {
+            Real s = gen();
+            Real t = gen() * (1 - s);
+            Real u = gen() * (1 - s - t);
+            p = Math::Vector<Real>{{s, t, u}};
+            break;
+          }
+          default:
+            continue;
+        }
+        
+        // Interpolate
+        Real interpolated = 0.0;
+        for (size_t i = 0; i < elem.getCount(); i++)
+          interpolated += dof_values[i] * elem.getBasis(i)(p);
+        
+        EXPECT_NEAR(interpolated, f(p), RODIN_FUZZY_CONSTANT);
+      }
+    }
+  }
+
+  TEST(FinalTest_P1Element_Interpolation, VectorLinearFieldInterpolation)
+  {
+    // Test vector field interpolation
+    for (size_t vdim : {2, 3})
+    {
+      VectorP1Element<Real> elem(Polytope::Type::Triangle, vdim);
+      
+      // Linear vector field
+      auto f = [vdim](const Math::SpatialPoint& x) {
+        Math::Vector<Real> v(vdim);
+        for (size_t i = 0; i < vdim; i++)
+          v(i) = (i + 1) * (1.0 + 2.0 * x.x() + 3.0 * x.y());
+        return v;
+      };
+      
+      // Get DOF values
+      std::vector<Real> dof_values(elem.getCount());
+      for (size_t i = 0; i < elem.getCount(); i++)
+        dof_values[i] = elem.getLinearForm(i)(f);
+      
+      // Test interpolation at a point
+      Math::Vector<Real> p{{0.3, 0.4}};
+      Math::Vector<Real> interpolated = Math::Vector<Real>::Zero(vdim);
+      
+      for (size_t i = 0; i < elem.getCount(); i++)
+        interpolated += dof_values[i] * elem.getBasis(i)(p);
+      
+      Math::Vector<Real> exact = f(p);
+      for (size_t i = 0; i < vdim; i++)
+        EXPECT_NEAR(interpolated(i), exact(i), RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(FinalTest_P1Element_Interpolation, GradientInterpolationConsistency)
+  {
+    // Test that gradient of interpolant matches expected gradient
+    RealP1Element elem(Polytope::Type::Segment);
+    
+    // Linear function f(x) = 2 + 3x, so f'(x) = 3
+    auto f = [](const Math::SpatialPoint& x) { return 2.0 + 3.0 * x.x(); };
+    
+    // Get DOF values
+    std::vector<Real> dof_values(elem.getCount());
+    for (size_t i = 0; i < elem.getCount(); i++)
+      dof_values[i] = elem.getLinearForm(i)(f);
+    
+    // Compute interpolated gradient
+    Math::Vector<Real> p{{0.5}};
+    Real interpolated_grad = 0.0;
+    for (size_t i = 0; i < elem.getCount(); i++)
+    {
+      auto deriv = elem.getBasis(i).getDerivative<1>(0);
+      interpolated_grad += dof_values[i] * deriv(p);
+    }
+    
+    EXPECT_NEAR(interpolated_grad, 3.0, RODIN_FUZZY_CONSTANT);
+  }
 }

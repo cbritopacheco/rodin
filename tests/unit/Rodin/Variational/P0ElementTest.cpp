@@ -2,6 +2,7 @@
 #include "Rodin/Test/Random.h"
 
 #include <complex>
+#include <functional>
 #include "Rodin/Variational/P0.h"
 
 using namespace Rodin;
@@ -620,6 +621,166 @@ namespace Rodin::Tests::Unit
         for (size_t j = 0; j < vdim; j++)
           EXPECT_NEAR(sum_per_component[j], 1.0, RODIN_FUZZY_CONSTANT);
       }
+    }
+  }
+
+  // ========================================================================
+  // LINEARFORM TESTS FOR P0ELEMENT
+  // ========================================================================
+
+  TEST(FinalTest_P0Element_LinearForm, LinearForm_AllGeometries)
+  {
+    // Test LinearForm evaluation for P0 elements across all geometries
+    for (auto geom : {Polytope::Type::Point, Polytope::Type::Segment,
+                      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+                      Polytope::Type::Tetrahedron, Polytope::Type::Wedge})
+    {
+      RealP0Element elem(geom);
+      
+      // P0 element has only one DOF - test the linear form
+      const auto& lf = elem.getLinearForm(0);
+      
+      // Create a test function that returns a constant value
+      const Real constant_value = 5.0;
+      auto test_func = [constant_value](const Math::SpatialPoint&) { return constant_value; };
+      
+      // LinearForm should evaluate the function at the barycenter
+      Real result = lf(test_func);
+      EXPECT_NEAR(result, 5.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(FinalTest_P0Element_LinearForm, VectorLinearForm_AllVectorDimensions)
+  {
+    // Test LinearForm for vector P0 elements with different vector dimensions
+    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
+                      Polytope::Type::Tetrahedron})
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        VectorP0Element<Real> elem(geom, vdim);
+        
+        // Test each component's linear form
+        for (size_t i = 0; i < vdim; i++)
+        {
+          const auto& lf = elem.getLinearForm(i);
+          
+          // Create a test vector function
+          const size_t captured_vdim = vdim;
+          const size_t captured_i = i;
+          const Real test_value = 3.0 + static_cast<Real>(i);
+          std::function<Math::Vector<Real>(const Math::SpatialPoint&)> test_func = 
+            [captured_vdim, captured_i, test_value](const Math::SpatialPoint&) -> Math::Vector<Real> {
+              Math::Vector<Real> v;
+              v.resize(captured_vdim);
+              for (size_t j = 0; j < captured_vdim; j++)
+                v(j) = (j == captured_i) ? test_value : 0.0;
+              return v;
+            };
+          
+          Real result = lf(test_func);
+          EXPECT_NEAR(result, test_value, RODIN_FUZZY_CONSTANT);
+        }
+      }
+    }
+  }
+
+  // ========================================================================
+  // INTERPOLATION TESTS FOR P0ELEMENT
+  // ========================================================================
+
+  TEST(FinalTest_P0Element_Interpolation, ScalarConstantInterpolation)
+  {
+    // Test that P0 element correctly interpolates constant functions
+    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
+                      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+                      Polytope::Type::Wedge})
+    {
+      RealP0Element elem(geom);
+      
+      // Constant function f(x) = 7.5
+      const Real constant_value = 7.5;
+      auto f = [constant_value](const Math::SpatialPoint&) { return constant_value; };
+      
+      // Get DOF value using linear form
+      Real dof_value = elem.getLinearForm(0)(f);
+      
+      // Interpolate at various points
+      Math::Vector<Real> p;
+      switch (geom)
+      {
+        case Polytope::Type::Segment:
+          p = Math::Vector<Real>{{0.3}};
+          break;
+        case Polytope::Type::Triangle:
+        case Polytope::Type::Quadrilateral:
+          p = Math::Vector<Real>{{0.4, 0.3}};
+          break;
+        case Polytope::Type::Tetrahedron:
+        case Polytope::Type::Wedge:
+          p = Math::Vector<Real>{{0.2, 0.3, 0.4}};
+          break;
+        default:
+          continue;
+      }
+      
+      Real interpolated = dof_value * elem.getBasis(0)(p);
+      EXPECT_NEAR(interpolated, 7.5, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(FinalTest_P0Element_Interpolation, VectorConstantInterpolation)
+  {
+    // Test vector P0 element interpolation for constant vector fields
+    for (size_t vdim : {1, 2, 3})
+    {
+      VectorP0Element<Real> elem(Polytope::Type::Triangle, vdim);
+      
+      // Constant vector field
+      const size_t captured_vdim = vdim;
+      std::function<Math::Vector<Real>(const Math::SpatialPoint&)> f = 
+        [captured_vdim](const Math::SpatialPoint&) -> Math::Vector<Real> {
+          Math::Vector<Real> v;
+          v.resize(captured_vdim);
+          for (size_t i = 0; i < captured_vdim; i++)
+            v(i) = 2.0 + 0.5 * static_cast<Real>(i);
+          return v;
+        };
+      
+      // Get DOF values
+      std::vector<Real> dof_values(vdim);
+      for (size_t i = 0; i < vdim; i++)
+        dof_values[i] = elem.getLinearForm(i)(f);
+      
+      // Interpolate
+      Math::Vector<Real> p{{0.3, 0.4}};
+      Math::Vector<Real> interpolated = Math::Vector<Real>::Zero(vdim);
+      for (size_t i = 0; i < vdim; i++)
+        interpolated += dof_values[i] * elem.getBasis(i)(p);
+      
+      // Check each component
+      for (size_t i = 0; i < vdim; i++)
+        EXPECT_NEAR(interpolated(i), 2.0 + 0.5 * i, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(FinalTest_P0Element_Interpolation, InterpolationAccuracy_MultiplePoints)
+  {
+    // Test interpolation accuracy at multiple points for P0 element
+    RealP0Element elem(Polytope::Type::Segment);
+    
+    // Constant function
+    const Real constant_value = 3.14;
+    auto f = [constant_value](const Math::SpatialPoint&) { return constant_value; };
+    Real dof_value = elem.getLinearForm(0)(f);
+    
+    // Test at multiple points - should all give same value
+    RandomFloat gen(0.0, 1.0);
+    for (size_t i = 0; i < 10; i++)
+    {
+      Math::Vector<Real> p{{gen()}};
+      Real interpolated = dof_value * elem.getBasis(0)(p);
+      EXPECT_NEAR(interpolated, 3.14, RODIN_FUZZY_CONSTANT);
     }
   }
 }

@@ -2656,4 +2656,676 @@ namespace Rodin::Tests::Unit
       }
     }
   }
+
+  // ========================================================================
+  // LINEARFORM TESTS FOR PKELEMENT K=0 TO K=6
+  // ========================================================================
+
+  TEST(FinalTest_PkElement_LinearForm, ScalarLinearForm_K0_to_K6_Segment)
+  {
+    // Test LinearForm for all polynomial orders on Segment
+    for (size_t K : {0, 1, 2, 3, 4, 5, 6})
+    {
+      // Polynomial function of appropriate degree
+      auto f = [K](const Math::SpatialPoint& x) -> Real {
+        Real result = 1.0;
+        for (size_t k = 1; k <= K; k++)
+          result += (k + 1.0) * std::pow(x.x(), k);
+        return result;
+      };
+      
+      switch (K)
+      {
+        case 0:
+        {
+          RealPkElement<0> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& lf = elem.getLinearForm(i);
+            Real dof_val = lf(f);
+            const auto& node = elem.getNode(i);
+            EXPECT_NEAR(dof_val, f(node), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 1:
+        {
+          RealPkElement<1> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& lf = elem.getLinearForm(i);
+            Real dof_val = lf(f);
+            const auto& node = elem.getNode(i);
+            EXPECT_NEAR(dof_val, f(node), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 2:
+        {
+          RealPkElement<2> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& lf = elem.getLinearForm(i);
+            Real dof_val = lf(f);
+            const auto& node = elem.getNode(i);
+            EXPECT_NEAR(dof_val, f(node), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 3:
+        {
+          RealPkElement<3> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& lf = elem.getLinearForm(i);
+            Real dof_val = lf(f);
+            const auto& node = elem.getNode(i);
+            EXPECT_NEAR(dof_val, f(node), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 4:
+        {
+          RealPkElement<4> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& lf = elem.getLinearForm(i);
+            Real dof_val = lf(f);
+            const auto& node = elem.getNode(i);
+            EXPECT_NEAR(dof_val, f(node), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 5:
+        {
+          RealPkElement<5> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& lf = elem.getLinearForm(i);
+            Real dof_val = lf(f);
+            const auto& node = elem.getNode(i);
+            EXPECT_NEAR(dof_val, f(node), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 6:
+        {
+          RealPkElement<6> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            const auto& lf = elem.getLinearForm(i);
+            Real dof_val = lf(f);
+            const auto& node = elem.getNode(i);
+            EXPECT_NEAR(dof_val, f(node), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  TEST(FinalTest_PkElement_LinearForm, VectorLinearForm_K0_to_K3_AllVectorDimensions)
+  {
+    // Test LinearForm for vector Pk elements
+    for (size_t K : {0, 1, 2, 3})
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        // Vector function
+        auto f = [vdim, K](const Math::SpatialPoint& x) {
+          Math::Vector<Real> v(vdim);
+          Real poly_val = 1.0;
+          for (size_t k = 1; k <= K; k++)
+            poly_val += std::pow(x.x(), k);
+          for (size_t i = 0; i < vdim; i++)
+            v(i) = (i + 1) * poly_val;
+          return v;
+        };
+        
+        switch (K)
+        {
+          case 0:
+          {
+            PkElement<0, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+            {
+              const auto& lf = elem.getLinearForm(i);
+              Real dof_val = lf(f);
+              const auto& node = elem.getNode(i);
+              size_t comp = i % vdim;
+              EXPECT_NEAR(dof_val, f(node)(comp), RODIN_FUZZY_CONSTANT);
+            }
+            break;
+          }
+          case 1:
+          {
+            PkElement<1, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+            {
+              const auto& lf = elem.getLinearForm(i);
+              Real dof_val = lf(f);
+              const auto& node = elem.getNode(i);
+              size_t comp = i % vdim;
+              EXPECT_NEAR(dof_val, f(node)(comp), RODIN_FUZZY_CONSTANT);
+            }
+            break;
+          }
+          case 2:
+          {
+            PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+            {
+              const auto& lf = elem.getLinearForm(i);
+              Real dof_val = lf(f);
+              const auto& node = elem.getNode(i);
+              size_t comp = i % vdim;
+              EXPECT_NEAR(dof_val, f(node)(comp), RODIN_FUZZY_CONSTANT);
+            }
+            break;
+          }
+          case 3:
+          {
+            PkElement<3, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+            {
+              const auto& lf = elem.getLinearForm(i);
+              Real dof_val = lf(f);
+              const auto& node = elem.getNode(i);
+              size_t comp = i % vdim;
+              EXPECT_NEAR(dof_val, f(node)(comp), RODIN_FUZZY_CONSTANT);
+            }
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // ========================================================================
+  // GRADIENTFUNCTION TESTS FOR PKELEMENT K=0 TO K=6
+  // ========================================================================
+
+  TEST(FinalTest_PkElement_GradientFunction, GradientConsistency_K1_to_K6)
+  {
+    // Test gradient functions for polynomial orders 1-6
+    for (size_t K : {1, 2, 3, 4, 5, 6})
+    {
+      Math::Vector<Real> p{{0.5}};
+      
+      switch (K)
+      {
+        case 1:
+        {
+          RealPkElement<1> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            auto grad_func = elem.getBasis(i).getGradient();
+            const auto& grad_val = grad_func(p);
+            EXPECT_EQ(grad_val.size(), 1);
+            
+            // Check consistency with derivative
+            auto deriv = elem.getBasis(i).getDerivative<1>(0);
+            EXPECT_NEAR(grad_val(0), deriv(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 2:
+        {
+          RealPkElement<2> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            auto grad_func = elem.getBasis(i).getGradient();
+            const auto& grad_val = grad_func(p);
+            auto deriv = elem.getBasis(i).getDerivative<1>(0);
+            EXPECT_NEAR(grad_val(0), deriv(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 3:
+        {
+          RealPkElement<3> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            auto grad_func = elem.getBasis(i).getGradient();
+            const auto& grad_val = grad_func(p);
+            auto deriv = elem.getBasis(i).getDerivative<1>(0);
+            EXPECT_NEAR(grad_val(0), deriv(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 4:
+        {
+          RealPkElement<4> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            auto grad_func = elem.getBasis(i).getGradient();
+            const auto& grad_val = grad_func(p);
+            auto deriv = elem.getBasis(i).getDerivative<1>(0);
+            EXPECT_NEAR(grad_val(0), deriv(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 5:
+        {
+          RealPkElement<5> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            auto grad_func = elem.getBasis(i).getGradient();
+            const auto& grad_val = grad_func(p);
+            auto deriv = elem.getBasis(i).getDerivative<1>(0);
+            EXPECT_NEAR(grad_val(0), deriv(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 6:
+        {
+          RealPkElement<6> elem(Polytope::Type::Segment);
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            auto grad_func = elem.getBasis(i).getGradient();
+            const auto& grad_val = grad_func(p);
+            auto deriv = elem.getBasis(i).getDerivative<1>(0);
+            EXPECT_NEAR(grad_val(0), deriv(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  TEST(FinalTest_PkElement_GradientFunction, GradientPartitionProperty_K2_Triangle)
+  {
+    // Test that sum of gradients equals zero (partition of unity)
+    RealPkElement<2> elem(Polytope::Type::Triangle);
+    
+    Math::Vector<Real> p{{0.3, 0.4}};
+    Math::SpatialVector<Real> grad_sum = Math::SpatialVector<Real>::Zero(2);
+    
+    for (size_t i = 0; i < elem.getCount(); i++)
+    {
+      auto grad_func = elem.getBasis(i).getGradient();
+      grad_sum += grad_func(p);
+    }
+    
+    EXPECT_NEAR(grad_sum(0), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(grad_sum(1), 0.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  // ========================================================================
+  // JACOBIANFUNCTION TESTS FOR PKELEMENT K=0 TO K=6
+  // ========================================================================
+
+  TEST(FinalTest_PkElement_JacobianFunction, JacobianStructure_K0_to_K3)
+  {
+    // Test Jacobian function for vector Pk elements
+    for (size_t K : {0, 1, 2, 3})
+    {
+      for (size_t vdim : {2, 3})
+      {
+        Math::Vector<Real> p{{0.5}};
+        
+        switch (K)
+        {
+          case 0:
+          {
+            PkElement<0, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+            {
+              auto jac_func = elem.getBasis(i).getJacobian();
+              const auto& jac = jac_func(p);
+              EXPECT_EQ(jac.rows(), vdim);
+              EXPECT_EQ(jac.cols(), 1);
+            }
+            break;
+          }
+          case 1:
+          {
+            PkElement<1, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+            {
+              auto jac_func = elem.getBasis(i).getJacobian();
+              const auto& jac = jac_func(p);
+              EXPECT_EQ(jac.rows(), vdim);
+              EXPECT_EQ(jac.cols(), 1);
+            }
+            break;
+          }
+          case 2:
+          {
+            PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+            {
+              auto jac_func = elem.getBasis(i).getJacobian();
+              const auto& jac = jac_func(p);
+              EXPECT_EQ(jac.rows(), vdim);
+              EXPECT_EQ(jac.cols(), 1);
+            }
+            break;
+          }
+          case 3:
+          {
+            PkElement<3, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+            {
+              auto jac_func = elem.getBasis(i).getJacobian();
+              const auto& jac = jac_func(p);
+              EXPECT_EQ(jac.rows(), vdim);
+              EXPECT_EQ(jac.cols(), 1);
+            }
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  TEST(FinalTest_PkElement_JacobianFunction, Jacobian2D_K2_Triangle)
+  {
+    // Test 2D Jacobian for K=2 on triangle
+    PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Triangle, 2);
+    
+    Math::Vector<Real> p{{0.3, 0.4}};
+    
+    for (size_t local = 0; local < elem.getCount(); local++)
+    {
+      auto jac_func = elem.getBasis(local).getJacobian();
+      const auto& jac = jac_func(p);
+      
+      EXPECT_EQ(jac.rows(), 2);
+      EXPECT_EQ(jac.cols(), 2);
+      
+      // Verify Jacobian entries
+      size_t comp = local % 2;
+      for (size_t i = 0; i < 2; i++)
+      {
+        for (size_t j = 0; j < 2; j++)
+        {
+          auto deriv = elem.getBasis(local).getDerivative<1>(i, j);
+          EXPECT_NEAR(jac(i, j), deriv(p), RODIN_FUZZY_CONSTANT);
+        }
+      }
+    }
+  }
+
+  // ========================================================================
+  // INTERPOLATION TESTS FOR PKELEMENT K=0 TO K=6
+  // ========================================================================
+
+  TEST(FinalTest_PkElement_Interpolation, PolynomialInterpolation_K0_to_K6)
+  {
+    // Test that Pk element exactly interpolates polynomials of degree K
+    RandomFloat gen(0.0, 1.0);
+    
+    for (size_t K : {0, 1, 2, 3, 4, 5, 6})
+    {
+      // Polynomial of degree K
+      auto f = [K](const Math::SpatialPoint& x) -> Real {
+        Real result = 1.0;
+        for (size_t k = 1; k <= K; k++)
+          result += (k + 0.5) * std::pow(x.x(), k);
+        return result;
+      };
+      
+      switch (K)
+      {
+        case 0:
+        {
+          RealPkElement<0> elem(Polytope::Type::Segment);
+          std::vector<Real> dofs(elem.getCount());
+          for (size_t i = 0; i < elem.getCount(); i++)
+            dofs[i] = elem.getLinearForm(i)(f);
+          
+          for (size_t test = 0; test < 5; test++)
+          {
+            Math::Vector<Real> p{{gen()}};
+            Real interp = 0.0;
+            for (size_t i = 0; i < elem.getCount(); i++)
+              interp += dofs[i] * elem.getBasis(i)(p);
+            EXPECT_NEAR(interp, f(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 1:
+        {
+          RealPkElement<1> elem(Polytope::Type::Segment);
+          std::vector<Real> dofs(elem.getCount());
+          for (size_t i = 0; i < elem.getCount(); i++)
+            dofs[i] = elem.getLinearForm(i)(f);
+          
+          for (size_t test = 0; test < 5; test++)
+          {
+            Math::Vector<Real> p{{gen()}};
+            Real interp = 0.0;
+            for (size_t i = 0; i < elem.getCount(); i++)
+              interp += dofs[i] * elem.getBasis(i)(p);
+            EXPECT_NEAR(interp, f(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 2:
+        {
+          RealPkElement<2> elem(Polytope::Type::Segment);
+          std::vector<Real> dofs(elem.getCount());
+          for (size_t i = 0; i < elem.getCount(); i++)
+            dofs[i] = elem.getLinearForm(i)(f);
+          
+          for (size_t test = 0; test < 5; test++)
+          {
+            Math::Vector<Real> p{{gen()}};
+            Real interp = 0.0;
+            for (size_t i = 0; i < elem.getCount(); i++)
+              interp += dofs[i] * elem.getBasis(i)(p);
+            EXPECT_NEAR(interp, f(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 3:
+        {
+          RealPkElement<3> elem(Polytope::Type::Segment);
+          std::vector<Real> dofs(elem.getCount());
+          for (size_t i = 0; i < elem.getCount(); i++)
+            dofs[i] = elem.getLinearForm(i)(f);
+          
+          for (size_t test = 0; test < 5; test++)
+          {
+            Math::Vector<Real> p{{gen()}};
+            Real interp = 0.0;
+            for (size_t i = 0; i < elem.getCount(); i++)
+              interp += dofs[i] * elem.getBasis(i)(p);
+            EXPECT_NEAR(interp, f(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 4:
+        {
+          RealPkElement<4> elem(Polytope::Type::Segment);
+          std::vector<Real> dofs(elem.getCount());
+          for (size_t i = 0; i < elem.getCount(); i++)
+            dofs[i] = elem.getLinearForm(i)(f);
+          
+          for (size_t test = 0; test < 5; test++)
+          {
+            Math::Vector<Real> p{{gen()}};
+            Real interp = 0.0;
+            for (size_t i = 0; i < elem.getCount(); i++)
+              interp += dofs[i] * elem.getBasis(i)(p);
+            EXPECT_NEAR(interp, f(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 5:
+        {
+          RealPkElement<5> elem(Polytope::Type::Segment);
+          std::vector<Real> dofs(elem.getCount());
+          for (size_t i = 0; i < elem.getCount(); i++)
+            dofs[i] = elem.getLinearForm(i)(f);
+          
+          for (size_t test = 0; test < 5; test++)
+          {
+            Math::Vector<Real> p{{gen()}};
+            Real interp = 0.0;
+            for (size_t i = 0; i < elem.getCount(); i++)
+              interp += dofs[i] * elem.getBasis(i)(p);
+            EXPECT_NEAR(interp, f(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+        case 6:
+        {
+          RealPkElement<6> elem(Polytope::Type::Segment);
+          std::vector<Real> dofs(elem.getCount());
+          for (size_t i = 0; i < elem.getCount(); i++)
+            dofs[i] = elem.getLinearForm(i)(f);
+          
+          for (size_t test = 0; test < 5; test++)
+          {
+            Math::Vector<Real> p{{gen()}};
+            Real interp = 0.0;
+            for (size_t i = 0; i < elem.getCount(); i++)
+              interp += dofs[i] * elem.getBasis(i)(p);
+            EXPECT_NEAR(interp, f(p), RODIN_FUZZY_CONSTANT);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  TEST(FinalTest_PkElement_Interpolation, VectorPolynomialInterpolation_K1_K2_K3)
+  {
+    // Test vector field interpolation for Pk elements
+    for (size_t K : {1, 2, 3})
+    {
+      for (size_t vdim : {2, 3})
+      {
+        // Vector polynomial
+        auto f = [K, vdim](const Math::SpatialPoint& x) {
+          Math::Vector<Real> v(vdim);
+          Real poly = 1.0;
+          for (size_t k = 1; k <= K; k++)
+            poly += std::pow(x.x(), k);
+          for (size_t i = 0; i < vdim; i++)
+            v(i) = (i + 1) * poly;
+          return v;
+        };
+        
+        switch (K)
+        {
+          case 1:
+          {
+            PkElement<1, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            std::vector<Real> dofs(elem.getCount());
+            for (size_t i = 0; i < elem.getCount(); i++)
+              dofs[i] = elem.getLinearForm(i)(f);
+            
+            Math::Vector<Real> p{{0.5}};
+            Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+              interp += dofs[i] * elem.getBasis(i)(p);
+            
+            Math::Vector<Real> exact = f(p);
+            for (size_t i = 0; i < vdim; i++)
+              EXPECT_NEAR(interp(i), exact(i), RODIN_FUZZY_CONSTANT);
+            break;
+          }
+          case 2:
+          {
+            PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            std::vector<Real> dofs(elem.getCount());
+            for (size_t i = 0; i < elem.getCount(); i++)
+              dofs[i] = elem.getLinearForm(i)(f);
+            
+            Math::Vector<Real> p{{0.5}};
+            Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+              interp += dofs[i] * elem.getBasis(i)(p);
+            
+            Math::Vector<Real> exact = f(p);
+            for (size_t i = 0; i < vdim; i++)
+              EXPECT_NEAR(interp(i), exact(i), RODIN_FUZZY_CONSTANT);
+            break;
+          }
+          case 3:
+          {
+            PkElement<3, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            std::vector<Real> dofs(elem.getCount());
+            for (size_t i = 0; i < elem.getCount(); i++)
+              dofs[i] = elem.getLinearForm(i)(f);
+            
+            Math::Vector<Real> p{{0.5}};
+            Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
+            for (size_t i = 0; i < elem.getCount(); i++)
+              interp += dofs[i] * elem.getBasis(i)(p);
+            
+            Math::Vector<Real> exact = f(p);
+            for (size_t i = 0; i < vdim; i++)
+              EXPECT_NEAR(interp(i), exact(i), RODIN_FUZZY_CONSTANT);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  TEST(FinalTest_PkElement_Interpolation, GradientInterpolationConsistency_K2_K3)
+  {
+    // Test that gradient of interpolant matches derivative of function
+    for (size_t K : {2, 3})
+    {
+      // Polynomial and its derivative
+      auto f = [K](const Math::SpatialPoint& x) -> Real {
+        Real result = 0.0;
+        for (size_t k = 1; k <= K; k++)
+          result += std::pow(x.x(), k);
+        return result;
+      };
+      
+      auto df = [K](const Math::SpatialPoint& x) -> Real {
+        Real result = 0.0;
+        for (size_t k = 1; k <= K; k++)
+          result += k * std::pow(x.x(), k - 1);
+        return result;
+      };
+      
+      switch (K)
+      {
+        case 2:
+        {
+          RealPkElement<2> elem(Polytope::Type::Segment);
+          std::vector<Real> dofs(elem.getCount());
+          for (size_t i = 0; i < elem.getCount(); i++)
+            dofs[i] = elem.getLinearForm(i)(f);
+          
+          Math::Vector<Real> p{{0.5}};
+          Real interp_grad = 0.0;
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            auto deriv = elem.getBasis(i).getDerivative<1>(0);
+            interp_grad += dofs[i] * deriv(p);
+          }
+          
+          EXPECT_NEAR(interp_grad, df(p), RODIN_FUZZY_CONSTANT);
+          break;
+        }
+        case 3:
+        {
+          RealPkElement<3> elem(Polytope::Type::Segment);
+          std::vector<Real> dofs(elem.getCount());
+          for (size_t i = 0; i < elem.getCount(); i++)
+            dofs[i] = elem.getLinearForm(i)(f);
+          
+          Math::Vector<Real> p{{0.5}};
+          Real interp_grad = 0.0;
+          for (size_t i = 0; i < elem.getCount(); i++)
+          {
+            auto deriv = elem.getBasis(i).getDerivative<1>(0);
+            interp_grad += dofs[i] * deriv(p);
+          }
+          
+          EXPECT_NEAR(interp_grad, df(p), RODIN_FUZZY_CONSTANT);
+          break;
+        }
+      }
+    }
+  }
 }
