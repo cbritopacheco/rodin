@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1762944786724,
+  "lastUpdate": 1763023204155,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -37738,6 +37738,162 @@ window.BENCHMARK_DATA = {
             "value": 51.956048079770326,
             "unit": "ns/iter",
             "extra": "iterations: 11765197\ncpu: 51.94326163854288 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "198982749+Copilot@users.noreply.github.com",
+            "name": "Copilot",
+            "username": "Copilot"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "999dc09d4afda054f58e2fde868d2ff86027a457",
+          "message": "Prepare library for first release: fix CMake policies, add release documentation, installation tests, and user guide (#141)\n\n* Initial plan\n\n* Fix CMake policy CMP0167 warnings for Boost FindModule deprecation\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive CHANGELOG.md for v0.0.1 release\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix GCC 13 array-bounds warning with Eigen to enable unit test builds\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive installation testing report\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add installation test script and GitHub workflow\n\n- Created tests/installation/ directory with test infrastructure\n- test_installation.sh: Automated script to test installation workflow\n- test_poisson.cpp: Simple Poisson solver to verify installed library works\n- test_project_CMakeLists.txt: CMake template for downstream project test\n- README.md: Documentation for installation tests\n- Added Installation.yml GitHub workflow for CI testing on Ubuntu and macOS\n- Tests verify: build, install, CMake integration, linking, and execution\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix macOS compatibility in installation test script\n\n- Replace nproc with cross-platform CPU detection (nproc for Linux, sysctl for macOS)\n- Split brew link command into separate step in workflow for better error isolation\n- Ensures installation test works on both Linux and macOS platforms\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add macOS compatibility verification and documentation\n\n- Created verify_macos_compat.sh to validate macOS compatibility\n- Added MACOS_VERIFICATION.md documenting all compatibility checks\n- Verification confirms: CPU detection, workflow config, dependencies, and script compatibility\n- All tests pass - installation script is ready for macOS testing in CI\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Improve macOS installation test robustness\n\n- Add conditional submodule initialization (skip if already initialized)\n- Add CMAKE_POLICY_VERSION_MINIMUM=3.5 flag for macOS builds\n- Improve workflow error handling with || true for Python setup\n- Add dependency verification step in workflow\n- Split brew update into separate step for better debugging\n\nThese changes address potential CI failures on macOS by matching the approach used in Build.yml\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix Eigen3 version compatibility for macOS (Homebrew has Eigen 5.0)\n\nProblem: RodinConfig.cmake required Eigen3 3.4, but Homebrew on macOS now provides Eigen 5.0.0\nCMake's find_dependency with exact version fails when encountering 5.0.0 vs required 3.4\n\nSolution: Remove specific version requirement for Eigen3 in RodinConfig.cmake.in\n- Eigen 5.x is backwards compatible with 3.4\n- Allows installation to work with system-provided Eigen versions\n- Main CMakeLists.txt already uses Eigen3 without version specification\n\nThis fixes the macOS CI installation test failure.\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix macOS Xcode 16 header path issues in test project\n\nProblem: Xcode 16 on macOS has stricter header search path requirements\nThe test project compilation failed with \"<cmath> tried including <math.h> but didn't find libc++'s <math.h> header\"\n\nSolution: Add CMAKE_OSX_DEPLOYMENT_TARGET=12.0 for test project configuration on macOS\nThis ensures proper SDK configuration and header search paths for downstream projects\n\nFixes macOS CI compilation errors in the installation test.\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Clear environment variables for macOS test project build (Xcode 16 workaround)\n\nProblem: Xcode 16 compilation still fails with header path errors\nInherited CXXFLAGS/CFLAGS/LDFLAGS may cause conflicts with SDK configuration\n\nSolution: Clear environment variables (CXXFLAGS, CFLAGS, LDFLAGS) before configuring test project on macOS\nThis prevents inherited flags from interfering with CMake's SDK auto-detection\n\nNote: This is a workaround for Xcode 16 strictness. If issue persists, may need to investigate Rodin's exported compiler flags or use an older Xcode version for testing.\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Skip test project compilation on macOS due to Xcode 16 limitations\n\nProblem: Xcode 16 has strict header path requirements causing persistent compilation failures in test project\nMultiple workaround attempts have not resolved the issue\n\nSolution: Add SKIP_TEST_PROJECT flag to installation test script\n- On macOS: Skip test project compilation but verify build and install\n- On Linux: Run full test including downstream project compilation\n- Library itself builds and installs successfully on all platforms\n\nThe library works correctly - this is a limitation of the test environment with Xcode 16.\nUsers can build downstream projects with proper SDK configuration.\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* CI\n\n* Re-enable full macOS installation test\n\nUser has fixed the macOS installation issues, so removing SKIP_TEST_PROJECT flag.\nThe macOS workflow will now run the complete installation test including test project compilation.\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* CI\n\n* Add comprehensive installation documentation to README.md\n\nExpanded the Installation section in README.md with:\n- Prerequisites (required and optional dependencies)\n- Quick install instructions with comments\n- User-local installation option (without sudo)\n- Installation verification section with complete example\n- Platform-specific notes for Ubuntu/Debian and macOS\n- Troubleshooting tips\n- Reference to INSTALL.md for detailed instructions\n\nThis provides users with a clear, step-by-step guide to install and verify Rodin.\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* CI\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>",
+          "timestamp": "2025-11-13T09:34:56+01:00",
+          "tree_id": "47e3d8c2171b3db82cfb611624e8c31ed6fc2604",
+          "url": "https://github.com/cbritopacheco/rodin/commit/999dc09d4afda054f58e2fde868d2ff86027a457"
+        },
+        "date": 1763023196776,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.28846548014896967,
+            "unit": "ns/iter",
+            "extra": "iterations: 2426533021\ncpu: 0.2884441365284022 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.28815241573798817,
+            "unit": "ns/iter",
+            "extra": "iterations: 2424066313\ncpu: 0.28814469606467397 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.28850375832999736,
+            "unit": "ns/iter",
+            "extra": "iterations: 2418486293\ncpu: 0.2884722832704514 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.2880075225212044,
+            "unit": "ns/iter",
+            "extra": "iterations: 2430456430\ncpu: 0.2879800581325375 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 558.2306503051548,
+            "unit": "ns/iter",
+            "extra": "iterations: 1255472\ncpu: 558.164457670103 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 112811.99675798866,
+            "unit": "ns/iter",
+            "extra": "iterations: 6169\ncpu: 112801.60139406713 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 478975.5444067789,
+            "unit": "ns/iter",
+            "extra": "iterations: 1475\ncpu: 478929.097627119 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 1008.5055087845107,
+            "unit": "ns/iter",
+            "extra": "iterations: 695707\ncpu: 1008.4481326190481 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 215659.3951985395,
+            "unit": "ns/iter",
+            "extra": "iterations: 3249\ncpu: 215636.85133887362 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 916492.2306684311,
+            "unit": "ns/iter",
+            "extra": "iterations: 763\ncpu: 916438.9541284424 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 226635.39403758827,
+            "unit": "ns/iter",
+            "extra": "iterations: 3086\ncpu: 226607.78353856108 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 211799.49788390475,
+            "unit": "ns/iter",
+            "extra": "iterations: 3308\ncpu: 211788.91233373625 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 10099.69543271352,
+            "unit": "ns/iter",
+            "extra": "iterations: 69538\ncpu: 10098.975193419441 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 5931772.749999216,
+            "unit": "ns/iter",
+            "extra": "iterations: 120\ncpu: 5930972.375000006 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 101226.265552322,
+            "unit": "ns/iter",
+            "extra": "iterations: 6880\ncpu: 101220.79680232573 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 1891401.7506776773,
+            "unit": "ns/iter",
+            "extra": "iterations: 369\ncpu: 1891139.5203252048 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9470939.729730211,
+            "unit": "ns/iter",
+            "extra": "iterations: 74\ncpu: 9470141.675675685 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 54893612.9166672,
+            "unit": "ns/iter",
+            "extra": "iterations: 12\ncpu: 54884150.25000008 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 351987201.4999805,
+            "unit": "ns/iter",
+            "extra": "iterations: 2\ncpu: 351965368.0000001 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_16x16",
+            "value": 45.49460503058564,
+            "unit": "ns/iter",
+            "extra": "iterations: 15327149\ncpu: 45.47627207121186 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_32x32",
+            "value": 45.75137998065721,
+            "unit": "ns/iter",
+            "extra": "iterations: 15203474\ncpu: 45.74052160710117 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_64x64",
+            "value": 44.799748376299895,
+            "unit": "ns/iter",
+            "extra": "iterations: 13824612\ncpu: 44.78940703724625 ns\nthreads: 1"
           }
         ]
       }
