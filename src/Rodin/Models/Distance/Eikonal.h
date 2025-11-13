@@ -1,3 +1,15 @@
+/**
+ * @file Eikonal.h
+ * @brief Eikonal equation-based distance function computation.
+ *
+ * This file provides the Eikonal class, which computes distance functions
+ * by solving the Eikonal equation using the Fast Marching Method (FMM).
+ * The Eikonal equation is given by:
+ * @f[
+ *   |\nabla d| = 1
+ * @f]
+ * where @f$ d @f$ is the distance function.
+ */
 #ifndef RODIN_MODELS_DITANCE_EIKONAL_H
 #define RODIN_MODELS_DITANCE_EIKONAL_H
 
@@ -10,16 +22,56 @@
 
 namespace Rodin::Models::Distance
 {
+  /**
+   * @brief Distance function computation using the Eikonal equation.
+   *
+   * This class solves the Eikonal equation @f$ |\nabla d| = 1 @f$ to compute
+   * distance functions on meshes using the Fast Marching Method. It can
+   * optionally compute signed distance functions by specifying interior regions.
+   *
+   * @tparam FES Finite element space type
+   * @tparam Data Data storage type for the solution
+   *
+   * ## Mathematical Background
+   * The Eikonal equation describes the propagation of wavefronts with unit
+   * speed, which is equivalent to computing distances. The Fast Marching Method
+   * solves this equation efficiently on unstructured meshes.
+   *
+   * ## Usage Example
+   * ```cpp
+   * P1 fes(mesh);
+   * GridFunction u(fes);
+   * Eikonal eikonal(u);
+   * eikonal.setInterface(interfaceAttr)
+   *        .setInterior(interiorAttr)
+   *        .solve()
+   *        .sign();
+   * ```
+   */
   template <class FES, class Data>
   class Eikonal : public Base<Eikonal<FES, Data>>
   {
     public:
+      /// Solution type: grid function containing the distance values
       using SolutionType = Variational::GridFunction<FES, Data>;
 
+      /**
+       * @brief Constructs an Eikonal distance solver.
+       *
+       * @param[in,out] u Grid function to store the computed distance values
+       */
       Eikonal(SolutionType& u)
         : m_u(u)
       {}
 
+      /**
+       * @brief Solves the Eikonal equation to compute the distance function.
+       *
+       * This method seeds the Fast Marching Method at the interface region
+       * and propagates the distance values throughout the domain.
+       *
+       * @return Reference to this object for method chaining
+       */
       Eikonal& solve()
       {
         static thread_local const auto s_speed =
@@ -64,6 +116,18 @@ namespace Rodin::Models::Distance
         return *this;
       };
 
+      /**
+       * @brief Computes the sign of the distance function.
+       *
+       * This method assigns negative values to the distance function in the
+       * interior region, converting an unsigned distance to a signed distance
+       * function. Must be called after solve().
+       *
+       * @return Reference to this object for method chaining
+       *
+       * @note The interior region must be set via setInterior() before calling
+       * this method for correct signed distance computation.
+       */
       Eikonal& sign()
       {
         auto& u = m_u.get();
@@ -96,9 +160,9 @@ namespace Rodin::Models::Distance
       }
 
     private:
-      std::reference_wrapper<SolutionType> m_u;
-      std::vector<uint8_t> m_visited;
-      std::vector<Index> m_seeds;
+      std::reference_wrapper<SolutionType> m_u;   ///< Reference to the solution grid function
+      std::vector<uint8_t> m_visited;              ///< Visited vertices tracker
+      std::vector<Index> m_seeds;                  ///< Seed vertices for FMM
   };
 }
 

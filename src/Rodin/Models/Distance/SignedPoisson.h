@@ -4,6 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file SignedPoisson.h
+ * @brief Signed Poisson equation-based distance function approximation.
+ *
+ * This file provides a signed distance function computation method using
+ * the Poisson equation with region-specific forcing terms.
+ */
 #ifndef RODIN_MODELS_DISTANCE_SIGNEDPOISSON_H
 #define RODIN_MODELS_DISTANCE_SIGNEDPOISSON_H
 
@@ -20,10 +27,45 @@ namespace Rodin::Models::Distance
 {
   /**
    * @brief Poisson approximation to the signed distance function.
+   *
+   * This class computes an approximation to the signed distance function by
+   * solving a Poisson equation with different forcing terms in interior and
+   * exterior regions:
+   * @f[
+   *   -\Delta u = f \quad \text{in } \Omega
+   * @f]
+   * @f[
+   *   u = 0 \quad \text{on } \Gamma
+   * @f]
+   * where @f$ f @f$ changes sign based on the region, and @f$ \Gamma @f$ is
+   * the interface.
+   *
+   * ## Variants
+   * This class provides two operator() overloads:
+   * 1. Unsigned distance (full domain)
+   * 2. Signed distance (with specified interior/interface regions)
+   *
+   * ## Usage Example
+   * ```cpp
+   * P1 fes(mesh);
+   * SignedPoisson signedDist;
+   * // Signed distance with regions:
+   * auto u = signedDist(interfaceAttr, interiorAttr, fes);
+   * ```
    */
   class SignedPoisson
   {
     public:
+      /**
+       * @brief Computes the unsigned Poisson-based distance approximation.
+       *
+       * Solves the Poisson equation over the entire domain with uniform
+       * forcing term.
+       *
+       * @tparam FES Finite element space type
+       * @param[in] fes Finite element space on which to solve
+       * @return Grid function containing the distance approximation
+       */
       template <class FES>
       auto operator()(const FES& fes) const
       {
@@ -41,6 +83,18 @@ namespace Rodin::Models::Distance
         return u.getSolution();
       }
 
+      /**
+       * @brief Computes the signed distance for specified interface and region.
+       *
+       * Convenience overload that accepts single attributes for interface
+       * and region.
+       *
+       * @tparam FES Finite element space type
+       * @param[in] interface Attribute marking the interface (zero level set)
+       * @param[in] region Attribute marking the interior region
+       * @param[in] fes Finite element space on which to solve
+       * @return Grid function containing the signed distance approximation
+       */
       template <class FES>
       auto operator()(
           Geometry::Attribute interface,
@@ -51,6 +105,18 @@ namespace Rodin::Models::Distance
             FlatSet<Geometry::Attribute>{interface}, FlatSet<Geometry::Attribute>{region}, fes);
       }
 
+      /**
+       * @brief Computes the signed distance for specified interface and region sets.
+       *
+       * Solves the Poisson equation with different forcing terms in the interior
+       * and exterior regions, creating a signed distance approximation.
+       *
+       * @tparam FES Finite element space type
+       * @param[in] interface Set of attributes marking the interface
+       * @param[in] region Set of attributes marking the interior region
+       * @param[in] fes Finite element space on which to solve
+       * @return Grid function containing the signed distance approximation
+       */
       template <class FES>
       auto operator()(
           const FlatSet<Geometry::Attribute>& interface,
