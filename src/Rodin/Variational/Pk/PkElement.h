@@ -360,6 +360,131 @@ namespace Rodin::Variational
       };
 
       /**
+       * @brief Builds the Lagrange nodes for the element geometry.
+       *
+       * Constructs the positions of DOF nodes based on the geometry type and
+       * polynomial degree. Uses uniform spacing for segments, barycentric
+       * coordinates for simplices, and tensor products for structured elements.
+       */
+      static
+      const std::vector<Math::SpatialPoint>&
+      getLagrangeNodes(Geometry::Polytope::Type g)
+      {
+        switch (g)
+        {
+          case Geometry::Polytope::Type::Point:
+          {
+            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> n;
+              n.push_back(Math::SpatialPoint{{0}});
+              return n;
+            }();
+            return s_nodes;
+          }
+
+          case Geometry::Polytope::Type::Segment:
+          {
+            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> n;
+              for (size_t i = 0; i <= K; ++i)
+              {
+                Real t = static_cast<Real>(i) / static_cast<Real>(K);
+                n.push_back(Math::SpatialPoint{{t}});
+              }
+              return n;
+            }();
+            return s_nodes;
+          }
+
+          case Geometry::Polytope::Type::Triangle:
+          {
+            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> n;
+              for (size_t j = 0; j <= K; ++j)
+              {
+                for (size_t i = 0; i <= K - j; ++i)
+                {
+                  Real s = static_cast<Real>(i) / static_cast<Real>(K);
+                  Real t = static_cast<Real>(j) / static_cast<Real>(K);
+                  n.push_back(Math::SpatialPoint{{s, t}});
+                }
+              }
+              return n;
+            }();
+            return s_nodes;
+          }
+
+          case Geometry::Polytope::Type::Quadrilateral:
+          {
+            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> n;
+              for (size_t j = 0; j <= K; ++j)
+              {
+                for (size_t i = 0; i <= K; ++i)
+                {
+                  Real s = static_cast<Real>(i) / static_cast<Real>(K);
+                  Real t = static_cast<Real>(j) / static_cast<Real>(K);
+                  n.push_back(Math::SpatialPoint{{s, t}});
+                }
+              }
+              return n;
+            }();
+            return s_nodes;
+          }
+
+          case Geometry::Polytope::Type::Tetrahedron:
+          {
+            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> n;
+              for (size_t k = 0; k <= K; ++k)
+              {
+                for (size_t j = 0; j <= K - k; ++j)
+                {
+                  for (size_t i = 0; i <= K - j - k; ++i)
+                  {
+                    Real r = static_cast<Real>(i) / static_cast<Real>(K);
+                    Real s = static_cast<Real>(j) / static_cast<Real>(K);
+                    Real t = static_cast<Real>(k) / static_cast<Real>(K);
+                    n.push_back(Math::SpatialPoint{{r, s, t}});
+                  }
+                }
+              }
+              return n;
+            }();
+            return s_nodes;
+          }
+
+          case Geometry::Polytope::Type::Wedge:
+          {
+            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> n;
+              // Tensor product of triangle (r,s) and segment (t)
+              for (size_t k = 0; k <= K; ++k)
+              {
+                for (size_t j = 0; j <= K; ++j)
+                {
+                  for (size_t i = 0; i <= K - j; ++i)
+                  {
+                    Real r = static_cast<Real>(i) / static_cast<Real>(K);
+                    Real s = static_cast<Real>(j) / static_cast<Real>(K);
+                    Real t = static_cast<Real>(k) / static_cast<Real>(K);
+                    n.push_back(Math::SpatialPoint{{r, s, t}});
+                  }
+                }
+              }
+              return n;
+            }();
+            return s_nodes;
+          }
+        }
+
+        // Should be unreachable if all enum values are handled
+        assert(false && "Unsupported Polytope type.");
+        static thread_local const std::vector<Math::SpatialPoint> s_empty;
+        return s_empty;
+      }
+
+      /**
        * @brief Default constructor. Creates a Pk element on a Point geometry.
        */
       PkElement()
@@ -375,9 +500,7 @@ namespace Rodin::Variational
        */
       PkElement(Geometry::Polytope::Type geometry)
         : Parent(geometry)
-      {
-        buildNodes();
-      }
+      {}
 
       /**
        * @brief Copy constructor.
@@ -385,7 +508,7 @@ namespace Rodin::Variational
        */
       constexpr
       PkElement(const PkElement& other)
-        : Parent(other), m_nodes(other.m_nodes)
+        : Parent(other)
       {}
 
       /**
@@ -394,7 +517,7 @@ namespace Rodin::Variational
        */
       constexpr
       PkElement(PkElement&& other)
-        : Parent(std::move(other)), m_nodes(std::move(other.m_nodes))
+        : Parent(std::move(other))
       {}
 
       /**
@@ -406,7 +529,6 @@ namespace Rodin::Variational
       PkElement& operator=(const PkElement& other)
       {
         Parent::operator=(other);
-        m_nodes = other.m_nodes;
         return *this;
       }
 
@@ -419,7 +541,6 @@ namespace Rodin::Variational
       PkElement& operator=(PkElement&& other)
       {
         Parent::operator=(std::move(other));
-        m_nodes = std::move(other.m_nodes);
         return *this;
       }
 
@@ -436,7 +557,25 @@ namespace Rodin::Variational
        * @return Number of degrees of freedom
        */
       constexpr
-      size_t getCount() const;
+      size_t getCount() const
+      {
+        switch (this->getGeometry())
+        {
+          case Geometry::Polytope::Type::Point:
+            return 1;
+          case Geometry::Polytope::Type::Segment:
+            return K + 1;
+          case Geometry::Polytope::Type::Triangle:
+            return (K + 1) * (K + 2) / 2;
+          case Geometry::Polytope::Type::Quadrilateral:
+            return (K + 1) * (K + 1);
+          case Geometry::Polytope::Type::Tetrahedron:
+            return (K + 1) * (K + 2) * (K + 3) / 6;
+          case Geometry::Polytope::Type::Wedge:
+            return (K + 1) * (K + 1) * (K + 2) / 2;
+        }
+        return 0;
+      }
 
       /**
        * @brief Gets the spatial coordinates of the i-th Lagrange node.
@@ -448,10 +587,7 @@ namespace Rodin::Variational
        * degree and geometry type.
        */
       constexpr
-      const Math::SpatialPoint& getNode(size_t i) const
-      {
-        return m_nodes[i];
-      }
+      const Math::SpatialPoint& getNode(size_t i) const;
 
       /**
        * @brief Gets the linear form (evaluation functional) for the i-th DOF.
@@ -470,13 +606,33 @@ namespace Rodin::Variational
       const BasisFunction& getBasis(size_t i) const;
 
       /**
-       * @brief Gets the polynomial order of the element.
+       * @brief Gets the total maximum polynomial order of the element.
        * @return Polynomial degree K
        */
       constexpr
       size_t getOrder() const
       {
-        return K;
+        using G = Geometry::Polytope::Type;
+        switch (this->getGeometry())
+        {
+          case G::Point:
+            // No actual polynomial variation
+            return 0;
+
+          case G::Segment:
+          case G::Triangle:
+          case G::Tetrahedron:
+            // Total-degree Pk on simplices
+            return K;
+
+          case G::Quadrilateral:
+          case G::Wedge:
+            // Tensor-product type: max total degree is 2K
+            return 2 * K;
+        }
+
+        assert(false && "Unsupported geometry.");
+        return 0;
       }
 
       /**
@@ -489,18 +645,6 @@ namespace Rodin::Variational
       {
         ar & boost::serialization::base_object<Parent>(*this);
       }
-
-    private:
-      /**
-       * @brief Builds the Lagrange nodes for the element geometry.
-       *
-       * Constructs the positions of DOF nodes based on the geometry type and
-       * polynomial degree. Uses uniform spacing for segments, barycentric
-       * coordinates for simplices, and tensor products for structured elements.
-       */
-      void buildNodes();
-
-      std::vector<Math::SpatialPoint> m_nodes;  ///< Lagrange node positions
   };
 
   /**

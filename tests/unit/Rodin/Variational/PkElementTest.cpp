@@ -34,7 +34,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 1);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getOrder(), 0);
 
     // Check basis function value
     EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{0}}), 1, RODIN_FUZZY_CONSTANT);
@@ -141,7 +141,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 9);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getOrder(), 4);
 
     // Test tensor product property at corner
     {
@@ -285,7 +285,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 18);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getOrder(), 4);
   }
 
   // ========================================================================

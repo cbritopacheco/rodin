@@ -16,123 +16,6 @@ namespace Rodin::Variational
   namespace Internal
   {
     /**
-     * @brief Computes the number of DOFs for a Pk element on a given geometry.
-     */
-    constexpr size_t getPkDofCount(size_t k, Geometry::Polytope::Type g)
-    {
-      switch (g)
-      {
-        case Geometry::Polytope::Type::Point:
-          return 1;
-        case Geometry::Polytope::Type::Segment:
-          return k + 1;
-        case Geometry::Polytope::Type::Triangle:
-          return (k + 1) * (k + 2) / 2;
-        case Geometry::Polytope::Type::Quadrilateral:
-          return (k + 1) * (k + 1);
-        case Geometry::Polytope::Type::Tetrahedron:
-          return (k + 1) * (k + 2) * (k + 3) / 6;
-        case Geometry::Polytope::Type::Wedge:
-          return (k + 1) * (k + 1) * (k + 2) / 2;
-      }
-      return 0;
-    }
-
-    /**
-     * @brief Generates Lagrange nodes for degree k on reference element.
-     */
-    template <size_t K>
-    constexpr void generateLagrangeNodes(
-        std::vector<Math::SpatialPoint>& nodes,
-        Geometry::Polytope::Type g)
-    {
-      nodes.clear();
-      
-      switch (g)
-      {
-        case Geometry::Polytope::Type::Point:
-        {
-          nodes.push_back(Math::SpatialPoint{{0}});
-          break;
-        }
-        case Geometry::Polytope::Type::Segment:
-        {
-          // Uniformly spaced nodes on [0, 1]
-          for (size_t i = 0; i <= K; ++i)
-          {
-            Real t = static_cast<Real>(i) / static_cast<Real>(K);
-            nodes.push_back(Math::SpatialPoint{{t}});
-          }
-          break;
-        }
-        case Geometry::Polytope::Type::Triangle:
-        {
-          // Nodes on reference triangle vertices (0,0), (1,0), (0,1)
-          for (size_t j = 0; j <= K; ++j)
-          {
-            for (size_t i = 0; i <= K - j; ++i)
-            {
-              Real s = static_cast<Real>(i) / static_cast<Real>(K);
-              Real t = static_cast<Real>(j) / static_cast<Real>(K);
-              nodes.push_back(Math::SpatialPoint{{s, t}});
-            }
-          }
-          break;
-        }
-        case Geometry::Polytope::Type::Quadrilateral:
-        {
-          // Tensor product nodes on [0,1]^2
-          for (size_t j = 0; j <= K; ++j)
-          {
-            for (size_t i = 0; i <= K; ++i)
-            {
-              Real s = static_cast<Real>(i) / static_cast<Real>(K);
-              Real t = static_cast<Real>(j) / static_cast<Real>(K);
-              nodes.push_back(Math::SpatialPoint{{s, t}});
-            }
-          }
-          break;
-        }
-        case Geometry::Polytope::Type::Tetrahedron:
-        {
-          // Nodes on reference tetrahedron vertices (0,0,0), (1,0,0), (0,1,0), (0,0,1)
-          for (size_t k = 0; k <= K; ++k)
-          {
-            for (size_t j = 0; j <= K - k; ++j)
-            {
-              for (size_t i = 0; i <= K - j - k; ++i)
-              {
-                Real r = static_cast<Real>(i) / static_cast<Real>(K);
-                Real s = static_cast<Real>(j) / static_cast<Real>(K);
-                Real t = static_cast<Real>(k) / static_cast<Real>(K);
-                nodes.push_back(Math::SpatialPoint{{r, s, t}});
-              }
-            }
-          }
-          break;
-        }
-        case Geometry::Polytope::Type::Wedge:
-        {
-          // Tensor product of triangle and segment
-          for (size_t k = 0; k <= K; ++k)
-          {
-            for (size_t j = 0; j <= K; ++j)
-            {
-              for (size_t i = 0; i <= K - j; ++i)
-              {
-                Real r = static_cast<Real>(i) / static_cast<Real>(K);
-                Real s = static_cast<Real>(j) / static_cast<Real>(K);
-                Real t = static_cast<Real>(k) / static_cast<Real>(K);
-                nodes.push_back(Math::SpatialPoint{{r, s, t}});
-              }
-            }
-          }
-          break;
-        }
-      }
-    }
-
-    /**
      * @brief Evaluates Lagrange basis function for 1D.
      */
     template <size_t K, class Scalar>
@@ -140,7 +23,7 @@ namespace Rodin::Variational
     {
       Scalar result = 1;
       Real xi = static_cast<Real>(i) / static_cast<Real>(K);
-      
+
       for (size_t j = 0; j <= K; ++j)
       {
         if (j != i)
@@ -160,7 +43,7 @@ namespace Rodin::Variational
     {
       Real xi = static_cast<Real>(i) / static_cast<Real>(K);
       Scalar result = 0;
-      
+
       // Derivative using product rule
       for (size_t m = 0; m <= K; ++m)
       {
@@ -168,7 +51,7 @@ namespace Rodin::Variational
         {
           Scalar term = 1;
           Real xm = static_cast<Real>(m) / static_cast<Real>(K);
-          
+
           for (size_t j = 0; j <= K; ++j)
           {
             if (j != i && j != m)
@@ -201,12 +84,12 @@ namespace Rodin::Variational
       lambda[0] = 1.0 - r.x() - r.y();
       lambda[1] = r.x();
       lambda[2] = r.y();
-      
+
       // Node (i,j) corresponds to Cartesian (i/K, j/K)
       // which has barycentric (lambda0=(K-i-j)/K, lambda1=i/K, lambda2=j/K)
       // So basis (i,j) should be L_i^K(lambda1) * L_j^K(lambda2) * L_(K-i-j)^K(lambda0)
       size_t indices[3] = {K - i - j, i, j};  // Reordered to match lambda[0], lambda[1], lambda[2]
-      
+
       // Compute product of generalized Lagrange polynomials
       Scalar result = 1;
       for (size_t dim = 0; dim < 3; ++dim)
@@ -214,7 +97,7 @@ namespace Rodin::Variational
         size_t n = indices[dim];
         if (n == 0)
           continue;
-        
+
         Scalar L_n = 1;
         for (size_t m = 0; m < n; ++m)
         {
@@ -223,7 +106,7 @@ namespace Rodin::Variational
         }
         result *= L_n;
       }
-      
+
       return result;
     }
 
@@ -239,30 +122,37 @@ namespace Rodin::Variational
       lambda[0] = 1.0 - r.x() - r.y();
       lambda[1] = r.x();
       lambda[2] = r.y();
-      
+
       // Derivatives of barycentric coordinates w.r.t. x and y
       // dλ0/dx = -1, dλ0/dy = -1
-      // dλ1/dx = 1,  dλ1/dy = 0
-      // dλ2/dx = 0,  dλ2/dy = 1
+      // dλ1/dx =  1, dλ1/dy =  0
+      // dλ2/dx =  0, dλ2/dy =  1
       Real dlambda[3][2] = {{-1, -1}, {1, 0}, {0, 1}};
-      
-      size_t indices[3] = {K - i - j, i, j};  // Reordered to match lambda[0], lambda[1], lambda[2]
-      
-      // Use product rule: d/dx[f*g*h] = f'*g*h + f*g'*h + f*g*h'
+
+      size_t indices[3] = {K - i - j, i, j}; // for λ0, λ1, λ2
+
       Scalar result = 0;
-      
+
+      // Derivative via chain rule over λ_d
       for (size_t d = 0; d < 3; ++d)
       {
-        // Compute derivative contribution from dimension d
         Scalar term = dlambda[d][deriv_dim];
-        
+
         for (size_t dim = 0; dim < 3; ++dim)
         {
-          size_t n = indices[dim];
-          
-          if (dim == d && n > 0)
+          const size_t n = indices[dim];
+
+          if (dim == d)
           {
-            // Derivative of L_n^K(λ_d)
+            // Differentiated factor L_n^K(λ_d)
+            if (n == 0)
+            {
+              // L_0 ≡ 1 → derivative 0 → whole contribution for this d is 0
+              term = Scalar(0);
+              break; // no need to consider other dims
+            }
+
+            // d/dλ L_n^K(λ_d)
             Scalar dL_n = 0;
             for (size_t p = 0; p < n; ++p)
             {
@@ -282,10 +172,10 @@ namespace Rodin::Variational
           }
           else
           {
-            // Regular L_n^K(λ_dim)
+            // Undifferentiated factor L_n^K(λ_dim)
             if (n == 0)
-              continue;
-            
+              continue; // factor 1
+
             Scalar L_n = 1;
             for (size_t m = 0; m < n; ++m)
             {
@@ -295,10 +185,10 @@ namespace Rodin::Variational
             term *= L_n;
           }
         }
-        
+
         result += term;
       }
-      
+
       return result;
     }
 
@@ -315,19 +205,19 @@ namespace Rodin::Variational
       lambda[1] = r.x();
       lambda[2] = r.y();
       lambda[3] = r.z();
-      
+
       // Node (i,j,k) corresponds to Cartesian (i/K, j/K, k/K)
       // which has barycentric (lambda0=(K-i-j-k)/K, lambda1=i/K, lambda2=j/K, lambda3=k/K)
       // So basis (i,j,k) should be L_i^K(lambda1) * L_j^K(lambda2) * L_k^K(lambda3) * L_(K-i-j-k)^K(lambda0)
       size_t indices[4] = {K - i - j - k, i, j, k};  // Reordered to match lambda[0], lambda[1], lambda[2], lambda[3]
-      
+
       Scalar result = 1;
       for (size_t dim = 0; dim < 4; ++dim)
       {
         size_t n = indices[dim];
         if (n == 0)
           continue;
-        
+
         Scalar L_n = 1;
         for (size_t m = 0; m < n; ++m)
         {
@@ -336,7 +226,7 @@ namespace Rodin::Variational
         }
         result *= L_n;
       }
-      
+
       return result;
     }
 
@@ -349,22 +239,22 @@ namespace Rodin::Variational
     {
       // Wedge is a tensor product: triangle (x,y) × segment (z)
       // For indices (i,j) on triangle with i+j≤K, and k on segment
-      
+
       // Triangle part using barycentric coordinates
       Real lambda[3];
       lambda[0] = 1.0 - r.x() - r.y();
       lambda[1] = r.x();
       lambda[2] = r.y();
-      
+
       size_t tri_indices[3] = {K - i - j, i, j};  // Reordered to match lambda[0], lambda[1], lambda[2]
-      
+
       Scalar tri_result = 1;
       for (size_t dim = 0; dim < 3; ++dim)
       {
         size_t n = tri_indices[dim];
         if (n == 0)
           continue;
-        
+
         Scalar L_n = 1;
         for (size_t m = 0; m < n; ++m)
         {
@@ -373,10 +263,10 @@ namespace Rodin::Variational
         }
         tri_result *= L_n;
       }
-      
+
       // Segment part (1D Lagrange)
       Scalar seg_result = evaluateLagrange1D<K, Scalar>(k, r.z());
-      
+
       return tri_result * seg_result;
     }
 
@@ -393,28 +283,36 @@ namespace Rodin::Variational
       lambda[1] = r.x();
       lambda[2] = r.y();
       lambda[3] = r.z();
-      
-      // Derivatives: dλ0/dx = -1, dλ0/dy = -1, dλ0/dz = -1
-      //              dλ1/dx = 1,  dλ1/dy = 0,  dλ1/dz = 0
-      //              dλ2/dx = 0,  dλ2/dy = 1,  dλ2/dz = 0
-      //              dλ3/dx = 0,  dλ3/dy = 0,  dλ3/dz = 1
+
+      // Derivatives:
+      // dλ0/dx = -1, dλ0/dy = -1, dλ0/dz = -1
+      // dλ1/dx =  1, dλ1/dy =  0, dλ1/dz =  0
+      // dλ2/dx =  0, dλ2/dy =  1, dλ2/dz =  0
+      // dλ3/dx =  0, dλ3/dy =  0, dλ3/dz =  1
       Real dlambda[4][3] = {{-1, -1, -1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-      
-      size_t indices[4] = {K - i - j - k, i, j, k};  // Reordered to match lambda[0], lambda[1], lambda[2], lambda[3]
-      
+
+      size_t indices[4] = {K - i - j - k, i, j, k}; // for λ0, λ1, λ2, λ3
+
       Scalar result = 0;
-      
+
       for (size_t d = 0; d < 4; ++d)
       {
         Scalar term = dlambda[d][deriv_dim];
-        
+
         for (size_t dim = 0; dim < 4; ++dim)
         {
-          size_t n = indices[dim];
-          
-          if (dim == d && n > 0)
+          const size_t n = indices[dim];
+
+          if (dim == d)
           {
-            // Derivative of L_n^K
+            // Differentiated factor L_n^K(λ_d)
+            if (n == 0)
+            {
+              // L_0 ≡ 1 → derivative 0 → whole contribution for this d is 0
+              term = Scalar(0);
+              break;
+            }
+
             Scalar dL_n = 0;
             for (size_t p = 0; p < n; ++p)
             {
@@ -434,9 +332,10 @@ namespace Rodin::Variational
           }
           else
           {
+            // Undifferentiated factor L_n^K(λ_dim)
             if (n == 0)
-              continue;
-            
+              continue; // factor 1
+
             Scalar L_n = 1;
             for (size_t m = 0; m < n; ++m)
             {
@@ -446,10 +345,10 @@ namespace Rodin::Variational
             term *= L_n;
           }
         }
-        
+
         result += term;
       }
-      
+
       return result;
     }
 
@@ -479,23 +378,16 @@ namespace Rodin::Variational
 
   template <size_t K, class Scalar>
   constexpr
-  size_t PkElement<K, Scalar>::getCount() const
+  const Math::SpatialPoint& PkElement<K, Scalar>::getNode(size_t i) const
   {
-    return Internal::getPkDofCount(K, this->getGeometry());
+    return getLagrangeNodes(this->getGeometry())[i];
   }
 
   template <size_t K, class Scalar>
-  void PkElement<K, Scalar>::buildNodes()
-  {
-    Internal::generateLagrangeNodes<K>(m_nodes, this->getGeometry());
-  }
-
-  template <size_t K, class Scalar>
-  const typename PkElement<K, Scalar>::LinearForm&
-  PkElement<K, Scalar>::getLinearForm(size_t i) const
+  const typename PkElement<K, Scalar>::LinearForm& PkElement<K, Scalar>::getLinearForm(size_t i) const
   {
     const Geometry::Polytope::Type g = this->getGeometry();
-    
+
     // Use switch to create geometry-specific thread_local storage
     switch (g)
     {
@@ -572,7 +464,7 @@ namespace Rodin::Variational
         return s_lfs[i];
       }
     }
-    
+
     // Fallback (should never happen)
     static thread_local LinearForm s_null(0, g);
     assert(false);
@@ -580,11 +472,10 @@ namespace Rodin::Variational
   }
 
   template <size_t K, class Scalar>
-  const typename PkElement<K, Scalar>::BasisFunction&
-  PkElement<K, Scalar>::getBasis(size_t i) const
+  const typename PkElement<K, Scalar>::BasisFunction& PkElement<K, Scalar>::getBasis(size_t i) const
   {
     const Geometry::Polytope::Type g = this->getGeometry();
-    
+
     // Use switch to create geometry-specific thread_local storage
     switch (g)
     {
@@ -661,7 +552,7 @@ namespace Rodin::Variational
         return s_bs[i];
       }
     }
-    
+
     // Fallback (should never happen)
     static thread_local BasisFunction s_null(0, g);
     assert(false);
@@ -705,12 +596,12 @@ namespace Rodin::Variational
         // Tensor product of 1D Lagrange basis
         size_t j_idx = m_local / (K + 1);
         size_t i_idx = m_local % (K + 1);
-        
+
         // Initialize to ensure no uninitialized warnings
         const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
         if (dim < 2)
           return Math::nan<Scalar>();
-        
+
         return Internal::evaluateLagrange1D<K, Scalar>(i_idx, r.x()) *
                Internal::evaluateLagrange1D<K, Scalar>(j_idx, r.y());
       }
@@ -756,7 +647,7 @@ namespace Rodin::Variational
         return Math::nan<Scalar>();
       }
     }
-    
+
     return Math::nan<Scalar>();
   }
 
@@ -805,7 +696,7 @@ namespace Rodin::Variational
           // Tensor product derivative
           size_t j_idx = m_local / (K + 1);
           size_t i_idx = m_local % (K + 1);
-          
+
           if (m_i == 0) // d/dx
           {
             return Internal::evaluateLagrange1DDerivative<K, Scalar>(i_idx, r.x()) *
