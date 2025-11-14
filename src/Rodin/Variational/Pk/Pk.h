@@ -266,9 +266,6 @@ namespace Rodin::Variational
       size_t m_totalDOFs;
   };
 
-  template <size_t K, class Context>
-  Pk(const Geometry::Mesh<Context>&) -> Pk<K, Real, Geometry::Mesh<Context>>;
-
   /// Alias for a scalar valued Pk finite element space
   template <size_t K, class Mesh>
   using RealPk = Pk<K, Real, Mesh>;
@@ -414,10 +411,6 @@ namespace Rodin::Variational
       std::vector<std::vector<IndexArray>> m_dofs;
       size_t m_totalDOFs;
   };
-
-  template <size_t K, class Context>
-  Pk(const Geometry::Mesh<Context>&, size_t)
-    -> Pk<K, Math::Vector<Real>, Geometry::Mesh<Context>>;
 
   /// Alias for a vector valued Pk finite element space
   template <size_t K, class Mesh>
