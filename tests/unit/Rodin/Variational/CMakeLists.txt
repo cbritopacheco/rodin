@@ -1,10 +1,11 @@
+rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
+
 add_executable(RodinVariationalP1ElementTest P1ElementTest.cpp)
 target_link_libraries(RodinVariationalP1ElementTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-target_compile_options(RodinVariationalP1ElementTest PRIVATE -Wno-error=use-after-free)
 gtest_discover_tests(RodinVariationalP1ElementTest)
 
 add_executable(RodinVariationalP0ElementTest P0ElementTest.cpp)
@@ -13,7 +14,6 @@ target_link_libraries(RodinVariationalP0ElementTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-target_compile_options(RodinVariationalP0ElementTest PRIVATE -Wno-error=use-after-free)
 gtest_discover_tests(RodinVariationalP0ElementTest)
 
 add_executable(RodinVariationalPkElementTest PkElementTest.cpp)
@@ -22,7 +22,6 @@ target_link_libraries(RodinVariationalPkElementTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-target_compile_options(RodinVariationalPkElementTest PRIVATE -Wno-error=use-after-free)
 gtest_discover_tests(RodinVariationalPkElementTest)
 
 add_executable(RodinVariationalP1Test P1Test.cpp)
