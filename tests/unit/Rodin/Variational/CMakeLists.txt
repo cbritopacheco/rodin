@@ -24,6 +24,15 @@ target_link_libraries(RodinVariationalPkElementTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalPkElementTest)
 
+add_executable(RodinVariationalPkSpaceTest PkSpaceTest.cpp)
+target_link_libraries(RodinVariationalPkSpaceTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational
+  Rodin::Geometry)
+gtest_discover_tests(RodinVariationalPkSpaceTest)
+
 add_executable(RodinVariationalP1Test P1Test.cpp)
 target_link_libraries(RodinVariationalP1Test
   PUBLIC
