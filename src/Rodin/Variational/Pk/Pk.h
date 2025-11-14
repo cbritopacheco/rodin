@@ -259,7 +259,7 @@ namespace Rodin::Variational
       }
 
     private:
-      void buildDOFMap();
+      void build();
 
       std::reference_wrapper<const MeshType> m_mesh;
       std::vector<std::vector<IndexArray>> m_dofs;
@@ -404,7 +404,7 @@ namespace Rodin::Variational
       }
 
     private:
-      void buildDOFMap();
+      void build();
 
       std::reference_wrapper<const Geometry::Mesh<ContextType>> m_mesh;
       size_t m_vdim;
@@ -416,5 +416,7 @@ namespace Rodin::Variational
   template <size_t K, class Mesh>
   using VectorPk = Pk<K, Math::Vector<Real>, Mesh>;
 }
+
+#include "Pk.hpp"
 
 #endif
