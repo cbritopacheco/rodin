@@ -328,12 +328,12 @@ namespace Rodin::Variational
            * @return Component value at the barycenter
            */
           template <class T>
-          constexpr
-          decltype(auto) operator()(const T& v) const
+          ScalarType operator()(const T& v) const
           {
-            // Single scalar P0 DOF at barycenter, shared by all components
-            const auto& x = P0Element<ScalarType>(m_g).getNode(0);
-            return v(x).coeff(m_local % m_vdim);
+            static thread_local RangeType s_out;
+            const auto& vtx = P0Element<ScalarType>(m_g).getNode(m_local / m_vdim);
+            s_out = v(vtx);
+            return s_out.coeff(m_local % m_vdim);
           }
 
         private:
@@ -540,10 +540,9 @@ namespace Rodin::Variational
       }
 
       constexpr
-      const Math::SpatialVector<Real>& getNode(size_t) const
+      const Math::SpatialVector<Real>& getNode(size_t local) const
       {
-        // All vector DOFs are located at the same barycenter
-        return P0Element<ScalarType>(this->getGeometry()).getNode(0);
+        return P1Element<ScalarType>(this->getGeometry()).getNode(local / m_vdim);
       }
 
       constexpr
