@@ -219,4 +219,103 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(elem.getCount(), 28);  // P6 triangle has 28 DOFs
     }
   }
+
+  // Test that lower-dimensional entities have proper DOFs for K>=2
+  TEST(Rodin_Variational_PkSpace, LowerDimensionalDOFs_P2_Triangle)
+  {
+    // Create a simple triangle mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {2, 2});
+    
+    // Compute connectivity for edges
+    mesh.getConnectivity().compute(1, 2);
+    
+    // Create P2 space
+    Pk<2, Real> Vh(mesh);
+    
+    // Check that vertices (dimension 0) have DOFs
+    const size_t numVertices = mesh.getConnectivity().getCount(0);
+    EXPECT_GT(numVertices, 0);
+    for (size_t i = 0; i < numVertices; ++i)
+    {
+      const auto& vertexDOFs = Vh.getDOFs(0, i);
+      EXPECT_EQ(vertexDOFs.size(), 1);  // Each vertex has 1 DOF for P2
+      EXPECT_GE(vertexDOFs(0), 0);
+      EXPECT_LT(static_cast<size_t>(vertexDOFs(0)), Vh.getSize());
+    }
+    
+    // Check that edges (dimension 1) have DOFs
+    const size_t numEdges = mesh.getConnectivity().getCount(1);
+    EXPECT_GT(numEdges, 0);
+    for (size_t i = 0; i < numEdges; ++i)
+    {
+      const auto& edgeDOFs = Vh.getDOFs(1, i);
+      // For P2, each edge should have 2 vertex DOFs + 1 interior DOF = 3 DOFs
+      EXPECT_EQ(edgeDOFs.size(), 3);
+      for (Index j = 0; j < edgeDOFs.size(); ++j)
+      {
+        EXPECT_GE(edgeDOFs(j), 0);
+        EXPECT_LT(static_cast<size_t>(edgeDOFs(j)), Vh.getSize());
+      }
+    }
+    
+    // Check that faces (dimension 2) have DOFs
+    const size_t numFaces = mesh.getConnectivity().getCount(2);
+    EXPECT_GT(numFaces, 0);
+    for (size_t i = 0; i < numFaces; ++i)
+    {
+      const auto& faceDOFs = Vh.getDOFs(2, i);
+      // For P2 triangles, should have 3 vertex + 3 edge interior = 6 DOFs total
+      EXPECT_EQ(faceDOFs.size(), 6);
+      for (Index j = 0; j < faceDOFs.size(); ++j)
+      {
+        EXPECT_GE(faceDOFs(j), 0);
+        EXPECT_LT(static_cast<size_t>(faceDOFs(j)), Vh.getSize());
+      }
+    }
+  }
+
+  // Test vector space lower-dimensional DOFs
+  TEST(Rodin_Variational_PkSpace, LowerDimensionalDOFs_VectorP2_Triangle)
+  {
+    // Create a simple triangle mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {2, 2});
+    
+    // Compute connectivity for edges
+    mesh.getConnectivity().compute(1, 2);
+    
+    // Create vector P2 space
+    const size_t vdim = 2;
+    Pk<2, Math::Vector<Real>> Vh(mesh, vdim);
+    
+    // Check that vertices (dimension 0) have DOFs
+    const size_t numVertices = mesh.getConnectivity().getCount(0);
+    EXPECT_GT(numVertices, 0);
+    for (size_t i = 0; i < numVertices; ++i)
+    {
+      const auto& vertexDOFs = Vh.getDOFs(0, i);
+      EXPECT_EQ(vertexDOFs.size(), vdim);  // Each vertex has vdim DOFs
+      for (size_t c = 0; c < vdim; ++c)
+      {
+        EXPECT_GE(vertexDOFs(c), 0);
+        EXPECT_LT(static_cast<size_t>(vertexDOFs(c)), Vh.getSize());
+      }
+    }
+    
+    // Check that edges (dimension 1) have DOFs
+    const size_t numEdges = mesh.getConnectivity().getCount(1);
+    EXPECT_GT(numEdges, 0);
+    for (size_t i = 0; i < numEdges; ++i)
+    {
+      const auto& edgeDOFs = Vh.getDOFs(1, i);
+      // For vector P2, each edge should have (2 vertices + 1 interior) * vdim DOFs
+      EXPECT_EQ(edgeDOFs.size(), 3 * vdim);
+      for (Index j = 0; j < edgeDOFs.size(); ++j)
+      {
+        EXPECT_GE(edgeDOFs(j), 0);
+        EXPECT_LT(static_cast<size_t>(edgeDOFs(j)), Vh.getSize());
+      }
+    }
+  }
 }
