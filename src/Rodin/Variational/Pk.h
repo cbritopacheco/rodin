@@ -58,6 +58,7 @@
 #ifndef RODIN_VARIATIONAL_PK_H
 #define RODIN_VARIATIONAL_PK_H
 
+#include "Pk/Pk.h"
 #include "Pk/PkElement.h"
 
 #endif

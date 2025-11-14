@@ -27,6 +27,20 @@ namespace Rodin::Variational
   class PkElement;
 
   /**
+   * @brief Degree k Lagrange finite element space
+   * @tparam K Polynomial degree
+   * @tparam Range Range value type
+   * @tparam Mesh Mesh type
+   *
+   * @note For an overview of all the possible specializations of the
+   * Pk class, please see @ref PkSpecializations.
+   *
+   * @see PkSpecializations
+   */
+  template <size_t K, class Range, class Mesh>
+  class Pk;
+
+  /**
    * @brief Convenience alias for real-valued Pk element
    */
   template <size_t K>
