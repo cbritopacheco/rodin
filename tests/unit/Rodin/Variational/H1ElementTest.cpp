@@ -2099,7 +2099,7 @@ namespace Rodin::Tests::Unit
   {
     // Comprehensive tests for H1Element<0> across all geometries
     // K=0 is piecewise constant element
-    
+
     for (auto geom : {Polytope::Type::Point, Polytope::Type::Segment,
                       Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
                       Polytope::Type::Tetrahedron, Polytope::Type::Wedge})
@@ -2140,7 +2140,7 @@ namespace Rodin::Tests::Unit
   {
     // Comprehensive tests for H1Element<1> across all geometries
     // K=1 is piecewise linear element
-    
+
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
                       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
                       Polytope::Type::Wedge})
@@ -2171,8 +2171,23 @@ namespace Rodin::Tests::Unit
       }
       EXPECT_EQ(pk.getCount(), expected_dofs);
 
-      // Check order
-      EXPECT_EQ(pk.getOrder(), 1);
+      // Check order (total polynomial degree)
+      size_t expected_order = 0;
+      switch (geom)
+      {
+        case Polytope::Type::Segment:
+        case Polytope::Type::Triangle:
+        case Polytope::Type::Tetrahedron:
+          expected_order = 1;
+          break;
+        case Polytope::Type::Quadrilateral:
+        case Polytope::Type::Wedge:
+          expected_order = 2; // tensor-product degree with K=1
+          break;
+        default:
+          continue;
+      }
+      EXPECT_EQ(pk.getOrder(), expected_order);
 
       // Test partition of unity
       Math::Vector<Real> p;
@@ -2377,7 +2392,7 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_H1Element_Comprehensive, VectorH1Element_AllVectorDimensions)
   {
     // Test vector H1Element with vdim=1,2,3 for various K values
-    
+
     // K=0, vdim=1,2,3 on Segment
     {
       for (size_t vdim : {1, 2, 3})
@@ -2419,7 +2434,7 @@ namespace Rodin::Tests::Unit
   {
     // Test Lagrange property for all K values on Segment
     // phi_i(node_j) = delta_ij
-    
+
     for (size_t K : {0, 1, 2, 3, 4, 5, 6})
     {
       switch (K)
@@ -2535,7 +2550,7 @@ namespace Rodin::Tests::Unit
           result += (k + 1.0) * std::pow(x.x(), k);
         return result;
       };
-      
+
       switch (K)
       {
         case 0:
@@ -2643,7 +2658,7 @@ namespace Rodin::Tests::Unit
             v(i) = (i + 1) * poly_val;
           return v;
         };
-        
+
         switch (K)
         {
           case 0:
@@ -2713,7 +2728,7 @@ namespace Rodin::Tests::Unit
     for (size_t K : {1, 2, 3, 4, 5, 6})
     {
       Math::Vector<Real> p{{0.5}};
-      
+
       switch (K)
       {
         case 1:
@@ -2724,7 +2739,7 @@ namespace Rodin::Tests::Unit
             auto grad_func = elem.getBasis(i).getGradient();
             const auto& grad_val = grad_func(p);
             EXPECT_EQ(grad_val.size(), 1);
-            
+
             // Check consistency with derivative
             auto deriv = elem.getBasis(i).getDerivative<1>(0);
             EXPECT_NEAR(grad_val(0), deriv(p), RODIN_FUZZY_CONSTANT);
@@ -2799,16 +2814,16 @@ namespace Rodin::Tests::Unit
   {
     // Test that sum of gradients equals zero (partition of unity)
     RealH1Element<2> elem(Polytope::Type::Triangle);
-    
+
     Math::Vector<Real> p{{0.3, 0.4}};
     Math::SpatialVector<Real> grad_sum = Math::SpatialVector<Real>::Zero(2);
-    
+
     for (size_t i = 0; i < elem.getCount(); i++)
     {
       auto grad_func = elem.getBasis(i).getGradient();
       grad_sum += grad_func(p);
     }
-    
+
     EXPECT_NEAR(grad_sum(0), 0.0, RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(grad_sum(1), 0.0, RODIN_FUZZY_CONSTANT);
   }
@@ -2825,7 +2840,7 @@ namespace Rodin::Tests::Unit
       for (size_t vdim : {2, 3})
       {
         Math::Vector<Real> p{{0.5}};
-        
+
         switch (K)
         {
           case 0:
@@ -2885,17 +2900,17 @@ namespace Rodin::Tests::Unit
   {
     // Test 2D Jacobian for K=2 on triangle
     H1Element<2, Math::Vector<Real>> elem(Polytope::Type::Triangle, 2);
-    
+
     Math::Vector<Real> p{{0.3, 0.4}};
-    
+
     for (size_t local = 0; local < elem.getCount(); local++)
     {
       auto jac_func = elem.getBasis(local).getJacobian();
       const auto& jac = jac_func(p);
-      
+
       EXPECT_EQ(jac.rows(), 2);
       EXPECT_EQ(jac.cols(), 2);
-      
+
       // Verify Jacobian entries
       size_t comp = local % 2;
       for (size_t i = 0; i < 2; i++)
@@ -2917,7 +2932,7 @@ namespace Rodin::Tests::Unit
   {
     // Test that Pk element exactly interpolates polynomials of degree K
     RandomFloat gen(0.0, 1.0);
-    
+
     for (size_t K : {0, 1, 2, 3, 4, 5, 6})
     {
       // Polynomial of degree K
@@ -2927,7 +2942,7 @@ namespace Rodin::Tests::Unit
           result += (k + 0.5) * std::pow(x.x(), k);
         return result;
       };
-      
+
       switch (K)
       {
         case 0:
@@ -2936,7 +2951,7 @@ namespace Rodin::Tests::Unit
           std::vector<Real> dofs(elem.getCount());
           for (size_t i = 0; i < elem.getCount(); i++)
             dofs[i] = elem.getLinearForm(i)(f);
-          
+
           for (size_t test = 0; test < 5; test++)
           {
             Math::Vector<Real> p{{gen()}};
@@ -2953,7 +2968,7 @@ namespace Rodin::Tests::Unit
           std::vector<Real> dofs(elem.getCount());
           for (size_t i = 0; i < elem.getCount(); i++)
             dofs[i] = elem.getLinearForm(i)(f);
-          
+
           for (size_t test = 0; test < 5; test++)
           {
             Math::Vector<Real> p{{gen()}};
@@ -2970,7 +2985,7 @@ namespace Rodin::Tests::Unit
           std::vector<Real> dofs(elem.getCount());
           for (size_t i = 0; i < elem.getCount(); i++)
             dofs[i] = elem.getLinearForm(i)(f);
-          
+
           for (size_t test = 0; test < 5; test++)
           {
             Math::Vector<Real> p{{gen()}};
@@ -2987,7 +3002,7 @@ namespace Rodin::Tests::Unit
           std::vector<Real> dofs(elem.getCount());
           for (size_t i = 0; i < elem.getCount(); i++)
             dofs[i] = elem.getLinearForm(i)(f);
-          
+
           for (size_t test = 0; test < 5; test++)
           {
             Math::Vector<Real> p{{gen()}};
@@ -3004,7 +3019,7 @@ namespace Rodin::Tests::Unit
           std::vector<Real> dofs(elem.getCount());
           for (size_t i = 0; i < elem.getCount(); i++)
             dofs[i] = elem.getLinearForm(i)(f);
-          
+
           for (size_t test = 0; test < 5; test++)
           {
             Math::Vector<Real> p{{gen()}};
@@ -3021,7 +3036,7 @@ namespace Rodin::Tests::Unit
           std::vector<Real> dofs(elem.getCount());
           for (size_t i = 0; i < elem.getCount(); i++)
             dofs[i] = elem.getLinearForm(i)(f);
-          
+
           for (size_t test = 0; test < 5; test++)
           {
             Math::Vector<Real> p{{gen()}};
@@ -3038,7 +3053,7 @@ namespace Rodin::Tests::Unit
           std::vector<Real> dofs(elem.getCount());
           for (size_t i = 0; i < elem.getCount(); i++)
             dofs[i] = elem.getLinearForm(i)(f);
-          
+
           for (size_t test = 0; test < 5; test++)
           {
             Math::Vector<Real> p{{gen()}};
@@ -3070,7 +3085,7 @@ namespace Rodin::Tests::Unit
             v(i) = (i + 1) * poly;
           return v;
         };
-        
+
         switch (K)
         {
           case 1:
@@ -3079,12 +3094,12 @@ namespace Rodin::Tests::Unit
             std::vector<Real> dofs(elem.getCount());
             for (size_t i = 0; i < elem.getCount(); i++)
               dofs[i] = elem.getLinearForm(i)(f);
-            
+
             Math::Vector<Real> p{{0.5}};
             Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
-            
+
             Math::Vector<Real> exact = f(p);
             for (size_t i = 0; i < vdim; i++)
               EXPECT_NEAR(interp(i), exact(i), RODIN_FUZZY_CONSTANT);
@@ -3096,12 +3111,12 @@ namespace Rodin::Tests::Unit
             std::vector<Real> dofs(elem.getCount());
             for (size_t i = 0; i < elem.getCount(); i++)
               dofs[i] = elem.getLinearForm(i)(f);
-            
+
             Math::Vector<Real> p{{0.5}};
             Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
-            
+
             Math::Vector<Real> exact = f(p);
             for (size_t i = 0; i < vdim; i++)
               EXPECT_NEAR(interp(i), exact(i), RODIN_FUZZY_CONSTANT);
@@ -3113,12 +3128,12 @@ namespace Rodin::Tests::Unit
             std::vector<Real> dofs(elem.getCount());
             for (size_t i = 0; i < elem.getCount(); i++)
               dofs[i] = elem.getLinearForm(i)(f);
-            
+
             Math::Vector<Real> p{{0.5}};
             Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
-            
+
             Math::Vector<Real> exact = f(p);
             for (size_t i = 0; i < vdim; i++)
               EXPECT_NEAR(interp(i), exact(i), RODIN_FUZZY_CONSTANT);
@@ -3141,14 +3156,14 @@ namespace Rodin::Tests::Unit
           result += std::pow(x.x(), k);
         return result;
       };
-      
+
       auto df = [K](const Math::SpatialPoint& x) -> Real {
         Real result = 0.0;
         for (size_t k = 1; k <= K; k++)
           result += k * std::pow(x.x(), k - 1);
         return result;
       };
-      
+
       switch (K)
       {
         case 2:
@@ -3157,7 +3172,7 @@ namespace Rodin::Tests::Unit
           std::vector<Real> dofs(elem.getCount());
           for (size_t i = 0; i < elem.getCount(); i++)
             dofs[i] = elem.getLinearForm(i)(f);
-          
+
           Math::Vector<Real> p{{0.5}};
           Real interp_grad = 0.0;
           for (size_t i = 0; i < elem.getCount(); i++)
@@ -3165,7 +3180,7 @@ namespace Rodin::Tests::Unit
             auto deriv = elem.getBasis(i).getDerivative<1>(0);
             interp_grad += dofs[i] * deriv(p);
           }
-          
+
           EXPECT_NEAR(interp_grad, df(p), RODIN_FUZZY_CONSTANT);
           break;
         }
@@ -3175,7 +3190,7 @@ namespace Rodin::Tests::Unit
           std::vector<Real> dofs(elem.getCount());
           for (size_t i = 0; i < elem.getCount(); i++)
             dofs[i] = elem.getLinearForm(i)(f);
-          
+
           Math::Vector<Real> p{{0.5}};
           Real interp_grad = 0.0;
           for (size_t i = 0; i < elem.getCount(); i++)
@@ -3183,7 +3198,7 @@ namespace Rodin::Tests::Unit
             auto deriv = elem.getBasis(i).getDerivative<1>(0);
             interp_grad += dofs[i] * deriv(p);
           }
-          
+
           EXPECT_NEAR(interp_grad, df(p), RODIN_FUZZY_CONSTANT);
           break;
         }

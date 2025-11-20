@@ -57,33 +57,91 @@ namespace Rodin::Variational
 
   /**
    * @brief Base class for finite elements.
+   *
+   * This class provides a minimal CRTP interface shared by all finite elements.
+   * Derived classes are expected to implement the following methods:
+   * - `size_t getCount() const`
+   * - `const Math::SpatialVector<Real>& getNode(size_t) const`
+   * - `auto getBasis(size_t) const`
+   * - `auto getLinearForm(size_t) const`
+   * - `size_t getOrder() const`
+   *
+   * The base class stores only the reference geometry and forwards all
+   * finite-element-specific queries to the Derived class.
+   *
+   * @tparam Derived Concrete finite element type implementing the CRTP interface.
    */
   template <class Derived>
   class FiniteElementBase
   {
     public:
+      /**
+       * @brief Scalar type associated with the finite element.
+       *
+       * This type is obtained from the @ref FormLanguage::Traits specialization
+       * of the Derived finite element. It corresponds to the scalar field
+       * underlying the finite element (e.g. @c Real, @c Complex<Real>, etc.).
+       */
       using ScalarType = typename FormLanguage::Traits<Derived>::ScalarType;
 
+      /**
+       * @brief Default constructor.
+       *
+       * Initializes the finite element with a Point geometry. This is mainly
+       * provided for default-constructibility and is typically overridden
+       * by Derived classes that expose more specific constructors.
+       */
       constexpr
       FiniteElementBase()
         : m_g(Geometry::Polytope::Type::Point)
       {}
 
+      /**
+       * @brief Constructs a finite element base with a given reference geometry.
+       *
+       * @param g Reference geometry of the element (segment, triangle, etc.).
+       *
+       * The geometry is stored and later queried via getGeometry(). Derived
+       * classes may interpret this geometry to build their DOFs and basis.
+       */
       constexpr
       FiniteElementBase(Geometry::Polytope::Type g)
         : m_g(g)
       {}
 
+      /**
+       * @brief Copy constructor.
+       *
+       * Copies the reference geometry from another base object.
+       *
+       * @param other Object to copy from.
+       */
       constexpr
       FiniteElementBase(const FiniteElementBase& other)
         : m_g(other.m_g)
       {}
 
+      /**
+       * @brief Move constructor.
+       *
+       * Moves the reference geometry from another base object.
+       *
+       * @param other Object to move from.
+       */
       constexpr
       FiniteElementBase(FiniteElementBase&& other)
         : m_g(std::move(other.m_g))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       *
+       * Assigns the reference geometry from another base object. The Derived
+       * part is handled by the concrete finite element type.
+       *
+       * @param other Object to copy from.
+       * @return Reference to this object.
+       */
       constexpr
       FiniteElementBase& operator=(const FiniteElementBase& other)
       {
@@ -94,6 +152,15 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
+      /**
+       * @brief Move assignment operator.
+       *
+       * Moves the reference geometry from another base object. The Derived
+       * part is handled by the concrete finite element type.
+       *
+       * @param other Object to move from.
+       * @return Reference to this object.
+       */
       constexpr
       FiniteElementBase& operator=(FiniteElementBase&& other)
       {
@@ -104,8 +171,26 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
+      /**
+       * @brief Virtual destructor.
+       *
+       * Provided to allow polymorphic destruction through a base-class pointer
+       * (e.g. when storing different finite elements in a common container).
+       */
       virtual ~FiniteElementBase() = default;
 
+      /**
+       * @brief Returns the reference geometry of the finite element.
+       *
+       * The geometry identifies the reference domain @f$ K @f$ used to define
+       * the element (segment, triangle, quadrilateral, etc.). It is typically
+       * used to:
+       * - Select appropriate quadrature rules.
+       * - Interpret reference coordinates.
+       * - Build geometry-dependent DOFs and basis functions in Derived classes.
+       *
+       * @return Geometry::Polytope::Type representing the reference geometry.
+       */
       constexpr
       Geometry::Polytope::Type getGeometry() const
       {
@@ -114,7 +199,16 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
-       * @note CRTP method to be overriden in Derived class.
+       *
+       * This forwards to the Derived class via CRTP:
+       * @code
+       * static_cast<const Derived&>(*this).getCount();
+       * @endcode
+       *
+       * For polynomial elements, this is typically the number of interpolation
+       * nodes (scalar DOFs) on the reference element.
+       *
+       * @return Total number of local DOFs associated with the element.
        */
       constexpr
       size_t getCount() const
@@ -123,7 +217,19 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets the i-th degree of freedom on the finite element.
+       * @brief Gets the coordinates of the i-th interpolation node.
+       *
+       * For nodal (Lagrange-type) finite elements, the nodes coincide with the
+       * locations where the degrees of freedom are defined (e.g. vertices,
+       * edge midpoints, interior points).
+       *
+       * The coordinates are given in the reference geometry associated with
+       * getGeometry().
+       *
+       * @param i Local node index in the range @f$ 0 \leq i < \text{getCount()} @f$.
+       * @return Reference to the spatial coordinates of the i-th node.
+       *
+       * @note This method is expected to be implemented in the Derived class.
        */
       constexpr
       const Math::SpatialVector<Real>& getNode(size_t i) const
@@ -133,7 +239,22 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the i-th basis function of the finite element.
-       * @note CRTP method to be overriden in Derived class.
+       *
+       * The basis functions @f$ \{\phi_i\} @f$ span the local approximation
+       * space on the reference element. For Lagrange elements, they satisfy
+       * the nodal property:
+       * @f[
+       *   \phi_i(x_j) = \delta_{ij},
+       * @f]
+       * where @f$ x_j @f$ are the interpolation nodes.
+       *
+       * The exact return type depends on the Derived class (scalar-valued,
+       * vector-valued, etc.) and is deduced automatically.
+       *
+       * @param i Local basis function index.
+       * @return Basis function object usable as a callable functor.
+       *
+       * @note CRTP method: implemented by the Derived class.
        */
       constexpr
       decltype(auto) getBasis(size_t i) const
@@ -142,8 +263,20 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets the i-th linear function on the finite element.
-       * @note CRTP method to be overriden in Derived class.
+       * @brief Gets the i-th linear functional (degree of freedom) on the element.
+       *
+       * A linear form represents one element of the DOF set @f$ \Sigma @f$, such
+       * as:
+       * - Point evaluation at a node (for nodal elements),
+       * - Moments against test polynomials (for non-nodal elements).
+       *
+       * Applying the linear form to a function @f$ v @f$ typically produces
+       * the coefficient associated with the i-th degree of freedom.
+       *
+       * @param i Local DOF index.
+       * @return Linear functional object representing the i-th degree of freedom.
+       *
+       * @note CRTP method: implemented by the Derived class.
        */
       constexpr
       decltype(auto) getLinearForm(size_t i) const
@@ -151,22 +284,57 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getLinearForm(i);
       }
 
+      /**
+       * @brief Returns a characteristic polynomial order of the finite element.
+       *
+       * For polynomial-based elements, this is defined as the maximum total
+       * polynomial degree of the shape functions on the reference element,
+       * or a safe upper bound for it. It is typically used to select
+       * appropriate quadrature rules (e.g. rules exact for polynomials
+       * up to degree getOrder(), or 2*getOrder() for bilinear forms).
+       *
+       * The precise meaning may be refined in the Derived class
+       * documentation (e.g. @f$ \mathbb{P}_k @f$ vs @f$ \mathbb{Q}_k @f$
+       * elements, tensor-product spaces, etc.).
+       *
+       * @return Polynomial order (total degree or upper bound).
+       *
+       * @note CRTP method: implemented by the Derived class.
+       */
       constexpr
       size_t getOrder() const
       {
         return static_cast<const Derived&>(*this).getOrder();
       }
 
+      /**
+       * @brief Serializes the finite element base (Boost.Serialization).
+       *
+       * This function stores or loads the reference geometry. Derived classes
+       * are expected to provide their own @c serialize method and call this
+       * one to ensure the geometry is correctly handled.
+       *
+       * @tparam Archive Boost.Serialization archive type.
+       * @param ar Archive to serialize to or from.
+       * @param version Serialization version (unused).
+       */
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {
+        (void) version;
         ar & m_g;
       }
 
     private:
+      /**
+       * @brief Reference geometry of the finite element.
+       *
+       * This encodes the type of the reference domain @f$ K @f$ (point, segment,
+       * triangle, quadrilateral, tetrahedron, wedge, etc.) on which the finite
+       * element is defined.
+       */
       Geometry::Polytope::Type m_g;
   };
 }
 
 #endif
-
