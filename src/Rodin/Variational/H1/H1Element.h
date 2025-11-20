@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_PK_PKELEMENT_H
-#define RODIN_VARIATIONAL_PK_PKELEMENT_H
+#ifndef RODIN_VARIATIONAL_H1_H1ELEMENT_H
+#define RODIN_VARIATIONAL_H1_H1ELEMENT_H
 
 /**
  * @file
@@ -77,7 +77,7 @@ namespace Rodin::FormLanguage
    * @ingroup TraitsSpecializations
    */
   template <size_t K, class Range>
-  struct Traits<Variational::PkElement<K, Range>>
+  struct Traits<Variational::H1Element<K, Range>>
   {
     using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
     using RangeType = Range;
@@ -87,17 +87,18 @@ namespace Rodin::FormLanguage
 namespace Rodin::Variational
 {
   /**
-   * @defgroup PkElementSpecializations PkElement Template Specializations
-   * @brief Template specializations of the PkElement class.
-   * @see PkElement
+   * @defgroup H1ElementSpecializations H1Element Template Specializations
+   * @brief Template specializations of the H1Element class.
+   * @see H1Element
    */
 
   /**
    * @ingroup FiniteElements
-   * @ingroup PkElementSpecializations
-   * @brief Continuous piecewise polynomial (degree k) scalar Lagrange element.
+   * @ingroup H1ElementSpecializations
+   * @brief Continuous H1-conforming piecewise polynomial (degree k) scalar Lagrange element.
    *
-   * The PkElement provides a k-th order finite element with Lagrange basis functions.
+   * The H1Element provides a k-th order finite element with Lagrange basis functions.
+   * This is a high-order-stable H1-conforming element family.
    *
    * ## Mathematical Properties
    * - **DOF count**: Depends on geometry and polynomial degree K
@@ -110,10 +111,10 @@ namespace Rodin::Variational
    *   @f$ \phi_i(x_j) = \delta_{ij} @f$ where @f$ x_j @f$ are the Lagrange nodes
    * - **Gradient**: Polynomial of degree K-1
    * - **Partition of unity**: @f$ \sum_{i=1}^{n} \phi_i(x) = 1 @f$ for all @f$ x @f$
-   * - **Continuity**: Global C⁰ continuity across element interfaces
+   * - **Continuity**: Global C⁰ continuity across element interfaces (H¹-conforming)
    *
    * ## Convergence Rates
-   * For smooth solutions, Pk elements provide k-th order convergence:
+   * For smooth solutions, H1 elements of degree k provide k-th order convergence:
    * - **L² norm**: @f$ \|u - u_h\|_{L^2} = O(h^{k+1}) @f$
    * - **H¹ norm (energy)**: @f$ \|u - u_h\|_{H^1} = O(h^k) @f$
    *
@@ -124,28 +125,28 @@ namespace Rodin::Variational
    *
    * ## Usage Example
    * ```cpp
-   * // P3 element on triangle - 10 DOFs
-   * RealPkElement<3> p3_tri(Polytope::Type::Triangle);
-   * std::cout << p3_tri.getCount() << std::endl;  // Output: 10
+   * // H1 element of degree 3 on triangle - 10 DOFs
+   * RealH1Element<3> h1_tri(Polytope::Type::Triangle);
+   * std::cout << h1_tri.getCount() << std::endl;  // Output: 10
    *
    * // Evaluate basis function at a point
    * Math::Vector<Real> pt{{0.25, 0.25}};
-   * Real value = p3_tri.getBasis(0)(pt);
+   * Real value = h1_tri.getBasis(0)(pt);
    *
    * // Get gradient of basis function
-   * auto grad = p3_tri.getBasis(0).getGradient()(pt);
+   * auto grad = h1_tri.getBasis(0).getGradient()(pt);
    * ```
    *
    * @tparam K Polynomial degree (0, 1, 2, 3, ...). Higher degrees provide better approximation
    *           for smooth functions but increase computational cost.
    * @tparam Scalar Type of scalar range (e.g., Real, Complex<Real>)
    *
-   * @see PkElement<K, Math::Vector<Scalar>> for vector-valued version
-   * @see P0Element for K=0 specialization
-   * @see P1Element for K=1 specialization
+   * @see H1Element<K, Math::Vector<Scalar>> for vector-valued version
+   * @see P0Element for piecewise constant elements
+   * @see P1Element for piecewise linear elements
    */
   template <size_t K, class Scalar>
-  class PkElement final : public FiniteElementBase<PkElement<K, Scalar>>
+  class H1Element final : public FiniteElementBase<H1Element<K, Scalar>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -153,7 +154,7 @@ namespace Rodin::Variational
       friend class boost::serialization::access;
 
       /// Parent class
-      using Parent = FiniteElementBase<PkElement<K, Scalar>>;
+      using Parent = FiniteElementBase<H1Element<K, Scalar>>;
 
       using ScalarType = Scalar;
 
@@ -193,7 +194,7 @@ namespace Rodin::Variational
           template <class T>
           ScalarType operator()(const T& v) const
           {
-            const auto& node = PkElement<K, Scalar>(m_g).getNode(m_i);
+            const auto& node = H1Element<K, Scalar>(m_g).getNode(m_i);
             return v(node);
           }
 
@@ -485,20 +486,20 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Default constructor. Creates a Pk element on a Point geometry.
+       * @brief Default constructor. Creates an H1 element on a Point geometry.
        */
-      PkElement()
+      H1Element()
         : Parent(Geometry::Polytope::Type::Point)
       {}
 
       /**
-       * @brief Constructs a Pk element for the specified geometry.
+       * @brief Constructs an H1 element for the specified geometry.
        * @param geometry Type of element geometry (Segment, Triangle, Quadrilateral, etc.)
        *
        * Initializes the element and builds the Lagrange nodes for the specified geometry.
        * The number and positions of nodes depend on both the geometry and polynomial degree K.
        */
-      PkElement(Geometry::Polytope::Type geometry)
+      H1Element(Geometry::Polytope::Type geometry)
         : Parent(geometry)
       {}
 
@@ -507,7 +508,7 @@ namespace Rodin::Variational
        * @param other Element to copy from
        */
       constexpr
-      PkElement(const PkElement& other)
+      H1Element(const H1Element& other)
         : Parent(other)
       {}
 
@@ -516,7 +517,7 @@ namespace Rodin::Variational
        * @param other Element to move from
        */
       constexpr
-      PkElement(PkElement&& other)
+      H1Element(H1Element&& other)
         : Parent(std::move(other))
       {}
 
@@ -526,7 +527,7 @@ namespace Rodin::Variational
        * @return Reference to this element
        */
       constexpr
-      PkElement& operator=(const PkElement& other)
+      H1Element& operator=(const H1Element& other)
       {
         Parent::operator=(other);
         return *this;
@@ -538,7 +539,7 @@ namespace Rodin::Variational
        * @return Reference to this element
        */
       constexpr
-      PkElement& operator=(PkElement&& other)
+      H1Element& operator=(H1Element&& other)
       {
         Parent::operator=(std::move(other));
         return *this;
@@ -649,20 +650,20 @@ namespace Rodin::Variational
 
   /**
    * @ingroup FiniteElements
-   * @ingroup PkElementSpecializations
-   * @brief Continuous piecewise polynomial (degree k) vector Lagrange element.
+   * @ingroup H1ElementSpecializations
+   * @brief Continuous H1-conforming piecewise polynomial (degree k) vector Lagrange element.
    *
-   * Vector-valued Pk element for approximating vector fields (e.g., displacement, velocity).
+   * Vector-valued H1 element for approximating vector fields (e.g., displacement, velocity).
    *
    * ## Mathematical Properties
    * - **DOF count**: @f$ d \times n_s @f$ where:
    *   - @f$ d @f$ is the vector dimension (vdim)
-   *   - @f$ n_s @f$ is the number of scalar DOFs for the underlying Pk element
+   *   - @f$ n_s @f$ is the number of scalar DOFs for the underlying H1 element
    * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,c}(x) = \phi_i(x) \mathbf{e}_c @f$ where:
-   *   - @f$ \phi_i(x) @f$ is the scalar Pk basis function
+   *   - @f$ \phi_i(x) @f$ is the scalar H1 basis function
    *   - @f$ \mathbf{e}_c @f$ is the unit vector in direction c
    * - **Jacobian**: @f$ J_{ij} = \frac{\partial u_i}{\partial x_j} @f$ where @f$ \mathbf{u} @f$ is the vector field
-   * - **Continuity**: C⁰ continuous vector field (each component is C⁰ continuous)
+   * - **Continuity**: C⁰ continuous vector field (each component is C⁰ continuous, H¹-conforming)
    *
    * ## Component Structure
    * Each vector basis function is non-zero in only one component:
@@ -677,26 +678,26 @@ namespace Rodin::Variational
    *
    * ## Usage Example
    * ```cpp
-   * // 2D vector P2 element on triangle - 6 nodes × 2 components = 12 DOFs
-   * VectorPkElement<2> vec_p2(2, Polytope::Type::Triangle);
-   * std::cout << vec_p2.getCount() << std::endl;  // Output: 12
+   * // 2D vector H1 element of degree 2 on triangle - 6 nodes × 2 components = 12 DOFs
+   * VectorH1Element<2> vec_h1(2, Polytope::Type::Triangle);
+   * std::cout << vec_h1.getCount() << std::endl;  // Output: 12
    *
    * // Evaluate vector basis function
    * Math::Vector<Real> pt{{0.25, 0.25}};
-   * auto vec_value = vec_p2.getBasis(0)(pt);  // Returns a 2D vector
+   * auto vec_value = vec_h1.getBasis(0)(pt);  // Returns a 2D vector
    *
    * // Get Jacobian matrix
-   * auto jac = vec_p2.getBasis(0).getJacobian()(pt);  // Returns 2×2 matrix
+   * auto jac = vec_h1.getBasis(0).getJacobian()(pt);  // Returns 2×2 matrix
    * ```
    *
    * @tparam K Polynomial degree
    * @tparam Scalar Type of scalar components (e.g., Real, Complex<Real>)
    *
-   * @see PkElement<K, Scalar> for scalar-valued version
+   * @see H1Element<K, Scalar> for scalar-valued version
    */
   template <size_t K, class Scalar>
-  class PkElement<K, Math::Vector<Scalar>> final
-    : public FiniteElementBase<PkElement<K, Math::Vector<Scalar>>>
+  class H1Element<K, Math::Vector<Scalar>> final
+    : public FiniteElementBase<H1Element<K, Math::Vector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -704,7 +705,7 @@ namespace Rodin::Variational
       friend class boost::serialization::access;
 
       /// Parent class
-      using Parent = FiniteElementBase<PkElement<K, Math::Vector<Scalar>>>;
+      using Parent = FiniteElementBase<H1Element<K, Math::Vector<Scalar>>>;
 
       using ScalarType = Scalar;
 
@@ -729,7 +730,7 @@ namespace Rodin::Variational
           ScalarType operator()(const T& v) const
           {
             static thread_local RangeType s_out;
-            const auto& node = PkElement<K, ScalarType>(m_g).getNode(m_local / m_vdim);
+            const auto& node = H1Element<K, ScalarType>(m_g).getNode(m_local / m_vdim);
             s_out = v(node);
             return s_out.coeff(m_local % m_vdim);
           }
@@ -775,7 +776,7 @@ namespace Rodin::Variational
                 {
                   if (m_i == m_local % m_vdim)
                   {
-                    return PkElement<K, ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
+                    return H1Element<K, ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
                   }
                   else
                   {
@@ -786,7 +787,7 @@ namespace Rodin::Variational
                 {
                   if (m_i == m_local % m_vdim)
                   {
-                    return PkElement<K, ScalarType>(m_g).getBasis(m_local / m_vdim).template getDerivative<1>(m_j)(rc);
+                    return H1Element<K, ScalarType>(m_g).getBasis(m_local / m_vdim).template getDerivative<1>(m_j)(rc);
                   }
                   else
                   {
@@ -857,7 +858,7 @@ namespace Rodin::Variational
             static thread_local ReturnType s_out;
             s_out.resize(m_vdim);
             s_out.setZero();
-            s_out.coeffRef(m_local % m_vdim) = PkElement<K, ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
+            s_out.coeffRef(m_local % m_vdim) = H1Element<K, ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
             return s_out;
           }
 
@@ -880,12 +881,12 @@ namespace Rodin::Variational
           const Geometry::Polytope::Type m_g;
       };
 
-      PkElement()
+      H1Element()
         : Parent(Geometry::Polytope::Type::Point), m_vdim(0)
       {}
 
       constexpr
-      PkElement(Geometry::Polytope::Type geometry, size_t vdim)
+      H1Element(Geometry::Polytope::Type geometry, size_t vdim)
         : Parent(geometry), m_vdim(vdim)
       {
         const size_t count = this->getCount();
@@ -899,18 +900,18 @@ namespace Rodin::Variational
       }
 
       constexpr
-      PkElement(const PkElement& other)
+      H1Element(const H1Element& other)
         : Parent(other), m_vdim(other.m_vdim), m_lfs(other.m_lfs), m_bs(other.m_bs)
       {}
 
       constexpr
-      PkElement(PkElement&& other)
+      H1Element(H1Element&& other)
         : Parent(std::move(other)), m_vdim(std::move(other.m_vdim)),
           m_lfs(std::move(other.m_lfs)), m_bs(std::move(other.m_bs))
       {}
 
       constexpr
-      PkElement& operator=(const PkElement& other)
+      H1Element& operator=(const H1Element& other)
       {
         Parent::operator=(other);
         m_vdim = other.m_vdim;
@@ -920,7 +921,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      PkElement& operator=(PkElement&& other)
+      H1Element& operator=(H1Element&& other)
       {
         Parent::operator=(std::move(other));
         m_vdim = std::exchange(other.m_vdim, 0);
@@ -932,7 +933,7 @@ namespace Rodin::Variational
       constexpr
       size_t getCount() const
       {
-        return m_vdim * PkElement<K, ScalarType>(this->getGeometry()).getCount();
+        return m_vdim * H1Element<K, ScalarType>(this->getGeometry()).getCount();
       }
 
       constexpr
@@ -950,7 +951,7 @@ namespace Rodin::Variational
       constexpr
       const Math::SpatialPoint& getNode(size_t local) const
       {
-        return PkElement<K, ScalarType>(this->getGeometry()).getNode(local / m_vdim);
+        return H1Element<K, ScalarType>(this->getGeometry()).getNode(local / m_vdim);
       }
 
       constexpr
@@ -974,7 +975,7 @@ namespace Rodin::Variational
   };
 }
 
-#include "PkElement.hpp"
+#include "H1Element.hpp"
 
 #endif
 

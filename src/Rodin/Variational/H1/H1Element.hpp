@@ -4,12 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_PK_PKELEMENT_HPP
-#define RODIN_VARIATIONAL_PK_PKELEMENT_HPP
+#ifndef RODIN_VARIATIONAL_H1_H1ELEMENT_HPP
+#define RODIN_VARIATIONAL_H1_H1ELEMENT_HPP
 
 #include "Rodin/Math/Common.h"
 
-#include "PkElement.h"
+#include "H1Element.h"
 
 namespace Rodin::Variational
 {
@@ -378,13 +378,13 @@ namespace Rodin::Variational
 
   template <size_t K, class Scalar>
   constexpr
-  const Math::SpatialPoint& PkElement<K, Scalar>::getNode(size_t i) const
+  const Math::SpatialPoint& H1Element<K, Scalar>::getNode(size_t i) const
   {
     return getLagrangeNodes(this->getGeometry())[i];
   }
 
   template <size_t K, class Scalar>
-  const typename PkElement<K, Scalar>::LinearForm& PkElement<K, Scalar>::getLinearForm(size_t i) const
+  const typename H1Element<K, Scalar>::LinearForm& H1Element<K, Scalar>::getLinearForm(size_t i) const
   {
     const Geometry::Polytope::Type g = this->getGeometry();
 
@@ -472,7 +472,7 @@ namespace Rodin::Variational
   }
 
   template <size_t K, class Scalar>
-  const typename PkElement<K, Scalar>::BasisFunction& PkElement<K, Scalar>::getBasis(size_t i) const
+  const typename H1Element<K, Scalar>::BasisFunction& H1Element<K, Scalar>::getBasis(size_t i) const
   {
     const Geometry::Polytope::Type g = this->getGeometry();
 
@@ -561,7 +561,7 @@ namespace Rodin::Variational
 
   template <size_t K, class Scalar>
   constexpr
-  Scalar PkElement<K, Scalar>::BasisFunction::operator()(const Math::SpatialPoint& r) const
+  Scalar H1Element<K, Scalar>::BasisFunction::operator()(const Math::SpatialPoint& r) const
   {
     switch (m_g)
     {
@@ -654,7 +654,7 @@ namespace Rodin::Variational
   template <size_t K, class Scalar>
   template <size_t Order>
   constexpr
-  Scalar PkElement<K, Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
+  Scalar H1Element<K, Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
       const Math::SpatialPoint& r) const
   {
     if constexpr (Order == 0)

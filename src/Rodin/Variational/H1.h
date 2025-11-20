@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file Pk.h
+ * @file H1.h
  * @brief H1-conforming Lagrange finite element space.
  *
  * This header provides access to the H1-conforming Lagrange finite element
@@ -45,17 +45,17 @@
  * auto basis = h1_3.getBasis(0);
  * auto value = basis(Math::Vector<Real>{{0.5}});
  * 
- * // Complex-valued H1 element
+ * // Complex-valued H1 element of degree 4
  * ComplexH1Element<4> h1_c(Polytope::Type::Quadrilateral);
  * 
  * // Vector-valued H1 element for elasticity
  * VectorH1Element<2> h1_v(Polytope::Type::Tetrahedron, 3);
  * ```
  *
- * @note This file is retained for compatibility. Use H1.h for new code.
+ * @see Pk.h for alternative include
  */
-#ifndef RODIN_VARIATIONAL_PK_H
-#define RODIN_VARIATIONAL_PK_H
+#ifndef RODIN_VARIATIONAL_H1_H
+#define RODIN_VARIATIONAL_H1_H
 
 #include "H1/H1Element.h"
 
