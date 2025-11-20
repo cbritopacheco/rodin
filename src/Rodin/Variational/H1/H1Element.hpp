@@ -4,12 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_PK_PKELEMENT_HPP
-#define RODIN_VARIATIONAL_PK_PKELEMENT_HPP
+#ifndef RODIN_VARIATIONAL_H1_H1ELEMENT_HPP
+#define RODIN_VARIATIONAL_H1_H1ELEMENT_HPP
 
 #include "Rodin/Math/Common.h"
 
-#include "PkElement.h"
+#include "H1Element.h"
 
 namespace Rodin::Variational
 {

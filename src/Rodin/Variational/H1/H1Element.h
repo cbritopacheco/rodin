@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_PK_PKELEMENT_H
-#define RODIN_VARIATIONAL_PK_PKELEMENT_H
+#ifndef RODIN_VARIATIONAL_H1_H1ELEMENT_H
+#define RODIN_VARIATIONAL_H1_H1ELEMENT_H
 
 /**
  * @file
@@ -975,7 +975,7 @@ namespace Rodin::Variational
   };
 }
 
-#include "PkElement.hpp"
+#include "H1Element.hpp"
 
 #endif
 

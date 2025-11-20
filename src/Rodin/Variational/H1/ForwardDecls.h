@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_Pk_FORWARDDECLS_H
-#define RODIN_VARIATIONAL_Pk_FORWARDDECLS_H
+#ifndef RODIN_VARIATIONAL_H1_FORWARDDECLS_H
+#define RODIN_VARIATIONAL_H1_FORWARDDECLS_H
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
