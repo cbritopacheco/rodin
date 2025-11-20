@@ -14,41 +14,57 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Degree k Lagrange element
+   * @brief Degree k H1-conforming Lagrange element
    * @tparam K Polynomial degree
    * @tparam Range Range value type
    *
    * @note For an overview of all the possible specializations of the
-   * Pk class, please see @ref PkSpecializations.
+   * H1 class, please see @ref H1ElementSpecializations.
    *
-   * @see PkElementSpecializations
+   * @see H1ElementSpecializations
    */
   template <size_t K, class Range>
-  class PkElement;
+  class H1Element;
 
   /**
-   * @brief Convenience alias for real-valued Pk element
+   * @brief Convenience alias for real-valued H1 element
    */
   template <size_t K>
-  using RealPkElement = PkElement<K, Real>;
+  using RealH1Element = H1Element<K, Real>;
 
   /**
-   * @brief Convenience alias for complex-valued Pk element
+   * @brief Convenience alias for complex-valued H1 element
    */
   template <size_t K>
-  using ComplexPkElement = PkElement<K, Complex>;
+  using ComplexH1Element = H1Element<K, Complex>;
 
   /**
-   * @brief Convenience alias for real vector-valued Pk element
+   * @brief Convenience alias for real vector-valued H1 element
    */
   template <size_t K>
-  using VectorPkElement = PkElement<K, Math::Vector<Real>>;
+  using VectorH1Element = H1Element<K, Math::Vector<Real>>;
 
   /**
-   * @brief Convenience alias for complex vector-valued Pk element
+   * @brief Convenience alias for complex vector-valued H1 element
    */
   template <size_t K>
-  using ComplexVectorPkElement = PkElement<K, Math::Vector<Complex>>;
+  using ComplexVectorH1Element = H1Element<K, Math::Vector<Complex>>;
+  
+  // Legacy aliases for backwards compatibility
+  template <size_t K, class Range>
+  using PkElement = H1Element<K, Range>;
+  
+  template <size_t K>
+  using RealPkElement = RealH1Element<K>;
+  
+  template <size_t K>
+  using ComplexPkElement = ComplexH1Element<K>;
+  
+  template <size_t K>
+  using VectorPkElement = VectorH1Element<K>;
+  
+  template <size_t K>
+  using ComplexVectorPkElement = ComplexVectorH1Element<K>;
 }
 
 #endif
