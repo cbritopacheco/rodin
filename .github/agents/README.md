@@ -4,11 +4,11 @@ This directory contains custom GitHub Copilot agents that provide specialized as
 
 ## Available Agents
 
-### Developer Agent
+### Rodin Agent
 
-**File**: `developer.yml`
+**File**: `rodin.yml`
 
-**Purpose**: The Developer agent is an expert at building and testing Rodin code changes. It automatically compiles the codebase and runs tests whenever modifications are detected.
+**Purpose**: The Rodin agent is an expert at building and testing Rodin code changes. It automatically compiles the codebase and runs tests whenever modifications are detected.
 
 **Capabilities**:
 - Compiles the Rodin codebase using CMake
@@ -25,11 +25,11 @@ This directory contains custom GitHub Copilot agents that provide specialized as
 - To understand test results and failures
 
 **How to Use**:
-In GitHub Copilot Chat, you can invoke the Developer agent with commands like:
-- `@Developer build and test my changes`
-- `@Developer compile the code and run unit tests`
-- `@Developer why did the tests fail?`
-- `@Developer help me fix this build error`
+In GitHub Copilot Chat, you can invoke the Rodin agent with commands like:
+- `@Rodin build and test my changes`
+- `@Rodin compile the code and run unit tests`
+- `@Rodin why did the tests fail?`
+- `@Rodin help me fix this build error`
 
 ## Agent Structure
 
