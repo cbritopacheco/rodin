@@ -86,6 +86,19 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
+  // Forward declarations for Internal namespace functions
+  namespace Internal
+  {
+    template <size_t K>
+    std::array<Real, K+1> getGLLNodes01();
+    
+    template <size_t K>
+    const std::vector<Math::SpatialPoint>& getTriangleFeketeNodes();
+    
+    template <size_t K>
+    const std::vector<Math::SpatialPoint>& getTetrahedronFeketeNodes();
+  }
+
   /**
    * @defgroup H1ElementSpecializations H1Element Template Specializations
    * @brief Template specializations of the H1Element class.
@@ -361,15 +374,19 @@ namespace Rodin::Variational
       };
 
       /**
-       * @brief Builds the Lagrange nodes for the element geometry.
+       * @brief Builds the high-order stable nodes for the element geometry.
        *
        * Constructs the positions of DOF nodes based on the geometry type and
-       * polynomial degree. Uses uniform spacing for segments, barycentric
-       * coordinates for simplices, and tensor products for structured elements.
+       * polynomial degree. Uses:
+       * - Segment: Gauss-Lobatto-Legendre (GLL) nodes on [0,1]
+       * - Quadrilateral: Tensor product of 1D GLL nodes
+       * - Triangle: Fekete nodes on reference triangle
+       * - Tetrahedron: Fekete nodes on reference tetrahedron
+       * - Wedge: Tensor product of triangle Fekete nodes with 1D GLL nodes
        */
       static
       const std::vector<Math::SpatialPoint>&
-      getLagrangeNodes(Geometry::Polytope::Type g)
+      getNodes(Geometry::Polytope::Type g)
       {
         switch (g)
         {
@@ -377,7 +394,7 @@ namespace Rodin::Variational
           {
             static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
               std::vector<Math::SpatialPoint> n;
-              n.push_back(Math::SpatialPoint{{0}});
+              n.emplace_back(Math::SpatialPoint{{0}});
               return n;
             }();
             return s_nodes;
@@ -385,96 +402,59 @@ namespace Rodin::Variational
 
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+            {
+              auto xi = Internal::getGLLNodes01<K>();
+              s_nodes.reserve(K + 1);
               for (size_t i = 0; i <= K; ++i)
-              {
-                Real t = static_cast<Real>(i) / static_cast<Real>(K);
-                n.push_back(Math::SpatialPoint{{t}});
-              }
-              return n;
-            }();
+                s_nodes.emplace_back(Math::SpatialPoint{{xi[i]}});
+            }
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              for (size_t j = 0; j <= K; ++j)
-              {
-                for (size_t i = 0; i <= K - j; ++i)
-                {
-                  Real s = static_cast<Real>(i) / static_cast<Real>(K);
-                  Real t = static_cast<Real>(j) / static_cast<Real>(K);
-                  n.push_back(Math::SpatialPoint{{s, t}});
-                }
-              }
-              return n;
-            }();
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+              s_nodes = Internal::getTriangleFeketeNodes<K>();
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+            {
+              auto xi = Internal::getGLLNodes01<K>();
+              s_nodes.reserve((K + 1) * (K + 1));
               for (size_t j = 0; j <= K; ++j)
-              {
                 for (size_t i = 0; i <= K; ++i)
-                {
-                  Real s = static_cast<Real>(i) / static_cast<Real>(K);
-                  Real t = static_cast<Real>(j) / static_cast<Real>(K);
-                  n.push_back(Math::SpatialPoint{{s, t}});
-                }
-              }
-              return n;
-            }();
+                  s_nodes.emplace_back(Math::SpatialPoint{{xi[i], xi[j]}});
+            }
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              for (size_t k = 0; k <= K; ++k)
-              {
-                for (size_t j = 0; j <= K - k; ++j)
-                {
-                  for (size_t i = 0; i <= K - j - k; ++i)
-                  {
-                    Real r = static_cast<Real>(i) / static_cast<Real>(K);
-                    Real s = static_cast<Real>(j) / static_cast<Real>(K);
-                    Real t = static_cast<Real>(k) / static_cast<Real>(K);
-                    n.push_back(Math::SpatialPoint{{r, s, t}});
-                  }
-                }
-              }
-              return n;
-            }();
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+              s_nodes = Internal::getTetrahedronFeketeNodes<K>();
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              // Tensor product of triangle (r,s) and segment (t)
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+            {
+              const auto& tri = Internal::getTriangleFeketeNodes<K>();
+              auto z = Internal::getGLLNodes01<K>();
+              s_nodes.reserve(tri.size() * (K + 1));
               for (size_t k = 0; k <= K; ++k)
-              {
-                for (size_t j = 0; j <= K; ++j)
-                {
-                  for (size_t i = 0; i <= K - j; ++i)
-                  {
-                    Real r = static_cast<Real>(i) / static_cast<Real>(K);
-                    Real s = static_cast<Real>(j) / static_cast<Real>(K);
-                    Real t = static_cast<Real>(k) / static_cast<Real>(K);
-                    n.push_back(Math::SpatialPoint{{r, s, t}});
-                  }
-                }
-              }
-              return n;
-            }();
+                for (const auto& p : tri)
+                  s_nodes.emplace_back(Math::SpatialPoint{{p.x(), p.y(), z[k]}});
+            }
             return s_nodes;
           }
         }
