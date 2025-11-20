@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Variational/Pk/PkElement.h file | Rodin</title>
+  <title>Rodin/Variational/H1/H1Element.h file | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,16 +64,16 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_395971cfff6b4bbc1ba679cc9c3bffee.html">Pk</a>/</span>PkElement.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_4bca0b286e0f4e2445f6f25378ef63e0.html">H1</a>/</span>H1Element.h <span class="m-thin">file</span>
         </h1>
         <p>Pk (piecewise polynomial degree k) finite element implementation.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md339">Supported Geometries</a></li>
-            <li><a href="#autotoc_md340">Convergence Properties</a></li>
-            <li><a href="#autotoc_md341">Special Cases</a></li>
-            <li><a href="#autotoc_md342">Implementation Details</a></li>
+            <li><a href="#autotoc_md278">Supported Geometries</a></li>
+            <li><a href="#autotoc_md279">Convergence Properties</a></li>
+            <li><a href="#autotoc_md280">Special Cases</a></li>
+            <li><a href="#autotoc_md281">Implementation Details</a></li>
             <li>
               Reference
               <ul>
@@ -123,7 +123,7 @@ $ \nabla \phi_i $
 <use x='9.962671' y='0' xlink:href='#eq2-g2-30'/>
 <use x='16.890773' y='1.793263' xlink:href='#eq2-g1-105'/>
 </g>
-</svg> is a polynomial of degree k-1</li><li><strong>Continuity</strong>: C⁰ continuous across element interfaces</li></ul><section id="autotoc_md339"><h3><a href="#autotoc_md339">Supported Geometries</a></h3><ul><li><strong>Point</strong>: 1 DOF (trivial element)</li><li><strong>Segment</strong>: (K+1) DOFs - uniformly spaced nodes on [0,1]</li><li><strong>Triangle</strong>: (K+1)(K+2)/2 DOFs - barycentric Lagrange nodes</li><li><strong>Quadrilateral</strong>: (K+1)² DOFs - tensor product of segment nodes</li><li><strong>Tetrahedron</strong>: (K+1)(K+2)(K+3)/6 DOFs - barycentric Lagrange nodes</li><li><strong>Wedge</strong>: (K+1)·(K+1)(K+2)/2 DOFs - tensor product of triangle and segment</li></ul></section><section id="autotoc_md340"><h3><a href="#autotoc_md340">Convergence Properties</a></h3><p>Pk elements provide k-th order convergence for smooth solutions:</p><ul><li>L² error: <svg class="m-math" style="width: 4.277em; height: 1.340em; vertical-align: -0.312em;" viewBox="0 -9.873238 41.054891 12.86203">
+</svg> is a polynomial of degree k-1</li><li><strong>Continuity</strong>: C⁰ continuous across element interfaces</li></ul><section id="autotoc_md278"><h3><a href="#autotoc_md278">Supported Geometries</a></h3><ul><li><strong>Point</strong>: 1 DOF (trivial element)</li><li><strong>Segment</strong>: (K+1) DOFs - uniformly spaced nodes on [0,1]</li><li><strong>Triangle</strong>: (K+1)(K+2)/2 DOFs - barycentric Lagrange nodes</li><li><strong>Quadrilateral</strong>: (K+1)² DOFs - tensor product of segment nodes</li><li><strong>Tetrahedron</strong>: (K+1)(K+2)(K+3)/6 DOFs - barycentric Lagrange nodes</li><li><strong>Wedge</strong>: (K+1)·(K+1)(K+2)/2 DOFs - tensor product of triangle and segment</li></ul></section><section id="autotoc_md279"><h3><a href="#autotoc_md279">Convergence Properties</a></h3><p>Pk elements provide k-th order convergence for smooth solutions:</p><ul><li>L² error: <svg class="m-math" style="width: 4.277em; height: 1.340em; vertical-align: -0.312em;" viewBox="0 -9.873238 41.054891 12.86203">
 <title>
 $ O(h^{k+1}) $
 </title>
@@ -163,7 +163,7 @@ $ O(h^k) $
 <use x='20.562128' y='-4.338437' xlink:href='#eq4-g0-107'/>
 <use x='25.681876' y='0' xlink:href='#eq4-g2-41'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md341"><h3><a href="#autotoc_md341">Special Cases</a></h3><ul><li><code>PkElement&lt;0, Scalar&gt;</code> is equivalent to P0Element (piecewise constant)</li><li><code>PkElement&lt;1, Scalar&gt;</code> is equivalent to P1Element (piecewise linear)</li></ul></section><section id="autotoc_md342"><h3><a href="#autotoc_md342">Implementation Details</a></h3><ul><li><strong>Lagrange polynomials</strong>: Classical formulas for 1D: <svg class="m-math" style="width: 10.332em; height: 1.812em; vertical-align: -0.680em;" viewBox="0 -10.898781 99.185888 17.398807">
+</svg></li></ul></section><section id="autotoc_md280"><h3><a href="#autotoc_md280">Special Cases</a></h3><ul><li><code>PkElement&lt;0, Scalar&gt;</code> is equivalent to P0Element (piecewise constant)</li><li><code>PkElement&lt;1, Scalar&gt;</code> is equivalent to P1Element (piecewise linear)</li></ul></section><section id="autotoc_md281"><h3><a href="#autotoc_md281">Implementation Details</a></h3><ul><li><strong>Lagrange polynomials</strong>: Classical formulas for 1D: <svg class="m-math" style="width: 10.332em; height: 1.812em; vertical-align: -0.680em;" viewBox="0 -10.898781 99.185888 17.398807">
 <title>
 $ L_i^K(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} $
 </title>
@@ -225,34 +225,34 @@ $ L_i^K(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">Rodin::Variational::PkElement</a>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">Rodin::Variational::H1Element</a>
             </dt>
-            <dd>Degree k Lagrange element.</dd>
+            <dd>Degree k H1-conforming Lagrange element.</dd>
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_linear_form.html" class="m-doc">Rodin::Variational::PkElement::LinearForm</a>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_linear_form.html" class="m-doc">Rodin::Variational::H1Element::LinearForm</a>
             </dt>
             <dd>Evaluates linear form at a given function/vector field.</dd>
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function.html" class="m-doc">Rodin::Variational::PkElement::BasisFunction</a>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">Rodin::Variational::H1Element::BasisFunction</a>
             </dt>
             <dd>Represents a Lagrange basis function of degree K.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">Rodin::Variational::PkElement::BasisFunction::DerivativeFunction</a>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">Rodin::Variational::H1Element::BasisFunction::DerivativeFunction</a>
             </dt>
             <dd>Represents a partial derivative of a basis function.</dd>
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">Rodin::Variational::PkElement::BasisFunction::GradientFunction</a>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">Rodin::Variational::H1Element::BasisFunction::GradientFunction</a>
             </dt>
             <dd>Represents the gradient of a basis function.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::Variational::PkElement&lt;K, Math::Vector&lt;Scalar&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::Variational::H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
-            <dd>Continuous piecewise polynomial (degree k) vector Lagrange element.</dd>
+            <dd>Continuous H1-conforming piecewise polynomial (degree k) vector Lagrange element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4_1_b40280c16d0cfa44639593bc79c7c725.html" class="m-doc">Rodin::Variational::PkElement&lt;K, Math::Vector&lt;Scalar&gt;&gt;::BasisFunction::DerivativeFunction</a>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4_1_da7f47bed79bb94d2381ddeae76b890a.html" class="m-doc">Rodin::Variational::H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt;::BasisFunction::DerivativeFunction</a>
             </dt>
             <dd>Represents a derivative function of a Pk vector element.</dd>
           </dl>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::PkElement class | Rodin</title>
+  <title>Rodin::Variational::H1Element class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,11 +64,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_pk_element_8h.html">&lt;Rodin/Variational/Pk/PkElement.h&gt;</a></div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_element_8h.html">&lt;Rodin/Variational/H1/H1Element.h&gt;</a></div>
           <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>PkElement <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>H1Element <span class="m-thin">class</span>
         </h1>
-        <p>Degree k Lagrange element.</p>
+        <p>Degree k H1-conforming Lagrange element.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -83,10 +83,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md343">Mathematical Properties</a></li>
-            <li><a href="#autotoc_md344">Convergence Rates</a></li>
-            <li><a href="#autotoc_md345">Basis Function Construction</a></li>
-            <li><a href="#autotoc_md346">Usage Example</a></li>
+            <li><a href="#autotoc_md282">Mathematical Properties</a></li>
+            <li><a href="#autotoc_md283">Convergence Rates</a></li>
+            <li><a href="#autotoc_md284">Basis Function Construction</a></li>
+            <li><a href="#autotoc_md285">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -99,7 +99,7 @@
             </li>
           </ul>
         </nav>
-<p>Continuous piecewise polynomial (degree k) scalar Lagrange element.</p><aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the Pk class, please see PkSpecializations.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="group___pk_element_specializations.html" class="m-doc">PkElement Template Specializations</a></p></aside><p>The <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a> provides a k-th order finite element with Lagrange basis functions.</p><section id="autotoc_md343"><h3><a href="#autotoc_md343">Mathematical Properties</a></h3><ul><li><strong>DOF count</strong>: Depends on geometry and polynomial degree K<ul><li>Segment: K+1</li><li>Triangle: (K+1)(K+2)/2</li><li>Quadrilateral: (K+1)²</li><li>Tetrahedron: (K+1)(K+2)(K+3)/6</li><li>Wedge: (K+1)·(K+1)(K+2)/2</li></ul></li><li><strong>Basis functions</strong>: Lagrange polynomials of degree K satisfying the Lagrange property: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
+<p>Continuous H1-conforming piecewise polynomial (degree k) scalar Lagrange element.</p><aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the H1 class, please see <a href="group___h1_element_specializations.html" class="m-doc">H1Element Template Specializations</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="group___h1_element_specializations.html" class="m-doc">H1Element Template Specializations</a></p></aside><p>The <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a> provides a k-th order finite element with Lagrange basis functions. This is a high-order-stable H1-conforming element family.</p><section id="autotoc_md282"><h3><a href="#autotoc_md282">Mathematical Properties</a></h3><ul><li><strong>DOF count</strong>: Depends on geometry and polynomial degree K<ul><li>Segment: K+1</li><li>Triangle: (K+1)(K+2)/2</li><li>Quadrilateral: (K+1)²</li><li>Tetrahedron: (K+1)(K+2)(K+3)/6</li><li>Wedge: (K+1)·(K+1)(K+2)/2</li></ul></li><li><strong>Basis functions</strong>: Lagrange polynomials of degree K satisfying the Lagrange property: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
 <title>
 $ \phi_i(x_j) = \delta_{ij} $
 </title>
@@ -178,7 +178,7 @@ $ x $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-120'/>
 </g>
-</svg></li><li><strong>Continuity</strong>: Global C⁰ continuity across element interfaces</li></ul></section><section id="autotoc_md344"><h3><a href="#autotoc_md344">Convergence Rates</a></h3><p>For smooth solutions, Pk elements provide k-th order convergence:</p><ul><li><strong>L² norm</strong>: <svg class="m-math" style="width: 11.717em; height: 1.340em; vertical-align: -0.312em;" viewBox="0 -9.873238 112.479379 12.86203">
+</svg></li><li><strong>Continuity</strong>: Global C⁰ continuity across element interfaces (H¹-conforming)</li></ul></section><section id="autotoc_md283"><h3><a href="#autotoc_md283">Convergence Rates</a></h3><p>For smooth solutions, H1 elements of degree k provide k-th order convergence:</p><ul><li><strong>L² norm</strong>: <svg class="m-math" style="width: 11.717em; height: 1.340em; vertical-align: -0.312em;" viewBox="0 -9.873238 112.479379 12.86203">
 <title>
 $ \|u - u_h\|_{L^2} = O(h^{k+1}) $
 </title>
@@ -250,7 +250,7 @@ $ \|u - u_h\|_{H^1} = O(h^k) $
 <use x='93.797878' y='-4.338437' xlink:href='#eq6-g1-107'/>
 <use x='98.917625' y='0' xlink:href='#eq6-g4-41'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md345"><h3><a href="#autotoc_md345">Basis Function Construction</a></h3><ul><li><strong>1D (Segment)</strong>: Classical Lagrange interpolation <svg class="m-math" style="width: 10.332em; height: 1.812em; vertical-align: -0.680em;" viewBox="0 -10.898781 99.185888 17.398807">
+</svg></li></ul></section><section id="autotoc_md284"><h3><a href="#autotoc_md284">Basis Function Construction</a></h3><ul><li><strong>1D (Segment)</strong>: Classical Lagrange interpolation <svg class="m-math" style="width: 10.332em; height: 1.812em; vertical-align: -0.680em;" viewBox="0 -10.898781 99.185888 17.398807">
 <title>
 $ L_i^K(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} $
 </title>
@@ -340,22 +340,22 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
 <use x='92.830646' y='4.122632' xlink:href='#eq8-g4-43'/>
 <use x='99.417152' y='4.122632' xlink:href='#eq8-g4-49'/>
 </g>
-</svg></li><li><strong>Tensor Products</strong>: For quadrilaterals and wedges, tensor product of lower-dimensional bases</li></ul></section><section id="autotoc_md346"><h3><a href="#autotoc_md346">Usage Example</a></h3><pre class="m-code"><span class="c1">// P3 element on triangle - 10 DOFs</span>
-<span class="n">RealPkElement</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">p3_tri</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
-<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">p3_tri</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// Output: 10</span>
+</svg></li><li><strong>Tensor Products</strong>: For quadrilaterals and wedges, tensor product of lower-dimensional bases</li></ul></section><section id="autotoc_md285"><h3><a href="#autotoc_md285">Usage Example</a></h3><pre class="m-code"><span class="c1">// H1 element of degree 3 on triangle - 10 DOFs</span>
+<span class="n">RealH1Element</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_tri</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">h1_tri</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// Output: 10</span>
 
 <span class="c1">// Evaluate basis function at a point</span>
 <span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pt</span><span class="p">{{</span><span class="mf">0.25</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25</span><span class="p">}};</span>
-<span class="n">Real</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p3_tri</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">)(</span><span class="n">pt</span><span class="p">);</span>
+<span class="n">Real</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h1_tri</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">)(</span><span class="n">pt</span><span class="p">);</span>
 
 <span class="c1">// Get gradient of basis function</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">grad</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p3_tri</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="n">getGradient</span><span class="p">()(</span><span class="n">pt</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_pk_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">PkElement&lt;K, Math::<wbr />Vector&lt;Scalar&gt;&gt;</a> for vector-valued version</p><p><a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a> for K=0 specialization</p><p><a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a> for K=1 specialization</p></aside></section>
+<span class="k">auto</span><span class="w"> </span><span class="n">grad</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h1_tri</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="n">getGradient</span><span class="p">()(</span><span class="n">pt</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">H1Element&lt;K, Math::<wbr />Vector&lt;Scalar&gt;&gt;</a> for vector-valued version</p><p><a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a> for piecewise constant elements</p><p><a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a> for piecewise linear elements</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;PkElement&lt;K, Scalar&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;H1Element&lt;K, Scalar&gt;&gt;</a>
             </dt>
             <dd>Base class for finite elements.</dd>
           </dl>
@@ -364,15 +364,15 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>
             </dt>
             <dd>Represents a Lagrange basis function of degree K.</dd>
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_linear_form.html" class="m-doc">LinearForm</a>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_linear_form.html" class="m-doc">LinearForm</a>
             </dt>
             <dd>Evaluates linear form at a given function/vector field.</dd>
-            <dt id="a465d9f095ec96e71502e376e3c103f89">
-              using <a href="#a465d9f095ec96e71502e376e3c103f89" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&lt;K, Scalar&gt;&gt;
+            <dt id="ad2f3d3db1285d2304d373106b02d7a4f">
+              using <a href="#ad2f3d3db1285d2304d373106b02d7a4f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, Scalar&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
             <dt id="a56808c86c123d70341266761d0bc71d4">
@@ -393,20 +393,20 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a6766d6e16bb0aa76d2e20f26293202f9">
-              <span class="m-doc-wrap-bumper"><a href="#a6766d6e16bb0aa76d2e20f26293202f9" class="m-doc-self">PkElement</a>(</span><span class="m-doc-wrap">)</span>
+            <dt id="a3d3cf98791321aa36d4afd5445dcedc7">
+              <span class="m-doc-wrap-bumper"><a href="#a3d3cf98791321aa36d4afd5445dcedc7" class="m-doc-self">H1Element</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Default constructor. Creates a Pk element on a Point geometry.</dd>
+            <dd>Default constructor. Creates an H1 element on a Point geometry.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ad222e33281633f93863dc59150ff8583" class="m-doc">PkElement</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry)</span>
+              <span class="m-doc-wrap-bumper"><a href="#acf54a44527db53b909aed772408e200b" class="m-doc">H1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry)</span>
             </dt>
-            <dd>Constructs a Pk element for the specified geometry.</dd>
+            <dd>Constructs an H1 element for the specified geometry.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a14ceaa44df3156150ea47282d70e83dd" class="m-doc">PkElement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ac35a35920d925f8e9fdea8ccd04d16cb" class="m-doc">H1Element</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aa4e718f4508fb31bd5d2d1d58a9e60d6" class="m-doc">PkElement</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a826350d81c53807eafab3f772428dd6e" class="m-doc">H1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -415,11 +415,11 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1c43c60be7b8a1d88ee5c2534fe16e7f" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1afcb3f7c592184e678d91c8a11d4588" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a19b6dd5c51c2ed590eda0727573b9d03" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a83acd376325dc2a868d0cb33daf3a53c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -431,11 +431,11 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
             </dt>
             <dd>Gets the spatial coordinates of the i-th Lagrange node.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae2e44a60a467f1fd5f966c7dd1978df8" class="m-doc">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acb564d84df1a6c5f029e33900c58b7bc" class="m-doc">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;</span>
             </dt>
             <dd>Gets the linear form (evaluation functional) for the i-th DOF.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2453de1e2340df427c265c33def0af9a" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac1960e06062772a20ff19201baaf0299" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp;</span>
             </dt>
             <dd>Gets the i-th basis function.</dd>
             <dt>
@@ -457,19 +457,19 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static const std::vector&lt;<a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a00cd4972317768cfbfcda388191215a2" class="m-doc-self">getLagrangeNodes</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
+              <span class="m-doc-wrap-bumper">static const std::vector&lt;<a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a00cd4972317768cfbfcda388191215a2" class="m-doc-self">getLagrangeNodes</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
             </h3>
             <p>Builds the Lagrange nodes for the element geometry.</p>
 <p>Constructs the positions of DOF nodes based on the geometry type and polynomial degree. Uses uniform spacing for segments, barycentric coordinates for simplices, and tensor products for structured elements.</p>
           </div></section>
-          <section class="m-doc-details" id="ad222e33281633f93863dc59150ff8583"><div>
+          <section class="m-doc-details" id="acf54a44527db53b909aed772408e200b"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad222e33281633f93863dc59150ff8583" class="m-doc-self">PkElement</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf54a44527db53b909aed772408e200b" class="m-doc-self">H1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry)</span></span>
             </h3>
-            <p>Constructs a Pk element for the specified geometry.</p>
+            <p>Constructs an H1 element for the specified geometry.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -483,12 +483,12 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
             </table>
 <p>Initializes the element and builds the Lagrange nodes for the specified geometry. The number and positions of nodes depend on both the geometry and polynomial degree K.</p>
           </div></section>
-          <section class="m-doc-details" id="a14ceaa44df3156150ea47282d70e83dd"><div>
+          <section class="m-doc-details" id="ac35a35920d925f8e9fdea8ccd04d16cb"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a14ceaa44df3156150ea47282d70e83dd" class="m-doc-self">PkElement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac35a35920d925f8e9fdea8ccd04d16cb" class="m-doc-self">H1Element</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -503,12 +503,12 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aa4e718f4508fb31bd5d2d1d58a9e60d6"><div>
+          <section class="m-doc-details" id="a826350d81c53807eafab3f772428dd6e"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa4e718f4508fb31bd5d2d1d58a9e60d6" class="m-doc-self">PkElement</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a826350d81c53807eafab3f772428dd6e" class="m-doc-self">H1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -523,12 +523,12 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a1c43c60be7b8a1d88ee5c2534fe16e7f"><div>
+          <section class="m-doc-details" id="a1afcb3f7c592184e678d91c8a11d4588"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp; Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c43c60be7b8a1d88ee5c2534fe16e7f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1afcb3f7c592184e678d91c8a11d4588" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -549,12 +549,12 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a19b6dd5c51c2ed590eda0727573b9d03"><div>
+          <section class="m-doc-details" id="a83acd376325dc2a868d0cb33daf3a53c"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp; Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19b6dd5c51c2ed590eda0727573b9d03" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83acd376325dc2a868d0cb33daf3a53c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -580,7 +580,7 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the number of degrees of freedom in the finite element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -598,7 +598,7 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7802959bcdde2b8600942b7dfb450178" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7802959bcdde2b8600942b7dfb450178" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the spatial coordinates of the i-th Lagrange node.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -620,12 +620,12 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
             </table>
 <p>Lagrange nodes are the interpolation points where the basis functions satisfy φ_i(x_j) = δ_ij. Their positions are determined by the polynomial degree and geometry type.</p>
           </div></section>
-          <section class="m-doc-details" id="ae2e44a60a467f1fd5f966c7dd1978df8"><div>
+          <section class="m-doc-details" id="acb564d84df1a6c5f029e33900c58b7bc"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2e44a60a467f1fd5f966c7dd1978df8" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acb564d84df1a6c5f029e33900c58b7bc" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
             </h3>
             <p>Gets the linear form (evaluation functional) for the i-th DOF.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -646,12 +646,12 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a2453de1e2340df427c265c33def0af9a"><div>
+          <section class="m-doc-details" id="ac1960e06062772a20ff19201baaf0299"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2453de1e2340df427c265c33def0af9a" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac1960e06062772a20ff19201baaf0299" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
             </h3>
             <p>Gets the i-th basis function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -678,7 +678,7 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the total maximum polynomial order of the element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -696,7 +696,7 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
                 template&lt;size_t K, class Scalar&gt;
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />PkElement&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
               const unsigned int version)</span></span>
             </h3>
             <p>Serializes the element (for boost::serialization).</p>

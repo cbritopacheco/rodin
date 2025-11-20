@@ -590,6 +590,16 @@ $ u $
             </dt>
             <dd></dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>
+            </dt>
+            <dd>Degree k H1-conforming Lagrange element.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Continuous H1-conforming piecewise polynomial (degree k) vector Lagrange element.</dd>
+            <dt>
               class <a href="class_rodin_1_1_variational_1_1_identity_matrix.html" class="m-doc">IdentityMatrix</a>
             </dt>
             <dd>Represents the identity matrix function <svg class="m-math" style="width: 1.073em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 10.301104 9.962629">
@@ -896,16 +906,6 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
               class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>
             </dt>
             <dd>Abstract base class for a periodic boundary condition.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>
-            </dt>
-            <dd>Degree k Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_pk_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">PkElement&lt;K, Math::Vector&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Continuous piecewise polynomial (degree k) vector Lagrange element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHS, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_potential_3_01_l_h_s_00_01_shape_function_base_3_01_shape_functi4145b7b2aff814bfaf9999814be99c57.html" class="m-doc">Potential&lt;LHS, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FES, SpaceType&gt;, FES, SpaceType&gt;&gt;</a>
@@ -1233,6 +1233,26 @@ $
               using <a href="#ab9a83f620bec3f8ed0a69e776fc4f9e4" class="m-doc">EssentialBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>&lt;Scalar&gt;&gt;
             </dt>
             <dd>Alias for a list of Dirichlet boundary conditions.</dd>
+            <dt id="a5519f0efb971b7fab2cf3dbbacf42c56">
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              using <a href="#a5519f0efb971b7fab2cf3dbbacf42c56" class="m-doc-self">RealH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+            </dt>
+            <dd>Convenience alias for real-valued H1 element.</dd>
+            <dt id="ab8a0310545623c72b4c533376a21385c">
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              using <a href="#ab8a0310545623c72b4c533376a21385c" class="m-doc-self">ComplexH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;
+            </dt>
+            <dd>Convenience alias for complex-valued H1 element.</dd>
+            <dt id="a48821e91b2b2f8502058511c31bc3b7e">
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              using <a href="#a48821e91b2b2f8502058511c31bc3b7e" class="m-doc-self">VectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
+            </dt>
+            <dd>Convenience alias for real vector-valued H1 element.</dd>
+            <dt id="a6b5f8e318606689037d8550f08bed2dc">
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              using <a href="#a6b5f8e318606689037d8550f08bed2dc" class="m-doc-self">ComplexVectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;&gt;
+            </dt>
+            <dd>Convenience alias for complex vector-valued H1 element.</dd>
             <dt id="a69e6ba579db6ad5e2d0c043a14f363aa">
               using <a href="#a69e6ba579db6ad5e2d0c043a14f363aa" class="m-doc-self">RealP0Element</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
@@ -1278,26 +1298,6 @@ $
               using <a href="#ae96ff4011e48301bbd1da1a6f9b08c36" class="m-doc">PeriodicBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>&lt;Scalar&gt;&gt;
             </dt>
             <dd>Alias for a list of peridodic boundary conditions.</dd>
-            <dt id="a48fc6172b9278a66dbc058ea992a6c7d">
-              <div class="m-doc-template">template&lt;size_t K&gt;</div>
-              using <a href="#a48fc6172b9278a66dbc058ea992a6c7d" class="m-doc-self">RealPkElement</a> = <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&lt;K, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
-            </dt>
-            <dd>Convenience alias for real-valued Pk element.</dd>
-            <dt id="a09a4755bf1144d6ec66a20a80dd600ca">
-              <div class="m-doc-template">template&lt;size_t K&gt;</div>
-              using <a href="#a09a4755bf1144d6ec66a20a80dd600ca" class="m-doc-self">ComplexPkElement</a> = <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&lt;K, <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;
-            </dt>
-            <dd>Convenience alias for complex-valued Pk element.</dd>
-            <dt id="ad78de8996a2516171b5c9e11db280667">
-              <div class="m-doc-template">template&lt;size_t K&gt;</div>
-              using <a href="#ad78de8996a2516171b5c9e11db280667" class="m-doc-self">VectorPkElement</a> = <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
-            </dt>
-            <dd>Convenience alias for real vector-valued Pk element.</dd>
-            <dt id="ab313d8693e8b583b262b77003a669e43">
-              <div class="m-doc-template">template&lt;size_t K&gt;</div>
-              using <a href="#ab313d8693e8b583b262b77003a669e43" class="m-doc-self">ComplexVectorPkElement</a> = <a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;&gt;
-            </dt>
-            <dd>Convenience alias for complex vector-valued Pk element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               using <a href="#ae7a8a5041b3fc0a39f9f4804b28c7c21" class="m-doc">VectorZero</a> = <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&lt;<a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;

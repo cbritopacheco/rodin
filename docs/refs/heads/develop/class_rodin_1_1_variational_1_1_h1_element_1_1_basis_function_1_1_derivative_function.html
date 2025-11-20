@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::PkElement::BasisFunction::DerivativeFunction class | Rodin</title>
+  <title>Rodin::Variational::H1Element::BasisFunction::DerivativeFunction class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,9 +64,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_pk_element_8h.html">&lt;Rodin/Variational/Pk/PkElement.h&gt;</a></div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_element_8h.html">&lt;Rodin/Variational/H1/H1Element.h&gt;</a></div>
           <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_pk_element.html">PkElement</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function.html">BasisFunction</a>::<wbr/></span>DerivativeFunction <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_h1_element.html">H1Element</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html">BasisFunction</a>::<wbr/></span>DerivativeFunction <span class="m-thin">class</span>
         </h1>
         <p>Represents a partial derivative of a basis function.</p>
         <table class="m-table m-fullwidth m-flat">
@@ -140,7 +140,7 @@ $ \frac{\partial^{Order} \phi}{\partial x_i^{Order}} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a26023d44a910ce6ff9f5307eff8efee5" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; <a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function.html#a3ecb01c9ff447e63e2d15066ada3dcd7" class="m-doc">ReturnType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a26023d44a910ce6ff9f5307eff8efee5" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html#a3ecb01c9ff447e63e2d15066ada3dcd7" class="m-doc">ReturnType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the derivative at a spatial point.</dd>
           </dl>
@@ -152,7 +152,7 @@ $ \frac{\partial^{Order} \phi}{\partial x_i^{Order}} $
               <div class="m-doc-template">
                 template&lt;size_t Order&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />PkElement::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56c280a96254646b8babfa1d1eae37c1" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap">size_t i,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56c280a96254646b8babfa1d1eae37c1" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap">size_t i,
               size_t local,
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
@@ -182,7 +182,7 @@ $ \frac{\partial^{Order} \phi}{\partial x_i^{Order}} $
               <div class="m-doc-template">
                 template&lt;size_t Order&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_pk_element_1_1_basis_function.html#a3ecb01c9ff447e63e2d15066ada3dcd7" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />PkElement::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26023d44a910ce6ff9f5307eff8efee5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html#a3ecb01c9ff447e63e2d15066ada3dcd7" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />H1Element::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26023d44a910ce6ff9f5307eff8efee5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the derivative at a spatial point.</p>
             <table class="m-table m-fullwidth m-flat">

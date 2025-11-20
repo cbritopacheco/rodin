@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::PkElement&lt;K, Math::Vector&lt;Scalar&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,18 +64,18 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_pk_element_8h.html">&lt;Rodin/Variational/Pk/PkElement.h&gt;</a></div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_element_8h.html">&lt;Rodin/Variational/H1/H1Element.h&gt;</a></div>
           <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>PkElement&lt;K, Math::Vector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Continuous piecewise polynomial (degree k) vector Lagrange element.</p>
+        <p>Continuous H1-conforming piecewise polynomial (degree k) vector Lagrange element.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md347">Mathematical Properties</a></li>
-            <li><a href="#autotoc_md348">Component Structure</a></li>
-            <li><a href="#autotoc_md349">Applications</a></li>
-            <li><a href="#autotoc_md350">Usage Example</a></li>
+            <li><a href="#autotoc_md286">Mathematical Properties</a></li>
+            <li><a href="#autotoc_md287">Component Structure</a></li>
+            <li><a href="#autotoc_md288">Applications</a></li>
+            <li><a href="#autotoc_md289">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -85,7 +85,7 @@
             </li>
           </ul>
         </nav>
-<p>Vector-valued Pk element for approximating vector fields (e.g., displacement, velocity).</p><section id="autotoc_md347"><h3><a href="#autotoc_md347">Mathematical Properties</a></h3><ul><li><strong>DOF count</strong>: <svg class="m-math" style="width: 3.291em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 31.598041 10.095454">
+<p>Vector-valued H1 element for approximating vector fields (e.g., displacement, velocity).</p><section id="autotoc_md286"><h3><a href="#autotoc_md286">Mathematical Properties</a></h3><ul><li><strong>DOF count</strong>: <svg class="m-math" style="width: 3.291em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 31.598041 10.095454">
 <title>
 $ d \times n_s $
 </title>
@@ -123,7 +123,7 @@ $ n_s $
 <use x='0' y='0' xlink:href='#eq3-g1-110'/>
 <use x='6.987606' y='1.793263' xlink:href='#eq3-g0-115'/>
 </g>
-</svg> is the number of scalar DOFs for the underlying Pk element</li></ul></li><li><strong>Basis functions</strong>: <svg class="m-math" style="width: 8.885em; height: 1.389em; vertical-align: -0.457em;" viewBox="0 -8.966376 85.293028 13.338865">
+</svg> is the number of scalar DOFs for the underlying H1 element</li></ul></li><li><strong>Basis functions</strong>: <svg class="m-math" style="width: 8.885em; height: 1.389em; vertical-align: -0.457em;" viewBox="0 -8.966376 85.293028 13.338865">
 <title>
 $ \boldsymbol{\phi}_{i,c}(x) = \phi_i(x) \mathbf{e}_c $
 </title>
@@ -174,7 +174,7 @@ $ \phi_i(x) $
 <use x='14.8617' y='0' xlink:href='#eq5-g1-120'/>
 <use x='21.513787' y='0' xlink:href='#eq5-g2-41'/>
 </g>
-</svg> is the scalar Pk basis function</li><li><svg class="m-math" style="width: 1.021em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313399 9.804492 7.106662">
+</svg> is the scalar H1 basis function</li><li><svg class="m-math" style="width: 1.021em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313399 9.804492 7.106662">
 <title>
 $ \mathbf{e}_c $
 </title>
@@ -224,7 +224,7 @@ $ \mathbf{u} $
 <g id='eq8-page1'>
 <use x='0' y='0' xlink:href='#eq8-g0-117'/>
 </g>
-</svg> is the vector field</li><li><strong>Continuity</strong>: C⁰ continuous vector field (each component is C⁰ continuous)</li></ul></section><section id="autotoc_md348"><h3><a href="#autotoc_md348">Component Structure</a></h3><p>Each vector basis function is non-zero in only one component:</p><ul><li>Basis function <code>i*vdim + c</code> has value <svg class="m-math" style="width: 2.715em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.066112 11.955168">
+</svg> is the vector field</li><li><strong>Continuity</strong>: C⁰ continuous vector field (each component is C⁰ continuous, H¹-conforming)</li></ul></section><section id="autotoc_md287"><h3><a href="#autotoc_md287">Component Structure</a></h3><p>Each vector basis function is non-zero in only one component:</p><ul><li>Basis function <code>i*vdim + c</code> has value <svg class="m-math" style="width: 2.715em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.066112 11.955168">
 <title>
 $ \phi_i(x) $
 </title>
@@ -242,7 +242,7 @@ $ \phi_i(x) $
 <use x='14.8617' y='0' xlink:href='#eq9-g1-120'/>
 <use x='21.513787' y='0' xlink:href='#eq9-g2-41'/>
 </g>
-</svg> in component c, zero elsewhere</li><li>This allows efficient assembly and clear physical interpretation</li></ul></section><section id="autotoc_md349"><h3><a href="#autotoc_md349">Applications</a></h3><ul><li><strong>Linear elasticity</strong>: Displacement field <svg class="m-math" style="width: 2.420em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 23.228719 11.955168">
+</svg> in component c, zero elsewhere</li><li>This allows efficient assembly and clear physical interpretation</li></ul></section><section id="autotoc_md288"><h3><a href="#autotoc_md288">Applications</a></h3><ul><li><strong>Linear elasticity</strong>: Displacement field <svg class="m-math" style="width: 2.420em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 23.228719 11.955168">
 <title>
 $ \mathbf{u}(x) $
 </title>
@@ -290,22 +290,22 @@ $ \mathbf{E}(x) $
 <use x='13.380335' y='0' xlink:href='#eq12-g1-120'/>
 <use x='20.032422' y='0' xlink:href='#eq12-g2-41'/>
 </g>
-</svg></li><li><strong>General vector PDEs</strong>: Any vector-valued unknown</li></ul></section><section id="autotoc_md350"><h3><a href="#autotoc_md350">Usage Example</a></h3><pre class="m-code"><span class="c1">// 2D vector P2 element on triangle - 6 nodes × 2 components = 12 DOFs</span>
-<span class="n">VectorPkElement</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vec_p2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
-<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">vec_p2</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// Output: 12</span>
+</svg></li><li><strong>General vector PDEs</strong>: Any vector-valued unknown</li></ul></section><section id="autotoc_md289"><h3><a href="#autotoc_md289">Usage Example</a></h3><pre class="m-code"><span class="c1">// 2D vector H1 element of degree 2 on triangle - 6 nodes × 2 components = 12 DOFs</span>
+<span class="n">VectorH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// Output: 12</span>
 
 <span class="c1">// Evaluate vector basis function</span>
 <span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pt</span><span class="p">{{</span><span class="mf">0.25</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25</span><span class="p">}};</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">vec_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec_p2</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">)(</span><span class="n">pt</span><span class="p">);</span><span class="w">  </span><span class="c1">// Returns a 2D vector</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">vec_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">)(</span><span class="n">pt</span><span class="p">);</span><span class="w">  </span><span class="c1">// Returns a 2D vector</span>
 
 <span class="c1">// Get Jacobian matrix</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">jac</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec_p2</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="n">getJacobian</span><span class="p">()(</span><span class="n">pt</span><span class="p">);</span><span class="w">  </span><span class="c1">// Returns 2×2 matrix</span></pre><aside class="m-note m-default"><h4>See also</h4><p>PkElement&lt;K, Scalar&gt; for scalar-valued version</p></aside></section>
+<span class="k">auto</span><span class="w"> </span><span class="n">jac</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="n">getJacobian</span><span class="p">()(</span><span class="n">pt</span><span class="p">);</span><span class="w">  </span><span class="c1">// Returns 2×2 matrix</span></pre><aside class="m-note m-default"><h4>See also</h4><p>H1Element&lt;K, Scalar&gt; for scalar-valued version</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;PkElement&lt;K, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for finite elements.</dd>
           </dl>
@@ -313,8 +313,8 @@ $ \mathbf{E}(x) $
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="ad252de44fbe45e94a8733b906e4b2e00">
-              using <a href="#ad252de44fbe45e94a8733b906e4b2e00" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_pk_element.html" class="m-doc">PkElement</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;&gt;
+            <dt id="ad51cb44d68f0a511f9b1f8bda8990d76">
+              using <a href="#ad51cb44d68f0a511f9b1f8bda8990d76" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
             <dt id="a1f9f2413f0b7c0761221b0df7e358bba">
