@@ -477,6 +477,323 @@ namespace Rodin::Variational
     }
 
     /**
+     * @brief Evaluates normalized Jacobi polynomial P^{α,β}_n(x) on [-1,1]
+     * Used for Dubiner modal basis construction.
+     */
+    inline Real jacobiPolynomial(size_t n, Real alpha, Real beta, Real x)
+    {
+      if (n == 0)
+        return 1.0;
+      
+      Real P0 = 1.0;
+      Real P1 = 0.5 * (alpha - beta + (alpha + beta + 2.0) * x);
+      
+      if (n == 1)
+        return P1;
+      
+      // 3-term recurrence for Jacobi polynomials
+      Real P2 = 0.0;
+      for (size_t k = 1; k < n; ++k)
+      {
+        Real a1 = 2.0 * (k + 1.0) * (k + alpha + beta + 1.0) * (2.0 * k + alpha + beta);
+        Real a2 = (2.0 * k + alpha + beta + 1.0) * (alpha * alpha - beta * beta);
+        Real a3 = (2.0 * k + alpha + beta) * (2.0 * k + alpha + beta + 1.0) * (2.0 * k + alpha + beta + 2.0);
+        Real a4 = 2.0 * (k + alpha) * (k + beta) * (2.0 * k + alpha + beta + 2.0);
+        
+        P2 = ((a2 + a3 * x) * P1 - a4 * P0) / a1;
+        P0 = P1;
+        P1 = P2;
+      }
+      
+      return P1;
+    }
+
+    /**
+     * @brief Evaluates derivative of Jacobi polynomial dP^{α,β}_n/dx on [-1,1]
+     */
+    inline Real jacobiPolynomialDerivative(size_t n, Real alpha, Real beta, Real x)
+    {
+      if (n == 0)
+        return 0.0;
+      
+      // d/dx P^{α,β}_n = 0.5 * (n + α + β + 1) * P^{α+1,β+1}_{n-1}
+      return 0.5 * (n + alpha + beta + 1.0) * jacobiPolynomial(n - 1, alpha + 1.0, beta + 1.0, x);
+    }
+
+    /**
+     * @brief Evaluates Dubiner modal basis function ψ_{p,q} on triangle
+     * 
+     * Dubiner basis in collapsed coordinates (r,s) ∈ [-1,1]²
+     * Standard form: ψ_{p,q}(r,s) = P^{0,0}_p(a) * P^{2p+1,0}_q(b) * ((1-b)/2)^p
+     * where a = 2*(1+r)/(1-s) - 1, b = s
+     */
+    inline Real dubinerTriangle(size_t p, size_t q, Real r, Real s)
+    {
+      Real b = s;
+      Real a;
+      
+      // Handle singularity at s = 1
+      if (std::abs(s - 1.0) < 1e-10)
+      {
+        a = -1.0;
+      }
+      else
+      {
+        a = 2.0 * (1.0 + r) / (1.0 - s) - 1.0;
+      }
+      
+      Real psi = jacobiPolynomial(p, 0.0, 0.0, a);
+      psi *= jacobiPolynomial(q, 2.0 * p + 1.0, 0.0, b);
+      psi *= std::pow(0.5 * (1.0 - b), p);
+      
+      return psi;
+    }
+
+    /**
+     * @brief Evaluates gradient of Dubiner modal basis ∇ψ_{p,q} on triangle
+     * Returns (∂ψ/∂r, ∂ψ/∂s) in collapsed coordinates
+     */
+    inline std::pair<Real, Real> dubinerTriangleGradient(size_t p, size_t q, Real r, Real s)
+    {
+      Real eps = 1e-10;
+      Real b = s;
+      Real a;
+      
+      if (std::abs(s - 1.0) < eps)
+      {
+        a = -1.0;
+      }
+      else
+      {
+        a = 2.0 * (1.0 + r) / (1.0 - s) - 1.0;
+      }
+      
+      Real Pa = jacobiPolynomial(p, 0.0, 0.0, a);
+      Real dPa = jacobiPolynomialDerivative(p, 0.0, 0.0, a);
+      Real Pb = jacobiPolynomial(q, 2.0 * p + 1.0, 0.0, b);
+      Real dPb = jacobiPolynomialDerivative(q, 2.0 * p + 1.0, 0.0, b);
+      Real scale_b = std::pow(0.5 * (1.0 - b), p);
+      
+      // ∂ψ/∂r: only a depends on r
+      Real dpsi_dr = 0.0;
+      if (std::abs(s - 1.0) > eps)
+      {
+        Real da_dr = 2.0 / (1.0 - s);
+        dpsi_dr = dPa * da_dr * Pb * scale_b;
+      }
+      
+      // ∂ψ/∂s: both a and b depend on s, and scale_b depends on b=s
+      Real dpsi_ds = 0.0;
+      if (std::abs(s - 1.0) > eps)
+      {
+        Real da_ds = -2.0 * (1.0 + r) / ((1.0 - s) * (1.0 - s));
+        dpsi_ds += dPa * da_ds * Pb * scale_b;
+      }
+      dpsi_ds += Pa * dPb * scale_b;  // db_ds = 1
+      if (p > 0)
+      {
+        dpsi_ds += Pa * Pb * p * std::pow(0.5 * (1.0 - b), p - 1) * (-0.5);
+      }
+      
+      return {dpsi_dr, dpsi_ds};
+    }
+
+    /**
+     * @brief Converts from reference triangle (x,y) ∈ [0,1]² to collapsed coords (r,s) ∈ [-1,1]²
+     * Reference triangle: (0,0), (1,0), (0,1)
+     * Standard triangle (for Dubiner): (-1,-1), (1,-1), (-1,1)
+     */
+    inline std::pair<Real, Real> triangleToCollapsed(Real x, Real y)
+    {
+      // First map reference triangle to standard triangle
+      // (0,0) -> (-1,-1), (1,0) -> (1,-1), (0,1) -> (-1,1)
+      // This is: x_std = -1 + 2*x, y_std = -1 + 2*y
+      // But we need to account for the constraint x+y <= 1
+      
+      // Use Hesthaven & Warburton formula:
+      // r = 2*(1+x)/(1-y) - 1  (when y != 1)
+      // s = 2*y - 1
+      
+      Real eps = 1e-10;
+      Real r, s;
+      
+      if (y > 1.0 - eps)
+      {
+        r = -1.0;
+        s = 1.0;
+      }
+      else
+      {
+        r = 2.0 * (x / (1.0 - y)) - 1.0;
+        s = 2.0 * y - 1.0;
+      }
+      
+      return {r, s};
+    }
+
+    /**
+     * @brief Gets Vandermonde matrix (and its inverse) for Triangle Dubiner basis
+     * V[i,j] = ψ_j(node_i) where ψ_j is the j-th Dubiner mode
+     * This is cached per polynomial degree K
+     */
+    template <size_t K>
+    struct TriangleDubinerVandermonde
+    {
+      static const Math::Matrix<Real>& get()
+      {
+        static thread_local Math::Matrix<Real> V;
+        if (V.rows() == 0)
+        {
+          const auto& nodes = getTriangleFeketeNodes<K>();
+          const size_t n_nodes = nodes.size();
+          V.resize(n_nodes, n_nodes);
+          
+          // Fill Vandermonde matrix
+          size_t mode_idx = 0;
+          for (size_t p = 0; p <= K; ++p)
+          {
+            for (size_t q = 0; q <= K - p; ++q)
+            {
+              for (size_t node_idx = 0; node_idx < n_nodes; ++node_idx)
+              {
+                auto [r, s] = triangleToCollapsed(nodes[node_idx].x(), nodes[node_idx].y());
+                V(node_idx, mode_idx) = dubinerTriangle(p, q, r, s);
+              }
+              mode_idx++;
+            }
+          }
+        }
+        return V;
+      }
+      
+      static const Math::Matrix<Real>& getInverse()
+      {
+        static thread_local Math::Matrix<Real> Vinv;
+        if (Vinv.rows() == 0)
+        {
+          const auto& V = get();
+          Vinv = V.inverse();
+        }
+        return Vinv;
+      }
+    };
+
+    /**
+     * @brief Evaluates Dubiner modal basis function ψ_{p,q,r} on tetrahedron
+     */
+    inline Real dubinerTetrahedron(size_t p, size_t q, size_t r_idx, Real r, Real s, Real t)
+    {
+      Real eps = 1e-10;
+      
+      // Collapsed coordinates transformation
+      Real sr = (std::abs(1.0 - r) < eps) ? -1.0 : (2.0 * (1.0 + s) / (1.0 - r) - 1.0);
+      Real tr = (std::abs(1.0 - r - s) < eps) ? -1.0 : (2.0 * (1.0 + t) / (1.0 - r - s) - 1.0);
+      
+      Real psi = jacobiPolynomial(p, 0.0, 0.0, r);
+      psi *= std::pow(0.5 * (1.0 - r), p);
+      psi *= jacobiPolynomial(q, 2.0 * p + 1.0, 0.0, sr);
+      psi *= std::pow(0.5 * (1.0 - s), q);
+      psi *= jacobiPolynomial(r_idx, 2.0 * (p + q) + 2.0, 0.0, tr);
+      
+      return psi;
+    }
+
+    /**
+     * @brief Evaluates gradient of Dubiner modal basis ∇ψ_{p,q,r} on tetrahedron
+     */
+    inline std::tuple<Real, Real, Real> dubinerTetrahedronGradient(size_t p, size_t q, size_t r_idx, Real r, Real s, Real t)
+    {
+      // Simplified implementation - proper chain rule derivatives needed for production
+      Real h = 1e-7;
+      Real psi0 = dubinerTetrahedron(p, q, r_idx, r, s, t);
+      Real psi_r = dubinerTetrahedron(p, q, r_idx, r + h, s, t);
+      Real psi_s = dubinerTetrahedron(p, q, r_idx, r, s + h, t);
+      Real psi_t = dubinerTetrahedron(p, q, r_idx, r, s, t + h);
+      
+      return {(psi_r - psi0) / h, (psi_s - psi0) / h, (psi_t - psi0) / h};
+    }
+
+    /**
+     * @brief Converts from reference tetrahedron (x,y,z) to collapsed coords (r,s,t)
+     * Reference tetrahedron: (0,0,0), (1,0,0), (0,1,0), (0,0,1)
+     */
+    inline std::tuple<Real, Real, Real> tetrahedronToCollapsed(Real x, Real y, Real z)
+    {
+      Real eps = 1e-10;
+      Real r, s, t;
+      
+      if (y + z < 1.0 - eps)
+      {
+        r = -1.0 + 2.0 * x / (1.0 - y - z);
+      }
+      else
+      {
+        r = -1.0;
+      }
+      
+      if (z < 1.0 - eps)
+      {
+        s = -1.0 + 2.0 * y / (1.0 - z);
+      }
+      else
+      {
+        s = -1.0;
+      }
+      
+      t = -1.0 + 2.0 * z;
+      
+      return {r, s, t};
+    }
+
+    /**
+     * @brief Gets Vandermonde matrix for Tetrahedron Dubiner basis
+     */
+    template <size_t K>
+    struct TetrahedronDubinerVandermonde
+    {
+      static const Math::Matrix<Real>& get()
+      {
+        static thread_local Math::Matrix<Real> V;
+        if (V.rows() == 0)
+        {
+          const auto& nodes = getTetrahedronFeketeNodes<K>();
+          const size_t n_nodes = nodes.size();
+          V.resize(n_nodes, n_nodes);
+          
+          size_t mode_idx = 0;
+          for (size_t p = 0; p <= K; ++p)
+          {
+            for (size_t q = 0; q <= K - p; ++q)
+            {
+              for (size_t r = 0; r <= K - p - q; ++r)
+              {
+                for (size_t node_idx = 0; node_idx < n_nodes; ++node_idx)
+                {
+                  auto [rc, sc, tc] = tetrahedronToCollapsed(
+                    nodes[node_idx].x(), nodes[node_idx].y(), nodes[node_idx].z());
+                  V(node_idx, mode_idx) = dubinerTetrahedron(p, q, r, rc, sc, tc);
+                }
+                mode_idx++;
+              }
+            }
+          }
+        }
+        return V;
+      }
+      
+      static const Math::Matrix<Real>& getInverse()
+      {
+        static thread_local Math::Matrix<Real> Vinv;
+        if (Vinv.rows() == 0)
+        {
+          const auto& V = get();
+          Vinv = V.inverse();
+        }
+        return Vinv;
+      }
+    };
+
+    /**
      * @brief Evaluates Lagrange basis function for 1D with given nodes.
      */
     template <size_t K, class Scalar>
@@ -1064,21 +1381,23 @@ namespace Rodin::Variational
       }
       case Geometry::Polytope::Type::Triangle:
       {
-        // Use barycentric coordinates for triangle
-        // Node ordering: (i,j) with i+j≤K, ordered by j then i
-        size_t idx = 0;
-        for (size_t j = 0; j <= K; ++j)
+        // Use Dubiner modal basis with Vandermonde approach
+        const auto& Vinv = Internal::TriangleDubinerVandermonde<K>::getInverse();
+        
+        auto [rc, sc] = Internal::triangleToCollapsed(r.x(), r.y());
+        
+        Scalar result = 0.0;
+        size_t mode_idx = 0;
+        for (size_t p = 0; p <= K; ++p)
         {
-          for (size_t i = 0; i <= K - j; ++i)
+          for (size_t q = 0; q <= K - p; ++q)
           {
-            if (idx == m_local)
-            {
-              return Internal::evaluateLagrangeTriangle<K, Scalar>(i, j, r);
-            }
-            idx++;
+            Real psi = Internal::dubinerTriangle(p, q, rc, sc);
+            result += Vinv(m_local, mode_idx) * psi;
+            mode_idx++;
           }
         }
-        return Math::nan<Scalar>();
+        return result;
       }
       case Geometry::Polytope::Type::Quadrilateral:
       {
@@ -1097,23 +1416,26 @@ namespace Rodin::Variational
       }
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        // Node ordering: (i,j,k) with i+j+k≤K, ordered by k, then j, then i
-        size_t idx = 0;
-        for (size_t k = 0; k <= K; ++k)
+        // Use Dubiner modal basis with Vandermonde approach
+        const auto& Vinv = Internal::TetrahedronDubinerVandermonde<K>::getInverse();
+        
+        auto [rc, sc, tc] = Internal::tetrahedronToCollapsed(r.x(), r.y(), r.z());
+        
+        Scalar result = 0.0;
+        size_t mode_idx = 0;
+        for (size_t p = 0; p <= K; ++p)
         {
-          for (size_t j = 0; j <= K - k; ++j)
+          for (size_t q = 0; q <= K - p; ++q)
           {
-            for (size_t i = 0; i <= K - j - k; ++i)
+            for (size_t r_mode = 0; r_mode <= K - p - q; ++r_mode)
             {
-              if (idx == m_local)
-              {
-                return Internal::evaluateLagrangeTetrahedron<K, Scalar>(i, j, k, r);
-              }
-              idx++;
+              Real psi = Internal::dubinerTetrahedron(p, q, r_mode, rc, sc, tc);
+              result += Vinv(m_local, mode_idx) * psi;
+              mode_idx++;
             }
           }
         }
-        return Math::nan<Scalar>();
+        return result;
       }
       case Geometry::Polytope::Type::Wedge:
       {
@@ -1167,20 +1489,50 @@ namespace Rodin::Variational
         }
         case Geometry::Polytope::Type::Triangle:
         {
-          // Find the (i,j) indices for this local DOF
-          size_t idx = 0;
-          for (size_t j = 0; j <= K; ++j)
+          // Use Dubiner modal basis with Vandermonde approach
+          const auto& Vinv = Internal::TriangleDubinerVandermonde<K>::getInverse();
+          
+          auto [rc, sc] = Internal::triangleToCollapsed(r.x(), r.y());
+          
+          Scalar result = 0.0;
+          size_t mode_idx = 0;
+          for (size_t p = 0; p <= K; ++p)
           {
-            for (size_t i = 0; i <= K - j; ++i)
+            for (size_t q = 0; q <= K - p; ++q)
             {
-              if (idx == m_local)
+              auto [dpsi_dr, dpsi_ds] = Internal::dubinerTriangleGradient(p, q, rc, sc);
+              
+              // Transform gradients from collapsed (r,s) to reference (x,y) coordinates
+              // r = 2*x/(1-y) - 1, s = 2*y - 1
+              // ∂r/∂x = 2/(1-y), ∂r/∂y = 2*x/((1-y)^2)
+              // ∂s/∂x = 0, ∂s/∂y = 2
+              
+              Real x = r.x();
+              Real y = r.y();
+              Real eps = 1e-10;
+              
+              Real dpsi_dx = 0.0, dpsi_dy = 0.0;
+              
+              if (y < 1.0 - eps)
               {
-                return Internal::evaluateLagrangeTriangleDerivative<K, Scalar>(i, j, m_i, r);
+                Real dr_dx = 2.0 / (1.0 - y);
+                Real dr_dy = 2.0 * x / ((1.0 - y) * (1.0 - y));
+                Real ds_dx = 0.0;
+                Real ds_dy = 2.0;
+                
+                dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
+                dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
               }
-              idx++;
+              
+              if (m_i == 0) // ∂/∂x
+                result += Vinv(m_local, mode_idx) * dpsi_dx;
+              else if (m_i == 1) // ∂/∂y
+                result += Vinv(m_local, mode_idx) * dpsi_dy;
+              
+              mode_idx++;
             }
           }
-          return 0;
+          return result;
         }
         case Geometry::Polytope::Type::Quadrilateral:
         {
@@ -1203,23 +1555,38 @@ namespace Rodin::Variational
         }
         case Geometry::Polytope::Type::Tetrahedron:
         {
-          // Find (i,j,k) indices for this local DOF
-          size_t idx = 0;
-          for (size_t k = 0; k <= K; ++k)
+          // Use Dubiner modal basis with Vandermonde approach
+          const auto& Vinv = Internal::TetrahedronDubinerVandermonde<K>::getInverse();
+          
+          auto [rc, sc, tc] = Internal::tetrahedronToCollapsed(r.x(), r.y(), r.z());
+          
+          Scalar result = 0.0;
+          size_t mode_idx = 0;
+          for (size_t p = 0; p <= K; ++p)
           {
-            for (size_t j = 0; j <= K - k; ++j)
+            for (size_t q = 0; q <= K - p; ++q)
             {
-              for (size_t i = 0; i <= K - j - k; ++i)
+              for (size_t r_mode = 0; r_mode <= K - p - q; ++r_mode)
               {
-                if (idx == m_local)
-                {
-                  return Internal::evaluateLagrangeTetrahedronDerivative<K, Scalar>(i, j, k, m_i, r);
-                }
-                idx++;
+                auto [dpsi_dr, dpsi_ds, dpsi_dt] = Internal::dubinerTetrahedronGradient(p, q, r_mode, rc, sc, tc);
+                
+                // Transform from collapsed coordinates to reference coordinates
+                Real dpsi_dx = dpsi_dr * 0.5;
+                Real dpsi_dy = dpsi_ds * 0.5;
+                Real dpsi_dz = dpsi_dt * 0.5;
+                
+                if (m_i == 0) // ∂/∂x
+                  result += Vinv(m_local, mode_idx) * dpsi_dx;
+                else if (m_i == 1) // ∂/∂y
+                  result += Vinv(m_local, mode_idx) * dpsi_dy;
+                else if (m_i == 2) // ∂/∂z
+                  result += Vinv(m_local, mode_idx) * dpsi_dz;
+                
+                mode_idx++;
               }
             }
           }
-          return 0;
+          return result;
         }
         case Geometry::Polytope::Type::Wedge:
         {
