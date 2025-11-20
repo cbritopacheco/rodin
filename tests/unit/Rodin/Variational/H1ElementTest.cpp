@@ -26,7 +26,7 @@ using namespace Rodin::Test::Random;
 namespace Rodin::Tests::Unit
 {
   // Test P2 element (K=2) on Point geometry
-  TEST(Rodin_Variational_RealPkElement, SanityTest_P2_0D_Reference_Point)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P2_0D_Reference_Point)
   {
     RealPkElement<2> k(Polytope::Type::Point);
 
@@ -41,7 +41,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 element (K=2) on Segment geometry
-  TEST(Rodin_Variational_RealPkElement, SanityTest_P2_1D_Reference_Segment)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P2_1D_Reference_Segment)
   {
     RealPkElement<2> k(Polytope::Type::Segment);
 
@@ -72,7 +72,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 element partition of unity on Segment
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P2_Segment)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P2_Segment)
   {
     constexpr size_t n = 25;
     RandomFloat gen(0.0, 1.0);
@@ -88,7 +88,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 element derivatives on Segment
-  TEST(Rodin_Variational_RealPkElement, DerivativeTest_P2_1D_Reference_Segment)
+  TEST(Rodin_Variational_RealH1Element, DerivativeTest_P2_1D_Reference_Segment)
   {
     RealPkElement<2> k(Polytope::Type::Segment);
 
@@ -121,7 +121,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 element on Triangle geometry
-  TEST(Rodin_Variational_RealPkElement, SanityTest_P2_2D_Reference_Triangle)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P2_2D_Reference_Triangle)
   {
     RealPkElement<2> k(Polytope::Type::Triangle);
 
@@ -133,7 +133,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 element on Quadrilateral geometry
-  TEST(Rodin_Variational_RealPkElement, SanityTest_P2_2D_Reference_Quadrilateral)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P2_2D_Reference_Quadrilateral)
   {
     RealPkElement<2> k(Polytope::Type::Quadrilateral);
 
@@ -150,7 +150,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 element partition of unity on Quadrilateral
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P2_Quadrilateral)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P2_Quadrilateral)
   {
     constexpr size_t n = 25;
     RandomFloat gen(0.0, 1.0);
@@ -173,7 +173,7 @@ namespace Rodin::Tests::Unit
 
 
   // Test P3 element on Segment
-  TEST(Rodin_Variational_RealPkElement, SanityTest_P3_1D_Reference_Segment)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P3_1D_Reference_Segment)
   {
     RealPkElement<3> k(Polytope::Type::Segment);
 
@@ -196,7 +196,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P3 element partition of unity on Segment
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P3_Segment)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P3_Segment)
   {
     constexpr size_t n = 25;
     RandomFloat gen(0.0, 1.0);
@@ -216,7 +216,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 element on Tetrahedron geometry
-  TEST(Rodin_Variational_RealPkElement, SanityTest_P2_3D_Reference_Tetrahedron)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P2_3D_Reference_Tetrahedron)
   {
     RealPkElement<2> k(Polytope::Type::Tetrahedron);
 
@@ -228,7 +228,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 element on Wedge geometry
-  TEST(Rodin_Variational_RealPkElement, SanityTest_P2_3D_Reference_Wedge)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P2_3D_Reference_Wedge)
   {
     RealPkElement<2> k(Polytope::Type::Wedge);
 
@@ -245,7 +245,7 @@ namespace Rodin::Tests::Unit
   // ========================================================================
 
   // Test P4 element on Segment
-  TEST(Rodin_Variational_RealPkElement, SanityTest_P4_1D_Reference_Segment)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P4_1D_Reference_Segment)
   {
     RealPkElement<4> k(Polytope::Type::Segment);
 
@@ -266,7 +266,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P4 partition of unity on Segment
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P4_Segment)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P4_Segment)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -286,7 +286,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P4 derivatives on Segment
-  TEST(Rodin_Variational_RealPkElement, DerivativeTest_P4_1D_Reference_Segment)
+  TEST(Rodin_Variational_RealH1Element, DerivativeTest_P4_1D_Reference_Segment)
   {
     RealPkElement<4> k(Polytope::Type::Segment);
 
@@ -308,7 +308,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P5 element on Segment
-  TEST(Rodin_Variational_RealPkElement, SanityTest_P5_1D_Reference_Segment)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P5_1D_Reference_Segment)
   {
     RealPkElement<5> k(Polytope::Type::Segment);
 
@@ -329,7 +329,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P5 partition of unity on Segment
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P5_Segment)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P5_Segment)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -349,7 +349,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P5 behavior: symmetry of basis functions
-  TEST(Rodin_Variational_RealPkElement, SymmetryTest_P5_Segment)
+  TEST(Rodin_Variational_RealH1Element, SymmetryTest_P5_Segment)
   {
     RealPkElement<5> k(Polytope::Type::Segment);
 
@@ -372,7 +372,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P6 element on Segment
-  TEST(Rodin_Variational_RealPkElement, SanityTest_P6_1D_Reference_Segment)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P6_1D_Reference_Segment)
   {
     RealPkElement<6> k(Polytope::Type::Segment);
 
@@ -393,7 +393,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P6 partition of unity on Segment
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P6_Segment)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P6_Segment)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -413,7 +413,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P6 derivatives sum to zero
-  TEST(Rodin_Variational_RealPkElement, DerivativeTest_P6_1D_Reference_Segment)
+  TEST(Rodin_Variational_RealH1Element, DerivativeTest_P6_1D_Reference_Segment)
   {
     RealPkElement<6> k(Polytope::Type::Segment);
 
@@ -434,7 +434,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test DOF count consistency for all orders on Segment
-  TEST(Rodin_Variational_RealPkElement, DOFCount_Consistency_Segment)
+  TEST(Rodin_Variational_RealH1Element, DOFCount_Consistency_Segment)
   {
     // Test DOF formula: (k+1) for Segment
     EXPECT_EQ(RealPkElement<2>(Polytope::Type::Segment).getCount(), 3);
@@ -445,7 +445,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test higher orders on Quadrilateral
-  TEST(Rodin_Variational_RealPkElement, SanityTest_HigherOrders_Quadrilateral)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_HigherOrders_Quadrilateral)
   {
     // Test DOF formula: (k+1)^2 for Quadrilateral
     EXPECT_EQ(RealPkElement<2>(Polytope::Type::Quadrilateral).getCount(), 9);
@@ -456,7 +456,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P3 partition of unity on Quadrilateral
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P3_Quadrilateral)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P3_Quadrilateral)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -477,7 +477,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P4 partition of unity on Quadrilateral
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P4_Quadrilateral)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P4_Quadrilateral)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -498,7 +498,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test higher orders on Triangle
-  TEST(Rodin_Variational_RealPkElement, SanityTest_HigherOrders_Triangle)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_HigherOrders_Triangle)
   {
     // Test DOF formula: (k+1)(k+2)/2 for Triangle
     EXPECT_EQ(RealPkElement<2>(Polytope::Type::Triangle).getCount(), 6);
@@ -509,7 +509,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test higher orders on Tetrahedron
-  TEST(Rodin_Variational_RealPkElement, SanityTest_HigherOrders_Tetrahedron)
+  TEST(Rodin_Variational_RealH1Element, SanityTest_HigherOrders_Tetrahedron)
   {
     // Test DOF formula: (k+1)(k+2)(k+3)/6 for Tetrahedron
     EXPECT_EQ(RealPkElement<2>(Polytope::Type::Tetrahedron).getCount(), 10);
@@ -520,7 +520,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 behavior: linear reproduction property
-  TEST(Rodin_Variational_RealPkElement, LinearReproduction_P2_Segment)
+  TEST(Rodin_Variational_RealH1Element, LinearReproduction_P2_Segment)
   {
     RealPkElement<2> k(Polytope::Type::Segment);
 
@@ -557,7 +557,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P3 behavior: quadratic reproduction property
-  TEST(Rodin_Variational_RealPkElement, QuadraticReproduction_P3_Segment)
+  TEST(Rodin_Variational_RealH1Element, QuadraticReproduction_P3_Segment)
   {
     RealPkElement<3> k(Polytope::Type::Segment);
 
@@ -596,7 +596,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test gradient computation consistency for P4
-  TEST(Rodin_Variational_RealPkElement, GradientConsistency_P4_Segment)
+  TEST(Rodin_Variational_RealH1Element, GradientConsistency_P4_Segment)
   {
     RealPkElement<4> k(Polytope::Type::Segment);
 
@@ -624,7 +624,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test consistency across orders for identical geometries
-  TEST(Rodin_Variational_RealPkElement, CrossOrder_Consistency_Segment)
+  TEST(Rodin_Variational_RealH1Element, CrossOrder_Consistency_Segment)
   {
     // Verify that nodes are uniformly distributed for all orders
     for (size_t k = 2; k <= 6; k++)
@@ -644,7 +644,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test non-negativity of basis functions at interior points
-  TEST(Rodin_Variational_RealPkElement, BasisNonNegativity_P3_Segment)
+  TEST(Rodin_Variational_RealH1Element, BasisNonNegativity_P3_Segment)
   {
     RealPkElement<3> k(Polytope::Type::Segment);
 
@@ -658,7 +658,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test order property is correctly set for all orders
-  TEST(Rodin_Variational_RealPkElement, OrderProperty_AllOrders)
+  TEST(Rodin_Variational_RealH1Element, OrderProperty_AllOrders)
   {
     EXPECT_EQ(RealPkElement<2>(Polytope::Type::Segment).getOrder(), 2);
     EXPECT_EQ(RealPkElement<3>(Polytope::Type::Segment).getOrder(), 3);
@@ -672,7 +672,7 @@ namespace Rodin::Tests::Unit
   // ========================================================================
 
   // Test P2 triangle Lagrange property
-  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P2_Triangle)
+  TEST(Rodin_Variational_RealH1Element, LagrangeProperty_P2_Triangle)
   {
     RealPkElement<2> k(Polytope::Type::Triangle);
 
@@ -689,7 +689,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 triangle partition of unity
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P2_Triangle)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P2_Triangle)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -711,7 +711,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P3 triangle Lagrange property
-  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P3_Triangle)
+  TEST(Rodin_Variational_RealH1Element, LagrangeProperty_P3_Triangle)
   {
     RealPkElement<3> k(Polytope::Type::Triangle);
 
@@ -727,7 +727,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P3 triangle partition of unity
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P3_Triangle)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P3_Triangle)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -749,7 +749,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P4 triangle partition of unity
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P4_Triangle)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P4_Triangle)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -772,7 +772,7 @@ namespace Rodin::Tests::Unit
 
   // Test P2 triangle derivative consistency
   // TODO: Fix derivative computation for barycentric elements
-  TEST(Rodin_Variational_RealPkElement, DerivativeConsistency_P2_Triangle)
+  TEST(Rodin_Variational_RealH1Element, DerivativeConsistency_P2_Triangle)
   {
     RealPkElement<2> k(Polytope::Type::Triangle);
 
@@ -798,7 +798,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 triangle linear reproduction
-  TEST(Rodin_Variational_RealPkElement, LinearReproduction_P2_Triangle)
+  TEST(Rodin_Variational_RealH1Element, LinearReproduction_P2_Triangle)
   {
     RealPkElement<2> k(Polytope::Type::Triangle);
 
@@ -837,7 +837,7 @@ namespace Rodin::Tests::Unit
   // ========================================================================
 
   // Test P2 tetrahedron Lagrange property
-  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P2_Tetrahedron)
+  TEST(Rodin_Variational_RealH1Element, LagrangeProperty_P2_Tetrahedron)
   {
     RealPkElement<2> k(Polytope::Type::Tetrahedron);
 
@@ -853,7 +853,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 tetrahedron partition of unity
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P2_Tetrahedron)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P2_Tetrahedron)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -876,7 +876,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P3 tetrahedron Lagrange property
-  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P3_Tetrahedron)
+  TEST(Rodin_Variational_RealH1Element, LagrangeProperty_P3_Tetrahedron)
   {
     RealPkElement<3> k(Polytope::Type::Tetrahedron);
 
@@ -892,7 +892,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P3 tetrahedron partition of unity
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P3_Tetrahedron)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P3_Tetrahedron)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -916,7 +916,7 @@ namespace Rodin::Tests::Unit
 
   // Test P2 tetrahedron derivative consistency
   // TODO: Fix derivative computation for barycentric elements
-  TEST(Rodin_Variational_RealPkElement, DerivativeConsistency_P2_Tetrahedron)
+  TEST(Rodin_Variational_RealH1Element, DerivativeConsistency_P2_Tetrahedron)
   {
     RealPkElement<2> k(Polytope::Type::Tetrahedron);
 
@@ -948,7 +948,7 @@ namespace Rodin::Tests::Unit
   // ========================================================================
 
   // Test P2 wedge Lagrange property
-  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P2_Wedge)
+  TEST(Rodin_Variational_RealH1Element, LagrangeProperty_P2_Wedge)
   {
     RealPkElement<2> k(Polytope::Type::Wedge);
 
@@ -964,7 +964,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P2 wedge partition of unity
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P2_Wedge)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P2_Wedge)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -987,7 +987,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P3 wedge Lagrange property
-  TEST(Rodin_Variational_RealPkElement, LagrangeProperty_P3_Wedge)
+  TEST(Rodin_Variational_RealH1Element, LagrangeProperty_P3_Wedge)
   {
     RealPkElement<3> k(Polytope::Type::Wedge);
 
@@ -1003,7 +1003,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P3 wedge partition of unity
-  TEST(Rodin_Variational_RealPkElement, PartitionOfUnity_P3_Wedge)
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P3_Wedge)
   {
     constexpr size_t n = 50;
     RandomFloat gen(0.0, 1.0);
@@ -1027,7 +1027,7 @@ namespace Rodin::Tests::Unit
 
   // Test P2 wedge derivative consistency
   // TODO: Fix derivative computation for barycentric elements
-  TEST(Rodin_Variational_RealPkElement, DerivativeConsistency_P2_Wedge)
+  TEST(Rodin_Variational_RealH1Element, DerivativeConsistency_P2_Wedge)
   {
     RealPkElement<2> k(Polytope::Type::Wedge);
 
@@ -1055,7 +1055,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test higher orders DOF count for triangle
-  TEST(Rodin_Variational_RealPkElement, DOFCount_HigherOrders_Triangle)
+  TEST(Rodin_Variational_RealH1Element, DOFCount_HigherOrders_Triangle)
   {
     EXPECT_EQ(RealPkElement<4>(Polytope::Type::Triangle).getCount(), 15);
     EXPECT_EQ(RealPkElement<5>(Polytope::Type::Triangle).getCount(), 21);
@@ -1063,7 +1063,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test higher orders DOF count for tetrahedron
-  TEST(Rodin_Variational_RealPkElement, DOFCount_HigherOrders_Tetrahedron)
+  TEST(Rodin_Variational_RealH1Element, DOFCount_HigherOrders_Tetrahedron)
   {
     EXPECT_EQ(RealPkElement<4>(Polytope::Type::Tetrahedron).getCount(), 35);
     EXPECT_EQ(RealPkElement<5>(Polytope::Type::Tetrahedron).getCount(), 56);
@@ -1071,7 +1071,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test higher orders DOF count for wedge
-  TEST(Rodin_Variational_RealPkElement, DOFCount_HigherOrders_Wedge)
+  TEST(Rodin_Variational_RealH1Element, DOFCount_HigherOrders_Wedge)
   {
     // Wedge: (k+1) * (k+1)(k+2)/2
     EXPECT_EQ(RealPkElement<4>(Polytope::Type::Wedge).getCount(), 75);  // 5 * 5*6/2 = 5 * 15 = 75
@@ -1083,7 +1083,7 @@ namespace Rodin::Tests::Unit
   // ========================================================================
 
   // Test Complex P2 element basic functionality
-  TEST(Rodin_Variational_ComplexPkElement, SanityTest_P2_Segment)
+  TEST(Rodin_Variational_ComplexH1Element, SanityTest_P2_Segment)
   {
     ComplexPkElement<2> k(Polytope::Type::Segment);
 
@@ -1105,7 +1105,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Complex P3 partition of unity
-  TEST(Rodin_Variational_ComplexPkElement, PartitionOfUnity_P3_Segment)
+  TEST(Rodin_Variational_ComplexH1Element, PartitionOfUnity_P3_Segment)
   {
     constexpr size_t n = 20;
     RandomFloat gen(0.0, 1.0);
@@ -1126,7 +1126,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Complex P2 on Triangle
-  TEST(Rodin_Variational_ComplexPkElement, LagrangeProperty_P2_Triangle)
+  TEST(Rodin_Variational_ComplexH1Element, LagrangeProperty_P2_Triangle)
   {
     ComplexPkElement<2> k(Polytope::Type::Triangle);
 
@@ -1144,7 +1144,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Complex P2 partition of unity on Quadrilateral
-  TEST(Rodin_Variational_ComplexPkElement, PartitionOfUnity_P2_Quadrilateral)
+  TEST(Rodin_Variational_ComplexH1Element, PartitionOfUnity_P2_Quadrilateral)
   {
     constexpr size_t n = 20;
     RandomFloat gen(0.0, 1.0);
@@ -1166,7 +1166,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Complex DOF count consistency
-  TEST(Rodin_Variational_ComplexPkElement, DOFCount_Consistency)
+  TEST(Rodin_Variational_ComplexH1Element, DOFCount_Consistency)
   {
     EXPECT_EQ(ComplexPkElement<2>(Polytope::Type::Segment).getCount(), 3);
     EXPECT_EQ(ComplexPkElement<3>(Polytope::Type::Segment).getCount(), 4);
@@ -1180,7 +1180,7 @@ namespace Rodin::Tests::Unit
   // ========================================================================
 
   // Test Vector P2 element basic functionality
-  TEST(Rodin_Variational_VectorPkElement, SanityTest_P2_Segment_2D)
+  TEST(Rodin_Variational_VectorH1Element, SanityTest_P2_Segment_2D)
   {
     constexpr size_t vdim = 2;
     VectorPkElement<2> k(Polytope::Type::Segment, vdim);
@@ -1200,7 +1200,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector P3 element with 3D vectors
-  TEST(Rodin_Variational_VectorPkElement, SanityTest_P3_Segment_3D)
+  TEST(Rodin_Variational_VectorH1Element, SanityTest_P3_Segment_3D)
   {
     constexpr size_t vdim = 3;
     VectorPkElement<3> k(Polytope::Type::Segment, vdim);
@@ -1211,7 +1211,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector P2 basis function structure
-  TEST(Rodin_Variational_VectorPkElement, BasisStructure_P2_Segment)
+  TEST(Rodin_Variational_VectorH1Element, BasisStructure_P2_Segment)
   {
     constexpr size_t vdim = 2;
     VectorPkElement<2> k(Polytope::Type::Segment, vdim);
@@ -1246,7 +1246,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector P2 on Triangle
-  TEST(Rodin_Variational_VectorPkElement, SanityTest_P2_Triangle_2D)
+  TEST(Rodin_Variational_VectorH1Element, SanityTest_P2_Triangle_2D)
   {
     constexpr size_t vdim = 2;
     VectorPkElement<2> k(Polytope::Type::Triangle, vdim);
@@ -1257,7 +1257,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector P2 on Quadrilateral
-  TEST(Rodin_Variational_VectorPkElement, SanityTest_P2_Quadrilateral_2D)
+  TEST(Rodin_Variational_VectorH1Element, SanityTest_P2_Quadrilateral_2D)
   {
     constexpr size_t vdim = 2;
     VectorPkElement<2> k(Polytope::Type::Quadrilateral, vdim);
@@ -1268,7 +1268,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector P2 on Tetrahedron
-  TEST(Rodin_Variational_VectorPkElement, SanityTest_P2_Tetrahedron_3D)
+  TEST(Rodin_Variational_VectorH1Element, SanityTest_P2_Tetrahedron_3D)
   {
     constexpr size_t vdim = 3;
     VectorPkElement<2> k(Polytope::Type::Tetrahedron, vdim);
@@ -1279,7 +1279,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector P2 Jacobian computation
-  TEST(Rodin_Variational_VectorPkElement, JacobianTest_P2_Segment)
+  TEST(Rodin_Variational_VectorH1Element, JacobianTest_P2_Segment)
   {
     constexpr size_t vdim = 2;
     VectorPkElement<2> k(Polytope::Type::Segment, vdim);
@@ -1303,7 +1303,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector DOF count consistency
-  TEST(Rodin_Variational_VectorPkElement, DOFCount_Consistency)
+  TEST(Rodin_Variational_VectorH1Element, DOFCount_Consistency)
   {
     EXPECT_EQ(VectorPkElement<2>(Polytope::Type::Segment, 2).getCount(), 6);   // 3 nodes * 2 components
     EXPECT_EQ(VectorPkElement<3>(Polytope::Type::Segment, 2).getCount(), 8);   // 4 nodes * 2 components
@@ -1313,7 +1313,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test higher-order vector elements
-  TEST(Rodin_Variational_VectorPkElement, HigherOrder_P4_Segment)
+  TEST(Rodin_Variational_VectorH1Element, HigherOrder_P4_Segment)
   {
     constexpr size_t vdim = 3;
     VectorPkElement<4> k(Polytope::Type::Segment, vdim);
@@ -1324,7 +1324,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test vector P3 on higher-dimensional elements
-  TEST(Rodin_Variational_VectorPkElement, P3_Wedge_3D)
+  TEST(Rodin_Variational_VectorH1Element, P3_Wedge_3D)
   {
     constexpr size_t vdim = 3;
     VectorPkElement<3> k(Polytope::Type::Wedge, vdim);
@@ -1340,7 +1340,7 @@ namespace Rodin::Tests::Unit
   // ========================================================================
 
   // Test Complex P4 partition of unity on Triangle
-  TEST(Rodin_Variational_ComplexPkElement, PartitionOfUnity_P4_Triangle)
+  TEST(Rodin_Variational_ComplexH1Element, PartitionOfUnity_P4_Triangle)
   {
     constexpr size_t n = 20;
     RandomFloat gen(0.0, 1.0);
@@ -1362,7 +1362,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Complex P5 partition of unity on Quadrilateral
-  TEST(Rodin_Variational_ComplexPkElement, PartitionOfUnity_P5_Quadrilateral)
+  TEST(Rodin_Variational_ComplexH1Element, PartitionOfUnity_P5_Quadrilateral)
   {
     constexpr size_t n = 20;
     RandomFloat gen(0.0, 1.0);
@@ -1384,7 +1384,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Complex P3 Lagrange property on Tetrahedron
-  TEST(Rodin_Variational_ComplexPkElement, LagrangeProperty_P3_Tetrahedron)
+  TEST(Rodin_Variational_ComplexH1Element, LagrangeProperty_P3_Tetrahedron)
   {
     ComplexPkElement<3> k(Polytope::Type::Tetrahedron);
 
@@ -1401,7 +1401,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Complex higher orders DOF counting
-  TEST(Rodin_Variational_ComplexPkElement, DOFCount_HigherOrders)
+  TEST(Rodin_Variational_ComplexH1Element, DOFCount_HigherOrders)
   {
     EXPECT_EQ(ComplexPkElement<4>(Polytope::Type::Segment).getCount(), 5);
     EXPECT_EQ(ComplexPkElement<5>(Polytope::Type::Segment).getCount(), 6);
@@ -1411,7 +1411,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Complex linear reproduction
-  TEST(Rodin_Variational_ComplexPkElement, LinearReproduction_P2_Segment)
+  TEST(Rodin_Variational_ComplexH1Element, LinearReproduction_P2_Segment)
   {
     ComplexPkElement<2> k(Polytope::Type::Segment);
     RandomFloat gen(0.0, 1.0);
@@ -1441,7 +1441,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Complex symmetry properties
-  TEST(Rodin_Variational_ComplexPkElement, BasisSymmetry_P3_Segment)
+  TEST(Rodin_Variational_ComplexH1Element, BasisSymmetry_P3_Segment)
   {
     ComplexPkElement<3> k(Polytope::Type::Segment);
 
@@ -1467,7 +1467,7 @@ namespace Rodin::Tests::Unit
   // ========================================================================
 
   // Test Vector P3 partition of unity on Triangle
-  TEST(Rodin_Variational_VectorPkElement, PartitionOfUnity_P3_Triangle)
+  TEST(Rodin_Variational_VectorH1Element, PartitionOfUnity_P3_Triangle)
   {
     constexpr size_t vdim = 2;
     constexpr size_t n = 20;
@@ -1494,7 +1494,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector P2 Lagrange property on Quadrilateral
-  TEST(Rodin_Variational_VectorPkElement, LagrangeProperty_P2_Quadrilateral)
+  TEST(Rodin_Variational_VectorH1Element, LagrangeProperty_P2_Quadrilateral)
   {
     constexpr size_t vdim = 2;
     VectorPkElement<2> k(Polytope::Type::Quadrilateral, vdim);
@@ -1526,7 +1526,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector higher orders on Tetrahedron
-  TEST(Rodin_Variational_VectorPkElement, HigherOrder_P4_Tetrahedron)
+  TEST(Rodin_Variational_VectorH1Element, HigherOrder_P4_Tetrahedron)
   {
     constexpr size_t vdim = 3;
     VectorPkElement<4> k(Polytope::Type::Tetrahedron, vdim);
@@ -1537,7 +1537,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector basis sparsity in components
-  TEST(Rodin_Variational_VectorPkElement, ComponentSparsity_P2_Segment)
+  TEST(Rodin_Variational_VectorH1Element, ComponentSparsity_P2_Segment)
   {
     constexpr size_t vdim = 3;
     VectorPkElement<2> k(Polytope::Type::Segment, vdim);
@@ -1579,7 +1579,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector gradient consistency
-  TEST(Rodin_Variational_VectorPkElement, GradientConsistency_P3_Segment)
+  TEST(Rodin_Variational_VectorH1Element, GradientConsistency_P3_Segment)
   {
     constexpr size_t vdim = 2;
     VectorPkElement<3> k(Polytope::Type::Segment, vdim);
@@ -1610,7 +1610,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector DOF count on all geometries with higher orders
-  TEST(Rodin_Variational_VectorPkElement, DOFCount_AllGeometries_P5)
+  TEST(Rodin_Variational_VectorH1Element, DOFCount_AllGeometries_P5)
   {
     constexpr size_t vdim = 3;
 
@@ -1628,7 +1628,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector linear field reproduction
-  TEST(Rodin_Variational_VectorPkElement, LinearReproduction_P2_Segment)
+  TEST(Rodin_Variational_VectorH1Element, LinearReproduction_P2_Segment)
   {
     constexpr size_t vdim = 2;
     VectorPkElement<2> k(Polytope::Type::Segment, vdim);
@@ -1679,7 +1679,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Real, PartitionOfUnity_P2_AllGeometries)
+  TEST(FinalTest_H1Element_Real, PartitionOfUnity_P2_AllGeometries)
   {
     constexpr size_t n = 20;
     RandomFloat gen(0.0, 1.0);
@@ -1728,7 +1728,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Real, PartitionOfUnity_P3_P4_P5_P6_Segment)
+  TEST(FinalTest_H1Element_Real, PartitionOfUnity_P3_P4_P5_P6_Segment)
   {
     constexpr size_t n = 20;
     RandomFloat gen(0.0, 1.0);
@@ -1773,7 +1773,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Real, LagrangeProperty_P2_Segment)
+  TEST(FinalTest_H1Element_Real, LagrangeProperty_P2_Segment)
   {
     RealPkElement<2> elem(Polytope::Type::Segment);
 
@@ -1788,7 +1788,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Real, LagrangeProperty_P3_P4_P5_P6_Segment)
+  TEST(FinalTest_H1Element_Real, LagrangeProperty_P3_P4_P5_P6_Segment)
   {
     // Test orders 3-6
     {
@@ -1844,7 +1844,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Real, QuadraticReproduction_P2_Segment)
+  TEST(FinalTest_H1Element_Real, QuadraticReproduction_P2_Segment)
   {
     RealPkElement<2> elem(Polytope::Type::Segment);
 
@@ -1859,7 +1859,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(interpolated, exact, RODIN_FUZZY_CONSTANT);
   }
 
-  TEST(FinalTest_PkElement_Complex, PartitionOfUnity_P2_P3_P4_Segment)
+  TEST(FinalTest_H1Element_Complex, PartitionOfUnity_P2_P3_P4_Segment)
   {
     using Complex = std::complex<Real>;
     constexpr size_t n = 20;
@@ -1908,7 +1908,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Complex, ComplexQuadraticReproduction_P2_Segment)
+  TEST(FinalTest_H1Element_Complex, ComplexQuadraticReproduction_P2_Segment)
   {
     using Complex = std::complex<Real>;
     PkElement<2, Complex> elem(Polytope::Type::Segment);
@@ -1926,7 +1926,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(interpolated.imag(), exact.imag(), RODIN_FUZZY_CONSTANT);
   }
 
-  TEST(FinalTest_PkElement_Vector, ComponentStructure_P2_2D_Segment)
+  TEST(FinalTest_H1Element_Vector, ComponentStructure_P2_2D_Segment)
   {
     constexpr size_t vdim = 2;
     PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
@@ -1967,7 +1967,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Vector, QuadraticVectorFieldReproduction_P2_Segment)
+  TEST(FinalTest_H1Element_Vector, QuadraticVectorFieldReproduction_P2_Segment)
   {
     PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Segment, 2);
 
@@ -2003,7 +2003,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(interpolated(1), exact(1), RODIN_FUZZY_CONSTANT);
   }
 
-  TEST(FinalTest_PkElement_Vector, PartitionOfUnity_P3_P4_3D_Triangle)
+  TEST(FinalTest_H1Element_Vector, PartitionOfUnity_P3_P4_3D_Triangle)
   {
     // P3 on Triangle with 3D vectors
     {
@@ -2095,7 +2095,7 @@ namespace Rodin::Tests::Unit
   // NEW COMPREHENSIVE TESTS FOR PKELEMENT K=0 THROUGH K=6
   // ========================================================================
 
-  TEST(FinalTest_PkElement_Comprehensive, PkElement_K0_AllGeometries)
+  TEST(FinalTest_H1Element_Comprehensive, PkElement_K0_AllGeometries)
   {
     // Comprehensive tests for PkElement<0> across all geometries
     // K=0 is piecewise constant element
@@ -2136,7 +2136,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Comprehensive, PkElement_K1_AllGeometries)
+  TEST(FinalTest_H1Element_Comprehensive, PkElement_K1_AllGeometries)
   {
     // Comprehensive tests for PkElement<1> across all geometries
     // K=1 is piecewise linear element
@@ -2202,7 +2202,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Comprehensive, PkElement_K2_to_K6_Segment)
+  TEST(FinalTest_H1Element_Comprehensive, PkElement_K2_to_K6_Segment)
   {
     // Comprehensive test of PkElement for K=2,3,4,5,6 on Segment
     constexpr size_t n = 20;
@@ -2260,7 +2260,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Comprehensive, PkElement_K2_to_K6_Triangle)
+  TEST(FinalTest_H1Element_Comprehensive, PkElement_K2_to_K6_Triangle)
   {
     // Test PkElement for K=2,3,4,5,6 on Triangle
     constexpr size_t n = 15;
@@ -2324,7 +2324,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Comprehensive, PkElement_K2_to_K6_AllGeometries_DOFCount)
+  TEST(FinalTest_H1Element_Comprehensive, PkElement_K2_to_K6_AllGeometries_DOFCount)
   {
     // Verify DOF counts for all K values and geometries
 
@@ -2374,7 +2374,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealPkElement<6>(Polytope::Type::Wedge).getCount(), 196);
   }
 
-  TEST(FinalTest_PkElement_Comprehensive, VectorPkElement_AllVectorDimensions)
+  TEST(FinalTest_H1Element_Comprehensive, VectorPkElement_AllVectorDimensions)
   {
     // Test vector PkElement with vdim=1,2,3 for various K values
     
@@ -2415,7 +2415,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Comprehensive, PkElement_LagrangeProperty_AllOrders_Segment)
+  TEST(FinalTest_H1Element_Comprehensive, PkElement_LagrangeProperty_AllOrders_Segment)
   {
     // Test Lagrange property for all K values on Segment
     // phi_i(node_j) = delta_ij
@@ -2523,7 +2523,7 @@ namespace Rodin::Tests::Unit
   // LINEARFORM TESTS FOR PKELEMENT K=0 TO K=6
   // ========================================================================
 
-  TEST(FinalTest_PkElement_LinearForm, ScalarLinearForm_K0_to_K6_Segment)
+  TEST(FinalTest_H1Element_LinearForm, ScalarLinearForm_K0_to_K6_Segment)
   {
     // Test LinearForm for all polynomial orders on Segment
     for (size_t K : {0, 1, 2, 3, 4, 5, 6})
@@ -2626,7 +2626,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_LinearForm, VectorLinearForm_K0_to_K3_AllVectorDimensions)
+  TEST(FinalTest_H1Element_LinearForm, VectorLinearForm_K0_to_K3_AllVectorDimensions)
   {
     // Test LinearForm for vector Pk elements
     for (size_t K : {0, 1, 2, 3})
@@ -2707,7 +2707,7 @@ namespace Rodin::Tests::Unit
   // GRADIENTFUNCTION TESTS FOR PKELEMENT K=0 TO K=6
   // ========================================================================
 
-  TEST(FinalTest_PkElement_GradientFunction, GradientConsistency_K1_to_K6)
+  TEST(FinalTest_H1Element_GradientFunction, GradientConsistency_K1_to_K6)
   {
     // Test gradient functions for polynomial orders 1-6
     for (size_t K : {1, 2, 3, 4, 5, 6})
@@ -2795,7 +2795,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_GradientFunction, GradientPartitionProperty_K2_Triangle)
+  TEST(FinalTest_H1Element_GradientFunction, GradientPartitionProperty_K2_Triangle)
   {
     // Test that sum of gradients equals zero (partition of unity)
     RealPkElement<2> elem(Polytope::Type::Triangle);
@@ -2817,7 +2817,7 @@ namespace Rodin::Tests::Unit
   // JACOBIANFUNCTION TESTS FOR PKELEMENT K=0 TO K=6
   // ========================================================================
 
-  TEST(FinalTest_PkElement_JacobianFunction, JacobianStructure_K0_to_K3)
+  TEST(FinalTest_H1Element_JacobianFunction, JacobianStructure_K0_to_K3)
   {
     // Test Jacobian function for vector Pk elements
     for (size_t K : {0, 1, 2, 3})
@@ -2881,7 +2881,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_JacobianFunction, Jacobian2D_K2_Triangle)
+  TEST(FinalTest_H1Element_JacobianFunction, Jacobian2D_K2_Triangle)
   {
     // Test 2D Jacobian for K=2 on triangle
     PkElement<2, Math::Vector<Real>> elem(Polytope::Type::Triangle, 2);
@@ -2913,7 +2913,7 @@ namespace Rodin::Tests::Unit
   // INTERPOLATION TESTS FOR PKELEMENT K=0 TO K=6
   // ========================================================================
 
-  TEST(FinalTest_PkElement_Interpolation, PolynomialInterpolation_K0_to_K6)
+  TEST(FinalTest_H1Element_Interpolation, PolynomialInterpolation_K0_to_K6)
   {
     // Test that Pk element exactly interpolates polynomials of degree K
     RandomFloat gen(0.0, 1.0);
@@ -3053,7 +3053,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Interpolation, VectorPolynomialInterpolation_K1_K2_K3)
+  TEST(FinalTest_H1Element_Interpolation, VectorPolynomialInterpolation_K1_K2_K3)
   {
     // Test vector field interpolation for Pk elements
     for (size_t K : {1, 2, 3})
@@ -3129,7 +3129,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(FinalTest_PkElement_Interpolation, GradientInterpolationConsistency_K2_K3)
+  TEST(FinalTest_H1Element_Interpolation, GradientInterpolationConsistency_K2_K3)
   {
     // Test that gradient of interpolant matches derivative of function
     for (size_t K : {2, 3})
