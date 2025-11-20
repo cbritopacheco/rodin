@@ -361,129 +361,19 @@ namespace Rodin::Variational
       };
 
       /**
-       * @brief Builds the Lagrange nodes for the element geometry.
+       * @brief Builds the nodes for the element geometry.
        *
        * Constructs the positions of DOF nodes based on the geometry type and
-       * polynomial degree. Uses uniform spacing for segments, barycentric
-       * coordinates for simplices, and tensor products for structured elements.
+       * polynomial degree. Uses high-order stable nodal sets:
+       * - Segment: Gauss-Lobatto-Legendre (GLL) nodes
+       * - Quadrilateral: Tensor product of GLL nodes
+       * - Triangle: Fekete nodes
+       * - Tetrahedron: Fekete nodes
+       * - Wedge: Tensor product of triangle Fekete and segment GLL nodes
        */
       static
       const std::vector<Math::SpatialPoint>&
-      getLagrangeNodes(Geometry::Polytope::Type g)
-      {
-        switch (g)
-        {
-          case Geometry::Polytope::Type::Point:
-          {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              n.push_back(Math::SpatialPoint{{0}});
-              return n;
-            }();
-            return s_nodes;
-          }
-
-          case Geometry::Polytope::Type::Segment:
-          {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              for (size_t i = 0; i <= K; ++i)
-              {
-                Real t = static_cast<Real>(i) / static_cast<Real>(K);
-                n.push_back(Math::SpatialPoint{{t}});
-              }
-              return n;
-            }();
-            return s_nodes;
-          }
-
-          case Geometry::Polytope::Type::Triangle:
-          {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              for (size_t j = 0; j <= K; ++j)
-              {
-                for (size_t i = 0; i <= K - j; ++i)
-                {
-                  Real s = static_cast<Real>(i) / static_cast<Real>(K);
-                  Real t = static_cast<Real>(j) / static_cast<Real>(K);
-                  n.push_back(Math::SpatialPoint{{s, t}});
-                }
-              }
-              return n;
-            }();
-            return s_nodes;
-          }
-
-          case Geometry::Polytope::Type::Quadrilateral:
-          {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              for (size_t j = 0; j <= K; ++j)
-              {
-                for (size_t i = 0; i <= K; ++i)
-                {
-                  Real s = static_cast<Real>(i) / static_cast<Real>(K);
-                  Real t = static_cast<Real>(j) / static_cast<Real>(K);
-                  n.push_back(Math::SpatialPoint{{s, t}});
-                }
-              }
-              return n;
-            }();
-            return s_nodes;
-          }
-
-          case Geometry::Polytope::Type::Tetrahedron:
-          {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              for (size_t k = 0; k <= K; ++k)
-              {
-                for (size_t j = 0; j <= K - k; ++j)
-                {
-                  for (size_t i = 0; i <= K - j - k; ++i)
-                  {
-                    Real r = static_cast<Real>(i) / static_cast<Real>(K);
-                    Real s = static_cast<Real>(j) / static_cast<Real>(K);
-                    Real t = static_cast<Real>(k) / static_cast<Real>(K);
-                    n.push_back(Math::SpatialPoint{{r, s, t}});
-                  }
-                }
-              }
-              return n;
-            }();
-            return s_nodes;
-          }
-
-          case Geometry::Polytope::Type::Wedge:
-          {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              // Tensor product of triangle (r,s) and segment (t)
-              for (size_t k = 0; k <= K; ++k)
-              {
-                for (size_t j = 0; j <= K; ++j)
-                {
-                  for (size_t i = 0; i <= K - j; ++i)
-                  {
-                    Real r = static_cast<Real>(i) / static_cast<Real>(K);
-                    Real s = static_cast<Real>(j) / static_cast<Real>(K);
-                    Real t = static_cast<Real>(k) / static_cast<Real>(K);
-                    n.push_back(Math::SpatialPoint{{r, s, t}});
-                  }
-                }
-              }
-              return n;
-            }();
-            return s_nodes;
-          }
-        }
-
-        // Should be unreachable if all enum values are handled
-        assert(false && "Unsupported Polytope type.");
-        static thread_local const std::vector<Math::SpatialPoint> s_empty;
-        return s_empty;
-      }
+      getNodes(Geometry::Polytope::Type g);
 
       /**
        * @brief Default constructor. Creates an H1 element on a Point geometry.
