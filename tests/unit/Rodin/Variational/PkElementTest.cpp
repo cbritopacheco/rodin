@@ -170,56 +170,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  // Test that P1 element matches PkElement<1>
-  TEST(Rodin_Variational_RealPkElement, P1_Consistency_Segment)
-  {
-    RealPkElement<1> pk(Polytope::Type::Segment);
-    RealP1Element p1(Polytope::Type::Segment);
 
-    // Same number of DOFs
-    EXPECT_EQ(pk.getCount(), p1.getCount());
-
-    // Same order
-    EXPECT_EQ(pk.getOrder(), p1.getOrder());
-
-    // Same basis function values at several points
-    constexpr size_t n = 10;
-    RandomFloat gen(0.0, 1.0);
-
-    for (size_t i = 0; i < n; i++)
-    {
-      const auto& x = gen();
-      Math::Vector<Real> p{{x}};
-      for (size_t j = 0; j < pk.getCount(); j++)
-      {
-        EXPECT_NEAR(pk.getBasis(j)(p), p1.getBasis(j)(p), RODIN_FUZZY_CONSTANT);
-      }
-    }
-  }
-
-  // Test that P0 element matches PkElement<0>
-  TEST(Rodin_Variational_RealPkElement, P0_Consistency_Segment)
-  {
-    RealPkElement<0> pk(Polytope::Type::Segment);
-    RealP0Element p0(Polytope::Type::Segment);
-
-    // Same number of DOFs
-    EXPECT_EQ(pk.getCount(), p0.getCount());
-
-    // Same order
-    EXPECT_EQ(pk.getOrder(), p0.getOrder());
-
-    // Same basis function value (constant = 1)
-    constexpr size_t n = 10;
-    RandomFloat gen(0.0, 1.0);
-
-    for (size_t i = 0; i < n; i++)
-    {
-      const auto& x = gen();
-      Math::Vector<Real> p{{x}};
-      EXPECT_NEAR(pk.getBasis(0)(p), p0.getBasis(0)(p), RODIN_FUZZY_CONSTANT);
-    }
-  }
 
   // Test P3 element on Segment
   TEST(Rodin_Variational_RealPkElement, SanityTest_P3_1D_Reference_Segment)
@@ -1388,53 +1339,6 @@ namespace Rodin::Tests::Unit
   // Extended tests for Complex PkElement (additional mathematical properties)
   // ========================================================================
 
-  // Test Complex P0 consistency
-  TEST(Rodin_Variational_ComplexPkElement, P0_Consistency)
-  {
-    ComplexPkElement<0> pk0(Polytope::Type::Segment);
-    ComplexP0Element p0(Polytope::Type::Segment);
-
-    EXPECT_EQ(pk0.getCount(), p0.getCount());
-    EXPECT_EQ(pk0.getOrder(), p0.getOrder());
-
-    // Test basis function values match
-    RandomFloat gen(0.0, 1.0);
-    for (size_t i = 0; i < 5; i++)
-    {
-      const auto& x = gen();
-      Math::Vector<Real> p{{x}};
-
-      Complex pk_val = pk0.getBasis(0)(p);
-      Complex p0_val = p0.getBasis(0)(p);
-      EXPECT_NEAR(std::abs(pk_val - p0_val), 0.0, RODIN_FUZZY_CONSTANT);
-    }
-  }
-
-  // Test Complex P1 consistency
-  TEST(Rodin_Variational_ComplexPkElement, P1_Consistency)
-  {
-    ComplexPkElement<1> pk1(Polytope::Type::Segment);
-    ComplexP1Element p1(Polytope::Type::Segment);
-
-    EXPECT_EQ(pk1.getCount(), p1.getCount());
-    EXPECT_EQ(pk1.getOrder(), p1.getOrder());
-
-    // Test basis function values match
-    RandomFloat gen(0.0, 1.0);
-    for (size_t trial = 0; trial < 10; trial++)
-    {
-      const auto& x = gen();
-      Math::Vector<Real> p{{x}};
-
-      for (size_t i = 0; i < pk1.getCount(); i++)
-      {
-        Complex pk_val = pk1.getBasis(i)(p);
-        Complex p1_val = p1.getBasis(i)(p);
-        EXPECT_NEAR(std::abs(pk_val - p1_val), 0.0, RODIN_FUZZY_CONSTANT);
-      }
-    }
-  }
-
   // Test Complex P4 partition of unity on Triangle
   TEST(Rodin_Variational_ComplexPkElement, PartitionOfUnity_P4_Triangle)
   {
@@ -1955,29 +1859,6 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(interpolated, exact, RODIN_FUZZY_CONSTANT);
   }
 
-  TEST(FinalTest_PkElement_Real, CrossElementConsistency_P0)
-  {
-    // PkElement<0> should match P0Element
-    RealP0Element p0(Polytope::Type::Segment);
-    RealPkElement<0> pk0(Polytope::Type::Segment);
-
-    Math::Vector<Real> p{{0.7}};
-    EXPECT_NEAR(p0.getBasis(0)(p), pk0.getBasis(0)(p), RODIN_FUZZY_CONSTANT);
-  }
-
-  TEST(FinalTest_PkElement_Real, CrossElementConsistency_P1)
-  {
-    // PkElement<1> should match P1Element
-    RealP1Element p1(Polytope::Type::Triangle);
-    RealPkElement<1> pk1(Polytope::Type::Triangle);
-
-    Math::Vector<Real> p{{0.3, 0.4}};
-    for (size_t i = 0; i < 3; i++)
-    {
-      EXPECT_NEAR(p1.getBasis(i)(p), pk1.getBasis(i)(p), RODIN_FUZZY_CONSTANT);
-    }
-  }
-
   TEST(FinalTest_PkElement_Complex, PartitionOfUnity_P2_P3_P4_Segment)
   {
     using Complex = std::complex<Real>;
@@ -2043,38 +1924,6 @@ namespace Rodin::Tests::Unit
 
     EXPECT_NEAR(interpolated.real(), exact.real(), RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(interpolated.imag(), exact.imag(), RODIN_FUZZY_CONSTANT);
-  }
-
-  TEST(FinalTest_PkElement_Complex, CrossElementConsistency_P0_P1)
-  {
-    using Complex = std::complex<Real>;
-
-    // Check P0 consistency
-    {
-      P0Element<Complex> p0(Polytope::Type::Segment);
-      PkElement<0, Complex> pk0(Polytope::Type::Segment);
-
-      Math::Vector<Real> p{{0.5}};
-      auto v0 = p0.getBasis(0)(p);
-      auto vk = pk0.getBasis(0)(p);
-      EXPECT_NEAR(v0.real(), vk.real(), RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(v0.imag(), vk.imag(), RODIN_FUZZY_CONSTANT);
-    }
-
-    // Check P1 consistency
-    {
-      P1Element<Complex> p1(Polytope::Type::Segment);
-      PkElement<1, Complex> pk1(Polytope::Type::Segment);
-
-      Math::Vector<Real> p{{0.6}};
-      for (size_t i = 0; i < 2; i++)
-      {
-        auto v1 = p1.getBasis(i)(p);
-        auto vk = pk1.getBasis(i)(p);
-        EXPECT_NEAR(v1.real(), vk.real(), RODIN_FUZZY_CONSTANT);
-        EXPECT_NEAR(v1.imag(), vk.imag(), RODIN_FUZZY_CONSTANT);
-      }
-    }
   }
 
   TEST(FinalTest_PkElement_Vector, ComponentStructure_P2_2D_Segment)
@@ -2249,24 +2098,21 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_PkElement_Comprehensive, PkElement_K0_AllGeometries)
   {
     // Comprehensive tests for PkElement<0> across all geometries
-    // K=0 should behave identically to P0Element
+    // K=0 is piecewise constant element
     
     for (auto geom : {Polytope::Type::Point, Polytope::Type::Segment,
                       Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
                       Polytope::Type::Tetrahedron, Polytope::Type::Wedge})
     {
       RealPkElement<0> pk(geom);
-      RealP0Element p0(geom);
 
-      // Same DOF count
-      EXPECT_EQ(pk.getCount(), p0.getCount());
+      // Should have 1 DOF
       EXPECT_EQ(pk.getCount(), 1);
 
-      // Same order
-      EXPECT_EQ(pk.getOrder(), p0.getOrder());
+      // Should have order 0
       EXPECT_EQ(pk.getOrder(), 0);
 
-      // Test basis function values
+      // Test basis function value (constant = 1)
       Math::Vector<Real> p;
       switch (geom)
       {
@@ -2286,7 +2132,6 @@ namespace Rodin::Tests::Unit
           break;
       }
 
-      EXPECT_NEAR(pk.getBasis(0)(p), p0.getBasis(0)(p), RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(pk.getBasis(0)(p), 1.0, RODIN_FUZZY_CONSTANT);
     }
   }
@@ -2294,20 +2139,40 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_PkElement_Comprehensive, PkElement_K1_AllGeometries)
   {
     // Comprehensive tests for PkElement<1> across all geometries
-    // K=1 should behave identically to P1Element
+    // K=1 is piecewise linear element
     
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
                       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
                       Polytope::Type::Wedge})
     {
       RealPkElement<1> pk(geom);
-      RealP1Element p1(geom);
 
-      // Same DOF count
-      EXPECT_EQ(pk.getCount(), p1.getCount());
+      // Check expected DOF count
+      size_t expected_dofs = 0;
+      switch (geom)
+      {
+        case Polytope::Type::Segment:
+          expected_dofs = 2;
+          break;
+        case Polytope::Type::Triangle:
+          expected_dofs = 3;
+          break;
+        case Polytope::Type::Quadrilateral:
+          expected_dofs = 4;
+          break;
+        case Polytope::Type::Tetrahedron:
+          expected_dofs = 4;
+          break;
+        case Polytope::Type::Wedge:
+          expected_dofs = 6;
+          break;
+        default:
+          continue;
+      }
+      EXPECT_EQ(pk.getCount(), expected_dofs);
 
-      // Same order
-      EXPECT_EQ(pk.getOrder(), p1.getOrder());
+      // Check order
+      EXPECT_EQ(pk.getOrder(), 1);
 
       // Test partition of unity
       Math::Vector<Real> p;
@@ -2329,14 +2194,11 @@ namespace Rodin::Tests::Unit
       }
 
       Real sum_pk = 0;
-      Real sum_p1 = 0;
       for (size_t i = 0; i < pk.getCount(); i++)
       {
         sum_pk += pk.getBasis(i)(p);
-        sum_p1 += p1.getBasis(i)(p);
       }
       EXPECT_NEAR(sum_pk, 1.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(sum_p1, 1.0, RODIN_FUZZY_CONSTANT);
     }
   }
 
