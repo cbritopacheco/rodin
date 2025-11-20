@@ -26,6 +26,7 @@ Any contributors are warmly encouraged and any help or comments are always appre
 5. [Requirements](#requirements)
 6. [CMake options](#cmake-options)
 7. [Building the documentation](#building-the-documentation)
+8. [Development](#development)
 
 ## Installation
 
@@ -371,3 +372,24 @@ manager.
 ## Building the documentation
 
 See [this page](doc/README.md) to see how to build the documentation.
+
+## Development
+
+Rodin includes a GitHub Copilot custom agent called **Rodin** that assists with building and testing code changes.
+
+### Using the Rodin Agent
+
+The Rodin agent can help you:
+- Compile the Rodin codebase
+- Run unit tests, manufactured tests, and benchmarks
+- Troubleshoot build and test failures
+- Understand the build system
+
+To use the Rodin agent in GitHub Copilot Chat:
+```
+@Rodin build and test my changes
+@Rodin compile the code and run unit tests
+@Rodin help me fix this build error
+```
+
+For more information, see [.github/agents/README.md](.github/agents/README.md).
