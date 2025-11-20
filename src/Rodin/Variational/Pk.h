@@ -2,15 +2,15 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2022.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
- *          https://www.boost.org/LICENSE_1.0.txt)
+ *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
  * @file Pk.h
- * @brief H1-conforming Lagrange finite element space (backward compatibility header).
+ * @brief H1-conforming Lagrange finite element space.
  *
- * This header provides backward compatibility for the Pk naming convention.
- * The element has been renamed to H1Element to emphasize its H1-conforming nature
- * and high-order stability properties.
+ * This header provides access to the H1-conforming Lagrange finite element
+ * family. These are high-order-stable elements with continuous (H¹) basis
+ * functions across element boundaries.
  *
  * ## Mathematical Foundation
  * The H1-conforming Lagrange space of degree k is defined as:
@@ -36,13 +36,13 @@
  *
  * ## Usage Example
  * ```cpp
- * // H1 element of degree 2 (quadratic) - new preferred naming
+ * // H1 element of degree 2 (quadratic)
  * RealH1Element<2> h1_2(Polytope::Type::Triangle);
  * std::cout << "DOFs: " << h1_2.getCount() << std::endl;  // 6
  * 
- * // Legacy Pk naming also works for backward compatibility
- * RealPkElement<3> p3(Polytope::Type::Segment);
- * auto basis = p3.getBasis(0);
+ * // H1 element of degree 3 (cubic)
+ * RealH1Element<3> h1_3(Polytope::Type::Segment);
+ * auto basis = h1_3.getBasis(0);
  * auto value = basis(Math::Vector<Real>{{0.5}});
  * 
  * // Complex-valued H1 element
@@ -52,10 +52,7 @@
  * VectorH1Element<2> h1_v(Polytope::Type::Tetrahedron, 3);
  * ```
  *
- * ## Note on Naming
- * - The class is now named `H1Element` to emphasize H¹-conforming properties
- * - Backward compatibility aliases `PkElement`, `RealPkElement`, etc. are provided
- * - New code should prefer the H1Element naming convention
+ * @note This file is retained for compatibility. Use H1.h for new code.
  */
 #ifndef RODIN_VARIATIONAL_PK_H
 #define RODIN_VARIATIONAL_PK_H

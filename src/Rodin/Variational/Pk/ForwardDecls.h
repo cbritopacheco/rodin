@@ -49,22 +49,6 @@ namespace Rodin::Variational
    */
   template <size_t K>
   using ComplexVectorH1Element = H1Element<K, Math::Vector<Complex>>;
-  
-  // Legacy aliases for backwards compatibility
-  template <size_t K, class Range>
-  using PkElement = H1Element<K, Range>;
-  
-  template <size_t K>
-  using RealPkElement = RealH1Element<K>;
-  
-  template <size_t K>
-  using ComplexPkElement = ComplexH1Element<K>;
-  
-  template <size_t K>
-  using VectorPkElement = VectorH1Element<K>;
-  
-  template <size_t K>
-  using ComplexVectorPkElement = ComplexVectorH1Element<K>;
 }
 
 #endif

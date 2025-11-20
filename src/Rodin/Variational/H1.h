@@ -52,12 +52,7 @@
  * VectorH1Element<2> h1_v(Polytope::Type::Tetrahedron, 3);
  * ```
  *
- * ## Backward Compatibility
- * The old naming convention using "Pk" (e.g., `RealPkElement<K>`) is still
- * available for backward compatibility via type aliases. However, new code
- * should prefer the H1Element naming convention.
- *
- * @see Pk.h for backward compatibility
+ * @see Pk.h for alternative include
  */
 #ifndef RODIN_VARIATIONAL_H1_H
 #define RODIN_VARIATIONAL_H1_H
