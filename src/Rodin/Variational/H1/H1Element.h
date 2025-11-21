@@ -7,42 +7,6 @@
 #ifndef RODIN_VARIATIONAL_H1_H1ELEMENT_H
 #define RODIN_VARIATIONAL_H1_H1ELEMENT_H
 
-/**
- * @file
- * @brief Pk (piecewise polynomial degree k) finite element implementation.
- *
- * This file provides the PkElement class template for continuous piecewise
- * polynomial finite elements of arbitrary degree k. Pk elements have:
- * - **Lagrange basis functions** of degree k: @f$ \phi_i(x_j) = \delta_{ij} @f$
- * - **DOFs** at Lagrange nodes: vertices, edge points, face points, volume points
- * - **Polynomial gradient** of degree k-1: @f$ \nabla \phi_i @f$ is a polynomial of degree k-1
- * - **Continuity**: C⁰ continuous across element interfaces
- *
- * ## Supported Geometries
- * - **Point**: 1 DOF (trivial element)
- * - **Segment**: (K+1) DOFs - uniformly spaced nodes on [0,1]
- * - **Triangle**: (K+1)(K+2)/2 DOFs - barycentric Lagrange nodes
- * - **Quadrilateral**: (K+1)² DOFs - tensor product of segment nodes
- * - **Tetrahedron**: (K+1)(K+2)(K+3)/6 DOFs - barycentric Lagrange nodes
- * - **Wedge**: (K+1)·(K+1)(K+2)/2 DOFs - tensor product of triangle and segment
- *
- * ## Convergence Properties
- * Pk elements provide k-th order convergence for smooth solutions:
- * - L² error: @f$ O(h^{k+1}) @f$
- * - H¹ error (energy norm): @f$ O(h^k) @f$
- *
- * ## Special Cases
- * - `PkElement<0, Scalar>` is equivalent to P0Element (piecewise constant)
- * - `PkElement<1, Scalar>` is equivalent to P1Element (piecewise linear)
- *
- * ## Implementation Details
- * - **Lagrange polynomials**: Classical formulas for 1D: @f$ L_i^K(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} @f$
- * - **Barycentric coordinates**: For simplices (triangles, tetrahedra), uses barycentric Lagrange basis
- * - **Tensor products**: For structured elements (quadrilaterals, wedges), uses tensor product of lower-dimensional bases
- * - **Thread-local caching**: Geometry-specific caching prevents cross-contamination between element types
- *
- * @see P0Element, P1Element
- */
 
 #include <cstddef>
 #include <array>
@@ -69,7 +33,7 @@
  * @ingroup RodinDirectives
  * @brief Indicates the maximum vector dimension a PkElement
  */
-#define RODIN_PK_MAX_VECTOR_DIMENSION 16
+#define RODIN_H1_MAX_VECTOR_DIMENSION 16
 
 namespace Rodin::FormLanguage
 {

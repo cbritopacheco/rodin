@@ -16,7 +16,6 @@
 #define RODIN_CORE_COMMON_H
 
 #include <cmath>
-#include <type_traits>
 #include <Eigen/Core>
 
 #include "Rodin/Types.h"
@@ -36,7 +35,7 @@ namespace Rodin::Math
   constexpr
   auto abs(const T& x)
   {
-    return std::abs(x);
+    return x < static_cast<T>(0.0) ? -x : x;
   }
 
   /**

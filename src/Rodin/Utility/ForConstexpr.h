@@ -1,8 +1,7 @@
 #ifndef RODIN_UTILITY_FORCONSTEXPR_H
 #define RODIN_UTILITY_FORCONSTEXPR_H
 
-#include <functional>
-#include <type_traits>
+#include <utility>
 
 namespace Rodin::Utility
 {
