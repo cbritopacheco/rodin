@@ -51,18 +51,18 @@ namespace Rodin::Variational
       Real P1 = x;      // P_1
       Real dP0 = 0.0;   // P'_0
       Real dP1 = 1.0;   // P'_1
-      
+
       for (size_t k = 1; k < n; ++k)
       {
         Real P2 = ((2.0 * k + 1.0) * x * P1 - k * P0) / (k + 1.0);
         Real dP2 = ((2.0 * k + 1.0) * (P1 + x * dP1) - k * dP0) / (k + 1.0);
-        
+
         P0 = P1;
         P1 = P2;
         dP0 = dP1;
         dP1 = dP2;
       }
-      
+
       P = P1;
       dP = dP1;
     }
@@ -81,36 +81,36 @@ namespace Rodin::Variational
     std::array<Real, K+1> getGLLNodes()
     {
       std::array<Real, K+1> nodes;
-      
+
       // Endpoints are always -1 and 1
       nodes[0] = -1.0;
       nodes[K] = 1.0;
-      
+
       if (K == 0)
         return nodes;
-      
+
       if (K == 1)
         return nodes;
-      
+
       // Interior nodes are zeros of (1 - x²) P'_K(x)
       // Use Newton iteration starting from Chebyshev points as initial guess
       constexpr Real tol = 1e-15;
       constexpr size_t max_iter = 20;
-      
+
       for (size_t i = 1; i < K; ++i)
       {
         // Initial guess: Chebyshev points
         Real x = -std::cos(M_PI * i / K);
-        
+
         // Newton iteration to find zero of (1 - x²) P'_K(x)
         for (size_t iter = 0; iter < max_iter; ++iter)
         {
           Real P, dP;
           legendrePolynomial(K, x, P, dP);
-          
+
           // f(x) = (1 - x²) P'_K(x)
           Real f = (1.0 - x * x) * dP;
-          
+
           // f'(x) = -2x P'_K(x) + (1 - x²) P''_K(x)
           // Using P''_K = ((2K+1)xP'_K - KP_{K-1}) / (1-x²) when needed
           // But simpler: use the relation dP = K(xP - P_{K-1})/(x²-1)
@@ -121,22 +121,22 @@ namespace Rodin::Variational
             legendrePolynomial(K - 1, x, P_Kminus1, dP_Kminus1);
           else
             P_Kminus1 = x; // P_1 = x when K = 2
-          
+
           // Use: (x² - 1) dP = K(xP - P_{K-1})
           Real d2P = (2.0 * x * dP - K * (K + 1.0) * P) / (1.0 - x * x);
           Real df = -2.0 * x * dP + (1.0 - x * x) * d2P;
-          
+
           // Newton update
           Real dx = -f / df;
           x += dx;
-          
+
           if (std::abs(dx) < tol)
             break;
         }
-        
+
         nodes[i] = x;
       }
-      
+
       return nodes;
     }
 
@@ -153,10 +153,10 @@ namespace Rodin::Variational
     {
       auto nodes_ref = getGLLNodes<K>();
       std::array<Real, K+1> nodes;
-      
+
       for (size_t i = 0; i <= K; ++i)
         nodes[i] = (nodes_ref[i] + 1.0) / 2.0;
-      
+
       return nodes;
     }
 
@@ -170,7 +170,7 @@ namespace Rodin::Variational
       const auto& gll_nodes = getGLLNodes<K>();
       Real result = 1.0;
       Real xi = gll_nodes[i];
-      
+
       for (size_t j = 0; j <= K; ++j)
       {
         if (j != i)
@@ -191,19 +191,19 @@ namespace Rodin::Variational
     {
       if (K == 0)
         return 0.0;
-      
+
       // Get GLL nodes on [-1, 1]
       const auto& gll_nodes = getGLLNodes<K>();
-      
+
       // Evaluate warp based on distance from edge
       Real warp = 0.0;
-      
+
       // Compute barycentric coordinate along edge
       Real lambda = r / (r + s + 1e-10);  // Add small epsilon to avoid division by zero
-      
+
       // Map to [-1, 1]
       Real xi = 2.0 * lambda - 1.0;
-      
+
       // Compute warp as weighted sum of Lagrange polynomials
       for (size_t i = 1; i < K; ++i)  // Skip endpoints
       {
@@ -212,7 +212,7 @@ namespace Rodin::Variational
         Real equi = 2.0 * static_cast<Real>(i) / static_cast<Real>(K) - 1.0;
         warp += L * (target - equi);
       }
-      
+
       return warp;
     }
 
@@ -229,35 +229,35 @@ namespace Rodin::Variational
     {
       if (K <= 1)
         return;  // No warping needed for linear elements
-      
+
       const size_t n_nodes = nodes.size();
-      
+
       // Convert to equilateral triangle coordinates
       std::vector<std::pair<Real, Real>> equi_coords(n_nodes);
       for (size_t idx = 0; idx < n_nodes; ++idx)
       {
         Real x = nodes[idx].x();
         Real y = nodes[idx].y();
-        
+
         // Convert from reference triangle (x,y) to equilateral coordinates (r,s)
         // Reference triangle: (0,0), (1,0), (0,1)
         // Equilateral triangle: centered coordinate system
         Real r = 2.0 * x - 1.0 + y;
         Real s = std::sqrt(3.0) * y - 1.0;
-        
+
         equi_coords[idx] = {r, s};
       }
-      
+
       // Apply warp for each node
       for (size_t idx = 0; idx < n_nodes; ++idx)
       {
         // Note: equi_coords computed above but not used in simplified warp implementation
         // (void)equi_coords;  // Suppress unused warning
-        
+
         Real x = nodes[idx].x();
         Real y = nodes[idx].y();
         Real z = 1.0 - x - y;  // Third barycentric coordinate
-        
+
         // Skip vertices (they should remain fixed)
         if (x < 1e-10 && y < 1e-10)  // Vertex (0,0)
           continue;
@@ -265,42 +265,42 @@ namespace Rodin::Variational
           continue;
         if (x < 1e-10 && y > 1.0 - 1e-10)  // Vertex (0,1)
           continue;
-        
+
         // Compute warp contributions from each edge
         Real warp1 = 0.0, warp2 = 0.0, warp3 = 0.0;
-        
+
         // Edge 1: from (1,0) to (0,1), perpendicular direction
         if (x + y > 1e-10)
         {
           warp1 = warpFactor<K>(x, y);
         }
-        
+
         // Edge 2: from (0,0) to (0,1), perpendicular direction
         if (y + z > 1e-10)
         {
           warp2 = warpFactor<K>(y, z);
         }
-        
-        // Edge 3: from (0,0) to (1,0), perpendicular direction  
+
+        // Edge 3: from (0,0) to (1,0), perpendicular direction
         if (z + x > 1e-10)
         {
           warp3 = warpFactor<K>(z, x);
         }
-        
+
         // Blend the warp contributions using barycentric coordinates as weights
         // This ensures smooth transition and maintains symmetry
         Real blend1 = y * z;
         Real blend2 = z * x;
         Real blend3 = x * y;
         Real blend_sum = blend1 + blend2 + blend3 + 1e-10;
-        
+
         // Apply scaled warp in each direction
         Real scale = 1.0;  // Scaling factor for warp magnitude
         Real dx = scale * (blend1 * warp1 + blend2 * warp2 + blend3 * warp3) / blend_sum;
-        
+
         // Update node position (warp is applied in x-direction as approximation)
         nodes[idx] = Math::SpatialPoint{{x + dx * 0.5, y - dx * 0.5 * std::sqrt(3.0)}};
-        
+
         // Clamp to valid triangle domain
         Real new_x = nodes[idx].x();
         Real new_y = nodes[idx].y();
@@ -331,13 +331,13 @@ namespace Rodin::Variational
     const std::vector<Math::SpatialPoint>& getTriangleFeketeNodes()
     {
       static thread_local std::vector<Math::SpatialPoint> s_nodes;
-      
+
       if (!s_nodes.empty())
         return s_nodes;
-      
+
       const size_t n_nodes = (K + 1) * (K + 2) / 2;
       s_nodes.reserve(n_nodes);
-      
+
       // Start with equispaced nodes
       for (size_t j = 0; j <= K; ++j)
       {
@@ -348,10 +348,10 @@ namespace Rodin::Variational
           s_nodes.emplace_back(Math::SpatialPoint{{s, t}});
         }
       }
-      
+
       // Apply warp-blend algorithm to move nodes toward Fekete positions
       applyTriangleWarpBlend<K>(s_nodes);
-      
+
       return s_nodes;
     }
 
@@ -365,9 +365,9 @@ namespace Rodin::Variational
     {
       if (K <= 1)
         return;  // No warping needed for linear elements
-      
+
       const size_t n_nodes = nodes.size();
-      
+
       // Apply warp for each node
       for (size_t idx = 0; idx < n_nodes; ++idx)
       {
@@ -375,7 +375,7 @@ namespace Rodin::Variational
         Real y = nodes[idx].y();
         Real z = nodes[idx].z();
         Real w = 1.0 - x - y - z;  // Fourth barycentric coordinate
-        
+
         // Skip vertices (they should remain fixed)
         const Real eps = 1e-10;
         bool is_vertex = 
@@ -383,46 +383,46 @@ namespace Rodin::Variational
           (x > 1.0-eps && y < eps && z < eps) ||  // Vertex (1,0,0)
           (x < eps && y > 1.0-eps && z < eps) ||  // Vertex (0,1,0)
           (x < eps && y < eps && z > 1.0-eps);    // Vertex (0,0,1)
-        
+
         if (is_vertex)
           continue;
-        
+
         // Compute warp contributions from each face/edge
         // Simplified approach: warp based on distance from faces
         Real warp_x = 0.0, warp_y = 0.0, warp_z = 0.0;
-        
+
         // Face 1: opposite to vertex (1,0,0)
         if (y + z + w > eps)
         {
           warp_x += warpFactor<K>(y, z + w) * 0.3;
         }
-        
+
         // Face 2: opposite to vertex (0,1,0)
         if (x + z + w > eps)
         {
           warp_y += warpFactor<K>(x, z + w) * 0.3;
         }
-        
+
         // Face 3: opposite to vertex (0,0,1)
         if (x + y + w > eps)
         {
           warp_z += warpFactor<K>(x, y + w) * 0.3;
         }
-        
+
         // Blend using barycentric coordinates
         Real blend_factor = x * y * z * w;
         Real scale = 1.0 / (1.0 + K * K * 0.1);  // Reduce warp for higher orders
-        
+
         // Apply warp
         Real new_x = x + warp_x * scale * blend_factor;
         Real new_y = y + warp_y * scale * blend_factor;
         Real new_z = z + warp_z * scale * blend_factor;
-        
+
         // Clamp to valid tetrahedron domain
         new_x = std::max(0.0, std::min(1.0, new_x));
         new_y = std::max(0.0, std::min(1.0, new_y));
         new_z = std::max(0.0, std::min(1.0, new_z));
-        
+
         if (new_x + new_y + new_z > 1.0)
         {
           Real excess = new_x + new_y + new_z - 1.0;
@@ -430,7 +430,7 @@ namespace Rodin::Variational
           new_y -= excess / 3.0;
           new_z -= excess / 3.0;
         }
-        
+
         nodes[idx] = Math::SpatialPoint{{new_x, new_y, new_z}};
       }
     }
@@ -448,13 +448,13 @@ namespace Rodin::Variational
     const std::vector<Math::SpatialPoint>& getTetrahedronFeketeNodes()
     {
       static thread_local std::vector<Math::SpatialPoint> s_nodes;
-      
+
       if (!s_nodes.empty())
         return s_nodes;
-      
+
       const size_t n_nodes = (K + 1) * (K + 2) * (K + 3) / 6;
       s_nodes.reserve(n_nodes);
-      
+
       // Start with equispaced nodes
       for (size_t k = 0; k <= K; ++k)
       {
@@ -469,10 +469,10 @@ namespace Rodin::Variational
           }
         }
       }
-      
+
       // Apply warp-blend algorithm to move nodes toward Fekete positions
       applyTetrahedronWarpBlend<K>(s_nodes);
-      
+
       return s_nodes;
     }
 
@@ -484,13 +484,13 @@ namespace Rodin::Variational
     {
       if (n == 0)
         return 1.0;
-      
+
       Real P0 = 1.0;
       Real P1 = 0.5 * (alpha - beta + (alpha + beta + 2.0) * x);
-      
+
       if (n == 1)
         return P1;
-      
+
       // 3-term recurrence for Jacobi polynomials
       Real P2 = 0.0;
       for (size_t k = 1; k < n; ++k)
@@ -499,12 +499,12 @@ namespace Rodin::Variational
         Real a2 = (2.0 * k + alpha + beta + 1.0) * (alpha * alpha - beta * beta);
         Real a3 = (2.0 * k + alpha + beta) * (2.0 * k + alpha + beta + 1.0) * (2.0 * k + alpha + beta + 2.0);
         Real a4 = 2.0 * (k + alpha) * (k + beta) * (2.0 * k + alpha + beta + 2.0);
-        
+
         P2 = ((a2 + a3 * x) * P1 - a4 * P0) / a1;
         P0 = P1;
         P1 = P2;
       }
-      
+
       return P1;
     }
 
@@ -515,7 +515,7 @@ namespace Rodin::Variational
     {
       if (n == 0)
         return 0.0;
-      
+
       // d/dx P^{α,β}_n = 0.5 * (n + α + β + 1) * P^{α+1,β+1}_{n-1}
       return 0.5 * (n + alpha + beta + 1.0) * jacobiPolynomial(n - 1, alpha + 1.0, beta + 1.0, x);
     }
@@ -531,7 +531,7 @@ namespace Rodin::Variational
     {
       Real b = s;
       Real a;
-      
+
       // Handle singularity at s = 1
       if (std::abs(s - 1.0) < 1e-10)
       {
@@ -541,11 +541,11 @@ namespace Rodin::Variational
       {
         a = 2.0 * (1.0 + r) / (1.0 - s) - 1.0;
       }
-      
+
       Real psi = jacobiPolynomial(p, 0.0, 0.0, a);
       psi *= jacobiPolynomial(q, 2.0 * p + 1.0, 0.0, b);
       psi *= std::pow(0.5 * (1.0 - b), p);
-      
+
       return psi;
     }
 
@@ -558,7 +558,7 @@ namespace Rodin::Variational
       Real eps = 1e-10;
       Real b = s;
       Real a;
-      
+
       if (std::abs(s - 1.0) < eps)
       {
         a = -1.0;
@@ -567,13 +567,13 @@ namespace Rodin::Variational
       {
         a = 2.0 * (1.0 + r) / (1.0 - s) - 1.0;
       }
-      
+
       Real Pa = jacobiPolynomial(p, 0.0, 0.0, a);
       Real dPa = jacobiPolynomialDerivative(p, 0.0, 0.0, a);
       Real Pb = jacobiPolynomial(q, 2.0 * p + 1.0, 0.0, b);
       Real dPb = jacobiPolynomialDerivative(q, 2.0 * p + 1.0, 0.0, b);
       Real scale_b = std::pow(0.5 * (1.0 - b), p);
-      
+
       // ∂ψ/∂r: only a depends on r
       Real dpsi_dr = 0.0;
       if (std::abs(s - 1.0) > eps)
@@ -581,7 +581,7 @@ namespace Rodin::Variational
         Real da_dr = 2.0 / (1.0 - s);
         dpsi_dr = dPa * da_dr * Pb * scale_b;
       }
-      
+
       // ∂ψ/∂s: both a and b depend on s, and scale_b depends on b=s
       Real dpsi_ds = 0.0;
       if (std::abs(s - 1.0) > eps)
@@ -594,7 +594,7 @@ namespace Rodin::Variational
       {
         dpsi_ds += Pa * Pb * p * std::pow(0.5 * (1.0 - b), p - 1) * (-0.5);
       }
-      
+
       return {dpsi_dr, dpsi_ds};
     }
 
@@ -605,29 +605,18 @@ namespace Rodin::Variational
      */
     inline std::pair<Real, Real> triangleToCollapsed(Real x, Real y)
     {
-      // First map reference triangle to standard triangle
-      // (0,0) -> (-1,-1), (1,0) -> (1,-1), (0,1) -> (-1,1)
-      // This is: x_std = -1 + 2*x, y_std = -1 + 2*y
-      // But we need to account for the constraint x+y <= 1
-      
-      // Use Hesthaven & Warburton formula:
-      // r = 2*(1+x)/(1-y) - 1  (when y != 1)
-      // s = 2*y - 1
-      
-      Real eps = 1e-10;
-      Real r, s;
-      
+      const Real eps = 1e-10;
+
+      Real r = 2.0 * x - 1.0;
+      Real s = 2.0 * y - 1.0;
+
+      // Keep the special-case at the top vertex to avoid division by zero
       if (y > 1.0 - eps)
       {
         r = -1.0;
         s = 1.0;
       }
-      else
-      {
-        r = 2.0 * (x / (1.0 - y)) - 1.0;
-        s = 2.0 * y - 1.0;
-      }
-      
+
       return {r, s};
     }
 
@@ -647,7 +636,7 @@ namespace Rodin::Variational
           const auto& nodes = getTriangleFeketeNodes<K>();
           const size_t n_nodes = nodes.size();
           V.resize(n_nodes, n_nodes);
-          
+
           // Fill Vandermonde matrix
           size_t mode_idx = 0;
           for (size_t p = 0; p <= K; ++p)
@@ -665,7 +654,7 @@ namespace Rodin::Variational
         }
         return V;
       }
-      
+
       static const Math::Matrix<Real>& getInverse()
       {
         static thread_local Math::Matrix<Real> Vinv;
@@ -681,68 +670,168 @@ namespace Rodin::Variational
     /**
      * @brief Evaluates Dubiner modal basis function ψ_{p,q,r} on tetrahedron
      */
-    inline Real dubinerTetrahedron(size_t p, size_t q, size_t r_idx, Real r, Real s, Real t)
+    inline Real dubinerTetrahedron(size_t p, size_t q, size_t r,
+                                   Real a, Real b, Real c)
     {
-      Real eps = 1e-10;
-      
-      // Collapsed coordinates transformation
-      Real sr = (std::abs(1.0 - r) < eps) ? -1.0 : (2.0 * (1.0 + s) / (1.0 - r) - 1.0);
-      Real tr = (std::abs(1.0 - r - s) < eps) ? -1.0 : (2.0 * (1.0 + t) / (1.0 - r - s) - 1.0);
-      
-      Real psi = jacobiPolynomial(p, 0.0, 0.0, r);
-      psi *= std::pow(0.5 * (1.0 - r), p);
-      psi *= jacobiPolynomial(q, 2.0 * p + 1.0, 0.0, sr);
-      psi *= std::pow(0.5 * (1.0 - s), q);
-      psi *= jacobiPolynomial(r_idx, 2.0 * (p + q) + 2.0, 0.0, tr);
-      
-      return psi;
+      // A(a) = P_p^{0,0}(a)
+      Real A  = jacobiPolynomial(p, 0.0, 0.0, a);
+
+      // B(a) = ((1-a)/2)^p
+      Real B  = 1.0;
+      if (p > 0)
+      {
+        Real factor = 0.5 * (1.0 - a);
+        B = std::pow(factor, static_cast<Real>(p));
+      }
+
+      // C(b) = P_q^{2p+1,0}(b)
+      Real C  = 1.0;
+      if (q > 0)
+        C = jacobiPolynomial(q, 2.0 * p + 1.0, 0.0, b);
+
+      // D(b) = ((1-b)/2)^q
+      Real D  = 1.0;
+      if (q > 0)
+      {
+        Real factor = 0.5 * (1.0 - b);
+        D = std::pow(factor, static_cast<Real>(q));
+      }
+
+      // E(c) = P_r^{2(p+q)+2,0}(c)
+      Real alpha_r = 2.0 * (p + q) + 2.0;
+      Real E  = jacobiPolynomial(r, alpha_r, 0.0, c);
+
+      return A * B * C * D * E;
     }
 
-    /**
-     * @brief Evaluates gradient of Dubiner modal basis ∇ψ_{p,q,r} on tetrahedron
-     */
-    inline std::tuple<Real, Real, Real> dubinerTetrahedronGradient(size_t p, size_t q, size_t r_idx, Real r, Real s, Real t)
+    inline std::tuple<Real, Real, Real> dubinerTetrahedronGradient(
+        size_t p, size_t q, size_t r_idx, Real r, Real s, Real t)
     {
-      // Simplified implementation - proper chain rule derivatives needed for production
-      Real h = 1e-7;
-      Real psi0 = dubinerTetrahedron(p, q, r_idx, r, s, t);
-      Real psi_r = dubinerTetrahedron(p, q, r_idx, r + h, s, t);
-      Real psi_s = dubinerTetrahedron(p, q, r_idx, r, s + h, t);
-      Real psi_t = dubinerTetrahedron(p, q, r_idx, r, s, t + h);
-      
-      return {(psi_r - psi0) / h, (psi_s - psi0) / h, (psi_t - psi0) / h};
+      const Real eps = 1e-10;
+
+      // --- Collapsed auxiliary coordinates sr, tr (same as in dubinerTetrahedron) ---
+      Real sr, tr;
+      bool sr_singular = (std::abs(1.0 - r) < eps);
+      bool tr_singular = (std::abs(1.0 - r - s) < eps);
+
+      if (sr_singular)
+        sr = -1.0;
+      else
+        sr = 2.0 * (1.0 + s) / (1.0 - r) - 1.0;
+
+      if (tr_singular)
+        tr = -1.0;
+      else
+        tr = 2.0 * (1.0 + t) / (1.0 - r - s) - 1.0;
+
+      // --- Building blocks of ψ(r,s,t) = A(r) B(r) E(sr) C(s) F(tr) ---
+
+      // A(r) = P_p^{0,0}(r)
+      Real A  = jacobiPolynomial(p, 0.0, 0.0, r);
+      Real dA = jacobiPolynomialDerivative(p, 0.0, 0.0, r);
+
+      // B(r) = (0.5*(1-r))^p
+      Real B  = 1.0;
+      Real dB = 0.0;
+      if (p > 0)
+      {
+        Real br = 0.5 * (1.0 - r);
+        B = std::pow(br, static_cast<Real>(p));
+        dB = -0.5 * static_cast<Real>(p) * std::pow(br, static_cast<Real>(p - 1));
+      }
+
+      // E(sr) = P_q^{2p+1,0}(sr)
+      Real E  = 1.0;
+      Real dE = 0.0;
+      if (q > 0)
+      {
+        E  = jacobiPolynomial(q, 2.0 * p + 1.0, 0.0, sr);
+        dE = jacobiPolynomialDerivative(q, 2.0 * p + 1.0, 0.0, sr);
+      }
+
+      // C(s) = (0.5*(1-s))^q
+      Real C  = 1.0;
+      Real dC = 0.0;
+      if (q > 0)
+      {
+        Real cs = 0.5 * (1.0 - s);
+        C = std::pow(cs, static_cast<Real>(q));
+        dC = -0.5 * static_cast<Real>(q) * std::pow(cs, static_cast<Real>(q - 1));
+      }
+
+      // F(tr) = P_r^{2(p+q)+2,0}(tr)
+      Real alpha_r = 2.0 * (p + q) + 2.0;
+      Real F  = jacobiPolynomial(r_idx, alpha_r, 0.0, tr);
+      Real dF = jacobiPolynomialDerivative(r_idx, alpha_r, 0.0, tr);
+
+      // --- Derivatives of sr, tr wrt (r,s,t) ---
+
+      Real dsr_dr = 0.0, dsr_ds = 0.0;
+      if (!sr_singular)
+      {
+        // sr = 2(1+s)/(1-r) - 1
+        dsr_dr =  2.0 * (1.0 + s) / ((1.0 - r) * (1.0 - r));
+        dsr_ds =  2.0 / (1.0 - r);
+      }
+
+      Real dtr_dr = 0.0, dtr_ds = 0.0, dtr_dt = 0.0;
+      if (!tr_singular)
+      {
+        // tr = 2(1+t)/(1-r-s) - 1
+        Real denom = (1.0 - r - s);
+        dtr_dr =  2.0 * (1.0 + t) / (denom * denom);
+        dtr_ds =  2.0 * (1.0 + t) / (denom * denom);
+        dtr_dt =  2.0 / denom;
+      }
+
+      // --- ∂ψ/∂r, ∂ψ/∂s, ∂ψ/∂t in collapsed coordinates ---
+
+      // ψ = A B E C F
+      Real common = A * B * E * C * F;
+
+      // ∂ψ/∂r
+      Real dpsi_dr = 0.0;
+      // A,B depend directly on r
+      dpsi_dr += (dA * B + A * dB) * E * C * F;
+      // E(sr), F(tr) via chain rule
+      dpsi_dr += A * B * dE * dsr_dr * C * F;
+      dpsi_dr += A * B * E * C * dF * dtr_dr;
+
+      // ∂ψ/∂s
+      Real dpsi_ds = 0.0;
+      // C(s) directly
+      dpsi_ds += A * B * E * dC * F;
+      // E(sr), F(tr) via s
+      dpsi_ds += A * B * dE * dsr_ds * C * F;
+      dpsi_ds += A * B * E * C * dF * dtr_ds;
+
+      // ∂ψ/∂t
+      Real dpsi_dt = 0.0;
+      dpsi_dt += A * B * E * C * dF * dtr_dt;
+
+      return {dpsi_dr, dpsi_ds, dpsi_dt};
     }
 
-    /**
-     * @brief Converts from reference tetrahedron (x,y,z) to collapsed coords (r,s,t)
-     * Reference tetrahedron: (0,0,0), (1,0,0), (0,1,0), (0,0,1)
-     */
     inline std::tuple<Real, Real, Real> tetrahedronToCollapsed(Real x, Real y, Real z)
     {
-      Real eps = 1e-10;
-      Real r, s, t;
-      
-      if (y + z < 1.0 - eps)
-      {
-        r = -1.0 + 2.0 * x / (1.0 - y - z);
-      }
+      const Real eps = 1e-12;
+      Real a = 2.0 * x - 1.0;
+
+      Real b;
+      Real denom1 = 1.0 - x;
+      if (denom1 > eps)
+        b = 2.0 * (y / denom1) - 1.0;
       else
-      {
-        r = -1.0;
-      }
-      
-      if (z < 1.0 - eps)
-      {
-        s = -1.0 + 2.0 * y / (1.0 - z);
-      }
+        b = -1.0; // collapse to edge
+
+      Real c;
+      Real denom2 = 1.0 - x - y;
+      if (denom2 > eps)
+        c = 2.0 * (z / denom2) - 1.0;
       else
-      {
-        s = -1.0;
-      }
-      
-      t = -1.0 + 2.0 * z;
-      
-      return {r, s, t};
+        c = -1.0; // collapse to face
+
+      return {a, b, c};
     }
 
     /**
@@ -759,7 +848,7 @@ namespace Rodin::Variational
           const auto& nodes = getTetrahedronFeketeNodes<K>();
           const size_t n_nodes = nodes.size();
           V.resize(n_nodes, n_nodes);
-          
+
           size_t mode_idx = 0;
           for (size_t p = 0; p <= K; ++p)
           {
@@ -780,7 +869,7 @@ namespace Rodin::Variational
         }
         return V;
       }
-      
+
       static const Math::Matrix<Real>& getInverse()
       {
         static thread_local Math::Matrix<Real> Vinv;
@@ -1163,7 +1252,7 @@ namespace Rodin::Variational
         for (size_t kk = 0; kk <= K; ++kk)
           seg_nodes.emplace_back(Math::SpatialPoint{{wedge_nodes[kk * tri_count].z()}});
       }
-      
+
       if (deriv_dim < 2)
       {
         // Derivative w.r.t. x or y (triangle part)
@@ -1365,7 +1454,6 @@ namespace Rodin::Variational
   }
 
   template <size_t K, class Scalar>
-  constexpr
   Scalar H1Element<K, Scalar>::BasisFunction::operator()(const Math::SpatialPoint& r) const
   {
     switch (m_g)
@@ -1383,9 +1471,9 @@ namespace Rodin::Variational
       {
         // Use Dubiner modal basis with Vandermonde approach
         const auto& Vinv = Internal::TriangleDubinerVandermonde<K>::getInverse();
-        
+
         auto [rc, sc] = Internal::triangleToCollapsed(r.x(), r.y());
-        
+
         Scalar result = 0.0;
         size_t mode_idx = 0;
         for (size_t p = 0; p <= K; ++p)
@@ -1393,7 +1481,7 @@ namespace Rodin::Variational
           for (size_t q = 0; q <= K - p; ++q)
           {
             Real psi = Internal::dubinerTriangle(p, q, rc, sc);
-            result += Vinv(m_local, mode_idx) * psi;
+            result += Vinv(mode_idx, m_local) * psi;
             mode_idx++;
           }
         }
@@ -1401,26 +1489,31 @@ namespace Rodin::Variational
       }
       case Geometry::Polytope::Type::Quadrilateral:
       {
-        // Tensor product of 1D Lagrange basis
+        // Tensor product of 1D Lagrange basis on GLL nodes in [0,1]
         size_t j_idx = m_local / (K + 1);
         size_t i_idx = m_local % (K + 1);
 
-        // Initialize to ensure no uninitialized warnings
-        const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-        if (dim < 2)
-          return Math::nan<Scalar>();
+        // 1D GLL abscissas on [0,1]
+        static thread_local std::vector<Math::SpatialPoint> s_nodes1D;
+        if (s_nodes1D.empty())
+        {
+          auto xi = Internal::getGLLNodes01<K>();
+          s_nodes1D.reserve(K + 1);
+          for (size_t i = 0; i <= K; ++i)
+            s_nodes1D.emplace_back(Math::SpatialPoint{{xi[i]}});
+        }
 
-        const auto& nodes = H1Element<K, Scalar>::getNodes(m_g);
-        return Internal::evaluateLagrange1D<K, Scalar>(i_idx, r.x(), nodes) *
-               Internal::evaluateLagrange1D<K, Scalar>(j_idx, r.y(), nodes);
+        const auto& nodes1D = s_nodes1D;
+        return Internal::evaluateLagrange1D<K, Scalar>(i_idx, r.x(), nodes1D) *
+               Internal::evaluateLagrange1D<K, Scalar>(j_idx, r.y(), nodes1D);
       }
       case Geometry::Polytope::Type::Tetrahedron:
       {
         // Use Dubiner modal basis with Vandermonde approach
         const auto& Vinv = Internal::TetrahedronDubinerVandermonde<K>::getInverse();
-        
+
         auto [rc, sc, tc] = Internal::tetrahedronToCollapsed(r.x(), r.y(), r.z());
-        
+
         Scalar result = 0.0;
         size_t mode_idx = 0;
         for (size_t p = 0; p <= K; ++p)
@@ -1430,7 +1523,7 @@ namespace Rodin::Variational
             for (size_t r_mode = 0; r_mode <= K - p - q; ++r_mode)
             {
               Real psi = Internal::dubinerTetrahedron(p, q, r_mode, rc, sc, tc);
-              result += Vinv(m_local, mode_idx) * psi;
+              result += Vinv(mode_idx, m_local) * psi;
               mode_idx++;
             }
           }
@@ -1465,7 +1558,6 @@ namespace Rodin::Variational
 
   template <size_t K, class Scalar>
   template <size_t Order>
-  constexpr
   Scalar H1Element<K, Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
       const Math::SpatialPoint& r) const
   {
@@ -1491,9 +1583,9 @@ namespace Rodin::Variational
         {
           // Use Dubiner modal basis with Vandermonde approach
           const auto& Vinv = Internal::TriangleDubinerVandermonde<K>::getInverse();
-          
+
           auto [rc, sc] = Internal::triangleToCollapsed(r.x(), r.y());
-          
+
           Scalar result = 0.0;
           size_t mode_idx = 0;
           for (size_t p = 0; p <= K; ++p)
@@ -1501,34 +1593,34 @@ namespace Rodin::Variational
             for (size_t q = 0; q <= K - p; ++q)
             {
               auto [dpsi_dr, dpsi_ds] = Internal::dubinerTriangleGradient(p, q, rc, sc);
-              
+
               // Transform gradients from collapsed (r,s) to reference (x,y) coordinates
               // r = 2*x/(1-y) - 1, s = 2*y - 1
               // ∂r/∂x = 2/(1-y), ∂r/∂y = 2*x/((1-y)^2)
               // ∂s/∂x = 0, ∂s/∂y = 2
-              
+
               Real x = r.x();
               Real y = r.y();
               Real eps = 1e-10;
-              
+
               Real dpsi_dx = 0.0, dpsi_dy = 0.0;
-              
+
               if (y < 1.0 - eps)
               {
                 Real dr_dx = 2.0 / (1.0 - y);
                 Real dr_dy = 2.0 * x / ((1.0 - y) * (1.0 - y));
                 Real ds_dx = 0.0;
                 Real ds_dy = 2.0;
-                
+
                 dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
                 dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
               }
-              
+
               if (m_i == 0) // ∂/∂x
-                result += Vinv(m_local, mode_idx) * dpsi_dx;
+                result += Vinv(mode_idx, m_local) * dpsi_dx;
               else if (m_i == 1) // ∂/∂y
-                result += Vinv(m_local, mode_idx) * dpsi_dy;
-              
+                result += Vinv(mode_idx, m_local) * dpsi_dy;
+
               mode_idx++;
             }
           }
@@ -1536,20 +1628,29 @@ namespace Rodin::Variational
         }
         case Geometry::Polytope::Type::Quadrilateral:
         {
-          // Tensor product derivative
+          // Tensor product derivative with clean 1D GLL nodes
           size_t j_idx = m_local / (K + 1);
           size_t i_idx = m_local % (K + 1);
 
-          const auto& nodes = H1Element<K, Scalar>::getNodes(m_g);
+          static thread_local std::vector<Math::SpatialPoint> s_nodes1D;
+          if (s_nodes1D.empty())
+          {
+            auto xi = Internal::getGLLNodes01<K>();
+            s_nodes1D.reserve(K + 1);
+            for (size_t i = 0; i <= K; ++i)
+              s_nodes1D.emplace_back(Math::SpatialPoint{{xi[i]}});
+          }
+          const auto& nodes1D = s_nodes1D;
+
           if (m_i == 0) // d/dx
           {
-            return Internal::evaluateLagrange1DDerivative<K, Scalar>(i_idx, r.x(), nodes) *
-                   Internal::evaluateLagrange1D<K, Scalar>(j_idx, r.y(), nodes);
+            return Internal::evaluateLagrange1DDerivative<K, Scalar>(i_idx, r.x(), nodes1D) *
+                   Internal::evaluateLagrange1D<K, Scalar>(j_idx, r.y(), nodes1D);
           }
           else if (m_i == 1) // d/dy
           {
-            return Internal::evaluateLagrange1D<K, Scalar>(i_idx, r.x(), nodes) *
-                   Internal::evaluateLagrange1DDerivative<K, Scalar>(j_idx, r.y(), nodes);
+            return Internal::evaluateLagrange1D<K, Scalar>(i_idx, r.x(), nodes1D) *
+                   Internal::evaluateLagrange1DDerivative<K, Scalar>(j_idx, r.y(), nodes1D);
           }
           return 0;
         }
@@ -1557,9 +1658,9 @@ namespace Rodin::Variational
         {
           // Use Dubiner modal basis with Vandermonde approach
           const auto& Vinv = Internal::TetrahedronDubinerVandermonde<K>::getInverse();
-          
+
           auto [rc, sc, tc] = Internal::tetrahedronToCollapsed(r.x(), r.y(), r.z());
-          
+
           Scalar result = 0.0;
           size_t mode_idx = 0;
           for (size_t p = 0; p <= K; ++p)
@@ -1569,19 +1670,19 @@ namespace Rodin::Variational
               for (size_t r_mode = 0; r_mode <= K - p - q; ++r_mode)
               {
                 auto [dpsi_dr, dpsi_ds, dpsi_dt] = Internal::dubinerTetrahedronGradient(p, q, r_mode, rc, sc, tc);
-                
+
                 // Transform from collapsed coordinates to reference coordinates
                 Real dpsi_dx = dpsi_dr * 0.5;
                 Real dpsi_dy = dpsi_ds * 0.5;
                 Real dpsi_dz = dpsi_dt * 0.5;
-                
+
                 if (m_i == 0) // ∂/∂x
-                  result += Vinv(m_local, mode_idx) * dpsi_dx;
+                  result += Vinv(mode_idx, m_local) * dpsi_dx;
                 else if (m_i == 1) // ∂/∂y
-                  result += Vinv(m_local, mode_idx) * dpsi_dy;
+                  result += Vinv(mode_idx, m_local) * dpsi_dy;
                 else if (m_i == 2) // ∂/∂z
-                  result += Vinv(m_local, mode_idx) * dpsi_dz;
-                
+                  result += Vinv(mode_idx, m_local) * dpsi_dz;
+
                 mode_idx++;
               }
             }

@@ -91,10 +91,10 @@ namespace Rodin::Variational
   {
     template <size_t K>
     std::array<Real, K+1> getGLLNodes01();
-    
+
     template <size_t K>
     const std::vector<Math::SpatialPoint>& getTriangleFeketeNodes();
-    
+
     template <size_t K>
     const std::vector<Math::SpatialPoint>& getTetrahedronFeketeNodes();
   }
@@ -271,7 +271,6 @@ namespace Rodin::Variational
                * @param r Reference point in the element
                * @return Value of the derivative at point r
                */
-              constexpr
               ReturnType operator()(const Math::SpatialPoint& r) const;
 
             private:
@@ -342,7 +341,6 @@ namespace Rodin::Variational
            * @param r Reference point in the element (typically in [0,1]^d)
            * @return Value of basis function at point r
            */
-          constexpr
           ReturnType operator()(const Math::SpatialPoint& r) const;
 
           /**
