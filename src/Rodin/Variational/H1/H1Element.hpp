@@ -607,15 +607,15 @@ namespace Rodin::Variational
     {
       const Real eps = 1e-10;
 
-      Real r = 2.0 * x - 1.0;
+      // s = 2y - 1 always
       Real s = 2.0 * y - 1.0;
 
-      // Keep the special-case at the top vertex to avoid division by zero
-      if (y > 1.0 - eps)
-      {
-        r = -1.0;
-        s = 1.0;
-      }
+      // r = 2x/(1-y) - 1, with collapse at the top edge
+      Real r;
+      if (1.0 - y > eps)
+        r = 2.0 * (x / (1.0 - y)) - 1.0;
+      else
+        r = -1.0; // collapse at top vertex/edge
 
       return {r, s};
     }
@@ -704,112 +704,75 @@ namespace Rodin::Variational
       return A * B * C * D * E;
     }
 
-    inline std::tuple<Real, Real, Real> dubinerTetrahedronGradient(
-        size_t p, size_t q, size_t r_idx, Real r, Real s, Real t)
+    inline std::tuple<Real, Real, Real>
+    dubinerTetrahedronGradient(size_t p, size_t q, size_t r_idx,
+                               Real a, Real b, Real c)
     {
-      const Real eps = 1e-10;
+      const Real eps = 1e-12;
 
-      // --- Collapsed auxiliary coordinates sr, tr (same as in dubinerTetrahedron) ---
-      Real sr, tr;
-      bool sr_singular = (std::abs(1.0 - r) < eps);
-      bool tr_singular = (std::abs(1.0 - r - s) < eps);
+      // --- A(a), B(a) and derivatives ---
+      Real A  = jacobiPolynomial(p, 0.0, 0.0, a);
+      Real dA = jacobiPolynomialDerivative(p, 0.0, 0.0, a);
 
-      if (sr_singular)
-        sr = -1.0;
-      else
-        sr = 2.0 * (1.0 + s) / (1.0 - r) - 1.0;
-
-      if (tr_singular)
-        tr = -1.0;
-      else
-        tr = 2.0 * (1.0 + t) / (1.0 - r - s) - 1.0;
-
-      // --- Building blocks of ψ(r,s,t) = A(r) B(r) E(sr) C(s) F(tr) ---
-
-      // A(r) = P_p^{0,0}(r)
-      Real A  = jacobiPolynomial(p, 0.0, 0.0, r);
-      Real dA = jacobiPolynomialDerivative(p, 0.0, 0.0, r);
-
-      // B(r) = (0.5*(1-r))^p
       Real B  = 1.0;
       Real dB = 0.0;
       if (p > 0)
       {
-        Real br = 0.5 * (1.0 - r);
-        B = std::pow(br, static_cast<Real>(p));
-        dB = -0.5 * static_cast<Real>(p) * std::pow(br, static_cast<Real>(p - 1));
+        Real t = 0.5 * (1.0 - a);
+        B  = std::pow(t, static_cast<Real>(p));
+        dB = -0.5 * static_cast<Real>(p) *
+             std::pow(t, static_cast<Real>(p - 1));
       }
 
-      // E(sr) = P_q^{2p+1,0}(sr)
-      Real E  = 1.0;
-      Real dE = 0.0;
+      // --- C(b), D(b) and derivatives ---
+      Real C  = jacobiPolynomial(q, 2.0 * p + 1.0, 0.0, b);
+      Real dC = jacobiPolynomialDerivative(q, 2.0 * p + 1.0, 0.0, b);
+
+      Real D  = 1.0;
+      Real dD = 0.0;
       if (q > 0)
       {
-        E  = jacobiPolynomial(q, 2.0 * p + 1.0, 0.0, sr);
-        dE = jacobiPolynomialDerivative(q, 2.0 * p + 1.0, 0.0, sr);
+        Real t = 0.5 * (1.0 - b);
+        D  = std::pow(t, static_cast<Real>(q));
+        dD = -0.5 * static_cast<Real>(q) *
+             std::pow(t, static_cast<Real>(q - 1));
       }
 
-      // C(s) = (0.5*(1-s))^q
-      Real C  = 1.0;
-      Real dC = 0.0;
-      if (q > 0)
-      {
-        Real cs = 0.5 * (1.0 - s);
-        C = std::pow(cs, static_cast<Real>(q));
-        dC = -0.5 * static_cast<Real>(q) * std::pow(cs, static_cast<Real>(q - 1));
-      }
-
-      // F(tr) = P_r^{2(p+q)+2,0}(tr)
+      // --- E(c) and derivative ---
       Real alpha_r = 2.0 * (p + q) + 2.0;
-      Real F  = jacobiPolynomial(r_idx, alpha_r, 0.0, tr);
-      Real dF = jacobiPolynomialDerivative(r_idx, alpha_r, 0.0, tr);
+      Real E  = jacobiPolynomial(r_idx, alpha_r, 0.0, c);
+      Real dE = jacobiPolynomialDerivative(r_idx, alpha_r, 0.0, c);
 
-      // --- Derivatives of sr, tr wrt (r,s,t) ---
+      // --- derivatives in (a,b,c) ---
+      Real dpsi_da = (dA * B + A * dB) * C * D * E;
+      Real dpsi_db = A * B * (dC * D + C * dD) * E;
+      Real dpsi_dc = A * B * C * D * dE;
 
-      Real dsr_dr = 0.0, dsr_ds = 0.0;
-      if (!sr_singular)
-      {
-        // sr = 2(1+s)/(1-r) - 1
-        dsr_dr =  2.0 * (1.0 + s) / ((1.0 - r) * (1.0 - r));
-        dsr_ds =  2.0 / (1.0 - r);
-      }
+      // --- map to (x,y,z) using (J^{-1})^T ---
+      Real one_minus_a = 1.0 - a;
+      Real one_minus_b = 1.0 - b;
+      Real denom       = one_minus_a * one_minus_b;
 
-      Real dtr_dr = 0.0, dtr_ds = 0.0, dtr_dt = 0.0;
-      if (!tr_singular)
-      {
-        // tr = 2(1+t)/(1-r-s) - 1
-        Real denom = (1.0 - r - s);
-        dtr_dr =  2.0 * (1.0 + t) / (denom * denom);
-        dtr_ds =  2.0 * (1.0 + t) / (denom * denom);
-        dtr_dt =  2.0 / denom;
-      }
+      // Handle degeneracies very conservatively
+      if (std::abs(one_minus_a) < eps || std::abs(denom) < eps)
+        return {0.0, 0.0, 0.0};
 
-      // --- ∂ψ/∂r, ∂ψ/∂s, ∂ψ/∂t in collapsed coordinates ---
+      Real inv_one_minus_a = 1.0 / one_minus_a;
+      Real inv_denom       = 1.0 / denom;
 
-      // ψ = A B E C F
-      Real common = A * B * E * C * F;
+      Real dpsi_dx =
+          2.0 * dpsi_da
+        + 2.0 * (b + 1.0) * inv_one_minus_a * dpsi_db
+        + 4.0 * (c + 1.0) * inv_denom       * dpsi_dc;
 
-      // ∂ψ/∂r
-      Real dpsi_dr = 0.0;
-      // A,B depend directly on r
-      dpsi_dr += (dA * B + A * dB) * E * C * F;
-      // E(sr), F(tr) via chain rule
-      dpsi_dr += A * B * dE * dsr_dr * C * F;
-      dpsi_dr += A * B * E * C * dF * dtr_dr;
+      Real dpsi_dy =
+          4.0 * inv_one_minus_a * dpsi_db
+        + 4.0 * (c + 1.0) * inv_denom * dpsi_dc;
 
-      // ∂ψ/∂s
-      Real dpsi_ds = 0.0;
-      // C(s) directly
-      dpsi_ds += A * B * E * dC * F;
-      // E(sr), F(tr) via s
-      dpsi_ds += A * B * dE * dsr_ds * C * F;
-      dpsi_ds += A * B * E * C * dF * dtr_ds;
+      Real dpsi_dz =
+          8.0 * inv_denom * dpsi_dc;
 
-      // ∂ψ/∂t
-      Real dpsi_dt = 0.0;
-      dpsi_dt += A * B * E * C * dF * dtr_dt;
-
-      return {dpsi_dr, dpsi_ds, dpsi_dt};
+      return {dpsi_dx, dpsi_dy, dpsi_dz};
     }
 
     inline std::tuple<Real, Real, Real> tetrahedronToCollapsed(Real x, Real y, Real z)
@@ -1656,10 +1619,9 @@ namespace Rodin::Variational
         }
         case Geometry::Polytope::Type::Tetrahedron:
         {
-          // Use Dubiner modal basis with Vandermonde approach
           const auto& Vinv = Internal::TetrahedronDubinerVandermonde<K>::getInverse();
 
-          auto [rc, sc, tc] = Internal::tetrahedronToCollapsed(r.x(), r.y(), r.z());
+          auto [ac, bc, cc] = Internal::tetrahedronToCollapsed(r.x(), r.y(), r.z());
 
           Scalar result = 0.0;
           size_t mode_idx = 0;
@@ -1669,21 +1631,17 @@ namespace Rodin::Variational
             {
               for (size_t r_mode = 0; r_mode <= K - p - q; ++r_mode)
               {
-                auto [dpsi_dr, dpsi_ds, dpsi_dt] = Internal::dubinerTetrahedronGradient(p, q, r_mode, rc, sc, tc);
+                auto [dpsi_dx, dpsi_dy, dpsi_dz] =
+                    Internal::dubinerTetrahedronGradient(p, q, r_mode, ac, bc, cc);
 
-                // Transform from collapsed coordinates to reference coordinates
-                Real dpsi_dx = dpsi_dr * 0.5;
-                Real dpsi_dy = dpsi_ds * 0.5;
-                Real dpsi_dz = dpsi_dt * 0.5;
-
-                if (m_i == 0) // ∂/∂x
+                if (m_i == 0)      // ∂/∂x
                   result += Vinv(mode_idx, m_local) * dpsi_dx;
                 else if (m_i == 1) // ∂/∂y
                   result += Vinv(mode_idx, m_local) * dpsi_dy;
                 else if (m_i == 2) // ∂/∂z
                   result += Vinv(mode_idx, m_local) * dpsi_dz;
 
-                mode_idx++;
+                ++mode_idx;
               }
             }
           }
