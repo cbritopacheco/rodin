@@ -8,7 +8,6 @@
 #define RODIN_VARIATIONAL_H1_FEKETE_H
 
 #include <array>
-#include <vector>
 #include <cstddef>
 
 #include "Rodin/Types.h"
@@ -97,7 +96,7 @@ namespace Rodin::Variational
    *
    * @tparam K Polynomial degree on the tetrahedron.
    */
-  template <size_t K, size_t MaxItGLL>
+  template <size_t K, size_t MaxItGLL = 25>
   class FeketeTetrahedron
   {
     public:
@@ -142,7 +141,7 @@ namespace Rodin::Variational
         }
 
         // Move equispaced nodes toward Fekete positions using warp–blend
-        WarpBlendTetrahedron<K, MaxItGLL>::template apply<Count>(nodes);
+        WarpBlendTetrahedron<Real, K, MaxItGLL>::template apply<Count>(nodes);
 
         return nodes;
       }

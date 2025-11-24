@@ -4,699 +4,330 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_H1_LAGRANGEBASIS_H
-#define RODIN_VARIATIONAL_H1_LAGRANGEBASIS_H
+#ifndef RODIN_VARIATIONAL_H1_DUBINER_H
+#define RODIN_VARIATIONAL_H1_DUBINER_H
 
-#include <array>
 #include <cstddef>
-#include <functional>
 
-#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/Common.h"
+#include "Rodin/Math/Matrix.h"
 
-#include "GLL.h"
+#include "Rodin/Utility/ForConstexpr.h"
+
+#include "Fekete.h"
+#include "JacobiPolynomial.h"
+
+#define RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE 1e-14
 
 namespace Rodin::Variational
 {
-  //==========================================================================
-  // Generic 1D Lagrange on arbitrary nodes (keeps nodes)
-  //==========================================================================
-
-  template <size_t K>
-  class LagrangeBasis1D
+  template <size_t K, size_t MaxItGLL = 25>
+  class DubinerTriangle
   {
     public:
-      // nodes: K+1 1D interpolation nodes along x (e.g. GLL or arbitrary)
-      constexpr
-      LagrangeBasis1D(const std::array<Math::SpatialPoint, K + 1>& nodes)
-        : m_nodes(nodes)
-      {}
-
-      constexpr
-      Real getBasis(size_t i, Real x) const
+      template <size_t P, size_t Q>
+      static constexpr void getBasis(Real& basis, Real r, Real s)
       {
-        const auto& nodes = m_nodes.get();
+        static_assert(P + Q <= K, "DubinerTriangle: P + Q must be <= K.");
 
-        Real result = 1;
-        Real xi = nodes[i].x();
+        Real b = s;
+        Real a;
 
-        for (size_t j = 0; j <= K; ++j)
-        {
-          if (j != i)
-          {
-            Real xj = nodes[j].x();
-            result *= (x - xj) / (xi - xj);
-          }
-        }
-        return result;
-      }
-
-      constexpr
-      Real getDerivative(size_t i, Real x) const
-      {
-        const auto& nodes = m_nodes.get();
-
-        Real xi = nodes[i].x();
-        Real result = 0;
-
-        // Derivative using product rule
-        for (size_t m = 0; m <= K; ++m)
-        {
-          if (m != i)
-          {
-            Real term = 1;
-            Real xm = nodes[m].x();
-
-            for (size_t j = 0; j <= K; ++j)
-            {
-              if (j != i && j != m)
-              {
-                Real xj = nodes[j].x();
-                term *= (x - xj) / (xi - xj);
-              }
-            }
-            term /= (xi - xm);
-            result += term;
-          }
-        }
-        return result;
-      }
-
-    private:
-      std::reference_wrapper<const std::array<Math::SpatialPoint, K + 1>> m_nodes;
-  };
-
-  //==========================================================================
-  // Point basis (reference 0D element)
-  //==========================================================================
-
-  class LagrangeBasisPoint
-  {
-    public:
-      constexpr
-      Real getBasis() const
-      {
-        return 1.0;
-      }
-
-      constexpr
-      Real getDerivative() const
-      {
-        return 0.0;
-      }
-  };
-
-  //==========================================================================
-  // Segment basis on canonical [0,1] with GLL01<K> nodes
-  //==========================================================================
-
-  template <size_t K>
-  class LagrangeBasisSegment
-  {
-    public:
-      // Node index i, 0 <= i <= K, x in [0,1]
-      constexpr
-      Real getBasis(size_t i, Real x) const
-      {
-        const auto& nodes = GLL01<K>::getNodes();
-
-        Real result = 1;
-        Real xi = nodes[i];
-
-        for (size_t j = 0; j <= K; ++j)
-        {
-          if (j != i)
-          {
-            Real xj = nodes[j];
-            result *= (x - xj) / (xi - xj);
-          }
-        }
-        return result;
-      }
-
-      constexpr
-      Real getDerivative(size_t i, Real x) const
-      {
-        const auto& nodes = GLL01<K>::getNodes();
-
-        Real xi = nodes[i];
-        Real result = 0;
-
-        for (size_t m = 0; m <= K; ++m)
-        {
-          if (m != i)
-          {
-            Real term = 1;
-            Real xm = nodes[m];
-
-            for (size_t j = 0; j <= K; ++j)
-            {
-              if (j != i && j != m)
-              {
-                Real xj = nodes[j];
-                term *= (x - xj) / (xi - xj);
-              }
-            }
-            term /= (xi - xm);
-            result += term;
-          }
-        }
-        return result;
-      }
-  };
-
-  //==========================================================================
-  // Triangle basis (Pk on reference triangle (0,0),(1,0),(0,1))
-  //==========================================================================
-
-  template <size_t K>
-  class LagrangeBasisTriangle
-  {
-    public:
-      // Node identified by (i,j) with i+j <= K.
-      constexpr
-      Real getBasis(size_t i, size_t j, Real x, Real y) const
-      {
-        // Barycentric coordinates: λ0 = 1 - x - y, λ1 = x, λ2 = y
-        const Real lambda[3] = { 1.0 - x - y, x, y };
-
-        // Node (i,j) ↔ barycentric ( (K-i-j)/K, i/K, j/K )
-        size_t indices[3] = { K - i - j, i, j };
-
-        Real result = 1;
-        for (size_t dim = 0; dim < 3; ++dim)
-        {
-          size_t n = indices[dim];
-          if (n == 0)
-            continue;
-
-          Real L_n = 1;
-          for (size_t m = 0; m < n; ++m)
-          {
-            L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-            L_n /= static_cast<Real>(m + 1);
-          }
-          result *= L_n;
-        }
-
-        return result;
-      }
-
-      // deriv_dim = 0 -> ∂/∂x, deriv_dim = 1 -> ∂/∂y
-      constexpr
-      Real getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y) const
-      {
-        const Real lambda[3] = { 1.0 - x - y, x, y };
-
-        // dλ0/dx = -1, dλ0/dy = -1
-        // dλ1/dx =  1, dλ1/dy =  0
-        // dλ2/dx =  0, dλ2/dy =  1
-        const Real dlambda[3][2] = { {-1, -1}, { 1, 0 }, { 0, 1 } };
-
-        size_t indices[3] = { K - i - j, i, j };
-
-        Real result = 0;
-
-        // Chain rule over λ_d
-        for (size_t d = 0; d < 3; ++d)
-        {
-          Real term = dlambda[d][deriv_dim];
-
-          for (size_t dim = 0; dim < 3; ++dim)
-          {
-            const size_t n = indices[dim];
-
-            if (dim == d)
-            {
-              if (n == 0)
-              {
-                term = Real(0);
-                break;
-              }
-
-              Real dL_n = 0;
-              for (size_t p = 0; p < n; ++p)
-              {
-                Real prod = static_cast<Real>(K);
-                for (size_t m = 0; m < n; ++m)
-                {
-                  if (m != p)
-                  {
-                    prod *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                    prod /= static_cast<Real>(m + 1);
-                  }
-                }
-                prod /= static_cast<Real>(p + 1);
-                dL_n += prod;
-              }
-              term *= dL_n;
-            }
-            else
-            {
-              if (n == 0)
-                continue;
-
-              Real L_n = 1;
-              for (size_t m = 0; m < n; ++m)
-              {
-                L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                L_n /= static_cast<Real>(m + 1);
-              }
-              term *= L_n;
-            }
-          }
-
-          result += term;
-        }
-
-        return result;
-      }
-  };
-
-  //==========================================================================
-  // Tetrahedron basis (Pk on reference tetra (0,0,0),(1,0,0),(0,1,0),(0,0,1))
-  //==========================================================================
-
-  template <size_t K>
-  class LagrangeBasisTetrahedron
-  {
-    public:
-      // Node (i,j,k) with i+j+k <= K.
-      constexpr
-      Real getBasis(
-        size_t i, size_t j, size_t k, Real x, Real y, Real z) const
-      {
-        // Barycentric: λ0 = 1-x-y-z, λ1 = x, λ2 = y, λ3 = z
-        const Real lambda[4] = { 1.0 - x - y - z, x, y, z };
-
-        size_t indices[4] = { K - i - j - k, i, j, k };
-
-        Real result = 1;
-        for (size_t dim = 0; dim < 4; ++dim)
-        {
-          size_t n = indices[dim];
-          if (n == 0)
-            continue;
-
-          Real L_n = 1;
-          for (size_t m = 0; m < n; ++m)
-          {
-            L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-            L_n /= static_cast<Real>(m + 1);
-          }
-          result *= L_n;
-        }
-
-        return result;
-      }
-
-      // deriv_dim = 0 -> ∂/∂x, 1 -> ∂/∂y, 2 -> ∂/∂z
-      constexpr
-      Real getDerivative(
-        size_t i, size_t j, size_t k, size_t deriv_dim,
-        Real x, Real y, Real z) const
-      {
-        const Real lambda[4] = { 1.0 - x - y - z, x, y, z };
-
-        // dλ0 = (-1,-1,-1)
-        // dλ1 = ( 1, 0, 0)
-        // dλ2 = ( 0, 1, 0)
-        // dλ3 = ( 0, 0, 1)
-        const Real dlambda[4][3] = {
-          { -1, -1, -1 },
-          {  1,  0,  0 },
-          {  0,  1,  0 },
-          {  0,  0,  1 }
-        };
-
-        size_t indices[4] = { K - i - j - k, i, j, k };
-
-        Real result = 0;
-
-        for (size_t d = 0; d < 4; ++d)
-        {
-          Real term = dlambda[d][deriv_dim];
-
-          for (size_t dim = 0; dim < 4; ++dim)
-          {
-            const size_t n = indices[dim];
-
-            if (dim == d)
-            {
-              if (n == 0)
-              {
-                term = 0;
-                break;
-              }
-
-              Real dL_n = 0;
-              for (size_t p = 0; p < n; ++p)
-              {
-                Real prod = static_cast<Real>(K);
-                for (size_t m = 0; m < n; ++m)
-                {
-                  if (m != p)
-                  {
-                    prod *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                    prod /= static_cast<Real>(m + 1);
-                  }
-                }
-                prod /= static_cast<Real>(p + 1);
-                dL_n += prod;
-              }
-              term *= dL_n;
-            }
-            else
-            {
-              if (n == 0)
-                continue;
-
-              Real L_n = 1;
-              for (size_t m = 0; m < n; ++m)
-              {
-                L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                L_n /= static_cast<Real>(m + 1);
-              }
-              term *= L_n;
-            }
-          }
-
-          result += term;
-        }
-
-        return result;
-      }
-  };
-
-  //==========================================================================
-  // Quadrilateral basis (tensor product on [0,1]×[0,1], GLL01<K> in each dir)
-  //==========================================================================
-
-  template <size_t K>
-  class LagrangeBasisQuadrilateral
-  {
-    public:
-      // Node (i,j), 0 ≤ i,j ≤ K, φ_{i,j}(x,y) = L_i^K(x) L_j^K(y)
-      constexpr
-      Real getBasis(size_t i, size_t j, Real x, Real y) const
-      {
-        const auto& nodes = GLL01<K>::getNodes();
-
-        // L_i(x)
-        Real Lix = 1;
-        Real xi = nodes[i];
-        for (size_t m = 0; m <= K; ++m)
-        {
-          if (m != i)
-          {
-            Real xm = nodes[m];
-            Lix *= (x - xm) / (xi - xm);
-          }
-        }
-
-        // L_j(y)
-        Real Ljy = 1;
-        Real yj = nodes[j];
-        for (size_t n = 0; n <= K; ++n)
-        {
-          if (n != j)
-          {
-            Real yn = nodes[n];
-            Ljy *= (y - yn) / (yj - yn);
-          }
-        }
-
-        return Lix * Ljy;
-      }
-
-      // deriv_dim = 0 -> ∂/∂x, deriv_dim = 1 -> ∂/∂y
-      constexpr
-      Real getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y) const
-      {
-        const auto& nodes = GLL01<K>::getNodes();
-
-        if (deriv_dim == 0)
-        {
-          // ∂/∂x L_i(x) * L_j(y)
-          // dL_i/dx
-          Real xi = nodes[i];
-          Real dLix = 0;
-
-          for (size_t m = 0; m <= K; ++m)
-          {
-            if (m != i)
-            {
-              Real xm = nodes[m];
-              Real term = 1;
-
-              for (size_t q = 0; q <= K; ++q)
-              {
-                if (q != i && q != m)
-                {
-                  Real xq = nodes[q];
-                  term *= (x - xq) / (xi - xq);
-                }
-              }
-              term /= (xi - xm);
-              dLix += term;
-            }
-          }
-
-          // L_j(y)
-          Real Ljy = 1;
-          Real yj = nodes[j];
-          for (size_t n = 0; n <= K; ++n)
-          {
-            if (n != j)
-            {
-              Real yn = nodes[n];
-              Ljy *= (y - yn) / (yj - yn);
-            }
-          }
-
-          return dLix * Ljy;
-        }
+        // Handle singularity at s = 1
+        if (std::abs(s - 1.0) < RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+          a = -1.0;
         else
+          a = 2.0 * (1.0 + r) / (1.0 - s) - 1.0;
+
+        Real _unused;
+
+        Real psi_p;
+        JacobiPolynomial<P>::getValue(psi_p, _unused, 0.0, 0.0, a);
+
+        Real psi_q;
+        JacobiPolynomial<Q>::getValue(psi_q, _unused, 2.0 * P + 1.0, 0.0, b);
+
+        basis = psi_p * psi_q * Math::pow(0.5 * (1.0 - b), P);
+      }
+
+      template <size_t P, size_t Q>
+      static constexpr void getGradient(Real& dpsi_dr, Real& dpsi_ds, Real r, Real s)
+      {
+        Real b = s;
+        Real a;
+
+        if (Math::abs(s - 1.0) < RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+          a = -1.0;
+        else
+          a = 2.0 * (1.0 + r) / (1.0 - s) - 1.0;
+
+        Real Pa, dPa;
+        JacobiPolynomial<P>::getValue(Pa, dPa, 0.0, 0.0, a);
+
+        Real Pb, dPb;
+        JacobiPolynomial<Q>::getValue(Pb, dPb, 2.0 * P + 1.0, 0.0, b);
+
+        Real scale_b = Math::pow(0.5 * (1.0 - b), P);
+
+        // ∂ψ / ∂r: only a depends on r
+        dpsi_dr = 0.0;
+        if (Math::abs(s - 1.0) > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
         {
-          // ∂/∂y L_i(x) * dL_j/dy
-          // L_i(x)
-          Real Lix = 1;
-          Real xi = nodes[i];
-          for (size_t m = 0; m <= K; ++m)
-          {
-            if (m != i)
-            {
-              Real xm = nodes[m];
-              Lix *= (x - xm) / (xi - xm);
-            }
-          }
-
-          // dL_j/dy
-          Real yj = nodes[j];
-          Real dLjy = 0;
-
-          for (size_t n = 0; n <= K; ++n)
-          {
-            if (n != j)
-            {
-              Real yn = nodes[n];
-              Real term = 1;
-
-              for (size_t q = 0; q <= K; ++q)
-              {
-                if (q != j && q != n)
-                {
-                  Real yq = nodes[q];
-                  term *= (y - yq) / (yj - yq);
-                }
-              }
-              term /= (yj - yn);
-              dLjy += term;
-            }
-          }
-
-          return Lix * dLjy;
+          const Real da_dr = 2.0 / (1.0 - s);
+          dpsi_dr = dPa * da_dr * Pb * scale_b;
         }
+
+        // ∂ψ / ∂s: both a and b depend on s, and scale_b depends on b = s
+        dpsi_ds = 0.0;
+        if (Math::abs(s - 1.0) > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+        {
+          const Real da_ds = -2.0 * (1.0 + r) / ((1.0 - s) * (1.0 - s));
+          dpsi_ds += dPa * da_ds * Pb * scale_b;
+        }
+
+        dpsi_ds += Pa * dPb * scale_b;  // db_ds = 1
+
+        if constexpr (P > 0)
+          dpsi_ds += Pa * Pb * P * Math::pow(0.5 * (1.0 - b), P - 1) * (-0.5);
+      }
+
+      static constexpr void getCollapsed(Real& r, Real& s, Real x, Real y)
+      {
+        // s = 2y - 1 always
+        s = 2.0 * y - 1.0;
+
+        // r = 2x / (1 - y) - 1, with collapse at the top edge
+        if (1.0 - y > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+          r = 2.0 * (x / (1.0 - y)) - 1.0;
+        else
+          r = -1.0; // collapse at top vertex/edge
       }
   };
 
-  //==========================================================================
-  // Wedge basis (triangle × segment, [0,1] in z, triangle as above)
-  //==========================================================================
-
-  template <size_t K>
-  class LagrangeBasisWedge
+  template <size_t K, size_t MaxItGLL = 25>
+  class VandermondeTriangle
   {
     public:
-      constexpr
-      Real getBasis(
-        size_t i, size_t j, size_t k,
-        Real x, Real y, Real z) const
+      static const Math::Matrix<Real>& getMatrix()
       {
-        // Triangle part
-        const Real lambda[3] = { 1.0 - x - y, x, y };
-        size_t tri_indices[3] = { K - i - j, i, j };
+        static thread_local Math::Matrix<Real> s_vandermonde;
 
-        Real tri_val = 1;
-        for (size_t dim = 0; dim < 3; ++dim)
+        constexpr size_t N = FeketeTriangle<K, MaxItGLL>::Count;
+
+        if (s_vandermonde.size() == 0)
         {
-          size_t n = tri_indices[dim];
-          if (n == 0)
-            continue;
+          const auto& nodes = FeketeTriangle<K, MaxItGLL>::getNodes();
+          s_vandermonde.resize(N, N);
 
-          Real L_n = 1;
-          for (size_t m = 0; m < n; ++m)
-          {
-            L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-            L_n /= static_cast<Real>(m + 1);
-          }
-          tri_val *= L_n;
-        }
-
-        // Segment part in z on GLL01<K>
-        const auto& nodes = GLL01<K>::getNodes();
-        Real seg_val = 1;
-        Real zk = nodes[k];
-        for (size_t s = 0; s <= K; ++s)
-        {
-          if (s != k)
-          {
-            Real zs = nodes[s];
-            seg_val *= (z - zs) / (zk - zs);
-          }
-        }
-
-        return tri_val * seg_val;
-      }
-
-      constexpr
-      Real getDerivative(
-        size_t i, size_t j, size_t k, size_t deriv_dim,
-        Real x, Real y, Real z) const
-      {
-        const auto& seg_nodes = GLL01<K>::getNodes();
-
-        if (deriv_dim < 2)
-        {
-          // d/dx or d/dy on triangle part, segment untouched
-          const Real lambda[3] = { 1.0 - x - y, x, y };
-          const Real dlambda[3][2] = { {-1, -1}, { 1, 0 }, { 0, 1 } };
-          size_t tri_indices[3] = { K - i - j, i, j };
-
-          Real tri_deriv = 0;
-
-          for (size_t d = 0; d < 3; ++d)
-          {
-            Real term = dlambda[d][deriv_dim];
-
-            for (size_t dim = 0; dim < 3; ++dim)
-            {
-              const size_t n = tri_indices[dim];
-
-              if (dim == d)
+          // Fill Vandermonde matrix
+          size_t mode_idx = 0;
+          Rodin::Utility::ForIndex<K + 1>(
+              [&](auto p_idx)
               {
-                if (n == 0)
-                {
-                  term = 0;
-                  break;
-                }
-
-                Real dL_n = 0;
-                for (size_t p = 0; p < n; ++p)
-                {
-                  Real prod = static_cast<Real>(K);
-                  for (size_t m = 0; m < n; ++m)
-                  {
-                    if (m != p)
+                constexpr size_t P = p_idx.value;
+                Rodin::Utility::ForIndex<K + 1 - P>(
+                    [&](auto q_idx)
                     {
-                      prod *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                      prod /= static_cast<Real>(m + 1);
-                    }
-                  }
-                  prod /= static_cast<Real>(p + 1);
-                  dL_n += prod;
-                }
-                term *= dL_n;
-              }
-              else
-              {
-                if (n == 0)
-                  continue;
+                      constexpr size_t Q = q_idx.value;
+                      for (size_t node_idx = 0; node_idx < N; ++node_idx)
+                      {
+                        Real r, s;
+                        DubinerTriangle<K, MaxItGLL>::getCollapsed(
+                            r, s, nodes[node_idx].x(), nodes[node_idx].y());
 
-                Real L_n = 1;
-                for (size_t m = 0; m < n; ++m)
-                {
-                  L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                  L_n /= static_cast<Real>(m + 1);
-                }
-                term *= L_n;
-              }
-            }
+                        DubinerTriangle<K, MaxItGLL>::template getBasis<P, Q>(
+                            s_vandermonde(node_idx, mode_idx), r, s);
+                      }
+                      ++mode_idx;
+                    });
+              });
+        }
+        return s_vandermonde;
+      }
 
-            tri_deriv += term;
-          }
+      static const Math::Matrix<Real>& getInverse()
+      {
+        static thread_local Math::Matrix<Real> s_inv;
 
-          // Segment value
-          Real seg_val = 1;
-          Real zk = seg_nodes[k];
-          for (size_t s = 0; s <= K; ++s)
-          {
-            if (s != k)
-            {
-              Real zs = seg_nodes[s];
-              seg_val *= (z - zs) / (zk - zs);
-            }
-          }
+        if (s_inv.size() == 0)
+        {
+          const auto& V = VandermondeTriangle<K, MaxItGLL>::getMatrix();
+          assert(V.rows() == V.cols() && "Triangle Vandermonde must be square.");
+          Eigen::FullPivLU<Math::Matrix<Real>> lu(V);
+          assert(lu.isInvertible());
+          s_inv = lu.inverse();
+        }
 
-          return tri_deriv * seg_val;
+        return s_inv;
+      }
+  };
+
+  // ---------------------------------------------------------------------------
+  // Tetrahedron version
+  // ---------------------------------------------------------------------------
+
+  template <size_t K, size_t MaxItGLL = 25>
+  class DubinerTetrahedron
+  {
+    public:
+      // ψ_{P,Q,R}(a,b,c) on [-1,1]^3 (Dubiner tetrahedral basis)
+      template <size_t P, size_t Q, size_t R>
+      static constexpr void getBasis(Real& basis, Real a, Real b, Real c)
+      {
+        static_assert(P + Q + R <= K, "DubinerTetrahedron: P + Q + R must be <= K.");
+
+        Real _unused;
+
+        Real P_a;
+        JacobiPolynomial<P>::getValue(P_a, _unused, 0.0, 0.0, a);
+
+        Real P_b;
+        JacobiPolynomial<Q>::getValue(P_b, _unused, 2.0 * P + 1.0, 0.0, b);
+
+        Real P_c;
+        JacobiPolynomial<R>::getValue(P_c, _unused, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
+
+        Real scale_b = Math::pow(0.5 * (1.0 - b), P);
+        Real scale_c = Math::pow(0.5 * (1.0 - c), P + Q);
+
+        basis = P_a * P_b * P_c * scale_b * scale_c;
+      }
+
+      template <size_t P, size_t Q, size_t R>
+      static constexpr void getGradient(Real& dpsi_da,
+                                        Real& dpsi_db,
+                                        Real& dpsi_dc,
+                                        Real a, Real b, Real c)
+      {
+        Real P_a, dP_a;
+        JacobiPolynomial<P>::getValue(P_a, dP_a, 0.0, 0.0, a);
+
+        Real P_b, dP_b;
+        JacobiPolynomial<Q>::getValue(P_b, dP_b, 2.0 * P + 1.0, 0.0, b);
+
+        Real P_c, dP_c;
+        JacobiPolynomial<R>::getValue(P_c, dP_c, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
+
+        const Real scale_b = Math::pow(0.5 * (1.0 - b), P);
+        const Real scale_c = Math::pow(0.5 * (1.0 - c), P + Q);
+
+        // ∂ψ / ∂a
+        dpsi_da = dP_a * P_b * P_c * scale_b * scale_c;
+
+        // ∂ψ / ∂b
+        Real dscale_b_db = 0.0;
+        if constexpr (P > 0)
+          dscale_b_db = P * Math::pow(0.5 * (1.0 - b), P - 1) * (-0.5);
+
+        dpsi_db = P_a * (dP_b * scale_b + P_b * dscale_b_db) * P_c * scale_c;
+
+        // ∂ψ / ∂c
+        Real dscale_c_dc = 0.0;
+        if constexpr (P + Q > 0)
+          dscale_c_dc = (P + Q) * Math::pow(0.5 * (1.0 - c), P + Q - 1) * (-0.5);
+
+        dpsi_dc = P_a * P_b * (dP_c * scale_c + P_c * dscale_c_dc) * scale_b;
+      }
+
+      // Map reference tetra (0,0,0)-(1,0,0)-(0,1,0)-(0,0,1) → (a,b,c) ∈ [-1,1]^3
+      // Using a Duffy-type collapse:
+      //
+      //   c = 2 z - 1
+      //   b = 2 y / (1 - z) - 1          if 1 - z > tol
+      //   a = 2 x / (1 - y - z) - 1      if 1 - y - z > tol
+      //
+      static constexpr void getCollapsed(Real& a,
+                                         Real& b,
+                                         Real& c,
+                                         Real x,
+                                         Real y,
+                                         Real z)
+      {
+        c = 2.0 * z - 1.0;
+
+        const Real one_minus_z = 1.0 - z;
+        if (one_minus_z > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+        {
+          b = 2.0 * (y / one_minus_z) - 1.0;
+
+          const Real one_minus_yz = 1.0 - y - z;
+          if (one_minus_yz > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+            a = 2.0 * (x / one_minus_yz) - 1.0;
+          else
+            a = -1.0; // collapse along edge
         }
         else
         {
-          // d/dz on segment part, triangle unchanged
-          const Real lambda[3] = { 1.0 - x - y, x, y };
-          size_t tri_indices[3] = { K - i - j, i, j };
-
-          Real tri_val = 1;
-          for (size_t dim = 0; dim < 3; ++dim)
-          {
-            size_t n = tri_indices[dim];
-            if (n == 0)
-              continue;
-
-            Real L_n = 1;
-            for (size_t m = 0; m < n; ++m)
-            {
-              L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-              L_n /= static_cast<Real>(m + 1);
-            }
-            tri_val *= L_n;
-          }
-
-          // Segment derivative
-          const Real zk = seg_nodes[k];
-          Real dseg = 0;
-
-          for (size_t s = 0; s <= K; ++s)
-          {
-            if (s != k)
-            {
-              Real zs = seg_nodes[s];
-              Real term = 1;
-
-              for (size_t q = 0; q <= K; ++q)
-              {
-                if (q != k && q != s)
-                {
-                  Real zq = seg_nodes[q];
-                  term *= (z - zq) / (zk - zq);
-                }
-              }
-              term /= (zk - zs);
-              dseg += term;
-            }
-          }
-
-          return tri_val * dseg;
+          // collapse along vertex line
+          b = -1.0;
+          a = -1.0;
         }
+      }
+  };
+
+  template <size_t K, size_t MaxItGLL = 25>
+  class VandermondeTetrahedron
+  {
+    public:
+      static const Math::Matrix<Real>& getMatrix()
+      {
+        static thread_local Math::Matrix<Real> s_vandermonde;
+
+        constexpr size_t N = FeketeTetrahedron<K, MaxItGLL>::Count;
+
+        if (s_vandermonde.size() == 0)
+        {
+          const auto& nodes = FeketeTetrahedron<K, MaxItGLL>::getNodes();
+          s_vandermonde.resize(N, N);
+
+          size_t mode_idx = 0;
+          Rodin::Utility::ForIndex<K + 1>(
+              [&](auto p_idx)
+              {
+                constexpr size_t P = p_idx.value;
+                Rodin::Utility::ForIndex<K + 1 - P>(
+                    [&](auto q_idx)
+                    {
+                      constexpr size_t Q = q_idx.value;
+                      Rodin::Utility::ForIndex<K + 1 - P - Q>(
+                          [&](auto r_idx)
+                          {
+                            constexpr size_t R = r_idx.value;
+                            for (size_t node_idx = 0; node_idx < N; ++node_idx)
+                            {
+                              Real a, b, c;
+                              DubinerTetrahedron<K, MaxItGLL>::getCollapsed(
+                                  a, b, c,
+                                  nodes[node_idx].x(),
+                                  nodes[node_idx].y(),
+                                  nodes[node_idx].z());
+
+                              DubinerTetrahedron<K, MaxItGLL>::template getBasis<P, Q, R>(
+                                  s_vandermonde(node_idx, mode_idx), a, b, c);
+                            }
+                            ++mode_idx;
+                          });
+                    });
+              });
+        }
+
+        return s_vandermonde;
+      }
+
+      static const Math::Matrix<Real>& getInverse()
+      {
+        static thread_local Math::Matrix<Real> s_inv;
+
+        if (s_inv.size() == 0)
+        {
+          const auto& V = VandermondeTetrahedron<K, MaxItGLL>::getMatrix();
+          assert(V.rows() == V.cols() && "Tetrahedron Vandermonde must be square.");
+          Eigen::FullPivLU<Math::Matrix<Real>> lu(V);
+          assert(lu.isInvertible());
+          s_inv = lu.inverse();
+        }
+
+        return s_inv;
       }
   };
 }

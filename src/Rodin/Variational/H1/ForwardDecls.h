@@ -9,7 +9,6 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::Variational
 {

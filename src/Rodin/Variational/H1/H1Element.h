@@ -16,18 +16,16 @@
 #include <boost/serialization/access.hpp>
 
 #include "Rodin/Types.h"
-#include "Rodin/Math/Traits.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/Connectivity.h"
 #include "Rodin/Geometry/Polytope.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
-#include "Rodin/Variational/FiniteElementSpace.h"
 
 #include "ForwardDecls.h"
+#include "Rodin/Variational/H1/Fekete.h"
+#include "Rodin/Variational/H1/GLL.h"
 
 /**
  * @ingroup RodinDirectives
@@ -50,19 +48,6 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
-  // Forward declarations for Internal namespace functions
-  namespace Internal
-  {
-    template <size_t K>
-    std::array<Real, K+1> getGLLNodes01();
-
-    template <size_t K>
-    const std::vector<Math::SpatialPoint>& getTriangleFeketeNodes();
-
-    template <size_t K>
-    const std::vector<Math::SpatialPoint>& getTetrahedronFeketeNodes();
-  }
-
   /**
    * @defgroup H1ElementSpecializations H1Element Template Specializations
    * @brief Template specializations of the H1Element class.
@@ -367,7 +352,7 @@ namespace Rodin::Variational
             static thread_local std::vector<Math::SpatialPoint> s_nodes;
             if (s_nodes.empty())
             {
-              auto xi = Internal::getGLLNodes01<K>();
+              const auto& xi = GLL01<K>::getNodes();
               s_nodes.reserve(K + 1);
               for (size_t i = 0; i <= K; ++i)
                 s_nodes.emplace_back(Math::SpatialPoint{{xi[i]}});
@@ -379,7 +364,10 @@ namespace Rodin::Variational
           {
             static thread_local std::vector<Math::SpatialPoint> s_nodes;
             if (s_nodes.empty())
-              s_nodes = Internal::getTriangleFeketeNodes<K>();
+            {
+              const auto& tri = FeketeTriangle<K>::getNodes();
+              s_nodes.assign(tri.begin(), tri.end());
+            }
             return s_nodes;
           }
 
@@ -388,7 +376,7 @@ namespace Rodin::Variational
             static thread_local std::vector<Math::SpatialPoint> s_nodes;
             if (s_nodes.empty())
             {
-              auto xi = Internal::getGLLNodes01<K>();
+              const auto& xi = GLL01<K>::getNodes();
               s_nodes.reserve((K + 1) * (K + 1));
               for (size_t j = 0; j <= K; ++j)
                 for (size_t i = 0; i <= K; ++i)
@@ -401,7 +389,11 @@ namespace Rodin::Variational
           {
             static thread_local std::vector<Math::SpatialPoint> s_nodes;
             if (s_nodes.empty())
-              s_nodes = Internal::getTetrahedronFeketeNodes<K>();
+            {
+              // Choose MaxItGLL = 25 consistently with your other code
+              const auto& tet = FeketeTetrahedron<K>::getNodes();
+              s_nodes.assign(tet.begin(), tet.end());
+            }
             return s_nodes;
           }
 
@@ -410,12 +402,16 @@ namespace Rodin::Variational
             static thread_local std::vector<Math::SpatialPoint> s_nodes;
             if (s_nodes.empty())
             {
-              const auto& tri = Internal::getTriangleFeketeNodes<K>();
-              auto z = Internal::getGLLNodes01<K>();
+              const auto& tri = FeketeTriangle<K>::getNodes();
+              const auto& z   = GLL01<K>::getNodes();
+
               s_nodes.reserve(tri.size() * (K + 1));
               for (size_t k = 0; k <= K; ++k)
+              {
                 for (const auto& p : tri)
-                  s_nodes.emplace_back(Math::SpatialPoint{{p.x(), p.y(), z[k]}});
+                  s_nodes.emplace_back(
+                    Math::SpatialPoint{{p.x(), p.y(), z[k]}});
+              }
             }
             return s_nodes;
           }

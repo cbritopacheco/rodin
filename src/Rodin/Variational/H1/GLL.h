@@ -9,7 +9,6 @@
 
 #include <array>
 
-#include "Rodin/Types.h"
 #include "Rodin/Math/Constants.h"
 #include "Rodin/Math/Common.h"
 
@@ -22,9 +21,9 @@ namespace Rodin::Variational
   /**
    * @brief Compile-time Gauss–Lobatto–Legendre (GLL) nodes on [-1, 1].
    *
-   * This class provides the \f$ K+1 \f$ GLL nodes associated with the
-   * Legendre polynomial degree \f$ K \f$. The nodes consist of the endpoints
-   * \f$ \{-1, 1\} \f$ and the interior zeros of \f$ (1 - x^2) P'_K(x) \f$.
+   * This class provides the @f$ K+1 @f$ GLL nodes associated with the
+   * Legendre polynomial degree @f$ K @f$. The nodes consist of the endpoints
+   * @f$ \{-1, 1\} @f$ and the interior zeros of @f$ (1 - x^2) P'_K(x) @f$.
    *
    * The nodes are computed once at compile time (subject to compiler support
    * for `constexpr` floating-point operations) using a Newton iteration with
@@ -112,7 +111,7 @@ namespace Rodin::Variational
           for (size_t it = 0; it < maxIt; ++it)
           {
             Real P, dP;
-            LegendrePolynomial<K>::evaluate(P, dP, x); // P_K(x), P'_K(x)
+            LegendrePolynomial<K>::getValue(P, dP, x); // P_K(x), P'_K(x)
 
             const Real one_minus_x2 = static_cast<Real>(1.0) - x * x;
 
@@ -135,17 +134,17 @@ namespace Rodin::Variational
         return nodes;
       }
 
-      inline static constexpr std::array<Real, K + 1> s_nodes = compute();
+      inline static const std::array<Real, K + 1> s_nodes = compute();
   };
 
   /**
    * @brief Gauss–Lobatto–Legendre nodes mapped from [-1, 1] to [0, 1].
    *
-   * Given the standard GLL nodes \f$x_i \in [-1, 1]\f$, this class provides
+   * Given the standard GLL nodes @f$ x_i \in [-1, 1] @f$, this class provides
    * the corresponding mapped nodes
-   * \f[
+   * @f[
    *   \hat{x}_i = \frac{1}{2}\,(x_i + 1) \in [0, 1],
-   * \f]
+   * @f]
    * preserving the ordering and indexing.
    *
    * @tparam K Polynomial degree.
@@ -188,7 +187,7 @@ namespace Rodin::Variational
         return nodes;
       }
 
-      inline static constexpr std::array<Real, K + 1> s_nodes = compute();
+      inline static const std::array<Real, K + 1> s_nodes = compute();
   };
 }
 

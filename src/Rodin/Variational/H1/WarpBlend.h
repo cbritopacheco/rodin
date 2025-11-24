@@ -10,11 +10,9 @@
 #include <cstddef>
 
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Types.h"
-
-#include "GLL.h"
 
 #include "LagrangeBasis.h"
+#include "GLL.h"
 
 #define RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE 1e-14
 
@@ -53,7 +51,7 @@ namespace Rodin::Variational
           // Compute warp as weighted sum of Lagrange polynomials
           for (size_t i = 1; i < K; ++i)  // Skip endpoints
           {
-            const Real L = LagrangeBasis1D<K>(GLL<K, MaxItGLL>::getNodes()).getBasis(i, xi);
+            const Real L = LagrangeBasis1D<K>::getBasis(i, xi, gll_nodes);
             const Real target = gll_nodes[i];
             const Real equi = 2.0 * static_cast<Real>(i) / static_cast<Real>(K) - 1.0;
             warp += L * (target - equi);
@@ -159,84 +157,102 @@ namespace Rodin::Variational
       }
   };
 
-  template <size_t K, size_t MaxItGLL = 25>
+  template <class Real, size_t K, size_t MaxItGLL = 25>
   class WarpBlendTetrahedron
   {
     public:
       template <size_t N>
       static void apply(std::array<Math::SpatialPoint, N>& nodes)
       {
-        constexpr Real TOL = RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE;
+        constexpr Real TOL =
+          static_cast<Real>(RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE);
 
         if constexpr (K <= 1)
         {
-          return;  // No warping needed for linear elements
+          // No warping needed for linear elements
+          return;
         }
         else
         {
-          // Apply warp for each node
           for (size_t idx = 0; idx < N; ++idx)
           {
             Real x = nodes[idx].x();
             Real y = nodes[idx].y();
             Real z = nodes[idx].z();
-            Real w = 1.0 - x - y - z;  // Fourth barycentric coordinate
+            Real w = static_cast<Real>(1.0) - x - y - z; // 4th barycentric
 
-            // Skip vertices (they should remain fixed)
-            bool is_vertex =
-              (x < TOL && y < TOL && z < TOL) ||  // Vertex (0,0,0)
-              (x > 1.0 - TOL && y < TOL && z < TOL) ||  // Vertex (1,0,0)
-              (x < TOL && y > 1.0-TOL && z < TOL) ||  // Vertex (0,1,0)
-              (x < TOL && y < TOL && z > 1.0 - TOL);    // Vertex (0,0,1)
+            // Skip vertices (keep reference vertices fixed)
+            const bool is_vertex =
+              (x < TOL && y < TOL && z < TOL) ||                                    // (0,0,0)
+              (x > static_cast<Real>(1.0) - TOL && y < TOL && z < TOL) ||        // (1,0,0)
+              (x < TOL && y > static_cast<Real>(1.0) - TOL && z < TOL) ||        // (0,1,0)
+              (x < TOL && y < TOL && z > static_cast<Real>(1.0) - TOL);          // (0,0,1)
 
             if (is_vertex)
               continue;
 
-            // Compute warp contributions from each face/edge
-            // Simplified approach: warp based on distance from faces
-            Real warp_x = 0.0, warp_y = 0.0, warp_z = 0.0;
+            // Warp contributions (heuristic, face-based)
+            Real warp_x = static_cast<Real>(0.0);
+            Real warp_y = static_cast<Real>(0.0);
+            Real warp_z = static_cast<Real>(0.0);
 
             // Face 1: opposite to vertex (1,0,0)
+            // Use (y, z+w) as local "edge" pair for warp factor
             if (y + z + w > TOL)
             {
-              warp_x += warpFactor<K>(y, z + w) * 0.3;
+              warp_x +=
+                WarpBlend<K, MaxItGLL>::getFactor(y, z + w)
+                * static_cast<Real>(0.3);
             }
 
             // Face 2: opposite to vertex (0,1,0)
             if (x + z + w > TOL)
             {
-              warp_y += warpFactor<K>(x, z + w) * 0.3;
+              warp_y +=
+                WarpBlend<K, MaxItGLL>::getFactor(x, z + w)
+                * static_cast<Real>(0.3);
             }
 
             // Face 3: opposite to vertex (0,0,1)
             if (x + y + w > TOL)
             {
-              warp_z += warpFactor<K>(x, y + w) * 0.3;
+              warp_z +=
+                WarpBlend<K, MaxItGLL>::getFactor(x, y + w)
+                * static_cast<Real>(0.3);
             }
 
-            // Blend using barycentric coordinates
-            Real blend_factor = x * y * z * w;
-            Real scale = 1.0 / (1.0 + K * K * 0.1);  // Reduce warp for higher orders
+            // Blend using barycentric product (small in boundary layers)
+            const Real blend_factor = x * y * z * w;
 
-            // Apply warp
+            // Dampen warp for higher orders
+            const Real scale =
+              static_cast<Real>(1.0) /
+              (static_cast<Real>(1.0) +
+               static_cast<Real>(0.1) * static_cast<Real>(K * K));
+
             Real new_x = x + warp_x * scale * blend_factor;
             Real new_y = y + warp_y * scale * blend_factor;
             Real new_z = z + warp_z * scale * blend_factor;
 
-            // Clamp to valid tetrahedron domain
-            new_x = std::max(0.0, std::min(1.0, new_x));
-            new_y = std::max(0.0, std::min(1.0, new_y));
-            new_z = std::max(0.0, std::min(1.0, new_z));
+            // Clamp to [0,1]
+            new_x = std::max(static_cast<Real>(0.0),
+                             std::min(static_cast<Real>(1.0), new_x));
+            new_y = std::max(static_cast<Real>(0.0),
+                             std::min(static_cast<Real>(1.0), new_y));
+            new_z = std::max(static_cast<Real>(0.0),
+                             std::min(static_cast<Real>(1.0), new_z));
 
-            if (new_x + new_y + new_z > 1.0)
+            // Enforce x + y + z ≤ 1 (stay in reference tetra)
+            const Real sum = new_x + new_y + new_z;
+            if (sum > static_cast<Real>(1.0))
             {
-              Real excess = new_x + new_y + new_z - 1.0;
-              new_x -= excess / 3.0;
-              new_y -= excess / 3.0;
-              new_z -= excess / 3.0;
+              const Real excess = sum - static_cast<Real>(1.0);
+              new_x -= excess / static_cast<Real>(3.0);
+              new_y -= excess / static_cast<Real>(3.0);
+              new_z -= excess / static_cast<Real>(3.0);
             }
 
-            nodes[idx] = Math::SpatialPoint{{new_x, new_y, new_z}};
+            nodes[idx] = Math::SpatialPoint{{ new_x, new_y, new_z }};
           }
         }
       }

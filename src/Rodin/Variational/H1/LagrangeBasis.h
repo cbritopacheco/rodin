@@ -24,37 +24,27 @@ namespace Rodin::Variational
   class LagrangeBasis1D
   {
     public:
-      // nodes: K+1 1D interpolation nodes along x (e.g. GLL or arbitrary)
-      constexpr
-      LagrangeBasis1D(const std::array<Math::SpatialPoint, K + 1>& nodes)
-        : m_nodes(nodes)
-      {}
-
-      constexpr
-      Real getBasis(size_t i, Real x) const
+      static constexpr
+      Real getBasis(size_t i, Real x, const std::array<Real, K + 1>& nodes)
       {
-        const auto& nodes = m_nodes.get();
-
         Real result = 1;
-        Real xi = nodes[i].x();
+        const Real xi = nodes[i];
 
         for (size_t j = 0; j <= K; ++j)
         {
           if (j != i)
           {
-            Real xj = nodes[j].x();
+            const Real xj = nodes[j];
             result *= (x - xj) / (xi - xj);
           }
         }
         return result;
       }
 
-      constexpr
-      Real getDerivative(size_t i, Real x) const
+      static constexpr
+      Real getDerivative(size_t i, Real x, const std::array<Real, K + 1>& nodes)
       {
-        const auto& nodes = m_nodes.get();
-
-        Real xi = nodes[i].value();
+        const Real xi = nodes[i];
         Real result = 0;
 
         // Derivative using product rule
@@ -63,13 +53,13 @@ namespace Rodin::Variational
           if (m != i)
           {
             Real term = 1;
-            Real xm = nodes[m].x();
+            const Real xm = nodes[m];
 
             for (size_t j = 0; j <= K; ++j)
             {
               if (j != i && j != m)
               {
-                Real xj = nodes[j].x();
+                const Real xj = nodes[j];
                 term *= (x - xj) / (xi - xj);
               }
             }
@@ -79,24 +69,22 @@ namespace Rodin::Variational
         }
         return result;
       }
-
-    private:
-      std::reference_wrapper<const std::array<Math::SpatialPoint, K + 1>> m_nodes;
   };
 
   //==========================================================================
   // Point basis (reference 0D element)
   //==========================================================================
 
+  template <size_t K>
   class LagrangeBasisPoint
   {
     public:
-      Real getBasis() const
+      static constexpr Real getBasis()
       {
         return 1.0;
       }
 
-      Real getDerivative() const
+      static constexpr Real getDerivative()
       {
         return 0.0;
       }
@@ -111,7 +99,7 @@ namespace Rodin::Variational
   {
     public:
       // Node index i, 0 <= i <= K, x in [0,1]
-      Real getBasis(size_t i, Real x) const
+      static constexpr Real getBasis(size_t i, Real x)
       {
         const auto& nodes = GLL01<K>::getNodes();
 
@@ -129,7 +117,7 @@ namespace Rodin::Variational
         return result;
       }
 
-      Real getDerivative(size_t i, Real x) const
+      static constexpr Real getDerivative(size_t i, Real x)
       {
         const auto& nodes = GLL01<K>::getNodes();
 
@@ -168,7 +156,7 @@ namespace Rodin::Variational
   {
     public:
       // Node identified by (i,j) with i+j <= K.
-      Real getBasis(size_t i, size_t j, Real x, Real y) const
+      static constexpr Real getBasis(size_t i, size_t j, Real x, Real y)
       {
         // Barycentric coordinates: λ0 = 1 - x - y, λ1 = x, λ2 = y
         const Real lambda[3] = { 1.0 - x - y, x, y };
@@ -196,7 +184,8 @@ namespace Rodin::Variational
       }
 
       // deriv_dim = 0 -> ∂/∂x, deriv_dim = 1 -> ∂/∂y
-      Real getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y) const
+      static constexpr
+      Real getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y)
       {
         const Real lambda[3] = { 1.0 - x - y, x, y };
 
@@ -274,8 +263,8 @@ namespace Rodin::Variational
   {
     public:
       // Node (i,j,k) with i+j+k <= K.
-      Real getBasis(
-        size_t i, size_t j, size_t k, Real x, Real y, Real z) const
+      static constexpr Real getBasis(
+        size_t i, size_t j, size_t k, Real x, Real y, Real z)
       {
         // Barycentric: λ0 = 1-x-y-z, λ1 = x, λ2 = y, λ3 = z
         const Real lambda[4] = { 1.0 - x - y - z, x, y, z };
@@ -302,9 +291,9 @@ namespace Rodin::Variational
       }
 
       // deriv_dim = 0 -> ∂/∂x, 1 -> ∂/∂y, 2 -> ∂/∂z
-      Real getDerivative(
+      static constexpr Real getDerivative(
         size_t i, size_t j, size_t k, size_t deriv_dim,
-        Real x, Real y, Real z) const
+        Real x, Real y, Real z)
       {
         const Real lambda[4] = { 1.0 - x - y - z, x, y, z };
 
@@ -387,7 +376,7 @@ namespace Rodin::Variational
   {
     public:
       // Node (i,j), 0 ≤ i,j ≤ K, φ_{i,j}(x,y) = L_i^K(x) L_j^K(y)
-      Real getBasis(size_t i, size_t j, Real x, Real y) const
+      static constexpr Real getBasis(size_t i, size_t j, Real x, Real y)
       {
         const auto& nodes = GLL01<K>::getNodes();
 
@@ -419,7 +408,8 @@ namespace Rodin::Variational
       }
 
       // deriv_dim = 0 -> ∂/∂x, deriv_dim = 1 -> ∂/∂y
-      Real getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y) const
+      static constexpr Real getDerivative(
+          size_t i, size_t j, size_t deriv_dim, Real x, Real y)
       {
         const auto& nodes = GLL01<K>::getNodes();
 
@@ -517,9 +507,9 @@ namespace Rodin::Variational
   {
     public:
       // Node (i,j,k): triangle indices (i,j) with i+j ≤ K, segment index k.
-      Real getBasis(
+      static constexpr Real getBasis(
         size_t i, size_t j, size_t k,
-        Real x, Real y, Real z) const
+        Real x, Real y, Real z)
       {
         // Triangle part
         const Real lambda[3] = { 1.0 - x - y, x, y };
@@ -559,9 +549,9 @@ namespace Rodin::Variational
       }
 
       // deriv_dim = 0 -> ∂/∂x, 1 -> ∂/∂y, 2 -> ∂/∂z
-      Real getDerivative(
+      static constexpr Real getDerivative(
         size_t i, size_t j, size_t k, size_t deriv_dim,
-        Real x, Real y, Real z) const
+        Real x, Real y, Real z)
       {
         const auto& seg_nodes = GLL01<K>::getNodes();
 
@@ -665,21 +655,21 @@ namespace Rodin::Variational
           }
 
           // Segment derivative
-          Real zk = seg_nodes[k];
+          const Real zk = seg_nodes[k];
           Real dseg = 0;
 
           for (size_t s = 0; s <= K; ++s)
           {
             if (s != k)
             {
-              Real zs = seg_nodes[s];
+              const Real zs = seg_nodes[s];
               Real term = 1;
 
               for (size_t q = 0; q <= K; ++q)
               {
                 if (q != k && q != s)
                 {
-                  Real zq = seg_nodes[q];
+                  const Real zq = seg_nodes[q];
                   term *= (z - zq) / (zk - zq);
                 }
               }
