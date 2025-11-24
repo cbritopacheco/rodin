@@ -91,7 +91,7 @@ namespace Rodin::Variational
    *    towards Fekete-type positions.
    *
    * For a given polynomial degree K, the number of nodes is
-   * \f$ (K+1)(K+2)(K+3)/6 \f$.
+   * @f$ (K + 1)(K + 2)(K + 3) / 6 @f$.
    *
    * Nodes are computed once per template instantiation and cached.
    *

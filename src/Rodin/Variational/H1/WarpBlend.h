@@ -14,6 +14,8 @@
 
 #include "GLL.h"
 
+#include "LagrangeBasis.h"
+
 #define RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE 1e-14
 
 namespace Rodin::Variational
@@ -22,23 +24,6 @@ namespace Rodin::Variational
   class WarpBlend
   {
     public:
-      static Real getLagrange(size_t i, Real x)
-      {
-        const auto& gll_nodes = GLL<K, MaxItGLL>::getNodes();
-        Real result = 1.0;
-        Real xi = gll_nodes[i];
-
-        for (size_t j = 0; j <= K; ++j)
-        {
-          if (j != i)
-          {
-            Real xj = gll_nodes[j];
-            result *= (x - xj) / (xi - xj);
-          }
-        }
-        return result;
-      }
-
       /**
        * @brief Computes the warp factor for a given edge in the triangle
        * This is used to move equispaced nodes toward optimal Fekete positions.
@@ -60,17 +45,17 @@ namespace Rodin::Variational
           Real warp = 0.0;
 
           // Compute barycentric coordinate along edge
-          Real lambda = r / (r + s + TOL);  // Add small epsilon to avoid division by zero
+          const Real lambda = r / (r + s + TOL);  // Add small epsilon to avoid division by zero
 
           // Map to [-1, 1]
-          Real xi = 2.0 * lambda - 1.0;
+          const Real xi = 2.0 * lambda - 1.0;
 
           // Compute warp as weighted sum of Lagrange polynomials
           for (size_t i = 1; i < K; ++i)  // Skip endpoints
           {
-            Real L = getLagrange(i, xi);
-            Real target = gll_nodes[i];
-            Real equi = 2.0 * static_cast<Real>(i) / static_cast<Real>(K) - 1.0;
+            const Real L = LagrangeBasis1D<K>(GLL<K, MaxItGLL>::getNodes()).getBasis(i, xi);
+            const Real target = gll_nodes[i];
+            const Real equi = 2.0 * static_cast<Real>(i) / static_cast<Real>(K) - 1.0;
             warp += L * (target - equi);
           }
 
@@ -98,14 +83,14 @@ namespace Rodin::Variational
           std::array<std::pair<Real, Real>, N> equi_coords;
           for (size_t idx = 0; idx < N; ++idx)
           {
-            Real x = nodes[idx].x();
-            Real y = nodes[idx].y();
+            const Real x = nodes[idx].x();
+            const Real y = nodes[idx].y();
 
             // Convert from reference triangle (x,y) to equilateral coordinates (r,s)
             // Reference triangle: (0,0), (1,0), (0,1)
             // Equilateral triangle: centered coordinate system
-            Real r = 2.0 * x - 1.0 + y;
-            Real s = std::sqrt(3.0) * y - 1.0;
+            const Real r = 2.0 * x - 1.0 + y;
+            const Real s = Math::sqrt(3.0) * y - 1.0;
 
             equi_coords[idx] = { r, s };
           }
@@ -116,9 +101,9 @@ namespace Rodin::Variational
             // Note: equi_coords computed above but not used in simplified warp implementation
             // (void)equi_coords;  // Suppress unused warning
 
-            Real x = nodes[idx].x();
-            Real y = nodes[idx].y();
-            Real z = 1.0 - x - y;  // Third barycentric coordinate
+            const Real x = nodes[idx].x();
+            const Real y = nodes[idx].y();
+            const Real z = 1.0 - x - y;  // Third barycentric coordinate
 
             // Skip vertices (they should remain fixed)
             if (x < TOL && y < TOL)  // Vertex (0,0)
