@@ -61,7 +61,6 @@ namespace Rodin::Variational
    * This class provides a minimal CRTP interface shared by all finite elements.
    * Derived classes are expected to implement the following methods:
    * - `size_t getCount() const`
-   * - `const Math::SpatialVector<Real>& getNode(size_t) const`
    * - `auto getBasis(size_t) const`
    * - `auto getLinearForm(size_t) const`
    * - `size_t getOrder() const`
@@ -214,27 +213,6 @@ namespace Rodin::Variational
       size_t getCount() const
       {
         return static_cast<const Derived&>(*this).getCount();
-      }
-
-      /**
-       * @brief Gets the coordinates of the i-th interpolation node.
-       *
-       * For nodal (Lagrange-type) finite elements, the nodes coincide with the
-       * locations where the degrees of freedom are defined (e.g. vertices,
-       * edge midpoints, interior points).
-       *
-       * The coordinates are given in the reference geometry associated with
-       * getGeometry().
-       *
-       * @param i Local node index in the range @f$ 0 \leq i < \text{getCount()} @f$.
-       * @return Reference to the spatial coordinates of the i-th node.
-       *
-       * @note This method is expected to be implemented in the Derived class.
-       */
-      constexpr
-      const Math::SpatialVector<Real>& getNode(size_t i) const
-      {
-        return static_cast<const Derived&>(*this).getNode(i);
       }
 
       /**
