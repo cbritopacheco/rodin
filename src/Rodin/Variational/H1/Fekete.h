@@ -31,7 +31,7 @@ namespace Rodin::Variational
    *
    * @tparam K Polynomial degree on the triangle.
    */
-  template <size_t K, size_t MaxItGLL = 25>
+  template <size_t K>
   class FeketeTriangle
   {
     public:
@@ -96,7 +96,7 @@ namespace Rodin::Variational
    *
    * @tparam K Polynomial degree on the tetrahedron.
    */
-  template <size_t K, size_t MaxItGLL = 25>
+  template <size_t K>
   class FeketeTetrahedron
   {
     public:

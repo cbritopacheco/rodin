@@ -21,7 +21,7 @@
 
 namespace Rodin::Variational
 {
-  template <size_t K, size_t MaxItGLL = 25>
+  template <size_t K>
   class DubinerTriangle
   {
     public:
@@ -112,11 +112,11 @@ namespace Rodin::Variational
       {
         static thread_local Math::Matrix<Real> s_vandermonde;
 
-        constexpr size_t N = FeketeTriangle<K, MaxItGLL>::Count;
+        constexpr size_t N = FeketeTriangle<K>::Count;
 
         if (s_vandermonde.size() == 0)
         {
-          const auto& nodes = FeketeTriangle<K, MaxItGLL>::getNodes();
+          const auto& nodes = FeketeTriangle<K>::getNodes();
           s_vandermonde.resize(N, N);
 
           // Fill Vandermonde matrix
@@ -132,10 +132,10 @@ namespace Rodin::Variational
                       for (size_t node_idx = 0; node_idx < N; ++node_idx)
                       {
                         Real r, s;
-                        DubinerTriangle<K, MaxItGLL>::getCollapsed(
+                        DubinerTriangle<K>::getCollapsed(
                             r, s, nodes[node_idx].x(), nodes[node_idx].y());
 
-                        DubinerTriangle<K, MaxItGLL>::template getBasis<P, Q>(
+                        DubinerTriangle<K>::template getBasis<P, Q>(
                             s_vandermonde(node_idx, mode_idx), r, s);
                       }
                       ++mode_idx;
@@ -151,7 +151,7 @@ namespace Rodin::Variational
 
         if (s_inv.size() == 0)
         {
-          const auto& V = VandermondeTriangle<K, MaxItGLL>::getMatrix();
+          const auto& V = VandermondeTriangle<K>::getMatrix();
           assert(V.rows() == V.cols() && "Triangle Vandermonde must be square.");
           Eigen::FullPivLU<Math::Matrix<Real>> lu(V);
           assert(lu.isInvertible());
@@ -166,7 +166,7 @@ namespace Rodin::Variational
   // Tetrahedron version
   // ---------------------------------------------------------------------------
 
-  template <size_t K, size_t MaxItGLL = 25>
+  template <size_t K>
   class DubinerTetrahedron
   {
     public:
@@ -265,7 +265,7 @@ namespace Rodin::Variational
       }
   };
 
-  template <size_t K, size_t MaxItGLL = 25>
+  template <size_t K>
   class VandermondeTetrahedron
   {
     public:
@@ -273,11 +273,11 @@ namespace Rodin::Variational
       {
         static thread_local Math::Matrix<Real> s_vandermonde;
 
-        constexpr size_t N = FeketeTetrahedron<K, MaxItGLL>::Count;
+        constexpr size_t N = FeketeTetrahedron<K>::Count;
 
         if (s_vandermonde.size() == 0)
         {
-          const auto& nodes = FeketeTetrahedron<K, MaxItGLL>::getNodes();
+          const auto& nodes = FeketeTetrahedron<K>::getNodes();
           s_vandermonde.resize(N, N);
 
           size_t mode_idx = 0;
@@ -296,13 +296,13 @@ namespace Rodin::Variational
                             for (size_t node_idx = 0; node_idx < N; ++node_idx)
                             {
                               Real a, b, c;
-                              DubinerTetrahedron<K, MaxItGLL>::getCollapsed(
+                              DubinerTetrahedron<K>::getCollapsed(
                                   a, b, c,
                                   nodes[node_idx].x(),
                                   nodes[node_idx].y(),
                                   nodes[node_idx].z());
 
-                              DubinerTetrahedron<K, MaxItGLL>::template getBasis<P, Q, R>(
+                              DubinerTetrahedron<K>::template getBasis<P, Q, R>(
                                   s_vandermonde(node_idx, mode_idx), a, b, c);
                             }
                             ++mode_idx;
@@ -320,7 +320,7 @@ namespace Rodin::Variational
 
         if (s_inv.size() == 0)
         {
-          const auto& V = VandermondeTetrahedron<K, MaxItGLL>::getMatrix();
+          const auto& V = VandermondeTetrahedron<K>::getMatrix();
           assert(V.rows() == V.cols() && "Tetrahedron Vandermonde must be square.");
           Eigen::FullPivLU<Math::Matrix<Real>> lu(V);
           assert(lu.isInvertible());

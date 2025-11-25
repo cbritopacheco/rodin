@@ -29,9 +29,11 @@
 
 /**
  * @ingroup RodinDirectives
- * @brief Indicates the maximum vector dimension a PkElement
+ * @brief Indicates the maximum vector dimension a H1Element can support.
  */
-#define RODIN_H1_MAX_VECTOR_DIMENSION 16
+#define RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION 16
+
+#define RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE 1e-12
 
 namespace Rodin::FormLanguage
 {

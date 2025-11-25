@@ -296,23 +296,41 @@ namespace Rodin::Variational
       }
       case Geometry::Polytope::Type::Wedge:
       {
-        // Wedge = triangle × segment; local numbering k–j–i as in FeketeTetrahedron
-        size_t idx = 0;
-        for (size_t k = 0; k <= K; ++k)
-        {
-          for (size_t j = 0; j <= K; ++j)
-          {
-            for (size_t i = 0; i <= K - j; ++i, ++idx)
+        // Number of triangle DOFs (Fekete triangle)
+        constexpr size_t ntri = FeketeTriangle<K>::Count; // same as FeketeTriangle<K>::Count
+
+        const size_t k     = m_local / ntri; // z-index, 0..K
+        const size_t alpha = m_local % ntri; // triangle node index
+
+        // --- triangle factor: nodal basis on Fekete nodes ---
+        const auto& Vinv = VandermondeTriangle<K>::getInverse();
+
+        Real rc, sc;
+        DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
+
+        Scalar tri_val = Scalar(0);
+        size_t mode_idx = 0;
+
+        Rodin::Utility::ForIndex<K + 1>(
+            [&](auto p_idx)
             {
-              if (idx == m_local)
-              {
-                return LagrangeBasisWedge<K>::getBasis(
-                    i, j, k, r.x(), r.y(), r.z());
-              }
-            }
-          }
-        }
-        return Math::nan<Scalar>();
+              constexpr size_t P = p_idx.value;
+              Rodin::Utility::ForIndex<K + 1 - P>(
+                  [&](auto q_idx)
+                  {
+                    constexpr size_t Q = q_idx.value;
+                    Real psi;
+                    DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
+                    tri_val += Vinv(mode_idx, alpha) * psi;
+                    ++mode_idx;
+                  });
+            });
+
+        // --- segment factor in z (GLL01, Lagrange) ---
+        const Real z = r(2);
+        const Real seg_val = LagrangeBasisSegment<K>::getBasis(k, z);
+
+        return tri_val * seg_val;
       }
     }
 
@@ -355,7 +373,7 @@ namespace Rodin::Variational
 
           const Scalar x = r.x();
           const Scalar y = r.y();
-          const Scalar eps = static_cast<Scalar>(1e-10);
+          const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
 
           Scalar result = Scalar(0);
           size_t mode_idx = 0;
@@ -432,7 +450,7 @@ namespace Rodin::Variational
           const Scalar x = r.x();
           const Scalar y = r.y();
           const Scalar z = r.z();
-          const Scalar eps = static_cast<Scalar>(1e-10);
+          const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
 
           Scalar result = Scalar(0);
           size_t mode_idx = 0;
@@ -513,23 +531,100 @@ namespace Rodin::Variational
 
         case Geometry::Polytope::Type::Wedge:
         {
-          // Wedge derivative via LagrangeBasisWedge (triangle × GLL segment)
-          size_t idx = 0;
-          for (size_t k = 0; k <= K; ++k)
+          constexpr size_t ntri = FeketeTriangle<K>::Count;
+
+          const size_t k = m_local / ntri;
+          const size_t alpha = m_local % ntri;
+
+          const Real z = r(2);
+
+          if (m_i < 2) // ∂/∂x or ∂/∂y
           {
-            for (size_t j = 0; j <= K; ++j)
-            {
-              for (size_t i = 0; i <= K - j; ++i, ++idx)
-              {
-                if (idx == m_local)
+            // --- triangle gradient (same as Triangle case, but index = alpha) ---
+            const auto& Vinv = VandermondeTriangle<K>::getInverse();
+
+            Scalar rc, sc;
+            DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
+
+            const Scalar x   = r.x();
+            const Scalar y   = r.y();
+            const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+
+            Scalar tri_deriv = Scalar(0);
+            size_t mode_idx  = 0;
+
+            Rodin::Utility::ForIndex<K + 1>(
+                [&](auto p_idx)
                 {
-                  return LagrangeBasisWedge<K>::getDerivative(
-                      i, j, k, m_i, r.x(), r.y(), r.z());
-                }
-              }
-            }
+                  constexpr size_t P = p_idx.value;
+                  Rodin::Utility::ForIndex<K + 1 - P>(
+                      [&](auto q_idx)
+                      {
+                        constexpr size_t Q = q_idx.value;
+
+                        Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
+                        DubinerTriangle<K>::template getGradient<P, Q>(
+                            dpsi_dr, dpsi_ds, rc, sc);
+
+                        Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
+
+                        // r = 2x/(1-y) - 1, s = 2y - 1
+                        if (Math::abs(Scalar(1) - y) > eps)
+                        {
+                          const Scalar denom = Scalar(1) - y;
+                          const Scalar dr_dx = Scalar(2) / denom;
+                          const Scalar dr_dy =
+                              Scalar(2) * x / (denom * denom);
+                          const Scalar ds_dx = Scalar(0);
+                          const Scalar ds_dy = Scalar(2);
+
+                          dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
+                          dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
+                        }
+
+                        if (m_i == 0)      // ∂/∂x
+                          tri_deriv += Vinv(mode_idx, alpha) * dpsi_dx;
+                        else if (m_i == 1) // ∂/∂y
+                          tri_deriv += Vinv(mode_idx, alpha) * dpsi_dy;
+
+                        ++mode_idx;
+                      });
+                });
+
+            // --- segment value in z ---
+            const Real seg_val = LagrangeBasisSegment<K>::getBasis(k, z);
+            return tri_deriv * seg_val;
           }
-          return Scalar(0);
+          else // m_i == 2 → ∂/∂z
+          {
+            // --- triangle value (same as in BasisFunction wedge case) ---
+            const auto& Vinv = VandermondeTriangle<K>::getInverse();
+
+            Real rc, sc;
+            DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
+
+            Scalar tri_val = Scalar(0);
+            size_t mode_idx = 0;
+
+            Rodin::Utility::ForIndex<K + 1>(
+                [&](auto p_idx)
+                {
+                  constexpr size_t P = p_idx.value;
+                  Rodin::Utility::ForIndex<K + 1 - P>(
+                      [&](auto q_idx)
+                      {
+                        constexpr size_t Q = q_idx.value;
+                        Real psi;
+                        DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
+                        tri_val += Vinv(mode_idx, alpha) * psi;
+                        ++mode_idx;
+                      });
+                });
+
+            // --- 1D derivative in z ---
+            const Real dseg = LagrangeBasisSegment<K>::getDerivative(k, z);
+            return tri_val * dseg;
+          }
         }
       }
 
