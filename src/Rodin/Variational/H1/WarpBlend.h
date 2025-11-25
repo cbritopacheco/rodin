@@ -8,252 +8,353 @@
 #define RODIN_VARIATIONAL_H1_WARPBLEND_H
 
 #include <cstddef>
+#include <array>
+#include <algorithm>
 
+#include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/Common.h"
 
-#include "LagrangeBasis.h"
 #include "GLL.h"
 
 #define RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE 1e-14
 
 namespace Rodin::Variational
 {
-  template <size_t K, size_t MaxItGLL = 25>
-  class WarpBlend
+  //======================================================================
+  // 1D warp factor: equispaced -> GLL (→ GLL01 on [0,1])
+  //
+  // Concept:
+  //   - req_j: equispaced nodes in [-1,1]
+  //   - rGL_j: GLL nodes in [-1,1]
+  //   - difference d_j = rGL_j - req_j
+  //   - warp(r) = ∑_j L_j(r) d_j, where L_j are Lagrange polynomials on req_j
+  //
+  // Using GLL01 on [0,1] is consistent because GLL01<K> is defined
+  // from GLL<K> by an affine map.
+  //======================================================================
+
+  template <size_t K>
+  class WarpFactor1D
   {
     public:
-      /**
-       * @brief Computes the warp factor for a given edge in the triangle
-       * This is used to move equispaced nodes toward optimal Fekete positions.
-       */
-      static Real getFactor(Real r, Real s)
+      static Real get(Real r)
       {
-        constexpr Real TOL = RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE;
-
-        if constexpr (K == 0)
-        {
+        if constexpr (K <= 1)
           return 0.0;
-        }
-        else
+
+        // Equispaced nodes on [-1, 1]
+        static constexpr auto buildReq = []()
         {
-          // Get GLL nodes on [-1, 1]
-          const auto& gll_nodes = GLL<K, MaxItGLL>::getNodes();
+          std::array<Real, K + 1> req{};
+          for (size_t j = 0; j <= K; ++j)
+            req[j] = static_cast<Real>(-1.0)
+                   + static_cast<Real>(2.0) * static_cast<Real>(j) / static_cast<Real>(K);
+          return req;
+        };
 
-          // Evaluate warp based on distance from edge
-          Real warp = 0.0;
+        static const std::array<Real, K + 1> req = buildReq();
 
-          // Compute barycentric coordinate along edge
-          const Real lambda = r / (r + s + TOL);  // Add small epsilon to avoid division by zero
+        // GLL nodes on [-1,1]
+        const auto& rGL = GLL<K>::getNodes();
 
-          // Map to [-1, 1]
-          const Real xi = 2.0 * lambda - 1.0;
-
-          // Compute warp as weighted sum of Lagrange polynomials
-          for (size_t i = 1; i < K; ++i)  // Skip endpoints
+        // Interpolate the displacement (rGL - req) at r
+        Real warp = 0.0;
+        for (size_t i = 0; i <= K; ++i)
+        {
+          Real Li = 1.0;
+          const Real xi = req[i];
+          for (size_t m = 0; m <= K; ++m)
           {
-            const Real L = LagrangeBasis1D<K>::getBasis(i, xi, gll_nodes);
-            const Real target = gll_nodes[i];
-            const Real equi = 2.0 * static_cast<Real>(i) / static_cast<Real>(K) - 1.0;
-            warp += L * (target - equi);
+            if (m == i) continue;
+            const Real xm = req[m];
+            Li *= (r - xm) / (xi - xm);
           }
-
-          return warp;
+          warp += Li * (rGL[i] - req[i]);
         }
+
+        // This warp already vanishes at the endpoints (because rGL and req coincide).
+        // No extra scaling is strictly necessary; if you want, you can
+        // introduce the usual (1 - r^2) “compression” here.
+        return warp;
       }
   };
 
-  template <size_t K, size_t MaxItGLL = 25>
+  //======================================================================
+  // Triangle warp–blend
+  //
+  // Input nodes are in reference triangle with vertices:
+  //   V1 = (0,0), V2 = (1,0), V3 = (0,1).
+  //
+  // Steps:
+  //  1. Compute barycentric L1,L2,L3.
+  //  2. For edge nodes (one Li ≈ 0), apply pure 1D GLL01 edge warp tangentially.
+  //  3. Convert barycentric -> equilateral coordinates (x,y).
+  //  4. For all nodes, compute 1D warp values in edge coordinates:
+  //       r1 = L3 - L2, r2 = L1 - L3, r3 = L2 - L1,
+  //     and get w1,w2,w3 from WarpFactor1D.
+  //  5. Blend these edge warps into the interior with a symmetric
+  //     blending function B = 4 L1 L2 L3.
+  //  6. Update equilateral coordinates (x,y), then map back to
+  //     barycentric and then to reference (s,t).
+  //
+  // Notes:
+  //   - Edge warps ensure that edge nodes are on the 1D GLL01 grid.
+  //   - The interior warp provides “Fekete-type” clustering.
+  //======================================================================
+
+  template <size_t K>
   class WarpBlendTriangle
   {
     public:
       template <size_t N>
-      static void apply(std::array<Math::SpatialPoint, N>& nodes)
+      static void apply(std::array<Math::SpatialPoint, N>& nodes, Real alpha = 0)
       {
-        constexpr Real TOL = RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE;
+        constexpr Real TOL        = static_cast<Real>(RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE);
+        constexpr Real SQRT3      = static_cast<Real>(1.7320508075688772); // ≈ sqrt(3)
+        constexpr Real INV_SQRT3  = static_cast<Real>(1.0) / SQRT3;
 
         if constexpr (K <= 1)
         {
-          return;  // No warping needed for linear elements
+          // K=0: single vertex, K=1: standard P1, no warp.
+          return;
         }
-        else
+
+        // -------------------------------------------------------------------
+        // Step A: 1D warp along each boundary edge to put edge nodes on GLL01
+        // -------------------------------------------------------------------
+        for (auto& p : nodes)
         {
-          // Convert to equilateral triangle coordinates
-          std::array<std::pair<Real, Real>, N> equi_coords;
-          for (size_t idx = 0; idx < N; ++idx)
+          Real s = p.x();
+          Real t = p.y();
+          Real L1 = static_cast<Real>(1.0) - s - t;
+          Real L2 = s;
+          Real L3 = t;
+
+          // Classify edges (exclude vertices)
+          const bool on_e23 = (Math::abs(L1) < TOL) && (L2 > TOL) && (L3 > TOL); // edge V2–V3
+          const bool on_e13 = (Math::abs(L2) < TOL) && (L1 > TOL) && (L3 > TOL); // edge V1–V3
+          const bool on_e12 = (Math::abs(L3) < TOL) && (L1 > TOL) && (L2 > TOL); // edge V1–V2
+
+          if (on_e23)
           {
-            const Real x = nodes[idx].x();
-            const Real y = nodes[idx].y();
+            // Edge between V2 (L2=1,L3=0) and V3 (L2=0,L3=1)
+            // Param in [-1,1]: r = L3 - L2
+            Real r = L3 - L2;
+            Real warp = WarpFactor1D<K>::get(r);
+            Real r_new = r + warp;
 
-            // Convert from reference triangle (x,y) to equilateral coordinates (r,s)
-            // Reference triangle: (0,0), (1,0), (0,1)
-            // Equilateral triangle: centered coordinate system
-            const Real r = 2.0 * x - 1.0 + y;
-            const Real s = Math::sqrt(3.0) * y - 1.0;
+            // Recover L2,L3 on that edge (L1=0, L2+L3=1, L3-L2 = r_new)
+            L2 = (static_cast<Real>(1.0) - r_new) * static_cast<Real>(0.5);
+            L3 = (static_cast<Real>(1.0) + r_new) * static_cast<Real>(0.5);
+            L1 = static_cast<Real>(0.0);
+          }
+          else if (on_e13)
+          {
+            // Edge between V1 (L1=1,L3=0) and V3 (L1=0,L3=1)
+            // Param in [-1,1]: r = L1 - L3
+            Real r = L1 - L3;
+            Real warp = WarpFactor1D<K>::get(r);
+            Real r_new = r + warp;
 
-            equi_coords[idx] = { r, s };
+            // L1+L3=1, L1-L3=r_new
+            L1 = (static_cast<Real>(1.0) + r_new) * static_cast<Real>(0.5);
+            L3 = (static_cast<Real>(1.0) - r_new) * static_cast<Real>(0.5);
+            L2 = static_cast<Real>(0.0);
+          }
+          else if (on_e12)
+          {
+            // Edge between V1 (L1=1,L2=0) and V2 (L1=0,L2=1)
+            // Param in [-1,1]: r = L2 - L1
+            Real r = L2 - L1;
+            Real warp = WarpFactor1D<K>::get(r);
+            Real r_new = r + warp;
+
+            // L1+L2=1, L2-L1=r_new
+            L2 = (static_cast<Real>(1.0) + r_new) * static_cast<Real>(0.5);
+            L1 = (static_cast<Real>(1.0) - r_new) * static_cast<Real>(0.5);
+            L3 = static_cast<Real>(0.0);
           }
 
-          // Apply warp for each node
-          for (size_t idx = 0; idx < N; ++idx)
+          // Project back to reference coordinates
+          p = Math::SpatialPoint{{L2, L3}};
+        }
+
+        // -------------------------------------------------------------------
+        // Step B: interior warp–blend (Fekete-type clustering + α factor)
+        // -------------------------------------------------------------------
+        for (auto& p : nodes)
+        {
+          Real s = p.x();
+          Real t = p.y();
+          Real L1 = static_cast<Real>(1.0) - s - t;
+          Real L2 = s;
+          Real L3 = t;
+
+          // Vertices: do nothing
+          if ( (Math::abs(L1 - 1.0) < TOL) ||
+               (Math::abs(L2 - 1.0) < TOL) ||
+               (Math::abs(L3 - 1.0) < TOL) )
           {
-            // Note: equi_coords computed above but not used in simplified warp implementation
-            // (void)equi_coords;  // Suppress unused warning
-
-            const Real x = nodes[idx].x();
-            const Real y = nodes[idx].y();
-            const Real z = 1.0 - x - y;  // Third barycentric coordinate
-
-            // Skip vertices (they should remain fixed)
-            if (x < TOL && y < TOL)  // Vertex (0,0)
-              continue;
-            if (x > 1.0 - TOL && y < TOL)  // Vertex (1,0)
-              continue;
-            if (x < TOL && y > 1.0 - TOL)  // Vertex (0,1)
-              continue;
-
-            // Compute warp contributions from each edge
-            Real warp1 = 0.0, warp2 = 0.0, warp3 = 0.0;
-
-            // Edge 1: from (1,0) to (0,1), perpendicular direction
-            if (x + y > TOL)
-              warp1 = WarpBlend<K, MaxItGLL>::getFactor(x, y);
-
-            // Edge 2: from (0,0) to (0,1), perpendicular direction
-            if (y + z > TOL)
-              warp2 = WarpBlend<K, MaxItGLL>::getFactor(y, z);
-
-            // Edge 3: from (0,0) to (1,0), perpendicular direction
-            if (z + x > TOL)
-              warp3 = WarpBlend<K, MaxItGLL>::getFactor(z, x);
-
-            // Blend the warp contributions using barycentric coordinates as weights
-            // This ensures smooth transition and maintains symmetry
-            Real blend1 = y * z;
-            Real blend2 = z * x;
-            Real blend3 = x * y;
-            Real blend_sum = blend1 + blend2 + blend3 + TOL;
-
-            // Apply scaled warp in each direction
-            Real scale = 1.0;  // Scaling factor for warp magnitude
-            Real dx = scale * (blend1 * warp1 + blend2 * warp2 + blend3 * warp3) / blend_sum;
-
-            // Update node position (warp is applied in x-direction as approximation)
-            nodes[idx] = Math::SpatialPoint{{x + dx * 0.5, y - dx * 0.5 * std::sqrt(3.0)}};
-
-            // Clamp to valid triangle domain
-            Real new_x = nodes[idx].x();
-            Real new_y = nodes[idx].y();
-            new_x = std::max(0.0, std::min(1.0, new_x));
-            new_y = std::max(0.0, std::min(1.0, new_y));
-            if (new_x + new_y > 1.0)
-            {
-              Real excess = new_x + new_y - 1.0;
-              new_x -= excess * 0.5;
-              new_y -= excess * 0.5;
-            }
-            nodes[idx] = Math::SpatialPoint{{ new_x, new_y }};
+            continue;
           }
+
+          // Convert to equilateral coordinates
+          // v1 = (0,  2/√3), v2 = (-1,-1/√3), v3 = (1,-1/√3)
+          Real x = -L2 + L3;
+          Real y = (-L2 - L3 + static_cast<Real>(2.0)*L1) * INV_SQRT3;
+
+          // 1D edge coordinates in [-1,1]
+          Real r1 = L3 - L2; // edge 2–3 (opposite vertex 1)
+          Real r2 = L1 - L3; // edge 1–3 (opposite vertex 2)
+          Real r3 = L2 - L1; // edge 1–2 (opposite vertex 3)
+
+          Real w1 = WarpFactor1D<K>::get(r1);
+          Real w2 = WarpFactor1D<K>::get(r2);
+          Real w3 = WarpFactor1D<K>::get(r3);
+
+          // Base blending factor: vanishes on edges, max at interior
+          Real blend = static_cast<Real>(4.0) * L1 * L2 * L3;
+
+          // α-dependent quadratic factors using opposite vertex barycentric
+          Real a1 = static_cast<Real>(1.0) + (alpha * L1) * (alpha * L1); // edge 2–3, opp. L1
+          Real a2 = static_cast<Real>(1.0) + (alpha * L2) * (alpha * L2); // edge 1–3, opp. L2
+          Real a3 = static_cast<Real>(1.0) + (alpha * L3) * (alpha * L3); // edge 1–2, opp. L3
+
+          // Apply blending + α
+          Real dw1 = blend * a1 * w1;
+          Real dw2 = blend * a2 * w2;
+          Real dw3 = blend * a3 * w3;
+
+          // Symmetric combination (equilateral)
+          Real dx =  dw2 - dw3;
+          Real dy = (static_cast<Real>(2.0) * dw1 - dw2 - dw3) * INV_SQRT3;
+
+          x += dx;
+          y += dy;
+
+          // Map back: equilateral -> barycentric
+          L1 = y * INV_SQRT3 + static_cast<Real>(1.0) / static_cast<Real>(3.0);
+          L2 = -static_cast<Real>(0.5) * x
+             - static_cast<Real>(0.5) * y * INV_SQRT3
+             + static_cast<Real>(1.0) / static_cast<Real>(3.0);
+          L3 =  static_cast<Real>(0.5) * x
+             - static_cast<Real>(0.5) * y * INV_SQRT3
+             + static_cast<Real>(1.0) / static_cast<Real>(3.0);
+
+          // Clamp and renormalize
+          L1 = std::max(static_cast<Real>(0.0), L1);
+          L2 = std::max(static_cast<Real>(0.0), L2);
+          L3 = std::max(static_cast<Real>(0.0), L3);
+          Real sumL = L1 + L2 + L3;
+          if (sumL > TOL)
+          {
+            L1 /= sumL;
+            L2 /= sumL;
+            L3 /= sumL;
+          }
+
+          p = Math::SpatialPoint{{L2, L3}};
         }
       }
   };
 
-  template <class Real, size_t K, size_t MaxItGLL = 25>
+  //======================================================================
+  // Tetrahedral warp–blend (face-based heuristic)
+  //
+  // Here I keep essentially the structure you already had, but use
+  // WarpFactor1D<K> for face-based warps so that edge traces are
+  // consistent with the 1D GLL01 distribution.
+  //
+  // This is a reasonable “Hesthaven–Warburton style” warp–blend,
+  // but not guaranteed to match Nodes3D.m exactly.
+  //======================================================================
+
+  template <size_t K>
   class WarpBlendTetrahedron
   {
     public:
       template <size_t N>
       static void apply(std::array<Math::SpatialPoint, N>& nodes)
       {
-        constexpr Real TOL =
-          static_cast<Real>(RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE);
+        constexpr Real TOL      = static_cast<Real>(RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE);
+        constexpr Real ONE      = static_cast<Real>(1.0);
+        constexpr Real HALF     = static_cast<Real>(0.5);
 
         if constexpr (K <= 1)
-        {
-          // No warping needed for linear elements
           return;
-        }
-        else
+
+        for (auto& p : nodes)
         {
-          for (size_t idx = 0; idx < N; ++idx)
+          Real x = p.x();
+          Real y = p.y();
+          Real z = p.z();
+          Real w = ONE - x - y - z; // 4th barycentric
+
+          // Skip vertices
+          const bool is_vertex =
+              ((Math::abs(x)     < TOL) && (Math::abs(y) < TOL) && (Math::abs(z) < TOL)) ||
+              ((Math::abs(x-ONE) < TOL) && (Math::abs(y) < TOL) && (Math::abs(z) < TOL)) ||
+              ((Math::abs(y-ONE) < TOL) && (Math::abs(x) < TOL) && (Math::abs(z) < TOL)) ||
+              ((Math::abs(z-ONE) < TOL) && (Math::abs(x) < TOL) && (Math::abs(y) < TOL));
+          if (is_vertex)
+            continue;
+
+          // Simple face-based warp: treat each face as a triangle and
+          // apply a 1D-like warp in the appropriate direction.
+          //
+          // Face opposite (1,0,0): (y,z,w)
+          Real warp_x = 0.0;
+          if (y + z + w > TOL)
           {
-            Real x = nodes[idx].x();
-            Real y = nodes[idx].y();
-            Real z = nodes[idx].z();
-            Real w = static_cast<Real>(1.0) - x - y - z; // 4th barycentric
-
-            // Skip vertices (keep reference vertices fixed)
-            const bool is_vertex =
-              (x < TOL && y < TOL && z < TOL) ||                                    // (0,0,0)
-              (x > static_cast<Real>(1.0) - TOL && y < TOL && z < TOL) ||        // (1,0,0)
-              (x < TOL && y > static_cast<Real>(1.0) - TOL && z < TOL) ||        // (0,1,0)
-              (x < TOL && y < TOL && z > static_cast<Real>(1.0) - TOL);          // (0,0,1)
-
-            if (is_vertex)
-              continue;
-
-            // Warp contributions (heuristic, face-based)
-            Real warp_x = static_cast<Real>(0.0);
-            Real warp_y = static_cast<Real>(0.0);
-            Real warp_z = static_cast<Real>(0.0);
-
-            // Face 1: opposite to vertex (1,0,0)
-            // Use (y, z+w) as local "edge" pair for warp factor
-            if (y + z + w > TOL)
-            {
-              warp_x +=
-                WarpBlend<K, MaxItGLL>::getFactor(y, z + w)
-                * static_cast<Real>(0.3);
-            }
-
-            // Face 2: opposite to vertex (0,1,0)
-            if (x + z + w > TOL)
-            {
-              warp_y +=
-                WarpBlend<K, MaxItGLL>::getFactor(x, z + w)
-                * static_cast<Real>(0.3);
-            }
-
-            // Face 3: opposite to vertex (0,0,1)
-            if (x + y + w > TOL)
-            {
-              warp_z +=
-                WarpBlend<K, MaxItGLL>::getFactor(x, y + w)
-                * static_cast<Real>(0.3);
-            }
-
-            // Blend using barycentric product (small in boundary layers)
-            const Real blend_factor = x * y * z * w;
-
-            // Dampen warp for higher orders
-            const Real scale =
-              static_cast<Real>(1.0) /
-              (static_cast<Real>(1.0) +
-               static_cast<Real>(0.1) * static_cast<Real>(K * K));
-
-            Real new_x = x + warp_x * scale * blend_factor;
-            Real new_y = y + warp_y * scale * blend_factor;
-            Real new_z = z + warp_z * scale * blend_factor;
-
-            // Clamp to [0,1]
-            new_x = std::max(static_cast<Real>(0.0),
-                             std::min(static_cast<Real>(1.0), new_x));
-            new_y = std::max(static_cast<Real>(0.0),
-                             std::min(static_cast<Real>(1.0), new_y));
-            new_z = std::max(static_cast<Real>(0.0),
-                             std::min(static_cast<Real>(1.0), new_z));
-
-            // Enforce x + y + z ≤ 1 (stay in reference tetra)
-            const Real sum = new_x + new_y + new_z;
-            if (sum > static_cast<Real>(1.0))
-            {
-              const Real excess = sum - static_cast<Real>(1.0);
-              new_x -= excess / static_cast<Real>(3.0);
-              new_y -= excess / static_cast<Real>(3.0);
-              new_z -= excess / static_cast<Real>(3.0);
-            }
-
-            nodes[idx] = Math::SpatialPoint{{ new_x, new_y, new_z }};
+            // Parameter in [-1,1] on that face: r_face ≈ (z - y)/(y+z+w)
+            Real r_face = (z - y) / (y + z + w);
+            Real wf = WarpFactor1D<K>::get(r_face);
+            // scale: small, to avoid large distortions
+            warp_x += HALF * wf * y * z * w;
           }
+
+          // Face opposite (0,1,0): (x,z,w)
+          Real warp_y = 0.0;
+          if (x + z + w > TOL)
+          {
+            Real r_face = (z - x) / (x + z + w);
+            Real wf = WarpFactor1D<K>::get(r_face);
+            warp_y += HALF * wf * x * z * w;
+          }
+
+          // Face opposite (0,0,1): (x,y,w)
+          Real warp_z = 0.0;
+          if (x + y + w > TOL)
+          {
+            Real r_face = (y - x) / (x + y + w);
+            Real wf = WarpFactor1D<K>::get(r_face);
+            warp_z += HALF * wf * x * y * w;
+          }
+
+          // Global blending factor to keep nodes near faces mostly on faces.
+          Real blend = x * y * z * w;
+          Real scale = ONE / (ONE + static_cast<Real>(0.1) * static_cast<Real>(K * K));
+
+          x += scale * blend * warp_x;
+          y += scale * blend * warp_y;
+          z += scale * blend * warp_z;
+
+          // Clamp to tetra
+          x = std::max(static_cast<Real>(0.0), std::min(ONE, x));
+          y = std::max(static_cast<Real>(0.0), std::min(ONE, y));
+          z = std::max(static_cast<Real>(0.0), std::min(ONE, z));
+
+          Real sum = x + y + z;
+          if (sum > ONE)
+          {
+            Real excess = sum - ONE;
+            x -= excess / static_cast<Real>(3.0);
+            y -= excess / static_cast<Real>(3.0);
+            z -= excess / static_cast<Real>(3.0);
+          }
+
+          p = Math::SpatialPoint{{x, y, z}};
         }
       }
   };
