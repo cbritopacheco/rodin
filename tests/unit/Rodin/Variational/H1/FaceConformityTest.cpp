@@ -35,15 +35,31 @@ namespace Rodin::Tests::Unit
   // Helper functions for extracting face nodes
   //==========================================================================
 
-  // Check if a 3D point lies on a triangular face with vertices p0, p1, p2
-  // Returns barycentric coordinates (u, v, w) if on face, or NaN values if not
+  /**
+   * @brief Checks if a 3D point lies on a triangular face and computes its barycentric coordinates.
+   *
+   * Uses the barycentric coordinate method to determine if point (px, py, pz) lies on the
+   * triangle defined by vertices (x0,y0,z0), (x1,y1,z1), (x2,y2,z2).
+   *
+   * Algorithm:
+   * 1. Express the point as P = u*V0 + v*(V1-V0) + w*(V2-V0) where u + v + w = 1
+   * 2. Solve for v, w using dot products (Cramer's rule)
+   * 3. Point is on triangle if 0 <= u,v,w <= 1 and point lies on the plane
+   *
+   * @param px, py, pz  The query point coordinates
+   * @param x0, y0, z0  First vertex of the triangle (corresponds to barycentric u=1)
+   * @param x1, y1, z1  Second vertex of the triangle (corresponds to barycentric v=1)
+   * @param x2, y2, z2  Third vertex of the triangle (corresponds to barycentric w=1)
+   * @return Tuple of (u, v, w) barycentric coordinates if point is on face;
+   *         (NaN, NaN, NaN) if point is not on the triangular face
+   */
   inline std::tuple<Real, Real, Real> computeTriangleFaceBarycentric(
       Real px, Real py, Real pz,
       Real x0, Real y0, Real z0,
       Real x1, Real y1, Real z1,
       Real x2, Real y2, Real z2)
   {
-    // Compute vectors
+    // Compute edge vectors from vertex 0
     Real v0x = x1 - x0, v0y = y1 - y0, v0z = z1 - z0;
     Real v1x = x2 - x0, v1y = y2 - y0, v1z = z2 - z0;
     Real v2x = px - x0, v2y = py - y0, v2z = pz - z0;
@@ -91,27 +107,51 @@ namespace Rodin::Tests::Unit
             std::numeric_limits<Real>::quiet_NaN()};
   }
 
-  // Check if a 3D point lies on a quadrilateral face
-  // Returns parametric coordinates (s, t) in [0,1]x[0,1] if on face
+  // Axis indices for coordinate projection
+  constexpr int AXIS_X = 0;
+  constexpr int AXIS_Y = 1;
+  constexpr int AXIS_Z = 2;
+
+  /**
+   * @brief Checks if a 3D point lies on a planar quadrilateral face and computes parametric coords.
+   *
+   * For a planar quadrilateral with vertices ordered counter-clockwise, determines if point
+   * (px, py, pz) lies on the face and computes its parametric coordinates (s, t) in [0,1]x[0,1].
+   *
+   * Algorithm:
+   * 1. Compute the face normal using cross product of edge vectors
+   * 2. Check if point lies on the plane within tolerance
+   * 3. Project to 2D by dropping the axis with largest normal component
+   * 4. Solve for parametric coordinates in the projected space
+   *
+   * Note: This simplified algorithm assumes axis-aligned or near-axis-aligned quads,
+   * which is appropriate for reference element faces.
+   *
+   * @param px, py, pz  The query point coordinates
+   * @param x0, y0, z0  First vertex (maps to parametric (0,0))
+   * @param x1, y1, z1  Second vertex (maps to parametric (1,0))
+   * @param x2, y2, z2  Third vertex (maps to parametric (1,1))
+   * @param x3, y3, z3  Fourth vertex (maps to parametric (0,1))
+   * @return Pair of (s, t) parametric coordinates if point is on face;
+   *         (NaN, NaN) if point is not on the quadrilateral face
+   */
   inline std::pair<Real, Real> computeQuadFaceParametric(
       Real px, Real py, Real pz,
-      Real x0, Real y0, Real z0,  // corner at (0,0)
-      Real x1, Real y1, Real z1,  // corner at (1,0)
-      Real x2, Real y2, Real z2,  // corner at (1,1)
-      Real x3, Real y3, Real z3)  // corner at (0,1)
+      Real x0, Real y0, Real z0,
+      Real x1, Real y1, Real z1,
+      Real x2, Real y2, Real z2,
+      Real x3, Real y3, Real z3)
   {
-    // For a planar quad, compute bilinear parameters
-    // P = (1-s)(1-t)*P0 + s(1-t)*P1 + st*P2 + (1-s)t*P3
-
-    // First, check if point is on the plane
+    // Compute edge vectors from vertex 0
     Real v1x = x1 - x0, v1y = y1 - y0, v1z = z1 - z0;
     Real v2x = x3 - x0, v2y = y3 - y0, v2z = z3 - z0;
 
-    // Normal vector
+    // Compute normal vector via cross product
     Real nx = v1y * v2z - v1z * v2y;
     Real ny = v1z * v2x - v1x * v2z;
     Real nz = v1x * v2y - v1y * v2x;
 
+    // Check if point lies on the plane (distance to plane < tolerance)
     Real d = nx * x0 + ny * y0 + nz * z0;
     Real dist = std::abs(nx * px + ny * py + nz * pz - d) /
                 std::sqrt(nx * nx + ny * ny + nz * nz + FACE_EPS);
@@ -122,10 +162,11 @@ namespace Rodin::Tests::Unit
               std::numeric_limits<Real>::quiet_NaN()};
     }
 
-    // Project to 2D by dropping coordinate with largest normal component
-    int drop_axis = 0;
+    // Project to 2D by dropping the coordinate with largest normal component
+    // This minimizes numerical error in the 2D computation
+    int drop_axis = AXIS_X;
     if (std::abs(ny) > std::abs(nx) && std::abs(ny) > std::abs(nz))
-      drop_axis = 1;
+      drop_axis = AXIS_Y;
     else if (std::abs(nz) > std::abs(nx))
       drop_axis = 2;
 
@@ -353,11 +394,44 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron base face K=3", "Triangle K=3");
   }
 
-  // NOTE: At K>=4, FeketeTetrahedron's warp-blend algorithm moves some interior
-  // face nodes slightly off the face plane, breaking face conformity with
-  // FeketeTriangle. This is a known limitation of the 3D warp-blend approach.
-  // The wedge element (which uses tensor product of triangle × segment) does
-  // not have this issue. Tests for K>=4 tetrahedron face conformity are omitted.
+  TEST(FaceConformity, Tetrahedron_BaseFace_MatchesTriangle_K4)
+  {
+    auto tet_face = extractTetrahedronTriangleFaceNodes<4>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    auto tri_nodes = extractTriangleNodes<4>();
+
+    compareFaceCoordinates(tet_face, tri_nodes,
+                           "Tetrahedron base face K=4", "Triangle K=4");
+  }
+
+  TEST(FaceConformity, Tetrahedron_BaseFace_MatchesTriangle_K5)
+  {
+    auto tet_face = extractTetrahedronTriangleFaceNodes<5>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    auto tri_nodes = extractTriangleNodes<5>();
+
+    compareFaceCoordinates(tet_face, tri_nodes,
+                           "Tetrahedron base face K=5", "Triangle K=5");
+  }
+
+  TEST(FaceConformity, Tetrahedron_BaseFace_MatchesTriangle_K6)
+  {
+    auto tet_face = extractTetrahedronTriangleFaceNodes<6>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    auto tri_nodes = extractTriangleNodes<6>();
+
+    compareFaceCoordinates(tet_face, tri_nodes,
+                           "Tetrahedron base face K=6", "Triangle K=6");
+  }
 
   TEST(FaceConformity, Tetrahedron_Face013_MatchesTriangle_K3)
   {
@@ -512,9 +586,53 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron triangle face K=3", "Wedge triangle face K=3");
   }
 
-  // NOTE: For K>=4, tetrahedron face nodes don't match wedge/triangle due to
-  // the 3D warp-blend algorithm pushing some interior nodes off face planes.
-  // See FeketeTetrahedron implementation for details.
+  TEST(FaceConformity, Tetrahedron_Wedge_TriangleFaces_Match_K4)
+  {
+    auto tet_face = extractTetrahedronTriangleFaceNodes<4>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    auto wedge_face = extractWedgeTriangleFaceNodes<4>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    compareFaceCoordinates(tet_face, wedge_face,
+                           "Tetrahedron triangle face K=4", "Wedge triangle face K=4");
+  }
+
+  TEST(FaceConformity, Tetrahedron_Wedge_TriangleFaces_Match_K5)
+  {
+    auto tet_face = extractTetrahedronTriangleFaceNodes<5>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    auto wedge_face = extractWedgeTriangleFaceNodes<5>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    compareFaceCoordinates(tet_face, wedge_face,
+                           "Tetrahedron triangle face K=5", "Wedge triangle face K=5");
+  }
+
+  TEST(FaceConformity, Tetrahedron_Wedge_TriangleFaces_Match_K6)
+  {
+    auto tet_face = extractTetrahedronTriangleFaceNodes<6>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    auto wedge_face = extractWedgeTriangleFaceNodes<6>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    compareFaceCoordinates(tet_face, wedge_face,
+                           "Tetrahedron triangle face K=6", "Wedge triangle face K=6");
+  }
 
   //==========================================================================
   // Wedge quad faces match Quadrilateral (2D)
