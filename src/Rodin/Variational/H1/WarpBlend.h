@@ -12,28 +12,16 @@
 #include <algorithm>
 
 #include "Rodin/Types.h"
-#include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Common.h"
+#include "Rodin/Math/Vector.h"
 
-#include "GLL.h"
+#include "LagrangeBasis.h" // LagrangeBasis1D<K>
+#include "GLL.h"           // GLL<K>
 
 #define RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE 1e-14
 
 namespace Rodin::Variational
 {
-  //======================================================================
-  // 1D warp factor: equispaced -> GLL (→ GLL01 on [0,1])
-  //
-  // Concept:
-  //   - req_j: equispaced nodes in [-1,1]
-  //   - rGL_j: GLL nodes in [-1,1]
-  //   - difference d_j = rGL_j - req_j
-  //   - warp(r) = ∑_j L_j(r) d_j, where L_j are Lagrange polynomials on req_j
-  //
-  // Using GLL01 on [0,1] is consistent because GLL01<K> is defined
-  // from GLL<K> by an affine map.
-  //======================================================================
-
   template <size_t K>
   class WarpFactor1D
   {
@@ -41,157 +29,216 @@ namespace Rodin::Variational
       static Real get(Real r)
       {
         if constexpr (K <= 1)
-          return 0.0;
+          return static_cast<Real>(0.0);
 
-        // Equispaced nodes on [-1, 1]
-        static constexpr auto buildReq = []()
+        // Equispaced nodes req_j on [-1,1]
+        static const std::array<Real, K + 1> s_req = []()
         {
           std::array<Real, K + 1> req{};
           for (size_t j = 0; j <= K; ++j)
+          {
             req[j] = static_cast<Real>(-1.0)
-                   + static_cast<Real>(2.0) * static_cast<Real>(j) / static_cast<Real>(K);
+                   + static_cast<Real>(2.0) * static_cast<Real>(j)
+                   / static_cast<Real>(K);
+          }
           return req;
-        };
+        }();
 
-        static const std::array<Real, K + 1> req = buildReq();
+        // Legendre–GLL nodes on [-1,1]
+        const auto& gll = GLL<K>::getNodes();
 
-        // GLL nodes on [-1,1]
-        const auto& rGL = GLL<K>::getNodes();
-
-        // Interpolate the displacement (rGL - req) at r
-        Real warp = 0.0;
+        // Interpolate (gll - req) at r using Lagrange basis on req
+        Real warp = static_cast<Real>(0.0);
         for (size_t i = 0; i <= K; ++i)
         {
-          Real Li = 1.0;
-          const Real xi = req[i];
-          for (size_t m = 0; m <= K; ++m)
-          {
-            if (m == i) continue;
-            const Real xm = req[m];
-            Li *= (r - xm) / (xi - xm);
-          }
-          warp += Li * (rGL[i] - req[i]);
+          const Real Li = LagrangeBasis1D<K>::getBasis(i, r, s_req);
+          warp += Li * (gll[i] - s_req[i]);
         }
 
-        // This warp already vanishes at the endpoints (because rGL and req coincide).
-        // No extra scaling is strictly necessary; if you want, you can
-        // introduce the usual (1 - r^2) “compression” here.
+        const Real one = static_cast<Real>(1.0);
+        const Real tol = static_cast<Real>(1.0e-10);
+
+        if (Math::abs(r) < one - tol)
+        {
+          const Real sf = one - r * r;
+          warp /= sf;
+        }
+        else
+        {
+          warp = static_cast<Real>(0.0);
+        }
+
         return warp;
       }
   };
 
-  //======================================================================
-  // Triangle warp–blend
-  //
-  // Input nodes are in reference triangle with vertices:
-  //   V1 = (0,0), V2 = (1,0), V3 = (0,1).
-  //
-  // Steps:
-  //  1. Compute barycentric L1,L2,L3.
-  //  2. For edge nodes (one Li ≈ 0), apply pure 1D GLL01 edge warp tangentially.
-  //  3. Convert barycentric -> equilateral coordinates (x,y).
-  //  4. For all nodes, compute 1D warp values in edge coordinates:
-  //       r1 = L3 - L2, r2 = L1 - L3, r3 = L2 - L1,
-  //     and get w1,w2,w3 from WarpFactor1D.
-  //  5. Blend these edge warps into the interior with a symmetric
-  //     blending function B = 4 L1 L2 L3.
-  //  6. Update equilateral coordinates (x,y), then map back to
-  //     barycentric and then to reference (s,t).
-  //
-  // Notes:
-  //   - Edge warps ensure that edge nodes are on the 1D GLL01 grid.
-  //   - The interior warp provides “Fekete-type” clustering.
-  //======================================================================
+  template <size_t K>
+  class TriangleBlend
+  {
+    public:
+      static constexpr Real getAlpha()
+      {
+        if constexpr (K <= 2)
+          return 0.0;
+        else if constexpr (K == 3)
+          return 1.4152;
+        else if constexpr (K == 4)
+          return 0.1001;
+        else if constexpr (K == 5)
+          return 0.2751;
+        else if constexpr (K == 6)
+          return 0.9800;
+        else if constexpr (K == 7)
+          return 1.0999;
+        else if constexpr (K == 8)
+          return 1.2832;
+        else if constexpr (K == 9)
+          return 1.3648;
+        else if constexpr (K == 10)
+          return 1.4773;
+        else if constexpr (K == 11)
+          return 1.4959;
+        else if constexpr (K == 12)
+          return 1.5743;
+        else if constexpr (K == 13)
+          return 1.5770;
+        else if constexpr (K == 14)
+          return 1.6223;
+        else if constexpr (K == 15)
+          return 1.6258;
+        else
+          return 5.0 / 3.0; // HW choice for higher orders
+      }
+  };
+
+  template <size_t K>
+  class TetrahedronBlend
+  {
+    public:
+      static constexpr Real getAlpha()
+      {
+        if constexpr (K <= 3)
+          return 0.0;
+        else if constexpr (K == 4)
+          return 0.1002;
+        else if constexpr (K == 5)
+          return 1.1332;
+        else if constexpr (K == 6)
+          return 1.5608;
+        else if constexpr (K == 7)
+          return 1.3413;
+        else if constexpr (K == 8)
+          return 1.2577;
+        else if constexpr (K == 9)
+          return 1.1603;
+        else if constexpr (K == 10)
+          return 1.10153;
+        else if constexpr (K == 11)
+          return 0.6080;
+        else if constexpr (K == 12)
+          return 0.4523;
+        else if constexpr (K == 13)
+          return 0.8856;
+        else if constexpr (K == 14)
+          return 0.8717;
+        else if constexpr (K == 15)
+          return 0.9655;
+        else
+          return 1.0; // HW choice for higher orders
+      }
+  };
+
+  template <size_t K>
+  class WarpShiftFace2D
+  {
+    public:
+      static constexpr void apply(Real& dx, Real& dy,
+          Real L1, Real L2, Real L3, Real alpha)
+      {
+        if constexpr (K <= 1)
+        {
+          dx = dy = static_cast<Real>(0.0);
+          return;
+        }
+
+        // 2) blending per edge
+        const Real blend1 = L2 * L3; // edge opposite L1
+        const Real blend2 = L1 * L3; // edge opposite L2
+        const Real blend3 = L1 * L2; // edge opposite L3
+
+        // 3) edge coordinates in [-1,1]
+        const Real r1 = L3 - L2;
+        const Real r2 = L1 - L3;
+        const Real r3 = L2 - L1;
+
+        const Real warpf1 = static_cast<Real>(4.0) * WarpFactor1D<K>::get(r1);
+        const Real warpf2 = static_cast<Real>(4.0) * WarpFactor1D<K>::get(r2);
+        const Real warpf3 = static_cast<Real>(4.0) * WarpFactor1D<K>::get(r3);
+
+        const Real aL1 = alpha * L1;
+        const Real aL2 = alpha * L2;
+        const Real aL3 = alpha * L3;
+
+        const Real warp1 = blend1 * warpf1 * (static_cast<Real>(1.0) + aL1 * aL1);
+        const Real warp2 = blend2 * warpf2 * (static_cast<Real>(1.0) + aL2 * aL2);
+        const Real warp3 = blend3 * warpf3 * (static_cast<Real>(1.0) + aL3 * aL3);
+
+        // 5) shift in equilateral triangle
+        const Real cos2pi3 = static_cast<Real>(-0.5);
+        const Real sin2pi3 = static_cast<Real>(0.5) * std::sqrt(static_cast<Real>(3.0));
+        const Real cos4pi3 = cos2pi3;
+        const Real sin4pi3 = -sin2pi3;
+
+        dx = warp1
+           + cos2pi3 * warp2
+           + cos4pi3 * warp3;
+
+        dy = static_cast<Real>(0.0)
+           + sin2pi3 * warp2
+           + sin4pi3 * warp3;
+      }
+  };
+
+  template <size_t K>
+  class WarpShiftFace3D
+  {
+    public:
+      static constexpr void apply(
+          Real& warpx, Real& warpy,
+          Real La, Real Lb, Real Lc, Real Ld, Real alpha)
+      {
+        (void) Ld;
+        WarpShiftFace2D<K>::apply(warpx, warpy, Lb, Lc, Ld, alpha);
+      }
+  };
 
   template <size_t K>
   class WarpBlendTriangle
   {
     public:
       template <size_t N>
-      static void apply(std::array<Math::SpatialPoint, N>& nodes, Real alpha = 0)
+      static void apply(std::array<Math::SpatialPoint, N>& nodes)
       {
-        constexpr Real TOL        = static_cast<Real>(RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE);
-        constexpr Real SQRT3      = static_cast<Real>(1.7320508075688772); // ≈ sqrt(3)
-        constexpr Real INV_SQRT3  = static_cast<Real>(1.0) / SQRT3;
-
         if constexpr (K <= 1)
-        {
-          // K=0: single vertex, K=1: standard P1, no warp.
           return;
-        }
 
-        // -------------------------------------------------------------------
-        // Step A: 1D warp along each boundary edge to put edge nodes on GLL01
-        // -------------------------------------------------------------------
+        constexpr Real TOL       = static_cast<Real>(RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE);
+        constexpr Real SQRT3     = static_cast<Real>(1.7320508075688772);
+        constexpr Real INV_SQRT3 = static_cast<Real>(1.0) / SQRT3;
+
+        const Real alpha = TriangleBlend<K>::getAlpha();
+
         for (auto& p : nodes)
         {
-          Real s = p.x();
-          Real t = p.y();
-          Real L1 = static_cast<Real>(1.0) - s - t;
-          Real L2 = s;
-          Real L3 = t;
+          Real xref = p.x();
+          Real yref = p.y();
 
-          // Classify edges (exclude vertices)
-          const bool on_e23 = (Math::abs(L1) < TOL) && (L2 > TOL) && (L3 > TOL); // edge V2–V3
-          const bool on_e13 = (Math::abs(L2) < TOL) && (L1 > TOL) && (L3 > TOL); // edge V1–V3
-          const bool on_e12 = (Math::abs(L3) < TOL) && (L1 > TOL) && (L2 > TOL); // edge V1–V2
+          // Barycentric on reference triangle
+          Real L1 = static_cast<Real>(1.0) - xref - yref;
+          Real L2 = xref;
+          Real L3 = yref;
 
-          if (on_e23)
-          {
-            // Edge between V2 (L2=1,L3=0) and V3 (L2=0,L3=1)
-            // Param in [-1,1]: r = L3 - L2
-            Real r = L3 - L2;
-            Real warp = WarpFactor1D<K>::get(r);
-            Real r_new = r + warp;
-
-            // Recover L2,L3 on that edge (L1=0, L2+L3=1, L3-L2 = r_new)
-            L2 = (static_cast<Real>(1.0) - r_new) * static_cast<Real>(0.5);
-            L3 = (static_cast<Real>(1.0) + r_new) * static_cast<Real>(0.5);
-            L1 = static_cast<Real>(0.0);
-          }
-          else if (on_e13)
-          {
-            // Edge between V1 (L1=1,L3=0) and V3 (L1=0,L3=1)
-            // Param in [-1,1]: r = L1 - L3
-            Real r = L1 - L3;
-            Real warp = WarpFactor1D<K>::get(r);
-            Real r_new = r + warp;
-
-            // L1+L3=1, L1-L3=r_new
-            L1 = (static_cast<Real>(1.0) + r_new) * static_cast<Real>(0.5);
-            L3 = (static_cast<Real>(1.0) - r_new) * static_cast<Real>(0.5);
-            L2 = static_cast<Real>(0.0);
-          }
-          else if (on_e12)
-          {
-            // Edge between V1 (L1=1,L2=0) and V2 (L1=0,L2=1)
-            // Param in [-1,1]: r = L2 - L1
-            Real r = L2 - L1;
-            Real warp = WarpFactor1D<K>::get(r);
-            Real r_new = r + warp;
-
-            // L1+L2=1, L2-L1=r_new
-            L2 = (static_cast<Real>(1.0) + r_new) * static_cast<Real>(0.5);
-            L1 = (static_cast<Real>(1.0) - r_new) * static_cast<Real>(0.5);
-            L3 = static_cast<Real>(0.0);
-          }
-
-          // Project back to reference coordinates
-          p = Math::SpatialPoint{{L2, L3}};
-        }
-
-        // -------------------------------------------------------------------
-        // Step B: interior warp–blend (Fekete-type clustering + α factor)
-        // -------------------------------------------------------------------
-        for (auto& p : nodes)
-        {
-          Real s = p.x();
-          Real t = p.y();
-          Real L1 = static_cast<Real>(1.0) - s - t;
-          Real L2 = s;
-          Real L3 = t;
-
-          // Vertices: do nothing
+          // Vertices unchanged
           if ( (Math::abs(L1 - 1.0) < TOL) ||
                (Math::abs(L2 - 1.0) < TOL) ||
                (Math::abs(L3 - 1.0) < TOL) )
@@ -199,41 +246,18 @@ namespace Rodin::Variational
             continue;
           }
 
-          // Convert to equilateral coordinates
-          // v1 = (0,  2/√3), v2 = (-1,-1/√3), v3 = (1,-1/√3)
+          // To equilateral coordinates
           Real x = -L2 + L3;
-          Real y = (-L2 - L3 + static_cast<Real>(2.0)*L1) * INV_SQRT3;
+          Real y = (-L2 - L3 + static_cast<Real>(2.0) * L1) * INV_SQRT3;
 
-          // 1D edge coordinates in [-1,1]
-          Real r1 = L3 - L2; // edge 2–3 (opposite vertex 1)
-          Real r2 = L1 - L3; // edge 1–3 (opposite vertex 2)
-          Real r3 = L2 - L1; // edge 1–2 (opposite vertex 3)
-
-          Real w1 = WarpFactor1D<K>::get(r1);
-          Real w2 = WarpFactor1D<K>::get(r2);
-          Real w3 = WarpFactor1D<K>::get(r3);
-
-          // Base blending factor: vanishes on edges, max at interior
-          Real blend = static_cast<Real>(4.0) * L1 * L2 * L3;
-
-          // α-dependent quadratic factors using opposite vertex barycentric
-          Real a1 = static_cast<Real>(1.0) + (alpha * L1) * (alpha * L1); // edge 2–3, opp. L1
-          Real a2 = static_cast<Real>(1.0) + (alpha * L2) * (alpha * L2); // edge 1–3, opp. L2
-          Real a3 = static_cast<Real>(1.0) + (alpha * L3) * (alpha * L3); // edge 1–2, opp. L3
-
-          // Apply blending + α
-          Real dw1 = blend * a1 * w1;
-          Real dw2 = blend * a2 * w2;
-          Real dw3 = blend * a3 * w3;
-
-          // Symmetric combination (equilateral)
-          Real dx =  dw2 - dw3;
-          Real dy = (static_cast<Real>(2.0) * dw1 - dw2 - dw3) * INV_SQRT3;
+          // 2D warp–blend shift
+          Real dx, dy;
+          WarpShiftFace2D<K>::apply(dx, dy, L1, L2, L3, alpha);
 
           x += dx;
           y += dy;
 
-          // Map back: equilateral -> barycentric
+          // Back: equilateral → barycentric (inverse of above)
           L1 = y * INV_SQRT3 + static_cast<Real>(1.0) / static_cast<Real>(3.0);
           L2 = -static_cast<Real>(0.5) * x
              - static_cast<Real>(0.5) * y * INV_SQRT3
@@ -242,10 +266,11 @@ namespace Rodin::Variational
              - static_cast<Real>(0.5) * y * INV_SQRT3
              + static_cast<Real>(1.0) / static_cast<Real>(3.0);
 
-          // Clamp and renormalize
+          // Clamp and renormalize (robustness)
           L1 = std::max(static_cast<Real>(0.0), L1);
           L2 = std::max(static_cast<Real>(0.0), L2);
           L3 = std::max(static_cast<Real>(0.0), L3);
+
           Real sumL = L1 + L2 + L3;
           if (sumL > TOL)
           {
@@ -254,120 +279,11 @@ namespace Rodin::Variational
             L3 /= sumL;
           }
 
+          // Back to reference triangle: (x,y) = (L2,L3)
           p = Math::SpatialPoint{{L2, L3}};
         }
       }
   };
-
-  //----------------------------------------------------------------------
-  // Helper: degree-dependent α for tetrahedron (Table 10.1 in H&W)
-  //----------------------------------------------------------------------
-
-  template <size_t K>
-  static constexpr Real getTetraAlpha()
-  {
-    if constexpr (K <= 3)
-    {
-      return static_cast<Real>(0.0);
-    }
-    else
-    {
-      // Optimized α for N = 1..15 (N=degree)
-      //  N :   1      2      3      4       5       6       7       8
-      // αN : 0.0,   0.0,   0.0, 0.1002, 1.1332, 1.5608, 1.3413, 1.2577,
-      //   9      10      11      12      13      14      15
-      // 1.1603, 1.0153, 0.6080, 0.4523, 0.8856, 0.8717, 0.9655
-      constexpr Real table[16] =
-      {
-        static_cast<Real>(0.0), // dummy for index 0
-        static_cast<Real>(0.0), // 1
-        static_cast<Real>(0.0), // 2
-        static_cast<Real>(0.0), // 3
-        static_cast<Real>(0.1002), // 4
-        static_cast<Real>(1.1332), // 5
-        static_cast<Real>(1.5608), // 6
-        static_cast<Real>(1.3413), // 7
-        static_cast<Real>(1.2577), // 8
-        static_cast<Real>(1.1603), // 9
-        static_cast<Real>(1.0153), // 10
-        static_cast<Real>(0.6080), // 11
-        static_cast<Real>(0.4523), // 12
-        static_cast<Real>(0.8856), // 13
-        static_cast<Real>(0.8717), // 14
-        static_cast<Real>(0.9655)  // 15
-      };
-
-      if constexpr (K < 16)
-        return table[K];
-      else
-        // For K > 15, just freeze α at the last optimized value.
-        return table[15];
-    }
-  }
-
-  //----------------------------------------------------------------------
-  // Helper: 2D Warp–Blend shift on a triangle face (evalshift.m)
-  //
-  // Input: barycentric (L1,L2,L3) on the face, and α (triangle parameter).
-  // Output: (dx,dy) in equilateral triangle coordinates.
-  //----------------------------------------------------------------------
-
-  template <size_t K>
-  inline void evalShiftTriangle(Real L1, Real L2, Real L3,
-                                Real alpha, Real& dx, Real& dy)
-  {
-    if constexpr (K <= 1)
-    {
-      dx = dy = static_cast<Real>(0.0);
-      return;
-    }
-
-    // Blending per edge
-    const Real blend1 = L2 * L3;
-    const Real blend2 = L1 * L3;
-    const Real blend3 = L1 * L2;
-
-    // Edge coordinates in [-1,1]
-    const Real r1 = L3 - L2;
-    const Real r2 = L1 - L3;
-    const Real r3 = L2 - L1;
-
-    // 1D warp (equispaced -> GLL) along each edge, with factor 4
-    const Real warpf1 = static_cast<Real>(4.0) * WarpFactor1D<K>::get(r1);
-    const Real warpf2 = static_cast<Real>(4.0) * WarpFactor1D<K>::get(r2);
-    const Real warpf3 = static_cast<Real>(4.0) * WarpFactor1D<K>::get(r3);
-
-    const Real aL1 = alpha * L1;
-    const Real aL2 = alpha * L2;
-    const Real aL3 = alpha * L3;
-
-    const Real warp1 = blend1 * warpf1 * (static_cast<Real>(1.0) + aL1 * aL1);
-    const Real warp2 = blend2 * warpf2 * (static_cast<Real>(1.0) + aL2 * aL2);
-    const Real warp3 = blend3 * warpf3 * (static_cast<Real>(1.0) + aL3 * aL3);
-
-    const Real cos2pi3 = static_cast<Real>(-0.5);
-    const Real sin2pi3 = static_cast<Real>(0.5) * std::sqrt(static_cast<Real>(3.0));
-    const Real cos4pi3 = cos2pi3;
-    const Real sin4pi3 = -sin2pi3;
-
-    dx = warp1
-       + cos2pi3 * warp2
-       + cos4pi3 * warp3;
-
-    dy = static_cast<Real>(0.0)
-       + sin2pi3 * warp2
-       + sin4pi3 * warp3;
-  }
-
-  //======================================================================
-  // Tetrahedral Warp–Blend (Hesthaven–Warburton style)
-  //
-  // - Uses 2D warp–blend on each face (via evalShiftTriangle)
-  // - Builds 3D face warps using orthonormal face tangents t_{f,1}, t_{f,2}
-  // - Blends the four face warps with b_f(λ) and β (α_3D) in barycentric space
-  // - Works in an origin-centered equilateral tetrahedron and maps back to
-  //   the standard reference tetrahedron with vertices (0,0,0),(1,0,0),(0,1,0),(0,0,1).
-  //======================================================================
 
   template <size_t K>
   class WarpBlendTetrahedron
@@ -376,25 +292,17 @@ namespace Rodin::Variational
       template <size_t N>
       static void apply(std::array<Math::SpatialPoint, N>& nodes)
       {
-        constexpr Real TOL   = static_cast<Real>(RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE);
-
         if constexpr (K <= 1)
           return;
 
-        // α for triangle faces (usual choice 5/3 for p>=4)
-        const Real alphaTri =
-          (K >= 4 ? static_cast<Real>(5.0) / static_cast<Real>(3.0)
-                  : static_cast<Real>(0.0));
+        constexpr Real TOL = static_cast<Real>(RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE);
 
-        // β for 3D blending (degree-dependent)
-        const Real beta = getTetraAlpha<K>();
+        const Real alpha = TetrahedronBlend<K>::getAlpha();
 
-        // Geometry of the equilateral tetrahedron (Hesthaven–Warburton / Göbel)
-        const Real invSqrt2 = static_cast<Real>(1.0) / std::sqrt(static_cast<Real>(2.0));
+        // Equilateral tetra vertices (same as HW)
         const Real invSqrt3 = static_cast<Real>(1.0) / std::sqrt(static_cast<Real>(3.0));
         const Real invSqrt6 = static_cast<Real>(1.0) / std::sqrt(static_cast<Real>(6.0));
 
-        // Vertices v1..v4 in R^3 (origin-centered equilateral tetrahedron)
         const Real v1x = static_cast<Real>(-1.0);
         const Real v1y = -invSqrt3;
         const Real v1z = -invSqrt6;
@@ -411,7 +319,53 @@ namespace Rodin::Variational
         const Real v4y = static_cast<Real>(0.0);
         const Real v4z = static_cast<Real>(3.0) * invSqrt6;
 
-        // Inverse of A = [v1-v4, v2-v4, v3-v4], for barycentric recovery
+        // Tangent directions t1(face,:), t2(face,:)
+        Real t1[4][3];
+        Real t2[4][3];
+
+        // Face 1
+        t1[0][0] = v2x - v1x;
+        t1[0][1] = v2y - v1y;
+        t1[0][2] = v2z - v1z;
+        t2[0][0] = v3x - static_cast<Real>(0.5) * (v1x + v2x);
+        t2[0][1] = v3y - static_cast<Real>(0.5) * (v1y + v2y);
+        t2[0][2] = v3z - static_cast<Real>(0.5) * (v1z + v2z);
+
+        // Face 2
+        t1[1][0] = v2x - v1x;
+        t1[1][1] = v2y - v1y;
+        t1[1][2] = v2z - v1z;
+        t2[1][0] = v4x - static_cast<Real>(0.5) * (v1x + v2x);
+        t2[1][1] = v4y - static_cast<Real>(0.5) * (v1y + v2y);
+        t2[1][2] = v4z - static_cast<Real>(0.5) * (v1z + v2z);
+
+        // Face 3
+        t1[2][0] = v3x - v2x;
+        t1[2][1] = v3y - v2y;
+        t1[2][2] = v3z - v2z;
+        t2[2][0] = v4x - static_cast<Real>(0.5) * (v2x + v3x);
+        t2[2][1] = v4y - static_cast<Real>(0.5) * (v2y + v3y);
+        t2[2][2] = v4z - static_cast<Real>(0.5) * (v2z + v3z);
+
+        // Face 4
+        t1[3][0] = v3x - v1x;
+        t1[3][1] = v3y - v1y;
+        t1[3][2] = v3z - v1z;
+        t2[3][0] = v4x - static_cast<Real>(0.5) * (v1x + v3x);
+        t2[3][1] = v4y - static_cast<Real>(0.5) * (v1y + v3y);
+        t2[3][2] = v4z - static_cast<Real>(0.5) * (v1z + v3z);
+
+        // Normalize tangents
+        for (int f = 0; f < 4; ++f)
+        {
+          const Real n1 = std::sqrt(t1[f][0]*t1[f][0] + t1[f][1]*t1[f][1] + t1[f][2]*t1[f][2]);
+          const Real n2 = std::sqrt(t2[f][0]*t2[f][0] + t2[f][1]*t2[f][1] + t2[f][2]*t2[f][2]);
+
+          t1[f][0] /= n1; t1[f][1] /= n1; t1[f][2] /= n1;
+          t2[f][0] /= n2; t2[f][1] /= n2; t2[f][2] /= n2;
+        }
+
+        // Inverse of A = [v1-v4, v2-v4, v3-v4] for barycentric recovery
         const Real a11 = static_cast<Real>(-0.5);
         const Real a12 = -static_cast<Real>(0.5) * invSqrt3;
         const Real a13 = -static_cast<Real>(0.5) * invSqrt6;
@@ -424,155 +378,99 @@ namespace Rodin::Variational
         const Real a32 = invSqrt3;
         const Real a33 = -static_cast<Real>(0.5) * invSqrt6;
 
-        // Orthonormal face tangents t_{f,1}, t_{f,2} (Göbel 2024, Sec. 4.2)
-        const Real t11x = static_cast<Real>(1.0);
-        const Real t11y = static_cast<Real>(0.0);
-        const Real t11z = static_cast<Real>(0.0);
-        const Real t12x = static_cast<Real>(0.0);
-        const Real t12y = static_cast<Real>(1.0);
-        const Real t12z = static_cast<Real>(0.0);
-
-        const Real t21x = static_cast<Real>(1.0);
-        const Real t21y = static_cast<Real>(0.0);
-        const Real t21z = static_cast<Real>(0.0);
-        const Real t22x = static_cast<Real>(0.0);
-        const Real t22y = static_cast<Real>(1.0) / static_cast<Real>(3.0);
-        const Real t22z = static_cast<Real>(4.0)
-                        / (static_cast<Real>(3.0) * std::sqrt(static_cast<Real>(2.0)));
-
-        const Real t31x = -static_cast<Real>(0.5);
-        const Real t31y = static_cast<Real>(3.0)
-                        / (static_cast<Real>(2.0) * std::sqrt(static_cast<Real>(3.0)));
-        const Real t31z = static_cast<Real>(0.0);
-        const Real t32x = -static_cast<Real>(0.5) * invSqrt3;
-        const Real t32y = -static_cast<Real>(1.0) / static_cast<Real>(6.0);
-        const Real t32z = static_cast<Real>(4.0)
-                        / (static_cast<Real>(3.0) * std::sqrt(static_cast<Real>(2.0)));
-
-        const Real t41x =  static_cast<Real>(0.5);
-        const Real t41y =  static_cast<Real>(3.0)
-                         / (static_cast<Real>(2.0) * std::sqrt(static_cast<Real>(3.0)));
-        const Real t41z =  static_cast<Real>(0.0);
-        const Real t42x =  static_cast<Real>(0.5) * invSqrt3;
-        const Real t42y = -static_cast<Real>(1.0) / static_cast<Real>(6.0);
-        const Real t42z =  static_cast<Real>(4.0)
-                         / (static_cast<Real>(3.0) * std::sqrt(static_cast<Real>(2.0)));
-
         for (auto& p : nodes)
         {
-          // Standard reference tetra coordinates
           Real xr = p.x();
           Real yr = p.y();
           Real zr = p.z();
 
-          // Barycentric coordinates w.r.t. standard simplex
-          Real l1 = static_cast<Real>(1.0) - xr - yr - zr; // vertex (0,0,0)
-          Real l2 = xr;                                   // vertex (1,0,0)
-          Real l3 = yr;                                   // vertex (0,1,0)
-          Real l4 = zr;                                   // vertex (0,0,1)
+          // Barycentric on reference tetra
+          Real L1 = static_cast<Real>(1.0) - xr - yr - zr; // vertex (0,0,0)
+          Real L2 = xr;                                   // vertex (1,0,0)
+          Real L3 = yr;                                   // vertex (0,1,0)
+          Real L4 = zr;                                   // vertex (0,0,1)
 
-          // Skip vertices (keep them fixed)
-          const bool near_v1 = (l1 > static_cast<Real>(1.0) - TOL);
-          const bool near_v2 = (l2 > static_cast<Real>(1.0) - TOL);
-          const bool near_v3 = (l3 > static_cast<Real>(1.0) - TOL);
-          const bool near_v4 = (l4 > static_cast<Real>(1.0) - TOL);
+          // Keep vertices fixed
+          const bool near_v1 = (L1 > static_cast<Real>(1.0) - TOL);
+          const bool near_v2 = (L2 > static_cast<Real>(1.0) - TOL);
+          const bool near_v3 = (L3 > static_cast<Real>(1.0) - TOL);
+          const bool near_v4 = (L4 > static_cast<Real>(1.0) - TOL);
           if (near_v1 || near_v2 || near_v3 || near_v4)
             continue;
 
-          // Equilateral coordinates of the current point
-          const Real rx0 = l1 * v1x + l2 * v2x + l3 * v3x + l4 * v4x;
-          const Real ry0 = l1 * v1y + l2 * v2y + l3 * v3y + l4 * v4y;
-          const Real rz0 = l1 * v1z + l2 * v2z + l3 * v3z + l4 * v4z;
+          // Equilateral coordinates of undeformed point
+          const Real rx0 = L1 * v1x + L2 * v2x + L3 * v3x + L4 * v4x;
+          const Real ry0 = L1 * v1y + L2 * v2y + L3 * v3y + L4 * v4y;
+          const Real rz0 = L1 * v1z + L2 * v2z + L3 * v3z + L4 * v4z;
 
-          //------------------------------------------------------------------
-          // Face warps w1..w4 using 2D Warp–Blend on appropriate triples
-          //------------------------------------------------------------------
-          Real dxF1 = 0, dyF1 = 0;
-          Real dxF2 = 0, dyF2 = 0;
-          Real dxF3 = 0, dyF3 = 0;
-          Real dxF4 = 0, dyF4 = 0;
+          Real shiftx = 0.0;
+          Real shifty = 0.0;
+          Real shiftz = 0.0;
 
-          // Face F1 (opposite λ1), triple (λ2,λ3,λ4)
-          evalShiftTriangle<K>(l2, l3, l4, alphaTri, dxF1, dyF1);
-
-          // Face F2 (opposite λ2), triple (λ1,λ3,λ4)
-          evalShiftTriangle<K>(l1, l3, l4, alphaTri, dxF2, dyF2);
-
-          // Face F3 (opposite λ3), triple (λ1,λ4,λ2)
-          evalShiftTriangle<K>(l1, l4, l2, alphaTri, dxF3, dyF3);
-
-          // Face F4 (opposite λ4), triple (λ1,λ3,λ2)
-          evalShiftTriangle<K>(l1, l3, l2, alphaTri, dxF4, dyF4);
-
-          // Build 3D warps w_f
-          const Real w1x = dxF1 * t11x + dyF1 * t12x;
-          const Real w1y = dxF1 * t11y + dyF1 * t12y;
-          const Real w1z = dxF1 * t11z + dyF1 * t12z;
-
-          const Real w2x = dxF2 * t21x + dyF2 * t22x;
-          const Real w2y = dxF2 * t21y + dyF2 * t22y;
-          const Real w2z = dxF2 * t21z + dyF2 * t22z;
-
-          const Real w3x = dxF3 * t31x + dyF3 * t32x;
-          const Real w3y = dxF3 * t31y + dyF3 * t32y;
-          const Real w3z = dxF3 * t31z + dyF3 * t32z;
-
-          const Real w4x = dxF4 * t41x + dyF4 * t42x;
-          const Real w4y = dxF4 * t41y + dyF4 * t42y;
-          const Real w4z = dxF4 * t41z + dyF4 * t42z;
-
-          //------------------------------------------------------------------
-          // Face blending b_f(λ) and β-dependent factors (Göbel (4.7))
-          //------------------------------------------------------------------
-          auto safe_ratio = [&](Real num, Real den) -> Real
+          // Loop over faces 1..4 (indices 0..3)
+          for (int face = 0; face < 4; ++face)
           {
-            if (Math::abs(den) < TOL)
-              return static_cast<Real>(0.0);
-            return num / den;
-          };
+            Real La, Lb, Lc, Ld;
 
-          const Real b1 =
-            safe_ratio(static_cast<Real>(2.0) * l2, static_cast<Real>(2.0) * l2 + l1) *
-            safe_ratio(static_cast<Real>(2.0) * l3, static_cast<Real>(2.0) * l3 + l1) *
-            safe_ratio(static_cast<Real>(2.0) * l4, static_cast<Real>(2.0) * l4 + l1);
+            if (face == 0) { La = L1; Lb = L2; Lc = L3; Ld = L4; }
+            else if (face == 1) { La = L2; Lb = L1; Lc = L3; Ld = L4; }
+            else if (face == 2) { La = L3; Lb = L1; Lc = L4; Ld = L2; }
+            else { /* face == 3 */ La = L4; Lb = L1; Lc = L3; Ld = L2; }
 
-          const Real b2 =
-            safe_ratio(static_cast<Real>(2.0) * l1, static_cast<Real>(2.0) * l1 + l2) *
-            safe_ratio(static_cast<Real>(2.0) * l3, static_cast<Real>(2.0) * l3 + l2) *
-            safe_ratio(static_cast<Real>(2.0) * l4, static_cast<Real>(2.0) * l4 + l2);
+            Real warp1, warp2;
+            WarpShiftFace3D<K>::apply(warp1, warp2, La, Lb, Lc, Ld, alpha);
 
-          const Real b3 =
-            safe_ratio(static_cast<Real>(2.0) * l1, static_cast<Real>(2.0) * l1 + l3) *
-            safe_ratio(static_cast<Real>(2.0) * l2, static_cast<Real>(2.0) * l2 + l3) *
-            safe_ratio(static_cast<Real>(2.0) * l4, static_cast<Real>(2.0) * l4 + l3);
+            // Volume blending
+            Real blend = Lb * Lc * Ld;
+            const Real denom = (Lb + static_cast<Real>(0.5) * La)
+                             * (Lc + static_cast<Real>(0.5) * La)
+                             * (Ld + static_cast<Real>(0.5) * La);
 
-          const Real b4 =
-            safe_ratio(static_cast<Real>(2.0) * l1, static_cast<Real>(2.0) * l1 + l4) *
-            safe_ratio(static_cast<Real>(2.0) * l2, static_cast<Real>(2.0) * l2 + l4) *
-            safe_ratio(static_cast<Real>(2.0) * l3, static_cast<Real>(2.0) * l3 + l4);
+            if (denom > TOL)
+            {
+              const Real alphaLa = alpha * La;
+              blend = (static_cast<Real>(1.0) + alphaLa * alphaLa) * blend / denom;
+            }
+            else
+            {
+              blend = static_cast<Real>(0.0);
+            }
 
-          const Real betaL1 = beta * l1;
-          const Real betaL2 = beta * l2;
-          const Real betaL3 = beta * l3;
-          const Real betaL4 = beta * l4;
+            // Boundary fix: pure face warp if La≈0 and not all (Lb,Lc,Ld) vertices
+            const bool boundary_face =
+              (La < TOL) &&
+              ( (Lb > TOL ? 1 : 0)
+              + (Lc > TOL ? 1 : 0)
+              + (Ld > TOL ? 1 : 0) < 3);
 
-          const Real f1 = b1 * (static_cast<Real>(1.0) + betaL1 * betaL1);
-          const Real f2 = b2 * (static_cast<Real>(1.0) + betaL2 * betaL2);
-          const Real f3 = b3 * (static_cast<Real>(1.0) + betaL3 * betaL3);
-          const Real f4 = b4 * (static_cast<Real>(1.0) + betaL4 * betaL4);
+            Real sx_face, sy_face, sz_face;
+            if (boundary_face)
+            {
+              // Use unblended tangential warp
+              sx_face = warp1 * t1[face][0] + warp2 * t2[face][0];
+              sy_face = warp1 * t1[face][1] + warp2 * t2[face][1];
+              sz_face = warp1 * t1[face][2] + warp2 * t2[face][2];
+            }
+            else
+            {
+              const Real bw1 = blend * warp1;
+              const Real bw2 = blend * warp2;
+              sx_face = bw1 * t1[face][0] + bw2 * t2[face][0];
+              sy_face = bw1 * t1[face][1] + bw2 * t2[face][1];
+              sz_face = bw1 * t1[face][2] + bw2 * t2[face][2];
+            }
 
-          const Real gx = f1 * w1x + f2 * w2x + f3 * w3x + f4 * w4x;
-          const Real gy = f1 * w1y + f2 * w2y + f3 * w3y + f4 * w4y;
-          const Real gz = f1 * w1z + f2 * w2z + f3 * w3z + f4 * w4z;
+            shiftx += sx_face;
+            shifty += sy_face;
+            shiftz += sz_face;
+          }
 
-          // New equilateral coordinates
-          const Real rx = rx0 + gx;
-          const Real ry = ry0 + gy;
-          const Real rz = rz0 + gz;
+          // New equilateral coords
+          const Real rx = rx0 + shiftx;
+          const Real ry = ry0 + shifty;
+          const Real rz = rz0 + shiftz;
 
-          //------------------------------------------------------------------
-          // Recover barycentric λ' from equilateral coordinates
-          //------------------------------------------------------------------
+          // Recover barycentric w.r.t v1..v4 via A^{-1}
           const Real dxv = rx - v4x;
           const Real dyv = ry - v4y;
           const Real dzv = rz - v4z;
@@ -582,7 +480,7 @@ namespace Rodin::Variational
           Real l3n = a31 * dxv + a32 * dyv + a33 * dzv;
           Real l4n = static_cast<Real>(1.0) - l1n - l2n - l3n;
 
-          // Clamp and renormalize barycentric coordinates
+          // Clamp and renormalize barycentric
           l1n = std::max(static_cast<Real>(0.0), l1n);
           l2n = std::max(static_cast<Real>(0.0), l2n);
           l3n = std::max(static_cast<Real>(0.0), l3n);
@@ -597,15 +495,13 @@ namespace Rodin::Variational
             l4n /= sumL;
           }
 
-          // Back to standard reference tetra: (x,y,z) = (λ2,λ3,λ4)
-          xr = l2n;
-          yr = l3n;
-          zr = l4n;
-
-          p = Math::SpatialPoint{{xr, yr, zr}};
+          // Back to reference tetra: (x,y,z) = (λ2,λ3,λ4)
+          p.x() = l2n;
+          p.y() = l3n;
+          p.z() = l4n;
         }
       }
   };
 }
 
-#endif
+#endif // RODIN_VARIATIONAL_H1_WARPBLEND_H
