@@ -71,7 +71,7 @@ namespace Rodin::Variational
         }
 
         // Move equispaced nodes toward Fekete positions using warp–blend
-        WarpBlendTriangle<K, MaxItGLL>::template apply<Count>(nodes);
+        WarpBlendTriangle<K>::template apply<Count>(nodes);
 
         return nodes;
       }
@@ -141,7 +141,7 @@ namespace Rodin::Variational
         }
 
         // Move equispaced nodes toward Fekete positions using warp–blend
-        WarpBlendTetrahedron<Real, K, MaxItGLL>::template apply<Count>(nodes);
+        WarpBlendTetrahedron<K>::template apply<Count>(nodes);
 
         return nodes;
       }
