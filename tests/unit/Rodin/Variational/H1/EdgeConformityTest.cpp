@@ -212,7 +212,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Compare two vectors of 1D coordinates
-  void compareEdgeCoordinates(
+  inline void compareEdgeCoordinates(
       const std::vector<Real>& edge1,
       const std::vector<Real>& edge2,
       const std::string& name1,

@@ -22,10 +22,11 @@
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
-
-#include "ForwardDecls.h"
 #include "Rodin/Variational/H1/Fekete.h"
 #include "Rodin/Variational/H1/GLL.h"
+#include "Rodin/Math/Traits.h"
+
+#include "ForwardDecls.h"
 
 /**
  * @ingroup RodinDirectives
