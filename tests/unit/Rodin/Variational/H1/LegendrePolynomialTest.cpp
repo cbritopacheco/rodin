@@ -23,16 +23,16 @@ namespace Rodin::Tests::Unit
   {
     // P_0(x) = 1 for all x
     Real P, dP;
-    
+
     LegendrePolynomial<0>::getValue(P, dP, 0.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
-    
+
     LegendrePolynomial<0>::getValue(P, dP, 0.5);
     EXPECT_NEAR(P, 1.0, 1e-14);
-    
+
     LegendrePolynomial<0>::getValue(P, dP, -1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
-    
+
     LegendrePolynomial<0>::getValue(P, dP, 1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
   }
@@ -41,16 +41,16 @@ namespace Rodin::Tests::Unit
   {
     // P_1(x) = x
     Real P, dP;
-    
+
     LegendrePolynomial<1>::getValue(P, dP, 0.0);
     EXPECT_NEAR(P, 0.0, 1e-14);
-    
+
     LegendrePolynomial<1>::getValue(P, dP, 0.5);
     EXPECT_NEAR(P, 0.5, 1e-14);
-    
+
     LegendrePolynomial<1>::getValue(P, dP, -1.0);
     EXPECT_NEAR(P, -1.0, 1e-14);
-    
+
     LegendrePolynomial<1>::getValue(P, dP, 1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
   }
@@ -59,16 +59,16 @@ namespace Rodin::Tests::Unit
   {
     // P_2(x) = (3x^2 - 1) / 2
     Real P, dP;
-    
+
     LegendrePolynomial<2>::getValue(P, dP, 0.0);
     EXPECT_NEAR(P, -0.5, 1e-14);  // (3*0 - 1)/2 = -0.5
-    
+
     LegendrePolynomial<2>::getValue(P, dP, 1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);   // (3*1 - 1)/2 = 1
-    
+
     LegendrePolynomial<2>::getValue(P, dP, -1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);   // (3*1 - 1)/2 = 1
-    
+
     Real x = 0.5;
     Real expected = (3.0 * x * x - 1.0) / 2.0;
     LegendrePolynomial<2>::getValue(P, dP, x);
@@ -79,16 +79,16 @@ namespace Rodin::Tests::Unit
   {
     // P_3(x) = (5x^3 - 3x) / 2
     Real P, dP;
-    
+
     LegendrePolynomial<3>::getValue(P, dP, 0.0);
     EXPECT_NEAR(P, 0.0, 1e-14);
-    
+
     LegendrePolynomial<3>::getValue(P, dP, 1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);  // (5 - 3)/2 = 1
-    
+
     LegendrePolynomial<3>::getValue(P, dP, -1.0);
     EXPECT_NEAR(P, -1.0, 1e-14);
-    
+
     Real x = 0.5;
     Real expected = (5.0 * x * x * x - 3.0 * x) / 2.0;
     LegendrePolynomial<3>::getValue(P, dP, x);
@@ -99,13 +99,13 @@ namespace Rodin::Tests::Unit
   {
     // P_4(x) = (35x^4 - 30x^2 + 3) / 8
     Real P, dP;
-    
+
     LegendrePolynomial<4>::getValue(P, dP, 0.0);
     EXPECT_NEAR(P, 3.0/8.0, 1e-14);
-    
+
     LegendrePolynomial<4>::getValue(P, dP, 1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
-    
+
     LegendrePolynomial<4>::getValue(P, dP, -1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
   }
@@ -118,10 +118,10 @@ namespace Rodin::Tests::Unit
   {
     // P'_0(x) = 0
     Real P, dP;
-    
+
     LegendrePolynomial<0>::getValue(P, dP, 0.0);
     EXPECT_NEAR(dP, 0.0, 1e-14);
-    
+
     LegendrePolynomial<0>::getValue(P, dP, 0.5);
     EXPECT_NEAR(dP, 0.0, 1e-14);
   }
@@ -130,13 +130,13 @@ namespace Rodin::Tests::Unit
   {
     // P'_1(x) = 1
     Real P, dP;
-    
+
     LegendrePolynomial<1>::getValue(P, dP, 0.0);
     EXPECT_NEAR(dP, 1.0, 1e-14);
-    
+
     LegendrePolynomial<1>::getValue(P, dP, 0.5);
     EXPECT_NEAR(dP, 1.0, 1e-14);
-    
+
     LegendrePolynomial<1>::getValue(P, dP, -1.0);
     EXPECT_NEAR(dP, 1.0, 1e-14);
   }
@@ -145,16 +145,16 @@ namespace Rodin::Tests::Unit
   {
     // P'_2(x) = 3x
     Real P, dP;
-    
+
     LegendrePolynomial<2>::getValue(P, dP, 0.0);
     EXPECT_NEAR(dP, 0.0, 1e-14);
-    
+
     LegendrePolynomial<2>::getValue(P, dP, 0.5);
     EXPECT_NEAR(dP, 1.5, 1e-14);
-    
+
     LegendrePolynomial<2>::getValue(P, dP, 1.0);
     EXPECT_NEAR(dP, 3.0, 1e-14);
-    
+
     LegendrePolynomial<2>::getValue(P, dP, -1.0);
     EXPECT_NEAR(dP, -3.0, 1e-14);
   }
@@ -163,10 +163,10 @@ namespace Rodin::Tests::Unit
   {
     // P'_3(x) = (15x^2 - 3) / 2
     Real P, dP;
-    
+
     LegendrePolynomial<3>::getValue(P, dP, 0.0);
     EXPECT_NEAR(dP, -1.5, 1e-14);  // (0 - 3)/2 = -1.5
-    
+
     Real x = 0.5;
     Real expected = (15.0 * x * x - 3.0) / 2.0;
     LegendrePolynomial<3>::getValue(P, dP, x);
@@ -182,27 +182,27 @@ namespace Rodin::Tests::Unit
     // P_K(1) = 1 for all K
     // P_K(-1) = (-1)^K for all K
     Real P, dP;
-    
+
     LegendrePolynomial<0>::getValue(P, dP, 1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
     LegendrePolynomial<0>::getValue(P, dP, -1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
-    
+
     LegendrePolynomial<1>::getValue(P, dP, 1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
     LegendrePolynomial<1>::getValue(P, dP, -1.0);
     EXPECT_NEAR(P, -1.0, 1e-14);
-    
+
     LegendrePolynomial<2>::getValue(P, dP, 1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
     LegendrePolynomial<2>::getValue(P, dP, -1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
-    
+
     LegendrePolynomial<5>::getValue(P, dP, 1.0);
     EXPECT_NEAR(P, 1.0, 1e-14);
     LegendrePolynomial<5>::getValue(P, dP, -1.0);
     EXPECT_NEAR(P, -1.0, 1e-14);
-    
+
     LegendrePolynomial<10>::getValue(P, dP, 1.0);
     EXPECT_NEAR(P, 1.0, 1e-13);
     LegendrePolynomial<10>::getValue(P, dP, -1.0);
@@ -255,15 +255,15 @@ namespace Rodin::Tests::Unit
     // P_K(-x) = P_K(x) for even K
     Real P_pos, dP_pos, P_neg, dP_neg;
     Real x = 0.3;
-    
+
     LegendrePolynomial<2>::getValue(P_pos, dP_pos, x);
     LegendrePolynomial<2>::getValue(P_neg, dP_neg, -x);
     EXPECT_NEAR(P_pos, P_neg, 1e-14);
-    
+
     LegendrePolynomial<4>::getValue(P_pos, dP_pos, x);
     LegendrePolynomial<4>::getValue(P_neg, dP_neg, -x);
     EXPECT_NEAR(P_pos, P_neg, 1e-14);
-    
+
     LegendrePolynomial<6>::getValue(P_pos, dP_pos, x);
     LegendrePolynomial<6>::getValue(P_neg, dP_neg, -x);
     EXPECT_NEAR(P_pos, P_neg, 1e-14);
@@ -274,17 +274,106 @@ namespace Rodin::Tests::Unit
     // P_K(-x) = -P_K(x) for odd K
     Real P_pos, dP_pos, P_neg, dP_neg;
     Real x = 0.3;
-    
+
     LegendrePolynomial<1>::getValue(P_pos, dP_pos, x);
     LegendrePolynomial<1>::getValue(P_neg, dP_neg, -x);
     EXPECT_NEAR(P_pos, -P_neg, 1e-14);
-    
+
     LegendrePolynomial<3>::getValue(P_pos, dP_pos, x);
     LegendrePolynomial<3>::getValue(P_neg, dP_neg, -x);
     EXPECT_NEAR(P_pos, -P_neg, 1e-14);
-    
+
     LegendrePolynomial<5>::getValue(P_pos, dP_pos, x);
     LegendrePolynomial<5>::getValue(P_neg, dP_neg, -x);
     EXPECT_NEAR(P_pos, -P_neg, 1e-14);
+  }
+
+  //==========================================================================
+  // Higher Order Tests (K = 5, 6)
+  //==========================================================================
+
+  TEST(LegendrePolynomial, P5_Value)
+  {
+    // P_5(x) = (63x^5 - 70x^3 + 15x) / 8
+    Real P, dP;
+
+    LegendrePolynomial<5>::getValue(P, dP, 0.0);
+    EXPECT_NEAR(P, 0.0, 1e-14);  // Odd polynomial
+
+    LegendrePolynomial<5>::getValue(P, dP, 1.0);
+    EXPECT_NEAR(P, 1.0, 1e-14);
+
+    LegendrePolynomial<5>::getValue(P, dP, -1.0);
+    EXPECT_NEAR(P, -1.0, 1e-14);
+
+    Real x = 0.5;
+    Real expected = (63.0 * std::pow(x, 5) - 70.0 * std::pow(x, 3) + 15.0 * x) / 8.0;
+    LegendrePolynomial<5>::getValue(P, dP, x);
+    EXPECT_NEAR(P, expected, 1e-14);
+  }
+
+  TEST(LegendrePolynomial, P6_Value)
+  {
+    // P_6(x) = (231x^6 - 315x^4 + 105x^2 - 5) / 16
+    Real P, dP;
+
+    LegendrePolynomial<6>::getValue(P, dP, 0.0);
+    Real expected_at_0 = -5.0 / 16.0;
+    EXPECT_NEAR(P, expected_at_0, 1e-14);
+
+    LegendrePolynomial<6>::getValue(P, dP, 1.0);
+    EXPECT_NEAR(P, 1.0, 1e-14);
+
+    LegendrePolynomial<6>::getValue(P, dP, -1.0);
+    EXPECT_NEAR(P, 1.0, 1e-14);  // Even polynomial
+
+    Real x = 0.5;
+    Real expected = (231.0 * std::pow(x, 6) - 315.0 * std::pow(x, 4) + 105.0 * x * x - 5.0) / 16.0;
+    LegendrePolynomial<6>::getValue(P, dP, x);
+    EXPECT_NEAR(P, expected, 1e-13);
+  }
+
+  TEST(LegendrePolynomial, P5_Derivative)
+  {
+    // P'_5(x) = (315x^4 - 210x^2 + 15) / 8
+    Real P, dP;
+
+    Real x = 0.5;
+    Real expected = (315.0 * std::pow(x, 4) - 210.0 * x * x + 15.0) / 8.0;
+    LegendrePolynomial<5>::getValue(P, dP, x);
+    EXPECT_NEAR(dP, expected, 1e-13);
+
+    LegendrePolynomial<5>::getValue(P, dP, 0.0);
+    EXPECT_NEAR(dP, 15.0 / 8.0, 1e-14);
+  }
+
+  TEST(LegendrePolynomial, P6_Derivative)
+  {
+    // P'_6(x) = (1386x^5 - 1260x^3 + 210x) / 16
+    Real P, dP;
+
+    Real x = 0.5;
+    Real expected = (1386.0 * std::pow(x, 5) - 1260.0 * std::pow(x, 3) + 210.0 * x) / 16.0;
+    LegendrePolynomial<6>::getValue(P, dP, x);
+    EXPECT_NEAR(dP, expected, 1e-12);
+
+    LegendrePolynomial<6>::getValue(P, dP, 0.0);
+    EXPECT_NEAR(dP, 0.0, 1e-14);  // Even polynomial has odd derivative
+  }
+
+  TEST(LegendrePolynomial, Orthogonality_P2_P5)
+  {
+    // ∫_{-1}^{1} P_2(x) P_5(x) dx = 0
+    const int N = 30;
+    Real sum = 0.0;
+    for (int i = 0; i < N; ++i)
+    {
+      Real x = -1.0 + 2.0 * (i + 0.5) / N;
+      Real P2, dP2, P5, dP5;
+      LegendrePolynomial<2>::getValue(P2, dP2, x);
+      LegendrePolynomial<5>::getValue(P5, dP5, x);
+      sum += P2 * P5 * (2.0 / N);
+    }
+    EXPECT_NEAR(sum, 0.0, 1e-12);
   }
 }
