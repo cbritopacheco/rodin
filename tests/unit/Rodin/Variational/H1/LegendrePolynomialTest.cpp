@@ -451,17 +451,43 @@ namespace Rodin::Tests::Unit
   TEST(LegendrePolynomial, Orthogonality_P5_P15)
   {
     // ∫_{-1}^{1} P_5(x) P_15(x) dx = 0
-    // Need more quadrature points for high-order polynomials
-    const int N = 100;
+    // Use Gauss-Legendre quadrature with 11 points (exact for deg <= 21)
+    // Nodes and weights for 11-point Gauss-Legendre quadrature on [-1, 1]
+    const std::array<Real, 11> nodes = {
+      -0.9782286581460570,
+      -0.8870625997680953,
+      -0.7301520055740494,
+      -0.5190961292068118,
+      -0.2695431559523450,
+      0.0,
+      0.2695431559523450,
+      0.5190961292068118,
+      0.7301520055740494,
+      0.8870625997680953,
+      0.9782286581460570
+    };
+    const std::array<Real, 11> weights = {
+      0.0556685671161737,
+      0.1255803694649046,
+      0.1862902109277343,
+      0.2331937645919905,
+      0.2628045445102467,
+      0.2729250867779006,
+      0.2628045445102467,
+      0.2331937645919905,
+      0.1862902109277343,
+      0.1255803694649046,
+      0.0556685671161737
+    };
+
     Real sum = 0.0;
-    for (int i = 0; i < N; ++i)
+    for (size_t i = 0; i < nodes.size(); ++i)
     {
-      Real x = -1.0 + 2.0 * (i + 0.5) / N;
       Real P5, dP5, P15, dP15;
-      LegendrePolynomial<5>::getValue(P5, dP5, x);
-      LegendrePolynomial<15>::getValue(P15, dP15, x);
-      sum += P5 * P15 * (2.0 / N);
+      LegendrePolynomial<5>::getValue(P5, dP5, nodes[i]);
+      LegendrePolynomial<15>::getValue(P15, dP15, nodes[i]);
+      sum += weights[i] * P5 * P15;
     }
-    EXPECT_NEAR(sum, 0.0, 1e-8);
+    EXPECT_NEAR(sum, 0.0, 1e-12);
   }
 }
