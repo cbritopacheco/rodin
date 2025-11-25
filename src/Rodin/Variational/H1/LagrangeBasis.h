@@ -20,10 +20,29 @@ namespace Rodin::Variational
   // Generic 1D Lagrange on arbitrary nodes (keeps nodes)
   //==========================================================================
 
+  /**
+   * @brief Generic 1D Lagrange basis on arbitrary nodes.
+   *
+   * Evaluates Lagrange basis functions and their derivatives on a given
+   * set of nodes. The i-th basis function is defined as:
+   * @f[
+   *   L_i(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j}
+   * @f]
+   *
+   * @tparam K Polynomial degree (number of nodes is K+1).
+   */
   template <size_t K>
   class LagrangeBasis1D
   {
     public:
+      /**
+       * @brief Evaluates the i-th Lagrange basis function at x.
+       *
+       * @param i Node index (0 ≤ i ≤ K).
+       * @param x Evaluation point.
+       * @param nodes Array of K+1 nodes.
+       * @return Value of L_i(x).
+       */
       static constexpr
       Real getBasis(size_t i, Real x, const std::array<Real, K + 1>& nodes)
       {
@@ -41,6 +60,16 @@ namespace Rodin::Variational
         return result;
       }
 
+      /**
+       * @brief Evaluates the derivative of the i-th Lagrange basis function.
+       *
+       * Uses the product rule to compute @f$ L'_i(x) @f$.
+       *
+       * @param i Node index.
+       * @param x Evaluation point.
+       * @param nodes Array of K+1 nodes.
+       * @return Value of L'_i(x).
+       */
       static constexpr
       Real getDerivative(size_t i, Real x, const std::array<Real, K + 1>& nodes)
       {
@@ -75,6 +104,13 @@ namespace Rodin::Variational
   // Point basis (reference 0D element)
   //==========================================================================
 
+  /**
+   * @brief Lagrange basis on the reference point (0D element).
+   *
+   * The only basis function is the constant 1.
+   *
+   * @tparam K Polynomial degree (ignored for points).
+   */
   template <size_t K>
   class LagrangeBasisPoint
   {
@@ -94,6 +130,19 @@ namespace Rodin::Variational
   // Segment basis on canonical [0,1] with GLL01<K> nodes
   //==========================================================================
 
+  /**
+   * @brief Lagrange basis on the reference segment [0,1] using GLL nodes.
+   *
+   * Provides K+1 Lagrange basis functions on GLL01 nodes (Gauss-Lobatto-Legendre
+   * nodes mapped to [0,1]). The basis satisfies:
+   * @f[
+   *   L_i(x_j) = \delta_{ij}
+   * @f]
+   *
+   * @tparam K Polynomial degree.
+   *
+   * @see GLL01 for the node positions.
+   */
   template <size_t K>
   class LagrangeBasisSegment
   {
@@ -151,6 +200,17 @@ namespace Rodin::Variational
   // Triangle basis (Pk on reference triangle (0,0),(1,0),(0,1))
   //==========================================================================
 
+  /**
+   * @brief Lagrange basis on the reference triangle.
+   *
+   * Provides polynomial basis functions of degree K on the reference triangle
+   * with vertices (0,0), (1,0), (0,1). Uses barycentric coordinates
+   * @f$ \lambda_0 = 1-x-y, \lambda_1 = x, \lambda_2 = y @f$.
+   *
+   * The number of basis functions is @f$ (K+1)(K+2)/2 @f$.
+   *
+   * @tparam K Polynomial degree.
+   */
   template <size_t K>
   class LagrangeBasisTriangle
   {
@@ -258,6 +318,17 @@ namespace Rodin::Variational
   // Tetrahedron basis (Pk on reference tetra (0,0,0),(1,0,0),(0,1,0),(0,0,1))
   //==========================================================================
 
+  /**
+   * @brief Lagrange basis on the reference tetrahedron.
+   *
+   * Provides polynomial basis functions of degree K on the reference tetrahedron
+   * with vertices (0,0,0), (1,0,0), (0,1,0), (0,0,1). Uses barycentric coordinates
+   * @f$ \lambda_0 = 1-x-y-z, \lambda_1 = x, \lambda_2 = y, \lambda_3 = z @f$.
+   *
+   * The number of basis functions is @f$ (K+1)(K+2)(K+3)/6 @f$.
+   *
+   * @tparam K Polynomial degree.
+   */
   template <size_t K>
   class LagrangeBasisTetrahedron
   {
@@ -371,6 +442,21 @@ namespace Rodin::Variational
   // Quadrilateral basis (tensor product on [0,1]×[0,1], GLL01<K> in each dir)
   //==========================================================================
 
+  /**
+   * @brief Lagrange basis on the reference quadrilateral [0,1]².
+   *
+   * Provides tensor-product Lagrange basis functions using GLL01 nodes
+   * in each direction:
+   * @f[
+   *   \phi_{i,j}(x,y) = L_i(x) \cdot L_j(y)
+   * @f]
+   *
+   * The number of basis functions is @f$ (K+1)^2 @f$.
+   *
+   * @tparam K Polynomial degree in each direction.
+   *
+   * @see GLL01, LagrangeBasisSegment
+   */
   template <size_t K>
   class LagrangeBasisQuadrilateral
   {
@@ -502,6 +588,23 @@ namespace Rodin::Variational
   // Wedge basis (triangle × segment, [0,1] in z, triangle as above)
   //==========================================================================
 
+  /**
+   * @brief Lagrange basis on the reference wedge (triangular prism).
+   *
+   * The wedge is the tensor product of a triangle in (x,y) with a segment
+   * in z. Basis functions are:
+   * @f[
+   *   \phi_{i,j,k}(x,y,z) = T_{i,j}(x,y) \cdot L_k(z)
+   * @f]
+   * where @f$ T_{i,j} @f$ is a triangle basis function and @f$ L_k @f$ is
+   * a 1D Lagrange function on GLL01 nodes.
+   *
+   * The number of basis functions is @f$ (K+1)^2(K+2)/2 @f$.
+   *
+   * @tparam K Polynomial degree.
+   *
+   * @see LagrangeBasisTriangle, LagrangeBasisSegment
+   */
   template <size_t K>
   class LagrangeBasisWedge
   {

@@ -21,10 +21,42 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Dubiner orthogonal modal basis on the reference triangle.
+   *
+   * This class provides evaluation of the Dubiner basis functions
+   * @f$ \psi_{p,q}(r,s) @f$ on the collapsed coordinate system
+   * @f$ (r,s) \in [-1,1]^2 @f$, which maps from the reference triangle
+   * with vertices @f$ (0,0), (1,0), (0,1) @f$.
+   *
+   * The Dubiner basis is constructed as a product of Jacobi polynomials:
+   * @f[
+   *   \psi_{p,q}(r,s) = P_p^{(0,0)}(a) \cdot P_q^{(2p+1,0)}(b)
+   *     \cdot \left(\frac{1-b}{2}\right)^p
+   * @f]
+   * where @f$ (a,b) @f$ are collapsed coordinates derived from @f$ (r,s) @f$.
+   *
+   * This basis is L2-orthogonal on the reference triangle, making it
+   * numerically stable for high-order polynomial approximations.
+   *
+   * @tparam K Maximum polynomial degree.
+   *
+   * @see JacobiPolynomial for the underlying polynomial evaluation.
+   * @see VandermondeTriangle for the nodal-to-modal transformation.
+   */
   template <size_t K>
   class DubinerTriangle
   {
     public:
+      /**
+       * @brief Evaluates the Dubiner basis function @f$ \psi_{P,Q}(r,s) @f$.
+       *
+       * @tparam P First modal index (0 ≤ P).
+       * @tparam Q Second modal index (0 ≤ Q, P + Q ≤ K).
+       * @param[out] basis The computed basis function value.
+       * @param r First collapsed coordinate in [-1,1].
+       * @param s Second collapsed coordinate in [-1,1].
+       */
       template <size_t P, size_t Q>
       static constexpr void getBasis(Real& basis, Real r, Real s)
       {
@@ -50,6 +82,21 @@ namespace Rodin::Variational
         basis = psi_p * psi_q * Math::pow(0.5 * (1.0 - b), P);
       }
 
+      /**
+       * @brief Computes the gradient of @f$ \psi_{P,Q} @f$ w.r.t. collapsed coordinates.
+       *
+       * Uses the chain rule to compute:
+       * @f[
+       *   \frac{\partial \psi}{\partial r}, \quad \frac{\partial \psi}{\partial s}
+       * @f]
+       *
+       * @tparam P First modal index.
+       * @tparam Q Second modal index.
+       * @param[out] dpsi_dr Derivative w.r.t. r.
+       * @param[out] dpsi_ds Derivative w.r.t. s.
+       * @param r First collapsed coordinate.
+       * @param s Second collapsed coordinate.
+       */
       template <size_t P, size_t Q>
       static constexpr void getGradient(Real& dpsi_dr, Real& dpsi_ds, Real r, Real s)
       {
@@ -91,6 +138,20 @@ namespace Rodin::Variational
           dpsi_ds += Pa * Pb * P * Math::pow(0.5 * (1.0 - b), P - 1) * (-0.5);
       }
 
+      /**
+       * @brief Converts reference triangle coordinates to collapsed coordinates.
+       *
+       * Maps @f$ (x,y) @f$ from the reference triangle to @f$ (r,s) \in [-1,1]^2 @f$:
+       * @f[
+       *   s = 2y - 1, \quad r = \frac{2x}{1-y} - 1
+       * @f]
+       * with singularity handling at @f$ y = 1 @f$ (top vertex).
+       *
+       * @param[out] r First collapsed coordinate.
+       * @param[out] s Second collapsed coordinate.
+       * @param x First reference coordinate.
+       * @param y Second reference coordinate.
+       */
       static constexpr void getCollapsed(Real& r, Real& s, Real x, Real y)
       {
         // s = 2y - 1 always
@@ -104,10 +165,35 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @brief Vandermonde matrix for nodal-to-modal transformation on triangles.
+   *
+   * Constructs and caches the Vandermonde matrix @f$ V @f$ where
+   * @f$ V_{ij} = \psi_j(x_i) @f$ with @f$ \psi_j @f$ being the j-th Dubiner
+   * mode and @f$ x_i @f$ the i-th Fekete node.
+   *
+   * The nodal basis functions @f$ \phi_i @f$ are recovered from the modal
+   * basis via @f$ \phi_i(x) = \sum_j V^{-1}_{ij} \psi_j(x) @f$.
+   *
+   * Both @f$ V @f$ and @f$ V^{-1} @f$ are cached in thread-local storage.
+   *
+   * @tparam K Polynomial degree.
+   * @tparam MaxItGLL Maximum Newton iterations for GLL node computation.
+   *
+   * @see DubinerTriangle for the modal basis functions.
+   * @see FeketeTriangle for the nodal points.
+   */
   template <size_t K, size_t MaxItGLL = 25>
   class VandermondeTriangle
   {
     public:
+      /**
+       * @brief Returns the Vandermonde matrix @f$ V @f$.
+       *
+       * The matrix is computed once and cached in thread-local storage.
+       *
+       * @return Reference to the N×N Vandermonde matrix where N = (K+1)(K+2)/2.
+       */
       static const Math::Matrix<Real>& getMatrix()
       {
         static thread_local Math::Matrix<Real> s_vandermonde;
@@ -166,10 +252,40 @@ namespace Rodin::Variational
   // Tetrahedron version
   // ---------------------------------------------------------------------------
 
+  /**
+   * @brief Dubiner orthogonal modal basis on the reference tetrahedron.
+   *
+   * Provides evaluation of the Dubiner basis functions
+   * @f$ \psi_{p,q,r}(a,b,c) @f$ on collapsed coordinates
+   * @f$ (a,b,c) \in [-1,1]^3 @f$, mapped from the reference tetrahedron
+   * with vertices @f$ (0,0,0), (1,0,0), (0,1,0), (0,0,1) @f$.
+   *
+   * The basis uses a Duffy-type collapse and is constructed as:
+   * @f[
+   *   \psi_{p,q,r}(a,b,c) = P_p^{(0,0)}(a) \cdot P_q^{(2p+1,0)}(b)
+   *     \cdot P_r^{(2p+2q+2,0)}(c) \cdot \left(\frac{1-b}{2}\right)^p
+   *     \cdot \left(\frac{1-c}{2}\right)^{p+q}
+   * @f]
+   *
+   * @tparam K Maximum polynomial degree.
+   *
+   * @see JacobiPolynomial, VandermondeTetrahedron
+   */
   template <size_t K>
   class DubinerTetrahedron
   {
     public:
+      /**
+       * @brief Evaluates the Dubiner basis function @f$ \psi_{P,Q,R}(a,b,c) @f$.
+       *
+       * @tparam P First modal index.
+       * @tparam Q Second modal index.
+       * @tparam R Third modal index (P + Q + R ≤ K).
+       * @param[out] basis The computed basis function value.
+       * @param a First collapsed coordinate.
+       * @param b Second collapsed coordinate.
+       * @param c Third collapsed coordinate.
+       */
       // ψ_{P,Q,R}(a,b,c) on [-1,1]^3 (Dubiner tetrahedral basis)
       template <size_t P, size_t Q, size_t R>
       static constexpr void getBasis(Real& basis, Real a, Real b, Real c)

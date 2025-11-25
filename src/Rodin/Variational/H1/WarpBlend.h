@@ -22,10 +22,30 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Computes the 1D warp factor for moving equispaced nodes to GLL positions.
+   *
+   * Given an evaluation point @f$ r \in [-1,1] @f$, this class computes the
+   * warp displacement that interpolates the difference between GLL nodes and
+   * equispaced nodes using Lagrange interpolation on the equispaced nodes.
+   *
+   * The warp factor is normalized by @f$ (1 - r^2) @f$ to ensure smooth
+   * blending near the endpoints.
+   *
+   * @tparam K Polynomial degree.
+   *
+   * @see GLL for the target GLL node positions.
+   */
   template <size_t K>
   class WarpFactor1D
   {
     public:
+      /**
+       * @brief Computes the warp factor at point r.
+       *
+       * @param r Evaluation point in [-1,1].
+       * @return The warp displacement factor.
+       */
       static Real get(Real r)
       {
         if constexpr (K <= 1)
@@ -72,6 +92,15 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @brief Optimized blending parameter α for triangular warp-blend.
+   *
+   * Provides the blending parameter α for different polynomial degrees,
+   * empirically optimized to minimize the Lebesgue constant.
+   * Values follow Hesthaven & Warburton, "Nodal DG Methods" (2008).
+   *
+   * @tparam K Polynomial degree.
+   */
   template <size_t K>
   class TriangleBlend
   {
@@ -111,6 +140,14 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @brief Optimized blending parameter α for tetrahedral warp-blend.
+   *
+   * Provides the blending parameter α for different polynomial degrees,
+   * empirically optimized for tetrahedra.
+   *
+   * @tparam K Polynomial degree.
+   */
   template <size_t K>
   class TetrahedronBlend
   {
@@ -148,6 +185,15 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @brief Computes 2D warp-blend shift for a triangular face.
+   *
+   * Given barycentric coordinates @f$ (L_1, L_2, L_3) @f$ on an equilateral
+   * triangle, computes the displacement @f$ (\Delta x, \Delta y) @f$ that
+   * moves the point towards its Fekete position.
+   *
+   * @tparam K Polynomial degree.
+   */
   template <size_t K>
   class WarpShiftFace2D
   {
@@ -199,6 +245,14 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @brief Computes 3D warp-blend shift for a tetrahedral face.
+   *
+   * Extends the 2D face warp to 3D by computing displacement in the
+   * tangent plane of a tetrahedral face.
+   *
+   * @tparam K Polynomial degree.
+   */
   template <size_t K>
   class WarpShiftFace3D
   {
@@ -212,6 +266,23 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @brief Applies warp-blend algorithm to move triangle nodes toward Fekete positions.
+   *
+   * Given an array of equispaced nodes on the reference triangle, this class
+   * applies the warp-blend algorithm from Hesthaven & Warburton to move them
+   * toward optimal Fekete-type positions that minimize the Lebesgue constant.
+   *
+   * The algorithm:
+   * 1. Converts reference coordinates to equilateral triangle coordinates
+   * 2. Computes edge-based warp contributions using 1D GLL warping
+   * 3. Blends contributions using barycentric weights with parameter α
+   * 4. Converts back to reference triangle coordinates
+   *
+   * @tparam K Polynomial degree.
+   *
+   * @see WarpFactor1D, TriangleBlend, FeketeTriangle
+   */
   template <size_t K>
   class WarpBlendTriangle
   {
@@ -285,6 +356,23 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @brief Applies warp-blend algorithm to move tetrahedron nodes toward Fekete positions.
+   *
+   * Extends the triangular warp-blend to 3D tetrahedra. The algorithm:
+   * 1. Converts to equilateral tetrahedron coordinates
+   * 2. Computes face-based warp contributions from all 4 faces
+   * 3. Special handling for edge nodes (2 zero barycentric coords) using 1D GLL warp
+   * 4. Blends contributions using 4D barycentric weights
+   * 5. Converts back to reference tetrahedron coordinates
+   *
+   * Edge nodes are handled separately to ensure they match GLL01 positions
+   * exactly, which is essential for H1 conformity between adjacent elements.
+   *
+   * @tparam K Polynomial degree.
+   *
+   * @see WarpBlendTriangle, TetrahedronBlend, FeketeTetrahedron
+   */
   template <size_t K>
   class WarpBlendTetrahedron
   {
