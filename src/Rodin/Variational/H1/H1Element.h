@@ -393,7 +393,6 @@ namespace Rodin::Variational
             static thread_local std::vector<Math::SpatialPoint> s_nodes;
             if (s_nodes.empty())
             {
-              // Choose MaxItGLL = 25 consistently with your other code
               const auto& tet = FeketeTetrahedron<K>::getNodes();
               s_nodes.assign(tet.begin(), tet.end());
             }

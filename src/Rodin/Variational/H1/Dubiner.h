@@ -178,12 +178,11 @@ namespace Rodin::Variational
    * Both @f$ V @f$ and @f$ V^{-1} @f$ are cached in thread-local storage.
    *
    * @tparam K Polynomial degree.
-   * @tparam MaxItGLL Maximum Newton iterations for GLL node computation.
    *
    * @see DubinerTriangle for the modal basis functions.
    * @see FeketeTriangle for the nodal points.
    */
-  template <size_t K, size_t MaxItGLL = 25>
+  template <size_t K>
   class VandermondeTriangle
   {
     public:
