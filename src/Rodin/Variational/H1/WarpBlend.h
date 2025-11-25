@@ -662,20 +662,23 @@ namespace Rodin::Variational
 
             // Map back to 3D tetrahedron barycentric coordinates
             // The zero coordinate stays zero (node stays on face)
-            // Note: l1n is computed for completeness but only l2n, l3n, l4n are used
-            // for reference tetrahedron coordinates (x,y,z) = (L2,L3,L4)
-            [[maybe_unused]] Real l1n = 0;
+            // l1n is assigned for code symmetry but its value is not used since
+            // reference tetrahedron coordinates are (x,y,z) = (L2,L3,L4)
             Real l2n = 0, l3n = 0, l4n = 0;
 
             // Assign new face barycentric coords to the correct tet barycentric coords
-            if (ia == 0) l1n = La_new; else if (ia == 1) l2n = La_new;
-            else if (ia == 2) l3n = La_new; else l4n = La_new;
+            // Note: assignments to index 0 (L1) are no-ops since l1n isn't used
+            if (ia == 1) l2n = La_new;
+            else if (ia == 2) l3n = La_new;
+            else if (ia == 3) l4n = La_new;
 
-            if (ib == 0) l1n = Lb_new; else if (ib == 1) l2n = Lb_new;
-            else if (ib == 2) l3n = Lb_new; else l4n = Lb_new;
+            if (ib == 1) l2n = Lb_new;
+            else if (ib == 2) l3n = Lb_new;
+            else if (ib == 3) l4n = Lb_new;
 
-            if (ic == 0) l1n = Lc_new; else if (ic == 1) l2n = Lc_new;
-            else if (ic == 2) l3n = Lc_new; else l4n = Lc_new;
+            if (ic == 1) l2n = Lc_new;
+            else if (ic == 2) l3n = Lc_new;
+            else if (ic == 3) l4n = Lc_new;
 
             // The i_zero coordinate stays 0 (already initialized to 0)
 

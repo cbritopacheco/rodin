@@ -168,12 +168,12 @@ namespace Rodin::Tests::Unit
     if (std::abs(ny) > std::abs(nx) && std::abs(ny) > std::abs(nz))
       drop_axis = AXIS_Y;
     else if (std::abs(nz) > std::abs(nx))
-      drop_axis = 2;
+      drop_axis = AXIS_Z;
 
     auto project = [drop_axis](Real x, Real y, Real z) {
-      if (drop_axis == 0)
+      if (drop_axis == AXIS_X)
         return std::make_pair(y, z);
-      else if (drop_axis == 1)
+      else if (drop_axis == AXIS_Y)
         return std::make_pair(x, z);
       else
         return std::make_pair(x, y);
