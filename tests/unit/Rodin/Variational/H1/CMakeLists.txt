@@ -53,3 +53,11 @@ target_link_libraries(RodinVariationalH1WarpBlendTest
   GTest::gtest_main
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalH1WarpBlendTest)
+
+add_executable(RodinVariationalH1EdgeConformityTest EdgeConformityTest.cpp)
+target_link_libraries(RodinVariationalH1EdgeConformityTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1EdgeConformityTest)
