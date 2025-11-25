@@ -455,6 +455,7 @@ namespace Rodin::Geometry
         }
         else if (dim == 1)
         {
+          // Local segment orientation: (0 -> 1)
           out.resize(1);
           out[0] = { Polytope::Type::Segment, p };
         }
@@ -478,6 +479,7 @@ namespace Rodin::Geometry
         }
         else if (dim == 1)
         {
+          // Triangle edges in CCW loop: (0->1), (1->2), (2->0)
           out.resize(3);
           out[0] = { Polytope::Type::Segment, { { p(0), p(1) } } };
           out[1] = { Polytope::Type::Segment, { { p(1), p(2) } } };
@@ -485,6 +487,7 @@ namespace Rodin::Geometry
         }
         else if (dim == 2)
         {
+          // Face orientation: (0,1,2) = reference CCW triangle
           out.resize(1);
           out[0] = { Polytope::Type::Triangle, p };
         }
@@ -509,6 +512,7 @@ namespace Rodin::Geometry
         }
         else if (dim == 1)
         {
+          // Quad edges in CCW loop: (0->1->2->3->0)
           out.resize(4);
           out[0] = { Polytope::Type::Segment, { { p(0), p(1) } } };
           out[1] = { Polytope::Type::Segment, { { p(1), p(2) } } };
@@ -517,6 +521,7 @@ namespace Rodin::Geometry
         }
         else if (dim == 2)
         {
+          // Face orientation: (0,1,2,3) = CCW quad
           out.resize(1);
           out[0] = { Polytope::Type::Quadrilateral, p };
         }
@@ -541,6 +546,7 @@ namespace Rodin::Geometry
         }
         else if (dim == 1)
         {
+          // Edge list: (0,1),(0,2),(0,3),(1,2),(1,3),(2,3)
           out.resize(6);
           out[0] = { Polytope::Type::Segment, { { p(0), p(1) } } };
           out[1] = { Polytope::Type::Segment, { { p(0), p(2) } } };
@@ -551,11 +557,12 @@ namespace Rodin::Geometry
         }
         else if (dim == 2)
         {
+          // Faces oriented to match ∂[0,1,2,3] = [1,2,3] - [0,2,3] + [0,1,3] - [0,1,2]
           out.resize(4);
-          out[0] = { Polytope::Type::Triangle, {{ p(0), p(1), p(3) }} };
-          out[1] = { Polytope::Type::Triangle, {{ p(0), p(2), p(1) }} };
-          out[2] = { Polytope::Type::Triangle, {{ p(0), p(3), p(2) }} };
-          out[3] = { Polytope::Type::Triangle, {{ p(1), p(2), p(3) }} };
+          out[0] = { Polytope::Type::Triangle, {{ p(1), p(2), p(3) }} }; // +[1,2,3]
+          out[1] = { Polytope::Type::Triangle, {{ p(0), p(3), p(2) }} }; // -[0,2,3]
+          out[2] = { Polytope::Type::Triangle, {{ p(0), p(1), p(3) }} }; // +[0,1,3]
+          out[3] = { Polytope::Type::Triangle, {{ p(0), p(2), p(1) }} }; // -[0,1,2]
         }
         else if (dim == 3)
         {
@@ -585,6 +592,10 @@ namespace Rodin::Geometry
         }
         else if (dim == 1)
         {
+          // Edges: bottom tri, top tri, verticals
+          // bottom: (0->1),(1->2),(2->0)
+          // top:    (3->4),(4->5),(5->3)
+          // verts:  (0->3),(1->4),(2->5)
           out.resize(9);
           out[0] = { Polytope::Type::Segment, {{ p(0), p(1) }} };
           out[1] = { Polytope::Type::Segment, {{ p(1), p(2) }} };
@@ -598,12 +609,16 @@ namespace Rodin::Geometry
         }
         else if (dim == 2)
         {
+          // Faces: two triangles + three quads, oriented consistently
+          // bottom tri: (0,1,2)
+          // top    tri: (3,5,4) (flipped to match prism boundary orientation)
+          // quads: (0,1,4,3), (1,2,5,4), (2,0,3,5)
           out.resize(5);
-          out[0] = { Polytope::Type::Triangle,     { { p(0), p(2), p(1) } } };
-          out[1] = { Polytope::Type::Quadrilateral,{ { p(0), p(1), p(4), p(3) } } };
-          out[2] = { Polytope::Type::Quadrilateral,{ { p(1), p(2), p(5), p(4) } } };
-          out[3] = { Polytope::Type::Quadrilateral,{ { p(2), p(0), p(3), p(5) } } };
-          out[4] = { Polytope::Type::Triangle,     { { p(3), p(4), p(5) } } };
+          out[0] = { Polytope::Type::Triangle,      {{ p(0), p(1), p(2) }} };
+          out[1] = { Polytope::Type::Quadrilateral, {{ p(0), p(1), p(4), p(3) }} };
+          out[2] = { Polytope::Type::Quadrilateral, {{ p(1), p(2), p(5), p(4) }} };
+          out[3] = { Polytope::Type::Quadrilateral, {{ p(2), p(0), p(3), p(5) }} };
+          out[4] = { Polytope::Type::Triangle,      {{ p(3), p(5), p(4) }} };
         }
         else if (dim == 3)
         {

@@ -1,5 +1,8 @@
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
+# Add H1 subdirectory for H1Element component tests
+add_subdirectory(H1)
+
 add_executable(RodinVariationalP1ElementTest P1ElementTest.cpp)
 target_link_libraries(RodinVariationalP1ElementTest
   PUBLIC

@@ -7,42 +7,6 @@
 #ifndef RODIN_VARIATIONAL_H1_H1ELEMENT_H
 #define RODIN_VARIATIONAL_H1_H1ELEMENT_H
 
-/**
- * @file
- * @brief Pk (piecewise polynomial degree k) finite element implementation.
- *
- * This file provides the PkElement class template for continuous piecewise
- * polynomial finite elements of arbitrary degree k. Pk elements have:
- * - **Lagrange basis functions** of degree k: @f$ \phi_i(x_j) = \delta_{ij} @f$
- * - **DOFs** at Lagrange nodes: vertices, edge points, face points, volume points
- * - **Polynomial gradient** of degree k-1: @f$ \nabla \phi_i @f$ is a polynomial of degree k-1
- * - **Continuity**: C⁰ continuous across element interfaces
- *
- * ## Supported Geometries
- * - **Point**: 1 DOF (trivial element)
- * - **Segment**: (K+1) DOFs - uniformly spaced nodes on [0,1]
- * - **Triangle**: (K+1)(K+2)/2 DOFs - barycentric Lagrange nodes
- * - **Quadrilateral**: (K+1)² DOFs - tensor product of segment nodes
- * - **Tetrahedron**: (K+1)(K+2)(K+3)/6 DOFs - barycentric Lagrange nodes
- * - **Wedge**: (K+1)·(K+1)(K+2)/2 DOFs - tensor product of triangle and segment
- *
- * ## Convergence Properties
- * Pk elements provide k-th order convergence for smooth solutions:
- * - L² error: @f$ O(h^{k+1}) @f$
- * - H¹ error (energy norm): @f$ O(h^k) @f$
- *
- * ## Special Cases
- * - `PkElement<0, Scalar>` is equivalent to P0Element (piecewise constant)
- * - `PkElement<1, Scalar>` is equivalent to P1Element (piecewise linear)
- *
- * ## Implementation Details
- * - **Lagrange polynomials**: Classical formulas for 1D: @f$ L_i^K(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} @f$
- * - **Barycentric coordinates**: For simplices (triangles, tetrahedra), uses barycentric Lagrange basis
- * - **Tensor products**: For structured elements (quadrilaterals, wedges), uses tensor product of lower-dimensional bases
- * - **Thread-local caching**: Geometry-specific caching prevents cross-contamination between element types
- *
- * @see P0Element, P1Element
- */
 
 #include <cstddef>
 #include <array>
@@ -52,24 +16,25 @@
 #include <boost/serialization/access.hpp>
 
 #include "Rodin/Types.h"
-#include "Rodin/Math/Traits.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/Connectivity.h"
 #include "Rodin/Geometry/Polytope.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
-#include "Rodin/Variational/FiniteElementSpace.h"
+#include "Rodin/Variational/H1/Fekete.h"
+#include "Rodin/Variational/H1/GLL.h"
+#include "Rodin/Math/Traits.h"
 
 #include "ForwardDecls.h"
 
 /**
  * @ingroup RodinDirectives
- * @brief Indicates the maximum vector dimension a PkElement
+ * @brief Indicates the maximum vector dimension a H1Element can support.
  */
-#define RODIN_PK_MAX_VECTOR_DIMENSION 16
+#define RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION 16
+
+#define RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE 1e-12
 
 namespace Rodin::FormLanguage
 {
@@ -258,7 +223,6 @@ namespace Rodin::Variational
                * @param r Reference point in the element
                * @return Value of the derivative at point r
                */
-              constexpr
               ReturnType operator()(const Math::SpatialPoint& r) const;
 
             private:
@@ -329,7 +293,6 @@ namespace Rodin::Variational
            * @param r Reference point in the element (typically in [0,1]^d)
            * @return Value of basis function at point r
            */
-          constexpr
           ReturnType operator()(const Math::SpatialPoint& r) const;
 
           /**
@@ -361,15 +324,19 @@ namespace Rodin::Variational
       };
 
       /**
-       * @brief Builds the Lagrange nodes for the element geometry.
+       * @brief Builds the high-order stable nodes for the element geometry.
        *
        * Constructs the positions of DOF nodes based on the geometry type and
-       * polynomial degree. Uses uniform spacing for segments, barycentric
-       * coordinates for simplices, and tensor products for structured elements.
+       * polynomial degree. Uses:
+       * - Segment: Gauss-Lobatto-Legendre (GLL) nodes on [0,1]
+       * - Quadrilateral: Tensor product of 1D GLL nodes
+       * - Triangle: Fekete nodes on reference triangle
+       * - Tetrahedron: Fekete nodes on reference tetrahedron
+       * - Wedge: Tensor product of triangle Fekete nodes with 1D GLL nodes
        */
       static
       const std::vector<Math::SpatialPoint>&
-      getLagrangeNodes(Geometry::Polytope::Type g)
+      getNodes(Geometry::Polytope::Type g)
       {
         switch (g)
         {
@@ -377,7 +344,7 @@ namespace Rodin::Variational
           {
             static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
               std::vector<Math::SpatialPoint> n;
-              n.push_back(Math::SpatialPoint{{0}});
+              n.emplace_back(Math::SpatialPoint{{0}});
               return n;
             }();
             return s_nodes;
@@ -385,96 +352,69 @@ namespace Rodin::Variational
 
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+            {
+              const auto& xi = GLL01<K>::getNodes();
+              s_nodes.reserve(K + 1);
               for (size_t i = 0; i <= K; ++i)
-              {
-                Real t = static_cast<Real>(i) / static_cast<Real>(K);
-                n.push_back(Math::SpatialPoint{{t}});
-              }
-              return n;
-            }();
+                s_nodes.emplace_back(Math::SpatialPoint{{xi[i]}});
+            }
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              for (size_t j = 0; j <= K; ++j)
-              {
-                for (size_t i = 0; i <= K - j; ++i)
-                {
-                  Real s = static_cast<Real>(i) / static_cast<Real>(K);
-                  Real t = static_cast<Real>(j) / static_cast<Real>(K);
-                  n.push_back(Math::SpatialPoint{{s, t}});
-                }
-              }
-              return n;
-            }();
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+            {
+              const auto& tri = FeketeTriangle<K>::getNodes();
+              s_nodes.assign(tri.begin(), tri.end());
+            }
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+            {
+              const auto& xi = GLL01<K>::getNodes();
+              s_nodes.reserve((K + 1) * (K + 1));
               for (size_t j = 0; j <= K; ++j)
-              {
                 for (size_t i = 0; i <= K; ++i)
-                {
-                  Real s = static_cast<Real>(i) / static_cast<Real>(K);
-                  Real t = static_cast<Real>(j) / static_cast<Real>(K);
-                  n.push_back(Math::SpatialPoint{{s, t}});
-                }
-              }
-              return n;
-            }();
+                  s_nodes.emplace_back(Math::SpatialPoint{{xi[i], xi[j]}});
+            }
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              for (size_t k = 0; k <= K; ++k)
-              {
-                for (size_t j = 0; j <= K - k; ++j)
-                {
-                  for (size_t i = 0; i <= K - j - k; ++i)
-                  {
-                    Real r = static_cast<Real>(i) / static_cast<Real>(K);
-                    Real s = static_cast<Real>(j) / static_cast<Real>(K);
-                    Real t = static_cast<Real>(k) / static_cast<Real>(K);
-                    n.push_back(Math::SpatialPoint{{r, s, t}});
-                  }
-                }
-              }
-              return n;
-            }();
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+            {
+              const auto& tet = FeketeTetrahedron<K>::getNodes();
+              s_nodes.assign(tet.begin(), tet.end());
+            }
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
-              std::vector<Math::SpatialPoint> n;
-              // Tensor product of triangle (r,s) and segment (t)
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+            {
+              const auto& tri = FeketeTriangle<K>::getNodes();
+              const auto& z   = GLL01<K>::getNodes();
+
+              s_nodes.reserve(tri.size() * (K + 1));
               for (size_t k = 0; k <= K; ++k)
               {
-                for (size_t j = 0; j <= K; ++j)
-                {
-                  for (size_t i = 0; i <= K - j; ++i)
-                  {
-                    Real r = static_cast<Real>(i) / static_cast<Real>(K);
-                    Real s = static_cast<Real>(j) / static_cast<Real>(K);
-                    Real t = static_cast<Real>(k) / static_cast<Real>(K);
-                    n.push_back(Math::SpatialPoint{{r, s, t}});
-                  }
-                }
+                for (const auto& p : tri)
+                  s_nodes.emplace_back(
+                    Math::SpatialPoint{{p.x(), p.y(), z[k]}});
               }
-              return n;
-            }();
+            }
             return s_nodes;
           }
         }

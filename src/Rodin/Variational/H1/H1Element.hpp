@@ -1,5 +1,5 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2025.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
@@ -11,376 +11,25 @@
 
 #include "H1Element.h"
 
+#include "LagrangeBasis.h"
+#include "Dubiner.h"
+#include "Fekete.h"
+#include "WarpBlend.h"
+#include "GLL.h"
+#include "LegendrePolynomial.h"
+
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 namespace Rodin::Variational
 {
-  namespace Internal
-  {
-    /**
-     * @brief Evaluates Lagrange basis function for 1D.
-     */
-    template <size_t K, class Scalar>
-    constexpr Scalar evaluateLagrange1D(size_t i, Real x)
-    {
-      Scalar result = 1;
-      Real xi = static_cast<Real>(i) / static_cast<Real>(K);
-
-      for (size_t j = 0; j <= K; ++j)
-      {
-        if (j != i)
-        {
-          Real xj = static_cast<Real>(j) / static_cast<Real>(K);
-          result *= (x - xj) / (xi - xj);
-        }
-      }
-      return result;
-    }
-
-    /**
-     * @brief Evaluates derivative of Lagrange basis function for 1D.
-     */
-    template <size_t K, class Scalar>
-    constexpr Scalar evaluateLagrange1DDerivative(size_t i, Real x)
-    {
-      Real xi = static_cast<Real>(i) / static_cast<Real>(K);
-      Scalar result = 0;
-
-      // Derivative using product rule
-      for (size_t m = 0; m <= K; ++m)
-      {
-        if (m != i)
-        {
-          Scalar term = 1;
-          Real xm = static_cast<Real>(m) / static_cast<Real>(K);
-
-          for (size_t j = 0; j <= K; ++j)
-          {
-            if (j != i && j != m)
-            {
-              Real xj = static_cast<Real>(j) / static_cast<Real>(K);
-              term *= (x - xj) / (xi - xj);
-            }
-          }
-          term /= (xi - xm);
-          result += term;
-        }
-      }
-      return result;
-    }
-
-    /**
-     * @brief Evaluates Lagrange basis for triangle using barycentric coordinates.
-     * 
-     * For a triangle with barycentric coordinates (λ0, λ1, λ2), the Pk Lagrange
-     * basis function associated with node (i, j, k) where i+j+k=K is:
-     * φ_{i,j,k}(λ) = L_i^K(λ0) * L_j^K(λ1) * L_k^K(λ2)
-     * 
-     * where L_n^K(λ) = ∏_{m=0}^{n-1} (K*λ - m) / (n - m) for n > 0, and L_0^K = 1
-     */
-    template <size_t K, class Scalar>
-    constexpr Scalar evaluateLagrangeTriangle(size_t i, size_t j, const Math::SpatialPoint& r)
-    {
-      // Barycentric coordinates: λ0 = 1 - x - y, λ1 = x, λ2 = y
-      Real lambda[3];
-      lambda[0] = 1.0 - r.x() - r.y();
-      lambda[1] = r.x();
-      lambda[2] = r.y();
-
-      // Node (i,j) corresponds to Cartesian (i/K, j/K)
-      // which has barycentric (lambda0=(K-i-j)/K, lambda1=i/K, lambda2=j/K)
-      // So basis (i,j) should be L_i^K(lambda1) * L_j^K(lambda2) * L_(K-i-j)^K(lambda0)
-      size_t indices[3] = {K - i - j, i, j};  // Reordered to match lambda[0], lambda[1], lambda[2]
-
-      // Compute product of generalized Lagrange polynomials
-      Scalar result = 1;
-      for (size_t dim = 0; dim < 3; ++dim)
-      {
-        size_t n = indices[dim];
-        if (n == 0)
-          continue;
-
-        Scalar L_n = 1;
-        for (size_t m = 0; m < n; ++m)
-        {
-          L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-          L_n /= static_cast<Real>(m + 1);
-        }
-        result *= L_n;
-      }
-
-      return result;
-    }
-
-    /**
-     * @brief Evaluates derivative of Lagrange basis for triangle.
-     */
-    template <size_t K, class Scalar>
-    constexpr Scalar evaluateLagrangeTriangleDerivative(
-        size_t i, size_t j, size_t deriv_dim, const Math::SpatialPoint& r)
-    {
-      // Barycentric coordinates: λ0 = 1 - x - y, λ1 = x, λ2 = y
-      Real lambda[3];
-      lambda[0] = 1.0 - r.x() - r.y();
-      lambda[1] = r.x();
-      lambda[2] = r.y();
-
-      // Derivatives of barycentric coordinates w.r.t. x and y
-      // dλ0/dx = -1, dλ0/dy = -1
-      // dλ1/dx =  1, dλ1/dy =  0
-      // dλ2/dx =  0, dλ2/dy =  1
-      Real dlambda[3][2] = {{-1, -1}, {1, 0}, {0, 1}};
-
-      size_t indices[3] = {K - i - j, i, j}; // for λ0, λ1, λ2
-
-      Scalar result = 0;
-
-      // Derivative via chain rule over λ_d
-      for (size_t d = 0; d < 3; ++d)
-      {
-        Scalar term = dlambda[d][deriv_dim];
-
-        for (size_t dim = 0; dim < 3; ++dim)
-        {
-          const size_t n = indices[dim];
-
-          if (dim == d)
-          {
-            // Differentiated factor L_n^K(λ_d)
-            if (n == 0)
-            {
-              // L_0 ≡ 1 → derivative 0 → whole contribution for this d is 0
-              term = Scalar(0);
-              break; // no need to consider other dims
-            }
-
-            // d/dλ L_n^K(λ_d)
-            Scalar dL_n = 0;
-            for (size_t p = 0; p < n; ++p)
-            {
-              Scalar prod = static_cast<Real>(K);
-              for (size_t m = 0; m < n; ++m)
-              {
-                if (m != p)
-                {
-                  prod *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                  prod /= static_cast<Real>(m + 1);
-                }
-              }
-              prod /= static_cast<Real>(p + 1);
-              dL_n += prod;
-            }
-            term *= dL_n;
-          }
-          else
-          {
-            // Undifferentiated factor L_n^K(λ_dim)
-            if (n == 0)
-              continue; // factor 1
-
-            Scalar L_n = 1;
-            for (size_t m = 0; m < n; ++m)
-            {
-              L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-              L_n /= static_cast<Real>(m + 1);
-            }
-            term *= L_n;
-          }
-        }
-
-        result += term;
-      }
-
-      return result;
-    }
-
-    /**
-     * @brief Evaluates Lagrange basis for tetrahedron using barycentric coordinates.
-     */
-    template <size_t K, class Scalar>
-    constexpr Scalar evaluateLagrangeTetrahedron(
-        size_t i, size_t j, size_t k, const Math::SpatialPoint& r)
-    {
-      // Barycentric coordinates: λ0 = 1-x-y-z, λ1 = x, λ2 = y, λ3 = z
-      Real lambda[4];
-      lambda[0] = 1.0 - r.x() - r.y() - r.z();
-      lambda[1] = r.x();
-      lambda[2] = r.y();
-      lambda[3] = r.z();
-
-      // Node (i,j,k) corresponds to Cartesian (i/K, j/K, k/K)
-      // which has barycentric (lambda0=(K-i-j-k)/K, lambda1=i/K, lambda2=j/K, lambda3=k/K)
-      // So basis (i,j,k) should be L_i^K(lambda1) * L_j^K(lambda2) * L_k^K(lambda3) * L_(K-i-j-k)^K(lambda0)
-      size_t indices[4] = {K - i - j - k, i, j, k};  // Reordered to match lambda[0], lambda[1], lambda[2], lambda[3]
-
-      Scalar result = 1;
-      for (size_t dim = 0; dim < 4; ++dim)
-      {
-        size_t n = indices[dim];
-        if (n == 0)
-          continue;
-
-        Scalar L_n = 1;
-        for (size_t m = 0; m < n; ++m)
-        {
-          L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-          L_n /= static_cast<Real>(m + 1);
-        }
-        result *= L_n;
-      }
-
-      return result;
-    }
-
-    /**
-     * @brief Evaluates Lagrange basis for wedge (tensor product of triangle and segment).
-     */
-    template <size_t K, class Scalar>
-    constexpr Scalar evaluateLagrangeWedge(
-        size_t i, size_t j, size_t k, const Math::SpatialPoint& r)
-    {
-      // Wedge is a tensor product: triangle (x,y) × segment (z)
-      // For indices (i,j) on triangle with i+j≤K, and k on segment
-
-      // Triangle part using barycentric coordinates
-      Real lambda[3];
-      lambda[0] = 1.0 - r.x() - r.y();
-      lambda[1] = r.x();
-      lambda[2] = r.y();
-
-      size_t tri_indices[3] = {K - i - j, i, j};  // Reordered to match lambda[0], lambda[1], lambda[2]
-
-      Scalar tri_result = 1;
-      for (size_t dim = 0; dim < 3; ++dim)
-      {
-        size_t n = tri_indices[dim];
-        if (n == 0)
-          continue;
-
-        Scalar L_n = 1;
-        for (size_t m = 0; m < n; ++m)
-        {
-          L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-          L_n /= static_cast<Real>(m + 1);
-        }
-        tri_result *= L_n;
-      }
-
-      // Segment part (1D Lagrange)
-      Scalar seg_result = evaluateLagrange1D<K, Scalar>(k, r.z());
-
-      return tri_result * seg_result;
-    }
-
-    /**
-     * @brief Evaluates derivative of Lagrange basis for tetrahedron.
-     */
-    template <size_t K, class Scalar>
-    constexpr Scalar evaluateLagrangeTetrahedronDerivative(
-        size_t i, size_t j, size_t k, size_t deriv_dim, const Math::SpatialPoint& r)
-    {
-      // Barycentric coordinates: λ0 = 1-x-y-z, λ1 = x, λ2 = y, λ3 = z
-      Real lambda[4];
-      lambda[0] = 1.0 - r.x() - r.y() - r.z();
-      lambda[1] = r.x();
-      lambda[2] = r.y();
-      lambda[3] = r.z();
-
-      // Derivatives:
-      // dλ0/dx = -1, dλ0/dy = -1, dλ0/dz = -1
-      // dλ1/dx =  1, dλ1/dy =  0, dλ1/dz =  0
-      // dλ2/dx =  0, dλ2/dy =  1, dλ2/dz =  0
-      // dλ3/dx =  0, dλ3/dy =  0, dλ3/dz =  1
-      Real dlambda[4][3] = {{-1, -1, -1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-
-      size_t indices[4] = {K - i - j - k, i, j, k}; // for λ0, λ1, λ2, λ3
-
-      Scalar result = 0;
-
-      for (size_t d = 0; d < 4; ++d)
-      {
-        Scalar term = dlambda[d][deriv_dim];
-
-        for (size_t dim = 0; dim < 4; ++dim)
-        {
-          const size_t n = indices[dim];
-
-          if (dim == d)
-          {
-            // Differentiated factor L_n^K(λ_d)
-            if (n == 0)
-            {
-              // L_0 ≡ 1 → derivative 0 → whole contribution for this d is 0
-              term = Scalar(0);
-              break;
-            }
-
-            Scalar dL_n = 0;
-            for (size_t p = 0; p < n; ++p)
-            {
-              Scalar prod = static_cast<Real>(K);
-              for (size_t m = 0; m < n; ++m)
-              {
-                if (m != p)
-                {
-                  prod *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                  prod /= static_cast<Real>(m + 1);
-                }
-              }
-              prod /= static_cast<Real>(p + 1);
-              dL_n += prod;
-            }
-            term *= dL_n;
-          }
-          else
-          {
-            // Undifferentiated factor L_n^K(λ_dim)
-            if (n == 0)
-              continue; // factor 1
-
-            Scalar L_n = 1;
-            for (size_t m = 0; m < n; ++m)
-            {
-              L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-              L_n /= static_cast<Real>(m + 1);
-            }
-            term *= L_n;
-          }
-        }
-
-        result += term;
-      }
-
-      return result;
-    }
-
-    /**
-     * @brief Evaluates derivative of Lagrange basis for wedge.
-     */
-    template <size_t K, class Scalar>
-    constexpr Scalar evaluateLagrangeWedgeDerivative(
-        size_t i, size_t j, size_t k, size_t deriv_dim, const Math::SpatialPoint& r)
-    {
-      if (deriv_dim < 2)
-      {
-        // Derivative w.r.t. x or y (triangle part)
-        Scalar tri_deriv = evaluateLagrangeTriangleDerivative<K, Scalar>(i, j, deriv_dim, r);
-        Scalar seg_val = evaluateLagrange1D<K, Scalar>(k, r.z());
-        return tri_deriv * seg_val;
-      }
-      else
-      {
-        // Derivative w.r.t. z (segment part)
-        Scalar tri_val = evaluateLagrangeTriangle<K, Scalar>(i, j, r);
-        Scalar seg_deriv = evaluateLagrange1DDerivative<K, Scalar>(k, r.z());
-        return tri_val * seg_deriv;
-      }
-    }
-  }
-
   template <size_t K, class Scalar>
   constexpr
   const Math::SpatialPoint& H1Element<K, Scalar>::getNode(size_t i) const
   {
-    return getLagrangeNodes(this->getGeometry())[i];
+    return this->getNodes(this->getGeometry())[i];
   }
 
   template <size_t K, class Scalar>
@@ -560,91 +209,128 @@ namespace Rodin::Variational
   }
 
   template <size_t K, class Scalar>
-  constexpr
-  Scalar H1Element<K, Scalar>::BasisFunction::operator()(const Math::SpatialPoint& r) const
+  Scalar H1Element<K, Scalar>::BasisFunction::operator()(
+      const Math::SpatialPoint& r) const
   {
     switch (m_g)
     {
       case Geometry::Polytope::Type::Point:
       {
-        return 1;
+        return Scalar(1);
       }
       case Geometry::Polytope::Type::Segment:
       {
-        return Internal::evaluateLagrange1D<K, Scalar>(m_local, r.x());
+        // Canonical [0,1] segment with GLL01 nodes
+        return LagrangeBasisSegment<K>::getBasis(m_local, r.value());
       }
       case Geometry::Polytope::Type::Triangle:
       {
-        // Use barycentric coordinates for triangle
-        // Node ordering: (i,j) with i+j≤K, ordered by j then i
-        size_t idx = 0;
-        for (size_t j = 0; j <= K; ++j)
-        {
-          for (size_t i = 0; i <= K - j; ++i)
-          {
-            if (idx == m_local)
+        // Modal Dubiner basis + Vandermonde on Fekete nodes
+        const auto& inverse = VandermondeTriangle<K>::getInverse();
+
+        Real rc, sc;
+        DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
+
+        Scalar result = Scalar(0);
+        size_t mode_idx = 0;
+
+        Rodin::Utility::ForIndex<K + 1>(
+            [&](auto p_idx)
             {
-              return Internal::evaluateLagrangeTriangle<K, Scalar>(i, j, r);
-            }
-            idx++;
-          }
-        }
-        return Math::nan<Scalar>();
+              constexpr size_t P = p_idx.value;
+              Rodin::Utility::ForIndex<K + 1 - P>(
+                  [&](auto q_idx)
+                  {
+                    constexpr size_t Q = q_idx.value;
+                    Real psi;
+                    DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
+                    result += inverse(mode_idx, m_local) * psi;
+                    ++mode_idx;
+                  });
+            });
+
+        return result;
       }
       case Geometry::Polytope::Type::Quadrilateral:
       {
-        // Tensor product of 1D Lagrange basis
-        size_t j_idx = m_local / (K + 1);
-        size_t i_idx = m_local % (K + 1);
-
-        // Initialize to ensure no uninitialized warnings
-        const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-        if (dim < 2)
-          return Math::nan<Scalar>();
-
-        return Internal::evaluateLagrange1D<K, Scalar>(i_idx, r.x()) *
-               Internal::evaluateLagrange1D<K, Scalar>(j_idx, r.y());
+        // Tensor product GLL01 × GLL01 (Lagrange)
+        const size_t j_idx = m_local / (K + 1);
+        const size_t i_idx = m_local % (K + 1);
+        return LagrangeBasisQuadrilateral<K>::getBasis(
+            i_idx, j_idx, r.x(), r.y());
       }
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        // Node ordering: (i,j,k) with i+j+k≤K, ordered by k, then j, then i
-        size_t idx = 0;
-        for (size_t k = 0; k <= K; ++k)
-        {
-          for (size_t j = 0; j <= K - k; ++j)
-          {
-            for (size_t i = 0; i <= K - j - k; ++i)
+        // Modal Dubiner basis + Vandermonde on tetra Fekete nodes
+        const auto& inverse = VandermondeTetrahedron<K>::getInverse();
+
+        Real ac, bc, cc;
+        DubinerTetrahedron<K>::getCollapsed(
+            ac, bc, cc, r.x(), r.y(), r.z());
+
+        Real result = 0;
+        size_t mode_idx = 0;
+
+        Rodin::Utility::ForIndex<K + 1>(
+            [&](auto p_idx)
             {
-              if (idx == m_local)
-              {
-                return Internal::evaluateLagrangeTetrahedron<K, Scalar>(i, j, k, r);
-              }
-              idx++;
-            }
-          }
-        }
-        return Math::nan<Scalar>();
+              constexpr size_t P = p_idx.value;
+              Rodin::Utility::ForIndex<K + 1 - P>(
+                  [&](auto q_idx)
+                  {
+                    constexpr size_t Q = q_idx.value;
+                    Rodin::Utility::ForIndex<K + 1 - P - Q>(
+                        [&](auto r_idx)
+                        {
+                          constexpr size_t R = r_idx.value;
+                          Real psi;
+                          DubinerTetrahedron<K>::template getBasis<P, Q, R>(
+                              psi, ac, bc, cc);
+                          result += inverse(mode_idx, m_local) * psi;
+                          ++mode_idx;
+                        });
+                  });
+            });
+
+        return result;
       }
       case Geometry::Polytope::Type::Wedge:
       {
-        // Node ordering: triangle nodes (i,j) with i+j≤K, then segment node k
-        // Ordered by k, then j, then i
-        size_t idx = 0;
-        for (size_t k = 0; k <= K; ++k)
-        {
-          for (size_t j = 0; j <= K; ++j)
-          {
-            for (size_t i = 0; i <= K - j; ++i)
+        // Number of triangle DOFs (Fekete triangle)
+        constexpr size_t ntri = FeketeTriangle<K>::Count; // same as FeketeTriangle<K>::Count
+
+        const size_t k     = m_local / ntri; // z-index, 0..K
+        const size_t alpha = m_local % ntri; // triangle node index
+
+        // --- triangle factor: nodal basis on Fekete nodes ---
+        const auto& Vinv = VandermondeTriangle<K>::getInverse();
+
+        Real rc, sc;
+        DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
+
+        Scalar tri_val = Scalar(0);
+        size_t mode_idx = 0;
+
+        Rodin::Utility::ForIndex<K + 1>(
+            [&](auto p_idx)
             {
-              if (idx == m_local)
-              {
-                return Internal::evaluateLagrangeWedge<K, Scalar>(i, j, k, r);
-              }
-              idx++;
-            }
-          }
-        }
-        return Math::nan<Scalar>();
+              constexpr size_t P = p_idx.value;
+              Rodin::Utility::ForIndex<K + 1 - P>(
+                  [&](auto q_idx)
+                  {
+                    constexpr size_t Q = q_idx.value;
+                    Real psi;
+                    DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
+                    tri_val += Vinv(mode_idx, alpha) * psi;
+                    ++mode_idx;
+                  });
+            });
+
+        // --- segment factor in z (GLL01, Lagrange) ---
+        const Real z = r(2);
+        const Real seg_val = LagrangeBasisSegment<K>::getBasis(k, z);
+
+        return tri_val * seg_val;
       }
     }
 
@@ -653,7 +339,6 @@ namespace Rodin::Variational
 
   template <size_t K, class Scalar>
   template <size_t Order>
-  constexpr
   Scalar H1Element<K, Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
       const Math::SpatialPoint& r) const
   {
@@ -667,94 +352,288 @@ namespace Rodin::Variational
       {
         case Geometry::Polytope::Type::Point:
         {
-          return 0;
+          return Scalar(0);
         }
+
         case Geometry::Polytope::Type::Segment:
         {
+          // ∂φ_i / ∂x on [0,1] with GLL01 nodes
           assert(m_i == 0);
-          return Internal::evaluateLagrange1DDerivative<K, Scalar>(m_local, r.x());
+          return LagrangeBasisSegment<K>::getDerivative(
+              m_local, r.value());
         }
+
         case Geometry::Polytope::Type::Triangle:
         {
-          // Find the (i,j) indices for this local DOF
-          size_t idx = 0;
-          for (size_t j = 0; j <= K; ++j)
-          {
-            for (size_t i = 0; i <= K - j; ++i)
-            {
-              if (idx == m_local)
+          // Dubiner modal gradients + chain rule (r,s) → (x,y)
+          const auto& Vinv = VandermondeTriangle<K>::getInverse();
+
+          Scalar rc, sc;
+          DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
+
+          const Scalar x = r.x();
+          const Scalar y = r.y();
+          const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+
+          Scalar result = Scalar(0);
+          size_t mode_idx = 0;
+
+          Rodin::Utility::ForIndex<K + 1>(
+              [&](auto p_idx)
               {
-                return Internal::evaluateLagrangeTriangleDerivative<K, Scalar>(i, j, m_i, r);
-              }
-              idx++;
-            }
-          }
-          return 0;
+                constexpr size_t P = p_idx.value;
+                Rodin::Utility::ForIndex<K + 1 - P>(
+                    [&](auto q_idx)
+                    {
+                      constexpr size_t Q = q_idx.value;
+
+                      Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
+                      DubinerTriangle<K>::template getGradient<P, Q>(
+                          dpsi_dr, dpsi_ds, rc, sc);
+
+                      Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
+
+                      // r = 2x/(1-y) - 1, s = 2y - 1
+                      if (Math::abs(Scalar(1) - y) > eps)
+                      {
+                        const Scalar denom = Scalar(1) - y;
+                        const Scalar dr_dx = Scalar(2) / denom;
+                        const Scalar dr_dy =
+                            Scalar(2) * x / (denom * denom);
+                        const Scalar ds_dx = Scalar(0);
+                        const Scalar ds_dy = Scalar(2);
+
+                        dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
+                        dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
+                      }
+
+                      if (m_i == 0)      // ∂/∂x
+                        result += Vinv(mode_idx, m_local) * dpsi_dx;
+                      else if (m_i == 1) // ∂/∂y
+                        result += Vinv(mode_idx, m_local) * dpsi_dy;
+
+                      ++mode_idx;
+                    });
+              });
+
+          return result;
         }
+
         case Geometry::Polytope::Type::Quadrilateral:
         {
-          // Tensor product derivative
-          size_t j_idx = m_local / (K + 1);
-          size_t i_idx = m_local % (K + 1);
+          // Tensor product Lagrange on GLL01 × GLL01
+          const size_t j_idx = m_local / (K + 1);
+          const size_t i_idx = m_local % (K + 1);
 
-          if (m_i == 0) // d/dx
+          if (m_i == 0) // ∂/∂x
           {
-            return Internal::evaluateLagrange1DDerivative<K, Scalar>(i_idx, r.x()) *
-                   Internal::evaluateLagrange1D<K, Scalar>(j_idx, r.y());
+            return LagrangeBasisQuadrilateral<K>::getDerivative(
+                       i_idx, j_idx, 0, r.x(), r.y());
           }
-          else if (m_i == 1) // d/dy
+          else if (m_i == 1) // ∂/∂y
           {
-            return Internal::evaluateLagrange1D<K, Scalar>(i_idx, r.x()) *
-                   Internal::evaluateLagrange1DDerivative<K, Scalar>(j_idx, r.y());
+            return LagrangeBasisQuadrilateral<K>::getDerivative(
+                       i_idx, j_idx, 1, r.x(), r.y());
           }
-          return 0;
+          return Scalar(0);
         }
+
         case Geometry::Polytope::Type::Tetrahedron:
         {
-          // Find (i,j,k) indices for this local DOF
-          size_t idx = 0;
-          for (size_t k = 0; k <= K; ++k)
-          {
-            for (size_t j = 0; j <= K - k; ++j)
-            {
-              for (size_t i = 0; i <= K - j - k; ++i)
+          // Dubiner modal gradients + chain rule (a,b,c) → (x,y,z)
+          const auto& Vinv = VandermondeTetrahedron<K>::getInverse();
+
+          Scalar ac, bc, cc;
+          DubinerTetrahedron<K>::getCollapsed(
+              ac, bc, cc, r.x(), r.y(), r.z());
+
+          const Scalar x = r.x();
+          const Scalar y = r.y();
+          const Scalar z = r.z();
+          const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+
+          Scalar result = Scalar(0);
+          size_t mode_idx = 0;
+
+          Rodin::Utility::ForIndex<K + 1>(
+              [&](auto p_idx)
               {
-                if (idx == m_local)
-                {
-                  return Internal::evaluateLagrangeTetrahedronDerivative<K, Scalar>(i, j, k, m_i, r);
-                }
-                idx++;
-              }
-            }
-          }
-          return 0;
+                constexpr size_t P = p_idx.value;
+                Rodin::Utility::ForIndex<K + 1 - P>(
+                    [&](auto q_idx)
+                    {
+                      constexpr size_t Q = q_idx.value;
+                      Rodin::Utility::ForIndex<K + 1 - P - Q>(
+                          [&](auto r_idx)
+                          {
+                            constexpr size_t R = r_idx.value;
+
+                            Scalar dpsi_da = Scalar(0);
+                            Scalar dpsi_db = Scalar(0);
+                            Scalar dpsi_dc = Scalar(0);
+                            DubinerTetrahedron<K>::template getGradient<P, Q, R>(
+                                dpsi_da, dpsi_db, dpsi_dc, ac, bc, cc);
+
+                            Scalar dpsi_dx = Scalar(0);
+                            Scalar dpsi_dy = Scalar(0);
+                            Scalar dpsi_dz = Scalar(0);
+
+                            const Scalar denom2 = Scalar(1) - z;       // 1 - z
+                            const Scalar denom3 = Scalar(1) - y - z;   // 1 - y - z
+
+                            if (Math::abs(denom2) > eps &&
+                                Math::abs(denom3) > eps)
+                            {
+                              // a = 2x / (1 - y - z) - 1
+                              const Scalar da_dx = Scalar(2) / denom3;
+                              const Scalar da_dy =
+                                  Scalar(2) * x / (denom3 * denom3);
+                              const Scalar da_dz = da_dy;
+
+                              // b = 2y / (1 - z) - 1
+                              const Scalar db_dx = Scalar(0);
+                              const Scalar db_dy = Scalar(2) / denom2;
+                              const Scalar db_dz =
+                                  Scalar(2) * y / (denom2 * denom2);
+
+                              // c = 2z - 1
+                              const Scalar dc_dx = Scalar(0);
+                              const Scalar dc_dy = Scalar(0);
+                              const Scalar dc_dz = Scalar(2);
+
+                              dpsi_dx = dpsi_da * da_dx
+                                      + dpsi_db * db_dx
+                                      + dpsi_dc * dc_dx;
+
+                              dpsi_dy = dpsi_da * da_dy
+                                      + dpsi_db * db_dy
+                                      + dpsi_dc * dc_dy;
+
+                              dpsi_dz = dpsi_da * da_dz
+                                      + dpsi_db * db_dz
+                                      + dpsi_dc * dc_dz;
+                            }
+
+                            if (m_i == 0)      // ∂/∂x
+                              result += Vinv(mode_idx, m_local) * dpsi_dx;
+                            else if (m_i == 1) // ∂/∂y
+                              result += Vinv(mode_idx, m_local) * dpsi_dy;
+                            else if (m_i == 2) // ∂/∂z
+                              result += Vinv(mode_idx, m_local) * dpsi_dz;
+
+                            ++mode_idx;
+                          });
+                    });
+              });
+
+          return result;
         }
+
         case Geometry::Polytope::Type::Wedge:
         {
-          // Find (i,j,k) indices for this local DOF
-          size_t idx = 0;
-          for (size_t k = 0; k <= K; ++k)
+          constexpr size_t ntri = FeketeTriangle<K>::Count;
+
+          const size_t k = m_local / ntri;
+          const size_t alpha = m_local % ntri;
+
+          const Real z = r(2);
+
+          if (m_i < 2) // ∂/∂x or ∂/∂y
           {
-            for (size_t j = 0; j <= K; ++j)
-            {
-              for (size_t i = 0; i <= K - j; ++i)
-              {
-                if (idx == m_local)
+            // --- triangle gradient (same as Triangle case, but index = alpha) ---
+            const auto& Vinv = VandermondeTriangle<K>::getInverse();
+
+            Scalar rc, sc;
+            DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
+
+            const Scalar x   = r.x();
+            const Scalar y   = r.y();
+            const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+
+            Scalar tri_deriv = Scalar(0);
+            size_t mode_idx  = 0;
+
+            Rodin::Utility::ForIndex<K + 1>(
+                [&](auto p_idx)
                 {
-                  return Internal::evaluateLagrangeWedgeDerivative<K, Scalar>(i, j, k, m_i, r);
-                }
-                idx++;
-              }
-            }
+                  constexpr size_t P = p_idx.value;
+                  Rodin::Utility::ForIndex<K + 1 - P>(
+                      [&](auto q_idx)
+                      {
+                        constexpr size_t Q = q_idx.value;
+
+                        Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
+                        DubinerTriangle<K>::template getGradient<P, Q>(
+                            dpsi_dr, dpsi_ds, rc, sc);
+
+                        Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
+
+                        // r = 2x/(1-y) - 1, s = 2y - 1
+                        if (Math::abs(Scalar(1) - y) > eps)
+                        {
+                          const Scalar denom = Scalar(1) - y;
+                          const Scalar dr_dx = Scalar(2) / denom;
+                          const Scalar dr_dy =
+                              Scalar(2) * x / (denom * denom);
+                          const Scalar ds_dx = Scalar(0);
+                          const Scalar ds_dy = Scalar(2);
+
+                          dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
+                          dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
+                        }
+
+                        if (m_i == 0)      // ∂/∂x
+                          tri_deriv += Vinv(mode_idx, alpha) * dpsi_dx;
+                        else if (m_i == 1) // ∂/∂y
+                          tri_deriv += Vinv(mode_idx, alpha) * dpsi_dy;
+
+                        ++mode_idx;
+                      });
+                });
+
+            // --- segment value in z ---
+            const Real seg_val = LagrangeBasisSegment<K>::getBasis(k, z);
+            return tri_deriv * seg_val;
           }
-          return 0;
+          else // m_i == 2 → ∂/∂z
+          {
+            // --- triangle value (same as in BasisFunction wedge case) ---
+            const auto& Vinv = VandermondeTriangle<K>::getInverse();
+
+            Real rc, sc;
+            DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
+
+            Scalar tri_val = Scalar(0);
+            size_t mode_idx = 0;
+
+            Rodin::Utility::ForIndex<K + 1>(
+                [&](auto p_idx)
+                {
+                  constexpr size_t P = p_idx.value;
+                  Rodin::Utility::ForIndex<K + 1 - P>(
+                      [&](auto q_idx)
+                      {
+                        constexpr size_t Q = q_idx.value;
+                        Real psi;
+                        DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
+                        tri_val += Vinv(mode_idx, alpha) * psi;
+                        ++mode_idx;
+                      });
+                });
+
+            // --- 1D derivative in z ---
+            const Real dseg = LagrangeBasisSegment<K>::getDerivative(k, z);
+            return tri_val * dseg;
+          }
         }
       }
-      return 0;
+
+      return Scalar(0);
     }
     else
     {
-      return 0; // Higher order derivatives
+      // Higher-order derivatives not implemented
+      return Scalar(0);
     }
   }
 }

@@ -18,6 +18,7 @@
 #include <boost/bimap/unordered_set_of.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/split_member.hpp>
+
 #include "Rodin/Serialization/UnorderedMap.h"
 
 #include "Rodin/Array.h"
