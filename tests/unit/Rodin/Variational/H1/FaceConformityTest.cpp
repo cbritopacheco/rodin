@@ -857,4 +857,151 @@ namespace Rodin::Tests::Unit
         0.0, 0.0, 1.0);
     EXPECT_EQ(wedge_face.size(), 16u);
   }
+
+  //==========================================================================
+  // Very high-order conformity tests (K = 15)
+  //==========================================================================
+
+  TEST(FaceConformity, Tetrahedron_BaseFace_MatchesTriangle_K15)
+  {
+    auto tet_face = extractTetrahedronTriangleFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    auto tri_nodes = extractTriangleNodes<15>();
+
+    compareFaceCoordinates(tet_face, tri_nodes,
+                           "Tetrahedron base face K=15", "Triangle K=15");
+  }
+
+  TEST(FaceConformity, Tetrahedron_AllFaces_MatchTriangle_K15)
+  {
+    auto tri_nodes = extractTriangleNodes<15>();
+
+    // Base face (z=0)
+    auto tet_base = extractTetrahedronTriangleFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+    compareFaceCoordinates(tet_base, tri_nodes,
+                           "Tetrahedron base face K=15", "Triangle K=15");
+
+    // Face (y=0)
+    auto tet_y0 = extractTetrahedronTriangleFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0);
+    compareFaceCoordinates(tet_y0, tri_nodes,
+                           "Tetrahedron face (y=0) K=15", "Triangle K=15");
+
+    // Face (x=0)
+    auto tet_x0 = extractTetrahedronTriangleFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0);
+    compareFaceCoordinates(tet_x0, tri_nodes,
+                           "Tetrahedron face (x=0) K=15", "Triangle K=15");
+
+    // Diagonal face
+    auto tet_diag = extractTetrahedronTriangleFaceNodes<15>(
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0);
+    compareFaceCoordinates(tet_diag, tri_nodes,
+                           "Tetrahedron diagonal face K=15", "Triangle K=15");
+  }
+
+  TEST(FaceConformity, Wedge_TriangleFaces_MatchTriangle_K15)
+  {
+    auto tri_nodes = extractTriangleNodes<15>();
+
+    // Bottom face (z=0)
+    auto wedge_bottom = extractWedgeTriangleFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+    compareFaceCoordinates(wedge_bottom, tri_nodes,
+                           "Wedge bottom face K=15", "Triangle K=15");
+
+    // Top face (z=1)
+    auto wedge_top = extractWedgeTriangleFaceNodes<15>(
+        0.0, 0.0, 1.0,
+        1.0, 0.0, 1.0,
+        0.0, 1.0, 1.0);
+    compareFaceCoordinates(wedge_top, tri_nodes,
+                           "Wedge top face K=15", "Triangle K=15");
+  }
+
+  TEST(FaceConformity, Tetrahedron_Wedge_TriangleFaces_Match_K15)
+  {
+    auto tet_face = extractTetrahedronTriangleFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    auto wedge_face = extractWedgeTriangleFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+
+    compareFaceCoordinates(tet_face, wedge_face,
+                           "Tetrahedron triangle face K=15", "Wedge triangle face K=15");
+  }
+
+  TEST(FaceConformity, Wedge_QuadFaces_MatchQuadrilateral_K15)
+  {
+    auto quad_nodes = extractQuadrilateralNodes<15>();
+
+    // y=0 face
+    auto wedge_y0 = extractWedgeQuadFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0);
+    compareFaceCoordinates(wedge_y0, quad_nodes,
+                           "Wedge quad face (y=0) K=15", "Quadrilateral K=15");
+
+    // x=0 face
+    auto wedge_x0 = extractWedgeQuadFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 1.0, 1.0,
+        0.0, 0.0, 1.0);
+    compareFaceCoordinates(wedge_x0, quad_nodes,
+                           "Wedge quad face (x=0) K=15", "Quadrilateral K=15");
+  }
+
+  TEST(FaceConformity, TriangleFaceNodeCount_K15)
+  {
+    // Triangle should have (K+1)(K+2)/2 = 136 nodes at K=15
+    auto tri = extractTriangleNodes<15>();
+    EXPECT_EQ(tri.size(), 136u);
+
+    auto tet_face = extractTetrahedronTriangleFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+    EXPECT_EQ(tet_face.size(), 136u);
+
+    auto wedge_face = extractWedgeTriangleFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0);
+    EXPECT_EQ(wedge_face.size(), 136u);
+  }
+
+  TEST(FaceConformity, QuadFaceNodeCount_K15)
+  {
+    // Quadrilateral should have (K+1)^2 = 256 nodes at K=15
+    auto quad = extractQuadrilateralNodes<15>();
+    EXPECT_EQ(quad.size(), 256u);
+
+    auto wedge_face = extractWedgeQuadFaceNodes<15>(
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0);
+    EXPECT_EQ(wedge_face.size(), 256u);
+  }
 }
