@@ -22,8 +22,95 @@ using namespace Rodin::Variational;
 namespace Rodin::Tests::Unit
 {
   //==========================================================================
+  // Common constants for edge extraction
+  //==========================================================================
+
+  // Tolerance for geometric comparisons (whether a point is on an edge)
+  constexpr Real EDGE_TOL = 1e-10;
+
+  // Epsilon for division by zero protection
+  const Real EDGE_EPS = std::numeric_limits<Real>::epsilon() * 100;
+
+  //==========================================================================
   // Helper functions for extracting edge nodes
   //==========================================================================
+
+  // Compute parameter t along edge from (start) to (end) for point p
+  // Returns t in [0,1] if point is on edge, or NaN if edge is degenerate
+  inline Real computeEdgeParameter2D(
+      Real px, Real py,
+      Real x0, Real y0,
+      Real x1, Real y1)
+  {
+    Real dx = x1 - x0;
+    Real dy = y1 - y0;
+
+    Real t;
+    if (std::abs(dx) > EDGE_EPS && std::abs(dx) >= std::abs(dy))
+    {
+      t = (px - x0) / dx;
+    }
+    else if (std::abs(dy) > EDGE_EPS)
+    {
+      t = (py - y0) / dy;
+    }
+    else
+    {
+      return std::numeric_limits<Real>::quiet_NaN();
+    }
+
+    // Verify point is actually on the line
+    Real expected_x = x0 + t * dx;
+    Real expected_y = y0 + t * dy;
+
+    if (std::abs(px - expected_x) < EDGE_TOL && std::abs(py - expected_y) < EDGE_TOL)
+    {
+      return t;
+    }
+    return std::numeric_limits<Real>::quiet_NaN();
+  }
+
+  // Compute parameter t along edge in 3D
+  inline Real computeEdgeParameter3D(
+      Real px, Real py, Real pz,
+      Real x0, Real y0, Real z0,
+      Real x1, Real y1, Real z1)
+  {
+    Real dx = x1 - x0;
+    Real dy = y1 - y0;
+    Real dz = z1 - z0;
+
+    Real t;
+    if (std::abs(dx) > EDGE_EPS && std::abs(dx) >= std::abs(dy) && std::abs(dx) >= std::abs(dz))
+    {
+      t = (px - x0) / dx;
+    }
+    else if (std::abs(dy) > EDGE_EPS && std::abs(dy) >= std::abs(dz))
+    {
+      t = (py - y0) / dy;
+    }
+    else if (std::abs(dz) > EDGE_EPS)
+    {
+      t = (pz - z0) / dz;
+    }
+    else
+    {
+      return std::numeric_limits<Real>::quiet_NaN();
+    }
+
+    // Verify point is actually on the line
+    Real expected_x = x0 + t * dx;
+    Real expected_y = y0 + t * dy;
+    Real expected_z = z0 + t * dz;
+
+    if (std::abs(px - expected_x) < EDGE_TOL &&
+        std::abs(py - expected_y) < EDGE_TOL &&
+        std::abs(pz - expected_z) < EDGE_TOL)
+    {
+      return t;
+    }
+    return std::numeric_limits<Real>::quiet_NaN();
+  }
 
   // Extract 1D coordinates of nodes lying on a specific edge
   // Returns sorted coordinates in [0,1]
@@ -44,47 +131,15 @@ namespace Rodin::Tests::Unit
   template <size_t K>
   std::vector<Real> extractTriangleEdgeNodes(Real x0, Real y0, Real x1, Real y1)
   {
-    const Real tol = 1e-10;
-    const Real eps = std::numeric_limits<Real>::epsilon() * 100;
     std::vector<Real> coords;
     const auto& nodes = FeketeTriangle<K>::getNodes();
 
     for (const auto& node : nodes)
     {
-      Real px = node.x();
-      Real py = node.y();
-
-      // Check if point lies on the line segment from (x0,y0) to (x1,y1)
-      Real dx = x1 - x0;
-      Real dy = y1 - y0;
-      Real len = std::sqrt(dx*dx + dy*dy);
-
-      // Parameter t along the edge - use dimension with largest delta
-      Real t;
-      if (std::abs(dx) > eps && std::abs(dx) >= std::abs(dy))
+      Real t = computeEdgeParameter2D(node.x(), node.y(), x0, y0, x1, y1);
+      if (!std::isnan(t) && t >= -EDGE_TOL && t <= 1.0 + EDGE_TOL)
       {
-        t = (px - x0) / dx;
-      }
-      else if (std::abs(dy) > eps)
-      {
-        t = (py - y0) / dy;
-      }
-      else
-      {
-        // Edge is degenerate (single point)
-        continue;
-      }
-
-      // Check if t is in [0,1] and point is on the line
-      if (t >= -tol && t <= 1.0 + tol)
-      {
-        Real expected_x = x0 + t * dx;
-        Real expected_y = y0 + t * dy;
-
-        if (std::abs(px - expected_x) < tol && std::abs(py - expected_y) < tol)
-        {
-          coords.push_back(std::max(0.0, std::min(1.0, t)));
-        }
+        coords.push_back(std::max(0.0, std::min(1.0, t)));
       }
     }
 
@@ -96,42 +151,15 @@ namespace Rodin::Tests::Unit
   template <size_t K>
   std::vector<Real> extractQuadrilateralEdgeNodes(Real x0, Real y0, Real x1, Real y1)
   {
-    const Real tol = 1e-10;
-    const Real eps = std::numeric_limits<Real>::epsilon() * 100;
     std::vector<Real> coords;
     const auto& nodes = H1Element<K, Real>::getNodes(Polytope::Type::Quadrilateral);
 
     for (const auto& node : nodes)
     {
-      Real px = node.x();
-      Real py = node.y();
-
-      Real dx = x1 - x0;
-      Real dy = y1 - y0;
-
-      Real t;
-      if (std::abs(dx) > eps && std::abs(dx) >= std::abs(dy))
+      Real t = computeEdgeParameter2D(node.x(), node.y(), x0, y0, x1, y1);
+      if (!std::isnan(t) && t >= -EDGE_TOL && t <= 1.0 + EDGE_TOL)
       {
-        t = (px - x0) / dx;
-      }
-      else if (std::abs(dy) > eps)
-      {
-        t = (py - y0) / dy;
-      }
-      else
-      {
-        continue;
-      }
-
-      if (t >= -tol && t <= 1.0 + tol)
-      {
-        Real expected_x = x0 + t * dx;
-        Real expected_y = y0 + t * dy;
-
-        if (std::abs(px - expected_x) < tol && std::abs(py - expected_y) < tol)
-        {
-          coords.push_back(std::max(0.0, std::min(1.0, t)));
-        }
+        coords.push_back(std::max(0.0, std::min(1.0, t)));
       }
     }
 
@@ -145,52 +173,15 @@ namespace Rodin::Tests::Unit
       Real x0, Real y0, Real z0,
       Real x1, Real y1, Real z1)
   {
-    const Real tol = 1e-10;
-    const Real eps = std::numeric_limits<Real>::epsilon() * 100;
     std::vector<Real> coords;
     const auto& nodes = FeketeTetrahedron<K>::getNodes();
 
     for (const auto& node : nodes)
     {
-      Real px = node.x();
-      Real py = node.y();
-      Real pz = node.z();
-
-      Real dx = x1 - x0;
-      Real dy = y1 - y0;
-      Real dz = z1 - z0;
-
-      // Find the parameter t (use the dimension with largest delta)
-      Real t;
-      if (std::abs(dx) > eps && std::abs(dx) >= std::abs(dy) && std::abs(dx) >= std::abs(dz))
+      Real t = computeEdgeParameter3D(node.x(), node.y(), node.z(), x0, y0, z0, x1, y1, z1);
+      if (!std::isnan(t) && t >= -EDGE_TOL && t <= 1.0 + EDGE_TOL)
       {
-        t = (px - x0) / dx;
-      }
-      else if (std::abs(dy) > eps && std::abs(dy) >= std::abs(dz))
-      {
-        t = (py - y0) / dy;
-      }
-      else if (std::abs(dz) > eps)
-      {
-        t = (pz - z0) / dz;
-      }
-      else
-      {
-        continue;
-      }
-
-      if (t >= -tol && t <= 1.0 + tol)
-      {
-        Real expected_x = x0 + t * dx;
-        Real expected_y = y0 + t * dy;
-        Real expected_z = z0 + t * dz;
-
-        if (std::abs(px - expected_x) < tol &&
-            std::abs(py - expected_y) < tol &&
-            std::abs(pz - expected_z) < tol)
-        {
-          coords.push_back(std::max(0.0, std::min(1.0, t)));
-        }
+        coords.push_back(std::max(0.0, std::min(1.0, t)));
       }
     }
 
@@ -204,51 +195,15 @@ namespace Rodin::Tests::Unit
       Real x0, Real y0, Real z0,
       Real x1, Real y1, Real z1)
   {
-    const Real tol = 1e-10;
-    const Real eps = std::numeric_limits<Real>::epsilon() * 100;
     std::vector<Real> coords;
     const auto& nodes = H1Element<K, Real>::getNodes(Polytope::Type::Wedge);
 
     for (const auto& node : nodes)
     {
-      Real px = node.x();
-      Real py = node.y();
-      Real pz = node.z();
-
-      Real dx = x1 - x0;
-      Real dy = y1 - y0;
-      Real dz = z1 - z0;
-
-      Real t;
-      if (std::abs(dx) > eps && std::abs(dx) >= std::abs(dy) && std::abs(dx) >= std::abs(dz))
+      Real t = computeEdgeParameter3D(node.x(), node.y(), node.z(), x0, y0, z0, x1, y1, z1);
+      if (!std::isnan(t) && t >= -EDGE_TOL && t <= 1.0 + EDGE_TOL)
       {
-        t = (px - x0) / dx;
-      }
-      else if (std::abs(dy) > eps && std::abs(dy) >= std::abs(dz))
-      {
-        t = (py - y0) / dy;
-      }
-      else if (std::abs(dz) > eps)
-      {
-        t = (pz - z0) / dz;
-      }
-      else
-      {
-        continue;
-      }
-
-      if (t >= -tol && t <= 1.0 + tol)
-      {
-        Real expected_x = x0 + t * dx;
-        Real expected_y = y0 + t * dy;
-        Real expected_z = z0 + t * dz;
-
-        if (std::abs(px - expected_x) < tol &&
-            std::abs(py - expected_y) < tol &&
-            std::abs(pz - expected_z) < tol)
-        {
-          coords.push_back(std::max(0.0, std::min(1.0, t)));
-        }
+        coords.push_back(std::max(0.0, std::min(1.0, t)));
       }
     }
 
@@ -263,15 +218,13 @@ namespace Rodin::Tests::Unit
       const std::string& name1,
       const std::string& name2)
   {
-    const Real tol = 1e-10;
-
     ASSERT_EQ(edge1.size(), edge2.size())
         << "Edge node counts differ: " << name1 << " has " << edge1.size()
         << " nodes, " << name2 << " has " << edge2.size() << " nodes";
 
     for (size_t i = 0; i < edge1.size(); ++i)
     {
-      EXPECT_NEAR(edge1[i], edge2[i], tol)
+      EXPECT_NEAR(edge1[i], edge2[i], EDGE_TOL)
           << "Node " << i << " differs: " << name1 << "[" << i << "]=" << edge1[i]
           << ", " << name2 << "[" << i << "]=" << edge2[i];
     }
@@ -401,7 +354,7 @@ namespace Rodin::Tests::Unit
     auto edge_right = extractQuadrilateralEdgeNodes<2>(1.0, 0.0, 1.0, 1.0);
     compareEdgeCoordinates(edge_right, gll_vec, "Quad right edge", "GLL01 K=2");
 
-    // Top edge: (1,1) to (0,1)
+    // Top edge: (0,1) to (1,1)
     auto edge_top = extractQuadrilateralEdgeNodes<2>(0.0, 1.0, 1.0, 1.0);
     compareEdgeCoordinates(edge_top, gll_vec, "Quad top edge", "GLL01 K=2");
 
