@@ -398,6 +398,89 @@ namespace Rodin::Variational
           if (near_v1 || near_v2 || near_v3 || near_v4)
             continue;
 
+          // Count how many barycentric coords are essentially zero
+          const int nzero = (L1 < TOL ? 1 : 0) + (L2 < TOL ? 1 : 0)
+                          + (L3 < TOL ? 1 : 0) + (L4 < TOL ? 1 : 0);
+
+          // Edge nodes: exactly 2 barycentric coords are zero
+          // For edge nodes, apply 1D warp along the edge direction only
+          if (nzero == 2)
+          {
+            // Determine which edge this node is on
+            // Edges connect pairs of vertices where exactly 2 L's are nonzero
+            // Apply 1D GLL warp along that edge
+
+            // Find the two non-zero barycentric coordinates
+            Real La = 0, Lb = 0;
+            int ia = -1, ib = -1;
+            Real Lvals[4] = {L1, L2, L3, L4};
+            for (int i = 0; i < 4; ++i)
+            {
+              if (Lvals[i] >= TOL)
+              {
+                if (ia < 0) { ia = i; La = Lvals[i]; }
+                else { ib = i; Lb = Lvals[i]; }
+              }
+            }
+
+            // Edge parameter in [0,1]: t = Lb / (La + Lb)
+            Real t = Lb / (La + Lb);
+
+            // Map to [-1,1] for warp calculation
+            Real r = static_cast<Real>(2.0) * t - static_cast<Real>(1.0);
+
+            // Get the RAW interpolated displacement (gll[i] - equispaced[i])
+            // We need to compute this without the (1-r²) division that WarpFactor1D does
+            // Use the same approach as WarpFactor1D but without the division
+            static const std::array<Real, K + 1> s_req = []()
+            {
+              std::array<Real, K + 1> req{};
+              for (size_t j = 0; j <= K; ++j)
+              {
+                req[j] = static_cast<Real>(-1.0)
+                       + static_cast<Real>(2.0) * static_cast<Real>(j)
+                       / static_cast<Real>(K);
+              }
+              return req;
+            }();
+
+            const auto& gll = GLL<K>::getNodes();
+
+            // Interpolate (gll - req) at r using Lagrange basis on req
+            Real warp = static_cast<Real>(0.0);
+            for (size_t i = 0; i <= K; ++i)
+            {
+              const Real Li = LagrangeBasis1D<K>::getBasis(i, r, s_req);
+              warp += Li * (gll[i] - s_req[i]);
+            }
+
+            // The warp is directly in [-1,1] space, so apply it
+            Real r_new = r + warp;
+
+            // Clamp to valid range
+            r_new = std::max(static_cast<Real>(-1.0), std::min(static_cast<Real>(1.0), r_new));
+
+            // Map back to [0,1]
+            Real t_new = (r_new + static_cast<Real>(1.0)) * static_cast<Real>(0.5);
+
+            // Update barycentric coordinates
+            Real La_new = static_cast<Real>(1.0) - t_new;
+            Real Lb_new = t_new;
+
+            // Reconstruct position (l1n not directly used but needed for completeness)
+            [[maybe_unused]] Real l1n = 0;
+            Real l2n = 0, l3n = 0, l4n = 0;
+            if (ia == 0) l1n = La_new; else if (ia == 1) l2n = La_new;
+            else if (ia == 2) l3n = La_new; else l4n = La_new;
+            if (ib == 0) l1n = Lb_new; else if (ib == 1) l2n = Lb_new;
+            else if (ib == 2) l3n = Lb_new; else l4n = Lb_new;
+
+            p.x() = l2n;
+            p.y() = l3n;
+            p.z() = l4n;
+            continue;
+          }
+
           // Equilateral coordinates of undeformed point
           const Real rx0 = L1 * v1x + L2 * v2x + L3 * v3x + L4 * v4x;
           const Real ry0 = L1 * v1y + L2 * v2y + L3 * v3y + L4 * v4y;
