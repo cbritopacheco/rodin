@@ -23,7 +23,7 @@ namespace Rodin::Tests::Unit
   {
     // On equispaced nodes [0, 0.5, 1]
     std::array<Real, 3> nodes = {0.0, 0.5, 1.0};
-    
+
     for (size_t i = 0; i < 3; ++i)
     {
       for (size_t j = 0; j < 3; ++j)
@@ -38,7 +38,7 @@ namespace Rodin::Tests::Unit
   TEST(LagrangeBasis1D, PartitionOfUnity_K2)
   {
     std::array<Real, 3> nodes = {0.0, 0.5, 1.0};
-    
+
     for (Real x = 0.0; x <= 1.0; x += 0.1)
     {
       Real sum = 0.0;
@@ -52,7 +52,7 @@ namespace Rodin::Tests::Unit
   {
     // Sum of derivatives should be 0 (derivative of constant 1)
     std::array<Real, 3> nodes = {0.0, 0.5, 1.0};
-    
+
     for (Real x = 0.1; x <= 0.9; x += 0.1)
     {
       Real sum = 0.0;
@@ -84,7 +84,7 @@ namespace Rodin::Tests::Unit
   {
     // GLL01<2> nodes are at 0, 0.5, 1
     const auto& nodes = GLL01<2>::getNodes();
-    
+
     for (size_t i = 0; i < 3; ++i)
     {
       for (size_t j = 0; j < 3; ++j)
@@ -99,7 +99,7 @@ namespace Rodin::Tests::Unit
   TEST(LagrangeBasisSegment, LagrangeProperty_K3)
   {
     const auto& nodes = GLL01<3>::getNodes();
-    
+
     for (size_t i = 0; i <= 3; ++i)
     {
       for (size_t j = 0; j <= 3; ++j)
@@ -143,7 +143,7 @@ namespace Rodin::Tests::Unit
     // Corresponding to (i,j) = (0,0), (1,0), (0,1)
     std::vector<std::pair<size_t, size_t>> nodes = {{0,0}, {1,0}, {0,1}};
     std::vector<std::pair<Real, Real>> coords = {{0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}};
-    
+
     for (size_t ni = 0; ni < 3; ++ni)
     {
       auto [i, j] = nodes[ni];
@@ -162,7 +162,7 @@ namespace Rodin::Tests::Unit
     // Test at interior point
     Real x = 0.3, y = 0.3;
     Real sum = 0.0;
-    
+
     // Sum over all (i,j) with i+j <= K
     for (size_t j = 0; j <= 2; ++j)
     {
@@ -180,11 +180,11 @@ namespace Rodin::Tests::Unit
     std::vector<std::pair<Real, Real>> test_points = {
       {0.25, 0.25}, {0.1, 0.1}, {0.5, 0.3}, {0.1, 0.8}
     };
-    
+
     for (auto [x, y] : test_points)
     {
       if (x + y > 1.0) continue;  // Skip outside triangle
-      
+
       Real sum = 0.0;
       for (size_t j = 0; j <= 3; ++j)
       {
@@ -202,7 +202,7 @@ namespace Rodin::Tests::Unit
     Real x = 0.3, y = 0.3;
     Real sum_dx = 0.0;
     Real sum_dy = 0.0;
-    
+
     for (size_t j = 0; j <= 2; ++j)
     {
       for (size_t i = 0; i <= 2 - j; ++i)
@@ -228,7 +228,7 @@ namespace Rodin::Tests::Unit
     std::vector<std::tuple<Real, Real, Real>> coords = {
       {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}
     };
-    
+
     for (size_t ni = 0; ni < 4; ++ni)
     {
       auto [i, j, k] = nodes[ni];
@@ -246,7 +246,7 @@ namespace Rodin::Tests::Unit
   {
     Real x = 0.2, y = 0.2, z = 0.2;
     Real sum = 0.0;
-    
+
     for (size_t k = 0; k <= 2; ++k)
     {
       for (size_t j = 0; j <= 2 - k; ++j)
@@ -264,7 +264,7 @@ namespace Rodin::Tests::Unit
   {
     Real x = 0.2, y = 0.2, z = 0.2;
     Real sum_dx = 0.0, sum_dy = 0.0, sum_dz = 0.0;
-    
+
     for (size_t k = 0; k <= 2; ++k)
     {
       for (size_t j = 0; j <= 2 - k; ++j)
@@ -289,7 +289,7 @@ namespace Rodin::Tests::Unit
   TEST(LagrangeBasisQuadrilateral, LagrangeProperty_K2)
   {
     const auto& nodes = GLL01<2>::getNodes();
-    
+
     for (size_t i = 0; i <= 2; ++i)
     {
       for (size_t j = 0; j <= 2; ++j)
@@ -330,7 +330,7 @@ namespace Rodin::Tests::Unit
   {
     Real x = 0.3, y = 0.7;
     Real sum_dx = 0.0, sum_dy = 0.0;
-    
+
     for (size_t i = 0; i <= 2; ++i)
     {
       for (size_t j = 0; j <= 2; ++j)
@@ -351,7 +351,7 @@ namespace Rodin::Tests::Unit
   {
     Real x = 0.2, y = 0.2, z = 0.5;  // Point inside wedge
     Real sum = 0.0;
-    
+
     for (size_t k = 0; k <= 2; ++k)  // z direction
     {
       for (size_t j = 0; j <= 2; ++j)  // triangle j
@@ -369,7 +369,7 @@ namespace Rodin::Tests::Unit
   {
     Real x = 0.2, y = 0.2, z = 0.5;
     Real sum_dx = 0.0, sum_dy = 0.0, sum_dz = 0.0;
-    
+
     for (size_t k = 0; k <= 2; ++k)
     {
       for (size_t j = 0; j <= 2; ++j)
@@ -385,5 +385,176 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum_dx, 0.0, 1e-12);
     EXPECT_NEAR(sum_dy, 0.0, 1e-12);
     EXPECT_NEAR(sum_dz, 0.0, 1e-12);
+  }
+
+  //==========================================================================
+  // Higher Order Tests (K = 5, 6)
+  //==========================================================================
+
+  TEST(LagrangeBasis1D, LagrangeProperty_K5)
+  {
+    const auto& nodes = GLL01<5>::getNodes();
+
+    for (size_t i = 0; i <= 5; ++i)
+    {
+      for (size_t j = 0; j <= 5; ++j)
+      {
+        Real val = LagrangeBasis1D<5>::getBasis(i, nodes[j], nodes);
+        Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(val, expected, 1e-13);
+      }
+    }
+  }
+
+  TEST(LagrangeBasis1D, PartitionOfUnity_K6)
+  {
+    const auto& nodes = GLL01<6>::getNodes();
+
+    for (Real x = 0.0; x <= 1.0; x += 0.1)
+    {
+      Real sum = 0.0;
+      for (size_t i = 0; i <= 6; ++i)
+        sum += LagrangeBasis1D<6>::getBasis(i, x, nodes);
+      EXPECT_NEAR(sum, 1.0, 1e-13);
+    }
+  }
+
+  TEST(LagrangeBasisSegment, LagrangeProperty_K5)
+  {
+    const auto& nodes = GLL01<5>::getNodes();
+
+    for (size_t i = 0; i <= 5; ++i)
+    {
+      for (size_t j = 0; j <= 5; ++j)
+      {
+        Real val = LagrangeBasisSegment<5>::getBasis(i, nodes[j]);
+        Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(val, expected, 1e-13);
+      }
+    }
+  }
+
+  TEST(LagrangeBasisSegment, PartitionOfUnity_K6)
+  {
+    for (Real x = 0.0; x <= 1.0; x += 0.05)
+    {
+      Real sum = 0.0;
+      for (size_t i = 0; i <= 6; ++i)
+        sum += LagrangeBasisSegment<6>::getBasis(i, x);
+      EXPECT_NEAR(sum, 1.0, 1e-13);
+    }
+  }
+
+  TEST(LagrangeBasisTriangle, PartitionOfUnity_K5)
+  {
+    std::vector<std::pair<Real, Real>> test_points = {
+      {0.2, 0.2}, {0.1, 0.6}, {0.4, 0.1}, {0.33, 0.33}
+    };
+
+    for (auto [x, y] : test_points)
+    {
+      if (x + y > 1.0) continue;
+
+      Real sum = 0.0;
+      for (size_t j = 0; j <= 5; ++j)
+      {
+        for (size_t i = 0; i <= 5 - j; ++i)
+        {
+          sum += LagrangeBasisTriangle<5>::getBasis(i, j, x, y);
+        }
+      }
+      EXPECT_NEAR(sum, 1.0, 1e-12) << "x=" << x << " y=" << y;
+    }
+  }
+
+  TEST(LagrangeBasisTriangle, PartitionOfUnity_K6)
+  {
+    Real x = 0.25, y = 0.25;
+    Real sum = 0.0;
+
+    for (size_t j = 0; j <= 6; ++j)
+    {
+      for (size_t i = 0; i <= 6 - j; ++i)
+      {
+        sum += LagrangeBasisTriangle<6>::getBasis(i, j, x, y);
+      }
+    }
+    EXPECT_NEAR(sum, 1.0, 1e-11);
+  }
+
+  TEST(LagrangeBasisTetrahedron, PartitionOfUnity_K5)
+  {
+    Real x = 0.15, y = 0.15, z = 0.15;
+    Real sum = 0.0;
+
+    for (size_t k = 0; k <= 5; ++k)
+    {
+      for (size_t j = 0; j <= 5 - k; ++j)
+      {
+        for (size_t i = 0; i <= 5 - j - k; ++i)
+        {
+          sum += LagrangeBasisTetrahedron<5>::getBasis(i, j, k, x, y, z);
+        }
+      }
+    }
+    EXPECT_NEAR(sum, 1.0, 1e-11);
+  }
+
+  TEST(LagrangeBasisQuadrilateral, LagrangeProperty_K5)
+  {
+    const auto& nodes = GLL01<5>::getNodes();
+
+    for (size_t i = 0; i <= 5; ++i)
+    {
+      for (size_t j = 0; j <= 5; ++j)
+      {
+        for (size_t ii = 0; ii <= 5; ++ii)
+        {
+          for (size_t jj = 0; jj <= 5; ++jj)
+          {
+            Real val = LagrangeBasisQuadrilateral<5>::getBasis(i, j, nodes[ii], nodes[jj]);
+            Real expected = (i == ii && j == jj) ? 1.0 : 0.0;
+            EXPECT_NEAR(val, expected, 1e-12);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(LagrangeBasisQuadrilateral, PartitionOfUnity_K6)
+  {
+    for (Real x = 0.1; x <= 0.9; x += 0.2)
+    {
+      for (Real y = 0.1; y <= 0.9; y += 0.2)
+      {
+        Real sum = 0.0;
+        for (size_t i = 0; i <= 6; ++i)
+        {
+          for (size_t j = 0; j <= 6; ++j)
+          {
+            sum += LagrangeBasisQuadrilateral<6>::getBasis(i, j, x, y);
+          }
+        }
+        EXPECT_NEAR(sum, 1.0, 1e-12);
+      }
+    }
+  }
+
+  TEST(LagrangeBasisWedge, PartitionOfUnity_K5)
+  {
+    Real x = 0.15, y = 0.15, z = 0.5;
+    Real sum = 0.0;
+
+    for (size_t k = 0; k <= 5; ++k)
+    {
+      for (size_t j = 0; j <= 5; ++j)
+      {
+        for (size_t i = 0; i <= 5 - j; ++i)
+        {
+          sum += LagrangeBasisWedge<5>::getBasis(i, j, k, x, y, z);
+        }
+      }
+    }
+    EXPECT_NEAR(sum, 1.0, 1e-11);
   }
 }
