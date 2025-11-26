@@ -151,9 +151,14 @@
               <span class="m-doc-wrap-bumper"><a href="#gadd536d27925aad7bf5ef3b07ec1a1dc5" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Grad&lt; GridFunction&lt; P0&lt; Range, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
-            <dt id="ga164208e001d26ef5ecdb313b4cdea2ff">
+            <dt id="ga43dd5ee144eed5795b2ef177151cdd28">
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ga43dd5ee144eed5795b2ef177151cdd28" class="m-doc-self">P0</a>(</span><span class="m-doc-wrap">const Geometry::Mesh&lt;Context&gt;&amp;) -&gt; P0&lt; Real, Geometry::Mesh&lt; Context &gt; &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> from mesh - deduces to RealP0.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga164208e001d26ef5ecdb313b4cdea2ff" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap">size_t,
+              <span class="m-doc-wrap-bumper"><a href="#ga164208e001d26ef5ecdb313b4cdea2ff" class="m-doc">Derivative</a>(</span><span class="m-doc-wrap">size_t,
               const GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Derivative&lt; GridFunction&lt; P1&lt; Range, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
@@ -162,11 +167,16 @@
               <span class="m-doc-wrap-bumper"><a href="#ga58e9d391d18423707a5d53fdf29d55d8" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P1&lt; Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
-            <dt id="gae991a1cc48ead16fcb81cd6f9e4e3efc">
+            <dt>
               <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#gae991a1cc48ead16fcb81cd6f9e4e3efc" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Jacobian&lt; GridFunction&lt; P1&lt; Range, Mesh &gt;, Data &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gae991a1cc48ead16fcb81cd6f9e4e3efc" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Jacobian&lt; GridFunction&lt; P1&lt; Range, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dt id="ga63b4ffb105cdbc627ffe1883e3f319c5">
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ga63b4ffb105cdbc627ffe1883e3f319c5" class="m-doc-self">P1</a>(</span><span class="m-doc-wrap">const Geometry::Mesh&lt;Context&gt;&amp;) -&gt; P1&lt; Real, Geometry::Mesh&lt; Context &gt; &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> from mesh - deduces to RealP1.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#ga20c440bfc99b99b3439bf7f395d7ad53" class="m-doc">PeriodicBC</a>(</span><span class="m-doc-wrap">const TrialFunction&lt;Solution, FES&gt;&amp;,
@@ -341,6 +351,17 @@
             </h3>
             <p>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
           </div></section>
+          <section class="m-doc-details" id="ga164208e001d26ef5ecdb313b4cdea2ff"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_derivative_8h.html">&lt;Rodin/Variational/P1/Derivative.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga164208e001d26ef5ecdb313b4cdea2ff" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap">size_t,
+              const GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Derivative&lt; GridFunction&lt; P1&lt; Range, Mesh &gt;, Data &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+          </div></section>
           <section class="m-doc-details" id="ga58e9d391d18423707a5d53fdf29d55d8"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_div_8h.html">&lt;Rodin/Variational/P1/Div.h&gt;</a></div>
@@ -350,6 +371,16 @@
               <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga58e9d391d18423707a5d53fdf29d55d8" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P1&lt; Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span></span>
             </h3>
             <p>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="gae991a1cc48ead16fcb81cd6f9e4e3efc"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_jacobian_8h.html">&lt;Rodin/Variational/P1/Jacobian.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gae991a1cc48ead16fcb81cd6f9e4e3efc" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Jacobian&lt; GridFunction&lt; P1&lt; Range, Mesh &gt;, Data &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
           </div></section>
           <section class="m-doc-details" id="ga20c440bfc99b99b3439bf7f395d7ad53"><div>
             <h3>
