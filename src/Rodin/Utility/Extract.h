@@ -7,6 +7,11 @@
 #ifndef RODIN_UTILITY_EXTRACT_H
 #define RODIN_UTILITY_EXTRACT_H
 
+/**
+ * @file
+ * @brief Defines the Extract metafunction for tuple type transformation.
+ */
+
 #include "Rodin/Tuple.h"
 
 /**

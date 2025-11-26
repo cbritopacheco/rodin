@@ -7,6 +7,11 @@
 #ifndef RODIN_UTILITY_PARAMETERPACK_H
 #define RODIN_UTILITY_PARAMETERPACK_H
 
+/**
+ * @file
+ * @brief Defines the ParameterPack class for compile-time parameter pack manipulation.
+ */
+
 #include <type_traits>
 
 namespace Rodin::Utility

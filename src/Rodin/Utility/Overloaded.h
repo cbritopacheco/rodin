@@ -7,6 +7,11 @@
 #ifndef RODIN_UTILITY_OVERLOADED_H
 #define RODIN_UTILITY_OVERLOADED_H
 
+/**
+ * @file
+ * @brief Defines the Overloaded helper for combining multiple lambdas.
+ */
+
 namespace Rodin::Utility
 {
   /**
