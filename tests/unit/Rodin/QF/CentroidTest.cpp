@@ -13,7 +13,7 @@
 using namespace Rodin::QF;
 using namespace Rodin::Geometry;
 
-// Test class for QF1P1 functionality
+// Test class for centroid quadrature functionality
 class CentroidTest : public ::testing::Test
 {
   protected:
@@ -21,7 +21,7 @@ class CentroidTest : public ::testing::Test
     void TearDown() override {}
 };
 
-// Test QF1P1 (Single-point quadrature)
+// Test centroid (Single-point quadrature)
 TEST_F(CentroidTest, BasicProperties)
 {
   Centroid qf_triangle(Polytope::Type::Triangle);
