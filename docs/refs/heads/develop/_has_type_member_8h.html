@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Partial differential equations &raquo; Solving on surfaces with flat elements &raquo; SurfaceMeshes.cpp source | Rodin</title>
+  <title>Rodin/Utility/HasTypeMember.h file | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
-  <link rel="prev" href="_p_d_es_2_poisson_8cpp-example.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -65,12 +64,45 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="examples-pdes-index.html">Partial differential equations</a> &raquo;</span>
-          <span class="m-breadcrumb"><a href="examples-pdes-surface_meshes.html">Solving on surfaces with flat elements</a> &raquo;</span>
-          SurfaceMeshes.cpp <span class="m-thin">source</span>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_bb1cccf0f1bfa5c5894d1e15a316045e.html">Utility</a>/</span>HasTypeMember.h <span class="m-thin">file</span>
         </h1>
-<pre class="m-code"></pre>
-        <div class="m-note m-dim m-thin m-text-center"><a href="_p_d_es_2_poisson_8cpp-example.html" class="m-doc">&laquo; Poisson.cpp</a> | <a href="examples-pdes-surface_meshes.html" class="m-doc">Solving on surfaces with flat elements</a></div>
+        <p>Defines the HasTypeMember type trait for detecting nested Type members.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Rodin::Utility</a></dt>
+            <dd>Module containing general purpose and language support utility classes.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;typename T, typename = void&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_has_type_member.html" class="m-doc">Rodin::Utility::HasTypeMember</a>
+            </dt>
+            <dd>Type trait to detect if a type has a nested Type member.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_has_type_member_3_01_t_00_01std_1_1void__t_3_01typename_01_t_1_1_type_01_4_01_4.html" class="m-doc">Rodin::Utility::HasTypeMember&lt;T, std::void_t&lt;typename T::Type&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for types that have a nested Type member.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

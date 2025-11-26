@@ -219,10 +219,14 @@ $ s \geq 0 $
               <span class="m-doc-wrap-bumper">#define <a href="#ga1035ee2cc7cc5a5b36584d6a24d743da" class="m-doc">RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER</a></span>
             </dt>
             <dd>Maximum degree permitted for Grundmann-Moller quadrature.</dd>
-            <dt id="gac32d624f27cdd48fb27e3f0688e4653b">
-              <span class="m-doc-wrap-bumper">#define <a href="#gac32d624f27cdd48fb27e3f0688e4653b" class="m-doc-self">RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a href="#gac32d624f27cdd48fb27e3f0688e4653b" class="m-doc">RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION</a></span>
             </dt>
             <dd>Indicates the maximum vector dimension a H1Element can support.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a href="#gae86972acfc12fffaa9c05cb99d6073fe" class="m-doc">RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE</a></span>
+            </dt>
+            <dd>Tolerance for numerical computations in H1Element.</dd>
           </dl>
         </section>
         <section>
@@ -476,6 +480,7 @@ $ d \rightarrow d&#x27; $
           <section class="m-doc-details" id="ga747198e816a916073b472c30da02c125"><div>
             <h3>
               <span class="m-doc-wrap-bumper">#define <a href="#ga747198e816a916073b472c30da02c125" class="m-doc-self">RODIN_VARIATIONAL_QF_GENERIC_POLYTOPE_QUADRATURE_DEFAULT_ORDER</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_generic_polytope_quadrature_8h.html">&lt;Rodin/QF/GenericPolytopeQuadrature.h&gt;</a></div>
             </h3>
             <p>Default order for GenericPolytopeQuadrature.</p>
 <p>This macro defines the default polynomial degree of exactness when constructing a GenericPolytopeQuadrature without specifying an order.</p>
@@ -483,6 +488,7 @@ $ d \rightarrow d&#x27; $
           <section class="m-doc-details" id="gad6b973c029096901ebc4827fcfcfb9d9"><div>
             <h3>
               <span class="m-doc-wrap-bumper">#define <a href="#gad6b973c029096901ebc4827fcfcfb9d9" class="m-doc-self">RODIN_QF_GRUNDMANNMOLLER_MAX_S</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_grundmann_moller_8h.html">&lt;Rodin/QF/GrundmannMoller.h&gt;</a></div>
             </h3>
             <p>Maximum value permitted for the <svg class="m-math" style="width: 2.844em; height: 0.972em; vertical-align: -0.170em;" viewBox="0 -7.704442 27.307152 9.329999">
 <title>
@@ -504,6 +510,7 @@ $ s \geq 0 $
           <section class="m-doc-details" id="ga1035ee2cc7cc5a5b36584d6a24d743da"><div>
             <h3>
               <span class="m-doc-wrap-bumper">#define <a href="#ga1035ee2cc7cc5a5b36584d6a24d743da" class="m-doc-self">RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_grundmann_moller_8h.html">&lt;Rodin/QF/GrundmannMoller.h&gt;</a></div>
             </h3>
             <p>Maximum degree permitted for Grundmann-Moller quadrature.</p>
 <p>The degree is given by <svg class="m-math" style="width: 5.569em; height: 0.960em; vertical-align: -0.095em;" viewBox="0 -8.302191 53.466968 9.215393">
@@ -541,6 +548,21 @@ $ s \geq 0 $
 <use x='21.454161' y='0' xlink:href='#eq5-g2-48'/>
 </g>
 </svg>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html" class="m-doc">Rodin::<wbr />QF::<wbr />GrundmannMoller</a></p><p><a href="#gad6b973c029096901ebc4827fcfcfb9d9" class="m-doc">RODIN_<wbr />QF_<wbr />GRUNDMANNMOLLER_<wbr />MAX_<wbr />S</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="gac32d624f27cdd48fb27e3f0688e4653b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a href="#gac32d624f27cdd48fb27e3f0688e4653b" class="m-doc-self">RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_element_8h.html">&lt;Rodin/Variational/H1/H1Element.h&gt;</a></div>
+            </h3>
+            <p>Indicates the maximum vector dimension a H1Element can support.</p>
+          </div></section>
+          <section class="m-doc-details" id="gae86972acfc12fffaa9c05cb99d6073fe"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a href="#gae86972acfc12fffaa9c05cb99d6073fe" class="m-doc-self">RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_element_8h.html">&lt;Rodin/Variational/H1/H1Element.h&gt;</a></div>
+            </h3>
+            <p>Tolerance for numerical computations in H1Element.</p>
+<p>This tolerance is used in the collapsed coordinate transformations (Duffy transformation) to avoid division by zero near element boundaries. Used when computing basis function gradients on triangles and tetrahedra.</p>
           </div></section>
         </section>
       </div>

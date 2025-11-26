@@ -72,9 +72,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md313">Role in Assembly</a></li>
-            <li><a href="#autotoc_md314">Common Linear Forms</a></li>
-            <li><a href="#autotoc_md315">Domain Specification</a></li>
+            <li><a href="#autotoc_md316">Role in Assembly</a></li>
+            <li><a href="#autotoc_md317">Common Linear Forms</a></li>
+            <li><a href="#autotoc_md318">Domain Specification</a></li>
             <li>
               Reference
               <ul>
@@ -159,7 +159,7 @@ $ l(\cdot) $
 <use x='8.302134' y='0' xlink:href='#eq4-g0-1'/>
 <use x='11.623024' y='0' xlink:href='#eq4-g2-41'/>
 </g>
-</svg> is a linear functional.</p><section id="autotoc_md313"><h3><a href="#autotoc_md313">Role in Assembly</a></h3><p>During finite element assembly:</p><ol><li>The integrator is called for each element (or boundary face) in the mesh</li><li>Local element vectors are computed using quadrature</li><li>Local vectors are assembled into the global right-hand side vector</li></ol></section><section id="autotoc_md314"><h3><a href="#autotoc_md314">Common Linear Forms</a></h3><ul><li><strong>Volume load</strong>: <svg class="m-math" style="width: 5.452em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 52.336818 13.781784">
+</svg> is a linear functional.</p><section id="autotoc_md316"><h3><a href="#autotoc_md316">Role in Assembly</a></h3><p>During finite element assembly:</p><ol><li>The integrator is called for each element (or boundary face) in the mesh</li><li>Local element vectors are computed using quadrature</li><li>Local vectors are assembled into the global right-hand side vector</li></ol></section><section id="autotoc_md317"><h3><a href="#autotoc_md317">Common Linear Forms</a></h3><ul><li><strong>Volume load</strong>: <svg class="m-math" style="width: 5.452em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 52.336818 13.781784">
 <title>
 $ \int_K f \cdot v \, dx $
 </title>
@@ -250,7 +250,7 @@ $ \int_K u_0 \cdot v \, dx $
 <use x='43.950356' y='0' xlink:href='#eq8-g3-100'/>
 <use x='50.033049' y='0' xlink:href='#eq8-g3-120'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md315"><h3><a href="#autotoc_md315">Domain Specification</a></h3><p>Linear form integrators support the <code><a href="#acdd90257d932f2691107f8b8b036770e" class="m-doc">over()</a></code> method to restrict integration to specific mesh regions identified by attributes: <code class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  </span><span class="c1">// Integrate over regions 1 and 2</span></code></p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>, <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a></p></aside></section>
+</svg></li></ul></section><section id="autotoc_md318"><h3><a href="#autotoc_md318">Domain Specification</a></h3><p>Linear form integrators support the <code><a href="#acdd90257d932f2691107f8b8b036770e" class="m-doc">over()</a></code> method to restrict integration to specific mesh regions identified by attributes: <code class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  </span><span class="c1">// Integrate over regions 1 and 2</span></code></p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>, <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

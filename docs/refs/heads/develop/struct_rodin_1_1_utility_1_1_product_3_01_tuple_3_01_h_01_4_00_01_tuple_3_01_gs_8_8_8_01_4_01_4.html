@@ -64,10 +64,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_product_8h.html">&lt;Rodin/Utility/Product.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class H, class ... Gs&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span>Product&lt;Tuple&lt;H&gt;, Tuple&lt;Gs...&gt;&gt; <span class="m-thin">struct</span>
         </h1>
-        <p><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> has exactly one element.</p>
+        <p>Specialization for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with exactly one element.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -77,9 +78,13 @@
               <td style="width: 1%">H</td>
               <td>The lone type in the first <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</td>
             </tr>
+            <tr>
+              <td>Gs</td>
+              <td>All types of the second <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</td>
+            </tr>
           </tbody>
         </table>
-<p>Generates a single <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt; Pair&lt;H, G1&gt;, Pair&lt;H, G2&gt;, … &gt;.</p>
+<p>Generates a single <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt; Pair&lt;H, G1&gt;, Pair&lt;H, G2&gt;, ...&gt;.</p>
       </div>
     </div>
   </div>

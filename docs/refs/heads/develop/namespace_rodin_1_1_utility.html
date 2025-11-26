@@ -82,6 +82,26 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_bottom_template.html" class="m-doc">BottomTemplate</a>
+            </dt>
+            <dd>Metafunction to extract the innermost (bottom) type from nested templates.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;template&lt;class&gt; class T, class S&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_bottom_template_3_01_t_3_01_s_01_4_01_4.html" class="m-doc">BottomTemplate&lt;T&lt;S&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for single-parameter template instantiations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class From, class To&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_cast.html" class="m-doc">Cast</a>
+            </dt>
+            <dd>Template for defining type conversion operations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T, T Value_, class ... Args&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_dependent_value.html" class="m-doc">DependentValue</a>
+            </dt>
+            <dd>Creates a type-dependent compile-time constant value.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class ...&gt;</div>
               struct <a href="struct_rodin_1_1_utility_1_1_extract.html" class="m-doc">Extract</a>
             </dt>
@@ -92,10 +112,60 @@
             </dt>
             <dd>Specialization of <a href="struct_rodin_1_1_utility_1_1_extract.html" class="m-doc">Extract</a> for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> types.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;typename T, typename = void&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_has_type_member.html" class="m-doc">HasTypeMember</a>
+            </dt>
+            <dd>Type trait to detect if a type has a nested Type member.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_has_type_member_3_01_t_00_01std_1_1void__t_3_01typename_01_t_1_1_type_01_4_01_4.html" class="m-doc">HasTypeMember&lt;T, std::void_t&lt;typename T::Type&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for types that have a nested Type member.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T, typename = void&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_has_value_member.html" class="m-doc">HasValueMember</a>
+            </dt>
+            <dd>Type trait to detect if a type has a nested Value member type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_has_value_member_3_01_t_00_01std_1_1void__t_3_01typename_01_t_1_1_value_01_4_01_4.html" class="m-doc">HasValueMember&lt;T, std::void_t&lt;typename T::Value&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for types that have a nested Value member type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T, T... Is&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_integer_sequence.html" class="m-doc">IntegerSequence</a>
+            </dt>
+            <dd>Represents a compile-time sequence of integers.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ...&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_is_one_of.html" class="m-doc">IsOneOf</a>
+            </dt>
+            <dd>Type trait to check if a type is one of a specified list of types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename F, typename S, typename ... T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_is_one_of_3_01_f_00_01_s_00_01_t_8_8_8_01_4.html" class="m-doc">IsOneOf&lt;F, S, T...&gt;</a>
+            </dt>
+            <dd>Specialization for non-empty type lists.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Test, template&lt;class...&gt; class Ref&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_is_specialization.html" class="m-doc">IsSpecialization</a>
+            </dt>
+            <dd>Type trait to check if a type is a specialization of a given template.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;template&lt;class...&gt; class Ref, class... Args&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_is_specialization_3_01_ref_3_01_args_8_8_8_01_4_00_01_ref_01_4.html" class="m-doc">IsSpecialization&lt;Ref&lt;Args...&gt;, Ref&gt;</a>
+            </dt>
+            <dd>Specialization for types that are specializations of the reference template.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
               struct <a href="struct_rodin_1_1_utility_1_1_make.html" class="m-doc">Make</a>
             </dt>
             <dd>Factory template for perfect forwarding construction.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_optional_reference.html" class="m-doc">OptionalReference</a>
+            </dt>
+            <dd>A wrapper providing optional reference semantics.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class... Ts&gt;</div>
               struct <a href="struct_rodin_1_1_utility_1_1_overloaded.html" class="m-doc">Overloaded</a>
@@ -112,15 +182,75 @@
             </dt>
             <dd>Metafunction to compute the Cartesian product of two <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> type-lists.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class ... Gs&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_product_3_01_tuple_3_01_gs_8_8_8_01_4_00_01_tuple_3_4_01_4.html" class="m-doc">Product&lt;Tuple&lt;Gs...&gt;, Tuple&lt;&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for empty second <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class H, class ... Gs&gt;</div>
               struct <a href="struct_rodin_1_1_utility_1_1_product_3_01_tuple_3_01_h_01_4_00_01_tuple_3_01_gs_8_8_8_01_4_01_4.html" class="m-doc">Product&lt;Tuple&lt;H&gt;, Tuple&lt;Gs...&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> has exactly one element.</dd>
+            <dd>Specialization for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with exactly one element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class H1, class H2, class ... Hs, class ... Gs&gt;</div>
               struct <a href="struct_rodin_1_1_utility_1_1_product_3_01_tuple_3_01_h1_00_01_h2_00_01_hs_8_8_8_01_4_00_01_tuple_3_01_gs_8_8_8_01_4_01_4.html" class="m-doc">Product&lt;Tuple&lt;H1, H2, Hs...&gt;, Tuple&lt;Gs...&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> has at least two elements (H1, H2, Hs…).</dd>
+            <dd>Specialization for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with at least two elements (H1, H2, Hs…).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Gs&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_product_3_01_tuple_3_4_00_01_tuple_3_01_gs_8_8_8_01_4_01_4.html" class="m-doc">Product&lt;Tuple&lt;&gt;, Tuple&lt;Gs...&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for empty first <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t N, class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_repeat.html" class="m-doc">Repeat</a>
+            </dt>
+            <dd>Metafunction to create a <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with N repetitions of type T.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_repeat_3_010_00_01_t_01_4.html" class="m-doc">Repeat&lt;0, T&gt;</a>
+            </dt>
+            <dd>Specialization for N = 0.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_repeat_3_011_00_01_t_01_4.html" class="m-doc">Repeat&lt;1, T&gt;</a>
+            </dt>
+            <dd>Specialization for N = 1.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_unwrap_ref_decay.html" class="m-doc">UnwrapRefDecay</a>
+            </dt>
+            <dd>Combines decay and reference unwrapping.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_unwrap_reference.html" class="m-doc">UnwrapReference</a>
+            </dt>
+            <dd>Metafunction to unwrap std::reference_wrapper types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class U&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_unwrap_reference_3_01std_1_1reference__wrapper_3_01_u_01_4_01_4.html" class="m-doc">UnwrapReference&lt;std::reference_wrapper&lt;U&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for std::reference_wrapper.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ...&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_wrap.html" class="m-doc">Wrap</a>
+            </dt>
+            <dd>Metafunction to wrap all types in a <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with an external template.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_wrap_3_01_tuple_3_01_ts_8_8_8_01_4_01_4.html" class="m-doc">Wrap&lt;Tuple&lt;Ts...&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ...&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_zip.html" class="m-doc">Zip</a>
+            </dt>
+            <dd>Metafunction to combine two Tuples element-wise using a binary template.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Ts, class ... Gs&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_zip_3_01_tuple_3_01_ts_8_8_8_01_4_00_01_tuple_3_01_gs_8_8_8_01_4_01_4.html" class="m-doc">Zip&lt;Tuple&lt;Ts...&gt;, Tuple&lt;Gs...&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for two Tuples.</dd>
           </dl>
         </section>
       </div>
