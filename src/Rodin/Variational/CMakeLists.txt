@@ -55,6 +55,7 @@ set(RodinVariational_SRCS
   P0/P0Element.cpp
   P1/P1.cpp
   P1/P1Element.cpp
+  H1/H1.cpp
   H1/H1Element.cpp
   )
 

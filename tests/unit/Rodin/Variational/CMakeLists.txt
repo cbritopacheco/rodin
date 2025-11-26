@@ -35,6 +35,14 @@ target_link_libraries(RodinVariationalP1Test
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalP1Test)
 
+add_executable(RodinVariationalH1Test H1Test.cpp)
+target_link_libraries(RodinVariationalH1Test
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1Test)
+
 add_executable(RodinVariationalDirichletBCTest DirichletBCTest.cpp)
 target_link_libraries(RodinVariationalDirichletBCTest
   PUBLIC

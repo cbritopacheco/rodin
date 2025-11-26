@@ -50,6 +50,11 @@
  * 
  * // Vector-valued H1 element for elasticity
  * VectorH1Element<2> h1_v(Polytope::Type::Tetrahedron, 3);
+ *
+ * // H1 finite element space of degree 2
+ * H1<2> Vh(mesh);
+ * TrialFunction u(Vh);
+ * TestFunction v(Vh);
  * ```
  *
  * @see Pk.h for alternative include
@@ -57,6 +62,7 @@
 #ifndef RODIN_VARIATIONAL_H1_H
 #define RODIN_VARIATIONAL_H1_H
 
+#include "H1/H1.h"
 #include "H1/H1Element.h"
 
 #endif
