@@ -19,7 +19,7 @@
  * stored as unique_ptr instances, ensuring automatic memory management.
  *
  * ## Usage Example
- * @code
+ * @code{.cpp}
  * List<BoundaryCondition> bcList;
  * bcList.add(DirichletBC(...));
  * bcList.add(NeumannBC(...));

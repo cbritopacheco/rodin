@@ -28,7 +28,7 @@ namespace Rodin::Utility
    * for generating homogeneous tuple types at compile time.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * using ThreeInts = Repeat<3, int>::Type;
    * // ThreeInts is Tuple<int, int, int>
    * @endcode

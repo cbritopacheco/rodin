@@ -89,7 +89,7 @@ namespace Rodin::Variational::F
    * @f]
    *
    * @par Usage Example:
-   * @code
+   * @code{.cpp}
    * using namespace Rodin::Variational;
    * auto bc = DirichletBC(u, F::x); // u = x on boundary
    * @endcode
@@ -158,7 +158,7 @@ namespace Rodin::Variational::F
    * @f]
    *
    * @par Usage Example:
-   * @code
+   * @code{.cpp}
    * using namespace Rodin::Variational;
    * auto bc = DirichletBC(u, F::y); // u = y on boundary
    * @endcode
@@ -227,7 +227,7 @@ namespace Rodin::Variational::F
    * @f]
    *
    * @par Usage Example:
-   * @code
+   * @code{.cpp}
    * using namespace Rodin::Variational;
    * auto bc = DirichletBC(u, F::z); // u = z on boundary
    * @endcode

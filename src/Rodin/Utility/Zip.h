@@ -19,10 +19,9 @@ namespace Rodin::Utility
   /**
    * @brief Metafunction to combine two Tuples element-wise using a binary template.
    * @ingroup UtilityModule
-   * @tparam ... Primary template (undefined). Specializations implement the logic.
    *
    * Zip takes two Tuple types of equal size and a binary template Pair,
-   * and produces a new Tuple where each element is Pair<Ti, Gi> for corresponding
+   * and produces a new Tuple where each element is `Pair<Ti, Gi>` for corresponding
    * elements Ti from the first tuple and Gi from the second.
    */
   template <class ...>
@@ -37,7 +36,7 @@ namespace Rodin::Utility
    * Both tuples must have the same number of elements (enforced by static_assert).
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * using A = Tuple<int, double, char>;
    * using B = Tuple<bool, float, short>;
    * using Zipped = Zip<A, B>::Type<std::pair>;

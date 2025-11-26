@@ -49,7 +49,7 @@ namespace Rodin::Alert
    * detailed warning messages with formatting capabilities.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * Warning() << "This operation is deprecated" << Raise;
    * @endcode
    */

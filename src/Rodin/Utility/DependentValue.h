@@ -27,7 +27,7 @@ namespace Rodin::Utility
    * template contexts.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * template <typename T>
    * void foo()
    * {

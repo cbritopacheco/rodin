@@ -27,7 +27,7 @@ namespace Rodin::Alert
    * and numeric values.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * Exception() << "Invalid polytope " << Notation::Polytope(2, 5) << Raise;
    * @endcode
    */

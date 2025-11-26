@@ -20,8 +20,8 @@ namespace Rodin::Utility
    * @brief Metafunction to compute the Cartesian product of two Tuple type-lists.
    * @ingroup UtilityModule
    *
-   * Given two `Tuple<…>` types, `A = Tuple<A1, A2, …>` and `B = Tuple<B1, B2, …>`,
-   * `Product<A, B>::Type<Pair>` will be `Tuple< Pair<Ai,Bj>… >` for all i,j.
+   * Given two `Tuple<...>` types, `A = Tuple<A1, A2, ...>` and `B = Tuple<B1, B2, ...>`,
+   * `Product<A, B>::Type<Pair>` will be `Tuple< Pair<Ai,Bj>... >` for all i,j.
    *
    * @tparam ... Primary template (undefined). Specializations below implement the logic.
    */
@@ -50,7 +50,7 @@ namespace Rodin::Utility
      * @tparam Pair Binary template taking one type from each input Tuple.
      *
      * Example:
-     * @code
+     * @code{.cpp}
      * using A = Tuple<int, double, char>;
      * using B = Tuple<bool, long>;
      * using P = Product<A,B>::Type<std::pair>;
@@ -73,7 +73,7 @@ namespace Rodin::Utility
    * @brief Specialization for Tuple with exactly one element.
    * @ingroup UtilityModule
    *
-   * Generates a single Tuple< Pair<H, G1>, Pair<H, G2>, … >.
+   * Generates a single Tuple< Pair<H, G1>, Pair<H, G2>, ...>.
    *
    * @tparam H The lone type in the first Tuple.
    * @tparam Gs All types of the second Tuple.

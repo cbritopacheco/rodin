@@ -116,7 +116,7 @@ namespace Rodin::Utility
    * type manipulation and validation are required.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * using Pack = ParameterPack<int, double, std::string>;
    * 
    * // Get type at index 1 (double)

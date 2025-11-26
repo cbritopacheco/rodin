@@ -30,7 +30,7 @@
  * - Basis functions: @f$ \boldsymbol{\phi}_i = \mathbf{e}_j @f$ where @f$ j = i \mod d @f$
  *
  * ## Usage Example
- * @code
+ * @code{.cpp}
  * using namespace Rodin::Variational;
  *
  * // Scalar P0 element (real or complex)

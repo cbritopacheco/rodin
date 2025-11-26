@@ -128,7 +128,7 @@ namespace Rodin::Alert
    * - Integration with the Alert tag types (NewLine, Raise, etc.)
    *
    * Example usage (through derived classes):
-   * @code
+   * @code{.cpp}
    * Exception() << "Error in function: " << funcName << NewLine
    *             << "Invalid parameter value: " << value << Raise;
    * @endcode

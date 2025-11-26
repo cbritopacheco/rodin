@@ -16,7 +16,7 @@
  * colored terminal output support.
  *
  * Include this header to use the Alert module:
- * @code
+ * @code{.cpp}
  * #include <Rodin/Alert.h>
  * @endcode
  */

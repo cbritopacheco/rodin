@@ -21,7 +21,7 @@ namespace Rodin::Alert
    * and emphasis for clear visual identification in error output.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * NamespacedException("Rodin::Geometry") << "Invalid operation" << Raise;
    * @endcode
    *

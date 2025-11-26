@@ -26,7 +26,7 @@ namespace Rodin::Utility
    * of the Ref template.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * static_assert(IsSpecialization<std::vector<int>, std::vector>::Value == true);
    * static_assert(IsSpecialization<int, std::vector>::Value == false);
    * @endcode

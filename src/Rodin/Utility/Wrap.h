@@ -35,7 +35,8 @@ namespace Rodin::Utility
    * @tparam Ts The types in the tuple.
    *
    * Example usage:
-   * @code
+   *
+   * @code{.cpp}
    * using Original = Tuple<int, double, char>;
    * using Wrapped = Wrap<Original>::Type<std::optional>;
    * // Wrapped is Tuple<std::optional<int>, std::optional<double>, std::optional<char>>

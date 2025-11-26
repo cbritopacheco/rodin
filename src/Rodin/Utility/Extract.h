@@ -50,7 +50,7 @@ namespace Rodin::Utility
    * from a Rodin::Tuple by applying an Extractor metafunction to each element type.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * template<typename T>
    * struct AddConst { using Type = const T; };
    * 

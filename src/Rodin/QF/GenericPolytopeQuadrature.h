@@ -47,7 +47,7 @@ namespace Rodin::QF
    *
    * ## Usage
    *
-   * @code
+   * @code{.cpp}
    * // Create a quadrature rule exact for degree 3 polynomials on a triangle
    * GenericPolytopeQuadrature qf(3, Geometry::Polytope::Type::Triangle);
    *

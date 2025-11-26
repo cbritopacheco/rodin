@@ -33,7 +33,7 @@ namespace Rodin::Utility
    * iteration over heterogeneous argument packs.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * auto printer = [](auto x) { std::cout << x << " "; };
    * Utility::For(printer, 1, 2.5, "hello");
    * // Output: 1 2.5 hello
@@ -74,14 +74,13 @@ namespace Rodin::Utility
    * @ingroup UtilityModule
    * @tparam N Number of times to execute the function.
    * @tparam F Callable type.
-   * @param f Function to execute; receives an Index<i> for each iteration.
+   * @param f Function to execute; receives an object with a `v.value` member for each iteration.
    *
    * This utility enables compile-time loops where the loop index is
-   * available as a compile-time constant. The function @p f is called
-   * with an Index<i> object for i = 0, 1, ..., N-1.
+   * available as a compile-time constant.
    *
    * Example usage:
-   * @code{cpp}
+   * @code{.cpp}
    * Utility::ForIndex<5>(
    *   [&](auto i){ std::cout << i.value << std::endl; });
    * // Output: 0 1 2 3 4

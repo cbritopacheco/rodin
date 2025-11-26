@@ -19,7 +19,7 @@ namespace Rodin::Alert
    * (such as program termination for Exception types).
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * Exception() << "An error occurred" << Raise;
    * @endcode
    */

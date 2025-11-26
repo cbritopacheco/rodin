@@ -115,7 +115,7 @@ namespace Rodin::Alert
    * assertions. This enables type-safe custom terminal colors.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * using MyColor = RGB<128, 64, 255>;
    * @endcode
    */

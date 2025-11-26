@@ -25,7 +25,7 @@ namespace Rodin::Utility
    * specializations that should never be instantiated.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * template <typename T>
    * struct MyStruct
    * {

@@ -111,7 +111,7 @@ namespace Rodin::Alert
    * template parameters to specify color types at compile time for type safety.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * auto redText = Text<RedT>("Error message");
    * auto boldText = Text("Important").setBold();
    * auto styledText = Text<RedT, BlueT>(RedT{}, BlueT{}, "Styled text");

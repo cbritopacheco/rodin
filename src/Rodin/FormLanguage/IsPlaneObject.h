@@ -29,7 +29,7 @@ namespace Rodin::FormLanguage
    * - **Non-plain**: MatrixBase expressions, Map types, Block expressions
    *
    * ## Usage
-   * @code
+   * @code{.cpp}
    * // Check if type is plain object
    * static_assert(IsPlainObject<Eigen::MatrixXd>::Value);
    * static_assert(IsPlainObject<Eigen::VectorXd>::Value);

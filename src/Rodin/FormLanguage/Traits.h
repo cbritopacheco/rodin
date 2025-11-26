@@ -16,7 +16,7 @@
  * - Type transformations
  *
  * ## Usage
- * @code
+ * @code{.cpp}
  * // Query traits of a form language object
  * using MyFES = typename Traits<MyFormObject>::FESType;
  * constexpr auto space = Traits<MyFormObject>::SpaceType;
@@ -72,7 +72,7 @@ namespace Rodin::FormLanguage
    * - **Dimension**: Spatial or value dimension
    *
    * ## Specialization Example
-   * @code
+   * @code{.cpp}
    * template <class Derived, class FES>
    * struct Traits<MyFormType<Derived, FES>>
    * {

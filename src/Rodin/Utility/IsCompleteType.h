@@ -49,7 +49,7 @@ namespace Rodin::Utility
    * different behavior is needed for complete vs. incomplete types.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * struct Complete { int x; };
    * struct Incomplete;
    *

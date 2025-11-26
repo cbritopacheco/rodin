@@ -24,7 +24,7 @@ namespace Rodin::Utility
    * For a nested template like A<B<C<D>>>, the result is D.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * using Nested = std::vector<std::optional<int>>;
    * using Bottom = BottomTemplate<Nested>::Type;
    * // Bottom is int (assuming single-param template specialization)

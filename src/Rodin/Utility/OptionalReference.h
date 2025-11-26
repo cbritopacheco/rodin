@@ -30,7 +30,7 @@ namespace Rodin::Utility
    * convenient pointer-like and reference access operators.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * int value = 42;
    * OptionalReference<int> optRef;  // Empty optional reference
    * optRef = value;  // Now refers to value

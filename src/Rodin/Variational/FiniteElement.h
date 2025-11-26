@@ -200,7 +200,7 @@ namespace Rodin::Variational
        * @brief Gets the number of degrees of freedom in the finite element.
        *
        * This forwards to the Derived class via CRTP:
-       * @code
+       * @code{.cpp}
        * static_cast<const Derived&>(*this).getCount();
        * @endcode
        *

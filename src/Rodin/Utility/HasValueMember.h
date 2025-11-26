@@ -26,7 +26,7 @@ namespace Rodin::Utility
    * where no such member exists.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * struct WithValue { using Value = int; };
    * struct WithoutValue { };
    *

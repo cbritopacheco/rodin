@@ -31,7 +31,7 @@ namespace Rodin::Utility
    * is not possible or convenient.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * auto factory = Make<std::vector<int>>{};
    * auto vec = factory(10, 42);  // Creates std::vector<int>(10, 42)
    * 

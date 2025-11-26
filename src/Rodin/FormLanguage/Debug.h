@@ -26,7 +26,7 @@ namespace Rodin::FormLanguage
    * compiler errors will reveal the actual type of T.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * // This will trigger a compile error showing the actual type
    * Debug<decltype(myExpression)> debug;
    * @endcode

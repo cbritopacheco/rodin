@@ -24,7 +24,7 @@ namespace Rodin::Alert
    * format the class name with proper coloring and emphasis.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * ClassException(*this) << "Invalid state detected" << Raise;
    * @endcode
    *

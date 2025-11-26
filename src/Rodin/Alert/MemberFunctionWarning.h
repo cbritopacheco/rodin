@@ -27,7 +27,7 @@ namespace Rodin::Alert
    * the program but instead displays a formatted warning message.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * MemberFunctionWarning(*this, __func__) << "Deprecated feature used" << Raise;
    * @endcode
    *

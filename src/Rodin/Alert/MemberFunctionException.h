@@ -23,7 +23,7 @@ namespace Rodin::Alert
    * occurred.
    *
    * Example usage:
-   * @code{cpp}
+   * @code{.cpp}
    * MemberFunctionException(*this, __func__) << "Some kind of error." << Raise;
    * @endcode
    *

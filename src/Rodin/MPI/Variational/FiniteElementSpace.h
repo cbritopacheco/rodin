@@ -58,7 +58,7 @@ namespace Rodin::Variational
        * The callable type T must be a function on the mesh, i.e. the call
        * operator must have the following signature:
        *
-       * @code{cpp}
+       * @code{.cpp}
        *  auto operator()(const Geometry::Point&);
        * @endcode
        *
