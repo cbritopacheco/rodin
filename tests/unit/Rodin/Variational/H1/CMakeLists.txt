@@ -61,3 +61,11 @@ target_link_libraries(RodinVariationalH1EdgeConformityTest
   GTest::gtest_main
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalH1EdgeConformityTest)
+
+add_executable(RodinVariationalH1FaceConformityTest FaceConformityTest.cpp)
+target_link_libraries(RodinVariationalH1FaceConformityTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1FaceConformityTest)

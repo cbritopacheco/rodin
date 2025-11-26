@@ -812,4 +812,113 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tri_edge, wedge_edge, "Triangle K=6", "Wedge K=6");
     compareEdgeCoordinates(tet_edge, wedge_edge, "Tetrahedron K=6", "Wedge K=6");
   }
+
+  //==========================================================================
+  // Very high-order conformity tests (K = 15)
+  //==========================================================================
+
+  TEST(EdgeConformity3D2D, AllGeometries_HighOrder_K15)
+  {
+    // Comprehensive test: all geometry combinations at K=15
+    auto seg = extractSegmentNodes<15>();
+    auto tri_edge = extractTriangleEdgeNodes<15>(0.0, 0.0, 1.0, 0.0);
+    auto quad_edge = extractQuadrilateralEdgeNodes<15>(0.0, 0.0, 1.0, 0.0);
+    auto tet_edge = extractTetrahedronEdgeNodes<15>(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    auto wedge_edge = extractWedgeEdgeNodes<15>(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+
+    // 1D-2D
+    compareEdgeCoordinates(seg, tri_edge, "Segment K=15", "Triangle edge K=15");
+    compareEdgeCoordinates(seg, quad_edge, "Segment K=15", "Quadrilateral edge K=15");
+
+    // 1D-3D
+    compareEdgeCoordinates(seg, tet_edge, "Segment K=15", "Tetrahedron edge K=15");
+    compareEdgeCoordinates(seg, wedge_edge, "Segment K=15", "Wedge edge K=15");
+
+    // 2D-2D
+    compareEdgeCoordinates(tri_edge, quad_edge, "Triangle K=15", "Quadrilateral K=15");
+
+    // 2D-3D
+    compareEdgeCoordinates(tri_edge, tet_edge, "Triangle K=15", "Tetrahedron K=15");
+    compareEdgeCoordinates(tri_edge, wedge_edge, "Triangle K=15", "Wedge K=15");
+    compareEdgeCoordinates(quad_edge, tet_edge, "Quadrilateral K=15", "Tetrahedron K=15");
+    compareEdgeCoordinates(quad_edge, wedge_edge, "Quadrilateral K=15", "Wedge K=15");
+
+    // 3D-3D
+    compareEdgeCoordinates(tet_edge, wedge_edge, "Tetrahedron K=15", "Wedge K=15");
+  }
+
+  TEST(EdgeConformity, AllGeometries_EdgeNodes_Match_K15)
+  {
+    const auto& gll = GLL01<15>::getNodes();
+    std::vector<Real> gll_vec(gll.begin(), gll.end());
+
+    // Segment
+    auto seg = extractSegmentNodes<15>();
+    compareEdgeCoordinates(seg, gll_vec, "Segment K=15", "GLL01");
+
+    // Triangle
+    auto tri_edge = extractTriangleEdgeNodes<15>(0.0, 0.0, 1.0, 0.0);
+    compareEdgeCoordinates(tri_edge, gll_vec, "Triangle edge K=15", "GLL01");
+
+    // Quadrilateral
+    auto quad_edge = extractQuadrilateralEdgeNodes<15>(0.0, 0.0, 1.0, 0.0);
+    compareEdgeCoordinates(quad_edge, gll_vec, "Quadrilateral edge K=15", "GLL01");
+
+    // Tetrahedron
+    auto tet_edge = extractTetrahedronEdgeNodes<15>(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    compareEdgeCoordinates(tet_edge, gll_vec, "Tetrahedron edge K=15", "GLL01");
+
+    // Wedge - triangle edge
+    auto wedge_tri_edge = extractWedgeEdgeNodes<15>(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    compareEdgeCoordinates(wedge_tri_edge, gll_vec, "Wedge triangle edge K=15", "GLL01");
+
+    // Wedge - vertical edge
+    auto wedge_vert_edge = extractWedgeEdgeNodes<15>(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+    compareEdgeCoordinates(wedge_vert_edge, gll_vec, "Wedge vertical edge K=15", "GLL01");
+  }
+
+  TEST(EdgeConformity3D, Tetrahedron_Wedge_AllSharedEdges_K15)
+  {
+    // Test all edges that can be shared between tetrahedron and wedge base face
+    // Reference tetrahedron: (0,0,0), (1,0,0), (0,1,0), (0,0,1)
+    // Reference wedge base: triangle at z=0 with vertices (0,0,0), (1,0,0), (0,1,0)
+
+    // Edge 01: (0,0,0) to (1,0,0)
+    auto tet_01 = extractTetrahedronEdgeNodes<15>(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    auto wedge_01 = extractWedgeEdgeNodes<15>(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    compareEdgeCoordinates(tet_01, wedge_01, "Tet-Wedge edge 01 K=15", "same");
+
+    // Edge 02: (0,0,0) to (0,1,0)
+    auto tet_02 = extractTetrahedronEdgeNodes<15>(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    auto wedge_02 = extractWedgeEdgeNodes<15>(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    compareEdgeCoordinates(tet_02, wedge_02, "Tet-Wedge edge 02 K=15", "same");
+
+    // Edge 12: (1,0,0) to (0,1,0)
+    auto tet_12 = extractTetrahedronEdgeNodes<15>(1.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    auto wedge_12 = extractWedgeEdgeNodes<15>(1.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    compareEdgeCoordinates(tet_12, wedge_12, "Tet-Wedge edge 12 K=15", "same");
+  }
+
+  TEST(EdgeConformity, EdgeNodeCount_K15)
+  {
+    // Segment should have K+1 = 16 nodes at K=15
+    auto seg = extractSegmentNodes<15>();
+    EXPECT_EQ(seg.size(), 16u);
+
+    // Triangle edge should also have 16 nodes
+    auto tri_edge = extractTriangleEdgeNodes<15>(0.0, 0.0, 1.0, 0.0);
+    EXPECT_EQ(tri_edge.size(), 16u);
+
+    // Quadrilateral edge should also have 16 nodes
+    auto quad_edge = extractQuadrilateralEdgeNodes<15>(0.0, 0.0, 1.0, 0.0);
+    EXPECT_EQ(quad_edge.size(), 16u);
+
+    // Tetrahedron edge should also have 16 nodes
+    auto tet_edge = extractTetrahedronEdgeNodes<15>(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    EXPECT_EQ(tet_edge.size(), 16u);
+
+    // Wedge edge should also have 16 nodes
+    auto wedge_edge = extractWedgeEdgeNodes<15>(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    EXPECT_EQ(wedge_edge.size(), 16u);
+  }
 }

@@ -436,4 +436,83 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(V.rows(), FeketeTetrahedron<5>::Count);
     EXPECT_EQ(V.cols(), FeketeTetrahedron<5>::Count);
   }
+
+  //==========================================================================
+  // Very High Order Tests (K = 15)
+  //==========================================================================
+
+  TEST(DubinerTriangle, Basis_P5Q5_K15_NoNaN)
+  {
+    Real basis;
+    Real r = 0.3, s = -0.3;
+
+    DubinerTriangle<15>::getBasis<5, 5>(basis, r, s);
+    EXPECT_FALSE(std::isnan(basis));
+    EXPECT_FALSE(std::isinf(basis));
+  }
+
+  TEST(DubinerTriangle, Basis_P7Q3_K15_NoNaN)
+  {
+    Real basis;
+    Real r = 0.0, s = 0.5;
+
+    DubinerTriangle<15>::getBasis<7, 3>(basis, r, s);
+    EXPECT_FALSE(std::isnan(basis));
+    EXPECT_FALSE(std::isinf(basis));
+  }
+
+  TEST(DubinerTriangle, Gradient_P5Q5_K15_NoNaN)
+  {
+    Real dpsi_dr, dpsi_ds;
+    DubinerTriangle<15>::getGradient<5, 5>(dpsi_dr, dpsi_ds, 0.3, -0.5);
+    EXPECT_FALSE(std::isnan(dpsi_dr));
+    EXPECT_FALSE(std::isnan(dpsi_ds));
+    EXPECT_FALSE(std::isinf(dpsi_dr));
+    EXPECT_FALSE(std::isinf(dpsi_ds));
+  }
+
+  TEST(VandermondeTriangle, MatrixSize_K15)
+  {
+    const auto& V = VandermondeTriangle<15>::getMatrix();
+    EXPECT_EQ(V.rows(), FeketeTriangle<15>::Count);
+    EXPECT_EQ(V.cols(), FeketeTriangle<15>::Count);
+  }
+
+  // Note: VandermondeTriangle InverseIsInverse_K15 is skipped due to
+  // ill-conditioning at high polynomial orders (numerical precision issues)
+
+  TEST(DubinerTetrahedron, Basis_P3Q3R3_K15_NoNaN)
+  {
+    Real basis;
+    DubinerTetrahedron<15>::getBasis<3, 3, 3>(basis, 0.3, -0.3, -0.5);
+    EXPECT_FALSE(std::isnan(basis));
+    EXPECT_FALSE(std::isinf(basis));
+  }
+
+  TEST(DubinerTetrahedron, Basis_P5Q2R2_K15_NoNaN)
+  {
+    Real basis;
+    DubinerTetrahedron<15>::getBasis<5, 2, 2>(basis, 0.0, 0.2, -0.5);
+    EXPECT_FALSE(std::isnan(basis));
+    EXPECT_FALSE(std::isinf(basis));
+  }
+
+  TEST(DubinerTetrahedron, Gradient_P3Q3R3_K15_NoNaN)
+  {
+    Real dpsi_da, dpsi_db, dpsi_dc;
+    DubinerTetrahedron<15>::getGradient<3, 3, 3>(dpsi_da, dpsi_db, dpsi_dc, 0.3, -0.3, -0.5);
+    EXPECT_FALSE(std::isnan(dpsi_da));
+    EXPECT_FALSE(std::isnan(dpsi_db));
+    EXPECT_FALSE(std::isnan(dpsi_dc));
+  }
+
+  TEST(VandermondeTetrahedron, MatrixSize_K15)
+  {
+    const auto& V = VandermondeTetrahedron<15>::getMatrix();
+    EXPECT_EQ(V.rows(), FeketeTetrahedron<15>::Count);
+    EXPECT_EQ(V.cols(), FeketeTetrahedron<15>::Count);
+  }
+
+  // Note: VandermondeTetrahedron InverseIsInverse_K15 is skipped due to
+  // computational cost (816x816 matrix multiplication takes too long)
 }

@@ -376,4 +376,92 @@ namespace Rodin::Tests::Unit
     }
     EXPECT_NEAR(sum, 0.0, 1e-12);
   }
+
+  //==========================================================================
+  // Very High Order Tests (K = 15)
+  //==========================================================================
+
+  TEST(LegendrePolynomial, P15_EndpointValues)
+  {
+    // P_15(1) = 1, P_15(-1) = -1 (odd degree)
+    Real P, dP;
+
+    LegendrePolynomial<15>::getValue(P, dP, 1.0);
+    EXPECT_NEAR(P, 1.0, 1e-11);
+
+    LegendrePolynomial<15>::getValue(P, dP, -1.0);
+    EXPECT_NEAR(P, -1.0, 1e-11);
+  }
+
+  TEST(LegendrePolynomial, P15_AtZero)
+  {
+    // P_15(0) = 0 (odd polynomial)
+    Real P, dP;
+
+    LegendrePolynomial<15>::getValue(P, dP, 0.0);
+    EXPECT_NEAR(P, 0.0, 1e-12);
+  }
+
+  TEST(LegendrePolynomial, P15_Symmetry_OddDegree)
+  {
+    // P_15(-x) = -P_15(x) for odd K
+    Real P_pos, dP_pos, P_neg, dP_neg;
+
+    std::vector<Real> test_points = {0.1, 0.3, 0.5, 0.7, 0.9};
+
+    for (Real x : test_points)
+    {
+      LegendrePolynomial<15>::getValue(P_pos, dP_pos, x);
+      LegendrePolynomial<15>::getValue(P_neg, dP_neg, -x);
+      EXPECT_NEAR(P_pos, -P_neg, 1e-12);
+    }
+  }
+
+  TEST(LegendrePolynomial, P15_Value_NoNaN)
+  {
+    // Verify no NaN/Inf at various points
+    Real P, dP;
+
+    std::vector<Real> test_points = {-0.9, -0.5, 0.0, 0.5, 0.9};
+
+    for (Real x : test_points)
+    {
+      LegendrePolynomial<15>::getValue(P, dP, x);
+      EXPECT_FALSE(std::isnan(P));
+      EXPECT_FALSE(std::isinf(P));
+      EXPECT_FALSE(std::isnan(dP));
+      EXPECT_FALSE(std::isinf(dP));
+    }
+  }
+
+  TEST(LegendrePolynomial, P15_Derivative_NoNaN)
+  {
+    Real P, dP;
+
+    std::vector<Real> test_points = {-0.9, -0.5, 0.0, 0.5, 0.9};
+
+    for (Real x : test_points)
+    {
+      LegendrePolynomial<15>::getValue(P, dP, x);
+      EXPECT_FALSE(std::isnan(dP));
+      EXPECT_FALSE(std::isinf(dP));
+    }
+  }
+
+  TEST(LegendrePolynomial, Orthogonality_P5_P15)
+  {
+    // ∫_{-1}^{1} P_5(x) P_15(x) dx = 0
+    // Need more quadrature points for high-order polynomials
+    const int N = 100;
+    Real sum = 0.0;
+    for (int i = 0; i < N; ++i)
+    {
+      Real x = -1.0 + 2.0 * (i + 0.5) / N;
+      Real P5, dP5, P15, dP15;
+      LegendrePolynomial<5>::getValue(P5, dP5, x);
+      LegendrePolynomial<15>::getValue(P15, dP15, x);
+      sum += P5 * P15 * (2.0 / N);
+    }
+    EXPECT_NEAR(sum, 0.0, 1e-8);
+  }
 }
