@@ -21,7 +21,7 @@ namespace Rodin::QF
    * point (typically the centroid) and are exact for polynomials up to degree 1.
    * This is the simplest possible quadrature rule for each geometry type.
    */
-  class QF1P1 final : public QuadratureFormulaBase
+  class Centroid final : public QuadratureFormulaBase
   {
     public:
       /// Parent class type
@@ -32,7 +32,7 @@ namespace Rodin::QF
        * @param g Geometry type (e.g., triangle, quadrilateral, etc.)
        */
       constexpr
-      QF1P1(Geometry::Polytope::Type g)
+      Centroid(Geometry::Polytope::Type g)
         : Parent(g)
       {}
 
@@ -71,15 +71,15 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new QF1P1 instance (ownership transferred to caller)
        */
-      QF1P1* copy() const noexcept override
+      Centroid* copy() const noexcept override
       {
-        return new QF1P1(*this);
+        return new Centroid(*this);
       }
 
     private:
       /// Static data: single quadrature point coordinates for each geometry
       static const Geometry::GeometryIndexed<Math::SpatialVector<Real>> s_points;
-      
+
       /// Static data: single quadrature point weight for each geometry
       static const Geometry::GeometryIndexed<Real> s_weights;
   };

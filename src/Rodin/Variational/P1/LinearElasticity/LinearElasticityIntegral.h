@@ -4,8 +4,7 @@
 #include "Rodin/Variational/LinearElasticity/LinearElasticityIntegral.h"
 #include "Rodin/Variational/P1/ForwardDecls.h"
 #include "Rodin/Variational/P1/P1.h"
-#include "Rodin/Variational/P1/P1Element.h"
-#include "Rodin/QF/QF1P1.h"
+#include "Rodin/QF/Centroid.h"
 
 namespace Rodin::Variational
 {
@@ -166,7 +165,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const TestFESType> m_testfes;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::QF1P1> m_qf;
+      Optional<QF::Centroid> m_qf;
       Optional<Geometry::Point> m_p;
 
       Real m_distortion;

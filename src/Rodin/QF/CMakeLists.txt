@@ -6,16 +6,14 @@ Distributed under the Boost Software License, Version 1.0.
 ]]
 
 set(RodinQF_HEADERS
-  QF1P1.h
-  QF2P1.h
+  Centroid.h
   GaussLegendre.h
   GrundmannMoller.h
   GenericPolytopeQuadrature.h
 )
 
 set(RodinQF_SRCS
-  QF1P1.cpp
-  QF2P1.cpp
+  Centroid.cpp
   GaussLegendre.cpp
   GrundmannMoller.cpp
   GenericPolytopeQuadrature.cpp
