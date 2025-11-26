@@ -7,6 +7,24 @@
 #ifndef RODIN_VARIATIONAL_H1_H1ELEMENT_HPP
 #define RODIN_VARIATIONAL_H1_H1ELEMENT_HPP
 
+/**
+ * @file
+ * @brief Template implementation for H1Element class.
+ *
+ * This file contains the template member function implementations for
+ * H1Element, including:
+ * - Basis function evaluation using modal Dubiner basis
+ * - First-order derivative computation via chain rule
+ * - Vandermonde matrix inversion for nodal-to-modal conversion
+ *
+ * The implementation uses:
+ * - **Segments**: Classical Lagrange interpolation with GLL nodes
+ * - **Triangles**: Dubiner modal basis with Fekete nodes
+ * - **Quadrilaterals**: Tensor product of 1D GLL Lagrange bases
+ * - **Tetrahedra**: 3D Dubiner modal basis with Fekete nodes
+ * - **Wedges**: Product of triangle Fekete basis and 1D GLL basis
+ */
+
 #include "Rodin/Math/Common.h"
 
 #include "H1Element.h"

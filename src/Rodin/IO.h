@@ -7,9 +7,24 @@
 #ifndef RODIN_IO_H
 #define RODIN_IO_H
 
+/**
+ * @file
+ * @brief Top level include for the Rodin::IO module.
+ *
+ * The IO module provides input/output functionality for meshes, grid functions,
+ * and other finite element data. It supports various file formats commonly used
+ * in computational mechanics and scientific visualization.
+ *
+ * Supported formats include:
+ * - MEDIT (.mesh)
+ * - MFEM (.mfem)
+ * - EnSight (.case)
+ *
+ * @see Rodin::IO
+ */
+
 #include "IO/ForwardDecls.h"
 #include "IO/Loader.h"
 #include "IO/Printer.h"
 
 #endif
-

@@ -7,5 +7,12 @@
 #ifndef RODIN_COMMON_H
 #define RODIN_COMMON_H
 
+/**
+ * @file
+ * @brief Common definitions and includes used throughout Rodin.
+ *
+ * This header provides shared definitions and common includes that are
+ * used across multiple modules in the Rodin library.
+ */
 
 #endif

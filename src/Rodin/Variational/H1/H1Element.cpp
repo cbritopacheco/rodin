@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Implementation file for H1Element non-template members.
+ */
+
 #include "H1Element.h"
 
 namespace Rodin::Variational

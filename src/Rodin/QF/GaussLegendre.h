@@ -7,10 +7,16 @@
 #ifndef RODIN_VARIATIONAL_QF_GAUSSLEGENDRE_H
 #define RODIN_VARIATIONAL_QF_GAUSSLEGENDRE_H
 
+/**
+ * @file
+ * @brief Defines the GaussLegendre quadrature formula.
+ */
+
 #include <vector>
 #include <cassert>
 
 #include "QuadratureFormula.h"
+
 
 namespace Rodin::QF
 {

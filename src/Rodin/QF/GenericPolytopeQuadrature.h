@@ -8,6 +8,11 @@
 #define RODIN_VARIATIONAL_QF_GENERIC_POLYTOPE_QUADRATURE_H
 
 /**
+ * @file
+ * @brief Defines the GenericPolytopeQuadrature dispatcher class.
+ */
+
+/**
  * @ingroup RodinDirectives
  * @brief Default order for GenericPolytopeQuadrature.
  *
@@ -15,6 +20,7 @@
  * constructing a GenericPolytopeQuadrature without specifying an order.
  */
 #define RODIN_VARIATIONAL_QF_GENERIC_POLYTOPE_QUADRATURE_DEFAULT_ORDER 1
+
 
 #include "QuadratureFormula.h"
 

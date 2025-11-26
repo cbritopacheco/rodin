@@ -4,8 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_QF_QF1P1_H
-#define RODIN_VARIATIONAL_QF_QF1P1_H
+#ifndef RODIN_VARIATIONAL_QF_CENTROID_H
+#define RODIN_VARIATIONAL_QF_CENTROID_H
+
+/**
+ * @file
+ * @brief Defines the Centroid single-point quadrature formula.
+ */
 
 #include "Rodin/Geometry/GeometryIndexed.h"
 
@@ -15,11 +20,46 @@ namespace Rodin::QF
 {
   /**
    * @ingroup RodinQuadrature
-   * @brief Single-point quadrature formula with degree of exactness 1.
+   * @brief Single-point centroid quadrature formula.
    *
-   * This class implements quadrature formulas that use a single integration 
-   * point (typically the centroid) and are exact for polynomials up to degree 1.
-   * This is the simplest possible quadrature rule for each geometry type.
+   * This class implements a quadrature formula that uses a single integration
+   * point located at the centroid (barycenter) of the reference polytope.
+   * The quadrature is exact for polynomials up to degree 1 (linear functions).
+   *
+   * ## Mathematical Foundation
+   *
+   * The centroid rule approximates integrals as:
+   * @f[
+   *   \int_K f(x) \, dx \approx w \cdot f(c)
+   * @f]
+   * where @f$ c @f$ is the centroid of the polytope @f$ K @f$ and @f$ w @f$
+   * is the weight equal to the volume (measure) of the reference element.
+   *
+   * ## Reference Element Centroids
+   *
+   * The quadrature points are located at:
+   * - Point: @f$ (0) @f$
+   * - Segment: @f$ (0.5) @f$
+   * - Triangle: @f$ (1/3, 1/3) @f$
+   * - Quadrilateral: @f$ (0.5, 0.5) @f$
+   * - Tetrahedron: @f$ (0.25, 0.25, 0.25) @f$
+   * - Wedge: @f$ (1/3, 1/3, 0.5) @f$
+   *
+   * ## Reference Element Weights
+   *
+   * The weights correspond to the reference element measures:
+   * - Point: @f$ 1 @f$
+   * - Segment: @f$ 1 @f$
+   * - Triangle: @f$ 1/2 @f$
+   * - Quadrilateral: @f$ 1 @f$
+   * - Tetrahedron: @f$ 1/6 @f$
+   * - Wedge: @f$ 1/2 @f$
+   *
+   * This is the simplest possible quadrature rule for each geometry type
+   * and is computationally efficient when low accuracy is acceptable.
+   *
+   * @see QuadratureFormulaBase
+   * @see GaussLegendre
    */
   class Centroid final : public QuadratureFormulaBase
   {
@@ -28,8 +68,8 @@ namespace Rodin::QF
       using Parent = QuadratureFormulaBase;
 
       /**
-       * @brief Constructs a QF1P1 quadrature formula for the given geometry.
-       * @param g Geometry type (e.g., triangle, quadrilateral, etc.)
+       * @brief Constructs a centroid quadrature formula for the given geometry.
+       * @param g Geometry type (e.g., Triangle, Quadrilateral, Tetrahedron, etc.)
        */
       constexpr
       Centroid(Geometry::Polytope::Type g)
@@ -46,9 +86,9 @@ namespace Rodin::QF
       }
 
       /**
-       * @brief Gets the single quadrature point coordinates.
+       * @brief Gets the single quadrature point coordinates (the centroid).
        * @param i Index of the quadrature point (must be 0)
-       * @return Reference to the spatial coordinates of the quadrature point
+       * @return Reference to the centroid coordinates in reference space
        */
       const Math::SpatialVector<Real>& getPoint(size_t i) const override
       {
@@ -59,7 +99,7 @@ namespace Rodin::QF
       /**
        * @brief Gets the weight of the single quadrature point.
        * @param i Index of the quadrature point (must be 0)
-       * @return Weight associated with the quadrature point
+       * @return Weight equal to the reference element measure
        */
       Real getWeight(size_t i) const override
       {
@@ -69,7 +109,7 @@ namespace Rodin::QF
 
       /**
        * @brief Creates a copy of this quadrature formula.
-       * @return Pointer to a new QF1P1 instance (ownership transferred to caller)
+       * @return Pointer to a new Centroid instance (caller takes ownership)
        */
       Centroid* copy() const noexcept override
       {
@@ -77,10 +117,10 @@ namespace Rodin::QF
       }
 
     private:
-      /// Static data: single quadrature point coordinates for each geometry
+      /// Static data: centroid coordinates for each geometry type
       static const Geometry::GeometryIndexed<Math::SpatialVector<Real>> s_points;
 
-      /// Static data: single quadrature point weight for each geometry
+      /// Static data: quadrature weight (reference element measure) for each geometry type
       static const Geometry::GeometryIndexed<Real> s_weights;
   };
 }
