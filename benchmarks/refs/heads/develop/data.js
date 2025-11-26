@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1764083461635,
+  "lastUpdate": 1764154514221,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -38986,6 +38986,162 @@ window.BENCHMARK_DATA = {
             "value": 51.007120224060884,
             "unit": "ns/iter",
             "extra": "iterations: 12151303\ncpu: 50.9918349497169 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "198982749+Copilot@users.noreply.github.com",
+            "name": "Copilot",
+            "username": "Copilot"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9ddcff2af97e46583cb447bbdb3e0b84a562ca97",
+          "message": "Add FaceConformityTest and fix tetrahedron face node placement in warp-blend (#151)\n\n* Initial plan\n\n* Implement GLL and Fekete nodes for high-order stable H1Element\n\n- Rename getLagrangeNodes() to getNodes()\n- Add GLL (Gauss-Lobatto-Legendre) node generation for segments and quadrilaterals\n- Add Fekete node generation placeholders for triangles and tetrahedra\n- Update all basis function evaluations to use actual node positions\n- Use static thread_local caching for all node sets\n- All 108 unit tests pass\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add M_PI fallback definition for portability\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Implement full warp-blend Fekete algorithm for triangles and tetrahedra\n\n- Add evaluateWarpLagrange() for warp function computation\n- Add warpFactor() to compute warp based on GLL node displacement\n- Implement applyTriangleWarpBlend() with edge-based warping and blending\n- Implement applyTetrahedronWarpBlend() extending 2D approach to 3D\n- Apply warp-blend to move equispaced nodes toward optimal Fekete positions\n- All 108 unit tests pass\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add Dubiner modal basis implementation for Triangle and Tetrahedron (WIP)\n\n- Implement Jacobi polynomial evaluation with 3-term recurrence\n- Add Dubiner modal basis functions for Triangle and Tetrahedron\n- Implement Vandermonde matrix construction and caching\n- Update basis evaluation to use Dubiner + Vandermonde approach\n- Add coordinate transformations from reference to collapsed coordinates\n- Implement gradient transformations with proper Jacobians\n\nNote: Implementation structure is in place but coordinate transformations\nneed further debugging to pass all tests. The approach is correct but\nrequires careful validation of the collapsed coordinate mappings.\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Tests seem to pass\n\n* Consistency fix\n\n* Skeleton for proper handling of bases\n\n* Update\n\n* Refactor H1 element internals: replace Internal:: helpers with dedicated node/basis classes\n\n* update\n\n* CI\n\n* Update\n\n* Hesthaven–Warburton nodal sets\n\n* Fix tests\n\n* Add unit tests for H1 element component classes\n\n- LegendrePolynomialTest.cpp: 14 tests for Legendre polynomials\n- JacobiPolynomialTest.cpp: 16 tests for Jacobi polynomials\n- GLLTest.cpp: 31 tests for GLL and GLL01 nodes\n- FeketeTest.cpp: 21 tests for Fekete nodes\n- DubinerTest.cpp: 28 tests for Dubiner basis and Vandermonde matrices\n- LagrangeBasisTest.cpp: 21 tests for Lagrange basis classes\n- WarpBlendTest.cpp: 17 tests for warp-blend algorithm\n\nAll 148 new tests pass. Each H1 component class now has its own test file.\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add higher-order tests (K=5,6) and fix trailing whitespace\n\n- Add 58 new tests for higher order K=5 and K=6\n- Fix trailing whitespace in all test files\n- All 206 H1 component tests pass\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix orientations for de Rham\n\n* Add EdgeConformityTest.cpp for verifying segment edge node compatibility\n\n- Add tests verifying Segment nodes match GLL01 nodes\n- Add tests verifying Triangle edge nodes match GLL01 nodes on all 3 edges\n- Add tests verifying Quadrilateral edge nodes match GLL01 nodes on all 4 edges\n- Add tests verifying Tetrahedron edge nodes match GLL01 nodes on all 6 edges\n- Add tests verifying Wedge vertical edges and triangle edges match\n- Add cross-geometry conformity tests (Triangle-Quad, Triangle-Tet, etc.)\n- Add K=6 conformity tests across all geometry types\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive 3D-3D and 3D-2D cross-geometry conformity tests\n\n- Fix division by zero protection in all edge extraction functions\n- Add std::numeric_limits for proper epsilon handling\n- Add 3D-3D tests: Tetrahedron vs Wedge shared edges (K=3,4,5,6)\n- Add 3D-2D tests: Triangle-Tetrahedron, Triangle-Wedge, Quad-Wedge, Quad-Tet\n- Add Segment-3D tests: Segment vs Tetrahedron/Wedge edges\n- Add comprehensive all-geometry tests at K=5 and K=6\n- Total: ~50 edge conformity tests covering all dimension combinations\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Refactor edge conformity tests: extract shared utility functions\n\n- Extract computeEdgeParameter2D and computeEdgeParameter3D functions\n- Define EDGE_TOL and EDGE_EPS as namespace-level constants\n- Fix comment for top edge direction (was reversed)\n- Reduce code duplication in edge extraction functions\n- Maintain consistent tolerance handling across all tests\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix compilation\n\n* Fix WarpBlendTetrahedron to preserve edge nodes with GLL01 positions\n\nThe warp-blend algorithm was moving tetrahedron edge nodes off their\nedges, breaking H1 conformity. This fix:\n\n- Detect edge nodes (exactly 2 barycentric coords are zero)\n- Apply 1D GLL warp along edge direction only\n- Compute raw displacement (gll - equispaced) without blend factor\n- Edge nodes now match GLL01 positions exactly\n\nAll 274 H1 tests pass (108 H1Element + 166 component tests).\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive Doxygen documentation to H1 element classes\n\n- Document LegendrePolynomial, JacobiPolynomial, GLL, GLL01 classes\n- Document Fekete triangle and tetrahedron node generators\n- Document Dubiner modal basis classes and Vandermonde matrices\n- Document WarpBlend algorithm classes (WarpFactor1D, TriangleBlend, etc.)\n- Document LagrangeBasis classes for all geometry types\n- Add mathematical formulas and references to Hesthaven & Warburton\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove unused template parameter\n\n* Initial plan\n\n* Add FaceConformityTest.cpp to verify 2D face nodes on 3D geometries\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix FeketeTetrahedron face conformity and add K>=4 tests\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Address code review comments: use named constants and fix unused variable\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add K=15 tests for EdgeConformity and FaceConformity\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix doc\n\n* Changes before error encountered\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove getNode from the base api\n\n* Remove getNode from base api\n\n* Fix Doc\n\n* Fix Orthogonality_P5_P15 test using Gauss-Legendre quadrature\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Quadrature rename\n\n* Fix CI\n\n* Rename test\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>",
+          "timestamp": "2025-11-26T11:41:54+01:00",
+          "tree_id": "7e91ac2c90c7c22b3f32f4eb5850187597985a5f",
+          "url": "https://github.com/cbritopacheco/rodin/commit/9ddcff2af97e46583cb447bbdb3e0b84a562ca97"
+        },
+        "date": 1764154506947,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.3111952167600952,
+            "unit": "ns/iter",
+            "extra": "iterations: 2245680047\ncpu: 0.3111848145658837 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.31116124956233404,
+            "unit": "ns/iter",
+            "extra": "iterations: 2251551178\ncpu: 0.3111438149153187 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.31072041423696034,
+            "unit": "ns/iter",
+            "extra": "iterations: 2250397267\ncpu: 0.31071128162723644 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.310974066598055,
+            "unit": "ns/iter",
+            "extra": "iterations: 2244822453\ncpu: 0.31096223626376923 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 630.8428146866073,
+            "unit": "ns/iter",
+            "extra": "iterations: 1115435\ncpu: 630.8074141478435 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 128292.11937556806,
+            "unit": "ns/iter",
+            "extra": "iterations: 5445\ncpu: 128279.88448117537 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 536964.8024502372,
+            "unit": "ns/iter",
+            "extra": "iterations: 1306\ncpu: 536966.184532925 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 1100.058409040342,
+            "unit": "ns/iter",
+            "extra": "iterations: 638206\ncpu: 1099.9922470174206 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 227212.30882351482,
+            "unit": "ns/iter",
+            "extra": "iterations: 3060\ncpu: 227208.99771241823 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 952474.4578804391,
+            "unit": "ns/iter",
+            "extra": "iterations: 736\ncpu: 952388.2771739139 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 263743.7563865339,
+            "unit": "ns/iter",
+            "extra": "iterations: 2701\ncpu: 263717.85560903384 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 250751.6683327282,
+            "unit": "ns/iter",
+            "extra": "iterations: 2801\ncpu: 250711.5208853982 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 13431.668924364254,
+            "unit": "ns/iter",
+            "extra": "iterations: 52118\ncpu: 13430.499884876634 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 6009537.478632378,
+            "unit": "ns/iter",
+            "extra": "iterations: 117\ncpu: 6009172.487179493 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 111139.1210492971,
+            "unit": "ns/iter",
+            "extra": "iterations: 6328\ncpu: 111135.75900758535 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2068858.0979229568,
+            "unit": "ns/iter",
+            "extra": "iterations: 337\ncpu: 2068721.7774480695 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9104247.545454424,
+            "unit": "ns/iter",
+            "extra": "iterations: 77\ncpu: 9103682.506493488 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 42354414.846154384,
+            "unit": "ns/iter",
+            "extra": "iterations: 13\ncpu: 42349799.38461527 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 283277119.49998504,
+            "unit": "ns/iter",
+            "extra": "iterations: 2\ncpu: 283231845.4999996 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_16x16",
+            "value": 48.21299317963018,
+            "unit": "ns/iter",
+            "extra": "iterations: 14521357\ncpu: 48.208129240263155 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_32x32",
+            "value": 48.548458622642954,
+            "unit": "ns/iter",
+            "extra": "iterations: 14482015\ncpu: 48.546995980877014 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_64x64",
+            "value": 49.09896667279146,
+            "unit": "ns/iter",
+            "extra": "iterations: 12572010\ncpu: 49.097596167995405 ns\nthreads: 1"
           }
         ]
       }
