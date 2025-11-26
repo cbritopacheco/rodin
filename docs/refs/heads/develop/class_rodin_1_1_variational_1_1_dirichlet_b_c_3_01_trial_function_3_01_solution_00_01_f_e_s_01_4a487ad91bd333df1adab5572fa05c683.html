@@ -193,8 +193,8 @@ $ \Gamma_D \subset \mathcal{B}_h $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a2ce4f113b14abd08c862386b43957f01">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ce4f113b14abd08c862386b43957f01" class="m-doc-self">on</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> bdrAtr) -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ce4f113b14abd08c862386b43957f01" class="m-doc">on</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> bdrAtr) -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Specifies the region of the boundary over which the condition will be imposed.</dd>
             <dt>
@@ -254,6 +254,26 @@ $ \Gamma_D \subset \mathcal{B}_h $
                 <tr>
                   <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Value object</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2ce4f113b14abd08c862386b43957f01"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class FES, class ValueDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES&gt;, FunctionBase&lt;ValueDerived&gt;&gt;&lt;Solution, FES, ValueDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ce4f113b14abd08c862386b43957f01" class="m-doc-self">on</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> bdrAtr) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Specifies the region of the boundary over which the condition will be imposed.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">bdrAtr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute associated to the boundary region</td>
                 </tr>
               </tbody>
             </table>
