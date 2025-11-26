@@ -8,8 +8,12 @@
 #define RODIN_VARIATIONAL_QF_GAUSSLOBATTO_H
 
 /**
- * @file
+ * @file GaussLobato.h
  * @brief Defines the GaussLobatto quadrature formula.
+ *
+ * @note This file provides a header-only implementation of Gauss-Lobatto
+ * quadrature. The filename contains a typo (GaussLobato instead of GaussLobatto)
+ * but the class name uses the correct spelling.
  */
 
 #include <vector>

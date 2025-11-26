@@ -25,6 +25,7 @@
  * @see Rodin::QF::GrundmannMoller
  * @see Rodin::QF::Centroid
  * @see Rodin::QF::GenericPolytopeQuadrature
+ * @see Rodin::QF::GaussLobatto (header-only, include QF/GaussLobato.h separately)
  */
 
 #include "QF/QuadratureFormula.h"
