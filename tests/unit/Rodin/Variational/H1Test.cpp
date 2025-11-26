@@ -246,9 +246,13 @@ namespace Rodin::Tests::Unit
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
     const size_t cellCount = mesh.getCellCount();
 
-    // H1<0>: 0 DOFs (K=0 means no vertex DOFs)
-    // Actually for K=0, we still have 1 DOF per vertex since K >= 1 check is for vertices
-    // Let's check the actual formula
+    // H1<K> DOF distribution:
+    // - K >= 1: 1 DOF per vertex
+    // - K >= 2: (K-1) DOFs per edge interior
+    // - K >= 3: (K-1)(K-2)/2 DOFs per triangle interior
+    // 
+    // Note: K=0 is a special case where we have no vertex DOFs (constant elements).
+    // This is consistent with P0 elements.
 
     // H1<1>: vertices only
     H1<1, Real> h1_1(mesh);

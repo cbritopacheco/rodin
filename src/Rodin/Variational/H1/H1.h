@@ -355,6 +355,14 @@ namespace Rodin::Variational
        *
        * For H1-conforming elements, DOFs are distributed across vertices,
        * edges, faces, and interior based on the polynomial degree K.
+       *
+       * DOF distribution for degree K:
+       * - K = 0: No DOFs (constant elements, similar to P0)
+       * - K >= 1: 1 DOF per vertex
+       * - K >= 2: (K-1) DOFs per edge interior
+       * - K >= 3: (K-1)(K-2)/2 DOFs per triangle interior (for triangles)
+       *           (K-1)^2 DOFs per quadrilateral interior (for quads)
+       * - K >= 4: (K-1)(K-2)(K-3)/6 DOFs per tetrahedron interior
        */
       void buildDOFs()
       {
@@ -376,6 +384,7 @@ namespace Rodin::Variational
 
         // Vertex DOFs (dimension 0)
         // Each vertex has 1 DOF if K >= 1, 0 DOFs if K == 0
+        // For K=0, this results in a space with no DOFs (similar to P0 behavior)
         const size_t vertexCount = mesh.getVertexCount();
         const size_t dofsPerVertex = (K >= 1) ? 1 : 0;
         m_dofs[0].resize(vertexCount);
@@ -469,6 +478,11 @@ namespace Rodin::Variational
        *
        * Each cell's DOF array should contain all DOFs associated with that cell,
        * including vertex, edge, face, and interior DOFs.
+       *
+       * @note For 2D meshes, m_dofs[2] initially stores only interior DOFs for each
+       * face. This function reads those interior DOFs, builds a complete DOF array
+       * including vertex and edge DOFs, then overwrites m_dofs[2] with the complete
+       * array. This is safe because interior DOFs are unique to each cell (not shared).
        */
       void rebuildCellDOFs()
       {
@@ -691,7 +705,7 @@ namespace Rodin::Variational
               const size_t q = local / vdim;
               const size_t r = local % vdim;
               assert(q < scalarCount);
-              dofs.coeffRef(local) = scalarDOFs(q) + r * scalarSize;
+              dofs(local) = scalarDOFs(q) + r * scalarSize;
             }
           }
         }
