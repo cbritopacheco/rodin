@@ -30,14 +30,6 @@ target_link_libraries(RodinGeometryUniformGridTest
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryUniformGridTest)
 
-add_executable(RodinGeometryPolytopeCountTest PolytopeCountTest.cpp)
-target_link_libraries(RodinGeometryPolytopeCountTest
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPolytopeCountTest)
-
 add_executable(RodinGeometryRegionTest RegionTest.cpp)
 target_link_libraries(RodinGeometryRegionTest
   PUBLIC

@@ -38,6 +38,8 @@ int main(int, char**)
 {
   Mesh mesh;
   mesh.load("BiVentricle.mesh", IO::FileFormat::MEDIT);
+
+
   mesh.getConnectivity().compute(2, 3);
   mesh.getConnectivity().compute(1, 2);
   mesh.getConnectivity().compute(1, 1);
