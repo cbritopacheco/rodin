@@ -8,6 +8,11 @@
 #define RODIN_VARIATIONAL_QF_GRUNDMANNMOLLER_H
 
 /**
+ * @file
+ * @brief Defines the GrundmannMoller simplex quadrature formula.
+ */
+
+/**
  * @ingroup RodinDirectives
  * @brief Maximum value permitted for the @f$ s \geq 0 @f$ parameter in
  * Grundmann-Moller quadrature.
@@ -25,6 +30,7 @@
  * @see RODIN_QF_GRUNDMANNMOLLER_MAX_S
  */
 #define RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER 2 * RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1
+
 
 #include <boost/multi_array.hpp>
 

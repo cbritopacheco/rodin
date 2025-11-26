@@ -7,11 +7,17 @@
 #ifndef RODIN_VARIATIONAL_QF_GAUSSLOBATTO_H
 #define RODIN_VARIATIONAL_QF_GAUSSLOBATTO_H
 
+/**
+ * @file
+ * @brief Defines the GaussLobatto quadrature formula.
+ */
+
 #include <vector>
 #include <cassert>
 #include <cmath>
 
 #include "QuadratureFormula.h"
+
 
 namespace Rodin::QF
 {

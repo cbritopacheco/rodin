@@ -1,3 +1,15 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+
+/**
+ * @file
+ * @brief Implementation of the GrundmannMoller simplex quadrature formula.
+ */
+
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "GrundmannMoller.h"
@@ -6,6 +18,13 @@ namespace Rodin::QF
 {
   /**
    * @internal
+   * @brief Initializes the static table of quadrature point counts.
+   *
+   * Computes the number of quadrature points for each combination of
+   * simplex dimension @f$ n @f$ and parameter @f$ s @f$ using the formula:
+   * @f[
+   *   \text{size} = \binom{n + s + 1}{n + 1}
+   * @f]
    */
   boost::multi_array<size_t, 2> GrundmannMoller::initSizes()
   {
@@ -21,6 +40,11 @@ namespace Rodin::QF
 
   /**
    * @internal
+   * @brief Initializes the static table of quadrature weights.
+   *
+   * Computes the Grundmann-Möller quadrature weights for each combination
+   * of simplex dimension @f$ n @f$ and parameter @f$ s @f$. The weights
+   * are computed using the closed-form expressions from the original paper.
    */
   boost::multi_array<Math::Vector<Real>, 2> GrundmannMoller::initWeights()
   {
@@ -82,6 +106,14 @@ namespace Rodin::QF
     return res;
   }
 
+  /**
+   * @internal
+   * @brief Initializes the static table of quadrature points.
+   *
+   * Computes the Grundmann-Möller quadrature points for each combination
+   * of simplex dimension @f$ n @f$ and parameter @f$ s @f$. The points
+   * are located in barycentric coordinates within the reference simplex.
+   */
   boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> GrundmannMoller::initPoints()
   {
     const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1][RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
