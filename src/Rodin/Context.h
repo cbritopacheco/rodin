@@ -7,6 +7,17 @@
 #ifndef RODIN_CONTEXT_H
 #define RODIN_CONTEXT_H
 
+/**
+ * @file
+ * @brief Top level include for the Rodin::Context module.
+ *
+ * The Context module provides execution context management for the Rodin library.
+ * It handles thread-local and process-local state that may be needed during
+ * finite element computations.
+ *
+ * @see Rodin::Context
+ */
+
 #include "Context/Local.h"
 
 #endif

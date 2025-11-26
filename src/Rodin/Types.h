@@ -1,5 +1,25 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_TYPES_H
 #define RODIN_TYPES_H
+
+/**
+ * @file
+ * @brief Fundamental type definitions for the Rodin library.
+ *
+ * This header defines the standard type aliases used throughout Rodin,
+ * including numeric types (Integer, Real, Complex), container types
+ * (List, Map, Set), and utility types (Optional, Index).
+ *
+ * These definitions ensure consistent type usage across the library and
+ * facilitate easy customization of underlying types if needed.
+ *
+ * @see @ref RodinTypes
+ */
 
 #include <stack>
 #include <cstddef>

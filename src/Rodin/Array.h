@@ -7,6 +7,15 @@
 #ifndef RODIN_ARRAY_H
 #define RODIN_ARRAY_H
 
+/**
+ * @file
+ * @brief Defines array types and utility functors for index arrays.
+ *
+ * This header provides Eigen-based array type aliases and various functors
+ * for comparing, hashing, and manipulating index arrays used throughout
+ * the Rodin library.
+ */
+
 #include <Eigen/Core>
 #include <Eigen/Dense>
 

@@ -9,7 +9,18 @@
 
 /**
  * @file
- * @brief Top level include for the Rodin::Variational namespace.
+ * @brief Top level include for the Rodin::Threads module.
+ *
+ * The Threads module provides thread-safety utilities for multi-threaded
+ * finite element computations. It includes mutex wrappers, thread-safe
+ * containers, and synchronization primitives.
+ *
+ * Components include:
+ * - **Mutex**: Mutual exclusion primitives
+ * - **Unsafe**: Markers for non-thread-safe operations
+ * - **Mutable**: Thread-safe mutable state wrappers
+ *
+ * @see Rodin::Threads
  */
 
 #include "Threads/Mutex.h"

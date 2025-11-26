@@ -7,6 +7,19 @@
 #ifndef RODIN_PLOT_H
 #define RODIN_PLOT_H
 
+/**
+ * @file
+ * @brief Top level include for the Rodin::Plot module.
+ *
+ * The Plot module provides visualization capabilities for meshes, grid functions,
+ * and other finite element data. It enables interactive 3D rendering and
+ * scientific visualization of simulation results.
+ *
+ * @note This module may require additional graphics dependencies (OpenGL, etc.).
+ *
+ * @see Rodin::Plot
+ */
+
 #include "Plot/Plot.h"
 
 #endif

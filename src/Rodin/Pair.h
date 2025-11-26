@@ -7,6 +7,11 @@
 #ifndef RODIN_PAIR_H
 #define RODIN_PAIR_H
 
+/**
+ * @file
+ * @brief Defines the Pair class, a specialized two-element Tuple.
+ */
+
 #include "Tuple.h"
 
 namespace Rodin
