@@ -7,6 +7,11 @@
 #ifndef RODIN_FLATSET_H
 #define RODIN_FLATSET_H
 
+/**
+ * @file
+ * @brief Defines comparison and hash functors for IndexSet types.
+ */
+
 #include "Types.h"
 
 #include <boost/functional/hash.hpp>
