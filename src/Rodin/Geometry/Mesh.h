@@ -1305,7 +1305,6 @@ namespace Rodin::Geometry
       * @brief Saves a mesh to file in the given format.
       * @param[in] filename Name of file to write
       * @param[in] fmt Mesh file format
-      * @returns Reference to this (for method chaining)
       */
       virtual void save(
         const boost::filesystem::path& filename,

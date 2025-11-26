@@ -43,7 +43,6 @@ namespace Rodin::Solver
        * Initializes to PETSC defaults.
        *
        * @param pb   Variational problem this solver will solve.
-       * @param comm MPI communicator (default PETSC_COMM_WORLD).
        */
       explicit KSP(ProblemBaseType& pb);
 
@@ -57,9 +56,7 @@ namespace Rodin::Solver
        *
        * Applies programmatic settings, then SetFromOptions, then KSPSolve.
        *
-       * @param A Left‐hand side matrix.
-       * @param x Solution vector (initial guess in; may be PETSC_NULL).
-       * @param b Right‐hand side vector.
+       * @param b Linear system containing matrix and right-hand side vector.
        */
       void solve(LinearSystemType& b) override;
 

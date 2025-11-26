@@ -82,7 +82,6 @@ namespace Rodin::Variational
 
       /**
        * @brief Evaluates the identity matrix at a point.
-       * @param p Point at which to evaluate (unused)
        * @returns Identity matrix @f$ I_n @f$
        */
       auto getValue(const Geometry::Point&) const

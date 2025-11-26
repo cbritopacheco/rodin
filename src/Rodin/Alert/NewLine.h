@@ -28,7 +28,6 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for NewLineT.
    * @ingroup AlertModule
    * @param os The output stream to write to.
-   * @param The NewLine tag (unused).
    * @return Reference to the output stream.
    *
    * Inserts a newline character into the output stream.

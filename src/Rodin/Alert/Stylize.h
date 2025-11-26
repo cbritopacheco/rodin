@@ -35,7 +35,6 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for StylizeT.
    * @ingroup AlertModule
    * @param os The output stream to write to.
-   * @param The Stylize tag (unused).
    * @return Reference to the output stream.
    *
    * Enables terminal colorization for the output stream using the

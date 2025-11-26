@@ -51,7 +51,6 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for ResetT.
    * @ingroup AlertModule
    * @param os The output stream to write to.
-   * @param The Reset tag (unused).
    * @return Reference to the output stream.
    *
    * Resets all terminal formatting and colors to default using the

@@ -218,7 +218,6 @@ namespace Rodin::Alert
 
       /**
        * @brief Stream insertion operator for NewLine tag.
-       * @param The NewLine tag (unused).
        * @return Reference to this Message object for method chaining.
        *
        * Inserts a newline character and marks the next insertion for
@@ -233,7 +232,6 @@ namespace Rodin::Alert
 
       /**
        * @brief Stream insertion operator for Raise tag.
-       * @param The Raise tag (unused).
        *
        * Triggers the raise() method to output the message and perform
        * any associated actions (such as program termination for exceptions).

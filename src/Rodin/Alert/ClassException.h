@@ -37,7 +37,6 @@ namespace Rodin::Alert
     public:
       /**
        * @brief Constructs a ClassException for the given class instance.
-       * @param An instance of the class (used for type deduction).
        *
        * Automatically extracts the class name using Boost.TypeIndex and
        * prepends it to the exception message with appropriate formatting.

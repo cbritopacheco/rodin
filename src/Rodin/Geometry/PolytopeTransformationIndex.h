@@ -350,7 +350,6 @@ namespace Rodin::Geometry
     /**
      * @brief Serialization save method.
      * @param[in,out] ar Archive object
-     * @param[in] version Serialization version (unused)
      */
     template <class Archive>
     void save(Archive& ar, const unsigned int) const
@@ -361,7 +360,6 @@ namespace Rodin::Geometry
     /**
      * @brief Serialization load method.
      * @param[in,out] ar Archive object
-     * @param[in] version Serialization version (unused)
      *
      * Clears existing data before loading.
      */

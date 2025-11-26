@@ -67,11 +67,11 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
    *   f(x,y)=(2\pi^2+1)\sin(\pi x)\sin(\pi y)
    * @f]
    *
-   * Weak formulation: Find \(u\in H^1_0(\Omega)\) such that
+   * Weak formulation: Find @f$ u \in H^1_0(\Omega) @f$ such that
    * @f[
    *   \int_\Omega \nabla u\cdot\nabla v\,dx + \int_\Omega u\,v\,dx = \int_\Omega f\,v\,dx,
    * @f]
-   * for all \(v\in H^1_0(\Omega)\).
+   * for all @f$ v \in H^1_0(\Omega) @f$.
    */
   TEST_P(ManufacturedReactionDiffusionTest16x16, ReactionDiffusion_Sine)
   {

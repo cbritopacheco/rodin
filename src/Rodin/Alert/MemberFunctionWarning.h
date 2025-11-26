@@ -43,7 +43,6 @@ namespace Rodin::Alert
 
       /**
        * @brief Constructs a MemberFunctionWarning.
-       * @param An instance of the class where the warning occurred (used for type deduction).
        * @param funcName The name of the member function where the warning occurred.
        *
        * This constructor formats a warning message that includes the name of

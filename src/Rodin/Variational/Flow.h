@@ -82,9 +82,6 @@ namespace Rodin::Variational
     public:
       /**
        * @brief Called when flow reaches a boundary.
-       * @param[in,out] t Current time parameter
-       * @param[in,out] idx Element index
-       * @param[in,out] rc Reference coordinates
        * @returns false (no special boundary treatment)
        */
       constexpr
@@ -104,9 +101,6 @@ namespace Rodin::Variational
     public:
       /**
        * @brief Called to determine if tangent computation is allowed.
-       * @param[in,out] t Current time parameter
-       * @param[in,out] idx Element index
-       * @param[in,out] rc Reference coordinates
        * @returns true (always allow tangent computation)
        */
       constexpr
