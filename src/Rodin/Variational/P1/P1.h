@@ -359,28 +359,55 @@ namespace Rodin::Variational
       std::reference_wrapper<const MeshType> m_mesh;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for P1 from mesh - deduces to RealP1
+   */
   template <class Context>
   P1(const Geometry::Mesh<Context>&) -> P1<Real, Geometry::Mesh<Context>>;
 
-  /// Alias for a scalar valued P1 finite element space
+  /// Alias for a scalar real-valued P1 finite element space
   template <class Mesh>
   using RealP1 = P1<Real, Mesh>;
 
+  /// Alias for a scalar complex-valued P1 finite element space
   template <class Mesh>
   using ComplexP1 = P1<Complex, Mesh>;
 
   /**
    * @ingroup P1Specializations
-   * @brief Vector valued Lagrange finite element space
+   * @brief Vector-valued continuous piecewise linear Lagrange finite element space.
    *
-   * Represents the finite element space composed of @f$ d @f$ dimensional
-   * vector valued, continuous, piecewise linear functions:
+   * Represents the finite element space composed of @f$ d @f$-dimensional
+   * vector-valued, continuous, piecewise linear functions:
    * @f[
-   *  \mathbb{P}_1 (\mathcal{T}_h)^d = \{ v \in C^0(\mathcal{T}_h)^d \mid v|_{\tau} \in \mathbb{P}_1(\tau), \ \tau \in \mathcal{T}_h \} \ .
+   *  [\mathbb{P}_1 (\mathcal{T}_h)]^d = \{ \mathbf{v} \in [C^0(\mathcal{T}_h)]^d : \mathbf{v}|_{\tau} \in [\mathbb{P}_1(\tau)]^d, \ \tau \in \mathcal{T}_h \}
    * @f]
+   * where @f$ d @f$ is the vector dimension (typically the spatial dimension).
    *
-   * This class is vector valued, i.e. evaluations of the function are of
-   * Math::Vector<Scalar> type.
+   * ## Properties
+   * - **DOF count**: @f$ d \cdot n_{\text{vertices}} @f$ total
+   * - **DOF structure**: Each vertex has @f$ d @f$ DOFs (one per vector component)
+   * - **Continuity**: C⁰ continuous for each component
+   * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j @f$
+   *
+   * ## Use Cases
+   * - Displacement fields in elasticity
+   * - Velocity fields in fluid mechanics
+   * - Vector-valued PDEs requiring H¹ conformity
+   *
+   * ## Example
+   * @code{.cpp}
+   * Mesh Th;
+   * Th = Th.UniformGrid(Polytope::Type::Triangle, {8, 8});
+   * size_t vdim = 2;  // 2D displacement
+   * P1 Vh(Th, vdim);  // Vector P1 space
+   * GridFunction u(Vh);
+   * @endcode
+   *
+   * @tparam Scalar Scalar type for vector components (Real or Complex)
+   *
+   * @see P1Element, TrialFunction, TestFunction
    */
   template <class Scalar>
   class P1<Math::Vector<Scalar>, Geometry::Mesh<Context::Local>> final
@@ -655,11 +682,15 @@ namespace Rodin::Variational
       std::vector<std::vector<IndexArray>> m_dofs;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for Vector P1 from mesh and vector dimension
+   */
   template <class Context>
   P1(const Geometry::Mesh<Context>&, size_t)
     -> P1<Math::Vector<Real>, Geometry::Mesh<Context>>;
 
-  /// Alias for a vector valued P1 finite element space
+  /// Alias for a vector-valued real P1 finite element space
   template <class Mesh>
   using VectorP1 = P1<Math::Vector<Real>, Mesh>;
 }

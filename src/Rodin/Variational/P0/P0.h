@@ -56,16 +56,39 @@ namespace Rodin::Variational
 
   /**
    * @ingroup P0Specializations
-   * @brief Real valued Lagrange finite element space
+   * @brief Scalar-valued piecewise constant (P0) Lagrange finite element space.
    *
-   * Represents the finite element space composed of scalar valued continuous,
-   * piecewise linear functions:
+   * Represents the finite element space composed of discontinuous,
+   * piecewise constant functions:
    * @f[
-   *  \mathbb{P}_1 (\mathcal{T}_h) = \{ v \in C^0(\mathcal{T}_h) : v|_{\tau} \in \mathbb{P}_1(\tau), \ \tau \in \mathcal{T}_h \} \ .
+   *  \mathbb{P}_0 (\mathcal{T}_h) = \{ v \in L^2(\Omega) : v|_{\tau} \in \mathbb{P}_0(\tau), \ \tau \in \mathcal{T}_h \}
    * @f]
+   * where @f$ \mathbb{P}_0(\tau) @f$ denotes constant functions on element @f$ \tau @f$.
    *
-   * This class is scalar valued, i.e. evaluations of the function are of
-   * Rodin::Real type.
+   * ## Properties
+   * - **DOF count**: One DOF per cell (total: @f$ n_{\text{cells}} @f$)
+   * - **DOF location**: Element barycenter
+   * - **Continuity**: Discontinuous across element boundaries (@f$ L^2 @f$-conforming)
+   * - **Polynomial degree**: 0 (constant functions)
+   * - **Gradient**: @f$ \nabla u|_K = 0 @f$ (zero within each element)
+   *
+   * ## Use Cases
+   * - Discontinuous Galerkin (DG) methods
+   * - Flux-based formulations
+   * - Element-wise constant material properties
+   * - Finite volume schemes as FEM
+   * - Pressure space in mixed methods (when inf-sup stability permits)
+   *
+   * ## Example
+   * @code{.cpp}
+   * Mesh Th;
+   * Th = Th.UniformGrid(Polytope::Type::Triangle, {8, 8});
+   * P0 Vh(Th);  // Scalar P0 space
+   * GridFunction u(Vh);
+   * u = 1.0;  // Constant function
+   * @endcode
+   *
+   * @see P0Element, GridFunction
    */
   template <>
   class P0<Real, Geometry::Mesh<Context::Local>> final
@@ -305,12 +328,18 @@ namespace Rodin::Variational
       std::reference_wrapper<const MeshType> m_mesh;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for P0 from mesh - deduces to RealP0
+   */
   template <class Context>
   P0(const Geometry::Mesh<Context>&) -> P0<Real, Geometry::Mesh<Context>>;
 
+  /// Alias for a scalar real-valued P0 finite element space
   template <class Mesh>
   using RealP0 = P0<Real, Mesh>;
 
+  /// Alias for a scalar complex-valued P0 finite element space
   template <class Mesh>
   using ComplexP0 = P0<Complex, Mesh>;
 }

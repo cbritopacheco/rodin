@@ -4,6 +4,43 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file P1Element.hpp
+ * @brief Template implementation of P1 basis functions and derivatives.
+ *
+ * This file provides the explicit implementations of P1 basis functions
+ * and their first derivatives for each supported polytope geometry.
+ *
+ * ## Basis Functions by Geometry
+ *
+ * **Point** (0D): @f$ \phi_0 = 1 @f$
+ *
+ * **Segment** (1D): Linear interpolation on @f$ [0,1] @f$
+ * - @f$ \phi_0(x) = 1 - x @f$
+ * - @f$ \phi_1(x) = x @f$
+ *
+ * **Triangle** (2D): Barycentric coordinates on reference triangle
+ * - @f$ \phi_0(x,y) = 1 - x - y @f$
+ * - @f$ \phi_1(x,y) = x @f$
+ * - @f$ \phi_2(x,y) = y @f$
+ *
+ * **Quadrilateral** (2D): Bilinear functions on @f$ [0,1]^2 @f$
+ * - @f$ \phi_0 = (1-x)(1-y) @f$
+ * - @f$ \phi_1 = x(1-y) @f$
+ * - @f$ \phi_2 = xy @f$
+ * - @f$ \phi_3 = (1-x)y @f$
+ *
+ * **Tetrahedron** (3D): Barycentric coordinates
+ * - @f$ \phi_0 = 1 - x - y - z @f$
+ * - @f$ \phi_1 = x @f$
+ * - @f$ \phi_2 = y @f$
+ * - @f$ \phi_3 = z @f$
+ *
+ * **Wedge** (3D): Product of triangle and segment basis
+ *
+ * All derivatives are computed analytically as the partial derivatives
+ * of these basis functions.
+ */
 #ifndef RODIN_VARIATIONAL_P1_P1ELEMENT_HPP
 #define RODIN_VARIATIONAL_P1_P1ELEMENT_HPP
 

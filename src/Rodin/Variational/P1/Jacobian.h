@@ -4,6 +4,28 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Jacobian.h
+ * @brief Jacobian operator specialization for P1 vector functions.
+ *
+ * This file provides specialized implementations of the Jacobian matrix
+ * operator for P1 vector-valued GridFunctions and ShapeFunctions.
+ *
+ * For a vector function @f$ \mathbf{u} : \Omega \to \mathbb{R}^d @f$, the
+ * Jacobian is the @f$ d \times d @f$ matrix:
+ * @f[
+ *   \mathbf{J}(\mathbf{u}) = \begin{pmatrix}
+ *     \frac{\partial u_1}{\partial x_1} & \cdots & \frac{\partial u_1}{\partial x_d} \\
+ *     \vdots & \ddots & \vdots \\
+ *     \frac{\partial u_d}{\partial x_1} & \cdots & \frac{\partial u_d}{\partial x_d}
+ *   \end{pmatrix}
+ * @f]
+ *
+ * For P1 elements, the Jacobian is piecewise constant on each element since
+ * P1 basis function gradients are constant per element.
+ *
+ * @see Jacobian, P1, Grad, Div
+ */
 #ifndef RODIN_VARIATIONAL_P1_JACOBIAN_H
 #define RODIN_VARIATIONAL_P1_JACOBIAN_H
 
@@ -38,7 +60,24 @@ namespace Rodin::Variational
 {
   /**
    * @ingroup JacobianSpecializations
-   * @brief Jacobian of an P1 GridFunction object.
+   * @brief Jacobian of a P1 vector GridFunction.
+   *
+   * Computes the Jacobian matrix of a P1 vector-valued grid function:
+   * @f[
+   *   \mathbf{J}(\mathbf{u})|_K = \sum_{i=1}^{n_v \cdot d} u_i \nabla \phi_i \otimes \mathbf{e}_j
+   * @f]
+   * where @f$ j = i \mod d @f$ and @f$ n_v @f$ is the number of vertices.
+   *
+   * The Jacobian is constant on each element for P1 functions.
+   *
+   * ## Applications
+   * - Strain tensor in elasticity: @f$ \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{J} + \mathbf{J}^T) @f$
+   * - Velocity gradient in fluid mechanics
+   * - Deformation gradient in nonlinear mechanics
+   *
+   * @tparam Range Value range type (typically Math::Vector<Scalar>)
+   * @tparam Data Data storage type
+   * @tparam Mesh Mesh type
    */
   template <class Range, class Data, class Mesh>
   class Jacobian<GridFunction<P1<Range, Mesh>, Data>> final
