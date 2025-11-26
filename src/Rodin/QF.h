@@ -31,6 +31,7 @@
 #include "QF/QuadratureFormula.h"
 #include "QF/Centroid.h"
 #include "QF/GaussLegendre.h"
+#include "QF/GaussLobatto.h"
 #include "QF/GrundmannMoller.h"
 #include "QF/GenericPolytopeQuadrature.h"
 
