@@ -398,9 +398,10 @@ namespace Rodin::Variational
    *
    * ## Example
    * @code{.cpp}
-   * Mesh mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+   * Mesh Th;
+   * Th = Th.UniformGrid(Polytope::Type::Triangle, {8, 8});
    * size_t vdim = 2;  // 2D displacement
-   * P1 Vh(mesh, vdim);  // Vector P1 space
+   * P1 Vh(Th, vdim);  // Vector P1 space
    * GridFunction u(Vh);
    * @endcode
    *
