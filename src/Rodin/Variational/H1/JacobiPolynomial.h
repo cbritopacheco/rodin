@@ -38,9 +38,11 @@ namespace Rodin::Variational
        * @brief Computes @f$ P_K^{(\alpha, \beta)}(x) @f$ and
        * @f$ \partial_x P_K^{(\alpha, \beta)}(x) @f$.
        *
-       * @param[out] P   Value of @f$ P_K^{(\alpha, \beta)}(x) @f$.
-       * @param[out] dP  Value of @f$ \partial_x P_K^{(\alpha, \beta)}(x) @f$.
-       * @param[in]  x   Evaluation point.
+       * @param[out] P      Value of @f$ P_K^{(\alpha, \beta)}(x) @f$.
+       * @param[out] dP     Value of @f$ \partial_x P_K^{(\alpha, \beta)}(x) @f$.
+       * @param[in]  alpha  First Jacobi parameter @f$ \alpha @f$.
+       * @param[in]  beta   Second Jacobi parameter @f$ \beta @f$.
+       * @param[in]  x      Evaluation point.
        */
       static constexpr void getValue(Real& P, Real& dP, Real alpha, Real beta, Real x)
       {

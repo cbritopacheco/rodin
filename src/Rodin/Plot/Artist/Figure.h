@@ -45,7 +45,7 @@ namespace Rodin::Plot::Artist
        * Constructs a Figure object.
        * @param pltRef Plot reference
        * @param width Width in pixels of the window
-       * @param Height Height in pixels of the window
+       * @param height Height in pixels of the window
        */
       Figure(Plot& pltRef, int width, int height);
 
@@ -53,7 +53,7 @@ namespace Rodin::Plot::Artist
        * Constructs a Figure object.
        * @param pltRef Plot reference.
        * @param width Width in pixels of the window.
-       * @param Height Height in pixels of the window.
+       * @param height Height in pixels of the window.
        * @param title Title of the window.
        */
       Figure(Plot& pltRef, int width, int height, const std::string& title);

@@ -4,7 +4,7 @@
 
   @tableofcontents
 
-  @subsection examples-index-variational Variational methods and weak formulations
+  @section examples-index-variational Variational methods and weak formulations
 
   The Rodin::Variational module is mostly used when dealing with to variational
   problems of the form:
@@ -14,7 +14,7 @@
     a(u, v) = b(v) \ .
   @f]
 
-  @subsection examples-index-pdes Solving PDEs
+  @section examples-index-pdes Solving PDEs
 
   %Rodin can be used to solve partial differential equations of many types. To
   start solving PDEs with Rodin, we recommend taking a look at the simplest
@@ -24,21 +24,20 @@
   | ----------------------------------------------- | --------------- |
   | @f$ - \Delta u = f @f$                          | @ref examples-pdes-poisson |
   | @f$ - \nabla \cdot \sigma (u ) = 0  @f$         | @ref examples-pdes-elasticity |
-  | @f$ - \Delta u + u = f \text{ on } S^2 \subset \mathbb{R}^3 @f$ | @ref examples-pdes-surface_meshes |
 
-  @subsection examples-index-solver Solving linear systems
+  @section examples-index-solver Solving linear systems
 
   Rodin::Solver
 
   In progress.
 
-  @subsection examples-index-geometry Mesh geometry
+  @section examples-index-geometry Mesh geometry
 
   Rodin::Geometry
 
   In progress.
 
-  @subsection examples-index-mmg Working with MMG
+  @section examples-index-mmg Working with MMG
 
   The Rodin::External::MMG module has a wide variety of uses which ranges from
   optimization of the mesh, to implicit domain meshing. It provides many C++
@@ -49,11 +48,11 @@
 
   - @subpage examples-mmg-index
 
-  @subsection examples-index-density_optimization Density optimization examples
+  @section examples-index-density_optimization Density optimization examples
 
   - @subpage examples-density_optimization-index
 
-  @subsection examples-index-shapeoptimization Shape optimization examples
+  @section examples-index-shapeoptimization Shape optimization examples
 
   - @subpage examples-shapeoptimization-index
 

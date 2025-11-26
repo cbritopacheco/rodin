@@ -22,7 +22,7 @@ namespace Rodin::Plot::Artist::Axes
       * @param figRef Figure reference.
       * @param bottomLeft Bottom left coordinate.
       * @param size Width and height dimensions
-      * @param frameEnable Enable the drawing of the axes frames
+      * @param frameEnabled Enable the drawing of the axes frames
       */
       Axes2D(
          Figure& figRef,
@@ -36,7 +36,7 @@ namespace Rodin::Plot::Artist::Axes
       * Plots `y` versus `x` as lines and/or markers.
       * @param x Horizontal coordinates of data points
       * @param y Vertical coordinates of data points
-      * @param Other arguments to be passed to the Artist::Line2D constructor
+      * @param args Additional arguments to be passed to the Artist::Line2D constructor
       * @returns Line artist for the manipulation of the line
       */
       template <class T, class ... Args>

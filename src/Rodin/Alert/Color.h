@@ -284,7 +284,6 @@ namespace Rodin::Alert
    * @ingroup AlertModule
    * @tparam Code The RGB color code type.
    * @param os Output stream to write to.
-   * @param The color object (color values extracted from Code type).
    * @return Reference to the output stream.
    *
    * Applies a custom RGB color to the output stream using the termcolor

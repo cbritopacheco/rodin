@@ -124,9 +124,7 @@ namespace Rodin::Variational
 
   /**
    * @note For an overview of all the possible specializations of the
-   * IntegerFunction class, please see @ref IntegerFunctionSpecializations.
-   *
-   * @see IntegerFunctionSpecializations
+   * IntegerFunction class, please see the IntegerFunction specializations.
    */
   template <class T>
   class IntegerFunction;
@@ -765,9 +763,7 @@ namespace Rodin::Variational
    * @f]
    *
    * @note For an overview of all the possible specializations of the
-   * Composition class, please see @ref CompositionSpecializations.
-   *
-   * @see CompositionSpecializations
+   * Composition class, please see the Composition specializations.
    */
   template <class LHS, class RHS>
   class Composition;
@@ -879,9 +875,7 @@ namespace Rodin::Variational
    * @f]
    *
    * @note For an overview of all the possible specializations of the
-   * NEQ class, please see @ref NEQSpecializations.
-   *
-   * @see NEQSpecializations
+   * NEQ class, please see the NEQ specializations.
    */
   template <class LHS, class RHS>
   class NEQ;

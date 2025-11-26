@@ -220,7 +220,7 @@ namespace Rodin::Variational
       /**
        * @brief Specifies the region of the boundary over which the condition
        * will be imposed.
-       * @param[in] bdrAttr Attribute associated to the boundary region
+       * @param[in] bdrAtr Attribute associated to the boundary region
        */
       constexpr
       DirichletBC& on(Geometry::Attribute bdrAtr)

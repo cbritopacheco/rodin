@@ -189,7 +189,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Constructs a vector with the given values.
-       * @param[in] values Parameter pack of values
+       * @param[in] v The vector values
        *
        * Each value passed must be convertible to any specialization of
        * RealFunction.

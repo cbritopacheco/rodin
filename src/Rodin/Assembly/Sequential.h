@@ -48,7 +48,6 @@ namespace Rodin::Assembly
        * @brief Constructs sequential iteration over a mesh region.
        *
        * @param mesh Mesh to iterate over
-       * @param region Geometric region defining the iteration domain
        */
       SequentialIteration(const MeshType& mesh, const Geometry::Region&);
 

@@ -76,7 +76,6 @@ namespace Rodin::Variational
 
       /**
        * @brief Evaluates the zero function at a point
-       * @param[in] p Point at which to evaluate (unused)
        * @returns Always returns 0
        */
       constexpr
@@ -154,7 +153,6 @@ namespace Rodin::Variational
 
       /**
        * @brief Evaluates the zero vector function at a point
-       * @param[in] p Point at which to evaluate (unused)
        * @returns Zero vector of dimension m_d
        */
       auto getValue(const Geometry::Point&) const

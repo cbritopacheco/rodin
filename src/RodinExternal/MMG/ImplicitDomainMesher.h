@@ -100,8 +100,7 @@ namespace Rodin::External::MMG
 
       /**
        * @brief Indicates that a material reference should not be split.
-       * @param[in] ref Material to split
-       * @param[in] s Interior and exterior labels
+       * @param[in] ref Material reference that should not be split
        * @returns Reference to self (for method chaining)
        */
       ImplicitDomainMesher& noSplit(const Geometry::Attribute& ref);

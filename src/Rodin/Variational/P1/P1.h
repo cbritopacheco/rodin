@@ -125,7 +125,6 @@ namespace Rodin::Variational
           using CallableType = Callable;
 
           /**
-           * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
@@ -444,7 +443,6 @@ namespace Rodin::Variational
           using CallableType = Callable;
 
           /**
-           * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */

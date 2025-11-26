@@ -174,7 +174,6 @@ namespace Rodin::Variational
 
               /**
                * @brief Evaluates the derivative (always returns 0).
-               * @param r Spatial point (unused, as derivative is zero everywhere)
                * @return Zero (constant function has zero derivative)
                */
               constexpr
@@ -382,7 +381,6 @@ namespace Rodin::Variational
 
               /**
                * @brief Evaluates the derivative (always returns 0).
-               * @param rc Spatial point (unused, as derivative is zero everywhere)
                * @return Zero (constant function has zero derivative)
                */
               constexpr
@@ -416,7 +414,6 @@ namespace Rodin::Variational
 
           /**
            * @brief Evaluates the vector basis function at a spatial point.
-           * @param r Spatial point (unused, as basis is constant)
            * @return Constant unit vector: e_j where j = local % vdim
            */
           const ReturnType& operator()(const Math::SpatialVector<ScalarType>&) const

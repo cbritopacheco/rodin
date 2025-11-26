@@ -101,7 +101,6 @@ namespace Rodin::Variational
           using FunctionType = CallableType;
 
           /**
-           * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
