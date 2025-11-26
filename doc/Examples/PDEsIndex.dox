@@ -4,6 +4,5 @@
 
   - @subpage examples-pdes-poisson
   - @subpage examples-pdes-elasticity
-  - @subpage examples-pdes-surface_meshes
 
   */
