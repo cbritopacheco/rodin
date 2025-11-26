@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/QF/GrundmannMoller.h>
-#include <Rodin/QF/QF1P1.h>
+#include <Rodin/QF/Centroid.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
