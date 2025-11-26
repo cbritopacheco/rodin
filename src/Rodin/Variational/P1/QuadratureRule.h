@@ -1,3 +1,27 @@
+/**
+ * @file QuadratureRule.h
+ * @brief Optimized quadrature rules for P1 finite element spaces.
+ *
+ * This file provides specialized quadrature rules for P1 spaces that exploit
+ * the constant gradient property of P1 basis functions to achieve exact
+ * integration with minimal quadrature points.
+ *
+ * ## Quadrature Strategies
+ * - **Centroid quadrature**: Uses single point at element barycenter
+ * - **Exact for P1 bilinear forms**: @f$ \int \nabla \phi_i \cdot \nabla \phi_j @f$
+ * - **Reduced integration**: Enables efficient assembly
+ *
+ * ## Supported Integrands
+ * - Scalar P1 shape functions: @f$ \int v \, dx @f$
+ * - Dot products: @f$ \int f \cdot v \, dx @f$
+ * - Mass forms: @f$ \int (Au) \cdot v \, dx @f$
+ * - Stiffness forms: @f$ \int \nabla u \cdot \nabla v \, dx @f$
+ * - Anisotropic stiffness: @f$ \int (A\nabla u) \cdot \nabla v \, dx @f$
+ * - Jacobian forms: @f$ \int \mathbf{J}u : \mathbf{J}v \, dx @f$
+ * - Potential operators for boundary elements
+ *
+ * @see P1, QuadratureFormula, Integral
+ */
 #ifndef RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 

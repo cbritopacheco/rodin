@@ -4,6 +4,21 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file P0Element.hpp
+ * @brief Template implementation for P0Element static node coordinates.
+ *
+ * Defines the barycenter coordinates (DOF nodes) for each supported polytope type:
+ * - **Point**: @f$ (0) @f$
+ * - **Segment**: @f$ (0.5) @f$
+ * - **Triangle**: @f$ (1/3, 1/3) @f$
+ * - **Quadrilateral**: @f$ (0.5, 0.5) @f$
+ * - **Tetrahedron**: @f$ (0.25, 0.25, 0.25) @f$
+ * - **Wedge**: @f$ (1/3, 1/3, 0.5) @f$
+ *
+ * These coordinates define the single DOF location for P0 elements, where
+ * the function value is evaluated/stored.
+ */
 #ifndef RODIN_VARIATIONAL_P0_P0ELEMENT_HPP
 #define RODIN_VARIATIONAL_P0_P0ELEMENT_HPP
 

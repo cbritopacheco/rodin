@@ -1,6 +1,24 @@
 #ifndef RODIN_VARIATIONAL_P1_DERIVATIVE_H
 #define RODIN_VARIATIONAL_P1_DERIVATIVE_H
 
+/**
+ * @file Derivative.h
+ * @brief Partial derivative operator specialization for P1 functions.
+ *
+ * This file provides specialized implementations of the partial derivative
+ * operator for P1 GridFunctions and ShapeFunctions.
+ *
+ * For a scalar P1 function @f$ u @f$, the partial derivative with respect
+ * to coordinate @f$ x_i @f$ is computed as:
+ * @f[
+ *   \frac{\partial u}{\partial x_i} = (\nabla u) \cdot \mathbf{e}_i
+ * @f]
+ *
+ * For P1 elements, partial derivatives are piecewise constant on each element.
+ *
+ * @see Derivative, Grad, P1
+ */
+
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Derivative.h"
 

@@ -4,6 +4,21 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file GridFunction.h
+ * @brief P0 GridFunction specialization (currently uses generic implementation).
+ *
+ * This file includes the generic GridFunction header and provides the P0 space
+ * specialization. P0 grid functions store one value per mesh cell, representing
+ * piecewise constant functions.
+ *
+ * ## Notes
+ * - Uses generic GridFunction implementation (specialized code commented out)
+ * - P0 grid functions support projection via L2 projection
+ * - Evaluation returns the constant value for the containing cell
+ *
+ * @see GridFunction, P0
+ */
 #ifndef RODIN_VARIATIONAL_P0_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_P0_GRIDFUNCTION_H
 

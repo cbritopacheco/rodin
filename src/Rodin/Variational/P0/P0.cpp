@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file P0.cpp
+ * @brief Implementation of P0 finite element space static members.
+ *
+ * This file initializes the static P0Element instances for each supported
+ * polytope geometry type (Point, Segment, Triangle, Quadrilateral, 
+ * Tetrahedron, Wedge).
+ */
 #include "P0.h"
 
 namespace Rodin::Variational
