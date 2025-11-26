@@ -134,6 +134,39 @@
               MeshAccess)</span>
             </dt>
             <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> mesh polytope access and validation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6442218de2d57a7b1b5d2f7fb3265be2" class="m-doc">computeTriangleFaceBarycentric</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> px,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> py,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> pz,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z2) -&gt; std::tuple&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;</span>
+            </dt>
+            <dd>Checks if a 3D point lies on a triangular face and computes its barycentric coordinates.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab8f5b1d46e5100643c86febec7ca1b22" class="m-doc">computeQuadFaceParametric</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> px,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> py,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> pz,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x3,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y3,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z3) -&gt; std::pair&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;</span>
+            </dt>
+            <dd>Checks if a 3D point lies on a planar quadrilateral face and computes parametric coords.</dd>
           </dl>
         </section>
         <section>
@@ -193,6 +226,179 @@
             </h3>
             <p><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> mesh polytope access and validation.</p>
 <p>This test verifies basic mesh functionality needed for Flow operations.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6442218de2d57a7b1b5d2f7fb3265be2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::tuple&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6442218de2d57a7b1b5d2f7fb3265be2" class="m-doc-self">computeTriangleFaceBarycentric</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> px,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> py,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> pz,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z2)</span></span>
+            </h3>
+            <p>Checks if a 3D point lies on a triangular face and computes its barycentric coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">px</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>py</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>pz</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>x0</td>
+                  <td>First vertex of the triangle (corresponds to barycentric u=1)</td>
+                </tr>
+                <tr>
+                  <td>y0</td>
+                  <td>First vertex of the triangle (corresponds to barycentric u=1)</td>
+                </tr>
+                <tr>
+                  <td>z0</td>
+                  <td>First vertex of the triangle (corresponds to barycentric u=1)</td>
+                </tr>
+                <tr>
+                  <td>x1</td>
+                  <td>Second vertex of the triangle (corresponds to barycentric v=1)</td>
+                </tr>
+                <tr>
+                  <td>y1</td>
+                  <td>Second vertex of the triangle (corresponds to barycentric v=1)</td>
+                </tr>
+                <tr>
+                  <td>z1</td>
+                  <td>Second vertex of the triangle (corresponds to barycentric v=1)</td>
+                </tr>
+                <tr>
+                  <td>x2</td>
+                  <td>Third vertex of the triangle (corresponds to barycentric w=1)</td>
+                </tr>
+                <tr>
+                  <td>y2</td>
+                  <td>Third vertex of the triangle (corresponds to barycentric w=1)</td>
+                </tr>
+                <tr>
+                  <td>z2</td>
+                  <td>Third vertex of the triangle (corresponds to barycentric w=1)</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> of (u, v, w) barycentric coordinates if point is on face; (NaN, NaN, NaN) if point is not on the triangular face</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Uses the barycentric coordinate method to determine if point (px, py, pz) lies on the triangle defined by vertices (x0,y0,z0), (x1,y1,z1), (x2,y2,z2).</p><p>Algorithm:</p><ol><li>Express the point as P = u*V0 + v*(V1-V0) + w*(V2-V0) where u + v + w = 1</li><li>Solve for v, w using dot products (Cramer&#x27;s rule)</li><li>Point is on triangle if 0 &lt;= u,v,w &lt;= 1 and point lies on the plane</li></ol>
+          </div></section>
+          <section class="m-doc-details" id="ab8f5b1d46e5100643c86febec7ca1b22"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::pair&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8f5b1d46e5100643c86febec7ca1b22" class="m-doc-self">computeQuadFaceParametric</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> px,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> py,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> pz,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x3,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y3,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z3)</span></span>
+            </h3>
+            <p>Checks if a 3D point lies on a planar quadrilateral face and computes parametric coords.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">px</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>py</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>pz</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>x0</td>
+                  <td>First vertex (maps to parametric (0,0))</td>
+                </tr>
+                <tr>
+                  <td>y0</td>
+                  <td>First vertex (maps to parametric (0,0))</td>
+                </tr>
+                <tr>
+                  <td>z0</td>
+                  <td>First vertex (maps to parametric (0,0))</td>
+                </tr>
+                <tr>
+                  <td>x1</td>
+                  <td>Second vertex (maps to parametric (1,0))</td>
+                </tr>
+                <tr>
+                  <td>y1</td>
+                  <td>Second vertex (maps to parametric (1,0))</td>
+                </tr>
+                <tr>
+                  <td>z1</td>
+                  <td>Second vertex (maps to parametric (1,0))</td>
+                </tr>
+                <tr>
+                  <td>x2</td>
+                  <td>Third vertex (maps to parametric (1,1))</td>
+                </tr>
+                <tr>
+                  <td>y2</td>
+                  <td>Third vertex (maps to parametric (1,1))</td>
+                </tr>
+                <tr>
+                  <td>z2</td>
+                  <td>Third vertex (maps to parametric (1,1))</td>
+                </tr>
+                <tr>
+                  <td>x3</td>
+                  <td>Fourth vertex (maps to parametric (0,1))</td>
+                </tr>
+                <tr>
+                  <td>y3</td>
+                  <td>Fourth vertex (maps to parametric (0,1))</td>
+                </tr>
+                <tr>
+                  <td>z3</td>
+                  <td>Fourth vertex (maps to parametric (0,1))</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (s, t) parametric coordinates if point is on face; (NaN, NaN) if point is not on the quadrilateral face</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For a planar quadrilateral with vertices ordered counter-clockwise, determines if point (px, py, pz) lies on the face and computes its parametric coordinates (s, t) in [0,1]x[0,1].</p><p>Algorithm:</p><ol><li>Compute the face normal using cross product of edge vectors</li><li>Check if point lies on the plane within tolerance</li><li>Project to 2D by dropping the axis with largest normal component</li><li>Solve for parametric coordinates in the projected space</li></ol><p>Note: This simplified algorithm assumes axis-aligned or near-axis-aligned quads, which is appropriate for reference element faces.</p>
           </div></section>
         </section>
       </div>

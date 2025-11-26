@@ -70,11 +70,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md237">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md238">Orientation Convention</a></li>
-            <li><a href="#autotoc_md239">Applications in DG Methods</a></li>
-            <li><a href="#autotoc_md240">Difference from BoundaryNormal</a></li>
-            <li><a href="#autotoc_md241">Usage Example</a></li>
+            <li><a href="#autotoc_md235">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md236">Orientation Convention</a></li>
+            <li><a href="#autotoc_md237">Applications in DG Methods</a></li>
+            <li><a href="#autotoc_md238">Difference from BoundaryNormal</a></li>
+            <li><a href="#autotoc_md239">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -84,7 +84,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the FaceNormal class, which represents the unit normal vector on mesh faces (both interior and boundary). Face normals are crucial for Discontinuous Galerkin (DG) methods where numerical fluxes depend on the normal direction at element interfaces.</p><section id="autotoc_md237"><h3><a href="#autotoc_md237">Mathematical Foundation</a></h3><p>For a face <svg class="m-math" style="width: 0.959em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.203615 8.169366">
+<p>This file defines the FaceNormal class, which represents the unit normal vector on mesh faces (both interior and boundary). Face normals are crucial for Discontinuous Galerkin (DG) methods where numerical fluxes depend on the normal direction at element interfaces.</p><section id="autotoc_md235"><h3><a href="#autotoc_md235">Mathematical Foundation</a></h3><p>For a face <svg class="m-math" style="width: 0.959em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.203615 8.169366">
 <title>
 $ F $
 </title>
@@ -147,7 +147,7 @@ $ \mathbf{n} $
 <use x='196.506266' y='-2.988792' xlink:href='#eq5-g2-61'/>
 <use x='208.931746' y='-2.988792' xlink:href='#eq5-g2-49'/>
 </g>
-</svg></div></section><section id="autotoc_md238"><h3><a href="#autotoc_md238">Orientation Convention</a></h3><p>The normal direction is chosen according to a consistent orientation:</p><ul><li>For interior faces: points from <svg class="m-math" style="width: 1.813em; height: 0.954em; vertical-align: -0.000em;" viewBox="0 -9.153753 17.404186 9.153753">
+</svg></div></section><section id="autotoc_md236"><h3><a href="#autotoc_md236">Orientation Convention</a></h3><p>The normal direction is chosen according to a consistent orientation:</p><ul><li>For interior faces: points from <svg class="m-math" style="width: 1.813em; height: 0.954em; vertical-align: -0.000em;" viewBox="0 -9.153753 17.404186 9.153753">
 <title>
 $ K^+ $
 </title>
@@ -171,7 +171,7 @@ $ K^- $
 <use x='0' y='0' xlink:href='#eq7-g1-75'/>
 <use x='10.81768' y='-4.338437' xlink:href='#eq7-g0-0'/>
 </g>
-</svg></li><li>For boundary faces: points outward from the domain</li></ul></section><section id="autotoc_md239"><h3><a href="#autotoc_md239">Applications in DG Methods</a></h3><ul><li><strong>Numerical fluxes</strong>: <svg class="m-math" style="width: 6.586em; height: 1.505em; vertical-align: -0.312em;" viewBox="0 -11.457002 63.224623 14.445794">
+</svg></li><li>For boundary faces: points outward from the domain</li></ul></section><section id="autotoc_md237"><h3><a href="#autotoc_md237">Applications in DG Methods</a></h3><ul><li><strong>Numerical fluxes</strong>: <svg class="m-math" style="width: 6.586em; height: 1.505em; vertical-align: -0.312em;" viewBox="0 -11.457002 63.224623 14.445794">
 <title>
 $ \hat{f}(\mathbf{u}^+, \mathbf{u}^-, \mathbf{n}) $
 </title>
@@ -281,7 +281,7 @@ $ \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] $
 <use x='42.433674' y='0' xlink:href='#eq11-g3-93'/>
 <use x='43.692837' y='0' xlink:href='#eq11-g3-93'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md240"><h3><a href="#autotoc_md240">Difference from BoundaryNormal</a></h3><ul><li><strong>FaceNormal</strong>: Defined on all faces (interior + boundary)</li><li><strong>BoundaryNormal</strong>: Only defined on domain boundary</li></ul></section><section id="autotoc_md241"><h3><a href="#autotoc_md241">Usage Example</a></h3><pre class="m-code"><span class="n">FaceNormal</span><span class="w"> </span><span class="nf">n</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></li></ul></section><section id="autotoc_md238"><h3><a href="#autotoc_md238">Difference from BoundaryNormal</a></h3><ul><li><strong>FaceNormal</strong>: Defined on all faces (interior + boundary)</li><li><strong>BoundaryNormal</strong>: Only defined on domain boundary</li></ul></section><section id="autotoc_md239"><h3><a href="#autotoc_md239">Usage Example</a></h3><pre class="m-code"><span class="n">FaceNormal</span><span class="w"> </span><span class="nf">n</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 
 <span class="c1">// DG numerical flux on interior faces</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">flux</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InterfaceIntegral</span><span class="p">(</span><span class="n">Average</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">)));</span>

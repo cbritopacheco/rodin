@@ -425,6 +425,16 @@ $ \mathbf{A} $
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product of trial and test shape functions for bilinear forms.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dubiner_tetrahedron.html" class="m-doc">DubinerTetrahedron</a>
+            </dt>
+            <dd>Dubiner orthogonal modal basis on the reference tetrahedron.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dubiner_triangle.html" class="m-doc">DubinerTriangle</a>
+            </dt>
+            <dd>Dubiner orthogonal modal basis on the reference triangle.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_e_q.html" class="m-doc">EQ</a>
             </dt>
@@ -458,6 +468,16 @@ $ \mathbf{A} $
               class <a href="class_rodin_1_1_variational_1_1_face_normal.html" class="m-doc">FaceNormal</a>
             </dt>
             <dd>Unit normal vector on mesh faces.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_fekete_tetrahedron.html" class="m-doc">FeketeTetrahedron</a>
+            </dt>
+            <dd>Cached Fekete-type nodes on the reference tetrahedron for degree K.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_fekete_triangle.html" class="m-doc">FeketeTriangle</a>
+            </dt>
+            <dd>Cached Fekete-type nodes on the reference triangle for degree K.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>
@@ -517,6 +537,16 @@ $ \mathbf{A} $
               class <a href="class_rodin_1_1_variational_1_1_g_e_q.html" class="m-doc">GEQ</a>
             </dt>
             <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, size_t MaxIt = 25&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_g_l_l.html" class="m-doc">GLL</a>
+            </dt>
+            <dd>Compile-time Gauss–Lobatto–Legendre (<a href="class_rodin_1_1_variational_1_1_g_l_l.html" class="m-doc">GLL</a>) nodes on [-1, 1].</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_g_l_l01.html" class="m-doc">GLL01</a>
+            </dt>
+            <dd>Gauss–Lobatto–Legendre nodes mapped from [-1, 1] to [0, 1].</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Operand&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>
@@ -720,6 +750,11 @@ $ I_n $
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jacobi_polynomial.html" class="m-doc">JacobiPolynomial</a>
+            </dt>
+            <dd>Jacobi polynomial evaluator.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Range, class Context&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a>
             </dt>
@@ -756,6 +791,46 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
 <use x='82.848004' y='0' xlink:href='#eq4-g4-41'/>
 </g>
 </svg> broken Sobolev space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_lagrange_basis1_d.html" class="m-doc">LagrangeBasis1D</a>
+            </dt>
+            <dd>Generic 1D Lagrange basis on arbitrary nodes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_lagrange_basis_point.html" class="m-doc">LagrangeBasisPoint</a>
+            </dt>
+            <dd>Lagrange basis on the reference point (0D element).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_lagrange_basis_quadrilateral.html" class="m-doc">LagrangeBasisQuadrilateral</a>
+            </dt>
+            <dd>Lagrange basis on the reference quadrilateral [0,1]².</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_lagrange_basis_segment.html" class="m-doc">LagrangeBasisSegment</a>
+            </dt>
+            <dd>Lagrange basis on the reference segment [0,1] using <a href="class_rodin_1_1_variational_1_1_g_l_l.html" class="m-doc">GLL</a> nodes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_lagrange_basis_tetrahedron.html" class="m-doc">LagrangeBasisTetrahedron</a>
+            </dt>
+            <dd>Lagrange basis on the reference tetrahedron.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_lagrange_basis_triangle.html" class="m-doc">LagrangeBasisTriangle</a>
+            </dt>
+            <dd>Lagrange basis on the reference triangle.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_lagrange_basis_wedge.html" class="m-doc">LagrangeBasisWedge</a>
+            </dt>
+            <dd>Lagrange basis on the reference wedge (triangular prism).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_legendre_polynomial.html" class="m-doc">LegendrePolynomial</a>
+            </dt>
+            <dd>Compile-time degree Legendre polynomial evaluator.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_l_e_q.html" class="m-doc">LEQ</a>
@@ -1101,6 +1176,11 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             </dt>
             <dd>Represents a function which belongs to a test space.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_tetrahedron_blend.html" class="m-doc">TetrahedronBlend</a>
+            </dt>
+            <dd>Optimized blending parameter α for tetrahedral warp-blend.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Operand&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a>
             </dt>
@@ -1164,6 +1244,11 @@ $
             </dt>
             <dd>Reference wrapper for trial functions.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_triangle_blend.html" class="m-doc">TriangleBlend</a>
+            </dt>
+            <dd>Optimized blending parameter α for triangular warp-blend.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Operand&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_unary_minus.html" class="m-doc">UnaryMinus</a>
             </dt>
@@ -1199,6 +1284,11 @@ $
             </dt>
             <dd>Negation of a shape function.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_vandermonde_triangle.html" class="m-doc">VandermondeTriangle</a>
+            </dt>
+            <dd>Vandermonde matrix for nodal-to-modal transformation on triangles.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class ... Values&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>
             </dt>
@@ -1213,6 +1303,31 @@ $
               class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>
             </dt>
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_warp_blend_tetrahedron.html" class="m-doc">WarpBlendTetrahedron</a>
+            </dt>
+            <dd>Applies warp-blend algorithm to move tetrahedron nodes toward Fekete positions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_warp_blend_triangle.html" class="m-doc">WarpBlendTriangle</a>
+            </dt>
+            <dd>Applies warp-blend algorithm to move triangle nodes toward Fekete positions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_warp_factor1_d.html" class="m-doc">WarpFactor1D</a>
+            </dt>
+            <dd>Computes the 1D warp factor for moving equispaced nodes to <a href="class_rodin_1_1_variational_1_1_g_l_l.html" class="m-doc">GLL</a> positions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_warp_shift_face2_d.html" class="m-doc">WarpShiftFace2D</a>
+            </dt>
+            <dd>Computes 2D warp-blend shift for a triangular face.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_warp_shift_face3_d.html" class="m-doc">WarpShiftFace3D</a>
+            </dt>
+            <dd>Computes 3D warp-blend shift for a tetrahedral face.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_zero_3_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Zero&lt;Math::Vector&lt;Scalar&gt;&gt;</a>
