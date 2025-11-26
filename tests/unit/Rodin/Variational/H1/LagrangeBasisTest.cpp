@@ -557,4 +557,139 @@ namespace Rodin::Tests::Unit
     }
     EXPECT_NEAR(sum, 1.0, 1e-11);
   }
+
+  //==========================================================================
+  // Very High Order Tests (K = 15)
+  //==========================================================================
+
+  TEST(LagrangeBasis1D, LagrangeProperty_K15)
+  {
+    const auto& nodes = GLL01<15>::getNodes();
+
+    for (size_t i = 0; i <= 15; ++i)
+    {
+      for (size_t j = 0; j <= 15; ++j)
+      {
+        Real val = LagrangeBasis1D<15>::getBasis(i, nodes[j], nodes);
+        Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(val, expected, 1e-10);
+      }
+    }
+  }
+
+  TEST(LagrangeBasis1D, PartitionOfUnity_K15)
+  {
+    const auto& nodes = GLL01<15>::getNodes();
+
+    for (Real x = 0.0; x <= 1.0; x += 0.1)
+    {
+      Real sum = 0.0;
+      for (size_t i = 0; i <= 15; ++i)
+        sum += LagrangeBasis1D<15>::getBasis(i, x, nodes);
+      EXPECT_NEAR(sum, 1.0, 1e-11);
+    }
+  }
+
+  TEST(LagrangeBasisSegment, LagrangeProperty_K15)
+  {
+    const auto& nodes = GLL01<15>::getNodes();
+
+    for (size_t i = 0; i <= 15; ++i)
+    {
+      for (size_t j = 0; j <= 15; ++j)
+      {
+        Real val = LagrangeBasisSegment<15>::getBasis(i, nodes[j]);
+        Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(val, expected, 1e-10);
+      }
+    }
+  }
+
+  TEST(LagrangeBasisSegment, PartitionOfUnity_K15)
+  {
+    for (Real x = 0.0; x <= 1.0; x += 0.05)
+    {
+      Real sum = 0.0;
+      for (size_t i = 0; i <= 15; ++i)
+        sum += LagrangeBasisSegment<15>::getBasis(i, x);
+      EXPECT_NEAR(sum, 1.0, 1e-10);
+    }
+  }
+
+  TEST(LagrangeBasisTriangle, PartitionOfUnity_K15)
+  {
+    std::vector<std::pair<Real, Real>> test_points = {
+      {0.2, 0.2}, {0.1, 0.6}, {0.4, 0.1}, {0.33, 0.33}
+    };
+
+    for (auto [x, y] : test_points)
+    {
+      if (x + y > 1.0) continue;
+
+      Real sum = 0.0;
+      for (size_t j = 0; j <= 15; ++j)
+      {
+        for (size_t i = 0; i <= 15 - j; ++i)
+        {
+          sum += LagrangeBasisTriangle<15>::getBasis(i, j, x, y);
+        }
+      }
+      EXPECT_NEAR(sum, 1.0, 1e-8) << "x=" << x << " y=" << y;
+    }
+  }
+
+  TEST(LagrangeBasisTetrahedron, PartitionOfUnity_K15)
+  {
+    Real x = 0.15, y = 0.15, z = 0.15;
+    Real sum = 0.0;
+
+    for (size_t k = 0; k <= 15; ++k)
+    {
+      for (size_t j = 0; j <= 15 - k; ++j)
+      {
+        for (size_t i = 0; i <= 15 - j - k; ++i)
+        {
+          sum += LagrangeBasisTetrahedron<15>::getBasis(i, j, k, x, y, z);
+        }
+      }
+    }
+    EXPECT_NEAR(sum, 1.0, 1e-7);
+  }
+
+  TEST(LagrangeBasisQuadrilateral, PartitionOfUnity_K15)
+  {
+    for (Real x = 0.1; x <= 0.9; x += 0.2)
+    {
+      for (Real y = 0.1; y <= 0.9; y += 0.2)
+      {
+        Real sum = 0.0;
+        for (size_t i = 0; i <= 15; ++i)
+        {
+          for (size_t j = 0; j <= 15; ++j)
+          {
+            sum += LagrangeBasisQuadrilateral<15>::getBasis(i, j, x, y);
+          }
+        }
+        EXPECT_NEAR(sum, 1.0, 1e-9);
+      }
+    }
+  }
+
+  TEST(LagrangeBasisWedge, PartitionOfUnity_K15)
+  {
+    Real x = 0.15, y = 0.15, z = 0.5;
+    Real sum = 0.0;
+
+    for (size_t k = 0; k <= 15; ++k)
+    {
+      for (size_t j = 0; j <= 15; ++j)
+      {
+        for (size_t i = 0; i <= 15 - j; ++i)
+        {
+          sum += LagrangeBasisWedge<15>::getBasis(i, j, k, x, y, z);
+        }
+      }
+    }
+    EXPECT_NEAR(sum, 1.0, 1e-7);
+  }
 }

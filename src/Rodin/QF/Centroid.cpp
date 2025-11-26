@@ -1,8 +1,8 @@
-#include "QF1P1.h"
+#include "Centroid.h"
 
 namespace Rodin::QF
 {
-  const Geometry::GeometryIndexed<Math::SpatialVector<Real>> QF1P1::s_points =
+  const Geometry::GeometryIndexed<Math::SpatialVector<Real>> Centroid::s_points =
   {
     { Geometry::Polytope::Type::Point,
       Math::SpatialVector<Real>{{ 0 }} },
@@ -18,7 +18,7 @@ namespace Rodin::QF
       Math::SpatialVector<Real>{{ Real(1) / Real(3), Real(1) / Real(3), 0.5 }} }
   };
 
-  const Geometry::GeometryIndexed<Real> QF1P1::s_weights =
+  const Geometry::GeometryIndexed<Real> Centroid::s_weights =
   {
     { Geometry::Polytope::Type::Point, 1 },
     { Geometry::Polytope::Type::Segment, 1 },

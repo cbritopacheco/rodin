@@ -478,4 +478,184 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(dx));
     EXPECT_FALSE(std::isinf(dy));
   }
+
+  //==========================================================================
+  // Very High Order Tests (K = 15)
+  //==========================================================================
+
+  TEST(WarpFactor1D, ZeroAtEndpoints_K15)
+  {
+    EXPECT_NEAR(WarpFactor1D<15>::get(-1.0), 0.0, 1e-14);
+    EXPECT_NEAR(WarpFactor1D<15>::get(1.0), 0.0, 1e-14);
+  }
+
+  TEST(WarpFactor1D, Finite_K15)
+  {
+    for (Real r = -0.9; r <= 0.9; r += 0.1)
+    {
+      Real warp = WarpFactor1D<15>::get(r);
+      EXPECT_FALSE(std::isnan(warp));
+      EXPECT_FALSE(std::isinf(warp));
+    }
+  }
+
+  TEST(TriangleBlend, Alpha_K15)
+  {
+    // For K=15, alpha should be positive
+    EXPECT_GT(TriangleBlend<15>::getAlpha(), 0.0);
+    EXPECT_FALSE(std::isnan(TriangleBlend<15>::getAlpha()));
+    EXPECT_FALSE(std::isinf(TriangleBlend<15>::getAlpha()));
+  }
+
+  TEST(TetrahedronBlend, Alpha_K15)
+  {
+    // For K=15, alpha should be positive
+    EXPECT_GT(TetrahedronBlend<15>::getAlpha(), 0.0);
+    EXPECT_FALSE(std::isnan(TetrahedronBlend<15>::getAlpha()));
+    EXPECT_FALSE(std::isinf(TetrahedronBlend<15>::getAlpha()));
+  }
+
+  TEST(WarpShiftFace2D, Finite_K15)
+  {
+    Real dx, dy;
+
+    // Test at interior point
+    WarpShiftFace2D<15>::apply(dx, dy, 0.4, 0.3, 0.3, 0.5);
+    EXPECT_FALSE(std::isnan(dx));
+    EXPECT_FALSE(std::isnan(dy));
+    EXPECT_FALSE(std::isinf(dx));
+    EXPECT_FALSE(std::isinf(dy));
+  }
+
+  TEST(WarpBlendTriangle, NodesStayInTriangle_K15)
+  {
+    constexpr size_t N = (15 + 1) * (15 + 2) / 2;  // 136
+    std::array<Math::SpatialPoint, N> nodes;
+
+    size_t idx = 0;
+    for (size_t j = 0; j <= 15; ++j)
+    {
+      for (size_t i = 0; i <= 15 - j; ++i, ++idx)
+      {
+        Real s = static_cast<Real>(i) / 15.0;
+        Real t = static_cast<Real>(j) / 15.0;
+        nodes[idx] = Math::SpatialPoint{{s, t}};
+      }
+    }
+
+    WarpBlendTriangle<15>::apply<N>(nodes);
+
+    for (const auto& n : nodes)
+    {
+      EXPECT_GE(n.x(), -1e-10);
+      EXPECT_GE(n.y(), -1e-10);
+      EXPECT_LE(n.x() + n.y(), 1.0 + 1e-10);
+    }
+  }
+
+  TEST(WarpBlendTriangle, PreservesVertices_K15)
+  {
+    constexpr size_t N = (15 + 1) * (15 + 2) / 2;  // 136
+    std::array<Math::SpatialPoint, N> nodes;
+
+    size_t idx = 0;
+    for (size_t j = 0; j <= 15; ++j)
+    {
+      for (size_t i = 0; i <= 15 - j; ++i, ++idx)
+      {
+        Real s = static_cast<Real>(i) / 15.0;
+        Real t = static_cast<Real>(j) / 15.0;
+        nodes[idx] = Math::SpatialPoint{{s, t}};
+      }
+    }
+
+    WarpBlendTriangle<15>::apply<N>(nodes);
+
+    bool has_v0 = false, has_v1 = false, has_v2 = false;
+    for (const auto& n : nodes)
+    {
+      if (std::abs(n.x()) < 1e-10 && std::abs(n.y()) < 1e-10)
+        has_v0 = true;
+      if (std::abs(n.x() - 1.0) < 1e-10 && std::abs(n.y()) < 1e-10)
+        has_v1 = true;
+      if (std::abs(n.x()) < 1e-10 && std::abs(n.y() - 1.0) < 1e-10)
+        has_v2 = true;
+    }
+
+    EXPECT_TRUE(has_v0);
+    EXPECT_TRUE(has_v1);
+    EXPECT_TRUE(has_v2);
+  }
+
+  TEST(WarpBlendTetrahedron, NodesStayInTetrahedron_K15)
+  {
+    constexpr size_t N = (15 + 1) * (15 + 2) * (15 + 3) / 6;  // 816
+    std::array<Math::SpatialPoint, N> nodes;
+
+    size_t idx = 0;
+    for (size_t k = 0; k <= 15; ++k)
+    {
+      for (size_t j = 0; j <= 15 - k; ++j)
+      {
+        for (size_t i = 0; i <= 15 - j - k; ++i, ++idx)
+        {
+          Real r = static_cast<Real>(i) / 15.0;
+          Real s = static_cast<Real>(j) / 15.0;
+          Real t = static_cast<Real>(k) / 15.0;
+          nodes[idx] = Math::SpatialPoint{{r, s, t}};
+        }
+      }
+    }
+
+    WarpBlendTetrahedron<15>::apply<N>(nodes);
+
+    for (const auto& n : nodes)
+    {
+      EXPECT_GE(n.x(), -1e-10);
+      EXPECT_GE(n.y(), -1e-10);
+      EXPECT_GE(n.z(), -1e-10);
+      EXPECT_LE(n.x() + n.y() + n.z(), 1.0 + 1e-10);
+    }
+  }
+
+  TEST(WarpBlendTetrahedron, PreservesVertices_K15)
+  {
+    constexpr size_t N = (15 + 1) * (15 + 2) * (15 + 3) / 6;  // 816
+    std::array<Math::SpatialPoint, N> nodes;
+
+    size_t idx = 0;
+    for (size_t k = 0; k <= 15; ++k)
+    {
+      for (size_t j = 0; j <= 15 - k; ++j)
+      {
+        for (size_t i = 0; i <= 15 - j - k; ++i, ++idx)
+        {
+          Real r = static_cast<Real>(i) / 15.0;
+          Real s = static_cast<Real>(j) / 15.0;
+          Real t = static_cast<Real>(k) / 15.0;
+          nodes[idx] = Math::SpatialPoint{{r, s, t}};
+        }
+      }
+    }
+
+    WarpBlendTetrahedron<15>::apply<N>(nodes);
+
+    bool has_v0 = false, has_v1 = false, has_v2 = false, has_v3 = false;
+    for (const auto& n : nodes)
+    {
+      if (std::abs(n.x()) < 1e-10 && std::abs(n.y()) < 1e-10 && std::abs(n.z()) < 1e-10)
+        has_v0 = true;
+      if (std::abs(n.x() - 1.0) < 1e-10 && std::abs(n.y()) < 1e-10 && std::abs(n.z()) < 1e-10)
+        has_v1 = true;
+      if (std::abs(n.x()) < 1e-10 && std::abs(n.y() - 1.0) < 1e-10 && std::abs(n.z()) < 1e-10)
+        has_v2 = true;
+      if (std::abs(n.x()) < 1e-10 && std::abs(n.y()) < 1e-10 && std::abs(n.z() - 1.0) < 1e-10)
+        has_v3 = true;
+    }
+
+    EXPECT_TRUE(has_v0);
+    EXPECT_TRUE(has_v1);
+    EXPECT_TRUE(has_v2);
+    EXPECT_TRUE(has_v3);
+  }
 }

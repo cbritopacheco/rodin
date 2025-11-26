@@ -394,4 +394,99 @@ namespace Rodin::Tests::Unit
   {
     EXPECT_EQ(GLL01<6>::getCount(), 7);
   }
+
+  //==========================================================================
+  // Very High Order Tests (K = 15)
+  //==========================================================================
+
+  TEST(GLL, NodeCount_K15)
+  {
+    EXPECT_EQ(GLL<15>::getCount(), 16);
+  }
+
+  TEST(GLL, Endpoints_K15)
+  {
+    const auto& nodes = GLL<15>::getNodes();
+    EXPECT_NEAR(nodes[0], -1.0, 1e-14);
+    EXPECT_NEAR(nodes[15], 1.0, 1e-14);
+  }
+
+  TEST(GLL, Ascending_K15)
+  {
+    const auto& nodes = GLL<15>::getNodes();
+    for (size_t i = 0; i < 15; ++i)
+    {
+      EXPECT_LT(nodes[i], nodes[i + 1]);
+    }
+  }
+
+  TEST(GLL, Symmetry_K15)
+  {
+    const auto& nodes = GLL<15>::getNodes();
+
+    // Check symmetry pairs
+    EXPECT_NEAR(nodes[0], -nodes[15], 1e-14);
+    EXPECT_NEAR(nodes[1], -nodes[14], 1e-14);
+    EXPECT_NEAR(nodes[2], -nodes[13], 1e-14);
+    EXPECT_NEAR(nodes[3], -nodes[12], 1e-14);
+    EXPECT_NEAR(nodes[4], -nodes[11], 1e-14);
+    EXPECT_NEAR(nodes[5], -nodes[10], 1e-14);
+    EXPECT_NEAR(nodes[6], -nodes[9], 1e-14);
+    EXPECT_NEAR(nodes[7], -nodes[8], 1e-14);
+  }
+
+  TEST(GLL, InteriorNodesInInterval_K15)
+  {
+    const auto& nodes = GLL<15>::getNodes();
+    for (size_t i = 1; i < 15; ++i)
+    {
+      EXPECT_GT(nodes[i], -1.0);
+      EXPECT_LT(nodes[i], 1.0);
+    }
+  }
+
+  TEST(GLL01, NodeCount_K15)
+  {
+    EXPECT_EQ(GLL01<15>::getCount(), 16);
+  }
+
+  TEST(GLL01, Endpoints_K15)
+  {
+    const auto& nodes = GLL01<15>::getNodes();
+    EXPECT_NEAR(nodes[0], 0.0, 1e-14);
+    EXPECT_NEAR(nodes[15], 1.0, 1e-14);
+  }
+
+  TEST(GLL01, MappingConsistency_K15)
+  {
+    // GLL01 = (GLL + 1) / 2
+    const auto& gll = GLL<15>::getNodes();
+    const auto& gll01 = GLL01<15>::getNodes();
+
+    for (size_t i = 0; i <= 15; ++i)
+    {
+      Real expected = (gll[i] + 1.0) / 2.0;
+      EXPECT_NEAR(gll01[i], expected, 1e-14);
+    }
+  }
+
+  TEST(GLL01, Range_K15)
+  {
+    // All nodes should be in [0, 1]
+    const auto& nodes = GLL01<15>::getNodes();
+    for (size_t i = 0; i <= 15; ++i)
+    {
+      EXPECT_GE(nodes[i], 0.0);
+      EXPECT_LE(nodes[i], 1.0);
+    }
+  }
+
+  TEST(GLL01, Ascending_K15)
+  {
+    const auto& nodes = GLL01<15>::getNodes();
+    for (size_t i = 0; i < 15; ++i)
+    {
+      EXPECT_LT(nodes[i], nodes[i + 1]);
+    }
+  }
 }

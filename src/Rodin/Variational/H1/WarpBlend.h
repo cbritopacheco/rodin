@@ -569,6 +569,126 @@ namespace Rodin::Variational
             continue;
           }
 
+          // Face nodes: exactly 1 barycentric coord is zero
+          // Apply 2D warp-blend within the face plane using triangle warp-blend
+          // This ensures face nodes match FeketeTriangle nodes for conformity
+          if (nzero == 1)
+          {
+            // Determine which face this node is on (which L is zero)
+            // Face opposite to vertex i has Li = 0
+            Real Lvals[4] = {L1, L2, L3, L4};
+            int i_zero = -1;
+            for (int i = 0; i < 4; ++i)
+            {
+              if (Lvals[i] < TOL)
+              {
+                i_zero = i;
+                break;
+              }
+            }
+
+            // Get the three non-zero barycentric coordinates for this face
+            // These form the barycentric coordinates within the triangular face
+            Real La, Lb, Lc;
+            int ia, ib, ic;
+
+            // Map face vertices to reference triangle vertices
+            // Face opposite L1 (i_zero=0): vertices 2,3,4 with L2,L3,L4
+            // Face opposite L2 (i_zero=1): vertices 1,3,4 with L1,L3,L4
+            // Face opposite L3 (i_zero=2): vertices 1,2,4 with L1,L2,L4
+            // Face opposite L4 (i_zero=3): vertices 1,2,3 with L1,L2,L3 (base face z=0)
+            if (i_zero == 0) { ia = 1; ib = 2; ic = 3; }
+            else if (i_zero == 1) { ia = 0; ib = 2; ic = 3; }
+            else if (i_zero == 2) { ia = 0; ib = 1; ic = 3; }
+            else { ia = 0; ib = 1; ic = 2; } // i_zero == 3: base face
+
+            La = Lvals[ia];
+            Lb = Lvals[ib];
+            Lc = Lvals[ic];
+
+            // Normalize to get face barycentric coordinates
+            Real sum = La + Lb + Lc;
+            La /= sum;
+            Lb /= sum;
+            Lc /= sum;
+
+            // Use the same warp-blend as triangle (FeketeTriangle uses WarpBlendTriangle)
+            // But we need to apply it in face coordinates and then map back
+
+            // For the reference triangle with vertices at (0,0), (1,0), (0,1):
+            // - La corresponds to vertex (0,0) i.e., 1 - x - y
+            // - Lb corresponds to vertex (1,0) i.e., x
+            // - Lc corresponds to vertex (0,1) i.e., y
+            // So on the face: xface = Lb, yface = Lc
+
+            // Apply 2D warp-blend (same as WarpBlendTriangle)
+            const Real alphaT = TriangleBlend<K>::getAlpha();
+
+            // Convert to equilateral triangle coordinates
+            constexpr Real SQRT3     = static_cast<Real>(1.7320508075688772);
+            constexpr Real INV_SQRT3 = static_cast<Real>(1.0) / SQRT3;
+
+            Real x = -Lb + Lc;
+            Real y = (-Lb - Lc + static_cast<Real>(2.0) * La) * INV_SQRT3;
+
+            // 2D warp–blend shift
+            Real dx, dy;
+            WarpShiftFace2D<K>::apply(dx, dy, La, Lb, Lc, alphaT);
+
+            x += dx;
+            y += dy;
+
+            // Back: equilateral → barycentric (inverse of above)
+            Real La_new = y * INV_SQRT3 + static_cast<Real>(1.0) / static_cast<Real>(3.0);
+            Real Lb_new = -static_cast<Real>(0.5) * x
+                        - static_cast<Real>(0.5) * y * INV_SQRT3
+                        + static_cast<Real>(1.0) / static_cast<Real>(3.0);
+            Real Lc_new =  static_cast<Real>(0.5) * x
+                        - static_cast<Real>(0.5) * y * INV_SQRT3
+                        + static_cast<Real>(1.0) / static_cast<Real>(3.0);
+
+            // Clamp and renormalize
+            La_new = std::max(static_cast<Real>(0.0), La_new);
+            Lb_new = std::max(static_cast<Real>(0.0), Lb_new);
+            Lc_new = std::max(static_cast<Real>(0.0), Lc_new);
+
+            Real sumL = La_new + Lb_new + Lc_new;
+            if (sumL > TOL)
+            {
+              La_new /= sumL;
+              Lb_new /= sumL;
+              Lc_new /= sumL;
+            }
+
+            // Map back to 3D tetrahedron barycentric coordinates
+            // The zero coordinate stays zero (node stays on face)
+            // l1n is assigned for code symmetry but its value is not used since
+            // reference tetrahedron coordinates are (x,y,z) = (L2,L3,L4)
+            Real l2n = 0, l3n = 0, l4n = 0;
+
+            // Assign new face barycentric coords to the correct tet barycentric coords
+            // Note: assignments to index 0 (L1) are no-ops since l1n isn't used
+            if (ia == 1) l2n = La_new;
+            else if (ia == 2) l3n = La_new;
+            else if (ia == 3) l4n = La_new;
+
+            if (ib == 1) l2n = Lb_new;
+            else if (ib == 2) l3n = Lb_new;
+            else if (ib == 3) l4n = Lb_new;
+
+            if (ic == 1) l2n = Lc_new;
+            else if (ic == 2) l3n = Lc_new;
+            else if (ic == 3) l4n = Lc_new;
+
+            // The i_zero coordinate stays 0 (already initialized to 0)
+
+            // Back to reference tetra: (x,y,z) = (L2,L3,L4)
+            p.x() = l2n;
+            p.y() = l3n;
+            p.z() = l4n;
+            continue;
+          }
+
           // Equilateral coordinates of undeformed point
           const Real rx0 = L1 * v1x + L2 * v2x + L3 * v3x + L4 * v4x;
           const Real ry0 = L1 * v1y + L2 * v2y + L3 * v3y + L4 * v4y;

@@ -7,27 +7,25 @@
 #include <gtest/gtest.h>
 
 #include <vector>
-#include <cmath>
 
-#include "Rodin/QF/QF1P1.h"
-#include "Rodin/Geometry.h"
+#include "Rodin/QF/Centroid.h"
 
 using namespace Rodin::QF;
 using namespace Rodin::Geometry;
 
-// Test class for QF1P1 functionality
-class QF1P1Test : public ::testing::Test
+// Test class for centroid quadrature functionality
+class CentroidTest : public ::testing::Test
 {
   protected:
     void SetUp() override {}
     void TearDown() override {}
 };
 
-// Test QF1P1 (Single-point quadrature)
-TEST_F(QF1P1Test, BasicProperties)
+// Test centroid (Single-point quadrature)
+TEST_F(CentroidTest, BasicProperties)
 {
-  QF1P1 qf_triangle(Polytope::Type::Triangle);
-  QF1P1 qf_quad(Polytope::Type::Quadrilateral);
+  Centroid qf_triangle(Polytope::Type::Triangle);
+  Centroid qf_quad(Polytope::Type::Quadrilateral);
 
   // Single point quadrature should always have size 1
   EXPECT_EQ(qf_triangle.getSize(), 1);
@@ -38,11 +36,11 @@ TEST_F(QF1P1Test, BasicProperties)
   EXPECT_EQ(qf_quad.getGeometry(), Polytope::Type::Quadrilateral);
 }
 
-TEST_F(QF1P1Test, Weights)
+TEST_F(CentroidTest, Weights)
 {
-  QF1P1 qf_triangle(Polytope::Type::Triangle);
-  QF1P1 qf_quad(Polytope::Type::Quadrilateral);
-  QF1P1 qf_line(Polytope::Type::Segment);
+  Centroid qf_triangle(Polytope::Type::Triangle);
+  Centroid qf_quad(Polytope::Type::Quadrilateral);
+  Centroid qf_line(Polytope::Type::Segment);
 
   // For single point quadrature, weights should represent the measure of the reference element
   EXPECT_NO_THROW(qf_triangle.getWeight(0));
@@ -55,10 +53,10 @@ TEST_F(QF1P1Test, Weights)
   EXPECT_GT(qf_line.getWeight(0), 0.0);
 }
 
-TEST_F(QF1P1Test, Points)
+TEST_F(CentroidTest, Points)
 {
-  QF1P1 qf_triangle(Polytope::Type::Triangle);
-  QF1P1 qf_quad(Polytope::Type::Quadrilateral);
+  Centroid qf_triangle(Polytope::Type::Triangle);
+  Centroid qf_quad(Polytope::Type::Quadrilateral);
 
   // Test that we can get the single quadrature point (index 0)
   EXPECT_NO_THROW(qf_triangle.getPoint(0));
@@ -73,7 +71,7 @@ TEST_F(QF1P1Test, Points)
 }
 
 // Test different geometry types
-TEST_F(QF1P1Test, DifferentGeometryTypes)
+TEST_F(CentroidTest, DifferentGeometryTypes)
 {
   // Test that QF1P1 works with various geometry types
   std::vector<Polytope::Type> geometries = {
@@ -85,9 +83,9 @@ TEST_F(QF1P1Test, DifferentGeometryTypes)
   };
 
   for (auto geom : geometries) {
-    EXPECT_NO_THROW(QF1P1 qf(geom));
+    EXPECT_NO_THROW(Centroid qf(geom));
 
-    QF1P1 qf(geom);
+    Centroid qf(geom);
     EXPECT_EQ(qf.getGeometry(), geom);
     EXPECT_EQ(qf.getSize(), 1);
     EXPECT_NO_THROW(qf.getWeight(0));
@@ -96,10 +94,10 @@ TEST_F(QF1P1Test, DifferentGeometryTypes)
 }
 
 // Integration test: verify quadrature accuracy for simple functions
-TEST_F(QF1P1Test, QuadratureAccuracy)
+TEST_F(CentroidTest, QuadratureAccuracy)
 {
   // Test that constant function integration is exact
-  QF1P1 qf_triangle(Polytope::Type::Triangle);
+  Centroid qf_triangle(Polytope::Type::Triangle);
 
   // For a constant function f(x) = 1, integral over reference triangle should equal area * 1
   double integral_approx = qf_triangle.getWeight(0) * 1.0;  // f(x) = 1
@@ -110,9 +108,9 @@ TEST_F(QF1P1Test, QuadratureAccuracy)
 }
 
 // Error handling tests
-TEST_F(QF1P1Test, OutOfBoundsAccess)
+TEST_F(CentroidTest, OutOfBoundsAccess)
 {
-  QF1P1 qf(Polytope::Type::Triangle);
+  Centroid qf(Polytope::Type::Triangle);
 
   // Should work for valid index
   EXPECT_NO_THROW(qf.getWeight(0));

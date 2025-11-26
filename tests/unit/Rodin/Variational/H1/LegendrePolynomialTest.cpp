@@ -376,4 +376,118 @@ namespace Rodin::Tests::Unit
     }
     EXPECT_NEAR(sum, 0.0, 1e-12);
   }
+
+  //==========================================================================
+  // Very High Order Tests (K = 15)
+  //==========================================================================
+
+  TEST(LegendrePolynomial, P15_EndpointValues)
+  {
+    // P_15(1) = 1, P_15(-1) = -1 (odd degree)
+    Real P, dP;
+
+    LegendrePolynomial<15>::getValue(P, dP, 1.0);
+    EXPECT_NEAR(P, 1.0, 1e-11);
+
+    LegendrePolynomial<15>::getValue(P, dP, -1.0);
+    EXPECT_NEAR(P, -1.0, 1e-11);
+  }
+
+  TEST(LegendrePolynomial, P15_AtZero)
+  {
+    // P_15(0) = 0 (odd polynomial)
+    Real P, dP;
+
+    LegendrePolynomial<15>::getValue(P, dP, 0.0);
+    EXPECT_NEAR(P, 0.0, 1e-12);
+  }
+
+  TEST(LegendrePolynomial, P15_Symmetry_OddDegree)
+  {
+    // P_15(-x) = -P_15(x) for odd K
+    Real P_pos, dP_pos, P_neg, dP_neg;
+
+    std::vector<Real> test_points = {0.1, 0.3, 0.5, 0.7, 0.9};
+
+    for (Real x : test_points)
+    {
+      LegendrePolynomial<15>::getValue(P_pos, dP_pos, x);
+      LegendrePolynomial<15>::getValue(P_neg, dP_neg, -x);
+      EXPECT_NEAR(P_pos, -P_neg, 1e-12);
+    }
+  }
+
+  TEST(LegendrePolynomial, P15_Value_NoNaN)
+  {
+    // Verify no NaN/Inf at various points
+    Real P, dP;
+
+    std::vector<Real> test_points = {-0.9, -0.5, 0.0, 0.5, 0.9};
+
+    for (Real x : test_points)
+    {
+      LegendrePolynomial<15>::getValue(P, dP, x);
+      EXPECT_FALSE(std::isnan(P));
+      EXPECT_FALSE(std::isinf(P));
+      EXPECT_FALSE(std::isnan(dP));
+      EXPECT_FALSE(std::isinf(dP));
+    }
+  }
+
+  TEST(LegendrePolynomial, P15_Derivative_NoNaN)
+  {
+    Real P, dP;
+
+    std::vector<Real> test_points = {-0.9, -0.5, 0.0, 0.5, 0.9};
+
+    for (Real x : test_points)
+    {
+      LegendrePolynomial<15>::getValue(P, dP, x);
+      EXPECT_FALSE(std::isnan(dP));
+      EXPECT_FALSE(std::isinf(dP));
+    }
+  }
+
+  TEST(LegendrePolynomial, Orthogonality_P5_P15)
+  {
+    // ∫_{-1}^{1} P_5(x) P_15(x) dx = 0
+    // Use Gauss-Legendre quadrature with 11 points (exact for deg <= 21)
+    // Nodes and weights for 11-point Gauss-Legendre quadrature on [-1, 1]
+    const std::array<Real, 11> nodes = {
+      -0.9782286581460570,
+      -0.8870625997680953,
+      -0.7301520055740494,
+      -0.5190961292068118,
+      -0.2695431559523450,
+      0.0,
+      0.2695431559523450,
+      0.5190961292068118,
+      0.7301520055740494,
+      0.8870625997680953,
+      0.9782286581460570
+    };
+    const std::array<Real, 11> weights = {
+      0.0556685671161737,
+      0.1255803694649046,
+      0.1862902109277343,
+      0.2331937645919905,
+      0.2628045445102467,
+      0.2729250867779006,
+      0.2628045445102467,
+      0.2331937645919905,
+      0.1862902109277343,
+      0.1255803694649046,
+      0.0556685671161737
+    };
+
+    Real sum = 0.0;
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+      Real P5, dP5, P15, dP15;
+      LegendrePolynomial<5>::getValue(P5, dP5, nodes[i]);
+      LegendrePolynomial<15>::getValue(P15, dP15, nodes[i]);
+      sum += weights[i] * P5 * P15;
+    }
+    EXPECT_NEAR(sum, 0.0, 1e-12);
+  }
 }

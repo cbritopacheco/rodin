@@ -35,11 +35,11 @@ namespace Rodin::Variational
   {
     public:
       /**
-       * @brief Computes @f$ P_K^{(\Alpha, \Beta)}(x) @f$ and
-       * @f$ \partial_x P_K^{(\Alpha, \Beta)}(x) @f$.
+       * @brief Computes @f$ P_K^{(\alpha, \beta)}(x) @f$ and
+       * @f$ \partial_x P_K^{(\alpha, \beta)}(x) @f$.
        *
-       * @param[out] P   Value of @f$ P_K^{(\Alpha, \Beta)}(x) @f$.
-       * @param[out] dP  Value of @f$ \partial_x P_K^{(\Alpha, \Beta)}(x) @f$.
+       * @param[out] P   Value of @f$ P_K^{(\alpha, \beta)}(x) @f$.
+       * @param[out] dP  Value of @f$ \partial_x P_K^{(\alpha, \beta)}(x) @f$.
        * @param[in]  x   Evaluation point.
        */
       static constexpr void getValue(Real& P, Real& dP, Real alpha, Real beta, Real x)

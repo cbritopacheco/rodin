@@ -406,4 +406,101 @@ namespace Rodin::Tests::Unit
     Real expected = -5.0 / 16.0;  // Known value for P_6(0)
     EXPECT_NEAR(P, expected, tol);
   }
+
+  //==========================================================================
+  // Very High Order Tests (K = 15)
+  //==========================================================================
+
+  TEST(JacobiPolynomial, P00_K15_EndpointValues)
+  {
+    // P_15^{0,0}(1) = 1, P_15^{0,0}(-1) = -1 (Legendre, odd degree)
+    Real P, dP;
+
+    JacobiPolynomial<15>::getValue(P, dP, 0.0, 0.0, 1.0);
+    EXPECT_NEAR(P, 1.0, 1e-11);
+
+    JacobiPolynomial<15>::getValue(P, dP, 0.0, 0.0, -1.0);
+    EXPECT_NEAR(P, -1.0, 1e-11);  // Odd polynomial
+  }
+
+  TEST(JacobiPolynomial, P00_K15_AtZero)
+  {
+    // P_15(0) = 0 for odd degree Legendre polynomial
+    Real P, dP;
+
+    JacobiPolynomial<15>::getValue(P, dP, 0.0, 0.0, 0.0);
+    EXPECT_NEAR(P, 0.0, 1e-12);  // Odd polynomial
+  }
+
+  TEST(JacobiPolynomial, HigherAlpha_K15)
+  {
+    // Test P_15^{10,0}(x) - used in high-order Dubiner tetrahedron
+    Real P, dP;
+
+    JacobiPolynomial<15>::getValue(P, dP, 10.0, 0.0, 0.0);
+    EXPECT_FALSE(std::isnan(P));
+    EXPECT_FALSE(std::isinf(P));
+
+    JacobiPolynomial<15>::getValue(P, dP, 10.0, 0.0, 0.5);
+    EXPECT_FALSE(std::isnan(P));
+    EXPECT_FALSE(std::isinf(P));
+
+    JacobiPolynomial<15>::getValue(P, dP, 10.0, 0.0, 1.0);
+    EXPECT_FALSE(std::isnan(P));
+    EXPECT_FALSE(std::isinf(P));
+  }
+
+  TEST(JacobiPolynomial, VeryHighAlpha_K15)
+  {
+    // Test P_15^{20,0}(x) - verifying stability for very high alpha
+    Real P, dP;
+
+    JacobiPolynomial<15>::getValue(P, dP, 20.0, 0.0, 0.0);
+    EXPECT_FALSE(std::isnan(P));
+    EXPECT_FALSE(std::isinf(P));
+
+    JacobiPolynomial<15>::getValue(P, dP, 20.0, 0.0, 0.5);
+    EXPECT_FALSE(std::isnan(P));
+    EXPECT_FALSE(std::isinf(P));
+  }
+
+  TEST(JacobiPolynomial, RecurrenceConsistency_K15)
+  {
+    // Verify consistency at multiple points for K=15
+    Real P, dP;
+
+    // Test at several points
+    std::vector<Real> test_points = {-0.9, -0.5, 0.0, 0.5, 0.9};
+
+    for (Real x : test_points)
+    {
+      JacobiPolynomial<15>::getValue(P, dP, 0.0, 0.0, x);
+      // Just verify no NaN/Inf
+      EXPECT_FALSE(std::isnan(P));
+      EXPECT_FALSE(std::isinf(P));
+      EXPECT_FALSE(std::isnan(dP));
+      EXPECT_FALSE(std::isinf(dP));
+    }
+
+    JacobiPolynomial<15>::getValue(P, dP, 0.0, 0.0, 1.0);
+    EXPECT_NEAR(P, 1.0, 1e-11);
+
+    JacobiPolynomial<15>::getValue(P, dP, 0.0, 0.0, -1.0);
+    EXPECT_NEAR(P, -1.0, 1e-11);
+  }
+
+  TEST(JacobiPolynomial, DerivativeIdentity_K15)
+  {
+    // d/dx P_15^{α,β}(x) = (15 + α + β + 1)/2 * P_14^{α+1,β+1}(x)
+    Real P, dP;
+    Real x = 0.3;
+
+    JacobiPolynomial<15>::getValue(P, dP, 0.0, 0.0, x);
+
+    Real P14_11, dP14_11;
+    JacobiPolynomial<14>::getValue(P14_11, dP14_11, 1.0, 1.0, x);
+
+    Real expected_deriv = 8.0 * P14_11;  // (15 + 0 + 0 + 1)/2 = 8
+    EXPECT_NEAR(dP, expected_deriv, 1e-9);
+  }
 }
