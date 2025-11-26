@@ -7,6 +7,21 @@
 #ifndef RODIN_VARIATIONAL_H1_H1ELEMENT_H
 #define RODIN_VARIATIONAL_H1_H1ELEMENT_H
 
+/**
+ * @file
+ * @brief Defines the H1Element class for H1-conforming Lagrange finite elements.
+ *
+ * This file provides the implementation of high-order H1-conforming Lagrange
+ * finite elements. These elements are characterized by:
+ * - Continuous basis functions (H¹-conforming)
+ * - Lagrange nodal property: @f$ \phi_i(x_j) = \delta_{ij} @f$
+ * - Arbitrary polynomial degree K
+ * - Support for scalar and vector-valued fields
+ *
+ * @see H1Element
+ * @see RealH1Element
+ * @see VectorH1Element
+ */
 
 #include <cstddef>
 #include <array>
@@ -34,6 +49,14 @@
  */
 #define RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION 16
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Tolerance for numerical computations in H1Element.
+ *
+ * This tolerance is used in the collapsed coordinate transformations
+ * (Duffy transformation) to avoid division by zero near element boundaries.
+ * Used when computing basis function gradients on triangles and tetrahedra.
+ */
 #define RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE 1e-12
 
 namespace Rodin::FormLanguage
