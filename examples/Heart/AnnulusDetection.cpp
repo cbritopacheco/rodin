@@ -10,8 +10,8 @@
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
-static std::set<Attribute> s_epicardium = { 1 } ;
-static std::set<Attribute> s_endocardium = { 7, 9 } ;
+static std::set<Attribute> s_epicardium = { 100, 101, 102, 103, 104, 200, 300 } ;
+static std::set<Attribute> s_endocardium = { 666 } ;
 
 template <class Mesh>
 bool isAnnulus(const Mesh& mesh, Index edgeIdx)
@@ -37,7 +37,7 @@ bool isAnnulus(const Mesh& mesh, Index edgeIdx)
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("BiVentricle.mesh", IO::FileFormat::MEDIT);
+  mesh.load("LeftAtrium__tetra_layers_1.mesh", IO::FileFormat::MEDIT);
 
 
   mesh.getConnectivity().compute(2, 3);
@@ -57,7 +57,7 @@ int main(int, char**)
 
   std::cout << "Found " << ccl.getCount() << " annuli." << std::endl;
 
-  Attribute label = 10;
+  Attribute label = 50;
   for (const auto& cc : ccl)
   {
     for (const auto& i : cc)

@@ -18,7 +18,7 @@
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
-static constexpr Attribute AnnulusLabel = 54;
+static constexpr Attribute AnnulusLabel = 51;
 
 using Vector2 = Rodin::Math::Vector2<Real>;
 using Vector3 = Rodin::Math::Vector3<Real>;
@@ -125,7 +125,7 @@ namespace
 int main()
 {
   Mesh mesh;
-  mesh.load("LeftAtriumTetra.mesh", IO::FileFormat::MEDIT);
+  mesh.load("Annulus_clean2.mesh", IO::FileFormat::MEDIT);
 
   std::cout << "---------------------" << AnnulusLabel << "\n";
   std::cout << "Closing annuli in mesh with label " << AnnulusLabel << "...\n";

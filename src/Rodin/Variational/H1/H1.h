@@ -160,7 +160,7 @@ namespace Rodin::Variational
       H1(std::integral_constant<size_t, K>, const MeshType& mesh)
         : m_mesh(mesh)
       {
-        buildDOFs();
+        // buildDOFs();
       }
 
       /**
@@ -368,111 +368,111 @@ namespace Rodin::Variational
        */
       void buildDOFs()
       {
-        const auto& mesh = getMesh();
-        const size_t meshDim = mesh.getDimension();
+        // const auto& mesh = getMesh();
+        // const size_t meshDim = mesh.getDimension();
 
-        // Initialize DOF storage for each dimension
-        m_dofs.resize(meshDim + 1);
+        // // Initialize DOF storage for each dimension
+        // m_dofs.resize(meshDim + 1);
 
-        // For H1<K>, DOFs are placed at:
-        // - Vertices: 1 DOF per vertex (for K >= 1)
-        // - Edges: (K-1) DOFs per edge (for K >= 2)
-        // - Faces (triangles): (K-1)(K-2)/2 DOFs per face (for K >= 3)
-        // - Faces (quads): (K-1)^2 DOFs per face (for K >= 2)
-        // - Cells: interior DOFs
+        // // For H1<K>, DOFs are placed at:
+        // // - Vertices: 1 DOF per vertex (for K >= 1)
+        // // - Edges: (K-1) DOFs per edge (for K >= 2)
+        // // - Faces (triangles): (K-1)(K-2)/2 DOFs per face (for K >= 3)
+        // // - Faces (quads): (K-1)^2 DOFs per face (for K >= 2)
+        // // - Cells: interior DOFs
 
-        // Count DOFs by entity type
-        Index globalDOFIndex = 0;
+        // // Count DOFs by entity type
+        // Index globalDOFIndex = 0;
 
-        // Vertex DOFs (dimension 0)
-        // Each vertex has 1 DOF if K >= 1, 0 DOFs if K == 0
-        // For K=0, this results in a space with no DOFs (similar to P0 behavior)
-        const size_t vertexCount = mesh.getVertexCount();
-        const size_t dofsPerVertex = (K >= 1) ? 1 : 0;
-        m_dofs[0].resize(vertexCount);
-        for (size_t v = 0; v < vertexCount; ++v)
-        {
-          if (dofsPerVertex > 0)
-          {
-            m_dofs[0][v].resize(dofsPerVertex);
-            m_dofs[0][v](0) = globalDOFIndex++;
-          }
-          else
-          {
-            m_dofs[0][v].resize(0);
-          }
-        }
+        // // Vertex DOFs (dimension 0)
+        // // Each vertex has 1 DOF if K >= 1, 0 DOFs if K == 0
+        // // For K=0, this results in a space with no DOFs (similar to P0 behavior)
+        // const size_t vertexCount = mesh.getVertexCount();
+        // const size_t dofsPerVertex = (K >= 1) ? 1 : 0;
+        // m_dofs[0].resize(vertexCount);
+        // for (size_t v = 0; v < vertexCount; ++v)
+        // {
+        //   if (dofsPerVertex > 0)
+        //   {
+        //     m_dofs[0][v].resize(dofsPerVertex);
+        //     m_dofs[0][v](0) = globalDOFIndex++;
+        //   }
+        //   else
+        //   {
+        //     m_dofs[0][v].resize(0);
+        //   }
+        // }
 
-        // Edge DOFs (dimension 1, if mesh dimension >= 1)
-        if (meshDim >= 1)
-        {
-          const size_t edgeCount = mesh.getConnectivity().getCount(1);
-          const size_t dofsPerEdge = (K >= 2) ? (K - 1) : 0;
-          m_dofs[1].resize(edgeCount);
-          for (size_t e = 0; e < edgeCount; ++e)
-          {
-            m_dofs[1][e].resize(dofsPerEdge);
-            for (size_t local = 0; local < dofsPerEdge; ++local)
-              m_dofs[1][e](local) = globalDOFIndex++;
-          }
-        }
+        // // Edge DOFs (dimension 1, if mesh dimension >= 1)
+        // if (meshDim >= 1)
+        // {
+        //   const size_t edgeCount = mesh.getConnectivity().getCount(1);
+        //   const size_t dofsPerEdge = (K >= 2) ? (K - 1) : 0;
+        //   m_dofs[1].resize(edgeCount);
+        //   for (size_t e = 0; e < edgeCount; ++e)
+        //   {
+        //     m_dofs[1][e].resize(dofsPerEdge);
+        //     for (size_t local = 0; local < dofsPerEdge; ++local)
+        //       m_dofs[1][e](local) = globalDOFIndex++;
+        //   }
+        // }
 
-        // Face DOFs (dimension 2, if mesh dimension >= 2)
-        if (meshDim >= 2)
-        {
-          const size_t faceCount = mesh.getConnectivity().getCount(2);
-          m_dofs[2].resize(faceCount);
-          for (size_t f = 0; f < faceCount; ++f)
-          {
-            const auto g = mesh.getGeometry(2, f);
-            size_t dofsPerFace = 0;
-            if (g == Geometry::Polytope::Type::Triangle)
-            {
-              // Interior DOFs for triangle: (K-1)(K-2)/2 for K >= 3
-              dofsPerFace = (K >= 3) ? ((K - 1) * (K - 2) / 2) : 0;
-            }
-            else if (g == Geometry::Polytope::Type::Quadrilateral)
-            {
-              // Interior DOFs for quadrilateral: (K-1)^2 for K >= 2
-              dofsPerFace = (K >= 2) ? ((K - 1) * (K - 1)) : 0;
-            }
-            m_dofs[2][f].resize(dofsPerFace);
-            for (size_t local = 0; local < dofsPerFace; ++local)
-              m_dofs[2][f](local) = globalDOFIndex++;
-          }
-        }
+        // // Face DOFs (dimension 2, if mesh dimension >= 2)
+        // if (meshDim >= 2)
+        // {
+        //   const size_t faceCount = mesh.getConnectivity().getCount(2);
+        //   m_dofs[2].resize(faceCount);
+        //   for (size_t f = 0; f < faceCount; ++f)
+        //   {
+        //     const auto g = mesh.getGeometry(2, f);
+        //     size_t dofsPerFace = 0;
+        //     if (g == Geometry::Polytope::Type::Triangle)
+        //     {
+        //       // Interior DOFs for triangle: (K-1)(K-2)/2 for K >= 3
+        //       dofsPerFace = (K >= 3) ? ((K - 1) * (K - 2) / 2) : 0;
+        //     }
+        //     else if (g == Geometry::Polytope::Type::Quadrilateral)
+        //     {
+        //       // Interior DOFs for quadrilateral: (K-1)^2 for K >= 2
+        //       dofsPerFace = (K >= 2) ? ((K - 1) * (K - 1)) : 0;
+        //     }
+        //     m_dofs[2][f].resize(dofsPerFace);
+        //     for (size_t local = 0; local < dofsPerFace; ++local)
+        //       m_dofs[2][f](local) = globalDOFIndex++;
+        //   }
+        // }
 
-        // Cell DOFs (dimension meshDim, if mesh dimension >= 3)
-        if (meshDim >= 3)
-        {
-          const size_t cellCount = mesh.getCellCount();
-          m_dofs[3].resize(cellCount);
-          for (size_t c = 0; c < cellCount; ++c)
-          {
-            const auto g = mesh.getGeometry(meshDim, c);
-            size_t dofsPerCell = 0;
-            if (g == Geometry::Polytope::Type::Tetrahedron)
-            {
-              // Interior DOFs for tetrahedron: (K-1)(K-2)(K-3)/6 for K >= 4
-              dofsPerCell = (K >= 4) ? ((K - 1) * (K - 2) * (K - 3) / 6) : 0;
-            }
-            else if (g == Geometry::Polytope::Type::Wedge)
-            {
-              // Interior DOFs for wedge: more complex formula
-              // For simplicity, use (K-1)*(K-1)*(K-2)/2 for K >= 3
-              dofsPerCell = (K >= 3) ? ((K - 1) * (K - 1) * (K - 2) / 2) : 0;
-            }
-            m_dofs[3][c].resize(dofsPerCell);
-            for (size_t local = 0; local < dofsPerCell; ++local)
-              m_dofs[3][c](local) = globalDOFIndex++;
-          }
-        }
+        // // Cell DOFs (dimension meshDim, if mesh dimension >= 3)
+        // if (meshDim >= 3)
+        // {
+        //   const size_t cellCount = mesh.getCellCount();
+        //   m_dofs[3].resize(cellCount);
+        //   for (size_t c = 0; c < cellCount; ++c)
+        //   {
+        //     const auto g = mesh.getGeometry(meshDim, c);
+        //     size_t dofsPerCell = 0;
+        //     if (g == Geometry::Polytope::Type::Tetrahedron)
+        //     {
+        //       // Interior DOFs for tetrahedron: (K-1)(K-2)(K-3)/6 for K >= 4
+        //       dofsPerCell = (K >= 4) ? ((K - 1) * (K - 2) * (K - 3) / 6) : 0;
+        //     }
+        //     else if (g == Geometry::Polytope::Type::Wedge)
+        //     {
+        //       // Interior DOFs for wedge: more complex formula
+        //       // For simplicity, use (K-1)*(K-1)*(K-2)/2 for K >= 3
+        //       dofsPerCell = (K >= 3) ? ((K - 1) * (K - 1) * (K - 2) / 2) : 0;
+        //     }
+        //     m_dofs[3][c].resize(dofsPerCell);
+        //     for (size_t local = 0; local < dofsPerCell; ++local)
+        //       m_dofs[3][c](local) = globalDOFIndex++;
+        //   }
+        // }
 
-        m_size = globalDOFIndex;
+        // m_size = globalDOFIndex;
 
-        // Now rebuild the DOF arrays for each cell to include all DOFs
-        // (vertex + edge + face + interior)
-        rebuildCellDOFs();
+        // // Now rebuild the DOF arrays for each cell to include all DOFs
+        // // (vertex + edge + face + interior)
+        // rebuildCellDOFs();
       }
 
       /**
@@ -488,86 +488,86 @@ namespace Rodin::Variational
        */
       void rebuildCellDOFs()
       {
-        const auto& mesh = getMesh();
-        const size_t meshDim = mesh.getDimension();
-        const size_t cellCount = mesh.getCellCount();
+        // const auto& mesh = getMesh();
+        // const size_t meshDim = mesh.getDimension();
+        // const size_t cellCount = mesh.getCellCount();
 
-        // We need to build complete DOF arrays for cells
-        // The getDOFs(d, i) should return all DOFs for the d-polytope i
-        // For cells, this includes vertex, edge, face, and interior DOFs
+        // // We need to build complete DOF arrays for cells
+        // // The getDOFs(d, i) should return all DOFs for the d-polytope i
+        // // For cells, this includes vertex, edge, face, and interior DOFs
 
-        for (size_t cellIdx = 0; cellIdx < cellCount; ++cellIdx)
-        {
-          const auto& fe = getFiniteElement(meshDim, cellIdx);
-          const size_t numDOFs = fe.getCount();
+        // for (size_t cellIdx = 0; cellIdx < cellCount; ++cellIdx)
+        // {
+        //   const auto& fe = getFiniteElement(meshDim, cellIdx);
+        //   const size_t numDOFs = fe.getCount();
 
-          // Collect all DOFs for this cell
-          IndexArray allDOFs(numDOFs);
-          size_t dofIdx = 0;
+        //   // Collect all DOFs for this cell
+        //   IndexArray allDOFs(numDOFs);
+        //   size_t dofIdx = 0;
 
-          // Vertex DOFs
-          const auto& cellVertices = mesh.getConnectivity().getPolytope(meshDim, cellIdx);
-          const size_t dofsPerVertex = (K >= 1) ? 1 : 0;
-          for (size_t v = 0; v < static_cast<size_t>(cellVertices.size()); ++v)
-          {
-            for (size_t local = 0; local < dofsPerVertex; ++local)
-            {
-              allDOFs(dofIdx++) = m_dofs[0][cellVertices(v)](local);
-            }
-          }
+        //   // Vertex DOFs
+        //   const auto& cellVertices = mesh.getConnectivity().getPolytope(meshDim, cellIdx);
+        //   const size_t dofsPerVertex = (K >= 1) ? 1 : 0;
+        //   for (size_t v = 0; v < static_cast<size_t>(cellVertices.size()); ++v)
+        //   {
+        //     for (size_t local = 0; local < dofsPerVertex; ++local)
+        //     {
+        //       allDOFs(dofIdx++) = m_dofs[0][cellVertices(v)](local);
+        //     }
+        //   }
 
-          // Edge DOFs (for meshDim >= 1 and K >= 2)
-          if (meshDim >= 1 && K >= 2)
-          {
-            const size_t dofsPerEdge = K - 1;
-            // Get edges of this cell
-            const auto& cellEdges = mesh.getConnectivity().getIncidence({meshDim, 1}, cellIdx);
-            for (size_t e = 0; e < cellEdges.size(); ++e)
-            {
-              for (size_t local = 0; local < dofsPerEdge; ++local)
-              {
-                allDOFs(dofIdx++) = m_dofs[1][cellEdges[e]](local);
-              }
-            }
-          }
+        //   // Edge DOFs (for meshDim >= 1 and K >= 2)
+        //   if (meshDim >= 1 && K >= 2)
+        //   {
+        //     const size_t dofsPerEdge = K - 1;
+        //     // Get edges of this cell
+        //     const auto& cellEdges = mesh.getConnectivity().getIncidence({meshDim, 1}, cellIdx);
+        //     for (size_t e = 0; e < cellEdges.size(); ++e)
+        //     {
+        //       for (size_t local = 0; local < dofsPerEdge; ++local)
+        //       {
+        //         allDOFs(dofIdx++) = m_dofs[1][cellEdges[e]](local);
+        //       }
+        //     }
+        //   }
 
-          // Face DOFs (for meshDim >= 3 and appropriate K)
-          if (meshDim >= 3)
-          {
-            const auto& cellFaces = mesh.getConnectivity().getIncidence({meshDim, 2}, cellIdx);
-            for (size_t f = 0; f < cellFaces.size(); ++f)
-            {
-              const size_t faceDofsCount = m_dofs[2][cellFaces[f]].size();
-              for (size_t local = 0; local < faceDofsCount; ++local)
-              {
-                allDOFs(dofIdx++) = m_dofs[2][cellFaces[f]](local);
-              }
-            }
-          }
-          else if (meshDim == 2)
-          {
-            // For 2D meshes, faces are the cells themselves
-            // Interior DOFs are already handled
-            const size_t faceDofsCount = m_dofs[2][cellIdx].size();
-            for (size_t local = 0; local < faceDofsCount; ++local)
-            {
-              allDOFs(dofIdx++) = m_dofs[2][cellIdx](local);
-            }
-          }
+        //   // Face DOFs (for meshDim >= 3 and appropriate K)
+        //   if (meshDim >= 3)
+        //   {
+        //     const auto& cellFaces = mesh.getConnectivity().getIncidence({meshDim, 2}, cellIdx);
+        //     for (size_t f = 0; f < cellFaces.size(); ++f)
+        //     {
+        //       const size_t faceDofsCount = m_dofs[2][cellFaces[f]].size();
+        //       for (size_t local = 0; local < faceDofsCount; ++local)
+        //       {
+        //         allDOFs(dofIdx++) = m_dofs[2][cellFaces[f]](local);
+        //       }
+        //     }
+        //   }
+        //   else if (meshDim == 2)
+        //   {
+        //     // For 2D meshes, faces are the cells themselves
+        //     // Interior DOFs are already handled
+        //     const size_t faceDofsCount = m_dofs[2][cellIdx].size();
+        //     for (size_t local = 0; local < faceDofsCount; ++local)
+        //     {
+        //       allDOFs(dofIdx++) = m_dofs[2][cellIdx](local);
+        //     }
+        //   }
 
-          // Interior cell DOFs (for meshDim >= 3)
-          if (meshDim >= 3)
-          {
-            const size_t interiorDofsCount = m_dofs[meshDim][cellIdx].size();
-            for (size_t local = 0; local < interiorDofsCount; ++local)
-            {
-              allDOFs(dofIdx++) = m_dofs[meshDim][cellIdx](local);
-            }
-          }
+        //   // Interior cell DOFs (for meshDim >= 3)
+        //   if (meshDim >= 3)
+        //   {
+        //     const size_t interiorDofsCount = m_dofs[meshDim][cellIdx].size();
+        //     for (size_t local = 0; local < interiorDofsCount; ++local)
+        //     {
+        //       allDOFs(dofIdx++) = m_dofs[meshDim][cellIdx](local);
+        //     }
+        //   }
 
-          // Store the complete DOF array for this cell
-          m_dofs[meshDim][cellIdx] = allDOFs;
-        }
+        //   // Store the complete DOF array for this cell
+        //   m_dofs[meshDim][cellIdx] = allDOFs;
+        // }
       }
 
       std::reference_wrapper<const MeshType> m_mesh;
@@ -685,34 +685,34 @@ namespace Rodin::Variational
       H1(const Geometry::Mesh<ContextType>& mesh, size_t vdim)
         : m_mesh(mesh), m_vdim(vdim)
       {
-        // First build scalar DOFs
-        H1<K, ScalarType, MeshType> scalarSpace(mesh);
-        const size_t scalarSize = scalarSpace.getSize();
+        // // First build scalar DOFs
+        // H1<K, ScalarType, MeshType> scalarSpace(mesh);
+        // const size_t scalarSize = scalarSpace.getSize();
 
-        const size_t meshDim = mesh.getDimension();
-        m_dofs.resize(meshDim + 1);
+        // const size_t meshDim = mesh.getDimension();
+        // m_dofs.resize(meshDim + 1);
 
-        // Build vector DOFs from scalar DOFs
-        for (size_t d = 0; d <= meshDim; d++)
-        {
-          const size_t count = mesh.getConnectivity().getCount(d);
-          m_dofs[d].reserve(count);
-          for (size_t i = 0; i < count; i++)
-          {
-            const auto& scalarDOFs = scalarSpace.getDOFs(d, i);
-            const size_t scalarCount = scalarDOFs.size();
-            auto& dofs = m_dofs[d].emplace_back(scalarCount * vdim);
-            for (size_t local = 0; local < scalarCount * vdim; local++)
-            {
-              const size_t q = local / vdim;
-              const size_t r = local % vdim;
-              assert(q < scalarCount);
-              dofs(local) = scalarDOFs(q) + r * scalarSize;
-            }
-          }
-        }
+        // // Build vector DOFs from scalar DOFs
+        // for (size_t d = 0; d <= meshDim; d++)
+        // {
+        //   const size_t count = mesh.getConnectivity().getCount(d);
+        //   m_dofs[d].reserve(count);
+        //   for (size_t i = 0; i < count; i++)
+        //   {
+        //     const auto& scalarDOFs = scalarSpace.getDOFs(d, i);
+        //     const size_t scalarCount = scalarDOFs.size();
+        //     auto& dofs = m_dofs[d].emplace_back(scalarCount * vdim);
+        //     for (size_t local = 0; local < scalarCount * vdim; local++)
+        //     {
+        //       const size_t q = local / vdim;
+        //       const size_t r = local % vdim;
+        //       assert(q < scalarCount);
+        //       dofs(local) = scalarDOFs(q) + r * scalarSize;
+        //     }
+        //   }
+        // }
 
-        m_scalarSize = scalarSize;
+        // m_scalarSize = scalarSize;
       }
 
       H1(const H1& other)
