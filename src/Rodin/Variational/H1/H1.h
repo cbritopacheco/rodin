@@ -66,7 +66,7 @@ namespace Rodin::Variational
    * This class is scalar valued, i.e. evaluations of the function are of
    * Rodin::Real type.
    *
-   * @tparam K Polynomial degree (0, 1, 2, 3, ...)
+   * @tparam K Polynomial degree (1, 2, 3, ...)
    * @tparam Scalar Scalar type (Real, Complex)
    */
   template <size_t K, class Scalar>
@@ -75,6 +75,8 @@ namespace Rodin::Variational
         Geometry::Mesh<Context::Local>, H1<K, Scalar, Geometry::Mesh<Context::Local>>>
   {
     public:
+      static_assert(K > 0, "Polynomial degree K must be greater than 0.");
+
       using ScalarType = Scalar;
 
       /// Range type of value
@@ -359,7 +361,6 @@ namespace Rodin::Variational
        * edges, faces, and interior based on the polynomial degree K.
        *
        * DOF distribution for degree K:
-       * - K = 0: No DOFs (constant elements, similar to P0)
        * - K >= 1: 1 DOF per vertex
        * - K >= 2: (K-1) DOFs per edge interior
        * - K >= 3: (K-1)(K-2)/2 DOFs per triangle interior (for triangles)
@@ -611,6 +612,8 @@ namespace Rodin::Variational
         H1<K, Math::Vector<Scalar>, Geometry::Mesh<Context::Local>>>
   {
     public:
+      static_assert(K > 0, "Polynomial degree K must be greater than 0.");
+
       using ScalarType = Scalar;
 
       /// Range type of value

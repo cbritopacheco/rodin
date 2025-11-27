@@ -139,6 +139,8 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
     public:
+      static_assert(K > 0, "Polynomial degree K must be greater than 0.");
+
       friend class boost::serialization::access;
 
       /// Parent class
@@ -586,7 +588,6 @@ namespace Rodin::Variational
           case G::Segment:
           case G::Triangle:
           case G::Tetrahedron:
-            // Total-degree Pk on simplices
             return K;
 
           case G::Quadrilateral:
@@ -665,6 +666,8 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
     public:
+      static_assert(K > 0, "Polynomial degree K must be greater than 0.");
+
       friend class boost::serialization::access;
 
       /// Parent class

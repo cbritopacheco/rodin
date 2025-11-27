@@ -56,8 +56,6 @@
  * TrialFunction u(Vh);
  * TestFunction v(Vh);
  * ```
- *
- * @see Pk.h for alternative include
  */
 #ifndef RODIN_VARIATIONAL_H1_H
 #define RODIN_VARIATIONAL_H1_H
