@@ -556,4 +556,686 @@ namespace Rodin::Tests::Unit
         << " should match exact function.";
     }
   }
+
+  // ============================================================================
+  // Comprehensive behavioral tests for H1<K> spaces from K=1 to K=6
+  // ============================================================================
+
+  // Helper function to compute expected DOF count for H1<K> on a 2D triangle mesh
+  inline size_t expectedDOFCount2D(size_t K, size_t vertexCount, size_t edgeCount, size_t cellCount)
+  {
+    // DOF formula for H1<K> on 2D triangular meshes:
+    // - K >= 1: 1 DOF per vertex
+    // - K >= 2: (K-1) DOFs per edge interior
+    // - K >= 3: (K-1)(K-2)/2 DOFs per cell interior (triangle)
+    size_t total = vertexCount;  // vertices (K >= 1)
+    if (K >= 2)
+      total += (K - 1) * edgeCount;  // edge interior
+    if (K >= 3)
+      total += ((K - 1) * (K - 2) / 2) * cellCount;  // cell interior
+    return total;
+  }
+
+  // Test H1<4> construction and DOF count
+  TEST(Rodin_Variational_H1_Space, SanityTest_H1_4_2D_Square_Build)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .vertex({1, 1})
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+      .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
+      .finalize();
+
+    mesh.getConnectivity().compute(1, 2);
+
+    H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+
+    const size_t vertexCount = mesh.getVertexCount();
+    const size_t edgeCount = mesh.getConnectivity().getCount(1);
+    const size_t cellCount = mesh.getCellCount();
+
+    // H1<4> has:
+    // - 1 DOF per vertex (4)
+    // - 3 DOFs per edge interior (5 edges * 3 = 15)
+    // - 3 DOFs per cell interior (2 triangles * 3 = 6)
+    // Total = 4 + 15 + 6 = 25
+    size_t expectedDOFs = expectedDOFCount2D(4, vertexCount, edgeCount, cellCount);
+    EXPECT_EQ(fes.getSize(), expectedDOFs);
+    EXPECT_EQ(fes.getVectorDimension(), 1);
+  }
+
+  // Test H1<5> construction and DOF count
+  TEST(Rodin_Variational_H1_Space, SanityTest_H1_5_2D_Square_Build)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .vertex({1, 1})
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+      .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
+      .finalize();
+
+    mesh.getConnectivity().compute(1, 2);
+
+    H1 fes(std::integral_constant<size_t, 5>{}, mesh);
+
+    const size_t vertexCount = mesh.getVertexCount();
+    const size_t edgeCount = mesh.getConnectivity().getCount(1);
+    const size_t cellCount = mesh.getCellCount();
+
+    // H1<5> has:
+    // - 1 DOF per vertex (4)
+    // - 4 DOFs per edge interior (5 edges * 4 = 20)
+    // - 6 DOFs per cell interior (2 triangles * 6 = 12)
+    // Total = 4 + 20 + 12 = 36
+    size_t expectedDOFs = expectedDOFCount2D(5, vertexCount, edgeCount, cellCount);
+    EXPECT_EQ(fes.getSize(), expectedDOFs);
+    EXPECT_EQ(fes.getVectorDimension(), 1);
+  }
+
+  // Test H1<6> construction and DOF count
+  TEST(Rodin_Variational_H1_Space, SanityTest_H1_6_2D_Square_Build)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .vertex({1, 1})
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+      .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
+      .finalize();
+
+    mesh.getConnectivity().compute(1, 2);
+
+    H1 fes(std::integral_constant<size_t, 6>{}, mesh);
+
+    const size_t vertexCount = mesh.getVertexCount();
+    const size_t edgeCount = mesh.getConnectivity().getCount(1);
+    const size_t cellCount = mesh.getCellCount();
+
+    // H1<6> has:
+    // - 1 DOF per vertex (4)
+    // - 5 DOFs per edge interior (5 edges * 5 = 25)
+    // - 10 DOFs per cell interior (2 triangles * 10 = 20)
+    // Total = 4 + 25 + 20 = 49
+    size_t expectedDOFs = expectedDOFCount2D(6, vertexCount, edgeCount, cellCount);
+    EXPECT_EQ(fes.getSize(), expectedDOFs);
+    EXPECT_EQ(fes.getVectorDimension(), 1);
+  }
+
+  // Comprehensive DOF count test for K = 1 to 6 on larger uniform grid
+  TEST(Rodin_Variational_H1_Space, DOFCount_K1_to_K6_UniformGrid)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    const size_t vertexCount = mesh.getVertexCount();
+    const size_t edgeCount = mesh.getConnectivity().getCount(1);
+    const size_t cellCount = mesh.getCellCount();
+
+    // K = 1
+    {
+      H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+      EXPECT_EQ(fes.getSize(), expectedDOFCount2D(1, vertexCount, edgeCount, cellCount));
+    }
+
+    // K = 2
+    {
+      H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+      EXPECT_EQ(fes.getSize(), expectedDOFCount2D(2, vertexCount, edgeCount, cellCount));
+    }
+
+    // K = 3
+    {
+      H1 fes(std::integral_constant<size_t, 3>{}, mesh);
+      EXPECT_EQ(fes.getSize(), expectedDOFCount2D(3, vertexCount, edgeCount, cellCount));
+    }
+
+    // K = 4
+    {
+      H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+      EXPECT_EQ(fes.getSize(), expectedDOFCount2D(4, vertexCount, edgeCount, cellCount));
+    }
+
+    // K = 5
+    {
+      H1 fes(std::integral_constant<size_t, 5>{}, mesh);
+      EXPECT_EQ(fes.getSize(), expectedDOFCount2D(5, vertexCount, edgeCount, cellCount));
+    }
+
+    // K = 6
+    {
+      H1 fes(std::integral_constant<size_t, 6>{}, mesh);
+      EXPECT_EQ(fes.getSize(), expectedDOFCount2D(6, vertexCount, edgeCount, cellCount));
+    }
+  }
+
+  // Test finite element retrieval for K = 4, 5, 6
+  TEST(Rodin_Variational_H1_Space, FiniteElement_K4_to_K6)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    // K = 4
+    {
+      H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+      const auto& fe = fes.getFiniteElement(2, 0);
+      EXPECT_EQ(fe.getGeometry(), Polytope::Type::Triangle);
+      EXPECT_EQ(fe.getCount(), 15);  // (4+1)(4+2)/2 = 15
+      EXPECT_EQ(fe.getOrder(), 4);
+    }
+
+    // K = 5
+    {
+      H1 fes(std::integral_constant<size_t, 5>{}, mesh);
+      const auto& fe = fes.getFiniteElement(2, 0);
+      EXPECT_EQ(fe.getGeometry(), Polytope::Type::Triangle);
+      EXPECT_EQ(fe.getCount(), 21);  // (5+1)(5+2)/2 = 21
+      EXPECT_EQ(fe.getOrder(), 5);
+    }
+
+    // K = 6
+    {
+      H1 fes(std::integral_constant<size_t, 6>{}, mesh);
+      const auto& fe = fes.getFiniteElement(2, 0);
+      EXPECT_EQ(fe.getGeometry(), Polytope::Type::Triangle);
+      EXPECT_EQ(fe.getCount(), 28);  // (6+1)(6+2)/2 = 28
+      EXPECT_EQ(fe.getOrder(), 6);
+    }
+  }
+
+  // Test closure decomposition for K = 4
+  TEST(Rodin_Variational_H1_Space, CellClosure_DecomposesIntoSubentities_H1_4)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .vertex({1, 1})
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+      .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
+      .finalize();
+
+    mesh.getConnectivity().compute(1, 2);
+
+    H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+
+    const auto& conn = mesh.getConnectivity();
+    const size_t nc = mesh.getCellCount();
+
+    for (size_t c = 0; c < nc; ++c)
+    {
+      const auto& dofs_c = fes.getDOFs(2, static_cast<Index>(c));
+      const auto& fe_c = fes.getFiniteElement(2, static_cast<Index>(c));
+
+      EXPECT_EQ(dofs_c.size(), fe_c.getCount());
+
+      std::set<Index> from_vertices_edges;
+
+      // Vertices of the cell
+      const auto& poly = conn.getPolytope(2, static_cast<Index>(c));
+      for (Index v : poly)
+      {
+        const auto& dofs_v = fes.getDOFs(0, v);
+        for (size_t k = 0; k < static_cast<size_t>(dofs_v.size()); ++k)
+          from_vertices_edges.insert(dofs_v(k));
+      }
+
+      // Edges of the cell
+      const auto& edges = conn.getIncidence({ 2, 1 }, static_cast<Index>(c));
+      for (Index e : edges)
+      {
+        const auto& dofs_e = fes.getDOFs(1, e);
+        for (size_t k = 0; k < static_cast<size_t>(dofs_e.size()); ++k)
+          from_vertices_edges.insert(dofs_e(k));
+      }
+
+      // Interior DOFs = cell closure minus vertex+edge DOFs
+      std::set<Index> interior;
+      for (size_t k = 0; k < static_cast<size_t>(dofs_c.size()); ++k)
+      {
+        Index g = dofs_c(k);
+        if (from_vertices_edges.count(g) == 0)
+          interior.insert(g);
+      }
+
+      // For H1<4> on a triangle: 3 interior DOFs = (4-1)(4-2)/2 = 3
+      EXPECT_EQ(interior.size(), 3u)
+        << "Cell " << c << " should have exactly 3 interior DOFs for H1<4>.";
+
+      EXPECT_EQ(from_vertices_edges.size() + interior.size(), dofs_c.size());
+    }
+  }
+
+  // Test closure decomposition for K = 5
+  TEST(Rodin_Variational_H1_Space, CellClosure_DecomposesIntoSubentities_H1_5)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .vertex({1, 1})
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+      .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
+      .finalize();
+
+    mesh.getConnectivity().compute(1, 2);
+
+    H1 fes(std::integral_constant<size_t, 5>{}, mesh);
+
+    const auto& conn = mesh.getConnectivity();
+    const size_t nc = mesh.getCellCount();
+
+    for (size_t c = 0; c < nc; ++c)
+    {
+      const auto& dofs_c = fes.getDOFs(2, static_cast<Index>(c));
+      const auto& fe_c = fes.getFiniteElement(2, static_cast<Index>(c));
+
+      EXPECT_EQ(dofs_c.size(), fe_c.getCount());
+
+      std::set<Index> from_vertices_edges;
+
+      const auto& poly = conn.getPolytope(2, static_cast<Index>(c));
+      for (Index v : poly)
+      {
+        const auto& dofs_v = fes.getDOFs(0, v);
+        for (size_t k = 0; k < static_cast<size_t>(dofs_v.size()); ++k)
+          from_vertices_edges.insert(dofs_v(k));
+      }
+
+      const auto& edges = conn.getIncidence({ 2, 1 }, static_cast<Index>(c));
+      for (Index e : edges)
+      {
+        const auto& dofs_e = fes.getDOFs(1, e);
+        for (size_t k = 0; k < static_cast<size_t>(dofs_e.size()); ++k)
+          from_vertices_edges.insert(dofs_e(k));
+      }
+
+      std::set<Index> interior;
+      for (size_t k = 0; k < static_cast<size_t>(dofs_c.size()); ++k)
+      {
+        Index g = dofs_c(k);
+        if (from_vertices_edges.count(g) == 0)
+          interior.insert(g);
+      }
+
+      // For H1<5> on a triangle: 6 interior DOFs = (5-1)(5-2)/2 = 6
+      EXPECT_EQ(interior.size(), 6u)
+        << "Cell " << c << " should have exactly 6 interior DOFs for H1<5>.";
+
+      EXPECT_EQ(from_vertices_edges.size() + interior.size(), dofs_c.size());
+    }
+  }
+
+  // Test closure decomposition for K = 6
+  TEST(Rodin_Variational_H1_Space, CellClosure_DecomposesIntoSubentities_H1_6)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .vertex({1, 1})
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+      .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
+      .finalize();
+
+    mesh.getConnectivity().compute(1, 2);
+
+    H1 fes(std::integral_constant<size_t, 6>{}, mesh);
+
+    const auto& conn = mesh.getConnectivity();
+    const size_t nc = mesh.getCellCount();
+
+    for (size_t c = 0; c < nc; ++c)
+    {
+      const auto& dofs_c = fes.getDOFs(2, static_cast<Index>(c));
+      const auto& fe_c = fes.getFiniteElement(2, static_cast<Index>(c));
+
+      EXPECT_EQ(dofs_c.size(), fe_c.getCount());
+
+      std::set<Index> from_vertices_edges;
+
+      const auto& poly = conn.getPolytope(2, static_cast<Index>(c));
+      for (Index v : poly)
+      {
+        const auto& dofs_v = fes.getDOFs(0, v);
+        for (size_t k = 0; k < static_cast<size_t>(dofs_v.size()); ++k)
+          from_vertices_edges.insert(dofs_v(k));
+      }
+
+      const auto& edges = conn.getIncidence({ 2, 1 }, static_cast<Index>(c));
+      for (Index e : edges)
+      {
+        const auto& dofs_e = fes.getDOFs(1, e);
+        for (size_t k = 0; k < static_cast<size_t>(dofs_e.size()); ++k)
+          from_vertices_edges.insert(dofs_e(k));
+      }
+
+      std::set<Index> interior;
+      for (size_t k = 0; k < static_cast<size_t>(dofs_c.size()); ++k)
+      {
+        Index g = dofs_c(k);
+        if (from_vertices_edges.count(g) == 0)
+          interior.insert(g);
+      }
+
+      // For H1<6> on a triangle: 10 interior DOFs = (6-1)(6-2)/2 = 10
+      EXPECT_EQ(interior.size(), 10u)
+        << "Cell " << c << " should have exactly 10 interior DOFs for H1<6>.";
+
+      EXPECT_EQ(from_vertices_edges.size() + interior.size(), dofs_c.size());
+    }
+  }
+
+  // Test GlobalIndex matches getDOFs for K = 4, 5, 6
+  TEST(Rodin_Variational_H1_Space, GlobalIndex_MatchesGetDOFs_K4_to_K6)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    const auto& conn = mesh.getConnectivity();
+    const size_t D = mesh.getDimension();
+
+    auto testGlobalIndex = [&](auto fes) {
+      for (size_t d = 0; d <= D; ++d)
+      {
+        const size_t nd = conn.getCount(d);
+        for (size_t i = 0; i < nd; ++i)
+        {
+          const auto& dofs = fes.getDOFs(d, static_cast<Index>(i));
+          for (Index local = 0; local < static_cast<Index>(dofs.size()); ++local)
+          {
+            Index g_from_dofs = dofs(local);
+            Index g_from_api = fes.getGlobalIndex({ d, static_cast<Index>(i) }, local);
+            EXPECT_EQ(g_from_dofs, g_from_api);
+          }
+        }
+      }
+    };
+
+    testGlobalIndex(H1(std::integral_constant<size_t, 4>{}, mesh));
+    testGlobalIndex(H1(std::integral_constant<size_t, 5>{}, mesh));
+    testGlobalIndex(H1(std::integral_constant<size_t, 6>{}, mesh));
+  }
+
+  // Test closures cover all global DOFs for K = 4, 5, 6
+  TEST(Rodin_Variational_H1_Space, ClosuresCoverAllGlobalDOFs_K4_to_K6)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh.getConnectivity().compute(1, 2);
+
+    const auto& conn = mesh.getConnectivity();
+    const size_t D = mesh.getDimension();
+
+    auto testCoverage = [&](auto fes) {
+      std::set<Index> all_dofs;
+      for (size_t d = 0; d <= D; ++d)
+      {
+        const size_t nd = conn.getCount(d);
+        for (size_t i = 0; i < nd; ++i)
+        {
+          const auto& dofs = fes.getDOFs(d, static_cast<Index>(i));
+          for (size_t k = 0; k < static_cast<size_t>(dofs.size()); ++k)
+            all_dofs.insert(dofs(k));
+        }
+      }
+      EXPECT_EQ(all_dofs.size(), fes.getSize());
+    };
+
+    testCoverage(H1(std::integral_constant<size_t, 4>{}, mesh));
+    testCoverage(H1(std::integral_constant<size_t, 5>{}, mesh));
+    testCoverage(H1(std::integral_constant<size_t, 6>{}, mesh));
+  }
+
+  // Test TrialFunction and TestFunction creation for K = 4, 5, 6
+  TEST(Rodin_Variational_H1_Space, TrialTestFunction_K4_to_K6)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    // K = 4
+    {
+      H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+      TrialFunction u(fes);
+      TestFunction v(fes);
+    }
+
+    // K = 5
+    {
+      H1 fes(std::integral_constant<size_t, 5>{}, mesh);
+      TrialFunction u(fes);
+      TestFunction v(fes);
+    }
+
+    // K = 6
+    {
+      H1 fes(std::integral_constant<size_t, 6>{}, mesh);
+      TrialFunction u(fes);
+      TestFunction v(fes);
+    }
+  }
+
+  // Test Vector H1 DOF scaling for K = 4, 5, 6
+  TEST(Rodin_Variational_H1_Space, VectorH1_EntityDOFScaling_K4_to_K6)
+  {
+    constexpr size_t vdim = 2;
+
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh.getConnectivity().compute(1, 2);
+
+    const auto& conn = mesh.getConnectivity();
+    const size_t D = mesh.getDimension();
+
+    auto testScaling = [&](auto scalar_fes, auto vector_fes) {
+      EXPECT_EQ(vector_fes.getVectorDimension(), vdim);
+      EXPECT_EQ(vector_fes.getSize(), scalar_fes.getSize() * vdim);
+
+      for (size_t d = 0; d <= D; ++d)
+      {
+        const size_t nd = conn.getCount(d);
+        for (size_t i = 0; i < nd; ++i)
+        {
+          const auto& sdofs = scalar_fes.getDOFs(d, static_cast<Index>(i));
+          const auto& vdofs = vector_fes.getDOFs(d, static_cast<Index>(i));
+          EXPECT_EQ(vdofs.size(), sdofs.size() * vdim);
+        }
+      }
+    };
+
+    testScaling(
+      H1(std::integral_constant<size_t, 4>{}, mesh),
+      H1(std::integral_constant<size_t, 4>{}, mesh, vdim)
+    );
+
+    testScaling(
+      H1(std::integral_constant<size_t, 5>{}, mesh),
+      H1(std::integral_constant<size_t, 5>{}, mesh, vdim)
+    );
+
+    testScaling(
+      H1(std::integral_constant<size_t, 6>{}, mesh),
+      H1(std::integral_constant<size_t, 6>{}, mesh, vdim)
+    );
+  }
+
+  // Test edge DOF count per entity for K = 1 to 6
+  TEST(Rodin_Variational_H1_Space, EdgeDOFCount_K1_to_K6)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    const auto& conn = mesh.getConnectivity();
+    const size_t ne = conn.getCount(1);
+
+    // K = 1: 0 edge interior DOFs per edge
+    {
+      H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+      for (size_t e = 0; e < ne; ++e)
+      {
+        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
+        EXPECT_EQ(dofs_e.size(), 0u);  // K-1 = 0
+      }
+    }
+
+    // K = 2: 1 edge interior DOF per edge
+    {
+      H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+      for (size_t e = 0; e < ne; ++e)
+      {
+        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
+        EXPECT_EQ(dofs_e.size(), 1u);  // K-1 = 1
+      }
+    }
+
+    // K = 3: 2 edge interior DOFs per edge
+    {
+      H1 fes(std::integral_constant<size_t, 3>{}, mesh);
+      for (size_t e = 0; e < ne; ++e)
+      {
+        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
+        EXPECT_EQ(dofs_e.size(), 2u);  // K-1 = 2
+      }
+    }
+
+    // K = 4: 3 edge interior DOFs per edge
+    {
+      H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+      for (size_t e = 0; e < ne; ++e)
+      {
+        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
+        EXPECT_EQ(dofs_e.size(), 3u);  // K-1 = 3
+      }
+    }
+
+    // K = 5: 4 edge interior DOFs per edge
+    {
+      H1 fes(std::integral_constant<size_t, 5>{}, mesh);
+      for (size_t e = 0; e < ne; ++e)
+      {
+        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
+        EXPECT_EQ(dofs_e.size(), 4u);  // K-1 = 4
+      }
+    }
+
+    // K = 6: 5 edge interior DOFs per edge
+    {
+      H1 fes(std::integral_constant<size_t, 6>{}, mesh);
+      for (size_t e = 0; e < ne; ++e)
+      {
+        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
+        EXPECT_EQ(dofs_e.size(), 5u);  // K-1 = 5
+      }
+    }
+  }
+
+  // Test vertex DOF count per entity for K = 1 to 6
+  TEST(Rodin_Variational_H1_Space, VertexDOFCount_K1_to_K6)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    const size_t nv = mesh.getVertexCount();
+
+    auto testVertexDOFs = [&](auto fes) {
+      for (size_t v = 0; v < nv; ++v)
+      {
+        const auto& dofs_v = fes.getDOFs(0, static_cast<Index>(v));
+        EXPECT_EQ(dofs_v.size(), 1u)  // Always 1 DOF per vertex for K >= 1
+          << "Vertex " << v << " should have exactly 1 DOF.";
+      }
+    };
+
+    testVertexDOFs(H1(std::integral_constant<size_t, 1>{}, mesh));
+    testVertexDOFs(H1(std::integral_constant<size_t, 2>{}, mesh));
+    testVertexDOFs(H1(std::integral_constant<size_t, 3>{}, mesh));
+    testVertexDOFs(H1(std::integral_constant<size_t, 4>{}, mesh));
+    testVertexDOFs(H1(std::integral_constant<size_t, 5>{}, mesh));
+    testVertexDOFs(H1(std::integral_constant<size_t, 6>{}, mesh));
+  }
+
+  // Test that DOF indices are contiguous and range from 0 to size-1
+  TEST(Rodin_Variational_H1_Space, DOFIndices_Contiguous_K1_to_K6)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh.getConnectivity().compute(1, 2);
+
+    const auto& conn = mesh.getConnectivity();
+    const size_t D = mesh.getDimension();
+
+    auto testContiguous = [&](auto fes) {
+      std::set<Index> all_dofs;
+      for (size_t d = 0; d <= D; ++d)
+      {
+        const size_t nd = conn.getCount(d);
+        for (size_t i = 0; i < nd; ++i)
+        {
+          const auto& dofs = fes.getDOFs(d, static_cast<Index>(i));
+          for (size_t k = 0; k < static_cast<size_t>(dofs.size()); ++k)
+            all_dofs.insert(dofs(k));
+        }
+      }
+
+      // Check that indices are contiguous from 0 to size-1
+      EXPECT_EQ(all_dofs.size(), fes.getSize());
+      if (!all_dofs.empty())
+      {
+        EXPECT_EQ(*all_dofs.begin(), 0u);
+        EXPECT_EQ(*all_dofs.rbegin(), fes.getSize() - 1);
+      }
+    };
+
+    testContiguous(H1(std::integral_constant<size_t, 1>{}, mesh));
+    testContiguous(H1(std::integral_constant<size_t, 2>{}, mesh));
+    testContiguous(H1(std::integral_constant<size_t, 3>{}, mesh));
+    testContiguous(H1(std::integral_constant<size_t, 4>{}, mesh));
+    testContiguous(H1(std::integral_constant<size_t, 5>{}, mesh));
+    testContiguous(H1(std::integral_constant<size_t, 6>{}, mesh));
+  }
+
+  // Test cell closure size matches element DOF count for K = 1 to 6
+  TEST(Rodin_Variational_H1_Space, CellClosureSize_MatchesElementDOFCount_K1_to_K6)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    const size_t nc = mesh.getCellCount();
+
+    auto testClosureSize = [&](auto fes) {
+      for (size_t c = 0; c < nc; ++c)
+      {
+        const auto& dofs_c = fes.getDOFs(2, static_cast<Index>(c));
+        const auto& fe_c = fes.getFiniteElement(2, static_cast<Index>(c));
+        EXPECT_EQ(dofs_c.size(), fe_c.getCount())
+          << "Cell " << c << " closure size should match element DOF count.";
+      }
+    };
+
+    testClosureSize(H1(std::integral_constant<size_t, 1>{}, mesh));
+    testClosureSize(H1(std::integral_constant<size_t, 2>{}, mesh));
+    testClosureSize(H1(std::integral_constant<size_t, 3>{}, mesh));
+    testClosureSize(H1(std::integral_constant<size_t, 4>{}, mesh));
+    testClosureSize(H1(std::integral_constant<size_t, 5>{}, mesh));
+    testClosureSize(H1(std::integral_constant<size_t, 6>{}, mesh));
+  }
 }
