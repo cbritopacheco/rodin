@@ -17,6 +17,7 @@
  */
 
 #include <utility>
+#include <type_traits>
 
 namespace Rodin::Utility
 {
@@ -47,25 +48,10 @@ namespace Rodin::Utility
 
   namespace Internal
   {
-    /**
-     * @brief Compile-time index wrapper.
-     * @ingroup UtilityModule
-     * @tparam N The index value.
-     *
-     * Wraps an index value as a type with a static constexpr member,
-     * allowing compile-time access to loop indices within constexpr contexts.
-     */
-    template <size_t N>
-    struct Index
-    {
-      static constexpr const size_t value = N;  ///< The index value
-      constexpr operator size_t() const { return N; }  ///< Implicit conversion to size_t
-    };
-
     template <size_t ... Is, class F>
     constexpr void ForIndexImpl(F&& f, std::index_sequence<Is...>)
     {
-      (std::forward<F>(f)(Index<Is>{}), ...);
+      (std::forward<F>(f)(std::integral_constant<size_t, Is>{}), ...);
     }
   }
 

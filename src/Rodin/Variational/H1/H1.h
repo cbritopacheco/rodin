@@ -7,8 +7,10 @@
 #ifndef RODIN_VARIATIONAL_H1_H1_H
 #define RODIN_VARIATIONAL_H1_H1_H
 
-#include <boost/multi_array.hpp>
 #include <functional>
+#include <type_traits>
+
+#include <boost/multi_array.hpp>
 
 #include "Rodin/Types.h"
 
@@ -155,7 +157,7 @@ namespace Rodin::Variational
        * Creates the H1 space of degree K. The total number of DOFs depends on
        * the polynomial degree and mesh topology.
        */
-      H1(const MeshType& mesh)
+      H1(std::integral_constant<size_t, K>, const MeshType& mesh)
         : m_mesh(mesh)
       {
         buildDOFs();
@@ -578,7 +580,7 @@ namespace Rodin::Variational
    * @brief CTAD for H1 from mesh - deduces to RealH1
    */
   template <size_t K, class Context>
-  H1(const Geometry::Mesh<Context>&) -> H1<K, Real, Geometry::Mesh<Context>>;
+  H1(std::integral_constant<size_t, K>, const Geometry::Mesh<Context>&) -> H1<K, Real, Geometry::Mesh<Context>>;
 
   /// Alias for a scalar real-valued H1 finite element space
   template <size_t K, class Mesh>
@@ -886,7 +888,7 @@ namespace Rodin::Variational
    * @brief CTAD for Vector H1 from mesh and vector dimension
    */
   template <size_t K, class Context>
-  H1(const Geometry::Mesh<Context>&, size_t)
+  H1(std::integral_constant<size_t, K>, const Geometry::Mesh<Context>&, size_t)
     -> H1<K, Math::Vector<Real>, Geometry::Mesh<Context>>;
 
   /// Alias for a vector-valued real H1 finite element space
