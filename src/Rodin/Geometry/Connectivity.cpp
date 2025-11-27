@@ -232,44 +232,83 @@ namespace Rodin::Geometry
     const size_t D = getDimension();
     assert(d > 0);
     assert(d < D);
-    assert(!m_dirty[D][0]);
-    assert(!m_dirty[D][D]);
-    for (Index i = 0; i < m_count[D]; i++)
-      local(i, d);
+    assert(!m_dirty[D][0]); // cells→vertices must already exist
+    assert(!m_dirty[D][D]); // cells→cells (diagonal) is ready
+
+    const bool restricted =
+        !m_dirty[d][0] &&
+        !m_connectivity[d][0].empty() &&
+        m_connectivity[d][0].size() == m_count[d];
+
+    // We always rebuild D→d
+    m_connectivity[D][d].clear();
+    m_connectivity[D][d].reserve(m_count[D]);
+
+    for (Index i = 0; i < m_count[D]; ++i)
+      local(i, d, restricted); // new parameter
+
     m_dirty[D][d] = false;
-    m_dirty[d][0] = false;
+
+    // In full-discovery mode, we have just built d→0 as well
+    if (!restricted)
+      m_dirty[d][0] = false;
+
     return *this;
   }
 
   Connectivity<Context::Local>&
-  Connectivity<Context::Local>::local(size_t i, size_t d)
+  Connectivity<Context::Local>::local(size_t i, size_t d, bool restricted)
   {
     static thread_local std::vector<SubPolytope> subpolytopes;
-
     std::vector<Index> s;
+
     const size_t D = getDimension();
     assert(d > 0);
     assert(d < D);
+
     this->getSubPolytopes(subpolytopes, i, d);
+
     for (auto& [geometry, vertices] : subpolytopes)
     {
-      auto insert = m_index[d].right.insert({ std::move(vertices), m_count[d] });
-      const auto it = insert.first;
-      const bool inserted = insert.second;
-      const auto& [arr, idx] = *it;
-      if (inserted)
+      Index idx;
+
+      if (restricted)
       {
-        auto& v = m_connectivity[d][0].emplace_back();
-        v.reserve(arr.size());
-        for (const Index& j : arr)
-          v.push_back(j);
-        m_index[d].left.push_back(&it->first);
-        m_geometry[d].push_back(geometry);
+        // LOOKUP ONLY
+        auto it = m_index[d].right.find(vertices);
+        if (it == m_index[d].right.end())
+          continue;       // this subpolytope is not in the tracked set
+        idx = it->second; // existing entity index
       }
-      m_count[d] += inserted && !(d == D || d == 0);
-      m_gcount[geometry] += inserted && !(d == D || d == 0);
+      else
+      {
+        // ORIGINAL BEHAVIOR: insert if missing
+        auto insert = m_index[d].right.insert({ std::move(vertices), m_count[d] });
+        const auto it = insert.first;
+        const bool inserted = insert.second;
+        const auto& arr = it->first;
+        idx = it->second;
+
+        if (inserted)
+        {
+          auto& v = m_connectivity[d][0].emplace_back();
+          v.reserve(arr.size());
+          for (Index j : arr)
+            v.push_back(j);
+          m_index[d].left.push_back(&it->first);
+          m_geometry[d].push_back(geometry);
+
+          if (d != 0 && d != D)
+          {
+            ++m_count[d];
+            ++m_gcount[geometry];
+          }
+        }
+      }
+
       s.push_back(idx);
     }
+
     m_connectivity[D][d].push_back(std::move(s));
     return *this;
   }

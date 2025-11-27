@@ -430,7 +430,7 @@ namespace Rodin::Variational
             if (s_nodes.empty())
             {
               const auto& tri = FeketeTriangle<K>::getNodes();
-              const auto& z   = GLL01<K>::getNodes();
+              const auto& z = GLL01<K>::getNodes();
 
               s_nodes.reserve(tri.size() * (K + 1));
               for (size_t k = 0; k <= K; ++k)

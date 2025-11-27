@@ -308,9 +308,12 @@ namespace Rodin::Geometry
        * @brief Extracts local connectivity for a specific polytope.
        * @param[in] i Polytope index
        * @param[in] d Dimension of the polytope
+       * @param[in] restricted If true, only include sub-polytopes that are
+       * already present in the connectivity; if false, insert missing
+       * sub-polytopes.
        * @returns Reference to this connectivity object
        */
-      Connectivity& local(size_t i, size_t d);
+      Connectivity& local(size_t i, size_t d, bool restricted);
 
       /**
        * @brief Computes connectivity between dimensions.

@@ -143,9 +143,33 @@ namespace Rodin::Variational
       virtual const Geometry::MeshBase& getMesh() const = 0;
 
       /**
-       * @brief Gets a set of global degree of freedom indices associated to
-       * the polytope of dimension @f$ d @f$ and index @f$ i @f$.
-       * @returns Set of indices associated to the @f$ (d, i) @f$-polytope.
+       * @brief Returns the global DOF indices attached to a given mesh entity.
+       *
+       * Let @f$ (d,i) @f$ denote the mesh entity of (topological) dimension
+       * @f$ d @f$ and index @f$ i @f$.
+       *
+       * This function returns a read-only array of global degree-of-freedom
+       * indices corresponding to the local basis functions of the finite
+       * element associated with @f$ (d,i) @f$:
+       *
+       * - The entries are ordered exactly as the local basis functions of
+       *   the finite element returned by getFiniteElement(d, i).
+       * - The size of the returned array equals the number of local basis
+       *   functions, i.e.
+       *   @code
+       *     getDOFs(d,i).size() == getFiniteElement(d,i).getCount()
+       *   @endcode
+       * - For higher-order spaces, the array may contain DOFs that are
+       *   topologically associated with the entity @f$ (d,i) @f$ itself
+       *   (e.g. edge- or face-interior DOFs) and/or with its subentities
+       *   (e.g. vertex DOFs), according to the convention of the concrete
+       *   finite element space.
+       *
+       * @param d Topological dimension of the entity.
+       * @param i Index of the entity of dimension @p d.
+       *
+       * @return Const reference to the array of global DOF indices associated
+       *         with the finite element on entity @f$ (d,i) @f$.
        */
       virtual const IndexArray& getDOFs(size_t d, Index i) const = 0;
 
