@@ -38,6 +38,7 @@
 #include "Rodin/Variational/FiniteElement.h"
 #include "Rodin/Variational/H1/Fekete.h"
 #include "Rodin/Variational/H1/GLL.h"
+#include "Rodin/Math/Traits.h"
 
 #include "ForwardDecls.h"
 
