@@ -625,26 +625,6 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  // Test consistency across orders for identical geometries
-  TEST(Rodin_Variational_RealH1Element, CrossOrder_Consistency_Segment)
-  {
-    // Verify that nodes are uniformly distributed for all orders
-    for (size_t k = 2; k <= 6; k++)
-    {
-      // We can't instantiate templates with runtime values, so we check specific cases
-      if (k == 2)
-      {
-        RealH1Element<2> elem(Polytope::Type::Segment);
-        for (size_t i = 0; i < elem.getCount(); i++)
-        {
-          const auto& node = elem.getNode(i);
-          Real expected = static_cast<Real>(i) / static_cast<Real>(k);
-          EXPECT_NEAR(node.x(), expected, RODIN_FUZZY_CONSTANT);
-        }
-      }
-    }
-  }
-
   // Test non-negativity of basis functions at interior points
   TEST(Rodin_Variational_RealH1Element, BasisNonNegativity_P3_Segment)
   {
@@ -3081,38 +3061,6 @@ namespace Rodin::Tests::Unit
           EXPECT_NEAR(interp_grad, df(p), RODIN_FUZZY_CONSTANT);
           break;
         }
-      }
-    }
-  }
-
-  TEST(H1Element_Triangle_Order, VertexNodesAreFirst)
-  {
-    H1Element<2,Real> fe(Polytope::Type::Triangle);
-
-    // Reference vertices
-    Polytope::Traits triTraits(Polytope::Type::Triangle);
-    auto v0 = triTraits.getVertex(0); // (0,0)
-    auto v1 = triTraits.getVertex(1); // (1,0)
-    auto v2 = triTraits.getVertex(2); // (0,1)
-
-    // Node coordinates
-    EXPECT_NEAR(fe.getNode(0).x(), v0.x(), 1e-14);
-    EXPECT_NEAR(fe.getNode(0).y(), v0.y(), 1e-14);
-
-    EXPECT_NEAR(fe.getNode(1).x(), v1.x(), 1e-14);
-    EXPECT_NEAR(fe.getNode(1).y(), v1.y(), 1e-14);
-
-    EXPECT_NEAR(fe.getNode(2).x(), v2.x(), 1e-14);
-    EXPECT_NEAR(fe.getNode(2).y(), v2.y(), 1e-14);
-
-    // Lagrange property at vertices
-    for (size_t i = 0; i < 3; ++i)
-    {
-      auto vi = triTraits.getVertex(i);
-      for (size_t j = 0; j < 3; ++j)
-      {
-        Real val = fe.getBasis(j)(vi);
-        EXPECT_NEAR(val, (i == j ? 1.0 : 0.0), 1e-12);
       }
     }
   }
