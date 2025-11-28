@@ -374,6 +374,7 @@ namespace Rodin::Variational
       H1(const H1& other)
         : Parent(other),
           m_mesh(other.m_mesh),
+          m_owned(other.m_owned),
           m_closure(other.m_dofs),
           m_size(other.m_size)
       {}
@@ -385,6 +386,7 @@ namespace Rodin::Variational
       H1(H1&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
+          m_owned(std::move(other.m_owned)),
           m_closure(std::move(other.m_dofs)),
           m_size(std::move(other.m_size))
       {}
@@ -402,6 +404,7 @@ namespace Rodin::Variational
         {
           Parent::operator=(std::move(other));
           m_mesh = std::move(other.m_mesh);
+          m_owned = std::move(other.m_owned);
           m_closure = std::move(other.m_dofs);
           m_size = std::move(other.m_size);
         }
@@ -419,6 +422,7 @@ namespace Rodin::Variational
         {
           Parent::operator=(other);
           m_mesh = other.m_mesh;
+          m_owned = other.m_owned;
           m_closure = other.m_dofs;
           m_size = other.m_size;
         }
@@ -872,6 +876,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_mesh(other.m_mesh),
           m_vdim(other.m_vdim),
+          m_owned(other.m_owned),
           m_closure(other.m_dofs),
           m_size(other.m_size)
       {}
@@ -880,6 +885,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
           m_vdim(std::move(other.m_vdim)),
+          m_owned(std::move(other.m_owned)),
           m_closure(std::move(other.m_dofs)),
           m_size(std::move(other.m_size))
       {}
@@ -893,6 +899,7 @@ namespace Rodin::Variational
           Parent::operator=(std::move(other));
           m_mesh = std::move(other.m_mesh);
           m_vdim = std::move(other.m_vdim);
+          m_owned = std::move(other.m_owned);
           m_closure = std::move(other.m_dofs);
           m_size = std::move(other.m_size);
         }
@@ -906,6 +913,7 @@ namespace Rodin::Variational
           Parent::operator=(other);
           m_mesh = other.m_mesh;
           m_vdim = other.m_vdim;
+          m_owned = other.m_owned;
           m_closure = other.m_dofs;
           m_size = other.m_size;
         }

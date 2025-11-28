@@ -1268,13 +1268,31 @@ namespace Rodin::Tests::Unit
     const size_t nv = mesh.getVertexCount();
     for (size_t vtx = 0; vtx < nv; ++vtx)
     {
+      const auto& dofs_vertex = fes.getDOFs(0, vtx);
+
+      EXPECT_EQ(dofs_vertex.size(), 1);
+
+      Index gdof = dofs_vertex(0);
+
+      decltype(auto) fe = fes.getFiniteElement(0, vtx);
+
+      EXPECT_EQ(dofs_vertex.size(), fe.getCount());
+      EXPECT_NEAR(fe.getBasis(0)(Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0)), 1.0, 1e-12);
+
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
           Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
           vit->getCoordinates());
+
       Real expected = exact(p);
       Real value = gf(p);
+
+      Real stored = gf[gdof];
+
+      EXPECT_NEAR(value, stored, 1e-10)
+        << "H1<2> interpolation at vertex " << vtx << " should match exact linear function.";
+
       EXPECT_NEAR(value, expected, 1e-10)
         << "H1<2> interpolation at vertex " << vtx << " should match exact linear function.";
     }
