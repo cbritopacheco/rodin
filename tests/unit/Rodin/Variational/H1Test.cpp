@@ -1241,9 +1241,10 @@ namespace Rodin::Tests::Unit
 
   // ============================================================================
   // Interpolation tests for H1<K> spaces from K=1 to K=6
+  // Verify that GridFunction evaluation returns correct values
   // ============================================================================
 
-  // Interpolation test for H1<2>: GridFunction creation and assignment
+  // Interpolation test for H1<2>: Linear function (degree 1) should be exact
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1252,6 +1253,7 @@ namespace Rodin::Tests::Unit
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
 
+    // Linear function (degree 1) - H1<2> can represent this exactly
     auto exact = [](const Geometry::Point& p) -> Real
     {
       return 2.0 * p.x() + 3.0 * p.y() + 1.0;
@@ -1261,9 +1263,24 @@ namespace Rodin::Tests::Unit
 
     // Verify GridFunction size matches FES size
     EXPECT_EQ(gf.getSize(), fes.getSize());
+
+    // Verify interpolated values at vertices match the exact function
+    const size_t nv = mesh.getVertexCount();
+    for (size_t vtx = 0; vtx < nv; ++vtx)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "H1<2> interpolation at vertex " << vtx << " should match exact linear function.";
+    }
   }
 
-  // Interpolation test for H1<3>: GridFunction creation and assignment
+  // Interpolation test for H1<3>: Quadratic function (degree 2) should be exact
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1272,18 +1289,34 @@ namespace Rodin::Tests::Unit
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
 
+    // Quadratic function (degree 2) - H1<3> can represent this exactly
     auto exact = [](const Geometry::Point& p) -> Real
     {
-      return p.x() * p.x() + p.y() * p.y();
+      return p.x() * p.x() + p.y() * p.y() + p.x() * p.y();
     };
 
     gf = exact;
 
     // Verify GridFunction size matches FES size
     EXPECT_EQ(gf.getSize(), fes.getSize());
+
+    // Verify interpolated values at vertices match the exact function
+    const size_t nv = mesh.getVertexCount();
+    for (size_t vtx = 0; vtx < nv; ++vtx)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "H1<3> interpolation at vertex " << vtx << " should match exact quadratic function.";
+    }
   }
 
-  // Interpolation test for H1<4>: GridFunction creation and assignment
+  // Interpolation test for H1<4>: Cubic function (degree 3) should be exact
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1292,18 +1325,34 @@ namespace Rodin::Tests::Unit
     H1 fes(std::integral_constant<size_t, 4>{}, mesh);
     GridFunction gf(fes);
 
+    // Cubic function (degree 3) - H1<4> can represent this exactly
     auto exact = [](const Geometry::Point& p) -> Real
     {
-      return p.x() * p.x() * p.x() + p.y() * p.y() * p.y();
+      return p.x() * p.x() * p.x() + p.y() * p.y() * p.y() + p.x() * p.y() * p.y();
     };
 
     gf = exact;
 
     // Verify GridFunction size matches FES size
     EXPECT_EQ(gf.getSize(), fes.getSize());
+
+    // Verify interpolated values at vertices match the exact function
+    const size_t nv = mesh.getVertexCount();
+    for (size_t vtx = 0; vtx < nv; ++vtx)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "H1<4> interpolation at vertex " << vtx << " should match exact cubic function.";
+    }
   }
 
-  // Interpolation test for H1<5>: GridFunction creation and assignment
+  // Interpolation test for H1<5>: Quartic function (degree 4) should be exact
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_5)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1312,18 +1361,34 @@ namespace Rodin::Tests::Unit
     H1 fes(std::integral_constant<size_t, 5>{}, mesh);
     GridFunction gf(fes);
 
+    // Quartic function (degree 4) - H1<5> can represent this exactly
     auto exact = [](const Geometry::Point& p) -> Real
     {
-      return p.x() * p.x() * p.x() * p.x() + p.y() * p.y() * p.y() * p.y();
+      return p.x() * p.x() * p.x() * p.x() + p.y() * p.y() * p.y() * p.y() + p.x() * p.x() * p.y() * p.y();
     };
 
     gf = exact;
 
     // Verify GridFunction size matches FES size
     EXPECT_EQ(gf.getSize(), fes.getSize());
+
+    // Verify interpolated values at vertices match the exact function
+    const size_t nv = mesh.getVertexCount();
+    for (size_t vtx = 0; vtx < nv; ++vtx)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "H1<5> interpolation at vertex " << vtx << " should match exact quartic function.";
+    }
   }
 
-  // Interpolation test for H1<6>: GridFunction creation and assignment
+  // Interpolation test for H1<6>: Quintic function (degree 5) should be exact
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1332,16 +1397,33 @@ namespace Rodin::Tests::Unit
     H1 fes(std::integral_constant<size_t, 6>{}, mesh);
     GridFunction gf(fes);
 
+    // Quintic function (degree 5) - H1<6> can represent this exactly
     auto exact = [](const Geometry::Point& p) -> Real
     {
       return p.x() * p.x() * p.x() * p.x() * p.x()
-           + p.y() * p.y() * p.y() * p.y() * p.y();
+           + p.y() * p.y() * p.y() * p.y() * p.y()
+           + p.x() * p.x() * p.y() * p.y() * p.y();
     };
 
     gf = exact;
 
     // Verify GridFunction size matches FES size
     EXPECT_EQ(gf.getSize(), fes.getSize());
+
+    // Verify interpolated values at vertices match the exact function
+    const size_t nv = mesh.getVertexCount();
+    for (size_t vtx = 0; vtx < nv; ++vtx)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "H1<6> interpolation at vertex " << vtx << " should match exact quintic function.";
+    }
   }
 
   // ============================================================================
@@ -1429,7 +1511,7 @@ namespace Rodin::Tests::Unit
     testGlobalIndex(H1(std::integral_constant<size_t, 6>{}, mesh));
   }
 
-  // Test interpolation on 16x16 mesh - GridFunction creation and size
+  // Test interpolation on 16x16 mesh - verify GridFunction values
   TEST(Rodin_Variational_H1_Space, Interpolation_16x16_Mesh_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
@@ -1438,6 +1520,7 @@ namespace Rodin::Tests::Unit
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
 
+    // Quadratic function (degree 2) - H1<3> can represent this exactly
     auto exact = [](const Geometry::Point& p) -> Real
     {
       return p.x() * p.x() + p.y() * p.y() + 2.0 * p.x() * p.y();
@@ -1451,6 +1534,21 @@ namespace Rodin::Tests::Unit
       mesh.getVertexCount(),
       mesh.getConnectivity().getCount(1),
       mesh.getCellCount()));
+
+    // Verify interpolated values at vertices match the exact function
+    const size_t nv = mesh.getVertexCount();
+    for (size_t vtx = 0; vtx < nv; ++vtx)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "H1<3> interpolation on 16x16 mesh at vertex " << vtx << " should match exact quadratic function.";
+    }
   }
 
   // ============================================================================
@@ -1483,7 +1581,7 @@ namespace Rodin::Tests::Unit
     testVectorDOFCount(6, H1(std::integral_constant<size_t, 6>{}, mesh, vdim));
   }
 
-  // Vector H1 GridFunction creation test
+  // Vector H1 GridFunction creation and value verification test
   TEST(Rodin_Variational_H1_Space, VectorH1_GridFunction_K1_to_K6)
   {
     constexpr size_t vdim = 2;
@@ -1491,9 +1589,10 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(1, 2);
 
-    auto testVectorGridFunction = [&](auto fes) {
+    auto testVectorGridFunction = [&mesh](auto fes) {
       GridFunction gf(fes);
 
+      // Linear vector function - should be exact for all K >= 1
       auto exact = [](const Geometry::Point& p) -> Math::Vector<Real>
       {
         Math::Vector<Real> v(2);
@@ -1506,6 +1605,24 @@ namespace Rodin::Tests::Unit
 
       // Verify GridFunction size matches FES size
       EXPECT_EQ(gf.getSize(), fes.getSize());
+
+      // Verify interpolated values at vertices match the exact function
+      const size_t nv = mesh.getVertexCount();
+      for (size_t vtx = 0; vtx < nv; ++vtx)
+      {
+        const auto vit = mesh.getVertex(vtx);
+        const Geometry::Point p(
+            *vit,
+            Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+            vit->getCoordinates());
+        Math::Vector<Real> expected = exact(p);
+        Math::Vector<Real> value = gf(p);
+        EXPECT_EQ(value.size(), 2);
+        EXPECT_NEAR(value(0), expected(0), 1e-10)
+          << "Vector H1 interpolation component 0 at vertex " << vtx << " should match exact function.";
+        EXPECT_NEAR(value(1), expected(1), 1e-10)
+          << "Vector H1 interpolation component 1 at vertex " << vtx << " should match exact function.";
+      }
     };
 
     testVectorGridFunction(H1(std::integral_constant<size_t, 1>{}, mesh, vdim));
