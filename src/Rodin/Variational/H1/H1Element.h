@@ -24,7 +24,6 @@
  */
 
 #include <cstddef>
-#include <array>
 #include <vector>
 #include <utility>
 
@@ -39,7 +38,6 @@
 #include "Rodin/Variational/FiniteElement.h"
 #include "Rodin/Variational/H1/Fekete.h"
 #include "Rodin/Variational/H1/GLL.h"
-#include "Rodin/Math/Traits.h"
 
 #include "ForwardDecls.h"
 
@@ -380,10 +378,24 @@ namespace Rodin::Variational
             static thread_local std::vector<Math::SpatialPoint> s_nodes;
             if (s_nodes.empty())
             {
-              const auto& xi = GLL01<K>::getNodes();
-              s_nodes.reserve(K + 1);
-              for (size_t i = 0; i <= K; ++i)
-                s_nodes.emplace_back(Math::SpatialPoint{{xi[i]}});
+              const auto& xi = GLL01<K>::getNodes(); // increasing on [0,1]
+              s_nodes.resize(K + 1);
+
+              if constexpr (K == 0)
+              {
+                // Degree 0: only one node. You can choose midpoint or left vertex
+                s_nodes[0] = Math::SpatialPoint{{xi[0]}};
+              }
+              else
+              {
+                // Vertex nodes first
+                s_nodes[0] = Math::SpatialPoint{{xi[0]}};     // x=0
+                s_nodes[1] = Math::SpatialPoint{{xi[K]}};     // x=1
+
+                // Interior nodes in between
+                for (size_t i = 1; i < K; ++i)
+                  s_nodes[1 + i] = Math::SpatialPoint{{xi[i]}};
+              }
             }
             return s_nodes;
           }
@@ -405,10 +417,53 @@ namespace Rodin::Variational
             if (s_nodes.empty())
             {
               const auto& xi = GLL01<K>::getNodes();
-              s_nodes.reserve((K + 1) * (K + 1));
-              for (size_t j = 0; j <= K; ++j)
-                for (size_t i = 0; i <= K; ++i)
-                  s_nodes.emplace_back(Math::SpatialPoint{{xi[i], xi[j]}});
+              const size_t n1d = K + 1;
+              const size_t N   = n1d * n1d;
+
+              // 1) geometric tensor-product nodes (row-major)
+              std::vector<Math::SpatialPoint> tmp;
+              tmp.reserve(N);
+              for (size_t j = 0; j < n1d; ++j)
+                for (size_t i = 0; i < n1d; ++i)
+                  tmp.emplace_back(Math::SpatialPoint{{xi[i], xi[j]}});
+
+              s_nodes.resize(N);
+
+              const Real tol = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+              auto find_index = [&](Real x, Real y) -> size_t
+              {
+                for (size_t idx = 0; idx < N; ++idx)
+                {
+                  if (std::abs(tmp[idx].x() - x) < tol &&
+                      std::abs(tmp[idx].y() - y) < tol)
+                    return idx;
+                }
+                assert(false && "Quadrilateral vertex not found in GLL nodes.");
+                return static_cast<size_t>(0);
+              };
+
+              // Reference quad vertices in (x,y): (0,0), (1,0), (1,1), (0,1)
+              const size_t iv0 = find_index(0.0, 0.0);
+              const size_t iv1 = find_index(1.0, 0.0);
+              const size_t iv2 = find_index(1.0, 1.0);
+              const size_t iv3 = find_index(0.0, 1.0);
+
+              // 2) put vertex nodes first, in Traits order V0,V1,V2,V3
+              s_nodes[0] = tmp[iv0];
+              s_nodes[1] = tmp[iv1];
+              s_nodes[2] = tmp[iv2];
+              s_nodes[3] = tmp[iv3];
+
+              // 3) append all remaining (edge + interior) nodes
+              size_t cursor = 4;
+              for (size_t idx = 0; idx < N; ++idx)
+              {
+                if (idx == iv0 || idx == iv1 || idx == iv2 || idx == iv3)
+                  continue;
+                s_nodes[cursor++] = tmp[idx];
+              }
+
+              assert(cursor == N);
             }
             return s_nodes;
           }
@@ -430,15 +485,66 @@ namespace Rodin::Variational
             if (s_nodes.empty())
             {
               const auto& tri = FeketeTriangle<K>::getNodes();
-              const auto& z = GLL01<K>::getNodes();
+              const auto& z   = GLL01<K>::getNodes();
 
-              s_nodes.reserve(tri.size() * (K + 1));
-              for (size_t k = 0; k <= K; ++k)
-              {
+              const size_t Nt = tri.size();
+              const size_t Nz = K + 1;
+              const size_t N  = Nt * Nz;
+
+              std::vector<Math::SpatialPoint> tmp;
+              tmp.reserve(N);
+
+              // 1) geometric tensor-product nodes: tri × GLL_z
+              for (size_t k = 0; k < Nz; ++k)
                 for (const auto& p : tri)
-                  s_nodes.emplace_back(
-                    Math::SpatialPoint{{p.x(), p.y(), z[k]}});
+                  tmp.emplace_back(Math::SpatialPoint{{p.x(), p.y(), z[k]}});
+
+              s_nodes.resize(N);
+
+              const Real tol = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+              auto find_index = [&](Real x, Real y, Real zz) -> size_t
+              {
+                for (size_t idx = 0; idx < N; ++idx)
+                {
+                  const auto& q = tmp[idx];
+                  if (std::abs(q.x() - x) < tol &&
+                      std::abs(q.y() - y) < tol &&
+                      std::abs(q.z() - zz) < tol)
+                    return idx;
+                }
+                assert(false && "Wedge vertex not found in (Fekete × GLL) nodes.");
+                return static_cast<size_t>(0);
+              };
+
+              // Reference wedge vertices in (x,y,z):
+              // bottom: (0,0,0), (1,0,0), (0,1,0)
+              // top:    (0,0,1), (1,0,1), (0,1,1)
+              const size_t iv0 = find_index(0.0, 0.0, 0.0);
+              const size_t iv1 = find_index(1.0, 0.0, 0.0);
+              const size_t iv2 = find_index(0.0, 1.0, 0.0);
+              const size_t iv3 = find_index(0.0, 0.0, 1.0);
+              const size_t iv4 = find_index(1.0, 0.0, 1.0);
+              const size_t iv5 = find_index(0.0, 1.0, 1.0);
+
+              // 2) put vertex nodes first in Traits order: V0..V5
+              s_nodes[0] = tmp[iv0];
+              s_nodes[1] = tmp[iv1];
+              s_nodes[2] = tmp[iv2];
+              s_nodes[3] = tmp[iv3];
+              s_nodes[4] = tmp[iv4];
+              s_nodes[5] = tmp[iv5];
+
+              // 3) append all remaining nodes
+              size_t cursor = 6;
+              for (size_t idx = 0; idx < N; ++idx)
+              {
+                if (idx == iv0 || idx == iv1 || idx == iv2 ||
+                    idx == iv3 || idx == iv4 || idx == iv5)
+                  continue;
+                s_nodes[cursor++] = tmp[idx];
               }
+
+              assert(cursor == N);
             }
             return s_nodes;
           }
