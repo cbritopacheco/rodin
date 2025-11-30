@@ -12,16 +12,25 @@
 #include <type_traits>
 
 #include <boost/multi_array.hpp>
+#include <vector>
 
 #include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Geometry/Point.h"
+#include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
 
 #include "Rodin/Geometry/Mesh.h"
 
+#include "Rodin/Utility/ForConstexpr.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
 #include "ForwardDecls.h"
 #include "H1Element.h"
+#include "Rodin/Variational/H1/Fekete.h"
+#include "Rodin/Variational/H1/GLL.h"
+
+#include "Rodin/Utility/DependentValue.h"
 
 namespace Rodin::FormLanguage
 {
@@ -96,6 +105,9 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpace<MeshType, H1<K, RangeType, MeshType>>;
 
+      template <Geometry::Polytope::Type G, size_t Local>
+      class Cochain;
+
       /**
        * @brief Pullback for the scalar/complex H1 space.
        */
@@ -169,201 +181,16 @@ namespace Rodin::Variational
 
         // Ensure we have incidence from cells to all lower dimensions
         for (size_t d = 0; d <= D; ++d)
-          RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, D, d);
+          RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d - 1);
 
-        m_owned.resize(D + 1);
+        m_closure.resize(D + 1);
         for (size_t d = 0; d <= D; ++d)
-          m_owned[d].resize(conn.getCount(d));
-
-        std::vector<std::vector<uint8_t>> visited(D + 1);
-        for (size_t d = 0; d <= D; ++d)
-          visited[d].assign(conn.getCount(d), false);
-
-        Index global = 0;
-        for (Index c = 0; c < conn.getCount(D); ++c)
         {
-          // Loop over all subentity dimensions of the cell
-          for (size_t dp = 0; dp <= D; ++dp)
+          std::vector<IndexArray>& closure = m_closure[d];
+          for (size_t dp = D - 1; dp >= 0; ++dp)
           {
-            const auto& inc = conn.getIncidence({ D, dp }, c);
-            for (Index idx : inc)
-            {
-              if (visited[dp][idx])
-                continue;
-
-              visited[dp][idx] = true;
-
-              size_t count = 0;
-              const auto g = mesh.getGeometry(dp, idx);
-              switch (g)
-              {
-                case Geometry::Polytope::Type::Point:
-                {
-                  // Vertices: 1 DOF per vertex for K >= 1
-                  if constexpr (K >= 1)
-                    count = 1;
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Segment:
-                {
-                  // Edges: (K-1) interior DOFs for K >= 2
-                  if constexpr (K >= 2)
-                    count = K - 1;
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Triangle:
-                {
-                  // Triangular faces / cells: interior DOFs (K-1)(K-2)/2 for K >= 3
-                  if constexpr (K >= 3)
-                  {
-                    if (dp >= 2) // 2D cells or 3D faces
-                      count = (K - 1) * (K - 2) / 2;
-                  }
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Quadrilateral:
-                {
-                  // Quad faces / cells: interior DOFs (K-1)^2 for K >= 2
-                  if constexpr (K >= 2)
-                  {
-                    if (dp >= 2)
-                      count = (K - 1) * (K - 1);
-                  }
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Tetrahedron:
-                {
-                  // Tetrahedra: interior DOFs (K-1)(K-2)(K-3)/6 for K >= 4
-                  if constexpr (K >= 4)
-                  {
-                    if (dp == 3)
-                      count = (K - 1) * (K - 2) * (K - 3) / 6;
-                  }
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Wedge:
-                {
-                  // Wedges (prisms): choose a reasonable interior DOF formula
-                  if constexpr (K >= 3)
-                  {
-                    if (dp == 3)
-                      count = (K - 1) * (K - 1) * (K - 2) / 2;
-                  }
-                  break;
-                }
-              }
-
-              m_owned[dp][idx].resize(count);
-              for (size_t k = 0; k < count; ++k)
-                m_owned[dp][idx](k) = global++;
-            }
+            const std::vector<std::vector<Index>>& inc = conn.getIncidence(D, dp);
           }
-        }
-
-        m_size = static_cast<size_t>(global);
-
-        m_closure.assign(D + 1, {});
-        for (size_t d = 0; d <= D; ++d)
-          m_closure[d].resize(conn.getCount(d));
-
-        // For lower-dimensional entities, closure := owned (can be enriched later)
-        for (size_t d = 0; d < D; ++d)
-        {
-          const size_t nd = conn.getCount(d);
-          for (size_t i = 0; i < nd; ++i)
-            m_closure[d][i] = m_owned[d][i];
-        }
-
-        // For cells (d = D), build standard H1 closure:
-        //   vertices -> edges -> faces -> cell interior
-        const size_t cellCount = conn.getCount(D);
-        for (size_t i = 0; i < cellCount; ++i)
-        {
-          std::vector<Index> buffer;
-          buffer.reserve(32); // small default; will grow if needed
-
-          if (D == 1)
-          {
-            // 1D: segment cell
-            //  - vertex DOFs
-            const auto& poly = conn.getPolytope(1, i); // vertex indices
-            for (Index v : poly)
-            {
-              for (Index dof : m_owned[0][v])
-                buffer.push_back(dof);
-            }
-            //  - edge interior DOFs
-            for (Index dof : m_owned[1][i])
-              buffer.push_back(dof);
-          }
-          else if (D == 2)
-          {
-            // 2D: triangle / quad cell
-            // 1) vertex DOFs
-            const auto& poly = conn.getPolytope(2, i); // vertex indices
-            for (Index v : poly)
-            {
-              for (Index dof : m_owned[0][v])
-                buffer.push_back(dof);
-            }
-
-            // 2) edge interior DOFs
-            const auto& edges = conn.getIncidence({ 2, 1 }, i);
-            for (Index e : edges)
-            {
-              for (Index dof : m_owned[1][e])
-                buffer.push_back(dof);
-            }
-
-            // 3) cell interior DOFs
-            for (Index dof : m_owned[2][i])
-              buffer.push_back(dof);
-          }
-          else if (D == 3)
-          {
-            // 3D: tetra / wedge cell
-            // 1) vertex DOFs
-            const auto& poly = conn.getPolytope(3, i); // vertex indices
-            for (Index v : poly)
-            {
-              for (Index dof : m_owned[0][v])
-                buffer.push_back(dof);
-            }
-
-            // 2) edge interior DOFs
-            const auto& edges = conn.getIncidence({ 3, 1 }, i);
-            for (Index e : edges)
-            {
-              for (Index dof : m_owned[1][e])
-                buffer.push_back(dof);
-            }
-
-            // 3) face interior DOFs
-            const auto& faces = conn.getIncidence({ 3, 2 }, i);
-            for (Index f : faces)
-            {
-              for (Index dof : m_owned[2][f])
-                buffer.push_back(dof);
-            }
-
-            // 4) cell interior DOFs
-            for (Index dof : m_owned[3][i])
-              buffer.push_back(dof);
-          }
-          else
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Dimension " << D << " not supported." << Alert::Raise;
-          }
-
-          auto& dofs = m_closure[D][i];
-          dofs.resize(buffer.size());
-          std::copy(buffer.begin(), buffer.end(), dofs.data());
         }
       }
 
@@ -679,197 +506,7 @@ namespace Rodin::Variational
       H1(std::integral_constant<size_t, K>, const Geometry::Mesh<ContextType>& mesh, size_t vdim)
         : m_mesh(mesh), m_vdim(vdim)
       {
-        const auto& conn = mesh.getConnectivity();
-        const size_t D = mesh.getDimension();
-
-        for (size_t d = 0; d <= D; ++d)
-          RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, D, d);
-
-        m_owned.resize(D + 1);
-        for (size_t d = 0; d <= D; ++d)
-          m_owned[d].resize(conn.getCount(d));
-
-        std::vector<std::vector<uint8_t>> visited(D + 1);
-        for (size_t d = 0; d <= D; ++d)
-          visited[d].assign(conn.getCount(d), false);
-
-        Index global = 0;
-        for (Index c = 0; c < conn.getCount(D); ++c)
-        {
-          for (size_t dp = 0; dp <= D; ++dp)
-          {
-            const auto& inc = conn.getIncidence({ D, dp }, c);
-            for (Index idx : inc)
-            {
-              if (visited[dp][idx])
-                continue;
-
-              visited[dp][idx] = true;
-
-              // scalar DOFs owned by (dp, idx)
-              size_t count = 0;
-              const auto g = mesh.getGeometry(dp, idx);
-              switch (g)
-              {
-                case Geometry::Polytope::Type::Point:
-                {
-                  if constexpr (K >= 1)
-                    count = 1;
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Segment:
-                {
-                  if constexpr (K >= 2)
-                    count = K - 1;
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Triangle:
-                {
-                  if constexpr (K >= 3)
-                  {
-                    if (dp >= 2)
-                      count = (K - 1) * (K - 2) / 2;
-                  }
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Quadrilateral:
-                {
-                  if constexpr (K >= 2)
-                  {
-                    if (dp >= 2)
-                      count = (K - 1) * (K - 1);
-                  }
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Tetrahedron:
-                {
-                  if constexpr (K >= 4)
-                  {
-                    if (dp == 3)
-                      count = (K - 1) * (K - 2) * (K - 3) / 6;
-                  }
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Wedge:
-                {
-                  if constexpr (K >= 3)
-                  {
-                    if (dp == 3)
-                      count = (K - 1) * (K - 1) * (K - 2) / 2;
-                  }
-                  break;
-                }
-              }
-
-              count *= m_vdim;
-              m_owned[dp][idx].resize(count);
-              for (size_t k = 0; k < count; ++k)
-                m_owned[dp][idx](k) = global++;
-            }
-          }
-        }
-
-        m_size = static_cast<size_t>(global);
-
-        m_closure.assign(D + 1, {});
-        for (size_t d = 0; d <= D; ++d)
-          m_closure[d].resize(conn.getCount(d));
-
-        // For lower-dimensional entities, closure := owned (for now)
-        for (size_t d = 0; d < D; ++d)
-        {
-          const size_t nd = conn.getCount(d);
-          for (size_t i = 0; i < nd; ++i)
-            m_closure[d][i] = m_owned[d][i];
-        }
-
-        // For cells (d = D), build closure: vertices + edges + faces + interior
-        const size_t cellCount = conn.getCount(D);
-        for (size_t i = 0; i < cellCount; ++i)
-        {
-          std::vector<Index> buffer;
-          buffer.reserve(64);
-
-          if (D == 1)
-          {
-            // 1D segment cell
-            const auto& poly = conn.getPolytope(1, i);
-            for (Index v : poly)
-            {
-              for (Index dof : m_owned[0][v])
-                buffer.push_back(dof);
-            }
-            for (Index dof : m_owned[1][i])
-              buffer.push_back(dof);
-          }
-          else if (D == 2)
-          {
-            // 2D triangle / quad cell
-            // 1) vertex vector DOFs
-            const auto& poly = conn.getPolytope(2, i);
-            for (Index v : poly)
-            {
-              for (Index dof : m_owned[0][v])
-                buffer.push_back(dof);
-            }
-
-            // 2) edge vector DOFs
-            const auto& edges = conn.getIncidence({ 2, 1 }, i);
-            for (Index e : edges)
-            {
-              for (Index dof : m_owned[1][e])
-                buffer.push_back(dof);
-            }
-
-            // 3) cell-interior vector DOFs
-            for (Index dof : m_owned[2][i])
-              buffer.push_back(dof);
-          }
-          else if (D == 3)
-          {
-            // 3D tetra / wedge cell
-            // 1) vertex DOFs
-            const auto& poly = conn.getPolytope(3, i);
-            for (Index v : poly)
-            {
-              for (Index dof : m_owned[0][v])
-                buffer.push_back(dof);
-            }
-
-            // 2) edge DOFs
-            const auto& edges = conn.getIncidence({ 3, 1 }, i);
-            for (Index e : edges)
-            {
-              for (Index dof : m_owned[1][e])
-                buffer.push_back(dof);
-            }
-
-            // 3) face DOFs
-            const auto& faces = conn.getIncidence({ 3, 2 }, i);
-            for (Index f : faces)
-            {
-              for (Index dof : m_owned[2][f])
-                buffer.push_back(dof);
-            }
-
-            // 4) cell-interior DOFs
-            for (Index dof : m_owned[3][i])
-              buffer.push_back(dof);
-          }
-          else
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Dimension " << D << " not supported." << Alert::Raise;
-          }
-
-          m_closure[D][i].resize(buffer.size());
-          std::copy(buffer.begin(), buffer.end(), m_closure[D][i].data());
-        }
+        // TODO
       }
 
       H1(const H1& other)
@@ -1057,5 +694,7 @@ namespace Rodin::Variational
   template <size_t K, class Mesh>
   using VectorH1 = H1<K, Math::Vector<Real>, Mesh>;
 }
+
+#include "H1.hpp"
 
 #endif
