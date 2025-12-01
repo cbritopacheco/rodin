@@ -27,6 +27,24 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  TEST(Rodin_Variational_RealH1Element, LinearForm_Triangle_MustBeNodal)
+  {
+    RealH1Element<2> fe(Polytope::Type::Triangle);
+
+    auto f = [](const Math::SpatialPoint& x) -> Real {
+      return 2.0 * x.x() + 3.0 * x.y() + 1.0;
+    };
+
+    for (size_t i = 0; i < fe.getCount(); ++i)
+    {
+      const auto& lf   = fe.getLinearForm(i);
+      const auto& node = fe.getNode(i);
+      Real dof        = lf(f);
+      Real expected   = f(node);
+      EXPECT_NEAR(dof, expected, 1e-14) << "dof " << i << " is not nodal";
+    }
+  }
+
   // Test P2 element (K=2) on Point geometry
   TEST(Rodin_Variational_RealH1Element, SanityTest_P2_0D_Reference_Point)
   {

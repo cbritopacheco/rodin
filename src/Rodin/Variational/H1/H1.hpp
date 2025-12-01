@@ -598,6 +598,469 @@ namespace Rodin::Variational
         break;
       }
 
+      case Geometry::Polytope::Type::Triangle:
+      {
+        // Triangle edges: (0->1), (1->2), (2->0)
+        const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
+        assert(inc.size() == 3);
+
+        // Mark which triangle nodes belong to edges (boundary DOFs)
+        std::array<uint8_t,
+                   Cochain<Geometry::Polytope::Type::Triangle>::Count> used{};
+        used.fill(0);
+
+        // Convenience aliases
+        using TriCochain = Cochain<Geometry::Polytope::Type::Triangle>;
+        using SegCochain = Cochain<Geometry::Polytope::Type::Segment>;
+        constexpr size_t Ns = SegCochain::Count;
+
+        // Edge 0: (0->1), "bottom edge"
+        {
+          const Index e = inc[0];
+          this->getClosure(d - 1, e);
+          const auto& edge = m_closure[d - 1][e];
+
+          Utility::ForIndex<Ns>([&](auto ii)
+          {
+            constexpr size_t r   = ii.value; // 0..K
+            constexpr size_t tId = r;        // bottom row contiguous
+            local[tId] = edge[r];
+            used[tId]  = 1;
+          });
+        }
+
+        // Edge 1: (1->2), "hypotenuse"
+        {
+          const Index e = inc[1];
+          this->getClosure(d - 1, e);
+          const auto& edge = m_closure[d - 1][e];
+
+          Utility::ForIndex<Ns>([&](auto ii)
+          {
+            constexpr size_t r = ii.value;   // 0..K
+            constexpr size_t j = r;          // param along hypotenuse
+
+            constexpr size_t rowStart_j =
+                j * (K + 1) - (j * (j - 1)) / 2;
+            constexpr size_t tId = rowStart_j + (K - j);
+
+            local[tId] = edge[r];
+            used[tId]  = 1;
+          });
+        }
+
+        // Edge 2: (2->0), "left edge"
+        {
+          const Index e = inc[2];
+          this->getClosure(d - 1, e);
+          const auto& edge = m_closure[d - 1][e];
+
+          Utility::ForIndex<Ns>([&](auto ii)
+          {
+            constexpr size_t r      = ii.value;  // 0..K along edge
+            constexpr size_t j      = K - r;
+            constexpr size_t rowStart_j =
+                j * (K + 1) - (j * (j - 1)) / 2;
+            constexpr size_t tId = rowStart_j;   // i = 0 on row j
+
+            local[tId] = edge[r];
+            used[tId]  = 1;
+          });
+        }
+
+        // Interior triangle DOFs (not on any edge)
+        for (size_t tId = 0; tId < TriCochain::Count; ++tId)
+        {
+          if (!used[tId])
+            local[tId] = m_size++;
+        }
+
+        break;
+      }
+
+      case Geometry::Polytope::Type::Quadrilateral:
+      {
+        // Quad edges in CCW loop: (0->1) bottom, (1->2) right,
+        //                         (2->3) top,    (3->0) left
+        const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
+        assert(inc.size() == 4);
+
+        using QuadCochain = Cochain<Geometry::Polytope::Type::Quadrilateral>;
+        constexpr size_t N1  = K + 1;
+
+        // Map each edge closure into the quad boundary DOFs
+        // local-edge indices: 0 bottom, 1 right, 2 top, 3 left
+        for (size_t le = 0; le < 4; ++le)
+        {
+          const Index e = inc[le];
+          this->getClosure(d - 1, e);
+          const auto& edge = m_closure[d - 1][e];
+
+          QuadCochain::map(le, local, edge);
+        }
+
+        // Interior quad DOFs:
+        // indices (i,j) with 0 < i < K and 0 < j < K
+        for (size_t j = 1; j < K; ++j)
+        {
+          for (size_t i = 1; i < K; ++i)
+          {
+            const size_t qId = j * N1 + i;
+            local[qId] = m_size++;
+          }
+        }
+
+        break;
+      }
+
+      case Geometry::Polytope::Type::Tetrahedron:
+      {
+        // Faces (dim=2, Connectivity::getSubPolytopes):
+        //   Local 0: (1,2,3)  // +[1,2,3]
+        //   Local 1: (0,3,2)  // -[0,2,3]
+        //   Local 2: (0,1,3)  // +[0,1,3]
+        //   Local 3: (0,2,1)  // -[0,1,2]
+        const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
+        assert(inc.size() == 4);
+
+        using TetCochain = Cochain<Geometry::Polytope::Type::Tetrahedron>;
+
+        std::array<uint8_t, TetCochain::Count> used{};
+        used.fill(0);
+
+        constexpr size_t tetraTotal =
+            (K + 1) * (K + 2) * (K + 3) / 6;
+
+        // Helper lambdas to apply each face mapping and mark "used"
+        auto face0 = [&](const Index fIdx)
+        {
+          const auto& face = m_closure[d - 1][fIdx]; // triangle DOFs
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j2 = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i2 = ii.value;
+              if constexpr (i2 + j2 <= K)
+              {
+                constexpr size_t triRowStart =
+                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
+                constexpr size_t triIdx = triRowStart + i2;
+
+                // (i,j,k) = (K - i2 - j2, i2, j2)
+                constexpr size_t i = K - i2 - j2;
+                constexpr size_t j = i2;
+                constexpr size_t k = j2;
+
+                constexpr size_t m_tail = K - k;
+                constexpr size_t tetraTail =
+                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
+                constexpr size_t offset_k = tetraTotal - tetraTail;
+
+                constexpr size_t offset_j =
+                    j * (K - k + 1) - (j * (j - 1)) / 2;
+
+                constexpr size_t tetIdx = offset_k + offset_j + i;
+
+                local[tetIdx] = face[triIdx];
+                used[tetIdx]  = 1;
+              }
+            });
+          });
+        };
+
+        auto face1 = [&](const Index fIdx)
+        {
+          const auto& face = m_closure[d - 1][fIdx];
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j2 = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i2 = ii.value;
+              if constexpr (i2 + j2 <= K)
+              {
+                constexpr size_t triRowStart =
+                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
+                constexpr size_t triIdx = triRowStart + i2;
+
+                // (i,j,k) = (0, j2, i2)
+                constexpr size_t i = 0;
+                constexpr size_t j = j2;
+                constexpr size_t k = i2;
+
+                constexpr size_t m_tail = K - k;
+                constexpr size_t tetraTail =
+                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
+                constexpr size_t offset_k = tetraTotal - tetraTail;
+
+                constexpr size_t offset_j =
+                    j * (K - k + 1) - (j * (j - 1)) / 2;
+
+                constexpr size_t tetIdx = offset_k + offset_j + i;
+
+                local[tetIdx] = face[triIdx];
+                used[tetIdx]  = 1;
+              }
+            });
+          });
+        };
+
+        auto face2 = [&](const Index fIdx)
+        {
+          const auto& face = m_closure[d - 1][fIdx];
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j2 = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i2 = ii.value;
+              if constexpr (i2 + j2 <= K)
+              {
+                constexpr size_t triRowStart =
+                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
+                constexpr size_t triIdx = triRowStart + i2;
+
+                // (i,j,k) = (i2, 0, j2)
+                constexpr size_t i = i2;
+                constexpr size_t j = 0;
+                constexpr size_t k = j2;
+
+                constexpr size_t m_tail = K - k;
+                constexpr size_t tetraTail =
+                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
+                constexpr size_t offset_k = tetraTotal - tetraTail;
+
+                constexpr size_t offset_j =
+                    j * (K - k + 1) - (j * (j - 1)) / 2;
+
+                constexpr size_t tetIdx = offset_k + offset_j + i;
+
+                local[tetIdx] = face[triIdx];
+                used[tetIdx]  = 1;
+              }
+            });
+          });
+        };
+
+        auto face3 = [&](const Index fIdx)
+        {
+          const auto& face = m_closure[d - 1][fIdx];
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j2 = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i2 = ii.value;
+              if constexpr (i2 + j2 <= K)
+              {
+                constexpr size_t triRowStart =
+                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
+                constexpr size_t triIdx = triRowStart + i2;
+
+                // (i,j,k) = (j2, i2, 0)
+                constexpr size_t i = j2;
+                constexpr size_t j = i2;
+                constexpr size_t k = 0;
+
+                constexpr size_t m_tail = K - k;
+                constexpr size_t tetraTail =
+                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
+                constexpr size_t offset_k = tetraTotal - tetraTail;
+
+                constexpr size_t offset_j =
+                    j * (K - k + 1) - (j * (j - 1)) / 2;
+
+                constexpr size_t tetIdx = offset_k + offset_j + i;
+
+                local[tetIdx] = face[triIdx];
+                used[tetIdx]  = 1;
+              }
+            });
+          });
+        };
+
+        // Recurse on faces and apply mappings
+        // Face 0: (1,2,3)
+        this->getClosure(d - 1, inc[0]);
+        face0(inc[0]);
+
+        // Face 1: (0,3,2)
+        this->getClosure(d - 1, inc[1]);
+        face1(inc[1]);
+
+        // Face 2: (0,1,3)
+        this->getClosure(d - 1, inc[2]);
+        face2(inc[2]);
+
+        // Face 3: (0,2,1)
+        this->getClosure(d - 1, inc[3]);
+        face3(inc[3]);
+
+        // Interior tetra DOFs (not on any face)
+        for (size_t tId = 0; tId < TetCochain::Count; ++tId)
+        {
+          if (!used[tId])
+            local[tId] = m_size++;
+        }
+
+        break;
+      }
+
+      case Geometry::Polytope::Type::Wedge:
+      {
+        // Faces (dim=2, getSubPolytopes):
+        //   Local 0 : Triangle (0,1,2)      bottom
+        //   Local 1 : Quad     (0,1,4,3)
+        //   Local 2 : Quad     (1,2,5,4)
+        //   Local 3 : Quad     (2,0,3,5)
+        //   Local 4 : Triangle (3,5,4)      top
+        const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
+        assert(inc.size() == 5);
+
+        using WedgeCochain = Cochain<Geometry::Polytope::Type::Wedge>;
+        using TriCochain   = Cochain<Geometry::Polytope::Type::Triangle>;
+        constexpr size_t TriCount = TriCochain::Count;
+
+        std::array<uint8_t, WedgeCochain::Count> used{};
+        used.fill(0);
+
+        // Triangular faces ----------------------------------------------------
+        // Local 0: bottom triangle (k = 0)
+        {
+          const Index f = inc[0];
+          this->getClosure(d - 1, f);
+          const auto& tri = m_closure[d - 1][f];
+
+          Utility::ForIndex<TriCount>([&](auto ii)
+          {
+            constexpr size_t triIdx   = ii.value;
+            constexpr size_t wedgeIdx = triIdx; // k = 0
+            local[wedgeIdx] = tri[triIdx];
+            used[wedgeIdx]  = 1;
+          });
+        }
+
+        // Local 4: top triangle (k = K)
+        {
+          const Index f = inc[4];
+          this->getClosure(d - 1, f);
+          const auto& tri = m_closure[d - 1][f];
+
+          Utility::ForIndex<TriCount>([&](auto ii)
+          {
+            constexpr size_t triIdx   = ii.value;
+            constexpr size_t wedgeIdx = K * TriCount + triIdx;
+            local[wedgeIdx] = tri[triIdx];
+            used[wedgeIdx]  = 1;
+          });
+        }
+
+        // Quadrilateral faces -------------------------------------------------
+        // We follow the same formulas as Cochain<Wedge>::map, but we also
+        // mark which wedge DOFs are used.
+
+        // Local 1: Quad (0,1,4,3): extrude edge 0->1
+        {
+          const Index f = inc[1];
+          this->getClosure(d - 1, f);
+          const auto& quad = m_closure[d - 1][f];
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j = jj.value; // layer 0..K
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i = ii.value; // along edge 0->1
+
+              constexpr size_t quadIdx = j * (K + 1) + i;
+              // triangle edge 0->1 corresponds to triIdx = i
+              constexpr size_t triEdgeIdx = i;
+              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
+
+              local[wedgeIdx] = quad[quadIdx];
+              used[wedgeIdx]  = 1;
+            });
+          });
+        }
+
+        // Local 2: Quad (1,2,5,4): extrude edge 1->2
+        {
+          const Index f = inc[2];
+          this->getClosure(d - 1, f);
+          const auto& quad = m_closure[d - 1][f];
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i = ii.value; // along edge 1->2
+
+              constexpr size_t quadIdx = j * (K + 1) + i;
+
+              // triangle edge 1->2 (Segment->Triangle Local=1):
+              //  r = i
+              //  rowStart = r*(K+1) - r*(r-1)/2
+              //  triEdgeIdx = rowStart + (K - r)
+              constexpr size_t r        = i;
+              constexpr size_t rowStart =
+                  r * (K + 1) - (r * (r - 1)) / 2;
+              constexpr size_t triEdgeIdx = rowStart + (K - r);
+              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
+
+              local[wedgeIdx] = quad[quadIdx];
+              used[wedgeIdx]  = 1;
+            });
+          });
+        }
+
+        // Local 3: Quad (2,0,3,5): extrude edge 2->0
+        {
+          const Index f = inc[3];
+          this->getClosure(d - 1, f);
+          const auto& quad = m_closure[d - 1][f];
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i = ii.value; // along edge 2->0
+
+              constexpr size_t quadIdx = j * (K + 1) + i;
+
+              // triangle edge 2->0 (Segment->Triangle Local=2):
+              //  r      = i
+              //  j_edge = K - r
+              //  rowStart = j_edge*(K+1) - j_edge*(j_edge-1)/2
+              //  triEdgeIdx = rowStart (i=0)
+              constexpr size_t r      = i;
+              constexpr size_t j_edge = K - r;
+              constexpr size_t rowStart =
+                  j_edge * (K + 1) - (j_edge * (j_edge - 1)) / 2;
+              constexpr size_t triEdgeIdx = rowStart;
+              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
+
+              local[wedgeIdx] = quad[quadIdx];
+              used[wedgeIdx]  = 1;
+            });
+          });
+        }
+
+        // Interior wedge DOFs: not touched by any face mapping
+        for (size_t wId = 0; wId < WedgeCochain::Count; ++wId)
+        {
+          if (!used[wId])
+            local[wId] = m_size++;
+        }
+
+        break;
+      }
     }
   }
 
@@ -675,6 +1138,58 @@ namespace Rodin::Variational
     const size_t nCells = mesh.getPolytopeCount(D);
     for (Index c = 0; c < static_cast<Index>(nCells); ++c)
       this->getClosure(D, c);
+  }
+
+  template <size_t K, class Scalar>
+  H1<K, Math::Vector<Scalar>, Geometry::Mesh<Context::Local>>::
+  H1(std::integral_constant<size_t, K>, const Geometry::Mesh<ContextType>& mesh,
+     size_t vdim)
+    : m_mesh(mesh),
+      m_vdim(vdim),
+      m_size(0)
+  {
+    using MeshType    = Geometry::Mesh<ContextType>;
+    using ScalarSpace = H1<K, Scalar, MeshType>;
+
+    const size_t D = mesh.getDimension();
+
+    // 1. Build the scalar H1 space on the same mesh
+    ScalarSpace scalar(std::integral_constant<size_t, K>{}, mesh);
+
+    const size_t scalarSize = scalar.getSize(); // total scalar DOFs
+    m_size                  = scalarSize * vdim; // total vector DOFs
+
+    // 2. Lift scalar closure to vector closure
+    m_closure.resize(D + 1);
+
+    for (size_t d = 0; d <= D; ++d)
+    {
+      const size_t count = mesh.getPolytopeCount(d);
+      m_closure[d].resize(count);
+
+      for (Index i = 0; i < static_cast<Index>(count); ++i)
+      {
+        const IndexArray& scalarLocal = scalar.getDOFs(d, i);
+        const size_t nLocalScalar     = scalarLocal.size();
+
+        IndexArray& vecLocal = m_closure[d][i];
+        vecLocal.resize(nLocalScalar * vdim);
+
+        // Local layout: (node q, component c) -> q*vdim + c
+        // Global layout: block by component
+        //   component c lives in [c*scalarSize, (c+1)*scalarSize)
+        for (size_t q = 0; q < nLocalScalar; ++q)
+        {
+          const Index sIdx = scalarLocal(q); // scalar global index
+
+          for (size_t c = 0; c < vdim; ++c)
+          {
+            const Index vIdx = sIdx + static_cast<Index>(c * scalarSize);
+            vecLocal(q * vdim + c) = vIdx;
+          }
+        }
+      }
+    }
   }
 }
 

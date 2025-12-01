@@ -14,6 +14,259 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  TEST(Rodin_Variational_H1_Space, Triangle_VertexNodes_MatchConnectivity)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0}) // 0
+      .vertex({1, 0}) // 1
+      .vertex({0, 1}) // 2
+      .vertex({1, 1}) // 3
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} }) // cell 0
+      .polytope(Polytope::Type::Triangle, { {1, 3, 2} }) // cell 1
+      .finalize();
+
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+
+    auto cell_it = mesh.getCell();
+    for (; cell_it; ++cell_it)
+    {
+      const auto& cell = *cell_it;
+      const auto& fe   = fes.getFiniteElement(2, cell.getIndex());
+      ASSERT_EQ(fe.getGeometry(), Polytope::Type::Triangle);
+
+      // connectivity vertices
+      auto vconn = cell.getVertices(); // {v0, v1, v2}
+
+      for (int local_v = 0; local_v < 3; ++local_v)
+      {
+        Index vtx = vconn[local_v];
+
+        auto vit = mesh.getVertex(vtx);
+        const auto& X = vit->getCoordinates();
+
+        // Find the local node j whose physical position is X
+        int j_found = -1;
+        for (size_t j = 0; j < fe.getCount(); ++j)
+        {
+          const auto& node = fe.getNode(j);
+          // map node reference to physical as in section 2
+          Math::SpatialPoint phys;
+          mesh.getPolytopeTransformation(
+              cell.getDimension(), cell.getIndex()).transform(phys, node);
+          if ((phys - X).norm() < 1e-14)
+          {
+            j_found = static_cast<int>(j);
+            break;
+          }
+        }
+
+        EXPECT_NE(j_found, -1)
+          << "No local node found matching vertex " << vtx
+          << " on cell " << cell.getIndex();
+
+        // Optionally check that fes.getGlobalIndex for that local
+        // is the same as using the vertex DOF list:
+        Index gdof_from_cell = fes.getGlobalIndex({2, cell.getIndex()}, j_found);
+        const auto& vertex_dofs = fes.getDOFs(0, vtx);
+        ASSERT_EQ(vertex_dofs.size(), 1u);
+        Index gdof_from_vertex = vertex_dofs(0);
+
+        EXPECT_EQ(gdof_from_cell, gdof_from_vertex)
+          << "Inconsistent DOF for vertex " << vtx
+          << " between cell " << cell.getIndex()
+          << " and vertex-DOF list.";
+      }
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, GlobalIndex_MatchesGetDOFs_ForVertices)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .vertex({1, 1})
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+      .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
+      .finalize();
+
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    const auto& conn = mesh.getConnectivity();
+
+    for (Index vtx = 0; vtx < conn.getCount(0); ++vtx)
+    {
+      const auto& dofs_vertex = fes.getDOFs(0, vtx);
+      ASSERT_EQ(dofs_vertex.size(), 1u);
+
+      Index gdof_dofs = dofs_vertex(0);
+      Index gdof_gi   = fes.getGlobalIndex({0, vtx}, 0);
+
+      EXPECT_EQ(gdof_dofs, gdof_gi)
+        << "Vertex " << vtx << " has inconsistent DOF index.";
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, Project_TwoTriangles_AtAllLocalNodes)
+  {
+    // Patch of 2 triangles sharing an edge
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0}) // 0
+      .vertex({1, 0}) // 1
+      .vertex({0, 1}) // 2
+      .vertex({1, 1}) // 3
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} }) // cell 0
+      .polytope(Polytope::Type::Triangle, { {1, 3, 2} }) // cell 1
+      .finalize();
+
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return 2.0 * p.x() + 3.0 * p.y() + 1.0;
+    };
+
+    gf = exact; // project on cells
+
+    auto cell_it = mesh.getCell();
+    ASSERT_TRUE(cell_it);
+
+    for (; cell_it; ++cell_it)
+    {
+      const auto& cell = *cell_it;
+      const auto& fe   = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
+      ASSERT_EQ(fe.getGeometry(), Polytope::Type::Triangle);
+
+      for (size_t local = 0; local < fe.getCount(); ++local)
+      {
+        const auto& ref_node = fe.getNode(local);
+        Geometry::Point p(cell, ref_node, ref_node);
+
+        Real val      = gf(p);
+        Real expected = exact(p);
+
+        Index global = fes.getGlobalIndex({cell.getDimension(), cell.getIndex()}, local);
+        Real stored  = gf[global];
+
+        EXPECT_NEAR(stored, expected, 1e-14)
+          << "Stored DOF mismatch on cell " << cell.getIndex()
+          << ", local " << local;
+
+        EXPECT_NEAR(val, stored, 1e-14)
+          << "Interpolation mismatch on cell " << cell.getIndex()
+          << ", local " << local;
+      }
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, Pushforward_PointBasis_IsOneAtVertex)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+      .finalize();
+
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    const auto& conn = mesh.getConnectivity();
+
+    for (Index vtx = 0; vtx < conn.getCount(0); ++vtx)
+    {
+      const auto& fe_point = fes.getFiniteElement(0, vtx);
+      ASSERT_EQ(fe_point.getCount(), 1u);
+      const auto& basis0 = fe_point.getBasis(0);
+
+      const auto mapping = fes.getPushforward({0, vtx}, basis0);
+
+      auto vit = mesh.getVertex(vtx);
+      Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+
+      Real val = mapping(p);
+      EXPECT_NEAR(val, 1.0, 1e-14)
+        << "Pushforward of point basis at vertex " << vtx << " is not 1.";
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, Project_OneTriangle_AtNodes)
+  {
+    // 1 element mesh, triangle with vertices (0,0), (1,0), (0,1)
+    constexpr size_t sdim = 2;
+    constexpr size_t mdim = 2;
+
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(sdim)
+      .nodes(4)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+      .finalize();
+
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return 2.0 * p.x() + 3.0 * p.y() + 1.0;
+    };
+
+    gf = exact; // uses Region::Cells internally
+
+    auto cell = mesh.getCell();
+    ASSERT_TRUE(cell);
+
+    const auto& fe = fes.getFiniteElement(cell->getDimension(), cell->getIndex());
+    ASSERT_EQ(fe.getGeometry(), Polytope::Type::Triangle);
+
+    for (size_t local = 0; local < fe.getCount(); ++local)
+    {
+      const auto& ref_node = fe.getNode(local); // reference coords (xi,eta)
+      Geometry::Point p(*cell, ref_node, ref_node);
+
+      Real value    = gf(p);
+      // physical coords: here ref = physical
+      Real expected = exact(p);
+
+      Index global = fes.getGlobalIndex({cell->getDimension(), cell->getIndex()}, local);
+      Real stored  = gf[global];
+
+      EXPECT_NEAR(stored, expected, 1e-14);
+      EXPECT_NEAR(value, stored, 1e-14);
+    }
+  }
+
   // Basic construction test for H1<1> (equivalent to P1)
   TEST(Rodin_Variational_H1_Space, SanityTest_H1_1_2D_Square_Build)
   {
@@ -33,7 +286,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     EXPECT_EQ(mesh.getDimension(), mdim);
     EXPECT_EQ(mesh.getSpaceDimension(), sdim);
@@ -64,7 +318,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     EXPECT_EQ(mesh.getDimension(), mdim);
     EXPECT_EQ(mesh.getSpaceDimension(), sdim);
@@ -100,7 +355,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
 
@@ -122,7 +378,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, SanityTest_H1_2_UniformGrid)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
 
@@ -137,7 +394,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, FiniteElement_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
 
@@ -148,26 +406,30 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fe.getOrder(), 2);
   }
 
-  // Test DOF ownership (owned DOFs per entity) for H1<2>
-  // Test DOF structure (closure on cells) for H1<2>
+  // Test DOF structure (closures) for H1<2> on a simple 2D mesh
   TEST(Rodin_Variational_H1_Space, GetDOFs_H1_2)
   {
+    using Mesh     = Geometry::Mesh<Context::Local>;
+    using Polytope = Geometry::Polytope;
+
     Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(4)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .vertex({1, 1})
-      .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
-      .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
-      .finalize();
+      Mesh::Builder()
+        .initialize(2)
+        .nodes(4)
+        .vertex({0, 0})
+        .vertex({1, 0})
+        .vertex({0, 1})
+        .vertex({1, 1})
+        .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
+        .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
+        .finalize();
 
-    // Build edge–cell incidence so that H1 can enumerate edge entities
-    mesh.getConnectivity().compute(1, 2);
+    // Build edge–cell and edge–vertex incidence so that H1 can enumerate entities
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
-    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    constexpr size_t K = 2;
+    H1 fes(std::integral_constant<size_t, K>{}, mesh);
 
     const auto& conn = mesh.getConnectivity();
     const size_t nv  = mesh.getVertexCount();
@@ -177,43 +439,43 @@ namespace Rodin::Tests::Unit
     // 1) Vertices (d = 0): H1<2> has 1 DOF per vertex
     for (size_t v = 0; v < nv; ++v)
     {
-      const auto& dofs_v = fes.getDOFs(0, v);
-      EXPECT_EQ(dofs_v.size(), 1)
+      const auto& dofs_v = fes.getDOFs(0, static_cast<Index>(v));
+      EXPECT_EQ(dofs_v.size(), 1u)
         << "Vertex " << v << " should have exactly 1 DOF for H1<2>.";
     }
 
-    // 2) Edges (d = 1): H1<2> has (K-1) = 1 interior DOF per edge
+    // 2) Edges (d = 1): H1<2> has (K+1) = 3 DOFs per edge (2 vertices + 1 interior)
     for (size_t e = 0; e < ne; ++e)
     {
-      const auto& dofs_e = fes.getDOFs(1, e);
-      EXPECT_EQ(dofs_e.size(), 1)
-        << "Edge " << e << " should have exactly 1 interior DOF for H1<2>.";
+      const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
+      EXPECT_EQ(dofs_e.size(), 3u)
+        << "Edge " << e << " should have 3 DOFs (2 vertex + 1 interior) for H1<2>.";
     }
 
     // 3) Cells (d = 2): H1<2> triangle has closure = 3 vertex DOFs + 3 edge DOFs = 6 DOFs
     for (size_t c = 0; c < nc; ++c)
     {
-      const auto& dofs_c = fes.getDOFs(2, c);
-      const auto& fe_c   = fes.getFiniteElement(2, c);
+      const auto& dofs_c = fes.getDOFs(2, static_cast<Index>(c));
+      const auto& fe_c   = fes.getFiniteElement(2, static_cast<Index>(c));
 
       // Check that cell closure size matches element DOF count
       EXPECT_EQ(dofs_c.size(), fe_c.getCount())
         << "Cell " << c << " should have closure size equal to element DOF count.";
 
-      EXPECT_EQ(dofs_c.size(), 6)
+      EXPECT_EQ(dofs_c.size(), 6u)
         << "Triangle " << c << " should have 6 DOFs in its closure for H1<2>.";
     }
 
     // 4) Consistency check: for one cell, its closure is exactly the union
-    //    of its vertex DOFs and edge DOFs (no interior DOFs for K=2).
+    //    of its vertex DOFs and edge DOFs (no interior DOFs for K=2 on triangles).
     {
       const size_t c = 0; // first cell
-      const auto& dofs_c = fes.getDOFs(2, c);
+      const auto& dofs_c = fes.getDOFs(2, static_cast<Index>(c));
 
       std::set<Index> closure_from_subentities;
 
       // vertices of cell c
-      const auto& poly = conn.getPolytope(2, c);
+      const auto& poly = conn.getPolytope(2, static_cast<Index>(c));
       for (Index v : poly)
       {
         const auto& dofs_v = fes.getDOFs(0, v);
@@ -222,7 +484,7 @@ namespace Rodin::Tests::Unit
       }
 
       // edges of cell c
-      const auto& edges = conn.getIncidence({ 2, 1 }, c);
+      const auto& edges = conn.getIncidence({2, 1}, static_cast<Index>(c));
       for (Index e : edges)
       {
         const auto& dofs_e = fes.getDOFs(1, e);
@@ -232,7 +494,7 @@ namespace Rodin::Tests::Unit
 
       // No interior DOFs for H1<2> on triangles, so closure_from_subentities
       // should match dofs_c exactly.
-      EXPECT_EQ(closure_from_subentities.size(), dofs_c.size());
+      EXPECT_EQ(closure_from_subentities.size(), static_cast<size_t>(dofs_c.size()));
       for (size_t k = 0; k < static_cast<size_t>(dofs_c.size()); ++k)
       {
         EXPECT_EQ(closure_from_subentities.count(dofs_c(k)), 1u)
@@ -241,29 +503,22 @@ namespace Rodin::Tests::Unit
       }
     }
 
-    // 5) Global count still matches fes.getSize()
-    //    (sum of owned DOFs: vertices + edges + cell interior)
-    size_t total_owned = 0;
+    // 5) Global count: for H1<2> on this triangular mesh, total DOFs are
+    //    nv vertex DOFs + ne*(K-1) edge interior DOFs (no cell interior for K=2).
+    const size_t expected_global =
+      nv                 // 1 DOF per vertex
+      + ne * (K - 1);    // (K-1) interior DOFs per edge
 
-    // owned at vertices
-    for (size_t v = 0; v < nv; ++v)
-      total_owned += fes.getDOFs(0, v).size();
-
-    // owned at edges
-    for (size_t e = 0; e < ne; ++e)
-      total_owned += fes.getDOFs(1, e).size();
-
-    // owned at cells: for K=2 on triangles, 0 interior DOFs
-    // nothing to add; getDOFs(2,c) is closure, not owned
-
-    EXPECT_EQ(total_owned, fes.getSize());
+    EXPECT_EQ(fes.getSize(), expected_global)
+      << "Global DOF count should be nv + ne*(K-1) for H1<2> on triangles.";
   }
 
   // Test that H1<1> size matches P1 size
   TEST(Rodin_Variational_H1_Space, H1_1_MatchesP1_Size)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 h1_fes(std::integral_constant<size_t, 1>{}, mesh);
     P1<Real> p1_fes(mesh);
@@ -288,7 +543,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, vdim);
 
@@ -305,7 +561,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, H1_1_TrialTestFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 1>{}, mesh);
     TrialFunction u(fes);
@@ -327,7 +584,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, DOFCount_Consistency)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -358,7 +616,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, GlobalIndex_MatchesGetDOFs)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
 
@@ -387,7 +646,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, ClosuresCoverAllGlobalDOFs_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
 
@@ -425,7 +685,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
 
@@ -487,7 +748,8 @@ namespace Rodin::Tests::Unit
     constexpr size_t vdim = 3;
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     // Scalar and vector spaces on same mesh and degree
     H1 scalar_fes(std::integral_constant<size_t, 2>{}, mesh);
@@ -512,48 +774,6 @@ namespace Rodin::Tests::Unit
           << "Vector H1 DOFs on (d=" << d << ", i=" << i
           << ") should be vdim times scalar DOFs.";
       }
-    }
-  }
-
-  // Behavioral test: interpolate a simple function and check values at nodes for H1<1>
-  TEST(Rodin_Variational_H1_Space, Interpolation_Behavior_H1_1)
-  {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    mesh.getConnectivity().compute(1, 2);
-
-    H1 fes(std::integral_constant<size_t, 1>{}, mesh);
-
-    // Trial/Test functions just to ensure assembly/interpolation pipeline works
-    TrialFunction u(fes);
-    TestFunction  v(fes);
-
-    // GridFunction interpolation test: u(x, y) = x + 2y
-    GridFunction gf(fes);
-
-    auto exact = [](const Geometry::Point& p) -> Real
-    {
-      return p.x() + 2.0 * p.y();
-    };
-
-    gf = exact; // relies on existing interpolation operator in your framework
-
-    // Check that DOF values match the exact function at vertex coordinates
-    const size_t nv  = mesh.getVertexCount();
-
-    for (size_t vtx = 0; vtx < nv; ++vtx)
-    {
-      const auto vit = mesh.getVertex(vtx);
-      const Geometry::Point p(
-          *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
-          vit->getCoordinates());
-      Real expected = exact(p);
-
-      Real value = gf(p); // assuming scalar gf is indexed by global DOF (vertex) for H1<1>
-
-      EXPECT_NEAR(value, expected, 1e-12)
-        << "Interpolated value at vertex " << vtx
-        << " should match exact function.";
     }
   }
 
@@ -591,7 +811,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 4>{}, mesh);
 
@@ -657,7 +878,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 6>{}, mesh);
 
@@ -679,7 +901,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, DOFCount_K1_to_K6_UniformGrid)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -726,7 +949,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, FiniteElement_K4_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     // K = 4
     {
@@ -771,7 +995,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 4>{}, mesh);
 
@@ -837,7 +1062,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 5>{}, mesh);
 
@@ -900,7 +1126,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 6>{}, mesh);
 
@@ -952,7 +1179,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, GlobalIndex_MatchesGetDOFs_K4_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -983,7 +1211,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, ClosuresCoverAllGlobalDOFs_K4_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -1012,7 +1241,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, TrialTestFunction_K4_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     // K = 4
     {
@@ -1042,7 +1272,8 @@ namespace Rodin::Tests::Unit
     constexpr size_t vdim = 2;
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -1079,81 +1310,77 @@ namespace Rodin::Tests::Unit
     );
   }
 
-  // Test edge DOF count per entity for K = 1 to 6
+  // Test edge DOF structure for K = 1 to 6
   TEST(Rodin_Variational_H1_Space, EdgeDOFCount_K1_to_K6)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    mesh.getConnectivity().compute(1, 2);
+    using LocalMesh = Geometry::Mesh<Context::Local>;
+    using Polytope  = Geometry::Polytope;
+
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
-    const size_t ne = conn.getCount(1);
+    const size_t ne  = conn.getCount(1);
 
-    // K = 1: 0 edge interior DOFs per edge
+    // Helper lambda: check one value of K
+    auto checkK = [&](auto Ktag)
     {
-      H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+      constexpr size_t K = Ktag.value;
+      H1 fes(Ktag, mesh);
+
       for (size_t e = 0; e < ne; ++e)
       {
-        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
-        EXPECT_EQ(dofs_e.size(), 0u);  // K-1 = 0
-      }
-    }
+        const Index edgeIdx = static_cast<Index>(e);
 
-    // K = 2: 1 edge interior DOF per edge
-    {
-      H1 fes(std::integral_constant<size_t, 2>{}, mesh);
-      for (size_t e = 0; e < ne; ++e)
-      {
-        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
-        EXPECT_EQ(dofs_e.size(), 1u);  // K-1 = 1
-      }
-    }
+        // Edge closure DOFs
+        const auto& dofs_e = fes.getDOFs(1, edgeIdx);
 
-    // K = 3: 2 edge interior DOFs per edge
-    {
-      H1 fes(std::integral_constant<size_t, 3>{}, mesh);
-      for (size_t e = 0; e < ne; ++e)
-      {
-        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
-        EXPECT_EQ(dofs_e.size(), 2u);  // K-1 = 2
-      }
-    }
+        // For H1<K> on segments with GLL nodes: K+1 DOFs per edge in closure
+        EXPECT_EQ(dofs_e.size(), K + 1)
+          << "Edge " << e << " should have " << (K + 1)
+          << " total DOFs (including 2 vertex DOFs) for H1<" << K << ">.";
 
-    // K = 4: 3 edge interior DOFs per edge
-    {
-      H1 fes(std::integral_constant<size_t, 4>{}, mesh);
-      for (size_t e = 0; e < ne; ++e)
-      {
-        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
-        EXPECT_EQ(dofs_e.size(), 3u);  // K-1 = 3
-      }
-    }
+        // Get the two vertex DOFs of this edge
+        const auto& edgeVerts = conn.getIncidence({1, 0}, edgeIdx);
+        ASSERT_EQ(edgeVerts.size(), 2u);
 
-    // K = 5: 4 edge interior DOFs per edge
-    {
-      H1 fes(std::integral_constant<size_t, 5>{}, mesh);
-      for (size_t e = 0; e < ne; ++e)
-      {
-        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
-        EXPECT_EQ(dofs_e.size(), 4u);  // K-1 = 4
-      }
-    }
+        std::set<Index> vertexDOFs;
+        for (Index v : edgeVerts)
+        {
+          const auto& dofs_v = fes.getDOFs(0, v);
+          ASSERT_EQ(dofs_v.size(), 1u);
+          vertexDOFs.insert(dofs_v(0));
+        }
 
-    // K = 6: 5 edge interior DOFs per edge
-    {
-      H1 fes(std::integral_constant<size_t, 6>{}, mesh);
-      for (size_t e = 0; e < ne; ++e)
-      {
-        const auto& dofs_e = fes.getDOFs(1, static_cast<Index>(e));
-        EXPECT_EQ(dofs_e.size(), 5u);  // K-1 = 5
+        // Count interior DOFs on the edge = edge DOFs minus vertex DOFs
+        size_t interiorCount = 0;
+        for (Index k = 0; k < dofs_e.size(); ++k)
+        {
+          if (vertexDOFs.count(dofs_e(k)) == 0)
+            ++interiorCount;
+        }
+
+        EXPECT_EQ(interiorCount, (K > 0 ? K - 1 : 0))
+          << "Edge " << e << " should have " << (K > 0 ? K - 1 : 0)
+          << " interior DOFs for H1<" << K << ">.";
       }
-    }
+    };
+
+    checkK(std::integral_constant<size_t, 1>{});
+    checkK(std::integral_constant<size_t, 2>{});
+    checkK(std::integral_constant<size_t, 3>{});
+    checkK(std::integral_constant<size_t, 4>{});
+    checkK(std::integral_constant<size_t, 5>{});
+    checkK(std::integral_constant<size_t, 6>{});
   }
 
   // Test vertex DOF count per entity for K = 1 to 6
   TEST(Rodin_Variational_H1_Space, VertexDOFCount_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t nv = mesh.getVertexCount();
 
@@ -1178,7 +1405,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, DOFIndices_Contiguous_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -1217,7 +1445,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, CellClosureSize_MatchesElementDOFCount_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t nc = mesh.getCellCount();
 
@@ -1240,7 +1469,7 @@ namespace Rodin::Tests::Unit
   }
 
   // ============================================================================
-  // Interpolation tests for H1<K> spaces from K=1 to K=6
+  // Interpolation tests for H1<K> spaces from K=2 to K=6
   // Verify that GridFunction evaluation returns correct values
   // ============================================================================
 
@@ -1248,7 +1477,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
@@ -1302,7 +1532,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -1338,7 +1569,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 4>{}, mesh);
     GridFunction gf(fes);
@@ -1374,7 +1606,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_5)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 5>{}, mesh);
     GridFunction gf(fes);
@@ -1410,7 +1643,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 6>{}, mesh);
     GridFunction gf(fes);
@@ -1452,7 +1686,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, DOFCount_16x16_Mesh_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -1499,7 +1734,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, GlobalIndex_16x16_Mesh_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -1533,7 +1769,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_16x16_Mesh_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -1579,7 +1816,8 @@ namespace Rodin::Tests::Unit
     constexpr size_t vdim = 2;
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -1605,7 +1843,8 @@ namespace Rodin::Tests::Unit
     constexpr size_t vdim = 2;
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     auto testVectorGridFunction = [&mesh](auto fes) {
       GridFunction gf(fes);
@@ -1657,7 +1896,8 @@ namespace Rodin::Tests::Unit
     constexpr size_t vdim = 2;
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -1683,7 +1923,8 @@ namespace Rodin::Tests::Unit
     constexpr size_t vdim = 3;
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -1711,7 +1952,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, ComplexH1_Construction_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -1765,7 +2007,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, ComplexH1_GlobalIndex_K2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1<2, Complex, Geometry::Mesh<Context::Local>> fes(
         std::integral_constant<size_t, 2>{}, mesh);
@@ -1793,7 +2036,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, ComplexH1_16x16_Mesh_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -1859,7 +2103,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -1931,7 +2176,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {1, 3, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -1982,7 +2228,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, EdgeCase_8x8_Mesh_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -2063,7 +2310,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, ElementDOFCount_AllCells_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t nc = mesh.getCellCount();
 
@@ -2091,7 +2339,8 @@ namespace Rodin::Tests::Unit
     // 2x2 mesh
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
 
       H1 fes(std::integral_constant<size_t, 3>{}, mesh);
       TrialFunction u(fes);
@@ -2101,7 +2350,8 @@ namespace Rodin::Tests::Unit
     // 8x8 mesh
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });
-      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
 
       H1 fes(std::integral_constant<size_t, 3>{}, mesh);
       TrialFunction u(fes);
@@ -2111,7 +2361,9 @@ namespace Rodin::Tests::Unit
     // 16x16 mesh
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
+
 
       H1 fes(std::integral_constant<size_t, 3>{}, mesh);
       TrialFunction u(fes);
@@ -2125,7 +2377,8 @@ namespace Rodin::Tests::Unit
     constexpr size_t vdim = 2;
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -2186,7 +2439,7 @@ namespace Rodin::Tests::Unit
       .finalize();
 
     // For 1D meshes, compute vertex-to-cell (segment) connectivity
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     EXPECT_EQ(mesh.getDimension(), 1);
     EXPECT_EQ(mesh.getSpaceDimension(), 1);
@@ -2216,7 +2469,7 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Segment, { {3, 4} })
       .finalize();
 
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
 
@@ -2245,7 +2498,7 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Segment, { {3, 4} })
       .finalize();
 
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
 
@@ -2274,7 +2527,7 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Segment, { {3, 4} })
       .finalize();
 
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -2323,7 +2576,7 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Segment, { {3, 4} })
       .finalize();
 
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     TrialFunction u(fes);
@@ -2352,7 +2605,7 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Segment, { {3, 4} })
       .finalize();
 
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, vdim);
 
@@ -2368,7 +2621,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Quadrilateral_H1_1_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     EXPECT_EQ(mesh.getDimension(), 2);
 
@@ -2383,7 +2637,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Quadrilateral_H1_2_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
 
@@ -2402,7 +2657,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Quadrilateral_H1_3_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
 
@@ -2420,7 +2676,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Quadrilateral_H1_K1_to_K6_Indexing)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -2454,7 +2711,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Quadrilateral_8x8_DOFCount_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 8, 8 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -2500,7 +2758,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Quadrilateral_TrialTestFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     TrialFunction u(fes);
@@ -2514,7 +2773,8 @@ namespace Rodin::Tests::Unit
   {
     constexpr size_t vdim = 2;
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -2529,7 +2789,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Quadrilateral_ComplexH1_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -2548,8 +2809,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_1_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     EXPECT_EQ(mesh.getDimension(), 3);
 
@@ -2563,8 +2825,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_2_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
 
@@ -2580,8 +2843,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_3_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
 
@@ -2599,8 +2863,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_4_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 4>{}, mesh);
 
@@ -2620,8 +2885,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_K1_to_K6_Indexing)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -2655,8 +2921,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Tetrahedron_TrialTestFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     TrialFunction u(fes);
@@ -2670,8 +2937,9 @@ namespace Rodin::Tests::Unit
   {
     constexpr size_t vdim = 3;
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -2685,8 +2953,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Tetrahedron_ComplexH1_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const size_t vertexCount = mesh.getVertexCount();
     const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -2704,8 +2973,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Wedge_H1_1_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     EXPECT_EQ(mesh.getDimension(), 3);
 
@@ -2719,8 +2989,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Wedge_H1_2_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
 
@@ -2739,8 +3010,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Wedge_H1_K1_to_K6_Indexing)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -2774,8 +3046,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Wedge_TrialTestFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     TrialFunction u(fes);
@@ -2789,8 +3062,9 @@ namespace Rodin::Tests::Unit
   {
     constexpr size_t vdim = 3;
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     // H1<2> on wedges gives 27 scalar DOFs - see Wedge_H1_2_DOFCount test
     // for detailed explanation of the DOF distribution
@@ -2823,7 +3097,7 @@ namespace Rodin::Tests::Unit
         .polytope(Polytope::Type::Segment, { {1, 2} })
         .finalize();
 
-      mesh.getConnectivity().compute(0, 1);
+      mesh.getConnectivity().compute(1, 0);
 
       H1 fes(std::integral_constant<size_t, 1>{}, mesh);
       EXPECT_EQ(fes.getSize(), mesh.getVertexCount());
@@ -2832,7 +3106,8 @@ namespace Rodin::Tests::Unit
     // 2D Triangle
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 1>{}, mesh);
       EXPECT_EQ(fes.getSize(), mesh.getVertexCount());
     }
@@ -2840,7 +3115,8 @@ namespace Rodin::Tests::Unit
     // 2D Quadrilateral
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 3, 3 });
-      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 1>{}, mesh);
       EXPECT_EQ(fes.getSize(), mesh.getVertexCount());
     }
@@ -2848,8 +3124,9 @@ namespace Rodin::Tests::Unit
     // 3D Tetrahedron
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-      mesh.getConnectivity().compute(1, 3);
-      mesh.getConnectivity().compute(2, 3);
+      mesh.getConnectivity().compute(3, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 1>{}, mesh);
       EXPECT_EQ(fes.getSize(), mesh.getVertexCount());
     }
@@ -2857,8 +3134,9 @@ namespace Rodin::Tests::Unit
     // 3D Wedge
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-      mesh.getConnectivity().compute(1, 3);
-      mesh.getConnectivity().compute(2, 3);
+      mesh.getConnectivity().compute(3, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 1>{}, mesh);
       EXPECT_EQ(fes.getSize(), mesh.getVertexCount());
     }
@@ -2882,7 +3160,7 @@ namespace Rodin::Tests::Unit
         .polytope(Polytope::Type::Segment, { {1, 2} })
         .finalize();
 
-      mesh.getConnectivity().compute(0, 1);
+      mesh.getConnectivity().compute(1, 0);
 
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
       // 3 vertices + 2 segment interiors = 5
@@ -2892,7 +3170,8 @@ namespace Rodin::Tests::Unit
     // 2D Triangle
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
       EXPECT_EQ(fes.getSize(), mesh.getVertexCount() + mesh.getConnectivity().getCount(1));
     }
@@ -2900,7 +3179,8 @@ namespace Rodin::Tests::Unit
     // 2D Quadrilateral
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 3, 3 });
-      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
       // For quads K=2: v + e + c (interior DOFs per cell)
       const size_t v = mesh.getVertexCount();
@@ -2912,8 +3192,9 @@ namespace Rodin::Tests::Unit
     // 3D Tetrahedron
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-      mesh.getConnectivity().compute(1, 3);
-      mesh.getConnectivity().compute(2, 3);
+      mesh.getConnectivity().compute(3, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
       EXPECT_EQ(fes.getSize(), mesh.getVertexCount() + mesh.getConnectivity().getCount(1));
     }
@@ -2921,8 +3202,9 @@ namespace Rodin::Tests::Unit
     // 3D Wedge - just verify it runs without error
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-      mesh.getConnectivity().compute(1, 3);
-      mesh.getConnectivity().compute(2, 3);
+      mesh.getConnectivity().compute(3, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
       // Wedge H1<2> DOF count is complex, just check it's > 0
       EXPECT_GT(fes.getSize(), 0);
@@ -2947,7 +3229,7 @@ namespace Rodin::Tests::Unit
         .polytope(Polytope::Type::Segment, { {1, 2} })
         .finalize();
 
-      mesh.getConnectivity().compute(0, 1);
+      mesh.getConnectivity().compute(1, 0);
 
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
       GridFunction gf(fes);
@@ -2957,7 +3239,8 @@ namespace Rodin::Tests::Unit
     // 2D Triangle
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
       GridFunction gf(fes);
       EXPECT_EQ(gf.getSize(), fes.getSize());
@@ -2966,7 +3249,8 @@ namespace Rodin::Tests::Unit
     // 2D Quadrilateral
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 3, 3 });
-      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
       GridFunction gf(fes);
       EXPECT_EQ(gf.getSize(), fes.getSize());
@@ -2975,8 +3259,9 @@ namespace Rodin::Tests::Unit
     // 3D Tetrahedron
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-      mesh.getConnectivity().compute(1, 3);
-      mesh.getConnectivity().compute(2, 3);
+      mesh.getConnectivity().compute(3, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
       GridFunction gf(fes);
       EXPECT_EQ(gf.getSize(), fes.getSize());
@@ -2985,8 +3270,9 @@ namespace Rodin::Tests::Unit
     // 3D Wedge
     {
       Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-      mesh.getConnectivity().compute(1, 3);
-      mesh.getConnectivity().compute(2, 3);
+      mesh.getConnectivity().compute(3, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
       GridFunction gf(fes);
       EXPECT_EQ(gf.getSize(), fes.getSize());
@@ -3021,7 +3307,7 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Segment, { {3, 4} })
       .finalize();
 
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
@@ -3070,7 +3356,7 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Segment, { {3, 4} })
       .finalize();
 
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3119,7 +3405,7 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Segment, { {3, 4} })
       .finalize();
 
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 6>{}, mesh);
     GridFunction gf(fes);
@@ -3158,7 +3444,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Quadrilateral_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
@@ -3192,7 +3479,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Quadrilateral_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3226,7 +3514,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Quadrilateral_H1_6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 6>{}, mesh);
     GridFunction gf(fes);
@@ -3266,8 +3555,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
@@ -3301,8 +3591,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3336,8 +3627,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 6>{}, mesh);
     GridFunction gf(fes);
@@ -3378,8 +3670,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
@@ -3413,8 +3706,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3448,8 +3742,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 6>{}, mesh);
     GridFunction gf(fes);
@@ -3490,7 +3785,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Triangle_H1_2_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
@@ -3524,7 +3820,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Triangle_H1_3_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3558,7 +3855,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Triangle_H1_6_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 6>{}, mesh);
     GridFunction gf(fes);
@@ -3599,7 +3897,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Triangle_8x8_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3633,7 +3932,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Quadrilateral_8x8_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 8, 8 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3691,7 +3991,7 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Segment, { {7, 8} })
       .finalize();
 
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3741,7 +4041,8 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Triangle, { {0, 1, 2} })
       .finalize();
 
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3779,7 +4080,8 @@ namespace Rodin::Tests::Unit
   {
     // Small 3x3 quadrilateral mesh (9 cells) for edge case testing
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 3, 3 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3824,7 +4126,7 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Segment, { {0, 1} })
       .finalize();
 
-    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3862,8 +4164,9 @@ namespace Rodin::Tests::Unit
   {
     // Small tetrahedron mesh for edge case testing
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -3899,8 +4202,9 @@ namespace Rodin::Tests::Unit
   {
     // Small wedge mesh for edge case testing
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
-    mesh.getConnectivity().compute(1, 3);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
 
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);

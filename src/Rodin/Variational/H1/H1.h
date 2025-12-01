@@ -483,17 +483,12 @@ namespace Rodin::Variational
        * @param[in] mesh Mesh on which to build the finite element space
        * @param[in] vdim Vector dimension
        */
-      H1(std::integral_constant<size_t, K>, const Geometry::Mesh<ContextType>& mesh, size_t vdim)
-        : m_mesh(mesh), m_vdim(vdim)
-      {
-        // TODO
-      }
+      H1(std::integral_constant<size_t, K>, const Geometry::Mesh<ContextType>& mesh, size_t vdim);
 
       H1(const H1& other)
         : Parent(other),
           m_mesh(other.m_mesh),
           m_vdim(other.m_vdim),
-          m_owned(other.m_owned),
           m_closure(other.m_dofs),
           m_size(other.m_size)
       {}
@@ -502,7 +497,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
           m_vdim(std::move(other.m_vdim)),
-          m_owned(std::move(other.m_owned)),
           m_closure(std::move(other.m_dofs)),
           m_size(std::move(other.m_size))
       {}
@@ -516,7 +510,6 @@ namespace Rodin::Variational
           Parent::operator=(std::move(other));
           m_mesh = std::move(other.m_mesh);
           m_vdim = std::move(other.m_vdim);
-          m_owned = std::move(other.m_owned);
           m_closure = std::move(other.m_dofs);
           m_size = std::move(other.m_size);
         }
@@ -530,7 +523,6 @@ namespace Rodin::Variational
           Parent::operator=(other);
           m_mesh = other.m_mesh;
           m_vdim = other.m_vdim;
-          m_owned = other.m_owned;
           m_closure = other.m_dofs;
           m_size = other.m_size;
         }
@@ -657,9 +649,9 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const Geometry::Mesh<ContextType>> m_mesh;
       size_t m_vdim;
-      std::vector<std::vector<IndexArray>> m_owned;
-      std::vector<std::vector<IndexArray>> m_closure;
+
       size_t m_size;
+      std::vector<std::vector<IndexArray>> m_closure;
   };
 
   /**
