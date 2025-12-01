@@ -7,6 +7,8 @@
 #include "Rodin/Alert/Exception.h"
 
 #include "H1.h"
+#include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Utility/ForConstexpr.h"
 
 namespace Rodin::Variational
 {
@@ -20,8 +22,6 @@ namespace Rodin::Variational
    * Concretely:
    *  - @p G is the codomain polytope (Segment, Triangle, Quadrilateral,
    *    Tetrahedron, or Wedge),
-   *  - @p Local is the local index of the boundary entity of @p G
-   *    (vertex, edge, or face, depending on the dimension),
    *  - @p Domain is a container of DOF indices on the boundary entity,
    *  - @p Codomain is a container of DOF indices on the whole polytope @p G.
    *
@@ -43,13 +43,13 @@ namespace Rodin::Variational
    * @tparam K     Polynomial degree of the H¹ element.
    * @tparam Scalar Scalar type of the H¹ field (Real, Complex, ...).
    * @tparam G     Codomain reference polytope type (Segment, Triangle, ...).
-   * @tparam Local Local index of the boundary entity of @p G.
    */
   template <size_t K, class Scalar>
-  template <Geometry::Polytope::Type G, size_t Local>
+  template <Geometry::Polytope::Type G>
   class H1<K, Scalar, Geometry::Mesh<Context::Local>>::Cochain
   {
     public:
+
       /**
        * @name Local DOF counts per reference geometry
        * These constants describe how many nodal DOFs are attached to each
@@ -72,7 +72,29 @@ namespace Rodin::Variational
       /// Number of nodal DOFs on a reference quadrilateral ((K+1)×(K+1) GLL grid).
       static constexpr size_t QuadrilateralCount = (K + 1) * (K + 1);
 
+      static constexpr size_t WedgeCount = (K + 1) * FeketeTriangle<K>::Count;
+
       /** @} */
+
+      static constexpr size_t Count =
+        []()
+        {
+          if constexpr (G == Geometry::Polytope::Type::Point)
+            return PointCount;
+          else if constexpr (G == Geometry::Polytope::Type::Segment)
+            return SegmentCount;
+          else if constexpr (G == Geometry::Polytope::Type::Triangle)
+            return TriangleCount;
+          else if constexpr (G == Geometry::Polytope::Type::Quadrilateral)
+            return QuadrilateralCount;
+          else if constexpr (G == Geometry::Polytope::Type::Tetrahedron)
+            return TetrahedronCount;
+          else if constexpr (G == Geometry::Polytope::Type::Wedge)
+            return WedgeCount;
+          else
+            return 0;
+        }();
+
 
       /**
        * @brief Injects boundary DOFs into the DOFs of the polytope @p G.
@@ -96,12 +118,15 @@ namespace Rodin::Variational
        * @tparam Domain   Container type for the boundary DOFs (e.g. IndexArray).
        * @tparam Codomain Container type for the element DOFs (e.g. IndexArray).
        *
+       *
+       * @param[in]  local     Index of the boundary entity of @p G
+       *                       (vertex, edge, or face, depending on the dimension)
        * @param[out] codomain  DOF container on @p G to be updated
        *                       along the Local-th boundary entity.
        * @param[in]  domain    DOF container on the Local-th boundary entity.
        */
       template <class Domain, class Codomain>
-      static constexpr void map(Codomain& codomain, const Domain& domain)
+      static constexpr void map(size_t local, Codomain& codomain, const Domain& domain)
       {
         using Type = Geometry::Polytope::Type;
 
@@ -111,13 +136,13 @@ namespace Rodin::Variational
         // -------------------------------------------------------------------
         if constexpr (G == Type::Segment)
         {
-          static_assert(Local < 2, "Segment has 2 vertices (Local = 0, 1).");
-          if constexpr (Local == 0)
+          assert(local < 2 && "Segment has 2 vertices (Local = 0, 1).");
+          if (local == 0)
           {
             // left endpoint
             codomain[0] = domain[0];
           }
-          else if constexpr (Local == 1)
+          else if (local == 1)
           {
             // right endpoint
             codomain[SegmentCount - 1] = domain[0];
@@ -140,9 +165,9 @@ namespace Rodin::Variational
         // -------------------------------------------------------------------
         else if constexpr (G == Type::Triangle)
         {
-          static_assert(Local < 3, "Triangle has 3 edges (Local = 0, 1, 2).");
+          assert(local < 3 && "Triangle has 3 edges (Local = 0, 1, 2).");
 
-          if constexpr (Local == 0)
+          if (local == 0)
           {
             // bottom edge (0->1)
             Utility::ForIndex<SegmentCount>([&](auto ii)
@@ -152,28 +177,26 @@ namespace Rodin::Variational
               codomain[idx] = domain[r];
             });
           }
-          else if constexpr (Local == 1)
+          else if (local == 1)
           {
             // hypotenuse (1->2)
             Utility::ForIndex<SegmentCount>([&](auto ii)
             {
               constexpr size_t r = ii.value;   // 0..K
               constexpr size_t j = r;          // parameter along hypotenuse
-
               constexpr size_t rowStart_j =
                   j * (K + 1) - (j * (j - 1)) / 2;
               constexpr size_t idx = rowStart_j + (K - j);
               codomain[idx] = domain[r];
             });
           }
-          else if constexpr (Local == 2)
+          else if (local == 2)
           {
             // left edge (2->0)
             Utility::ForIndex<SegmentCount>([&](auto ii)
             {
               constexpr size_t r_on_edge = ii.value;  // 0..K
               constexpr size_t j         = K - r_on_edge;
-
               constexpr size_t rowStart_j =
                   j * (K + 1) - (j * (j - 1)) / 2;
               constexpr size_t idx = rowStart_j;      // i = 0 on row j
@@ -196,9 +219,9 @@ namespace Rodin::Variational
         // -------------------------------------------------------------------
         else if constexpr (G == Type::Quadrilateral)
         {
-          static_assert(Local < 4, "Quadrilateral has 4 edges (Local = 0, 1, 2, 3).");
+          assert(local < 4 && "Quadrilateral has 4 edges (Local = 0, 1, 2, 3).");
 
-          if constexpr (Local == 0)
+          if (local == 0)
           {
             // bottom edge: j = 0, i = 0..K
             Utility::ForIndex<SegmentCount>([&](auto ii)
@@ -210,7 +233,7 @@ namespace Rodin::Variational
               codomain[idx] = domain[r];
             });
           }
-          else if constexpr (Local == 1)
+          else if (local == 1)
           {
             // right edge: i = K, j = 0..K
             Utility::ForIndex<SegmentCount>([&](auto ii)
@@ -222,7 +245,7 @@ namespace Rodin::Variational
               codomain[idx] = domain[r];
             });
           }
-          else if constexpr (Local == 2)
+          else if (local == 2)
           {
             // top edge: j = K, i = K..0 (reverse to keep global orientation)
             Utility::ForIndex<SegmentCount>([&](auto ii)
@@ -234,7 +257,7 @@ namespace Rodin::Variational
               codomain[idx] = domain[r];
             });
           }
-          else if constexpr (Local == 3)
+          else if (local == 3)
           {
             // left edge: i = 0, j = K..0 (reverse)
             Utility::ForIndex<SegmentCount>([&](auto ii)
@@ -266,9 +289,9 @@ namespace Rodin::Variational
         // -------------------------------------------------------------------
         else if constexpr (G == Type::Tetrahedron)
         {
-          static_assert(Local < 4, "Tetrahedron has 4 faces (Local = 0,1,2,3).");
+          assert(local < 4 && "Tetrahedron has 4 faces (Local = 0, 1, 2, 3).");
 
-          if constexpr (Local == 0)
+          if (local == 0)
           {
             // Face (1,2,3) opposite vertex 0: tri(0,1,2) -> tet(1,2,3)
             // λ1 = λ_tri0, λ2 = λ_tri1, λ3 = λ_tri2, λ0 = 0
@@ -284,29 +307,24 @@ namespace Rodin::Variational
                   constexpr size_t triRowStart =
                       j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
                   constexpr size_t triIdx = triRowStart + i2;
-
                   constexpr size_t i = K - i2 - j2;
                   constexpr size_t j = i2;
                   constexpr size_t k = j2;
-
                   constexpr size_t tetraTotal =
                       (K + 1) * (K + 2) * (K + 3) / 6;
                   constexpr size_t m_tail = K - k;
                   constexpr size_t tetraTail =
                       (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
                   constexpr size_t offset_k = tetraTotal - tetraTail;
-
                   constexpr size_t offset_j =
                       j * (K - k + 1) - (j * (j - 1)) / 2;
-
                   constexpr size_t tetIdx = offset_k + offset_j + i;
-
                   codomain[tetIdx] = domain[triIdx];
                 }
               });
             });
           }
-          else if constexpr (Local == 1)
+          else if (local == 1)
           {
             // Face (0,3,2) opposite vertex 1: tri(0,1,2) -> tet(0,3,2)
             // λ0 = λ_tri0, λ3 = λ_tri1, λ2 = λ_tri2, λ1 = 0
@@ -322,29 +340,24 @@ namespace Rodin::Variational
                   constexpr size_t triRowStart =
                       j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
                   constexpr size_t triIdx = triRowStart + i2;
-
                   constexpr size_t i = 0;
                   constexpr size_t j = j2;
                   constexpr size_t k = i2;
-
                   constexpr size_t tetraTotal =
                       (K + 1) * (K + 2) * (K + 3) / 6;
                   constexpr size_t m_tail = K - k;
                   constexpr size_t tetraTail =
                       (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
                   constexpr size_t offset_k = tetraTotal - tetraTail;
-
                   constexpr size_t offset_j =
                       j * (K - k + 1) - (j * (j - 1)) / 2;
-
                   constexpr size_t tetIdx = offset_k + offset_j + i;
-
                   codomain[tetIdx] = domain[triIdx];
                 }
               });
             });
           }
-          else if constexpr (Local == 2)
+          else if (local == 2)
           {
             // Face (0,1,3) opposite vertex 2: tri(0,1,2) -> tet(0,1,3)
             // λ0 = λ_tri0, λ1 = λ_tri1, λ3 = λ_tri2, λ2 = 0
@@ -382,7 +395,7 @@ namespace Rodin::Variational
               });
             });
           }
-          else if constexpr (Local == 3)
+          else if (local == 3)
           {
             // Face (0,2,1) opposite vertex 3: tri(0,1,2) -> tet(0,2,1)
             // λ0 = λ_tri0, λ2 = λ_tri1, λ1 = λ_tri2, λ3 = 0
@@ -398,23 +411,18 @@ namespace Rodin::Variational
                   constexpr size_t triRowStart =
                       j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
                   constexpr size_t triIdx = triRowStart + i2;
-
                   constexpr size_t i = j2;
                   constexpr size_t j = i2;
                   constexpr size_t k = 0;
-
                   constexpr size_t tetraTotal =
                       (K + 1) * (K + 2) * (K + 3) / 6;
                   constexpr size_t m_tail = K - k;
                   constexpr size_t tetraTail =
                       (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
                   constexpr size_t offset_k = tetraTotal - tetraTail;
-
                   constexpr size_t offset_j =
                       j * (K - k + 1) - (j * (j - 1)) / 2;
-
                   constexpr size_t tetIdx = offset_k + offset_j + i;
-
                   codomain[tetIdx] = domain[triIdx];
                 }
               });
@@ -444,13 +452,12 @@ namespace Rodin::Variational
         else if constexpr (G == Type::Wedge)
         {
           // Triangular faces
-          if constexpr (Local == 0 || Local == 4)
+          if (local == 0 || local == 4)
           {
             // Triangle -> Wedge
-            static_assert(Local == 0 || Local == 4,
-                          "Triangle->Wedge only for Local = 0 (bottom) or 4 (top).");
+            assert(local == 0 || local == 4 && "Triangle -> Wedge only for Local = 0 (bottom) or 4 (top).");
 
-            if constexpr (Local == 0)
+            if (local == 0)
             {
               // bottom triangular face, k = 0
               Utility::ForIndex<TriangleCount>([&](auto ii)
@@ -460,7 +467,7 @@ namespace Rodin::Variational
                 codomain[wedgeIdx] = domain[triIdx];
               });
             }
-            else if constexpr (Local == 4)
+            else if (local == 4)
             {
               // top triangular face, k = K
               Utility::ForIndex<TriangleCount>([&](auto ii)
@@ -472,13 +479,12 @@ namespace Rodin::Variational
             }
           }
           // Quadrilateral faces
-          else if constexpr (Local == 1 || Local == 2 || Local == 3)
+          else if (local == 1 || local == 2 || local == 3)
           {
             // Quad -> Wedge
-            static_assert(Local >= 1 && Local <= 3,
-                          "Quadrilateral->Wedge implemented only for quad faces Local=1,2,3.");
+            assert(local >= 1 && local <= 3 && "Quadrilateral -> Wedge implemented only for quad faces Local = 1, 2, 3.");
 
-            if constexpr (Local == 1)
+            if (local == 1)
             {
               // Face (0,1,4,3): extrude edge 0->1 in z
               // base i along 0->1, j vertical 0..K
@@ -488,18 +494,15 @@ namespace Rodin::Variational
                 Utility::ForIndex<K + 1>([&](auto ii)
                 {
                   constexpr size_t i = ii.value; // 0..K along edge 0->1
-
                   constexpr size_t quadIdx = j * (K + 1) + i;
-
                   // triangle edge 0->1: same as Segment->Triangle Local=0
                   constexpr size_t triEdgeIdx = i;
-
                   constexpr size_t wedgeIdx = j * TriangleCount + triEdgeIdx;
                   codomain[wedgeIdx] = domain[quadIdx];
                 });
               });
             }
-            else if constexpr (Local == 2)
+            else if (local == 2)
             {
               // Face (1,2,5,4): extrude edge 1->2 in z
               Utility::ForIndex<K + 1>([&](auto jj)
@@ -508,21 +511,18 @@ namespace Rodin::Variational
                 Utility::ForIndex<K + 1>([&](auto ii)
                 {
                   constexpr size_t i = ii.value; // 0..K along edge 1->2
-
                   constexpr size_t quadIdx = j * (K + 1) + i;
-
                   // triangle edge 1->2 (Segment->Triangle Local=1)
                   constexpr size_t r = i;
                   constexpr size_t rowStart =
                       r * (K + 1) - (r * (r - 1)) / 2;
                   constexpr size_t triEdgeIdx = rowStart + (K - r);
-
                   constexpr size_t wedgeIdx = j * TriangleCount + triEdgeIdx;
                   codomain[wedgeIdx] = domain[quadIdx];
                 });
               });
             }
-            else if constexpr (Local == 3)
+            else if (local == 3)
             {
               // Face (2,0,3,5): extrude edge 2->0 in z
               Utility::ForIndex<K + 1>([&](auto jj)
@@ -531,16 +531,13 @@ namespace Rodin::Variational
                 Utility::ForIndex<K + 1>([&](auto ii)
                 {
                   constexpr size_t i = ii.value; // 0..K along edge 2->0
-
                   constexpr size_t quadIdx = j * (K + 1) + i;
-
                   // triangle edge 2->0 (Segment->Triangle Local=2)
                   constexpr size_t r      = i;
                   constexpr size_t j_edge = K - r;
                   constexpr size_t rowStart =
                       j_edge * (K + 1) - (j_edge * (j_edge - 1)) / 2;
                   constexpr size_t triEdgeIdx = rowStart; // i=0 on that row
-
                   constexpr size_t wedgeIdx = j * TriangleCount + triEdgeIdx;
                   codomain[wedgeIdx] = domain[quadIdx];
                 });
@@ -552,12 +549,133 @@ namespace Rodin::Variational
         {
           Alert::Exception()
             << "Cochain for geometry " << G
-            << " and Local = " << Local
+            << " and local = " << local
             << " not implemented."
             << Alert::Raise;
         }
       }
   };
+
+  template <size_t K, class Scalar>
+  void H1<K, Scalar, Geometry::Mesh<Context::Local>>::getClosure(size_t d, Index idx)
+  {
+    if (m_visited[d][idx])
+      return;
+
+    const auto& mesh = m_mesh.get();
+    const auto& conn = mesh.getConnectivity();
+    const auto g = mesh.getGeometry(d, idx);
+
+    m_visited[d][idx] = 1;
+
+    auto& local = m_closure[d][idx];
+
+    switch (g)
+    {
+      case Geometry::Polytope::Type::Point:
+      {
+        // exactly 1 local DOF
+        local[0] = m_size++;
+        break;
+      }
+
+      case Geometry::Polytope::Type::Segment:
+      {
+        const auto& inc = conn.getIncidence({ d, d - 1 }, idx); // 2 vertices
+
+        // Left endpoint
+        this->getClosure(d - 1, inc[0]);
+        Cochain<Geometry::Polytope::Type::Segment>::map(0, local, m_closure[d - 1][inc[0]]);
+
+        // Interior DOFs
+        for (size_t k = 1; k + 1 < Cochain<Geometry::Polytope::Type::Segment>::Count; ++k)
+          local[k] = m_size++;
+
+        // Right endpoint
+        this->getClosure(d - 1, inc[1]);
+        Cochain<Geometry::Polytope::Type::Segment>::map(1, local, m_closure[d - 1][inc[1]]);
+
+        break;
+      }
+
+    }
+  }
+
+
+  template <size_t K, class Scalar>
+  H1<K, Scalar, Geometry::Mesh<Context::Local>>::H1(
+      std::integral_constant<size_t, K>, const MeshType& mesh)
+    : m_mesh(mesh),
+      m_size(0)
+  {
+    const size_t D = mesh.getDimension();
+
+    m_visited.resize(D + 1);
+    m_closure.resize(D + 1);
+
+    // Pre-size closure arrays by geometry
+    for (size_t d = 0; d <= D; ++d)
+    {
+      const size_t count = mesh.getPolytopeCount(d);
+      m_closure[d].resize(count);
+
+      for (Index i = 0; i < static_cast<Index>(count); ++i)
+      {
+        const auto g = mesh.getGeometry(d, i);
+        switch (g)
+        {
+          case Geometry::Polytope::Type::Point:
+          {
+            m_closure[d][i].resize(
+              Cochain<Geometry::Polytope::Type::Point>::Count);
+            break;
+          }
+          case Geometry::Polytope::Type::Segment:
+          {
+            m_closure[d][i].resize(
+              Cochain<Geometry::Polytope::Type::Segment>::Count);
+            break;
+          }
+          case Geometry::Polytope::Type::Triangle:
+          {
+            m_closure[d][i].resize(
+              Cochain<Geometry::Polytope::Type::Triangle>::Count);
+            break;
+          }
+          case Geometry::Polytope::Type::Quadrilateral:
+          {
+            m_closure[d][i].resize(
+              Cochain<Geometry::Polytope::Type::Quadrilateral>::Count);
+            break;
+          }
+          case Geometry::Polytope::Type::Tetrahedron:
+          {
+            m_closure[d][i].resize(
+              Cochain<Geometry::Polytope::Type::Tetrahedron>::Count);
+            break;
+          }
+          case Geometry::Polytope::Type::Wedge:
+          {
+            m_closure[d][i].resize(
+              Cochain<Geometry::Polytope::Type::Wedge>::Count);
+            break;
+          }
+        }
+      }
+
+      // Now initialize visited flags for this dimension
+      m_visited[d].assign(count, 0);
+    }
+
+    // Ensure we have incidence d -> d-1 for d >= 1
+    for (size_t d = 1; d <= D; ++d)
+      RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d - 1);
+
+    // Build closure starting from top-dimensional cells
+    const size_t nCells = mesh.getPolytopeCount(D);
+    for (Index c = 0; c < static_cast<Index>(nCells); ++c)
+      this->getClosure(D, c);
+  }
 }
 
 #endif // RODIN_VARIATIONAL_H1_H1_HPP

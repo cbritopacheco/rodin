@@ -105,7 +105,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpace<MeshType, H1<K, RangeType, MeshType>>;
 
-      template <Geometry::Polytope::Type G, size_t Local>
+      template <Geometry::Polytope::Type G>
       class Cochain;
 
       /**
@@ -173,26 +173,7 @@ namespace Rodin::Variational
        * Creates the H1 space of degree K. The total number of DOFs depends on
        * the polynomial degree and mesh topology.
        */
-      H1(std::integral_constant<size_t, K>, const MeshType& mesh)
-        : m_mesh(mesh)
-      {
-        const auto& conn = mesh.getConnectivity();
-        const size_t D   = mesh.getDimension();
-
-        // Ensure we have incidence from cells to all lower dimensions
-        for (size_t d = 0; d <= D; ++d)
-          RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d - 1);
-
-        m_closure.resize(D + 1);
-        for (size_t d = 0; d <= D; ++d)
-        {
-          std::vector<IndexArray>& closure = m_closure[d];
-          for (size_t dp = D - 1; dp >= 0; ++dp)
-          {
-            const std::vector<std::vector<Index>>& inc = conn.getIncidence(D, dp);
-          }
-        }
-      }
+      H1(std::integral_constant<size_t, K>, const MeshType& mesh);
 
       /**
        * @brief Copy constructor.
@@ -201,7 +182,6 @@ namespace Rodin::Variational
       H1(const H1& other)
         : Parent(other),
           m_mesh(other.m_mesh),
-          m_owned(other.m_owned),
           m_closure(other.m_dofs),
           m_size(other.m_size)
       {}
@@ -213,7 +193,6 @@ namespace Rodin::Variational
       H1(H1&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
-          m_owned(std::move(other.m_owned)),
           m_closure(std::move(other.m_dofs)),
           m_size(std::move(other.m_size))
       {}
@@ -231,7 +210,6 @@ namespace Rodin::Variational
         {
           Parent::operator=(std::move(other));
           m_mesh = std::move(other.m_mesh);
-          m_owned = std::move(other.m_owned);
           m_closure = std::move(other.m_dofs);
           m_size = std::move(other.m_size);
         }
@@ -249,12 +227,13 @@ namespace Rodin::Variational
         {
           Parent::operator=(other);
           m_mesh = other.m_mesh;
-          m_owned = other.m_owned;
           m_closure = other.m_dofs;
           m_size = other.m_size;
         }
         return *this;
       }
+
+      void getClosure(size_t d, Index idx);
 
       /**
        * @brief Gets the finite element associated with a polytope.
@@ -388,9 +367,10 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const MeshType> m_mesh;
-      std::vector<std::vector<IndexArray>> m_owned;
-      std::vector<std::vector<IndexArray>> m_closure;
+
       size_t m_size;
+      std::vector<std::vector<uint8_t>> m_visited;
+      std::vector<std::vector<IndexArray>> m_closure;
   };
 
   /**
