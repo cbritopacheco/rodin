@@ -1504,7 +1504,7 @@ namespace Rodin::Variational
               break;
             }
           }
-          assert(f >= 0);
+
           this->getClosure(d - 1, f);
           const auto& quad = m_closure[d - 1][f];
 
@@ -1553,7 +1553,6 @@ namespace Rodin::Variational
               break;
             }
           }
-          assert(f >= 0);
           this->getClosure(d - 1, f);
           const auto& quad = m_closure[d - 1][f];
 
@@ -1609,7 +1608,7 @@ namespace Rodin::Variational
               break;
             }
           }
-          assert(f >= 0);
+
           this->getClosure(d - 1, f);
           const auto& quad = m_closure[d - 1][f];
 
