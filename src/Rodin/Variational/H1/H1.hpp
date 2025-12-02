@@ -849,255 +849,101 @@ namespace Rodin::Variational
 
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        // Canonical local vertex ordering for this tetra:
-        // v0, v1, v2, v3
+        using TetCochain = Cochain<Geometry::Polytope::Type::Tetrahedron>;
+        constexpr size_t tetraTotal = TetCochain::Count;
+
         const auto& tetVerts = conn.getPolytope(d, idx);
         assert(tetVerts.size() == 4);
 
-        // Incident faces of this tetra (in arbitrary order)
+        // Incident faces of this tetra (dim=2). For LocalMesh::UniformGrid
+        // and for Polytope::Tetrahedron in general, the face order matches
+        // the canonical Cochain face order:
+        //
+        //   local face 0: (1,2,3)
+        //   local face 1: (0,3,2)
+        //   local face 2: (0,1,3)
+        //   local face 3: (0,2,1)
+        //
         const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
         assert(inc.size() == 4);
 
-        using TetCochain = Cochain<Geometry::Polytope::Type::Tetrahedron>;
-
-        std::array<uint8_t, TetCochain::Count> used{};
+        std::array<uint8_t, tetraTotal> used{};
         used.fill(0);
 
-        constexpr size_t tetraTotal =
-            (K + 1) * (K + 2) * (K + 3) / 6;
+        auto& local = m_closure[d][idx];
 
-        // Helper: classify a face by which tetra local face it is
-        // Canonical faces (in terms of tetra local vertex indices):
-        //   local 0: {1,2,3}
-        //   local 1: {0,2,3}
-        //   local 2: {0,1,3}
-        //   local 3: {0,1,2}
-        auto classifyFace = [&](Index fIdx) -> int
+        // 1) Map faces → tetra using the canonical Cochain<Tetrahedron>.
+        //    We trust the incidence order to be the canonical face order.
+        for (size_t lf = 0; lf < inc.size(); ++lf)
         {
-          const auto& fVerts = conn.getPolytope(d - 1, fIdx);
-          assert(fVerts.size() == 3);
+          const Index f = inc[lf];
 
-          // Map each face vertex to its local tetra index (0..3)
-          int lf[3];
-          for (int k = 0; k < 3; ++k)
+          // Ensure face closure exists (triangle H1 already handles edge
+          // orientations and vertex DOFs correctly).
+          this->getClosure(d - 1, f);
+
+          // Inject this triangle's DOFs into the tetrahedron in canonical
+          // reference orientation.
+          TetCochain::map(lf, local, m_closure[d - 1][f]);
+        }
+
+        // 2) Mark boundary DOFs purely by barycentric combinatorics.
+        //
+        // Tetra reference nodes are enumerated as equispaced barycentric
+        // nodes with integer indices (i,j,k) such that:
+        //
+        //   i ≥ 0, j ≥ 0, k ≥ 0, i + j + k ≤ K
+        //
+        // and linear index:
+        //
+        //   idx(i,j,k) = offset_k + offset_j + i
+        //
+        // where
+        //
+        //   tetraTotal = (K+1)(K+2)(K+3)/6
+        //   m_tail     = K - k
+        //   tetraTail  = (m_tail+1)(m_tail+2)(m_tail+3)/6
+        //   offset_k   = tetraTotal - tetraTail
+        //
+        //   offset_j   = j*(K - k + 1) - j*(j - 1)/2
+        //
+        // A node is on the boundary iff at least one barycentric coordinate
+        // is zero, i.e. i == 0 or j == 0 or k == 0 or i + j + k == K.
+        //
+        Utility::ForIndex<K + 1>([&](auto kk)
+        {
+          constexpr size_t k = kk.value;
+          constexpr size_t m_tail = K - k;
+          constexpr size_t tetraTail =
+              (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
+          constexpr size_t offset_k = tetraTotal - tetraTail;
+
+          Utility::ForIndex<K + 1>([&](auto jj)
           {
-            int lid = -1;
-            for (int j = 0; j < 4; ++j)
+            constexpr size_t j = jj.value;
+            if constexpr (j <= K - k)
             {
-              if (tetVerts[j] == fVerts[k])
+              constexpr size_t offset_j =
+                  j * (K - k + 1) - (j * (j - 1)) / 2;
+
+              Utility::ForIndex<K + 1>([&](auto ii)
               {
-                lid = j;
-                break;
-              }
+                constexpr size_t i = ii.value;
+                if constexpr (i + j + k <= K)
+                {
+                  constexpr size_t tetIdx = offset_k + offset_j + i;
+
+                  // Boundary node?
+                  if constexpr (i == 0 || j == 0 || k == 0 || (i + j + k == K))
+                    used[tetIdx] = 1;
+                }
+              });
             }
-            assert(lid >= 0 && "Face vertex not found in tetra.");
-            lf[k] = lid;
-          }
-
-          // Sort copy for set comparison
-          std::array<int,3> s = { lf[0], lf[1], lf[2] };
-          std::sort(s.begin(), s.end());
-
-          if (s == std::array<int,3>{1,2,3}) return 0;
-          if (s == std::array<int,3>{0,2,3}) return 1;
-          if (s == std::array<int,3>{0,1,3}) return 2;
-          if (s == std::array<int,3>{0,1,2}) return 3;
-
-          assert(false && "Face does not match any tetra face.");
-          return -1;
-        };
-
-        // Face mapping lambdas (same as before, but now parameterized by fIdx)
-        auto face0 = [&](const Index fIdx)
-        {
-          const auto& face = m_closure[d - 1][fIdx]; // triangle DOFs
-
-          Utility::ForIndex<K + 1>([&](auto jj)
-          {
-            constexpr size_t j2 = jj.value;
-            Utility::ForIndex<K + 1>([&](auto ii)
-            {
-              constexpr size_t i2 = ii.value;
-              if constexpr (i2 + j2 <= K)
-              {
-                constexpr size_t triRowStart =
-                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
-                constexpr size_t triIdx = triRowStart + i2;
-
-                // (i,j,k) = (K - i2 - j2, i2, j2)
-                constexpr size_t i = K - i2 - j2;
-                constexpr size_t j = i2;
-                constexpr size_t k = j2;
-
-                constexpr size_t m_tail = K - k;
-                constexpr size_t tetraTail =
-                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                constexpr size_t offset_k = tetraTotal - tetraTail;
-
-                constexpr size_t offset_j =
-                    j * (K - k + 1) - (j * (j - 1)) / 2;
-
-                constexpr size_t tetIdx = offset_k + offset_j + i;
-
-                local[tetIdx] = face[triIdx];
-                used[tetIdx]  = 1;
-              }
-            });
           });
-        };
+        });
 
-        auto face1 = [&](const Index fIdx)
-        {
-          const auto& face = m_closure[d - 1][fIdx];
-
-          Utility::ForIndex<K + 1>([&](auto jj)
-          {
-            constexpr size_t j2 = jj.value;
-            Utility::ForIndex<K + 1>([&](auto ii)
-            {
-              constexpr size_t i2 = ii.value;
-              if constexpr (i2 + j2 <= K)
-              {
-                constexpr size_t triRowStart =
-                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
-                constexpr size_t triIdx = triRowStart + i2;
-
-                // (i,j,k) = (0, j2, i2)
-                constexpr size_t i = 0;
-                constexpr size_t j = j2;
-                constexpr size_t k = i2;
-
-                constexpr size_t m_tail = K - k;
-                constexpr size_t tetraTail =
-                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                constexpr size_t offset_k = tetraTotal - tetraTail;
-
-                constexpr size_t offset_j =
-                    j * (K - k + 1) - (j * (j - 1)) / 2;
-
-                constexpr size_t tetIdx = offset_k + offset_j + i;
-
-                local[tetIdx] = face[triIdx];
-                used[tetIdx]  = 1;
-              }
-            });
-          });
-        };
-
-        auto face2 = [&](const Index fIdx)
-        {
-          const auto& face = m_closure[d - 1][fIdx];
-
-          Utility::ForIndex<K + 1>([&](auto jj)
-          {
-            constexpr size_t j2 = jj.value;
-            Utility::ForIndex<K + 1>([&](auto ii)
-            {
-              constexpr size_t i2 = ii.value;
-              if constexpr (i2 + j2 <= K)
-              {
-                constexpr size_t triRowStart =
-                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
-                constexpr size_t triIdx = triRowStart + i2;
-
-                // (i,j,k) = (i2, 0, j2)
-                constexpr size_t i = i2;
-                constexpr size_t j = 0;
-                constexpr size_t k = j2;
-
-                constexpr size_t m_tail = K - k;
-                constexpr size_t tetraTail =
-                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                constexpr size_t offset_k = tetraTotal - tetraTail;
-
-                constexpr size_t offset_j =
-                    j * (K - k + 1) - (j * (j - 1)) / 2;
-
-                constexpr size_t tetIdx = offset_k + offset_j + i;
-
-                local[tetIdx] = face[triIdx];
-                used[tetIdx]  = 1;
-              }
-            });
-          });
-        };
-
-        auto face3 = [&](const Index fIdx)
-        {
-          const auto& face = m_closure[d - 1][fIdx];
-
-          Utility::ForIndex<K + 1>([&](auto jj)
-          {
-            constexpr size_t j2 = jj.value;
-            Utility::ForIndex<K + 1>([&](auto ii)
-            {
-              constexpr size_t i2 = ii.value;
-              if constexpr (i2 + j2 <= K)
-              {
-                constexpr size_t triRowStart =
-                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
-                constexpr size_t triIdx = triRowStart + i2;
-
-                // (i,j,k) = (j2, i2, 0)
-                constexpr size_t i = j2;
-                constexpr size_t j = i2;
-                constexpr size_t k = 0;
-
-                constexpr size_t m_tail = K - k;
-                constexpr size_t tetraTail =
-                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                constexpr size_t offset_k = tetraTotal - tetraTail;
-
-                constexpr size_t offset_j =
-                    j * (K - k + 1) - (j * (j - 1)) / 2;
-
-                constexpr size_t tetIdx = offset_k + offset_j + i;
-
-                local[tetIdx] = face[triIdx];
-                used[tetIdx]  = 1;
-              }
-            });
-          });
-        };
-
-        // For each incident face, figure out its local face index 0..3
-        // and remember which polytope index corresponds to which local face.
-        std::array<Index, 4> faceIdx;
-        faceIdx.fill(static_cast<Index>(-1));
-
-        for (size_t k = 0; k < inc.size(); ++k)
-        {
-          const Index f = inc[k];
-          const int lf  = classifyFace(f);
-          assert(lf >= 0 && lf < 4);
-          // Each local face must be assigned exactly once
-          assert(faceIdx[lf] == static_cast<Index>(-1)
-                 && "Same local face assigned twice.");
-          faceIdx[lf] = f;
-        }
-
-        // All faces must have been classified
-        for (int lf = 0; lf < 4; ++lf)
-        {
-          assert(faceIdx[lf] != static_cast<Index>(-1)
-                 && "Missing tetra face in incidence.");
-        }
-
-        // Recurse on faces and apply mappings using the canonical local index
-        this->getClosure(d - 1, faceIdx[0]);
-        face0(faceIdx[0]);
-
-        this->getClosure(d - 1, faceIdx[1]);
-        face1(faceIdx[1]);
-
-        this->getClosure(d - 1, faceIdx[2]);
-        face2(faceIdx[2]);
-
-        this->getClosure(d - 1, faceIdx[3]);
-        face3(faceIdx[3]);
-
-        // Interior tetra DOFs (not on any face)
-        for (size_t tId = 0; tId < TetCochain::Count; ++tId)
+        // 3) Assign interior DOFs (those not on any face)
+        for (size_t tId = 0; tId < tetraTotal; ++tId)
         {
           if (!used[tId])
             local[tId] = m_size++;
@@ -1108,238 +954,106 @@ namespace Rodin::Variational
 
       case Geometry::Polytope::Type::Wedge:
       {
-        // Canonical local vertex ordering for this wedge:
-        //   bottom triangle : v0, v1, v2
-        //   top triangle    : v3, v4, v5
+        using WedgeCochain = Cochain<Geometry::Polytope::Type::Wedge>;
+        using TriCochain   = Cochain<Geometry::Polytope::Type::Triangle>;
+
+        constexpr size_t TriCount   = TriCochain::Count;
+        constexpr size_t WedgeCount = WedgeCochain::Count; // (K+1)*TriCount
+
         const auto& wedgeVerts = conn.getPolytope(d, idx);
         assert(wedgeVerts.size() == 6);
 
-        // Incident faces of this wedge (in arbitrary order)
+        // Incident faces of this wedge (dim=2). The Connectivity for the
+        // reference wedge uses the canonical face order:
+        //
+        //   local 0 : Triangle (0,1,2)      bottom
+        //   local 1 : Quad     (0,1,4,3)
+        //   local 2 : Quad     (1,2,5,4)
+        //   local 3 : Quad     (2,0,3,5)
+        //   local 4 : Triangle (3,5,4)      top
+        //
         const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
         assert(inc.size() == 5);
 
-        using WedgeCochain = Cochain<Geometry::Polytope::Type::Wedge>;
-        using TriCochain   = Cochain<Geometry::Polytope::Type::Triangle>;
-        constexpr size_t TriCount = TriCochain::Count;
-
-        std::array<uint8_t, WedgeCochain::Count> used{};
+        std::array<uint8_t, WedgeCount> used{};
         used.fill(0);
 
-        // --------------------------------------------------------------------
-        // Helper: classify a face by which wedge local face it is.
+        auto& local = m_closure[d][idx];
+
+        // 1) Map faces → wedge using the canonical Cochain<Wedge>.
+        for (size_t lf = 0; lf < inc.size(); ++lf)
+        {
+          const Index f = inc[lf];
+
+          this->getClosure(d - 1, f);
+          WedgeCochain::map(lf, local, m_closure[d - 1][f]);
+        }
+
+        // 2) Mark boundary DOFs combinatorially.
         //
-        // Canonical faces in terms of wedge local vertex indices:
-        //   local 0 : Triangle {0,1,2}          bottom
-        //   local 1 : Quad     {0,1,4,3}
-        //   local 2 : Quad     {1,2,5,4}
-        //   local 3 : Quad     {2,0,3,5}
-        //   local 4 : Triangle {3,5,4}          top
-        // --------------------------------------------------------------------
-        auto classifyFace = [&](Index fIdx) -> int
+        // Wedge nodes are enumerated as:
+        //   for k = 0..K:          (GLL in z)
+        //     for triIdx = 0..TriCount-1: (Fekete triangle in (x,y))
+        //       wedgeIdx = k*TriCount + triIdx
+        //
+        // A node is on the boundary iff:
+        //   - k == 0 or k == K (bottom / top triangles), OR
+        //   - its triangle node lies on the triangle boundary:
+        //       (triangle DOF index belongs to an edge).
+        //
+        // Triangle boundary nodes can be detected exactly as in the
+        // triangle Cochain: index triIdx is boundary iff it lies on
+        // one of the three edges (0->1, 1->2, 2->0) in the equispaced
+        // integer lattice.
+        //
+        auto isTriangleBoundary = [](size_t triIdx) constexpr
         {
-          const auto& fVerts = conn.getPolytope(d - 1, fIdx);
-
-          // Map each face vertex to its local wedge index (0..5)
-          std::vector<int> lf(fVerts.size());
-          for (size_t k = 0; k < fVerts.size(); ++k)
+          // Reconstruct integer (i2, j2) from triIdx:
+          // enumerate as in FeketeTriangle<K>::compute():
+          //
+          //   idx = 0
+          //   for j2 = 0..K:
+          //     for i2 = 0..K - j2:
+          //       ...
+          //
+          size_t idx = 0;
+          for (size_t j2 = 0; j2 <= K; ++j2)
           {
-            int lid = -1;
-            for (int j = 0; j < 6; ++j)
+            const size_t rowLen = K + 1 - j2;
+            if (triIdx < idx + rowLen)
             {
-              if (wedgeVerts[j] == fVerts[k])
-              {
-                lid = j;
-                break;
-              }
+              const size_t i2 = triIdx - idx;
+
+              // barycentric integer coords:
+              // λ1 = i2, λ2 = j2, λ0 = K - i2 - j2
+              // boundary if one of λ's is zero:
+              if (i2 == 0 || j2 == 0 || (i2 + j2 == K))
+                return true;
+
+              return false;
             }
-            assert(lid >= 0 && "Face vertex not found in wedge.");
-            lf[k] = lid;
+            idx += rowLen;
           }
-
-          std::sort(lf.begin(), lf.end());
-
-          if (lf.size() == 3)
-          {
-            if (lf[0] == 0 && lf[1] == 1 && lf[2] == 2) return 0; // bottom tri
-            if (lf[0] == 3 && lf[1] == 4 && lf[2] == 5) return 4; // top tri
-          }
-          else if (lf.size() == 4)
-          {
-            if (lf[0] == 0 && lf[1] == 1 && lf[2] == 3 && lf[3] == 4) return 1; // {0,1,4,3}
-            if (lf[0] == 1 && lf[1] == 2 && lf[2] == 4 && lf[3] == 5) return 2; // {1,2,5,4}
-            if (lf[0] == 0 && lf[1] == 2 && lf[2] == 3 && lf[3] == 5) return 3; // {2,0,3,5}
-          }
-
-          assert(false && "Face does not match any wedge face.");
-          return -1;
+          // Should never reach here
+          return false;
         };
 
-        // --------------------------------------------------------------------
-        // Face mapping lambdas (same formulas as before, but parametrized by fIdx)
-        // --------------------------------------------------------------------
-
-        // Local 0: bottom triangle (k = 0)
-        auto face0 = [&](const Index fIdx)
+        Utility::ForIndex<K + 1>([&](auto kk)
         {
-          const auto& tri = m_closure[d - 1][fIdx];
+          constexpr size_t k = kk.value; // layer in z, 0..K
 
           Utility::ForIndex<TriCount>([&](auto ii)
           {
             constexpr size_t triIdx   = ii.value;
-            constexpr size_t wedgeIdx = triIdx; // k = 0
-            local[wedgeIdx] = tri[triIdx];
-            used[wedgeIdx]  = 1;
+            constexpr size_t wedgeIdx = k * TriCount + triIdx;
+
+            if constexpr (k == 0 || k == K || isTriangleBoundary(triIdx))
+              used[wedgeIdx] = 1;
           });
-        };
+        });
 
-        // Local 4: top triangle (k = K)
-        auto face4 = [&](const Index fIdx)
-        {
-          const auto& tri = m_closure[d - 1][fIdx];
-
-          Utility::ForIndex<TriCount>([&](auto ii)
-          {
-            constexpr size_t triIdx   = ii.value;
-            constexpr size_t wedgeIdx = K * TriCount + triIdx;
-            local[wedgeIdx] = tri[triIdx];
-            used[wedgeIdx]  = 1;
-          });
-        };
-
-        // Local 1: Quad (0,1,4,3): extrude edge 0->1
-        auto face1 = [&](const Index fIdx)
-        {
-          const auto& quad = m_closure[d - 1][fIdx];
-
-          Utility::ForIndex<K + 1>([&](auto jj)
-          {
-            constexpr size_t j = jj.value; // layer 0..K
-            Utility::ForIndex<K + 1>([&](auto ii)
-            {
-              constexpr size_t i = ii.value; // along edge 0->1
-
-              constexpr size_t quadIdx = j * (K + 1) + i;
-              // triangle edge 0->1 corresponds to triIdx = i
-              constexpr size_t triEdgeIdx = i;
-              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
-
-              local[wedgeIdx] = quad[quadIdx];
-              used[wedgeIdx]  = 1;
-            });
-          });
-        };
-
-        // Local 2: Quad (1,2,5,4): extrude edge 1->2
-        auto face2 = [&](const Index fIdx)
-        {
-          const auto& quad = m_closure[d - 1][fIdx];
-
-          Utility::ForIndex<K + 1>([&](auto jj)
-          {
-            constexpr size_t j = jj.value;
-            Utility::ForIndex<K + 1>([&](auto ii)
-            {
-              constexpr size_t i = ii.value; // along edge 1->2
-
-              constexpr size_t quadIdx = j * (K + 1) + i;
-
-              // triangle edge 1->2 (Segment->Triangle Local=1):
-              //  r = i
-              //  rowStart = r*(K+1) - r*(r-1)/2
-              //  triEdgeIdx = rowStart + (K - r)
-              constexpr size_t r        = i;
-              constexpr size_t rowStart =
-                  r * (K + 1) - (r * (r - 1)) / 2;
-              constexpr size_t triEdgeIdx = rowStart + (K - r);
-              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
-
-              local[wedgeIdx] = quad[quadIdx];
-              used[wedgeIdx]  = 1;
-            });
-          });
-        };
-
-        // Local 3: Quad (2,0,3,5): extrude edge 2->0
-        auto face3 = [&](const Index fIdx)
-        {
-          const auto& quad = m_closure[d - 1][fIdx];
-
-          Utility::ForIndex<K + 1>([&](auto jj)
-          {
-            constexpr size_t j = jj.value;
-            Utility::ForIndex<K + 1>([&](auto ii)
-            {
-              constexpr size_t i = ii.value; // along edge 2->0
-
-              constexpr size_t quadIdx = j * (K + 1) + i;
-
-              // triangle edge 2->0 (Segment->Triangle Local=2):
-              //  r      = i
-              //  j_edge = K - r
-              //  rowStart = j_edge*(K+1) - j_edge*(j_edge-1)/2
-              //  triEdgeIdx = rowStart (i=0)
-              constexpr size_t r      = i;
-              constexpr size_t j_edge = K - r;
-              constexpr size_t rowStart =
-                  j_edge * (K + 1) - (j_edge * (j_edge - 1)) / 2;
-              constexpr size_t triEdgeIdx = rowStart;
-              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
-
-              local[wedgeIdx] = quad[quadIdx];
-              used[wedgeIdx]  = 1;
-            });
-          });
-        };
-
-        // --------------------------------------------------------------------
-        // Match each incident face to its canonical local index 0..4
-        // --------------------------------------------------------------------
-        std::array<Index, 5> faceIdx;
-        faceIdx.fill(static_cast<Index>(-1));
-
-        for (size_t k = 0; k < inc.size(); ++k)
-        {
-          const Index f = inc[k];
-          const int lf  = classifyFace(f);
-          assert(lf >= 0 && lf < 5);
-          // Each local face must be assigned exactly once
-          assert(faceIdx[lf] == static_cast<Index>(-1)
-                 && "Same local wedge face assigned twice.");
-          faceIdx[lf] = f;
-        }
-
-        // All faces must have been classified
-        for (int lf = 0; lf < 5; ++lf)
-        {
-          assert(faceIdx[lf] != static_cast<Index>(-1)
-                 && "Missing wedge face in incidence.");
-        }
-
-        // --------------------------------------------------------------------
-        // Recurse on faces and apply mappings using the canonical local index
-        // --------------------------------------------------------------------
-        // Local 0: bottom triangle
-        this->getClosure(d - 1, faceIdx[0]);
-        face0(faceIdx[0]);
-
-        // Local 1: quad (0,1,4,3)
-        this->getClosure(d - 1, faceIdx[1]);
-        face1(faceIdx[1]);
-
-        // Local 2: quad (1,2,5,4)
-        this->getClosure(d - 1, faceIdx[2]);
-        face2(faceIdx[2]);
-
-        // Local 3: quad (2,0,3,5)
-        this->getClosure(d - 1, faceIdx[3]);
-        face3(faceIdx[3]);
-
-        // Local 4: top triangle
-        this->getClosure(d - 1, faceIdx[4]);
-        face4(faceIdx[4]);
-
-        // Interior wedge DOFs: not touched by any face mapping
-        for (size_t wId = 0; wId < WedgeCochain::Count; ++wId)
+        // 3) Assign interior wedge DOFs (not on any face)
+        for (size_t wId = 0; wId < WedgeCount; ++wId)
         {
           if (!used[wId])
             local[wId] = m_size++;
