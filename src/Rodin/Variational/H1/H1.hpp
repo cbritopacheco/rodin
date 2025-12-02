@@ -581,161 +581,178 @@ namespace Rodin::Variational
 
       case Geometry::Polytope::Type::Segment:
       {
-        // Canonical local vertex ordering for this segment (v0, v1)
-        const auto& segVerts = conn.getPolytope(d, idx);
-        assert(segVerts.size() == 2);
-        const Index v0 = segVerts[0];
-        const Index v1 = segVerts[1];
+        using SegCochain = Cochain<Geometry::Polytope::Type::Segment>;
+        constexpr size_t Ns = SegCochain::Count; // = K+1 GLL nodes
 
-        // Incident vertices from connectivity
-        const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
-        assert(inc.size() == 2);
+        // Segment vertices as stored in the connectivity (dimension 0)
+        assert(d == 1);
+        assert(d - 1 == 0);
+        const auto& segVertsIA = conn.getIncidence({ d, d - 1 }, idx);
+        assert(segVertsIA.size() == 2);
 
-        // Find which incidence entry is v0 and which is v1
-        Index v0_global;
-        Index v1_global;
+        const Index gv0 = segVertsIA[0]; // endpoint "0" in this cell
+        const Index gv1 = segVertsIA[1]; // endpoint "1" in this cell
 
-        if (inc[0] == v0 && inc[1] == v1)
-        {
-          v0_global = inc[0];
-          v1_global = inc[1];
-        }
-        else if (inc[0] == v1 && inc[1] == v0)
-        {
-          v0_global = inc[1];
-          v1_global = inc[0];
-        }
-        else
-        {
-          // Something is inconsistent in connectivity: segment's polytope vertices
-          // do not match its vertex incidence.
-          assert(false && "Segment: vertex incidence does not match polytope vertices.");
-        }
+        // Ensure closure for the vertices is built
+        this->getClosure(0, gv0);
+        this->getClosure(0, gv1);
 
-        // Left endpoint (local vertex 0)
-        this->getClosure(d - 1, v0_global);
-        Cochain<Geometry::Polytope::Type::Segment>::map(
-            0, local, m_closure[d - 1][v0_global]);
+        // We adopt the canonical reference orientation for the segment:
+        //   vertex 0 -> vertex 1
+        //
+        // GLL<K>::getNodes() is assumed ordered monotonically along
+        // this 1D parametric direction, so:
+        //   - local[0]      is the DOF at gv0,
+        //   - local[Ns - 1] is the DOF at gv1,
+        //   - intermediate indices are interior edge DOFs.
 
-        // Interior DOFs
-        for (size_t k = 1; k + 1 < Cochain<Geometry::Polytope::Type::Segment>::Count; ++k)
+        // Left endpoint DOF (canonical vertex 0)
+        local[0] = m_closure[0][gv0][0];
+
+        // Interior segment DOFs
+        for (size_t k = 1; k + 1 < Ns; ++k)
           local[k] = m_size++;
 
-        // Right endpoint (local vertex 1)
-        this->getClosure(d - 1, v1_global);
-        Cochain<Geometry::Polytope::Type::Segment>::map(1, local, m_closure[d - 1][v1_global]);
+        // Right endpoint DOF (canonical vertex 1)
+        local[Ns - 1] = m_closure[0][gv1][0];
 
         break;
       }
 
       case Geometry::Polytope::Type::Triangle:
       {
-        // Incident edges of this triangle (in arbitrary order)
+        // Incident edges (dimension 1)
         const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
         assert(inc.size() == 3);
 
-        // Local triangle vertex ordering (v0,v1,v2)
-        const auto& triVerts = conn.getPolytope(d, idx);
-        assert(triVerts.size() == 3);
-        const Index v0 = triVerts[0];
-        const Index v1 = triVerts[1];
-        const Index v2 = triVerts[2];
-
         using TriCochain = Cochain<Geometry::Polytope::Type::Triangle>;
         using SegCochain = Cochain<Geometry::Polytope::Type::Segment>;
-        constexpr size_t Ns = SegCochain::Count;
+        constexpr size_t Ns = SegCochain::Count; // K+1
 
-        // Mark which triangle nodes belong to edges (boundary DOFs)
+        // Mark which triangle nodes belong to edges
         std::array<uint8_t, TriCochain::Count> used{};
         used.fill(0);
 
-        // Loop over the 3 incident edges; for each, identify:
-        //  - which local edge (0: 0->1, 1: 1->2, 2: 2->0)
-        //  - orientation (forward/backward)
-        for (size_t epos = 0; epos < inc.size(); ++epos)
+        // Triangle vertices in this cell's local order (0,1,2)
+        const auto& triVertsIA = conn.getPolytope(d, idx);
+        assert(triVertsIA.size() == 3);
+        std::array<Index,3> v = {
+          triVertsIA(0),
+          triVertsIA(1),
+          triVertsIA(2)
+        };
+
+        // Canonical local edge vertices in global indices:
+        //  edge 0: (0->1)
+        //  edge 1: (1->2)
+        //  edge 2: (2->0)
+        auto canonicalEdgeVerts = [&](size_t le) -> std::array<Index,2>
         {
-          const Index e = inc[epos];
+          switch (le)
+          {
+            case 0: return { v[0], v[1] }; // (0->1)
+            case 1: return { v[1], v[2] }; // (1->2)
+            case 2: return { v[2], v[0] }; // (2->0)
+            default:
+              assert(false && "Invalid triangle local edge index.");
+              return { 0, 0 };
+          }
+        };
 
-          // Edge vertices (global indices)
-          const auto& eVerts = conn.getPolytope(d - 1, e);
-          assert(eVerts.size() == 2);
-          const Index a = eVerts[0];
-          const Index b = eVerts[1];
+        // For a given local edge 'le', find which segment entity in 'inc'
+        // corresponds to it, and whether it is oriented forward or backward
+        // compared to the canonical orientation.
+        auto findEdgeEntity = [&](size_t le, bool& forward) -> Index
+        {
+          const auto wanted  = canonicalEdgeVerts(le); // [a,b]
+          const Index a = wanted[0];
+          const Index b = wanted[1];
 
-          int  localEdge = -1;
-          bool forward   = false;
-          bool backward  = false;
+          for (Index e : inc)
+          {
+            const auto& eVertsIA = conn.getPolytope(d - 1, e);
+            assert(eVertsIA.size() == 2);
+            const Index ev0 = eVertsIA(0);
+            const Index ev1 = eVertsIA(1);
 
-          // Match against {v0,v1}, {v1,v2}, {v2,v0}
-          if      (a == v0 && b == v1) { localEdge = 0; forward = true;  }
-          else if (a == v1 && b == v0) { localEdge = 0; backward = true; }
+            if (ev0 == a && ev1 == b)
+            {
+              forward = true;  // stored with canonical orientation
+              return e;
+            }
+            if (ev0 == b && ev1 == a)
+            {
+              forward = false; // stored reversed
+              return e;
+            }
+          }
 
-          else if (a == v1 && b == v2) { localEdge = 1; forward = true;  }
-          else if (a == v2 && b == v1) { localEdge = 1; backward = true; }
+          assert(false && "Could not match triangle local edge to incident segment entity.");
+          return -1;
+        };
 
-          else if (a == v2 && b == v0) { localEdge = 2; forward = true;  }
-          else if (a == v0 && b == v2) { localEdge = 2; backward = true; }
-
-          // If we cannot match this edge to any triangle side, something is wrong
-          assert(localEdge >= 0 && "Triangle edge: not a side of this triangle.");
-          assert((forward || backward) && "Triangle edge: orientation mismatch.");
-
-          const bool edgeBackward = backward;
-
-          // Ensure edge closure is built
+        // --- Edge 0: canonical (0->1), "bottom edge" -----------------------
+        {
+          bool forward = true;
+          const Index e = findEdgeEntity(0, forward);
           this->getClosure(d - 1, e);
           const auto& edge = m_closure[d - 1][e];
 
-          // Now map this edge's DOFs into the triangle, correcting orientation
-          if (localEdge == 0)
+          Utility::ForIndex<Ns>([&](auto ii)
           {
-            // Local edge 0: (0->1)  bottom edge
-            Utility::ForIndex<Ns>([&](auto ii)
-            {
-              constexpr size_t r   = ii.value; // 0..K along canonical 0->1
-              constexpr size_t tId = r;        // bottom row contiguous
+            constexpr size_t r = ii.value;       // 0..K
+            const size_t rr    = forward ? r : (Ns - 1 - r);
 
-              const size_t rEdge = edgeBackward ? (Ns - 1 - r) : r;
+            // bottom row contiguous in Fekete ordering: idx = r
+            constexpr size_t tId = r;
 
-              local[tId] = edge[rEdge];
-              used[tId]  = 1;
-            });
-          }
-          else if (localEdge == 1)
+            local[tId] = edge[rr];
+            used[tId]  = 1;
+          });
+        }
+
+        // --- Edge 1: canonical (1->2), "hypotenuse" ------------------------
+        {
+          bool forward = true;
+          const Index e = findEdgeEntity(1, forward);
+          this->getClosure(d - 1, e);
+          const auto& edge = m_closure[d - 1][e];
+
+          Utility::ForIndex<Ns>([&](auto ii)
           {
-            // Local edge 1: (1->2)  hypotenuse
-            Utility::ForIndex<Ns>([&](auto ii)
-            {
-              constexpr size_t r = ii.value;   // 0..K
-              constexpr size_t j = r;          // parameter along hypotenuse
+            constexpr size_t r = ii.value;       // 0..K
+            const size_t rr    = forward ? r : (Ns - 1 - r);
 
-              constexpr size_t rowStart_j =
-                  j * (K + 1) - (j * (j - 1)) / 2;
-              constexpr size_t tId = rowStart_j + (K - j);
+            constexpr size_t j = r;              // parameter along hypotenuse
+            constexpr size_t rowStart_j =
+                j * (K + 1) - (j * (j - 1)) / 2;
+            constexpr size_t tId = rowStart_j + (K - j);
 
-              const size_t rEdge = edgeBackward ? (Ns - 1 - r) : r;
+            local[tId] = edge[rr];
+            used[tId]  = 1;
+          });
+        }
 
-              local[tId] = edge[rEdge];
-              used[tId]  = 1;
-            });
-          }
-          else if (localEdge == 2)
+        // --- Edge 2: canonical (2->0), "left edge" -------------------------
+        {
+          bool forward = true;
+          const Index e = findEdgeEntity(2, forward);
+          this->getClosure(d - 1, e);
+          const auto& edge = m_closure[d - 1][e];
+
+          Utility::ForIndex<Ns>([&](auto ii)
           {
-            // Local edge 2: (2->0)  left edge
-            Utility::ForIndex<Ns>([&](auto ii)
-            {
-              constexpr size_t r      = ii.value;  // 0..K along canonical 2->0
-              constexpr size_t j      = K - r;
-              constexpr size_t rowStart_j =
-                  j * (K + 1) - (j * (j - 1)) / 2;
-              constexpr size_t tId = rowStart_j;   // i = 0 on row j
+            constexpr size_t r = ii.value;       // 0..K
+            const size_t rr    = forward ? r : (Ns - 1 - r);
 
-              const size_t rEdge = edgeBackward ? (Ns - 1 - r) : r;
+            constexpr size_t j = K - r;
+            constexpr size_t rowStart_j =
+                j * (K + 1) - (j * (j - 1)) / 2;
+            constexpr size_t tId = rowStart_j;   // i = 0 on row j
 
-              local[tId] = edge[rEdge];
-              used[tId]  = 1;
-            });
-          }
+            local[tId] = edge[rr];
+            used[tId]  = 1;
+          });
         }
 
         // Interior triangle DOFs (not on any edge)
@@ -748,93 +765,101 @@ namespace Rodin::Variational
         break;
       }
 
-            case Geometry::Polytope::Type::Quadrilateral:
+      case Geometry::Polytope::Type::Quadrilateral:
       {
-        // Canonical local vertex ordering for this quad:
-        // v0: (0,0), v1: (1,0), v2: (1,1), v3: (0,1)
-        const auto& quadVerts = conn.getPolytope(d, idx);
-        assert(quadVerts.size() == 4);
-        const Index v0 = quadVerts[0];
-        const Index v1 = quadVerts[1];
-        const Index v2 = quadVerts[2];
-        const Index v3 = quadVerts[3];
-
-        // Incident edges of the quad (in arbitrary order)
+        // Incidence: cell (d) -> edges (d-1)
         const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
         assert(inc.size() == 4);
 
         using QuadCochain = Cochain<Geometry::Polytope::Type::Quadrilateral>;
         using SegCochain  = Cochain<Geometry::Polytope::Type::Segment>;
-        constexpr size_t Ns  = SegCochain::Count; // K+1
-        constexpr size_t N1  = K + 1;
+        constexpr size_t Ns = SegCochain::Count;   // K+1
+        constexpr size_t N1 = K + 1;
 
-        // For each incident edge, identify which local edge it is:
-        //   localEdge 0: (v0 -> v1) bottom
-        //   localEdge 1: (v1 -> v2) right
-        //   localEdge 2: (v2 -> v3) top
-        //   localEdge 3: (v3 -> v0) left
-        //
-        // and whether it is forward/backward relative to this canonical
-        // local orientation. Then map the segment DOFs with the correct
-        // direction into the quad via QuadCochain::map.
-        for (size_t epos = 0; epos < inc.size(); ++epos)
+        // Cell vertices in its local order 0..3
+        const auto& quadVertsIA = conn.getPolytope(d, idx);
+        assert(quadVertsIA.size() == 4);
+        std::array<Index,4> v = {
+          quadVertsIA(0),
+          quadVertsIA(1),
+          quadVertsIA(2),
+          quadVertsIA(3)
+        };
+
+        // Canonical local edges of the reference quad:
+        //   0: (0->1) bottom
+        //   1: (1->2) right
+        //   2: (2->3) top
+        //   3: (3->0) left
+        auto canonicalEdgeVerts = [&](size_t le) -> std::array<Index,2>
         {
-          const Index e = inc[epos];
-
-          // Edge vertices (global indices, in the segment's own canonical order)
-          const auto& eVerts = conn.getPolytope(d - 1, e);
-          assert(eVerts.size() == 2);
-          const Index a = eVerts[0];
-          const Index b = eVerts[1];
-
-          int  localEdge = -1;
-          bool forward   = false;
-          bool backward  = false;
-
-          // Match against quad edges
-          // Edge 0: v0 -> v1 (bottom)
-          if      (a == v0 && b == v1) { localEdge = 0; forward = true;  }
-          else if (a == v1 && b == v0) { localEdge = 0; backward = true; }
-
-          // Edge 1: v1 -> v2 (right)
-          else if (a == v1 && b == v2) { localEdge = 1; forward = true;  }
-          else if (a == v2 && b == v1) { localEdge = 1; backward = true; }
-
-          // Edge 2: v2 -> v3 (top)
-          else if (a == v2 && b == v3) { localEdge = 2; forward = true;  }
-          else if (a == v3 && b == v2) { localEdge = 2; backward = true; }
-
-          // Edge 3: v3 -> v0 (left)
-          else if (a == v3 && b == v0) { localEdge = 3; forward = true;  }
-          else if (a == v0 && b == v3) { localEdge = 3; backward = true; }
-
-          // If we cannot match this edge to any quad side, something is wrong
-          assert(localEdge >= 0 && "Quadrilateral edge: not a side of this quad.");
-          assert((forward || backward) && "Quadrilateral edge: orientation mismatch.");
-
-          const bool edgeBackward = backward;
-
-          // Ensure edge closure is built
-          this->getClosure(d - 1, e);
-          const auto& edgeDOFs = m_closure[d - 1][e]; // segment DOFs
-
-          // Build a canonically oriented segment DOF array for this edge:
-          // r = 0..K always runs from the local start vertex to the local end vertex
-          // of the quad's edge, irrespective of how the segment is oriented.
-          std::array<Index, Ns> canonicalEdge{};
-          Utility::ForIndex<Ns>([&](auto ii)
+          switch (le)
           {
-            constexpr size_t r = ii.value;
-            const size_t rEdge = edgeBackward ? (Ns - 1 - r) : r;
-            canonicalEdge[r] = edgeDOFs[rEdge];
-          });
+            case 0: return { v[0], v[1] }; // bottom
+            case 1: return { v[1], v[2] }; // right
+            case 2: return { v[2], v[3] }; // top
+            case 3: return { v[3], v[0] }; // left
+            default:
+              assert(false && "Invalid local edge index for quadrilateral.");
+              return { 0, 0 };
+          }
+        };
 
-          // Inject into the quad according to the local edge index
-          QuadCochain::map(static_cast<size_t>(localEdge), local, canonicalEdge);
+        // For a given local edge le, find which segment in 'inc' it corresponds
+        // to, and whether that segment is oriented forward or backward w.r.t.
+        // the canonical (0->1), (1->2), (2->3), (3->0).
+        auto findEdgeEntity = [&](size_t le, bool& forward) -> Index
+        {
+          const auto canon = canonicalEdgeVerts(le);
+          const Index a = canon[0];
+          const Index b = canon[1];
+
+          for (Index e : inc)
+          {
+            const auto& eVertsIA = conn.getPolytope(d - 1, e);
+            assert(eVertsIA.size() == 2);
+            const Index ev0 = eVertsIA(0);
+            const Index ev1 = eVertsIA(1);
+
+            if (ev0 == a && ev1 == b)
+            {
+              forward = true;  // stored in canonical orientation
+              return e;
+            }
+            if (ev0 == b && ev1 == a)
+            {
+              forward = false; // stored in opposite orientation
+              return e;
+            }
+          }
+
+          assert(false && "Could not match quad local edge to incident segment.");
+          return -1;
+        };
+
+        // Map all four edges, correcting orientation via a small local buffer.
+        for (size_t le = 0; le < 4; ++le)
+        {
+          bool forward = true;
+          const Index e = findEdgeEntity(le, forward);
+
+          // Ensure the segment closure is built
+          this->getClosure(d - 1, e);
+          const auto& edge = m_closure[d - 1][e]; // size = Ns
+
+          // Re-orient edge DOFs into canonical 0..K ordering along the local edge
+          std::array<Index, Ns> orientedEdge{};
+          for (size_t r = 0; r < Ns; ++r)
+          {
+            const size_t rr = forward ? r : (Ns - 1 - r);
+            orientedEdge[r] = edge[rr];
+          }
+
+          // Inject into quad using the canonical edge index 'le'
+          QuadCochain::map(le, local, orientedEdge);
         }
 
-        // Interior quad DOFs:
-        // indices (i,j) with 0 < i < K and 0 < j < K, i.e. not on any edge
+        // Interior quad DOFs: (i,j) with 0 < i < K, 0 < j < K
         for (size_t j = 1; j < K; ++j)
         {
           for (size_t i = 1; i < K; ++i)
@@ -849,101 +874,353 @@ namespace Rodin::Variational
 
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        using TetCochain = Cochain<Geometry::Polytope::Type::Tetrahedron>;
-        constexpr size_t tetraTotal = TetCochain::Count;
+        const auto& mesh = m_mesh.get();
+        const auto& conn = mesh.getConnectivity();
 
-        const auto& tetVerts = conn.getPolytope(d, idx);
-        assert(tetVerts.size() == 4);
-
-        // Incident faces of this tetra (dim=2). For LocalMesh::UniformGrid
-        // and for Polytope::Tetrahedron in general, the face order matches
-        // the canonical Cochain face order:
-        //
-        //   local face 0: (1,2,3)
-        //   local face 1: (0,3,2)
-        //   local face 2: (0,1,3)
-        //   local face 3: (0,2,1)
-        //
+        // Faces incident to this tetrahedron (dimension 2)
         const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
         assert(inc.size() == 4);
 
-        std::array<uint8_t, tetraTotal> used{};
+        using TetCochain = Cochain<Geometry::Polytope::Type::Tetrahedron>;
+        using TriCochain = Cochain<Geometry::Polytope::Type::Triangle>;
+
+        std::array<uint8_t, TetCochain::Count> used{};
         used.fill(0);
 
-        auto& local = m_closure[d][idx];
+        constexpr size_t tetraTotal =
+            (K + 1) * (K + 2) * (K + 3) / 6;
 
-        // 1) Map faces → tetra using the canonical Cochain<Tetrahedron>.
-        //    We trust the incidence order to be the canonical face order.
-        for (size_t lf = 0; lf < inc.size(); ++lf)
+        // Cell vertices in local order 0,1,2,3
+        const auto& cellVertsIA = conn.getPolytope(d, idx);
+        assert(cellVertsIA.size() == 4);
+        std::array<Index, 4> v = {
+          cellVertsIA(0),
+          cellVertsIA(1),
+          cellVertsIA(2),
+          cellVertsIA(3)
+        };
+
+        // Canonical faces in terms of the cell vertices:
+        // match Connectivity::getSubPolytopes convention:
+        //   0: (1,2,3)  // +[1,2,3]
+        //   1: (0,3,2)  // -[0,2,3]
+        //   2: (0,1,3)  // +[0,1,3]
+        //   3: (0,2,1)  // -[0,1,2]
+        auto canonicalFaceVerts = [&](size_t lf) -> std::array<Index, 3>
         {
-          const Index f = inc[lf];
+          switch (lf)
+          {
+            case 0: return { v[1], v[2], v[3] };
+            case 1: return { v[0], v[3], v[2] };
+            case 2: return { v[0], v[1], v[3] };
+            case 3: return { v[0], v[2], v[1] };
+            default:
+              assert(false && "Invalid local face index for tetrahedron.");
+              return { 0, 0, 0 };
+          }
+        };
 
-          // Ensure face closure exists (triangle H1 already handles edge
-          // orientations and vertex DOFs correctly).
-          this->getClosure(d - 1, f);
-
-          // Inject this triangle's DOFs into the tetrahedron in canonical
-          // reference orientation.
-          TetCochain::map(lf, local, m_closure[d - 1][f]);
-        }
-
-        // 2) Mark boundary DOFs purely by barycentric combinatorics.
-        //
-        // Tetra reference nodes are enumerated as equispaced barycentric
-        // nodes with integer indices (i,j,k) such that:
-        //
-        //   i ≥ 0, j ≥ 0, k ≥ 0, i + j + k ≤ K
-        //
-        // and linear index:
-        //
-        //   idx(i,j,k) = offset_k + offset_j + i
-        //
-        // where
-        //
-        //   tetraTotal = (K+1)(K+2)(K+3)/6
-        //   m_tail     = K - k
-        //   tetraTail  = (m_tail+1)(m_tail+2)(m_tail+3)/6
-        //   offset_k   = tetraTotal - tetraTail
-        //
-        //   offset_j   = j*(K - k + 1) - j*(j - 1)/2
-        //
-        // A node is on the boundary iff at least one barycentric coordinate
-        // is zero, i.e. i == 0 or j == 0 or k == 0 or i + j + k == K.
-        //
-        Utility::ForIndex<K + 1>([&](auto kk)
+        // All 6 permutations of a triangle's 3 local vertices
+        static constexpr int perms[6][3] =
         {
-          constexpr size_t k = kk.value;
-          constexpr size_t m_tail = K - k;
-          constexpr size_t tetraTail =
-              (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-          constexpr size_t offset_k = tetraTotal - tetraTail;
+          {0,1,2}, {1,2,0}, {2,0,1},
+          {0,2,1}, {2,1,0}, {1,0,2}
+        };
 
+        // For a given local tetra face lf (0..3), find the triangle entity
+        // in 'inc' which matches it, and the permutation that maps
+        // canonical face vertices -> triangle-local vertices.
+        auto getFaceEntityAndPerm =
+          [&](size_t lf, std::array<int, 3>& canonToTri) -> Index
+        {
+          const auto wanted = canonicalFaceVerts(lf); // global vertex ids (a,b,c)
+
+          for (Index f : inc)
+          {
+            const auto& fVertsIA = conn.getPolytope(d - 1, f);
+            assert(fVertsIA.size() == 3);
+            std::array<Index, 3> tv = {
+              fVertsIA(0),
+              fVertsIA(1),
+              fVertsIA(2)
+            };
+
+            // Try all permutations of the triangle's local vertices
+            for (int pi = 0; pi < 6; ++pi)
+            {
+              const int a = perms[pi][0];
+              const int b = perms[pi][1];
+              const int c = perms[pi][2];
+
+              if (tv[a] == wanted[0] &&
+                  tv[b] == wanted[1] &&
+                  tv[c] == wanted[2])
+              {
+                // canonical vertex 0 -> triangle local a
+                // canonical vertex 1 -> triangle local b
+                // canonical vertex 2 -> triangle local c
+                canonToTri[0] = a;
+                canonToTri[1] = b;
+                canonToTri[2] = c;
+                return f;
+              }
+            }
+          }
+
+          assert(false && "Could not match tetra face to incident triangle entity.");
+          return -1;
+        };
+
+        // Build a face DOF array in *canonical* FeketeTriangle<K> ordering
+        // for this tetra face: 'faceCanon' corresponds to the face whose
+        // vertices are the canonical ones used above, with the standard
+        // FeketeTriangle enumeration.
+        auto buildCanonicalFace =
+          [&](Index fIdx,
+              const std::array<int, 3>& canonToTri,
+              IndexArray& faceCanon)
+        {
+          const auto& faceLocal = m_closure[d - 1][fIdx]; // triangle DOFs, as built for that triangle
+          faceCanon.resize(TriCochain::Count);
+
+          // Inverse permutation: triangle local vertex q -> canonical vertex p
+          std::array<int, 3> triToCanon;
+          for (int p = 0; p < 3; ++p)
+          {
+            const int q = canonToTri[p];
+            triToCanon[q] = p;
+          }
+
+          size_t canonIdx = 0;
+          for (size_t j2 = 0; j2 <= K; ++j2)
+          {
+            for (size_t i2 = 0; i2 <= K - j2; ++i2, ++canonIdx)
+            {
+              // Canonical FeketeTriangle integer barycentric (a,b,c) w.r.t.
+              // vertices (0,1,2) of the reference triangle:
+              //   a = K - i2 - j2,  b = i2,  c = j2
+              const size_t a = K - i2 - j2;
+              const size_t b = i2;
+              const size_t c = j2;
+              const size_t abc[3] = { a, b, c };
+
+              // Triangle-local barycentric integers (a_t,b_t,c_t)
+              // for vertices 0,1,2 of that triangle:
+              const size_t a_t = abc[ triToCanon[0] ];
+              const size_t b_t = abc[ triToCanon[1] ];
+              const size_t c_t = abc[ triToCanon[2] ];
+
+              // Back to the triangle's Fekete enumeration:
+              //  i_loc = b_t, j_loc = c_t
+              const size_t i_loc = b_t;
+              const size_t j_loc = c_t;
+
+              const size_t rowStartLoc =
+                  j_loc * (K + 1) - (j_loc * (j_loc - 1)) / 2;
+              const size_t locIdx = rowStartLoc + i_loc;
+
+              faceCanon[canonIdx] = faceLocal[locIdx];
+            }
+          }
+        };
+
+        // Now apply the *canonical* tetra face maps using faceCanon.
+        auto applyFace0 = [&](const IndexArray& faceCanon)
+        {
+          // Face 0: (1,2,3), opposite vertex 0
+          // integer embedding: (i,j,k) = (K - i2 - j2, i2, j2)
           Utility::ForIndex<K + 1>([&](auto jj)
           {
-            constexpr size_t j = jj.value;
-            if constexpr (j <= K - k)
+            constexpr size_t j2 = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
             {
-              constexpr size_t offset_j =
-                  j * (K - k + 1) - (j * (j - 1)) / 2;
-
-              Utility::ForIndex<K + 1>([&](auto ii)
+              constexpr size_t i2 = ii.value;
+              if constexpr (i2 + j2 <= K)
               {
-                constexpr size_t i = ii.value;
-                if constexpr (i + j + k <= K)
-                {
-                  constexpr size_t tetIdx = offset_k + offset_j + i;
+                constexpr size_t triRowStart =
+                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
+                constexpr size_t triIdx = triRowStart + i2;
 
-                  // Boundary node?
-                  if constexpr (i == 0 || j == 0 || k == 0 || (i + j + k == K))
-                    used[tetIdx] = 1;
-                }
-              });
-            }
+                constexpr size_t i = K - i2 - j2;
+                constexpr size_t j = i2;
+                constexpr size_t k = j2;
+
+                constexpr size_t m_tail   = K - k;
+                constexpr size_t tetraTail =
+                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
+                constexpr size_t offset_k = tetraTotal - tetraTail;
+
+                constexpr size_t offset_j =
+                    j * (K - k + 1) - (j * (j - 1)) / 2;
+
+                constexpr size_t tetIdx = offset_k + offset_j + i;
+
+                local[tetIdx] = faceCanon[triIdx];
+                used[tetIdx]  = 1;
+              }
+            });
           });
-        });
+        };
 
-        // 3) Assign interior DOFs (those not on any face)
-        for (size_t tId = 0; tId < tetraTotal; ++tId)
+        auto applyFace1 = [&](const IndexArray& faceCanon)
+        {
+          // Face 1: (0,3,2), opposite vertex 1
+          // embedding: (i,j,k) = (0, j2, i2)
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j2 = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i2 = ii.value;
+              if constexpr (i2 + j2 <= K)
+              {
+                constexpr size_t triRowStart =
+                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
+                constexpr size_t triIdx = triRowStart + i2;
+
+                constexpr size_t i = 0;
+                constexpr size_t j = j2;
+                constexpr size_t k = i2;
+
+                constexpr size_t m_tail   = K - k;
+                constexpr size_t tetraTail =
+                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
+                constexpr size_t offset_k = tetraTotal - tetraTail;
+
+                constexpr size_t offset_j =
+                    j * (K - k + 1) - (j * (j - 1)) / 2;
+
+                constexpr size_t tetIdx = offset_k + offset_j + i;
+
+                local[tetIdx] = faceCanon[triIdx];
+                used[tetIdx]  = 1;
+              }
+            });
+          });
+        };
+
+        auto applyFace2 = [&](const IndexArray& faceCanon)
+        {
+          // Face 2: (0,1,3), opposite vertex 2
+          // embedding: (i,j,k) = (i2, 0, j2)
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j2 = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i2 = ii.value;
+              if constexpr (i2 + j2 <= K)
+              {
+                constexpr size_t triRowStart =
+                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
+                constexpr size_t triIdx = triRowStart + i2;
+
+                constexpr size_t i = i2;
+                constexpr size_t j = 0;
+                constexpr size_t k = j2;
+
+                constexpr size_t m_tail   = K - k;
+                constexpr size_t tetraTail =
+                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
+                constexpr size_t offset_k = tetraTotal - tetraTail;
+
+                constexpr size_t offset_j =
+                    j * (K - k + 1) - (j * (j - 1)) / 2;
+
+                constexpr size_t tetIdx = offset_k + offset_j + i;
+
+                local[tetIdx] = faceCanon[triIdx];
+                used[tetIdx]  = 1;
+              }
+            });
+          });
+        };
+
+        auto applyFace3 = [&](const IndexArray& faceCanon)
+        {
+          // Face 3: (0,2,1), opposite vertex 3
+          // embedding: (i,j,k) = (j2, i2, 0)
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j2 = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i2 = ii.value;
+              if constexpr (i2 + j2 <= K)
+              {
+                constexpr size_t triRowStart =
+                    j2 * (K + 1) - (j2 * (j2 - 1)) / 2;
+                constexpr size_t triIdx = triRowStart + i2;
+
+                constexpr size_t i = j2;
+                constexpr size_t j = i2;
+                constexpr size_t k = 0;
+
+                constexpr size_t m_tail   = K - k;
+                constexpr size_t tetraTail =
+                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
+                constexpr size_t offset_k = tetraTotal - tetraTail;
+
+                constexpr size_t offset_j =
+                    j * (K - k + 1) - (j * (j - 1)) / 2;
+
+                constexpr size_t tetIdx = offset_k + offset_j + i;
+
+                local[tetIdx] = faceCanon[triIdx];
+                used[tetIdx]  = 1;
+              }
+            });
+          });
+        };
+
+        // ---- Build and apply each face in canonical orientation -----------
+
+        // Face 0: (1,2,3)
+        {
+          std::array<int, 3> canonToTri{};
+          const Index f = getFaceEntityAndPerm(0, canonToTri);
+          this->getClosure(d - 1, f);
+
+          IndexArray faceCanon;
+          buildCanonicalFace(f, canonToTri, faceCanon);
+          applyFace0(faceCanon);
+        }
+
+        // Face 1: (0,3,2)
+        {
+          std::array<int, 3> canonToTri{};
+          const Index f = getFaceEntityAndPerm(1, canonToTri);
+          this->getClosure(d - 1, f);
+
+          IndexArray faceCanon;
+          buildCanonicalFace(f, canonToTri, faceCanon);
+          applyFace1(faceCanon);
+        }
+
+        // Face 2: (0,1,3)
+        {
+          std::array<int, 3> canonToTri{};
+          const Index f = getFaceEntityAndPerm(2, canonToTri);
+          this->getClosure(d - 1, f);
+
+          IndexArray faceCanon;
+          buildCanonicalFace(f, canonToTri, faceCanon);
+          applyFace2(faceCanon);
+        }
+
+        // Face 3: (0,2,1)
+        {
+          std::array<int, 3> canonToTri{};
+          const Index f = getFaceEntityAndPerm(3, canonToTri);
+          this->getClosure(d - 1, f);
+
+          IndexArray faceCanon;
+          buildCanonicalFace(f, canonToTri, faceCanon);
+          applyFace3(faceCanon);
+        }
+
+        // Interior tetra DOFs (not on any face)
+        for (size_t tId = 0; tId < TetCochain::Count; ++tId)
         {
           if (!used[tId])
             local[tId] = m_size++;
@@ -954,106 +1231,422 @@ namespace Rodin::Variational
 
       case Geometry::Polytope::Type::Wedge:
       {
-        using WedgeCochain = Cochain<Geometry::Polytope::Type::Wedge>;
-        using TriCochain   = Cochain<Geometry::Polytope::Type::Triangle>;
+        const auto& mesh = m_mesh.get();
+        const auto& conn = mesh.getConnectivity();
 
-        constexpr size_t TriCount   = TriCochain::Count;
-        constexpr size_t WedgeCount = WedgeCochain::Count; // (K+1)*TriCount
-
-        const auto& wedgeVerts = conn.getPolytope(d, idx);
-        assert(wedgeVerts.size() == 6);
-
-        // Incident faces of this wedge (dim=2). The Connectivity for the
-        // reference wedge uses the canonical face order:
+        // Faces (dim=2, Connectivity::getSubPolytopes):
+        //   Local 0 : Triangle (0,1,2)      bottom
+        //   Local 1 : Quad     (0,1,4,3)
+        //   Local 2 : Quad     (1,2,5,4)
+        //   Local 3 : Quad     (2,0,3,5)
+        //   Local 4 : Triangle (3,4,5)  (canonical wedge top)
         //
-        //   local 0 : Triangle (0,1,2)      bottom
-        //   local 1 : Quad     (0,1,4,3)
-        //   local 2 : Quad     (1,2,5,4)
-        //   local 3 : Quad     (2,0,3,5)
-        //   local 4 : Triangle (3,5,4)      top
-        //
+        // The actual Triangle / Quad entities in 'inc' may have these
+        // vertex sets but in a permuted order. We match them combinatorially.
         const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
         assert(inc.size() == 5);
 
-        std::array<uint8_t, WedgeCount> used{};
+        using WedgeCochain = Cochain<Geometry::Polytope::Type::Wedge>;
+        using TriCochain   = Cochain<Geometry::Polytope::Type::Triangle>;
+        using SegCochain   = Cochain<Geometry::Polytope::Type::Segment>;
+
+        constexpr size_t TriCount = TriCochain::Count;
+        constexpr size_t Ns       = SegCochain::Count; // = K+1
+        constexpr size_t N1       = K + 1;
+
+        std::array<uint8_t, WedgeCochain::Count> used{};
         used.fill(0);
 
-        auto& local = m_closure[d][idx];
-
-        // 1) Map faces → wedge using the canonical Cochain<Wedge>.
-        for (size_t lf = 0; lf < inc.size(); ++lf)
-        {
-          const Index f = inc[lf];
-
-          this->getClosure(d - 1, f);
-          WedgeCochain::map(lf, local, m_closure[d - 1][f]);
-        }
-
-        // 2) Mark boundary DOFs combinatorially.
-        //
-        // Wedge nodes are enumerated as:
-        //   for k = 0..K:          (GLL in z)
-        //     for triIdx = 0..TriCount-1: (Fekete triangle in (x,y))
-        //       wedgeIdx = k*TriCount + triIdx
-        //
-        // A node is on the boundary iff:
-        //   - k == 0 or k == K (bottom / top triangles), OR
-        //   - its triangle node lies on the triangle boundary:
-        //       (triangle DOF index belongs to an edge).
-        //
-        // Triangle boundary nodes can be detected exactly as in the
-        // triangle Cochain: index triIdx is boundary iff it lies on
-        // one of the three edges (0->1, 1->2, 2->0) in the equispaced
-        // integer lattice.
-        //
-        auto isTriangleBoundary = [](size_t triIdx) constexpr
-        {
-          // Reconstruct integer (i2, j2) from triIdx:
-          // enumerate as in FeketeTriangle<K>::compute():
-          //
-          //   idx = 0
-          //   for j2 = 0..K:
-          //     for i2 = 0..K - j2:
-          //       ...
-          //
-          size_t idx = 0;
-          for (size_t j2 = 0; j2 <= K; ++j2)
-          {
-            const size_t rowLen = K + 1 - j2;
-            if (triIdx < idx + rowLen)
-            {
-              const size_t i2 = triIdx - idx;
-
-              // barycentric integer coords:
-              // λ1 = i2, λ2 = j2, λ0 = K - i2 - j2
-              // boundary if one of λ's is zero:
-              if (i2 == 0 || j2 == 0 || (i2 + j2 == K))
-                return true;
-
-              return false;
-            }
-            idx += rowLen;
-          }
-          // Should never reach here
-          return false;
+        // Cell vertices in local order 0..5
+        const auto& cellVertsIA = conn.getPolytope(d, idx);
+        assert(cellVertsIA.size() == 6);
+        std::array<Index,6> v = {
+          cellVertsIA(0),
+          cellVertsIA(1),
+          cellVertsIA(2),
+          cellVertsIA(3),
+          cellVertsIA(4),
+          cellVertsIA(5)
         };
 
-        Utility::ForIndex<K + 1>([&](auto kk)
+        auto sort3 = [](std::array<Index,3> a)
         {
-          constexpr size_t k = kk.value; // layer in z, 0..K
+          std::sort(a.begin(), a.end());
+          return a;
+        };
+
+        auto sort4 = [](std::array<Index,4> a)
+        {
+          std::sort(a.begin(), a.end());
+          return a;
+        };
+
+        // Canonical triangular faces in terms of the cell vertices:
+        //   lf = 0 -> bottom: (0,1,2)
+        //   lf = 4 -> top   : (3,4,5)
+        auto canonicalTriFaceVerts = [&](size_t lf) -> std::array<Index,3>
+        {
+          switch (lf)
+          {
+            case 0: // bottom
+              return { v[0], v[1], v[2] };
+            case 4: // top (canonical orientation (3,4,5))
+              return { v[3], v[4], v[5] };
+            default:
+              assert(false && "Invalid local triangular face index for wedge.");
+              return { 0, 0, 0 };
+          }
+        };
+
+        // Canonical quadrilateral faces:
+        //   lf = 1 -> (0,1,4,3)
+        //   lf = 2 -> (1,2,5,4)
+        //   lf = 3 -> (2,0,3,5)
+        auto canonicalQuadFaceVerts = [&](size_t lf) -> std::array<Index,4>
+        {
+          switch (lf)
+          {
+            case 1:
+              return { v[0], v[1], v[4], v[3] };
+            case 2:
+              return { v[1], v[2], v[5], v[4] };
+            case 3:
+              return { v[2], v[0], v[3], v[5] };
+            default:
+              assert(false && "Invalid local quadrilateral face index for wedge.");
+              return { 0, 0, 0, 0 };
+          }
+        };
+
+        // All 6 permutations of 3 vertices
+        static constexpr int perms3[6][3] =
+        {
+          {0,1,2}, {1,2,0}, {2,0,1},
+          {0,2,1}, {2,1,0}, {1,0,2}
+        };
+
+        // All 24 permutations of 4 vertices
+        static constexpr int perms4[24][4] =
+        {
+          {0,1,2,3}, {0,1,3,2}, {0,2,1,3}, {0,2,3,1},
+          {0,3,1,2}, {0,3,2,1}, {1,0,2,3}, {1,0,3,2},
+          {1,2,0,3}, {1,2,3,0}, {1,3,0,2}, {1,3,2,0},
+          {2,0,1,3}, {2,0,3,1}, {2,1,0,3}, {2,1,3,0},
+          {2,3,0,1}, {2,3,1,0}, {3,0,1,2}, {3,0,2,1},
+          {3,1,0,2}, {3,1,2,0}, {3,2,0,1}, {3,2,1,0}
+        };
+
+        // For lf in {0,4}: find the triangle entity in 'inc' that matches
+        // the canonical face, and the permutation mapping canonical
+        // face vertices -> triangle local vertices.
+        auto getTriFaceEntityAndPerm =
+          [&](size_t lf, std::array<int,3>& canonToTri) -> Index
+        {
+          const auto wanted  = canonicalTriFaceVerts(lf);
+          const auto wantedS = sort3(wanted);
+
+          for (Index f : inc)
+          {
+            if (conn.getGeometry(d - 1, f) != Geometry::Polytope::Type::Triangle)
+              continue;
+
+            const auto& fVertsIA = conn.getPolytope(d - 1, f);
+            assert(fVertsIA.size() == 3);
+            std::array<Index,3> tv = {
+              fVertsIA(0),
+              fVertsIA(1),
+              fVertsIA(2)
+            };
+
+            // Match up to permutation
+            for (int pi = 0; pi < 6; ++pi)
+            {
+              const int a = perms3[pi][0];
+              const int b = perms3[pi][1];
+              const int c = perms3[pi][2];
+
+              if (tv[a] == wanted[0] &&
+                  tv[b] == wanted[1] &&
+                  tv[c] == wanted[2])
+              {
+                // canonical vertex 0 -> triangle local a
+                // canonical vertex 1 -> triangle local b
+                // canonical vertex 2 -> triangle local c
+                canonToTri[0] = a;
+                canonToTri[1] = b;
+                canonToTri[2] = c;
+                return f;
+              }
+            }
+          }
+
+          assert(false && "Could not match wedge triangular face to incident triangle entity.");
+          return -1;
+        };
+
+        // Build a face DOF array in *canonical* FeketeTriangle<K> ordering
+        // for this triangular face, given the triangle entity index fIdx
+        // and the permutation canonToTri (canonical -> tri-local).
+        auto buildCanonicalFace =
+          [&](Index fIdx,
+              const std::array<int,3>& canonToTri,
+              IndexArray& faceCanon)
+        {
+          const auto& faceLocal = m_closure[d - 1][fIdx]; // triangle DOFs as built
+          faceCanon.resize(TriCochain::Count);
+
+          // Inverse permutation: triangle local vertex q -> canonical vertex p
+          std::array<int,3> triToCanon;
+          for (int p = 0; p < 3; ++p)
+          {
+            const int q = canonToTri[p];
+            triToCanon[q] = p;
+          }
+
+          size_t canonIdx = 0;
+          for (size_t j2 = 0; j2 <= K; ++j2)
+          {
+            for (size_t i2 = 0; i2 <= K - j2; ++i2, ++canonIdx)
+            {
+              // Canonical integer barycentric (a,b,c) for FeketeTriangle
+              // w.r.t. vertices (0,1,2) of the reference triangle:
+              //   a = K - i2 - j2,  b = i2,  c = j2
+              const size_t a = K - i2 - j2;
+              const size_t b = i2;
+              const size_t c = j2;
+              const size_t abc[3] = { a, b, c };
+
+              // Triangle-local barycentric integers for its vertices 0,1,2:
+              const size_t a_t = abc[ triToCanon[0] ];
+              const size_t b_t = abc[ triToCanon[1] ];
+              const size_t c_t = abc[ triToCanon[2] ];
+
+              // Back to triangle's Fekete enumeration:
+              //   i_loc = b_t,  j_loc = c_t
+              const size_t i_loc = b_t;
+              const size_t j_loc = c_t;
+
+              const size_t rowStartLoc =
+                  j_loc * (K + 1) - (j_loc * (j_loc - 1)) / 2;
+              const size_t locIdx = rowStartLoc + i_loc;
+
+              faceCanon[canonIdx] = faceLocal[locIdx];
+            }
+          }
+        };
+
+        // -------------------------------------------------------------------
+        // 1) Triangular faces: bottom (lf=0, k=0) and top (lf=4, k=K)
+        // -------------------------------------------------------------------
+
+        // Bottom triangular face (k = 0)
+        {
+          std::array<int,3> canonToTri{};
+          const Index f = getTriFaceEntityAndPerm(0, canonToTri);
+          this->getClosure(d - 1, f);
+
+          IndexArray faceCanon;
+          buildCanonicalFace(f, canonToTri, faceCanon);
 
           Utility::ForIndex<TriCount>([&](auto ii)
           {
             constexpr size_t triIdx   = ii.value;
-            constexpr size_t wedgeIdx = k * TriCount + triIdx;
-
-            if constexpr (k == 0 || k == K || isTriangleBoundary(triIdx))
-              used[wedgeIdx] = 1;
+            constexpr size_t wedgeIdx = triIdx; // k = 0
+            local[wedgeIdx] = faceCanon[triIdx];
+            used[wedgeIdx]  = 1;
           });
-        });
+        }
 
-        // 3) Assign interior wedge DOFs (not on any face)
-        for (size_t wId = 0; wId < WedgeCount; ++wId)
+        // Top triangular face (k = K)
+        {
+          std::array<int,3> canonToTri{};
+          const Index f = getTriFaceEntityAndPerm(4, canonToTri);
+          this->getClosure(d - 1, f);
+
+          IndexArray faceCanon;
+          buildCanonicalFace(f, canonToTri, faceCanon);
+
+          Utility::ForIndex<TriCount>([&](auto ii)
+          {
+            constexpr size_t triIdx   = ii.value;
+            constexpr size_t wedgeIdx = K * TriCount + triIdx;
+            local[wedgeIdx] = faceCanon[triIdx];
+            used[wedgeIdx]  = 1;
+          });
+        }
+
+        // -------------------------------------------------------------------
+        // 2) Quadrilateral faces: fill side faces without overriding
+        //    DOFs already set by the triangular faces (especially vertices).
+        // -------------------------------------------------------------------
+
+        // Local 1: Quad (0,1,4,3): extrude edge 0->1 in z
+        {
+          const auto wanted = canonicalQuadFaceVerts(1);
+          const auto wantedS = sort4(wanted);
+
+          Index f = -1;
+          for (Index cand : inc)
+          {
+            if (conn.getGeometry(d - 1, cand) != Geometry::Polytope::Type::Quadrilateral)
+              continue;
+            const auto& qVertsIA = conn.getPolytope(d - 1, cand);
+            assert(qVertsIA.size() == 4);
+            std::array<Index,4> qv = {
+              qVertsIA(0),
+              qVertsIA(1),
+              qVertsIA(2),
+              qVertsIA(3)
+            };
+            if (sort4(qv) == wantedS)
+            {
+              f = cand;
+              break;
+            }
+          }
+          assert(f >= 0);
+          this->getClosure(d - 1, f);
+          const auto& quad = m_closure[d - 1][f];
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j = jj.value; // layer 0..K
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i = ii.value; // 0..K along edge 0->1
+
+              constexpr size_t quadIdx = j * (K + 1) + i;
+              // triangle edge 0->1 corresponds to triEdgeIdx = i
+              constexpr size_t triEdgeIdx = i;
+              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
+
+              if (!used[wedgeIdx])
+              {
+                local[wedgeIdx] = quad[quadIdx];
+                used[wedgeIdx]  = 1;
+              }
+            });
+          });
+        }
+
+        // Local 2: Quad (1,2,5,4): extrude edge 1->2
+        {
+          const auto wanted = canonicalQuadFaceVerts(2);
+          const auto wantedS = sort4(wanted);
+
+          Index f = -1;
+          for (Index cand : inc)
+          {
+            if (conn.getGeometry(d - 1, cand) != Geometry::Polytope::Type::Quadrilateral)
+              continue;
+            const auto& qVertsIA = conn.getPolytope(d - 1, cand);
+            assert(qVertsIA.size() == 4);
+            std::array<Index,4> qv = {
+              qVertsIA(0),
+              qVertsIA(1),
+              qVertsIA(2),
+              qVertsIA(3)
+            };
+            if (sort4(qv) == wantedS)
+            {
+              f = cand;
+              break;
+            }
+          }
+          assert(f >= 0);
+          this->getClosure(d - 1, f);
+          const auto& quad = m_closure[d - 1][f];
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i = ii.value; // 0..K along edge 1->2
+
+              constexpr size_t quadIdx = j * (K + 1) + i;
+
+              // triangle edge 1->2 (Segment->Triangle Local=1):
+              //  r = i
+              //  rowStart = r*(K+1) - r*(r-1)/2
+              //  triEdgeIdx = rowStart + (K - r)
+              constexpr size_t r        = i;
+              constexpr size_t rowStart =
+                  r * (K + 1) - (r * (r - 1)) / 2;
+              constexpr size_t triEdgeIdx = rowStart + (K - r);
+              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
+
+              if (!used[wedgeIdx])
+              {
+                local[wedgeIdx] = quad[quadIdx];
+                used[wedgeIdx]  = 1;
+              }
+            });
+          });
+        }
+
+        // Local 3: Quad (2,0,3,5): extrude edge 2->0
+        {
+          const auto wanted = canonicalQuadFaceVerts(3);
+          const auto wantedS = sort4(wanted);
+
+          Index f = -1;
+          for (Index cand : inc)
+          {
+            if (conn.getGeometry(d - 1, cand) != Geometry::Polytope::Type::Quadrilateral)
+              continue;
+            const auto& qVertsIA = conn.getPolytope(d - 1, cand);
+            assert(qVertsIA.size() == 4);
+            std::array<Index,4> qv = {
+              qVertsIA(0),
+              qVertsIA(1),
+              qVertsIA(2),
+              qVertsIA(3)
+            };
+            if (sort4(qv) == wantedS)
+            {
+              f = cand;
+              break;
+            }
+          }
+          assert(f >= 0);
+          this->getClosure(d - 1, f);
+          const auto& quad = m_closure[d - 1][f];
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i = ii.value; // 0..K along edge 2->0
+
+              constexpr size_t quadIdx = j * (K + 1) + i;
+
+              // triangle edge 2->0 (Segment->Triangle Local=2):
+              //  r      = i
+              //  j_edge = K - r
+              //  rowStart = j_edge*(K+1) - j_edge*(j_edge-1)/2
+              //  triEdgeIdx = rowStart (i=0 on that row)
+              constexpr size_t r      = i;
+              constexpr size_t j_edge = K - r;
+              constexpr size_t rowStart =
+                  j_edge * (K + 1) - (j_edge * (j_edge - 1)) / 2;
+              constexpr size_t triEdgeIdx = rowStart;
+              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
+
+              if (!used[wedgeIdx])
+              {
+                local[wedgeIdx] = quad[quadIdx];
+                used[wedgeIdx]  = 1;
+              }
+            });
+          });
+        }
+
+        // -------------------------------------------------------------------
+        // 3) Interior wedge DOFs (not on any face)
+        // -------------------------------------------------------------------
+        for (size_t wId = 0; wId < WedgeCochain::Count; ++wId)
         {
           if (!used[wId])
             local[wId] = m_size++;

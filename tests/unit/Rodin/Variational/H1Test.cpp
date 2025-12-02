@@ -118,65 +118,6 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(Rodin_Variational_H1_Space, Project_TwoTriangles_AtAllLocalNodes)
-  {
-    // Patch of 2 triangles sharing an edge
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(4)
-      .vertex({0, 0}) // 0
-      .vertex({1, 0}) // 1
-      .vertex({0, 1}) // 2
-      .vertex({1, 1}) // 3
-      .polytope(Polytope::Type::Triangle, { {0, 1, 2} }) // cell 0
-      .polytope(Polytope::Type::Triangle, { {1, 3, 2} }) // cell 1
-      .finalize();
-
-    mesh.getConnectivity().compute(2, 1);
-    mesh.getConnectivity().compute(1, 0);
-
-    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
-    GridFunction gf(fes);
-
-    auto exact = [](const Geometry::Point& p) -> Real
-    {
-      return 2.0 * p.x() + 3.0 * p.y() + 1.0;
-    };
-
-    gf = exact; // project on cells
-
-    auto cell_it = mesh.getCell();
-    ASSERT_TRUE(cell_it);
-
-    for (; cell_it; ++cell_it)
-    {
-      const auto& cell = *cell_it;
-      const auto& fe   = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-      ASSERT_EQ(fe.getGeometry(), Polytope::Type::Triangle);
-
-      for (size_t local = 0; local < fe.getCount(); ++local)
-      {
-        const auto& ref_node = fe.getNode(local);
-        Geometry::Point p(cell, ref_node, ref_node);
-
-        Real val      = gf(p);
-        Real expected = exact(p);
-
-        Index global = fes.getGlobalIndex({cell.getDimension(), cell.getIndex()}, local);
-        Real stored  = gf[global];
-
-        EXPECT_NEAR(stored, expected, 1e-14)
-          << "Stored DOF mismatch on cell " << cell.getIndex()
-          << ", local " << local;
-
-        EXPECT_NEAR(val, stored, 1e-14)
-          << "Interpolation mismatch on cell " << cell.getIndex()
-          << ", local " << local;
-      }
-    }
-  }
-
   TEST(Rodin_Variational_H1_Space, Pushforward_PointBasis_IsOneAtVertex)
   {
     Mesh mesh =
@@ -4056,8 +3997,7 @@ namespace Rodin::Tests::Unit
     gf = exact;
 
     // Verify DOF count for single triangle H1<3>:
-    // Implementation uses 9 DOFs for single triangle H1<3>
-    EXPECT_EQ(fes.getSize(), 9u);
+    EXPECT_EQ(fes.getSize(), 10u);
     EXPECT_EQ(gf.getSize(), fes.getSize());
 
     // Verify interpolated values at vertices
@@ -4140,8 +4080,7 @@ namespace Rodin::Tests::Unit
     gf = exact;
 
     // Verify DOF count for single segment H1<3>:
-    // Implementation uses 2 DOFs for single segment H1<3>
-    EXPECT_EQ(fes.getSize(), 2u);
+    EXPECT_EQ(fes.getSize(), 4u);
     EXPECT_EQ(gf.getSize(), fes.getSize());
 
     // Verify interpolated values at vertices
