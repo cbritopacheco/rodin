@@ -4688,4 +4688,250 @@ namespace Rodin::Tests::Unit
         << "Tetrahedron H1<2> interpolation (large mesh) at vertex " << vtx << " should match exact linear function.";
     }
   }
+
+  // Non-trivial 3D mesh tests with refined meshes (>=16 elements)
+
+  TEST(Rodin_Variational_H1_Space, Projection_Tetrahedron_H1_2_RefinedNonTrivialMesh)
+  {
+    // Refined non-trivial 3D tetrahedron mesh (5x5x5 grid, 750 tets)
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 5, 5, 5 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    ASSERT_GE(mesh.getCellCount(), 16u) << "Mesh should have at least 16 elements";
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    // Linear function that H1<2> can represent exactly
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return 2.0 * p.x() + 3.0 * p.y() - 1.5 * p.z() + 0.5;
+    };
+
+    // Test projection
+    RealFunction func(exact);
+    gf.project(func);
+
+    // Verify at a sample of vertices
+    const size_t nv = mesh.getVertexCount();
+    const size_t sample_stride = std::max(size_t(1), nv / 50); // Sample ~50 vertices
+    for (size_t vtx = 0; vtx < nv; vtx += sample_stride)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "Tetrahedron H1<2> projection (5x5x5 mesh) at vertex " << vtx << " should match exact linear function.";
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_3_RefinedNonTrivialMesh)
+  {
+    // Refined non-trivial 3D tetrahedron mesh (4x4x4 grid, 384 tets)
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 4, 4, 4 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    ASSERT_GE(mesh.getCellCount(), 16u) << "Mesh should have at least 16 elements";
+
+    H1 fes(std::integral_constant<size_t, 3>{}, mesh);
+    GridFunction gf(fes);
+
+    // Quadratic function that H1<3> can represent exactly
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return 0.5 * p.x() * p.x() + 0.75 * p.y() * p.y() + 0.25 * p.z() * p.z() + 
+             0.5 * p.x() * p.y() + 0.3 * p.y() * p.z() + 0.2 * p.x() * p.z() +
+             p.x() + 1.5 * p.y() + 0.5 * p.z() + 1.0;
+    };
+
+    // Test interpolation
+    gf = exact;
+
+    // Verify at a sample of vertices
+    const size_t nv = mesh.getVertexCount();
+    const size_t sample_stride = std::max(size_t(1), nv / 50); // Sample ~50 vertices
+    for (size_t vtx = 0; vtx < nv; vtx += sample_stride)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "Tetrahedron H1<3> interpolation (4x4x4 mesh) at vertex " << vtx << " should match exact quadratic function.";
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, Projection_Tetrahedron_H1_4_RefinedNonTrivialMesh)
+  {
+    // Refined non-trivial 3D tetrahedron mesh (3x3x3 grid, 162 tets)
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    ASSERT_GE(mesh.getCellCount(), 16u) << "Mesh should have at least 16 elements";
+
+    H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+    GridFunction gf(fes);
+
+    // Cubic function that H1<4> can represent exactly
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return 0.2 * p.x() * p.x() * p.x() + 0.3 * p.y() * p.y() * p.y() + 0.1 * p.z() * p.z() * p.z() +
+             0.4 * p.x() * p.y() + 0.5 * p.x() + 0.6 * p.y() + 0.7 * p.z() + 1.5;
+    };
+
+    // Test projection
+    RealFunction func(exact);
+    gf.project(func);
+
+    // Verify at a sample of vertices
+    const size_t nv = mesh.getVertexCount();
+    const size_t sample_stride = std::max(size_t(1), nv / 40); // Sample ~40 vertices
+    for (size_t vtx = 0; vtx < nv; vtx += sample_stride)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "Tetrahedron H1<4> projection (3x3x3 mesh) at vertex " << vtx << " should match exact cubic function.";
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, Projection_Wedge_H1_2_RefinedNonTrivialMesh)
+  {
+    // Refined non-trivial 3D wedge mesh (5x5x5 grid, 250 wedges)
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 5, 5, 5 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    ASSERT_GE(mesh.getCellCount(), 16u) << "Mesh should have at least 16 elements";
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    // Linear function that H1<2> can represent exactly
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return 1.5 * p.x() + 2.5 * p.y() - 0.75 * p.z() + 1.25;
+    };
+
+    // Test projection
+    RealFunction func(exact);
+    gf.project(func);
+
+    // Verify at a sample of vertices
+    const size_t nv = mesh.getVertexCount();
+    const size_t sample_stride = std::max(size_t(1), nv / 50); // Sample ~50 vertices
+    for (size_t vtx = 0; vtx < nv; vtx += sample_stride)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "Wedge H1<2> projection (5x5x5 mesh) at vertex " << vtx << " should match exact linear function.";
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_3_RefinedNonTrivialMesh)
+  {
+    // Refined non-trivial 3D wedge mesh (4x4x4 grid, 128 wedges)
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 4, 4, 4 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    ASSERT_GE(mesh.getCellCount(), 16u) << "Mesh should have at least 16 elements";
+
+    H1 fes(std::integral_constant<size_t, 3>{}, mesh);
+    GridFunction gf(fes);
+
+    // Quadratic function that H1<3> can represent exactly
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return 0.6 * p.x() * p.x() + 0.8 * p.y() * p.y() + 0.4 * p.z() * p.z() + 
+             0.3 * p.x() * p.y() + 0.2 * p.y() * p.z() + 0.1 * p.x() * p.z() +
+             1.2 * p.x() + 0.9 * p.y() + 1.5 * p.z() + 0.5;
+    };
+
+    // Test interpolation
+    gf = exact;
+
+    // Verify at a sample of vertices
+    const size_t nv = mesh.getVertexCount();
+    const size_t sample_stride = std::max(size_t(1), nv / 50); // Sample ~50 vertices
+    for (size_t vtx = 0; vtx < nv; vtx += sample_stride)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "Wedge H1<3> interpolation (4x4x4 mesh) at vertex " << vtx << " should match exact quadratic function.";
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, Projection_Wedge_H1_4_RefinedNonTrivialMesh)
+  {
+    // Refined non-trivial 3D wedge mesh (3x3x3 grid, 54 wedges)
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 3, 3, 3 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    ASSERT_GE(mesh.getCellCount(), 16u) << "Mesh should have at least 16 elements";
+
+    H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+    GridFunction gf(fes);
+
+    // Cubic function that H1<4> can represent exactly
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return 0.15 * p.x() * p.x() * p.x() + 0.25 * p.y() * p.y() * p.y() + 0.05 * p.z() * p.z() * p.z() +
+             0.35 * p.x() * p.y() + 0.45 * p.x() + 0.55 * p.y() + 0.65 * p.z() + 2.0;
+    };
+
+    // Test projection
+    RealFunction func(exact);
+    gf.project(func);
+
+    // Verify at a sample of vertices
+    const size_t nv = mesh.getVertexCount();
+    const size_t sample_stride = std::max(size_t(1), nv / 40); // Sample ~40 vertices
+    for (size_t vtx = 0; vtx < nv; vtx += sample_stride)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "Wedge H1<4> projection (3x3x3 mesh) at vertex " << vtx << " should match exact cubic function.";
+    }
+  }
 }
