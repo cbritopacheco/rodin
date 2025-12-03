@@ -145,6 +145,18 @@ namespace Rodin::Geometry
 
     public:
       /**
+       * @brief Mode for connectivity construction.
+       *
+       * Determines whether missing polytopes should be discovered and
+       * inserted during connectivity computation.
+       */
+      enum class Mode
+      {
+        Discover, ///< Discover and insert missing polytopes
+        Restrict ///< Only use existing polytopes, do not insert new ones
+      };
+
+      /**
        * @brief Bidirectional index mapping for polytope identification.
        *
        * Maintains a bidirectional mapping between vertex arrays (defining
@@ -302,7 +314,7 @@ namespace Rodin::Geometry
        * @f]
        * from @f$ D \longrightarrow 0 @f$ and @f$ D \longrightarrow D @f$.
        */
-      Connectivity& build(size_t d, bool restricted = false);
+      Connectivity& build(size_t d, Mode mode = Mode::Discover);
 
       /**
        * @brief Extracts local connectivity for a specific polytope.
@@ -313,7 +325,7 @@ namespace Rodin::Geometry
        * sub-polytopes.
        * @returns Reference to this connectivity object
        */
-      Connectivity& local(size_t i, size_t d, bool restricted);
+      Connectivity& local(size_t i, size_t d, Mode mode = Mode::Discover);
 
       /**
        * @brief Computes connectivity between dimensions.
@@ -324,7 +336,7 @@ namespace Rodin::Geometry
        * Computes the incidence relation from polytopes of dimension @p d
        * to polytopes of dimension @p dp.
        */
-      Connectivity& compute(size_t d, size_t dp, bool restricted = false);
+      Connectivity& compute(size_t d, size_t dp, Mode mode = Mode::Discover);
 
       /**
        * @brief Transposes a connectivity relation.
