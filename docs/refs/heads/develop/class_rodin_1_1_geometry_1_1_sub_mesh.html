@@ -72,10 +72,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md51">Overview</a></li>
-            <li><a href="#autotoc_md52">Mapping Between SubMesh and Parent Mesh</a></li>
-            <li><a href="#autotoc_md53">Downcasting</a></li>
-            <li><a href="#autotoc_md54">Use Cases</a></li>
+            <li><a href="#autotoc_md58">Overview</a></li>
+            <li><a href="#autotoc_md59">Mapping Between SubMesh and Parent Mesh</a></li>
+            <li><a href="#autotoc_md60">Downcasting</a></li>
+            <li><a href="#autotoc_md61">Use Cases</a></li>
             <li>
               Reference
               <ul>
@@ -83,12 +83,12 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md51"><h2><a href="#autotoc_md51">Overview</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> is a mesh that represents a subset of another mesh, typically corresponding to a specific region or boundary. It maintains references to its parent mesh and provides mappings between polytope indices in the child and parent meshes.</p></section><section id="autotoc_md52"><h2><a href="#autotoc_md52">Mapping Between SubMesh and Parent Mesh</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object holds a reference to its parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> and includes information about how polytopes and vertices are mapped between the child and parent. This allows finite element operations on the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to properly reference degrees of freedom in the parent mesh.</p></section><section id="autotoc_md53"><h2><a href="#autotoc_md53">Downcasting</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> that is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> can be downcasted to access <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
+<section id="autotoc_md58"><h2><a href="#autotoc_md58">Overview</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> is a mesh that represents a subset of another mesh, typically corresponding to a specific region or boundary. It maintains references to its parent mesh and provides mappings between polytope indices in the child and parent meshes.</p></section><section id="autotoc_md59"><h2><a href="#autotoc_md59">Mapping Between SubMesh and Parent Mesh</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object holds a reference to its parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> and includes information about how polytopes and vertices are mapped between the child and parent. This allows finite element operations on the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to properly reference degrees of freedom in the parent mesh.</p></section><section id="autotoc_md60"><h2><a href="#autotoc_md60">Downcasting</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> that is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> can be downcasted to access <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="c1">// The cast is well defined</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">getParent</span><span class="p">();</span>
-<span class="p">}</span></pre></section><section id="autotoc_md54"><h2><a href="#autotoc_md54">Use Cases</a></h2><ul><li>Boundary condition application</li><li>Interface problem formulation</li><li>Region-specific operations</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>, <a href="_sub_mesh_8h.html" class="m-doc">SubMesh.h</a></p></aside></section>
+<span class="p">}</span></pre></section><section id="autotoc_md61"><h2><a href="#autotoc_md61">Use Cases</a></h2><ul><li>Boundary condition application</li><li>Interface problem formulation</li><li>Region-specific operations</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>, <a href="_sub_mesh_8h.html" class="m-doc">SubMesh.h</a></p></aside></section>
       </div>
     </div>
   </div>
