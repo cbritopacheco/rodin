@@ -867,9 +867,7 @@ namespace Rodin::IO
       }
 
     private:
-      size_t m_dimension;
-      size_t m_spaceDimension;
-      size_t m_currentLineNumber;
+      size_t m_currentLineNumber = 0;
   };
 
   /**
@@ -987,8 +985,6 @@ namespace Rodin::IO
       }
 
     private:
-      size_t m_dimension;
-      size_t m_spaceDimension;
       size_t m_currentLineNumber = 0;
   };
 
