@@ -874,7 +874,8 @@ namespace Rodin::IO
    * @brief Specialization for loading H1 grid functions from MFEM format.
    *
    * Loads finite element solution data for H1-conforming Lagrange elements
-   * of arbitrary degree from MFEM grid function files.
+   * of arbitrary degree from MFEM grid function files. Handles DOF reordering
+   * between MFEM's ordering and Rodin's internal ordering.
    *
    * @tparam K Polynomial degree
    * @tparam Range Range type for the finite element space
@@ -885,13 +886,15 @@ namespace Rodin::IO
    * - FiniteElementCollection name (e.g., "H1_2D_P2" for degree 2 in 2D)
    * - VDim: vector dimension
    * - Ordering: data layout (Nodes=0 or VectorDimension=1)
-   * - Coefficient data values
+   * - Coefficient data values (ordered by MFEM convention)
+   *
+   * MFEM DOF ordering: vertices -> edge interiors -> face interiors -> element interiors
    *
    * ## Usage Example
    * ```cpp
-   * H1<2> Vh(mesh);  // Degree 2 H1 space
-   * GridFunction<H1<2>> u(Vh);
-   * GridFunctionLoader<FileFormat::MFEM, H1<2>, Vector<Real>> loader(u);
+   * H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+   * GridFunction gf(fes);
+   * GridFunctionLoader<FileFormat::MFEM, H1<2, Real>, Vector<Real>> loader(gf);
    * loader.load("solution.gf");
    * ```
    *
@@ -929,7 +932,7 @@ namespace Rodin::IO
        * @brief Loads grid function from an input stream.
        * @param[in] is Input stream containing MFEM grid function data
        *
-       * Parses the header and coefficient data, handling different data orderings.
+       * Parses the header and coefficient data, mapping from MFEM ordering to Rodin ordering.
        */
       void load(std::istream& is) override
       {
@@ -970,14 +973,118 @@ namespace Rodin::IO
 
         auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
         assert(header.vdim == fes.getVectorDimension());
         auto& data = gf.getData();
+        const size_t vdim = fes.getVectorDimension();
+        const size_t D = mesh.getDimension();
+        const size_t scalarSize = fes.getSize() / vdim;
+        
         if (data.size() > 0)
         {
+          // Read all values from MFEM file (in MFEM ordering)
+          std::vector<ScalarType> mfem_data;
+          mfem_data.reserve(data.size());
+          
           line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-          data.coeffRef(0) = std::stod(line);
+          mfem_data.push_back(std::stod(line));
           for (size_t i = 1; i < static_cast<size_t>(data.size()); i++)
-            is >> data.coeffRef(i);
+          {
+            ScalarType val;
+            is >> val;
+            mfem_data.push_back(val);
+          }
+
+          // Map from MFEM ordering to Rodin ordering using tracking
+          // MFEM order: vertices -> edges -> faces -> elements
+          size_t mfem_idx = 0;
+          std::vector<bool> written(scalarSize, false);
+          
+          // 1. Vertex DOFs
+          for (auto it = mesh.getVertex(); !it.end(); ++it)
+          {
+            const auto& dofs = fes.getDOFs(0, it->getIndex());
+            // Write only unwritten DOFs
+            for (size_t local = 0; local < dofs.size(); ++local)
+            {
+              Index rodin_dof = dofs(local);
+              if (!written[rodin_dof])
+              {
+                for (size_t c = 0; c < vdim; ++c)
+                {
+                  data.coeffRef(rodin_dof + c * scalarSize) = mfem_data[mfem_idx++];
+                }
+                written[rodin_dof] = true;
+              }
+            }
+          }
+
+          // 2. Edge DOFs (if D >= 1)
+          if (D >= 1)
+          {
+            const size_t edgeCount = mesh.getConnectivity().getCount(1);
+            for (Index i = 0; i < static_cast<Index>(edgeCount); ++i)
+            {
+              const auto& dofs = fes.getDOFs(1, i);
+              // Write only unwritten DOFs (these are edge interior DOFs)
+              for (size_t local = 0; local < dofs.size(); ++local)
+              {
+                Index rodin_dof = dofs(local);
+                if (!written[rodin_dof])
+                {
+                  for (size_t c = 0; c < vdim; ++c)
+                  {
+                    data.coeffRef(rodin_dof + c * scalarSize) = mfem_data[mfem_idx++];
+                  }
+                  written[rodin_dof] = true;
+                }
+              }
+            }
+          }
+
+          // 3. Face DOFs (if D >= 2)
+          if (D >= 2)
+          {
+            const size_t faceDim = (D == 3) ? 2 : (D - 1);
+            const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
+            for (Index i = 0; i < static_cast<Index>(faceCount); ++i)
+            {
+              const auto& dofs = fes.getDOFs(faceDim, i);
+              // Write only unwritten DOFs (these are face interior DOFs)
+              for (size_t local = 0; local < dofs.size(); ++local)
+              {
+                Index rodin_dof = dofs(local);
+                if (!written[rodin_dof])
+                {
+                  for (size_t c = 0; c < vdim; ++c)
+                  {
+                    data.coeffRef(rodin_dof + c * scalarSize) = mfem_data[mfem_idx++];
+                  }
+                  written[rodin_dof] = true;
+                }
+              }
+            }
+          }
+
+          // 4. Element (cell) interior DOFs
+          for (auto it = mesh.getCell(); !it.end(); ++it)
+          {
+            const auto& dofs = fes.getDOFs(D, it->getIndex());
+            // Write only unwritten DOFs (these are element interior DOFs)
+            for (size_t local = 0; local < dofs.size(); ++local)
+            {
+              Index rodin_dof = dofs(local);
+              if (!written[rodin_dof])
+              {
+                for (size_t c = 0; c < vdim; ++c)
+                {
+                  data.coeffRef(rodin_dof + c * scalarSize) = mfem_data[mfem_idx++];
+                }
+                written[rodin_dof] = true;
+              }
+            }
+          }
+
           if (header.ordering == MFEM::Ordering::VectorDimension)
             data.transposeInPlace();
         }
@@ -1265,6 +1372,137 @@ namespace Rodin::IO
         assert(vec.size() >= 0);
         for (size_t i = 0; i < static_cast<size_t>(vec.size()); i++)
           os << data[i] << '\n';
+      }
+  };
+
+  /**
+   * @brief Specialization for printing H1 grid functions with vector data in MFEM format.
+   *
+   * Handles DOF reordering between Rodin's internal ordering and MFEM's expected ordering.
+   * MFEM orders DOFs as: vertices -> edge interiors -> face interiors -> element interiors
+   *
+   * @tparam K Polynomial degree
+   * @tparam Range Range type for the finite element space
+   * @tparam Scalar Scalar type for the vector data
+   */
+  template <size_t K, class Range, class Scalar>
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::Local>>, Math::Vector<Scalar>> final
+    : public GridFunctionPrinterBase<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::Local>>, Math::Vector<Scalar>>
+  {
+    public:
+      using FESType = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+      
+      using DataType = Math::Vector<Scalar>;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
+
+      /**
+       * @brief Constructs a grid function printer.
+       * @param[in] gf Grid function to write to output
+       */
+      GridFunctionPrinter(const ObjectType& gf)
+        : Parent(gf)
+      {}
+
+      /**
+       * @brief Prints the coefficient data values in MFEM DOF ordering.
+       * @param[in,out] os Output stream
+       *
+       * Writes DOFs in MFEM order: vertices, edge interiors, face interiors, element interiors.
+       */
+      void printData(std::ostream& os) override
+      {
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const auto& data = gf.getData();
+        const size_t vdim = fes.getVectorDimension();
+        const size_t D = mesh.getDimension();
+        const size_t scalarSize = fes.getSize() / vdim;
+
+        // Track which DOFs have been written (for scalar space)
+        std::vector<bool> written(scalarSize, false);
+        
+        // MFEM ordering: vertices -> edges -> faces -> elements
+        
+        // 1. Vertex DOFs
+        for (auto it = mesh.getVertex(); !it.end(); ++it)
+        {
+          const auto& dofs = fes.getDOFs(0, it->getIndex());
+          // Write only unwritten DOFs
+          for (size_t local = 0; local < dofs.size(); ++local)
+          {
+            Index rodin_dof = dofs(local);
+            if (!written[rodin_dof])
+            {
+              for (size_t c = 0; c < vdim; ++c)
+                os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
+              written[rodin_dof] = true;
+            }
+          }
+        }
+
+        // 2. Edge DOFs (if D >= 1)
+        if (D >= 1)
+        {
+          const size_t edgeCount = mesh.getConnectivity().getCount(1);
+          for (Index i = 0; i < static_cast<Index>(edgeCount); ++i)
+          {
+            const auto& dofs = fes.getDOFs(1, i);
+            // Write only unwritten DOFs (these are edge interior DOFs)
+            for (size_t local = 0; local < dofs.size(); ++local)
+            {
+              Index rodin_dof = dofs(local);
+              if (!written[rodin_dof])
+              {
+                for (size_t c = 0; c < vdim; ++c)
+                  os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
+                written[rodin_dof] = true;
+              }
+            }
+          }
+        }
+
+        // 3. Face DOFs (if D >= 2)
+        if (D >= 2)
+        {
+          const size_t faceDim = (D == 3) ? 2 : (D - 1);
+          const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
+          for (Index i = 0; i < static_cast<Index>(faceCount); ++i)
+          {
+            const auto& dofs = fes.getDOFs(faceDim, i);
+            // Write only unwritten DOFs (these are face interior DOFs)
+            for (size_t local = 0; local < dofs.size(); ++local)
+            {
+              Index rodin_dof = dofs(local);
+              if (!written[rodin_dof])
+              {
+                for (size_t c = 0; c < vdim; ++c)
+                  os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
+                written[rodin_dof] = true;
+              }
+            }
+          }
+        }
+
+        // 4. Element (cell) interior DOFs
+        for (auto it = mesh.getCell(); !it.end(); ++it)
+        {
+          const auto& dofs = fes.getDOFs(D, it->getIndex());
+          // Write only unwritten DOFs (these are element interior DOFs)
+          for (size_t local = 0; local < dofs.size(); ++local)
+          {
+            Index rodin_dof = dofs(local);
+            if (!written[rodin_dof])
+            {
+              for (size_t c = 0; c < vdim; ++c)
+                os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
+              written[rodin_dof] = true;
+            }
+          }
+        }
       }
   };
 }
