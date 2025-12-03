@@ -15,6 +15,8 @@
 #include "LegendrePolynomial.h"
 
 #define RODIN_VARIATIONAL_H1_GLL_TOLERANCE 1e-14
+#define RODIN_VARIATIONAL_H1_GLL_TAYLOR_TERMS 14
+#define RODIN_VARIATIONAL_H1_GLL_MAX_ITERATIONS 25
 
 namespace Rodin::Variational
 {
@@ -33,14 +35,16 @@ namespace Rodin::Variational
    * @tparam Tolerance Newton stopping tolerance (compile-time constant).
    * @tparam MaxIt Maximum number of Newton iterations (compile-time constant).
    */
-  template <size_t K, size_t MaxIt = 25>
+  template <size_t K>
   class GLL
   {
     public:
+      static constexpr size_t Count = K + 1;
+
       /// Number of GLL nodes (K + 1).
       static constexpr size_t getCount()
       {
-        return K + 1;
+        return Count;
       }
 
       /// i-th GLL node in [-1, 1], 0 <= i <= K.
@@ -72,7 +76,7 @@ namespace Rodin::Variational
 
         // N-term Taylor series for cos(x)
         // cos x ≈ 1 - x^2/2! + x^4/4! - ... up to x^{2N}/(2N)!
-        for (size_t n = 1; n <= 14; ++n)
+        for (size_t n = 1; n <= RODIN_VARIATIONAL_H1_GLL_TAYLOR_TERMS; ++n)
         {
           term *= -x2 / (static_cast<Real>(2 * n) * static_cast<Real>(2 * n - 1));
           sum  += term;
@@ -99,8 +103,6 @@ namespace Rodin::Variational
           return nodes;
         }
 
-        constexpr size_t maxIt = MaxIt;
-
         for (size_t i = 1; i < K; ++i)
         {
           // Initial guess: Chebyshev point
@@ -108,7 +110,7 @@ namespace Rodin::Variational
           const Real kReal = static_cast<Real>(K);
           Real x = static_cast<Real>(-constexpr_cos(Math::Constants::pi() * ii / kReal));
 
-          for (size_t it = 0; it < maxIt; ++it)
+          for (size_t it = 0; it < RODIN_VARIATIONAL_H1_GLL_MAX_ITERATIONS; ++it)
           {
             Real P, dP;
             LegendrePolynomial<K>::getValue(P, dP, x); // P_K(x), P'_K(x)
@@ -180,7 +182,7 @@ namespace Rodin::Variational
 
         for (size_t i = 0; i < K + 1; ++i)
         {
-          // Map from [-1, 1] to [0, 1]: x̂ = (x + 1)/2
+          // Map from [-1, 1] to [0, 1]: x_hat = (x + 1)/2
           nodes[i] = static_cast<Real>(0.5) * (gll[i] + static_cast<Real>(1.0));
         }
 

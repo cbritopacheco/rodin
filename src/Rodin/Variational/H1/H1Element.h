@@ -139,6 +139,8 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
     public:
+      static_assert(K > 0, "Polynomial degree K must be greater than 0.");
+
       friend class boost::serialization::access;
 
       /// Parent class
@@ -428,7 +430,7 @@ namespace Rodin::Variational
             if (s_nodes.empty())
             {
               const auto& tri = FeketeTriangle<K>::getNodes();
-              const auto& z   = GLL01<K>::getNodes();
+              const auto& z = GLL01<K>::getNodes();
 
               s_nodes.reserve(tri.size() * (K + 1));
               for (size_t k = 0; k <= K; ++k)
@@ -586,7 +588,6 @@ namespace Rodin::Variational
           case G::Segment:
           case G::Triangle:
           case G::Tetrahedron:
-            // Total-degree Pk on simplices
             return K;
 
           case G::Quadrilateral:
@@ -665,6 +666,8 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
     public:
+      static_assert(K > 0, "Polynomial degree K must be greater than 0.");
+
       friend class boost::serialization::access;
 
       /// Parent class

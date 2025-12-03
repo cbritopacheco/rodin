@@ -9,11 +9,12 @@
 
 /**
  * @file
- * @brief Forward declarations and type aliases for H1Element classes.
+ * @brief Forward declarations and type aliases for H1Element and H1 space classes.
  */
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::Variational
 {
@@ -33,6 +34,24 @@ namespace Rodin::Variational
    */
   template <size_t K, class Range>
   class H1Element;
+
+  /**
+   * @brief Degree K H1-conforming Lagrange finite element space.
+   * @tparam K Polynomial degree
+   * @tparam Range Range value type (Scalar or Math::Vector<Scalar>)
+   * @tparam Mesh Mesh type
+   *
+   * H1 provides a high-order H1-conforming finite element space built from
+   * H1Element. The space consists of continuous piecewise polynomial functions
+   * of degree K.
+   *
+   * @note For an overview of all the possible specializations of the
+   * H1 class, please see @ref H1Specializations.
+   *
+   * @see H1Specializations
+   */
+  template <size_t K, class Range, class Mesh>
+  class H1;
 
   /**
    * @brief Convenience alias for real-valued H1 element.

@@ -188,7 +188,7 @@ namespace Rodin::Geometry
   }
 
   Connectivity<Context::Local>&
-  Connectivity<Context::Local>::compute(size_t d, size_t dp)
+  Connectivity<Context::Local>::compute(size_t d, size_t dp, Mode mode)
   {
     if (getCount(0) == 0)
       return *this;
@@ -199,11 +199,11 @@ namespace Rodin::Geometry
       transpose(0, D).intersection(D, D, 0);
     assert(!m_dirty[D][D]);
     if (d != D && d != 0 && (m_dirty[D][d] || m_dirty[d][0]))
-      build(d);
+      build(d, mode);
     assert(!m_dirty[D][d]);
     assert(!m_dirty[d][0] || d == D || d == 0);
     if (dp != D && dp != 0 && (m_dirty[D][dp] || m_dirty[dp][0]))
-      build(dp);
+      build(dp, mode);
     assert(!m_dirty[D][dp]);
     assert(!m_dirty[dp][0] || dp == D || dp == 0);
     if (m_dirty[d][dp])
@@ -227,49 +227,95 @@ namespace Rodin::Geometry
   }
 
   Connectivity<Context::Local>&
-  Connectivity<Context::Local>::build(size_t d)
+  Connectivity<Context::Local>::build(size_t d, Mode mode)
   {
     const size_t D = getDimension();
     assert(d > 0);
     assert(d < D);
     assert(!m_dirty[D][0]);
     assert(!m_dirty[D][D]);
-    for (Index i = 0; i < m_count[D]; i++)
-      local(i, d);
+
+    m_connectivity[D][d].clear();
+    m_connectivity[D][d].reserve(m_count[D]);
+
+    for (Index i = 0; i < m_count[D]; ++i)
+      local(i, d, mode);
+
     m_dirty[D][d] = false;
-    m_dirty[d][0] = false;
+
+    switch (mode)
+    {
+      case Mode::Discover:
+      {
+        m_dirty[d][0] = false;
+        break;
+      }
+      case Mode::Restrict:
+      {
+        assert(!m_dirty[d][0]); // precondition for restricted mode
+        break;
+      }
+    }
+
     return *this;
   }
 
   Connectivity<Context::Local>&
-  Connectivity<Context::Local>::local(size_t i, size_t d)
+  Connectivity<Context::Local>::local(size_t i, size_t d, Mode mode)
   {
     static thread_local std::vector<SubPolytope> subpolytopes;
-
     std::vector<Index> s;
+
     const size_t D = getDimension();
     assert(d > 0);
     assert(d < D);
+
     this->getSubPolytopes(subpolytopes, i, d);
+
     for (auto& [geometry, vertices] : subpolytopes)
     {
-      auto insert = m_index[d].right.insert({ std::move(vertices), m_count[d] });
-      const auto it = insert.first;
-      const bool inserted = insert.second;
-      const auto& [arr, idx] = *it;
-      if (inserted)
+      Index idx;
+
+      switch (mode)
       {
-        auto& v = m_connectivity[d][0].emplace_back();
-        v.reserve(arr.size());
-        for (const Index& j : arr)
-          v.push_back(j);
-        m_index[d].left.push_back(&it->first);
-        m_geometry[d].push_back(geometry);
+        case Mode::Discover:
+        {
+          auto insert = m_index[d].right.insert({ std::move(vertices), m_count[d] });
+          const auto it = insert.first;
+          const bool inserted = insert.second;
+          const auto& arr = it->first;
+          idx = it->second;
+
+          if (inserted)
+          {
+            auto& v = m_connectivity[d][0].emplace_back();
+            v.reserve(arr.size());
+            for (Index j : arr)
+              v.push_back(j);
+            m_index[d].left.push_back(&it->first);
+            m_geometry[d].push_back(geometry);
+
+            if (d != 0 && d != D)
+            {
+              ++m_count[d];
+              ++m_gcount[geometry];
+            }
+          }
+          break;
+        }
+        case Mode::Restrict:
+        {
+          // LOOKUP ONLY
+          auto it = m_index[d].right.find(vertices);
+          if (it == m_index[d].right.end())
+            continue;       // this subpolytope is not in the tracked set
+          idx = it->second; // existing entity index
+          break;
+        }
       }
-      m_count[d] += inserted && !(d == D || d == 0);
-      m_gcount[geometry] += inserted && !(d == D || d == 0);
       s.push_back(idx);
     }
+
     m_connectivity[D][d].push_back(std::move(s));
     return *this;
   }

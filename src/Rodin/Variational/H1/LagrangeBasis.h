@@ -196,10 +196,6 @@ namespace Rodin::Variational
       }
   };
 
-  //==========================================================================
-  // Triangle basis (Pk on reference triangle (0,0),(1,0),(0,1))
-  //==========================================================================
-
   /**
    * @brief Lagrange basis on the reference triangle.
    *
@@ -313,10 +309,6 @@ namespace Rodin::Variational
         return result;
       }
   };
-
-  //==========================================================================
-  // Tetrahedron basis (Pk on reference tetra (0,0,0),(1,0,0),(0,1,0),(0,0,1))
-  //==========================================================================
 
   /**
    * @brief Lagrange basis on the reference tetrahedron.

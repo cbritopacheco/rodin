@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+
 #include "Rodin/Test/Random.h"
 
 // Disable strict aliasing and array-bounds warnings from Eigen for tests
@@ -9,9 +10,10 @@
 #endif
 
 #include <complex>
-#include "Rodin/Variational/P0.h"
-#include "Rodin/Variational/P1.h"
-#include "Rodin/Variational/Pk.h"
+
+#include "Rodin/Variational/P0/P0Element.h"
+#include "Rodin/Variational/P1/P1Element.h"
+#include "Rodin/Variational/H1/H1Element.h"
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
@@ -25,6 +27,24 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  TEST(Rodin_Variational_RealH1Element, LinearForm_Triangle_MustBeNodal)
+  {
+    RealH1Element<2> fe(Polytope::Type::Triangle);
+
+    auto f = [](const Math::SpatialPoint& x) -> Real {
+      return 2.0 * x.x() + 3.0 * x.y() + 1.0;
+    };
+
+    for (size_t i = 0; i < fe.getCount(); ++i)
+    {
+      const auto& lf   = fe.getLinearForm(i);
+      const auto& node = fe.getNode(i);
+      Real dof        = lf(f);
+      Real expected   = f(node);
+      EXPECT_NEAR(dof, expected, 1e-14) << "dof " << i << " is not nodal";
+    }
+  }
+
   // Test P2 element (K=2) on Point geometry
   TEST(Rodin_Variational_RealH1Element, SanityTest_P2_0D_Reference_Point)
   {
@@ -619,26 +639,6 @@ namespace Rodin::Tests::Unit
 
         EXPECT_EQ(grad_val.size(), 1);
         EXPECT_NEAR(grad_val(0), deriv_val, RODIN_FUZZY_CONSTANT);
-      }
-    }
-  }
-
-  // Test consistency across orders for identical geometries
-  TEST(Rodin_Variational_RealH1Element, CrossOrder_Consistency_Segment)
-  {
-    // Verify that nodes are uniformly distributed for all orders
-    for (size_t k = 2; k <= 6; k++)
-    {
-      // We can't instantiate templates with runtime values, so we check specific cases
-      if (k == 2)
-      {
-        RealH1Element<2> elem(Polytope::Type::Segment);
-        for (size_t i = 0; i < elem.getCount(); i++)
-        {
-          const auto& node = elem.getNode(i);
-          Real expected = static_cast<Real>(i) / static_cast<Real>(k);
-          EXPECT_NEAR(node.x(), expected, RODIN_FUZZY_CONSTANT);
-        }
       }
     }
   }
@@ -1736,8 +1736,6 @@ namespace Rodin::Tests::Unit
     // Test P3, P4, P5, P6
     for (size_t order = 3; order <= 6; order++)
     {
-      size_t dofs = order + 1;
-
       for (size_t i = 0; i < n; i++)
       {
         Math::Vector<Real> p{{gen()}};
@@ -2091,51 +2089,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealH1Element<6>(Polytope::Type::Segment).getOrder(), 6);
   }
 
-  // ========================================================================
-  // NEW COMPREHENSIVE TESTS FOR PKELEMENT K=0 THROUGH K=6
-  // ========================================================================
-
-  TEST(FinalTest_H1Element_Comprehensive, H1Element_K0_AllGeometries)
-  {
-    // Comprehensive tests for H1Element<0> across all geometries
-    // K=0 is piecewise constant element
-
-    for (auto geom : {Polytope::Type::Point, Polytope::Type::Segment,
-                      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
-                      Polytope::Type::Tetrahedron, Polytope::Type::Wedge})
-    {
-      RealH1Element<0> pk(geom);
-
-      // Should have 1 DOF
-      EXPECT_EQ(pk.getCount(), 1);
-
-      // Should have order 0
-      EXPECT_EQ(pk.getOrder(), 0);
-
-      // Test basis function value (constant = 1)
-      Math::Vector<Real> p;
-      switch (geom)
-      {
-        case Polytope::Type::Point:
-          p = Math::Vector<Real>{{0}};
-          break;
-        case Polytope::Type::Segment:
-          p = Math::Vector<Real>{{0.5}};
-          break;
-        case Polytope::Type::Triangle:
-        case Polytope::Type::Quadrilateral:
-          p = Math::Vector<Real>{{0.3, 0.3}};
-          break;
-        case Polytope::Type::Tetrahedron:
-        case Polytope::Type::Wedge:
-          p = Math::Vector<Real>{{0.25, 0.25, 0.25}};
-          break;
-      }
-
-      EXPECT_NEAR(pk.getBasis(0)(p), 1.0, RODIN_FUZZY_CONSTANT);
-    }
-  }
-
   TEST(FinalTest_H1Element_Comprehensive, H1Element_K1_AllGeometries)
   {
     // Comprehensive tests for H1Element<1> across all geometries
@@ -2344,7 +2297,6 @@ namespace Rodin::Tests::Unit
     // Verify DOF counts for all K values and geometries
 
     // Segment: K+1
-    EXPECT_EQ(RealH1Element<0>(Polytope::Type::Segment).getCount(), 1);
     EXPECT_EQ(RealH1Element<1>(Polytope::Type::Segment).getCount(), 2);
     EXPECT_EQ(RealH1Element<2>(Polytope::Type::Segment).getCount(), 3);
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Segment).getCount(), 4);
@@ -2353,7 +2305,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealH1Element<6>(Polytope::Type::Segment).getCount(), 7);
 
     // Triangle: (K+1)(K+2)/2
-    EXPECT_EQ(RealH1Element<0>(Polytope::Type::Triangle).getCount(), 1);
     EXPECT_EQ(RealH1Element<1>(Polytope::Type::Triangle).getCount(), 3);
     EXPECT_EQ(RealH1Element<2>(Polytope::Type::Triangle).getCount(), 6);
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Triangle).getCount(), 10);
@@ -2362,7 +2313,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealH1Element<6>(Polytope::Type::Triangle).getCount(), 28);
 
     // Quadrilateral: (K+1)^2
-    EXPECT_EQ(RealH1Element<0>(Polytope::Type::Quadrilateral).getCount(), 1);
     EXPECT_EQ(RealH1Element<1>(Polytope::Type::Quadrilateral).getCount(), 4);
     EXPECT_EQ(RealH1Element<2>(Polytope::Type::Quadrilateral).getCount(), 9);
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Quadrilateral).getCount(), 16);
@@ -2371,7 +2321,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealH1Element<6>(Polytope::Type::Quadrilateral).getCount(), 49);
 
     // Tetrahedron: (K+1)(K+2)(K+3)/6
-    EXPECT_EQ(RealH1Element<0>(Polytope::Type::Tetrahedron).getCount(), 1);
     EXPECT_EQ(RealH1Element<1>(Polytope::Type::Tetrahedron).getCount(), 4);
     EXPECT_EQ(RealH1Element<2>(Polytope::Type::Tetrahedron).getCount(), 10);
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Tetrahedron).getCount(), 20);
@@ -2380,7 +2329,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealH1Element<6>(Polytope::Type::Tetrahedron).getCount(), 84);
 
     // Wedge: (K+1)·(K+1)(K+2)/2
-    EXPECT_EQ(RealH1Element<0>(Polytope::Type::Wedge).getCount(), 1);
     EXPECT_EQ(RealH1Element<1>(Polytope::Type::Wedge).getCount(), 6);
     EXPECT_EQ(RealH1Element<2>(Polytope::Type::Wedge).getCount(), 18);
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Wedge).getCount(), 40);
@@ -2392,15 +2340,6 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_H1Element_Comprehensive, VectorH1Element_AllVectorDimensions)
   {
     // Test vector H1Element with vdim=1,2,3 for various K values
-
-    // K=0, vdim=1,2,3 on Segment
-    {
-      for (size_t vdim : {1, 2, 3})
-      {
-        H1Element<0, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
-        EXPECT_EQ(elem.getCount(), vdim * 1);
-      }
-    }
 
     // K=1, vdim=1,2,3 on Segment
     {
@@ -2435,17 +2374,10 @@ namespace Rodin::Tests::Unit
     // Test Lagrange property for all K values on Segment
     // phi_i(node_j) = delta_ij
 
-    for (size_t K : {0, 1, 2, 3, 4, 5, 6})
+    for (size_t K : {1, 2, 3, 4, 5, 6})
     {
       switch (K)
       {
-        case 0:
-        {
-          RealH1Element<0> elem(Polytope::Type::Segment);
-          const auto& node = elem.getNode(0);
-          EXPECT_NEAR(elem.getBasis(0)(node), 1.0, RODIN_FUZZY_CONSTANT);
-          break;
-        }
         case 1:
         {
           RealH1Element<1> elem(Polytope::Type::Segment);
@@ -2541,7 +2473,7 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_H1Element_LinearForm, ScalarLinearForm_K0_to_K6_Segment)
   {
     // Test LinearForm for all polynomial orders on Segment
-    for (size_t K : {0, 1, 2, 3, 4, 5, 6})
+    for (size_t K : {1, 2, 3, 4, 5, 6})
     {
       // Polynomial function of appropriate degree
       auto f = [K](const Math::SpatialPoint& x) -> Real {
@@ -2553,18 +2485,6 @@ namespace Rodin::Tests::Unit
 
       switch (K)
       {
-        case 0:
-        {
-          RealH1Element<0> elem(Polytope::Type::Segment);
-          for (size_t i = 0; i < elem.getCount(); i++)
-          {
-            const auto& lf = elem.getLinearForm(i);
-            Real dof_val = lf(f);
-            const auto& node = elem.getNode(i);
-            EXPECT_NEAR(dof_val, f(node), RODIN_FUZZY_CONSTANT);
-          }
-          break;
-        }
         case 1:
         {
           RealH1Element<1> elem(Polytope::Type::Segment);
@@ -2644,7 +2564,7 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_H1Element_LinearForm, VectorLinearForm_K0_to_K3_AllVectorDimensions)
   {
     // Test LinearForm for vector Pk elements
-    for (size_t K : {0, 1, 2, 3})
+    for (size_t K : {1, 2, 3})
     {
       for (size_t vdim : {1, 2, 3})
       {
@@ -2661,19 +2581,6 @@ namespace Rodin::Tests::Unit
 
         switch (K)
         {
-          case 0:
-          {
-            H1Element<0, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
-            for (size_t i = 0; i < elem.getCount(); i++)
-            {
-              const auto& lf = elem.getLinearForm(i);
-              Real dof_val = lf(f);
-              const auto& node = elem.getNode(i);
-              size_t comp = i % vdim;
-              EXPECT_NEAR(dof_val, f(node)(comp), RODIN_FUZZY_CONSTANT);
-            }
-            break;
-          }
           case 1:
           {
             H1Element<1, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
@@ -2835,7 +2742,7 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_H1Element_JacobianFunction, JacobianStructure_K0_to_K3)
   {
     // Test Jacobian function for vector Pk elements
-    for (size_t K : {0, 1, 2, 3})
+    for (size_t K : {1, 2, 3})
     {
       for (size_t vdim : {2, 3})
       {
@@ -2843,18 +2750,6 @@ namespace Rodin::Tests::Unit
 
         switch (K)
         {
-          case 0:
-          {
-            H1Element<0, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
-            for (size_t i = 0; i < elem.getCount(); i++)
-            {
-              auto jac_func = elem.getBasis(i).getJacobian();
-              const auto& jac = jac_func(p);
-              EXPECT_EQ(jac.rows(), vdim);
-              EXPECT_EQ(jac.cols(), 1);
-            }
-            break;
-          }
           case 1:
           {
             H1Element<1, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
@@ -2912,7 +2807,6 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(jac.cols(), 2);
 
       // Verify Jacobian entries
-      size_t comp = local % 2;
       for (size_t i = 0; i < 2; i++)
       {
         for (size_t j = 0; j < 2; j++)
@@ -2933,7 +2827,7 @@ namespace Rodin::Tests::Unit
     // Test that Pk element exactly interpolates polynomials of degree K
     RandomFloat gen(0.0, 1.0);
 
-    for (size_t K : {0, 1, 2, 3, 4, 5, 6})
+    for (size_t K : {1, 2, 3, 4, 5, 6})
     {
       // Polynomial of degree K
       auto f = [K](const Math::SpatialPoint& x) -> Real {
@@ -2945,23 +2839,6 @@ namespace Rodin::Tests::Unit
 
       switch (K)
       {
-        case 0:
-        {
-          RealH1Element<0> elem(Polytope::Type::Segment);
-          std::vector<Real> dofs(elem.getCount());
-          for (size_t i = 0; i < elem.getCount(); i++)
-            dofs[i] = elem.getLinearForm(i)(f);
-
-          for (size_t test = 0; test < 5; test++)
-          {
-            Math::Vector<Real> p{{gen()}};
-            Real interp = 0.0;
-            for (size_t i = 0; i < elem.getCount(); i++)
-              interp += dofs[i] * elem.getBasis(i)(p);
-            EXPECT_NEAR(interp, f(p), RODIN_FUZZY_CONSTANT);
-          }
-          break;
-        }
         case 1:
         {
           RealH1Element<1> elem(Polytope::Type::Segment);

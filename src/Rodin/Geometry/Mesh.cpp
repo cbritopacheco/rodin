@@ -659,6 +659,25 @@ namespace Rodin::Geometry
       {
         return build.nodes(1).vertex({0}).finalize();
       }
+      case Polytope::Type::Segment:
+      {
+        assert(dimensions.size() == 1);
+        const size_t n = dimensions.coeff(0);
+        assert(n >= 2);
+
+        build.initialize(dim).nodes(n);
+
+        // Vertices on a 1D uniform grid: 0, 1, ..., n-1
+        for (size_t i = 0; i < n; ++i)
+          build.vertex({ static_cast<Real>(i) });
+
+        // Uniform segments [i, i+1]
+        build.reserve(dim, n - 1);
+        for (size_t i = 0; i + 1 < n; ++i)
+          build.polytope(g, { i, i + 1 });
+
+        return build.finalize();
+      }
       case Polytope::Type::Triangle:
       {
         assert(dimensions.size() == 2);
