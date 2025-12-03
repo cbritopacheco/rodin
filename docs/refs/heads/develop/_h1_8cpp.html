@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Utility::Internal::Index struct | Rodin</title>
+  <title>Rodin/Variational/H1/H1.cpp file | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,51 +64,28 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_for_constexpr_8h.html">&lt;Rodin/Utility/ForConstexpr.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;size_t N&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility_1_1_internal.html">Internal</a>::<wbr/></span>Index <span class="m-thin">struct</span>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_4bca0b286e0f4e2445f6f25378ef63e0.html">H1</a>/</span>H1.cpp <span class="m-thin">file</span>
         </h1>
-        <p>Compile-time index wrapper.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">N</td>
-              <td>The index value.</td>
-            </tr>
-          </tbody>
-        </table>
+        <p>Implementation of H1 finite element space (currently header-only).</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#pub-static-attribs">Public static variables</a></li>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#namespaces">Namespaces</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Wraps an index value as a type with a static constexpr member, allowing compile-time access to loop indices within constexpr contexts.</p>
-        <section id="pub-static-attribs">
-          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+<p>This file provides the compilation unit for the H1 finite element space. Most H1 functionality is template-based and implemented in headers.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
-            <dt id="ab7461cf8c46973d6d8e4457c3fc08cb4">
-              static const size_t <a href="#ab7461cf8c46973d6d8e4457c3fc08cb4" class="m-doc-self">value</a> <span class="m-label m-flat m-primary">constexpr</span>
-            </dt>
-            <dd>The index value.</dd>
-          </dl>
-        </section>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt id="a8efec2be22560bad98fa1e6d24f77bd0">
-              <span class="m-doc-wrap-bumper"><a href="#a8efec2be22560bad98fa1e6d24f77bd0" class="m-doc-self">operator size_t</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Implicit conversion to size_t.</dd>
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Module which provides the necessary tools for constructing variational problems.</dd>
           </dl>
         </section>
       </div>

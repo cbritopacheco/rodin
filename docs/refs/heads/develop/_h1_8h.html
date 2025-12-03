@@ -396,7 +396,12 @@ $ (k+1) \cdot \frac{(k+1)(k+2)}{2} $
 <span class="n">ComplexH1Element</span><span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_c</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Quadrilateral</span><span class="p">);</span>
 
 <span class="c1">// Vector-valued H1 element for elasticity</span>
-<span class="n">VectorH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_v</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="_pk_8h.html" class="m-doc">Pk.h</a> for alternative include</p></aside></section>
+<span class="n">VectorH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_v</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+
+<span class="c1">// H1 finite element space of degree 2</span>
+<span class="n">H1</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre></section>
       </div>
     </div>
   </div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Utility/ForConstexpr.h file | Rodin</title>
+  <title>Rodin::Variational::H1 class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,30 +64,31 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_bb1cccf0f1bfa5c5894d1e15a316045e.html">Utility</a>/</span>ForConstexpr.h <span class="m-thin">file</span>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_variational_2_h1_2_forward_decls_8h.html">&lt;Rodin/Variational/H1/ForwardDecls.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;size_t K, class Range, class Mesh&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>H1 <span class="m-thin">class</span>
         </h1>
-        <p>Defines compile-time loop utilities for template metaprogramming.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-<p>This file provides utilities for performing compile-time iterations over parameter packs and index sequences, enabling powerful template metaprogramming patterns.</p>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Rodin::Utility</a></dt>
-            <dd>Module containing general purpose and language support utility classes.</dd>
-          </dl>
-        </section>
+        <p>Degree K H1-conforming Lagrange finite element space.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">K</td>
+              <td>Polynomial degree</td>
+            </tr>
+            <tr>
+              <td>Range</td>
+              <td>Range value type (Scalar or <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector&lt;Scalar&gt;</a>)</td>
+            </tr>
+            <tr>
+              <td>Mesh</td>
+              <td>Mesh type</td>
+            </tr>
+          </tbody>
+        </table>
+<p><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> provides a high-order H1-conforming finite element space built from <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>. The space consists of continuous piecewise polynomial functions of degree K.</p><aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> class, please see <a href="group___h1_specializations.html" class="m-doc">H1 Template Specializations</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="group___h1_specializations.html" class="m-doc">H1 Template Specializations</a></p></aside>
       </div>
     </div>
   </div>

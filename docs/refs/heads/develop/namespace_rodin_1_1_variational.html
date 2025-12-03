@@ -538,7 +538,7 @@ $ \mathbf{A} $
             </dt>
             <dd></dd>
             <dt>
-              <div class="m-doc-template">template&lt;size_t K, size_t MaxIt = 25&gt;</div>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_g_l_l.html" class="m-doc">GLL</a>
             </dt>
             <dd>Compile-time Gauss–Lobatto–Legendre (<a href="class_rodin_1_1_variational_1_1_g_l_l.html" class="m-doc">GLL</a>) nodes on [-1, 1].</dd>
@@ -619,6 +619,21 @@ $ u $
               class <a href="class_rodin_1_1_variational_1_1_g_t.html" class="m-doc">GT</a>
             </dt>
             <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range, class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>
+            </dt>
+            <dd>Degree K H1-conforming Lagrange finite element space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_00_01_geometry_dd8eb703cffd8f538c93f76bd94767dd.html" class="m-doc">H1&lt;K, Math::Vector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
+            </dt>
+            <dd>Vector-valued continuous piecewise polynomial (degree K) Lagrange finite element space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html" class="m-doc">H1&lt;K, Scalar, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
+            </dt>
+            <dd>Degree K H1-conforming Lagrange finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>
@@ -1357,22 +1372,37 @@ $
               <div class="m-doc-template">template&lt;size_t K&gt;</div>
               using <a href="#a5519f0efb971b7fab2cf3dbbacf42c56" class="m-doc">RealH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
-            <dd>Convenience alias for real-valued H1 element.</dd>
+            <dd>Convenience alias for real-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K&gt;</div>
               using <a href="#ab8a0310545623c72b4c533376a21385c" class="m-doc">ComplexH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;
             </dt>
-            <dd>Convenience alias for complex-valued H1 element.</dd>
+            <dd>Convenience alias for complex-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K&gt;</div>
               using <a href="#a48821e91b2b2f8502058511c31bc3b7e" class="m-doc">VectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </dt>
-            <dd>Convenience alias for real vector-valued H1 element.</dd>
+            <dd>Convenience alias for real vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K&gt;</div>
               using <a href="#a6b5f8e318606689037d8550f08bed2dc" class="m-doc">ComplexVectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;&gt;
             </dt>
-            <dd>Convenience alias for complex vector-valued H1 element.</dd>
+            <dd>Convenience alias for complex vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> element.</dd>
+            <dt id="a6f93620390a59b9215ea0ffaa75e0697">
+              <div class="m-doc-template">template&lt;size_t K, class Mesh&gt;</div>
+              using <a href="#a6f93620390a59b9215ea0ffaa75e0697" class="m-doc-self">RealH1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, Mesh&gt;
+            </dt>
+            <dd>Alias for a scalar real-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> finite element space.</dd>
+            <dt id="aa1730a975ffb826d60f1a9c8b77f16df">
+              <div class="m-doc-template">template&lt;size_t K, class Mesh&gt;</div>
+              using <a href="#aa1730a975ffb826d60f1a9c8b77f16df" class="m-doc-self">ComplexH1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>, Mesh&gt;
+            </dt>
+            <dd>Alias for a scalar complex-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> finite element space.</dd>
+            <dt id="a44491574c6de1b1ebc824fc20b540c15">
+              <div class="m-doc-template">template&lt;size_t K, class Mesh&gt;</div>
+              using <a href="#a44491574c6de1b1ebc824fc20b540c15" class="m-doc-self">VectorH1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, Mesh&gt;
+            </dt>
+            <dd>Alias for a vector-valued real <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> finite element space.</dd>
             <dt id="a69e6ba579db6ad5e2d0c043a14f363aa">
               using <a href="#a69e6ba579db6ad5e2d0c043a14f363aa" class="m-doc-self">RealP0Element</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
@@ -1501,7 +1531,7 @@ $
               </div>
               using Rodin::<wbr />Variational::<wbr /><a href="#a5519f0efb971b7fab2cf3dbbacf42c56" class="m-doc-self">RealH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </h3>
-            <p>Convenience alias for real-valued H1 element.</p>
+            <p>Convenience alias for real-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> element.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -1523,7 +1553,7 @@ $
               </div>
               using Rodin::<wbr />Variational::<wbr /><a href="#ab8a0310545623c72b4c533376a21385c" class="m-doc-self">ComplexH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;
             </h3>
-            <p>Convenience alias for complex-valued H1 element.</p>
+            <p>Convenience alias for complex-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> element.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -1545,7 +1575,7 @@ $
               </div>
               using Rodin::<wbr />Variational::<wbr /><a href="#a48821e91b2b2f8502058511c31bc3b7e" class="m-doc-self">VectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </h3>
-            <p>Convenience alias for real vector-valued H1 element.</p>
+            <p>Convenience alias for real vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> element.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -1567,7 +1597,7 @@ $
               </div>
               using Rodin::<wbr />Variational::<wbr /><a href="#a6b5f8e318606689037d8550f08bed2dc" class="m-doc-self">ComplexVectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;&gt;
             </h3>
-            <p>Convenience alias for complex vector-valued H1 element.</p>
+            <p>Convenience alias for complex vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> element.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>

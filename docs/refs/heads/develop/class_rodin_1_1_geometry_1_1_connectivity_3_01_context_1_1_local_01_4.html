@@ -204,6 +204,11 @@ $ d&#x27; $
               struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4_1_1_sub_polytope.html" class="m-doc">SubPolytope</a>
             </dt>
             <dd>Represents a sub-polytope (lower-dimensional face).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> { </span><span class="m-doc-wrap"><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Discover</a>,
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a034d70b46e41ec9d0306b0001e04cae7" class="m-doc">Restrict</a> }</span>
+            </dt>
+            <dd>Mode for connectivity construction.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -263,7 +268,8 @@ $ d&#x27; $
             </dt>
             <dd>Adds a polytope to the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aab032e0675098d8d0f3f752f6c43d37c" class="m-doc">build</a>(</span><span class="m-doc-wrap">size_t d) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acff92cc07b34806d9aba47c25aeb56a3" class="m-doc">build</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Computes the entities of dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
@@ -277,13 +283,15 @@ $ d $
 </g>
 </svg> of each cell and for each such entity the vertices of that entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afc92c2cf0af1718b147eadc864b4b311" class="m-doc">local</a>(</span><span class="m-doc-wrap">size_t i,
-              size_t d) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afb82c2e51fd315c954b48e48791b8828" class="m-doc">local</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t d,
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Extracts local connectivity for a specific polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a26e14101729b80eb883ff3704c9b1e3e" class="m-doc">compute</a>(</span><span class="m-doc-wrap">size_t d,
-              size_t dp) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ec2ec9cd836d6d86d5f1415e9197c1e" class="m-doc">compute</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t dp,
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Computes connectivity between dimensions.</dd>
             <dt>
@@ -365,6 +373,36 @@ $ d \rightarrow d&#x27; $
             </dt>
             <dd>Gets incident polytopes for a specific polytope.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="a46c8a310cf4c094f8c80e1cb8dc1f911"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              enum class Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc-self">Mode</a>
+            </h3>
+            <p>Mode for connectivity construction.</p>
+<p>Determines whether missing polytopes should be discovered and inserted during connectivity computation.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc-self" id="a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6">Discover</a></td>
+                  <td>
+                  <p>Discover and insert missing polytopes.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a034d70b46e41ec9d0306b0001e04cae7" class="m-doc-self" id="a46c8a310cf4c094f8c80e1cb8dc1f911a034d70b46e41ec9d0306b0001e04cae7">Restrict</a></td>
+                  <td>
+                  <p>Only use existing polytopes, do not insert new ones.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
         <section>
           <h2>Function documentation</h2>
@@ -572,12 +610,13 @@ $ d \rightarrow d&#x27; $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aab032e0675098d8d0f3f752f6c43d37c"><div>
+          <section class="m-doc-details" id="acff92cc07b34806d9aba47c25aeb56a3"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aab032e0675098d8d0f3f752f6c43d37c" class="m-doc-self">build</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acff92cc07b34806d9aba47c25aeb56a3" class="m-doc-self">build</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>)</span></span>
             </h3>
             <p>Computes the entities of dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
@@ -661,13 +700,14 @@ $ D \longrightarrow D $
 </g>
 </svg>.</p>
           </div></section>
-          <section class="m-doc-details" id="afc92c2cf0af1718b147eadc864b4b311"><div>
+          <section class="m-doc-details" id="afb82c2e51fd315c954b48e48791b8828"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc92c2cf0af1718b147eadc864b4b311" class="m-doc-self">local</a>(</span><span class="m-doc-wrap">size_t i,
-              size_t d)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb82c2e51fd315c954b48e48791b8828" class="m-doc-self">local</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t d,
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>)</span></span>
             </h3>
             <p>Extracts local connectivity for a specific polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -683,6 +723,10 @@ $ D \longrightarrow D $
                   <td>d&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Dimension of the polytope</td>
                 </tr>
+                <tr>
+                  <td>mode</td>
+                  <td></td>
+                </tr>
               </tbody>
               <tfoot>
                 <tr>
@@ -692,13 +736,14 @@ $ D \longrightarrow D $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a26e14101729b80eb883ff3704c9b1e3e"><div>
+          <section class="m-doc-details" id="a9ec2ec9cd836d6d86d5f1415e9197c1e"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26e14101729b80eb883ff3704c9b1e3e" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">size_t d,
-              size_t dp)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ec2ec9cd836d6d86d5f1415e9197c1e" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t dp,
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> mode = <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a>)</span></span>
             </h3>
             <p>Computes connectivity between dimensions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -713,6 +758,10 @@ $ D \longrightarrow D $
                 <tr>
                   <td>dp&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Target dimension</td>
+                </tr>
+                <tr>
+                  <td>mode</td>
+                  <td></td>
                 </tr>
               </tbody>
               <tfoot>
