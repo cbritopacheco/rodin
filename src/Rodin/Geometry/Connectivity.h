@@ -120,9 +120,67 @@ namespace Rodin::Geometry
    *
    * # Usage
    *
-   * Connectivity must be computed before use:
+   * ## Basic Connectivity Computation
+   *
+   * Connectivity must be computed before use. The compute() method accepts an
+   * optional Mode parameter to control how missing polytopes are handled:
+   *
    * @code{.cpp}
-   * mesh.getConnectivity().compute(1, 2); // Compute face-to-cell incidence
+   * // Compute face-to-cell incidence (edges to cells in 2D)
+   * mesh.getConnectivity().compute(1, 2);
+   *
+   * // Compute with explicit mode (default is Mode::Discover)
+   * mesh.getConnectivity().compute(1, 2, Connectivity<Context::Local>::Mode::Discover);
+   * @endcode
+   *
+   * ## Mode Parameter
+   *
+   * The Mode parameter controls how connectivity computation handles missing polytopes:
+   *
+   * - **Mode::Discover** (default): Automatically discovers and creates missing 
+   *   sub-polytopes (e.g., edges, faces) during computation. This is the most 
+   *   common mode and ensures all necessary polytopes exist.
+   *
+   * - **Mode::Restrict**: Only uses polytopes that already exist in the connectivity.
+   *   Missing polytopes are not created. This mode is useful when you want to 
+   *   restrict connectivity to a specific subset of polytopes or when all required
+   *   polytopes have been pre-computed.
+   *
+   * Example demonstrating the difference:
+   * @code{.cpp}
+   * Connectivity<Context::Local> connectivity;
+   * connectivity.initialize(2)
+   *             .nodes(4)
+   *             .polytope(Polytope::Type::Triangle, {0, 1, 2})
+   *             .polytope(Polytope::Type::Triangle, {1, 2, 3});
+   *
+   * // Mode::Discover will create all edges automatically
+   * connectivity.compute(2, 1, Connectivity<Context::Local>::Mode::Discover);
+   * // Now connectivity.getCount(1) returns 5 (the edges were created)
+   *
+   * // Mode::Restrict only uses existing edges
+   * connectivity.clear(2, 1);
+   * connectivity.compute(2, 1, Connectivity<Context::Local>::Mode::Restrict);
+   * // Uses only edges that already exist (all 5 from previous computation)
+   * @endcode
+   *
+   * ## Common Connectivity Patterns
+   *
+   * @code{.cpp}
+   * auto& conn = mesh.getConnectivity();
+   *
+   * // Compute cell-to-vertex connectivity
+   * conn.compute(2, 0);
+   *
+   * // Compute edge-to-cell connectivity (for boundary/interface detection)
+   * conn.compute(1, 2);
+   *
+   * // Compute cell-to-cell connectivity (neighbors sharing faces)
+   * conn.compute(2, 2);
+   *
+   * // Get the edges of a specific cell
+   * conn.compute(2, 1);
+   * const auto& edges = conn.getIncidence({2, 1}, cellIndex);
    * @endcode
    *
    * # Storage Efficiency
@@ -136,7 +194,7 @@ namespace Rodin::Geometry
    * Connectivity objects are not thread-safe during construction. Once
    * finalized, read-only access is thread-safe.
    *
-   * @see ConnectivityBase, Mesh
+   * @see ConnectivityBase, Mesh, Mode
    */
   template <>
   class Connectivity<Context::Local> final : public ConnectivityBase
@@ -147,13 +205,71 @@ namespace Rodin::Geometry
       /**
        * @brief Mode for connectivity construction.
        *
-       * Determines whether missing polytopes should be discovered and
-       * inserted during connectivity computation.
+       * Controls how connectivity computation handles missing polytopes during
+       * the computation of incidence relations. This affects whether new
+       * sub-polytopes (edges, faces, etc.) are automatically created or only
+       * existing polytopes are used.
+       *
+       * # Mode::Discover
+       *
+       * Automatically discovers and inserts missing polytopes during connectivity
+       * computation. This is the default and most commonly used mode.
+       *
+       * **Behavior:**
+       * - When computing connectivity from dimension @p d to dimension @p dp,
+       *   any missing polytopes of dimension @p dp that are incident to polytopes
+       *   of dimension @p d are automatically created and inserted.
+       * - Edge and face counts will increase as new entities are discovered.
+       * - Ensures complete connectivity information.
+       *
+       * **Use when:**
+       * - Building connectivity for a new mesh
+       * - You need all sub-polytopes (edges, faces) to be available
+       * - Standard mesh operations that require complete connectivity
+       *
+       * **Example:**
+       * @code{.cpp}
+       * connectivity.compute(2, 1, Mode::Discover);
+       * // Creates all edges of cells automatically
+       * @endcode
+       *
+       * # Mode::Restrict
+       *
+       * Only uses polytopes that already exist in the connectivity without
+       * creating new ones.
+       *
+       * **Behavior:**
+       * - Only references polytopes of dimension @p dp that have been previously
+       *   added to the connectivity.
+       * - Polytope counts remain unchanged.
+       * - Missing polytopes are silently skipped.
+       * - Useful for partial connectivity or working with pre-defined subsets.
+       *
+       * **Use when:**
+       * - All required polytopes have been pre-computed
+       * - You want to restrict connectivity to a specific subset of polytopes
+       * - Re-computing connectivity relations after clearing them
+       * - Performance is critical and you've already built necessary polytopes
+       *
+       * **Example:**
+       * @code{.cpp}
+       * // First, build edges with Discover mode
+       * connectivity.compute(2, 1, Mode::Discover);
+       * // Later, rebuild the relation using existing edges
+       * connectivity.clear(2, 1);
+       * connectivity.compute(2, 1, Mode::Restrict);
+       * @endcode
+       *
+       * @note Mode::Restrict requires that the target polytopes already exist.
+       *       If a sub-polytope hasn't been added to the connectivity, it won't
+       *       be included in the incidence relation.
+       *
+       * @see compute(), build(), local()
        */
       enum class Mode
       {
-        Discover, ///< Discover and insert missing polytopes
-        Restrict ///< Only use existing polytopes, do not insert new ones
+        Discover, ///< Discover and insert missing polytopes automatically
+        Restrict  ///< Only use existing polytopes, do not insert new ones
       };
 
       /**
@@ -313,28 +429,71 @@ namespace Rodin::Geometry
        *  D \longrightarrow d \quad \text{and} \quad D \longrightarrow 0, \quad 0 < d < D,
        * @f]
        * from @f$ D \longrightarrow 0 @f$ and @f$ D \longrightarrow D @f$.
+       *
+       * @param[in] d Dimension of entities to build
+       * @param[in] mode Computation mode (default: Mode::Discover)
+       *   - Mode::Discover: Automatically creates missing sub-polytopes
+       *   - Mode::Restrict: Only uses existing polytopes
+       * @returns Reference to this connectivity object
        */
       Connectivity& build(size_t d, Mode mode = Mode::Discover);
 
       /**
        * @brief Extracts local connectivity for a specific polytope.
+       *
+       * Computes the sub-polytopes of a given polytope and establishes the
+       * connectivity relations.
+       *
        * @param[in] i Polytope index
-       * @param[in] d Dimension of the polytope
-       * @param[in] restricted If true, only include sub-polytopes that are
-       * already present in the connectivity; if false, insert missing
-       * sub-polytopes.
+       * @param[in] d Dimension of the sub-polytopes to extract
+       * @param[in] mode Computation mode (default: Mode::Discover)
+       *   - Mode::Discover: Creates missing sub-polytopes and inserts them
+       *   - Mode::Restrict: Only includes sub-polytopes already present in the connectivity
        * @returns Reference to this connectivity object
+       *
+       * @note When mode is Mode::Restrict, sub-polytopes not already present
+       *       in the connectivity will be skipped.
        */
       Connectivity& local(size_t i, size_t d, Mode mode = Mode::Discover);
 
       /**
        * @brief Computes connectivity between dimensions.
-       * @param[in] d Source dimension
-       * @param[in] dp Target dimension
-       * @returns Reference to this connectivity object
        *
        * Computes the incidence relation from polytopes of dimension @p d
-       * to polytopes of dimension @p dp.
+       * to polytopes of dimension @p dp. This establishes which polytopes
+       * of dimension @p dp are incident to each polytope of dimension @p d.
+       *
+       * @param[in] d Source dimension
+       * @param[in] dp Target dimension
+       * @param[in] mode Computation mode (default: Mode::Discover)
+       *   - Mode::Discover: Automatically discovers and creates missing polytopes
+       *     of dimension @p dp that are incident to polytopes of dimension @p d
+       *   - Mode::Restrict: Only uses polytopes of dimension @p dp that already
+       *     exist in the connectivity
+       * @returns Reference to this connectivity object
+       *
+       * # Common Use Cases
+       *
+       * - `compute(2, 0)`: Cell-to-vertex connectivity
+       * - `compute(2, 1)`: Cell-to-edge connectivity (in 2D) or Cell-to-face connectivity (in 3D)
+       * - `compute(1, 2)`: Edge-to-cell connectivity (useful for boundary detection)
+       * - `compute(2, 2)`: Cell-to-cell connectivity (neighboring cells)
+       *
+       * # Mode Selection
+       *
+       * Use Mode::Discover when:
+       * - Computing connectivity for the first time
+       * - You want all sub-polytopes to be automatically created
+       * - Working with a new mesh where edges/faces haven't been generated
+       *
+       * Use Mode::Restrict when:
+       * - All required polytopes already exist
+       * - You want to limit connectivity to a specific subset
+       * - Re-computing connectivity after clearing previous relations
+       *
+       * @note Mode::Restrict requires that polytopes of the target dimension
+       *       already exist. If they don't exist, they will not be referenced
+       *       in the resulting connectivity.
        */
       Connectivity& compute(size_t d, size_t dp, Mode mode = Mode::Discover);
 
