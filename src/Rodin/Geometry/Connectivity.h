@@ -302,7 +302,7 @@ namespace Rodin::Geometry
        * @f]
        * from @f$ D \longrightarrow 0 @f$ and @f$ D \longrightarrow D @f$.
        */
-      Connectivity& build(size_t d);
+      Connectivity& build(size_t d, bool restricted = false);
 
       /**
        * @brief Extracts local connectivity for a specific polytope.
@@ -324,7 +324,7 @@ namespace Rodin::Geometry
        * Computes the incidence relation from polytopes of dimension @p d
        * to polytopes of dimension @p dp.
        */
-      Connectivity& compute(size_t d, size_t dp);
+      Connectivity& compute(size_t d, size_t dp, bool restricted = false);
 
       /**
        * @brief Transposes a connectivity relation.

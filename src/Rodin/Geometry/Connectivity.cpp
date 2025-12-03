@@ -188,7 +188,7 @@ namespace Rodin::Geometry
   }
 
   Connectivity<Context::Local>&
-  Connectivity<Context::Local>::compute(size_t d, size_t dp)
+  Connectivity<Context::Local>::compute(size_t d, size_t dp, bool restricted)
   {
     if (getCount(0) == 0)
       return *this;
@@ -199,11 +199,11 @@ namespace Rodin::Geometry
       transpose(0, D).intersection(D, D, 0);
     assert(!m_dirty[D][D]);
     if (d != D && d != 0 && (m_dirty[D][d] || m_dirty[d][0]))
-      build(d);
+      build(d, restricted);
     assert(!m_dirty[D][d]);
     assert(!m_dirty[d][0] || d == D || d == 0);
     if (dp != D && dp != 0 && (m_dirty[D][dp] || m_dirty[dp][0]))
-      build(dp);
+      build(dp, restricted);
     assert(!m_dirty[D][dp]);
     assert(!m_dirty[dp][0] || dp == D || dp == 0);
     if (m_dirty[d][dp])
@@ -227,18 +227,13 @@ namespace Rodin::Geometry
   }
 
   Connectivity<Context::Local>&
-  Connectivity<Context::Local>::build(size_t d)
+  Connectivity<Context::Local>::build(size_t d, bool restricted)
   {
     const size_t D = getDimension();
     assert(d > 0);
     assert(d < D);
     assert(!m_dirty[D][0]); // cells→vertices must already exist
     assert(!m_dirty[D][D]); // cells→cells (diagonal) is ready
-
-    const bool restricted =
-        !m_dirty[d][0] &&
-        !m_connectivity[d][0].empty() &&
-        m_connectivity[d][0].size() == m_count[d];
 
     // We always rebuild D→d
     m_connectivity[D][d].clear();

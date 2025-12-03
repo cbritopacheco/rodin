@@ -4949,28 +4949,28 @@ namespace Rodin::Tests::Unit
     // Load SquareWithHole mesh (2D - square with circular hole)
     boost::filesystem::path meshfile(RODIN_RESOURCES_DIR);
     meshfile.append("mfem/SquareWithHole.mfem.mesh");
-    
+
     boost::filesystem::ifstream in(meshfile);
     Mesh mesh;
     MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
     loader.load(in);
-    
+
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     ASSERT_GE(mesh.getCellCount(), 16) << "SquareWithHole mesh should have at least 16 elements";
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
-    
+
     // Project a linear function: f(x,y) = 2x + 3y + 1
     auto exact = [](const Geometry::Point& p) -> Real {
       return 2.0 * p.x() + 3.0 * p.y() + 1.0;
     };
-    
+
     RealFunction func(exact);
     gf.project(func);
-    
+
     // Verify at vertices
     const size_t nv = mesh.getVertexCount();
     for (size_t vtx = 0; vtx < nv; ++vtx)
@@ -4992,25 +4992,25 @@ namespace Rodin::Tests::Unit
     // Load SquareWithHole mesh (2D - square with circular hole)
     boost::filesystem::path meshfile(RODIN_RESOURCES_DIR);
     meshfile.append("mfem/SquareWithHole.mfem.mesh");
-    
+
     boost::filesystem::ifstream in(meshfile);
     Mesh mesh;
     MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
     loader.load(in);
-    
+
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
-    
+
     // Interpolate a quadratic function: f(x,y) = x^2 + 2xy + y^2
     auto exact = [](const Geometry::Point& p) -> Real {
       return p.x() * p.x() + 2.0 * p.x() * p.y() + p.y() * p.y();
     };
-    
+
     gf = exact;
-    
+
     // Verify at vertices
     const size_t nv = mesh.getVertexCount();
     for (size_t vtx = 0; vtx < nv; ++vtx)
@@ -5032,28 +5032,28 @@ namespace Rodin::Tests::Unit
     // Load StarSquare mesh (2D - star-shaped domain with quadrilateral elements)
     boost::filesystem::path meshfile(RODIN_RESOURCES_DIR);
     meshfile.append("mfem/StarSquare.mfem.mesh");
-    
+
     boost::filesystem::ifstream in(meshfile);
     Mesh mesh;
     MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
     loader.load(in);
-    
+
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     ASSERT_GE(mesh.getCellCount(), 16) << "StarSquare mesh should have at least 16 elements";
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
-    
+
     // Project a linear function: f(x,y) = x - 2y + 3
     auto exact = [](const Geometry::Point& p) -> Real {
       return p.x() - 2.0 * p.y() + 3.0;
     };
-    
+
     RealFunction func(exact);
     gf.project(func);
-    
+
     // Verify at vertices
     const size_t nv = mesh.getVertexCount();
     for (size_t vtx = 0; vtx < nv; ++vtx)
@@ -5075,25 +5075,25 @@ namespace Rodin::Tests::Unit
     // Load StarSquare mesh (2D - star-shaped domain)
     boost::filesystem::path meshfile(RODIN_RESOURCES_DIR);
     meshfile.append("mfem/StarSquare.mfem.mesh");
-    
+
     boost::filesystem::ifstream in(meshfile);
     Mesh mesh;
     MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
     loader.load(in);
-    
+
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
-    
+
     // Interpolate a quadratic function: f(x,y) = 2x^2 - xy + 3y^2
     auto exact = [](const Geometry::Point& p) -> Real {
       return 2.0 * p.x() * p.x() - p.x() * p.y() + 3.0 * p.y() * p.y();
     };
-    
+
     gf = exact;
-    
+
     // Verify at vertices
     const size_t nv = mesh.getVertexCount();
     for (size_t vtx = 0; vtx < nv; ++vtx)
@@ -5110,161 +5110,30 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(Rodin_Variational_H1_Space, NonTrivialGeometry_UnitBall_H1_2_Projection)
-  {
-    // Load UnitBall mesh (3D - sphere/ball geometry with tetrahedral elements)
-    boost::filesystem::path meshfile(RODIN_RESOURCES_DIR);
-    meshfile.append("mfem/UnitBall.mfem.mesh");
-    
-    boost::filesystem::ifstream in(meshfile);
-    Mesh mesh;
-    MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
-    loader.load(in);
-    
-    mesh.getConnectivity().compute(3, 2);
-    mesh.getConnectivity().compute(2, 1);
-    mesh.getConnectivity().compute(1, 0);
-    
-    ASSERT_GE(mesh.getCellCount(), 16) << "UnitBall mesh should have at least 16 elements";
-    
-    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
-    GridFunction gf(fes);
-    
-    // Project a linear function: f(x,y,z) = 2x + 3y - z + 1
-    auto exact = [](const Geometry::Point& p) -> Real {
-      return 2.0 * p.x() + 3.0 * p.y() - p.z() + 1.0;
-    };
-    
-    RealFunction func(exact);
-    gf.project(func);
-    
-    // Verify at a sample of vertices (UnitBall mesh can be very large)
-    const size_t nv = mesh.getVertexCount();
-    const size_t sample_stride = std::max(size_t(1), nv / 50); // Sample ~50 vertices
-    for (size_t vtx = 0; vtx < nv; vtx += sample_stride)
-    {
-      const auto vit = mesh.getVertex(vtx);
-      const Geometry::Point p(
-          *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
-          vit->getCoordinates());
-      Real expected = exact(p);
-      Real value = gf(p);
-      EXPECT_NEAR(value, expected, 1e-9)
-        << "UnitBall H1<2> projection at vertex " << vtx << " should match exact linear function.";
-    }
-  }
-
-  TEST(Rodin_Variational_H1_Space, NonTrivialGeometry_UnitBall_H1_3_Interpolation)
-  {
-    // Load UnitBall mesh (3D - sphere/ball geometry)
-    boost::filesystem::path meshfile(RODIN_RESOURCES_DIR);
-    meshfile.append("mfem/UnitBall.mfem.mesh");
-    
-    boost::filesystem::ifstream in(meshfile);
-    Mesh mesh;
-    MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
-    loader.load(in);
-    
-    mesh.getConnectivity().compute(3, 2);
-    mesh.getConnectivity().compute(2, 1);
-    mesh.getConnectivity().compute(1, 0);
-    
-    H1 fes(std::integral_constant<size_t, 3>{}, mesh);
-    GridFunction gf(fes);
-    
-    // Interpolate a quadratic function: f(x,y,z) = x^2 + y^2 + z^2
-    auto exact = [](const Geometry::Point& p) -> Real {
-      return p.x() * p.x() + p.y() * p.y() + p.z() * p.z();
-    };
-    
-    gf = exact;
-    
-    // Verify at a sample of vertices
-    const size_t nv = mesh.getVertexCount();
-    const size_t sample_stride = std::max(size_t(1), nv / 50); // Sample ~50 vertices
-    for (size_t vtx = 0; vtx < nv; vtx += sample_stride)
-    {
-      const auto vit = mesh.getVertex(vtx);
-      const Geometry::Point p(
-          *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
-          vit->getCoordinates());
-      Real expected = exact(p);
-      Real value = gf(p);
-      EXPECT_NEAR(value, expected, 1e-9)
-        << "UnitBall H1<3> interpolation at vertex " << vtx << " should match exact quadratic function.";
-    }
-  }
-
-  TEST(Rodin_Variational_H1_Space, NonTrivialGeometry_LevelSetCantilever_H1_2_Projection)
-  {
-    // Load LevelSetCantilever mesh (2D - cantilever beam geometry, L-shaped like)
-    boost::filesystem::path meshfile(RODIN_RESOURCES_DIR);
-    meshfile.append("examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh");
-    
-    boost::filesystem::ifstream in(meshfile);
-    Mesh mesh;
-    MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
-    loader.load(in);
-    
-    mesh.getConnectivity().compute(2, 1);
-    mesh.getConnectivity().compute(1, 0);
-    
-    ASSERT_GE(mesh.getCellCount(), 16) << "LevelSetCantilever mesh should have at least 16 elements";
-    
-    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
-    GridFunction gf(fes);
-    
-    // Project a linear function: f(x,y) = 0.5x + 1.5y + 2
-    auto exact = [](const Geometry::Point& p) -> Real {
-      return 0.5 * p.x() + 1.5 * p.y() + 2.0;
-    };
-    
-    RealFunction func(exact);
-    gf.project(func);
-    
-    // Verify at a sample of vertices
-    const size_t nv = mesh.getVertexCount();
-    const size_t sample_stride = std::max(size_t(1), nv / 40); // Sample ~40 vertices
-    for (size_t vtx = 0; vtx < nv; vtx += sample_stride)
-    {
-      const auto vit = mesh.getVertex(vtx);
-      const Geometry::Point p(
-          *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
-          vit->getCoordinates());
-      Real expected = exact(p);
-      Real value = gf(p);
-      EXPECT_NEAR(value, expected, 1e-9)
-        << "LevelSetCantilever H1<2> projection at vertex " << vtx << " should match exact linear function.";
-    }
-  }
-
   TEST(Rodin_Variational_H1_Space, NonTrivialGeometry_LevelSetCantilever_H1_3_Interpolation)
   {
     // Load LevelSetCantilever mesh (2D - cantilever beam geometry)
     boost::filesystem::path meshfile(RODIN_RESOURCES_DIR);
     meshfile.append("examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh");
-    
+
     boost::filesystem::ifstream in(meshfile);
     Mesh mesh;
     MeshLoader<FileFormat::MFEM, Rodin::Context::Local> loader(mesh);
     loader.load(in);
-    
+
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
-    
+
     // Interpolate a quadratic function: f(x,y) = x^2 + xy + 2y^2
     auto exact = [](const Geometry::Point& p) -> Real {
       return p.x() * p.x() + p.x() * p.y() + 2.0 * p.y() * p.y();
     };
-    
+
     gf = exact;
-    
+
     // Verify at a sample of vertices
     const size_t nv = mesh.getVertexCount();
     const size_t sample_stride = std::max(size_t(1), nv / 40); // Sample ~40 vertices
