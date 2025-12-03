@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1764199060579,
+  "lastUpdate": 1764769545179,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -39766,6 +39766,162 @@ window.BENCHMARK_DATA = {
             "value": 51.03447155358135,
             "unit": "ns/iter",
             "extra": "iterations: 12035837\ncpu: 51.02301119564857 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "198982749+Copilot@users.noreply.github.com",
+            "name": "Copilot",
+            "username": "Copilot"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bffa490bf57ff15d9fbbaf61ec98997b47906223",
+          "message": "Implement H1 finite element space using H1Element (#156)\n\n* Initial plan\n\n* Implement H1<K> finite element space using H1Element\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Address code review comments: clarify K=0 behavior and fix coeffRef usage\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix compilation\n\n* Comment out to start fixing\n\n* Fix compile add example to test\n\n* Fix compilation\n\n* Implement numbering\n\n* Add comprehensive H1<K> behavioral tests for K=1 to K=6\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add comprehensive H1 tests: interpolation, indexing, 16x16 meshes, vector, and complex\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add proper interpolation value verification tests for H1<K> spaces\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix tests\n\n* Add comprehensive H1 tests across all geometries: Segment, Quadrilateral, Tetrahedron, Wedge\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Improve comments for wedge DOF count constants\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add cross-geometry interpolation tests for K=2, K=3, K=6\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fixed ordering\n\n* Fix compilation\n\n* Add interpolation tests on 8x8 grids and single cell meshes for K=3 across all geometries\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Restore local ordering. Interpolation will fail.\n\n* Add Cochain\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* All tests pass !\n\n* Add comprehensive projection and interpolation tests for all geometries with non-trivial meshes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* CI\n\n* Add Segment case\n\n* Add non-trivial 3D mesh tests with 16+ elements for Tetrahedron and Wedge geometries\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add non-trivial geometry tests for H1 spaces (SquareWithHole, StarSquare, UnitBall, LevelSetCantilever)\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Calculate full connectivity by default\n\n* Slight refactor\n\n* Add comprehensive documentation for H1 class, Cochain, and getClosure method\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: cbritopacheco <carlos.brito524@gmail.com>",
+          "timestamp": "2025-12-03T14:40:21+01:00",
+          "tree_id": "cfbb12506dec6bef2e0b2c7e1c424796dcac3c2f",
+          "url": "https://github.com/cbritopacheco/rodin/commit/bffa490bf57ff15d9fbbaf61ec98997b47906223"
+        },
+        "date": 1764769527334,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.3150626496774281,
+            "unit": "ns/iter",
+            "extra": "iterations: 2158734419\ncpu: 0.3150251476117313 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.31718780209959624,
+            "unit": "ns/iter",
+            "extra": "iterations: 2247675542\ncpu: 0.3170700208651377 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.3109057712401668,
+            "unit": "ns/iter",
+            "extra": "iterations: 2250634619\ncpu: 0.31087241709223884 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.31124069983093805,
+            "unit": "ns/iter",
+            "extra": "iterations: 2251985275\ncpu: 0.3112046933788235 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 616.187508323085,
+            "unit": "ns/iter",
+            "extra": "iterations: 1148909\ncpu: 616.1199685962939 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 126752.48192770877,
+            "unit": "ns/iter",
+            "extra": "iterations: 5561\ncpu: 126738.31487142613 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 539676.0365018732,
+            "unit": "ns/iter",
+            "extra": "iterations: 1315\ncpu: 539659.7231939165 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 1060.5805902810725,
+            "unit": "ns/iter",
+            "extra": "iterations: 665378\ncpu: 1060.4632765135002 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 222434.65459167695,
+            "unit": "ns/iter",
+            "extra": "iterations: 3147\ncpu: 222418.08198284073 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 1024587.4462810497,
+            "unit": "ns/iter",
+            "extra": "iterations: 726\ncpu: 1024432.0922864996 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 265208.8060538059,
+            "unit": "ns/iter",
+            "extra": "iterations: 2676\ncpu: 265193.0881913298 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 243136.3139493326,
+            "unit": "ns/iter",
+            "extra": "iterations: 2803\ncpu: 243097.6674991079 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 13594.432298956981,
+            "unit": "ns/iter",
+            "extra": "iterations: 51432\ncpu: 13592.75007777259 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 6087419.211864618,
+            "unit": "ns/iter",
+            "extra": "iterations: 118\ncpu: 6086414.525423729 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 111952.22982846138,
+            "unit": "ns/iter",
+            "extra": "iterations: 6296\ncpu: 111936.22013977126 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2100241.155688535,
+            "unit": "ns/iter",
+            "extra": "iterations: 334\ncpu: 2100002.3802395198 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9268818.933333782,
+            "unit": "ns/iter",
+            "extra": "iterations: 75\ncpu: 9267483.90666667 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 46732877.83333061,
+            "unit": "ns/iter",
+            "extra": "iterations: 12\ncpu: 46726132.0833335 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 318184856.99997723,
+            "unit": "ns/iter",
+            "extra": "iterations: 2\ncpu: 318115191.5000005 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_16x16",
+            "value": 48.63611461456674,
+            "unit": "ns/iter",
+            "extra": "iterations: 14389759\ncpu: 48.62169484561895 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_32x32",
+            "value": 48.78754153157766,
+            "unit": "ns/iter",
+            "extra": "iterations: 14376711\ncpu: 48.7757726367316 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_64x64",
+            "value": 49.74422695575857,
+            "unit": "ns/iter",
+            "extra": "iterations: 12469461\ncpu: 49.74067243163122 ns\nthreads: 1"
           }
         ]
       }
