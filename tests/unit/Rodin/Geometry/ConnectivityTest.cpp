@@ -706,7 +706,8 @@ namespace Rodin::Tests::Unit
     connectivity.compute(2, 1, Connectivity<Context::Local>::Mode::Discover);
 
     // After computing with Discover mode, edges should exist
-    EXPECT_EQ(connectivity.getCount(1), 5);  // 5 unique edges in two triangles
+    // Two triangles: 3+3=6 edges total, sharing 1 common edge = 5 unique edges
+    EXPECT_EQ(connectivity.getCount(1), 5);
   }
 
   TEST(Rodin_Geometry_Connectivity, Mode_Restrict_2D_OnlyUsesExisting)
@@ -1076,7 +1077,9 @@ namespace Rodin::Tests::Unit
     // Central vertex (0) should be in all 6 triangles
     EXPECT_EQ(connectivity.getIncidence({0, 2}, 0).size(), 6);
 
-    // Should have 12 edges (each triangle shares edges with neighbors)
+    // Should have 12 edges total:
+    // - 6 radial edges connecting center vertex to perimeter vertices
+    // - 6 perimeter edges connecting adjacent perimeter vertices
     EXPECT_EQ(connectivity.getCount(1), 12);
   }
 
