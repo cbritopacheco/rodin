@@ -976,7 +976,6 @@ namespace Rodin::IO
         {
           line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
           data.coeffRef(0) = std::stod(line);
-          assert(data.size() >= 0);
           for (size_t i = 1; i < static_cast<size_t>(data.size()); i++)
             is >> data.coeffRef(i);
           if (header.ordering == MFEM::Ordering::VectorDimension)
