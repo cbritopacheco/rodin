@@ -77,8 +77,40 @@ namespace Rodin::Variational
    * This class is scalar valued, i.e. evaluations of the function are of
    * Rodin::Real type.
    *
+   * ## Building the H1 Space
+   *
+   * The H1 space is built by distributing degrees of freedom (DOFs) across the
+   * mesh entities based on polynomial degree K:
+   * - **K ≥ 1**: Each vertex carries exactly 1 DOF (nodal value)
+   * - **K ≥ 2**: Each edge carries K-1 interior DOFs (in addition to endpoint vertices)
+   * - **K ≥ 3**: Each face (2D) carries interior DOFs (triangle: (K-1)(K-2)/2, quad: (K-1)²)
+   * - **K ≥ 4**: Each cell (3D) carries interior DOFs
+   *
+   * The construction requires the mesh connectivity chain from the highest
+   * dimension D down to dimension 0:
+   * @f[
+   *  D \to D-1 \to \ldots \to 1 \to 0
+   * @f]
+   *
+   * This connectivity is necessary because DOF numbering proceeds top-down:
+   * starting from cells (dimension D), we recursively number DOFs on faces,
+   * edges, and vertices while respecting H1 conformity (shared entities have
+   * shared DOFs).
+   *
+   * ### Nodal Ordering
+   *
+   * The nodal basis functions are ordered using:
+   * - **Segments**: Gauss-Lobatto-Legendre (GLL) points
+   * - **Triangles**: Fekete points (optimal for interpolation)
+   * - **Tetrahedra**: Fekete points
+   * - **Quadrilaterals**: Tensor-product GLL grid
+   * - **Wedges**: Tensor-product (triangle Fekete × segment GLL)
+   *
    * @tparam K Polynomial degree (1, 2, 3, ...)
    * @tparam Scalar Scalar type (Real, Complex)
+   *
+   * @see getClosure() for DOF numbering details
+   * @see Cochain for local-to-global DOF mapping on reference elements
    */
   template <size_t K, class Scalar>
   class H1<K, Scalar, Geometry::Mesh<Context::Local>>
@@ -105,6 +137,22 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpace<MeshType, H1<K, RangeType, MeshType>>;
 
+      /**
+       * @brief Local cochain map for H1 DOF injection from boundary to element.
+       *
+       * The Cochain class encodes how degrees of freedom from boundary entities
+       * (vertices, edges, faces) are injected into the DOF array of a polytope.
+       * This is essential for building conforming H1 spaces where shared entities
+       * have shared DOFs.
+       *
+       * For example, when numbering DOFs on a triangle, the Cochain::map method
+       * injects vertex and edge DOFs into the triangle's local DOF array,
+       * respecting the reference element's nodal ordering.
+       *
+       * @tparam G Polytope type (Segment, Triangle, Quadrilateral, Tetrahedron, Wedge)
+       *
+       * @see getClosure() which uses Cochain::map during DOF numbering
+       */
       template <Geometry::Polytope::Type G>
       class Cochain;
 
@@ -172,6 +220,36 @@ namespace Rodin::Variational
        *
        * Creates the H1 space of degree K. The total number of DOFs depends on
        * the polynomial degree and mesh topology.
+       *
+       * ### Mesh Connectivity Requirements
+       *
+       * The mesh must have the complete connectivity chain from dimension D
+       * (mesh dimension) down to dimension 0:
+       * @f[
+       *   D \to D-1 \to D-2 \to \ldots \to 1 \to 0
+       * @f]
+       *
+       * This is required because DOF numbering proceeds recursively from cells
+       * to faces to edges to vertices, ensuring conformity (shared entities
+       * have shared DOFs).
+       *
+       * #### Example for 2D Triangle Mesh
+       * Required connectivity:
+       * - 2 → 1 (triangles to edges)
+       * - 1 → 0 (edges to vertices)
+       *
+       * #### Example for 3D Tetrahedral Mesh
+       * Required connectivity:
+       * - 3 → 2 (tetrahedra to faces)
+       * - 2 → 1 (faces to edges)
+       * - 1 → 0 (edges to vertices)
+       *
+       * The constructor will automatically verify and require these connectivity
+       * relationships using RODIN_GEOMETRY_REQUIRE_INCIDENCE.
+       *
+       * @throws Alert::Exception if required connectivity is not available
+       *
+       * @see getClosure() for the DOF numbering algorithm
        */
       H1(std::integral_constant<size_t, K>, const MeshType& mesh);
 
@@ -233,6 +311,54 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Recursively builds the global DOF closure for a polytope.
+       *
+       * This method assigns global DOF indices to a polytope (dimension d, index idx)
+       * by recursively processing its boundary entities (faces, edges, vertices).
+       * The process ensures H1 conformity: shared entities receive shared DOFs.
+       *
+       * ### Algorithm Overview
+       *
+       * 1. **Check if already visited**: If this polytope has been numbered, return.
+       * 2. **Process boundary entities**: Recursively call getClosure on incident
+       *    entities of dimension d-1 (faces for cells, edges for faces, vertices for edges).
+       * 3. **Inject boundary DOFs**: Use Cochain::map to inject boundary DOFs into
+       *    this polytope's local DOF array.
+       * 4. **Number interior DOFs**: Assign new global DOF indices to any DOFs not
+       *    on the boundary (interior edge DOFs, face DOFs, cell DOFs).
+       *
+       * ### Connectivity Requirements
+       *
+       * This method requires mesh connectivity from dimension d down to dimension 0:
+       * @f[
+       *   d \to (d-1) \to \ldots \to 1 \to 0
+       * @f]
+       *
+       * For example, building H1 on a 3D tetrahedral mesh requires:
+       * - 3 → 2 (cells to faces)
+       * - 2 → 1 (faces to edges)  
+       * - 1 → 0 (edges to vertices)
+       *
+       * ### Example
+       *
+       * For a triangle (d=2) with 3 vertices and 3 edges:
+       * 1. Recursively number the 3 edges (which number their 2 vertices each)
+       * 2. Inject edge DOFs into triangle using Cochain<Triangle>::map
+       * 3. Number any interior triangle DOFs (for K≥3)
+       *
+       * The result is stored in m_closure[d][idx], which maps local DOF indices
+       * to global DOF indices for this polytope.
+       *
+       * @param[in] d Dimension of the polytope (0=vertex, 1=edge, 2=face, D=cell)
+       * @param[in] idx Global index of the polytope in dimension d
+       *
+       * @note This method is called recursively and uses m_visited to avoid
+       *       processing the same entity multiple times.
+       *
+       * @see Cochain::map for the boundary injection logic
+       * @see H1() constructor which initiates the process for all cells
+       */
       void getClosure(size_t d, Index idx);
 
       /**
