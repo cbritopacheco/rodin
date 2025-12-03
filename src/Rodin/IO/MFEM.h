@@ -1019,7 +1019,7 @@ namespace Rodin::IO
             }
           }
 
-          // 2. Edge DOFs (if D >= 1)
+          // 2. Edge DOFs
           if (D >= 1)
           {
             const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -1042,9 +1042,10 @@ namespace Rodin::IO
             }
           }
 
-          // 3. Face DOFs (if D >= 2)
+          // 3. Face DOFs (for 2D and 3D meshes)
           if (D >= 2)
           {
+            // For 3D: faces are dimension 2. For 2D: faces are dimension 1 (edges serve as faces)
             const size_t faceDim = (D == 3) ? 2 : (D - 1);
             const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
             for (Index i = 0; i < static_cast<Index>(faceCount); ++i)
@@ -1444,7 +1445,7 @@ namespace Rodin::IO
           }
         }
 
-        // 2. Edge DOFs (if D >= 1)
+        // 2. Edge DOFs
         if (D >= 1)
         {
           const size_t edgeCount = mesh.getConnectivity().getCount(1);
@@ -1465,9 +1466,10 @@ namespace Rodin::IO
           }
         }
 
-        // 3. Face DOFs (if D >= 2)
+        // 3. Face DOFs (for 2D and 3D meshes)
         if (D >= 2)
         {
+          // For 3D: faces are dimension 2. For 2D: faces are dimension 1 (edges serve as faces)
           const size_t faceDim = (D == 3) ? 2 : (D - 1);
           const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
           for (Index i = 0; i < static_cast<Index>(faceCount); ++i)
