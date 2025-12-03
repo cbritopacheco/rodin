@@ -24,6 +24,7 @@
 
 #include "Rodin/Variational/P0/P0.h"
 #include "Rodin/Variational/P1/P1.h"
+#include "Rodin/Variational/H1/H1.h"
 
 namespace Rodin::IO::MFEM
 {
@@ -872,6 +873,126 @@ namespace Rodin::IO
   };
 
   /**
+   * @brief Specialization for loading H1 grid functions from MFEM format.
+   *
+   * Loads finite element solution data for H1-conforming Lagrange elements
+   * of arbitrary degree from MFEM grid function files.
+   *
+   * @tparam K Polynomial degree
+   * @tparam Range Range type for the finite element space
+   *
+   * ## MFEM Grid Function Format
+   * The format includes:
+   * - FiniteElementSpace header
+   * - FiniteElementCollection name (e.g., "H1_2D_P2" for degree 2 in 2D)
+   * - VDim: vector dimension
+   * - Ordering: data layout (Nodes=0 or VectorDimension=1)
+   * - Coefficient data values
+   *
+   * ## Usage Example
+   * ```cpp
+   * H1<2> Vh(mesh);  // Degree 2 H1 space
+   * GridFunction<H1<2>> u(Vh);
+   * GridFunctionLoader<FileFormat::MFEM, H1<2>, Vector<Real>> loader(u);
+   * loader.load("solution.gf");
+   * ```
+   *
+   * @see GridFunctionPrinter
+   */
+  template <size_t K, class Range>
+  class GridFunctionLoader<
+    FileFormat::MFEM,
+    Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
+    Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
+    : public GridFunctionLoaderBase<
+        Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
+        Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
+  {
+    public:
+      using FESType = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+
+      using DataType = Math::Vector<ScalarType>;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = GridFunctionLoaderBase<FESType, DataType>;
+
+      /**
+       * @brief Constructs a grid function loader.
+       * @param[in,out] gf Grid function to populate with loaded data
+       */
+      GridFunctionLoader(ObjectType& gf)
+        : Parent(gf)
+      {}
+
+      /**
+       * @brief Loads grid function from an input stream.
+       * @param[in] is Input stream containing MFEM grid function data
+       *
+       * Parses the header and coefficient data, handling different data orderings.
+       */
+      void load(std::istream& is) override
+      {
+        using boost::spirit::x3::space;
+        using boost::spirit::x3::blank;
+        using boost::spirit::x3::uint_;
+        using boost::spirit::x3::_attr;
+        using boost::spirit::x3::char_;
+
+        MFEM::GridFunctionHeader header;
+        const auto get_fec = [&](auto& ctx) { header.fec = _attr(ctx); };
+        const auto get_vdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
+        const auto get_ordering = [&](auto& ctx) { header.ordering = static_cast<MFEM::Ordering>(_attr(ctx)); };
+
+        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        auto it = line.begin();
+        const auto pfes = boost::spirit::x3::string("FiniteElementSpace");
+        const bool rfes = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
+        assert(it == line.end() && rfes);
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it = line.begin();
+        const auto pfec = boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
+        bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
+        assert(it == line.end() && rfec);
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it = line.begin();
+        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[get_vdim];
+        bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
+        assert(it == line.end() && rvdim);
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it = line.begin();
+        const auto pordering = boost::spirit::x3::string("Ordering:") >> uint_[get_ordering];
+        bool rordering = boost::spirit::x3::phrase_parse(it, line.end(), pordering, space);
+        assert(it == line.end() && rordering);
+
+        auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        assert(header.vdim == fes.getVectorDimension());
+        auto& data = gf.getData();
+        if (data.size() > 0)
+        {
+          line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+          data.coeffRef(0) = std::stod(line);
+          assert(data.size() >= 0);
+          for (size_t i = 1; i < static_cast<size_t>(data.size()); i++)
+            is >> data.coeffRef(i);
+          if (header.ordering == MFEM::Ordering::VectorDimension)
+            data.transposeInPlace();
+        }
+      }
+
+    private:
+      size_t m_dimension;
+      size_t m_spaceDimension;
+      size_t m_currentLineNumber = 0;
+  };
+
+  /**
    * @brief Base class for printing P0 (piecewise constant) grid functions in MFEM format.
    *
    * Handles output of discontinuous finite element solutions on cells.
@@ -999,6 +1120,82 @@ namespace Rodin::IO
         const auto& fes = gf.getFiniteElementSpace();
         os << "FiniteElementSpace\n"
            << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension() << "D_P1\n"
+           << "VDim: " << fes.getVectorDimension() << '\n'
+           << "Ordering: " << MFEM::Ordering::Nodes
+           << "\n\n";
+        this->printData(os);
+      }
+
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
+
+      /**
+       * @brief Prints the coefficient data.
+       * @param[in,out] os Output stream
+       *
+       * Must be implemented by derived classes.
+       */
+      virtual void printData(std::ostream& os) = 0;
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
+  };
+
+  /**
+   * @brief Base class for printing H1 (continuous Lagrange) grid functions in MFEM format.
+   *
+   * Handles output of continuous finite element solutions on nodes for arbitrary degree H1 spaces.
+   *
+   * @tparam K Polynomial degree
+   * @tparam Range Range type for the finite element space
+   * @tparam Context Context type (e.g., Context::Local)
+   * @tparam Data Data storage type
+   *
+   * @see GridFunctionPrinter
+   */
+  template <size_t K, class Range, class Context, class Data>
+  class GridFunctionPrinterBase<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context>>, Data>
+  : public Printer<Variational::GridFunction<Variational::H1<K, Range, Geometry::Mesh<Context>>, Data>>
+  {
+    public:
+      using RangeType = Range;
+
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      using DataType = Data;
+
+      using MeshType = Geometry::Mesh<Context>;
+
+      using FESType = Variational::H1<K, Range, MeshType>;
+
+      static constexpr FileFormat Format = FileFormat::MFEM;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = Printer<ObjectType>;
+
+      /**
+       * @brief Constructs a grid function printer.
+       * @param[in] gf Grid function to write to output
+       */
+      GridFunctionPrinterBase(const ObjectType& gf)
+        : m_gf(gf)
+      {}
+
+      /**
+       * @brief Prints grid function to an output stream.
+       * @param[in,out] os Output stream
+       *
+       * Writes the finite element space header and coefficient data.
+       */
+      void print(std::ostream& os) override
+      {
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        os << "FiniteElementSpace\n"
+           << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension() << "D_P" << K << "\n"
            << "VDim: " << fes.getVectorDimension() << '\n'
            << "Ordering: " << MFEM::Ordering::Nodes
            << "\n\n";

@@ -6,3 +6,13 @@ target_link_libraries(RodinIOMeshLoaderTest
   Rodin::Geometry)
 gtest_discover_tests(RodinIOMeshLoaderTest)
 
+add_executable(RodinIOH1GridFunctionIOTest H1GridFunctionIOTest.cpp)
+target_link_libraries(RodinIOH1GridFunctionIOTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::IO)
+gtest_discover_tests(RodinIOH1GridFunctionIOTest)
+
