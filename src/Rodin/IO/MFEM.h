@@ -1005,13 +1005,11 @@ namespace Rodin::IO
           vertexScalarDof[v] = vdofs(0);
         }
 
-        auto register_dof = [&](Index d)
+        const auto register_dof = [&](Index d)
         {
           const size_t idx = static_cast<size_t>(d);
           if (mfem_pos[idx] == static_cast<size_t>(-1))
-          {
             mfem_pos[idx] = p++;
-          }
         };
 
         // 1. vertices
@@ -1026,6 +1024,7 @@ namespace Rodin::IO
           const auto& conn10 = mesh.getConnectivity().getIncidence(1, 0);
           const size_t nEdges = mesh.getConnectivity().getCount(1);
 
+          std::vector<Index> interior;
           for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
           {
             const auto& edgeVerts = conn10[e];
@@ -1034,16 +1033,16 @@ namespace Rodin::IO
             Index v0 = edgeVerts[0];
             Index v1 = edgeVerts[1];
 
-            Index vmin = std::min(v0, v1);
-            Index vmax = std::max(v0, v1);
+            const Index vmin = std::min(v0, v1);
+            const Index vmax = std::max(v0, v1);
 
             Index vminDof = vertexScalarDof[vmin];
             Index vmaxDof = vertexScalarDof[vmax];
 
             const auto& edofs = fes.getDOFs(1, e);
 
-            std::vector<Index> interior;
-            interior.reserve(edofs.size());
+            interior.clear();
+
             for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
             {
               Index d = edofs(k);
@@ -1517,6 +1516,7 @@ namespace Rodin::IO
         const auto& conn10  = mesh.getConnectivity().getIncidence(1, 0);
         const size_t nEdges = mesh.getConnectivity().getCount(1);
 
+        std::vector<Index> interior;
         for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
         {
           const auto& edgeVerts = conn10[e];
@@ -1533,8 +1533,7 @@ namespace Rodin::IO
 
           const auto& edofs = fes.getDOFs(1, e);
 
-          std::vector<Index> interior;
-          interior.reserve(edofs.size());
+          interior.clear();
           for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
           {
             Index d = edofs(k);
