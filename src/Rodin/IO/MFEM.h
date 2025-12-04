@@ -1427,163 +1427,457 @@ namespace Rodin::IO
    * @tparam Scalar Scalar type for the vector data
    */
   template <size_t K, class Range, class Scalar>
-  class GridFunctionPrinter<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::Local>>, Math::Vector<Scalar>> final
-    : public GridFunctionPrinterBase<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::Local>>, Math::Vector<Scalar>>
+  class GridFunctionPrinter<
+      FileFormat::MFEM,
+      Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
+      Math::Vector<Scalar>> final
+    : public GridFunctionPrinterBase<
+          FileFormat::MFEM,
+          Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
+          Math::Vector<Scalar>>
   {
-    public:
-      using FESType = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+  public:
+    using FESType   = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+    using DataType  = Math::Vector<Scalar>;
+    using ObjectType = Variational::GridFunction<FESType, DataType>;
+    using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
 
-      using DataType = Math::Vector<Scalar>;
+    GridFunctionPrinter(const ObjectType& gf)
+      : Parent(gf)
+    {}
 
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
+    void printData(std::ostream& os) override
+    {
+      const auto& gf   = this->getObject();
+      const auto& fes  = gf.getFiniteElementSpace();
+      const auto& mesh = fes.getMesh();
+      const auto& data = gf.getData();
 
-      using Parent = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
+      const size_t vdim       = fes.getVectorDimension();
+      const size_t D          = mesh.getDimension();
+      const size_t sdim       = mesh.getSpaceDimension();
+      const size_t scalarSize = fes.getSize() / vdim;
 
-      /**
-       * @brief Constructs a grid function printer.
-       * @param[in] gf Grid function to write to output
-       */
-      GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf)
-      {}
+      const std::streamsize old_prec = os.precision();
+      const std::ios::fmtflags old_flags = os.flags();
 
-      /**
-       * @brief Prints the coefficient data values in MFEM DOF ordering.
-       * @param[in,out] os Output stream
-       *
-       * Writes DOFs in MFEM order: vertices, edge interiors, face interiors, element interiors.
-       */
-      void printData(std::ostream& os) override
+      os << std::setprecision(std::numeric_limits<Scalar>::digits10 + 2);
+      os.setf(std::ios::scientific, std::ios::floatfield);
+
+      // Track which scalar DOFs are already written
+      std::vector<uint8_t> written(scalarSize, uint8_t(0));
+
+      // Vertex -> scalar DOF (H1: one per vertex)
+      const size_t nVertices = mesh.getConnectivity().getCount(0);
+      std::vector<Index> vertexScalarDof(nVertices);
+      for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
       {
-        const auto& gf   = this->getObject();
-        const auto& fes  = gf.getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        const auto& data = gf.getData();
+        const auto& vdofs = fes.getDOFs(0, v);
+        assert(vdofs.size() == 1 && "H1 vertex should have exactly one scalar dof.");
+        vertexScalarDof[v] = vdofs(0);
+      }
 
-        const size_t vdim       = fes.getVectorDimension();
-        const size_t D          = mesh.getDimension();
-        const size_t scalarSize = fes.getSize() / vdim;
+      // Emit coefficient(s) for a *scalar DOF index* (original Rodin dof)
+      auto emit_scalar_dof = [&](Index rodin_dof)
+      {
+        if (written[rodin_dof])
+          return;
+        for (size_t c = 0; c < vdim; ++c)
+          os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
+        written[rodin_dof] = uint8_t(1);
+      };
 
-        const std::streamsize old_prec = os.precision();
-        const std::ios::fmtflags old_flags = os.flags();
-
-        // full double precision: digits10+2 is safe for round-tripping
-        os << std::setprecision(std::numeric_limits<Scalar>::digits10 + 2);
-        os.setf(std::ios::scientific, std::ios::floatfield);
-
-        // Track which scalar DOFs are already written
-        std::vector<bool> written(scalarSize, false);
-
-        // Precompute the scalar DOF attached to each vertex (H1: exactly 1 per vertex per scalar component)
-        const size_t nVertices = mesh.getConnectivity().getCount(0);
-        std::vector<Index> vertexScalarDof(nVertices);
-        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
+      // Emit coefficient(s) for a value returned by gf(..)
+      auto emit_value = [&](const auto& val)
+      {
+        if constexpr (std::is_same_v<Range, Scalar>)
         {
-          const auto& vdofs = fes.getDOFs(0, v);
-          assert(vdofs.size() == 1 && "H1 vertex should have exactly one scalar dof.");
-          vertexScalarDof[v] = vdofs(0);
+          os << val << '\n';
         }
-
-        // Convenience lambda to print a scalar dof (all components) once
-        auto emit_scalar_dof = [&](Index rodin_dof)
+        else
         {
-          if (written[rodin_dof])
-            return;
+          static_assert(std::is_same_v<Range, Math::Vector<Scalar>>,
+                        "Range must be Scalar or Math::Vector<Scalar>.");
           for (size_t c = 0; c < vdim; ++c)
-            os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
-          written[rodin_dof] = true;
-        };
-
-        // 1. Vertices (MFEM: all vertex dofs first, in vertex index order)
-        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
-        {
-          Index sdof = vertexScalarDof[v];
-          emit_scalar_dof(sdof);
+            os << val[c] << '\n';
         }
+      };
 
-        // 2. Edges: interior DOFs, ordered w.r.t MFEM edge orientation (low-vertex -> high-vertex)
-        if (D >= 1)
+      // -----------------------------------------------------------------------
+      // 1. Vertices
+      // -----------------------------------------------------------------------
+      for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
+        emit_scalar_dof(vertexScalarDof[v]);
+
+      // -----------------------------------------------------------------------
+      // 2. Edges: interior DOFs, oriented low-vertex -> high-vertex
+      // -----------------------------------------------------------------------
+      if (D >= 1)
+      {
+        const auto& conn10  = mesh.getConnectivity().getIncidence(1, 0);
+        const size_t nEdges = mesh.getConnectivity().getCount(1);
+
+        for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
         {
-          const auto& conn10 = mesh.getConnectivity().getIncidence(1, 0);
-          const size_t nEdges = mesh.getConnectivity().getCount(1);
+          const auto& edgeVerts = conn10[e];
+          assert(edgeVerts.size() == 2 && "Segment should have 2 vertices.");
 
-          for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
+          const Index v0 = edgeVerts[0];
+          const Index v1 = edgeVerts[1];
+
+          const Index vmin = std::min(v0, v1);
+          const Index vmax = std::max(v0, v1);
+
+          const Index vminDof = vertexScalarDof[vmin];
+          const Index vmaxDof = vertexScalarDof[vmax];
+
+          const auto& edofs = fes.getDOFs(1, e);
+
+          std::vector<Index> interior;
+          interior.reserve(edofs.size());
+          for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
           {
-            const auto& edgeVerts = conn10[e];
-            assert(edgeVerts.size() == 2 && "Segment should have 2 vertices.");
-
-            Index v0 = edgeVerts[0];
-            Index v1 = edgeVerts[1];
-
-            // MFEM canonical orientation: from min vertex id to max vertex id
-            Index vmin = std::min(v0, v1);
-            Index vmax = std::max(v0, v1);
-
-            Index vminDof = vertexScalarDof[vmin];
-            Index vmaxDof = vertexScalarDof[vmax];
-
-            const auto& edofs = fes.getDOFs(1, e);
-
-            // Separate interior scalar dofs (exclude the two vertex dofs)
-            std::vector<Index> interior;
-            interior.reserve(edofs.size());
-            for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
-            {
-              Index d = edofs(k);
-              if (d != vminDof && d != vmaxDof)
-                interior.push_back(d);
-            }
-
-            // If our stored edge orientation is opposite to MFEM's, reverse the interior order.
-            //
-            // - Our local orientation is (v0 -> v1) by construction (see getSubPolytopes for Segment).
-            // - MFEM's global orientation is (min(v), max(v)).
-            //
-            // So if v0 > v1, we are reversed w.r.t MFEM and must reverse the interior node order.
-            if (v0 > v1)
-            {
-              std::reverse(interior.begin(), interior.end());
-            }
-
-            for (Index d : interior)
-            {
-              emit_scalar_dof(d);
-            }
+            Index d = edofs(k);
+            if (d != vminDof && d != vmaxDof)
+              interior.push_back(d);
           }
-        }
 
-        // 3. Faces (2D: edges as faces; 3D: true 2D faces)
-        if (D >= 2)
+          // Reverse if our local orientation is opposite to MFEM's
+          if (v0 > v1)
+            std::reverse(interior.begin(), interior.end());
+
+          for (Index d : interior)
+            emit_scalar_dof(d);
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // 3. Faces
+      //    - D == 2: faces are 1D edges -> handled by edge block
+      //    - D == 3: 2D faces; we special-case triangular faces to use MFEM
+      //              H1_TriangleElement interior nodes.
+      // -----------------------------------------------------------------------
+      if (D >= 2)
+      {
+        const size_t faceDim   = (D == 3) ? 2 : (D - 1);
+        const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
+
+        if (D == 3)
         {
-          const size_t faceDim   = (D == 3) ? 2 : (D - 1);
-          const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
+          const auto& conn20 = mesh.getConnectivity().getIncidence(2, 0);
+          const auto& cp     = Variational::GLL01<K>::getNodes();
+
+          Math::SpatialPoint xref(2);
+          Math::SpatialPoint xphys(sdim);
 
           for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
           {
-            const auto& fdofs = fes.getDOFs(faceDim, f);
-            // Only write DOFs that weren't already seen as vertex/edge DOFs
-            for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
+            const auto faceGeom = mesh.getGeometry(2, f);
+
+            if (faceGeom == Geometry::Polytope::Type::Triangle)
             {
-              emit_scalar_dof(fdofs(k));
+              const auto& fverts = conn20[f];
+              assert(fverts.size() == 3 && "Triangle face must have 3 vertices.");
+
+              const Index v0 = fverts[0];
+              const Index v1 = fverts[1];
+              const Index v2 = fverts[2];
+
+              const auto X0 = mesh.getVertexCoordinates(v0);
+              const auto X1 = mesh.getVertexCoordinates(v1);
+              const auto X2 = mesh.getVertexCoordinates(v2);
+
+              // MFEM H1_TriangleElement interior nodes on this face
+              for (int j = 1; j < static_cast<int>(K); ++j)
+              {
+                for (int i = 1; i + j < static_cast<int>(K); ++i)
+                {
+                  const Real ci = cp[i];
+                  const Real cj = cp[j];
+                  const Real ck = cp[K - i - j];
+                  const Real w  = ci + cj + ck;
+
+                  const Real L2 = ci / w;
+                  const Real L3 = cj / w;
+                  const Real L1 = Real(1) - L2 - L3;
+
+                  // reference (2D) coordinates on the face
+                  xref.x() = L2;
+                  xref.y() = L3;
+
+                  // physical coordinates in R^sdim
+                  xphys.x() = L1 * X0.x() + L2 * X1.x() + L3 * X2.x();
+                  xphys.y() = L1 * X0.y() + L2 * X1.y() + L3 * X2.y();
+                  if (sdim == 3)
+                    xphys.z() = L1 * X0.z() + L2 * X1.z() + L3 * X2.z();
+
+                  const auto  faceIt = mesh.getFace(f);
+                  const auto& face   = *faceIt;
+                  const Geometry::Point p(face, xref, xphys);
+
+                  decltype(auto) val = gf(p);
+                  emit_value(val);
+                }
+              }
+            }
+            else
+            {
+              // Non-triangular faces (e.g. quads): fall back to DOF-based ordering
+              const auto& fdofs = fes.getDOFs(faceDim, f);
+              for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
+                emit_scalar_dof(fdofs(k));
             }
           }
         }
+        else
+        {
+          // D == 2 or other: keep DOF-based behavior for faces
+          for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
+          {
+            const auto& fdofs = fes.getDOFs(faceDim, f);
+            for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
+              emit_scalar_dof(fdofs(k));
+          }
+        }
+      }
 
-        // 4. Element interiors
-        const size_t nCells = mesh.getConnectivity().getCount(D);
+      // -----------------------------------------------------------------------
+      // 4. Element interiors
+      // -----------------------------------------------------------------------
+      const size_t nCells = mesh.getConnectivity().getCount(D);
+
+      if (D == 2)
+      {
+        // 2D: triangles (possibly embedded in R^2 or R^3)
+        const auto& conn20 = mesh.getConnectivity().getIncidence(2, 0);
+        const auto& cp     = Variational::GLL01<K>::getNodes();
+
+        Math::SpatialPoint xref(2);
+        Math::SpatialPoint xphys(sdim);
+
+        for (Index c = 0; c < static_cast<Index>(nCells); ++c)
+        {
+          const auto geom = mesh.getGeometry(2, c);
+          if (geom != Geometry::Polytope::Type::Triangle)
+          {
+            // Fallback: non-triangle cells in 2D
+            const auto& cdofs = fes.getDOFs(D, c);
+            for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
+              emit_scalar_dof(cdofs(k));
+            continue;
+          }
+
+          const auto  cellIt = mesh.getCell(c);
+          const auto& cell   = *cellIt;
+          const auto& triVer = conn20[c];
+
+          const Index v0 = triVer[0];
+          const Index v1 = triVer[1];
+          const Index v2 = triVer[2];
+
+          const auto X0 = mesh.getVertexCoordinates(v0);
+          const auto X1 = mesh.getVertexCoordinates(v1);
+          const auto X2 = mesh.getVertexCoordinates(v2);
+
+          // MFEM H1_TriangleElement interior nodes
+          for (int j = 1; j < static_cast<int>(K); ++j)
+          {
+            for (int i = 1; i + j < static_cast<int>(K); ++i)
+            {
+              const Real ci = cp[i];
+              const Real cj = cp[j];
+              const Real ck = cp[K - i - j];
+              const Real w  = ci + cj + ck;
+
+              const Real L2 = ci / w;
+              const Real L3 = cj / w;
+              const Real L1 = Real(1) - L2 - L3;
+
+              // reference coords (2D)
+              xref.x() = L2;
+              xref.y() = L3;
+
+              // physical coords
+              xphys.x() = L1 * X0.x() + L2 * X1.x() + L3 * X2.x();
+              xphys.y() = L1 * X0.y() + L2 * X1.y() + L3 * X2.y();
+              if (sdim == 3)
+                xphys.z() = L1 * X0.z() + L2 * X1.z() + L3 * X2.z();
+
+              const Geometry::Point p(cell, xref, xphys);
+              decltype(auto) val = gf(p);
+              emit_value(val);
+            }
+          }
+        }
+      }
+      else if (D == 3)
+      {
+        const auto& conn30 = mesh.getConnectivity().getIncidence(3, 0);
+        const auto& cp     = Variational::GLL01<K>::getNodes();
+
+        Math::SpatialPoint xref(3);
+        Math::SpatialPoint xphys(sdim);
+        Math::SpatialPoint Xb(sdim);
+        Math::SpatialPoint Xt(sdim);
+
+        for (Index c = 0; c < static_cast<Index>(nCells); ++c)
+        {
+          const auto  cellIt = mesh.getCell(c);
+          const auto& cell   = *cellIt;
+          const auto& cellVer = conn30[c];
+
+          const auto geom = mesh.getGeometry(3, c);
+
+          // -------------------------------------------------------------
+          // Tetrahedron: use MFEM H1_TetrahedronElement interior nodes
+          // -------------------------------------------------------------
+          if (geom == Geometry::Polytope::Type::Tetrahedron)
+          {
+            assert(cellVer.size() == 4 && "Tetrahedron must have 4 vertices.");
+
+            const Index v0 = cellVer[0];
+            const Index v1 = cellVer[1];
+            const Index v2 = cellVer[2];
+            const Index v3 = cellVer[3];
+
+            const auto X0 = mesh.getVertexCoordinates(v0);
+            const auto X1 = mesh.getVertexCoordinates(v1);
+            const auto X2 = mesh.getVertexCoordinates(v2);
+            const auto X3 = mesh.getVertexCoordinates(v3);
+
+            // MFEM interior:
+            // for (k=1..K-1) for (j=1..K-1-k) for (i=1..K-1-j-k)
+            for (int k = 1; k < static_cast<int>(K); ++k)
+            {
+              for (int j = 1; j + k < static_cast<int>(K); ++j)
+              {
+                for (int i = 1; i + j + k < static_cast<int>(K); ++i)
+                {
+                  const Real ci = cp[i];
+                  const Real cj = cp[j];
+                  const Real ck = cp[k];
+                  const Real cl = cp[K - i - j - k];
+                  const Real w  = ci + cj + ck + cl;
+
+                  const Real L2 = ci / w; // v1
+                  const Real L3 = cj / w; // v2
+                  const Real L4 = ck / w; // v3
+                  const Real L1 = Real(1) - L2 - L3 - L4; // v0
+
+                  // reference coordinates on the reference tetrahedron
+                  xref.x() = L2;
+                  xref.y() = L3;
+                  xref.z() = L4;
+
+                  // physical coordinates
+                  xphys.x() = L1 * X0.x() + L2 * X1.x() + L3 * X2.x() + L4 * X3.x();
+                  xphys.y() = L1 * X0.y() + L2 * X1.y() + L3 * X2.y() + L4 * X3.y();
+                  xphys.z() = L1 * X0.z() + L2 * X1.z() + L3 * X2.z() + L4 * X3.z();
+
+                  const Geometry::Point p(cell, xref, xphys);
+                  decltype(auto) val = gf(p);
+                  emit_value(val);
+                }
+              }
+            }
+          }
+          // -------------------------------------------------------------
+          // Wedge / prism: use MFEM H1_WedgeElement interior nodes
+          // (triangle-interior × segment-interior)
+          // -------------------------------------------------------------
+          else if (geom == Geometry::Polytope::Type::Wedge)
+          {
+            assert(cellVer.size() == 6 && "Wedge must have 6 vertices.");
+
+            // Assume bottom: (v0,v1,v2), top: (v3,v4,v5)
+            const Index v0 = cellVer[0];
+            const Index v1 = cellVer[1];
+            const Index v2 = cellVer[2];
+            const Index v3 = cellVer[3];
+            const Index v4 = cellVer[4];
+            const Index v5 = cellVer[5];
+
+            const auto V0 = mesh.getVertexCoordinates(v0);
+            const auto V1 = mesh.getVertexCoordinates(v1);
+            const auto V2 = mesh.getVertexCoordinates(v2);
+            const auto V3 = mesh.getVertexCoordinates(v3);
+            const auto V4 = mesh.getVertexCoordinates(v4);
+            const auto V5 = mesh.getVertexCoordinates(v5);
+
+            // Precompute vertex coords into Xb/Xt via barycentric combination
+            // Interior wedge nodes: tensor product of:
+            //   - triangle-interior (i,j) on base tri (0,1,2)
+            //   - segment-interior cp[k], k=1..K-1
+            for (int k = 1; k < static_cast<int>(K); ++k)
+            {
+              const Real s           = cp[k];           // segment param in [0,1]
+              const Real one_minus_s = Real(1) - s;
+
+              for (int j = 1; j < static_cast<int>(K); ++j)
+              {
+                for (int i = 1; i + j < static_cast<int>(K); ++i)
+                {
+                  const Real ci = cp[i];
+                  const Real cj = cp[j];
+                  const Real ck = cp[K - i - j];
+                  const Real w_tri = ci + cj + ck;
+
+                  const Real L2 = ci / w_tri;
+                  const Real L3 = cj / w_tri;
+                  const Real L1 = Real(1) - L2 - L3;
+
+                  // reference coordinates (r,s,t): (L2,L3,s)
+                  xref.x() = L2;
+                  xref.y() = L3;
+                  xref.z() = s;
+
+                  // bottom triangle physical point Xb
+                  Xb.x() = L1 * V0.x() + L2 * V1.x() + L3 * V2.x();
+                  Xb.y() = L1 * V0.y() + L2 * V1.y() + L3 * V2.y();
+                  Xb.z() = L1 * V0.z() + L2 * V1.z() + L3 * V2.z();
+
+                  // top triangle physical point Xt
+                  Xt.x() = L1 * V3.x() + L2 * V4.x() + L3 * V5.x();
+                  Xt.y() = L1 * V3.y() + L2 * V4.y() + L3 * V5.y();
+                  Xt.z() = L1 * V3.z() + L2 * V4.z() + L3 * V5.z();
+
+                  // interpolate along the segment
+                  xphys.x() = one_minus_s * Xb.x() + s * Xt.x();
+                  xphys.y() = one_minus_s * Xb.y() + s * Xt.y();
+                  xphys.z() = one_minus_s * Xb.z() + s * Xt.z();
+
+                  const Geometry::Point p(cell, xref, xphys);
+                  decltype(auto) val = gf(p);
+                  emit_value(val);
+                }
+              }
+            }
+          }
+          // -------------------------------------------------------------
+          // Other 3D cell types: fallback DOF-based
+          // -------------------------------------------------------------
+          else
+          {
+            const auto& cdofs = fes.getDOFs(D, c);
+            for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
+              emit_scalar_dof(cdofs(k));
+          }
+        }
+      }
+      else
+      {
+        // Other dimensions: fallback DOF-based
         for (Index c = 0; c < static_cast<Index>(nCells); ++c)
         {
           const auto& cdofs = fes.getDOFs(D, c);
           for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
-          {
             emit_scalar_dof(cdofs(k));
-          }
         }
-
-        // --- restore previous stream state -------------------------------------
-        os.precision(old_prec);
-        os.flags(old_flags);
       }
+
+      os.precision(old_prec);
+      os.flags(old_flags);
+    }
   };
 }
 

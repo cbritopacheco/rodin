@@ -57,7 +57,7 @@
  * (Duffy transformation) to avoid division by zero near element boundaries.
  * Used when computing basis function gradients on triangles and tetrahedra.
  */
-#define RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE 1e-12
+#define RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE 1e-14
 
 namespace Rodin::FormLanguage
 {
