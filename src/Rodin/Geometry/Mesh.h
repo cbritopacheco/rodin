@@ -1010,6 +1010,10 @@ namespace Rodin::Geometry
 
       /**
        * @brief Generates a uniform grid for a given geometry.
+       *
+       * @param[in] g Geometry type of the cells (e.g., Triangle,
+       * Quadrilateral)
+       * @param[in] shape Number of nodes in each coordinate direction
        */
       static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
