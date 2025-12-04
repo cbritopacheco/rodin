@@ -1266,4 +1266,358 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
     }
   }
+
+  /**
+   * @brief Test H1 degree 1 on segment mesh (1D)
+   */
+  TEST(Rodin_IO_MFEM_H1_GridFunction, SaveLoadRoundTrip_H1_Degree1_Segment)
+  {
+    // Create 1D segment mesh with >= 16 elements
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, { 16 });
+    
+    mesh.getConnectivity().compute(1, 0);
+    
+    ASSERT_GE(mesh.getCellCount(), 16u);
+    
+    H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+    GridFunction gf(fes);
+    
+    RealFunction func([](const Geometry::Point& p) { 
+      return 2.0 * p.x() + 1.0; 
+    });
+    gf.project(func);
+    
+    std::stringstream ss;
+    GridFunctionPrinter<FileFormat::MFEM, H1<1, Real>, Math::Vector<Real>> printer(gf);
+    printer.print(ss);
+    
+    std::string line;
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementSpace");
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementCollection: H1_1D_P1");
+    
+    ss.clear();
+    ss.seekg(0);
+    
+    GridFunction gf_loaded(fes);
+    GridFunctionLoader<FileFormat::MFEM, H1<1, Real>, Math::Vector<Real>> loader(gf_loaded);
+    loader.load(ss);
+    
+    ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
+    }
+  }
+
+  /**
+   * @brief Test H1 degree 2 on segment mesh (1D)
+   */
+  TEST(Rodin_IO_MFEM_H1_GridFunction, SaveLoadRoundTrip_H1_Degree2_Segment)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, { 16 });
+    
+    mesh.getConnectivity().compute(1, 0);
+    
+    ASSERT_GE(mesh.getCellCount(), 16u);
+    
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+    
+    RealFunction func([](const Geometry::Point& p) { 
+      return p.x() * p.x() + 2.0 * p.x() + 1.0; 
+    });
+    gf.project(func);
+    
+    std::stringstream ss;
+    GridFunctionPrinter<FileFormat::MFEM, H1<2, Real>, Math::Vector<Real>> printer(gf);
+    printer.print(ss);
+    
+    std::string line;
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementSpace");
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementCollection: H1_1D_P2");
+    
+    ss.clear();
+    ss.seekg(0);
+    
+    GridFunction gf_loaded(fes);
+    GridFunctionLoader<FileFormat::MFEM, H1<2, Real>, Math::Vector<Real>> loader(gf_loaded);
+    loader.load(ss);
+    
+    ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
+    }
+  }
+
+  /**
+   * @brief Test H1 degree 3 on segment mesh (1D)
+   */
+  TEST(Rodin_IO_MFEM_H1_GridFunction, SaveLoadRoundTrip_H1_Degree3_Segment)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, { 16 });
+    
+    mesh.getConnectivity().compute(1, 0);
+    
+    ASSERT_GE(mesh.getCellCount(), 16u);
+    
+    H1 fes(std::integral_constant<size_t, 3>{}, mesh);
+    GridFunction gf(fes);
+    
+    RealFunction func([](const Geometry::Point& p) { 
+      return std::pow(p.x(), 3) + p.x() * p.x() + p.x(); 
+    });
+    gf.project(func);
+    
+    std::stringstream ss;
+    GridFunctionPrinter<FileFormat::MFEM, H1<3, Real>, Math::Vector<Real>> printer(gf);
+    printer.print(ss);
+    
+    std::string line;
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementSpace");
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementCollection: H1_1D_P3");
+    
+    ss.clear();
+    ss.seekg(0);
+    
+    GridFunction gf_loaded(fes);
+    GridFunctionLoader<FileFormat::MFEM, H1<3, Real>, Math::Vector<Real>> loader(gf_loaded);
+    loader.load(ss);
+    
+    ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
+    }
+  }
+
+  /**
+   * @brief Test H1 degree 4 on segment mesh (1D)
+   */
+  TEST(Rodin_IO_MFEM_H1_GridFunction, SaveLoadRoundTrip_H1_Degree4_Segment)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, { 16 });
+    
+    mesh.getConnectivity().compute(1, 0);
+    
+    ASSERT_GE(mesh.getCellCount(), 16u);
+    
+    H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+    GridFunction gf(fes);
+    
+    RealFunction func([](const Geometry::Point& p) { 
+      return std::pow(p.x(), 4) + std::pow(p.x(), 3) + p.x(); 
+    });
+    gf.project(func);
+    
+    std::stringstream ss;
+    GridFunctionPrinter<FileFormat::MFEM, H1<4, Real>, Math::Vector<Real>> printer(gf);
+    printer.print(ss);
+    
+    std::string line;
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementSpace");
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementCollection: H1_1D_P4");
+    
+    ss.clear();
+    ss.seekg(0);
+    
+    GridFunction gf_loaded(fes);
+    GridFunctionLoader<FileFormat::MFEM, H1<4, Real>, Math::Vector<Real>> loader(gf_loaded);
+    loader.load(ss);
+    
+    ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
+    }
+  }
+
+  /**
+   * @brief Test H1 degree 1 on wedge mesh (3D)
+   */
+  TEST(Rodin_IO_MFEM_H1_GridFunction, SaveLoadRoundTrip_H1_Degree1_Wedge)
+  {
+    // Create 3D wedge mesh with >= 16 elements (3x3x3 grid)
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 3, 3, 3 });
+    
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    ASSERT_GE(mesh.getCellCount(), 16u);
+    
+    H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+    GridFunction gf(fes);
+    
+    RealFunction func([](const Geometry::Point& p) { 
+      return p.x() + 2.0 * p.y() + 3.0 * p.z(); 
+    });
+    gf.project(func);
+    
+    std::stringstream ss;
+    GridFunctionPrinter<FileFormat::MFEM, H1<1, Real>, Math::Vector<Real>> printer(gf);
+    printer.print(ss);
+    
+    std::string line;
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementSpace");
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementCollection: H1_3D_P1");
+    
+    ss.clear();
+    ss.seekg(0);
+    
+    GridFunction gf_loaded(fes);
+    GridFunctionLoader<FileFormat::MFEM, H1<1, Real>, Math::Vector<Real>> loader(gf_loaded);
+    loader.load(ss);
+    
+    ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
+    }
+  }
+
+  /**
+   * @brief Test H1 degree 2 on wedge mesh (3D)
+   */
+  TEST(Rodin_IO_MFEM_H1_GridFunction, SaveLoadRoundTrip_H1_Degree2_Wedge)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 3, 3, 3 });
+    
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    ASSERT_GE(mesh.getCellCount(), 16u);
+    
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+    
+    RealFunction func([](const Geometry::Point& p) { 
+      return p.x() * p.x() + p.y() * p.y() + p.z() * p.z(); 
+    });
+    gf.project(func);
+    
+    std::stringstream ss;
+    GridFunctionPrinter<FileFormat::MFEM, H1<2, Real>, Math::Vector<Real>> printer(gf);
+    printer.print(ss);
+    
+    std::string line;
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementSpace");
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementCollection: H1_3D_P2");
+    
+    ss.clear();
+    ss.seekg(0);
+    
+    GridFunction gf_loaded(fes);
+    GridFunctionLoader<FileFormat::MFEM, H1<2, Real>, Math::Vector<Real>> loader(gf_loaded);
+    loader.load(ss);
+    
+    ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
+    }
+  }
+
+  /**
+   * @brief Test H1 degree 3 on wedge mesh (3D)
+   */
+  TEST(Rodin_IO_MFEM_H1_GridFunction, SaveLoadRoundTrip_H1_Degree3_Wedge)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 3, 3, 3 });
+    
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    ASSERT_GE(mesh.getCellCount(), 16u);
+    
+    H1 fes(std::integral_constant<size_t, 3>{}, mesh);
+    GridFunction gf(fes);
+    
+    RealFunction func([](const Geometry::Point& p) { 
+      return std::pow(p.x(), 3) + std::pow(p.y(), 3) + std::pow(p.z(), 3); 
+    });
+    gf.project(func);
+    
+    std::stringstream ss;
+    GridFunctionPrinter<FileFormat::MFEM, H1<3, Real>, Math::Vector<Real>> printer(gf);
+    printer.print(ss);
+    
+    std::string line;
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementSpace");
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementCollection: H1_3D_P3");
+    
+    ss.clear();
+    ss.seekg(0);
+    
+    GridFunction gf_loaded(fes);
+    GridFunctionLoader<FileFormat::MFEM, H1<3, Real>, Math::Vector<Real>> loader(gf_loaded);
+    loader.load(ss);
+    
+    ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], gf_loaded[i], 1e-4);
+    }
+  }
+
+  /**
+   * @brief Test H1 degree 4 on wedge mesh (3D)
+   */
+  TEST(Rodin_IO_MFEM_H1_GridFunction, SaveLoadRoundTrip_H1_Degree4_Wedge)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 3, 3, 3 });
+    
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    ASSERT_GE(mesh.getCellCount(), 16u);
+    
+    H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+    GridFunction gf(fes);
+    
+    RealFunction func([](const Geometry::Point& p) { 
+      return std::pow(p.x(), 4) + std::pow(p.y(), 4) + std::pow(p.z(), 4); 
+    });
+    gf.project(func);
+    
+    std::stringstream ss;
+    GridFunctionPrinter<FileFormat::MFEM, H1<4, Real>, Math::Vector<Real>> printer(gf);
+    printer.print(ss);
+    
+    std::string line;
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementSpace");
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementCollection: H1_3D_P4");
+    
+    ss.clear();
+    ss.seekg(0);
+    
+    GridFunction gf_loaded(fes);
+    GridFunctionLoader<FileFormat::MFEM, H1<4, Real>, Math::Vector<Real>> loader(gf_loaded);
+    loader.load(ss);
+    
+    ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], gf_loaded[i], 1e-4);
+    }
+  }
 }
