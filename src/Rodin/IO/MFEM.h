@@ -937,16 +937,18 @@ namespace Rodin::IO
       void load(std::istream& is) override
       {
         using boost::spirit::x3::space;
-        using boost::spirit::x3::blank;
         using boost::spirit::x3::uint_;
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::char_;
 
         MFEM::GridFunctionHeader header;
-        const auto get_fec = [&](auto& ctx) { header.fec = _attr(ctx); };
-        const auto get_vdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
-        const auto get_ordering = [&](auto& ctx) { header.ordering = static_cast<MFEM::Ordering>(_attr(ctx)); };
+        const auto get_fec      = [&](auto& ctx) { header.fec      = _attr(ctx); };
+        const auto get_vdim     = [&](auto& ctx) { header.vdim     = _attr(ctx); };
+        const auto get_ordering = [&](auto& ctx) {
+          header.ordering = static_cast<MFEM::Ordering>(_attr(ctx));
+        };
 
+        // --- parse header ------------------------------------------------------
         std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
         auto it = line.begin();
         const auto pfes = boost::spirit::x3::string("FiniteElementSpace");
@@ -955,7 +957,8 @@ namespace Rodin::IO
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
         it = line.begin();
-        const auto pfec = boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
+        const auto pfec =
+          boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
         bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
         assert(it == line.end() && rfec);
 
@@ -971,123 +974,160 @@ namespace Rodin::IO
         bool rordering = boost::spirit::x3::phrase_parse(it, line.end(), pordering, space);
         assert(it == line.end() && rordering);
 
-        auto& gf = this->getObject();
-        const auto& fes = gf.getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        assert(header.vdim == fes.getVectorDimension());
+        // --- basic info --------------------------------------------------------
+        auto& gf   = this->getObject();
         auto& data = gf.getData();
+        const auto& fes  = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+
         const size_t vdim = fes.getVectorDimension();
         const size_t D = mesh.getDimension();
         const size_t scalarSize = fes.getSize() / vdim;
-        
-        if (data.size() > 0)
+
+        assert(header.vdim == vdim);
+        if (data.size() == 0)
+          return;
+
+        assert(static_cast<size_t>(data.size()) == vdim * scalarSize);
+
+        // --- build scalar dof -> MFEM scalar position map ----------------------
+        // MFEM scalar ordering: vertices -> edges (oriented) -> faces -> elements.
+        std::vector<size_t> mfem_pos(scalarSize, static_cast<size_t>(-1));
+        size_t p = 0;
+
+        // 0. vertex -> scalar dof map (as in printer)
+        const size_t nVertices = mesh.getConnectivity().getCount(0);
+        std::vector<Index> vertexScalarDof(nVertices);
+        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
         {
-          // Read all values from MFEM file (in MFEM ordering)
-          std::vector<ScalarType> mfem_data;
-          mfem_data.reserve(data.size());
-          
-          line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-          mfem_data.push_back(std::stod(line));
-          for (size_t i = 1; i < static_cast<size_t>(data.size()); i++)
-          {
-            ScalarType val;
-            is >> val;
-            mfem_data.push_back(val);
-          }
+          const auto& vdofs = fes.getDOFs(0, v);
+          assert(vdofs.size() == 1); // H1 nodal: one scalar dof per vertex
+          vertexScalarDof[v] = vdofs(0);
+        }
 
-          // Map from MFEM ordering to Rodin ordering using tracking
-          // MFEM order: vertices -> edges -> faces -> elements
-          size_t mfem_idx = 0;
-          std::vector<bool> written(scalarSize, false);
-          
-          // 1. Vertex DOFs
-          for (auto it = mesh.getVertex(); !it.end(); ++it)
+        auto register_dof = [&](Index d)
+        {
+          const size_t idx = static_cast<size_t>(d);
+          if (mfem_pos[idx] == static_cast<size_t>(-1))
           {
-            const auto& dofs = fes.getDOFs(0, it->getIndex());
-            // Write only unwritten DOFs
-            for (size_t local = 0; local < dofs.size(); ++local)
+            mfem_pos[idx] = p++;
+          }
+        };
+
+        // 1. vertices
+        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
+        {
+          register_dof(vertexScalarDof[v]);
+        }
+
+        // 2. edges with MFEM orientation (same logic as printer)
+        if (D >= 1)
+        {
+          const auto& conn10 = mesh.getConnectivity().getIncidence(1, 0);
+          const size_t nEdges = mesh.getConnectivity().getCount(1);
+
+          for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
+          {
+            const auto& edgeVerts = conn10[e];
+            assert(edgeVerts.size() == 2);
+
+            Index v0 = edgeVerts[0];
+            Index v1 = edgeVerts[1];
+
+            Index vmin = std::min(v0, v1);
+            Index vmax = std::max(v0, v1);
+
+            Index vminDof = vertexScalarDof[vmin];
+            Index vmaxDof = vertexScalarDof[vmax];
+
+            const auto& edofs = fes.getDOFs(1, e);
+
+            std::vector<Index> interior;
+            interior.reserve(edofs.size());
+            for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
             {
-              Index rodin_dof = dofs(local);
-              if (!written[rodin_dof])
-              {
-                for (size_t c = 0; c < vdim; ++c)
-                {
-                  data.coeffRef(rodin_dof + c * scalarSize) = mfem_data[mfem_idx++];
-                }
-                written[rodin_dof] = true;
-              }
+              Index d = edofs(k);
+              if (d != vminDof && d != vmaxDof)
+                interior.push_back(d);
             }
-          }
 
-          // 2. Edge DOFs
-          if (D >= 1)
+            // If local orientation is opposite to MFEM's (low->high), reverse
+            if (v0 > v1)
+              std::reverse(interior.begin(), interior.end());
+
+            for (Index d : interior)
+              register_dof(d);
+          }
+        }
+
+        // 3. faces (we assume H1 face interior dofs are already stored in
+        //    MFEM-consistent local order in fes.getDOFs(faceDim, f))
+        if (D >= 2)
+        {
+          const size_t faceDim   = (D == 3) ? 2 : (D - 1);
+          const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
+          for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
           {
-            const size_t edgeCount = mesh.getConnectivity().getCount(1);
-            for (Index i = 0; i < static_cast<Index>(edgeCount); ++i)
-            {
-              const auto& dofs = fes.getDOFs(1, i);
-              // Write only unwritten DOFs (these are edge interior DOFs)
-              for (size_t local = 0; local < dofs.size(); ++local)
-              {
-                Index rodin_dof = dofs(local);
-                if (!written[rodin_dof])
-                {
-                  for (size_t c = 0; c < vdim; ++c)
-                  {
-                    data.coeffRef(rodin_dof + c * scalarSize) = mfem_data[mfem_idx++];
-                  }
-                  written[rodin_dof] = true;
-                }
-              }
-            }
+            const auto& fdofs = fes.getDOFs(faceDim, f);
+            for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
+              register_dof(fdofs(k));
           }
+        }
 
-          // 3. Face DOFs (for 2D and 3D meshes)
-          if (D >= 2)
+        // 4. element interiors
+        const size_t nCells = mesh.getConnectivity().getCount(D);
+        for (Index c = 0; c < static_cast<Index>(nCells); ++c)
+        {
+          const auto& cdofs = fes.getDOFs(D, c);
+          for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
+            register_dof(cdofs(k));
+        }
+
+        assert(p == scalarSize);
+        for (size_t i = 0; i < scalarSize; ++i)
+        {
+          assert(mfem_pos[i] != static_cast<size_t>(-1));
+        }
+
+        // --- read MFEM data (all components, all scalar dofs) -------------------
+        std::vector<ScalarType> mfem_data(static_cast<size_t>(data.size()));
+
+        // First value: line may contain only that number
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        mfem_data[0] = static_cast<ScalarType>(std::stod(line));
+
+        for (size_t i = 1; i < mfem_data.size(); ++i)
+        {
+          ScalarType val;
+          is >> val;
+          mfem_data[i] = val;
+        }
+
+        // --- map MFEM data -> Rodin internal storage (always Nodes ordering) ----
+        // Internal layout: data[s + c*scalarSize] is component c of scalar dof s.
+        // MFEM layout:
+        //   Nodes:           for each scalar position p, components c = 0..vdim-1
+        //   VectorDimension: for each component c, positions p = 0..scalarSize-1
+        for (size_t c = 0; c < vdim; ++c)
+        {
+          for (size_t s = 0; s < scalarSize; ++s)
           {
-            // For 3D: faces are dimension 2. For 2D: faces are dimension 1 (edges serve as faces)
-            const size_t faceDim = (D == 3) ? 2 : (D - 1);
-            const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
-            for (Index i = 0; i < static_cast<Index>(faceCount); ++i)
-            {
-              const auto& dofs = fes.getDOFs(faceDim, i);
-              // Write only unwritten DOFs (these are face interior DOFs)
-              for (size_t local = 0; local < dofs.size(); ++local)
-              {
-                Index rodin_dof = dofs(local);
-                if (!written[rodin_dof])
-                {
-                  for (size_t c = 0; c < vdim; ++c)
-                  {
-                    data.coeffRef(rodin_dof + c * scalarSize) = mfem_data[mfem_idx++];
-                  }
-                  written[rodin_dof] = true;
-                }
-              }
-            }
-          }
+            const size_t p_scalar = mfem_pos[s];
 
-          // 4. Element (cell) interior DOFs
-          for (auto it = mesh.getCell(); !it.end(); ++it)
-          {
-            const auto& dofs = fes.getDOFs(D, it->getIndex());
-            // Write only unwritten DOFs (these are element interior DOFs)
-            for (size_t local = 0; local < dofs.size(); ++local)
+            size_t mfem_index = 0;
+            if (header.ordering == MFEM::Ordering::Nodes)
             {
-              Index rodin_dof = dofs(local);
-              if (!written[rodin_dof])
-              {
-                for (size_t c = 0; c < vdim; ++c)
-                {
-                  data.coeffRef(rodin_dof + c * scalarSize) = mfem_data[mfem_idx++];
-                }
-                written[rodin_dof] = true;
-              }
+              // Node-major: [ (p0,c0..c_{vdim-1}), (p1,c0..), ... ]
+              mfem_index = p_scalar * vdim + c;
             }
-          }
+            else // MFEM::Ordering::VectorDimension
+            {
+              // Component-major: [ (c0,p0..p_{scalarSize-1}), (c1,p0..), ... ]
+              mfem_index = c * scalarSize + p_scalar;
+            }
 
-          if (header.ordering == MFEM::Ordering::VectorDimension)
-            data.transposeInPlace();
+            data.coeffRef(s + c * scalarSize) = mfem_data[mfem_index];
+          }
         }
       }
 
@@ -1392,7 +1432,7 @@ namespace Rodin::IO
   {
     public:
       using FESType = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
-      
+
       using DataType = Math::Vector<Scalar>;
 
       using ObjectType = Variational::GridFunction<FESType, DataType>;
@@ -1415,96 +1455,134 @@ namespace Rodin::IO
        */
       void printData(std::ostream& os) override
       {
-        const auto& gf = this->getObject();
-        const auto& fes = gf.getFiniteElementSpace();
+        const auto& gf   = this->getObject();
+        const auto& fes  = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const auto& data = gf.getData();
-        const size_t vdim = fes.getVectorDimension();
-        const size_t D = mesh.getDimension();
+
+        const size_t vdim       = fes.getVectorDimension();
+        const size_t D          = mesh.getDimension();
         const size_t scalarSize = fes.getSize() / vdim;
 
-        // Track which DOFs have been written (for scalar space)
+        const std::streamsize old_prec = os.precision();
+        const std::ios::fmtflags old_flags = os.flags();
+
+        // full double precision: digits10+2 is safe for round-tripping
+        os << std::setprecision(std::numeric_limits<Scalar>::digits10 + 2);
+        os.setf(std::ios::scientific, std::ios::floatfield);
+
+        // Track which scalar DOFs are already written
         std::vector<bool> written(scalarSize, false);
-        
-        // MFEM ordering: vertices -> edges -> faces -> elements
-        
-        // 1. Vertex DOFs
-        for (auto it = mesh.getVertex(); !it.end(); ++it)
+
+        // Precompute the scalar DOF attached to each vertex (H1: exactly 1 per vertex per scalar component)
+        const size_t nVertices = mesh.getConnectivity().getCount(0);
+        std::vector<Index> vertexScalarDof(nVertices);
+        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
         {
-          const auto& dofs = fes.getDOFs(0, it->getIndex());
-          // Write only unwritten DOFs
-          for (size_t local = 0; local < dofs.size(); ++local)
-          {
-            Index rodin_dof = dofs(local);
-            if (!written[rodin_dof])
-            {
-              for (size_t c = 0; c < vdim; ++c)
-                os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
-              written[rodin_dof] = true;
-            }
-          }
+          const auto& vdofs = fes.getDOFs(0, v);
+          assert(vdofs.size() == 1 && "H1 vertex should have exactly one scalar dof.");
+          vertexScalarDof[v] = vdofs(0);
         }
 
-        // 2. Edge DOFs
+        // Convenience lambda to print a scalar dof (all components) once
+        auto emit_scalar_dof = [&](Index rodin_dof)
+        {
+          if (written[rodin_dof])
+            return;
+          for (size_t c = 0; c < vdim; ++c)
+            os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
+          written[rodin_dof] = true;
+        };
+
+        // 1. Vertices (MFEM: all vertex dofs first, in vertex index order)
+        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
+        {
+          Index sdof = vertexScalarDof[v];
+          emit_scalar_dof(sdof);
+        }
+
+        // 2. Edges: interior DOFs, ordered w.r.t MFEM edge orientation (low-vertex -> high-vertex)
         if (D >= 1)
         {
-          const size_t edgeCount = mesh.getConnectivity().getCount(1);
-          for (Index i = 0; i < static_cast<Index>(edgeCount); ++i)
+          const auto& conn10 = mesh.getConnectivity().getIncidence(1, 0);
+          const size_t nEdges = mesh.getConnectivity().getCount(1);
+
+          for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
           {
-            const auto& dofs = fes.getDOFs(1, i);
-            // Write only unwritten DOFs (these are edge interior DOFs)
-            for (size_t local = 0; local < dofs.size(); ++local)
+            const auto& edgeVerts = conn10[e];
+            assert(edgeVerts.size() == 2 && "Segment should have 2 vertices.");
+
+            Index v0 = edgeVerts[0];
+            Index v1 = edgeVerts[1];
+
+            // MFEM canonical orientation: from min vertex id to max vertex id
+            Index vmin = std::min(v0, v1);
+            Index vmax = std::max(v0, v1);
+
+            Index vminDof = vertexScalarDof[vmin];
+            Index vmaxDof = vertexScalarDof[vmax];
+
+            const auto& edofs = fes.getDOFs(1, e);
+
+            // Separate interior scalar dofs (exclude the two vertex dofs)
+            std::vector<Index> interior;
+            interior.reserve(edofs.size());
+            for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
             {
-              Index rodin_dof = dofs(local);
-              if (!written[rodin_dof])
-              {
-                for (size_t c = 0; c < vdim; ++c)
-                  os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
-                written[rodin_dof] = true;
-              }
+              Index d = edofs(k);
+              if (d != vminDof && d != vmaxDof)
+                interior.push_back(d);
+            }
+
+            // If our stored edge orientation is opposite to MFEM's, reverse the interior order.
+            //
+            // - Our local orientation is (v0 -> v1) by construction (see getSubPolytopes for Segment).
+            // - MFEM's global orientation is (min(v), max(v)).
+            //
+            // So if v0 > v1, we are reversed w.r.t MFEM and must reverse the interior node order.
+            if (v0 > v1)
+            {
+              std::reverse(interior.begin(), interior.end());
+            }
+
+            for (Index d : interior)
+            {
+              emit_scalar_dof(d);
             }
           }
         }
 
-        // 3. Face DOFs (for 2D and 3D meshes)
+        // 3. Faces (2D: edges as faces; 3D: true 2D faces)
         if (D >= 2)
         {
-          // For 3D: faces are dimension 2. For 2D: faces are dimension 1 (edges serve as faces)
-          const size_t faceDim = (D == 3) ? 2 : (D - 1);
+          const size_t faceDim   = (D == 3) ? 2 : (D - 1);
           const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
-          for (Index i = 0; i < static_cast<Index>(faceCount); ++i)
+
+          for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
           {
-            const auto& dofs = fes.getDOFs(faceDim, i);
-            // Write only unwritten DOFs (these are face interior DOFs)
-            for (size_t local = 0; local < dofs.size(); ++local)
+            const auto& fdofs = fes.getDOFs(faceDim, f);
+            // Only write DOFs that weren't already seen as vertex/edge DOFs
+            for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
             {
-              Index rodin_dof = dofs(local);
-              if (!written[rodin_dof])
-              {
-                for (size_t c = 0; c < vdim; ++c)
-                  os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
-                written[rodin_dof] = true;
-              }
+              emit_scalar_dof(fdofs(k));
             }
           }
         }
 
-        // 4. Element (cell) interior DOFs
-        for (auto it = mesh.getCell(); !it.end(); ++it)
+        // 4. Element interiors
+        const size_t nCells = mesh.getConnectivity().getCount(D);
+        for (Index c = 0; c < static_cast<Index>(nCells); ++c)
         {
-          const auto& dofs = fes.getDOFs(D, it->getIndex());
-          // Write only unwritten DOFs (these are element interior DOFs)
-          for (size_t local = 0; local < dofs.size(); ++local)
+          const auto& cdofs = fes.getDOFs(D, c);
+          for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
           {
-            Index rodin_dof = dofs(local);
-            if (!written[rodin_dof])
-            {
-              for (size_t c = 0; c < vdim; ++c)
-                os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
-              written[rodin_dof] = true;
-            }
+            emit_scalar_dof(cdofs(k));
           }
         }
+
+        // --- restore previous stream state -------------------------------------
+        os.precision(old_prec);
+        os.flags(old_flags);
       }
   };
 }

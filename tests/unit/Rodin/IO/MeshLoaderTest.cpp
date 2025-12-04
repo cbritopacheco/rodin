@@ -21,7 +21,7 @@ namespace Rodin::Tests::Unit
 {
   TEST(Rodin_IO_MeshLoader, SanityTest_MEDIT_2D_Square)
   {
-    static constexpr const char* filename = "mmg/Square.medit.mesh";
+    static constexpr const char* filename = "medit/Square.medit.mesh";
     static constexpr size_t sdim = 2;
     boost::filesystem::path meshfile;
     meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
