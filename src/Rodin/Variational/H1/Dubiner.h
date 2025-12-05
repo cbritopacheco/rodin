@@ -237,10 +237,9 @@ namespace Rodin::Variational
         if (s_inv.size() == 0)
         {
           const auto& V = VandermondeTriangle<K>::getMatrix();
-          assert(V.rows() == V.cols() && "Triangle Vandermonde must be square.");
-          Eigen::FullPivLU<Math::Matrix<Real>> lu(V);
-          assert(lu.isInvertible());
-          s_inv = lu.inverse();
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
+          s_inv = svd.solve(I); // computes the (pseudo-)inverse applied to I
         }
 
         return s_inv;
@@ -436,10 +435,9 @@ namespace Rodin::Variational
         if (s_inv.size() == 0)
         {
           const auto& V = VandermondeTetrahedron<K>::getMatrix();
-          assert(V.rows() == V.cols() && "Tetrahedron Vandermonde must be square.");
-          Eigen::FullPivLU<Math::Matrix<Real>> lu(V);
-          assert(lu.isInvertible());
-          s_inv = lu.inverse();
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
+          s_inv = svd.solve(I); // computes the (pseudo-)inverse applied to I
         }
 
         return s_inv;
