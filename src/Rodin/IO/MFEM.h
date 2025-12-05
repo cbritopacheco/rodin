@@ -1424,6 +1424,7 @@ namespace Rodin::IO
 
           for (size_t j = 0; j < TriN; ++j)
           {
+            assert(j < fk.size());
             const auto& pt = fk[j];
             const Real x = pt.x();
             const Real y = pt.y();
@@ -1446,15 +1447,18 @@ namespace Rodin::IO
 
           for (int i = 0; i < nInt; ++i)
           {
+            assert(i < static_cast<int>(triBlocks.row_int.size()));
             const size_t ri = triBlocks.row_int[static_cast<size_t>(i)];
             for (int k = 0; k < nInt; ++k)
             {
+              assert(k < static_cast<int>(triBlocks.col_int.size()));
               const size_t cj = triBlocks.col_int[static_cast<size_t>(k)];
               triBlocks.C_ii_inv(i, k) = C(static_cast<Eigen::Index>(ri),
                                            static_cast<Eigen::Index>(cj));
             }
             for (int k = 0; k < nBnd; ++k)
             {
+              assert(k < static_cast<int>(triBlocks.col_bnd.size()));
               const size_t cj = triBlocks.col_bnd[static_cast<size_t>(k)];
               triBlocks.C_ib(i, k) = C(static_cast<Eigen::Index>(ri),
                                        static_cast<Eigen::Index>(cj));
@@ -1515,15 +1519,18 @@ namespace Rodin::IO
 
           for (int i = 0; i < nInt; ++i)
           {
+            assert(i < static_cast<int>(tetBlocks.row_int.size()));
             const size_t ri = tetBlocks.row_int[static_cast<size_t>(i)];
             for (int k = 0; k < nInt; ++k)
             {
+              assert(k < static_cast<int>(tetBlocks.col_int.size()));
               const size_t cj = tetBlocks.col_int[static_cast<size_t>(k)];
               tetBlocks.C_ii_inv(i, k) = C(static_cast<Eigen::Index>(ri),
                                            static_cast<Eigen::Index>(cj));
             }
             for (int k = 0; k < nBnd; ++k)
             {
+              assert(k < static_cast<int>(tetBlocks.col_bnd.size()));
               const size_t cj = tetBlocks.col_bnd[static_cast<size_t>(k)];
               tetBlocks.C_ib(i, k) = C(static_cast<Eigen::Index>(ri),
                                        static_cast<Eigen::Index>(cj));
@@ -1594,9 +1601,11 @@ namespace Rodin::IO
         auto visit_dof = [&](Index d)
         {
           const size_t s = static_cast<size_t>(d);
+          assert(s < scalarSize);
           if (!seen[s])
           {
             seen[s]   = uint8_t(1);
+            assert(s < dof2pos.size());
             dof2pos[s] = pos++;
           }
           // if already seen, printer's emit_scalar_dof would skip -> no new MFEM value
@@ -1606,7 +1615,10 @@ namespace Rodin::IO
 
         // 4.1 Vertices
         for (size_t v = 0; v < nVertices; ++v)
+        {
+          assert(v < vertexScalarDof.size());
           visit_dof(vertexScalarDof[v]);
+        }
 
         // 4.2 Edges (interior DOFs, oriented)
         if (D >= 1)
@@ -1623,7 +1635,9 @@ namespace Rodin::IO
 
             const Index vmin    = std::min(v0, v1);
             const Index vmax    = std::max(v0, v1);
+            assert(static_cast<size_t>(vmin) < vertexScalarDof.size());
             const Index vminDof = vertexScalarDof[static_cast<size_t>(vmin)];
+            assert(static_cast<size_t>(vmax) < vertexScalarDof.size());
             const Index vmaxDof = vertexScalarDof[static_cast<size_t>(vmax)];
 
             const auto& edofs = fes.getDOFs(1, static_cast<Index>(e));
@@ -1660,6 +1674,7 @@ namespace Rodin::IO
 
               if (faceGeom == Geometry::Polytope::Type::Triangle && nTriInt > 0)
               {
+                assert(f < triFaceStart.size());
                 triFaceStart[f] = pos;
                 pos += static_cast<size_t>(nTriInt);
               }
@@ -1693,6 +1708,7 @@ namespace Rodin::IO
 
             if (geom == Geometry::Polytope::Type::Triangle && nTriInt > 0)
             {
+              assert(c < triCellStart.size());
               triCellStart[c] = pos;
               pos += static_cast<size_t>(nTriInt);
             }
@@ -1712,11 +1728,13 @@ namespace Rodin::IO
 
             if (geom == Geometry::Polytope::Type::Tetrahedron && nTetInt > 0)
             {
+              assert(c < tetCellStart.size());
               tetCellStart[c] = pos;
               pos += static_cast<size_t>(nTetInt);
             }
             else if (geom == Geometry::Polytope::Type::Wedge && nWedgeInt > 0)
             {
+              assert(c < wedgeCellStart.size());
               wedgeCellStart[c] = pos;
               pos += static_cast<size_t>(nWedgeInt);
             }
@@ -1747,6 +1765,7 @@ namespace Rodin::IO
         std::vector<ScalarType> mfem_data(static_cast<size_t>(data.size()));
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        assert(mfem_data.size() >= 1);
         mfem_data[0] = static_cast<ScalarType>(std::stod(line));
 
         for (size_t i = 1; i < mfem_data.size(); ++i)
@@ -1763,6 +1782,7 @@ namespace Rodin::IO
             idx = p_s * vdim + c;
           else
             idx = c * scalarSize + p_s;
+          assert(idx < mfem_data.size());
           return mfem_data[idx];
         };
 
@@ -1772,11 +1792,15 @@ namespace Rodin::IO
         // DOFs with dof2pos[d] != invalid were printed via emit_scalar_dof.
         for (size_t s = 0; s < scalarSize; ++s)
         {
+          assert(s < dof2pos.size());
           const size_t p_s = dof2pos[s];
           if (p_s == invalid)
             continue; // will be handled via change-of-nodes
           for (size_t c = 0; c < vdim; ++c)
+          {
+            assert(static_cast<Index>(s + c * scalarSize) < data.size());
             data.coeffRef(static_cast<Index>(s + c * scalarSize)) = mfem_value(p_s, c);
+          }
         }
 
         // -------------------------------------------------------------
@@ -1797,7 +1821,10 @@ namespace Rodin::IO
           for (size_t k = 0; k < blk.col_bnd.size(); ++k)
           {
             const size_t loc = blk.col_bnd[k];
+            assert(loc < local_dofs.size());
             const Index d = local_dofs[loc];
+            assert(static_cast<Index>(k) < u_bnd.size());
+            assert(static_cast<Index>(d + comp * scalarSize) < data.size());
             u_bnd(static_cast<Index>(k)) =
               data.coeffRef(d + static_cast<Index>(comp * scalarSize));
           }
@@ -1807,6 +1834,7 @@ namespace Rodin::IO
           for (size_t i = 0; i < blk.row_int.size(); ++i)
           {
             const size_t p_s = mfem_start + i;
+            assert(static_cast<Index>(i) < y_int.size());
             y_int(static_cast<Index>(i)) = mfem_value(p_s, comp);
           }
 
@@ -1816,7 +1844,10 @@ namespace Rodin::IO
           for (size_t k = 0; k < blk.col_int.size(); ++k)
           {
             const size_t loc = blk.col_int[k];
+            assert(loc < local_dofs.size());
             const Index d = local_dofs[loc];
+            assert(static_cast<Index>(k) < u_int.size());
+            assert(static_cast<Index>(d + comp * scalarSize) < data.size());
             data.coeffRef(d + static_cast<Index>(comp * scalarSize)) =
               u_int(static_cast<Index>(k));
           }
@@ -1831,6 +1862,7 @@ namespace Rodin::IO
                 != Geometry::Polytope::Type::Triangle)
               continue;
 
+            assert(c < triCellStart.size());
             const size_t start = triCellStart[c];
             if (start == invalid)
               continue;
@@ -1840,7 +1872,11 @@ namespace Rodin::IO
 
             std::vector<Index> local(TriN);
             for (size_t i = 0; i < TriN; ++i)
+            {
+              assert(i < local.size());
+              assert(static_cast<Index>(i) < cdofs.size());
               local[i] = cdofs(static_cast<Index>(i));
+            }
 
             for (size_t comp = 0; comp < vdim; ++comp)
               invert_triangle_patch(local, start, comp);
@@ -1856,6 +1892,7 @@ namespace Rodin::IO
                 != Geometry::Polytope::Type::Triangle)
               continue;
 
+            assert(f < triFaceStart.size());
             const size_t start = triFaceStart[f];
             if (start == invalid)
               continue;
@@ -1865,7 +1902,11 @@ namespace Rodin::IO
 
             std::vector<Index> local(TriN);
             for (size_t i = 0; i < TriN; ++i)
+            {
+              assert(i < local.size());
+              assert(static_cast<Index>(i) < fdofs.size());
               local[i] = fdofs(static_cast<Index>(i));
+            }
 
             for (size_t comp = 0; comp < vdim; ++comp)
               invert_triangle_patch(local, start, comp);
@@ -1883,6 +1924,7 @@ namespace Rodin::IO
                 != Geometry::Polytope::Type::Tetrahedron)
               continue;
 
+            assert(c < tetCellStart.size());
             const size_t start = tetCellStart[c];
             if (start == invalid)
               continue;
@@ -1892,7 +1934,11 @@ namespace Rodin::IO
 
             std::vector<Index> local(TetN);
             for (size_t i = 0; i < TetN; ++i)
+            {
+              assert(i < local.size());
+              assert(static_cast<Index>(i) < cdofs.size());
               local[i] = cdofs(static_cast<Index>(i));
+            }
 
             for (size_t comp = 0; comp < vdim; ++comp)
             {
@@ -1902,6 +1948,8 @@ namespace Rodin::IO
               {
                 const size_t loc = blk.col_bnd[k];
                 const Index d = local[loc];
+                assert(static_cast<Index>(k) < u_bnd.size());
+                assert(static_cast<Index>(d + comp * scalarSize) < data.size());
                 u_bnd(static_cast<Index>(k)) =
                   data.coeffRef(d + static_cast<Index>(comp * scalarSize));
               }
@@ -1911,6 +1959,7 @@ namespace Rodin::IO
               for (size_t i = 0; i < blk.row_int.size(); ++i)
               {
                 const size_t p_s = start + i;
+                assert(static_cast<Index>(i) < y_int.size());
                 y_int(static_cast<Index>(i)) = mfem_value(p_s, comp);
               }
 
@@ -1919,8 +1968,12 @@ namespace Rodin::IO
 
               for (size_t k = 0; k < blk.col_int.size(); ++k)
               {
+                assert(k < blk.col_int.size());
                 const size_t loc = blk.col_int[k];
+                assert(loc < local.size());
                 const Index d = local[loc];
+                assert(static_cast<Index>(k) < u_int.size());
+                assert(static_cast<Index>(d + comp * scalarSize) < data.size());
                 data.coeffRef(d + static_cast<Index>(comp * scalarSize)) =
                   u_int(static_cast<Index>(k));
               }
@@ -1948,7 +2001,11 @@ namespace Rodin::IO
             // Local wedge DOFs: index = kseg * TriN + tri_idx, kseg = 0..p_int
             std::vector<Index> local(wedgeDofs);
             for (size_t i = 0; i < wedgeDofs; ++i)
+            {
+              assert(i < local.size());
+              assert(static_cast<Index>(i) < cdofs.size());
               local[i] = cdofs(static_cast<Index>(i));
+            }
 
             for (size_t comp = 0; comp < vdim; ++comp)
             {
@@ -1959,7 +2016,8 @@ namespace Rodin::IO
                 for (size_t it = 0; it < TriN; ++it)
                 {
                   const size_t loc = static_cast<size_t>(kseg) * TriN + it;
-                  local_tri[it]    = local[loc];
+                  assert(loc < local.size());
+                  local_tri[it] = local[loc];
                 }
 
                 const size_t slice_start =
@@ -2323,6 +2381,7 @@ namespace Rodin::IO
         auto emit_scalar_dof = [&](Index rodin_dof)
         {
           const size_t s = static_cast<size_t>(rodin_dof);
+          assert(s < scalarSize);
           if (written[s])
             return;
           for (size_t c = 0; c < vdim; ++c)
