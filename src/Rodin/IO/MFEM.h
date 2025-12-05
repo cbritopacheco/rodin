@@ -10,6 +10,7 @@
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <ostream>
+#include <optional>
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
@@ -1566,25 +1567,23 @@ namespace Rodin::IO
         const size_t nFaces    = (D >= 2) ? mesh.getConnectivity().getCount(2) : 0;
         const size_t nCells    = mesh.getConnectivity().getCount(D);
 
-        static constexpr size_t invalid = static_cast<size_t>(-1);
-
-        std::vector<size_t> dof2pos(scalarSize, invalid);
+        std::vector<std::optional<size_t>> dof2pos(scalarSize, std::nullopt);
         std::vector<uint8_t> seen(scalarSize, uint8_t(0));
 
         // Interior blocks for change-of-nodes entities
-        std::vector<size_t> triFaceStart;
-        std::vector<size_t> triCellStart;
-        std::vector<size_t> tetCellStart;
-        std::vector<size_t> wedgeCellStart;
+        std::vector<std::optional<size_t>> triFaceStart;
+        std::vector<std::optional<size_t>> triCellStart;
+        std::vector<std::optional<size_t>> tetCellStart;
+        std::vector<std::optional<size_t>> wedgeCellStart;
 
         if (D == 3 && nFaces > 0)
-          triFaceStart.assign(nFaces, invalid);
+          triFaceStart.assign(nFaces, std::nullopt);
         if (D == 2 && nCells > 0)
-          triCellStart.assign(nCells, invalid);
+          triCellStart.assign(nCells, std::nullopt);
         if (D == 3 && nCells > 0)
         {
-          tetCellStart.assign(nCells, invalid);
-          wedgeCellStart.assign(nCells, invalid);
+          tetCellStart.assign(nCells, std::nullopt);
+          wedgeCellStart.assign(nCells, std::nullopt);
         }
 
         // v → scalar DOF
@@ -1789,13 +1788,14 @@ namespace Rodin::IO
         // -------------------------------------------------------------
         // 6. Fill DOFs written directly (no change-of-nodes)
         // -------------------------------------------------------------
-        // DOFs with dof2pos[d] != invalid were printed via emit_scalar_dof.
+        // DOFs with dof2pos[d].has_value() were printed via emit_scalar_dof.
         for (size_t s = 0; s < scalarSize; ++s)
         {
           assert(s < dof2pos.size());
-          const size_t p_s = dof2pos[s];
-          if (p_s == invalid)
+          const auto& p_s_opt = dof2pos[s];
+          if (!p_s_opt.has_value())
             continue; // will be handled via change-of-nodes
+          const size_t p_s = p_s_opt.value();
           for (size_t c = 0; c < vdim; ++c)
           {
             assert(static_cast<Index>(s + c * scalarSize) < data.size());
@@ -1863,10 +1863,11 @@ namespace Rodin::IO
               continue;
 
             assert(c < triCellStart.size());
-            const size_t start = triCellStart[c];
-            if (start == invalid)
+            const auto& start_opt = triCellStart[c];
+            if (!start_opt.has_value())
               continue;
 
+            const size_t start = start_opt.value();
             const auto& cdofs = fes.getDOFs(2, static_cast<Index>(c));
             assert(cdofs.size() == TriN);
 
@@ -1893,10 +1894,11 @@ namespace Rodin::IO
               continue;
 
             assert(f < triFaceStart.size());
-            const size_t start = triFaceStart[f];
-            if (start == invalid)
+            const auto& start_opt = triFaceStart[f];
+            if (!start_opt.has_value())
               continue;
 
+            const size_t start = start_opt.value();
             const auto& fdofs = fes.getDOFs(2, static_cast<Index>(f));
             assert(fdofs.size() == TriN);
 
@@ -1925,10 +1927,11 @@ namespace Rodin::IO
               continue;
 
             assert(c < tetCellStart.size());
-            const size_t start = tetCellStart[c];
-            if (start == invalid)
+            const auto& start_opt = tetCellStart[c];
+            if (!start_opt.has_value())
               continue;
 
+            const size_t start = start_opt.value();
             const auto& cdofs = fes.getDOFs(3, static_cast<Index>(c));
             assert(cdofs.size() == TetN);
 
@@ -1990,10 +1993,12 @@ namespace Rodin::IO
                 != Geometry::Polytope::Type::Wedge)
               continue;
 
-            const size_t start = wedgeCellStart[c];
-            if (start == invalid)
+            assert(c < wedgeCellStart.size());
+            const auto& start_opt = wedgeCellStart[c];
+            if (!start_opt.has_value())
               continue;
 
+            const size_t start = start_opt.value();
             const auto& cdofs = fes.getDOFs(3, static_cast<Index>(c));
             const size_t wedgeDofs = static_cast<size_t>((p_int + 1) * TriN);
             assert(cdofs.size() == wedgeDofs);
