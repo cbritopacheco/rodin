@@ -32,8 +32,7 @@ namespace Rodin::Tests::Unit
 
     // Save to stringstream
     std::stringstream ss;
-    GridFunctionPrinter<FileFormat::MFEM, P0, Math::Vector<Real>> printer(u);
-    printer.print(ss);
+    u.save(ss, FileFormat::MFEM);
 
     // Check FEC header
     std::string line;
@@ -46,8 +45,7 @@ namespace Rodin::Tests::Unit
     ss.seekg(0);
 
     GridFunction v(fes);
-    GridFunctionLoader<FileFormat::MFEM, P0, Math::Vector<Real>> loader(v);
-    loader.load(ss);
+    v.load(ss, FileFormat::MFEM);
 
     // Compare values
     const auto& uData = u.getData();
@@ -79,8 +77,7 @@ namespace Rodin::Tests::Unit
 
     // Save to stringstream
     std::stringstream ss;
-    GridFunctionPrinter<FileFormat::MFEM, P0, Math::Vector<Real>> printer(u);
-    printer.print(ss);
+    u.save(ss, FileFormat::MFEM);
 
     // Check FEC header
     std::string line;
@@ -93,8 +90,7 @@ namespace Rodin::Tests::Unit
     ss.seekg(0);
 
     GridFunction v(fes);
-    GridFunctionLoader<FileFormat::MFEM, P0, Math::Vector<Real>> loader(v);
-    loader.load(ss);
+    v.load(ss, FileFormat::MFEM);
 
     // Compare values
     const auto& uData = u.getData();
@@ -126,8 +122,7 @@ namespace Rodin::Tests::Unit
 
     // Save to stringstream
     std::stringstream ss;
-    GridFunctionPrinter<FileFormat::MFEM, P0, Math::Vector<Real>> printer(u);
-    printer.print(ss);
+    u.save(ss, FileFormat::MFEM);
 
     // Check FEC header
     std::string line;
@@ -140,8 +135,7 @@ namespace Rodin::Tests::Unit
     ss.seekg(0);
 
     GridFunction v(fes);
-    GridFunctionLoader<FileFormat::MFEM, P0, Math::Vector<Real>> loader(v);
-    loader.load(ss);
+    v.load(ss, FileFormat::MFEM);
 
     // Compare values
     const auto& uData = u.getData();
@@ -173,8 +167,7 @@ namespace Rodin::Tests::Unit
 
     // Save to stringstream
     std::stringstream ss;
-    GridFunctionPrinter<FileFormat::MFEM, P0, Math::Vector<Real>> printer(u);
-    printer.print(ss);
+    u.save(ss, FileFormat::MFEM);
 
     // Check FEC header
     std::string line;
@@ -187,8 +180,7 @@ namespace Rodin::Tests::Unit
     ss.seekg(0);
 
     GridFunction v(fes);
-    GridFunctionLoader<FileFormat::MFEM, P0, Math::Vector<Real>> loader(v);
-    loader.load(ss);
+    v.load(ss, FileFormat::MFEM);
 
     // Compare values
     const auto& uData = u.getData();
@@ -220,8 +212,7 @@ namespace Rodin::Tests::Unit
 
     // Save to stringstream
     std::stringstream ss;
-    GridFunctionPrinter<FileFormat::MFEM, P0, Math::Vector<Real>> printer(u);
-    printer.print(ss);
+    u.save(ss, FileFormat::MFEM);
 
     // Check FEC header
     std::string line;
@@ -234,8 +225,7 @@ namespace Rodin::Tests::Unit
     ss.seekg(0);
 
     GridFunction v(fes);
-    GridFunctionLoader<FileFormat::MFEM, P0, Math::Vector<Real>> loader(v);
-    loader.load(ss);
+    v.load(ss, FileFormat::MFEM);
 
     // Compare values
     const auto& uData = u.getData();
@@ -298,8 +288,7 @@ namespace Rodin::Tests::Unit
 
     // Save to stringstream
     std::stringstream ss;
-    GridFunctionPrinter<FileFormat::MFEM, P0, Math::Vector<Real>> printer(u);
-    printer.print(ss);
+    u.save(ss, FileFormat::MFEM);
 
     // Check FEC header
     std::string line;
@@ -312,8 +301,7 @@ namespace Rodin::Tests::Unit
     ss.seekg(0);
 
     GridFunction v(fes);
-    GridFunctionLoader<FileFormat::MFEM, P0, Math::Vector<Real>> loader(v);
-    loader.load(ss);
+    v.load(ss, FileFormat::MFEM);
 
     // Compare values
     const auto& uData = u.getData();
@@ -344,11 +332,15 @@ namespace Rodin::Tests::Unit
 
     // Save to file
     const std::string filename = "/tmp/test_p0_gridfunction.gf";
-    u.save(filename, FileFormat::MFEM);
+    std::ofstream ofs(filename);
+    u.save(ofs, FileFormat::MFEM);
+    ofs.close();
 
     // Load from file
     GridFunction v(fes);
-    v.load(filename, FileFormat::MFEM);
+    std::ifstream ifs(filename);
+    v.load(ifs, FileFormat::MFEM);
+    ifs.close();
 
     // Compare values
     const auto& uData = u.getData();
