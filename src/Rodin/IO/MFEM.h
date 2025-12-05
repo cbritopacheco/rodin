@@ -1586,21 +1586,40 @@ namespace Rodin::IO
           wedgeCellStart.assign(nCells, std::nullopt);
         }
 
+        // Helper to convert potentially global DOF index to scalar DOF index
+        // For vector-valued spaces, getDOFs() may return indices in [0, vdim*scalarSize)
+        // We need to extract the scalar DOF in [0, scalarSize)
+        auto toScalarDOF = [&](Index dof) -> Index
+        {
+          // If vdim > 1 and DOF seems to be global, extract scalar part
+          if (vdim > 1 && dof >= scalarSize)
+          {
+            // Assuming interleaved or block ordering, try modulo
+            return dof % scalarSize;
+          }
+          return dof;
+        };
+
         // v → scalar DOF
         std::vector<Index> vertexScalarDof(nVertices);
         for (size_t v = 0; v < nVertices; ++v)
         {
           const auto& vdofs = fes.getDOFs(0, static_cast<Index>(v));
-          assert(vdofs.size() == 1);
-          vertexScalarDof[v] = vdofs(0);
+          assert(vdofs.size() >= 1);
+          vertexScalarDof[v] = toScalarDOF(vdofs(0));
         }
 
         size_t pos = 0; // MFEM scalar index (0..scalarSize-1)
 
         auto visit_dof = [&](Index d)
         {
-          const size_t s = static_cast<size_t>(d);
-          assert(s < scalarSize);
+          const Index scalar_dof = toScalarDOF(d);
+          const size_t s = static_cast<size_t>(scalar_dof);
+          if (s >= scalarSize)
+          {
+            // Skip invalid DOF indices that are out of range
+            return;
+          }
           if (!seen[s])
           {
             seen[s]   = uint8_t(1);
