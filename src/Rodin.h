@@ -17,4 +17,15 @@
  * @brief Class template argument deduction <a href="https://en.cppreference.com/w/cpp/language/class_template_argument_deduction">(CTAD)</a> of Rodin's classes.
  */
 
+
+#include "Rodin/Types.h"
+#include "Rodin/Alert.h"
+#include "Rodin/Geometry.h"
+#include "Rodin/Variational.h"
+#include "Rodin/Assembly.h"
+#include "Rodin/Solver.h"
+#include "Rodin/IO.h"
+#include "Rodin/Math.h"
+#include "Rodin/Utility.h"
+
 #endif
