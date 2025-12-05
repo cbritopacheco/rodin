@@ -50,7 +50,7 @@ namespace Rodin::Tests::Unit
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
-    EXPECT_EQ(line, "FiniteElementCollection: P1_2D_P1");
+    EXPECT_EQ(line, "FiniteElementCollection: H1_2D_P1");
     
     ss.clear();
     ss.seekg(0);
@@ -71,8 +71,8 @@ namespace Rodin::Tests::Unit
    */
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Quadrilateral)
   {
-    // Create 2D quad mesh with 16 elements (4x4 grid)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    // Create 2D quad mesh with >= 16 elements (5x5 grid = 16 quads)
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 5, 5 });
     
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -95,7 +95,7 @@ namespace Rodin::Tests::Unit
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
-    EXPECT_EQ(line, "FiniteElementCollection: P1_2D_P1");
+    EXPECT_EQ(line, "FiniteElementCollection: H1_2D_P1");
     
     ss.clear();
     ss.seekg(0);
@@ -141,7 +141,7 @@ namespace Rodin::Tests::Unit
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
-    EXPECT_EQ(line, "FiniteElementCollection: P1_3D_P1");
+    EXPECT_EQ(line, "FiniteElementCollection: H1_3D_P1");
     
     ss.clear();
     ss.seekg(0);
@@ -187,7 +187,7 @@ namespace Rodin::Tests::Unit
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
-    EXPECT_EQ(line, "FiniteElementCollection: P1_3D_P1");
+    EXPECT_EQ(line, "FiniteElementCollection: H1_3D_P1");
     
     ss.clear();
     ss.seekg(0);
@@ -208,8 +208,8 @@ namespace Rodin::Tests::Unit
    */
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Segment)
   {
-    // Create 1D segment mesh with >= 16 elements
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, { 16 });
+    // Create 1D segment mesh with >= 16 elements (17 divisions = 16 segments)
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, { 17 });
     
     mesh.getConnectivity().compute(1, 0);
     
@@ -231,7 +231,7 @@ namespace Rodin::Tests::Unit
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
-    EXPECT_EQ(line, "FiniteElementCollection: P1_1D_P1");
+    EXPECT_EQ(line, "FiniteElementCollection: H1_1D_P1");
     
     ss.clear();
     ss.seekg(0);
@@ -304,7 +304,7 @@ namespace Rodin::Tests::Unit
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
-    EXPECT_EQ(line, "FiniteElementCollection: P1_2D_P1");
+    EXPECT_EQ(line, "FiniteElementCollection: H1_2D_P1");
     
     ss.clear();
     ss.seekg(0);
