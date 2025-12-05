@@ -2515,30 +2515,44 @@ namespace Rodin::IO
         // fallback DOF-based paths (vertices / edges / non-tri/tet cells).
         std::vector<uint8_t> written(scalarSize, uint8_t(0));
 
+        // Helper to convert potentially global DOF index to scalar DOF index
+        // For vector-valued spaces, getDOFs() may return indices in [0, vdim*scalarSize)
+        // We need to extract the scalar DOF in [0, scalarSize)
+        auto toScalarDOF = [&](Index dof) -> Index
+        {
+          // If vdim > 1 and DOF seems to be global, extract scalar part
+          if (vdim > 1 && dof >= scalarSize)
+          {
+            // Assuming interleaved or block ordering, try modulo
+            return dof % scalarSize;
+          }
+          return dof;
+        };
+
         // Vertex -> scalar DOF (H1: exactly one scalar DOF per vertex)
         const size_t nVertices = mesh.getConnectivity().getCount(0);
         std::vector<Index> vertexScalarDof(nVertices);
         for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
         {
           const auto& vdofs = fes.getDOFs(0, v);
-          assert(vdofs.size() == 1 && "H1 vertex should have exactly one scalar DOF.");
-          vertexScalarDof[v] = vdofs(0);
+          assert(vdofs.size() >= 1 && "H1 vertex should have at least one DOF.");
+          vertexScalarDof[v] = toScalarDOF(vdofs(0));
         }
 
         // Emit coefficient(s) for a *Rodin scalar DOF index* in Nodes ordering
         auto emit_scalar_dof = [&](Index rodin_dof)
         {
-          const size_t s = static_cast<size_t>(rodin_dof);
+          const Index scalar_dof = toScalarDOF(rodin_dof);
+          const size_t s = static_cast<size_t>(scalar_dof);
           if (s >= scalarSize)
           {
             // Skip invalid DOF indices that are out of range
-            // This can happen in mixed meshes where DOF numbering may differ
             return;
           }
           if (written[s])
             return;
           for (size_t c = 0; c < vdim; ++c)
-            os << data.coeffRef(rodin_dof + c * scalarSize) << '\n';
+            os << data.coeffRef(scalar_dof + c * scalarSize) << '\n';
           written[s] = uint8_t(1);
         };
 
