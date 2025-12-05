@@ -90,6 +90,7 @@
 
 #include "Variational/P0.h"
 #include "Variational/P1.h"
+#include "Variational/H1.h"
 
 #include "Variational/DirichletBC.h"
 #include "Variational/PeriodicBC.h"

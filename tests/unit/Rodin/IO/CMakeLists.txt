@@ -25,4 +25,3 @@ target_link_libraries(RodinIOP1GridFunctionIOTest
   Rodin::Variational
   Rodin::IO)
 gtest_discover_tests(RodinIOP1GridFunctionIOTest)
-
