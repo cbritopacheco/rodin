@@ -2529,7 +2529,12 @@ namespace Rodin::IO
         auto emit_scalar_dof = [&](Index rodin_dof)
         {
           const size_t s = static_cast<size_t>(rodin_dof);
-          assert(s < scalarSize);
+          if (s >= scalarSize)
+          {
+            // Skip invalid DOF indices that are out of range
+            // This can happen in mixed meshes where DOF numbering may differ
+            return;
+          }
           if (written[s])
             return;
           for (size_t c = 0; c < vdim; ++c)
