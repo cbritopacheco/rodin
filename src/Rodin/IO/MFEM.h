@@ -1977,6 +1977,149 @@ namespace Rodin::IO
   };
 
   /**
+   * @brief Loader for P0 (piecewise constant) grid functions in MFEM format.
+   *
+   * Loads discontinuous finite element solutions from MFEM format.
+   * P0 spaces have one DOF per element, stored in element order.
+   *
+   * @tparam Range Range type for the finite element space
+   *
+   * ## Expected MFEM Format
+   * - Header: FiniteElementSpace
+   * - FiniteElementCollection: L2_<dim>D_P0
+   * - VDim: vector dimension
+   * - Ordering: data layout (Nodes=0 or VectorDimension=1)
+   * - Coefficient data values (one per element, in element order)
+   *
+   * ## Usage Example
+   * ```cpp
+   * P0 fes(mesh);
+   * GridFunction gf(fes);
+   * GridFunctionLoader<FileFormat::MFEM, P0<Real>, Vector<Real>> loader(gf);
+   * loader.load("solution.gf");
+   * ```
+   *
+   * @see GridFunctionPrinter
+   */
+  template <class Range>
+  class GridFunctionLoader<
+    FileFormat::MFEM,
+    Variational::P0<Range, Geometry::Mesh<Context::Local>>,
+    Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
+    : public GridFunctionLoaderBase<
+        Variational::P0<Range, Geometry::Mesh<Context::Local>>,
+        Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
+  {
+    public:
+      using FESType = Variational::P0<Range, Geometry::Mesh<Context::Local>>;
+
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+
+      using DataType = Math::Vector<ScalarType>;
+
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      using Parent = GridFunctionLoaderBase<FESType, DataType>;
+
+      /**
+       * @brief Constructs a grid function loader.
+       * @param[in,out] gf Grid function to populate with loaded data
+       */
+      GridFunctionLoader(ObjectType& gf)
+        : Parent(gf)
+      {}
+
+      /**
+       * @brief Loads grid function from an input stream.
+       * @param[in] is Input stream containing MFEM grid function data
+       *
+       * Parses the header and coefficient data. P0 elements are discontinuous,
+       * so data is simply ordered by element index.
+       */
+      void load(std::istream& is) override
+      {
+        using boost::spirit::x3::space;
+        using boost::spirit::x3::uint_;
+        using boost::spirit::x3::_attr;
+        using boost::spirit::x3::char_;
+
+        // -------------------------------------------------------------
+        // 1. Parse MFEM GridFunction header
+        // -------------------------------------------------------------
+        MFEM::GridFunctionHeader header;
+
+        const auto get_fec      = [&](auto& ctx) { header.fec      = _attr(ctx); };
+        const auto get_vdim     = [&](auto& ctx) { header.vdim     = _attr(ctx); };
+        const auto get_ordering = [&](auto& ctx)
+        {
+          header.ordering = static_cast<MFEM::Ordering>(_attr(ctx));
+        };
+
+        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+
+        auto it = line.begin();
+        const auto pfes  = boost::spirit::x3::string("FiniteElementSpace");
+        const bool rfes  = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
+        assert(rfes && it == line.end());
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it   = line.begin();
+        const auto pfec  =
+          boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
+        const bool rfec  = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
+        assert(rfec && it == line.end());
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it   = line.begin();
+        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[get_vdim];
+        const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
+        assert(rvdim && it == line.end());
+
+        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+        it   = line.begin();
+        const auto pord =
+          boost::spirit::x3::string("Ordering:") >> uint_[get_ordering];
+        const bool rord = boost::spirit::x3::phrase_parse(it, line.end(), pord, space);
+        assert(rord && it == line.end());
+
+        // -------------------------------------------------------------
+        // 2. Read coefficient data
+        // -------------------------------------------------------------
+        auto& gf  = this->getObject();
+        auto& fes = gf.getFiniteElementSpace();
+        auto& data = gf.getData();
+
+        const size_t vdim = fes.getVectorDimension();
+        const size_t dofCount = fes.getSize();
+
+        // Resize data vector
+        data.resize(dofCount);
+
+        // P0 spaces are discontinuous: one DOF per element
+        // MFEM orders by elements, and Rodin also orders by elements for P0
+        // So we can read directly in order
+        for (Index i = 0; i < static_cast<Index>(dofCount); i++)
+        {
+          line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
+          it = line.begin();
+
+          ScalarType value;
+          const auto get_value = [&](auto& ctx) { value = _attr(ctx); };
+
+          using boost::spirit::x3::double_;
+          const auto pvalue = double_[get_value];
+          const bool rvalue = boost::spirit::x3::phrase_parse(it, line.end(), pvalue, space);
+          assert(rvalue && it == line.end());
+
+          data(i) = value;
+        }
+      }
+
+    private:
+      size_t m_currentLineNumber = 0;
+  };
+
+  /**
    * @brief Base class for printing P0 (piecewise constant) grid functions in MFEM format.
    *
    * Handles output of discontinuous finite element solutions on cells.
