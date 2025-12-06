@@ -8,6 +8,15 @@ It is named after the French sculptor Auguste Rodin, considered the founder of m
 
 Any contributors are warmly encouraged and any help or comments are always appreciated!
 
+## Getting Started
+
+New to Rodin? Check out our comprehensive [Getting Started Guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html) which covers:
+
+- **[Installation and Setup](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html)** - Platform-specific installation instructions and verification
+- **[First Steps](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-steps.html)** - Basic concepts, project structure, and your first Rodin program
+- **[Your First Problem](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-problem.html)** - Complete walkthrough solving the Poisson equation
+- **[Core Concepts](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-core-concepts.html)** - Deep dive into meshes, finite elements, and variational formulations
+
 ## Status
 
 | Branch      |  Matrix  | Tests | Code Coverage | Benchmarks | Documentation |
@@ -17,14 +26,15 @@ Any contributors are warmly encouraged and any help or comments are always appre
 
 ## Table of Contents
 
-1. [Installation](#installation)
-2. [Building the project](#building-the-project)
-3. [Features](#features)
-4. [Third-Party integrations](#third-party-integrations)
-5. [Requirements](#requirements)
-6. [CMake options](#cmake-options)
-7. [Building the documentation](#building-the-documentation)
-8. [Development](#development)
+1. [Getting Started](#getting-started)
+2. [Installation](#installation)
+3. [Building the project](#building-the-project)
+4. [Features](#features)
+5. [Documentation](#documentation)
+6. [Third-Party integrations](#third-party-integrations)
+7. [Requirements](#requirements)
+8. [CMake options](#cmake-options)
+9. [Development](#development)
 
 ## Installation
 
@@ -314,6 +324,62 @@ Rodin supports different kinds of quadrature.
 
 ### SubMesh support
 
+## Documentation
+
+Rodin provides comprehensive documentation covering all aspects of the library:
+
+### User Guides
+
+**Getting Started:**
+- Installation and setup instructions
+- Your first Rodin program
+- Solving your first PDE (Poisson equation)
+- Understanding core concepts
+
+**Mesh Guide:**
+- [Creating meshes](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-creation.html) - UniformGrid, file loading, Builder API
+- [Connectivity](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-connectivity.html) - Computing and using connectivity relations
+- [Iteration](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-iteration.html) - Iterating over mesh entities
+- [Queries](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-queries.html) - Geometric measurements
+- [I/O](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-io.html) - File formats and operations
+- [Utilities](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-utilities.html) - Advanced operations
+
+### Examples
+
+The documentation includes numerous examples demonstrating Rodin's capabilities:
+
+- **PDE Examples:** Poisson equation, elasticity system, and more
+- **MMG Integration:** Mesh optimization, adaptation, and remeshing
+- **Shape Optimization:** Topology and shape optimization workflows
+- **Geometry Operations:** Mesh manipulation and transformations
+
+### API Reference
+
+Complete API documentation is available for all classes, functions, and modules:
+- [Full API Documentation](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/)
+- [Geometry Module](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/namespace_rodin_1_1_geometry.html)
+- [Variational Module](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/namespace_rodin_1_1_variational.html)
+- [Solver Module](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/namespace_rodin_1_1_solver.html)
+
+### Building Documentation Locally
+
+To build the documentation yourself:
+
+```bash
+# Clone repository with submodules
+git clone --recursive https://github.com/cbritopacheco/rodin.git
+cd rodin
+
+# Configure with documentation enabled
+mkdir build && cd build
+cmake .. -DRODIN_BUILD_DOC=ON -DRODIN_USE_MCSS=ON
+
+# Build documentation
+make RodinDoxygen
+```
+
+The generated documentation will be in the `doc/` directory. For more details, see [doc/README.md](doc/README.md).
+
 ## Third-Party integrations
 
 ### MMG
@@ -374,10 +440,6 @@ manager.
 | RODIN_USE_SUITESPARSE  | Build with SuiteSparse support                    |
 | RODIN_SILENCE_WARNINGS | Silence warnings outputted by Rodin               |
 | RODIN_BUILD_PY         | Build Python bindings                             |
-
-## Building the documentation
-
-See [this page](doc/README.md) to see how to build the documentation.
 
 ## Development
 
