@@ -58,33 +58,9 @@
   The Geometry module provides comprehensive support for mesh generation, manipulation,
   and geometric computations in finite element analysis.
 
-  @subsection guides-geometry-meshes-overview Meshes
+  For detailed information on specific geometry topics, see:
 
-  A mesh @f$ \mathcal{T}_h @f$ is a partition of a domain @f$ \Omega @f$ into
-  simple geometric elements (polytopes):
-
-  @f[
-    \Omega = \bigcup_{K \in \mathcal{T}_h} K
-  @f]
-
-  Rodin's Mesh class provides:
-  - Creation from files or programmatic generation
-  - Topology management through connectivity relations
-  - Geometric queries (volume, area, perimeter)
-  - Iterators for traversing mesh entities
-  - Support for submeshes and domain decomposition
-  - Attribute-based region marking
-
-  Learn more about meshes:
-
-  - @subpage guides-meshes-creation - How to create and load meshes
-  - @subpage guides-meshes-connectivity - Understanding and computing connectivity
-  - @subpage guides-meshes-iteration - Iterating over mesh entities
-  - @subpage guides-meshes-queries - Geometric queries and measurements
-  - @subpage guides-meshes-io - Saving and loading meshes
-  - @subpage guides-meshes-utilities - Advanced utilities and operations
-
-  @subsection guides-geometry-other Other Geometry Topics
+  - @subpage guides-meshes - Working with meshes
 
   - @subpage guides-polytopes - Geometric elements and their properties
 
