@@ -305,24 +305,39 @@ mesh.getConnectivity().compute(2, 1);
 // Etc.
 ```
 
-### Direct integration with Eigen solvers
+### Additional Features
 
-### Support for different finite elements
+Rodin provides many powerful features for finite element analysis:
 
-### Support for different mesh and solution file formats
+**Solver Integration:**
+- Direct integration with Eigen for linear algebra operations
+- Support for various linear solvers (CG, BiCGSTAB, SparseLU, etc.)
+- Iterative and direct solver methods
 
-- MFEM
-- MEDIT
+**Finite Element Spaces:**
+- P1 (piecewise linear) elements
+- P0 (piecewise constant) elements
+- H1
 
-### Different quadrature formulae
+**File Format Support:**
+- MFEM mesh and grid function formats
+- MEDIT mesh format (`.mesh`)
+- GMSH mesh format (`.msh`)
+- Support for reading and writing solutions
 
-Rodin supports different kinds of quadrature.
+**Quadrature Formulas:**
+- Multiple quadrature rules for integration
+- Grundmann-Moeller quadrature
+- Gauss-Legendre quadrature
+- See the [complete list of quadrature formulas](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/group___rodin_quadrature.html)
 
-- Grundmann-Moeller
+**Advanced Mesh Operations:**
+- SubMesh extraction for domain decomposition
+- Mesh partitioning for parallel computing
+- Boundary and interface mesh generation
+- See the [Mesh Utilities Guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-utilities.html) for more details
 
-[See here for the full list](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/group___rodin_quadrature.html).
-
-### SubMesh support
+For comprehensive documentation on all features, see the [Documentation](#documentation) section below.
 
 ## Documentation
 
@@ -400,20 +415,6 @@ The generated documentation will be in the `doc/` directory. For more details, s
                   .setHausdorff(hausd) // curvature refinement
                   .optimize(Omega);
   ```
-
-## Roadmap
-
-List of features and modules that are in the works:
-  - Discontinuous Galerkin methods
-  - `Rodin::Plot` module
-  - H1
-  - L2
-  - HDiv
-  - HCurl
-  - P2
-  - P0
-  - PETSc
-  - METIS
 
 ## Requirements
 
