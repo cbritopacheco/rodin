@@ -27,7 +27,7 @@ namespace Rodin::Tests::Benchmarks
 
   BENCHMARK_F(MeshIO, Load_MEDIT_2D_Square)(benchmark::State& st)
   {
-    static constexpr const char* filename = "mmg/Square.medit.mesh";
+    static constexpr const char* filename = "medit/Square.medit.mesh";
     boost::filesystem::path meshfile;
     meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
     meshfile.append(filename);
@@ -38,7 +38,7 @@ namespace Rodin::Tests::Benchmarks
 
   BENCHMARK_F(MeshIO, Load_MEDIT_2D_UniformTriangular64)(benchmark::State& st)
   {
-    static constexpr const char* filename = "mmg/UniformTriangular64.medit.mesh";
+    static constexpr const char* filename = "medit/UniformTriangular64.medit.mesh";
     boost::filesystem::path meshfile;
     meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
     meshfile.append(filename);
