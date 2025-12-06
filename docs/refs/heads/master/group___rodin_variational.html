@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -69,16 +76,17 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md47">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md386">Mathematical Foundation</a></li>
             <li>
               Reference
               <ul>
                 <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#enum-members">Enums</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module provides the infrastructure for defining and solving variational problems in finite element analysis. It supports the formulation of linear and nonlinear problems, boundary conditions, and various finite element spaces.</p><section id="autotoc_md47"><h3><a href="#autotoc_md47">Mathematical Foundation</a></h3><p>The module implements the standard finite element methodology:</p><ul><li><strong>Bilinear Forms</strong>: <svg class="m-math" style="width: 10.816em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 103.832088 11.955168">
+<p>The <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module provides the infrastructure for defining and solving variational problems in finite element analysis. It supports the formulation of linear and nonlinear problems, boundary conditions, and various finite element spaces.</p><section id="autotoc_md386"><h3><a href="#autotoc_md386">Mathematical Foundation</a></h3><p>The module implements the standard finite element methodology:</p><ul><li><strong>Bilinear Forms</strong>: <svg class="m-math" style="width: 10.816em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 103.832088 11.955168">
 <title>
 $ a(u,v) : V \times V \to \mathbb{R} $
 </title>
@@ -262,14 +270,47 @@ $ b_i = l(\psi_i) $
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_average_3_01_function_base_3_01_function_derived_01_4_01_4.html" class="m-doc">Rodin::Variational::Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a> operator for computing interface averages.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Operator&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">Rodin::Variational::BilinearFormBase</a>
             </dt>
             <dd>Base class for bilinear form representations.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Number, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">Rodin::Variational::BilinearFormIntegratorBase</a>
+            </dt>
+            <dd>Abstract base class for bilinear form integrators.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_boundary_normal.html" class="m-doc">Rodin::Variational::BoundaryNormal</a>
+            </dt>
+            <dd>Outward unit normal vector on domain boundaries.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_derivative_base.html" class="m-doc">Rodin::Variational::DerivativeBase</a>
+            </dt>
+            <dd>Base class for directional derivative operators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">Rodin::Variational::DivBase</a>
+            </dt>
+            <dd>Base class for divergence operator implementations.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_face_normal.html" class="m-doc">Rodin::Variational::FaceNormal</a>
+            </dt>
+            <dd>Unit normal vector on mesh faces.</dd>
+            <dt>
               class <a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html" class="m-doc">Rodin::Variational::FiniteElementSpaceBase</a>
             </dt>
             <dd>Base class for finite element spaces.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy, class TangentPolicy&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_flow_3_01_function_base_3_01_derived_01_4_00_01_vector_field_00_dfb044b212cc5e4c3d85c3583a25df08.html" class="m-doc">Rodin::Variational::Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy, TangentPolicy&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a> map operator for functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Rodin::Variational::FunctionBase</a>
@@ -281,16 +322,97 @@ $ b_i = l(\psi_i) $
             </dt>
             <dd>Base class for discrete finite element functions.</dd>
             <dt>
+              class <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Rodin::Variational::Integrator</a>
+            </dt>
+            <dd>Abstract base class for integrators in variational formulations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">Rodin::Variational::JacobianBase</a>
+            </dt>
+            <dd>Base class for <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> matrix operator implementations.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Vector&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">Rodin::Variational::LinearFormBase</a>
             </dt>
             <dd>Base class for linear form objects.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">Rodin::Variational::LinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for linear form integrators.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Rodin::Variational::ProblemBase</a>
             </dt>
             <dd>Base class for variational problem objects.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_body_base.html" class="m-doc">Rodin::Variational::ProblemBodyBase</a>
+            </dt>
+            <dd>Base class representing the body of a variational problem.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_relative_error.html" class="m-doc">Rodin::Variational::RelativeError</a>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a> class for computing relative errors.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">::<wbr />FESType</a>, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::SpaceType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
+            </dt>
+            <dd>Base class for shape function objects.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::Variational::TestFunction</a>
+            </dt>
+            <dd>Represents a function which belongs to a test space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_trial_function_reference.html" class="m-doc">Rodin::Variational::TrialFunctionReference</a>
+            </dt>
+            <dd>Reference wrapper for trial functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Rodin::Variational::TrialFunction</a>
+            </dt>
+            <dd>Represents a function which belongs to a trial space.</dd>
           </dl>
+        </section>
+        <section id="enum-members">
+          <h2><a href="#enum-members">Enums</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> { </span><span class="m-doc-wrap"><a href="#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>,
+              <a href="#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a> }</span>
+            </dt>
+            <dd>Enumeration for shape function space types.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="ga6cd58505ac5f9e57b8f353cfeef7d7a4"><div>
+            <h3>
+              enum class <a href="#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc-self">ShapeFunctionSpaceType</a>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_variational_2_forward_decls_8h.html">&lt;Rodin/Variational/ForwardDecls.h&gt;</a></div>
+            </h3>
+            <p>Enumeration for shape function space types.</p>
+<p>Indicates whether a shape function belongs to the trial space (unknowns) or test space (weighting functions) in a variational formulation.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc-self" id="gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d">Trial</a></td>
+                  <td>
+                  <p>Indicates that the shape function belongs to a trial space.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc-self" id="gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b">Test</a></td>
+                  <td>
+                  <p>Indicates that the shape function belongs to a test space.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

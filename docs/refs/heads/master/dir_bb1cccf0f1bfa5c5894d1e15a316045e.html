@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -67,6 +74,68 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span>Utility<span class="m-breadcrumb">/</span> <span class="m-thin">directory</span>
         </h1>
         <p>Namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Rodin::<wbr />Utility</a>.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#files">Files</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="files">
+          <h2><a href="#files">Files</a></h2>
+          <dl class="m-doc">
+            <dt>file <a href="_bottom_template_8h.html" class="m-doc">BottomTemplate.h</a></dt>
+            <dd>Defines the BottomTemplate metafunction for extracting innermost types.</dd>
+            <dt>file <a href="_cast_8cpp.html" class="m-doc">Cast.cpp</a></dt>
+            <dd>Implementation file for Cast specializations.</dd>
+            <dt>file <a href="_utility_2_cast_8h.html" class="m-doc">Cast.h</a></dt>
+            <dd>Defines the Cast template for type conversions.</dd>
+            <dt>file <a href="_dependent_value_8h.html" class="m-doc">DependentValue.h</a></dt>
+            <dd>Defines the DependentValue utility for type-dependent compile-time constants.</dd>
+            <dt>file <a href="_extract_8h.html" class="m-doc">Extract.h</a></dt>
+            <dd>Defines the Extract metafunction for tuple type transformation.</dd>
+            <dt>file <a href="_false_8h.html" class="m-doc">False.h</a></dt>
+            <dd>Defines the False compile-time constant for static_assert in template contexts.</dd>
+            <dt>file <a href="_for_constexpr_8h.html" class="m-doc">ForConstexpr.h</a></dt>
+            <dd>Defines compile-time loop utilities for template metaprogramming.</dd>
+            <dt>file <a href="_has_type_member_8h.html" class="m-doc">HasTypeMember.h</a></dt>
+            <dd>Defines the HasTypeMember type trait for detecting nested Type members.</dd>
+            <dt>file <a href="_has_value_member_8h.html" class="m-doc">HasValueMember.h</a></dt>
+            <dd>Defines the HasValueMember type trait for detecting nested Value members.</dd>
+            <dt>file <a href="_integer_sequence_8h.html" class="m-doc">IntegerSequence.h</a></dt>
+            <dd>Defines the IntegerSequence class for compile-time integer sequences.</dd>
+            <dt>file <a href="_is_complete_type_8h.html" class="m-doc">IsCompleteType.h</a></dt>
+            <dd>Defines the IsCompleteType type trait for detecting complete types.</dd>
+            <dt>file <a href="_is_one_of_8h.html" class="m-doc">IsOneOf.h</a></dt>
+            <dd>Defines the IsOneOf type trait for checking type membership in a list.</dd>
+            <dt>file <a href="_is_specialization_8h.html" class="m-doc">IsSpecialization.h</a></dt>
+            <dd>Defines the IsSpecialization type trait for detecting template specializations.</dd>
+            <dt>file <a href="_make_8h.html" class="m-doc">Make.h</a></dt>
+            <dd>Defines the Make factory template for perfect forwarding construction.</dd>
+            <dt>file <a href="_optional_reference_8h.html" class="m-doc">OptionalReference.h</a></dt>
+            <dd>Defines the OptionalReference wrapper for optional reference semantics.</dd>
+            <dt>file <a href="_overloaded_8h.html" class="m-doc">Overloaded.h</a></dt>
+            <dd>Defines the Overloaded helper for combining multiple lambdas.</dd>
+            <dt>file <a href="_parameter_pack_8h.html" class="m-doc">ParameterPack.h</a></dt>
+            <dd>Defines the ParameterPack class for compile-time parameter pack manipulation.</dd>
+            <dt>file <a href="_product_8h.html" class="m-doc">Product.h</a></dt>
+            <dd>Defines the Product metafunction for computing Cartesian products of tuple types.</dd>
+            <dt>file <a href="_repeat_8h.html" class="m-doc">Repeat.h</a></dt>
+            <dd>Defines the Repeat metafunction for creating tuples with repeated types.</dd>
+            <dt>file <a href="_s_t_l_casts_8h.html" class="m-doc">STLCasts.h</a></dt>
+            <dd>Defines STL-related type conversion utilities.</dd>
+            <dt>file <a href="_unwrap_reference_8h.html" class="m-doc">UnwrapReference.h</a></dt>
+            <dd>Defines utilities for unwrapping reference_wrapper types.</dd>
+            <dt>file <a href="_wrap_8h.html" class="m-doc">Wrap.h</a></dt>
+            <dd>Defines the Wrap metafunction for wrapping tuple element types.</dd>
+            <dt>file <a href="_zip_8h.html" class="m-doc">Zip.h</a></dt>
+            <dd>Defines the Zip metafunction for combining two tuples element-wise.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

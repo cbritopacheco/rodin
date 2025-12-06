@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -99,6 +106,196 @@
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
+            <dt id="afb9cecf901552579b8a209ff95e1961c">
+              <span class="m-doc-wrap-bumper"><a href="#afb9cecf901552579b8a209ff95e1961c" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree1_Scalar)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> saving and loading H1 GridFunction with degree 1 (scalar)</dd>
+            <dt id="a7e40a888abee427ada3dfbdc6b844026">
+              <span class="m-doc-wrap-bumper"><a href="#a7e40a888abee427ada3dfbdc6b844026" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree2_Scalar)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> saving and loading H1 GridFunction with degree 2 (scalar)</dd>
+            <dt id="a861fe7df7f6c8a43f0c252b1bc0e6807">
+              <span class="m-doc-wrap-bumper"><a href="#a861fe7df7f6c8a43f0c252b1bc0e6807" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree3_Scalar)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> saving and loading H1 GridFunction with degree 3 (scalar)</dd>
+            <dt id="ace6b073112c067b70b8d96be877ec398">
+              <span class="m-doc-wrap-bumper"><a href="#ace6b073112c067b70b8d96be877ec398" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadFile_H1_Degree2_Scalar)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> saving H1 GridFunction to file and loading it back.</dd>
+            <dt id="acb6d2f37438227ec76b00c9889be136e">
+              <span class="m-doc-wrap-bumper"><a href="#acb6d2f37438227ec76b00c9889be136e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree4_Triangle)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 4 on triangle mesh.</dd>
+            <dt id="a4ada06928a2ef300ba804b8cea41ba43">
+              <span class="m-doc-wrap-bumper"><a href="#a4ada06928a2ef300ba804b8cea41ba43" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree5_Triangle)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 5 on triangle mesh.</dd>
+            <dt id="a81e38e33039e55df8620640fc95f8e64">
+              <span class="m-doc-wrap-bumper"><a href="#a81e38e33039e55df8620640fc95f8e64" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree6_Triangle)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 6 on triangle mesh.</dd>
+            <dt id="a863f72c9f184c614f9790b885946c6e9">
+              <span class="m-doc-wrap-bumper"><a href="#a863f72c9f184c614f9790b885946c6e9" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree4_Quadrilateral)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 4 on quadrilateral mesh.</dd>
+            <dt id="a33e757f6bb953e2fbaea6334d79052ef">
+              <span class="m-doc-wrap-bumper"><a href="#a33e757f6bb953e2fbaea6334d79052ef" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree5_Quadrilateral)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 5 on quadrilateral mesh.</dd>
+            <dt id="a35de334baa9cce3232ad59d5350ba6ee">
+              <span class="m-doc-wrap-bumper"><a href="#a35de334baa9cce3232ad59d5350ba6ee" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree6_Quadrilateral)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 6 on quadrilateral mesh.</dd>
+            <dt id="a1a354357a095f36cbc8151d11165789f">
+              <span class="m-doc-wrap-bumper"><a href="#a1a354357a095f36cbc8151d11165789f" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree4_Tetrahedron)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 4 on tetrahedron mesh (3D)</dd>
+            <dt id="a3d51b2e3b3476398981daca8901e931c">
+              <span class="m-doc-wrap-bumper"><a href="#a3d51b2e3b3476398981daca8901e931c" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree5_Tetrahedron)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 5 on tetrahedron mesh (3D)</dd>
+            <dt id="a41b401490696c8117b5ef9313bd760e7">
+              <span class="m-doc-wrap-bumper"><a href="#a41b401490696c8117b5ef9313bd760e7" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree6_Tetrahedron)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 6 on tetrahedron mesh (3D)</dd>
+            <dt id="afbef0d26487852eb0b81bfb93aa3355d">
+              <span class="m-doc-wrap-bumper"><a href="#afbef0d26487852eb0b81bfb93aa3355d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree4_Mixed2D)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 4 on mixed 2D mesh (triangles and quads)</dd>
+            <dt id="a2ef858a2165155bebeba315af6825095">
+              <span class="m-doc-wrap-bumper"><a href="#a2ef858a2165155bebeba315af6825095" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree5_Mixed2D)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 5 on mixed 2D mesh.</dd>
+            <dt id="a14b45f7c6480a2ea11d2dd69d3cb1da5">
+              <span class="m-doc-wrap-bumper"><a href="#a14b45f7c6480a2ea11d2dd69d3cb1da5" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree6_Mixed2D)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 6 on mixed 2D mesh.</dd>
+            <dt id="ad56b5fa12c1e4d5e94bce64d09039702">
+              <span class="m-doc-wrap-bumper"><a href="#ad56b5fa12c1e4d5e94bce64d09039702" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree1_Quadrilateral)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 1 on quadrilateral mesh.</dd>
+            <dt id="a04f8c8183f1effe77e0a21d0fc020efd">
+              <span class="m-doc-wrap-bumper"><a href="#a04f8c8183f1effe77e0a21d0fc020efd" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree2_Quadrilateral)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 2 on quadrilateral mesh.</dd>
+            <dt id="a78e8b988c56012b1d00b0fd890bfb94d">
+              <span class="m-doc-wrap-bumper"><a href="#a78e8b988c56012b1d00b0fd890bfb94d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree1_Tetrahedron)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 1 on tetrahedron mesh (3D)</dd>
+            <dt id="a3cfaef29d35f94ec3d269031bb9960ac">
+              <span class="m-doc-wrap-bumper"><a href="#a3cfaef29d35f94ec3d269031bb9960ac" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree2_Tetrahedron)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 2 on tetrahedron mesh (3D)</dd>
+            <dt id="ac99c4f205b4e815d1d63e081d454d98a">
+              <span class="m-doc-wrap-bumper"><a href="#ac99c4f205b4e815d1d63e081d454d98a" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree2_Triangle_Large)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 2 on triangle mesh with &gt;= 16 elements.</dd>
+            <dt id="a57821609934a0e6161b08b13c704dfd2">
+              <span class="m-doc-wrap-bumper"><a href="#a57821609934a0e6161b08b13c704dfd2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree1_Mixed2D)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 1 on mixed 2D mesh (triangles and quads)</dd>
+            <dt id="afb05698b6df6140c3adbebd6bad05c50">
+              <span class="m-doc-wrap-bumper"><a href="#afb05698b6df6140c3adbebd6bad05c50" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree2_Mixed2D)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 2 on mixed 2D mesh.</dd>
+            <dt id="a4e57c9f8bfe5773cdede5afdafaf5089">
+              <span class="m-doc-wrap-bumper"><a href="#a4e57c9f8bfe5773cdede5afdafaf5089" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree1_Segment)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 1 on segment mesh (1D)</dd>
+            <dt id="a7ab8ca1da04f1709eaab10f4d22e62d7">
+              <span class="m-doc-wrap-bumper"><a href="#a7ab8ca1da04f1709eaab10f4d22e62d7" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree2_Segment)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 2 on segment mesh (1D)</dd>
+            <dt id="a9196818aa2365e7c14d03feb381c7a39">
+              <span class="m-doc-wrap-bumper"><a href="#a9196818aa2365e7c14d03feb381c7a39" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree3_Segment)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 3 on segment mesh (1D)</dd>
+            <dt id="aafca2bcaec0a1500703de4f0d86c291c">
+              <span class="m-doc-wrap-bumper"><a href="#aafca2bcaec0a1500703de4f0d86c291c" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree4_Segment)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 4 on segment mesh (1D)</dd>
+            <dt id="a5c3979f489f427543824ba2578bd638c">
+              <span class="m-doc-wrap-bumper"><a href="#a5c3979f489f427543824ba2578bd638c" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree1_Wedge)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 1 on wedge mesh (3D)</dd>
+            <dt id="a866065733c71fd17a2d2c3c3a91ba1c7">
+              <span class="m-doc-wrap-bumper"><a href="#a866065733c71fd17a2d2c3c3a91ba1c7" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree2_Wedge)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 2 on wedge mesh (3D)</dd>
+            <dt id="a096f242a0aba805b0cb4106256fa2ed2">
+              <span class="m-doc-wrap-bumper"><a href="#a096f242a0aba805b0cb4106256fa2ed2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree3_Wedge)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 3 on wedge mesh (3D)</dd>
+            <dt id="a65582abe6209f35c577dc8465860ce90">
+              <span class="m-doc-wrap-bumper"><a href="#a65582abe6209f35c577dc8465860ce90" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
+              SaveLoadRoundTrip_H1_Degree4_Wedge)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> H1 degree 4 on wedge mesh (3D)</dd>
+            <dt id="a0ce8fdc5e03e89cfc36d5ee776715b96">
+              <span class="m-doc-wrap-bumper"><a href="#a0ce8fdc5e03e89cfc36d5ee776715b96" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_P1_GridFunction,
+              SaveLoadRoundTrip_Triangle)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> saving and loading P1 GridFunction on triangle mesh (2D)</dd>
+            <dt id="aad36af749b4579f5e2eb4a2244272479">
+              <span class="m-doc-wrap-bumper"><a href="#aad36af749b4579f5e2eb4a2244272479" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_P1_GridFunction,
+              SaveLoadRoundTrip_Quadrilateral)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> saving and loading P1 GridFunction on quadrilateral mesh (2D)</dd>
+            <dt id="a4d31ee6d231704f3454d31a377473e7d">
+              <span class="m-doc-wrap-bumper"><a href="#a4d31ee6d231704f3454d31a377473e7d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_P1_GridFunction,
+              SaveLoadRoundTrip_Tetrahedron)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> saving and loading P1 GridFunction on tetrahedron mesh (3D)</dd>
+            <dt id="a653761d8e3d4b876b95cd675d1ff00b1">
+              <span class="m-doc-wrap-bumper"><a href="#a653761d8e3d4b876b95cd675d1ff00b1" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_P1_GridFunction,
+              SaveLoadRoundTrip_Wedge)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> saving and loading P1 GridFunction on wedge mesh (3D)</dd>
+            <dt id="adcb4f8697e37d6b17360e6617fdf4cc0">
+              <span class="m-doc-wrap-bumper"><a href="#adcb4f8697e37d6b17360e6617fdf4cc0" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_P1_GridFunction,
+              SaveLoadRoundTrip_Segment)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> saving and loading P1 GridFunction on segment mesh (1D)</dd>
+            <dt id="abf52abe872df445677f4ab143505100b">
+              <span class="m-doc-wrap-bumper"><a href="#abf52abe872df445677f4ab143505100b" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_P1_GridFunction,
+              SaveLoadRoundTrip_Mixed2D)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> saving and loading P1 GridFunction on mixed 2D mesh.</dd>
+            <dt id="aaa396ab0e5e01e1c8adf577bc8a8d5f4">
+              <span class="m-doc-wrap-bumper"><a href="#aaa396ab0e5e01e1c8adf577bc8a8d5f4" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_P1_GridFunction,
+              SaveLoadFile)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> file-based I/O for P1 GridFunction.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a198ed75949276f5b978fa8da3509b63a" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_lagrangian_test.html" class="m-doc">LagrangianTest</a>,
               BasicConstruction)</span>
@@ -134,6 +331,39 @@
               MeshAccess)</span>
             </dt>
             <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> mesh polytope access and validation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6442218de2d57a7b1b5d2f7fb3265be2" class="m-doc">computeTriangleFaceBarycentric</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> px,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> py,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> pz,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z2) -&gt; std::tuple&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;</span>
+            </dt>
+            <dd>Checks if a 3D point lies on a triangular face and computes its barycentric coordinates.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab8f5b1d46e5100643c86febec7ca1b22" class="m-doc">computeQuadFaceParametric</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> px,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> py,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> pz,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x3,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y3,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z3) -&gt; std::pair&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;</span>
+            </dt>
+            <dd>Checks if a 3D point lies on a planar quadrilateral face and computes parametric coords.</dd>
           </dl>
         </section>
         <section>
@@ -193,6 +423,179 @@
             </h3>
             <p><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> mesh polytope access and validation.</p>
 <p>This test verifies basic mesh functionality needed for Flow operations.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6442218de2d57a7b1b5d2f7fb3265be2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::tuple&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6442218de2d57a7b1b5d2f7fb3265be2" class="m-doc-self">computeTriangleFaceBarycentric</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> px,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> py,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> pz,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z2)</span></span>
+            </h3>
+            <p>Checks if a 3D point lies on a triangular face and computes its barycentric coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">px</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>py</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>pz</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>x0</td>
+                  <td>First vertex of the triangle (corresponds to barycentric u=1)</td>
+                </tr>
+                <tr>
+                  <td>y0</td>
+                  <td>First vertex of the triangle (corresponds to barycentric u=1)</td>
+                </tr>
+                <tr>
+                  <td>z0</td>
+                  <td>First vertex of the triangle (corresponds to barycentric u=1)</td>
+                </tr>
+                <tr>
+                  <td>x1</td>
+                  <td>Second vertex of the triangle (corresponds to barycentric v=1)</td>
+                </tr>
+                <tr>
+                  <td>y1</td>
+                  <td>Second vertex of the triangle (corresponds to barycentric v=1)</td>
+                </tr>
+                <tr>
+                  <td>z1</td>
+                  <td>Second vertex of the triangle (corresponds to barycentric v=1)</td>
+                </tr>
+                <tr>
+                  <td>x2</td>
+                  <td>Third vertex of the triangle (corresponds to barycentric w=1)</td>
+                </tr>
+                <tr>
+                  <td>y2</td>
+                  <td>Third vertex of the triangle (corresponds to barycentric w=1)</td>
+                </tr>
+                <tr>
+                  <td>z2</td>
+                  <td>Third vertex of the triangle (corresponds to barycentric w=1)</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> of (u, v, w) barycentric coordinates if point is on face; (NaN, NaN, NaN) if point is not on the triangular face</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Uses the barycentric coordinate method to determine if point (px, py, pz) lies on the triangle defined by vertices (x0,y0,z0), (x1,y1,z1), (x2,y2,z2).</p><p>Algorithm:</p><ol><li>Express the point as P = u*V0 + v*(V1-V0) + w*(V2-V0) where u + v + w = 1</li><li>Solve for v, w using dot products (Cramer&#x27;s rule)</li><li>Point is on triangle if 0 &lt;= u,v,w &lt;= 1 and point lies on the plane</li></ol>
+          </div></section>
+          <section class="m-doc-details" id="ab8f5b1d46e5100643c86febec7ca1b22"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::pair&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8f5b1d46e5100643c86febec7ca1b22" class="m-doc-self">computeQuadFaceParametric</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> px,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> py,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> pz,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x3,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y3,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z3)</span></span>
+            </h3>
+            <p>Checks if a 3D point lies on a planar quadrilateral face and computes parametric coords.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">px</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>py</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>pz</td>
+                  <td>The query point coordinates</td>
+                </tr>
+                <tr>
+                  <td>x0</td>
+                  <td>First vertex (maps to parametric (0,0))</td>
+                </tr>
+                <tr>
+                  <td>y0</td>
+                  <td>First vertex (maps to parametric (0,0))</td>
+                </tr>
+                <tr>
+                  <td>z0</td>
+                  <td>First vertex (maps to parametric (0,0))</td>
+                </tr>
+                <tr>
+                  <td>x1</td>
+                  <td>Second vertex (maps to parametric (1,0))</td>
+                </tr>
+                <tr>
+                  <td>y1</td>
+                  <td>Second vertex (maps to parametric (1,0))</td>
+                </tr>
+                <tr>
+                  <td>z1</td>
+                  <td>Second vertex (maps to parametric (1,0))</td>
+                </tr>
+                <tr>
+                  <td>x2</td>
+                  <td>Third vertex (maps to parametric (1,1))</td>
+                </tr>
+                <tr>
+                  <td>y2</td>
+                  <td>Third vertex (maps to parametric (1,1))</td>
+                </tr>
+                <tr>
+                  <td>z2</td>
+                  <td>Third vertex (maps to parametric (1,1))</td>
+                </tr>
+                <tr>
+                  <td>x3</td>
+                  <td>Fourth vertex (maps to parametric (0,1))</td>
+                </tr>
+                <tr>
+                  <td>y3</td>
+                  <td>Fourth vertex (maps to parametric (0,1))</td>
+                </tr>
+                <tr>
+                  <td>z3</td>
+                  <td>Fourth vertex (maps to parametric (0,1))</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (s, t) parametric coordinates if point is on face; (NaN, NaN) if point is not on the quadrilateral face</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For a planar quadrilateral with vertices ordered counter-clockwise, determines if point (px, py, pz) lies on the face and computes its parametric coordinates (s, t) in [0,1]x[0,1].</p><p>Algorithm:</p><ol><li>Compute the face normal using cross product of edge vectors</li><li>Check if point lies on the plane within tolerance</li><li>Project to 2D by dropping the axis with largest normal component</li><li>Solve for parametric coordinates in the projected space</li></ol><p>Note: This simplified algorithm assumes axis-aligned or near-axis-aligned quads, which is appropriate for reference element faces.</p>
           </div></section>
         </section>
       </div>

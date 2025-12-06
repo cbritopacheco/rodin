@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -66,7 +73,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Warning <span class="m-thin">class</span>
         </h1>
-        <p>Derived Alert class representing a warning.</p>
+        <p><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> message class with formatted output.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -74,38 +81,124 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Represents an alert which does not terminate the program when raised, yet still has visible effects when raised. For example, showing a formatted message on the screen.</p>
+<p>A specialized message class for displaying warnings with yellow-colored formatting. Unlike exceptions, warning messages do not terminate the program and are used to notify users of potential issues or unusual conditions that don&#x27;t prevent execution.</p><p>The <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> class provides stream-like insertion operators for building detailed warning messages with formatting capabilities.</p><p>Example usage: <code class="m-code"><span class="n">Warning</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;This operation is deprecated&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></code></p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">Prefix</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Prefix&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message&lt;WarningPrefix&gt;</a>
             </dt>
-            <dd>Base class for objects which represents output messages.</dd>
+            <dd>Forward declaration of the <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> template class.</dd>
+          </dl>
+        </section>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_member_function_warning.html" class="m-doc">MemberFunctionWarning</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> type for issues occurring in member functions.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a82832aa74425c2497d62c0e36e2caf0b">
+              using <a href="#a82832aa74425c2497d62c0e36e2caf0b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&lt;<a href="class_rodin_1_1_alert_1_1_warning_prefix.html" class="m-doc">WarningPrefix</a>&gt;
+            </dt>
+            <dd>Parent class type alias.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ac75fc2b243c50e0381d9452161777b60">
-              <span class="m-doc-wrap-bumper"><a href="#ac75fc2b243c50e0381d9452161777b60" class="m-doc-self">Warning</a>(</span><span class="m-doc-wrap">)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac75fc2b243c50e0381d9452161777b60" class="m-doc">Warning</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Constructs a <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> alert with an empty message.</dd>
-            <dt id="ab068b840cca522fdbef84f424c28efa1">
-              <span class="m-doc-wrap-bumper"><a href="#ab068b840cca522fdbef84f424c28efa1" class="m-doc-self">Warning</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a646950a01b178ed701ba8ef46b1d0ac9" class="m-doc">Warning</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            </dt>
+            <dd>Constructs a <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> alert with a specific output stream.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab068b840cca522fdbef84f424c28efa1" class="m-doc">Warning</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a23b2e5570fecfc551718f4fe0a8724d5">
-              <span class="m-doc-wrap-bumper"><a href="#a23b2e5570fecfc551718f4fe0a8724d5" class="m-doc-self">Warning</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a23b2e5570fecfc551718f4fe0a8724d5" class="m-doc">Warning</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ac75fc2b243c50e0381d9452161777b60"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Warning::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac75fc2b243c50e0381d9452161777b60" class="m-doc-self">Warning</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Constructs a <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> alert with an empty message.</p>
+<p>Creates a warning message that outputs to std::cout by default.</p>
+          </div></section>
+          <section class="m-doc-details" id="a646950a01b178ed701ba8ef46b1d0ac9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Warning::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a646950a01b178ed701ba8ef46b1d0ac9" class="m-doc-self">Warning</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Constructs a <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> alert with a specific output stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>The output stream to write the warning message to.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab068b840cca522fdbef84f424c28efa1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Warning::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab068b840cca522fdbef84f424c28efa1" class="m-doc-self">Warning</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>The <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a23b2e5570fecfc551718f4fe0a8724d5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Warning::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23b2e5570fecfc551718f4fe0a8724d5" class="m-doc-self">Warning</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>The <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

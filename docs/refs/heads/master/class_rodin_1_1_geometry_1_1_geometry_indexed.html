@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -64,10 +71,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_indexed_8h.html">&lt;Rodin/Geometry/GeometryIndexed.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>GeometryIndexed <span class="m-thin">class</span>
         </h1>
-        <p>Container that maps polytope types to associated data.</p>
+        <p>Template container indexed by polytope geometry types.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -75,13 +83,14 @@
           <tbody>
             <tr>
               <td style="width: 1%">T</td>
-              <td>Type of data to associate with each polytope type</td>
+              <td>Type of values to store</td>
             </tr>
           </tbody>
         </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
+            <li><a href="#autotoc_md60">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +100,16 @@
             </li>
           </ul>
         </nav>
-<p>This class provides an efficient mapping from polytope geometry types (<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>, Segment, Triangle, etc.) to arbitrary data of type T. It uses compile-time knowledge of the number of polytope types to provide O(1) access with minimal memory overhead.</p>
+<p>Container that maps polytope types to associated data.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_geometry_indexed_8h.html" class="m-doc">GeometryIndexed.h</a></p></aside><p>This class provides an efficient mapping from polytope geometry types (<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>, Segment, Triangle, etc.) to arbitrary data of type T. It uses compile-time knowledge of the number of polytope types to provide O(1) access with minimal memory overhead.</p><section id="autotoc_md60"><h2><a href="#autotoc_md60">Usage Example</a></h2><pre class="m-code"><span class="c1">// Store quadrature orders for each polytope type</span>
+<span class="n">GeometryIndexed</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">quadratureOrders</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Point</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Segment</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Quadrilateral</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Wedge</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">}</span>
+<span class="p">};</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">quadratureOrders</span><span class="p">[</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">];</span><span class="w"> </span><span class="c1">// Returns 3</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a></p></aside></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">

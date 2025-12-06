@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -68,22 +75,121 @@
           <li class="m-doc-collapsible">
             <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_a76ff2fd046c37f043d49e701a9434a5.html" class="m-doc">Rodin</a> <span class="m-doc">Namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span>
             <ul class="m-doc">
-              <li>dir <a href="dir_609b8253b7bf42d1aa344d32447168a8.html" class="m-doc">Assembly</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::<wbr />Assembly</a>.</span></li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_661522309736fe80800cd3cfb8ddb937.html" class="m-doc">Alert</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_alert.html" class="m-doc">Rodin::<wbr />Alert</a>.</span>
+                <ul class="m-doc">
+                  <li>file <a href="_rodin_2_alert_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for Alert module types.</span></li>
+                </ul>
+              </li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_609b8253b7bf42d1aa344d32447168a8.html" class="m-doc">Assembly</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::<wbr />Assembly</a>.</span>
+                <ul class="m-doc">
+                  <li>file <a href="_input_8h.html" class="m-doc">Input.h</a> <span class="m-doc">Input data structures for assembly operations.</span></li>
+                  <li>file <a href="_assembly_2_default_8h.html" class="m-doc">Default.h</a> <span class="m-doc">Default assembly strategy selection based on compilation configuration.</span></li>
+                  <li>file <a href="_assembly_2_generic_8h.html" class="m-doc">Generic.h</a> <span class="m-doc">Generic problem assembly implementation for complete variational problems.</span></li>
+                  <li>file <a href="_rodin_2_assembly_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for the Assembly module.</span></li>
+                </ul>
+              </li>
               <li>dir <a href="dir_1526f74e52dc61ea8fbf2ff39ba6edac.html" class="m-doc">Context</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Rodin::<wbr />Context</a>.</span></li>
-              <li>dir <a href="dir_69861c49f4c9025c25efd09125ce7a4f.html" class="m-doc">FormLanguage</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</span></li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_69861c49f4c9025c25efd09125ce7a4f.html" class="m-doc">FormLanguage</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</span>
+                <ul class="m-doc">
+                  <li>file <a href="_debug_8h.html" class="m-doc">Debug.h</a> <span class="m-doc">Debugging utilities for form language objects.</span></li>
+                  <li>file <a href="_is_plane_object_8h.html" class="m-doc">IsPlaneObject.h</a> <span class="m-doc">Type trait for identifying Eigen plain object types.</span></li>
+                  <li>file <a href="_list_8h.html" class="m-doc">List.h</a> <span class="m-doc">Polymorphic container for form language objects.</span></li>
+                  <li>file <a href="_form_language_2_traits_8h.html" class="m-doc">Traits.h</a> <span class="m-doc">Type traits system for form language objects.</span></li>
+                  <li>file <a href="_rodin_2_form_language_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for the FormLanguage module.</span></li>
+                </ul>
+              </li>
               <li class="m-doc-collapsible collapsed">
                 <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_d1efb67081fb8c17d56b5a2c13c2a510.html" class="m-doc">Geometry</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a>.</span>
                 <ul class="m-doc">
-                  <li>dir <a href="dir_060030a60d114509cca2273f0b4fd0ec.html" class="m-doc">Euclidean</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Euclidean</a>.</span></li>
+                  <li class="m-doc-collapsible collapsed">
+                    <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_060030a60d114509cca2273f0b4fd0ec.html" class="m-doc">Euclidean</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Euclidean</a>.</span>
+                    <ul class="m-doc">
+                      <li>file <a href="_geometry_2_euclidean_2_base_8h.html" class="m-doc">Base.h</a> <span class="m-doc">Base class for Euclidean geometric objects using CRTP pattern.</span></li>
+                      <li>file <a href="_circle_8h.html" class="m-doc">Circle.h</a> <span class="m-doc">Circle in 2D Euclidean space.</span></li>
+                      <li>file <a href="_concepts_8h.html" class="m-doc">Concepts.h</a> <span class="m-doc">Type traits for detecting geometric operations on Euclidean objects.</span></li>
+                      <li>file <a href="_line_segment2_d_8h.html" class="m-doc">LineSegment2D.h</a> <span class="m-doc">Line segment in 2D Euclidean space.</span></li>
+                      <li>file <a href="_point2_d_8h.html" class="m-doc">Point2D.h</a> <span class="m-doc">Point in 2D Euclidean space.</span></li>
+                      <li>file <a href="_rectangle_8h.html" class="m-doc">Rectangle.h</a> <span class="m-doc">Axis-aligned rectangle in 2D Euclidean space.</span></li>
+                      <li>file <a href="_geometry_2_euclidean_2_line2_d_8h.html" class="m-doc">Line2D.h</a> <span class="m-doc">Infinite line in 2D Euclidean space.</span></li>
+                      <li>file <a href="_rodin_2_geometry_2_euclidean_2_common_8h.html" class="m-doc">Common.h</a> <span class="m-doc">Common utility functions for Euclidean geometry.</span></li>
+                      <li>file <a href="_rodin_2_geometry_2_euclidean_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for Euclidean geometry classes.</span></li>
+                    </ul>
+                  </li>
+                  <li>file <a href="_attribute_index_8h.html" class="m-doc">AttributeIndex.h</a> <span class="m-doc">Attribute indexing for mesh polytopes.</span></li>
+                  <li>file <a href="_balanced_compact_partitioner_8h.html" class="m-doc">BalancedCompactPartitioner.h</a> <span class="m-doc">Balanced compact partitioning strategy for mesh decomposition.</span></li>
+                  <li>file <a href="_euclidean_8h.html" class="m-doc">Euclidean.h</a> <span class="m-doc">Euclidean geometry utilities for the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a> module.</span></li>
+                  <li>file <a href="_geometry_indexed_8h.html" class="m-doc">GeometryIndexed.h</a> <span class="m-doc">Container for mapping polytope types to associated data.</span></li>
+                  <li>file <a href="_greedy_partitioner_8h.html" class="m-doc">GreedyPartitioner.h</a> <span class="m-doc">Greedy partitioning strategy for mesh decomposition.</span></li>
+                  <li>file <a href="_identity_transformation_8h.html" class="m-doc">IdentityTransformation.h</a> <span class="m-doc">Identity transformation for polytopes.</span></li>
+                  <li>file <a href="_index_generator_8h.html" class="m-doc">IndexGenerator.h</a> <span class="m-doc">Index generation utilities for iterating over polytope indices.</span></li>
+                  <li>file <a href="_isoparametric_transformation_8h.html" class="m-doc">IsoparametricTransformation.h</a> <span class="m-doc">Isoparametric transformation for finite elements.</span></li>
+                  <li>file <a href="_point_8h.html" class="m-doc">Point.h</a> <span class="m-doc">Spatial points on mesh polytopes with reference and physical coordinates.</span></li>
+                  <li>file <a href="_polytope_8h.html" class="m-doc">Polytope.h</a> <span class="m-doc">Polytope classes representing geometric elements in finite element meshes.</span></li>
+                  <li>file <a href="_polytope_iterator_8h.html" class="m-doc">PolytopeIterator.h</a> <span class="m-doc">Iterator classes for traversing mesh polytopes.</span></li>
+                  <li>file <a href="_polytope_transformation_8h.html" class="m-doc">PolytopeTransformation.h</a> <span class="m-doc">Base class for polytope geometric transformations.</span></li>
+                  <li>file <a href="_polytope_transformation_index_8h.html" class="m-doc">PolytopeTransformationIndex.h</a> <span class="m-doc">Index for storing polytope transformations.</span></li>
+                  <li>file <a href="_region_8h.html" class="m-doc">Region.h</a> <span class="m-doc">Region enumeration for identifying mesh subregions.</span></li>
+                  <li>file <a href="_shard_8h.html" class="m-doc">Shard.h</a> <span class="m-doc">Advanced mesh shard with ghost polytope tracking for distributed computing.</span></li>
+                  <li>file <a href="_sub_mesh_8h.html" class="m-doc">SubMesh.h</a> <span class="m-doc">SubMesh class for representing subregions of meshes with parent relationships.</span></li>
+                  <li>file <a href="_geometry_2_connectivity_8h.html" class="m-doc">Connectivity.h</a> <span class="m-doc">Mesh connectivity for representing topological relationships.</span></li>
+                  <li>file <a href="_geometry_2_sharder_8h.html" class="m-doc">Sharder.h</a> <span class="m-doc">Sharder interface for mesh decomposition.</span></li>
+                  <li>file <a href="_geometry_2_types_8h.html" class="m-doc">Types.h</a> <span class="m-doc">Type definitions for the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a> module.</span></li>
+                  <li>file <a href="_geometry_2_mesh_partitioner_8h.html" class="m-doc">MeshPartitioner.h</a> <span class="m-doc">Base interface for mesh partitioning algorithms.</span></li>
+                  <li>file <a href="_rodin_2_geometry_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a> module.</span></li>
+                  <li>file <a href="_geometry_2_mesh_8h.html" class="m-doc">Mesh.h</a> <span class="m-doc">Core mesh data structure for finite element computations.</span></li>
                 </ul>
               </li>
               <li>dir <a href="dir_ff6599c6033d39d885e7782b9df2e1c5.html" class="m-doc">IO</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::<wbr />IO</a>.</span></li>
-              <li>dir <a href="dir_b7e57313a66daf0cc7851f0d51a70ad3.html" class="m-doc">Math</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::<wbr />Math</a>.</span></li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_b7e57313a66daf0cc7851f0d51a70ad3.html" class="m-doc">Math</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::<wbr />Math</a>.</span>
+                <ul class="m-doc">
+                  <li>file <a href="_math_2_traits_8h.html" class="m-doc">Traits.h</a> <span class="m-doc">Type traits for the Math module and form language.</span></li>
+                  <li>file <a href="_constants_8h.html" class="m-doc">Constants.h</a> <span class="m-doc">Mathematical constants and related utility functions.</span></li>
+                  <li>file <a href="_rad_8h.html" class="m-doc">Rad.h</a> <span class="m-doc">Radian angle unit type.</span></li>
+                  <li>file <a href="_sparse_matrix_8h.html" class="m-doc">SparseMatrix.h</a> <span class="m-doc">Sparse matrix type and operations.</span></li>
+                  <li>file <a href="_unit_8h.html" class="m-doc">Unit.h</a> <span class="m-doc">Base class for type-safe unit representations.</span></li>
+                  <li>file <a href="_math_2_matrix_8h.html" class="m-doc">Matrix.h</a> <span class="m-doc">Dense matrix type aliases and definitions.</span></li>
+                  <li>file <a href="_math_2_vector_8h.html" class="m-doc">Vector.h</a> <span class="m-doc">Dense vector type aliases and definitions.</span></li>
+                  <li>file <a href="_math_2_types_8h.html" class="m-doc">Types.h</a> <span class="m-doc">Type definitions for the Math module.</span></li>
+                  <li>file <a href="_rodin_2_math_2_common_8h.html" class="m-doc">Common.h</a> <span class="m-doc">Common mathematical functions and operations.</span></li>
+                  <li>file <a href="_rodin_2_math_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for the Math module.</span></li>
+                </ul>
+              </li>
               <li class="m-doc-collapsible collapsed">
                 <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_5ed5bd20e7b55e8c0db0dae066728d9f.html" class="m-doc">Models</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_models.html" class="m-doc">Rodin::<wbr />Models</a>.</span>
                 <ul class="m-doc">
-                  <li>dir <a href="dir_6d33a1a5da1a55fc5f1155ebe44ac8c6.html" class="m-doc">Advection</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_models_1_1_advection.html" class="m-doc">Rodin::<wbr />Models::<wbr />Advection</a>.</span></li>
-                  <li>dir <a href="dir_cbe926da86c50aa603e7c83d7c6ba296.html" class="m-doc">Distance</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_models_1_1_distance.html" class="m-doc">Rodin::<wbr />Models::<wbr />Distance</a>.</span></li>
+                  <li class="m-doc-collapsible collapsed">
+                    <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_6d33a1a5da1a55fc5f1155ebe44ac8c6.html" class="m-doc">Advection</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_models_1_1_advection.html" class="m-doc">Rodin::<wbr />Models::<wbr />Advection</a>.</span>
+                    <ul class="m-doc">
+                      <li>file <a href="_lagrangian_8h.html" class="m-doc">Lagrangian.h</a> <span class="m-doc">Lagrangian variational advection for scalar fields.</span></li>
+                    </ul>
+                  </li>
+                  <li class="m-doc-collapsible collapsed">
+                    <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_cbe926da86c50aa603e7c83d7c6ba296.html" class="m-doc">Distance</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_models_1_1_distance.html" class="m-doc">Rodin::<wbr />Models::<wbr />Distance</a>.</span>
+                    <ul class="m-doc">
+                      <li>file <a href="_models_2_distance_2_base_8h.html" class="m-doc">Base.h</a> <span class="m-doc">Base class for distance function computation models.</span></li>
+                      <li>file <a href="_eikonal_8h.html" class="m-doc">Eikonal.h</a> <span class="m-doc">Eikonal equation-based distance function computation.</span></li>
+                      <li>file <a href="_poisson_8h.html" class="m-doc">Poisson.h</a> <span class="m-doc">Poisson equation-based distance function approximation.</span></li>
+                      <li>file <a href="_rvachev_8h.html" class="m-doc">Rvachev.h</a> <span class="m-doc">Rvachev normalization for level set functions.</span></li>
+                      <li>file <a href="_signed_poisson_8h.html" class="m-doc">SignedPoisson.h</a> <span class="m-doc">Signed Poisson equation-based distance function approximation.</span></li>
+                      <li>file <a href="_spalding_tucker_8h.html" class="m-doc">SpaldingTucker.h</a> <span class="m-doc">Spalding-Tucker normalization for level set functions.</span></li>
+                    </ul>
+                  </li>
+                  <li class="m-doc-collapsible collapsed">
+                    <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_9eef501c9c47359d20c9b0eaeaacb94b.html" class="m-doc">Eikonal</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_models_1_1_eikonal.html" class="m-doc">Rodin::<wbr />Models::<wbr />Eikonal</a>.</span>
+                    <ul class="m-doc">
+                      <li>file <a href="_f_m_m_8h.html" class="m-doc">FMM.h</a> <span class="m-doc">Fast marching method on simplicial meshes.</span></li>
+                    </ul>
+                  </li>
+                  <li class="m-doc-collapsible collapsed">
+                    <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_ae0f46bd0882f51d0f2a6bcd2fd45b37.html" class="m-doc">Elasticity</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_models_1_1_elasticity.html" class="m-doc">Rodin::<wbr />Models::<wbr />Elasticity</a>.</span>
+                    <ul class="m-doc">
+                      <li>file <a href="_models_2_elasticity_2_linear_elasticity_8h.html" class="m-doc">LinearElasticity.h</a> <span class="m-doc">Linear elasticity model for solid mechanics.</span></li>
+                    </ul>
+                  </li>
                   <li>dir <a href="dir_3cbbd0cd6e5d9acda5fb7df2988f654a.html" class="m-doc">Hilbert</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_models_1_1_hilbert.html" class="m-doc">Rodin::<wbr />Models::<wbr />Hilbert</a>.</span></li>
                 </ul>
               </li>
@@ -114,16 +220,183 @@
                   <li>dir <a href="dir_292645ed42601749d09564a84c0d1328.html" class="m-doc">GUI</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_g_u_i.html" class="m-doc">Rodin::<wbr />Plot::<wbr />GUI</a>.</span></li>
                 </ul>
               </li>
-              <li>dir <a href="dir_24fde64181801978fc54ae653a2aa3d2.html" class="m-doc">QF</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a>.</span></li>
-              <li>dir <a href="dir_d906c76e88cb4d166858d6593797cfbe.html" class="m-doc">Solver</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</span></li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_24fde64181801978fc54ae653a2aa3d2.html" class="m-doc">QF</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a>.</span>
+                <ul class="m-doc">
+                  <li>file <a href="_centroid_8cpp.html" class="m-doc">Centroid.cpp</a> <span class="m-doc">Implementation of the Centroid quadrature formula.</span></li>
+                  <li>file <a href="_centroid_8h.html" class="m-doc">Centroid.h</a> <span class="m-doc">Defines the Centroid single-point quadrature formula.</span></li>
+                  <li>file <a href="_gauss_legendre_8cpp.html" class="m-doc">GaussLegendre.cpp</a> <span class="m-doc">Implementation of the GaussLegendre quadrature formula.</span></li>
+                  <li>file <a href="_gauss_legendre_8h.html" class="m-doc">GaussLegendre.h</a> <span class="m-doc">Defines the GaussLegendre quadrature formula.</span></li>
+                  <li>file <a href="_gauss_lobatto_8h.html" class="m-doc">GaussLobatto.h</a> <span class="m-doc">Defines the GaussLobatto quadrature formula.</span></li>
+                  <li>file <a href="_generic_polytope_quadrature_8cpp.html" class="m-doc">GenericPolytopeQuadrature.cpp</a> <span class="m-doc">Implementation of the GenericPolytopeQuadrature dispatcher class.</span></li>
+                  <li>file <a href="_generic_polytope_quadrature_8h.html" class="m-doc">GenericPolytopeQuadrature.h</a> <span class="m-doc">Defines the GenericPolytopeQuadrature dispatcher class.</span></li>
+                  <li>file <a href="_grundmann_moller_8cpp.html" class="m-doc">GrundmannMoller.cpp</a> <span class="m-doc">Implementation of the GrundmannMoller simplex quadrature formula.</span></li>
+                  <li>file <a href="_grundmann_moller_8h.html" class="m-doc">GrundmannMoller.h</a> <span class="m-doc">Defines the GrundmannMoller simplex quadrature formula.</span></li>
+                  <li>file <a href="_quadrature_formula_8h.html" class="m-doc">QuadratureFormula.h</a> <span class="m-doc">Defines the QuadratureFormulaBase abstract base class.</span></li>
+                </ul>
+              </li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_d906c76e88cb4d166858d6593797cfbe.html" class="m-doc">Solver</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</span>
+                <ul class="m-doc">
+                  <li>file <a href="_solver_2_c_g_8h.html" class="m-doc">CG.h</a> <span class="m-doc">Conjugate gradient solver for symmetric positive definite systems.</span></li>
+                  <li>file <a href="_bi_c_g_s_t_a_b_8h.html" class="m-doc">BiCGSTAB.h</a> <span class="m-doc">Bi-conjugate gradient stabilized solver for non-symmetric systems.</span></li>
+                  <li>file <a href="_c_h_o_l_m_o_d_8h.html" class="m-doc">CHOLMOD.h</a> <span class="m-doc">CHOLMOD supernodal Cholesky factorization solver wrapper.</span></li>
+                  <li>file <a href="_householder_q_r_8h.html" class="m-doc">HouseholderQR.h</a> <span class="m-doc">Householder QR decomposition for dense matrices.</span></li>
+                  <li>file <a href="_l_d_l_t_8h.html" class="m-doc">LDLT.h</a> <span class="m-doc">Robust LDLT Cholesky factorization for dense matrices.</span></li>
+                  <li>file <a href="_least_squares_c_g_8h.html" class="m-doc">LeastSquaresCG.h</a> <span class="m-doc">Least-squares conjugate gradient solver.</span></li>
+                  <li>file <a href="_simplicial_l_d_l_t_8h.html" class="m-doc">SimplicialLDLT.h</a> <span class="m-doc">Simplicial LDLT Cholesky factorization for sparse SPD matrices.</span></li>
+                  <li>file <a href="_simplicial_l_l_t_8h.html" class="m-doc">SimplicialLLT.h</a> <span class="m-doc">Simplicial LLT Cholesky factorization for sparse SPD matrices.</span></li>
+                  <li>file <a href="_sparse_l_u_8h.html" class="m-doc">SparseLU.h</a> <span class="m-doc">Sparse LU factorization solver.</span></li>
+                  <li>file <a href="_sparse_q_r_8h.html" class="m-doc">SparseQR.h</a> <span class="m-doc">Sparse QR factorization with column pivoting.</span></li>
+                  <li>file <a href="_s_p_q_r_8h.html" class="m-doc">SPQR.h</a> <span class="m-doc">SuiteSparseQR multifrontal sparse QR solver wrapper.</span></li>
+                  <li>file <a href="_u_m_f_pack_8h.html" class="m-doc">UMFPack.h</a> <span class="m-doc">UMFPACK multifrontal sparse LU solver wrapper.</span></li>
+                  <li>file <a href="_rodin_2_solver_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for all solver classes.</span></li>
+                </ul>
+              </li>
               <li>dir <a href="dir_f40f36cffa54676223568f78ac36cfa0.html" class="m-doc">Test</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Rodin::<wbr />Test</a>.</span></li>
               <li>dir <a href="dir_1a8056c10a6bfc8395146f49a2bfc9aa.html" class="m-doc">Threads</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_threads.html" class="m-doc">Rodin::<wbr />Threads</a>.</span></li>
-              <li>dir <a href="dir_bb1cccf0f1bfa5c5894d1e15a316045e.html" class="m-doc">Utility</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Rodin::<wbr />Utility</a>.</span></li>
-              <li>dir <a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html" class="m-doc">Variational</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</span></li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_bb1cccf0f1bfa5c5894d1e15a316045e.html" class="m-doc">Utility</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Rodin::<wbr />Utility</a>.</span>
+                <ul class="m-doc">
+                  <li>file <a href="_bottom_template_8h.html" class="m-doc">BottomTemplate.h</a> <span class="m-doc">Defines the BottomTemplate metafunction for extracting innermost types.</span></li>
+                  <li>file <a href="_cast_8cpp.html" class="m-doc">Cast.cpp</a> <span class="m-doc">Implementation file for Cast specializations.</span></li>
+                  <li>file <a href="_utility_2_cast_8h.html" class="m-doc">Cast.h</a> <span class="m-doc">Defines the Cast template for type conversions.</span></li>
+                  <li>file <a href="_dependent_value_8h.html" class="m-doc">DependentValue.h</a> <span class="m-doc">Defines the DependentValue utility for type-dependent compile-time constants.</span></li>
+                  <li>file <a href="_extract_8h.html" class="m-doc">Extract.h</a> <span class="m-doc">Defines the Extract metafunction for tuple type transformation.</span></li>
+                  <li>file <a href="_false_8h.html" class="m-doc">False.h</a> <span class="m-doc">Defines the False compile-time constant for static_assert in template contexts.</span></li>
+                  <li>file <a href="_for_constexpr_8h.html" class="m-doc">ForConstexpr.h</a> <span class="m-doc">Defines compile-time loop utilities for template metaprogramming.</span></li>
+                  <li>file <a href="_has_type_member_8h.html" class="m-doc">HasTypeMember.h</a> <span class="m-doc">Defines the HasTypeMember type trait for detecting nested Type members.</span></li>
+                  <li>file <a href="_has_value_member_8h.html" class="m-doc">HasValueMember.h</a> <span class="m-doc">Defines the HasValueMember type trait for detecting nested Value members.</span></li>
+                  <li>file <a href="_integer_sequence_8h.html" class="m-doc">IntegerSequence.h</a> <span class="m-doc">Defines the IntegerSequence class for compile-time integer sequences.</span></li>
+                  <li>file <a href="_is_complete_type_8h.html" class="m-doc">IsCompleteType.h</a> <span class="m-doc">Defines the IsCompleteType type trait for detecting complete types.</span></li>
+                  <li>file <a href="_is_one_of_8h.html" class="m-doc">IsOneOf.h</a> <span class="m-doc">Defines the IsOneOf type trait for checking type membership in a list.</span></li>
+                  <li>file <a href="_is_specialization_8h.html" class="m-doc">IsSpecialization.h</a> <span class="m-doc">Defines the IsSpecialization type trait for detecting template specializations.</span></li>
+                  <li>file <a href="_make_8h.html" class="m-doc">Make.h</a> <span class="m-doc">Defines the Make factory template for perfect forwarding construction.</span></li>
+                  <li>file <a href="_optional_reference_8h.html" class="m-doc">OptionalReference.h</a> <span class="m-doc">Defines the OptionalReference wrapper for optional reference semantics.</span></li>
+                  <li>file <a href="_overloaded_8h.html" class="m-doc">Overloaded.h</a> <span class="m-doc">Defines the Overloaded helper for combining multiple lambdas.</span></li>
+                  <li>file <a href="_parameter_pack_8h.html" class="m-doc">ParameterPack.h</a> <span class="m-doc">Defines the ParameterPack class for compile-time parameter pack manipulation.</span></li>
+                  <li>file <a href="_product_8h.html" class="m-doc">Product.h</a> <span class="m-doc">Defines the Product metafunction for computing Cartesian products of tuple types.</span></li>
+                  <li>file <a href="_repeat_8h.html" class="m-doc">Repeat.h</a> <span class="m-doc">Defines the Repeat metafunction for creating tuples with repeated types.</span></li>
+                  <li>file <a href="_s_t_l_casts_8h.html" class="m-doc">STLCasts.h</a> <span class="m-doc">Defines STL-related type conversion utilities.</span></li>
+                  <li>file <a href="_unwrap_reference_8h.html" class="m-doc">UnwrapReference.h</a> <span class="m-doc">Defines utilities for unwrapping reference_wrapper types.</span></li>
+                  <li>file <a href="_wrap_8h.html" class="m-doc">Wrap.h</a> <span class="m-doc">Defines the Wrap metafunction for wrapping tuple element types.</span></li>
+                  <li>file <a href="_zip_8h.html" class="m-doc">Zip.h</a> <span class="m-doc">Defines the Zip metafunction for combining two tuples element-wise.</span></li>
+                </ul>
+              </li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html" class="m-doc">Variational</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</span>
+                <ul class="m-doc">
+                  <li>file <a href="_variational_2_traits_8h.html" class="m-doc">Traits.h</a> <span class="m-doc">Type traits for variational formulations.</span></li>
+                  <li>file <a href="_variational_2_bilinear_form_8h.html" class="m-doc">BilinearForm.h</a> <span class="m-doc">Bilinear form classes for finite element assembly.</span></li>
+                  <li>file <a href="_variational_2_linear_form_8h.html" class="m-doc">LinearForm.h</a> <span class="m-doc">Linear form classes for finite element assembly.</span></li>
+                  <li>file <a href="_variational_2_problem_8h.html" class="m-doc">Problem.h</a> <span class="m-doc">Variational problem classes for finite element systems.</span></li>
+                  <li>file <a href="_variational_2_test_function_8h.html" class="m-doc">TestFunction.h</a> <span class="m-doc">Test functions for variational formulations.</span></li>
+                  <li>file <a href="_variational_2_trial_function_8h.html" class="m-doc">TrialFunction.h</a> <span class="m-doc">Trial functions (solution functions) for variational formulations.</span></li>
+                  <li>file <a href="_abs_8h.html" class="m-doc">Abs.h</a> <span class="m-doc">Absolute value operations for functions.</span></li>
+                  <li>file <a href="_a_n_d_8h.html" class="m-doc">AND.h</a> <span class="m-doc">Logical AND operator for boolean functions.</span></li>
+                  <li>file <a href="_average_8h.html" class="m-doc">Average.h</a> <span class="m-doc">Average operator for interface jump terms in DG methods.</span></li>
+                  <li>file <a href="_bilinear_form_integrator_8h.html" class="m-doc">BilinearFormIntegrator.h</a> <span class="m-doc">Base classes for bilinear form integrators.</span></li>
+                  <li>file <a href="_boolean_function_8h.html" class="m-doc">BooleanFunction.h</a> <span class="m-doc">Boolean-valued functions for logical operations in variational formulations.</span></li>
+                  <li>file <a href="_boundary_integral_8h.html" class="m-doc">BoundaryIntegral.h</a> <span class="m-doc">Boundary integral classes for variational formulations.</span></li>
+                  <li>file <a href="_boundary_normal_8h.html" class="m-doc">BoundaryNormal.h</a> <span class="m-doc">Outward unit normal vector on domain boundaries.</span></li>
+                  <li>file <a href="_complex_function_8h.html" class="m-doc">ComplexFunction.h</a> <span class="m-doc">Complex-valued scalar functions.</span></li>
+                  <li>file <a href="_component_8h.html" class="m-doc">Component.h</a> <span class="m-doc">Component extraction from vector and matrix functions.</span></li>
+                  <li>file <a href="_conjugate_8h.html" class="m-doc">Conjugate.h</a> <span class="m-doc">Complex conjugate operation for functions.</span></li>
+                  <li>file <a href="_cosh_8h.html" class="m-doc">Cosh.h</a> <span class="m-doc">Hyperbolic cosine function operator for scalar functions.</span></li>
+                  <li>file <a href="_cosine_8h.html" class="m-doc">Cosine.h</a> <span class="m-doc">Cosine trigonometric function operator for scalar functions.</span></li>
+                  <li>file <a href="_dense_problem_8h.html" class="m-doc">DenseProblem.h</a> <span class="m-doc">Dense matrix problem specialization.</span></li>
+                  <li>file <a href="_dirichlet_b_c_8h.html" class="m-doc">DirichletBC.h</a> <span class="m-doc">Dirichlet boundary condition implementation.</span></li>
+                  <li>file <a href="_div_8h.html" class="m-doc">Div.h</a> <span class="m-doc">Divergence operator for vector-valued functions.</span></li>
+                  <li>file <a href="_division_8h.html" class="m-doc">Division.h</a> <span class="m-doc">Division operation for functions.</span></li>
+                  <li>file <a href="_dot_8h.html" class="m-doc">Dot.h</a> <span class="m-doc">Dot product (inner product) operations for functions and shape functions.</span></li>
+                  <li>file <a href="_e_q_8h.html" class="m-doc">EQ.h</a> <span class="m-doc">Equality comparison operator for functions.</span></li>
+                  <li>file <a href="_exp_8h.html" class="m-doc">Exp.h</a> <span class="m-doc">Exponential function operations.</span></li>
+                  <li>file <a href="_f_8h.html" class="m-doc">F.h</a> <span class="m-doc">Coordinate projection functions for variational formulations.</span></li>
+                  <li>file <a href="_face_integral_8h.html" class="m-doc">FaceIntegral.h</a> <span class="m-doc">Face integral classes for discontinuous Galerkin methods.</span></li>
+                  <li>file <a href="_face_normal_8h.html" class="m-doc">FaceNormal.h</a> <span class="m-doc">Normal vector on mesh faces for DG methods.</span></li>
+                  <li>file <a href="_finite_element_8h.html" class="m-doc">FiniteElement.h</a> <span class="m-doc">Base classes for finite element definitions.</span></li>
+                  <li>file <a href="_variational_2_finite_element_space_8h.html" class="m-doc">FiniteElementSpace.h</a> <span class="m-doc">Finite element space classes and infrastructure.</span></li>
+                  <li>file <a href="_flow_8h.html" class="m-doc">Flow.h</a> <span class="m-doc">Flow map operators for shape functions and grid functions.</span></li>
+                  <li>file <a href="_frobenius_8h.html" class="m-doc">Frobenius.h</a> <span class="m-doc">Frobenius norm operation for functions.</span></li>
+                  <li>file <a href="_function_8h.html" class="m-doc">Function.h</a> <span class="m-doc">Base class hierarchy for functions in variational formulations.</span></li>
+                  <li>file <a href="_g_e_q_8h.html" class="m-doc">GEQ.h</a> <span class="m-doc">Greater-than-or-equal comparison operator for functions.</span></li>
+                  <li>file <a href="_g_t_8h.html" class="m-doc">GT.h</a> <span class="m-doc">Greater-than comparison operator for functions.</span></li>
+                  <li>file <a href="_h1_8h.html" class="m-doc">H1.h</a> <span class="m-doc">H1-conforming Lagrange finite element space.</span></li>
+                  <li>file <a href="_identity_matrix_8h.html" class="m-doc">IdentityMatrix.h</a> <span class="m-doc">Identity matrix function.</span></li>
+                  <li>file <a href="_im_8h.html" class="m-doc">Im.h</a> <span class="m-doc">Imaginary part extraction from complex-valued functions.</span></li>
+                  <li>file <a href="_integral_8h.html" class="m-doc">Integral.h</a> <span class="m-doc">Domain integral classes for variational formulations.</span></li>
+                  <li>file <a href="_integrator_8h.html" class="m-doc">Integrator.h</a> <span class="m-doc">Base class for all integrator types in variational formulations.</span></li>
+                  <li>file <a href="_interface_integral_8h.html" class="m-doc">InterfaceIntegral.h</a> <span class="m-doc">Interface integral classes for interior element faces.</span></li>
+                  <li>file <a href="_jump_8h.html" class="m-doc">Jump.h</a> <span class="m-doc">Jump operator for interface discontinuities in DG methods.</span></li>
+                  <li>file <a href="_l_e_q_8h.html" class="m-doc">LEQ.h</a> <span class="m-doc">Less-than-or-equal comparison operator for functions.</span></li>
+                  <li>file <a href="_linear_form_integrator_8h.html" class="m-doc">LinearFormIntegrator.h</a> <span class="m-doc">Base classes for linear form integrators.</span></li>
+                  <li>file <a href="_l_t_8h.html" class="m-doc">LT.h</a> <span class="m-doc">Less-than comparison operator for functions.</span></li>
+                  <li>file <a href="_matrix_function_8h.html" class="m-doc">MatrixFunction.h</a> <span class="m-doc">Matrix-valued functions for variational formulations.</span></li>
+                  <li>file <a href="_max_8h.html" class="m-doc">Max.h</a> <span class="m-doc">Maximum function operations.</span></li>
+                  <li>file <a href="_min_8h.html" class="m-doc">Min.h</a> <span class="m-doc">Minimum function operations.</span></li>
+                  <li>file <a href="_minus_8h.html" class="m-doc">Minus.h</a> <span class="m-doc">Subtraction operations for functions, shape functions, and integrators.</span></li>
+                  <li>file <a href="_mult_8h.html" class="m-doc">Mult.h</a> <span class="m-doc">Multiplication operations for functions, shape functions, and integrators.</span></li>
+                  <li>file <a href="_o_r_8h.html" class="m-doc">OR.h</a> <span class="m-doc">Logical OR operator for boolean functions.</span></li>
+                  <li>file <a href="_p0_8h.html" class="m-doc">P0.h</a> <span class="m-doc">Piecewise constant (P0) finite element space.</span></li>
+                  <li>file <a href="_derivative_8h.html" class="m-doc">Derivative.h</a> <span class="m-doc">Directional derivative operator for scalar functions.</span></li>
+                  <li>file <a href="_grad_8h.html" class="m-doc">Grad.h</a> <span class="m-doc">Gradient operator for scalar functions and shape functions.</span></li>
+                  <li>file <a href="_jacobian_8h.html" class="m-doc">Jacobian.h</a> <span class="m-doc">Jacobian matrix operator for vector-valued functions.</span></li>
+                  <li>file <a href="_variational_2_linear_elasticity_8h.html" class="m-doc">LinearElasticity.h</a> <span class="m-doc">Linear elasticity formulations and integrators.</span></li>
+                  <li>file <a href="_variational_2_p1_8h.html" class="m-doc">P1.h</a> <span class="m-doc">Piecewise linear (P1) finite element space.</span></li>
+                  <li>file <a href="_quadrature_rule_8h.html" class="m-doc">QuadratureRule.h</a> <span class="m-doc">Quadrature rule classes for numerical integration.</span></li>
+                  <li>file <a href="_periodic_b_c_8h.html" class="m-doc">PeriodicBC.h</a> <span class="m-doc">Periodic boundary condition implementation.</span></li>
+                  <li>file <a href="_potential_8h.html" class="m-doc">Potential.h</a> <span class="m-doc">Potential operator for computing potential fields from kernels.</span></li>
+                  <li>file <a href="_pow_8h.html" class="m-doc">Pow.h</a> <span class="m-doc">Power (exponentiation) operations for functions.</span></li>
+                  <li>file <a href="_problem_body_8h.html" class="m-doc">ProblemBody.h</a> <span class="m-doc">Problem body class managing integrators and boundary conditions.</span></li>
+                  <li>file <a href="_re_8h.html" class="m-doc">Re.h</a> <span class="m-doc">Real part extraction from complex-valued functions.</span></li>
+                  <li>file <a href="_real_function_8h.html" class="m-doc">RealFunction.h</a> <span class="m-doc">Real-valued scalar functions for variational formulations.</span></li>
+                  <li>file <a href="_relative_error_8h.html" class="m-doc">RelativeError.h</a> <span class="m-doc">Relative error computation utilities for grid functions.</span></li>
+                  <li>file <a href="_restriction_8h.html" class="m-doc">Restriction.h</a> <span class="m-doc">Restriction operators for functions on subdomains.</span></li>
+                  <li>file <a href="_scalar_function_8h.html" class="m-doc">ScalarFunction.h</a> <span class="m-doc">Base class for scalar-valued functions in variational formulations.</span></li>
+                  <li>file <a href="_shape_function_8h.html" class="m-doc">ShapeFunction.h</a> <span class="m-doc">Base class for finite element shape functions and basis functions.</span></li>
+                  <li>file <a href="_sine_8h.html" class="m-doc">Sine.h</a> <span class="m-doc">Sine trigonometric function operator for scalar functions.</span></li>
+                  <li>file <a href="_sinh_8h.html" class="m-doc">Sinh.h</a> <span class="m-doc">Hyperbolic sine function operator for scalar functions.</span></li>
+                  <li>file <a href="_sparse_problem_8h.html" class="m-doc">SparseProblem.h</a> <span class="m-doc">Sparse matrix problem specialization.</span></li>
+                  <li>file <a href="_sqrt_8h.html" class="m-doc">Sqrt.h</a> <span class="m-doc">Square root operations for functions.</span></li>
+                  <li>file <a href="_sum_8h.html" class="m-doc">Sum.h</a> <span class="m-doc">Addition operation for functions, shape functions, and form integrators.</span></li>
+                  <li>file <a href="_tangent_8h.html" class="m-doc">Tangent.h</a> <span class="m-doc">Tangent trigonometric function operator for scalar functions.</span></li>
+                  <li>file <a href="_trace_8h.html" class="m-doc">Trace.h</a> <span class="m-doc">Matrix trace operator for matrix-valued functions.</span></li>
+                  <li>file <a href="_trace_operator_8h.html" class="m-doc">TraceOperator.h</a> <span class="m-doc">Function trace operator for boundary restriction.</span></li>
+                  <li>file <a href="_transpose_8h.html" class="m-doc">Transpose.h</a> <span class="m-doc">Matrix and ShapeFunction transpose operations.</span></li>
+                  <li>file <a href="_unary_minus_8h.html" class="m-doc">UnaryMinus.h</a> <span class="m-doc">Negation operator for functions, shape functions, and integrators.</span></li>
+                  <li>file <a href="_vector_function_8h.html" class="m-doc">VectorFunction.h</a> <span class="m-doc">Vector-valued functions for variational formulations.</span></li>
+                  <li>file <a href="_zero_8h.html" class="m-doc">Zero.h</a> <span class="m-doc">Zero function for variational formulations.</span></li>
+                  <li>file <a href="_rodin_2_variational_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for Variational module classes.</span></li>
+                  <li>file <a href="_variational_2_grid_function_8h.html" class="m-doc">GridFunction.h</a> <span class="m-doc">Grid function class for representing FEM solutions.</span></li>
+                </ul>
+              </li>
+              <li>file <a href="_alert_8h.html" class="m-doc">Alert.h</a> <span class="m-doc">Main include file for the Alert module.</span></li>
+              <li>file <a href="_array_8h.html" class="m-doc">Array.h</a> <span class="m-doc">Defines array types and utility functors for index arrays.</span></li>
+              <li>file <a href="_context_8h.html" class="m-doc">Context.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_context.html" class="m-doc">Rodin::<wbr />Context</a> module.</span></li>
+              <li>file <a href="_copyable_8h.html" class="m-doc">Copyable.h</a> <span class="m-doc">Defines the Copyable interface for polymorphic copying.</span></li>
+              <li>file <a href="_flat_set_8h.html" class="m-doc">FlatSet.h</a> <span class="m-doc">Defines comparison and hash functors for IndexSet types.</span></li>
+              <li>file <a href="_form_language_8h.html" class="m-doc">FormLanguage.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a> module.</span></li>
+              <li>file <a href="_moveable_8h.html" class="m-doc">Moveable.h</a> <span class="m-doc">Defines the Moveable interface for polymorphic move operations.</span></li>
               <li>file <a href="_geometry_8h.html" class="m-doc">Geometry.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a> utilities.</span></li>
+              <li>file <a href="_pair_8h.html" class="m-doc">Pair.h</a> <span class="m-doc">Defines the Pair class, a specialized two-element Tuple.</span></li>
+              <li>file <a href="_p_e_t_sc_8h.html" class="m-doc">PETSc.h</a> <span class="m-doc">Top level include for the Rodin::PETSc module.</span></li>
+              <li>file <a href="_assembly_8h.html" class="m-doc">Assembly.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::<wbr />Assembly</a> module.</span></li>
+              <li>file <a href="_m_p_i_8h.html" class="m-doc">MPI.h</a> <span class="m-doc">Top level include for the Rodin::MPI module.</span></li>
+              <li>file <a href="_i_o_8h.html" class="m-doc">IO.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::<wbr />IO</a> module.</span></li>
+              <li>file <a href="_math_8h.html" class="m-doc">Math.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::<wbr />Math</a> module.</span></li>
+              <li>file <a href="_solver_8h.html" class="m-doc">Solver.h</a> <span class="m-doc">Main header for the Solver module.</span></li>
+              <li>file <a href="_types_8h.html" class="m-doc">Types.h</a> <span class="m-doc">Fundamental type definitions for the <a href="namespace_rodin.html" class="m-doc">Rodin</a> library.</span></li>
               <li>file <a href="_variational_8h.html" class="m-doc">Variational.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a> namespace.</span></li>
-              <li>file <a href="_threads_8h.html" class="m-doc">Threads.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a> namespace.</span></li>
+              <li>file <a href="_plot_8h.html" class="m-doc">Plot.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_plot.html" class="m-doc">Rodin::<wbr />Plot</a> module.</span></li>
+              <li>file <a href="_q_f_8h.html" class="m-doc">QF.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a> module.</span></li>
+              <li>file <a href="_test_8h.html" class="m-doc">Test.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_test.html" class="m-doc">Rodin::<wbr />Test</a> module.</span></li>
+              <li>file <a href="_threads_8h.html" class="m-doc">Threads.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_threads.html" class="m-doc">Rodin::<wbr />Threads</a> module.</span></li>
+              <li>file <a href="_tuple_8h.html" class="m-doc">Tuple.h</a> <span class="m-doc">Defines the Tuple class, an extended tuple implementation.</span></li>
+              <li>file <a href="_utility_8h.html" class="m-doc">Utility.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_utility.html" class="m-doc">Rodin::<wbr />Utility</a> module.</span></li>
+              <li>file <a href="_cast_8h.html" class="m-doc">Cast.h</a> <span class="m-doc">Defines the Cast template for type conversion operations.</span></li>
+              <li>file <a href="_rodin_2_common_8h.html" class="m-doc">Common.h</a> <span class="m-doc">Common definitions and includes used throughout <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
               <li>file <a href="_rodin_2_configure_8h_8in.html" class="m-doc">Configure.h.in</a> <span class="m-doc">Header containing preprocessor directives for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+              <li>file <a href="_rodin_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for core <a href="namespace_rodin.html" class="m-doc">Rodin</a> types.</span></li>
             </ul>
           </li>
           <li class="m-doc-collapsible">

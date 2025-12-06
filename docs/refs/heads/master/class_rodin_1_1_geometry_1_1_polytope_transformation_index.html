@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Geometry::PolytopeTransformationIndex class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>PolytopeTransformationIndex <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_transformation_index_8h.html">&lt;Rodin/Geometry/PolytopeTransformationIndex.h&gt;</a></div>
+        </h1>
+        <p>Thread-safe index for managing polytope transformations.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This class maintains a mapping from polytopes (identified by dimension and index) to their associated geometric transformations. It supports lazy initialization of transformations via factory functions and concurrent access through atomic operations and shared mutexes.</p><p>The class is designed for high-performance access patterns where transformations are frequently read but infrequently written.</p><aside class="m-note m-info"><h4>Note</h4><p>This class supports Boost serialization for saving and loading transformation data.</p></aside>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="acad2508395478195fd82cca6e30b042b">
+              <span class="m-doc-wrap-bumper"><a href="#acad2508395478195fd82cca6e30b042b" class="m-doc-self">PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt id="ae03e7a2eebec90350994fbe016f99b0c">
+              <span class="m-doc-wrap-bumper"><a href="#ae03e7a2eebec90350994fbe016f99b0c" class="m-doc-self">~PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Destructor.</dd>
+            <dt id="aa7f6560ca3895cd92332bc76f6edabab">
+              <span class="m-doc-wrap-bumper"><a href="#aa7f6560ca3895cd92332bc76f6edabab" class="m-doc-self">PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Copy constructor (deleted).</dd>
+            <dt id="ae84188065786b4016608f8ffba7519b0">
+              <span class="m-doc-wrap-bumper"><a href="#ae84188065786b4016608f8ffba7519b0" class="m-doc-self">PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a4becc3f68881df9499e2fd842369c764">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4becc3f68881df9499e2fd842369c764" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Copy assignment operator (deleted).</dd>
+            <dt id="a4fdffff95b2b86b9803857d6bf3531f6">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4fdffff95b2b86b9803857d6bf3531f6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">size_t meshDim)</span>
+            </dt>
+            <dd>Initializes the index for a mesh of given dimension.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc">resize</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t count)</span>
+            </dt>
+            <dd>Resizes storage for polytopes of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a229acae08b3ed8aaae846de3898393fb" class="m-doc">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              std::unique_ptr&lt;<a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&gt; obj)</span>
+            </dt>
+            <dd>Sets the transformation for a polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a1917ddee273c446ff91466834a486d2a" class="m-doc">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              size_t count,
+              std::unique_ptr&lt;<a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&gt; obj)</span>
+            </dt>
+            <dd>Sets the transformation for a polytope with known count.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Factory&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f55a9d3d429f3921de14ed6c96efa6d" class="m-doc">get</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              size_t count,
+              const Factory&amp; factory) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp;</span>
+            </dt>
+            <dd>Gets or creates a transformation using a factory.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ac8bb3912a3ce86b15842e79d0b421204" class="m-doc">clear</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Clears all stored transformations.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a38d1df78f2175f8f38f74d4357ad6a35" class="m-doc">dimensions</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Gets the number of dimensions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#aa29aecdf903bb335cb999c7306ecfc48" class="m-doc">save</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int) const</span>
+            </dt>
+            <dd>Serialization save method.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a483eb490a8f4a63c6133ace3c8d8452f" class="m-doc">load</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int)</span>
+            </dt>
+            <dd>Serialization load method.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a77a1d55dead131c3707395c06f7b0b2b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">size_t meshDim)</span></span>
+            </h3>
+            <p>Initializes the index for a mesh of given dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">meshDim&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension of the mesh</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Must be called before any other operations. Allocates storage for dimensions 0 through <code>meshDim</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="aacead788d9511da9aac886f19c4b966f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t count)</span></span>
+            </h3>
+            <p>Resizes storage for polytopes of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension of polytopes</td>
+                </tr>
+                <tr>
+                  <td>count&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Number of polytopes to allocate space for</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Ensures the internal storage can hold at least <code>count</code> polytopes of dimension <code>d</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a229acae08b3ed8aaae846de3898393fb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a229acae08b3ed8aaae846de3898393fb" class="m-doc-self">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              std::unique_ptr&lt;<a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&gt; obj)</span></span>
+            </h3>
+            <p>Sets the transformation for a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, index) identifying the polytope</td>
+                </tr>
+                <tr>
+                  <td>obj&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Unique pointer to the transformation</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Stores the transformation and updates the atomic pointer for fast access. Automatically resizes storage if needed.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1917ddee273c446ff91466834a486d2a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1917ddee273c446ff91466834a486d2a" class="m-doc-self">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              size_t count,
+              std::unique_ptr&lt;<a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&gt; obj)</span></span>
+            </h3>
+            <p>Sets the transformation for a polytope with known count.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, index) identifying the polytope</td>
+                </tr>
+                <tr>
+                  <td>count&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Expected number of polytopes in this dimension</td>
+                </tr>
+                <tr>
+                  <td>obj&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Unique pointer to the transformation</td>
+                </tr>
+              </tbody>
+            </table>
+<p>More efficient than <a href="#a229acae08b3ed8aaae846de3898393fb" class="m-doc">set()</a> when the total count is known in advance.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4f55a9d3d429f3921de14ed6c96efa6d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Factory&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f55a9d3d429f3921de14ed6c96efa6d" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              size_t count,
+              const Factory&amp; factory) const</span></span>
+            </h3>
+            <p>Gets or creates a transformation using a factory.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Factory</td>
+                  <td>Callable type that creates transformations</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, index) identifying the polytope</td>
+                </tr>
+                <tr>
+                  <td>count&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Expected number of polytopes in this dimension</td>
+                </tr>
+                <tr>
+                  <td>factory&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Factory function to create transformation if needed</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the transformation</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Uses a two-phase locking strategy: first tries a fast shared-lock read, then upgrades to exclusive lock only if the transformation needs to be created. The factory is called at most once per polytope.</p><aside class="m-note m-info"><h4>Note</h4><p>The Factory must be callable with signature: <code>std::unique_ptr&lt;<a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&gt;(size_t d, Index idx)</code></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ac8bb3912a3ce86b15842e79d0b421204"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8bb3912a3ce86b15842e79d0b421204" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Clears all stored transformations.</p>
+<p>Releases all transformation objects and resets internal storage. Thread-safe with respect to concurrent operations.</p>
+          </div></section>
+          <section class="m-doc-details" id="a38d1df78f2175f8f38f74d4357ad6a35"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38d1df78f2175f8f38f74d4357ad6a35" class="m-doc-self">dimensions</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the number of dimensions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of polytope dimensions managed by this index</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa29aecdf903bb335cb999c7306ecfc48"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Archive&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa29aecdf903bb335cb999c7306ecfc48" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int) const</span></span>
+            </h3>
+            <p>Serialization save method.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Archive object</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a483eb490a8f4a63c6133ace3c8d8452f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Archive&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a483eb490a8f4a63c6133ace3c8d8452f" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int)</span></span>
+            </h3>
+            <p>Serialization load method.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Archive object</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Clears existing data before loading.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

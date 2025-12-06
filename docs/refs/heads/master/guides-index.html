@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html" id="m-navbar-current">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -70,13 +77,21 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#guides-getting-started-index">Getting started with Rodin</a></li>
+            <li>
+              <a href="#guides-getting-started-index">Getting started with Rodin</a>
+              <ul>
+                <li><a href="#guides-getting-started-overview">What you&#x27;ll learn</a></li>
+                <li><a href="#guides-getting-started-prerequisites">Prerequisites</a></li>
+                <li><a href="#guides-getting-started-next-steps">After completing this guide</a></li>
+                <li><a href="#guides-getting-started-help">Getting help</a></li>
+              </ul>
+            </li>
             <li><a href="#guides-geometry-index">Geometry</a></li>
             <li><a href="#guides-fem-index">The finite element method</a></li>
             <li><a href="#guides-variational-index">Weak formulations and variational problems</a></li>
           </ul>
         </nav>
-<section id="guides-getting-started-index"><h3><a href="#guides-getting-started-index">Getting started with Rodin</a></h3></section><section id="guides-geometry-index"><h3><a href="#guides-geometry-index">Geometry</a></h3><ul><li><a href="guides-meshes.html" class="m-doc">Meshes</a></li><li><a href="guides-polytopes.html" class="m-doc">Polytopes</a></li><li><a href="guides-connectivity.html" class="m-doc">Connectivity</a></li></ul></section><section id="guides-fem-index"><h3><a href="#guides-fem-index">The finite element method</a></h3><ul><li><a href="fem-ciarlet.html" class="m-doc">Ciarlet’s definition of a finite element</a></li></ul></section><section id="guides-variational-index"><h3><a href="#guides-variational-index">Weak formulations and variational problems</a></h3></section>
+<section id="guides-getting-started-index"><h2><a href="#guides-getting-started-index">Getting started with Rodin</a></h2><p>New to <a href="namespace_rodin.html" class="m-doc">Rodin</a>? Start here for a comprehensive introduction:</p><p>Welcome to Rodin! This guide will help you get started with the <a href="namespace_rodin.html" class="m-doc">Rodin</a> finite element framework. Whether you&#x27;re new to finite element methods or an experienced practitioner, these guides will walk you through the essentials of using <a href="namespace_rodin.html" class="m-doc">Rodin</a> effectively.</p><section id="guides-getting-started-overview"><h3><a href="#guides-getting-started-overview">What you&#x27;ll learn</a></h3><p>This Getting Started guide is organized into several sections that will take you from installation to solving your first finite element problem:</p><ul><li><a href="guides-getting-started-installation.html" class="m-doc">Installation and Setup</a> - How to install <a href="namespace_rodin.html" class="m-doc">Rodin</a> and set up your development environment</li><li><a href="guides-getting-started-first-steps.html" class="m-doc">First Steps with Rodin</a> - Basic concepts and your first <a href="namespace_rodin.html" class="m-doc">Rodin</a> program</li><li><a href="guides-getting-started-first-problem.html" class="m-doc">Your First Problem: Solving the Poisson Equation</a> - Solving a complete problem: the Poisson equation</li><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Understanding Core Concepts</a> - Understanding meshes, finite element spaces, and variational formulations</li></ul></section><section id="guides-getting-started-prerequisites"><h3><a href="#guides-getting-started-prerequisites">Prerequisites</a></h3><p>Before starting, you should have:</p><ul><li>Basic knowledge of C++</li><li>Familiarity with finite element methods (recommended but not required)</li><li>A Linux or macOS system with a C++20 compatible compiler</li></ul></section><section id="guides-getting-started-next-steps"><h3><a href="#guides-getting-started-next-steps">After completing this guide</a></h3><p>Once you&#x27;ve completed the Getting Started guide, you can:</p><ul><li>Explore more <a href="examples-index.html" class="m-doc">examples</a> to see <a href="namespace_rodin.html" class="m-doc">Rodin</a> in action</li><li>Read the <a href="guides-index.html" class="m-doc">general concepts</a> for deeper understanding</li><li>Check out the API reference for detailed information on specific classes and functions</li></ul></section><section id="guides-getting-started-help"><h3><a href="#guides-getting-started-help">Getting help</a></h3><p>If you encounter any issues:</p><ul><li>Check the <a href="https://github.com/cbritopacheco/rodin">GitHub repository</a></li><li>Look at the <a href="examples-index.html" class="m-doc">examples</a> for similar use cases</li><li>Review the <a href="guides-index.html" class="m-doc">guides</a> for conceptual explanations</li></ul></section></section><section id="guides-geometry-index"><h2><a href="#guides-geometry-index">Geometry</a></h2><p>The Geometry module provides comprehensive support for mesh generation, manipulation, and geometric computations in finite element analysis.</p><p>For detailed information on specific geometry topics, see:</p><ul><li><a href="guides-meshes.html" class="m-doc">Meshes</a> - Working with meshes</li><li><a href="guides-polytopes.html" class="m-doc">Polytopes</a> - Geometric elements and their properties</li><li><a href="guides-connectivity.html" class="m-doc">Connectivity</a> - Detailed connectivity information</li></ul></section><section id="guides-fem-index"><h2><a href="#guides-fem-index">The finite element method</a></h2><ul><li><a href="fem-ciarlet.html" class="m-doc">Ciarlet’s definition of a finite element</a></li><li><a href="fem-spaces.html" class="m-doc">Finite element spaces</a></li></ul></section><section id="guides-variational-index"><h2><a href="#guides-variational-index">Weak formulations and variational problems</a></h2></section>
       </div>
     </div>
   </div>

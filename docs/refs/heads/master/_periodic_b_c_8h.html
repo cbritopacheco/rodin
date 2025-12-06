@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin/Variational/PeriodicBC.h file | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span>PeriodicBC.h <span class="m-thin">file</span>
+        </h1>
+        <p>Periodic boundary condition implementation.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#autotoc_md378">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md379">Applications</a></li>
+            <li><a href="#autotoc_md380">Implementation</a></li>
+            <li><a href="#autotoc_md381">Usage Example</a></li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This file defines classes for imposing periodic boundary conditions in finite element problems. Periodic conditions enforce that the solution values match across opposite boundaries of the domain.</p><section id="autotoc_md378"><h3><a href="#autotoc_md378">Mathematical Foundation</a></h3><p>A periodic boundary condition specifies:</p><div class="m-math"><svg style="width: 16.198em; height: 1.245em;" viewBox="116.27065 -11.955168 155.503566 11.955168">
+<title>
+\[
+  u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
+\]
+</title>
+<defs>
+<path id='eq1-g1-50' d='M6.551432-2.749689C6.75467-2.749689 6.969863-2.749689 6.969863-2.988792S6.75467-3.227895 6.551432-3.227895H1.482441C1.625903-4.829888 3.000747-5.977584 4.686426-5.977584H6.551432C6.75467-5.977584 6.969863-5.977584 6.969863-6.216687S6.75467-6.455791 6.551432-6.455791H4.662516C2.618182-6.455791 .992279-4.901619 .992279-2.988792S2.618182 .478207 4.662516 .478207H6.551432C6.75467 .478207 6.969863 .478207 6.969863 .239103S6.75467 0 6.551432 0H4.686426C3.000747 0 1.625903-1.147696 1.482441-2.749689H6.551432Z'/>
+<path id='eq1-g0-0' d='M5.571108-1.809215C5.69863-1.809215 5.873973-1.809215 5.873973-1.992528S5.69863-2.175841 5.571108-2.175841H1.004234C.876712-2.175841 .70137-2.175841 .70137-1.992528S.876712-1.809215 1.004234-1.809215H5.571108Z'/>
+<path id='eq1-g5-102' d='M4.561723-7.396423C4.561723-7.825201 4.037661-8.134874 3.323031-8.134874C2.572669-8.134874 1.953323-7.81329 1.64365-7.277318S1.238692-6.312567 1.226782-5.359727H.250121V-4.978591H1.226782V-1.238692C1.226782-.369226 1.095766-.2263 .23821-.178658V0H3.334941V-.178658C2.35828-.214389 2.227264-.345405 2.227264-1.238692V-4.978591H3.680346V-5.359727H2.215354V-6.741345C2.215354-7.444065 2.441653-7.80138 2.894252-7.80138C3.156283-7.80138 3.31112-7.682275 3.525509-7.33687C3.716077-7.015287 3.859003-6.908092 4.061482-6.908092C4.347334-6.908092 4.561723-7.122481 4.561723-7.396423Z'/>
+<path id='eq1-g5-111' d='M5.597937-2.787058C5.597937-4.347334 4.50217-5.478832 2.977626-5.478832C1.42926-5.478832 .345405-4.335423 .345405-2.691774C.345405-1.083856 1.453081 .119105 2.953805 .119105S5.597937-1.143408 5.597937-2.787058ZM4.525991-2.37019C4.525991-1.024303 3.990019-.214389 3.096731-.214389C2.632221-.214389 2.191533-.500241 1.941412-.976661C1.607918-1.596007 1.41735-2.429743 1.41735-3.275389C1.41735-4.406886 1.977144-5.145338 2.822789-5.145338C3.823272-5.145338 4.525991-4.001929 4.525991-2.37019Z'/>
+<path id='eq1-g5-114' d='M3.990019-4.847575C3.990019-5.240622 3.739898-5.478832 3.334941-5.478832C2.8347-5.478832 2.489295-5.20489 1.905681-4.359244V-5.455011L1.846128-5.478832C1.214871-5.216801 .786093-5.061964 .083374-4.835665V-4.645096C.250121-4.680828 .357315-4.692738 .500241-4.692738C.798004-4.692738 .905198-4.50217 .905198-3.978108V-1.000482C.905198-.404957 .821825-.321584 .059553-.178658V0H2.918073V-.178658C2.108159-.214389 1.905681-.393047 1.905681-1.071945V-3.751809C1.905681-4.132945 2.417832-4.72847 2.739416-4.72847C2.810879-4.72847 2.918073-4.668917 3.049089-4.549812C3.239657-4.383065 3.370673-4.311602 3.525509-4.311602C3.811361-4.311602 3.990019-4.514081 3.990019-4.847575Z'/>
+<path id='eq1-g6-0' d='M6.503611-8.141469H.490162V-7.79477H.729265C1.590037-7.79477 1.625903-7.675218 1.625903-7.232877V-.908593C1.625903-.466252 1.590037-.3467 .729265-.3467H.490162V0C.777086-.02391 1.841096-.02391 2.199751-.02391C2.618182-.02391 3.670237-.02391 4.016936 0V-.3467H3.658281C2.618182-.3467 2.594271-.490162 2.594271-.920548V-7.316563C2.594271-7.711083 2.618182-7.79477 3.144209-7.79477H4.423412C6.073225-7.79477 6.38406-7.149191 6.551432-5.475467H6.814446L6.503611-8.141469Z'/>
+<path id='eq1-g6-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g6-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g6-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq1-g6-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g2-76' d='M4.387547-7.244832C4.495143-7.699128 4.531009-7.81868 5.583064-7.81868C5.905853-7.81868 5.989539-7.81868 5.989539-8.045828C5.989539-8.16538 5.858032-8.16538 5.810212-8.16538C5.571108-8.16538 5.296139-8.141469 5.057036-8.141469H3.455044C3.227895-8.141469 2.964882-8.16538 2.737733-8.16538C2.642092-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.618182-7.81868 2.797509-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.567621 3.526775-7.49589 3.478954-7.316563L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .621669 0 .860772 0H6.216687C6.479701 0 6.491656-.011955 6.575342-.227148L7.49589-2.773599C7.519801-2.833375 7.543711-2.905106 7.543711-2.940971C7.543711-3.012702 7.483935-3.060523 7.424159-3.060523C7.412204-3.060523 7.352428-3.060523 7.328518-3.012702C7.304608-3.000747 7.304608-2.976837 7.208966-2.749689C6.826401-1.697634 6.288418-.3467 4.267995-.3467H3.120299C2.952927-.3467 2.929016-.3467 2.857285-.358655C2.725778-.37061 2.713823-.394521 2.713823-.490162C2.713823-.573848 2.737733-.645579 2.761644-.753176L4.387547-7.244832Z'/>
+<path id='eq1-g2-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq1-g2-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='116.27065' y='-2.988792' xlink:href='#eq1-g2-117'/>
+<use x='122.93309' y='-2.988792' xlink:href='#eq1-g6-40'/>
+<use x='127.485415' y='-2.988792' xlink:href='#eq1-g2-120'/>
+<use x='136.794166' y='-2.988792' xlink:href='#eq1-g6-43'/>
+<use x='148.555481' y='-2.988792' xlink:href='#eq1-g2-76'/>
+<use x='156.519987' y='-2.988792' xlink:href='#eq1-g6-41'/>
+<use x='164.393143' y='-2.988792' xlink:href='#eq1-g6-61'/>
+<use x='176.818623' y='-2.988792' xlink:href='#eq1-g2-117'/>
+<use x='183.481063' y='-2.988792' xlink:href='#eq1-g6-40'/>
+<use x='188.033389' y='-2.988792' xlink:href='#eq1-g2-120'/>
+<use x='194.685476' y='-2.988792' xlink:href='#eq1-g6-41'/>
+<use x='211.19297' y='-2.988792' xlink:href='#eq1-g5-102'/>
+<use x='214.695825' y='-2.988792' xlink:href='#eq1-g5-111'/>
+<use x='220.673409' y='-2.988792' xlink:href='#eq1-g5-114'/>
+<use x='236.609651' y='-2.988792' xlink:href='#eq1-g2-120'/>
+<use x='246.582567' y='-2.988792' xlink:href='#eq1-g1-50'/>
+<use x='257.873535' y='-2.988792' xlink:href='#eq1-g6-0'/>
+<use x='265.187709' y='-1.195529' xlink:href='#eq1-g0-0'/>
+</g>
+</svg></div><p>where <svg class="m-math" style="width: 1.448em; height: 1.124em; vertical-align: -0.274em;" viewBox="0 -8.169366 13.900681 10.792889">
+<title>
+$ \Gamma_- $
+</title>
+<defs>
+<path id='eq2-g0-0' d='M5.571108-1.809215C5.69863-1.809215 5.873973-1.809215 5.873973-1.992528S5.69863-2.175841 5.571108-2.175841H1.004234C.876712-2.175841 .70137-2.175841 .70137-1.992528S.876712-1.809215 1.004234-1.809215H5.571108Z'/>
+<path id='eq2-g1-0' d='M6.503611-8.141469H.490162V-7.79477H.729265C1.590037-7.79477 1.625903-7.675218 1.625903-7.232877V-.908593C1.625903-.466252 1.590037-.3467 .729265-.3467H.490162V0C.777086-.02391 1.841096-.02391 2.199751-.02391C2.618182-.02391 3.670237-.02391 4.016936 0V-.3467H3.658281C2.618182-.3467 2.594271-.490162 2.594271-.920548V-7.316563C2.594271-7.711083 2.618182-7.79477 3.144209-7.79477H4.423412C6.073225-7.79477 6.38406-7.149191 6.551432-5.475467H6.814446L6.503611-8.141469Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g1-0'/>
+<use x='7.314174' y='1.793263' xlink:href='#eq2-g0-0'/>
+</g>
+</svg> and <svg class="m-math" style="width: 1.448em; height: 1.124em; vertical-align: -0.274em;" viewBox="0 -8.169366 13.900681 10.792889">
+<title>
+$ \Gamma_+ $
+</title>
+<defs>
+<path id='eq3-g0-43' d='M3.474969-1.809215H5.818182C5.929763-1.809215 6.105106-1.809215 6.105106-1.992528S5.929763-2.175841 5.818182-2.175841H3.474969V-4.527024C3.474969-4.638605 3.474969-4.813948 3.291656-4.813948S3.108344-4.638605 3.108344-4.527024V-2.175841H.757161C.645579-2.175841 .470237-2.175841 .470237-1.992528S.645579-1.809215 .757161-1.809215H3.108344V.541968C3.108344 .653549 3.108344 .828892 3.291656 .828892S3.474969 .653549 3.474969 .541968V-1.809215Z'/>
+<path id='eq3-g1-0' d='M6.503611-8.141469H.490162V-7.79477H.729265C1.590037-7.79477 1.625903-7.675218 1.625903-7.232877V-.908593C1.625903-.466252 1.590037-.3467 .729265-.3467H.490162V0C.777086-.02391 1.841096-.02391 2.199751-.02391C2.618182-.02391 3.670237-.02391 4.016936 0V-.3467H3.658281C2.618182-.3467 2.594271-.490162 2.594271-.920548V-7.316563C2.594271-7.711083 2.618182-7.79477 3.144209-7.79477H4.423412C6.073225-7.79477 6.38406-7.149191 6.551432-5.475467H6.814446L6.503611-8.141469Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g1-0'/>
+<use x='7.314174' y='1.793263' xlink:href='#eq3-g0-43'/>
+</g>
+</svg> are matching boundary pairs separated by periodicity vector <svg class="m-math" style="width: 0.830em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 7.964506 8.169366">
+<title>
+$ L $
+</title>
+<defs>
+<path id='eq4-g0-76' d='M4.387547-7.244832C4.495143-7.699128 4.531009-7.81868 5.583064-7.81868C5.905853-7.81868 5.989539-7.81868 5.989539-8.045828C5.989539-8.16538 5.858032-8.16538 5.810212-8.16538C5.571108-8.16538 5.296139-8.141469 5.057036-8.141469H3.455044C3.227895-8.141469 2.964882-8.16538 2.737733-8.16538C2.642092-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.618182-7.81868 2.797509-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.567621 3.526775-7.49589 3.478954-7.316563L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .621669 0 .860772 0H6.216687C6.479701 0 6.491656-.011955 6.575342-.227148L7.49589-2.773599C7.519801-2.833375 7.543711-2.905106 7.543711-2.940971C7.543711-3.012702 7.483935-3.060523 7.424159-3.060523C7.412204-3.060523 7.352428-3.060523 7.328518-3.012702C7.304608-3.000747 7.304608-2.976837 7.208966-2.749689C6.826401-1.697634 6.288418-.3467 4.267995-.3467H3.120299C2.952927-.3467 2.929016-.3467 2.857285-.358655C2.725778-.37061 2.713823-.394521 2.713823-.490162C2.713823-.573848 2.737733-.645579 2.761644-.753176L4.387547-7.244832Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-76'/>
+</g>
+</svg>.</p></section><section id="autotoc_md379"><h3><a href="#autotoc_md379">Applications</a></h3><ul><li>Crystal lattice simulations</li><li>Unit cell problems in homogenization</li><li>Fluid flow in periodic geometries</li><li>Wave propagation in periodic media</li></ul></section><section id="autotoc_md380"><h3><a href="#autotoc_md380">Implementation</a></h3><p>Periodic conditions are enforced by:</p><ol><li>Identifying matching DOF pairs on opposite boundaries</li><li>Constraining one DOF to equal its periodic partner</li><li>Eliminating dependent DOFs from the system</li></ol></section><section id="autotoc_md381"><h3><a href="#autotoc_md381">Usage Example</a></h3><pre class="m-code"><span class="c1">// Periodic BC between boundaries 1 and 2</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">pbc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PeriodicBC</span><span class="p">(</span><span class="n">u</span><span class="p">).</span><span class="n">from</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="n">to</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre></section>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Module which provides the necessary tools for constructing variational problems.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">Rodin::Variational::PeriodicBCBase</a>
+            </dt>
+            <dd>Abstract base class for a periodic boundary condition.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s_01_4_2a9e6d75de7ed6b1898c3fa8d377abc3.html" class="m-doc">Rodin::Variational::PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;</a>
+            </dt>
+            <dd>Represents a Peridodic boundary condition on a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

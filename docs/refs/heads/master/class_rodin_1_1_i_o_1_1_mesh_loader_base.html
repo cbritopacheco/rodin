@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -67,7 +74,112 @@
           <div class="m-doc-template">template&lt;class Context&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>MeshLoaderBase <span class="m-thin">class</span>
         </h1>
-        <p>Base class for mesh loader objects.</p>
+        <p>Base class for loading meshes from files or streams.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#autotoc_md106">Usage Example</a></li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pro-methods">Protected functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase</a> provides the foundation for loading mesh data in different file formats. It extends the generic <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> class to handle mesh-specific operations and manages the mesh object being populated.</p><p>Specialized loaders for specific file formats should derive from this class and implement the <a href="class_rodin_1_1_i_o_1_1_loader.html#a4a361edaafdca57b230ccf5f8bc6479a" class="m-doc">load(std::<wbr />istream&amp;)</a> method to parse their respective formats.</p><section id="autotoc_md106"><h3><a href="#autotoc_md106">Usage Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">MeshLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;mesh.mfem&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a>, <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a></p></aside></section>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader&lt;Rodin::Geometry::Mesh&lt;Context&gt;&gt;</a>
+            </dt>
+            <dd>Base template for loading objects from files or streams.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a6d47fa221a0d6476543bdda57927aeed">
+              using <a href="#a6d47fa221a0d6476543bdda57927aeed" class="m-doc-self">ContextType</a> = Context
+            </dt>
+            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type for the mesh (e.g., sequential or parallel).</dd>
+            <dt id="a0aa213e4c6f5333c6f41f8e57fd9ac5c">
+              using <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a6d47fa221a0d6476543bdda57927aeed" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Type of mesh object being loaded.</dd>
+            <dt id="af9494f24173605303862e0395041b453">
+              using <a href="#af9494f24173605303862e0395041b453" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">IO::<wbr />Loader</a>&lt;<a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&gt;
+            </dt>
+            <dd>Parent <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac4b2329eaa90a59450bfcdeb60ce7946" class="m-doc">MeshLoaderBase</a>(</span><span class="m-doc-wrap"><a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span>
+            </dt>
+            <dd>Constructs a mesh loader for the given mesh object.</dd>
+          </dl>
+        </section>
+        <section id="pro-methods">
+          <h2><a href="#pro-methods">Protected functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6c83de099561717325b0b3a729cfeb1f" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets a reference to the mesh being loaded.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ac4b2329eaa90a59450bfcdeb60ce7946"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Context&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshLoaderBase&lt;Context&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac4b2329eaa90a59450bfcdeb60ce7946" class="m-doc-self">MeshLoaderBase</a>(</span><span class="m-doc-wrap"><a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
+            </h3>
+            <p>Constructs a mesh loader for the given mesh object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Mesh object to be populated with loaded data</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The mesh is stored by reference and will be modified during loading.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6c83de099561717325b0b3a729cfeb1f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Context&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; Rodin::<wbr />IO::<wbr />MeshLoaderBase&lt;Context&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c83de099561717325b0b3a729cfeb1f" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-warning">protected</span></span></span>
+            </h3>
+            <p>Gets a reference to the mesh being loaded.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the mesh object</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Provides access to the mesh for derived classes to populate during loading.</p>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

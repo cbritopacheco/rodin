@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -64,35 +71,151 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sub_mesh_8h.html">&lt;Rodin/Geometry/SubMesh.h&gt;</a></div>
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>SubMesh&lt;Context::Local&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object.</p>
+        <p><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> representing a subregion of a parent mesh.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
+            <li><a href="#autotoc_md95">Mathematical Foundation</a></li>
+            <li>
+              <a href="#autotoc_md96">Usage Examples</a>
+              <ul>
+                <li><a href="#autotoc_md97">Creating a boundary submesh:</a></li>
+                <li><a href="#autotoc_md98">Accessing as submesh:</a></li>
+              </ul>
+            </li>
+            <li><a href="#autotoc_md99">Thread Safety</a></li>
             <li>
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object contains a reference to the parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object. It also contains information regarding the mapping of elements and vertices between the child and parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</p><p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> which is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> may be casted into down to access the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For example:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
+<p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> is a mesh that represents a subset of polytopes from a parent mesh, maintaining bidirectional index mappings between child and parent. This is useful for:</p><ul><li>Extracting boundary meshes</li><li>Defining material regions</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> refinement</li><li>Domain decomposition</li></ul><section id="autotoc_md95"><h2><a href="#autotoc_md95">Mathematical Foundation</a></h2><p>For a parent mesh <svg class="m-math" style="width: 1.187em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169354 11.391224 9.962617">
+<title>
+$ \mathcal{T}_h $
+</title>
+<defs>
+<path id='eq1-g1-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
+<path id='eq1-g0-84' d='M5.810212-7.424159H7.79477C9.372852-7.424159 9.97061-8.332752 9.97061-8.488169C9.97061-8.547945 9.92279-8.571856 9.863014-8.571856C9.731507-8.571856 9.420672-8.452304 9.121793-8.237111C9.026152-8.16538 9.002242-8.16538 8.775093-8.16538H3.550685C2.068244-8.16538 .406476-6.886177 .406476-5.905853C.406476-5.834122 .406476-5.762391 .502117-5.762391C.789041-5.762391 1.542217-6.156912 1.566127-6.443836C1.578082-6.647073 1.601993-6.874222 1.841096-7.185056C1.960648-7.328518 2.056289-7.424159 2.582316-7.424159H4.961395C4.758157-7.292653 4.710336-7.113325 4.686426-6.993773L3.323537-1.578082C3.180075-.992279 2.929016-.239103 2.582316 .537983C2.510585 .681445 2.510585 .705355 2.510585 .729265C2.510585 .800996 2.558406 .812951 2.618182 .812951C2.857285 .812951 3.443088 .490162 3.622416 .239103C3.694147 .119552 4.220174-1.099875 4.471233-2.092154L5.810212-7.424159Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-84'/>
+<use x='6.511315' y='1.793263' xlink:href='#eq1-g1-104'/>
+</g>
+</svg> and submesh <svg class="m-math" style="width: 0.848em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 8.136131 8.169354">
+<title>
+$ \mathcal{S} $
+</title>
+<defs>
+<path id='eq2-g0-83' d='M1.374844-2.618182C1.518306-2.677958 1.936737-2.940971 1.936737-3.108344C1.936737-3.19203 1.865006-3.19203 1.793275-3.19203C1.3868-3.19203 .215193-2.677958 .215193-1.482441C.215193-.621669 1.183562 .263014 2.642092 .263014C4.590785 .263014 6.850311-1.08792 6.850311-2.713823C6.850311-3.849564 5.654795-4.399502 4.686426-4.829888C3.849564-5.212453 3.299626-5.702615 3.299626-6.38406C3.299626-6.635118 3.407223-7.10137 3.777833-7.424159C4.136488-7.734994 4.805978-7.770859 4.97335-7.770859C5.104857-7.770859 5.606974-7.758904 6.121046-7.531756C6.348194-7.424159 6.659029-7.280697 6.659029-6.766625C6.659029-6.599253 6.647073-6.539477 6.611208-6.40797C6.599253-6.372105 6.587298-6.324284 6.587298-6.288418C6.587298-6.204732 6.659029-6.204732 6.706849-6.204732C6.862267-6.204732 7.149191-6.324284 7.388294-6.527522C7.543711-6.647073 7.675218-6.802491 7.675218-7.268742C7.675218-7.854545 7.364384-8.021918 7.041594-8.16538C6.479701-8.428394 5.929763-8.428394 5.762391-8.428394C4.196264-8.428394 2.283437-7.232877 2.283437-5.869988C2.283437-4.865753 3.323537-4.387547 3.897385-4.136488C4.746202-3.753923 5.834122-3.203985 5.834122-2.199751C5.834122-1.398755 5.248319-.394521 3.431133-.394521C2.211706-.394521 1.231382-1.183562 1.231382-1.996513C1.231382-2.211706 1.291158-2.426899 1.374844-2.618182Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-83'/>
+</g>
+</svg>:</p><div class="m-math"><svg style="width: 3.695em; height: 1.038em;" viewBox="176.288685 -9.962617 35.467503 9.962617">
+<title>
+\[
+  \mathcal{S} \subseteq \mathcal{T}_h
+\]
+</title>
+<defs>
+<path id='eq3-g1-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
+<path id='eq3-g0-18' d='M7.878456-7.12528C8.081694-7.12528 8.296887-7.12528 8.296887-7.364384S8.081694-7.603487 7.878456-7.603487H4.662516C2.606227-7.603487 .992279-6.03736 .992279-4.148443C.992279-2.223661 2.642092-.681445 4.662516-.681445H7.878456C8.081694-.681445 8.296887-.681445 8.296887-.920548S8.081694-1.159651 7.878456-1.159651H4.686426C2.797509-1.159651 1.470486-2.558406 1.470486-4.136488C1.470486-5.762391 2.833375-7.12528 4.686426-7.12528H7.878456ZM1.649813 1.159651C1.446575 1.159651 1.231382 1.159651 1.231382 1.398755S1.446575 1.637858 1.649813 1.637858H7.878456C8.081694 1.637858 8.296887 1.637858 8.296887 1.398755S8.081694 1.159651 7.878456 1.159651H1.649813Z'/>
+<path id='eq3-g0-83' d='M1.374844-2.618182C1.518306-2.677958 1.936737-2.940971 1.936737-3.108344C1.936737-3.19203 1.865006-3.19203 1.793275-3.19203C1.3868-3.19203 .215193-2.677958 .215193-1.482441C.215193-.621669 1.183562 .263014 2.642092 .263014C4.590785 .263014 6.850311-1.08792 6.850311-2.713823C6.850311-3.849564 5.654795-4.399502 4.686426-4.829888C3.849564-5.212453 3.299626-5.702615 3.299626-6.38406C3.299626-6.635118 3.407223-7.10137 3.777833-7.424159C4.136488-7.734994 4.805978-7.770859 4.97335-7.770859C5.104857-7.770859 5.606974-7.758904 6.121046-7.531756C6.348194-7.424159 6.659029-7.280697 6.659029-6.766625C6.659029-6.599253 6.647073-6.539477 6.611208-6.40797C6.599253-6.372105 6.587298-6.324284 6.587298-6.288418C6.587298-6.204732 6.659029-6.204732 6.706849-6.204732C6.862267-6.204732 7.149191-6.324284 7.388294-6.527522C7.543711-6.647073 7.675218-6.802491 7.675218-7.268742C7.675218-7.854545 7.364384-8.021918 7.041594-8.16538C6.479701-8.428394 5.929763-8.428394 5.762391-8.428394C4.196264-8.428394 2.283437-7.232877 2.283437-5.869988C2.283437-4.865753 3.323537-4.387547 3.897385-4.136488C4.746202-3.753923 5.834122-3.203985 5.834122-2.199751C5.834122-1.398755 5.248319-.394521 3.431133-.394521C2.211706-.394521 1.231382-1.183562 1.231382-1.996513C1.231382-2.211706 1.291158-2.426899 1.374844-2.618182Z'/>
+<path id='eq3-g0-84' d='M5.810212-7.424159H7.79477C9.372852-7.424159 9.97061-8.332752 9.97061-8.488169C9.97061-8.547945 9.92279-8.571856 9.863014-8.571856C9.731507-8.571856 9.420672-8.452304 9.121793-8.237111C9.026152-8.16538 9.002242-8.16538 8.775093-8.16538H3.550685C2.068244-8.16538 .406476-6.886177 .406476-5.905853C.406476-5.834122 .406476-5.762391 .502117-5.762391C.789041-5.762391 1.542217-6.156912 1.566127-6.443836C1.578082-6.647073 1.601993-6.874222 1.841096-7.185056C1.960648-7.328518 2.056289-7.424159 2.582316-7.424159H4.961395C4.758157-7.292653 4.710336-7.113325 4.686426-6.993773L3.323537-1.578082C3.180075-.992279 2.929016-.239103 2.582316 .537983C2.510585 .681445 2.510585 .705355 2.510585 .729265C2.510585 .800996 2.558406 .812951 2.618182 .812951C2.857285 .812951 3.443088 .490162 3.622416 .239103C3.694147 .119552 4.220174-1.099875 4.471233-2.092154L5.810212-7.424159Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='176.288685' y='-1.793263' xlink:href='#eq3-g0-83'/>
+<use x='187.745638' y='-1.793263' xlink:href='#eq3-g0-18'/>
+<use x='200.364964' y='-1.793263' xlink:href='#eq3-g0-84'/>
+<use x='206.876279' y='0' xlink:href='#eq3-g1-104'/>
+</g>
+</svg></div><p>The submesh maintains mappings <svg class="m-math" style="width: 6.351em; height: 1.198em; vertical-align: -0.334em;" viewBox="0 -8.302191 60.965236 11.5013">
+<title>
+$ \phi: I_{\mathcal{S}} \to I_{\mathcal{T}_h} $
+</title>
+<defs>
+<path id='eq4-g2-104' d='M1.990535-3.969116C1.996513-3.993026 2.008468-4.028892 2.008468-4.05878C2.008468-4.154421 1.888917-4.148443 1.817186-4.142466L1.147696-4.088667C1.046077-4.08269 .968369-4.076712 .968369-3.939228C.968369-3.843587 1.046077-3.843587 1.135741-3.843587C1.315068-3.843587 1.356912-3.831631 1.43462-3.801743C1.43462-3.730012 1.43462-3.718057 1.41071-3.622416L.573848-.280946C.549938-.185305 .549938-.155417 .549938-.143462C.549938 .005978 .669489 .059776 .759153 .059776C.818929 .059776 .926526 .035866 1.004234-.077709C1.022167-.119552 1.075965-.316812 1.105853-.442341C1.135741-.555915 1.201494-.830884 1.23736-.980324C1.279203-1.135741 1.309091-1.243337 1.338979-1.380822C1.362889-1.470486 1.392777-1.578082 1.560149-1.823163C1.75741-2.110087 2.068244-2.438854 2.528518-2.438854C2.905106-2.438854 2.905106-2.12802 2.905106-2.020423C2.905106-1.667746 2.654047-1.034122 2.540473-.759153C2.504608-.657534 2.462765-.561893 2.462765-.460274C2.462765-.155417 2.737733 .059776 3.066501 .059776C3.670237 .059776 3.969116-.729265 3.969116-.860772C3.969116-.872727 3.963138-.944458 3.855542-.944458C3.771856-.944458 3.765878-.91457 3.730012-.800996C3.634371-.490162 3.38929-.137484 3.084433-.137484C2.970859-.137484 2.923039-.227148 2.923039-.352677C2.923039-.472229 2.964882-.573848 3.01868-.699377C3.108344-.932503 3.377335-1.60797 3.377335-1.942715C3.377335-2.414944 3.036613-2.636115 2.552428-2.636115C2.080199-2.636115 1.763387-2.379078 1.524284-2.110087L1.990535-3.969116Z'/>
+<path id='eq4-g1-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq4-g0-83' d='M.956413-1.737484C1.179577-1.833126 1.346949-1.992528 1.346949-2.072229C1.346949-2.13599 1.291158-2.13599 1.251308-2.13599C.924533-2.13599 .159402-1.737484 .159402-1.012204C.159402-.406476 .924533 .167372 1.896887 .167372C3.339477 .167372 4.853798-.74122 4.853798-1.825156C4.853798-2.566376 4.104608-2.925031 3.371357-3.196015C3.020672-3.331507 2.279452-3.610461 2.279452-4.24807C2.279452-4.566874 2.462765-4.837858 2.622167-4.94944C2.82939-5.084932 3.188045-5.148692 3.451059-5.148692C3.5467-5.148692 3.897385-5.140722 4.27995-4.98929C4.439352-4.925529 4.662516-4.837858 4.662516-4.471233C4.662516-4.367621 4.654545-4.335741 4.630635-4.25604C4.630635-4.23213 4.622665-4.200249 4.622665-4.184309C4.622665-4.152428 4.654545-4.120548 4.702366-4.120548C4.813948-4.120548 5.029141-4.224159 5.164633-4.327771C5.260274-4.399502 5.371856-4.487173 5.371856-4.821918C5.371856-5.244334 5.116812-5.355915 4.909589-5.443587C4.503113-5.610959 4.128518-5.610959 4.008966-5.610959C2.86127-5.610959 1.570112-4.805978 1.570112-3.897385C1.570112-3.188045 2.367123-2.885181 2.773599-2.733748C3.371357-2.510585 4.144458-2.175841 4.144458-1.474471C4.144458-1.195517 4.008966-.757161 3.610461-.541968C3.164134-.310834 2.566376-.294894 2.462765-.294894C1.586052-.294894 .868742-.820922 .868742-1.362889C.868742-1.490411 .892653-1.625903 .956413-1.737484Z'/>
+<path id='eq4-g0-84' d='M4.080697-4.941469H5.587049C6.615193-4.941469 7.037609-5.531258 7.037609-5.65878C7.037609-5.71457 6.989788-5.71457 6.957908-5.71457C6.774595-5.71457 6.519552-5.539228 6.40797-5.459527C6.38406-5.443587 6.336239-5.443587 6.296389-5.443587H2.287422C1.323039-5.363885 .278954-4.519054 .278954-3.905355C.278954-3.849564 .302864-3.833624 .374595-3.833624C.478207-3.833624 .68543-3.929265 .804981-4.008966C1.044085-4.168369 1.060025-4.2401 1.075965-4.335741C1.099875-4.471233 1.155666-4.662516 1.338979-4.829888C1.458531-4.941469 1.753425-4.941469 1.849066-4.941469H3.498879C3.363387-4.845828 3.339477-4.750187 3.315567-4.654545L2.422914-1.091905C2.343213-.765131 2.1599-.207223 1.896887 .374595C1.857036 .462267 1.857036 .478207 1.857036 .486177C1.857036 .541968 1.896887 .541968 1.936737 .541968C2.10411 .541968 2.438854 .358655 2.582316 .199253C2.669988 .095641 3.044583-.804981 3.211955-1.466501L4.080697-4.941469Z'/>
+<path id='eq4-g4-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
+<path id='eq4-g3-30' d='M5.140722-8.18929C5.140722-8.296887 5.057036-8.296887 5.021171-8.296887C4.913574-8.296887 4.901619-8.272976 4.853798-8.069738L4.208219-5.499377C4.172354-5.34396 4.160399-5.332005 4.148443-5.32005C4.136488-5.296139 4.052802-5.284184 4.028892-5.284184C2.068244-5.116812 .561893-3.502864 .561893-2.008468C.561893-.71731 1.554172 .071731 2.797509 .143462C2.701868 .514072 2.618182 .896638 2.52254 1.267248C2.355168 1.900872 2.259527 2.295392 2.259527 2.343213C2.259527 2.367123 2.259527 2.438854 2.379078 2.438854C2.414944 2.438854 2.462765 2.438854 2.486675 2.391034C2.510585 2.367123 2.582316 2.080199 2.630137 1.924782L3.072478 .143462C5.116812 .035866 6.670984-1.637858 6.670984-3.144209C6.670984-4.351681 5.762391-5.212453 4.435367-5.296139L5.140722-8.18929ZM4.363636-5.057036C5.152677-5.009215 5.941719-4.566874 5.941719-3.395268C5.941719-2.044334 4.99726-.251059 3.132254-.107597L4.363636-5.057036ZM2.857285-.095641C2.271482-.131507 1.291158-.442341 1.291158-1.75741C1.291158-3.263761 2.379078-4.937484 4.100623-5.045081L2.857285-.095641Z'/>
+<path id='eq4-g3-73' d='M4.399502-7.280697C4.507098-7.699128 4.531009-7.81868 5.403736-7.81868C5.66675-7.81868 5.762391-7.81868 5.762391-8.045828C5.762391-8.16538 5.630884-8.16538 5.595019-8.16538C5.379826-8.16538 5.116812-8.141469 4.901619-8.141469H3.431133C3.19203-8.141469 2.917061-8.16538 2.677958-8.16538C2.582316-8.16538 2.450809-8.16538 2.450809-7.938232C2.450809-7.81868 2.546451-7.81868 2.785554-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.507846 3.502864-7.436115 3.478954-7.328518L1.865006-.884682C1.75741-.466252 1.733499-.3467 .860772-.3467C.597758-.3467 .490162-.3467 .490162-.119552C.490162 0 .609714 0 .669489 0C.884682 0 1.147696-.02391 1.362889-.02391H2.833375C3.072478-.02391 3.335492 0 3.574595 0C3.670237 0 3.813699 0 3.813699-.215193C3.813699-.3467 3.741968-.3467 3.478954-.3467C2.737733-.3467 2.737733-.442341 2.737733-.585803C2.737733-.609714 2.737733-.669489 2.785554-.860772L4.399502-7.280697Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g3-30'/>
+<use x='10.248931' y='0' xlink:href='#eq4-g4-58'/>
+<use x='16.821422' y='0' xlink:href='#eq4-g3-73'/>
+<use x='21.984324' y='1.793263' xlink:href='#eq4-g0-83'/>
+<use x='31.515385' y='0' xlink:href='#eq4-g1-33'/>
+<use x='46.791417' y='0' xlink:href='#eq4-g3-73'/>
+<use x='51.954318' y='1.793263' xlink:href='#eq4-g0-84'/>
+<use x='56.627346' y='3.199109' xlink:href='#eq4-g2-104'/>
+</g>
+</svg> where <svg class="m-math" style="width: 1.133em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 10.875002 9.962629">
+<title>
+$ I_{\mathcal{S}} $
+</title>
+<defs>
+<path id='eq5-g0-83' d='M.956413-1.737484C1.179577-1.833126 1.346949-1.992528 1.346949-2.072229C1.346949-2.13599 1.291158-2.13599 1.251308-2.13599C.924533-2.13599 .159402-1.737484 .159402-1.012204C.159402-.406476 .924533 .167372 1.896887 .167372C3.339477 .167372 4.853798-.74122 4.853798-1.825156C4.853798-2.566376 4.104608-2.925031 3.371357-3.196015C3.020672-3.331507 2.279452-3.610461 2.279452-4.24807C2.279452-4.566874 2.462765-4.837858 2.622167-4.94944C2.82939-5.084932 3.188045-5.148692 3.451059-5.148692C3.5467-5.148692 3.897385-5.140722 4.27995-4.98929C4.439352-4.925529 4.662516-4.837858 4.662516-4.471233C4.662516-4.367621 4.654545-4.335741 4.630635-4.25604C4.630635-4.23213 4.622665-4.200249 4.622665-4.184309C4.622665-4.152428 4.654545-4.120548 4.702366-4.120548C4.813948-4.120548 5.029141-4.224159 5.164633-4.327771C5.260274-4.399502 5.371856-4.487173 5.371856-4.821918C5.371856-5.244334 5.116812-5.355915 4.909589-5.443587C4.503113-5.610959 4.128518-5.610959 4.008966-5.610959C2.86127-5.610959 1.570112-4.805978 1.570112-3.897385C1.570112-3.188045 2.367123-2.885181 2.773599-2.733748C3.371357-2.510585 4.144458-2.175841 4.144458-1.474471C4.144458-1.195517 4.008966-.757161 3.610461-.541968C3.164134-.310834 2.566376-.294894 2.462765-.294894C1.586052-.294894 .868742-.820922 .868742-1.362889C.868742-1.490411 .892653-1.625903 .956413-1.737484Z'/>
+<path id='eq5-g1-73' d='M4.399502-7.280697C4.507098-7.699128 4.531009-7.81868 5.403736-7.81868C5.66675-7.81868 5.762391-7.81868 5.762391-8.045828C5.762391-8.16538 5.630884-8.16538 5.595019-8.16538C5.379826-8.16538 5.116812-8.141469 4.901619-8.141469H3.431133C3.19203-8.141469 2.917061-8.16538 2.677958-8.16538C2.582316-8.16538 2.450809-8.16538 2.450809-7.938232C2.450809-7.81868 2.546451-7.81868 2.785554-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.507846 3.502864-7.436115 3.478954-7.328518L1.865006-.884682C1.75741-.466252 1.733499-.3467 .860772-.3467C.597758-.3467 .490162-.3467 .490162-.119552C.490162 0 .609714 0 .669489 0C.884682 0 1.147696-.02391 1.362889-.02391H2.833375C3.072478-.02391 3.335492 0 3.574595 0C3.670237 0 3.813699 0 3.813699-.215193C3.813699-.3467 3.741968-.3467 3.478954-.3467C2.737733-.3467 2.737733-.442341 2.737733-.585803C2.737733-.609714 2.737733-.669489 2.785554-.860772L4.399502-7.280697Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g1-73'/>
+<use x='5.162902' y='1.793263' xlink:href='#eq5-g0-83'/>
+</g>
+</svg> and <svg class="m-math" style="width: 1.476em; height: 1.184em; vertical-align: -0.334em;" viewBox="0 -8.169366 14.173819 11.368474">
+<title>
+$ I_{\mathcal{T}_h} $
+</title>
+<defs>
+<path id='eq6-g1-104' d='M1.990535-3.969116C1.996513-3.993026 2.008468-4.028892 2.008468-4.05878C2.008468-4.154421 1.888917-4.148443 1.817186-4.142466L1.147696-4.088667C1.046077-4.08269 .968369-4.076712 .968369-3.939228C.968369-3.843587 1.046077-3.843587 1.135741-3.843587C1.315068-3.843587 1.356912-3.831631 1.43462-3.801743C1.43462-3.730012 1.43462-3.718057 1.41071-3.622416L.573848-.280946C.549938-.185305 .549938-.155417 .549938-.143462C.549938 .005978 .669489 .059776 .759153 .059776C.818929 .059776 .926526 .035866 1.004234-.077709C1.022167-.119552 1.075965-.316812 1.105853-.442341C1.135741-.555915 1.201494-.830884 1.23736-.980324C1.279203-1.135741 1.309091-1.243337 1.338979-1.380822C1.362889-1.470486 1.392777-1.578082 1.560149-1.823163C1.75741-2.110087 2.068244-2.438854 2.528518-2.438854C2.905106-2.438854 2.905106-2.12802 2.905106-2.020423C2.905106-1.667746 2.654047-1.034122 2.540473-.759153C2.504608-.657534 2.462765-.561893 2.462765-.460274C2.462765-.155417 2.737733 .059776 3.066501 .059776C3.670237 .059776 3.969116-.729265 3.969116-.860772C3.969116-.872727 3.963138-.944458 3.855542-.944458C3.771856-.944458 3.765878-.91457 3.730012-.800996C3.634371-.490162 3.38929-.137484 3.084433-.137484C2.970859-.137484 2.923039-.227148 2.923039-.352677C2.923039-.472229 2.964882-.573848 3.01868-.699377C3.108344-.932503 3.377335-1.60797 3.377335-1.942715C3.377335-2.414944 3.036613-2.636115 2.552428-2.636115C2.080199-2.636115 1.763387-2.379078 1.524284-2.110087L1.990535-3.969116Z'/>
+<path id='eq6-g0-84' d='M4.080697-4.941469H5.587049C6.615193-4.941469 7.037609-5.531258 7.037609-5.65878C7.037609-5.71457 6.989788-5.71457 6.957908-5.71457C6.774595-5.71457 6.519552-5.539228 6.40797-5.459527C6.38406-5.443587 6.336239-5.443587 6.296389-5.443587H2.287422C1.323039-5.363885 .278954-4.519054 .278954-3.905355C.278954-3.849564 .302864-3.833624 .374595-3.833624C.478207-3.833624 .68543-3.929265 .804981-4.008966C1.044085-4.168369 1.060025-4.2401 1.075965-4.335741C1.099875-4.471233 1.155666-4.662516 1.338979-4.829888C1.458531-4.941469 1.753425-4.941469 1.849066-4.941469H3.498879C3.363387-4.845828 3.339477-4.750187 3.315567-4.654545L2.422914-1.091905C2.343213-.765131 2.1599-.207223 1.896887 .374595C1.857036 .462267 1.857036 .478207 1.857036 .486177C1.857036 .541968 1.896887 .541968 1.936737 .541968C2.10411 .541968 2.438854 .358655 2.582316 .199253C2.669988 .095641 3.044583-.804981 3.211955-1.466501L4.080697-4.941469Z'/>
+<path id='eq6-g2-73' d='M4.399502-7.280697C4.507098-7.699128 4.531009-7.81868 5.403736-7.81868C5.66675-7.81868 5.762391-7.81868 5.762391-8.045828C5.762391-8.16538 5.630884-8.16538 5.595019-8.16538C5.379826-8.16538 5.116812-8.141469 4.901619-8.141469H3.431133C3.19203-8.141469 2.917061-8.16538 2.677958-8.16538C2.582316-8.16538 2.450809-8.16538 2.450809-7.938232C2.450809-7.81868 2.546451-7.81868 2.785554-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.507846 3.502864-7.436115 3.478954-7.328518L1.865006-.884682C1.75741-.466252 1.733499-.3467 .860772-.3467C.597758-.3467 .490162-.3467 .490162-.119552C.490162 0 .609714 0 .669489 0C.884682 0 1.147696-.02391 1.362889-.02391H2.833375C3.072478-.02391 3.335492 0 3.574595 0C3.670237 0 3.813699 0 3.813699-.215193C3.813699-.3467 3.741968-.3467 3.478954-.3467C2.737733-.3467 2.737733-.442341 2.737733-.585803C2.737733-.609714 2.737733-.669489 2.785554-.860772L4.399502-7.280697Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g2-73'/>
+<use x='5.162902' y='1.793263' xlink:href='#eq6-g0-84'/>
+<use x='9.835929' y='3.199109' xlink:href='#eq6-g1-104'/>
+</g>
+</svg> are index sets.</p></section><section id="autotoc_md96"><h2><a href="#autotoc_md96">Usage Examples</a></h2><section id="autotoc_md97"><h3><a href="#autotoc_md97">Creating a boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+
+<span class="c1">// Include all boundary faces</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getFace</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">isBoundary</span><span class="p">())</span>
+<span class="w">    </span><span class="n">builder</span><span class="p">.</span><span class="n">include</span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">getDimension</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getIndex</span><span class="p">());</span>
+
+<span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre></section><section id="autotoc_md98"><h3><a href="#autotoc_md98">Accessing as submesh:</a></h3><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="c1">// Cast is well defined</span>
+<span class="w">  </span><span class="c1">// Downcast to submesh</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="p">}</span></pre><p>Alternatively, you can use the asSubMesh() to access the <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a> interface:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">getParent</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// Or use base interface</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="c1">// Cast is well defined</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">asSubMesh</span><span class="p">();</span>
-<span class="p">}</span></pre>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">getParent</span><span class="p">();</span>
+<span class="p">}</span></pre></section></section><section id="autotoc_md99"><h2><a href="#autotoc_md99">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> objects are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>
+            </dt>
+            <dd>Abstract base class for <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> implementations.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::Local&gt;</a>
@@ -107,52 +230,182 @@
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4_1_1_builder.html" class="m-doc">Builder</a>
             </dt>
-            <dd>Class used to build <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">SubMesh&lt;Context::<wbr />Local&gt;</a> instances.</dd>
+            <dd><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4_1_1_builder.html" class="m-doc">Builder</a> for constructing <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> instances.</dd>
+            <dt id="ad785859f8b7c1b2fb93ab319ac879bcf">
+              using <a href="#ad785859f8b7c1b2fb93ab319ac879bcf" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>&gt;
+            </dt>
+            <dd>Parent mesh type.</dd>
+            <dt id="a5d11968e3ae899be574a41d47a17a36f">
+              using <a href="#a5d11968e3ae899be574a41d47a17a36f" class="m-doc-self">Context</a> = typename Parent::Context
+            </dt>
+            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aca1ab5018627fcf57019670175e9d1cf" class="m-doc">SubMesh</a>(</span><span class="m-doc-wrap">std::reference_wrapper&lt;const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="#a5d11968e3ae899be574a41d47a17a36f" class="m-doc">Context</a>&gt;&gt; parent) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs a submesh with a parent.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af0cbd32e3eb3c79832b7148e08b5152b" class="m-doc">SubMesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a4286a2e74ac7a331ed9c4bad4c4200cd" class="m-doc">SubMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ac8c6a074ce3c7c6ee92364debb64df8f">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac8c6a074ce3c7c6ee92364debb64df8f" class="m-doc-self">restriction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; <span class="m-label m-flat m-warning">override</span></span>
+            <dt id="a29bd8f94bf6d563e743530f1978c5db6">
+              <span class="m-doc-wrap-bumper">auto <a href="#a29bd8f94bf6d563e743530f1978c5db6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
-            <dd>Represents the restriction of a <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> <svg class="m-math" style="width: 0.955em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.171098 8.169366">
-<title>
-$ P $
-</title>
-<defs>
-<path id='eq1-g0-80' d='M3.53873-3.801743H5.547198C7.197011-3.801743 8.846824-5.021171 8.846824-6.38406C8.846824-7.316563 8.057783-8.16538 6.551432-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .669489 0 .74122 0C.968369 0 1.207472-.02391 1.43462-.02391H2.833375C3.060523-.02391 3.311582 0 3.53873 0C3.634371 0 3.765878 0 3.765878-.227148C3.765878-.3467 3.658281-.3467 3.478954-.3467C2.761644-.3467 2.749689-.430386 2.749689-.549938C2.749689-.609714 2.761644-.6934 2.773599-.753176L3.53873-3.801743ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.204732C7.10137-7.81868 7.84259-7.531756 7.84259-6.635118C7.84259-6.324284 7.687173-5.308095 7.137235-4.758157C6.933998-4.542964 6.360149-4.088667 5.272229-4.088667H3.58655L4.399502-7.352428Z'/>
-</defs>
-<g id='eq1-page1'>
-<use x='0' y='0' xlink:href='#eq1-g0-80'/>
-</g>
-</svg> into a <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> of a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> <svg class="m-math" style="width: 0.962em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.233623 8.169366">
-<title>
-$ C $
-</title>
-<defs>
-<path id='eq2-g0-67' d='M8.930511-8.308842C8.930511-8.416438 8.846824-8.416438 8.822914-8.416438S8.751183-8.416438 8.655542-8.296887L7.830635-7.292653C7.412204-8.009963 6.75467-8.416438 5.858032-8.416438C3.275716-8.416438 .597758-5.798257 .597758-2.988792C.597758-.992279 1.996513 .251059 3.741968 .251059C4.698381 .251059 5.535243-.155417 6.228643-.74122C7.268742-1.613948 7.579577-2.773599 7.579577-2.86924C7.579577-2.976837 7.483935-2.976837 7.44807-2.976837C7.340473-2.976837 7.328518-2.905106 7.304608-2.857285C6.75467-.992279 5.140722-.095641 3.945205-.095641C2.677958-.095641 1.578082-.908593 1.578082-2.606227C1.578082-2.988792 1.697634-5.068991 3.048568-6.635118C3.706102-7.400249 4.829888-8.069738 5.965629-8.069738C7.280697-8.069738 7.866501-6.981818 7.866501-5.762391C7.866501-5.451557 7.830635-5.188543 7.830635-5.140722C7.830635-5.033126 7.950187-5.033126 7.986052-5.033126C8.117559-5.033126 8.129514-5.045081 8.177335-5.260274L8.930511-8.308842Z'/>
-</defs>
-<g id='eq2-page1'>
-<use x='0' y='0' xlink:href='#eq2-g0-67'/>
-</g>
-</svg>.</dd>
+            <dd>Copy assignment (deleted).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2d193c27bc240a3ae73e7f4b4780dc9" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;</span>
+            </dt>
+            <dd>Move assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac8c6a074ce3c7c6ee92364debb64df8f" class="m-doc">restriction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Restricts a point to this submesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc">isSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Indicates whether the mesh is a submesh or not.</dd>
+            <dd>Checks if this mesh is a submesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af3acbd45d6f4a410dce369c13bdee9d1" class="m-doc">getParent</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;Context&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af3acbd45d6f4a410dce369c13bdee9d1" class="m-doc">getParent</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="#a5d11968e3ae899be574a41d47a17a36f" class="m-doc">Context</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd></dd>
-            <dt id="a287a1b2a30ef4cef88679681d6aca405">
-              <span class="m-doc-wrap-bumper">auto <a href="#a287a1b2a30ef4cef88679681d6aca405" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="struct_rodin_1_1_geometry_1_1_sub_mesh_base_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dd>Gets the immediate parent mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a287a1b2a30ef4cef88679681d6aca405" class="m-doc">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="struct_rodin_1_1_geometry_1_1_sub_mesh_base_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Gets the map of polytope indices from the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to the parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</dd>
+            <dd>Gets the polytope index mapping.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a824f93e01ba25a22356cff0ce669cac9" class="m-doc">getAncestors</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin.html#a672da592edc3a0551b41b89d3ac37f50" class="m-doc">Deque</a>&lt;<a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html#a5d3d19539a5f05df6f6f329b5d0aebae" class="m-doc">Ancestor</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets all ancestor meshes.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aca1ab5018627fcf57019670175e9d1cf"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca1ab5018627fcf57019670175e9d1cf" class="m-doc-self">SubMesh</a>(</span><span class="m-doc-wrap">std::reference_wrapper&lt;const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="#a5d11968e3ae899be574a41d47a17a36f" class="m-doc">Context</a>&gt;&gt; parent) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs a submesh with a parent.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">parent&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference to the parent mesh</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af0cbd32e3eb3c79832b7148e08b5152b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0cbd32e3eb3c79832b7148e08b5152b" class="m-doc-self">SubMesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to copy from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4286a2e74ac7a331ed9c4bad4c4200cd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4286a2e74ac7a331ed9c4bad4c4200cd" class="m-doc-self">SubMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to move from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad2d193c27bc240a3ae73e7f4b4780dc9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2d193c27bc240a3ae73e7f4b4780dc9" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to move from</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac8c6a074ce3c7c6ee92364debb64df8f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8c6a074ce3c7c6ee92364debb64df8f" class="m-doc-self">restriction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Restricts a point to this submesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> in parent mesh coordinates</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Optional point in submesh (empty if not in submesh)</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>Implements virtual method from <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="a07118dd6dc984cb9260ae21fc61a4130"><div>
             <h3>
               <div class="m-doc-template">
@@ -160,36 +413,77 @@ $ C $
               </div>
               <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Indicates whether the mesh is a submesh or not.</p>
+            <p>Checks if this mesh is a submesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>True if mesh is a submesh, false otherwise.</td>
+                  <td>Always true for <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> instances</td>
                 </tr>
               </tfoot>
             </table>
-<p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> which is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> may be casted into down to access the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For example:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="c1">// Cast is well defined</span>
-<span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="p">}</span></pre>
           </div></section>
           <section class="m-doc-details" id="af3acbd45d6f4a410dce369c13bdee9d1"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;Context&gt;&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af3acbd45d6f4a410dce369c13bdee9d1" class="m-doc-self">getParent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="#a5d11968e3ae899be574a41d47a17a36f" class="m-doc">Context</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af3acbd45d6f4a410dce369c13bdee9d1" class="m-doc-self">getParent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
+            <p>Gets the immediate parent mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Reference to the parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object</td>
+                  <td>Reference to the parent mesh</td>
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a287a1b2a30ef4cef88679681d6aca405"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_geometry_1_1_sub_mesh_base_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a287a1b2a30ef4cef88679681d6aca405" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the polytope index mapping.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Bidirectional mapping between submesh and parent indices</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The mapping allows efficient queries:</p><ul><li><code>left[i]</code>: parent index for submesh index i</li><li><code>right[j]</code>: submesh index for parent index j</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="a824f93e01ba25a22356cff0ce669cac9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a672da592edc3a0551b41b89d3ac37f50" class="m-doc">Deque</a>&lt;<a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html#a5d3d19539a5f05df6f6f329b5d0aebae" class="m-doc">Ancestor</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a824f93e01ba25a22356cff0ce669cac9" class="m-doc-self">getAncestors</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets all ancestor meshes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Deque of ancestor mesh references</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Returns the full chain of parent meshes up to the root mesh.</p>
           </div></section>
         </section>
       </div>

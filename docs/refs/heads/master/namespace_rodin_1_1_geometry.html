@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html" id="m-navbar-current">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -75,7 +82,9 @@
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#enum-members">Enums</a></li>
                 <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
@@ -91,40 +100,87 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>
+            </dt>
+            <dd>Manages attribute assignments for mesh polytopes.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html" class="m-doc">BalancedCompactPartitioner</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Partitioner</a> that creates balanced, spatially compact partitions.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_bounded_index_generator.html" class="m-doc">BoundedIndexGenerator</a>
+            </dt>
+            <dd>Index generator for a bounded range of indices.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_c_c_l.html" class="m-doc">CCL</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> data structures, geometric operations, and computational geometry utilities.</dd>
+            <dt>
               class <a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>
             </dt>
-            <dd>Class for representing polytopes of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</dd>
+            <dd>Represents a cell (highest-dimensional element) in a mesh.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a>
             </dt>
-            <dd>Represents an iterator over a set of cells of a mesh.</dd>
+            <dd>Iterator over mesh cells (highest-dimensional polytopes).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ContextType&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>
+            </dt>
+            <dd>Template for connectivity information.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html" class="m-doc">Connectivity&lt;Context::Local&gt;</a>
             </dt>
-            <dd>Represents the set of incidence relations of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</dd>
+            <dd><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> connectivity for sequential (local) meshes.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>
+            </dt>
+            <dd>Abstract base class for mesh connectivity.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_container_index_generator.html" class="m-doc">ContainerIndexGenerator</a>
+            </dt>
+            <dd>Index generator that wraps a container&#x27;s iterators.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_empty_index_generator.html" class="m-doc">EmptyIndexGenerator</a>
+            </dt>
+            <dd>Index generator that represents an empty sequence.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>
             </dt>
-            <dd>Class for representing elements of codimension 1 in the mesh, i.e. triangles in 3D or lines in 2D.</dd>
+            <dd>Represents a face (codimension-1 element) in a mesh.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>
             </dt>
-            <dd>Represents an iterator over a set of faces of a mesh.</dd>
+            <dd>Iterator over mesh faces (codimension-1 polytopes).</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>
             </dt>
-            <dd>Container that maps polytope types to associated data.</dd>
+            <dd>Template container indexed by polytope geometry types.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_greedy_partitioner.html" class="m-doc">GreedyPartitioner</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Partitioner</a> using a greedy algorithm.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_identity_transformation.html" class="m-doc">IdentityTransformation</a>
             </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> Identity transformation.</dd>
+            <dd><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> identity transformation.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>
+            </dt>
+            <dd>Abstract base class for index generators.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FE&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_isoparametric_transformation.html" class="m-doc">IsoparametricTransformation</a>
             </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> isoparametric transformation.</dd>
+            <dd>Template for isoparametric transformations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Iterator&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>
+            </dt>
+            <dd>Index generator that wraps an iterator pair.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class ContextType = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>
@@ -140,9 +196,13 @@
             </dt>
             <dd>Abstract base class for all mesh implementations.</dd>
             <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Partitioner</a>
+            </dt>
+            <dd>Abstract base class for mesh partitioning strategies.</dd>
+            <dt>
               class <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>
             </dt>
-            <dd>Represents a spatial point on a discrete mesh.</dd>
+            <dd>Concrete implementation of a spatial point on a mesh.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a>
             </dt>
@@ -154,11 +214,33 @@
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>
             </dt>
-            <dd>Represents an iterator over a set of polytopes of a mesh.</dd>
+            <dd>Iterator over general polytopes of specified dimension.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase</a>
+            </dt>
+            <dd>Base class template for polytope iterators.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>
             </dt>
-            <dd>Represents the transformation function of a simplex, taking reference coordinates to physical coordinates.</dd>
+            <dd>Abstract base class for polytope geometric transformations.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>
+            </dt>
+            <dd>Thread-safe index for managing polytope transformations.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_set_index_generator.html" class="m-doc">SetIndexGenerator</a>
+            </dt>
+            <dd>Index generator backed by a set of indices.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>
+            </dt>
+            <dd>Advanced mesh shard for distributed parallel computing.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a>
+            </dt>
+            <dd>Interface for mesh sharding algorithms.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_sharder_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Sharder&lt;Context::MPI&gt;</a>
@@ -173,33 +255,608 @@
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">SubMesh&lt;Context::Local&gt;</a>
             </dt>
-            <dd>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object.</dd>
+            <dd><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> representing a subregion of a parent mesh.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>
+            </dt>
+            <dd>Abstract base class for <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> implementations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_builder.html" class="m-doc">SubMeshBuilder</a>
+            </dt>
+            <dd>Builder for constructing <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> objects.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_vector_index_generator.html" class="m-doc">VectorIndexGenerator</a>
+            </dt>
+            <dd>Index generator backed by a vector of indices.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>
             </dt>
-            <dd>Represents a vertex of the mesh.</dd>
+            <dd>Represents a vertex (0-dimensional element) in a mesh.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a>
             </dt>
-            <dd>Represents an iterator over a set of vertices of a mesh.</dd>
+            <dd>Iterator over mesh vertices (0-dimensional polytopes).</dd>
+          </dl>
+        </section>
+        <section id="enum-members">
+          <h2><a href="#enum-members">Enums</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Region</a> { </span><span class="m-doc-wrap"><a href="#a81a01a86de31071a92e6cce0bab9bc4ba56284b76007b9f31cdec47174c4de6af" class="m-doc">Cells</a>,
+              <a href="#a81a01a86de31071a92e6cce0bab9bc4ba4f93ea0836ba76b6f9b81e3eee53a3af" class="m-doc">Faces</a>,
+              <a href="#a81a01a86de31071a92e6cce0bab9bc4bae234de581c9c5ef91322f1469a585f9e" class="m-doc">Boundary</a>,
+              <a href="#a81a01a86de31071a92e6cce0bab9bc4ba3c1aac82863ed9e5a9aca8ce687f711d" class="m-doc">Interface</a> }</span>
+            </dt>
+            <dd>Enumeration of standard mesh regions.</dd>
           </dl>
         </section>
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
-            <dt id="a2e85a5056404a8833600ced8a9fc603f">
-              using <a href="#a2e85a5056404a8833600ced8a9fc603f" class="m-doc-self">LocalMesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
+            <dt>
+              using <a href="#a353a95ac576fef3796ff6f2c5b1e147c" class="m-doc">SequentialConnectivity</a> = <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
+            </dt>
+            <dd>Type alias for sequential (non-distributed) connectivity.</dd>
+            <dt>
+              using <a href="#a2e85a5056404a8833600ced8a9fc603f" class="m-doc">LocalMesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
             </dt>
             <dd>Type alias for <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a></dd>
-            <dt id="aad3269c6d75ba79d0d3bde699227ea90">
-              using <a href="#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc-self">Attribute</a> = std::size_t
+            <dt>
+              using <a href="#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> = std::size_t
             </dt>
             <dd>Standard type for representing material attributes in a mesh.</dd>
-            <dt id="a1109e2bdd7327848ac57e234becf132f">
-              using <a href="#a1109e2bdd7327848ac57e234becf132f" class="m-doc-self">Incidence</a> = std::vector&lt;std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
+            <dt>
+              using <a href="#a1109e2bdd7327848ac57e234becf132f" class="m-doc">Incidence</a> = std::vector&lt;std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
             </dt>
-            <dd>Represents the incidence of a polytope.</dd>
+            <dd>Represents the incidence relation between polytopes.</dd>
           </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2865677bf09e748bc7b3d4b29cf9f847" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; q) -&gt; auto</span>
+            </dt>
+            <dd>Addition operator for <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> and Eigen vector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad9d1f8d8acbec45a65b745e6bf199e3f" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; q) -&gt; auto</span>
+            </dt>
+            <dd>Addition operator for Eigen vector and <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7d15ff369b808fd734a13fa76e31ac01" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; q) -&gt; auto</span>
+            </dt>
+            <dd>Subtraction operator for <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> and Eigen vector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3a0f64cdef451a52f0e84329cd77122e" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; q) -&gt; auto</span>
+            </dt>
+            <dd>Subtraction operator for Eigen vector and <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba8530770f0d27eb2a11a6cc1b1fffdb" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; q) -&gt; auto</span>
+            </dt>
+            <dd>Addition operator for two Points.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a320e51da4d6fbb457c5995459df5fa47" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; q) -&gt; auto</span>
+            </dt>
+            <dd>Subtraction operator for two Points.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a060d3aff04325a0c318dc5fcc06a1889" class="m-doc">operator*</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> s,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) -&gt; auto</span>
+            </dt>
+            <dd>Scalar multiplication (scalar * <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad0ec7c497e8e069992f9ff81b4ae24ae" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> s) -&gt; auto</span>
+            </dt>
+            <dd>Scalar multiplication (<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> * scalar).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a80fa59a2cf1bd92ab3263ec2d8bae01e" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a>&amp; p) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream output operator for polytope types.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a641d6332dbb2363dd4c605eea207d5d9" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; lhs,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Equality comparison for polytopes.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ace7ed49379e3cb490f7f63b7ac9335e7" class="m-doc">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; lhs,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Less-than comparison for polytopes.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="a81a01a86de31071a92e6cce0bab9bc4b"><div>
+            <h3>
+              enum class Rodin::<wbr />Geometry::<wbr /><a href="#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc-self">Region</a>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_region_8h.html">&lt;Rodin/Geometry/Region.h&gt;</a></div>
+            </h3>
+            <p>Enumeration of standard mesh regions.</p>
+<p>This enumeration defines commonly used subregions of a mesh that can be referenced in variational formulations and boundary conditions.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a81a01a86de31071a92e6cce0bab9bc4ba56284b76007b9f31cdec47174c4de6af" class="m-doc-self" id="a81a01a86de31071a92e6cce0bab9bc4ba56284b76007b9f31cdec47174c4de6af">Cells</a></td>
+                  <td>
+                  <p>Interior cells (elements) of the mesh.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a81a01a86de31071a92e6cce0bab9bc4ba4f93ea0836ba76b6f9b81e3eee53a3af" class="m-doc-self" id="a81a01a86de31071a92e6cce0bab9bc4ba4f93ea0836ba76b6f9b81e3eee53a3af">Faces</a></td>
+                  <td>
+                  <p>All faces (d-1 dimensional polytopes) in the mesh.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a81a01a86de31071a92e6cce0bab9bc4bae234de581c9c5ef91322f1469a585f9e" class="m-doc-self" id="a81a01a86de31071a92e6cce0bab9bc4bae234de581c9c5ef91322f1469a585f9e">Boundary</a></td>
+                  <td>
+                  <p>Boundary faces (faces incident to only one cell)</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a81a01a86de31071a92e6cce0bab9bc4ba3c1aac82863ed9e5a9aca8ce687f711d" class="m-doc-self" id="a81a01a86de31071a92e6cce0bab9bc4ba3c1aac82863ed9e5a9aca8ce687f711d">Interface</a></td>
+                  <td>
+                  <p>Interior faces (faces incident to two cells)</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="a353a95ac576fef3796ff6f2c5b1e147c"><div>
+            <h3>
+              using Rodin::<wbr />Geometry::<wbr /><a href="#a353a95ac576fef3796ff6f2c5b1e147c" class="m-doc-self">SequentialConnectivity</a> = <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_2_connectivity_8h.html">&lt;Rodin/Geometry/Connectivity.h&gt;</a></div>
+            </h3>
+            <p>Type alias for sequential (non-distributed) connectivity.</p>
+          </div></section>
+          <section class="m-doc-details" id="a2e85a5056404a8833600ced8a9fc603f"><div>
+            <h3>
+              using Rodin::<wbr />Geometry::<wbr /><a href="#a2e85a5056404a8833600ced8a9fc603f" class="m-doc-self">LocalMesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_2_mesh_8h.html">&lt;Rodin/Geometry/Mesh.h&gt;</a></div>
+            </h3>
+            <p>Type alias for <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a></p>
+          </div></section>
+          <section class="m-doc-details" id="aad3269c6d75ba79d0d3bde699227ea90"><div>
+            <h3>
+              using Rodin::<wbr />Geometry::<wbr /><a href="#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc-self">Attribute</a> = std::size_t
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_2_types_8h.html">&lt;Rodin/Geometry/Types.h&gt;</a></div>
+            </h3>
+            <p>Standard type for representing material attributes in a mesh.</p>
+<p>Attributes are used to mark different regions or materials in a mesh. For example, in a multi-material problem, each material region would have a distinct attribute value.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1109e2bdd7327848ac57e234becf132f"><div>
+            <h3>
+              using Rodin::<wbr />Geometry::<wbr /><a href="#a1109e2bdd7327848ac57e234becf132f" class="m-doc-self">Incidence</a> = std::vector&lt;std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_2_types_8h.html">&lt;Rodin/Geometry/Types.h&gt;</a></div>
+            </h3>
+            <p>Represents the incidence relation between polytopes.</p>
+<p>The incidence relation <svg class="m-math" style="width: 4.205em; height: 1.017em; vertical-align: -0.104em;" viewBox="0 -8.76629 40.365183 9.762562">
+<title>
+$ d \longrightarrow d&#x27; $
+</title>
+<defs>
+<path id='eq1-g0-48' d='M2.11208-3.777833C2.15193-3.881445 2.183811-3.937235 2.183811-4.016936C2.183811-4.27995 1.944707-4.455293 1.721544-4.455293C1.40274-4.455293 1.315068-4.176339 1.283188-4.064757L.270984-.629639C.239103-.533998 .239103-.510087 .239103-.502117C.239103-.430386 .286924-.414446 .366625-.390535C.510087-.326775 .526027-.326775 .541968-.326775C.565878-.326775 .613699-.326775 .669489-.462267L2.11208-3.777833Z'/>
+<path id='eq1-g1-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq1-g1-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq1-g2-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g2-100'/>
+<use x='9.403522' y='0' xlink:href='#eq1-g1-0'/>
+<use x='16.709514' y='0' xlink:href='#eq1-g1-33'/>
+<use x='31.985546' y='0' xlink:href='#eq1-g2-100'/>
+<use x='38.068239' y='-4.338437' xlink:href='#eq1-g0-48'/>
+</g>
+</svg> stores for each polytope of dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+<title>
+$ d $
+</title>
+<defs>
+<path id='eq2-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-100'/>
+</g>
+</svg> the indices of all incident polytopes of dimension <svg class="m-math" style="width: 0.873em; height: 0.913em; vertical-align: -0.000em;" viewBox="0 -8.76629 8.379637 8.76629">
+<title>
+$ d&#x27; $
+</title>
+<defs>
+<path id='eq3-g0-48' d='M2.11208-3.777833C2.15193-3.881445 2.183811-3.937235 2.183811-4.016936C2.183811-4.27995 1.944707-4.455293 1.721544-4.455293C1.40274-4.455293 1.315068-4.176339 1.283188-4.064757L.270984-.629639C.239103-.533998 .239103-.510087 .239103-.502117C.239103-.430386 .286924-.414446 .366625-.390535C.510087-.326775 .526027-.326775 .541968-.326775C.565878-.326775 .613699-.326775 .669489-.462267L2.11208-3.777833Z'/>
+<path id='eq3-g1-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g1-100'/>
+<use x='6.082693' y='-4.338437' xlink:href='#eq3-g0-48'/>
+</g>
+</svg>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a></p></aside>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a2865677bf09e748bc7b3d4b29cf9f847"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_point_8h.html">&lt;Rodin/Geometry/Point.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2865677bf09e748bc7b3d4b29cf9f847" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; q)</span></span>
+            </h3>
+            <p>Addition operator for <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> and Eigen vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">EigenDerived</td>
+                  <td>Eigen vector type</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></td>
+                </tr>
+                <tr>
+                  <td>q&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Vector</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Result vector</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad9d1f8d8acbec45a65b745e6bf199e3f"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_point_8h.html">&lt;Rodin/Geometry/Point.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9d1f8d8acbec45a65b745e6bf199e3f" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; q)</span></span>
+            </h3>
+            <p>Addition operator for Eigen vector and <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">EigenDerived</td>
+                  <td>Eigen vector type</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Vector</td>
+                </tr>
+                <tr>
+                  <td>q&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Result vector</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7d15ff369b808fd734a13fa76e31ac01"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_point_8h.html">&lt;Rodin/Geometry/Point.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d15ff369b808fd734a13fa76e31ac01" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; q)</span></span>
+            </h3>
+            <p>Subtraction operator for <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> and Eigen vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">EigenDerived</td>
+                  <td>Eigen vector type</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></td>
+                </tr>
+                <tr>
+                  <td>q&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Vector</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Result vector</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3a0f64cdef451a52f0e84329cd77122e"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_point_8h.html">&lt;Rodin/Geometry/Point.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a0f64cdef451a52f0e84329cd77122e" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; q)</span></span>
+            </h3>
+            <p>Subtraction operator for Eigen vector and <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">EigenDerived</td>
+                  <td>Eigen vector type</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Vector</td>
+                </tr>
+                <tr>
+                  <td>q&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Result vector</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aba8530770f0d27eb2a11a6cc1b1fffdb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba8530770f0d27eb2a11a6cc1b1fffdb" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; q)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_point_8h.html">&lt;Rodin/Geometry/Point.h&gt;</a></div>
+            </h3>
+            <p>Addition operator for two Points.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>First point</td>
+                </tr>
+                <tr>
+                  <td>q&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Second point</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Result vector (sum of physical coordinates)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a320e51da4d6fbb457c5995459df5fa47"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a320e51da4d6fbb457c5995459df5fa47" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; q)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_point_8h.html">&lt;Rodin/Geometry/Point.h&gt;</a></div>
+            </h3>
+            <p>Subtraction operator for two Points.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>First point</td>
+                </tr>
+                <tr>
+                  <td>q&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Second point</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Result vector (difference of physical coordinates)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a060d3aff04325a0c318dc5fcc06a1889"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a060d3aff04325a0c318dc5fcc06a1889" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> s,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_point_8h.html">&lt;Rodin/Geometry/Point.h&gt;</a></div>
+            </h3>
+            <p>Scalar multiplication (scalar * <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">s&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Scalar value</td>
+                </tr>
+                <tr>
+                  <td>p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Scaled vector</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad0ec7c497e8e069992f9ff81b4ae24ae"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0ec7c497e8e069992f9ff81b4ae24ae" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> s)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_point_8h.html">&lt;Rodin/Geometry/Point.h&gt;</a></div>
+            </h3>
+            <p>Scalar multiplication (<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> * scalar).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></td>
+                </tr>
+                <tr>
+                  <td>s&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Scalar value</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Scaled vector</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a80fa59a2cf1bd92ab3263ec2d8bae01e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80fa59a2cf1bd92ab3263ec2d8bae01e" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a>&amp; p)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_8h.html">&lt;Rodin/Geometry/Polytope.h&gt;</a></div>
+            </h3>
+            <p>Stream output operator for polytope types.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Output stream</td>
+                </tr>
+                <tr>
+                  <td>p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> type to output</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a641d6332dbb2363dd4c605eea207d5d9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a641d6332dbb2363dd4c605eea207d5d9" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; lhs,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; rhs)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_8h.html">&lt;Rodin/Geometry/Polytope.h&gt;</a></div>
+            </h3>
+            <p>Equality comparison for polytopes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Left-hand side polytope</td>
+                </tr>
+                <tr>
+                  <td>rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Right-hand side polytope</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if polytopes are equal (same mesh, dimension, and index)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ace7ed49379e3cb490f7f63b7ac9335e7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace7ed49379e3cb490f7f63b7ac9335e7" class="m-doc-self">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; lhs,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; rhs)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_8h.html">&lt;Rodin/Geometry/Polytope.h&gt;</a></div>
+            </h3>
+            <p>Less-than comparison for polytopes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Left-hand side polytope</td>
+                </tr>
+                <tr>
+                  <td>rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Right-hand side polytope</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if lhs &lt; rhs (lexicographic order by dimension then index)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

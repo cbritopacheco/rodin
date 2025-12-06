@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -82,6 +89,8 @@
         <section id="subdirs">
           <h2><a href="#subdirs">Directories</a></h2>
           <dl class="m-doc">
+            <dt>directory <a href="dir_661522309736fe80800cd3cfb8ddb937.html" class="m-doc">Alert</a>/</dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_alert.html" class="m-doc">Rodin::<wbr />Alert</a>.</dd>
             <dt>directory <a href="dir_609b8253b7bf42d1aa344d32447168a8.html" class="m-doc">Assembly</a>/</dt>
             <dd>Namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::<wbr />Assembly</a>.</dd>
             <dt>directory <a href="dir_1526f74e52dc61ea8fbf2ff39ba6edac.html" class="m-doc">Context</a>/</dt>
@@ -115,12 +124,58 @@
         <section id="files">
           <h2><a href="#files">Files</a></h2>
           <dl class="m-doc">
+            <dt>file <a href="_alert_8h.html" class="m-doc">Alert.h</a></dt>
+            <dd>Main include file for the Alert module.</dd>
+            <dt>file <a href="_array_8h.html" class="m-doc">Array.h</a></dt>
+            <dd>Defines array types and utility functors for index arrays.</dd>
+            <dt>file <a href="_assembly_8h.html" class="m-doc">Assembly.h</a></dt>
+            <dd>Top level include for the <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::<wbr />Assembly</a> module.</dd>
+            <dt>file <a href="_cast_8h.html" class="m-doc">Cast.h</a></dt>
+            <dd>Defines the Cast template for type conversion operations.</dd>
+            <dt>file <a href="_rodin_2_common_8h.html" class="m-doc">Common.h</a></dt>
+            <dd>Common definitions and includes used throughout <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
             <dt>file <a href="_rodin_2_configure_8h_8in.html" class="m-doc">Configure.h.in</a></dt>
             <dd>Header containing preprocessor directives for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
+            <dt>file <a href="_context_8h.html" class="m-doc">Context.h</a></dt>
+            <dd>Top level include for the <a href="namespace_rodin_1_1_context.html" class="m-doc">Rodin::<wbr />Context</a> module.</dd>
+            <dt>file <a href="_copyable_8h.html" class="m-doc">Copyable.h</a></dt>
+            <dd>Defines the Copyable interface for polymorphic copying.</dd>
+            <dt>file <a href="_flat_set_8h.html" class="m-doc">FlatSet.h</a></dt>
+            <dd>Defines comparison and hash functors for IndexSet types.</dd>
+            <dt>file <a href="_form_language_8h.html" class="m-doc">FormLanguage.h</a></dt>
+            <dd>Top level include for the <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a> module.</dd>
+            <dt>file <a href="_rodin_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a></dt>
+            <dd>Forward declarations for core <a href="namespace_rodin.html" class="m-doc">Rodin</a> types.</dd>
             <dt>file <a href="_geometry_8h.html" class="m-doc">Geometry.h</a></dt>
             <dd>Top level include for the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a> utilities.</dd>
+            <dt>file <a href="_i_o_8h.html" class="m-doc">IO.h</a></dt>
+            <dd>Top level include for the <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::<wbr />IO</a> module.</dd>
+            <dt>file <a href="_math_8h.html" class="m-doc">Math.h</a></dt>
+            <dd>Top level include for the <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::<wbr />Math</a> module.</dd>
+            <dt>file <a href="_moveable_8h.html" class="m-doc">Moveable.h</a></dt>
+            <dd>Defines the Moveable interface for polymorphic move operations.</dd>
+            <dt>file <a href="_m_p_i_8h.html" class="m-doc">MPI.h</a></dt>
+            <dd>Top level include for the Rodin::MPI module.</dd>
+            <dt>file <a href="_pair_8h.html" class="m-doc">Pair.h</a></dt>
+            <dd>Defines the Pair class, a specialized two-element Tuple.</dd>
+            <dt>file <a href="_p_e_t_sc_8h.html" class="m-doc">PETSc.h</a></dt>
+            <dd>Top level include for the Rodin::PETSc module.</dd>
+            <dt>file <a href="_plot_8h.html" class="m-doc">Plot.h</a></dt>
+            <dd>Top level include for the <a href="namespace_rodin_1_1_plot.html" class="m-doc">Rodin::<wbr />Plot</a> module.</dd>
+            <dt>file <a href="_q_f_8h.html" class="m-doc">QF.h</a></dt>
+            <dd>Top level include for the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a> module.</dd>
+            <dt>file <a href="_solver_8h.html" class="m-doc">Solver.h</a></dt>
+            <dd>Main header for the Solver module.</dd>
+            <dt>file <a href="_test_8h.html" class="m-doc">Test.h</a></dt>
+            <dd>Top level include for the <a href="namespace_rodin_1_1_test.html" class="m-doc">Rodin::<wbr />Test</a> module.</dd>
             <dt>file <a href="_threads_8h.html" class="m-doc">Threads.h</a></dt>
-            <dd>Top level include for the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a> namespace.</dd>
+            <dd>Top level include for the <a href="namespace_rodin_1_1_threads.html" class="m-doc">Rodin::<wbr />Threads</a> module.</dd>
+            <dt>file <a href="_tuple_8h.html" class="m-doc">Tuple.h</a></dt>
+            <dd>Defines the Tuple class, an extended tuple implementation.</dd>
+            <dt>file <a href="_types_8h.html" class="m-doc">Types.h</a></dt>
+            <dd>Fundamental type definitions for the <a href="namespace_rodin.html" class="m-doc">Rodin</a> library.</dd>
+            <dt>file <a href="_utility_8h.html" class="m-doc">Utility.h</a></dt>
+            <dd>Top level include for the <a href="namespace_rodin_1_1_utility.html" class="m-doc">Rodin::<wbr />Utility</a> module.</dd>
             <dt>file <a href="_variational_8h.html" class="m-doc">Variational.h</a></dt>
             <dd>Top level include for the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a> namespace.</dd>
           </dl>

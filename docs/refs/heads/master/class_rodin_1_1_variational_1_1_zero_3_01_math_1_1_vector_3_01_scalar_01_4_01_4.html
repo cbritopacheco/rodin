@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Variational::Zero&lt;Math::Vector&lt;Scalar&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_zero_8h.html">&lt;Rodin/Variational/Zero.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Zero&lt;Math::Vector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+        </h1>
+        <p>Vector zero function.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Scalar</td>
+              <td>Scalar type for vector components</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Represents the constant zero vector function:</p><div class="m-math"><svg style="width: 9.571em; height: 1.245em;" viewBox="148.332912 -11.955168 91.877152 11.955168">
+<title>
+\[
+  \mathbf{f}(x) = \mathbf{0} \quad \forall x \in \Omega
+\]
+</title>
+<defs>
+<path id='eq1-g1-50' d='M6.551432-2.749689C6.75467-2.749689 6.969863-2.749689 6.969863-2.988792S6.75467-3.227895 6.551432-3.227895H1.482441C1.625903-4.829888 3.000747-5.977584 4.686426-5.977584H6.551432C6.75467-5.977584 6.969863-5.977584 6.969863-6.216687S6.75467-6.455791 6.551432-6.455791H4.662516C2.618182-6.455791 .992279-4.901619 .992279-2.988792S2.618182 .478207 4.662516 .478207H6.551432C6.75467 .478207 6.969863 .478207 6.969863 .239103S6.75467 0 6.551432 0H4.686426C3.000747 0 1.625903-1.147696 1.482441-2.749689H6.551432Z'/>
+<path id='eq1-g1-56' d='M6.587298-7.84259C6.647073-7.974097 6.647073-7.998007 6.647073-8.057783C6.647073-8.177335 6.551432-8.296887 6.40797-8.296887C6.252553-8.296887 6.180822-8.153425 6.133001-8.021918L5.140722-5.391781H1.506351L.514072-8.021918C.454296-8.18929 .394521-8.296887 .239103-8.296887C.119552-8.296887 0-8.177335 0-8.057783C0-8.033873 0-8.009963 .071731-7.84259L3.048568-.011955C3.108344 .155417 3.16812 .263014 3.323537 .263014C3.490909 .263014 3.53873 .131507 3.58655 .011955L6.587298-7.84259ZM1.697634-4.913574H4.94944L3.323537-.657534L1.697634-4.913574Z'/>
+<path id='eq1-g3-10' d='M7.914321-1.865006H7.651308C7.591532-1.554172 7.531756-1.243337 7.436115-.992279C7.376339-.800996 7.340473-.705355 6.647073-.705355H5.702615C5.846077-1.374844 6.192777-1.948692 6.682939-2.689913C7.244832-3.56264 7.79477-4.435367 7.79477-5.427646C7.79477-7.07746 6.216687-8.416438 4.220174-8.416438C2.211706-8.416438 .645579-7.065504 .645579-5.427646C.645579-4.447323 1.183562-3.58655 1.745455-2.713823C2.247572-1.936737 2.606227-1.374844 2.737733-.705355H1.793275C1.099875-.705355 1.06401-.800996 1.004234-.980324C.908593-1.231382 .848817-1.578082 .789041-1.865006H.526027L.908593 0H2.761644C3.024658 0 3.048568 0 3.048568-.215193C3.048568-1.06401 2.666002-2.10411 2.426899-2.713823C2.080199-3.658281 1.75741-4.531009 1.75741-5.439601C1.75741-7.280697 3.036613-8.177335 4.220174-8.177335S6.682939-7.280697 6.682939-5.439601C6.682939-4.531009 6.348194-3.634371 6.01345-2.749689C5.810212-2.175841 5.391781-1.075965 5.391781-.227148C5.391781 0 5.427646 0 5.69066 0H7.531756L7.914321-1.865006Z'/>
+<path id='eq1-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g2-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq1-g0-48' d='M6.180822-3.813699C6.180822-4.961395 6.180822-7.84259 3.359402-7.84259C.526027-7.84259 .526027-4.97335 .526027-3.813699C.526027-2.666002 .526027 .143462 3.347447 .143462S6.180822-2.630137 6.180822-3.813699ZM3.359402-.251059C2.976837-.251059 2.689913-.406476 2.450809-.657534C2.15193-.956413 1.960648-1.147696 1.960648-3.957161C1.960648-4.794022 1.960648-5.559153 2.056289-6.180822C2.223661-7.364384 3.084433-7.44807 3.347447-7.44807C3.730012-7.44807 4.471233-7.268742 4.638605-6.264508C4.746202-5.654795 4.746202-4.686426 4.746202-3.957161C4.746202-1.135741 4.566874-.968369 4.208219-.609714C3.969116-.37061 3.646326-.251059 3.359402-.251059Z'/>
+<path id='eq1-g0-102' d='M2.594271-4.794022H3.957161V-5.308095H2.534496V-6.539477C2.534496-7.782814 3.323537-7.974097 3.718057-7.974097C3.849564-7.974097 3.873474-7.962142 3.945205-7.938232C3.765878-7.81868 3.658281-7.615442 3.658281-7.364384C3.658281-6.886177 4.040847-6.670984 4.351681-6.670984C4.614695-6.670984 5.045081-6.850311 5.045081-7.376339C5.045081-7.866501 4.614695-8.368618 3.765878-8.368618C2.677958-8.368618 1.350934-7.914321 1.350934-6.527522V-5.308095H.466252V-4.794022H1.350934V-.514072H.526027V0C.800996-.02391 1.697634-.02391 2.032379-.02391C2.379078-.02391 3.347447-.02391 3.634371 0V-.514072H2.594271V-4.794022Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='148.332912' y='-2.988792' xlink:href='#eq1-g0-102'/>
+<use x='153.66708' y='-2.988792' xlink:href='#eq1-g3-40'/>
+<use x='158.219406' y='-2.988792' xlink:href='#eq1-g2-120'/>
+<use x='164.871493' y='-2.988792' xlink:href='#eq1-g3-41'/>
+<use x='172.744648' y='-2.988792' xlink:href='#eq1-g3-61'/>
+<use x='185.170129' y='-2.988792' xlink:href='#eq1-g0-48'/>
+<use x='203.850079' y='-2.988792' xlink:href='#eq1-g1-56'/>
+<use x='210.49186' y='-2.988792' xlink:href='#eq1-g2-120'/>
+<use x='220.464776' y='-2.988792' xlink:href='#eq1-g1-50'/>
+<use x='231.755744' y='-2.988792' xlink:href='#eq1-g3-10'/>
+</g>
+</svg></div><p>where <svg class="m-math" style="width: 3.576em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 34.328209 10.340659">
+<title>
+$ \mathbf{0} \in \mathbb{R}^d $
+</title>
+<defs>
+<path id='eq2-g1-82' d='M3.203985-3.753923H3.634371L5.427646-.980324C5.547198-.789041 5.834122-.32279 5.965629-.143462C6.049315 0 6.085181 0 6.360149 0H8.009963C8.225156 0 8.404483 0 8.404483-.215193C8.404483-.310834 8.332752-.394521 8.225156-.418431C7.782814-.514072 7.197011-1.303113 6.910087-1.685679C6.826401-1.80523 6.228643-2.594271 5.427646-3.88543C6.491656-4.076712 7.519801-4.531009 7.519801-5.953674C7.519801-7.615442 5.762391-8.18929 4.351681-8.18929H.597758C.382565-8.18929 .191283-8.18929 .191283-7.974097C.191283-7.770859 .418431-7.770859 .514072-7.770859C1.195517-7.770859 1.255293-7.687173 1.255293-7.089415V-1.099875C1.255293-.502117 1.195517-.418431 .514072-.418431C.418431-.418431 .191283-.418431 .191283-.215193C.191283 0 .382565 0 .597758 0H3.873474C4.088667 0 4.267995 0 4.267995-.215193C4.267995-.418431 4.064757-.418431 3.93325-.418431C3.251806-.418431 3.203985-.514072 3.203985-1.099875V-3.753923ZM5.511333-4.339726C5.846077-4.782067 5.881943-5.415691 5.881943-5.941719C5.881943-6.515567 5.810212-7.149191 5.427646-7.639352C5.917808-7.531756 7.10137-7.161146 7.10137-5.953674C7.10137-5.176588 6.742715-4.566874 5.511333-4.339726ZM3.203985-7.12528C3.203985-7.376339 3.203985-7.770859 3.945205-7.770859C4.961395-7.770859 5.463512-7.352428 5.463512-5.941719C5.463512-4.399502 5.092902-4.172354 3.203985-4.172354V-7.12528ZM1.578082-.418431C1.673724-.633624 1.673724-.968369 1.673724-1.075965V-7.113325C1.673724-7.232877 1.673724-7.555666 1.578082-7.770859H2.940971C2.785554-7.579577 2.785554-7.340473 2.785554-7.161146V-1.075965C2.785554-.956413 2.785554-.633624 2.881196-.418431H1.578082ZM4.124533-3.753923C4.208219-3.765878 4.25604-3.777833 4.351681-3.777833C4.531009-3.777833 4.794022-3.801743 4.97335-3.825654C5.152677-3.53873 6.443836-1.41071 7.436115-.418431H6.276463L4.124533-3.753923Z'/>
+<path id='eq2-g3-100' d='M4.28792-5.292154C4.29589-5.308095 4.319801-5.411706 4.319801-5.419676C4.319801-5.459527 4.28792-5.531258 4.192279-5.531258C4.160399-5.531258 3.913325-5.507347 3.730012-5.491407L3.283686-5.459527C3.108344-5.443587 3.028643-5.435616 3.028643-5.292154C3.028643-5.180573 3.140224-5.180573 3.235866-5.180573C3.618431-5.180573 3.618431-5.132752 3.618431-5.061021C3.618431-5.0132 3.55467-4.750187 3.514819-4.590785L3.124284-3.036613C3.052553-3.172105 2.82142-3.514819 2.335243-3.514819C1.3868-3.514819 .342715-2.406974 .342715-1.227397C.342715-.398506 .876712 .079701 1.490411 .079701C2.000498 .079701 2.438854-.326775 2.582316-.486177C2.725778 .063761 3.267746 .079701 3.363387 .079701C3.730012 .079701 3.913325-.223163 3.977086-.358655C4.136488-.645579 4.24807-1.107846 4.24807-1.139726C4.24807-1.187547 4.216189-1.243337 4.120548-1.243337S4.008966-1.195517 3.961146-.996264C3.849564-.557908 3.698132-.143462 3.387298-.143462C3.203985-.143462 3.132254-.294894 3.132254-.518057C3.132254-.669489 3.156164-.757161 3.180075-.860772L4.28792-5.292154ZM2.582316-.860772C2.183811-.310834 1.769365-.143462 1.514321-.143462C1.147696-.143462 .964384-.478207 .964384-.892653C.964384-1.267248 1.179577-2.12005 1.354919-2.470735C1.586052-2.956912 1.976588-3.291656 2.343213-3.291656C2.86127-3.291656 3.012702-2.709838 3.012702-2.614197C3.012702-2.582316 2.81345-1.801245 2.765629-1.594022C2.662017-1.219427 2.662017-1.203487 2.582316-.860772Z'/>
+<path id='eq2-g2-50' d='M6.551432-2.749689C6.75467-2.749689 6.969863-2.749689 6.969863-2.988792S6.75467-3.227895 6.551432-3.227895H1.482441C1.625903-4.829888 3.000747-5.977584 4.686426-5.977584H6.551432C6.75467-5.977584 6.969863-5.977584 6.969863-6.216687S6.75467-6.455791 6.551432-6.455791H4.662516C2.618182-6.455791 .992279-4.901619 .992279-2.988792S2.618182 .478207 4.662516 .478207H6.551432C6.75467 .478207 6.969863 .478207 6.969863 .239103S6.75467 0 6.551432 0H4.686426C3.000747 0 1.625903-1.147696 1.482441-2.749689H6.551432Z'/>
+<path id='eq2-g0-48' d='M6.180822-3.813699C6.180822-4.961395 6.180822-7.84259 3.359402-7.84259C.526027-7.84259 .526027-4.97335 .526027-3.813699C.526027-2.666002 .526027 .143462 3.347447 .143462S6.180822-2.630137 6.180822-3.813699ZM3.359402-.251059C2.976837-.251059 2.689913-.406476 2.450809-.657534C2.15193-.956413 1.960648-1.147696 1.960648-3.957161C1.960648-4.794022 1.960648-5.559153 2.056289-6.180822C2.223661-7.364384 3.084433-7.44807 3.347447-7.44807C3.730012-7.44807 4.471233-7.268742 4.638605-6.264508C4.746202-5.654795 4.746202-4.686426 4.746202-3.957161C4.746202-1.135741 4.566874-.968369 4.208219-.609714C3.969116-.37061 3.646326-.251059 3.359402-.251059Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-48'/>
+<use x='10.045611' y='0' xlink:href='#eq2-g2-50'/>
+<use x='21.336579' y='0' xlink:href='#eq2-g1-82'/>
+<use x='29.970892' y='-4.338437' xlink:href='#eq2-g3-100'/>
+</g>
+</svg> is the zero vector in <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+<title>
+$ d $
+</title>
+<defs>
+<path id='eq3-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-100'/>
+</g>
+</svg> dimensions.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;Scalar, Zero&lt;Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Base class for vector-valued functions defined on a mesh.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a7182aa32062b9b891caa98a604ed2e39">
+              using <a href="#a7182aa32062b9b891caa98a604ed2e39" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;
+            </dt>
+            <dd>Vector value type.</dd>
+            <dt id="ae9cdb023c034115b2f088eb5f4dad6d1">
+              using <a href="#ae9cdb023c034115b2f088eb5f4dad6d1" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;Scalar, <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&lt;<a href="#a7182aa32062b9b891caa98a604ed2e39" class="m-doc">VectorType</a>&gt;&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae1396d7f244f16ffcf41689f55a91810" class="m-doc">Zero</a>(</span><span class="m-doc-wrap">size_t d)</span>
+            </dt>
+            <dd>Constructor with dimension.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8f65ac658b217246b4e263a3e6d5f615" class="m-doc">Zero</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a7d0a8fe48bcbd0c5d64fe2d3956c7953" class="m-doc">Zero</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a675890103fc5046e2643105d62f1c79e" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) const -&gt; auto</span>
+            </dt>
+            <dd>Evaluates the zero vector function at a point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3ee7449f5240988536012653bd7ac62d" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a copy of this zero vector function.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae1396d7f244f16ffcf41689f55a91810"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae1396d7f244f16ffcf41689f55a91810" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+            </h3>
+            <p>Constructor with dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Dimension of the zero vector</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8f65ac658b217246b4e263a3e6d5f615"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f65ac658b217246b4e263a3e6d5f615" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a> vector function to copy from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7d0a8fe48bcbd0c5d64fe2d3956c7953"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d0a8fe48bcbd0c5d64fe2d3956c7953" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a> vector function to move from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a675890103fc5046e2643105d62f1c79e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a675890103fc5046e2643105d62f1c79e" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) const</span></span>
+            </h3>
+            <p>Evaluates the zero vector function at a point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a> vector of dimension m_d</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3ee7449f5240988536012653bd7ac62d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>* Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ee7449f5240988536012653bd7ac62d" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a copy of this zero vector function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to newly allocated copy</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

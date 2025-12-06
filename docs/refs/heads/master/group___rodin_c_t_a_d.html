@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html" id="m-navbar-current">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -80,60 +87,65 @@
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
-            <dt id="ga4d53c9d30faf316057b99ad31bee1330">
+            <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga4d53c9d30faf316057b99ad31bee1330" class="m-doc-self">BiCGSTAB</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; BiCGSTAB&lt; LinearSystem &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#ga4d53c9d30faf316057b99ad31bee1330" class="m-doc">BiCGSTAB</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; BiCGSTAB&lt; LinearSystem &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a>.</dd>
-            <dt id="gab2cd3974171a87110a0e8d64bafdc65c">
+            <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#gab2cd3974171a87110a0e8d64bafdc65c" class="m-doc-self">CG</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; CG&lt; LinearSystem &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gab2cd3974171a87110a0e8d64bafdc65c" class="m-doc">CG</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; CG&lt; LinearSystem &gt;</span>
             </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>.</dd>
-            <dt id="ga365e3216a730ebdf9735597fe2646cc2">
+            <dd>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga365e3216a730ebdf9735597fe2646cc2" class="m-doc-self">HouseholderQR</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; HouseholderQR&lt; LinearSystem &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#ga365e3216a730ebdf9735597fe2646cc2" class="m-doc">HouseholderQR</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; HouseholderQR&lt; LinearSystem &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a>.</dd>
-            <dt id="ga3e665bdc378fd1d20423701cc43b38b5">
+            <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga3e665bdc378fd1d20423701cc43b38b5" class="m-doc-self">LDLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; LDLT&lt; LinearSystem &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#ga3e665bdc378fd1d20423701cc43b38b5" class="m-doc">LDLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; LDLT&lt; LinearSystem &gt;</span>
             </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a>.</dd>
-            <dt id="gacc677f2e577625039f0ec3b2cbd8e875">
+            <dd>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ga2d356c2752479bc11ca4d1fecc8c1523" class="m-doc">LeastSquaresCG</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; LeastSquaresCG&lt; LinearSystem &gt;</span>
+            </dt>
+            <dd>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LinearSystemType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#gacc677f2e577625039f0ec3b2cbd8e875" class="m-doc-self">SimplicialLDLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystemType&gt;&amp;) -&gt; SimplicialLDLT&lt; LinearSystemType &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gacc677f2e577625039f0ec3b2cbd8e875" class="m-doc">SimplicialLDLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystemType&gt;&amp;) -&gt; SimplicialLDLT&lt; LinearSystemType &gt;</span>
             </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a>.</dd>
-            <dt id="gafd83b376ae0ce8ed1cc4c427a9ce3a95">
+            <dd>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#gafd83b376ae0ce8ed1cc4c427a9ce3a95" class="m-doc-self">SimplicialLLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; SimplicialLLT&lt; LinearSystem &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gafd83b376ae0ce8ed1cc4c427a9ce3a95" class="m-doc">SimplicialLLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; SimplicialLLT&lt; LinearSystem &gt;</span>
             </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a>.</dd>
-            <dt id="gaa79ec2f0c8bf2024a12478ada3521c43">
+            <dd>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#gaa79ec2f0c8bf2024a12478ada3521c43" class="m-doc-self">SparseLU</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; SparseLU&lt; LinearSystem &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gaa79ec2f0c8bf2024a12478ada3521c43" class="m-doc">SparseLU</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; SparseLU&lt; LinearSystem &gt;</span>
             </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a>.</dd>
-            <dt id="gaaf5ec4712f37187b3e164c090cbec9c9">
+            <dd>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#gaaf5ec4712f37187b3e164c090cbec9c9" class="m-doc-self">SparseQR</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; SparseQR&lt; LinearSystem &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gaaf5ec4712f37187b3e164c090cbec9c9" class="m-doc">SparseQR</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; SparseQR&lt; LinearSystem &gt;</span>
             </dt>
-            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a>.</dd>
+            <dd>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class FES, class FunctionDerived&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#ga97152a700d3aa2212408d0aa95d8380d" class="m-doc">DirichletBC</a>(</span><span class="m-doc-wrap">const TrialFunction&lt;Solution, FES&gt;&amp;,
               const FunctionBase&lt;FunctionDerived&gt;&amp;) -&gt; DirichletBC&lt; TrialFunction&lt; Solution, FES &gt;, FunctionBase&lt; FunctionDerived &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>.</dd>
-            <dt id="ga925edb02340abd3a62c685f49bf01191">
+            <dt>
               <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga925edb02340abd3a62c685f49bf01191" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const GridFunction&lt;FES, Data&gt;&amp;) -&gt; Grad&lt; GridFunction&lt; FES, Data &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#ga925edb02340abd3a62c685f49bf01191" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const GridFunction&lt;FES, Data&gt;&amp;) -&gt; Grad&lt; GridFunction&lt; FES, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
-            <dt id="ga891e0a7ae2783f1b6536a482897c58fc">
+            <dt>
               <div class="m-doc-template">template&lt;class NestedDerived, class FES, ShapeFunctionSpaceType Space&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga891e0a7ae2783f1b6536a482897c58fc" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const ShapeFunction&lt;NestedDerived, FES, Space&gt;&amp;) -&gt; Grad&lt; ShapeFunction&lt; NestedDerived, FES, Space &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#ga891e0a7ae2783f1b6536a482897c58fc" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const ShapeFunction&lt;NestedDerived, FES, Space&gt;&amp;) -&gt; Grad&lt; ShapeFunction&lt; NestedDerived, FES, Space &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
             <dt>
@@ -141,27 +153,37 @@
               <span class="m-doc-wrap-bumper"><a href="#ga1bd1a873841469d1f210e6c14c98b542" class="m-doc">LinearForm</a>(</span><span class="m-doc-wrap">const TestFunction&lt;FES&gt;&amp; v) -&gt; LinearForm&lt; FES, Math::Vector&lt; typename FormLanguage::Traits&lt; FES &gt;::ScalarType &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
-            <dt id="gadd536d27925aad7bf5ef3b07ec1a1dc5">
+            <dt>
               <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#gadd536d27925aad7bf5ef3b07ec1a1dc5" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Grad&lt; GridFunction&lt; P0&lt; Range, Mesh &gt;, Data &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gadd536d27925aad7bf5ef3b07ec1a1dc5" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Grad&lt; GridFunction&lt; P0&lt; Range, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
-            <dt id="ga164208e001d26ef5ecdb313b4cdea2ff">
+            <dt id="ga43dd5ee144eed5795b2ef177151cdd28">
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ga43dd5ee144eed5795b2ef177151cdd28" class="m-doc-self">P0</a>(</span><span class="m-doc-wrap">const Geometry::Mesh&lt;Context&gt;&amp;) -&gt; P0&lt; Real, Geometry::Mesh&lt; Context &gt; &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> from mesh - deduces to RealP0.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga164208e001d26ef5ecdb313b4cdea2ff" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap">size_t,
+              <span class="m-doc-wrap-bumper"><a href="#ga164208e001d26ef5ecdb313b4cdea2ff" class="m-doc">Derivative</a>(</span><span class="m-doc-wrap">size_t,
               const GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Derivative&lt; GridFunction&lt; P1&lt; Range, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
-            <dt id="ga58e9d391d18423707a5d53fdf29d55d8">
+            <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Data, class Mesh&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga58e9d391d18423707a5d53fdf29d55d8" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P1&lt; Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#ga58e9d391d18423707a5d53fdf29d55d8" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P1&lt; Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
-            <dt id="gae991a1cc48ead16fcb81cd6f9e4e3efc">
+            <dt>
               <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#gae991a1cc48ead16fcb81cd6f9e4e3efc" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Jacobian&lt; GridFunction&lt; P1&lt; Range, Mesh &gt;, Data &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gae991a1cc48ead16fcb81cd6f9e4e3efc" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Jacobian&lt; GridFunction&lt; P1&lt; Range, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dt id="ga63b4ffb105cdbc627ffe1883e3f319c5">
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ga63b4ffb105cdbc627ffe1883e3f319c5" class="m-doc-self">P1</a>(</span><span class="m-doc-wrap">const Geometry::Mesh&lt;Context&gt;&amp;) -&gt; P1&lt; Real, Geometry::Mesh&lt; Context &gt; &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> from mesh - deduces to RealP1.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#ga20c440bfc99b99b3439bf7f395d7ad53" class="m-doc">PeriodicBC</a>(</span><span class="m-doc-wrap">const TrialFunction&lt;Solution, FES&gt;&amp;,
@@ -172,8 +194,99 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ga4d53c9d30faf316057b99ad31bee1330"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_bi_c_g_s_t_a_b_8h.html">&lt;Rodin/Solver/BiCGSTAB.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga4d53c9d30faf316057b99ad31bee1330" class="m-doc-self">BiCGSTAB</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; BiCGSTAB&lt; LinearSystem &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="gab2cd3974171a87110a0e8d64bafdc65c"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_solver_2_c_g_8h.html">&lt;Rodin/Solver/CG.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gab2cd3974171a87110a0e8d64bafdc65c" class="m-doc-self">CG</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; CG&lt; LinearSystem &gt;</span></span>
+            </h3>
+            <p>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga365e3216a730ebdf9735597fe2646cc2"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_householder_q_r_8h.html">&lt;Rodin/Solver/HouseholderQR.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga365e3216a730ebdf9735597fe2646cc2" class="m-doc-self">HouseholderQR</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; HouseholderQR&lt; LinearSystem &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga3e665bdc378fd1d20423701cc43b38b5"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_l_d_l_t_8h.html">&lt;Rodin/Solver/LDLT.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga3e665bdc378fd1d20423701cc43b38b5" class="m-doc-self">LDLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; LDLT&lt; LinearSystem &gt;</span></span>
+            </h3>
+            <p>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga2d356c2752479bc11ca4d1fecc8c1523"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_least_squares_c_g_8h.html">&lt;Rodin/Solver/LeastSquaresCG.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga2d356c2752479bc11ca4d1fecc8c1523" class="m-doc-self">LeastSquaresCG</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; LeastSquaresCG&lt; LinearSystem &gt;</span></span>
+            </h3>
+            <p>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="gacc677f2e577625039f0ec3b2cbd8e875"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_simplicial_l_d_l_t_8h.html">&lt;Rodin/Solver/SimplicialLDLT.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearSystemType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gacc677f2e577625039f0ec3b2cbd8e875" class="m-doc-self">SimplicialLDLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystemType&gt;&amp;) -&gt; SimplicialLDLT&lt; LinearSystemType &gt;</span></span>
+            </h3>
+            <p>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="gafd83b376ae0ce8ed1cc4c427a9ce3a95"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_simplicial_l_l_t_8h.html">&lt;Rodin/Solver/SimplicialLLT.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gafd83b376ae0ce8ed1cc4c427a9ce3a95" class="m-doc-self">SimplicialLLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; SimplicialLLT&lt; LinearSystem &gt;</span></span>
+            </h3>
+            <p>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="gaa79ec2f0c8bf2024a12478ada3521c43"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sparse_l_u_8h.html">&lt;Rodin/Solver/SparseLU.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaa79ec2f0c8bf2024a12478ada3521c43" class="m-doc-self">SparseLU</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; SparseLU&lt; LinearSystem &gt;</span></span>
+            </h3>
+            <p>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="gaaf5ec4712f37187b3e164c090cbec9c9"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sparse_q_r_8h.html">&lt;Rodin/Solver/SparseQR.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaaf5ec4712f37187b3e164c090cbec9c9" class="m-doc-self">SparseQR</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; SparseQR&lt; LinearSystem &gt;</span></span>
+            </h3>
+            <p>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a>.</p>
+          </div></section>
           <section class="m-doc-details" id="ga97152a700d3aa2212408d0aa95d8380d"><div>
             <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_8h.html">&lt;Rodin/Variational/DirichletBC.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class Solution, class FES, class FunctionDerived&gt;
               </div>
@@ -193,8 +306,29 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ga925edb02340abd3a62c685f49bf01191"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_grad_8h.html">&lt;Rodin/Variational/Grad.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga925edb02340abd3a62c685f49bf01191" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const GridFunction&lt;FES, Data&gt;&amp;) -&gt; Grad&lt; GridFunction&lt; FES, Data &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga891e0a7ae2783f1b6536a482897c58fc"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_grad_8h.html">&lt;Rodin/Variational/Grad.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, ShapeFunctionSpaceType Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga891e0a7ae2783f1b6536a482897c58fc" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const ShapeFunction&lt;NestedDerived, FES, Space&gt;&amp;) -&gt; Grad&lt; ShapeFunction&lt; NestedDerived, FES, Space &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</p>
+          </div></section>
           <section class="m-doc-details" id="ga1bd1a873841469d1f210e6c14c98b542"><div>
             <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_linear_form_8h.html">&lt;Rodin/Variational/LinearForm.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
@@ -214,8 +348,50 @@
             </table>
 <p>The constructor taking a single <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a> reference deduces a <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a> with a default-constructed <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a> owned by the <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a> instance.</p>
           </div></section>
+          <section class="m-doc-details" id="gadd536d27925aad7bf5ef3b07ec1a1dc5"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0_2_grad_8h.html">&lt;Rodin/Variational/P0/Grad.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gadd536d27925aad7bf5ef3b07ec1a1dc5" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Grad&lt; GridFunction&lt; P0&lt; Range, Mesh &gt;, Data &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga164208e001d26ef5ecdb313b4cdea2ff"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_derivative_8h.html">&lt;Rodin/Variational/P1/Derivative.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga164208e001d26ef5ecdb313b4cdea2ff" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap">size_t,
+              const GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Derivative&lt; GridFunction&lt; P1&lt; Range, Mesh &gt;, Data &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga58e9d391d18423707a5d53fdf29d55d8"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_div_8h.html">&lt;Rodin/Variational/P1/Div.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga58e9d391d18423707a5d53fdf29d55d8" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P1&lt; Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="gae991a1cc48ead16fcb81cd6f9e4e3efc"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_jacobian_8h.html">&lt;Rodin/Variational/P1/Jacobian.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gae991a1cc48ead16fcb81cd6f9e4e3efc" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&amp;) -&gt; Jacobian&lt; GridFunction&lt; P1&lt; Range, Mesh &gt;, Data &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+          </div></section>
           <section class="m-doc-details" id="ga20c440bfc99b99b3439bf7f395d7ad53"><div>
             <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_periodic_b_c_8h.html">&lt;Rodin/Variational/PeriodicBC.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class Solution, class FES&gt;
               </div>

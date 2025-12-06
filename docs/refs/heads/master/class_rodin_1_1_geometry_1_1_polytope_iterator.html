@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -65,9 +72,187 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>PolytopeIterator <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_iterator_8h.html">&lt;Rodin/Geometry/PolytopeIterator.h&gt;</a></div>
         </h1>
-        <p>Represents an iterator over a set of polytopes of a mesh.</p>
-<aside class="m-note m-danger"><h4>Warning</h4><p>The <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> class is not thread safe, i.e. only one thread should have access to one particular instance of the iterator at a time.</p></aside>
+        <p>Iterator over general polytopes of specified dimension.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#autotoc_md81">Thread Safety</a></li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Provides iteration over polytopes of any dimension (0 for vertices, 1 for edges, etc.) in a mesh.</p><section id="autotoc_md81"><h2><a href="#autotoc_md81">Thread Safety</a></h2><p>Not thread-safe. Each thread should use its own iterator instance.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a>, <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>, <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a></p></aside></section>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase&lt;Polytope, PolytopeIterator&gt;</a>
+            </dt>
+            <dd>Base class template for polytope iterators.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a847b58f2cc10b713ed632c5d9999d959">
+              using <a href="#a847b58f2cc10b713ed632c5d9999d959" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase</a>&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a0eb66c7198bf9a94c9b15213592037ec">
+              <span class="m-doc-wrap-bumper"><a href="#a0eb66c7198bf9a94c9b15213592037ec" class="m-doc-self">PolytopeIterator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ad998387babd5d1b648d70d396702300c" class="m-doc">PolytopeIterator</a>(</span><span class="m-doc-wrap">size_t dimension,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
+              <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp;&amp; gen)</span>
+            </dt>
+            <dd>Constructs an iterator for polytopes of given dimension.</dd>
+            <dt id="a7c51e853b8babe5593088c20af1fd26f">
+              <span class="m-doc-wrap-bumper"><a href="#a7c51e853b8babe5593088c20af1fd26f" class="m-doc-self">PolytopeIterator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Copy constructor (deleted).</dd>
+            <dt id="ad6eecb04542a348f82b9bb4521d2d9c7">
+              <span class="m-doc-wrap-bumper"><a href="#ad6eecb04542a348f82b9bb4521d2d9c7" class="m-doc-self">PolytopeIterator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a1a1cccb47ca3d4128ab8df3a78dd394b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1a1cccb47ca3d4128ab8df3a78dd394b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp;</span>
+            </dt>
+            <dd>Move assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4b2a011ccfd1b14cd8b0cb630d18716b" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> it) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp;</span>
+            </dt>
+            <dd>Assigns from a <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af5f66a99bcf5ef378f648017b2cd04e1" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> it) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp;</span>
+            </dt>
+            <dd>Assigns from a <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac56fbd31d24fe4bb30910013c34ab7c9" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> it) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp;</span>
+            </dt>
+            <dd>Assigns from a <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a88aeef1d7305904dc868f687502964fb" class="m-doc">generate</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>* <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Generates a polytope at current position.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ad998387babd5d1b648d70d396702300c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad998387babd5d1b648d70d396702300c" class="m-doc-self">PolytopeIterator</a>(</span><span class="m-doc-wrap">size_t dimension,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
+              <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp;&amp; gen)</span></span>
+            </h3>
+            <p>Constructs an iterator for polytopes of given dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dimension&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension of polytopes to iterate</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> containing the polytopes</td>
+                </tr>
+                <tr>
+                  <td>gen&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Index generator for iteration order</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4b2a011ccfd1b14cd8b0cb630d18716b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4b2a011ccfd1b14cd8b0cb630d18716b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> it)</span></span>
+            </h3>
+            <p>Assigns from a <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">it&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a> iterator to convert from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af5f66a99bcf5ef378f648017b2cd04e1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f66a99bcf5ef378f648017b2cd04e1" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> it)</span></span>
+            </h3>
+            <p>Assigns from a <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">it&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a> iterator to convert from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac56fbd31d24fe4bb30910013c34ab7c9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac56fbd31d24fe4bb30910013c34ab7c9" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> it)</span></span>
+            </h3>
+            <p>Assigns from a <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">it&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> iterator to convert from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a88aeef1d7305904dc868f687502964fb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>* Rodin::<wbr />Geometry::<wbr />PolytopeIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88aeef1d7305904dc868f687502964fb" class="m-doc-self">generate</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Generates a polytope at current position.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to new <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -73,7 +80,9 @@
               Reference
               <ul>
                 <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#typedef-members">Typedefs</a></li>
                 <li><a href="#func-members">Functions</a></li>
+                <li><a href="#var-members">Variables</a></li>
               </ul>
             </li>
           </ul>
@@ -82,6 +91,26 @@
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_bottom_template.html" class="m-doc">Rodin::Utility::BottomTemplate</a>
+            </dt>
+            <dd>Metafunction to extract the innermost (bottom) type from nested templates.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;template&lt;class&gt; class T, class S&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_bottom_template_3_01_t_3_01_s_01_4_01_4.html" class="m-doc">Rodin::Utility::BottomTemplate&lt;T&lt;S&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for single-parameter template instantiations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class From, class To&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_cast.html" class="m-doc">Rodin::Utility::Cast</a>
+            </dt>
+            <dd>Template for defining type conversion operations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T, T Value_, class ... Args&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_dependent_value.html" class="m-doc">Rodin::Utility::DependentValue</a>
+            </dt>
+            <dd>Creates a type-dependent compile-time constant value.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class ...&gt;</div>
               struct <a href="struct_rodin_1_1_utility_1_1_extract.html" class="m-doc">Rodin::Utility::Extract</a>
@@ -93,10 +122,60 @@
             </dt>
             <dd>Specialization of <a href="struct_rodin_1_1_utility_1_1_extract.html" class="m-doc">Extract</a> for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> types.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;typename T, typename = void&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_has_type_member.html" class="m-doc">Rodin::Utility::HasTypeMember</a>
+            </dt>
+            <dd>Type trait to detect if a type has a nested Type member.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_has_type_member_3_01_t_00_01std_1_1void__t_3_01typename_01_t_1_1_type_01_4_01_4.html" class="m-doc">Rodin::Utility::HasTypeMember&lt;T, std::void_t&lt;typename T::Type&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for types that have a nested Type member.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T, typename = void&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_has_value_member.html" class="m-doc">Rodin::Utility::HasValueMember</a>
+            </dt>
+            <dd>Type trait to detect if a type has a nested Value member type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_has_value_member_3_01_t_00_01std_1_1void__t_3_01typename_01_t_1_1_value_01_4_01_4.html" class="m-doc">Rodin::Utility::HasValueMember&lt;T, std::void_t&lt;typename T::Value&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for types that have a nested Value member type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T, T... Is&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_integer_sequence.html" class="m-doc">Rodin::Utility::IntegerSequence</a>
+            </dt>
+            <dd>Represents a compile-time sequence of integers.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ...&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_is_one_of.html" class="m-doc">Rodin::Utility::IsOneOf</a>
+            </dt>
+            <dd>Type trait to check if a type is one of a specified list of types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename F, typename S, typename ... T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_is_one_of_3_01_f_00_01_s_00_01_t_8_8_8_01_4.html" class="m-doc">Rodin::Utility::IsOneOf&lt;F, S, T...&gt;</a>
+            </dt>
+            <dd>Specialization for non-empty type lists.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Test, template&lt;class...&gt; class Ref&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_is_specialization.html" class="m-doc">Rodin::Utility::IsSpecialization</a>
+            </dt>
+            <dd>Type trait to check if a type is a specialization of a given template.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;template&lt;class...&gt; class Ref, class... Args&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_is_specialization_3_01_ref_3_01_args_8_8_8_01_4_00_01_ref_01_4.html" class="m-doc">Rodin::Utility::IsSpecialization&lt;Ref&lt;Args...&gt;, Ref&gt;</a>
+            </dt>
+            <dd>Specialization for types that are specializations of the reference template.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
               struct <a href="struct_rodin_1_1_utility_1_1_make.html" class="m-doc">Rodin::Utility::Make</a>
             </dt>
             <dd>Factory template for perfect forwarding construction.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_optional_reference.html" class="m-doc">Rodin::Utility::OptionalReference</a>
+            </dt>
+            <dd>A wrapper providing optional reference semantics.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class... Ts&gt;</div>
               struct <a href="struct_rodin_1_1_utility_1_1_overloaded.html" class="m-doc">Rodin::Utility::Overloaded</a>
@@ -137,11 +216,116 @@
               class <a href="class_rodin_1_1_utility_1_1_parameter_pack.html" class="m-doc">Rodin::Utility::ParameterPack</a>
             </dt>
             <dd>Template metaprogramming utilities for parameter packs.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ...&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_product.html" class="m-doc">Rodin::Utility::Product</a>
+            </dt>
+            <dd>Metafunction to compute the Cartesian product of two <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> type-lists.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class H1, class H2, class ... Hs, class ... Gs&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_product_3_01_tuple_3_01_h1_00_01_h2_00_01_hs_8_8_8_01_4_00_01_tuple_3_01_gs_8_8_8_01_4_01_4.html" class="m-doc">Rodin::Utility::Product&lt;Tuple&lt;H1, H2, Hs...&gt;, Tuple&lt;Gs...&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with at least two elements (H1, H2, Hs…).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class H, class ... Gs&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_product_3_01_tuple_3_01_h_01_4_00_01_tuple_3_01_gs_8_8_8_01_4_01_4.html" class="m-doc">Rodin::Utility::Product&lt;Tuple&lt;H&gt;, Tuple&lt;Gs...&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with exactly one element.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Gs&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_product_3_01_tuple_3_4_00_01_tuple_3_01_gs_8_8_8_01_4_01_4.html" class="m-doc">Rodin::Utility::Product&lt;Tuple&lt;&gt;, Tuple&lt;Gs...&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for empty first <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Gs&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_product_3_01_tuple_3_01_gs_8_8_8_01_4_00_01_tuple_3_4_01_4.html" class="m-doc">Rodin::Utility::Product&lt;Tuple&lt;Gs...&gt;, Tuple&lt;&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for empty second <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t N, class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_repeat.html" class="m-doc">Rodin::Utility::Repeat</a>
+            </dt>
+            <dd>Metafunction to create a <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with N repetitions of type T.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_repeat_3_010_00_01_t_01_4.html" class="m-doc">Rodin::Utility::Repeat&lt;0, T&gt;</a>
+            </dt>
+            <dd>Specialization for N = 0.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_repeat_3_011_00_01_t_01_4.html" class="m-doc">Rodin::Utility::Repeat&lt;1, T&gt;</a>
+            </dt>
+            <dd>Specialization for N = 1.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_unwrap_reference.html" class="m-doc">Rodin::Utility::UnwrapReference</a>
+            </dt>
+            <dd>Metafunction to unwrap std::reference_wrapper types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class U&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_unwrap_reference_3_01std_1_1reference__wrapper_3_01_u_01_4_01_4.html" class="m-doc">Rodin::Utility::UnwrapReference&lt;std::reference_wrapper&lt;U&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for std::reference_wrapper.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_unwrap_ref_decay.html" class="m-doc">Rodin::Utility::UnwrapRefDecay</a>
+            </dt>
+            <dd>Combines decay and reference unwrapping.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ...&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_wrap.html" class="m-doc">Rodin::Utility::Wrap</a>
+            </dt>
+            <dd>Metafunction to wrap all types in a <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with an external template.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
+              class <a href="class_rodin_1_1_utility_1_1_wrap_3_01_tuple_3_01_ts_8_8_8_01_4_01_4.html" class="m-doc">Rodin::Utility::Wrap&lt;Tuple&lt;Ts...&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ...&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_zip.html" class="m-doc">Rodin::Utility::Zip</a>
+            </dt>
+            <dd>Metafunction to combine two Tuples element-wise using a binary template.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Ts, class ... Gs&gt;</div>
+              struct <a href="struct_rodin_1_1_utility_1_1_zip_3_01_tuple_3_01_ts_8_8_8_01_4_00_01_tuple_3_01_gs_8_8_8_01_4_01_4.html" class="m-doc">Rodin::Utility::Zip&lt;Tuple&lt;Ts...&gt;, Tuple&lt;Gs...&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for two Tuples.</dd>
+          </dl>
+        </section>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              using <a href="#ga2869e5666ab4bc0c94d41a864445e344" class="m-doc">IsCompleteType</a> = decltype(Internal::IsCompleteTypeImpl(std::declval&lt;T*&gt;()))
+            </dt>
+            <dd>Type trait to detect if a type is complete (fully defined).</dd>
           </dl>
         </section>
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class F, class... Args&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#ga70d53718c88191ddecca0580b2eef9fa" class="m-doc">For</a>(</span><span class="m-doc-wrap">F&amp;&amp; f,
+              Args &amp;&amp; ... args) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Performs the application of a function over all arguments.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t N, class F&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#gaca33b1bb8b9d6d091e503107e6b712bd" class="m-doc">ForIndex</a>(</span><span class="m-doc-wrap">F&amp;&amp; f) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Executes a function N times with compile-time index access.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T, std::size_t = sizeof(T)&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga587f3c5aae55bafdc1bfb919f2460b72" class="m-doc">IsCompleteTypeImpl</a>(</span><span class="m-doc-wrap">T*) -&gt; std::true_type</span>
+            </dt>
+            <dd>Helper function for IsCompleteType detection (complete type case).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga6610b3bd9182e9cd6a293e724c24f5c7" class="m-doc">IsCompleteTypeImpl</a>(</span><span class="m-doc-wrap">...) -&gt; std::false_type</span>
+            </dt>
+            <dd>Helper function for IsCompleteType detection (incomplete type case).</dd>
             <dt>
               <div class="m-doc-template">template&lt;class... Ts&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#ga210e41a5c31edb45b12dd3d31f4a9a9e" class="m-doc">Overloaded</a>(</span><span class="m-doc-wrap">Ts...) -&gt; Overloaded&lt; Ts... &gt;</span>
@@ -149,10 +333,148 @@
             <dd>Deduction guide for <a href="struct_rodin_1_1_utility_1_1_overloaded.html" class="m-doc">Overloaded</a>.</dd>
           </dl>
         </section>
+        <section id="var-members">
+          <h2><a href="#var-members">Variables</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class...&gt;</div>
+              bool <a href="#ga8e52dff28b2ca5d4d1a6117aa7fbfbc3" class="m-doc">False</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Dependent false value for use in static_assert within template contexts.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="ga2869e5666ab4bc0c94d41a864445e344"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_is_complete_type_8h.html">&lt;Rodin/Utility/IsCompleteType.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              using <a href="#ga2869e5666ab4bc0c94d41a864445e344" class="m-doc-self">IsCompleteType</a> = decltype(Internal::IsCompleteTypeImpl(std::declval&lt;T*&gt;()))
+            </h3>
+            <p>Type trait to detect if a type is complete (fully defined).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>The type to check.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>A type is complete if its size is known (i.e., it has been fully defined). Incomplete types include forward declarations and array types of unknown bound.</p><p>This trait is useful for SFINAE-based conditional compilation when different behavior is needed for complete vs. incomplete types.</p><p>Example usage:</p><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">Complete</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Incomplete</span><span class="p">;</span>
+
+<span class="k">static_assert</span><span class="p">(</span><span class="n">IsCompleteType</span><span class="o">&lt;</span><span class="n">Complete</span><span class="o">&gt;::</span><span class="n">value</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">IsCompleteType</span><span class="o">&lt;</span><span class="n">Incomplete</span><span class="o">&gt;::</span><span class="n">value</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span></pre>
+          </div></section>
+        </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ga70d53718c88191ddecca0580b2eef9fa"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_for_constexpr_8h.html">&lt;Rodin/Utility/ForConstexpr.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class F, class... Args&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga70d53718c88191ddecca0580b2eef9fa" class="m-doc-self">For</a>(</span><span class="m-doc-wrap">F&amp;&amp; f,
+              Args &amp;&amp; ... args) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Performs the application of a function over all arguments.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">F</td>
+                  <td>The callable type.</td>
+                </tr>
+                <tr>
+                  <td>Args</td>
+                  <td>The argument types.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>f</td>
+                  <td>The function to apply.</td>
+                </tr>
+                <tr>
+                  <td>args</td>
+                  <td>The arguments to apply the function to.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This function uses fold expressions to apply the callable <code>f</code> to each argument in <code>args</code> in sequence. Useful for compile-time iteration over heterogeneous argument packs.</p><p>Example usage:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">printer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">auto</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<span class="n">Utility</span><span class="o">::</span><span class="n">For</span><span class="p">(</span><span class="n">printer</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">);</span>
+<span class="c1">// Output: 1 2.5 hello</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="gaca33b1bb8b9d6d091e503107e6b712bd"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_for_constexpr_8h.html">&lt;Rodin/Utility/ForConstexpr.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;size_t N, class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaca33b1bb8b9d6d091e503107e6b712bd" class="m-doc-self">ForIndex</a>(</span><span class="m-doc-wrap">F&amp;&amp; f) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Executes a function N times with compile-time index access.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">N</td>
+                  <td>Number of times to execute the function.</td>
+                </tr>
+                <tr>
+                  <td>F</td>
+                  <td>Callable type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>f</td>
+                  <td>Function to execute; receives an object with a <code>v.value</code> member for each iteration.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This utility enables compile-time loops where the loop index is available as a compile-time constant.</p><p>Example usage:</p><pre class="m-code"><span class="n">Utility</span><span class="o">::</span><span class="n">ForIndex</span><span class="o">&lt;</span><span class="mi">5</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">  </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="w"> </span><span class="n">i</span><span class="p">){</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+<span class="c1">// Output: 0 1 2 3 4</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="ga587f3c5aae55bafdc1bfb919f2460b72"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_is_complete_type_8h.html">&lt;Rodin/Utility/IsCompleteType.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class T, std::size_t = sizeof(T)&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::true_type </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga587f3c5aae55bafdc1bfb919f2460b72" class="m-doc-self">IsCompleteTypeImpl</a>(</span><span class="m-doc-wrap">T*)</span></span>
+            </h3>
+            <p>Helper function for IsCompleteType detection (complete type case).</p>
+<p>This overload is selected when sizeof(T) is valid, indicating T is complete.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga6610b3bd9182e9cd6a293e724c24f5c7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::false_type </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga6610b3bd9182e9cd6a293e724c24f5c7" class="m-doc-self">IsCompleteTypeImpl</a>(</span><span class="m-doc-wrap">...)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_is_complete_type_8h.html">&lt;Rodin/Utility/IsCompleteType.h&gt;</a></div>
+            </h3>
+            <p>Helper function for IsCompleteType detection (incomplete type case).</p>
+<p>This fallback overload is selected when sizeof(T) is not valid.</p>
+          </div></section>
           <section class="m-doc-details" id="ga210e41a5c31edb45b12dd3d31f4a9a9e"><div>
             <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_overloaded_8h.html">&lt;Rodin/Utility/Overloaded.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class... Ts&gt;
               </div>
@@ -171,6 +493,30 @@
               </tbody>
             </table>
 <p>This deduction guide allows the compiler to automatically deduce the template parameters when constructing an <a href="struct_rodin_1_1_utility_1_1_overloaded.html" class="m-doc">Overloaded</a> object from a set of callable objects.</p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="ga8e52dff28b2ca5d4d1a6117aa7fbfbc3"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_false_8h.html">&lt;Rodin/Utility/False.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class...&gt;
+              </div>
+              bool <a href="#ga8e52dff28b2ca5d4d1a6117aa7fbfbc3" class="m-doc-self">False</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Dependent false value for use in static_assert within template contexts.</p>
+<p>This utility provides a way to create a <code>static_assert(false, ...)</code> that only triggers when a template is actually instantiated, rather than when it is parsed. This is essential for implementing proper error messages in template specializations that should never be instantiated.</p><p>Example usage:</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">MyStruct</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">static_assert</span><span class="p">(</span><span class="n">Utility</span><span class="o">::</span><span class="n">False</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;This template should not be instantiated&quot;</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">MyStruct</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// Valid specialization</span>
+<span class="p">};</span></pre>
           </div></section>
         </section>
       </div>

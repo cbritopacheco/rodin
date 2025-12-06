@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -74,6 +81,7 @@
               Reference
               <ul>
                 <li><a href="#subdirs">Directories</a></li>
+                <li><a href="#files">Files</a></li>
               </ul>
             </li>
           </ul>
@@ -83,6 +91,55 @@
           <dl class="m-doc">
             <dt>directory <a href="dir_060030a60d114509cca2273f0b4fd0ec.html" class="m-doc">Euclidean</a>/</dt>
             <dd>Namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Euclidean</a>.</dd>
+          </dl>
+        </section>
+        <section id="files">
+          <h2><a href="#files">Files</a></h2>
+          <dl class="m-doc">
+            <dt>file <a href="_attribute_index_8h.html" class="m-doc">AttributeIndex.h</a></dt>
+            <dd>Attribute indexing for mesh polytopes.</dd>
+            <dt>file <a href="_balanced_compact_partitioner_8h.html" class="m-doc">BalancedCompactPartitioner.h</a></dt>
+            <dd>Balanced compact partitioning strategy for mesh decomposition.</dd>
+            <dt>file <a href="_geometry_2_connectivity_8h.html" class="m-doc">Connectivity.h</a></dt>
+            <dd>Mesh connectivity for representing topological relationships.</dd>
+            <dt>file <a href="_euclidean_8h.html" class="m-doc">Euclidean.h</a></dt>
+            <dd>Euclidean geometry utilities for the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a> module.</dd>
+            <dt>file <a href="_rodin_2_geometry_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a></dt>
+            <dd>Forward declarations for the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a> module.</dd>
+            <dt>file <a href="_geometry_indexed_8h.html" class="m-doc">GeometryIndexed.h</a></dt>
+            <dd>Container for mapping polytope types to associated data.</dd>
+            <dt>file <a href="_greedy_partitioner_8h.html" class="m-doc">GreedyPartitioner.h</a></dt>
+            <dd>Greedy partitioning strategy for mesh decomposition.</dd>
+            <dt>file <a href="_identity_transformation_8h.html" class="m-doc">IdentityTransformation.h</a></dt>
+            <dd>Identity transformation for polytopes.</dd>
+            <dt>file <a href="_index_generator_8h.html" class="m-doc">IndexGenerator.h</a></dt>
+            <dd>Index generation utilities for iterating over polytope indices.</dd>
+            <dt>file <a href="_isoparametric_transformation_8h.html" class="m-doc">IsoparametricTransformation.h</a></dt>
+            <dd>Isoparametric transformation for finite elements.</dd>
+            <dt>file <a href="_geometry_2_mesh_8h.html" class="m-doc">Mesh.h</a></dt>
+            <dd>Core mesh data structure for finite element computations.</dd>
+            <dt>file <a href="_geometry_2_mesh_partitioner_8h.html" class="m-doc">MeshPartitioner.h</a></dt>
+            <dd>Base interface for mesh partitioning algorithms.</dd>
+            <dt>file <a href="_point_8h.html" class="m-doc">Point.h</a></dt>
+            <dd>Spatial points on mesh polytopes with reference and physical coordinates.</dd>
+            <dt>file <a href="_polytope_8h.html" class="m-doc">Polytope.h</a></dt>
+            <dd>Polytope classes representing geometric elements in finite element meshes.</dd>
+            <dt>file <a href="_polytope_iterator_8h.html" class="m-doc">PolytopeIterator.h</a></dt>
+            <dd>Iterator classes for traversing mesh polytopes.</dd>
+            <dt>file <a href="_polytope_transformation_8h.html" class="m-doc">PolytopeTransformation.h</a></dt>
+            <dd>Base class for polytope geometric transformations.</dd>
+            <dt>file <a href="_polytope_transformation_index_8h.html" class="m-doc">PolytopeTransformationIndex.h</a></dt>
+            <dd>Index for storing polytope transformations.</dd>
+            <dt>file <a href="_region_8h.html" class="m-doc">Region.h</a></dt>
+            <dd>Region enumeration for identifying mesh subregions.</dd>
+            <dt>file <a href="_shard_8h.html" class="m-doc">Shard.h</a></dt>
+            <dd>Advanced mesh shard with ghost polytope tracking for distributed computing.</dd>
+            <dt>file <a href="_geometry_2_sharder_8h.html" class="m-doc">Sharder.h</a></dt>
+            <dd>Sharder interface for mesh decomposition.</dd>
+            <dt>file <a href="_sub_mesh_8h.html" class="m-doc">SubMesh.h</a></dt>
+            <dd>SubMesh class for representing subregions of meshes with parent relationships.</dd>
+            <dt>file <a href="_geometry_2_types_8h.html" class="m-doc">Types.h</a></dt>
+            <dd>Type definitions for the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a> module.</dd>
           </dl>
         </section>
       </div>

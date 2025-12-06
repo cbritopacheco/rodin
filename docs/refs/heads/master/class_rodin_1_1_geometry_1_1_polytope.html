@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -65,11 +72,15 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Polytope <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_8h.html">&lt;Rodin/Geometry/Polytope.h&gt;</a></div>
         </h1>
         <p>Base class for all geometric elements in finite element meshes.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
+            <li><a href="#autotoc_md76">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md77">Hierarchy</a></li>
+            <li><a href="#autotoc_md78">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -82,27 +93,110 @@
             </li>
           </ul>
         </nav>
-<p>A <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> represents a geometric entity in a finite element mesh, ranging from vertices (0D) to cells (highest dimension). Polytopes are the building blocks of mesh topology and provide the geometric foundation for finite element computations.</p>
+<p>A <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> represents a geometric entity in a finite element mesh, ranging from vertices (0D) to cells (highest dimension). Polytopes are the building blocks of mesh topology and provide the geometric foundation for finite element computations.</p><section id="autotoc_md76"><h2><a href="#autotoc_md76">Mathematical Foundation</a></h2><p>Each polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
+<title>
+$ \tau $
+</title>
+<defs>
+<path id='eq1-g0-28' d='M3.431133-4.507098H5.415691C5.571108-4.507098 5.965629-4.507098 5.965629-4.889664C5.965629-5.152677 5.738481-5.152677 5.523288-5.152677H2.235616C1.960648-5.152677 1.554172-5.152677 1.004234-4.566874C.6934-4.220174 .310834-3.58655 .310834-3.514819S.37061-3.419178 .442341-3.419178C.526027-3.419178 .537983-3.455044 .597758-3.526775C1.219427-4.507098 1.841096-4.507098 2.139975-4.507098H3.132254L1.888917-.406476C1.829141-.227148 1.829141-.203238 1.829141-.167372C1.829141-.035866 1.912827 .131507 2.15193 .131507C2.52254 .131507 2.582316-.191283 2.618182-.37061L3.431133-4.507098Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-28'/>
+</g>
+</svg> in a mesh <svg class="m-math" style="width: 1.187em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169354 11.391224 9.962617">
+<title>
+$ \mathcal{T}_h $
+</title>
+<defs>
+<path id='eq2-g1-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
+<path id='eq2-g0-84' d='M5.810212-7.424159H7.79477C9.372852-7.424159 9.97061-8.332752 9.97061-8.488169C9.97061-8.547945 9.92279-8.571856 9.863014-8.571856C9.731507-8.571856 9.420672-8.452304 9.121793-8.237111C9.026152-8.16538 9.002242-8.16538 8.775093-8.16538H3.550685C2.068244-8.16538 .406476-6.886177 .406476-5.905853C.406476-5.834122 .406476-5.762391 .502117-5.762391C.789041-5.762391 1.542217-6.156912 1.566127-6.443836C1.578082-6.647073 1.601993-6.874222 1.841096-7.185056C1.960648-7.328518 2.056289-7.424159 2.582316-7.424159H4.961395C4.758157-7.292653 4.710336-7.113325 4.686426-6.993773L3.323537-1.578082C3.180075-.992279 2.929016-.239103 2.582316 .537983C2.510585 .681445 2.510585 .705355 2.510585 .729265C2.510585 .800996 2.558406 .812951 2.618182 .812951C2.857285 .812951 3.443088 .490162 3.622416 .239103C3.694147 .119552 4.220174-1.099875 4.471233-2.092154L5.810212-7.424159Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-84'/>
+<use x='6.511315' y='1.793263' xlink:href='#eq2-g1-104'/>
+</g>
+</svg> has:</p><ul><li>A dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+<title>
+$ d $
+</title>
+<defs>
+<path id='eq3-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-100'/>
+</g>
+</svg> (0 for vertices, 1 for edges, etc.)</li><li>An index <svg class="m-math" style="width: 0.416em; height: 0.816em; vertical-align: -0.000em;" viewBox="0 -7.837689 3.993432 7.837689">
+<title>
+$ i $
+</title>
+<defs>
+<path id='eq4-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-105'/>
+</g>
+</svg> unique within its dimension</li><li>An associated reference element <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<title>
+$ K $
+</title>
+<defs>
+<path id='eq5-g0-75' d='M5.977584-4.829888C5.965629-4.865753 5.917808-4.961395 5.917808-4.99726C5.917808-5.009215 5.929763-5.021171 6.133001-5.176588L7.292653-6.085181C8.894645-7.328518 9.420672-7.746949 10.245579-7.81868C10.329265-7.830635 10.448817-7.830635 10.448817-8.033873C10.448817-8.105604 10.412951-8.16538 10.31731-8.16538C10.185803-8.16538 10.042341-8.141469 9.910834-8.141469H9.456538C9.085928-8.141469 8.691407-8.16538 8.332752-8.16538C8.249066-8.16538 8.105604-8.16538 8.105604-7.950187C8.105604-7.830635 8.18929-7.81868 8.261021-7.81868C8.392528-7.806725 8.547945-7.758904 8.547945-7.591532C8.547945-7.352428 8.18929-7.065504 8.093649-6.993773L3.407223-3.347447L4.399502-7.292653C4.507098-7.699128 4.531009-7.81868 5.379826-7.81868C5.606974-7.81868 5.71457-7.81868 5.71457-8.045828C5.71457-8.16538 5.595019-8.16538 5.535243-8.16538C5.32005-8.16538 5.068991-8.141469 4.841843-8.141469H3.431133C3.21594-8.141469 2.952927-8.16538 2.737733-8.16538C2.642092-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.618182-7.81868 2.797509-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.567621 3.526775-7.49589 3.478954-7.316563L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .657534 0 .729265 0C.956413 0 1.195517-.02391 1.422665-.02391H2.82142C3.048568-.02391 3.299626 0 3.526775 0C3.622416 0 3.753923 0 3.753923-.227148C3.753923-.3467 3.646326-.3467 3.466999-.3467C2.737733-.3467 2.737733-.442341 2.737733-.561893C2.737733-.645579 2.809465-.944458 2.857285-1.135741L3.323537-2.988792L5.140722-4.411457C5.487422-3.646326 6.121046-2.116065 6.611208-.944458C6.647073-.872727 6.670984-.800996 6.670984-.71731C6.670984-.358655 6.192777-.3467 6.085181-.3467S5.858032-.3467 5.858032-.119552C5.858032 0 5.989539 0 6.025405 0C6.443836 0 6.886177-.02391 7.304608-.02391H7.878456C8.057783-.02391 8.261021 0 8.440349 0C8.51208 0 8.643587 0 8.643587-.227148C8.643587-.3467 8.53599-.3467 8.416438-.3467C7.974097-.358655 7.81868-.454296 7.639352-.884682L5.977584-4.829888Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-75'/>
+</g>
+</svg></li><li>A transformation <svg class="m-math" style="width: 5.456em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 52.378889 8.169366">
+<title>
+$ x: K \rightarrow \tau $
+</title>
+<defs>
+<path id='eq6-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq6-g2-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
+<path id='eq6-g1-28' d='M3.431133-4.507098H5.415691C5.571108-4.507098 5.965629-4.507098 5.965629-4.889664C5.965629-5.152677 5.738481-5.152677 5.523288-5.152677H2.235616C1.960648-5.152677 1.554172-5.152677 1.004234-4.566874C.6934-4.220174 .310834-3.58655 .310834-3.514819S.37061-3.419178 .442341-3.419178C.526027-3.419178 .537983-3.455044 .597758-3.526775C1.219427-4.507098 1.841096-4.507098 2.139975-4.507098H3.132254L1.888917-.406476C1.829141-.227148 1.829141-.203238 1.829141-.167372C1.829141-.035866 1.912827 .131507 2.15193 .131507C2.52254 .131507 2.582316-.191283 2.618182-.37061L3.431133-4.507098Z'/>
+<path id='eq6-g1-75' d='M5.977584-4.829888C5.965629-4.865753 5.917808-4.961395 5.917808-4.99726C5.917808-5.009215 5.929763-5.021171 6.133001-5.176588L7.292653-6.085181C8.894645-7.328518 9.420672-7.746949 10.245579-7.81868C10.329265-7.830635 10.448817-7.830635 10.448817-8.033873C10.448817-8.105604 10.412951-8.16538 10.31731-8.16538C10.185803-8.16538 10.042341-8.141469 9.910834-8.141469H9.456538C9.085928-8.141469 8.691407-8.16538 8.332752-8.16538C8.249066-8.16538 8.105604-8.16538 8.105604-7.950187C8.105604-7.830635 8.18929-7.81868 8.261021-7.81868C8.392528-7.806725 8.547945-7.758904 8.547945-7.591532C8.547945-7.352428 8.18929-7.065504 8.093649-6.993773L3.407223-3.347447L4.399502-7.292653C4.507098-7.699128 4.531009-7.81868 5.379826-7.81868C5.606974-7.81868 5.71457-7.81868 5.71457-8.045828C5.71457-8.16538 5.595019-8.16538 5.535243-8.16538C5.32005-8.16538 5.068991-8.141469 4.841843-8.141469H3.431133C3.21594-8.141469 2.952927-8.16538 2.737733-8.16538C2.642092-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.618182-7.81868 2.797509-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.567621 3.526775-7.49589 3.478954-7.316563L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .657534 0 .729265 0C.956413 0 1.195517-.02391 1.422665-.02391H2.82142C3.048568-.02391 3.299626 0 3.526775 0C3.622416 0 3.753923 0 3.753923-.227148C3.753923-.3467 3.646326-.3467 3.466999-.3467C2.737733-.3467 2.737733-.442341 2.737733-.561893C2.737733-.645579 2.809465-.944458 2.857285-1.135741L3.323537-2.988792L5.140722-4.411457C5.487422-3.646326 6.121046-2.116065 6.611208-.944458C6.647073-.872727 6.670984-.800996 6.670984-.71731C6.670984-.358655 6.192777-.3467 6.085181-.3467S5.858032-.3467 5.858032-.119552C5.858032 0 5.989539 0 6.025405 0C6.443836 0 6.886177-.02391 7.304608-.02391H7.878456C8.057783-.02391 8.261021 0 8.440349 0C8.51208 0 8.643587 0 8.643587-.227148C8.643587-.3467 8.53599-.3467 8.416438-.3467C7.974097-.358655 7.81868-.454296 7.639352-.884682L5.977584-4.829888Z'/>
+<path id='eq6-g1-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g1-120'/>
+<use x='9.972917' y='0' xlink:href='#eq6-g2-58'/>
+<use x='16.545407' y='0' xlink:href='#eq6-g1-75'/>
+<use x='30.683916' y='0' xlink:href='#eq6-g0-33'/>
+<use x='45.959948' y='0' xlink:href='#eq6-g1-28'/>
+</g>
+</svg> mapping reference to physical coordinates</li></ul></section><section id="autotoc_md77"><h2><a href="#autotoc_md77">Hierarchy</a></h2><p>The <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> class serves as the base for specialized classes:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>: Highest-dimensional elements (e.g., tetrahedra in 3D, triangles in 2D)</li><li><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>: Codimension-1 elements (e.g., triangles in 3D, edges in 2D)</li><li><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>: 0-dimensional points</li></ul></section><section id="autotoc_md78"><h2><a href="#autotoc_md78">Usage</a></h2><p>Polytopes are typically obtained through iterators:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Cell</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Cell &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cell</span><span class="p">.</span><span class="n">getIndex</span><span class="p">()</span><span class="w"> </span>
+<span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; has measure &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cell</span><span class="p">.</span><span class="n">getMeasure</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>, <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>, <a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>, <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a></p></aside></section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>
             </dt>
-            <dd>Class for representing polytopes of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</dd>
+            <dd>Represents a cell (highest-dimensional element) in a mesh.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>
             </dt>
-            <dd>Class for representing elements of codimension 1 in the mesh, i.e. triangles in 3D or lines in 2D.</dd>
+            <dd>Represents a face (codimension-1 element) in a mesh.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>
             </dt>
-            <dd>Represents a vertex of the mesh.</dd>
+            <dd>Represents a vertex (0-dimensional element) in a mesh.</dd>
           </dl>
         </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_polytope_1_1_project.html" class="m-doc">Project</a>
+            </dt>
+            <dd>Projection operations for polytope sub-entities.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_polytope_1_1_traits.html" class="m-doc">Traits</a>
+            </dt>
+            <dd>Geometric traits for polytope types.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a> { </span><span class="m-doc-wrap"><a href="#a1d1cfd8ffb84e947f82999c682b666a7a2a3cd5946cfd317eb99c3d32e35e2d4c" class="m-doc">Point</a>,
               <a href="#a1d1cfd8ffb84e947f82999c682b666a7a4b77e2a9d8e9cfc299f504b32d6e3d2b" class="m-doc">Segment</a>,
@@ -117,62 +211,102 @@
         <section id="pub-static-attribs">
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
-            <dt id="a577c2d3d349d14811f817a2e49ac6afa">
-              static std::array&lt;<a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a>, 6&gt; <a href="#a577c2d3d349d14811f817a2e49ac6afa" class="m-doc-self">Types</a> <span class="m-label m-flat m-primary">constexpr</span>
+            <dt>
+              static std::array&lt;<a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a>, 6&gt; <a href="#a577c2d3d349d14811f817a2e49ac6afa" class="m-doc">Types</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Iterable of possible polytope geometry types.</dd>
+            <dd>Array of all supported polytope types.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a7969bd543fe55f27ba2bcb045b73b7e2">
-              <span class="m-doc-wrap-bumper"><a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap">size_t dimension,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index,
               const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh)</span>
             </dt>
-            <dd>Consructs a polytope of dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
-<title>
-$ d $
-</title>
-<defs>
-<path id='eq1-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
-</defs>
-<g id='eq1-page1'>
-<use x='0' y='0' xlink:href='#eq1-g0-100'/>
-</g>
-</svg> and index <svg class="m-math" style="width: 0.416em; height: 0.816em; vertical-align: -0.000em;" viewBox="0 -7.837689 3.993432 7.837689">
-<title>
-$ i $
-</title>
-<defs>
-<path id='eq2-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
-</defs>
-<g id='eq2-page1'>
-<use x='0' y='0' xlink:href='#eq2-g0-105'/>
-</g>
-</svg> belonging to the given mesh.</dd>
+            <dd>Constructs a polytope with given dimension and index.</dd>
+            <dt id="a990360c88a70aec645ba734695f84e81">
+              <span class="m-doc-wrap-bumper"><a href="#a990360c88a70aec645ba734695f84e81" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a7ed024fe333315d1e01a2abed984fdf3">
+              <span class="m-doc-wrap-bumper"><a href="#a7ed024fe333315d1e01a2abed984fdf3" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+            <dt id="a33651859418e495ca9b3aacf65a5b3c3">
+              <span class="m-doc-wrap-bumper"><a href="#a33651859418e495ca9b3aacf65a5b3c3" class="m-doc-self">~Polytope</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Virtual destructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a1915a339e5b40714b337e27f87a15576">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1915a339e5b40714b337e27f87a15576" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a></span>
+            <dt id="a6a724619bcc21c48d26074908bea7d1d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6a724619bcc21c48d26074908bea7d1d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;</span>
             </dt>
-            <dd>Gets the index of the simplex in the mesh.</dd>
-            <dt id="aec341f99d334fdd5540adacf3512cdae">
-              <span class="m-doc-wrap-bumper">auto <a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+            <dd>Copy assignment operator.</dd>
+            <dt id="a2b004a85f5c1b15fb6ffb3f7cbe7f4e2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2b004a85f5c1b15fb6ffb3f7cbe7f4e2" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;</span>
             </dt>
-            <dd>Gets the associated mesh to the simplex.</dd>
-            <dt id="a292e70e5a11064e944b614db800a27f7">
-              <span class="m-doc-wrap-bumper">auto <a href="#a292e70e5a11064e944b614db800a27f7" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a></span>
+            <dd>Move assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1915a339e5b40714b337e27f87a15576" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a></span>
             </dt>
-            <dd>Gets the attribute of the simplex.</dd>
+            <dd>Gets the polytope&#x27;s index within its dimension.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acfab02634131e313692a9c39c73b8976" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Gets the topological dimension.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+            </dt>
+            <dd>Gets the containing mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a292e70e5a11064e944b614db800a27f7" class="m-doc">getAttribute</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a></span>
+            </dt>
+            <dd>Gets the attribute (marker) of this polytope.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab47e720e5ad1eaf8f1fcd6473e431ae3" class="m-doc">getMeasure</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Gets the measure of the polytope.</dd>
+            <dd>Gets the geometric measure of this polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad909a66c68cb27e6651a2adc5e90e321" class="m-doc">getTransformation</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp;</span>
+            </dt>
+            <dd>Gets the geometric transformation for this polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8b0ab88ca43a70cd21dc35ca52782c71" class="m-doc">getVertex</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a></span>
+            </dt>
+            <dd>Gets an iterator over the vertices of this polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abf84a20770f1056ad9fc389aca0a2774" class="m-doc">getVertices</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin.html#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets the vertex indices defining this polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae8b47f622a0bf388a31386094c7eb655" class="m-doc">getAdjacent</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a></span>
+            </dt>
+            <dd>Gets an iterator over polytopes adjacent to this one.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acf2f8f6c39a2fe0809fd6b2d134f12a9" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a></span>
+            </dt>
+            <dd>Gets the geometry type of this polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aec0d641023eeffb5bb3a6ca02298f5b2" class="m-doc">isCell</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Checks if this is a cell (maximal dimension).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8a6b0c4e8ceed1e221aa65d48a39a868" class="m-doc">isFace</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Checks if this is a face (codimension 1).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a13c21226eae1b4ad1fd0469d3102cd45" class="m-doc">isVertex</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Checks if this is a vertex (dimension 0).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a32e87d846eb60f9fa07af7a9bf17edf9" class="m-doc">setAttribute</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;</span>
+            </dt>
+            <dd>Sets the attribute for this polytope.</dd>
           </dl>
         </section>
         <section>
@@ -219,7 +353,7 @@ $ i $
                 <tr>
                   <td><a href="#a1d1cfd8ffb84e947f82999c682b666a7a0e9bb3a0eff96690b1e9badd73b99219" class="m-doc-self" id="a1d1cfd8ffb84e947f82999c682b666a7a0e9bb3a0eff96690b1e9badd73b99219">Wedge</a></td>
                   <td>
-                  <p>3D prismatic element</p>
+                  <p>3D prismatic element (triangular prism)</p>
                   </td>
                 </tr>
               </tbody>
@@ -228,30 +362,311 @@ $ i $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ab47e720e5ad1eaf8f1fcd6473e431ae3"><div>
+          <section class="m-doc-details" id="a7969bd543fe55f27ba2bcb045b73b7e2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab47e720e5ad1eaf8f1fcd6473e431ae3" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh)</span></span>
             </h3>
-            <p>Gets the measure of the polytope.</p>
+            <p>Constructs a polytope with given dimension and index.</p>
             <table class="m-table m-fullwidth m-flat">
-              <tfoot>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
                 <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>The measure of the polytope.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Gets the <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+                  <td style="width: 1%">dimension&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
 <defs>
-<path id='eq3-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq7-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
 </defs>
-<g id='eq3-page1'>
-<use x='0' y='0' xlink:href='#eq3-g0-100'/>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-100'/>
 </g>
-</svg>-dimensional measure of the polytope. This has different names in different dimensions. See table below.</p><table class="m-table"><thead><tr><th>Dimension of polytope</th><th>Measure</th></tr></thead><tbody><tr><td>0</td><td>Always zero</td></tr><tr><td>1</td><td>Length</td></tr><tr><td>2</td><td>Area</td></tr><tr><td>3</td><td>Volume</td></tr></tbody></table>
+</svg></td>
+                </tr>
+                <tr>
+                  <td>index&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Index <svg class="m-math" style="width: 0.416em; height: 0.816em; vertical-align: -0.000em;" viewBox="0 -7.837689 3.993432 7.837689">
+<title>
+$ i $
+</title>
+<defs>
+<path id='eq8-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='0' y='0' xlink:href='#eq8-g0-105'/>
+</g>
+</svg> within the mesh</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference to the containing mesh</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1915a339e5b40714b337e27f87a15576"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1915a339e5b40714b337e27f87a15576" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the polytope&#x27;s index within its dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Index <svg class="m-math" style="width: 0.416em; height: 0.816em; vertical-align: -0.000em;" viewBox="0 -7.837689 3.993432 7.837689">
+<title>
+$ i $
+</title>
+<defs>
+<path id='eq9-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+</defs>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g0-105'/>
+</g>
+</svg> of this polytope</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acfab02634131e313692a9c39c73b8976"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfab02634131e313692a9c39c73b8976" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the topological dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+<title>
+$ d $
+</title>
+<defs>
+<path id='eq10-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq10-page1'>
+<use x='0' y='0' xlink:href='#eq10-g0-100'/>
+</g>
+</svg> of this polytope</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aec341f99d334fdd5540adacf3512cdae"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the containing mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the mesh this polytope belongs to</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a292e70e5a11064e944b614db800a27f7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a292e70e5a11064e944b614db800a27f7" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the attribute (marker) of this polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Attribute value</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Attributes are typically used to mark material regions, boundary conditions, or other domain-specific properties.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab47e720e5ad1eaf8f1fcd6473e431ae3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab47e720e5ad1eaf8f1fcd6473e431ae3" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the geometric measure of this polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The measure (length/area/volume) of the polytope</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Computes the <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+<title>
+$ d $
+</title>
+<defs>
+<path id='eq11-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq11-page1'>
+<use x='0' y='0' xlink:href='#eq11-g0-100'/>
+</g>
+</svg>-dimensional measure of the polytope:</p><table class="m-table"><thead><tr><th>Dimension</th><th>Measure</th></tr></thead><tbody><tr><td>0</td><td>Always 0</td></tr><tr><td>1</td><td>Length</td></tr><tr><td>2</td><td>Area</td></tr><tr><td>3</td><td>Volume</td></tr></tbody></table>
+          </div></section>
+          <section class="m-doc-details" id="ad909a66c68cb27e6651a2adc5e90e321"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad909a66c68cb27e6651a2adc5e90e321" class="m-doc-self">getTransformation</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the geometric transformation for this polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the transformation <svg class="m-math" style="width: 5.456em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 52.378889 8.169366">
+<title>
+$ x: K \rightarrow \tau $
+</title>
+<defs>
+<path id='eq12-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq12-g2-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
+<path id='eq12-g1-28' d='M3.431133-4.507098H5.415691C5.571108-4.507098 5.965629-4.507098 5.965629-4.889664C5.965629-5.152677 5.738481-5.152677 5.523288-5.152677H2.235616C1.960648-5.152677 1.554172-5.152677 1.004234-4.566874C.6934-4.220174 .310834-3.58655 .310834-3.514819S.37061-3.419178 .442341-3.419178C.526027-3.419178 .537983-3.455044 .597758-3.526775C1.219427-4.507098 1.841096-4.507098 2.139975-4.507098H3.132254L1.888917-.406476C1.829141-.227148 1.829141-.203238 1.829141-.167372C1.829141-.035866 1.912827 .131507 2.15193 .131507C2.52254 .131507 2.582316-.191283 2.618182-.37061L3.431133-4.507098Z'/>
+<path id='eq12-g1-75' d='M5.977584-4.829888C5.965629-4.865753 5.917808-4.961395 5.917808-4.99726C5.917808-5.009215 5.929763-5.021171 6.133001-5.176588L7.292653-6.085181C8.894645-7.328518 9.420672-7.746949 10.245579-7.81868C10.329265-7.830635 10.448817-7.830635 10.448817-8.033873C10.448817-8.105604 10.412951-8.16538 10.31731-8.16538C10.185803-8.16538 10.042341-8.141469 9.910834-8.141469H9.456538C9.085928-8.141469 8.691407-8.16538 8.332752-8.16538C8.249066-8.16538 8.105604-8.16538 8.105604-7.950187C8.105604-7.830635 8.18929-7.81868 8.261021-7.81868C8.392528-7.806725 8.547945-7.758904 8.547945-7.591532C8.547945-7.352428 8.18929-7.065504 8.093649-6.993773L3.407223-3.347447L4.399502-7.292653C4.507098-7.699128 4.531009-7.81868 5.379826-7.81868C5.606974-7.81868 5.71457-7.81868 5.71457-8.045828C5.71457-8.16538 5.595019-8.16538 5.535243-8.16538C5.32005-8.16538 5.068991-8.141469 4.841843-8.141469H3.431133C3.21594-8.141469 2.952927-8.16538 2.737733-8.16538C2.642092-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.618182-7.81868 2.797509-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.567621 3.526775-7.49589 3.478954-7.316563L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .657534 0 .729265 0C.956413 0 1.195517-.02391 1.422665-.02391H2.82142C3.048568-.02391 3.299626 0 3.526775 0C3.622416 0 3.753923 0 3.753923-.227148C3.753923-.3467 3.646326-.3467 3.466999-.3467C2.737733-.3467 2.737733-.442341 2.737733-.561893C2.737733-.645579 2.809465-.944458 2.857285-1.135741L3.323537-2.988792L5.140722-4.411457C5.487422-3.646326 6.121046-2.116065 6.611208-.944458C6.647073-.872727 6.670984-.800996 6.670984-.71731C6.670984-.358655 6.192777-.3467 6.085181-.3467S5.858032-.3467 5.858032-.119552C5.858032 0 5.989539 0 6.025405 0C6.443836 0 6.886177-.02391 7.304608-.02391H7.878456C8.057783-.02391 8.261021 0 8.440349 0C8.51208 0 8.643587 0 8.643587-.227148C8.643587-.3467 8.53599-.3467 8.416438-.3467C7.974097-.358655 7.81868-.454296 7.639352-.884682L5.977584-4.829888Z'/>
+<path id='eq12-g1-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq12-page1'>
+<use x='0' y='0' xlink:href='#eq12-g1-120'/>
+<use x='9.972917' y='0' xlink:href='#eq12-g2-58'/>
+<use x='16.545407' y='0' xlink:href='#eq12-g1-75'/>
+<use x='30.683916' y='0' xlink:href='#eq12-g0-33'/>
+<use x='45.959948' y='0' xlink:href='#eq12-g1-28'/>
+</g>
+</svg></td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a8b0ab88ca43a70cd21dc35ca52782c71"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b0ab88ca43a70cd21dc35ca52782c71" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets an iterator over the vertices of this polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iterator over all vertices</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abf84a20770f1056ad9fc389aca0a2774"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf84a20770f1056ad9fc389aca0a2774" class="m-doc-self">getVertices</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the vertex indices defining this polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Array of vertex indices</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae8b47f622a0bf388a31386094c7eb655"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae8b47f622a0bf388a31386094c7eb655" class="m-doc-self">getAdjacent</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets an iterator over polytopes adjacent to this one.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iterator over adjacent polytopes</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>Requires connectivity to be computed first.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="acf2f8f6c39a2fe0809fd6b2d134f12a9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf2f8f6c39a2fe0809fd6b2d134f12a9" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the geometry type of this polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> type (Triangle, Tetrahedron, etc.)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aec0d641023eeffb5bb3a6ca02298f5b2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec0d641023eeffb5bb3a6ca02298f5b2" class="m-doc-self">isCell</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Checks if this is a cell (maximal dimension).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True if this polytope is a cell, false otherwise</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8a6b0c4e8ceed1e221aa65d48a39a868"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a6b0c4e8ceed1e221aa65d48a39a868" class="m-doc-self">isFace</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Checks if this is a face (codimension 1).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True if this polytope is a face, false otherwise</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a13c21226eae1b4ad1fd0469d3102cd45"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13c21226eae1b4ad1fd0469d3102cd45" class="m-doc-self">isVertex</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Checks if this is a vertex (dimension 0).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True if this polytope is a vertex, false otherwise</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a32e87d846eb60f9fa07af7a9bf17edf9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a32e87d846eb60f9fa07af7a9bf17edf9" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Sets the attribute for this polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to this polytope for method chaining</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>Implementation details in derived classes.</p></aside>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a577c2d3d349d14811f817a2e49ac6afa"><div>
+            <h3>
+              static std::array&lt;<a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a>, 6&gt; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /><a href="#a577c2d3d349d14811f817a2e49ac6afa" class="m-doc-self">Types</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Array of all supported polytope types.</p>
+<p>Useful for iterating over all geometry types at compile time.</p>
           </div></section>
         </section>
       </div>

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -64,10 +71,164 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sub_mesh_8h.html">&lt;Rodin/Geometry/SubMesh.h&gt;</a></div>
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html">SubMesh&lt;Context::Local&gt;</a>::<wbr/></span>Builder <span class="m-thin">class</span>
         </h1>
-        <p>Class used to build <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">SubMesh&lt;Context::<wbr />Local&gt;</a> instances.</p>
+        <p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4_1_1_builder.html" class="m-doc">Builder</a> for constructing <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> instances.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Provides a fluent interface for incrementally building submeshes from parent meshes by selecting specific polytopes.</p>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a127ac7aab5c87bd7df242644885320ac">
+              <span class="m-doc-wrap-bumper"><a href="#a127ac7aab5c87bd7df242644885320ac" class="m-doc-self">Builder</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a32cd1dd2b9b05fd176853239cf65b54e" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html#a5d11968e3ae899be574a41d47a17a36f" class="m-doc">Context</a>&gt;&amp; parent) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Initializes builder with parent mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa2b1de14befec17d78919410f4f4f717" class="m-doc">include</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> parentIdx) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Includes a single polytope in the submesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a18c28050d88527a6198e141e68fe88d8" class="m-doc">include</a>(</span><span class="m-doc-wrap">size_t d,
+              const <a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">IndexVector</a>&amp; indices) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Includes multiple polytopes in the submesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae5238d6949ec0f1f494bda7c4c552a10" class="m-doc">finalize</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a></span>
+            </dt>
+            <dd>Finalizes construction and returns the submesh.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a32cd1dd2b9b05fd176853239cf65b54e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a32cd1dd2b9b05fd176853239cf65b54e" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html#a5d11968e3ae899be574a41d47a17a36f" class="m-doc">Context</a>&gt;&amp; parent)</span></span>
+            </h3>
+            <p>Initializes builder with parent mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">parent&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Parent mesh to extract submesh from</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa2b1de14befec17d78919410f4f4f717"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa2b1de14befec17d78919410f4f4f717" class="m-doc-self">include</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> parentIdx)</span></span>
+            </h3>
+            <p>Includes a single polytope in the submesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension of the polytope</td>
+                </tr>
+                <tr>
+                  <td>parentIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Index in parent mesh</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder for method chaining</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a18c28050d88527a6198e141e68fe88d8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a18c28050d88527a6198e141e68fe88d8" class="m-doc-self">include</a>(</span><span class="m-doc-wrap">size_t d,
+              const <a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">IndexVector</a>&amp; indices)</span></span>
+            </h3>
+            <p>Includes multiple polytopes in the submesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dimension of the polytopes</td>
+                </tr>
+                <tr>
+                  <td>indices&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Vector of parent mesh indices</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder for method chaining</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae5238d6949ec0f1f494bda7c4c552a10"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5238d6949ec0f1f494bda7c4c552a10" class="m-doc-self">finalize</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Finalizes construction and returns the submesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Newly constructed <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

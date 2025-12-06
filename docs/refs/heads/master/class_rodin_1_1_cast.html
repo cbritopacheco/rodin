@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -64,6 +71,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_cast_8h.html">&lt;Rodin/Cast.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class From, class To&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Cast <span class="m-thin">class</span>
         </h1>
@@ -86,7 +94,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md4">Usage</a></li>
+            <li><a href="#autotoc_md9">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -94,7 +102,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_cast.html" class="m-doc">Cast</a> provides a generic interface for converting between types, with specializations for specific type pairs. This enables safe and efficient type conversions while maintaining compile-time type checking.</p><section id="autotoc_md4"><h3><a href="#autotoc_md4">Usage</a></h3><pre class="m-code"><span class="c1">// Example casting operation</span>
+<p><a href="class_rodin_1_1_cast.html" class="m-doc">Cast</a> provides a generic interface for converting between types, with specializations for specific type pairs. This enables safe and efficient type conversions while maintaining compile-time type checking.</p><section id="autotoc_md9"><h3><a href="#autotoc_md9">Usage</a></h3><pre class="m-code"><span class="c1">// Example casting operation</span>
 <span class="n">Cast</span><span class="o">&lt;</span><span class="n">SourceType</span><span class="p">,</span><span class="w"> </span><span class="n">TargetType</span><span class="o">&gt;</span><span class="w"> </span><span class="n">converter</span><span class="p">;</span>
 <span class="n">TargetType</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">converter</span><span class="p">(</span><span class="n">sourceObject</span><span class="p">);</span></pre></section>
       </div>

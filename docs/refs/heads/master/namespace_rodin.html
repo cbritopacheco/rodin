@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -76,6 +83,7 @@
                 <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
                 <li><a href="#func-members">Functions</a></li>
+                <li><a href="#var-members">Variables</a></li>
               </ul>
             </li>
           </ul>
@@ -83,6 +91,8 @@
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a></dt>
+            <dd>Module to handle alerts.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></dt>
             <dd>Module for performing the assembly of linear algebra objects from variational expressions.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a></dt>
@@ -132,6 +142,10 @@
             </dt>
             <dd>Abstract base class for objects that can be copied.</dd>
             <dt>
+              struct <a href="struct_rodin_1_1_default_sentinel_t.html" class="m-doc">DefaultSentinelT</a>
+            </dt>
+            <dd>Sentinel type for default-constructed iterators.</dd>
+            <dt>
               struct <a href="struct_rodin_1_1_index_array_equality.html" class="m-doc">IndexArrayEquality</a>
             </dt>
             <dd>Functor for comparing two index arrays for equality.</dd>
@@ -163,7 +177,12 @@
               <div class="m-doc-template">template&lt;class L, class R&gt;</div>
               class <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>
             </dt>
-            <dd>A <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> class representing a tuple with two elements.</dd>
+            <dd>Forward declaration of the <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> template class.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
+              class <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>
+            </dt>
+            <dd>Forward declaration of the <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> template class.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T, class ... Ts&gt;</div>
               class <a href="class_rodin_1_1_tuple_3_01_t_00_01_ts_8_8_8_01_4.html" class="m-doc">Tuple&lt;T, Ts...&gt;</a>
@@ -196,10 +215,20 @@
             <dd>User-defined literal for size_t values.</dd>
           </dl>
         </section>
+        <section id="var-members">
+          <h2><a href="#var-members">Variables</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <a href="struct_rodin_1_1_default_sentinel_t.html" class="m-doc">DefaultSentinelT</a> <a href="#a4030fbfd291d610c5524ca79206e79b6" class="m-doc">DefaultSentinel</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Default sentinel value.</dd>
+          </dl>
+        </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="aca27e15f10cd90debc45f2ffab02bf45"><div>
             <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_pair_8h.html">&lt;Rodin/Pair.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class L, class R&gt;
               </div>
@@ -226,6 +255,7 @@
           </div></section>
           <section class="m-doc-details" id="a74e34a69a39a8bd20e7c0021a10567be"><div>
             <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_tuple_8h.html">&lt;Rodin/Tuple.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;Index First, Index Last&gt;
               </div>
@@ -258,6 +288,7 @@
           <section class="m-doc-details" id="ad9581b472b22e3c0f392a86bb92348ab"><div>
             <h3>
               <span class="m-doc-wrap-bumper">std::size_t Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9581b472b22e3c0f392a86bb92348ab" class="m-doc-self">operator&quot;&quot;_UZ</a>(</span><span class="m-doc-wrap">unsigned long long x) <span class="m-label m-primary">constexpr</span></span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_types_8h.html">&lt;Rodin/Types.h&gt;</a></div>
             </h3>
             <p>User-defined literal for size_t values.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -278,6 +309,16 @@
               </tfoot>
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>This provides backward compatibility for the _UZ suffix</p></aside>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a4030fbfd291d610c5524ca79206e79b6"><div>
+            <h3>
+              <a href="struct_rodin_1_1_default_sentinel_t.html" class="m-doc">DefaultSentinelT</a> Rodin::<wbr /><a href="#a4030fbfd291d610c5524ca79206e79b6" class="m-doc-self">DefaultSentinel</a> <span class="m-label m-primary">constexpr</span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_index_generator_8h.html">&lt;Rodin/Geometry/IndexGenerator.h&gt;</a></div>
+            </h3>
+            <p>Default sentinel value.</p>
           </div></section>
         </section>
       </div>

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -64,6 +71,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_2_mesh_8h.html">&lt;Rodin/Geometry/Mesh.h&gt;</a></div>
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh&lt;Context::Local&gt;</a>::<wbr/></span>Builder <span class="m-thin">class</span>
         </h1>
@@ -135,7 +143,7 @@
             </dt>
             <dd>Adds vertex with coordinates given by the array pointer.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a970af8e9ab8f80b3ea426cacc93345d4" class="m-doc">vertex</a>(</span><span class="m-doc-wrap">Eigen::Map&lt;const Math::SpatialPoint&gt; x) -&gt; Builder&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a970af8e9ab8f80b3ea426cacc93345d4" class="m-doc">vertex</a>(</span><span class="m-doc-wrap">Eigen::Map&lt;const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt; x) -&gt; Builder&amp;</span>
             </dt>
             <dd>Adds vertex with coordinates given by the mapped memory.</dd>
             <dt>
@@ -170,6 +178,26 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a0c2b73326859d6848d8f0af9a814d77d" class="m-doc-self">finalize</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a></span>
             </dt>
             <dd>Finalizes construction of the <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a> object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8e9f193ea1318725e9c33192b0f38766" class="m-doc">setVertices</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#ae13081c68a479c0cd7970a1374e2b6c8" class="m-doc">Math::<wbr />PointMatrix</a>&amp; vertices) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Sets the vertex coordinates (copy).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a98c1f2a65e519d7ed8ea9107cfe3be14" class="m-doc">setVertices</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#ae13081c68a479c0cd7970a1374e2b6c8" class="m-doc">Math::<wbr />PointMatrix</a>&amp;&amp; vertices) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Sets the vertex coordinates (move).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acda8d033117a586e95ae0d520d9fc480" class="m-doc">setConnectivity</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context</a>&gt;&amp;&amp; connectivity) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Sets the mesh connectivity.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7f326de95009d7f58a29cfc89766a7f6" class="m-doc">setAttributeIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;&amp; attrIndex) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Sets the attribute index.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af10532bed52b4d592ca3324807cb0f1f" class="m-doc">setTransformationIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;&amp; transIndex) -&gt; Builder&amp;</span>
+            </dt>
+            <dd>Sets the transformation index.</dd>
           </dl>
         </section>
         <section>
@@ -210,7 +238,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a970af8e9ab8f80b3ea426cacc93345d4" class="m-doc-self">vertex</a>(</span><span class="m-doc-wrap">Eigen::Map&lt;const Math::SpatialPoint&gt; x)</span></span>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a970af8e9ab8f80b3ea426cacc93345d4" class="m-doc-self">vertex</a>(</span><span class="m-doc-wrap">Eigen::Map&lt;const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt; x)</span></span>
             </h3>
             <p>Adds vertex with coordinates given by the mapped memory.</p>
 <aside class="m-note m-info"><h4>Note</h4><p>This method requires nodes(size_t) to be called beforehand.</p></aside>
@@ -234,6 +262,136 @@
             </h3>
             <p>Adds vertex with coordinates given by the vector.</p>
 <p>This method requires nodes(size_t) to be called beforehand.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8e9f193ea1318725e9c33192b0f38766"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e9f193ea1318725e9c33192b0f38766" class="m-doc-self">setVertices</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#ae13081c68a479c0cd7970a1374e2b6c8" class="m-doc">Math::<wbr />PointMatrix</a>&amp; vertices)</span></span>
+            </h3>
+            <p>Sets the vertex coordinates (copy).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vertices&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> matrix containing vertex coordinates</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a98c1f2a65e519d7ed8ea9107cfe3be14"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98c1f2a65e519d7ed8ea9107cfe3be14" class="m-doc-self">setVertices</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#ae13081c68a479c0cd7970a1374e2b6c8" class="m-doc">Math::<wbr />PointMatrix</a>&amp;&amp; vertices)</span></span>
+            </h3>
+            <p>Sets the vertex coordinates (move).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vertices&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> matrix containing vertex coordinates</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acda8d033117a586e95ae0d520d9fc480"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acda8d033117a586e95ae0d520d9fc480" class="m-doc-self">setConnectivity</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context</a>&gt;&amp;&amp; connectivity)</span></span>
+            </h3>
+            <p>Sets the mesh connectivity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">connectivity&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> object to move into the mesh</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7f326de95009d7f58a29cfc89766a7f6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f326de95009d7f58a29cfc89766a7f6" class="m-doc-self">setAttributeIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;&amp; attrIndex)</span></span>
+            </h3>
+            <p>Sets the attribute index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attrIndex&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute index object to move into the mesh</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af10532bed52b4d592ca3324807cb0f1f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Builder&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af10532bed52b4d592ca3324807cb0f1f" class="m-doc-self">setTransformationIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;&amp; transIndex)</span></span>
+            </h3>
+            <p>Sets the transformation index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">transIndex&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Transformation index object to move into the mesh</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>

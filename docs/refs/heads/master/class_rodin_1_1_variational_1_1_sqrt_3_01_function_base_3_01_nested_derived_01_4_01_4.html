@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Variational::Sqrt&lt;FunctionBase&lt;NestedDerived&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sqrt_8h.html">&lt;Rodin/Variational/Sqrt.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Sqrt&lt;FunctionBase&lt;NestedDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+        </h1>
+        <p>Square root operation for functions.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">NestedDerived</td>
+              <td>Type of the operand function</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This class represents the square root operation applied to a scalar function:</p><div class="m-math"><svg style="width: 10.692em; height: 1.494em;" viewBox="142.951162 -14.34634 102.640641 14.346348">
+<title>
+\[
+   \text{Sqrt}(f)(x) = \sqrt{f(x)}
+\]
+</title>
+<defs>
+<path id='eq1-g1-102' d='M5.332005-4.805978C5.571108-4.805978 5.66675-4.805978 5.66675-5.033126C5.66675-5.152677 5.571108-5.152677 5.355915-5.152677H4.387547C4.614695-6.38406 4.782067-7.232877 4.877709-7.615442C4.94944-7.902366 5.200498-8.177335 5.511333-8.177335C5.762391-8.177335 6.01345-8.069738 6.133001-7.962142C5.66675-7.914321 5.523288-7.567621 5.523288-7.364384C5.523288-7.12528 5.702615-6.981818 5.929763-6.981818C6.168867-6.981818 6.527522-7.185056 6.527522-7.639352C6.527522-8.141469 6.025405-8.416438 5.499377-8.416438C4.985305-8.416438 4.483188-8.033873 4.244085-7.567621C4.028892-7.149191 3.90934-6.718804 3.634371-5.152677H2.833375C2.606227-5.152677 2.486675-5.152677 2.486675-4.937484C2.486675-4.805978 2.558406-4.805978 2.797509-4.805978H3.56264C3.347447-3.694147 2.857285-.992279 2.582316 .286924C2.379078 1.327024 2.199751 2.199751 1.601993 2.199751C1.566127 2.199751 1.219427 2.199751 1.004234 1.972603C1.613948 1.924782 1.613948 1.398755 1.613948 1.3868C1.613948 1.147696 1.43462 1.004234 1.207472 1.004234C.968369 1.004234 .609714 1.207472 .609714 1.661768C.609714 2.175841 1.135741 2.438854 1.601993 2.438854C2.82142 2.438854 3.323537 .251059 3.455044-.3467C3.670237-1.267248 4.25604-4.447323 4.315816-4.805978H5.332005Z'/>
+<path id='eq1-g1-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq1-g5-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g5-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g5-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g0-112' d='M5.068991 13.867995C5.439601 13.867995 5.451557 13.85604 5.571108 13.628892L12.110585-.02391C12.194271-.179328 12.194271-.203238 12.194271-.239103C12.194271-.37061 12.09863-.478207 11.955168-.478207C11.799751-.478207 11.75193-.37061 11.692154-.239103L5.523288 12.624658L2.976837 6.694894L1.315068 7.974097L1.494396 8.16538L2.343213 7.519801L5.068991 13.867995Z'/>
+<path id='eq1-g4-83' d='M5.848057-2.000965C5.848057-2.989536 5.19298-3.751809 3.620793-4.609365C2.37019-5.288264 1.869949-5.812326 1.869949-6.467404S2.37019-7.56317 3.108641-7.56317C3.644614-7.56317 4.144855-7.33687 4.561723-6.908092C4.930949-6.526956 5.097696-6.217283 5.288264-5.514563H5.586026L5.323995-8.051501H5.073875C5.026233-7.789469 4.895217-7.646543 4.692738-7.646543C4.573633-7.646543 4.383065-7.694185 4.168676-7.789469C3.727988-7.956216 3.29921-8.051501 2.882342-8.051501C2.417832-8.051501 1.917591-7.860932 1.536455-7.551259C1.071945-7.170123 .845646-6.657972 .845646-6.002894C.845646-5.061964 1.369708-4.394976 2.703684-3.692256C3.561241-3.227747 4.180587-2.751326 4.478349-2.298727C4.585544-2.13198 4.645096-1.89377 4.645096-1.596007C4.645096-.809914 4.049571-.262031 3.180104-.262031C2.108159-.262031 1.369708-.917109 .774183-2.37019H.500241L.857556 .154837H1.119587C1.131498-.071463 1.274424-.23821 1.453081-.23821C1.584097-.23821 1.786576-.190568 2.012875-.107195C2.465474 .071463 2.941894 .166747 3.418315 .166747C4.799933 .166747 5.848057-.774183 5.848057-2.000965Z'/>
+<path id='eq1-g4-113' d='M5.812326 2.584579V2.417832C5.157248 2.274906 5.061964 2.179622 5.061964 1.679381V-5.4431H4.930949L4.287781-5.061964C3.739898-5.383548 3.382583-5.490742 2.918073-5.490742C1.42926-5.490742 .285852-4.156766 .285852-2.441653C.285852-.94093 1.071945 .119105 2.191533 .119105C2.882342 .119105 3.53742-.190568 4.061482-.762272V1.476902C4.061482 2.143891 3.847093 2.322548 3.001447 2.382101V2.584579H5.812326ZM4.061482-1.512634C4.061482-1.226782 4.01384-1.071945 3.894735-.976661C3.632704-.750362 3.239657-.607436 2.870431-.607436S2.179622-.726541 1.941412-.964751C1.560276-1.310155 1.310155-2.084338 1.310155-2.870431C1.310155-4.275871 1.941412-5.157248 2.953805-5.157248C3.692256-5.157248 4.061482-4.764201 4.061482-3.966198V-1.512634Z'/>
+<path id='eq1-g4-114' d='M3.990019-4.847575C3.990019-5.240622 3.739898-5.478832 3.334941-5.478832C2.8347-5.478832 2.489295-5.20489 1.905681-4.359244V-5.455011L1.846128-5.478832C1.214871-5.216801 .786093-5.061964 .083374-4.835665V-4.645096C.250121-4.680828 .357315-4.692738 .500241-4.692738C.798004-4.692738 .905198-4.50217 .905198-3.978108V-1.000482C.905198-.404957 .821825-.321584 .059553-.178658V0H2.918073V-.178658C2.108159-.214389 1.905681-.393047 1.905681-1.071945V-3.751809C1.905681-4.132945 2.417832-4.72847 2.739416-4.72847C2.810879-4.72847 2.918073-4.668917 3.049089-4.549812C3.239657-4.383065 3.370673-4.311602 3.525509-4.311602C3.811361-4.311602 3.990019-4.514081 3.990019-4.847575Z'/>
+<path id='eq1-g4-116' d='M3.323031-.786093L3.168194-.917109C2.906163-.607436 2.715595-.500241 2.453564-.500241C2.012875-.500241 1.834218-.809914 1.834218-1.572186V-4.978591H3.037178V-5.359727H1.834218V-6.741345C1.834218-6.86045 1.810397-6.896182 1.750844-6.896182C1.679381-6.777077 1.596007-6.669882 1.512634-6.562688C1.071945-5.90761 .666988-5.466921 .357315-5.288264C.2263-5.20489 .154837-5.133427 .154837-5.061964C.154837-5.026233 .166747-5.002412 .202479-4.978591H.833735V-1.393529C.833735-.393047 1.19105 .119105 1.88186 .119105C2.477385 .119105 2.929984-.166747 3.323031-.786093Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='142.951162' y='-3.062764' xlink:href='#eq1-g4-83'/>
+<use x='149.598232' y='-3.062764' xlink:href='#eq1-g4-113'/>
+<use x='155.575816' y='-3.062764' xlink:href='#eq1-g4-114'/>
+<use x='159.855756' y='-3.062764' xlink:href='#eq1-g4-116'/>
+<use x='163.179292' y='-3.062764' xlink:href='#eq1-g5-40'/>
+<use x='167.731617' y='-3.062764' xlink:href='#eq1-g1-102'/>
+<use x='174.778054' y='-3.062764' xlink:href='#eq1-g5-41'/>
+<use x='179.33038' y='-3.062764' xlink:href='#eq1-g5-40'/>
+<use x='183.882705' y='-3.062764' xlink:href='#eq1-g1-120'/>
+<use x='190.534793' y='-3.062764' xlink:href='#eq1-g5-41'/>
+<use x='198.407948' y='-3.062764' xlink:href='#eq1-g5-61'/>
+<use x='210.833429' y='-13.868145' xlink:href='#eq1-g0-112'/>
+<rect x='222.788627' y='-14.346332' height='.478187' width='22.803175'/>
+<use x='222.788627' y='-3.062764' xlink:href='#eq1-g1-102'/>
+<use x='229.835064' y='-3.062764' xlink:href='#eq1-g5-40'/>
+<use x='234.387389' y='-3.062764' xlink:href='#eq1-g1-120'/>
+<use x='241.039477' y='-3.062764' xlink:href='#eq1-g5-41'/>
+</g>
+</svg></div><p>The input function must be real-valued and non-negative for real results. The result is always a real-valued scalar function.</p><aside class="m-note m-info"><h4>Note</h4><p>For vector or matrix functions, consider using the <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a> norm first.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>, <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;Sqrt&lt;FunctionBase&lt;NestedDerived&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Base class for real-valued functions defined on a mesh.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#abf82291540e031be8a4e6a31eb86771a" class="m-doc">Sqrt</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">OperandType</a>&amp; v)</span>
+            </dt>
+            <dd>Constructs square root of a function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af3b43fb67bc116ff7a00e327788d6167" class="m-doc">Sqrt</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8b86eb1aa75b40f301c2e845337c2357" class="m-doc">Sqrt</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Args&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#af5b7b66bb86ad3332c9ca7abb7fdf219" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) -&gt; <a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Restricts operand to a trace domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8278f34cc3892c6ac0a5410c8bc13f87" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Evaluates square root at a point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">OperandType</a>&amp;</span>
+            </dt>
+            <dd>Gets the operand function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a38cf941e67cf658341a71e03ef5b7f52" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="abf82291540e031be8a4e6a31eb86771a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Sqrt&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf82291540e031be8a4e6a31eb86771a" class="m-doc-self">Sqrt</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">OperandType</a>&amp; v)</span></span>
+            </h3>
+            <p>Constructs square root of a function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> to take square root of (must be non-negative)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af3b43fb67bc116ff7a00e327788d6167"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Sqrt&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af3b43fb67bc116ff7a00e327788d6167" class="m-doc-self">Sqrt</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a> object to copy from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8b86eb1aa75b40f301c2e845337c2357"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Sqrt&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b86eb1aa75b40f301c2e845337c2357" class="m-doc-self">Sqrt</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a> object to move from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af5b7b66bb86ad3332c9ca7abb7fdf219"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+                template&lt;class ... Args&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a>&amp; Rodin::<wbr />Variational::<wbr />Sqrt&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5b7b66bb86ad3332c9ca7abb7fdf219" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Restricts operand to a trace domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">args</td>
+                  <td>Arguments for trace restriction</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8278f34cc3892c6ac0a5410c8bc13f87"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />Sqrt&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8278f34cc3892c6ac0a5410c8bc13f87" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+            </h3>
+            <p>Evaluates square root at a point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which to evaluate</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><svg class="m-math" style="width: 3.540em; height: 1.494em; vertical-align: -0.381em;" viewBox="0 -10.699934 33.98143 14.346348">
+<title>
+$ \sqrt{f(p)} $
+</title>
+<defs>
+<path id='eq2-g1-102' d='M5.332005-4.805978C5.571108-4.805978 5.66675-4.805978 5.66675-5.033126C5.66675-5.152677 5.571108-5.152677 5.355915-5.152677H4.387547C4.614695-6.38406 4.782067-7.232877 4.877709-7.615442C4.94944-7.902366 5.200498-8.177335 5.511333-8.177335C5.762391-8.177335 6.01345-8.069738 6.133001-7.962142C5.66675-7.914321 5.523288-7.567621 5.523288-7.364384C5.523288-7.12528 5.702615-6.981818 5.929763-6.981818C6.168867-6.981818 6.527522-7.185056 6.527522-7.639352C6.527522-8.141469 6.025405-8.416438 5.499377-8.416438C4.985305-8.416438 4.483188-8.033873 4.244085-7.567621C4.028892-7.149191 3.90934-6.718804 3.634371-5.152677H2.833375C2.606227-5.152677 2.486675-5.152677 2.486675-4.937484C2.486675-4.805978 2.558406-4.805978 2.797509-4.805978H3.56264C3.347447-3.694147 2.857285-.992279 2.582316 .286924C2.379078 1.327024 2.199751 2.199751 1.601993 2.199751C1.566127 2.199751 1.219427 2.199751 1.004234 1.972603C1.613948 1.924782 1.613948 1.398755 1.613948 1.3868C1.613948 1.147696 1.43462 1.004234 1.207472 1.004234C.968369 1.004234 .609714 1.207472 .609714 1.661768C.609714 2.175841 1.135741 2.438854 1.601993 2.438854C2.82142 2.438854 3.323537 .251059 3.455044-.3467C3.670237-1.267248 4.25604-4.447323 4.315816-4.805978H5.332005Z'/>
+<path id='eq2-g1-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq2-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq2-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq2-g0-112' d='M5.068991 13.867995C5.439601 13.867995 5.451557 13.85604 5.571108 13.628892L12.110585-.02391C12.194271-.179328 12.194271-.203238 12.194271-.239103C12.194271-.37061 12.09863-.478207 11.955168-.478207C11.799751-.478207 11.75193-.37061 11.692154-.239103L5.523288 12.624658L2.976837 6.694894L1.315068 7.974097L1.494396 8.16538L2.343213 7.519801L5.068991 13.867995Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='-10.221739' xlink:href='#eq2-g0-112'/>
+<rect x='11.955199' y='-10.699927' height='.478187' width='22.026227'/>
+<use x='11.955199' y='0' xlink:href='#eq2-g1-102'/>
+<use x='19.001635' y='0' xlink:href='#eq2-g2-40'/>
+<use x='23.553961' y='0' xlink:href='#eq2-g1-112'/>
+<use x='29.429104' y='0' xlink:href='#eq2-g2-41'/>
+</g>
+</svg></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a167036e7e1cfcff01c5f031ea96d3fed"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Sqrt&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the operand function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the function being operated on</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a38cf941e67cf658341a71e03ef5b7f52"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a>* Rodin::<wbr />Variational::<wbr />Sqrt&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38cf941e67cf658341a71e03ef5b7f52" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to new <a href="class_rodin_1_1_variational_1_1_sqrt.html" class="m-doc">Sqrt</a> object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

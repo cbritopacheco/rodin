@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -65,9 +72,124 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>FaceIterator <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_iterator_8h.html">&lt;Rodin/Geometry/PolytopeIterator.h&gt;</a></div>
         </h1>
-        <p>Represents an iterator over a set of faces of a mesh.</p>
-<aside class="m-note m-danger"><h4>Warning</h4><p>The <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> class is not thread safe, i.e. only one thread should have access to one particular instance of the iterator at a time.</p></aside>
+        <p>Iterator over mesh faces (codimension-1 polytopes).</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#autotoc_md84">Usage Example</a></li>
+            <li><a href="#autotoc_md85">Thread Safety</a></li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Provides iteration over faces, which are polytopes of dimension d-1 where d is the mesh dimension (e.g., edges in 2D, triangles in 3D).</p><section id="autotoc_md84"><h2><a href="#autotoc_md84">Usage Example</a></h2><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getFace</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Face</span><span class="o">&amp;</span><span class="w"> </span><span class="n">face</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">face</span><span class="p">.</span><span class="n">isOnBoundary</span><span class="p">())</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Boundary face &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">face</span><span class="p">.</span><span class="n">getIndex</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span></pre></section><section id="autotoc_md85"><h2><a href="#autotoc_md85">Thread Safety</a></h2><p>Not thread-safe. Each thread should use its own iterator instance.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>, <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a>, <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a></p></aside></section>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase&lt;Face, FaceIterator&gt;</a>
+            </dt>
+            <dd>Base class template for polytope iterators.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="af3d128f1ebf1514c94cb7a81462fd7ce">
+              using <a href="#af3d128f1ebf1514c94cb7a81462fd7ce" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase</a>&lt;<a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>, <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a2f44bca36d2e657412c9d67b317b17e3">
+              <span class="m-doc-wrap-bumper"><a href="#a2f44bca36d2e657412c9d67b317b17e3" class="m-doc-self">FaceIterator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a4ec1f890d451757a04193e72aa0229b6" class="m-doc">FaceIterator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
+              <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp;&amp; gen)</span>
+            </dt>
+            <dd>Constructs a face iterator.</dd>
+            <dt id="a87967ec8e00f930ca4f4aaa0f687a630">
+              <span class="m-doc-wrap-bumper"><a href="#a87967ec8e00f930ca4f4aaa0f687a630" class="m-doc-self">FaceIterator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Copy constructor (deleted).</dd>
+            <dt id="a9748eeefd718c234eb46639a925be2e1">
+              <span class="m-doc-wrap-bumper"><a href="#a9748eeefd718c234eb46639a925be2e1" class="m-doc-self">FaceIterator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="acd6fa3a93f11d99c42a5dbeddcb807cf">
+              <span class="m-doc-wrap-bumper">auto <a href="#acd6fa3a93f11d99c42a5dbeddcb807cf" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a53ec61bf740e07fbbf7fd75ec42d5c3d" class="m-doc">generate</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>* <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Generates a face at current position.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a4ec1f890d451757a04193e72aa0229b6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />FaceIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4ec1f890d451757a04193e72aa0229b6" class="m-doc-self">FaceIterator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
+              <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp;&amp; gen)</span></span>
+            </h3>
+            <p>Constructs a face iterator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> containing the faces</td>
+                </tr>
+                <tr>
+                  <td>gen&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Index generator for iteration order</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a53ec61bf740e07fbbf7fd75ec42d5c3d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>* Rodin::<wbr />Geometry::<wbr />FaceIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53ec61bf740e07fbbf7fd75ec42d5c3d" class="m-doc-self">generate</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Generates a face at current position.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to new <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a> object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Assembly::BilinearFormAssemblyInput class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>BilinearFormAssemblyInput <span class="m-thin">class</span>
+        </h1>
+        <p>Input data for bilinear form assembly.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">TrialFES</td>
+              <td>Trial finite element space type</td>
+            </tr>
+            <tr>
+              <td>TestFES</td>
+              <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> finite element space type</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#autotoc_md3">Local vs Global Integrators</a></li>
+            <li><a href="#autotoc_md4">Usage Example</a></li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Encapsulates trial and test finite element spaces along with local and global bilinear form integrators required for assembly.</p><p>This class encapsulates all data required to assemble a bilinear form <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
+<title>
+$ a(u,v) $
+</title>
+<defs>
+<path id='eq1-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq1-g0-97' d='M3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665ZM4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.944458 4.27995-1.075965 4.387547-1.542217C4.471233-1.841096 4.531009-2.10411 4.62665-2.450809C5.068991-4.244085 5.176588-4.674471 5.176588-4.746202C5.176588-4.913574 5.045081-5.045081 4.865753-5.045081C4.483188-5.045081 4.387547-4.62665 4.363636-4.483188Z'/>
+<path id='eq1-g0-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq1-g0-118' d='M5.463512-4.471233C5.463512-5.224408 5.080946-5.272229 4.985305-5.272229C4.698381-5.272229 4.435367-4.985305 4.435367-4.746202C4.435367-4.60274 4.519054-4.519054 4.566874-4.471233C4.686426-4.363636 4.99726-4.040847 4.99726-3.419178C4.99726-2.917061 4.27995-.119552 2.84533-.119552C2.116065-.119552 1.972603-.729265 1.972603-1.171606C1.972603-1.769365 2.247572-2.606227 2.570361-3.466999C2.761644-3.957161 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.255293-1.996513 1.255293-1.625903 1.255293-1.338979C1.255293-1.075965 1.291158-.585803 1.661768-.251059C2.092154 .119552 2.689913 .119552 2.797509 .119552C4.782067 .119552 5.463512-3.789788 5.463512-4.471233Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-97'/>
+<use x='6.144944' y='0' xlink:href='#eq1-g1-40'/>
+<use x='10.69727' y='0' xlink:href='#eq1-g0-117'/>
+<use x='17.35971' y='0' xlink:href='#eq1-g0-59'/>
+<use x='22.603868' y='0' xlink:href='#eq1-g0-118'/>
+<use x='28.692087' y='0' xlink:href='#eq1-g1-41'/>
+</g>
+</svg> into a matrix operator. It stores references to the trial and test finite element spaces, as well as lists of local and global bilinear form integrators.</p><section id="autotoc_md3"><h3><a href="#autotoc_md3">Local vs Global Integrators</a></h3><ul><li><strong>Local integrators</strong>: Operate on individual elements <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<title>
+$ K $
+</title>
+<defs>
+<path id='eq2-g0-75' d='M5.977584-4.829888C5.965629-4.865753 5.917808-4.961395 5.917808-4.99726C5.917808-5.009215 5.929763-5.021171 6.133001-5.176588L7.292653-6.085181C8.894645-7.328518 9.420672-7.746949 10.245579-7.81868C10.329265-7.830635 10.448817-7.830635 10.448817-8.033873C10.448817-8.105604 10.412951-8.16538 10.31731-8.16538C10.185803-8.16538 10.042341-8.141469 9.910834-8.141469H9.456538C9.085928-8.141469 8.691407-8.16538 8.332752-8.16538C8.249066-8.16538 8.105604-8.16538 8.105604-7.950187C8.105604-7.830635 8.18929-7.81868 8.261021-7.81868C8.392528-7.806725 8.547945-7.758904 8.547945-7.591532C8.547945-7.352428 8.18929-7.065504 8.093649-6.993773L3.407223-3.347447L4.399502-7.292653C4.507098-7.699128 4.531009-7.81868 5.379826-7.81868C5.606974-7.81868 5.71457-7.81868 5.71457-8.045828C5.71457-8.16538 5.595019-8.16538 5.535243-8.16538C5.32005-8.16538 5.068991-8.141469 4.841843-8.141469H3.431133C3.21594-8.141469 2.952927-8.16538 2.737733-8.16538C2.642092-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.618182-7.81868 2.797509-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.567621 3.526775-7.49589 3.478954-7.316563L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .657534 0 .729265 0C.956413 0 1.195517-.02391 1.422665-.02391H2.82142C3.048568-.02391 3.299626 0 3.526775 0C3.622416 0 3.753923 0 3.753923-.227148C3.753923-.3467 3.646326-.3467 3.466999-.3467C2.737733-.3467 2.737733-.442341 2.737733-.561893C2.737733-.645579 2.809465-.944458 2.857285-1.135741L3.323537-2.988792L5.140722-4.411457C5.487422-3.646326 6.121046-2.116065 6.611208-.944458C6.647073-.872727 6.670984-.800996 6.670984-.71731C6.670984-.358655 6.192777-.3467 6.085181-.3467S5.858032-.3467 5.858032-.119552C5.858032 0 5.989539 0 6.025405 0C6.443836 0 6.886177-.02391 7.304608-.02391H7.878456C8.057783-.02391 8.261021 0 8.440349 0C8.51208 0 8.643587 0 8.643587-.227148C8.643587-.3467 8.53599-.3467 8.416438-.3467C7.974097-.358655 7.81868-.454296 7.639352-.884682L5.977584-4.829888Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-75'/>
+</g>
+</svg>, computing contributions <svg class="m-math" style="width: 5.312em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 50.998221 12.309385">
+<title>
+$ a_K(\phi_j, \psi_i) $
+</title>
+<defs>
+<path id='eq3-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq3-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq3-g0-75' d='M4.27995-3.203985C4.27198-3.219925 4.23213-3.299626 4.23213-3.307597C4.23213-3.323537 4.367621-3.419178 4.447323-3.474969C5.076961-3.937235 5.937733-4.558904 6.200747-4.726276C6.607223-4.98132 6.902117-5.148692 7.260772-5.180573C7.324533-5.188543 7.436115-5.196513 7.436115-5.339975C7.428144-5.395766 7.380324-5.443587 7.324533-5.443587C7.316563-5.443587 7.0934-5.419676 7.037609-5.419676H6.718804C6.583313-5.419676 6.38406-5.419676 6.312329-5.427646C6.256538-5.427646 5.945704-5.443587 5.889913-5.443587S5.72254-5.443587 5.72254-5.292154C5.72254-5.284184 5.730511-5.188543 5.850062-5.180573C5.913823-5.172603 6.041345-5.156663 6.041345-5.061021C6.041345-4.933499 5.881943-4.798007 5.866002-4.790037L5.802242-4.734247C5.778331-4.710336 5.746451-4.678456 5.7066-4.654545L2.454795-2.295392L3.084433-4.821918C3.156164-5.108842 3.172105-5.180573 3.753923-5.180573C3.913325-5.180573 4.008966-5.180573 4.008966-5.332005C4.008966-5.339975 4.000996-5.443587 3.873474-5.443587C3.722042-5.443587 3.53076-5.427646 3.379328-5.419676H2.87721C2.11208-5.419676 1.904857-5.443587 1.849066-5.443587C1.809215-5.443587 1.689664-5.443587 1.689664-5.292154C1.689664-5.180573 1.785305-5.180573 1.920797-5.180573C2.183811-5.180573 2.414944-5.180573 2.414944-5.053051C2.414944-5.021171 2.406974-5.0132 2.383064-4.909589L1.315068-.629639C1.243337-.326775 1.227397-.263014 .637609-.263014C.486177-.263014 .390535-.263014 .390535-.111582C.390535-.079701 .414446 0 .518057 0C.669489 0 .860772-.01594 1.012204-.02391H2.040349C2.16787-.01594 2.430884 0 2.550436 0C2.590286 0 2.709838 0 2.709838-.143462C2.709838-.263014 2.614197-.263014 2.478705-.263014C2.422914-.263014 2.311333-.263014 2.175841-.278954C2.008468-.294894 1.984558-.310834 1.984558-.390535C1.984558-.438356 2.040349-.637609 2.064259-.765131L2.367123-1.968618L3.650311-2.893151L4.606725-.924533C4.638605-.860772 4.726276-.68543 4.758157-.613699C4.805978-.533998 4.805978-.518057 4.805978-.486177C4.805978-.270984 4.511083-.263014 4.423412-.263014C4.343711-.263014 4.23213-.263014 4.23213-.111582C4.23213-.103611 4.2401 0 4.367621 0C4.447323 0 4.750187-.01594 4.821918-.02391H5.284184C6.017435-.02391 5.993524 0 6.097136 0C6.129016 0 6.248568 0 6.248568-.151432C6.248568-.263014 6.136986-.263014 6.089166-.263014C5.778331-.270984 5.67472-.326775 5.547198-.597758L4.27995-3.203985Z'/>
+<path id='eq3-g0-105' d='M2.375093-4.97335C2.375093-5.148692 2.247572-5.276214 2.064259-5.276214C1.857036-5.276214 1.625903-5.084932 1.625903-4.845828C1.625903-4.670486 1.753425-4.542964 1.936737-4.542964C2.14396-4.542964 2.375093-4.734247 2.375093-4.97335ZM1.211457-2.048319L.781071-.948443C.74122-.828892 .70137-.73325 .70137-.597758C.70137-.207223 1.004234 .079701 1.42665 .079701C2.199751 .079701 2.526526-1.036115 2.526526-1.139726C2.526526-1.219427 2.462765-1.243337 2.406974-1.243337C2.311333-1.243337 2.295392-1.187547 2.271482-1.107846C2.088169-.470237 1.761395-.143462 1.44259-.143462C1.346949-.143462 1.251308-.183313 1.251308-.398506C1.251308-.589788 1.307098-.73325 1.41071-.980324C1.490411-1.195517 1.570112-1.41071 1.657783-1.625903L1.904857-2.271482C1.976588-2.454795 2.072229-2.701868 2.072229-2.83736C2.072229-3.235866 1.753425-3.514819 1.346949-3.514819C.573848-3.514819 .239103-2.399004 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.239601 .494147-2.319303C.71731-3.076463 1.083935-3.291656 1.323039-3.291656C1.43462-3.291656 1.514321-3.251806 1.514321-3.028643C1.514321-2.948941 1.506351-2.83736 1.42665-2.598257L1.211457-2.048319Z'/>
+<path id='eq3-g0-106' d='M3.291656-4.97335C3.291656-5.124782 3.172105-5.276214 2.980822-5.276214C2.741719-5.276214 2.534496-5.053051 2.534496-4.845828C2.534496-4.694396 2.654047-4.542964 2.84533-4.542964C3.084433-4.542964 3.291656-4.766127 3.291656-4.97335ZM1.625903 .398506C1.506351 .884682 1.115816 1.40274 .629639 1.40274C.502117 1.40274 .382565 1.370859 .366625 1.362889C.613699 1.243337 .645579 1.028144 .645579 .956413C.645579 .765131 .502117 .661519 .334745 .661519C.103611 .661519-.111582 .860772-.111582 1.123786C-.111582 1.42665 .183313 1.625903 .637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 .366625L2.956912-2.486675C2.980822-2.582316 2.996762-2.646077 2.996762-2.765629C2.996762-3.203985 2.646077-3.514819 2.183811-3.514819C1.338979-3.514819 .844832-2.399004 .844832-2.295392C.844832-2.223661 .900623-2.191781 .964384-2.191781C1.052055-2.191781 1.060025-2.215691 1.115816-2.335243C1.354919-2.885181 1.761395-3.291656 2.1599-3.291656C2.327273-3.291656 2.422914-3.180075 2.422914-2.917061C2.422914-2.805479 2.399004-2.693898 2.375093-2.582316L1.625903 .398506Z'/>
+<path id='eq3-g1-30' d='M5.140722-8.18929C5.140722-8.296887 5.057036-8.296887 5.021171-8.296887C4.913574-8.296887 4.901619-8.272976 4.853798-8.069738L4.208219-5.499377C4.172354-5.34396 4.160399-5.332005 4.148443-5.32005C4.136488-5.296139 4.052802-5.284184 4.028892-5.284184C2.068244-5.116812 .561893-3.502864 .561893-2.008468C.561893-.71731 1.554172 .071731 2.797509 .143462C2.701868 .514072 2.618182 .896638 2.52254 1.267248C2.355168 1.900872 2.259527 2.295392 2.259527 2.343213C2.259527 2.367123 2.259527 2.438854 2.379078 2.438854C2.414944 2.438854 2.462765 2.438854 2.486675 2.391034C2.510585 2.367123 2.582316 2.080199 2.630137 1.924782L3.072478 .143462C5.116812 .035866 6.670984-1.637858 6.670984-3.144209C6.670984-4.351681 5.762391-5.212453 4.435367-5.296139L5.140722-8.18929ZM4.363636-5.057036C5.152677-5.009215 5.941719-4.566874 5.941719-3.395268C5.941719-2.044334 4.99726-.251059 3.132254-.107597L4.363636-5.057036ZM2.857285-.095641C2.271482-.131507 1.291158-.442341 1.291158-1.75741C1.291158-3.263761 2.379078-4.937484 4.100623-5.045081L2.857285-.095641Z'/>
+<path id='eq3-g1-32' d='M5.618929-8.009963C5.618929-8.021918 5.66675-8.177335 5.66675-8.18929C5.66675-8.296887 5.571108-8.296887 5.535243-8.296887C5.427646-8.296887 5.415691-8.237111 5.36787-8.057783L3.395268-.143462C2.402989-.263014 2.032379-.765131 2.032379-1.482441C2.032379-1.745455 2.032379-2.020423 2.594271-3.502864C2.749689-3.93325 2.809465-4.088667 2.809465-4.303861C2.809465-4.841843 2.426899-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.590785 1.3868-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.590785 2.139975-4.327771 1.936737-3.801743C1.291158-2.10411 1.291158-1.841096 1.291158-1.566127C1.291158-.418431 2.247572 .02391 3.323537 .107597C3.227895 .478207 3.144209 .860772 3.048568 1.231382C2.857285 1.948692 2.773599 2.283437 2.773599 2.331258C2.773599 2.438854 2.86924 2.438854 2.905106 2.438854C2.929016 2.438854 2.976837 2.438854 3.000747 2.391034C3.048568 2.343213 3.53873 .334745 3.58655 .119552C4.028892 .119552 4.97335 .119552 6.049315-.992279C6.443836-1.422665 6.802491-1.972603 7.005729-2.486675C7.12528-2.797509 7.412204-3.861519 7.412204-4.471233C7.412204-5.188543 7.053549-5.272229 6.933998-5.272229C6.647073-5.272229 6.38406-4.985305 6.38406-4.746202C6.38406-4.60274 6.467746-4.519054 6.515567-4.471233C6.623163-4.363636 6.945953-4.040847 6.945953-3.419178C6.945953-2.988792 6.706849-2.10411 5.941719-1.243337C4.937484-.119552 4.016936-.119552 3.658281-.119552L5.618929-8.009963Z'/>
+<path id='eq3-g1-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq3-g1-97' d='M3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665ZM4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.944458 4.27995-1.075965 4.387547-1.542217C4.471233-1.841096 4.531009-2.10411 4.62665-2.450809C5.068991-4.244085 5.176588-4.674471 5.176588-4.746202C5.176588-4.913574 5.045081-5.045081 4.865753-5.045081C4.483188-5.045081 4.387547-4.62665 4.363636-4.483188Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g1-97'/>
+<use x='6.144944' y='1.793263' xlink:href='#eq3-g0-75'/>
+<use x='14.347613' y='0' xlink:href='#eq3-g2-40'/>
+<use x='18.899939' y='0' xlink:href='#eq3-g1-30'/>
+<use x='25.828041' y='1.793263' xlink:href='#eq3-g0-106'/>
+<use x='30.210198' y='0' xlink:href='#eq3-g1-59'/>
+<use x='35.454357' y='0' xlink:href='#eq3-g1-32'/>
+<use x='43.064624' y='1.793263' xlink:href='#eq3-g0-105'/>
+<use x='46.445895' y='0' xlink:href='#eq3-g2-41'/>
+</g>
+</svg> for basis functions with support on <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<title>
+$ K $
+</title>
+<defs>
+<path id='eq4-g0-75' d='M5.977584-4.829888C5.965629-4.865753 5.917808-4.961395 5.917808-4.99726C5.917808-5.009215 5.929763-5.021171 6.133001-5.176588L7.292653-6.085181C8.894645-7.328518 9.420672-7.746949 10.245579-7.81868C10.329265-7.830635 10.448817-7.830635 10.448817-8.033873C10.448817-8.105604 10.412951-8.16538 10.31731-8.16538C10.185803-8.16538 10.042341-8.141469 9.910834-8.141469H9.456538C9.085928-8.141469 8.691407-8.16538 8.332752-8.16538C8.249066-8.16538 8.105604-8.16538 8.105604-7.950187C8.105604-7.830635 8.18929-7.81868 8.261021-7.81868C8.392528-7.806725 8.547945-7.758904 8.547945-7.591532C8.547945-7.352428 8.18929-7.065504 8.093649-6.993773L3.407223-3.347447L4.399502-7.292653C4.507098-7.699128 4.531009-7.81868 5.379826-7.81868C5.606974-7.81868 5.71457-7.81868 5.71457-8.045828C5.71457-8.16538 5.595019-8.16538 5.535243-8.16538C5.32005-8.16538 5.068991-8.141469 4.841843-8.141469H3.431133C3.21594-8.141469 2.952927-8.16538 2.737733-8.16538C2.642092-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.618182-7.81868 2.797509-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.567621 3.526775-7.49589 3.478954-7.316563L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .657534 0 .729265 0C.956413 0 1.195517-.02391 1.422665-.02391H2.82142C3.048568-.02391 3.299626 0 3.526775 0C3.622416 0 3.753923 0 3.753923-.227148C3.753923-.3467 3.646326-.3467 3.466999-.3467C2.737733-.3467 2.737733-.442341 2.737733-.561893C2.737733-.645579 2.809465-.944458 2.857285-1.135741L3.323537-2.988792L5.140722-4.411457C5.487422-3.646326 6.121046-2.116065 6.611208-.944458C6.647073-.872727 6.670984-.800996 6.670984-.71731C6.670984-.358655 6.192777-.3467 6.085181-.3467S5.858032-.3467 5.858032-.119552C5.858032 0 5.989539 0 6.025405 0C6.443836 0 6.886177-.02391 7.304608-.02391H7.878456C8.057783-.02391 8.261021 0 8.440349 0C8.51208 0 8.643587 0 8.643587-.227148C8.643587-.3467 8.53599-.3467 8.416438-.3467C7.974097-.358655 7.81868-.454296 7.639352-.884682L5.977584-4.829888Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-75'/>
+</g>
+</svg>.</li><li><strong>Global integrators</strong>: Couple multiple elements, useful for non-local operators or interface conditions.</li></ul></section><section id="autotoc_md4"><h3><a href="#autotoc_md4">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Uh</span><span class="p">(</span><span class="n">mesh</span><span class="p">),</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">lbfis</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="c1">// list of local integrators</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">gbfis</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="c1">// list of global integrators  </span>
+<span class="n">BilinearFormAssemblyInput</span><span class="w"> </span><span class="n">input</span><span class="p">(</span><span class="n">Uh</span><span class="p">,</span><span class="w"> </span><span class="n">Vh</span><span class="p">,</span><span class="w"> </span><span class="n">lbfis</span><span class="p">,</span><span class="w"> </span><span class="n">gbfis</span><span class="p">);</span></pre></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ab434360b238d9ad16db489326c99b48e">
+              using <a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc-self">TrialFESType</a> = TrialFES
+            </dt>
+            <dd>Trial finite element space type.</dd>
+            <dt id="afa321364ce6063856f52da8fcfb00814">
+              using <a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc-self">TestFESType</a> = TestFES
+            </dt>
+            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> finite element space type.</dd>
+            <dt id="a533e71ea74d387d1140361ecea5de21b">
+              using <a href="#a533e71ea74d387d1140361ecea5de21b" class="m-doc-self">TrialFESScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc">TrialFESType</a>&gt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">::<wbr />ScalarType</a>
+            </dt>
+            <dd>Scalar type for trial space.</dd>
+            <dt id="a830bc63f4648b3d0132082865724810a">
+              using <a href="#a830bc63f4648b3d0132082865724810a" class="m-doc-self">TestFESScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc">TestFESType</a>&gt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">::<wbr />ScalarType</a>
+            </dt>
+            <dd>Scalar type for test space.</dd>
+            <dt id="a7c05a5538c984b20ce15fea8fcc8227c">
+              using <a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc-self">ScalarType</a> = decltype(std::declval&lt;<a href="#a533e71ea74d387d1140361ecea5de21b" class="m-doc">TrialFESScalarType</a>&gt;()*std::declval&lt;<a href="#a830bc63f4648b3d0132082865724810a" class="m-doc">TestFESScalarType</a>&gt;())
+            </dt>
+            <dd>Resulting scalar type for assembled operator.</dd>
+            <dt id="a41367851d8caefe154f8d74e18cce12a">
+              using <a href="#a41367851d8caefe154f8d74e18cce12a" class="m-doc-self">LocalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Type for local bilinear form integrators.</dd>
+            <dt id="ad2dc4e1413cf38bdd451405b67782566">
+              using <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc-self">LocalBilinearFormIntegratorBaseListType</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="#a41367851d8caefe154f8d74e18cce12a" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&gt;
+            </dt>
+            <dd>List type for local integrators.</dd>
+            <dt id="a47ee43e37dc1bfd025361456958ff949">
+              using <a href="#a47ee43e37dc1bfd025361456958ff949" class="m-doc-self">GlobalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Type for global bilinear form integrators.</dd>
+            <dt id="ad4f06355ceae3b303c6af033b93d257c">
+              using <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc-self">GlobalBilinearFormIntegratorBaseListType</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="#a47ee43e37dc1bfd025361456958ff949" class="m-doc">GlobalBilinearFormIntegratorBaseType</a>&gt;
+            </dt>
+            <dd>List type for global integrators.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a251e8743887899151cb8dfe4fc2eb50a" class="m-doc">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const TrialFES&amp; trialFES,
+              const TestFES&amp; testFES,
+              <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; lbfis,
+              <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; gbfis)</span>
+            </dt>
+            <dd>Constructs bilinear form assembly input.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3a966c62072dd61f23a1aba3570de748" class="m-doc">getTrialFES</a>(</span><span class="m-doc-wrap">) const -&gt; const TrialFES&amp;</span>
+            </dt>
+            <dd>Gets the trial finite element space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae7a9a442955d0da1df0d2a4cbebda7e2" class="m-doc">getTestFES</a>(</span><span class="m-doc-wrap">) const -&gt; const TestFES&amp;</span>
+            </dt>
+            <dd>Gets the test finite element space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afa0a823803c378cdd39a9c9bf7904a94" class="m-doc">getLocalBFIs</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp;</span>
+            </dt>
+            <dd>Gets the list of local bilinear form integrators.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a609d9b46bf0c8c40f4c896fd1fcf6c1a" class="m-doc">getGlobalBFIs</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp;</span>
+            </dt>
+            <dd>Gets the list of global bilinear form integrators.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a251e8743887899151cb8dfe4fc2eb50a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a251e8743887899151cb8dfe4fc2eb50a" class="m-doc-self">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const TrialFES&amp; trialFES,
+              const TestFES&amp; testFES,
+              <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; lbfis,
+              <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; gbfis)</span></span>
+            </h3>
+            <p>Constructs bilinear form assembly input.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">trialFES</td>
+                  <td>Trial finite element space</td>
+                </tr>
+                <tr>
+                  <td>testFES</td>
+                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> finite element space</td>
+                </tr>
+                <tr>
+                  <td>lbfis</td>
+                  <td>List of local bilinear form integrators</td>
+                </tr>
+                <tr>
+                  <td>gbfis</td>
+                  <td>List of global bilinear form integrators</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3a966c62072dd61f23a1aba3570de748"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const TrialFES&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a966c62072dd61f23a1aba3570de748" class="m-doc-self">getTrialFES</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the trial finite element space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to trial space</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae7a9a442955d0da1df0d2a4cbebda7e2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const TestFES&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7a9a442955d0da1df0d2a4cbebda7e2" class="m-doc-self">getTestFES</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the test finite element space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to test space</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afa0a823803c378cdd39a9c9bf7904a94"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa0a823803c378cdd39a9c9bf7904a94" class="m-doc-self">getLocalBFIs</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the list of local bilinear form integrators.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to local integrator list</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a609d9b46bf0c8c40f4c896fd1fcf6c1a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a609d9b46bf0c8c40f4c896fd1fcf6c1a" class="m-doc-self">getGlobalBFIs</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the list of global bilinear form integrators.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to global integrator list</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

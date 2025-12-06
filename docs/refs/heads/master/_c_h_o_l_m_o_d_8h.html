@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin/Solver/CHOLMOD.h file | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_d906c76e88cb4d166858d6593797cfbe.html">Solver</a>/</span>CHOLMOD.h <span class="m-thin">file</span>
+        </h1>
+        <p>CHOLMOD supernodal Cholesky factorization solver wrapper.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#autotoc_md182">Algorithm</a></li>
+            <li><a href="#autotoc_md183">Applicability</a></li>
+            <li><a href="#autotoc_md184">Usage Example</a></li>
+          </ul>
+        </nav>
+<p>This header provides a wrapper for CHOLMOD from SuiteSparse, a high-performance solver for sparse symmetric positive definite systems using supernodal LLT Cholesky factorization.</p><section id="autotoc_md182"><h3><a href="#autotoc_md182">Algorithm</a></h3><p>CHOLMOD computes:</p><div class="m-math"><svg style="width: 4.850em; height: 1.082em;" viewBox="170.743911 -10.382422 46.557028 10.382422">
+<title>
+\[
+  A = LL^T
+\]
+</title>
+<defs>
+<path id='eq1-g0-84' d='M3.602491-4.821918C3.674222-5.108842 3.682192-5.124782 4.008966-5.124782H4.614695C5.443587-5.124782 5.539228-4.861768 5.539228-4.463263C5.539228-4.26401 5.491407-3.921295 5.483437-3.881445C5.467497-3.793773 5.459527-3.722042 5.459527-3.706102C5.459527-3.602491 5.531258-3.57858 5.579078-3.57858C5.66675-3.57858 5.69863-3.626401 5.72254-3.777833L5.937733-5.276214C5.937733-5.387796 5.842092-5.387796 5.69863-5.387796H1.004234C.804981-5.387796 .789041-5.387796 .73325-5.220423L.247073-3.841594C.231133-3.801743 .207223-3.737983 .207223-3.690162C.207223-3.626401 .263014-3.57858 .326775-3.57858C.414446-3.57858 .430386-3.618431 .478207-3.753923C.932503-5.029141 1.163636-5.124782 2.375093-5.124782H2.685928C2.925031-5.124782 2.933001-5.116812 2.933001-5.053051C2.933001-5.029141 2.901121-4.869738 2.893151-4.837858L1.841096-.653549C1.769365-.350685 1.745455-.263014 .916563-.263014C.661519-.263014 .581818-.263014 .581818-.111582C.581818-.103611 .581818 0 .71731 0C.932503 0 1.482441-.02391 1.697634-.02391H2.375093C2.598257-.02391 3.156164 0 3.379328 0C3.443088 0 3.56264 0 3.56264-.151432C3.56264-.263014 3.474969-.263014 3.259776-.263014C3.068493-.263014 3.004732-.263014 2.797509-.278954C2.542466-.302864 2.510585-.334745 2.510585-.438356C2.510585-.470237 2.518555-.502117 2.542466-.581818L3.602491-4.821918Z'/>
+<path id='eq1-g2-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g1-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq1-g1-76' d='M4.387547-7.244832C4.495143-7.699128 4.531009-7.81868 5.583064-7.81868C5.905853-7.81868 5.989539-7.81868 5.989539-8.045828C5.989539-8.16538 5.858032-8.16538 5.810212-8.16538C5.571108-8.16538 5.296139-8.141469 5.057036-8.141469H3.455044C3.227895-8.141469 2.964882-8.16538 2.737733-8.16538C2.642092-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.618182-7.81868 2.797509-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.567621 3.526775-7.49589 3.478954-7.316563L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .621669 0 .860772 0H6.216687C6.479701 0 6.491656-.011955 6.575342-.227148L7.49589-2.773599C7.519801-2.833375 7.543711-2.905106 7.543711-2.940971C7.543711-3.012702 7.483935-3.060523 7.424159-3.060523C7.412204-3.060523 7.352428-3.060523 7.328518-3.012702C7.304608-3.000747 7.304608-2.976837 7.208966-2.749689C6.826401-1.697634 6.288418-.3467 4.267995-.3467H3.120299C2.952927-.3467 2.929016-.3467 2.857285-.358655C2.725778-.37061 2.713823-.394521 2.713823-.490162C2.713823-.573848 2.737733-.645579 2.761644-.753176L4.387547-7.244832Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='170.743911' y='0' xlink:href='#eq1-g1-65'/>
+<use x='182.840087' y='0' xlink:href='#eq1-g2-61'/>
+<use x='195.265568' y='0' xlink:href='#eq1-g1-76'/>
+<use x='203.230075' y='0' xlink:href='#eq1-g1-76'/>
+<use x='211.194581' y='-4.936186' xlink:href='#eq1-g0-84'/>
+</g>
+</svg></div><p>where <svg class="m-math" style="width: 0.830em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 7.964506 8.169366">
+<title>
+$ L $
+</title>
+<defs>
+<path id='eq2-g0-76' d='M4.387547-7.244832C4.495143-7.699128 4.531009-7.81868 5.583064-7.81868C5.905853-7.81868 5.989539-7.81868 5.989539-8.045828C5.989539-8.16538 5.858032-8.16538 5.810212-8.16538C5.571108-8.16538 5.296139-8.141469 5.057036-8.141469H3.455044C3.227895-8.141469 2.964882-8.16538 2.737733-8.16538C2.642092-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.618182-7.81868 2.797509-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.567621 3.526775-7.49589 3.478954-7.316563L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .621669 0 .860772 0H6.216687C6.479701 0 6.491656-.011955 6.575342-.227148L7.49589-2.773599C7.519801-2.833375 7.543711-2.905106 7.543711-2.940971C7.543711-3.012702 7.483935-3.060523 7.424159-3.060523C7.412204-3.060523 7.352428-3.060523 7.328518-3.012702C7.304608-3.000747 7.304608-2.976837 7.208966-2.749689C6.826401-1.697634 6.288418-.3467 4.267995-.3467H3.120299C2.952927-.3467 2.929016-.3467 2.857285-.358655C2.725778-.37061 2.713823-.394521 2.713823-.490162C2.713823-.573848 2.737733-.645579 2.761644-.753176L4.387547-7.244832Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-76'/>
+</g>
+</svg> is lower triangular. The supernodal method groups columns with similar sparsity patterns to exploit dense matrix operations (BLAS) for improved performance.</p></section><section id="autotoc_md183"><h3><a href="#autotoc_md183">Applicability</a></h3><ul><li>Symmetric positive definite sparse matrices</li><li>Large-scale finite element problems</li><li>Structural mechanics</li><li>Heat transfer problems</li><li>Graph Laplacian systems</li></ul></section><section id="autotoc_md184"><h3><a href="#autotoc_md184">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+
+<span class="n">Solver</span><span class="o">::</span><span class="n">CHOLMOD</span><span class="o">::</span><span class="n">SupernodalLLT</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-info"><h4>Note</h4><p>This solver requires CHOLMOD from SuiteSparse to be installed and RODIN_USE_CHOLMOD to be defined at compile time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p>CHOLMOD::SupernodalLLT for the solver implementation</p></aside></section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

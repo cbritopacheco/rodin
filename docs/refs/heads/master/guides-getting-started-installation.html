@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>General concepts &raquo; Installation and Setup | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="next" href="guides-getting-started-first-steps.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
+          Installation and Setup
+        </h1>
+        <p>How to install and configure <a href="namespace_rodin.html" class="m-doc">Rodin</a> on your system.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              <a href="#guides-getting-started-installation-requirements">System Requirements</a>
+              <ul>
+                <li><a href="#guides-getting-started-installation-required">Required Dependencies</a></li>
+                <li><a href="#guides-getting-started-installation-optional">Optional Dependencies</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-getting-started-installation-packages">Installing Dependencies</a>
+              <ul>
+                <li><a href="#guides-getting-started-installation-ubuntu">Ubuntu/Debian</a></li>
+                <li><a href="#guides-getting-started-installation-macos">macOS</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-getting-started-installation-rodin">Installing Rodin</a>
+              <ul>
+                <li><a href="#guides-getting-started-installation-clone">Clone the Repository</a></li>
+                <li>
+                  <a href="#guides-getting-started-installation-build">Build and Install</a>
+                  <ul>
+                    <li><a href="#guides-getting-started-installation-user">User-Local Installation (Recommended)</a></li>
+                    <li><a href="#guides-getting-started-installation-system">System-Wide Installation</a></li>
+                  </ul>
+                </li>
+                <li><a href="#guides-getting-started-installation-verify">Verifying the Installation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-getting-started-installation-troubleshooting">Troubleshooting</a>
+              <ul>
+                <li><a href="#guides-getting-started-installation-cmake-not-found">CMake can&#x27;t find Rodin</a></li>
+                <li><a href="#guides-getting-started-installation-linker-errors">Linker Errors</a></li>
+                <li><a href="#guides-getting-started-installation-compiler-errors">Compiler Errors</a></li>
+              </ul>
+            </li>
+            <li><a href="#guides-getting-started-installation-next">What&#x27;s Next?</a></li>
+          </ul>
+        </nav>
+<p>This guide will walk you through installing <a href="namespace_rodin.html" class="m-doc">Rodin</a> and setting up your development environment.</p><section id="guides-getting-started-installation-requirements"><h2><a href="#guides-getting-started-installation-requirements">System Requirements</a></h2><section id="guides-getting-started-installation-required"><h3><a href="#guides-getting-started-installation-required">Required Dependencies</a></h3><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> requires the following dependencies to be installed on your system:</p><ul><li><strong>CMake 3.16.0+</strong> - Build system generator</li><li><strong>C++20 compatible compiler</strong> - GCC 12+, Clang 14+, or AppleClang</li><li><strong>Boost 1.74+</strong> - C++ libraries collection</li><li><strong>Eigen3</strong> - Linear algebra library</li></ul></section><section id="guides-getting-started-installation-optional"><h3><a href="#guides-getting-started-installation-optional">Optional Dependencies</a></h3><p>For additional functionality, you may want to install:</p><ul><li><strong>OpenMP</strong> (<code>libomp</code>) - For parallel execution</li><li><strong>SuiteSparse</strong> (<code>libsuitesparse</code>) - For additional linear solvers</li><li><strong>METIS</strong> (<code>libmetis</code>) - For graph partitioning</li><li><strong>MPI</strong> - For distributed computing</li><li><strong>MMG</strong> - For mesh optimization (included as submodule)</li></ul></section></section><section id="guides-getting-started-installation-packages"><h2><a href="#guides-getting-started-installation-packages">Installing Dependencies</a></h2><section id="guides-getting-started-installation-ubuntu"><h3><a href="#guides-getting-started-installation-ubuntu">Ubuntu/Debian</a></h3><p>On Ubuntu or Debian-based systems, install the required dependencies with:</p><pre class="m-code">sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>cmake<span class="w"> </span>libboost-all-dev<span class="w"> </span>libeigen3-dev<span class="w"> </span>libomp-dev</pre><p>For optional dependencies:</p><pre class="m-code">sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>libsuitesparse-dev<span class="w"> </span>libmetis-dev<span class="w"> </span>libopenmpi-dev</pre></section><section id="guides-getting-started-installation-macos"><h3><a href="#guides-getting-started-installation-macos">macOS</a></h3><p>On macOS, use Homebrew to install dependencies:</p><pre class="m-code">brew<span class="w"> </span>install<span class="w"> </span>cmake<span class="w"> </span>boost<span class="w"> </span>eigen<span class="w"> </span>libomp</pre><p>For optional dependencies:</p><pre class="m-code">brew<span class="w"> </span>install<span class="w"> </span>suite-sparse<span class="w"> </span>metis<span class="w"> </span>open-mpi</pre></section></section><section id="guides-getting-started-installation-rodin"><h2><a href="#guides-getting-started-installation-rodin">Installing Rodin</a></h2><section id="guides-getting-started-installation-clone"><h3><a href="#guides-getting-started-installation-clone">Clone the Repository</a></h3><p>First, clone the <a href="namespace_rodin.html" class="m-doc">Rodin</a> repository with all submodules:</p><pre class="m-code">git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>https://github.com/cbritopacheco/rodin.git
+<span class="nb">cd</span><span class="w"> </span>rodin</pre><aside class="m-note m-info"><h4>Note</h4><p>The <code>--recursive</code> flag is important as it clones third-party dependencies included as git submodules. If you forgot this flag, run: <code>git submodule update --init --recursive</code></p></aside></section><section id="guides-getting-started-installation-build"><h3><a href="#guides-getting-started-installation-build">Build and Install</a></h3><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> uses CMake as its build system. There are two common installation methods:</p><section id="guides-getting-started-installation-user"><h4><a href="#guides-getting-started-installation-user">User-Local Installation (Recommended)</a></h4><p>Install <a href="namespace_rodin.html" class="m-doc">Rodin</a> to your home directory without requiring sudo:</p><pre class="m-code">mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..<span class="w"> </span>-DCMAKE_INSTALL_PREFIX<span class="o">=</span><span class="nv">$HOME</span>/.local<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release
+make<span class="w"> </span>-j4
+make<span class="w"> </span>install</pre><p>Then add to your shell profile (<code>~/.bashrc</code> or <code>~/.zshrc</code>):</p><pre class="m-code"><span class="nb">export</span><span class="w"> </span><span class="nv">CMAKE_PREFIX_PATH</span><span class="o">=</span><span class="nv">$HOME</span>/.local:<span class="nv">$CMAKE_PREFIX_PATH</span></pre></section><section id="guides-getting-started-installation-system"><h4><a href="#guides-getting-started-installation-system">System-Wide Installation</a></h4><p>Install <a href="namespace_rodin.html" class="m-doc">Rodin</a> system-wide (requires sudo):</p><pre class="m-code">mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..<span class="w"> </span>-DCMAKE_INSTALL_PREFIX<span class="o">=</span>/usr/local<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release
+make<span class="w"> </span>-j4
+sudo<span class="w"> </span>make<span class="w"> </span>install</pre></section></section><section id="guides-getting-started-installation-verify"><h3><a href="#guides-getting-started-installation-verify">Verifying the Installation</a></h3><p>After installation, verify that <a href="namespace_rodin.html" class="m-doc">Rodin</a> is working correctly by creating a simple test project.</p><p>Create a directory for your test project:</p><pre class="m-code">mkdir<span class="w"> </span>~/rodin-test<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>~/rodin-test</pre><p>Create a <code>CMakeLists.txt</code> file:</p><pre class="m-code"><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span><span class="w"> </span><span class="s">3.16</span><span class="p">)</span>
+<span class="nb">project</span><span class="p">(</span><span class="s">RodinTest</span><span class="w"> </span><span class="s">CXX</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD</span><span class="w"> </span><span class="s">20</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD_REQUIRED</span><span class="w"> </span><span class="s">ON</span><span class="p">)</span>
+
+<span class="nb">find_package</span><span class="p">(</span><span class="s">Rodin</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
+
+<span class="nb">add_executable</span><span class="p">(</span><span class="s">test_app</span><span class="w"> </span><span class="s">main.cpp</span><span class="p">)</span>
+<span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">test_app</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">Rodin::Geometry</span><span class="w"> </span><span class="s">Rodin::Variational</span><span class="p">)</span></pre><p>Create a <code>main.cpp</code> file:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">  </span><span class="n">P1</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Rodin installation verified!&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Mesh has &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCellCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; cells.&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;FE space has &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">.</span><span class="n">getSize</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; DOFs.&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre><p>Build and run:</p><pre class="m-code">cmake<span class="w"> </span>.
+make
+./test_app</pre><p>If you see output like:</p><pre class="m-code">Rodin<span class="w"> </span>installation<span class="w"> </span>verified!
+Mesh<span class="w"> </span>has<span class="w"> </span><span class="m">128</span><span class="w"> </span>cells.
+FE<span class="w"> </span>space<span class="w"> </span>has<span class="w"> </span><span class="m">81</span><span class="w"> </span>DOFs.</pre><p>Then your installation is successful!</p></section></section><section id="guides-getting-started-installation-troubleshooting"><h2><a href="#guides-getting-started-installation-troubleshooting">Troubleshooting</a></h2><section id="guides-getting-started-installation-cmake-not-found"><h3><a href="#guides-getting-started-installation-cmake-not-found">CMake can&#x27;t find Rodin</a></h3><p>If CMake reports that it cannot find the <a href="namespace_rodin.html" class="m-doc">Rodin</a> package, ensure that <code>CMAKE_PREFIX_PATH</code> includes your installation directory:</p><pre class="m-code">cmake<span class="w"> </span>.<span class="w"> </span>-DCMAKE_PREFIX_PATH<span class="o">=</span>/path/to/rodin/installation</pre></section><section id="guides-getting-started-installation-linker-errors"><h3><a href="#guides-getting-started-installation-linker-errors">Linker Errors</a></h3><p>If you encounter linker errors, make sure all required dependencies (Boost, Eigen) are properly installed and visible to CMake.</p></section><section id="guides-getting-started-installation-compiler-errors"><h3><a href="#guides-getting-started-installation-compiler-errors">Compiler Errors</a></h3><p>Verify that you&#x27;re using a C++20 compatible compiler:</p><pre class="m-code">g++<span class="w"> </span>--version<span class="w">  </span><span class="c1"># Should be 12.0 or higher</span>
+clang++<span class="w"> </span>--version<span class="w">  </span><span class="c1"># Should be 14.0 or higher</span></pre></section></section><section id="guides-getting-started-installation-next"><h2><a href="#guides-getting-started-installation-next">What&#x27;s Next?</a></h2><p>Now that you have <a href="namespace_rodin.html" class="m-doc">Rodin</a> installed, proceed to <a href="guides-getting-started-first-steps.html" class="m-doc">First Steps with Rodin</a> to learn the basic concepts and write your first <a href="namespace_rodin.html" class="m-doc">Rodin</a> program.</p></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-getting-started-first-steps.html" class="m-doc">First Steps with Rodin &raquo;</a></div>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -65,8 +72,9 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>::<wbr/></span>Flags <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_shard_8h.html">&lt;Rodin/Geometry/Shard.h&gt;</a></div>
         </h1>
-        <p>Bitmask enum indicating the state of a polytope in the shard.</p>
+        <p>Bitmask flags indicating polytope state.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -74,11 +82,13 @@
               Reference
               <ul>
                 <li><a href="#pub-static-attribs">Public static variables</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>A polytope can be:</p><ul><li>Owned locally</li><li>Ghosted from a remote process</li></ul>
+<p>A polytope in a shard can be marked as:</p><ul><li><strong>Owned</strong>: This process is responsible for computations on this element</li><li><strong>Ghost</strong>: Element is owned by another process but needed for boundary calculations</li></ul>
         <section id="pub-static-attribs">
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
@@ -89,12 +99,229 @@
             <dt id="af4bea3216236860c051fa1efcdd00482">
               static const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> <a href="#af4bea3216236860c051fa1efcdd00482" class="m-doc-self">Owned</a>
             </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> is owned by the local process.</dd>
+            <dd><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> is owned by local process.</dd>
             <dt id="a7d7cf5c14a93f0b6733c305c8f1cb3ad">
               static const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> <a href="#a7d7cf5c14a93f0b6733c305c8f1cb3ad" class="m-doc-self">Ghost</a>
             </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> is ghosted from a remote process.</dd>
+            <dd><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> is ghosted from remote process.</dd>
           </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a9d4763cab85470385da6310f3343fd88">
+              <span class="m-doc-wrap-bumper"><a href="#a9d4763cab85470385da6310f3343fd88" class="m-doc-self">Flags</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Default constructor (no flags).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a28b3ccd5828e35c454f98840e7a2ba14" class="m-doc">Flags</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#ga8df8de90fe5d375d6ed7367a432cb66e" class="m-doc">BitSet2</a> bits)</span>
+            </dt>
+            <dd>Constructs from bit pattern.</dd>
+            <dt id="a0624c11243afc09a128ff2a5881d6ee4">
+              <span class="m-doc-wrap-bumper"><a href="#a0624c11243afc09a128ff2a5881d6ee4" class="m-doc-self">Flags</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a77a316b5fcb9f4d7da290253218aaba2" class="m-doc">operator|</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; rhs) const -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a></span>
+            </dt>
+            <dd>Bitwise OR operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a24ba4edf8fdbac8c180284ae41f90d08" class="m-doc">operator&amp;</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; rhs) const -&gt; <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a></span>
+            </dt>
+            <dd>Checks if flags are set (bitwise AND).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af6c3119fd847b3059a96649314b907d9" class="m-doc">operator|=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp;</span>
+            </dt>
+            <dd>Bitwise OR assignment.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2764b073a20acf76fb30b41dd8af7995" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp;</span>
+            </dt>
+            <dd>Copy assignment.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8dc0ff2a1b7617446db375e164adbfee" class="m-doc">has</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> flag) const -&gt; <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a></span>
+            </dt>
+            <dd>Checks if specific flags are set.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
+            </dt>
+            <dd>Serialization method.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a28b3ccd5828e35c454f98840e7a2ba14"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Flags::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28b3ccd5828e35c454f98840e7a2ba14" class="m-doc-self">Flags</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#ga8df8de90fe5d375d6ed7367a432cb66e" class="m-doc">BitSet2</a> bits)</span></span>
+            </h3>
+            <p>Constructs from bit pattern.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">bits&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Bit pattern for flags</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a77a316b5fcb9f4d7da290253218aaba2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Flags::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77a316b5fcb9f4d7da290253218aaba2" class="m-doc-self">operator|</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; rhs) const</span></span>
+            </h3>
+            <p>Bitwise OR operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Right-hand side flags</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Combined flags</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a24ba4edf8fdbac8c180284ae41f90d08"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Flags::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24ba4edf8fdbac8c180284ae41f90d08" class="m-doc-self">operator&amp;</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; rhs) const</span></span>
+            </h3>
+            <p>Checks if flags are set (bitwise AND).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> to check</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if any of rhs flags are set</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af6c3119fd847b3059a96649314b907d9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Flags::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6c3119fd847b3059a96649314b907d9" class="m-doc-self">operator|=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; rhs)</span></span>
+            </h3>
+            <p>Bitwise OR assignment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> to add</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2764b073a20acf76fb30b41dd8af7995"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Flags::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2764b073a20acf76fb30b41dd8af7995" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy assignment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> to copy</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8dc0ff2a1b7617446db375e164adbfee"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Flags::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8dc0ff2a1b7617446db375e164adbfee" class="m-doc-self">has</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> flag) const</span></span>
+            </h3>
+            <p>Checks if specific flags are set.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">flag&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> to check for</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if any of the specified flags are set</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Archive&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Flags::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
+            </h3>
+            <p>Serialization method.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Archive</td>
+                  <td>Archive type</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Archive object</td>
+                </tr>
+                <tr>
+                  <td>version&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Serialization version</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

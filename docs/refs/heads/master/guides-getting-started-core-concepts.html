@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>General concepts &raquo; Understanding Core Concepts | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="prev" href="guides-getting-started-first-problem.html" />
+  <link rel="next" href="guides-meshes.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
+          Understanding Core Concepts
+        </h1>
+        <p>Deep dive into meshes, finite elements, and variational formulations.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              <a href="#guides-getting-started-core-concepts-geometry">Geometry and Meshes</a>
+              <ul>
+                <li><a href="#guides-getting-started-core-concepts-mesh">The Mesh Object</a></li>
+                <li><a href="#guides-getting-started-core-concepts-polytopes">Polytopes</a></li>
+                <li><a href="#guides-getting-started-core-concepts-connectivity">Connectivity</a></li>
+                <li><a href="#guides-getting-started-core-concepts-iterators">Mesh Iteration</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-getting-started-core-concepts-variational">Variational Formulations</a>
+              <ul>
+                <li><a href="#guides-getting-started-core-concepts-fe-spaces">Finite Element Spaces</a></li>
+                <li><a href="#guides-getting-started-core-concepts-trial-test">Trial and Test Functions</a></li>
+                <li><a href="#guides-getting-started-core-concepts-operators">Differential Operators</a></li>
+                <li><a href="#guides-getting-started-core-concepts-integrals">Integrals</a></li>
+                <li><a href="#guides-getting-started-core-concepts-bc">Boundary Conditions</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-getting-started-core-concepts-problem">Defining Problems</a>
+              <ul>
+                <li><a href="#guides-getting-started-core-concepts-problem-assembly">Problem Assembly</a></li>
+                <li><a href="#guides-getting-started-core-concepts-solving">Solving</a></li>
+              </ul>
+            </li>
+            <li><a href="#guides-getting-started-core-concepts-workflow">Typical Workflow</a></li>
+            <li><a href="#guides-getting-started-core-concepts-next">What&#x27;s Next?</a></li>
+          </ul>
+        </nav>
+<p>This section provides a deeper understanding of the core concepts in <a href="namespace_rodin.html" class="m-doc">Rodin</a>, building on what you learned in the previous sections.</p><section id="guides-getting-started-core-concepts-geometry"><h2><a href="#guides-getting-started-core-concepts-geometry">Geometry and Meshes</a></h2><section id="guides-getting-started-core-concepts-mesh"><h3><a href="#guides-getting-started-core-concepts-mesh">The Mesh Object</a></h3><p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> is the fundamental geometric object in <a href="namespace_rodin.html" class="m-doc">Rodin</a>. It represents a discretization of your domain into simple shapes (polytopes).</p><p>Key concepts:**</p><ul><li><strong>Vertices</strong> (dimension 0): Points in space</li><li><strong>Edges/Faces</strong> (dimension 1 in 2D, 1-2 in 3D): Line segments or faces</li><li><strong>Cells</strong> (dimension 2 in 2D, 3 in 3D): Triangles, quads, tetrahedra, etc.</li></ul><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Dimension: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getDimension</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Vertices: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getVertexCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Cells: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCellCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre></section><section id="guides-getting-started-core-concepts-polytopes"><h3><a href="#guides-getting-started-core-concepts-polytopes">Polytopes</a></h3><p>A <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> is a geometric shape. <a href="namespace_rodin.html" class="m-doc">Rodin</a> supports various polytope types:</p><table class="m-table"><thead><tr><th>Type</th><th>Dimension</th><th>Description</th></tr></thead><tbody><tr><td><code>Point</code></td><td>0</td><td>A point/vertex</td></tr><tr><td><code>Segment</code></td><td>1</td><td>A line segment</td></tr><tr><td><code>Triangle</code></td><td>2</td><td>A triangle</td></tr><tr><td><code>Quadrilateral</code></td><td>2</td><td>A quadrilateral</td></tr><tr><td><code>Tetrahedron</code></td><td>3</td><td>A tetrahedron</td></tr><tr><td><code>Hexahedron</code></td><td>3</td><td>A hexahedron (cube)</td></tr></tbody></table><pre class="m-code"><span class="c1">// Create different mesh types</span>
+<span class="n">Mesh</span><span class="w"> </span><span class="n">tri_mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mesh</span><span class="p">().</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span>
+<span class="n">Mesh</span><span class="w"> </span><span class="n">tet_mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mesh</span><span class="p">().</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">});</span></pre></section><section id="guides-getting-started-core-concepts-connectivity"><h3><a href="#guides-getting-started-core-concepts-connectivity">Connectivity</a></h3><p>Connectivity describes the relationships between polytopes of different dimensions. You need to compute connectivity before certain operations.</p><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+
+<span class="c1">// Face-to-cell connectivity (needed for boundary operations)</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+
+<span class="c1">// Vertex-to-cell connectivity</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+
+<span class="c1">// Cell-to-cell connectivity (for finding neighbors)</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span></pre><p>Common connectivity patterns:**</p><ul><li><code>(1, 2)</code>: Edges to cells - needed for boundary conditions in 2D</li><li><code>(2, 3)</code>: Faces to cells - needed for boundary conditions in 3D</li><li><code>(0, d)</code>: Vertices to cells - for vertex-based operations</li><li><code>(d, d)</code>: Cell-to-cell adjacency</li></ul></section><section id="guides-getting-started-core-concepts-iterators"><h3><a href="#guides-getting-started-core-concepts-iterators">Mesh Iteration</a></h3><p>You can iterate over polytopes of a specific dimension:</p><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span>
+
+<span class="c1">// Iterate over all cells</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Access cell information</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Cell &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getIndex</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Iterate over all vertices</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getVertex</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">Point</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getCoordinates</span><span class="p">();</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Vertex at (&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;, &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;)&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Iterate over faces (edges in 2D)</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getFace</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Access face information</span>
+<span class="p">}</span></pre></section></section><section id="guides-getting-started-core-concepts-variational"><h2><a href="#guides-getting-started-core-concepts-variational">Variational Formulations</a></h2><section id="guides-getting-started-core-concepts-fe-spaces"><h3><a href="#guides-getting-started-core-concepts-fe-spaces">Finite Element Spaces</a></h3><p>A finite element space defines the type of approximation used. <a href="namespace_rodin.html" class="m-doc">Rodin</a> provides several standard spaces:</p><table class="m-table"><thead><tr><th>Space</th><th>Description</th><th>Typical Use</th></tr></thead><tbody><tr><td><code>P1</code></td><td>Continuous piecewise linear</td><td>Most PDEs</td></tr><tr><td><code>P2</code></td><td>Continuous piecewise quadratic</td><td>Higher accuracy</td></tr><tr><td><code>P0</code></td><td>Piecewise constant</td><td>Discontinuous quantities</td></tr><tr><td><code>H1</code></td><td>General H¹ conforming space</td><td>Scalar problems</td></tr></tbody></table><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+
+<span class="c1">// Linear elements</span>
+<span class="n">P1</span><span class="w"> </span><span class="nf">Vh1</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;P1 space DOFs: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Vh1</span><span class="p">.</span><span class="n">getSize</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// Quadratic elements (if available)</span>
+<span class="c1">// P2 Vh2(mesh);</span>
+<span class="c1">// std::cout &lt;&lt; &quot;P2 space DOFs: &quot; &lt;&lt; Vh2.getSize() &lt;&lt; std::endl;</span></pre></section><section id="guides-getting-started-core-concepts-trial-test"><h3><a href="#guides-getting-started-core-concepts-trial-test">Trial and Test Functions</a></h3><p>In the finite element method, we express problems in weak form using trial and test functions.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+
+<span class="c1">// Trial function: the unknown we&#39;re solving for</span>
+<span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+
+<span class="c1">// Test function: used in weak formulation</span>
+<span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre><p>Mathematical background:**</p><ul><li>We seek <svg class="m-math" style="width: 3.435em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 32.978496 9.962629">
+<title>
+$ u \in V_h $
+</title>
+<defs>
+<path id='eq1-g1-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
+<path id='eq1-g0-50' d='M6.551432-2.749689C6.75467-2.749689 6.969863-2.749689 6.969863-2.988792S6.75467-3.227895 6.551432-3.227895H1.482441C1.625903-4.829888 3.000747-5.977584 4.686426-5.977584H6.551432C6.75467-5.977584 6.969863-5.977584 6.969863-6.216687S6.75467-6.455791 6.551432-6.455791H4.662516C2.618182-6.455791 .992279-4.901619 .992279-2.988792S2.618182 .478207 4.662516 .478207H6.551432C6.75467 .478207 6.969863 .478207 6.969863 .239103S6.75467 0 6.551432 0H4.686426C3.000747 0 1.625903-1.147696 1.482441-2.749689H6.551432Z'/>
+<path id='eq1-g2-86' d='M7.400249-6.838356C7.806725-7.483935 8.177335-7.770859 8.787049-7.81868C8.9066-7.830635 9.002242-7.830635 9.002242-8.045828C9.002242-8.093649 8.978331-8.16538 8.870735-8.16538C8.655542-8.16538 8.141469-8.141469 7.926276-8.141469C7.579577-8.141469 7.220922-8.16538 6.886177-8.16538C6.790535-8.16538 6.670984-8.16538 6.670984-7.938232C6.670984-7.830635 6.77858-7.81868 6.826401-7.81868C7.268742-7.782814 7.316563-7.567621 7.316563-7.424159C7.316563-7.244832 7.149191-6.969863 7.137235-6.957908L3.383313-1.004234L2.546451-7.44807C2.546451-7.79477 3.16812-7.81868 3.299626-7.81868C3.478954-7.81868 3.58655-7.81868 3.58655-8.045828C3.58655-8.16538 3.455044-8.16538 3.419178-8.16538C3.21594-8.16538 2.976837-8.141469 2.773599-8.141469H2.10411C1.231382-8.141469 .872727-8.16538 .860772-8.16538C.789041-8.16538 .645579-8.16538 .645579-7.950187C.645579-7.81868 .729265-7.81868 .920548-7.81868C1.530262-7.81868 1.566127-7.711083 1.601993-7.412204L2.558406-.035866C2.594271 .215193 2.594271 .251059 2.761644 .251059C2.905106 .251059 2.964882 .215193 3.084433 .02391L7.400249-6.838356Z'/>
+<path id='eq1-g2-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g2-117'/>
+<use x='9.983269' y='0' xlink:href='#eq1-g0-50'/>
+<use x='21.274237' y='0' xlink:href='#eq1-g2-86'/>
+<use x='28.098587' y='1.793263' xlink:href='#eq1-g1-104'/>
+</g>
+</svg> (the trial space)</li><li>We test against all <svg class="m-math" style="width: 3.375em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 32.404275 9.962629">
+<title>
+$ v \in V_h $
+</title>
+<defs>
+<path id='eq2-g1-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
+<path id='eq2-g0-50' d='M6.551432-2.749689C6.75467-2.749689 6.969863-2.749689 6.969863-2.988792S6.75467-3.227895 6.551432-3.227895H1.482441C1.625903-4.829888 3.000747-5.977584 4.686426-5.977584H6.551432C6.75467-5.977584 6.969863-5.977584 6.969863-6.216687S6.75467-6.455791 6.551432-6.455791H4.662516C2.618182-6.455791 .992279-4.901619 .992279-2.988792S2.618182 .478207 4.662516 .478207H6.551432C6.75467 .478207 6.969863 .478207 6.969863 .239103S6.75467 0 6.551432 0H4.686426C3.000747 0 1.625903-1.147696 1.482441-2.749689H6.551432Z'/>
+<path id='eq2-g2-86' d='M7.400249-6.838356C7.806725-7.483935 8.177335-7.770859 8.787049-7.81868C8.9066-7.830635 9.002242-7.830635 9.002242-8.045828C9.002242-8.093649 8.978331-8.16538 8.870735-8.16538C8.655542-8.16538 8.141469-8.141469 7.926276-8.141469C7.579577-8.141469 7.220922-8.16538 6.886177-8.16538C6.790535-8.16538 6.670984-8.16538 6.670984-7.938232C6.670984-7.830635 6.77858-7.81868 6.826401-7.81868C7.268742-7.782814 7.316563-7.567621 7.316563-7.424159C7.316563-7.244832 7.149191-6.969863 7.137235-6.957908L3.383313-1.004234L2.546451-7.44807C2.546451-7.79477 3.16812-7.81868 3.299626-7.81868C3.478954-7.81868 3.58655-7.81868 3.58655-8.045828C3.58655-8.16538 3.455044-8.16538 3.419178-8.16538C3.21594-8.16538 2.976837-8.141469 2.773599-8.141469H2.10411C1.231382-8.141469 .872727-8.16538 .860772-8.16538C.789041-8.16538 .645579-8.16538 .645579-7.950187C.645579-7.81868 .729265-7.81868 .920548-7.81868C1.530262-7.81868 1.566127-7.711083 1.601993-7.412204L2.558406-.035866C2.594271 .215193 2.594271 .251059 2.761644 .251059C2.905106 .251059 2.964882 .215193 3.084433 .02391L7.400249-6.838356Z'/>
+<path id='eq2-g2-118' d='M5.463512-4.471233C5.463512-5.224408 5.080946-5.272229 4.985305-5.272229C4.698381-5.272229 4.435367-4.985305 4.435367-4.746202C4.435367-4.60274 4.519054-4.519054 4.566874-4.471233C4.686426-4.363636 4.99726-4.040847 4.99726-3.419178C4.99726-2.917061 4.27995-.119552 2.84533-.119552C2.116065-.119552 1.972603-.729265 1.972603-1.171606C1.972603-1.769365 2.247572-2.606227 2.570361-3.466999C2.761644-3.957161 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.255293-1.996513 1.255293-1.625903 1.255293-1.338979C1.255293-1.075965 1.291158-.585803 1.661768-.251059C2.092154 .119552 2.689913 .119552 2.797509 .119552C4.782067 .119552 5.463512-3.789788 5.463512-4.471233Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g2-118'/>
+<use x='9.409048' y='0' xlink:href='#eq2-g0-50'/>
+<use x='20.700016' y='0' xlink:href='#eq2-g2-86'/>
+<use x='27.524366' y='1.793263' xlink:href='#eq2-g1-104'/>
+</g>
+</svg> (the test space)</li><li>The discrete problem is: Find <svg class="m-math" style="width: 1.202em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 11.542349 6.940636">
+<title>
+$ u_h $
+</title>
+<defs>
+<path id='eq3-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
+<path id='eq3-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g1-117'/>
+<use x='6.66244' y='1.793263' xlink:href='#eq3-g0-104'/>
+</g>
+</svg> such that <svg class="m-math" style="width: 8.796em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.436924 11.955168">
+<title>
+$ a(u_h, v_h) = b(v_h) $
+</title>
+<defs>
+<path id='eq4-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
+<path id='eq4-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq4-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq4-g2-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq4-g1-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq4-g1-97' d='M3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665ZM4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.944458 4.27995-1.075965 4.387547-1.542217C4.471233-1.841096 4.531009-2.10411 4.62665-2.450809C5.068991-4.244085 5.176588-4.674471 5.176588-4.746202C5.176588-4.913574 5.045081-5.045081 4.865753-5.045081C4.483188-5.045081 4.387547-4.62665 4.363636-4.483188Z'/>
+<path id='eq4-g1-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq4-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq4-g1-118' d='M5.463512-4.471233C5.463512-5.224408 5.080946-5.272229 4.985305-5.272229C4.698381-5.272229 4.435367-4.985305 4.435367-4.746202C4.435367-4.60274 4.519054-4.519054 4.566874-4.471233C4.686426-4.363636 4.99726-4.040847 4.99726-3.419178C4.99726-2.917061 4.27995-.119552 2.84533-.119552C2.116065-.119552 1.972603-.729265 1.972603-1.171606C1.972603-1.769365 2.247572-2.606227 2.570361-3.466999C2.761644-3.957161 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.255293-1.996513 1.255293-1.625903 1.255293-1.338979C1.255293-1.075965 1.291158-.585803 1.661768-.251059C2.092154 .119552 2.689913 .119552 2.797509 .119552C4.782067 .119552 5.463512-3.789788 5.463512-4.471233Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g1-97'/>
+<use x='6.144944' y='0' xlink:href='#eq4-g2-40'/>
+<use x='10.69727' y='0' xlink:href='#eq4-g1-117'/>
+<use x='17.35971' y='1.793263' xlink:href='#eq4-g0-104'/>
+<use x='22.737751' y='0' xlink:href='#eq4-g1-59'/>
+<use x='27.981909' y='0' xlink:href='#eq4-g1-118'/>
+<use x='33.64118' y='1.793263' xlink:href='#eq4-g0-104'/>
+<use x='39.019221' y='0' xlink:href='#eq4-g2-41'/>
+<use x='46.892376' y='0' xlink:href='#eq4-g2-61'/>
+<use x='59.317857' y='0' xlink:href='#eq4-g1-98'/>
+<use x='64.294962' y='0' xlink:href='#eq4-g2-40'/>
+<use x='68.847288' y='0' xlink:href='#eq4-g1-118'/>
+<use x='74.506558' y='1.793263' xlink:href='#eq4-g0-104'/>
+<use x='79.884599' y='0' xlink:href='#eq4-g2-41'/>
+</g>
+</svg> for all <svg class="m-math" style="width: 1.098em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 10.539179 6.940636">
+<title>
+$ v_h $
+</title>
+<defs>
+<path id='eq5-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
+<path id='eq5-g1-118' d='M5.463512-4.471233C5.463512-5.224408 5.080946-5.272229 4.985305-5.272229C4.698381-5.272229 4.435367-4.985305 4.435367-4.746202C4.435367-4.60274 4.519054-4.519054 4.566874-4.471233C4.686426-4.363636 4.99726-4.040847 4.99726-3.419178C4.99726-2.917061 4.27995-.119552 2.84533-.119552C2.116065-.119552 1.972603-.729265 1.972603-1.171606C1.972603-1.769365 2.247572-2.606227 2.570361-3.466999C2.761644-3.957161 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.255293-1.996513 1.255293-1.625903 1.255293-1.338979C1.255293-1.075965 1.291158-.585803 1.661768-.251059C2.092154 .119552 2.689913 .119552 2.797509 .119552C4.782067 .119552 5.463512-3.789788 5.463512-4.471233Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g1-118'/>
+<use x='5.65927' y='1.793263' xlink:href='#eq5-g0-104'/>
+</g>
+</svg></li></ul></section><section id="guides-getting-started-core-concepts-operators"><h3><a href="#guides-getting-started-core-concepts-operators">Differential Operators</a></h3><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> provides operators that work on trial and test functions:</p><table class="m-table"><thead><tr><th>Operator</th><th>Mathematical Meaning</th><th>Usage</th></tr></thead><tbody><tr><td><code>Grad(u)</code></td><td><svg class="m-math" style="width: 1.732em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 16.62511 8.169354">
+<title>
+$ \nabla u $
+</title>
+<defs>
+<path id='eq6-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq6-g0-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g0-114'/>
+<use x='9.962671' y='0' xlink:href='#eq6-g1-117'/>
+</g>
+</svg></td><td>Gradient</td></tr><tr><td><code>Div(u)</code></td><td><svg class="m-math" style="width: 2.631em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 25.259327 8.169354">
+<title>
+$ \nabla \cdot u $
+</title>
+<defs>
+<path id='eq7-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq7-g0-1' d='M2.295392-2.988792C2.295392-3.335492 2.008468-3.622416 1.661768-3.622416S1.028144-3.335492 1.028144-2.988792S1.315068-2.355168 1.661768-2.355168S2.295392-2.642092 2.295392-2.988792Z'/>
+<path id='eq7-g0-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-114'/>
+<use x='12.619334' y='0' xlink:href='#eq7-g0-1'/>
+<use x='18.596888' y='0' xlink:href='#eq7-g1-117'/>
+</g>
+</svg></td><td>Divergence</td></tr><tr><td><code>Curl(u)</code></td><td><svg class="m-math" style="width: 3.254em; height: 0.955em; vertical-align: -0.104em;" viewBox="0 -8.169354 31.236934 9.165626">
+<title>
+$ \nabla \times u $
+</title>
+<defs>
+<path id='eq8-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq8-g0-2' d='M4.65056-3.323537L2.259527-5.702615C2.116065-5.846077 2.092154-5.869988 1.996513-5.869988C1.876961-5.869988 1.75741-5.762391 1.75741-5.630884C1.75741-5.547198 1.78132-5.523288 1.912827-5.391781L4.303861-2.988792L1.912827-.585803C1.78132-.454296 1.75741-.430386 1.75741-.3467C1.75741-.215193 1.876961-.107597 1.996513-.107597C2.092154-.107597 2.116065-.131507 2.259527-.274969L4.638605-2.654047L7.113325-.179328C7.137235-.167372 7.220922-.107597 7.292653-.107597C7.436115-.107597 7.531756-.215193 7.531756-.3467C7.531756-.37061 7.531756-.418431 7.49589-.478207C7.483935-.502117 5.583064-2.379078 4.985305-2.988792L7.173101-5.176588C7.232877-5.248319 7.412204-5.403736 7.47198-5.475467C7.483935-5.499377 7.531756-5.547198 7.531756-5.630884C7.531756-5.762391 7.436115-5.869988 7.292653-5.869988C7.197011-5.869988 7.149191-5.822167 7.017684-5.69066L4.65056-3.323537Z'/>
+<path id='eq8-g0-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='0' y='0' xlink:href='#eq8-g0-114'/>
+<use x='12.619334' y='0' xlink:href='#eq8-g0-2'/>
+<use x='24.574495' y='0' xlink:href='#eq8-g1-117'/>
+</g>
+</svg></td><td>Curl</td></tr></tbody></table><pre class="m-code"><span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+
+<span class="c1">// Gradient operator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">grad_u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">grad_v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">);</span>
+
+<span class="c1">// Used in integrals</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">bilinear_form</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span></pre></section><section id="guides-getting-started-core-concepts-integrals"><h3><a href="#guides-getting-started-core-concepts-integrals">Integrals</a></h3><p>The <code>Integral</code> function represents integration over the domain or boundary:</p><pre class="m-code"><span class="c1">// Domain integral: ∫_Ω ∇u · ∇v dx</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
+
+<span class="c1">// Domain integral with function: ∫_Ω f v dx</span>
+<span class="n">RealFunction</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+
+<span class="c1">// The dot product is implicit for vector quantities</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">inner_product</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span></pre></section><section id="guides-getting-started-core-concepts-bc"><h3><a href="#guides-getting-started-core-concepts-bc">Boundary Conditions</a></h3><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> supports different types of boundary conditions:</p><p>Dirichlet (essential) boundary conditions:**</p><pre class="m-code"><span class="c1">// Homogeneous: u = 0 on boundary</span>
+<span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">())</span>
+
+<span class="c1">// Non-homogeneous: u = g on boundary</span>
+<span class="n">RealFunction</span><span class="w"> </span><span class="n">g</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">();</span><span class="w"> </span><span class="p">});</span>
+<span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">)</span>
+
+<span class="c1">// On specific boundary: u = 0 on boundary with attribute 1</span>
+<span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">()).</span><span class="n">on</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></pre><p>Neumann (natural) boundary conditions:**</p><pre class="m-code"><span class="c1">// Neumann conditions appear as boundary integrals</span>
+<span class="n">RealFunction</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">neumann</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">BoundaryAttribute</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span></pre></section></section><section id="guides-getting-started-core-concepts-problem"><h2><a href="#guides-getting-started-core-concepts-problem">Defining Problems</a></h2><section id="guides-getting-started-core-concepts-problem-assembly"><h3><a href="#guides-getting-started-core-concepts-problem-assembly">Problem Assembly</a></h3><p>The <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class represents a complete variational problem:</p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w">  </span><span class="c1">// Bilinear form</span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w">               </span><span class="c1">// Linear form</span>
+<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span><span class="w">      </span><span class="c1">// Boundary conditions</span></pre><p>What happens internally:**</p><ol><li><a href="namespace_rodin.html" class="m-doc">Rodin</a> assembles the stiffness matrix from <code>Integral(Grad(u), Grad(v))</code></li><li>Assembles the load vector from <code>Integral(f, v)</code></li><li>Applies boundary conditions by modifying the system</li><li>Prepares the linear system <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
+<title>
+$ Ax = b $
+</title>
+<defs>
+<path id='eq9-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq9-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq9-g0-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq9-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g0-65'/>
+<use x='8.775347' y='0' xlink:href='#eq9-g0-120'/>
+<use x='18.748263' y='0' xlink:href='#eq9-g1-61'/>
+<use x='31.173744' y='0' xlink:href='#eq9-g0-98'/>
+</g>
+</svg></li></ol></section><section id="guides-getting-started-core-concepts-solving"><h3><a href="#guides-getting-started-core-concepts-solving">Solving</a></h3><p>After defining a problem, solve it with an appropriate solver:</p><pre class="m-code"><span class="c1">// Direct solver (good for small to medium problems)</span>
+<span class="n">SparseLU</span><span class="p">().</span><span class="n">solve</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+
+<span class="c1">// Iterative solver (good for large problems)</span>
+<span class="n">CG</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
+<span class="n">solver</span><span class="p">.</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+<span class="n">solver</span><span class="p">.</span><span class="n">setRelativeTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">);</span>
+<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+
+<span class="c1">// Access solution</span>
+<span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">solution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">();</span></pre></section></section><section id="guides-getting-started-core-concepts-workflow"><h2><a href="#guides-getting-started-core-concepts-workflow">Typical Workflow</a></h2><p>Here&#x27;s a summary of the typical workflow for solving a PDE with <a href="namespace_rodin.html" class="m-doc">Rodin</a>:</p><ol><li><p><strong>Create/Load Mesh</strong></p><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span></pre></li><li><strong>Define Finite Element Space</strong> <code class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span></code></li><li><p><strong>Create Trial and Test Functions</strong></p><pre class="m-code"><span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre></li><li><p><strong>Define Problem</strong></p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">bilinear</span><span class="w"> </span><span class="n">forms</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">[</span><span class="n">linear</span><span class="w"> </span><span class="n">forms</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">[</span><span class="n">boundary</span><span class="w"> </span><span class="n">conditions</span><span class="p">];</span></pre></li><li><strong>Solve</strong> <code class="m-code"><span class="n">Solver</span><span class="p">().</span><span class="n">solve</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span></code></li><li><p><strong>Post-Process</strong></p><pre class="m-code"><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;solution.gf&quot;</span><span class="p">);</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;mesh.mesh&quot;</span><span class="p">);</span></pre></li></ol></section><section id="guides-getting-started-core-concepts-next"><h2><a href="#guides-getting-started-core-concepts-next">What&#x27;s Next?</a></h2><p>You now have a solid understanding of <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s core concepts! Here are some suggestions for continuing your journey:</p><ul><li><strong>Explore Examples</strong>: Check out <a href="examples-index.html" class="m-doc">Examples and tutorials</a> for more complex problems and techniques</li><li><strong>Read Guides</strong>: The <a href="guides-index.html" class="m-doc">General concepts</a> provide deeper dives into specific topics</li><li><strong>API Reference</strong>: Browse the API documentation to discover all available features</li><li><strong>Try Your Own Problems</strong>: Apply what you&#x27;ve learned to your own PDE problems</li></ul><p>For more detailed information on specific topics:</p><ul><li><a href="guides-meshes.html" class="m-doc">Meshes</a> - Comprehensive guide to mesh operations</li><li><a href="guides-polytopes.html" class="m-doc">Polytopes</a> - Detailed information about polytopes</li><li><a href="guides-connectivity.html" class="m-doc">Connectivity</a> - Understanding connectivity in depth</li><li><a href="fem-ciarlet.html" class="m-doc">Ciarlet’s definition of a finite element</a> - Mathematical foundations of finite elements</li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-getting-started-first-problem.html" class="m-doc">&laquo; Your First Problem: Solving the Poisson Equation</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-meshes.html" class="m-doc">Meshes &raquo;</a></div>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

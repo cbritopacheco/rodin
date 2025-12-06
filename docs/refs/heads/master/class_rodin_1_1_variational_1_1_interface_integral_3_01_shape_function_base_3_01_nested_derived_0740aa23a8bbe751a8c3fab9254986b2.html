@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -64,6 +71,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_interface_integral_8h.html">&lt;Rodin/Variational/InterfaceIntegral.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>InterfaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
@@ -75,6 +83,7 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -161,17 +170,195 @@ $ V_h $
             <dd>Approximation of the integral of a test shape function.</dd>
           </dl>
         </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a4a92b977c2f269d168936180d939d713" class="m-doc">InterfaceIntegral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, FES, TestSpace&gt;&amp; rhs) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs interface integral from function and test operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a462cecb0feba2c3da1b304d82c6350d0" class="m-doc">InterfaceIntegral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">IntegrandType</a>&amp; integrand) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs interface integral from integrand.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aedd7737f3184cc087a4efd14ba24b29b" class="m-doc">InterfaceIntegral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_interface_integral.html" class="m-doc">InterfaceIntegral</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a67bd9629f05368ddda322bb67b68e5b1" class="m-doc">InterfaceIntegral</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_interface_integral.html" class="m-doc">InterfaceIntegral</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the integration region.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af1f3519d4152a4d6cae4ad0aa8840243" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_interface_integral.html" class="m-doc">InterfaceIntegral</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+            <dd>Creates a copy of this integrator.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a4a92b977c2f269d168936180d939d713"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />InterfaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4a92b977c2f269d168936180d939d713" class="m-doc-self">InterfaceIntegral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, FES, TestSpace&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs interface integral from function and test operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">LHSDerived</td>
+                  <td>Type of left-hand side function</td>
+                </tr>
+                <tr>
+                  <td>RHSDerived</td>
+                  <td>Type of right-hand side shape function</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>lhs</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> operator (left-hand side)</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> operator (right-hand side)</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Creates the interior face integral <svg class="m-math" style="width: 9.045em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 86.831441 15.18763">
+<title>
+$ \int_{\Gamma_h} f(x) \cdot A(v) d\sigma $
+</title>
+<defs>
+<path id='eq4-g1-1' d='M2.295392-2.988792C2.295392-3.335492 2.008468-3.622416 1.661768-3.622416S1.028144-3.335492 1.028144-2.988792S1.315068-2.355168 1.661768-2.355168S2.295392-2.642092 2.295392-2.988792Z'/>
+<path id='eq4-g5-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq4-g5-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq4-g3-27' d='M6.073225-4.507098C6.228643-4.507098 6.623163-4.507098 6.623163-4.889664C6.623163-5.152677 6.396015-5.152677 6.180822-5.152677H3.53873C1.745455-5.152677 .454296-3.156164 .454296-1.745455C.454296-.729265 1.111831 .119552 2.187796 .119552C3.598506 .119552 5.140722-1.398755 5.140722-3.19203C5.140722-3.658281 5.033126-4.112578 4.746202-4.507098H6.073225ZM2.199751-.119552C1.590037-.119552 1.147696-.585803 1.147696-1.41071C1.147696-2.12802 1.578082-4.507098 3.335492-4.507098C3.849564-4.507098 4.423412-4.25604 4.423412-3.335492C4.423412-2.917061 4.23213-1.912827 3.813699-1.219427C3.383313-.514072 2.737733-.119552 2.199751-.119552Z'/>
+<path id='eq4-g3-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq4-g3-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq4-g3-102' d='M5.332005-4.805978C5.571108-4.805978 5.66675-4.805978 5.66675-5.033126C5.66675-5.152677 5.571108-5.152677 5.355915-5.152677H4.387547C4.614695-6.38406 4.782067-7.232877 4.877709-7.615442C4.94944-7.902366 5.200498-8.177335 5.511333-8.177335C5.762391-8.177335 6.01345-8.069738 6.133001-7.962142C5.66675-7.914321 5.523288-7.567621 5.523288-7.364384C5.523288-7.12528 5.702615-6.981818 5.929763-6.981818C6.168867-6.981818 6.527522-7.185056 6.527522-7.639352C6.527522-8.141469 6.025405-8.416438 5.499377-8.416438C4.985305-8.416438 4.483188-8.033873 4.244085-7.567621C4.028892-7.149191 3.90934-6.718804 3.634371-5.152677H2.833375C2.606227-5.152677 2.486675-5.152677 2.486675-4.937484C2.486675-4.805978 2.558406-4.805978 2.797509-4.805978H3.56264C3.347447-3.694147 2.857285-.992279 2.582316 .286924C2.379078 1.327024 2.199751 2.199751 1.601993 2.199751C1.566127 2.199751 1.219427 2.199751 1.004234 1.972603C1.613948 1.924782 1.613948 1.398755 1.613948 1.3868C1.613948 1.147696 1.43462 1.004234 1.207472 1.004234C.968369 1.004234 .609714 1.207472 .609714 1.661768C.609714 2.175841 1.135741 2.438854 1.601993 2.438854C2.82142 2.438854 3.323537 .251059 3.455044-.3467C3.670237-1.267248 4.25604-4.447323 4.315816-4.805978H5.332005Z'/>
+<path id='eq4-g3-118' d='M5.463512-4.471233C5.463512-5.224408 5.080946-5.272229 4.985305-5.272229C4.698381-5.272229 4.435367-4.985305 4.435367-4.746202C4.435367-4.60274 4.519054-4.519054 4.566874-4.471233C4.686426-4.363636 4.99726-4.040847 4.99726-3.419178C4.99726-2.917061 4.27995-.119552 2.84533-.119552C2.116065-.119552 1.972603-.729265 1.972603-1.171606C1.972603-1.769365 2.247572-2.606227 2.570361-3.466999C2.761644-3.957161 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.255293-1.996513 1.255293-1.625903 1.255293-1.338979C1.255293-1.075965 1.291158-.585803 1.661768-.251059C2.092154 .119552 2.689913 .119552 2.797509 .119552C4.782067 .119552 5.463512-3.789788 5.463512-4.471233Z'/>
+<path id='eq4-g3-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq4-g2-104' d='M1.990535-3.969116C1.996513-3.993026 2.008468-4.028892 2.008468-4.05878C2.008468-4.154421 1.888917-4.148443 1.817186-4.142466L1.147696-4.088667C1.046077-4.08269 .968369-4.076712 .968369-3.939228C.968369-3.843587 1.046077-3.843587 1.135741-3.843587C1.315068-3.843587 1.356912-3.831631 1.43462-3.801743C1.43462-3.730012 1.43462-3.718057 1.41071-3.622416L.573848-.280946C.549938-.185305 .549938-.155417 .549938-.143462C.549938 .005978 .669489 .059776 .759153 .059776C.818929 .059776 .926526 .035866 1.004234-.077709C1.022167-.119552 1.075965-.316812 1.105853-.442341C1.135741-.555915 1.201494-.830884 1.23736-.980324C1.279203-1.135741 1.309091-1.243337 1.338979-1.380822C1.362889-1.470486 1.392777-1.578082 1.560149-1.823163C1.75741-2.110087 2.068244-2.438854 2.528518-2.438854C2.905106-2.438854 2.905106-2.12802 2.905106-2.020423C2.905106-1.667746 2.654047-1.034122 2.540473-.759153C2.504608-.657534 2.462765-.561893 2.462765-.460274C2.462765-.155417 2.737733 .059776 3.066501 .059776C3.670237 .059776 3.969116-.729265 3.969116-.860772C3.969116-.872727 3.963138-.944458 3.855542-.944458C3.771856-.944458 3.765878-.91457 3.730012-.800996C3.634371-.490162 3.38929-.137484 3.084433-.137484C2.970859-.137484 2.923039-.227148 2.923039-.352677C2.923039-.472229 2.964882-.573848 3.01868-.699377C3.108344-.932503 3.377335-1.60797 3.377335-1.942715C3.377335-2.414944 3.036613-2.636115 2.552428-2.636115C2.080199-2.636115 1.763387-2.379078 1.524284-2.110087L1.990535-3.969116Z'/>
+<path id='eq4-g4-0' d='M4.702366-5.419676H.350685V-5.156663H.526027C1.139726-5.156663 1.155666-5.068991 1.155666-4.774097V-.645579C1.155666-.350685 1.139726-.263014 .526027-.263014H.350685V0C1.028144-.02391 1.044085-.02391 1.578082-.02391C1.952677-.02391 2.534496-.02391 2.893151 0V-.263014H2.638107C1.888917-.263014 1.888917-.374595 1.888917-.653549V-4.829888C1.888917-5.100872 1.904857-5.156663 2.271482-5.156663H3.188045C4.423412-5.156663 4.550934-4.638605 4.686426-3.610461H4.933499L4.702366-5.419676Z'/>
+<path id='eq4-g0-82' d='M3.251806 10.520548C3.096389 12.481196 2.666002 13.019178 1.984558 13.019178C1.829141 13.019178 1.470486 12.983313 1.219427 12.76812C1.566127 12.720299 1.661768 12.44533 1.661768 12.277958C1.661768 11.931258 1.398755 11.775841 1.171606 11.775841C.932503 11.775841 .669489 11.931258 .669489 12.289913C.669489 12.863761 1.267248 13.282192 1.984558 13.282192C3.120299 13.282192 3.694147 12.242092 3.957161 11.166127C4.112578 10.544458 4.542964 7.065504 4.638605 5.738481L4.865753 2.761644C5.033126 .561893 5.439601 .263014 5.977584 .263014C6.097136 .263014 6.467746 .286924 6.73076 .514072C6.38406 .561893 6.288418 .836862 6.288418 1.004234C6.288418 1.350934 6.551432 1.506351 6.77858 1.506351C7.017684 1.506351 7.280697 1.350934 7.280697 .992279C7.280697 .418431 6.682939 0 5.965629 0C4.829888 0 4.363636 1.159651 4.160399 2.068244C4.016936 2.725778 3.58655 6.097136 3.478954 7.543711L3.251806 10.520548Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='-9.630618' xlink:href='#eq4-g0-82'/>
+<use x='5.645501' y='4.151166' xlink:href='#eq4-g4-0'/>
+<use x='10.93408' y='5.557012' xlink:href='#eq4-g2-104'/>
+<use x='18.260731' y='0' xlink:href='#eq4-g3-102'/>
+<use x='25.307167' y='0' xlink:href='#eq4-g5-40'/>
+<use x='29.859493' y='0' xlink:href='#eq4-g3-120'/>
+<use x='36.51158' y='0' xlink:href='#eq4-g5-41'/>
+<use x='43.720569' y='0' xlink:href='#eq4-g1-1'/>
+<use x='49.698123' y='0' xlink:href='#eq4-g3-65'/>
+<use x='58.47347' y='0' xlink:href='#eq4-g5-40'/>
+<use x='63.025795' y='0' xlink:href='#eq4-g3-118'/>
+<use x='69.114014' y='0' xlink:href='#eq4-g5-41'/>
+<use x='73.66634' y='0' xlink:href='#eq4-g3-100'/>
+<use x='79.749033' y='0' xlink:href='#eq4-g3-27'/>
+</g>
+</svg>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a462cecb0feba2c3da1b304d82c6350d0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />InterfaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a462cecb0feba2c3da1b304d82c6350d0" class="m-doc-self">InterfaceIntegral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">IntegrandType</a>&amp; integrand) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs interface integral from integrand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">integrand</td>
+                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> operator to integrate</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aedd7737f3184cc087a4efd14ba24b29b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />InterfaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedd7737f3184cc087a4efd14ba24b29b" class="m-doc-self">InterfaceIntegral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_interface_integral.html" class="m-doc">InterfaceIntegral</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_interface_integral.html" class="m-doc">InterfaceIntegral</a> to copy</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a67bd9629f05368ddda322bb67b68e5b1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />InterfaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67bd9629f05368ddda322bb67b68e5b1" class="m-doc-self">InterfaceIntegral</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_interface_integral.html" class="m-doc">InterfaceIntegral</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_interface_integral.html" class="m-doc">InterfaceIntegral</a> to move</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa5d79cb88973b769fdd1665729c03952"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />InterfaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the integration region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Region::Interface indicating integration over interior faces only</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="af1f3519d4152a4d6cae4ad0aa8840243"><div>
             <h3>
               <div class="m-doc-template">
@@ -179,16 +366,15 @@ $ V_h $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_interface_integral.html" class="m-doc">InterfaceIntegral</a>* Rodin::<wbr />Variational::<wbr />InterfaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af1f3519d4152a4d6cae4ad0aa8840243" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <p>Creates a copy of this integrator.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object.</td>
+                  <td>Pointer to newly allocated copy</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
         </section>
       </div>
