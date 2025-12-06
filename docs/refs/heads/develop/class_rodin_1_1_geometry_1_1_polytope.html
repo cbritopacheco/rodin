@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -71,9 +78,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md78">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md79">Hierarchy</a></li>
-            <li><a href="#autotoc_md80">Usage</a></li>
+            <li><a href="#autotoc_md76">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md77">Hierarchy</a></li>
+            <li><a href="#autotoc_md78">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -86,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>A <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> represents a geometric entity in a finite element mesh, ranging from vertices (0D) to cells (highest dimension). Polytopes are the building blocks of mesh topology and provide the geometric foundation for finite element computations.</p><section id="autotoc_md78"><h2><a href="#autotoc_md78">Mathematical Foundation</a></h2><p>Each polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
+<p>A <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> represents a geometric entity in a finite element mesh, ranging from vertices (0D) to cells (highest dimension). Polytopes are the building blocks of mesh topology and provide the geometric foundation for finite element computations.</p><section id="autotoc_md76"><h2><a href="#autotoc_md76">Mathematical Foundation</a></h2><p>Each polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
 <title>
 $ \tau $
 </title>
@@ -156,7 +163,7 @@ $ x: K \rightarrow \tau $
 <use x='30.683916' y='0' xlink:href='#eq6-g0-33'/>
 <use x='45.959948' y='0' xlink:href='#eq6-g1-28'/>
 </g>
-</svg> mapping reference to physical coordinates</li></ul></section><section id="autotoc_md79"><h2><a href="#autotoc_md79">Hierarchy</a></h2><p>The <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> class serves as the base for specialized classes:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>: Highest-dimensional elements (e.g., tetrahedra in 3D, triangles in 2D)</li><li><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>: Codimension-1 elements (e.g., triangles in 3D, edges in 2D)</li><li><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>: 0-dimensional points</li></ul></section><section id="autotoc_md80"><h2><a href="#autotoc_md80">Usage</a></h2><p>Polytopes are typically obtained through iterators:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
+</svg> mapping reference to physical coordinates</li></ul></section><section id="autotoc_md77"><h2><a href="#autotoc_md77">Hierarchy</a></h2><p>The <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> class serves as the base for specialized classes:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>: Highest-dimensional elements (e.g., tetrahedra in 3D, triangles in 2D)</li><li><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>: Codimension-1 elements (e.g., triangles in 3D, edges in 2D)</li><li><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>: 0-dimensional points</li></ul></section><section id="autotoc_md78"><h2><a href="#autotoc_md78">Usage</a></h2><p>Polytopes are typically obtained through iterators:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Cell</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Cell &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cell</span><span class="p">.</span><span class="n">getIndex</span><span class="p">()</span><span class="w"> </span>

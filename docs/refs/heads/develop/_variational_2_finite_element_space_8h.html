@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -70,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md258">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md259">Conformity</a></li>
-            <li><a href="#autotoc_md260">DOF Management</a></li>
-            <li><a href="#autotoc_md261">Usage Example</a></li>
+            <li><a href="#autotoc_md256">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md257">Conformity</a></li>
+            <li><a href="#autotoc_md258">DOF Management</a></li>
+            <li><a href="#autotoc_md259">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -95,7 +102,7 @@ $ V_h $
 <use x='0' y='0' xlink:href='#eq1-g1-86'/>
 <use x='6.82435' y='1.793263' xlink:href='#eq1-g0-104'/>
 </g>
-</svg> used in finite element approximations. The finite element space defines the polynomial degree, mesh association, DOF mapping, and conformity properties of the approximation.</p><section id="autotoc_md258"><h3><a href="#autotoc_md258">Mathematical Foundation</a></h3><p>A finite element space <svg class="m-math" style="width: 1.219em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 11.704259 9.962629">
+</svg> used in finite element approximations. The finite element space defines the polynomial degree, mesh association, DOF mapping, and conformity properties of the approximation.</p><section id="autotoc_md256"><h3><a href="#autotoc_md256">Mathematical Foundation</a></h3><p>A finite element space <svg class="m-math" style="width: 1.219em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 11.704259 9.962629">
 <title>
 $ V_h $
 </title>
@@ -182,7 +189,7 @@ $ \Sigma $
 <g id='eq8-page1'>
 <use x='0' y='0' xlink:href='#eq8-g0-6'/>
 </g>
-</svg>: Set of degrees of freedom (nodal values, moments, etc.)</li></ul></section><section id="autotoc_md259"><h3><a href="#autotoc_md259">Conformity</a></h3><p>Different conforming spaces for different problems:</p><ul><li><strong>H¹-conforming</strong>: Continuous functions (standard Lagrange elements)</li><li><strong>H(div)-conforming</strong>: Normal component continuous (Raviart-Thomas, BDM)</li><li><strong>H(curl)-conforming</strong>: Tangential component continuous (Nédélec)</li><li><strong>L²-spaces</strong>: Discontinuous (DG methods)</li></ul></section><section id="autotoc_md260"><h3><a href="#autotoc_md260">DOF Management</a></h3><p>The finite element space manages:</p><ul><li>Global DOF numbering: unique index for each basis function</li><li>Local-to-global mapping: relates element DOFs to global DOFs</li><li>Boundary DOFs: identification for boundary condition application</li></ul></section><section id="autotoc_md261"><h3><a href="#autotoc_md261">Usage Example</a></h3><pre class="m-code"><span class="c1">// Create P1 space (continuous piecewise linear)</span>
+</svg>: Set of degrees of freedom (nodal values, moments, etc.)</li></ul></section><section id="autotoc_md257"><h3><a href="#autotoc_md257">Conformity</a></h3><p>Different conforming spaces for different problems:</p><ul><li><strong>H¹-conforming</strong>: Continuous functions (standard Lagrange elements)</li><li><strong>H(div)-conforming</strong>: Normal component continuous (Raviart-Thomas, BDM)</li><li><strong>H(curl)-conforming</strong>: Tangential component continuous (Nédélec)</li><li><strong>L²-spaces</strong>: Discontinuous (DG methods)</li></ul></section><section id="autotoc_md258"><h3><a href="#autotoc_md258">DOF Management</a></h3><p>The finite element space manages:</p><ul><li>Global DOF numbering: unique index for each basis function</li><li>Local-to-global mapping: relates element DOFs to global DOFs</li><li>Boundary DOFs: identification for boundary condition application</li></ul></section><section id="autotoc_md259"><h3><a href="#autotoc_md259">Usage Example</a></h3><pre class="m-code"><span class="c1">// Create P1 space (continuous piecewise linear)</span>
 <span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;DOFs: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">.</span><span class="n">getGlobalSize</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -72,7 +79,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md25">Usage</a></li>
+            <li><a href="#autotoc_md23">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -80,7 +87,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="struct_rodin_1_1_form_language_1_1_debug.html" class="m-doc">Debug</a> template provides a mechanism for introspecting and debugging form language types during compilation and runtime. Specialize this template for specific types to provide custom debugging information.</p><section id="autotoc_md25"><h3><a href="#autotoc_md25">Usage</a></h3><p>This template is primarily used during development to understand type transformations and check template instantiations. When instantiated, compiler errors will reveal the actual type of T.</p><p>Example usage:</p><pre class="m-code"><span class="c1">// This will trigger a compile error showing the actual type</span>
+<p>The <a href="struct_rodin_1_1_form_language_1_1_debug.html" class="m-doc">Debug</a> template provides a mechanism for introspecting and debugging form language types during compilation and runtime. Specialize this template for specific types to provide custom debugging information.</p><section id="autotoc_md23"><h3><a href="#autotoc_md23">Usage</a></h3><p>This template is primarily used during development to understand type transformations and check template instantiations. When instantiated, compiler errors will reveal the actual type of T.</p><p>Example usage:</p><pre class="m-code"><span class="c1">// This will trigger a compile error showing the actual type</span>
 <span class="n">Debug</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">myExpression</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">debug</span><span class="p">;</span></pre></section>
       </div>
     </div>

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -70,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md318">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md319">Special Cases</a></li>
-            <li><a href="#autotoc_md320">Applications</a></li>
-            <li><a href="#autotoc_md321">Usage Example</a></li>
+            <li><a href="#autotoc_md316">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md317">Special Cases</a></li>
+            <li><a href="#autotoc_md318">Applications</a></li>
+            <li><a href="#autotoc_md319">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -83,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Jacobian class, which computes the Jacobian matrix (matrix of all first-order partial derivatives) of vector-valued functions in variational formulations.</p><section id="autotoc_md318"><h3><a href="#autotoc_md318">Mathematical Foundation</a></h3><p>For a vector-valued function <svg class="m-math" style="width: 9.127em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 87.618912 10.340659">
+<p>This file defines the Jacobian class, which computes the Jacobian matrix (matrix of all first-order partial derivatives) of vector-valued functions in variational formulations.</p><section id="autotoc_md316"><h3><a href="#autotoc_md316">Mathematical Foundation</a></h3><p>For a vector-valued function <svg class="m-math" style="width: 9.127em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 87.618912 10.340659">
 <title>
 $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^n $
 </title>
@@ -150,7 +157,7 @@ $ n \times d $
 <use x='9.644269' y='0' xlink:href='#eq3-g0-2'/>
 <use x='21.59943' y='0' xlink:href='#eq3-g1-100'/>
 </g>
-</svg> matrix.</p></section><section id="autotoc_md319"><h3><a href="#autotoc_md319">Special Cases</a></h3><ul><li>When <svg class="m-math" style="width: 3.002em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 28.816609 8.302191">
+</svg> matrix.</p></section><section id="autotoc_md317"><h3><a href="#autotoc_md317">Special Cases</a></h3><ul><li>When <svg class="m-math" style="width: 3.002em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 28.816609 8.302191">
 <title>
 $ n = d $
 </title>
@@ -217,7 +224,7 @@ $ J^T $
 <use x='0' y='0' xlink:href='#eq7-g1-74'/>
 <use x='7.577119' y='-4.338437' xlink:href='#eq7-g0-84'/>
 </g>
-</svg> gives the gradient of components</li></ul></section><section id="autotoc_md320"><h3><a href="#autotoc_md320">Applications</a></h3><ul><li>Nonlinear elasticity: deformation gradient tensor</li><li>Fluid dynamics: velocity gradient tensor</li><li>Differential geometry: metric tensor computations</li><li>Coordinate transformations</li></ul></section><section id="autotoc_md321"><h3><a href="#autotoc_md321">Usage Example</a></h3><pre class="m-code"><span class="c1">// Displacement gradient for elasticity</span>
+</svg> gives the gradient of components</li></ul></section><section id="autotoc_md318"><h3><a href="#autotoc_md318">Applications</a></h3><ul><li>Nonlinear elasticity: deformation gradient tensor</li><li>Fluid dynamics: velocity gradient tensor</li><li>Differential geometry: metric tensor computations</li><li>Coordinate transformations</li></ul></section><section id="autotoc_md319"><h3><a href="#autotoc_md319">Usage Example</a></h3><pre class="m-code"><span class="c1">// Displacement gradient for elasticity</span>
 <span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">());</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// Deformation gradient F = ∇u</span></pre></section>

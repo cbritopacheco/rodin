@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -71,8 +78,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md262">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md263">Key Features</a></li>
+            <li><a href="#autotoc_md260">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md261">Key Features</a></li>
             <li>
               Reference
               <ul>
@@ -120,7 +127,7 @@ $ V_h $
 <use x='0' y='0' xlink:href='#eq3-g1-86'/>
 <use x='6.82435' y='1.793263' xlink:href='#eq3-g0-104'/>
 </g>
-</svg> is its finite-dimensional approximation. The finite element space defines the basis functions, degrees of freedom, and mesh association required for finite element computations.</p><section id="autotoc_md262"><h3><a href="#autotoc_md262">Mathematical Foundation</a></h3><p>A finite element space is characterized by:</p><ul><li><strong>Mesh</strong>: Geometric discretization <svg class="m-math" style="width: 1.187em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169354 11.391224 9.962617">
+</svg> is its finite-dimensional approximation. The finite element space defines the basis functions, degrees of freedom, and mesh association required for finite element computations.</p><section id="autotoc_md260"><h3><a href="#autotoc_md260">Mathematical Foundation</a></h3><p>A finite element space is characterized by:</p><ul><li><strong>Mesh</strong>: Geometric discretization <svg class="m-math" style="width: 1.187em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169354 11.391224 9.962617">
 <title>
 $ \mathcal{T}_h $
 </title>
@@ -234,7 +241,7 @@ $ V_h = \{v \in V : v|_K \in P_K \text{ for all } K \in \mathcal{T}_h\} $
 <use x='188.240684' y='1.793263' xlink:href='#eq9-g1-104'/>
 <use x='193.618725' y='0' xlink:href='#eq9-g0-103'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md263"><h3><a href="#autotoc_md263">Key Features</a></h3><ul><li><strong>DOF Management</strong>: Global and local degree of freedom indexing</li><li><strong>Basis Functions</strong>: Access to shape functions and their derivatives</li><li><strong>Mesh Association</strong>: Strong coupling with underlying mesh structure</li><li><strong>Conformity</strong>: Support for <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+</svg></li></ul></section><section id="autotoc_md261"><h3><a href="#autotoc_md261">Key Features</a></h3><ul><li><strong>DOF Management</strong>: Global and local degree of freedom indexing</li><li><strong>Basis Functions</strong>: Access to shape functions and their derivatives</li><li><strong>Mesh Association</strong>: Strong coupling with underlying mesh structure</li><li><strong>Conformity</strong>: Support for <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>

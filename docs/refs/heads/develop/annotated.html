@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html" id="m-navbar-current">Classes</a></li>
@@ -68,6 +75,47 @@
           <li class="m-doc-collapsible">
             <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin.html" class="m-doc">Rodin</a> <span class="m-doc">The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</span>
             <ul class="m-doc">
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> <span class="m-doc">Module to handle alerts.</span>
+                <ul class="m-doc">
+                  <li>namespace <a href="namespace_rodin_1_1_alert_1_1_identifier.html" class="m-doc">Identifier</a> <span class="m-doc">Namespace containing factory functions for code identifiers.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_blue_t.html" class="m-doc">BlueT</a> <span class="m-doc">Tag type for blue terminal color.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> <span class="m-doc">Empty tag type for bold text formatting.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_bright_gray_t.html" class="m-doc">BrightGrayT</a> <span class="m-doc">Tag type for bright gray terminal color.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a> <span class="m-doc">Tag type for bright white terminal color.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_class_exception.html" class="m-doc">ClassException</a> <span class="m-doc"><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class that automatically includes the class name.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a> <span class="m-doc">Type-safe wrapper for custom <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> colors.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a> <span class="m-doc">Tag type for cyan terminal color.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> <span class="m-doc"><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class with formatted output capabilities.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_exception_prefix.html" class="m-doc">ExceptionPrefix</a> <span class="m-doc">Prefix class for exception messages.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_gray_t.html" class="m-doc">GrayT</a> <span class="m-doc">Tag type for gray terminal color.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_green_t.html" class="m-doc">GreenT</a> <span class="m-doc">Tag type for green terminal color.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">IdentifierT</a> <span class="m-doc">Templated text class for code identifiers with bold formatting.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_info.html" class="m-doc">Info</a> <span class="m-doc">Informational message class with formatted output.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_info_prefix.html" class="m-doc">InfoPrefix</a> <span class="m-doc">Prefix class for informational messages.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a> <span class="m-doc">Tag type for magenta terminal color.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">MemberFunctionException</a> <span class="m-doc"><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> type for errors occurring in member functions.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_member_function_warning.html" class="m-doc">MemberFunctionWarning</a> <span class="m-doc"><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> type for issues occurring in member functions.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> <span class="m-doc">Forward declaration of the <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> template class.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a> <span class="m-doc">Base class for message prefixes with colored text.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_namespaced_exception.html" class="m-doc">NamespacedException</a> <span class="m-doc"><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class that automatically includes the namespace name.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> <span class="m-doc">Empty tag type for inserting newline characters.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> <span class="m-doc">Tag type representing no color (transparent/default).</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> <span class="m-doc">Specialized text class for mathematical and technical notation.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> <span class="m-doc">Empty tag type for raising an <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> message.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a> <span class="m-doc">Tag type for red terminal color.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> <span class="m-doc">Empty tag type for resetting terminal formatting.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> <span class="m-doc"><a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color template with compile-time color values.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> <span class="m-doc">Empty tag type for enabling terminal color output.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a> <span class="m-doc"><a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a> message class with formatted output.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_success_prefix.html" class="m-doc">SuccessPrefix</a> <span class="m-doc">Prefix class for success messages.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a> <span class="m-doc">Templated text class with foreground and background color support.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> <span class="m-doc"><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> message class with formatted output.</span></li>
+                  <li>class <a href="class_rodin_1_1_alert_1_1_warning_prefix.html" class="m-doc">WarningPrefix</a> <span class="m-doc">Prefix class for warning messages.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_white_t.html" class="m-doc">WhiteT</a> <span class="m-doc">Tag type for white terminal color.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_alert_1_1_yellow_t.html" class="m-doc">YellowT</a> <span class="m-doc">Tag type for yellow terminal color.</span></li>
+                </ul>
+              </li>
               <li class="m-doc-collapsible collapsed">
                 <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> <span class="m-doc">Module for performing the assembly of linear algebra objects from variational expressions.</span>
                 <ul class="m-doc">
@@ -201,7 +249,7 @@
                   </li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html" class="m-doc">BalancedCompactPartitioner</a> <span class="m-doc"><a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Partitioner</a> that creates balanced, spatially compact partitions.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_bounded_index_generator.html" class="m-doc">BoundedIndexGenerator</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Index generator for a bounded range of indices.</span></li>
-                  <li>class <a href="class_rodin_1_1_geometry_1_1_c_c_l.html" class="m-doc">CCL</a> <span class="m-doc">Connected component labeling result.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_c_c_l.html" class="m-doc">CCL</a> <span class="m-doc"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> data structures, geometric operations, and computational geometry utilities.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a> <span class="m-doc">Represents a cell (highest-dimensional element) in a mesh.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> <span class="m-doc">Iterator over mesh cells (highest-dimensional polytopes).</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> <span class="m-doc">Template for connectivity information.</span></li>
@@ -551,7 +599,7 @@
                     <ul class="m-doc">
                       <li>class <a href="class_rodin_1_1_variational_1_1_f_1_1_x.html" class="m-doc">X</a> <span class="m-doc">First coordinate projection function.</span></li>
                       <li>class <a href="class_rodin_1_1_variational_1_1_f_1_1_y.html" class="m-doc">Y</a> <span class="m-doc">Second coordinate projection function.</span></li>
-                      <li>class <a href="class_rodin_1_1_variational_1_1_f_1_1_z.html" class="m-doc">Z</a> <span class="m-doc">Third coordinate projection function.</span></li>
+                      <li>class <a href="class_rodin_1_1_variational_1_1_f_1_1_z.html" class="m-doc">Z</a> <span class="m-doc">Second coordinate projection function.</span></li>
                     </ul>
                   </li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_abs.html" class="m-doc">Abs</a> <span class="m-doc">Represents the absolute value of a value.</span></li>

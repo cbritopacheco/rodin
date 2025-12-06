@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -70,13 +77,13 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md286">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md287">Features</a></li>
-            <li><a href="#autotoc_md288">Degree of Freedom (DOF) Formulas</a></li>
-            <li><a href="#autotoc_md289">Usage Example</a></li>
+            <li><a href="#autotoc_md284">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md285">Features</a></li>
+            <li><a href="#autotoc_md286">Degree of Freedom (DOF) Formulas</a></li>
+            <li><a href="#autotoc_md287">Usage Example</a></li>
           </ul>
         </nav>
-<p>This header provides access to the H1-conforming Lagrange finite element family. These are high-order-stable elements with continuous (H¹) basis functions across element boundaries.</p><section id="autotoc_md286"><h3><a href="#autotoc_md286">Mathematical Foundation</a></h3><p>The H1-conforming Lagrange space of degree k is defined as:</p><div class="m-math"><svg style="width: 22.649em; height: 1.402em;" viewBox="85.557851 -13.45978 217.427342 13.45978">
+<p>This header provides access to the H1-conforming Lagrange finite element family. These are high-order-stable elements with continuous (H¹) basis functions across element boundaries.</p><section id="autotoc_md284"><h3><a href="#autotoc_md284">Mathematical Foundation</a></h3><p>The H1-conforming Lagrange space of degree k is defined as:</p><div class="m-math"><svg style="width: 22.649em; height: 1.402em;" viewBox="85.557851 -13.45978 217.427342 13.45978">
 <title>
 \[
   V_h^k = \{u \in H^1(\Omega) : u|_K \in \mathbb{P}_k(K) \, \forall K \in \mathcal{T}_h\}
@@ -162,7 +169,7 @@ $ K $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-75'/>
 </g>
-</svg>.</p></section><section id="autotoc_md287"><h3><a href="#autotoc_md287">Features</a></h3><ul><li>Supports arbitrary polynomial degree k (K=0, 1, 2, 3, 4, 5, 6, ...)</li><li>H¹-conforming (continuous across element boundaries)</li><li>Lagrange nodal basis functions: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
+</svg>.</p></section><section id="autotoc_md285"><h3><a href="#autotoc_md285">Features</a></h3><ul><li>Supports arbitrary polynomial degree k (K=0, 1, 2, 3, 4, 5, 6, ...)</li><li>H¹-conforming (continuous across element boundaries)</li><li>Lagrange nodal basis functions: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
 <title>
 $ \phi_i(x_j) = \delta_{ij} $
 </title>
@@ -252,7 +259,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq8-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq8-g1-49'/>
 </g>
-</svg> norm</li><li>Supports all standard geometries: Segment, Triangle, Quadrilateral, Tetrahedron, Wedge</li><li>High-order-stable implementation</li></ul></section><section id="autotoc_md288"><h3><a href="#autotoc_md288">Degree of Freedom (DOF) Formulas</a></h3><ul><li>Segment: <svg class="m-math" style="width: 2.788em; height: 0.960em; vertical-align: -0.095em;" viewBox="0 -8.302191 26.760473 9.215393">
+</svg> norm</li><li>Supports all standard geometries: Segment, Triangle, Quadrilateral, Tetrahedron, Wedge</li><li>High-order-stable implementation</li></ul></section><section id="autotoc_md286"><h3><a href="#autotoc_md286">Degree of Freedom (DOF) Formulas</a></h3><ul><li>Segment: <svg class="m-math" style="width: 2.788em; height: 0.960em; vertical-align: -0.095em;" viewBox="0 -8.302191 26.760473 9.215393">
 <title>
 $ k+1 $
 </title>
@@ -383,7 +390,7 @@ $ (k+1) \cdot \frac{(k+1)(k+2)}{2} $
 <rect x='45.694855' y='-3.227886' height='.478187' width='44.057623'/>
 <use x='65.606575' y='4.122632' xlink:href='#eq13-g3-50'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md289"><h3><a href="#autotoc_md289">Usage Example</a></h3><pre class="m-code"><span class="c1">// H1 element of degree 2 (quadratic)</span>
+</svg></li></ul></section><section id="autotoc_md287"><h3><a href="#autotoc_md287">Usage Example</a></h3><pre class="m-code"><span class="c1">// H1 element of degree 2 (quadratic)</span>
 <span class="n">RealH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_2</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;DOFs: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">h1_2</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// 6</span>
 

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -64,10 +71,21 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Prefix&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Message <span class="m-thin">class</span>
         </h1>
         <p>Forward declaration of the <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> template class.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Prefix</td>
+              <td>The prefix type for the message.</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -80,18 +98,18 @@
             </li>
           </ul>
         </nav>
-<p>Base template class for formatted message output.</p><p>Base template class for formatted message output with customizable prefixes.</p><p>Base class for creating formatted messages with customizable prefixes, colors, and styles. Messages support stream-like insertion operators for building content incrementally. This class is used as the base for <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>, <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>, <a href="class_rodin_1_1_alert_1_1_info.html" class="m-doc">Info</a>, and <a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a> message types.</p><p>The <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> class handles:</p><ul><li>Formatted output with colored prefixes</li><li>Automatic indentation for multi-line messages</li><li>Stream-like insertion operators for content</li><li>Integration with the Alert tag types (NewLine, Raise, etc.)</li></ul><p>Example usage (through derived classes):</p><pre class="m-code"><span class="n">Exception</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Error in function: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">funcName</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">NewLine</span>
+<p>Base template class for formatted message output.</p><p>Base template class for formatted message output with customizable prefixes.</p><p>Base class for creating formatted messages with customizable prefixes, colors, and styles. Messages support stream-like insertion operators for building content incrementally. This class is used as the base for <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>, <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>, <a href="class_rodin_1_1_alert_1_1_info.html" class="m-doc">Info</a>, and <a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a> message types.</p><p>The <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> class handles:</p><ul><li>Formatted output with colored prefixes</li><li>Automatic indentation for multi-line messages</li><li>Stream-like insertion operators for content</li><li>Integration with the <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> tag types (NewLine, Raise, etc.)</li></ul><p>Example usage (through derived classes):</p><pre class="m-code"><span class="n">Exception</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Error in function: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">funcName</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">NewLine</span>
 <span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Invalid parameter value: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></pre>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#ace94da823978a4ee0ba31c42ac1b6a16" class="m-doc">Message</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a>&amp; prefix) <span class="m-label m-flat m-success">noexcept</span></span>
+              const Prefix&amp; prefix) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Constructs a message with output stream and prefix.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac28205263989800da0204904b9475f31" class="m-doc">Message</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac28205263989800da0204904b9475f31" class="m-doc">Message</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -108,28 +126,28 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a576a441c2b1e2f01d271e237b314eac3" class="m-doc">what</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">char</a>* <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a576a441c2b1e2f01d271e237b314eac3" class="m-doc">what</a>(</span><span class="m-doc-wrap">) const -&gt; const char* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the message content as a C-string.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae86b1d95969f40504107a97b5af66432" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> T&amp; v) -&gt; std::enable_if_t&lt;<a href="class_rodin_1_1_alert_1_1_internal_1_1_can_be_output.html" class="m-doc">Internal::<wbr />CanBeOutput</a>&lt;T&gt;::Value, <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae86b1d95969f40504107a97b5af66432" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">const T&amp; v) -&gt; std::enable_if_t&lt;<a href="class_rodin_1_1_alert_1_1_internal_1_1_can_be_output.html" class="m-doc">Internal::<wbr />CanBeOutput</a>&lt;T&gt;::Value, <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Stream insertion operator for arbitrary streamable types.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3f97fbaabd7f762ad05a849d6aaf34ad" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp;) -&gt; <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f97fbaabd7f762ad05a849d6aaf34ad" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp;) -&gt; <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;</span>
             </dt>
             <dd>Stream insertion operator for NewLine tag.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac220a450cbcc48b9e15099e811453c1e" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>&amp;) -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ac220a450cbcc48b9e15099e811453c1e" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>&amp;)</span>
             </dt>
             <dd>Stream insertion operator for Raise tag.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc">raise</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">void</a> <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Raises (outputs) the message to the user.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a313a6aa220cc1d01a1ebf1d598043186" class="m-doc">setOutputStream</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a313a6aa220cc1d01a1ebf1d598043186" class="m-doc">setOutputStream</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
             </dt>
             <dd>Sets the output stream for this message.</dd>
           </dl>
@@ -139,10 +157,10 @@
           <section class="m-doc-details" id="ace94da823978a4ee0ba31c42ac1b6a16"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a> _1&gt;
+                template&lt;class Prefix&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace94da823978a4ee0ba31c42ac1b6a16" class="m-doc-self">Message</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a>&amp; prefix) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace94da823978a4ee0ba31c42ac1b6a16" class="m-doc-self">Message</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const Prefix&amp; prefix) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Constructs a message with output stream and prefix.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -164,9 +182,9 @@
           <section class="m-doc-details" id="ac28205263989800da0204904b9475f31"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a> _1&gt;
+                template&lt;class Prefix&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac28205263989800da0204904b9475f31" class="m-doc-self">Message</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac28205263989800da0204904b9475f31" class="m-doc-self">Message</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -185,9 +203,9 @@
           <section class="m-doc-details" id="aa158e3aa6b68c6ff1cd41aaabb028bdd"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a> _1&gt;
+                template&lt;class Prefix&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa158e3aa6b68c6ff1cd41aaabb028bdd" class="m-doc-self">Message</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa158e3aa6b68c6ff1cd41aaabb028bdd" class="m-doc-self">Message</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -205,9 +223,9 @@
           <section class="m-doc-details" id="a576a441c2b1e2f01d271e237b314eac3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a> _1&gt;
+                template&lt;class Prefix&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">char</a>* Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a576a441c2b1e2f01d271e237b314eac3" class="m-doc-self">what</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const char* Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a576a441c2b1e2f01d271e237b314eac3" class="m-doc-self">what</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the message content as a C-string.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -223,10 +241,10 @@
           <section class="m-doc-details" id="ae86b1d95969f40504107a97b5af66432"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a> _1&gt;
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> T&gt;
+                template&lt;class Prefix&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::enable_if_t&lt;<a href="class_rodin_1_1_alert_1_1_internal_1_1_can_be_output.html" class="m-doc">Internal::<wbr />CanBeOutput</a>&lt;T&gt;::Value, <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;&gt; Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae86b1d95969f40504107a97b5af66432" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> T&amp; v) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">std::enable_if_t&lt;<a href="class_rodin_1_1_alert_1_1_internal_1_1_can_be_output.html" class="m-doc">Internal::<wbr />CanBeOutput</a>&lt;T&gt;::Value, <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp;&gt; Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae86b1d95969f40504107a97b5af66432" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">const T&amp; v) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Stream insertion operator for arbitrary streamable types.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -260,9 +278,9 @@
           <section class="m-doc-details" id="a3f97fbaabd7f762ad05a849d6aaf34ad"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a> _1&gt;
+                template&lt;class Prefix&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp; Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f97fbaabd7f762ad05a849d6aaf34ad" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp;)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&amp; Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f97fbaabd7f762ad05a849d6aaf34ad" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp;)</span></span>
             </h3>
             <p>Stream insertion operator for NewLine tag.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -278,9 +296,9 @@
           <section class="m-doc-details" id="ac220a450cbcc48b9e15099e811453c1e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a> _1&gt;
+                template&lt;class Prefix&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">void</a> Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac220a450cbcc48b9e15099e811453c1e" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>&amp;)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac220a450cbcc48b9e15099e811453c1e" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>&amp;)</span></span>
             </h3>
             <p>Stream insertion operator for Raise tag.</p>
 <p>Triggers the <a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc">raise()</a> method to output the message and perform any associated actions (such as program termination for exceptions).</p>
@@ -288,9 +306,9 @@
           <section class="m-doc-details" id="a05fa0dbb9670de92ab00a301d3e676b5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a> _1&gt;
+                template&lt;class Prefix&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">void</a> Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Raises (outputs) the message to the user.</p>
 <p>Default behavior outputs the formatted message to the configured output stream. Derived classes may override this to add additional behavior (e.g., <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> terminates the program).</p>
@@ -298,9 +316,9 @@
           <section class="m-doc-details" id="a313a6aa220cc1d01a1ebf1d598043186"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Prefix</a> _1&gt;
+                template&lt;class Prefix&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">void</a> Rodin::<wbr />Alert::<wbr />Message&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a313a6aa220cc1d01a1ebf1d598043186" class="m-doc-self">setOutputStream</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a313a6aa220cc1d01a1ebf1d598043186" class="m-doc-self">setOutputStream</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Sets the output stream for this message.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -72,10 +79,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md58">Overview</a></li>
-            <li><a href="#autotoc_md59">Mapping Between SubMesh and Parent Mesh</a></li>
-            <li><a href="#autotoc_md60">Downcasting</a></li>
-            <li><a href="#autotoc_md61">Use Cases</a></li>
+            <li><a href="#autotoc_md56">Overview</a></li>
+            <li><a href="#autotoc_md57">Mapping Between SubMesh and Parent Mesh</a></li>
+            <li><a href="#autotoc_md58">Downcasting</a></li>
+            <li><a href="#autotoc_md59">Use Cases</a></li>
             <li>
               Reference
               <ul>
@@ -83,12 +90,12 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md58"><h2><a href="#autotoc_md58">Overview</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> is a mesh that represents a subset of another mesh, typically corresponding to a specific region or boundary. It maintains references to its parent mesh and provides mappings between polytope indices in the child and parent meshes.</p></section><section id="autotoc_md59"><h2><a href="#autotoc_md59">Mapping Between SubMesh and Parent Mesh</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object holds a reference to its parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> and includes information about how polytopes and vertices are mapped between the child and parent. This allows finite element operations on the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to properly reference degrees of freedom in the parent mesh.</p></section><section id="autotoc_md60"><h2><a href="#autotoc_md60">Downcasting</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> that is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> can be downcasted to access <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
+<section id="autotoc_md56"><h2><a href="#autotoc_md56">Overview</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> is a mesh that represents a subset of another mesh, typically corresponding to a specific region or boundary. It maintains references to its parent mesh and provides mappings between polytope indices in the child and parent meshes.</p></section><section id="autotoc_md57"><h2><a href="#autotoc_md57">Mapping Between SubMesh and Parent Mesh</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object holds a reference to its parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> and includes information about how polytopes and vertices are mapped between the child and parent. This allows finite element operations on the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to properly reference degrees of freedom in the parent mesh.</p></section><section id="autotoc_md58"><h2><a href="#autotoc_md58">Downcasting</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> that is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> can be downcasted to access <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="c1">// The cast is well defined</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">getParent</span><span class="p">();</span>
-<span class="p">}</span></pre></section><section id="autotoc_md61"><h2><a href="#autotoc_md61">Use Cases</a></h2><ul><li>Boundary condition application</li><li>Interface problem formulation</li><li>Region-specific operations</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>, <a href="_sub_mesh_8h.html" class="m-doc">SubMesh.h</a></p></aside></section>
+<span class="p">}</span></pre></section><section id="autotoc_md59"><h2><a href="#autotoc_md59">Use Cases</a></h2><ul><li>Boundary condition application</li><li>Interface problem formulation</li><li>Region-specific operations</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>, <a href="_sub_mesh_8h.html" class="m-doc">SubMesh.h</a></p></aside></section>
       </div>
     </div>
   </div>

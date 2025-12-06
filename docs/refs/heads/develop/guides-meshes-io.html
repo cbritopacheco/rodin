@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>General concepts &raquo; Meshes &raquo; Mesh Input/Output | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="prev" href="guides-meshes-queries.html" />
+  <link rel="next" href="guides-meshes-utilities.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
+          <span class="m-breadcrumb"><a href="guides-meshes.html">Meshes</a> &raquo;</span>
+          Mesh Input/Output
+        </h1>
+        <p>Saving and loading meshes.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#guides-meshes-io-intro">Introduction</a></li>
+            <li><a href="#guides-meshes-io-formats">Supported Formats</a></li>
+            <li>
+              <a href="#guides-meshes-io-loading">Loading Meshes</a>
+              <ul>
+                <li><a href="#guides-meshes-io-loading-basic">Basic Loading</a></li>
+                <li><a href="#guides-meshes-io-loading-constructor">Constructor Loading</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-meshes-io-saving">Saving Meshes</a>
+              <ul>
+                <li><a href="#guides-meshes-io-saving-basic">Basic Saving</a></li>
+                <li><a href="#guides-meshes-io-saving-medit">MEDIT Format</a></li>
+              </ul>
+            </li>
+            <li><a href="#guides-meshes-io-example">Complete Example</a></li>
+            <li>
+              <a href="#guides-meshes-io-external">External Mesh Generators</a>
+              <ul>
+                <li><a href="#guides-meshes-io-external-gmsh">Gmsh</a></li>
+                <li><a href="#guides-meshes-io-external-mmg">MMG</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-meshes-io-paths">File Paths</a>
+              <ul>
+                <li><a href="#guides-meshes-io-paths-absolute">Absolute Paths</a></li>
+                <li><a href="#guides-meshes-io-paths-relative">Relative Paths</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-meshes-io-workflow">Typical Workflow</a>
+              <ul>
+                <li><a href="#guides-meshes-io-workflow-generation">Generation and Storage</a></li>
+                <li><a href="#guides-meshes-io-workflow-simulation">Simulation Workflow</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-meshes-io-considerations">Format Considerations</a>
+              <ul>
+                <li><a href="#guides-meshes-io-considerations-compatibility">Compatibility</a></li>
+                <li><a href="#guides-meshes-io-considerations-attributes">Attributes</a></li>
+              </ul>
+            </li>
+            <li><a href="#guides-meshes-io-see-also">See Also</a></li>
+          </ul>
+        </nav>
+<p><a href="namespace_rodin.html" class="m-doc">Rodin</a> supports reading and writing meshes in various file formats.</p><section id="guides-meshes-io-intro"><h2><a href="#guides-meshes-io-intro">Introduction</a></h2><p>Mesh I/O operations allow you to:</p><ul><li>Load meshes from external mesh generators</li><li>Save computed meshes for later use</li><li>Exchange meshes with other software</li><li>Archive simulation data</li></ul></section><section id="guides-meshes-io-formats"><h2><a href="#guides-meshes-io-formats">Supported Formats</a></h2><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> supports several mesh file formats:</p><table class="m-table"><thead><tr><th>Format</th><th>Extension</th><th>Description</th></tr></thead><tbody><tr><td>MFEM</td><td><code>.mesh</code></td><td>MFEM native format (default)</td></tr><tr><td>MEDIT</td><td><code>.mesh</code></td><td>MEDIT format from INRIA</td></tr><tr><td>GMSH</td><td><code>.msh</code>, <code>.gmsh</code></td><td>Gmsh mesh format</td></tr></tbody></table></section><section id="guides-meshes-io-loading"><h2><a href="#guides-meshes-io-loading">Loading Meshes</a></h2><section id="guides-meshes-io-loading-basic"><h3><a href="#guides-meshes-io-loading-basic">Basic Loading</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO.h&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Load with default format (MFEM)</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;domain.mesh&quot;</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Explicitly specify format</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;domain.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;domain.msh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">GMSH</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></section><section id="guides-meshes-io-loading-constructor"><h3><a href="#guides-meshes-io-loading-constructor">Constructor Loading</a></h3><pre class="m-code"><span class="c1">// Load during construction</span>
+<span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">(</span><span class="s">&quot;domain.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+
+<span class="c1">// Mesh is ready to use</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Loaded mesh with &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCellCount</span><span class="p">()</span><span class="w"> </span>
+<span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; cells&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre></section></section><section id="guides-meshes-io-saving"><h2><a href="#guides-meshes-io-saving">Saving Meshes</a></h2><section id="guides-meshes-io-saving-basic"><h3><a href="#guides-meshes-io-saving-basic">Basic Saving</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+
+<span class="c1">// Save with default format (MFEM)</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;output.mesh&quot;</span><span class="p">);</span>
+
+<span class="c1">// Explicitly specify format</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;output.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;output.msh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">GMSH</span><span class="p">);</span></pre></section><section id="guides-meshes-io-saving-medit"><h3><a href="#guides-meshes-io-saving-medit">MEDIT Format</a></h3><p>The MEDIT format is commonly used with MMG and ISCD tools:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO.h&gt;</span>
+
+<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;domain.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span></pre></section></section><section id="guides-meshes-io-example"><h2><a href="#guides-meshes-io-example">Complete Example</a></h2><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO.h&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Generate a mesh</span>
+<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="p">});</span>
+
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Generated mesh with:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;  Vertices: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getVertexCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;  Cells: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCellCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Save in different formats</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;output_mfem.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;output_medit.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Saved mesh in MFEM and MEDIT formats&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Load the mesh back</span>
+<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">loadedMesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">loadedMesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;output_mfem.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Loaded mesh with:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;  Vertices: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">loadedMesh</span><span class="p">.</span><span class="n">getVertexCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;  Cells: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">loadedMesh</span><span class="p">.</span><span class="n">getCellCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></section><section id="guides-meshes-io-external"><h2><a href="#guides-meshes-io-external">External Mesh Generators</a></h2><section id="guides-meshes-io-external-gmsh"><h3><a href="#guides-meshes-io-external-gmsh">Gmsh</a></h3><p><a href="https://gmsh.info/">Gmsh</a> is a popular open-source mesh generator:</p><ol><li>Create geometry in Gmsh</li><li>Generate mesh</li><li>Export as <code>.msh</code> file</li><li>Load in <a href="namespace_rodin.html" class="m-doc">Rodin</a>:</li></ol><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;gmsh_output.msh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">GMSH</span><span class="p">);</span></pre></section><section id="guides-meshes-io-external-mmg"><h3><a href="#guides-meshes-io-external-mmg">MMG</a></h3><p><a href="https://www.mmgtools.org/">MMG</a> is used for mesh adaptation:</p><pre class="m-code"><span class="c1">// Rodin can work with MMG through RodinExternal::MMG</span>
+<span class="c1">// See MMG examples for details</span></pre></section></section><section id="guides-meshes-io-paths"><h2><a href="#guides-meshes-io-paths">File Paths</a></h2><section id="guides-meshes-io-paths-absolute"><h3><a href="#guides-meshes-io-paths-absolute">Absolute Paths</a></h3><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/home/user/meshes/domain.mesh&quot;</span><span class="p">);</span></pre></section><section id="guides-meshes-io-paths-relative"><h3><a href="#guides-meshes-io-paths-relative">Relative Paths</a></h3><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;../data/domain.mesh&quot;</span><span class="p">);</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;./output/result.mesh&quot;</span><span class="p">);</span></pre></section></section><section id="guides-meshes-io-workflow"><h2><a href="#guides-meshes-io-workflow">Typical Workflow</a></h2><section id="guides-meshes-io-workflow-generation"><h3><a href="#guides-meshes-io-workflow-generation">Generation and Storage</a></h3><pre class="m-code"><span class="c1">// Generate mesh</span>
+<span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">});</span>
+
+<span class="c1">// Save for later use</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;fine_mesh.mesh&quot;</span><span class="p">);</span></pre></section><section id="guides-meshes-io-workflow-simulation"><h3><a href="#guides-meshes-io-workflow-simulation">Simulation Workflow</a></h3><pre class="m-code"><span class="c1">// Load pre-generated mesh</span>
+<span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">(</span><span class="s">&quot;fine_mesh.mesh&quot;</span><span class="p">);</span>
+
+<span class="c1">// Setup and solve problem</span>
+<span class="c1">// ...</span>
+
+<span class="c1">// Save solution (grid functions saved separately)</span>
+<span class="c1">// solution.save(&quot;solution.gf&quot;);</span></pre></section></section><section id="guides-meshes-io-considerations"><h2><a href="#guides-meshes-io-considerations">Format Considerations</a></h2><section id="guides-meshes-io-considerations-compatibility"><h3><a href="#guides-meshes-io-considerations-compatibility">Compatibility</a></h3><ul><li><strong>MFEM</strong>: Best for MFEM-based workflows</li><li><strong>MEDIT</strong>: Required for MMG tools</li><li><strong>GMSH</strong>: For Gmsh-generated meshes</li></ul></section><section id="guides-meshes-io-considerations-attributes"><h3><a href="#guides-meshes-io-considerations-attributes">Attributes</a></h3><p>All formats preserve:</p><ul><li>Vertex coordinates</li><li>Element connectivity</li><li>Element attributes (region markers)</li><li>Boundary attributes</li></ul></section></section><section id="guides-meshes-io-see-also"><h2><a href="#guides-meshes-io-see-also">See Also</a></h2><ul><li><a href="guides-meshes-creation.html" class="m-doc">Mesh creation</a></li><li><a href="guides-meshes.html" class="m-doc">Meshes overview</a></li><li><a href="namespace_rodin_1_1_i_o.html" class="m-doc">I/O namespace</a></li><li>Examples: examples/MMG/MeshIO.cpp</li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-meshes-queries.html" class="m-doc">&laquo; Geometric Queries</a> | <a href="guides-meshes.html" class="m-doc">Meshes</a> | <a href="guides-meshes-utilities.html" class="m-doc">Advanced Utilities &raquo;</a></div>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html" id="m-navbar-current">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -536,7 +543,7 @@ $ J = \frac{\partial \mathbf{f}}{\partial \mathbf{x}} $
                 </tr>
               </tbody>
             </table>
-<p>A sparse matrix stores only the non-zero elements, making it memory-efficient for large matrices arising from finite element discretizations where most entries are zero. The matrix uses compressed column storage (CCS) format by default.</p><h5 id="autotoc_md135">Storage Format</h5><p>Eigen&#x27;s SparseMatrix uses Compressed Column Storage (CCS), also known as Compressed Sparse Column (CSC) format, which stores:</p><ul><li>Non-zero values</li><li>Row indices for each non-zero value</li><li>Column pointers indicating where each column starts</li></ul><h5 id="autotoc_md136">Typical Applications</h5><ul><li>Stiffness matrices: <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<p>A sparse matrix stores only the non-zero elements, making it memory-efficient for large matrices arising from finite element discretizations where most entries are zero. The matrix uses compressed column storage (CCS) format by default.</p><h5 id="autotoc_md133">Storage Format</h5><p>Eigen&#x27;s SparseMatrix uses Compressed Column Storage (CCS), also known as Compressed Sparse Column (CSC) format, which stores:</p><ul><li>Non-zero values</li><li>Row indices for each non-zero value</li><li>Column pointers indicating where each column starts</li></ul><h5 id="autotoc_md134">Typical Applications</h5><ul><li>Stiffness matrices: <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>

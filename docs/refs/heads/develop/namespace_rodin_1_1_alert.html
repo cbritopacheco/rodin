@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Alert namespace | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Alert <span class="m-thin">namespace</span>
+        </h1>
+        <p>Module to handle alerts.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#enum-members">Enums</a></li>
+                <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#func-members">Functions</a></li>
+                <li><a href="#var-members">Variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> module provides a comprehensive system for handling exceptions, warnings, informational messages, and success notifications with colored terminal output and formatted messaging capabilities.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin_1_1_alert_1_1_identifier.html" class="m-doc">Identifier</a></dt>
+            <dd>Namespace containing factory functions for code identifiers.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_blue_t.html" class="m-doc">BlueT</a>
+            </dt>
+            <dd>Tag type for blue terminal color.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a>
+            </dt>
+            <dd>Empty tag type for bold text formatting.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_bright_gray_t.html" class="m-doc">BrightGrayT</a>
+            </dt>
+            <dd>Tag type for bright gray terminal color.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a>
+            </dt>
+            <dd>Tag type for bright white terminal color.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_class_exception.html" class="m-doc">ClassException</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class that automatically includes the class name.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CodeT&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>
+            </dt>
+            <dd>Type-safe wrapper for custom <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> colors.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a>
+            </dt>
+            <dd>Tag type for cyan terminal color.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class with formatted output capabilities.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_exception_prefix.html" class="m-doc">ExceptionPrefix</a>
+            </dt>
+            <dd>Prefix class for exception messages.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_gray_t.html" class="m-doc">GrayT</a>
+            </dt>
+            <dd>Tag type for gray terminal color.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_green_t.html" class="m-doc">GreenT</a>
+            </dt>
+            <dd>Tag type for green terminal color.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_identifier_t.html" class="m-doc">IdentifierT</a>
+            </dt>
+            <dd>Templated text class for code identifiers with bold formatting.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_info.html" class="m-doc">Info</a>
+            </dt>
+            <dd>Informational message class with formatted output.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_info_prefix.html" class="m-doc">InfoPrefix</a>
+            </dt>
+            <dd>Prefix class for informational messages.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a>
+            </dt>
+            <dd>Tag type for magenta terminal color.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">MemberFunctionException</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> type for errors occurring in member functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_member_function_warning.html" class="m-doc">MemberFunctionWarning</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> type for issues occurring in member functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Prefix&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>
+            </dt>
+            <dd>Forward declaration of the <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> template class.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a>
+            </dt>
+            <dd>Base class for message prefixes with colored text.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_namespaced_exception.html" class="m-doc">NamespacedException</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class that automatically includes the namespace name.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>
+            </dt>
+            <dd>Empty tag type for inserting newline characters.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>
+            </dt>
+            <dd>Tag type representing no color (transparent/default).</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a>
+            </dt>
+            <dd>Specialized text class for mathematical and technical notation.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>
+            </dt>
+            <dd>Empty tag type for raising an <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> message.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a>
+            </dt>
+            <dd>Tag type for red terminal color.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>
+            </dt>
+            <dd>Empty tag type for resetting terminal formatting.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;</div>
+              struct <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a>
+            </dt>
+            <dd><a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color template with compile-time color values.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>
+            </dt>
+            <dd>Empty tag type for enabling terminal color output.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a> message class with formatted output.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_success_prefix.html" class="m-doc">SuccessPrefix</a>
+            </dt>
+            <dd>Prefix class for success messages.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class F = <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>, class B = <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>
+            </dt>
+            <dd>Templated text class with foreground and background color support.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> message class with formatted output.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_alert_1_1_warning_prefix.html" class="m-doc">WarningPrefix</a>
+            </dt>
+            <dd>Prefix class for warning messages.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_white_t.html" class="m-doc">WhiteT</a>
+            </dt>
+            <dd>Tag type for white terminal color.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_alert_1_1_yellow_t.html" class="m-doc">YellowT</a>
+            </dt>
+            <dd>Tag type for yellow terminal color.</dd>
+          </dl>
+        </section>
+        <section id="enum-members">
+          <h2><a href="#enum-members">Enums</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a7dc8852969b34ab082bf695522e7df61" class="m-doc">Color16</a> { </span><span class="m-doc-wrap"><a href="#a7dc8852969b34ab082bf695522e7df61aee38e4d5dd68c4e440825018d549cb47" class="m-doc">Red</a>,
+              <a href="#a7dc8852969b34ab082bf695522e7df61ad382816a3cbeed082c9e216e7392eed1" class="m-doc">Green</a>,
+              <a href="#a7dc8852969b34ab082bf695522e7df61a9594eec95be70e7b1710f730fdda33d9" class="m-doc">Blue</a>,
+              <a href="#a7dc8852969b34ab082bf695522e7df61a51e6cd92b6c45f9affdc158ecca2b8b8" class="m-doc">Yellow</a>,
+              <a href="#a7dc8852969b34ab082bf695522e7df61ab91cc2c1416fcca942b61c7ac5b1a9ac" class="m-doc">Magenta</a>,
+              <a href="#a7dc8852969b34ab082bf695522e7df61a023c239d2f2538f140a20e72c7b73f20" class="m-doc">Cyan</a>,
+              <a href="#a7dc8852969b34ab082bf695522e7df61a994ae1d9731cebe455aff211bcb25b93" class="m-doc">Gray</a>,
+              <a href="#a7dc8852969b34ab082bf695522e7df61a25a81701fbfa4a1efdf660a950c1d006" class="m-doc">White</a>,
+              <a href="#a7dc8852969b34ab082bf695522e7df61a31f029ab48a83c3f97ac1cebeba1be0c" class="m-doc">BrightGray</a>,
+              <a href="#a7dc8852969b34ab082bf695522e7df61a44a07eabeb77868ee704ec159a59e8e4" class="m-doc">BrightWhite</a> }</span>
+            </dt>
+            <dd>Enumeration of basic 16-color terminal colors.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a15b1b83081915ae5239f81050ae0f550" class="m-doc">Attribute</a> { </span><span class="m-doc-wrap"><a href="#a15b1b83081915ae5239f81050ae0f550a114c3050111d8b8ddd830b99ccebd246" class="m-doc">Bold</a>,
+              <a href="#a15b1b83081915ae5239f81050ae0f550aa18366b217ebf811ad1886e4f4f865b2" class="m-doc">Dark</a>,
+              <a href="#a15b1b83081915ae5239f81050ae0f550a1d874710ccdcd46b95397049d2e7500c" class="m-doc">Italic</a>,
+              <a href="#a15b1b83081915ae5239f81050ae0f550a852721aa5fc738dfedff2945d71da439" class="m-doc">Underline</a>,
+              <a href="#a15b1b83081915ae5239f81050ae0f550acfad0a7419f44ea0c64db24197abbf70" class="m-doc">Blink</a>,
+              <a href="#a15b1b83081915ae5239f81050ae0f550a67f115c1fddc4ce1aeb1c754001585bc" class="m-doc">Reverse</a>,
+              <a href="#a15b1b83081915ae5239f81050ae0f550aabd3472d589bf2baaa02a6472505d93c" class="m-doc">Concealed</a>,
+              <a href="#a15b1b83081915ae5239f81050ae0f550a23709652ceedf22aad4bbb6a355b83e2" class="m-doc">Crossed</a> }</span>
+            </dt>
+            <dd><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a> formatting attributes for terminal output.</dd>
+          </dl>
+        </section>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt>
+              using <a href="#a692d40b6e9e3d9415efe4bf4e8490443" class="m-doc">NotationForeground</a> = <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a>
+            </dt>
+            <dd>Type alias for notation foreground color.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7dd3b4546ebf8087d9efd926580143a1" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              <a href="#a7dc8852969b34ab082bf695522e7df61" class="m-doc">Color16</a> c) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for Color16.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Code&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a98bef331b3c83c69ca39de22cf1fece0" class="m-doc">Color</a>(</span><span class="m-doc-wrap">const Code&amp;) -&gt; Color&lt; Code &gt;</span>
+            </dt>
+            <dd>Deduction guide for <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Code&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a39226fadc0951c5356018a2fbb172b2a" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&lt;Code&gt;&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for custom <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> colors.</dd>
+            <dt id="ab50a35ef2b205f9bd9bb2ad85e93a388">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab50a35ef2b205f9bd9bb2ad85e93a388" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for red color.</dd>
+            <dt id="ae2898b384a41857d6ea94c19bbc9cd8f">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae2898b384a41857d6ea94c19bbc9cd8f" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_green_t.html" class="m-doc">GreenT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for green color.</dd>
+            <dt id="aa8cfdca9387371583a4657f8d25f9f84">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa8cfdca9387371583a4657f8d25f9f84" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_blue_t.html" class="m-doc">BlueT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for blue color.</dd>
+            <dt id="a7b50125ed8c3c959a4fe3717847bcf54">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7b50125ed8c3c959a4fe3717847bcf54" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_yellow_t.html" class="m-doc">YellowT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for yellow color.</dd>
+            <dt id="ab5dcd44b582e98fc1c7228487efe5650">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab5dcd44b582e98fc1c7228487efe5650" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for magenta color.</dd>
+            <dt id="ac4fcfb127fbf4b5713814e8db5a4d498">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac4fcfb127fbf4b5713814e8db5a4d498" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for cyan color.</dd>
+            <dt id="a28baa7280e5ffc536e6855c5b905274c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a28baa7280e5ffc536e6855c5b905274c" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_white_t.html" class="m-doc">WhiteT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for white color.</dd>
+            <dt id="ad5b4d3a2c4d16efa8a3fe8f836ac6101">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad5b4d3a2c4d16efa8a3fe8f836ac6101" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_gray_t.html" class="m-doc">GrayT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for gray color.</dd>
+            <dt id="af78f02bd95ae8535349fb3065ad04272">
+              <span class="m-doc-wrap-bumper">auto <a href="#af78f02bd95ae8535349fb3065ad04272" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_bright_gray_t.html" class="m-doc">BrightGrayT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for bright gray color.</dd>
+            <dt id="a7c55c547f0ab8947aee7e74f0727f33c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c55c547f0ab8947aee7e74f0727f33c" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for bright white color.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aabdf8ad5380cda9eeb370e5da5e9a0e6" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a10a7213329e4231f1e2581c7340066cb" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0d49473ee9f6757a0a6c6732a99f1593" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>&amp;) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab2f8e5633e049880a2ce019e3c7b3048" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              <a href="#a15b1b83081915ae5239f81050ae0f550" class="m-doc">Attribute</a> a) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream insertion operator for text attributes.</dd>
+          </dl>
+        </section>
+        <section id="var-members">
+          <h2><a href="#var-members">Variables</a></h2>
+          <dl class="m-doc">
+            <dt>
+              static <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> <a href="#a7d26b7dd312a20846e8a6df5fa59c24d" class="m-doc">Bold</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> tag type.</dd>
+            <dt>
+              static <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> <a href="#aaef4af32509cb2debf56145e0b83276d" class="m-doc">NoColor</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> tag type.</dd>
+            <dt id="a70326a13f78aac024516bfc9d74c0550">
+              static <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a> <a href="#a70326a13f78aac024516bfc9d74c0550" class="m-doc-self">Red</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a> tag type.</dd>
+            <dt id="a92803cd2d69fa243b3fe12c6d9836c52">
+              static <a href="struct_rodin_1_1_alert_1_1_green_t.html" class="m-doc">GreenT</a> <a href="#a92803cd2d69fa243b3fe12c6d9836c52" class="m-doc-self">Green</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_green_t.html" class="m-doc">GreenT</a> tag type.</dd>
+            <dt id="ac633a08b58782bbd4cbee8f69ceab8d2">
+              static <a href="struct_rodin_1_1_alert_1_1_blue_t.html" class="m-doc">BlueT</a> <a href="#ac633a08b58782bbd4cbee8f69ceab8d2" class="m-doc-self">Blue</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_blue_t.html" class="m-doc">BlueT</a> tag type.</dd>
+            <dt id="a416d22181440fcff37ed82165d95ae5d">
+              static <a href="struct_rodin_1_1_alert_1_1_yellow_t.html" class="m-doc">YellowT</a> <a href="#a416d22181440fcff37ed82165d95ae5d" class="m-doc-self">Yellow</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_yellow_t.html" class="m-doc">YellowT</a> tag type.</dd>
+            <dt id="ad1eaa7f9eaa5c245e1572df61087c41f">
+              static <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a> <a href="#ad1eaa7f9eaa5c245e1572df61087c41f" class="m-doc-self">Magenta</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a> tag type.</dd>
+            <dt id="a5778131b8329fea91bbdb78a744c1f9c">
+              static <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a> <a href="#a5778131b8329fea91bbdb78a744c1f9c" class="m-doc-self">Cyan</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a> tag type.</dd>
+            <dt id="ab4c0df23572c5dd1d82887170eb2c3b2">
+              static <a href="struct_rodin_1_1_alert_1_1_white_t.html" class="m-doc">WhiteT</a> <a href="#ab4c0df23572c5dd1d82887170eb2c3b2" class="m-doc-self">White</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_white_t.html" class="m-doc">WhiteT</a> tag type.</dd>
+            <dt id="a456aef5e2e65805eee30b22e675fe71d">
+              static <a href="struct_rodin_1_1_alert_1_1_gray_t.html" class="m-doc">GrayT</a> <a href="#a456aef5e2e65805eee30b22e675fe71d" class="m-doc-self">Gray</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_gray_t.html" class="m-doc">GrayT</a> tag type.</dd>
+            <dt id="ac311b9f8abfaf74edee14943db81aba9">
+              static <a href="struct_rodin_1_1_alert_1_1_bright_gray_t.html" class="m-doc">BrightGrayT</a> <a href="#ac311b9f8abfaf74edee14943db81aba9" class="m-doc-self">BrightGray</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_bright_gray_t.html" class="m-doc">BrightGrayT</a> tag type.</dd>
+            <dt id="a34326b1a98fedf399fc8fb3b329e5a09">
+              static <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a> <a href="#a34326b1a98fedf399fc8fb3b329e5a09" class="m-doc-self">BrightWhite</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a> tag type.</dd>
+            <dt>
+              static <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> <a href="#a9fa27b1c1233610a89519358019f0852" class="m-doc">NewLine</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> tag type.</dd>
+            <dt>
+              static <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> <a href="#aabd12e21cf71a6dcdf9e357e1a44468f" class="m-doc">Raise</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> tag type.</dd>
+            <dt>
+              static <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> <a href="#a5373079a3483ab0c86d3810a7fc1c9ce" class="m-doc">Reset</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> tag type.</dd>
+            <dt>
+              static <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> <a href="#a37a8929404e73ba7e850aee65200e806" class="m-doc">Stylize</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> tag type.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="a7dc8852969b34ab082bf695522e7df61"><div>
+            <h3>
+              enum class Rodin::<wbr />Alert::<wbr /><a href="#a7dc8852969b34ab082bf695522e7df61" class="m-doc-self">Color16</a>
+            </h3>
+            <p>Enumeration of basic 16-color terminal colors.</p>
+<p>Provides an enumeration of the standard 16-color terminal palette including primary colors, gray shades, and bright variants. These colors are widely supported across terminal emulators.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a7dc8852969b34ab082bf695522e7df61aee38e4d5dd68c4e440825018d549cb47" class="m-doc-self" id="a7dc8852969b34ab082bf695522e7df61aee38e4d5dd68c4e440825018d549cb47">Red</a></td>
+                  <td>
+                  <p>Standard red color.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a7dc8852969b34ab082bf695522e7df61ad382816a3cbeed082c9e216e7392eed1" class="m-doc-self" id="a7dc8852969b34ab082bf695522e7df61ad382816a3cbeed082c9e216e7392eed1">Green</a></td>
+                  <td>
+                  <p>Standard green color.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a7dc8852969b34ab082bf695522e7df61a9594eec95be70e7b1710f730fdda33d9" class="m-doc-self" id="a7dc8852969b34ab082bf695522e7df61a9594eec95be70e7b1710f730fdda33d9">Blue</a></td>
+                  <td>
+                  <p>Standard blue color.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a7dc8852969b34ab082bf695522e7df61a51e6cd92b6c45f9affdc158ecca2b8b8" class="m-doc-self" id="a7dc8852969b34ab082bf695522e7df61a51e6cd92b6c45f9affdc158ecca2b8b8">Yellow</a></td>
+                  <td>
+                  <p>Standard yellow color.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a7dc8852969b34ab082bf695522e7df61ab91cc2c1416fcca942b61c7ac5b1a9ac" class="m-doc-self" id="a7dc8852969b34ab082bf695522e7df61ab91cc2c1416fcca942b61c7ac5b1a9ac">Magenta</a></td>
+                  <td>
+                  <p>Standard magenta color.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a7dc8852969b34ab082bf695522e7df61a023c239d2f2538f140a20e72c7b73f20" class="m-doc-self" id="a7dc8852969b34ab082bf695522e7df61a023c239d2f2538f140a20e72c7b73f20">Cyan</a></td>
+                  <td>
+                  <p>Standard cyan color.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a7dc8852969b34ab082bf695522e7df61a994ae1d9731cebe455aff211bcb25b93" class="m-doc-self" id="a7dc8852969b34ab082bf695522e7df61a994ae1d9731cebe455aff211bcb25b93">Gray</a></td>
+                  <td>
+                  <p>Standard gray color.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a7dc8852969b34ab082bf695522e7df61a25a81701fbfa4a1efdf660a950c1d006" class="m-doc-self" id="a7dc8852969b34ab082bf695522e7df61a25a81701fbfa4a1efdf660a950c1d006">White</a></td>
+                  <td>
+                  <p>Standard white color.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a7dc8852969b34ab082bf695522e7df61a31f029ab48a83c3f97ac1cebeba1be0c" class="m-doc-self" id="a7dc8852969b34ab082bf695522e7df61a31f029ab48a83c3f97ac1cebeba1be0c">BrightGray</a></td>
+                  <td>
+                  <p>Bright gray color.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a7dc8852969b34ab082bf695522e7df61a44a07eabeb77868ee704ec159a59e8e4" class="m-doc-self" id="a7dc8852969b34ab082bf695522e7df61a44a07eabeb77868ee704ec159a59e8e4">BrightWhite</a></td>
+                  <td>
+                  <p>Bright white color.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a15b1b83081915ae5239f81050ae0f550"><div>
+            <h3>
+              enum class Rodin::<wbr />Alert::<wbr /><a href="#a15b1b83081915ae5239f81050ae0f550" class="m-doc-self">Attribute</a>
+            </h3>
+            <p><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a> formatting attributes for terminal output.</p>
+<p>Enumeration of text formatting attributes that can be applied to terminal output including bold, italic, underline, and other visual effects.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a15b1b83081915ae5239f81050ae0f550a114c3050111d8b8ddd830b99ccebd246" class="m-doc-self" id="a15b1b83081915ae5239f81050ae0f550a114c3050111d8b8ddd830b99ccebd246">Bold</a></td>
+                  <td>
+                  <p>Bold text formatting.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a15b1b83081915ae5239f81050ae0f550aa18366b217ebf811ad1886e4f4f865b2" class="m-doc-self" id="a15b1b83081915ae5239f81050ae0f550aa18366b217ebf811ad1886e4f4f865b2">Dark</a></td>
+                  <td>
+                  <p>Dark text formatting.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a15b1b83081915ae5239f81050ae0f550a1d874710ccdcd46b95397049d2e7500c" class="m-doc-self" id="a15b1b83081915ae5239f81050ae0f550a1d874710ccdcd46b95397049d2e7500c">Italic</a></td>
+                  <td>
+                  <p>Italic text formatting<br /></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a15b1b83081915ae5239f81050ae0f550a852721aa5fc738dfedff2945d71da439" class="m-doc-self" id="a15b1b83081915ae5239f81050ae0f550a852721aa5fc738dfedff2945d71da439">Underline</a></td>
+                  <td>
+                  <p>Underlined text.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a15b1b83081915ae5239f81050ae0f550acfad0a7419f44ea0c64db24197abbf70" class="m-doc-self" id="a15b1b83081915ae5239f81050ae0f550acfad0a7419f44ea0c64db24197abbf70">Blink</a></td>
+                  <td>
+                  <p>Blinking text effect.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a15b1b83081915ae5239f81050ae0f550a67f115c1fddc4ce1aeb1c754001585bc" class="m-doc-self" id="a15b1b83081915ae5239f81050ae0f550a67f115c1fddc4ce1aeb1c754001585bc">Reverse</a></td>
+                  <td>
+                  <p>Reverse video (inverted colors)</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a15b1b83081915ae5239f81050ae0f550aabd3472d589bf2baaa02a6472505d93c" class="m-doc-self" id="a15b1b83081915ae5239f81050ae0f550aabd3472d589bf2baaa02a6472505d93c">Concealed</a></td>
+                  <td>
+                  <p>Concealed/hidden text.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a15b1b83081915ae5239f81050ae0f550a23709652ceedf22aad4bbb6a355b83e2" class="m-doc-self" id="a15b1b83081915ae5239f81050ae0f550a23709652ceedf22aad4bbb6a355b83e2">Crossed</a></td>
+                  <td>
+                  <p>Crossed-out text.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="a692d40b6e9e3d9415efe4bf4e8490443"><div>
+            <h3>
+              using Rodin::<wbr />Alert::<wbr /><a href="#a692d40b6e9e3d9415efe4bf4e8490443" class="m-doc-self">NotationForeground</a> = <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a>
+            </h3>
+            <p>Type alias for notation foreground color.</p>
+<p><a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> text uses magenta color for visual distinction in messages.</p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a7dd3b4546ebf8087d9efd926580143a1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7dd3b4546ebf8087d9efd926580143a1" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              <a href="#a7dc8852969b34ab082bf695522e7df61" class="m-doc">Color16</a> c)</span></span>
+            </h3>
+            <p>Stream insertion operator for Color16.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream to write to.</td>
+                </tr>
+                <tr>
+                  <td>c</td>
+                  <td>The color to apply.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Applies the specified 16-color terminal color to the output stream using the termcolor library.</p>
+          </div></section>
+          <section class="m-doc-details" id="a98bef331b3c83c69ca39de22cf1fece0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Code&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98bef331b3c83c69ca39de22cf1fece0" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap">const Code&amp;) -&gt; Color&lt; Code &gt;</span></span>
+            </h3>
+            <p>Deduction guide for <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Code</td>
+                  <td>The color code type.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a39226fadc0951c5356018a2fbb172b2a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Code&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39226fadc0951c5356018a2fbb172b2a" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&lt;Code&gt;&amp;)</span></span>
+            </h3>
+            <p>Stream insertion operator for custom <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> colors.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Code</td>
+                  <td>The <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color code type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>os</td>
+                  <td>Output stream to write to.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Applies a custom <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color to the output stream using the termcolor library&#x27;s color template.</p>
+          </div></section>
+          <section class="m-doc-details" id="aabdf8ad5380cda9eeb370e5da5e9a0e6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aabdf8ad5380cda9eeb370e5da5e9a0e6" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp;)</span></span>
+            </h3>
+            <p>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>The output stream to write to.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Inserts a newline character into the output stream.</p>
+          </div></section>
+          <section class="m-doc-details" id="a10a7213329e4231f1e2581c7340066cb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10a7213329e4231f1e2581c7340066cb" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp;)</span></span>
+            </h3>
+            <p>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>The output stream to write to.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Resets all terminal formatting and colors to default using the termcolor library.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0d49473ee9f6757a0a6c6732a99f1593"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d49473ee9f6757a0a6c6732a99f1593" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>&amp;)</span></span>
+            </h3>
+            <p>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>The output stream to write to.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Enables terminal colorization for the output stream using the termcolor library.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab2f8e5633e049880a2ce019e3c7b3048"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2f8e5633e049880a2ce019e3c7b3048" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              <a href="#a15b1b83081915ae5239f81050ae0f550" class="m-doc">Attribute</a> a)</span></span>
+            </h3>
+            <p>Stream insertion operator for text attributes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream to write to.</td>
+                </tr>
+                <tr>
+                  <td>a</td>
+                  <td>The attribute to apply.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Applies the specified text formatting attribute to the output stream using termcolor library functionality.</p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a7d26b7dd312a20846e8a6df5fa59c24d"><div>
+            <h3>
+              static <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> Rodin::<wbr />Alert::<wbr /><a href="#a7d26b7dd312a20846e8a6df5fa59c24d" class="m-doc-self">Bold</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> tag type.</p>
+<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> tag type for convenient usage.</p>
+          </div></section>
+          <section class="m-doc-details" id="aaef4af32509cb2debf56145e0b83276d"><div>
+            <h3>
+              static <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> Rodin::<wbr />Alert::<wbr /><a href="#aaef4af32509cb2debf56145e0b83276d" class="m-doc-self">NoColor</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> tag type.</p>
+<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> tag type for convenient usage.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9fa27b1c1233610a89519358019f0852"><div>
+            <h3>
+              static <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> Rodin::<wbr />Alert::<wbr /><a href="#a9fa27b1c1233610a89519358019f0852" class="m-doc-self">NewLine</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> tag type.</p>
+<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> tag type for convenient usage. Use this to insert newlines in <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> messages with proper indentation.</p>
+          </div></section>
+          <section class="m-doc-details" id="aabd12e21cf71a6dcdf9e357e1a44468f"><div>
+            <h3>
+              static <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> Rodin::<wbr />Alert::<wbr /><a href="#aabd12e21cf71a6dcdf9e357e1a44468f" class="m-doc-self">Raise</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> tag type.</p>
+<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> tag type for convenient usage. Stream this into a <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> to trigger its raise() method.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5373079a3483ab0c86d3810a7fc1c9ce"><div>
+            <h3>
+              static <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> Rodin::<wbr />Alert::<wbr /><a href="#a5373079a3483ab0c86d3810a7fc1c9ce" class="m-doc-self">Reset</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> tag type.</p>
+<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> tag type for convenient usage. Use this to reset terminal formatting to default.</p>
+          </div></section>
+          <section class="m-doc-details" id="a37a8929404e73ba7e850aee65200e806"><div>
+            <h3>
+              static <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> Rodin::<wbr />Alert::<wbr /><a href="#a37a8929404e73ba7e850aee65200e806" class="m-doc-self">Stylize</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> tag type.</p>
+<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> tag type for convenient usage. Use this to enable colored terminal output.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

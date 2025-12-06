@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -70,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md409">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md410">Properties</a></li>
-            <li><a href="#autotoc_md411">Applications</a></li>
-            <li><a href="#autotoc_md412">Usage Example</a></li>
+            <li><a href="#autotoc_md407">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md408">Properties</a></li>
+            <li><a href="#autotoc_md409">Applications</a></li>
+            <li><a href="#autotoc_md410">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -83,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Trace class, which computes the trace (sum of diagonal elements) of matrix-valued functions in variational formulations.</p><section id="autotoc_md409"><h3><a href="#autotoc_md409">Mathematical Foundation</a></h3><p>For a square matrix <svg class="m-math" style="width: 5.092em; height: 1.002em; vertical-align: -0.049em;" viewBox="0 -9.153753 48.884368 9.621174">
+<p>This file defines the Trace class, which computes the trace (sum of diagonal elements) of matrix-valued functions in variational formulations.</p><section id="autotoc_md407"><h3><a href="#autotoc_md407">Mathematical Foundation</a></h3><p>For a square matrix <svg class="m-math" style="width: 5.092em; height: 1.002em; vertical-align: -0.049em;" viewBox="0 -9.153753 48.884368 9.621174">
 <title>
 $ A \in \mathbb{R}^{n \times n} $
 </title>
@@ -137,7 +144,7 @@ $ A \in \mathbb{R}^{n \times n} $
 <use x='225.622977' y='-13.239141' xlink:href='#eq2-g1-105'/>
 <use x='228.506116' y='-13.239141' xlink:href='#eq2-g1-105'/>
 </g>
-</svg></div></section><section id="autotoc_md410"><h3><a href="#autotoc_md410">Properties</a></h3><p>The trace operator satisfies:</p><ul><li><strong>Linearity</strong>: <svg class="m-math" style="width: 13.578em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 130.353262 11.955168">
+</svg></div></section><section id="autotoc_md408"><h3><a href="#autotoc_md408">Properties</a></h3><p>The trace operator satisfies:</p><ul><li><strong>Linearity</strong>: <svg class="m-math" style="width: 13.578em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 130.353262 11.955168">
 <title>
 $ \text{tr}(A + B) = \text{tr}(A) + \text{tr}(B) $
 </title>
@@ -266,7 +273,7 @@ $ \text{tr}(A^T) = \text{tr}(A) $
 <use x='59.392341' y='0' xlink:href='#eq6-g1-65'/>
 <use x='68.167688' y='0' xlink:href='#eq6-g5-41'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md411"><h3><a href="#autotoc_md411">Applications</a></h3><ul><li>Linear elasticity: <svg class="m-math" style="width: 2.368em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 22.731362 11.955168">
+</svg></li></ul></section><section id="autotoc_md409"><h3><a href="#autotoc_md409">Applications</a></h3><ul><li>Linear elasticity: <svg class="m-math" style="width: 2.368em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 22.731362 11.955168">
 <title>
 $ \text{tr}(\boldsymbol{\varepsilon}) $
 </title>
@@ -284,7 +291,7 @@ $ \text{tr}(\boldsymbol{\varepsilon}) $
 <use x='11.856934' y='0' xlink:href='#eq7-g0-34'/>
 <use x='18.179036' y='0' xlink:href='#eq7-g4-41'/>
 </g>
-</svg> (volumetric strain)</li><li>Continuum mechanics: invariants of stress/strain tensors</li><li>Fluid dynamics: divergence from velocity gradient</li><li>General tensor operations</li></ul></section><section id="autotoc_md412"><h3><a href="#autotoc_md412">Usage Example</a></h3><pre class="m-code"><span class="c1">// Volumetric strain in linear elasticity</span>
+</svg> (volumetric strain)</li><li>Continuum mechanics: invariants of stress/strain tensors</li><li>Fluid dynamics: divergence from velocity gradient</li><li>General tensor operations</li></ul></section><section id="autotoc_md410"><h3><a href="#autotoc_md410">Usage Example</a></h3><pre class="m-code"><span class="c1">// Volumetric strain in linear elasticity</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">strain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Transpose</span><span class="p">(</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">)));</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">volumetric_strain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Trace</span><span class="p">(</span><span class="n">strain</span><span class="p">);</span><span class="w">  </span><span class="c1">// tr(ε)</span></pre></section>
         <section id="namespaces">

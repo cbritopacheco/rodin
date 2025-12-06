@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -64,7 +71,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> RED, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> GREEN, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> BLUE&gt;</div>
+          <div class="m-doc-template">template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>RGB <span class="m-thin">struct</span>
         </h1>
         <p><a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color template with compile-time color values.</p>
@@ -104,19 +111,19 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="a1d74f6348d2177cedcf0016589daf67a">
-              static <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> <a href="#a1d74f6348d2177cedcf0016589daf67a" class="m-doc-self">R</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#a1d74f6348d2177cedcf0016589daf67a" class="m-doc-self">R</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Red component value.</dd>
             <dt id="a66fd9c1a1bc5c2b1e4263139601dc02b">
-              static <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> <a href="#a66fd9c1a1bc5c2b1e4263139601dc02b" class="m-doc-self">G</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#a66fd9c1a1bc5c2b1e4263139601dc02b" class="m-doc-self">G</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Green component value.</dd>
             <dt id="aa7d69b5a55676cf6ea31e3514fbf2439">
-              static <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> <a href="#aa7d69b5a55676cf6ea31e3514fbf2439" class="m-doc-self">B</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#aa7d69b5a55676cf6ea31e3514fbf2439" class="m-doc-self">B</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Blue component value.</dd>
             <dt id="afb7287293f0e0de8eac99f5495d7aaae">
-              static <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> <a href="#afb7287293f0e0de8eac99f5495d7aaae" class="m-doc-self">HEX</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#afb7287293f0e0de8eac99f5495d7aaae" class="m-doc-self">HEX</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Combined hexadecimal representation of the <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color.</dd>
           </dl>
@@ -125,19 +132,19 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a45316f291fb4b39a7c1ff34a3dea8016" class="m-doc">r</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a45316f291fb4b39a7c1ff34a3dea8016" class="m-doc">r</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the red component value.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a002559b44d8fe12ec939f49300e0df19" class="m-doc">g</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a002559b44d8fe12ec939f49300e0df19" class="m-doc">g</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the green component value.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0111e2e50dde22c88e6da3c9a329eac0" class="m-doc">b</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0111e2e50dde22c88e6da3c9a329eac0" class="m-doc">b</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the blue component value.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adf895e85532850742c72ede6d5cacf38" class="m-doc">hex</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adf895e85532850742c72ede6d5cacf38" class="m-doc">hex</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the hexadecimal representation of the color.</dd>
           </dl>
@@ -147,9 +154,9 @@
           <section class="m-doc-details" id="a45316f291fb4b39a7c1ff34a3dea8016"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> RED, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> GREEN, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> BLUE&gt;
+                template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45316f291fb4b39a7c1ff34a3dea8016" class="m-doc-self">r</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45316f291fb4b39a7c1ff34a3dea8016" class="m-doc-self">r</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the red component value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -164,9 +171,9 @@
           <section class="m-doc-details" id="a002559b44d8fe12ec939f49300e0df19"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> RED, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> GREEN, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> BLUE&gt;
+                template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a002559b44d8fe12ec939f49300e0df19" class="m-doc-self">g</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a002559b44d8fe12ec939f49300e0df19" class="m-doc-self">g</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the green component value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -181,9 +188,9 @@
           <section class="m-doc-details" id="a0111e2e50dde22c88e6da3c9a329eac0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> RED, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> GREEN, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> BLUE&gt;
+                template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0111e2e50dde22c88e6da3c9a329eac0" class="m-doc-self">b</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0111e2e50dde22c88e6da3c9a329eac0" class="m-doc-self">b</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the blue component value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -198,9 +205,9 @@
           <section class="m-doc-details" id="adf895e85532850742c72ede6d5cacf38"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> RED, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> GREEN, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> BLUE&gt;
+                template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">constexpr</a> <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf895e85532850742c72ede6d5cacf38" class="m-doc-self">hex</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Alert::<wbr />RGB&lt;RED, GREEN, BLUE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf895e85532850742c72ede6d5cacf38" class="m-doc-self">hex</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the hexadecimal representation of the color.</p>
             <table class="m-table m-fullwidth m-flat">

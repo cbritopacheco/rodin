@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -83,8 +90,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md271">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md272">Key Features</a></li>
+            <li><a href="#autotoc_md269">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md270">Key Features</a></li>
             <li>
               Reference
               <ul>
@@ -97,7 +104,7 @@
             </li>
           </ul>
         </nav>
-<p>Base class for functions defined on finite element meshes.</p><p>Instances of <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> will always have the <a href="#a880e867925a2f06a1f23051b890dd0aa" class="m-doc">getValue()</a> method defined, which enables the evaluation of any function on some mesh element.</p><p><a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> provides the foundation for representing mathematical functions defined over geometric domains discretized by finite element meshes. This includes both analytical functions and discrete finite element functions (grid functions) that arise in variational formulations.</p><section id="autotoc_md271"><h3><a href="#autotoc_md271">Mathematical Foundation</a></h3><p>A function <svg class="m-math" style="width: 6.017em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 57.763451 10.626798">
+<p>Base class for functions defined on finite element meshes.</p><p>Instances of <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> will always have the <a href="#a880e867925a2f06a1f23051b890dd0aa" class="m-doc">getValue()</a> method defined, which enables the evaluation of any function on some mesh element.</p><p><a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> provides the foundation for representing mathematical functions defined over geometric domains discretized by finite element meshes. This includes both analytical functions and discrete finite element functions (grid functions) that arise in variational formulations.</p><section id="autotoc_md269"><h3><a href="#autotoc_md269">Mathematical Foundation</a></h3><p>A function <svg class="m-math" style="width: 6.017em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 57.763451 10.626798">
 <title>
 $ f : \Omega \to \mathbb{R}^n $
 </title>
@@ -174,7 +181,7 @@ $ \phi_i $
 <use x='0' y='0' xlink:href='#eq5-g1-30'/>
 <use x='6.928102' y='1.793263' xlink:href='#eq5-g0-105'/>
 </g>
-</svg> spanning finite element spaces</li></ul></section><section id="autotoc_md272"><h3><a href="#autotoc_md272">Key Features</a></h3><ul><li><strong>Domain support</strong>: Functions can be restricted to subdomains or boundaries</li><li><strong><a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a> operations</strong>: Support for function traces on mesh boundaries</li><li><strong>Point evaluation</strong>: Evaluation at arbitrary points within the domain</li><li><strong>Polymorphic design</strong>: CRTP enables compile-time polymorphism for efficiency</li></ul></section>
+</svg> spanning finite element spaces</li></ul></section><section id="autotoc_md270"><h3><a href="#autotoc_md270">Key Features</a></h3><ul><li><strong>Domain support</strong>: Functions can be restricted to subdomains or boundaries</li><li><strong><a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a> operations</strong>: Support for function traces on mesh boundaries</li><li><strong>Point evaluation</strong>: Evaluation at arbitrary points within the domain</li><li><strong>Polymorphic design</strong>: CRTP enables compile-time polymorphism for efficiency</li></ul></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

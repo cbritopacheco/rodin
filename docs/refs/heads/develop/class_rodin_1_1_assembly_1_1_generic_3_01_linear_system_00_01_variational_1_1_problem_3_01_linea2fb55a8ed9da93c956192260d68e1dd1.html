@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -91,8 +98,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md1">Assembly Process</a></li>
-            <li><a href="#autotoc_md2">Usage Example</a></li>
+            <li><a href="#autotoc_md0">Assembly Process</a></li>
+            <li><a href="#autotoc_md1">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -177,7 +184,7 @@ $ b $
 <use x='194.949508' y='0' xlink:href='#eq5-g1-61'/>
 <use x='207.374989' y='0' xlink:href='#eq5-g0-98'/>
 </g>
-</svg></div><p>after applying boundary conditions.</p><section id="autotoc_md1"><h3><a href="#autotoc_md1">Assembly Process</a></h3><ol><li><strong>Bilinear Form <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: Assembles all bilinear form integrators into the stiffness matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+</svg></div><p>after applying boundary conditions.</p><section id="autotoc_md0"><h3><a href="#autotoc_md0">Assembly Process</a></h3><ol><li><strong>Bilinear Form <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: Assembles all bilinear form integrators into the stiffness matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
 $ A $
 </title>
@@ -197,7 +204,7 @@ $ b $
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-98'/>
 </g>
-</svg> (stored as negative mass for compatibility)</li><li><strong>Dirichlet BC Application</strong>: Eliminates rows/columns corresponding to essential boundary conditions</li><li><strong>Periodic BC Application</strong>: Merges dependent degrees of freedom for periodic boundary conditions</li></ol></section><section id="autotoc_md2"><h3><a href="#autotoc_md2">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> (stored as negative mass for compatibility)</li><li><strong>Dirichlet BC Application</strong>: Eliminates rows/columns corresponding to essential boundary conditions</li><li><strong>Periodic BC Application</strong>: Merges dependent degrees of freedom for periodic boundary conditions</li></ol></section><section id="autotoc_md1"><h3><a href="#autotoc_md1">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
 
 <span class="n">Generic</span><span class="o">&lt;</span><span class="n">LinearSystem</span><span class="p">,</span><span class="w"> </span><span class="k">decltype</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="k">decltype</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">assembly</span><span class="p">;</span>
@@ -373,7 +380,7 @@ $ b $
                 </tr>
               </tbody>
             </table>
-<p>Assembles the complete linear system by processing all bilinear forms, linear forms, and boundary conditions specified in the problem.</p><h5 id="autotoc_md3">Assembly Steps</h5><ol><li>Assemble bilinear forms into stiffness matrix</li><li>Add pre-assembled bilinear forms</li><li>Assemble linear forms into load vector</li><li>Add pre-assembled linear forms</li><li>Apply Dirichlet boundary conditions (eliminate DOFs)</li><li>Apply periodic boundary conditions (merge DOFs)</li></ol>
+<p>Assembles the complete linear system by processing all bilinear forms, linear forms, and boundary conditions specified in the problem.</p><h5 id="autotoc_md2">Assembly Steps</h5><ol><li>Assemble bilinear forms into stiffness matrix</li><li>Add pre-assembled bilinear forms</li><li>Assemble linear forms into load vector</li><li>Add pre-assembled linear forms</li><li>Apply Dirichlet boundary conditions (eliminate DOFs)</li><li>Apply periodic boundary conditions (merge DOFs)</li></ol>
           </div></section>
           <section class="m-doc-details" id="af426ebba7e878cfe0c530d58df8c2da7"><div>
             <h3>

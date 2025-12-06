@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -71,10 +78,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md126">Algorithm</a></li>
-            <li><a href="#autotoc_md127">Properties</a></li>
-            <li><a href="#autotoc_md128">Typical Use Cases</a></li>
-            <li><a href="#autotoc_md129">Example Usage</a></li>
+            <li><a href="#autotoc_md124">Algorithm</a></li>
+            <li><a href="#autotoc_md125">Properties</a></li>
+            <li><a href="#autotoc_md126">Typical Use Cases</a></li>
+            <li><a href="#autotoc_md127">Example Usage</a></li>
             <li>
               Reference
               <ul>
@@ -113,7 +120,7 @@
 <use x='216.032377' y='-8.200662' xlink:href='#eq1-g0-116'/>
 <use x='220.259537' y='-8.200662' xlink:href='#eq1-g1-41'/>
 </g>
-</svg></div><section id="autotoc_md126"><h3><a href="#autotoc_md126">Algorithm</a></h3><p>Given a time step <svg class="m-math" style="width: 1.456em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 13.982143 8.169366">
+</svg></div><section id="autotoc_md124"><h3><a href="#autotoc_md124">Algorithm</a></h3><p>Given a time step <svg class="m-math" style="width: 1.456em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 13.982143 8.169366">
 <title>
 $ \Delta t $
 </title>
@@ -219,7 +226,7 @@ $ q_{n+1} $
 <use x='212.613208' y='-4.333785' xlink:href='#eq5-g1-107'/>
 <use x='218.70143' y='-2.540522' xlink:href='#eq5-g2-50'/>
 </g>
-</svg></div></section><section id="autotoc_md127"><h3><a href="#autotoc_md127">Properties</a></h3><ul><li><strong>Order of accuracy</strong>: 2 (error <svg class="m-math" style="width: 5.178em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 49.709684 12.463531">
+</svg></div></section><section id="autotoc_md125"><h3><a href="#autotoc_md125">Properties</a></h3><ul><li><strong>Order of accuracy</strong>: 2 (error <svg class="m-math" style="width: 5.178em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 49.709684 12.463531">
 <title>
 $ \sim O(\Delta t^3) $
 </title>
@@ -241,7 +248,7 @@ $ \sim O(\Delta t^3) $
 <use x='40.425043' y='-4.338437' xlink:href='#eq6-g2-51'/>
 <use x='45.157358' y='0' xlink:href='#eq6-g3-41'/>
 </g>
-</svg> per step)</li><li><strong>Stages</strong>: 2 function evaluations per step</li><li><strong>Stability</strong>: A-stable for linear problems</li></ul></section><section id="autotoc_md128"><h3><a href="#autotoc_md128">Typical Use Cases</a></h3><ul><li>Time-dependent PDEs (heat equation, wave equation)</li><li>Particle dynamics</li><li>Systems requiring better accuracy than forward Euler</li></ul></section><section id="autotoc_md129"><h3><a href="#autotoc_md129">Example Usage</a></h3><pre class="m-code"><span class="n">RK2</span><span class="w"> </span><span class="n">integrator</span><span class="p">;</span>
+</svg> per step)</li><li><strong>Stages</strong>: 2 function evaluations per step</li><li><strong>Stability</strong>: A-stable for linear problems</li></ul></section><section id="autotoc_md126"><h3><a href="#autotoc_md126">Typical Use Cases</a></h3><ul><li>Time-dependent PDEs (heat equation, wave equation)</li><li>Particle dynamics</li><li>Systems requiring better accuracy than forward Euler</li></ul></section><section id="autotoc_md127"><h3><a href="#autotoc_md127">Example Usage</a></h3><pre class="m-code"><span class="n">RK2</span><span class="w"> </span><span class="n">integrator</span><span class="p">;</span>
 <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">initial_state</span><span class="p">;</span>
 <span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span><span class="p">;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">compute_derivative</span><span class="p">(</span><span class="n">state</span><span class="p">);</span><span class="w"> </span><span class="p">};</span>

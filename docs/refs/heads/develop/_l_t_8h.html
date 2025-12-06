@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -70,9 +77,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md338">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md339">Applications</a></li>
-            <li><a href="#autotoc_md340">Usage Example</a></li>
+            <li><a href="#autotoc_md336">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md337">Applications</a></li>
+            <li><a href="#autotoc_md338">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -81,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the LT class, which implements the less-than comparison operation between functions. This operator creates a boolean function indicating where one function is less than another.</p><section id="autotoc_md338"><h3><a href="#autotoc_md338">Mathematical Foundation</a></h3><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
+<p>This file defines the LT class, which implements the less-than comparison operation between functions. This operator creates a boolean function indicating where one function is less than another.</p><section id="autotoc_md336"><h3><a href="#autotoc_md336">Mathematical Foundation</a></h3><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
 <title>
 $ f, g : \Omega \to \mathbb{R} $
 </title>
@@ -164,7 +171,7 @@ $ f, g : \Omega \to \mathbb{R} $
 <use x='243.555676' y='-5.798537' xlink:href='#eq2-g4-115'/>
 <use x='248.206235' y='-5.798537' xlink:href='#eq2-g4-101'/>
 </g>
-</svg></div></section><section id="autotoc_md339"><h3><a href="#autotoc_md339">Applications</a></h3><ul><li>Negative region indicators: <svg class="m-math" style="width: 2.537em; height: 1.097em; vertical-align: -0.240em;" viewBox="0 -8.235778 24.357972 10.53216">
+</svg></div></section><section id="autotoc_md337"><h3><a href="#autotoc_md337">Applications</a></h3><ul><li>Negative region indicators: <svg class="m-math" style="width: 2.537em; height: 1.097em; vertical-align: -0.240em;" viewBox="0 -8.235778 24.357972 10.53216">
 <title>
 $ \mathbb{1}_{u &lt; 0} $
 </title>
@@ -180,7 +187,7 @@ $ \mathbb{1}_{u &lt; 0} $
 <use x='13.537282' y='1.793263' xlink:href='#eq3-g1-60'/>
 <use x='20.123789' y='1.793263' xlink:href='#eq3-g2-48'/>
 </g>
-</svg></li><li>Subdomain identification</li><li>Constraint violation detection</li><li>Thresholding operations</li></ul></section><section id="autotoc_md340"><h3><a href="#autotoc_md340">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">negative_region</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean: true where u is negative</span></pre></section>
+</svg></li><li>Subdomain identification</li><li>Constraint violation detection</li><li>Thresholding operations</li></ul></section><section id="autotoc_md338"><h3><a href="#autotoc_md338">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">negative_region</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean: true where u is negative</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html" id="m-navbar-current">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -66,18 +73,8 @@
         <h1>Modules</h1>
         <ul class="m-doc">
           <li>module <a href="group___rodin_c_t_a_d.html" class="m-doc">Template deduction guides</a> <span class="m-doc">Class template argument deduction <a href="https://en.cppreference.com/w/cpp/language/class_template_argument_deduction">(CTAD)</a> of <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s classes.</span></li>
-          <li>module <a href="group___alert_module.html" class="m-doc">Alert</a> <span class="m-doc">Alert and exception handling system for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
-          <li>module <a href="group___rodin_assembly.html" class="m-doc">Assembly Module</a> <span class="m-doc">Matrix and vector assembly infrastructure for finite element computations.</span></li>
           <li>module <a href="group___rodin_casting.html" class="m-doc">Type Casting Utilities</a> <span class="m-doc">Safe and efficient type casting operations.</span></li>
           <li>module <a href="group___rodin_directives.html" class="m-doc">Preprocessor directives</a> <span class="m-doc">Preprocessor directives defined by <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
-          <li>module <a href="group___rodin_context.html" class="m-doc">Context Module</a> <span class="m-doc">Execution context management for different computing environments.</span></li>
-          <li class="m-doc-collapsible">
-            <a href="#" onclick="return toggle(this)">module</a> <a href="group___rodin_form_language.html" class="m-doc">Form Language Module</a> <span class="m-doc">Domain-specific language for expressing finite element forms and expressions.</span>
-            <ul class="m-doc">
-              <li>module <a href="group___traits_specializations.html" class="m-doc">Traits Template Specializations</a> <span class="m-doc">Template specializations of the <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> class.</span></li>
-            </ul>
-          </li>
-          <li>module <a href="group___rodin_geometry.html" class="m-doc">Geometry Module</a> <span class="m-doc"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> data structures, geometric operations, and computational geometry utilities.</span></li>
           <li>module <a href="group___mesh_types.html" class="m-doc">Mesh Types and Template Specializations</a> <span class="m-doc">Different types of mesh and template specializations of the <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> class.</span></li>
           <li>module <a href="group___sub_mesh_specializations.html" class="m-doc">SubMesh Template Specializations</a> <span class="m-doc">Template specializations of the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> class.</span></li>
           <li>module <a href="group___mesh_loader_specializations.html" class="m-doc">MeshLoader Template Specializations</a> <span class="m-doc">Template specializations of the <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html" class="m-doc">MeshLoader</a> class.</span></li>

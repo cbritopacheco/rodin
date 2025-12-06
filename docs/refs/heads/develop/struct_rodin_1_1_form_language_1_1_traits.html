@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -84,13 +91,13 @@
           <h3>Contents</h3>
           <ul>
             <li>
-              <a href="#autotoc_md35">Common Trait Members</a>
+              <a href="#autotoc_md33">Common Trait Members</a>
               <ul>
-                <li><a href="#autotoc_md36">Type Members</a></li>
-                <li><a href="#autotoc_md37">Static Constants</a></li>
+                <li><a href="#autotoc_md34">Type Members</a></li>
+                <li><a href="#autotoc_md35">Static Constants</a></li>
               </ul>
             </li>
-            <li><a href="#autotoc_md38">Specialization Example</a></li>
+            <li><a href="#autotoc_md36">Specialization Example</a></li>
             <li>
               Reference
               <ul>
@@ -98,7 +105,7 @@
             </li>
           </ul>
         </nav>
-<p>Primary template for type traits of form language objects.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a></p></aside><p>The <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> template provides a centralized mechanism for querying compile-time type information about form language objects. This is the primary (unspecialized) template; specific types require explicit specializations to be useful.</p><section id="autotoc_md35"><h3><a href="#autotoc_md35">Common Trait Members</a></h3><p>While the primary template is intentionally incomplete, specializations typically provide some or all of the following:</p><section id="autotoc_md36"><h4><a href="#autotoc_md36">Type Members</a></h4><ul><li><strong>FESType</strong>: Associated finite element space type</li><li><strong>ScalarType</strong>: Scalar type for numerical values</li><li><strong>RangeType</strong>: Range type for function evaluations</li></ul></section><section id="autotoc_md37"><h4><a href="#autotoc_md37">Static Constants</a></h4><ul><li><strong>SpaceType</strong>: Indicates trial space, test space, or other</li><li><strong>Dimension</strong>: Spatial or value dimension</li></ul></section></section><section id="autotoc_md38"><h3><a href="#autotoc_md38">Specialization Example</a></h3><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<p>Primary template for type traits of form language objects.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a></p></aside><p>The <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> template provides a centralized mechanism for querying compile-time type information about form language objects. This is the primary (unspecialized) template; specific types require explicit specializations to be useful.</p><section id="autotoc_md33"><h3><a href="#autotoc_md33">Common Trait Members</a></h3><p>While the primary template is intentionally incomplete, specializations typically provide some or all of the following:</p><section id="autotoc_md34"><h4><a href="#autotoc_md34">Type Members</a></h4><ul><li><strong>FESType</strong>: Associated finite element space type</li><li><strong>ScalarType</strong>: Scalar type for numerical values</li><li><strong>RangeType</strong>: Range type for function evaluations</li></ul></section><section id="autotoc_md35"><h4><a href="#autotoc_md35">Static Constants</a></h4><ul><li><strong>SpaceType</strong>: Indicates trial space, test space, or other</li><li><strong>Dimension</strong>: Spatial or value dimension</li></ul></section></section><section id="autotoc_md36"><h3><a href="#autotoc_md36">Specialization Example</a></h3><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&lt;</span><span class="n">MyFormType</span><span class="o">&lt;</span><span class="n">Derived</span><span class="p">,</span><span class="w"> </span><span class="n">FES</span><span class="o">&gt;&gt;</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">using</span><span class="w"> </span><span class="n">FESType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FES</span><span class="p">;</span>

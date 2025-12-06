@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -70,11 +77,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md249">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md250">Orientation Convention</a></li>
-            <li><a href="#autotoc_md251">Applications in DG Methods</a></li>
-            <li><a href="#autotoc_md252">Difference from BoundaryNormal</a></li>
-            <li><a href="#autotoc_md253">Usage Example</a></li>
+            <li><a href="#autotoc_md247">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md248">Orientation Convention</a></li>
+            <li><a href="#autotoc_md249">Applications in DG Methods</a></li>
+            <li><a href="#autotoc_md250">Difference from BoundaryNormal</a></li>
+            <li><a href="#autotoc_md251">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -84,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the FaceNormal class, which represents the unit normal vector on mesh faces (both interior and boundary). Face normals are crucial for Discontinuous Galerkin (DG) methods where numerical fluxes depend on the normal direction at element interfaces.</p><section id="autotoc_md249"><h3><a href="#autotoc_md249">Mathematical Foundation</a></h3><p>For a face <svg class="m-math" style="width: 0.959em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.203615 8.169366">
+<p>This file defines the FaceNormal class, which represents the unit normal vector on mesh faces (both interior and boundary). Face normals are crucial for Discontinuous Galerkin (DG) methods where numerical fluxes depend on the normal direction at element interfaces.</p><section id="autotoc_md247"><h3><a href="#autotoc_md247">Mathematical Foundation</a></h3><p>For a face <svg class="m-math" style="width: 0.959em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.203615 8.169366">
 <title>
 $ F $
 </title>
@@ -147,7 +154,7 @@ $ \mathbf{n} $
 <use x='196.506266' y='-2.988792' xlink:href='#eq5-g2-61'/>
 <use x='208.931746' y='-2.988792' xlink:href='#eq5-g2-49'/>
 </g>
-</svg></div></section><section id="autotoc_md250"><h3><a href="#autotoc_md250">Orientation Convention</a></h3><p>The normal direction is chosen according to a consistent orientation:</p><ul><li>For interior faces: points from <svg class="m-math" style="width: 1.813em; height: 0.954em; vertical-align: -0.000em;" viewBox="0 -9.153753 17.404186 9.153753">
+</svg></div></section><section id="autotoc_md248"><h3><a href="#autotoc_md248">Orientation Convention</a></h3><p>The normal direction is chosen according to a consistent orientation:</p><ul><li>For interior faces: points from <svg class="m-math" style="width: 1.813em; height: 0.954em; vertical-align: -0.000em;" viewBox="0 -9.153753 17.404186 9.153753">
 <title>
 $ K^+ $
 </title>
@@ -171,7 +178,7 @@ $ K^- $
 <use x='0' y='0' xlink:href='#eq7-g1-75'/>
 <use x='10.81768' y='-4.338437' xlink:href='#eq7-g0-0'/>
 </g>
-</svg></li><li>For boundary faces: points outward from the domain</li></ul></section><section id="autotoc_md251"><h3><a href="#autotoc_md251">Applications in DG Methods</a></h3><ul><li><strong>Numerical fluxes</strong>: <svg class="m-math" style="width: 6.586em; height: 1.505em; vertical-align: -0.312em;" viewBox="0 -11.457002 63.224623 14.445794">
+</svg></li><li>For boundary faces: points outward from the domain</li></ul></section><section id="autotoc_md249"><h3><a href="#autotoc_md249">Applications in DG Methods</a></h3><ul><li><strong>Numerical fluxes</strong>: <svg class="m-math" style="width: 6.586em; height: 1.505em; vertical-align: -0.312em;" viewBox="0 -11.457002 63.224623 14.445794">
 <title>
 $ \hat{f}(\mathbf{u}^+, \mathbf{u}^-, \mathbf{n}) $
 </title>
@@ -281,7 +288,7 @@ $ \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] $
 <use x='42.433674' y='0' xlink:href='#eq11-g3-93'/>
 <use x='43.692837' y='0' xlink:href='#eq11-g3-93'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md252"><h3><a href="#autotoc_md252">Difference from BoundaryNormal</a></h3><ul><li><strong>FaceNormal</strong>: Defined on all faces (interior + boundary)</li><li><strong>BoundaryNormal</strong>: Only defined on domain boundary</li></ul></section><section id="autotoc_md253"><h3><a href="#autotoc_md253">Usage Example</a></h3><pre class="m-code"><span class="n">FaceNormal</span><span class="w"> </span><span class="nf">n</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></li></ul></section><section id="autotoc_md250"><h3><a href="#autotoc_md250">Difference from BoundaryNormal</a></h3><ul><li><strong>FaceNormal</strong>: Defined on all faces (interior + boundary)</li><li><strong>BoundaryNormal</strong>: Only defined on domain boundary</li></ul></section><section id="autotoc_md251"><h3><a href="#autotoc_md251">Usage Example</a></h3><pre class="m-code"><span class="n">FaceNormal</span><span class="w"> </span><span class="nf">n</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 
 <span class="c1">// DG numerical flux on interior faces</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">flux</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InterfaceIntegral</span><span class="p">(</span><span class="n">Average</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">)));</span>

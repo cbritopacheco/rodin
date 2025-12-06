@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -71,9 +78,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md153">Mathematical Properties</a></li>
-            <li><a href="#autotoc_md154">References</a></li>
-            <li><a href="#autotoc_md155">Usage Example</a></li>
+            <li><a href="#autotoc_md151">Mathematical Properties</a></li>
+            <li><a href="#autotoc_md152">References</a></li>
+            <li><a href="#autotoc_md153">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -161,7 +168,7 @@ $ d $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-100'/>
 </g>
-</svg> is the normalized approximate signed distance.</p><section id="autotoc_md153"><h3><a href="#autotoc_md153">Mathematical Properties</a></h3><ul><li>Preserves the zero level set: <svg class="m-math" style="width: 12.777em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 122.658435 11.955168">
+</svg> is the normalized approximate signed distance.</p><section id="autotoc_md151"><h3><a href="#autotoc_md151">Mathematical Properties</a></h3><ul><li>Preserves the zero level set: <svg class="m-math" style="width: 12.777em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 122.658435 11.955168">
 <title>
 $ d(x) = 0 \iff u(x) = 0 $
 </title>
@@ -224,7 +231,7 @@ $ \text{sign}(d) = \text{sign}(u) $
 <use x='75.344507' y='0' xlink:href='#eq5-g0-117'/>
 <use x='82.006946' y='0' xlink:href='#eq5-g4-41'/>
 </g>
-</svg></li><li>Better gradient normalization than simple <a href="class_rodin_1_1_models_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> method</li><li>More accurate near the interface</li></ul></section><section id="autotoc_md154"><h3><a href="#autotoc_md154">References</a></h3><p><a href="citelist.html#CITEREF_belyaev2015variational" class="m-doc">[2]</a> <a href="citelist.html#CITEREF_spalding1994calculation" class="m-doc">[10]</a> <a href="citelist.html#CITEREF_tucker1998assessment" class="m-doc">[11]</a></p></section><section id="autotoc_md155"><h3><a href="#autotoc_md155">Usage Example</a></h3><pre class="m-code"><span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span><span class="w">  </span><span class="c1">// Some level set function</span>
+</svg></li><li>Better gradient normalization than simple <a href="class_rodin_1_1_models_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> method</li><li>More accurate near the interface</li></ul></section><section id="autotoc_md152"><h3><a href="#autotoc_md152">References</a></h3><p><a href="citelist.html#CITEREF_belyaev2015variational" class="m-doc">[2]</a> <a href="citelist.html#CITEREF_spalding1994calculation" class="m-doc">[9]</a> <a href="citelist.html#CITEREF_tucker1998assessment" class="m-doc">[10]</a></p></section><section id="autotoc_md153"><h3><a href="#autotoc_md153">Usage Example</a></h3><pre class="m-code"><span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span><span class="w">  </span><span class="c1">// Some level set function</span>
 <span class="n">SpaldingTucker</span><span class="w"> </span><span class="n">st</span><span class="p">;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">dist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">st</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// Normalized distance approximation</span></pre></section>
         <section id="pub-methods">

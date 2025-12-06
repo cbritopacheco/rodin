@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -29,8 +29,8 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -38,13 +38,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
-                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -64,7 +71,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>MessagePrefix <span class="m-thin">class</span>
         </h1>
         <p>Base class for message prefixes with colored text.</p>
@@ -86,7 +93,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> F = <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>, <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> B = <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class F = <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>, class B = <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text&lt;Foreground&gt;</a>
             </dt>
             <dd>Templated text class with foreground and background color support.</dd>
@@ -105,16 +112,16 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a09b0803a3939b20ad18d47aa7949f0ed" class="m-doc">MessagePrefix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
-              <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> std::string&amp; prefix)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a09b0803a3939b20ad18d47aa7949f0ed" class="m-doc">MessagePrefix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
+              const std::string&amp; prefix)</span>
             </dt>
             <dd>Constructs a message prefix with foreground color and text.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a6745291eb703f348c814a4dbe7e9af6b" class="m-doc">MessagePrefix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> std::string&amp; prefix)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a6745291eb703f348c814a4dbe7e9af6b" class="m-doc">MessagePrefix</a>(</span><span class="m-doc-wrap">const std::string&amp; prefix)</span>
             </dt>
             <dd>Constructs a message prefix with text using default color.</dd>
             <dt id="a9f913ac4bf689fd2847099e4b6424fa6">
-              <span class="m-doc-wrap-bumper"><a href="#a9f913ac4bf689fd2847099e4b6424fa6" class="m-doc-self">MessagePrefix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a9f913ac4bf689fd2847099e4b6424fa6" class="m-doc-self">MessagePrefix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="ab1aa54e17e75830a206ccb87e2e502e9">
@@ -128,10 +135,10 @@
           <section class="m-doc-details" id="a09b0803a3939b20ad18d47aa7949f0ed"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a> _1&gt;
+                template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a> _1&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />MessagePrefix&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09b0803a3939b20ad18d47aa7949f0ed" class="m-doc-self">MessagePrefix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
-              <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> std::string&amp; prefix)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />MessagePrefix&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09b0803a3939b20ad18d47aa7949f0ed" class="m-doc-self">MessagePrefix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&amp; fg,
+              const std::string&amp; prefix)</span></span>
             </h3>
             <p>Constructs a message prefix with foreground color and text.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -153,9 +160,9 @@
           <section class="m-doc-details" id="a6745291eb703f348c814a4dbe7e9af6b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">class</a> <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a> _1&gt;
+                template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a> _1&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />MessagePrefix&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6745291eb703f348c814a4dbe7e9af6b" class="m-doc-self">MessagePrefix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">const</a> std::string&amp; prefix)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />MessagePrefix&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6745291eb703f348c814a4dbe7e9af6b" class="m-doc-self">MessagePrefix</a>(</span><span class="m-doc-wrap">const std::string&amp; prefix)</span></span>
             </h3>
             <p>Constructs a message prefix with text using default color.</p>
             <table class="m-table m-fullwidth m-flat">
