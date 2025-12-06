@@ -1,0 +1,245 @@
+/**
+  @page guides-meshes-iteration Mesh Iteration
+  @brief Iterating over mesh entities
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  Rodin provides iterators for traversing vertices, edges, faces, and cells
+  in a mesh.
+
+  @section guides-meshes-iteration-intro Introduction
+
+  Mesh iterators allow you to loop over all entities of a given dimension,
+  accessing their properties and performing operations.
+
+  @section guides-meshes-iteration-basic Basic Iteration
+
+  @subsection guides-meshes-iteration-basic-vertices Iterating Over Vertices
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+
+    // Iterate over all vertices
+    for (auto it = mesh.getVertex(); it; ++it) {
+      const auto coords = it->getCoordinates();
+      std::cout << "Vertex " << it->getIndex() 
+                << " at (" << coords[0] << ", " << coords[1] << ")" 
+                << std::endl;
+    }
+
+    return 0;
+  }
+  @endcode
+
+  @subsection guides-meshes-iteration-basic-cells Iterating Over Cells
+
+  @code{.cpp}
+  // Iterate over all cells
+  for (auto it = mesh.getCell(); it; ++it) {
+    std::cout << "Cell " << it->getIndex() 
+              << " with attribute " << it->getAttribute() 
+              << std::endl;
+  }
+  @endcode
+
+  @subsection guides-meshes-iteration-basic-faces Iterating Over Faces (Edges in 2D)
+
+  @code{.cpp}
+  // Iterate over all faces (edges in 2D)
+  for (auto it = mesh.getFace(); it; ++it) {
+    std::cout << "Face " << it->getIndex() << std::endl;
+  }
+  @endcode
+
+  @section guides-meshes-iteration-dimension Iteration by Dimension
+
+  You can iterate over polytopes of any dimension:
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+
+  // In 2D:
+  // Dimension 0 = vertices
+  // Dimension 1 = edges
+  // Dimension 2 = cells
+
+  for (size_t d = 0; d <= mesh.getDimension(); ++d) {
+    std::cout << "Polytopes of dimension " << d << ":" << std::endl;
+    for (auto it = mesh.getPolytope(d); it; ++it) {
+      std::cout << "  Index: " << it->getIndex() << std::endl;
+    }
+  }
+  @endcode
+
+  @section guides-meshes-iteration-properties Accessing Entity Properties
+
+  @subsection guides-meshes-iteration-properties-index Index
+
+  @code{.cpp}
+  for (auto it = mesh.getCell(); it; ++it) {
+    Index idx = it->getIndex();
+    std::cout << "Cell index: " << idx << std::endl;
+  }
+  @endcode
+
+  @subsection guides-meshes-iteration-properties-coords Coordinates
+
+  @code{.cpp}
+  for (auto it = mesh.getVertex(); it; ++it) {
+    auto coords = it->getCoordinates();
+    std::cout << "Coordinates: (" << coords[0] << ", " << coords[1] << ")" 
+              << std::endl;
+  }
+  @endcode
+
+  @subsection guides-meshes-iteration-properties-attribute Attributes
+
+  @code{.cpp}
+  for (auto it = mesh.getCell(); it; ++it) {
+    Attribute attr = it->getAttribute();
+    std::cout << "Cell attribute: " << attr << std::endl;
+  }
+  @endcode
+
+  @subsection guides-meshes-iteration-properties-geometry Geometry Type
+
+  @code{.cpp}
+  for (auto it = mesh.getCell(); it; ++it) {
+    Polytope::Type geom = it->getGeometry();
+    std::cout << "Geometry type: " << static_cast<int>(geom) << std::endl;
+  }
+  @endcode
+
+  @section guides-meshes-iteration-specific Accessing Specific Entities
+
+  Get iterators positioned at specific indices:
+
+  @code{.cpp}
+  // Get specific cell
+  auto cell5 = mesh.getCell(5);
+  std::cout << "Cell 5 attribute: " << cell5->getAttribute() << std::endl;
+
+  // Get specific vertex
+  auto vertex10 = mesh.getVertex(10);
+  auto coords = vertex10->getCoordinates();
+  std::cout << "Vertex 10: (" << coords[0] << ", " << coords[1] << ")" 
+            << std::endl;
+
+  // Get specific face
+  auto face7 = mesh.getFace(7);
+  @endcode
+
+  @section guides-meshes-iteration-neighbors Iterating Over Neighbors
+
+  With connectivity computed, iterate over adjacent polytopes:
+
+  @code{.cpp}
+  mesh.getConnectivity().compute(2, 2);  // Cell-to-cell
+
+  auto cell = mesh.getCell(0);
+  for (auto neighbor = cell->getAdjacent(); neighbor; ++neighbor) {
+    std::cout << "Cell 0 is adjacent to cell " 
+              << neighbor->getIndex() << std::endl;
+  }
+  @endcode
+
+  @section guides-meshes-iteration-boundary Boundary Iteration
+
+  Iterate over only boundary faces:
+
+  @code{.cpp}
+  mesh.getConnectivity().compute(1, 2);  // Required for boundary
+
+  for (auto it = mesh.getBoundary(); it; ++it) {
+    std::cout << "Boundary edge " << it->getIndex() << std::endl;
+  }
+  @endcode
+
+  @section guides-meshes-iteration-interface Interface Iteration
+
+  Iterate over interface faces (between different regions):
+
+  @code{.cpp}
+  for (auto it = mesh.getInterface(); it; ++it) {
+    std::cout << "Interface edge " << it->getIndex() << std::endl;
+  }
+  @endcode
+
+  @section guides-meshes-iteration-example Complete Example
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 2);
+
+    // Count different entity types
+    size_t vertexCount = 0;
+    size_t edgeCount = 0;
+    size_t cellCount = 0;
+    size_t boundaryCount = 0;
+
+    for (auto it = mesh.getVertex(); it; ++it) vertexCount++;
+    for (auto it = mesh.getFace(); it; ++it) edgeCount++;
+    for (auto it = mesh.getCell(); it; ++it) cellCount++;
+    for (auto it = mesh.getBoundary(); it; ++it) boundaryCount++;
+
+    std::cout << "Vertices: " << vertexCount << std::endl;
+    std::cout << "Edges: " << edgeCount << std::endl;
+    std::cout << "Cells: " << cellCount << std::endl;
+    std::cout << "Boundary edges: " << boundaryCount << std::endl;
+
+    // Analyze cells by attribute
+    std::map<Attribute, size_t> attrCount;
+    for (auto it = mesh.getCell(); it; ++it) {
+      attrCount[it->getAttribute()]++;
+    }
+
+    std::cout << "Cells by attribute:" << std::endl;
+    for (const auto& [attr, count] : attrCount) {
+      std::cout << "  Attribute " << attr << ": " << count << " cells" 
+                << std::endl;
+    }
+
+    // Compute average cell size
+    Real totalVolume = 0.0;
+    for (auto it = mesh.getCell(); it; ++it) {
+      totalVolume += it->getMeasure();
+    }
+    Real avgCellSize = totalVolume / cellCount;
+    std::cout << "Average cell size: " << avgCellSize << std::endl;
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-meshes-iteration-performance Performance Tips
+
+  - Cache results if iterating multiple times
+  - Use range-based loops where appropriate
+  - Avoid unnecessary coordinate lookups
+  - Compute connectivity once before iterating
+
+  @section guides-meshes-iteration-see-also See Also
+
+  - @ref guides-meshes "Meshes overview"
+  - @ref guides-meshes-connectivity "Connectivity"
+  - @ref Rodin::Geometry::PolytopeIterator "PolytopeIterator reference"
+
+  */
