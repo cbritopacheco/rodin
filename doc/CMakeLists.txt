@@ -21,6 +21,8 @@ if (RODIN_USE_MCSS)
   set(MCSS_CONF_OUT ${CMAKE_BINARY_DIR}/doc/conf.py)
   configure_file(${MCSS_CONF_IN} ${MCSS_CONF_OUT} @ONLY)
 
+  file(COPY favicon.ico DESTINATION ${CMAKE_BINARY_DIR}/doc)
+
   add_custom_target(RodinDoxygen
     COMMAND
     ${Python3_EXECUTABLE}

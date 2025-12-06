@@ -24,7 +24,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Text formatting attributes for terminal output.
-   * @ingroup AlertModule
    *
    * Enumeration of text formatting attributes that can be applied to terminal
    * output including bold, italic, underline, and other visual effects.
@@ -43,7 +42,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for text attributes.
-   * @ingroup AlertModule
    * @param os Output stream to write to.
    * @param a The attribute to apply.
    * @return Reference to the output stream.
@@ -102,7 +100,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Templated text class with foreground and background color support.
-   * @ingroup AlertModule
    * @tparam F Foreground color type (defaults to NoColorT).
    * @tparam B Background color type (defaults to NoColorT).
    *

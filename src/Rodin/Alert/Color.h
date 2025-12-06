@@ -14,7 +14,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Enumeration of basic 16-color terminal colors.
-   * @ingroup AlertModule
    *
    * Provides an enumeration of the standard 16-color terminal palette
    * including primary colors, gray shades, and bright variants. These
@@ -36,7 +35,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for Color16.
-   * @ingroup AlertModule
    * @param os Output stream to write to.
    * @param c The color to apply.
    * @return Reference to the output stream.
@@ -105,7 +103,6 @@ namespace Rodin::Alert
 
   /**
    * @brief RGB color template with compile-time color values.
-   * @ingroup AlertModule
    * @tparam RED Red component value (0-255).
    * @tparam GREEN Green component value (0-255).
    * @tparam BLUE Blue component value (0-255).
@@ -195,7 +192,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type representing no color (transparent/default).
-   * @ingroup AlertModule
    *
    * Empty tag type used to indicate the absence of a foreground or
    * background color. This allows the Text class to use default terminal
@@ -215,7 +211,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Instance of NoColorT tag type.
-   * @ingroup AlertModule
    *
    * Constant instance of the NoColorT tag type for convenient usage.
    */
@@ -223,7 +218,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Type-safe wrapper for custom RGB colors.
-   * @ingroup AlertModule
    * @tparam CodeT The RGB color code type.
    *
    * Template class providing a type-safe wrapper around RGB color codes.
@@ -281,7 +275,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for custom RGB colors.
-   * @ingroup AlertModule
    * @tparam Code The RGB color code type.
    * @param os Output stream to write to.
    * @return Reference to the output stream.
@@ -299,19 +292,16 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type for red terminal color.
-   * @ingroup AlertModule
    */
   struct RedT {};
 
   /**
    * @brief Instance of RedT tag type.
-   * @ingroup AlertModule
    */
   static constexpr RedT Red;
 
   /**
    * @brief Stream insertion operator for red color.
-   * @ingroup AlertModule
    */
   inline
   std::ostream& operator<<(std::ostream& os, const RedT&)
@@ -322,19 +312,16 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type for green terminal color.
-   * @ingroup AlertModule
    */
   struct GreenT {};
 
   /**
    * @brief Instance of GreenT tag type.
-   * @ingroup AlertModule
    */
   static constexpr GreenT Green;
 
   /**
    * @brief Stream insertion operator for green color.
-   * @ingroup AlertModule
    */
   inline
   std::ostream& operator<<(std::ostream& os, const GreenT&)
@@ -345,19 +332,16 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type for blue terminal color.
-   * @ingroup AlertModule
    */
   struct BlueT {};
 
   /**
    * @brief Instance of BlueT tag type.
-   * @ingroup AlertModule
    */
   static constexpr BlueT Blue;
 
   /**
    * @brief Stream insertion operator for blue color.
-   * @ingroup AlertModule
    */
   inline
   std::ostream& operator<<(std::ostream& os, const BlueT&)
@@ -368,19 +352,16 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type for yellow terminal color.
-   * @ingroup AlertModule
    */
   struct YellowT {};
 
   /**
    * @brief Instance of YellowT tag type.
-   * @ingroup AlertModule
    */
   static constexpr YellowT Yellow;
 
   /**
    * @brief Stream insertion operator for yellow color.
-   * @ingroup AlertModule
    */
   inline
   std::ostream& operator<<(std::ostream& os, const YellowT&)
@@ -391,19 +372,16 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type for magenta terminal color.
-   * @ingroup AlertModule
    */
   struct MagentaT {};
 
   /**
    * @brief Instance of MagentaT tag type.
-   * @ingroup AlertModule
    */
   static constexpr MagentaT Magenta;
 
   /**
    * @brief Stream insertion operator for magenta color.
-   * @ingroup AlertModule
    */
   inline
   std::ostream& operator<<(std::ostream& os, const MagentaT&)
@@ -414,19 +392,16 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type for cyan terminal color.
-   * @ingroup AlertModule
    */
   struct CyanT {};
 
   /**
    * @brief Instance of CyanT tag type.
-   * @ingroup AlertModule
    */
   static constexpr CyanT Cyan;
 
   /**
    * @brief Stream insertion operator for cyan color.
-   * @ingroup AlertModule
    */
   inline
   std::ostream& operator<<(std::ostream& os, const CyanT&)
@@ -437,19 +412,16 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type for white terminal color.
-   * @ingroup AlertModule
    */
   struct WhiteT {};
 
   /**
    * @brief Instance of WhiteT tag type.
-   * @ingroup AlertModule
    */
   static constexpr WhiteT White;
 
   /**
    * @brief Stream insertion operator for white color.
-   * @ingroup AlertModule
    */
   inline
   std::ostream& operator<<(std::ostream& os, const WhiteT&)
@@ -460,19 +432,16 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type for gray terminal color.
-   * @ingroup AlertModule
    */
   struct GrayT {};
 
   /**
    * @brief Instance of GrayT tag type.
-   * @ingroup AlertModule
    */
   static constexpr GrayT Gray;
 
   /**
    * @brief Stream insertion operator for gray color.
-   * @ingroup AlertModule
    */
   inline
   std::ostream& operator<<(std::ostream& os, const GrayT&)
@@ -483,19 +452,16 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type for bright gray terminal color.
-   * @ingroup AlertModule
    */
   struct BrightGrayT {};
 
   /**
    * @brief Instance of BrightGrayT tag type.
-   * @ingroup AlertModule
    */
   static constexpr BrightGrayT BrightGray;
 
   /**
    * @brief Stream insertion operator for bright gray color.
-   * @ingroup AlertModule
    */
   inline
   std::ostream& operator<<(std::ostream& os, const BrightGrayT&)
@@ -506,19 +472,16 @@ namespace Rodin::Alert
 
   /**
    * @brief Tag type for bright white terminal color.
-   * @ingroup AlertModule
    */
   struct BrightWhiteT {};
 
   /**
    * @brief Instance of BrightWhiteT tag type.
-   * @ingroup AlertModule
    */
   static constexpr BrightWhiteT BrightWhite;
 
   /**
    * @brief Stream insertion operator for bright white color.
-   * @ingroup AlertModule
    */
   inline
   std::ostream& operator<<(std::ostream& os, const BrightWhiteT&)

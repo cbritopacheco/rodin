@@ -61,7 +61,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Base class for message prefixes with colored text.
-   * @ingroup AlertModule
    * @tparam Foreground The foreground color type.
    *
    * Template class that provides colored, bolded prefix text for messages.
@@ -113,7 +112,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Base template class for formatted message output.
-   * @ingroup AlertModule
    * @tparam Prefix The prefix type for the message.
    *
    * Base class for creating formatted messages with customizable prefixes,

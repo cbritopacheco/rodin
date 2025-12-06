@@ -9,21 +9,25 @@ STYLESHEETS = [
 
 THEME_COLOR = '#22272e'
 
-FAVICON = 'favicon-dark.png'
+FAVICON = 'favicon.ico'
 
 LINKS_NAVBAR1 = [
     ("Pages", 'pages', [
-        ('Examples and tutorials', 'examples-index'),
         ('General concepts', 'guides-index'),
+        ('Examples and tutorials', 'examples-index'),
         ('Notation', 'notation-index'),
         ('Credits', 'credits-index')]),
     ("Modules", 'modules', [
-        ('Quadrature formulae', 'group___rodin_quadrature'),
-        ('Supported finite elements', 'group___finite_elements'),
-        ('CTADs', 'group___rodin_c_t_a_d'),
         ('Preprocessor directives', 'group___rodin_directives'),
     ]),
-    ("Namespaces", 'namespaces', []),
+    ("Namespaces", 'namespaces', [
+        ('Assembly', 'namespace_rodin_1_1_assembly'),
+        ('Geometry', 'namespace_rodin_1_1_geometry'),
+        ('Math', 'namespace_rodin_1_1_math'),
+        ('Quadrature formulae', 'namespace_rodin_1_1_q_f'),
+        ('Solver', 'namespace_rodin_1_1_solver'),
+        ('Variational', 'namespace_rodin_1_1_variational'),
+    ]),
 ]
 LINKS_NAVBAR2 = [
     ("Classes", 'annotated', []),

@@ -32,7 +32,6 @@
   libraries such as:
   - [Eigen3](https://eigen.tuxfamily.org/)
   - [MMG](https://www.mmgtools.org/)
-  - [ISCD Toolbox](https://iscd.sorbonne-universite.fr/)
 
   Aside from wrapping most of these tools into uniform and well documented
   interfaces, Rodin also builds upon many of the already existing functionality
@@ -52,6 +51,6 @@
   already implemented with various extension points. Furthermore, there is a
   lot of code lacking documentation. Hence, contributors are always welcome!
   Currently it is mantained (and primarily used) by [Carlos
-  Brito](https://github.com/cbritopacheco).
+  Brito-Pacheco](https://github.com/cbritopacheco).
 
   */

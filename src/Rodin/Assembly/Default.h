@@ -33,7 +33,6 @@
 namespace Rodin::Assembly
 {
   /**
-   * @ingroup RodinAssembly
    * @brief Default assembly strategy for local context with OpenMP enabled.
    *
    * When OpenMP support is compiled in (RODIN_USE_OPENMP is defined), this
@@ -61,7 +60,6 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @ingroup RodinAssembly
    * @brief Default assembly strategy for mixed local contexts with OpenMP enabled.
    *
    * Specialization for problems with separate trial and test spaces in local
@@ -92,7 +90,6 @@ namespace Rodin::Assembly
 namespace Rodin::Assembly
 {
   /**
-   * @ingroup RodinAssembly
    * @brief Default assembly strategy for local context without OpenMP.
    *
    * When OpenMP support is not available (RODIN_USE_OPENMP is not defined),
@@ -120,7 +117,6 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @ingroup RodinAssembly
    * @brief Default assembly strategy for mixed local contexts without OpenMP.
    *
    * Specialization for problems with separate trial and test spaces in local

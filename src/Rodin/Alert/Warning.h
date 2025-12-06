@@ -15,7 +15,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Prefix class for warning messages.
-   * @ingroup AlertModule
    *
    * Provides yellow-colored prefixing for warning messages using "Warning" as
    * the default prefix text.
@@ -38,7 +37,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Warning message class with formatted output.
-   * @ingroup AlertModule
    *
    * A specialized message class for displaying warnings with yellow-colored
    * formatting. Unlike exceptions, warning messages do not terminate the

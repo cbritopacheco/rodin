@@ -11,7 +11,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Empty tag type for raising an Alert message.
-   * @ingroup AlertModule
    *
    * Tag type used to trigger the raising (output) of an Alert message.
    * When streamed into a Message object using operator<<, it causes
@@ -30,7 +29,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Instance of RaiseT tag type.
-   * @ingroup AlertModule
    *
    * Constant instance of the RaiseT tag type for convenient usage.
    * Stream this into a Message to trigger its raise() method.

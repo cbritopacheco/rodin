@@ -7,7 +7,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Type alias for notation foreground color.
-   * @ingroup AlertModule
    *
    * Notation text uses magenta color for visual distinction in messages.
    */
@@ -15,7 +14,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Specialized text class for mathematical and technical notation.
-   * @ingroup AlertModule
    *
    * Provides a colored text formatting class specifically for displaying
    * mathematical notation, variable names, and technical identifiers in

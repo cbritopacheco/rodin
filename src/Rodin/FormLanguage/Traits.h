@@ -36,22 +36,9 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @defgroup TraitsSpecializations Traits Template Specializations
-   * @brief Template specializations of the Traits class.
-   * @ingroup RodinFormLanguage
-   *
-   * This group contains all specializations of the Traits template for
-   * different form language types. Each specialization provides type
-   * information specific to that form language construct.
-   *
-   * @see Traits
-   */
-
-  /**
    * @brief Primary template for type traits of form language objects.
    * @tparam T Form language type to query traits from
    * @tparam Enable SFINAE enabler for conditional specializations
-   * @ingroup RodinFormLanguage
    *
    * The Traits template provides a centralized mechanism for querying
    * compile-time type information about form language objects. This is

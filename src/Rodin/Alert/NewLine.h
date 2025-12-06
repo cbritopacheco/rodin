@@ -13,7 +13,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Empty tag type for inserting newline characters.
-   * @ingroup AlertModule
    *
    * Tag type used to insert newline characters into Alert messages.
    * When streamed to an output stream or Message object, it produces
@@ -26,7 +25,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for NewLineT.
-   * @ingroup AlertModule
    * @param os The output stream to write to.
    * @return Reference to the output stream.
    *
@@ -41,7 +39,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Instance of NewLineT tag type.
-   * @ingroup AlertModule
    *
    * Constant instance of the NewLineT tag type for convenient usage.
    * Use this to insert newlines in Alert messages with proper indentation.

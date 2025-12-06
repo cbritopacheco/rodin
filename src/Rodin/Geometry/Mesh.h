@@ -123,7 +123,6 @@ namespace Rodin::FormLanguage
 namespace Rodin::Geometry
 {
   /**
-   * @defgroup RodinGeometry Geometry Module
    * @brief Mesh data structures, geometric operations, and computational geometry utilities.
    *
    * The Geometry module provides comprehensive support for mesh generation, manipulation,

@@ -16,7 +16,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Exception class that automatically includes the class name.
-   * @ingroup AlertModule
    * @tparam T The class type where the exception occurred.
    *
    * Specialized exception class that prepends the class name to the

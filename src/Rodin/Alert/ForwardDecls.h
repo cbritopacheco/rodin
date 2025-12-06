@@ -12,7 +12,6 @@
 /**
  * @file ForwardDecls.h
  * @brief Forward declarations for Alert module types.
- * @ingroup AlertModule
  *
  * This header contains forward declarations of key types used throughout
  * the Alert module to minimize header dependencies and improve compilation

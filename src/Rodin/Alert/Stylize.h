@@ -14,7 +14,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Empty tag type for enabling terminal color output.
-   * @ingroup AlertModule
    *
    * Tag type used to enable colored output in terminal streams.
    * When streamed to an output stream, it activates the termcolor
@@ -24,7 +23,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Instance of StylizeT tag type.
-   * @ingroup AlertModule
    *
    * Constant instance of the StylizeT tag type for convenient usage.
    * Use this to enable colored terminal output.
@@ -33,7 +31,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for StylizeT.
-   * @ingroup AlertModule
    * @param os The output stream to write to.
    * @return Reference to the output stream.
    *

@@ -1,0 +1,207 @@
+/**
+  @page guides-getting-started-installation Installation and Setup
+  @brief How to install and configure Rodin on your system
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  This guide will walk you through installing Rodin and setting up your
+  development environment.
+
+  @section guides-getting-started-installation-requirements System Requirements
+
+  @subsection guides-getting-started-installation-required Required Dependencies
+
+  Rodin requires the following dependencies to be installed on your system:
+
+  - **CMake 3.16.0+** - Build system generator
+  - **C++20 compatible compiler** - GCC 12+, Clang 14+, or AppleClang
+  - **Boost 1.74+** - C++ libraries collection
+  - **Eigen3** - Linear algebra library
+
+  @subsection guides-getting-started-installation-optional Optional Dependencies
+
+  For additional functionality, you may want to install:
+
+  - **OpenMP** (`libomp`) - For parallel execution
+  - **SuiteSparse** (`libsuitesparse`) - For additional linear solvers
+  - **METIS** (`libmetis`) - For graph partitioning
+  - **MPI** - For distributed computing
+  - **MMG** - For mesh optimization (included as submodule)
+
+  @section guides-getting-started-installation-packages Installing Dependencies
+
+  @subsection guides-getting-started-installation-ubuntu Ubuntu/Debian
+
+  On Ubuntu or Debian-based systems, install the required dependencies with:
+
+  @code{.bash}
+  sudo apt-get update
+  sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
+  @endcode
+
+  For optional dependencies:
+
+  @code{.bash}
+  sudo apt-get install libsuitesparse-dev libmetis-dev libopenmpi-dev
+  @endcode
+
+  @subsection guides-getting-started-installation-macos macOS
+
+  On macOS, use Homebrew to install dependencies:
+
+  @code{.bash}
+  brew install cmake boost eigen libomp
+  @endcode
+
+  For optional dependencies:
+
+  @code{.bash}
+  brew install suite-sparse metis open-mpi
+  @endcode
+
+  @section guides-getting-started-installation-rodin Installing Rodin
+
+  @subsection guides-getting-started-installation-clone Clone the Repository
+
+  First, clone the Rodin repository with all submodules:
+
+  @code{.bash}
+  git clone --recursive https://github.com/cbritopacheco/rodin.git
+  cd rodin
+  @endcode
+
+  @note The `--recursive` flag is important as it clones third-party dependencies
+  included as git submodules. If you forgot this flag, run:
+  `git submodule update --init --recursive`
+
+  @subsection guides-getting-started-installation-build Build and Install
+
+  Rodin uses CMake as its build system. There are two common installation
+  methods:
+
+  @subsubsection guides-getting-started-installation-user User-Local Installation (Recommended)
+
+  Install Rodin to your home directory without requiring sudo:
+
+  @code{.bash}
+  mkdir build && cd build
+  cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release
+  make -j4
+  make install
+  @endcode
+
+  Then add to your shell profile (`~/.bashrc` or `~/.zshrc`):
+
+  @code{.bash}
+  export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
+  @endcode
+
+  @subsubsection guides-getting-started-installation-system System-Wide Installation
+
+  Install Rodin system-wide (requires sudo):
+
+  @code{.bash}
+  mkdir build && cd build
+  cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release
+  make -j4
+  sudo make install
+  @endcode
+
+  @subsection guides-getting-started-installation-verify Verifying the Installation
+
+  After installation, verify that Rodin is working correctly by creating a
+  simple test project.
+
+  Create a directory for your test project:
+
+  @code{.bash}
+  mkdir ~/rodin-test && cd ~/rodin-test
+  @endcode
+
+  Create a `CMakeLists.txt` file:
+
+  @code{.cmake}
+  cmake_minimum_required(VERSION 3.16)
+  project(RodinTest CXX)
+  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+  find_package(Rodin REQUIRED)
+
+  add_executable(test_app main.cpp)
+  target_link_libraries(test_app PRIVATE Rodin::Geometry Rodin::Variational)
+  @endcode
+
+  Create a `main.cpp` file:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <iostream>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main() {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+    mesh.getConnectivity().compute(1, 2);
+    P1 Vh(mesh);
+    std::cout << "Rodin installation verified!" << std::endl;
+    std::cout << "Mesh has " << mesh.getCellCount() << " cells." << std::endl;
+    std::cout << "FE space has " << Vh.getSize() << " DOFs." << std::endl;
+    return 0;
+  }
+  @endcode
+
+  Build and run:
+
+  @code{.bash}
+  cmake .
+  make
+  ./test_app
+  @endcode
+
+  If you see output like:
+  @code{.bash}
+  Rodin installation verified!
+  Mesh has 128 cells.
+  FE space has 81 DOFs.
+  @endcode
+
+  Then your installation is successful!
+
+  @section guides-getting-started-installation-troubleshooting Troubleshooting
+
+  @subsection guides-getting-started-installation-cmake-not-found CMake can't find Rodin
+
+  If CMake reports that it cannot find the Rodin package, ensure that
+  `CMAKE_PREFIX_PATH` includes your installation directory:
+
+  @code{.bash}
+  cmake . -DCMAKE_PREFIX_PATH=/path/to/rodin/installation
+  @endcode
+
+  @subsection guides-getting-started-installation-linker-errors Linker Errors
+
+  If you encounter linker errors, make sure all required dependencies (Boost,
+  Eigen) are properly installed and visible to CMake.
+
+  @subsection guides-getting-started-installation-compiler-errors Compiler Errors
+
+  Verify that you're using a C++20 compatible compiler:
+
+  @code{.bash}
+  g++ --version  # Should be 12.0 or higher
+  clang++ --version  # Should be 14.0 or higher
+  @endcode
+
+  @section guides-getting-started-installation-next What's Next?
+
+  Now that you have Rodin installed, proceed to @ref guides-getting-started-first-steps
+  to learn the basic concepts and write your first Rodin program.
+
+  */

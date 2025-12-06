@@ -30,7 +30,8 @@ namespace Rodin::Variational::F
   /**
    * @brief First coordinate projection function
    *
-   * Class representing the @f$ x_1 @f$ coordinate projection.
+   * Class representing the @f$ x @f$ coordinate projection of a point @f$ (x,
+   * y, z) @f$.
    */
   class X : public RealFunctionBase<X>
   {
@@ -80,12 +81,12 @@ namespace Rodin::Variational::F
   };
 
   /**
-   * @brief First coordinate projection @f$ x_1 @f$
+   * @brief First coordinate projection function
    *
    * Represents the function @f$ f : \mathcal{T}_h \rightarrow \mathbb{R} @f$
    * defined by:
    * @f[
-   *   f(x_1, \ldots, x_d) = x_1
+   *   f(x, y, z) = x
    * @f]
    *
    * @par Usage Example:
@@ -99,7 +100,8 @@ namespace Rodin::Variational::F
   /**
    * @brief Second coordinate projection function
    *
-   * Class representing the @f$ x_2 @f$ coordinate projection.
+   * Class representing the @f$ y @f$ coordinate projection of a point @f$ (x,
+   * y, z) @f$.
    */
   class Y : public RealFunctionBase<Y>
   {
@@ -149,12 +151,12 @@ namespace Rodin::Variational::F
   };
 
   /**
-   * @brief Second coordinate projection @f$ x_2 @f$
+   * @brief Second coordinate projection function
    *
    * Represents the function @f$ f : \mathcal{T}_h \rightarrow \mathbb{R} @f$
    * defined by:
    * @f[
-   *   f(x_1, \ldots, x_d) = x_2
+   *   f(x, y, z) = y
    * @f]
    *
    * @par Usage Example:
@@ -166,9 +168,10 @@ namespace Rodin::Variational::F
   static const Y y;
 
   /**
-   * @brief Third coordinate projection function
+   * @brief Second coordinate projection function
    *
-   * Class representing the @f$ x_3 @f$ coordinate projection.
+   * Class representing the @f$ z @f$ coordinate projection of a point @f$ (x,
+   * y, z) @f$.
    */
   class Z : public RealFunctionBase<Z>
   {
@@ -218,12 +221,12 @@ namespace Rodin::Variational::F
   };
 
   /**
-   * @brief Third coordinate projection @f$ x_3 @f$
+   * @brief Third coordinate projection function
    *
    * Represents the function @f$ f : \mathcal{T}_h \rightarrow \mathbb{R} @f$
    * defined by:
    * @f[
-   *   f(x_1, \ldots, x_d) = x_3
+   *   f(x, y, z) = z
    * @f]
    *
    * @par Usage Example:

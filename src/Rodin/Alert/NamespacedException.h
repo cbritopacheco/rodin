@@ -14,7 +14,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Exception class that automatically includes the namespace name.
-   * @ingroup AlertModule
    *
    * Specialized exception class that prepends a namespace identifier to the
    * error message. The namespace name is formatted with appropriate coloring

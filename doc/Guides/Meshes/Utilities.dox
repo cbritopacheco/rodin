@@ -1,0 +1,289 @@
+/**
+  @page guides-meshes-utilities Advanced Utilities
+  @brief Advanced mesh operations and transformations
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  Rodin provides advanced utilities for mesh manipulation, transformation,
+  and analysis.
+
+  @section guides-meshes-utilities-intro Introduction
+
+  Beyond basic mesh creation and queries, Rodin offers powerful utilities
+  for mesh transformation, domain decomposition, and advanced operations.
+
+  @section guides-meshes-utilities-transform Mesh Transformations
+
+  @subsection guides-meshes-utilities-transform-scale Scaling
+
+  Scale all mesh coordinates by a factor:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+    // Scale mesh by factor of 2.0
+    mesh.scale(2.0);
+
+    // Domain is now [0, 2] x [0, 2]
+    std::cout << "Volume after scaling: " << mesh.getVolume() << std::endl;
+
+    return 0;
+  }
+  @endcode
+
+  @subsection guides-meshes-utilities-transform-displace Displacement
+
+  Displace mesh nodes using a vector-valued function:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main() {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+    P1 Vh(mesh);
+
+    // Define displacement field
+    VectorFunction displacement(
+      [](const Point& p) {
+        Math::Vector<Real> u(2);
+        u(0) = 0.1 * std::sin(2 * M_PI * p.x());
+        u(1) = 0.1 * std::sin(2 * M_PI * p.y());
+        return u;
+      }, mesh.getSpaceDimension());
+
+    // Displace mesh
+    mesh.displace(displacement);
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-meshes-utilities-submesh SubMeshes
+
+  Create submeshes representing subregions:
+
+  @subsection guides-meshes-utilities-submesh-create Creating SubMeshes
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+    // Create submesh from attribute 1
+    SubMesh submesh = mesh.trace(1);
+
+    std::cout << "Parent mesh cells: " << mesh.getCellCount() << std::endl;
+    std::cout << "SubMesh cells: " << submesh.getCellCount() << std::endl;
+
+    // Access parent mesh
+    const Mesh& parent = submesh.getParent();
+
+    return 0;
+  }
+  @endcode
+
+  @subsection guides-meshes-utilities-submesh-boundary Boundary SubMesh
+
+  @code{.cpp}
+  mesh.getConnectivity().compute(1, 2);
+
+  // Create submesh of boundary
+  SubMesh boundary = mesh.skin();
+
+  std::cout << "Boundary elements: " << boundary.getCellCount() << std::endl;
+  @endcode
+
+  @section guides-meshes-utilities-ccl Connected Component Labeling
+
+  Find connected components in the mesh:
+
+  @code{.cpp}
+  mesh.getConnectivity().compute(2, 2);
+
+  // Find connected components
+  auto ccl = mesh.ccl(
+    [](const Polytope& p1, const Polytope& p2) {
+      // Define adjacency criterion
+      return true;  // All adjacent cells are connected
+    });
+
+  std::cout << "Found " << ccl.getCount() 
+            << " connected components" << std::endl;
+
+  for (const auto& component : ccl) {
+    std::cout << "Component with " << component.size() 
+              << " cells" << std::endl;
+  }
+  @endcode
+
+  @section guides-meshes-utilities-partition Domain Decomposition
+
+  Partition meshes for parallel computing:
+
+  @subsection guides-meshes-utilities-partition-balanced Balanced Partitioning
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {64, 64});
+
+    // Partition into 4 subdomains
+    size_t numParts = 4;
+    BalancedCompactPartitioner partitioner;
+    auto shards = partitioner.partition(mesh, numParts);
+
+    for (size_t i = 0; i < shards.size(); ++i) {
+      std::cout << "Shard " << i << " has " 
+                << shards[i].getCellCount() << " cells" << std::endl;
+    }
+
+    return 0;
+  }
+  @endcode
+
+  @subsection guides-meshes-utilities-partition-greedy Greedy Partitioning
+
+  @code{.cpp}
+  GreedyPartitioner partitioner;
+  auto shards = partitioner.partition(mesh, numParts);
+  @endcode
+
+  @section guides-meshes-utilities-coord Coordinate Operations
+
+  @subsection guides-meshes-utilities-coord-set Setting Coordinates
+
+  @code{.cpp}
+  // Set coordinates of vertex 0
+  mesh.setVertexCoordinates(0, 1.5, 0);  // x-coordinate
+  mesh.setVertexCoordinates(0, 2.5, 1);  // y-coordinate
+
+  // Or set all at once
+  Math::SpatialPoint coords(2);
+  coords << 1.5, 2.5;
+  mesh.setVertexCoordinates(0, coords);
+  @endcode
+
+  @section guides-meshes-utilities-flush Cache Management
+
+  Clear cached data:
+
+  @code{.cpp}
+  // Flush cached transformations and derived data
+  mesh.flush();
+  @endcode
+
+  This is useful after modifying mesh coordinates to ensure transformations
+  are recomputed.
+
+  @section guides-meshes-utilities-example Complete Example
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    // Create mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {32, 32});
+
+    std::cout << "Original mesh:" << std::endl;
+    std::cout << "  Volume: " << mesh.getVolume() << std::endl;
+
+    // Scale mesh
+    mesh.scale(2.0);
+    std::cout << "\nAfter scaling by 2.0:" << std::endl;
+    std::cout << "  Volume: " << mesh.getVolume() << std::endl;
+
+    // Create boundary submesh
+    mesh.getConnectivity().compute(1, 2);
+    SubMesh boundary = mesh.skin();
+    std::cout << "\nBoundary:" << std::endl;
+    std::cout << "  Elements: " << boundary.getCellCount() << std::endl;
+    std::cout << "  Perimeter: " << boundary.getMeasure(1) << std::endl;
+
+    // Find connected components
+    mesh.getConnectivity().compute(2, 2);
+    auto ccl = mesh.ccl(
+      [](const Polytope& p1, const Polytope& p2) { return true; });
+    std::cout << "\nConnected components: " << ccl.getCount() << std::endl;
+
+    // Partition mesh
+    BalancedCompactPartitioner partitioner;
+    auto shards = partitioner.partition(mesh, 4);
+    std::cout << "\nPartitioned into " << shards.size() 
+              << " shards" << std::endl;
+    for (size_t i = 0; i < shards.size(); ++i) {
+      std::cout << "  Shard " << i << ": " 
+                << shards[i].getCellCount() << " cells" << std::endl;
+    }
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-meshes-utilities-advanced Advanced Topics
+
+  @subsection guides-meshes-utilities-advanced-builder Custom Builder
+
+  Use the builder for complete control:
+
+  @code{.cpp}
+  auto builder = Mesh::Build();
+  builder.initialize(2)
+         .reserve(2, 100)  // Reserve space for 100 cells
+         .nodes(50);       // 50 vertices
+
+  // Add vertices and cells...
+
+  Mesh mesh = builder.finalize();
+  @endcode
+
+  @subsection guides-meshes-utilities-advanced-trans Transformations
+
+  Access and modify polytope transformations:
+
+  @code{.cpp}
+  const auto& trans = mesh.getPolytopeTransformation(2, 0);  // Cell 0
+  // Use transformation for geometric computations
+  @endcode
+
+  @section guides-meshes-utilities-see-also See Also
+
+  - @ref guides-meshes "Meshes overview"
+  - @ref Rodin::Geometry::SubMesh "SubMesh reference"
+  - @ref Rodin::Geometry::BalancedCompactPartitioner "Partitioner reference"
+  - Examples:
+    - @ref examples/Geometry/Displace.cpp
+    - @ref examples/Geometry/Skin.cpp
+    - @ref examples/Geometry/CCL.cpp
+    - @ref examples/Geometry/BalancedCompactPartitioner.cpp
+
+  */

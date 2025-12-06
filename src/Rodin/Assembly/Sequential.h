@@ -27,7 +27,6 @@
 namespace Rodin::Assembly
 {
   /**
-   * @ingroup RodinAssembly
    * @brief Sequential mesh iteration for single-threaded assembly.
    *
    * SequentialIteration provides a single-threaded iteration strategy over
@@ -71,7 +70,6 @@ namespace Rodin::Assembly
 namespace Rodin::Assembly
 {
   /**
-   * @ingroup RodinAssembly
    * @brief Sequential assembly implementation for linear forms.
    *
    * This class provides a single-threaded assembly implementation for linear
