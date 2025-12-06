@@ -1,5 +1,5 @@
 /**
-  @page getting-started-first-problem Your First Problem: Solving the Poisson Equation
+  @page guides-getting-started-first-problem Your First Problem: Solving the Poisson Equation
   @brief A complete walkthrough of solving a PDE with Rodin
 
   @tableofcontents
@@ -10,7 +10,7 @@
   Rodin: the Poisson equation. This is often the "Hello World" of finite
   element methods.
 
-  @section getting-started-first-problem-math The Mathematical Problem
+  @section guides-getting-started-first-problem-math The Mathematical Problem
 
   We want to solve the following boundary value problem:
 
@@ -29,7 +29,7 @@
   - @f$ f = 1 @f$ is a known source term
   - @f$ \partial\Omega @f$ is the boundary of the domain
 
-  @subsection getting-started-first-problem-weak Weak Formulation
+  @subsection guides-getting-started-first-problem-weak Weak Formulation
 
   The weak (or variational) formulation of this problem is:
 
@@ -42,7 +42,7 @@
   This is the form that finite element methods work with, and it's exactly
   what we'll implement in Rodin.
 
-  @section getting-started-first-problem-code The Complete Code
+  @section guides-getting-started-first-problem-code The Complete Code
 
   Here's the complete program to solve the Poisson equation:
 
@@ -91,11 +91,11 @@
   }
   @endcode
 
-  @section getting-started-first-problem-breakdown Code Breakdown
+  @section guides-getting-started-first-problem-breakdown Code Breakdown
 
   Let's understand each part of the code:
 
-  @subsection getting-started-first-problem-mesh Step 1-2: Create the Mesh
+  @subsection guides-getting-started-first-problem-mesh Step 1-2: Create the Mesh
 
   @code{.cpp}
   Mesh mesh;
@@ -107,7 +107,7 @@
   - Computes face-to-cell connectivity (dimension 1 to dimension 2)
   - This connectivity is needed to identify boundary elements
 
-  @subsection getting-started-first-problem-space Step 3-4: Define Function Space
+  @subsection guides-getting-started-first-problem-space Step 3-4: Define Function Space
 
   @code{.cpp}
   P1 Vh(mesh);
@@ -119,7 +119,7 @@
   - `u` is the unknown function (trial function)
   - `v` is the test function for the weak formulation
 
-  @subsection getting-started-first-problem-source Step 5: Define Source Term
+  @subsection guides-getting-started-first-problem-source Step 5: Define Source Term
 
   @code{.cpp}
   RealFunction f = 1.0;
@@ -128,7 +128,7 @@
   - Creates a constant function @f$ f = 1 @f$
   - Could also be a more complex function: `RealFunction f([](const Point& p) { return p.x() * p.y(); })`
 
-  @subsection getting-started-first-problem-formulation Step 6: Formulate the Problem
+  @subsection guides-getting-started-first-problem-formulation Step 6: Formulate the Problem
 
   @code{.cpp}
   Problem poisson(u, v);
@@ -145,7 +145,7 @@
 
   Note how the code closely resembles the mathematical notation!
 
-  @subsection getting-started-first-problem-solve Step 7: Solve the System
+  @subsection guides-getting-started-first-problem-solve Step 7: Solve the System
 
   @code{.cpp}
   CG(poisson).solve();
@@ -155,7 +155,7 @@
   - For symmetric positive definite systems (like the Poisson equation)
   - Alternative solvers: `SparseLU`, `BiCGSTAB`, etc.
 
-  @subsection getting-started-first-problem-output Step 8: Save Results
+  @subsection guides-getting-started-first-problem-output Step 8: Save Results
 
   @code{.cpp}
   u.getSolution().save("solution.gf");
@@ -166,7 +166,7 @@
   - Saves the mesh in MEDIT format
   - Can be visualized with tools like [GLVis](https://glvis.org/)
 
-  @section getting-started-first-problem-build Building and Running
+  @section guides-getting-started-first-problem-build Building and Running
 
   Save the code as `poisson.cpp` and create a `CMakeLists.txt`:
 
@@ -195,7 +195,7 @@
   ./poisson
   @endcode
 
-  @section getting-started-first-problem-visualize Visualizing the Solution
+  @section guides-getting-started-first-problem-visualize Visualizing the Solution
 
   If you have [GLVis](https://glvis.org/) installed, visualize the solution:
 
@@ -206,9 +206,9 @@
   You should see a smooth solution that represents the deflection of a
   membrane under uniform load.
 
-  @section getting-started-first-problem-variations Common Variations
+  @section guides-getting-started-first-problem-variations Common Variations
 
-  @subsection getting-started-first-problem-non-homogeneous Non-Homogeneous Boundary Conditions
+  @subsection guides-getting-started-first-problem-non-homogeneous Non-Homogeneous Boundary Conditions
 
   To set @f$ u = g @f$ on the boundary instead of @f$ u = 0 @f$:
 
@@ -222,7 +222,7 @@
           + DirichletBC(u, g);
   @endcode
 
-  @subsection getting-started-first-problem-partial-bc Partial Boundary Conditions
+  @subsection guides-getting-started-first-problem-partial-bc Partial Boundary Conditions
 
   To apply boundary conditions only on specific boundaries:
 
@@ -235,7 +235,7 @@
           + DirichletBC(u, Zero()).on(boundaryAttribute);
   @endcode
 
-  @subsection getting-started-first-problem-variable-source Variable Source Term
+  @subsection guides-getting-started-first-problem-variable-source Variable Source Term
 
   For a spatially varying source:
 
@@ -249,7 +249,7 @@
           + DirichletBC(u, Zero());
   @endcode
 
-  @subsection getting-started-first-problem-different-solver Using Different Solvers
+  @subsection guides-getting-started-first-problem-different-solver Using Different Solvers
 
   @code{.cpp}
   // Sparse LU direct solver (for small to medium problems)
@@ -263,10 +263,10 @@
   solver.solve(poisson);
   @endcode
 
-  @section getting-started-first-problem-next What's Next?
+  @section guides-getting-started-first-problem-next What's Next?
 
   Congratulations! You've solved your first PDE with Rodin. To deepen your
-  understanding, proceed to @ref getting-started-core-concepts to learn more
+  understanding, proceed to @ref guides-getting-started-core-concepts to learn more
   about the underlying concepts.
 
   You can also explore:

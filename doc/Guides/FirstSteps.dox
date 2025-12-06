@@ -1,5 +1,5 @@
 /**
-  @page getting-started-first-steps First Steps with Rodin
+  @page guides-getting-started-first-steps First Steps with Rodin
   @brief Understanding the basics and creating your first Rodin program
 
   @tableofcontents
@@ -9,7 +9,7 @@
   Now that you have Rodin installed, let's explore the basic concepts and
   create your first program.
 
-  @section getting-started-first-steps-structure Project Structure
+  @section guides-getting-started-first-steps-structure Project Structure
 
   A typical Rodin project consists of:
 
@@ -17,7 +17,7 @@
   - **Source files (.cpp)** - Your C++ code using Rodin
   - **Mesh files** - Geometry data (optional, can generate programmatically)
 
-  @subsection getting-started-first-steps-cmake Basic CMakeLists.txt
+  @subsection guides-getting-started-first-steps-cmake Basic CMakeLists.txt
 
   Here's a minimal CMakeLists.txt for a Rodin project:
 
@@ -43,7 +43,7 @@
   )
   @endcode
 
-  @section getting-started-first-steps-modules Rodin Modules
+  @section guides-getting-started-first-steps-modules Rodin Modules
 
   Rodin is organized into several modules, each providing specific
   functionality:
@@ -56,7 +56,7 @@
   | Rodin::IO | Input/output operations | File reading/writing |
   | Rodin::Assembly | Matrix assembly | Assemblers |
 
-  @section getting-started-first-steps-hello Hello Rodin
+  @section guides-getting-started-first-steps-hello Hello Rodin
 
   Let's create a simple program that creates a mesh and prints information
   about it.
@@ -99,9 +99,9 @@
     Dimension: 2
   @endcode
 
-  @section getting-started-first-steps-concepts Core Concepts
+  @section guides-getting-started-first-steps-concepts Core Concepts
 
-  @subsection getting-started-first-steps-mesh Working with Meshes
+  @subsection guides-getting-started-first-steps-mesh Working with Meshes
 
   A @ref Rodin::Geometry::Mesh "Mesh" represents the discretization of your
   domain. You can create meshes in several ways:
@@ -122,7 +122,7 @@
   mesh.load("domain.mesh");  // MEDIT format
   @endcode
 
-  @subsection getting-started-first-steps-connectivity Computing Connectivity
+  @subsection guides-getting-started-first-steps-connectivity Computing Connectivity
 
   Before performing certain operations, you may need to compute connectivity
   information:
@@ -141,7 +141,7 @@
   - `1` = edges (faces)
   - `2` = triangles (cells)
 
-  @subsection getting-started-first-steps-fe Finite Element Spaces
+  @subsection guides-getting-started-first-steps-fe Finite Element Spaces
 
   Finite element spaces define the type of basis functions used for
   approximation:
@@ -160,7 +160,7 @@
   std::cout << "FE space has " << Vh.getSize() << " degrees of freedom" << std::endl;
   @endcode
 
-  @subsection getting-started-first-steps-functions Trial and Test Functions
+  @subsection guides-getting-started-first-steps-functions Trial and Test Functions
 
   To formulate problems, we use trial and test functions:
 
@@ -176,7 +176,7 @@
 
   These are used to express variational formulations in a natural way.
 
-  @section getting-started-first-steps-namespaces Using Namespaces
+  @section guides-getting-started-first-steps-namespaces Using Namespaces
 
   To avoid typing `Rodin::Geometry::` and `Rodin::Variational::` repeatedly,
   most Rodin programs start with:
@@ -192,7 +192,7 @@
   using namespace Rodin::Solver;
   @endcode
 
-  @section getting-started-first-steps-example Complete Example
+  @section guides-getting-started-first-steps-example Complete Example
 
   Here's a complete program that demonstrates the basic workflow:
 
@@ -229,10 +229,10 @@
   }
   @endcode
 
-  @section getting-started-first-steps-next What's Next?
+  @section guides-getting-started-first-steps-next What's Next?
 
   You now understand the basic building blocks of a Rodin program. In the next
-  section, @ref getting-started-first-problem, we'll put these concepts
+  section, @ref guides-getting-started-first-problem, we'll put these concepts
   together to solve a complete PDE problem: the Poisson equation.
 
   */

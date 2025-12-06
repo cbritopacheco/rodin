@@ -67,55 +67,6 @@
   - https://glvis.org/
   @endparblock
 
-  @subsection credits-index-iscd ISCD Toolbox
-
-  The institute of computing and data sciences (ISCD) is dedicated to exploring
-  and developing the potential of computational and data-driven research and
-  training across science, humanities and medicine at Sorbonne Université. They
-  have created a series of repositories containing various tools for various
-  different computational tasks.
-
-  @par Links
-  @parblock
-  - https://github.com/ISCDtoolbox
-  - https://iscd.sorbonne-universite.fr/
-  @endparblock
-
-  @subsubsection credits-index-iscd-mshdist Mshdist
-
-  Mshdist is a simple algorithm to generate the signed distance function to
-  given objects in two and three space dimensions. It is licensed under the
-  [GPL-3.0
-  License](https://github.com/ISCDtoolbox/Mshdist/blob/master/LICENSE.md) and
-  is originally based on @cite dapogny2012computation.
-
-  The original authors of the software are [Charles
-  Dapogny](https://membres-ljk.imag.fr/Charles.Dapogny/) and [Pascal
-  Frey](https://www.ljll.math.upmc.fr/frey/).
-
-  @par Links
-  @parblock
-  - https://github.com/ISCDtoolbox/Mshdist
-  - https://github.com/cbritopacheco/Mshdist
-  @endparblock
-
-  @subsubsection credits-index-iscd-advection Advection
-
-  Advection is a program for solving linear advection problems in two and three
-  dimensions. It is licensed under the [GPL-3.0
-  License](https://github.com/ISCDtoolbox/Mshdist/blob/master/LICENSE.md)
-
-  The orignal authors of the software are [Thi Thu Cuc
-  Bui](https://www.ljll.math.upmc.fr/~bui/), [Charles
-  Dapogny](https://membres-ljk.imag.fr/Charles.Dapogny/), and [Pascal
-  Frey](https://www.ljll.math.upmc.fr/frey/).
-
-  @par Links
-  @parblock
-  - https://github.com/ISCDtoolbox/Advection
-  - https://github.com/cbritopacheco/Advection
-  @endparblock
-
   @subsection credits-index-suitesparse SuiteSparse
 
   SuiteSparse is a suite of sparse matrix algorithms.

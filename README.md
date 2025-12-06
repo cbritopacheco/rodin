@@ -6,8 +6,6 @@ Rodin is a lightweight and modular finite element framework which provides many 
 
 It is named after the French sculptor Auguste Rodin, considered the founder of modern sculpture.
 
-The library is still in development. It is primarily maintained by [Carlos Brito-Pacheco](https://edp-ljk.imag.fr/author/carlos-brito-pacheco/) and was developed to generate examples for his ongoing PhD.
-
 Any contributors are warmly encouraged and any help or comments are always appreciated!
 
 ## Status

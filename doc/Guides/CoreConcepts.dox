@@ -1,5 +1,5 @@
 /**
-  @page getting-started-core-concepts Understanding Core Concepts
+  @page guides-getting-started-core-concepts Understanding Core Concepts
   @brief Deep dive into meshes, finite elements, and variational formulations
 
   @tableofcontents
@@ -9,9 +9,9 @@
   This section provides a deeper understanding of the core concepts in Rodin,
   building on what you learned in the previous sections.
 
-  @section getting-started-core-concepts-geometry Geometry and Meshes
+  @section guides-getting-started-core-concepts-geometry Geometry and Meshes
 
-  @subsection getting-started-core-concepts-mesh The Mesh Object
+  @subsection guides-getting-started-core-concepts-mesh The Mesh Object
 
   A @ref Rodin::Geometry::Mesh "Mesh" is the fundamental geometric object in
   Rodin. It represents a discretization of your domain into simple shapes
@@ -31,7 +31,7 @@
   std::cout << "Cells: " << mesh.getCellCount() << std::endl;
   @endcode
 
-  @subsection getting-started-core-concepts-polytopes Polytopes
+  @subsection guides-getting-started-core-concepts-polytopes Polytopes
 
   A @ref Rodin::Geometry::Polytope "Polytope" is a geometric shape. Rodin
   supports various polytope types:
@@ -51,7 +51,7 @@
   Mesh tet_mesh = Mesh().UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4});
   @endcode
 
-  @subsection getting-started-core-concepts-connectivity Connectivity
+  @subsection guides-getting-started-core-concepts-connectivity Connectivity
 
   Connectivity describes the relationships between polytopes of different
   dimensions. You need to compute connectivity before certain operations.
@@ -76,7 +76,7 @@
   - `(0, d)`: Vertices to cells - for vertex-based operations
   - `(d, d)`: Cell-to-cell adjacency
 
-  @subsection getting-started-core-concepts-iterators Mesh Iteration
+  @subsection guides-getting-started-core-concepts-iterators Mesh Iteration
 
   You can iterate over polytopes of a specific dimension:
 
@@ -102,9 +102,9 @@
   }
   @endcode
 
-  @section getting-started-core-concepts-variational Variational Formulations
+  @section guides-getting-started-core-concepts-variational Variational Formulations
 
-  @subsection getting-started-core-concepts-fe-spaces Finite Element Spaces
+  @subsection guides-getting-started-core-concepts-fe-spaces Finite Element Spaces
 
   A finite element space defines the type of approximation used. Rodin provides
   several standard spaces:
@@ -129,7 +129,7 @@
   // std::cout << "P2 space DOFs: " << Vh2.getSize() << std::endl;
   @endcode
 
-  @subsection getting-started-core-concepts-trial-test Trial and Test Functions
+  @subsection guides-getting-started-core-concepts-trial-test Trial and Test Functions
 
   In the finite element method, we express problems in weak form using trial
   and test functions.
@@ -149,7 +149,7 @@
   - We test against all @f$ v \in V_h @f$ (the test space)
   - The discrete problem is: Find @f$ u_h @f$ such that @f$ a(u_h, v_h) = b(v_h) @f$ for all @f$ v_h @f$
 
-  @subsection getting-started-core-concepts-operators Differential Operators
+  @subsection guides-getting-started-core-concepts-operators Differential Operators
 
   Rodin provides operators that work on trial and test functions:
 
@@ -171,7 +171,7 @@
   auto bilinear_form = Integral(Grad(u), Grad(v));
   @endcode
 
-  @subsection getting-started-core-concepts-integrals Integrals
+  @subsection guides-getting-started-core-concepts-integrals Integrals
 
   The `Integral` function represents integration over the domain or boundary:
 
@@ -187,7 +187,7 @@
   auto inner_product = Integral(Grad(u), Grad(v));
   @endcode
 
-  @subsection getting-started-core-concepts-bc Boundary Conditions
+  @subsection guides-getting-started-core-concepts-bc Boundary Conditions
 
   Rodin supports different types of boundary conditions:
 
@@ -211,9 +211,9 @@
   auto neumann = Integral(g, v).over(BoundaryAttribute(2));
   @endcode
 
-  @section getting-started-core-concepts-problem Defining Problems
+  @section guides-getting-started-core-concepts-problem Defining Problems
 
-  @subsection getting-started-core-concepts-problem-assembly Problem Assembly
+  @subsection guides-getting-started-core-concepts-problem-assembly Problem Assembly
 
   The @ref Rodin::Variational::Problem "Problem" class represents a complete
   variational problem:
@@ -231,7 +231,7 @@
   3. Applies boundary conditions by modifying the system
   4. Prepares the linear system @f$ Ax = b @f$
 
-  @subsection getting-started-core-concepts-solving Solving
+  @subsection guides-getting-started-core-concepts-solving Solving
 
   After defining a problem, solve it with an appropriate solver:
 
@@ -249,7 +249,7 @@
   auto& solution = u.getSolution();
   @endcode
 
-  @section getting-started-core-concepts-workflow Typical Workflow
+  @section guides-getting-started-core-concepts-workflow Typical Workflow
 
   Here's a summary of the typical workflow for solving a PDE with Rodin:
 
@@ -288,7 +288,7 @@
      mesh.save("mesh.mesh");
      @endcode
 
-  @section getting-started-core-concepts-next What's Next?
+  @section guides-getting-started-core-concepts-next What's Next?
 
   You now have a solid understanding of Rodin's core concepts! Here are some
   suggestions for continuing your journey:
