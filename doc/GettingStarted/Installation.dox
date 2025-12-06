@@ -148,6 +148,7 @@
   int main() {
     Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+    mesh.getConnectivity().compute(1, 2);
     P1 Vh(mesh);
     std::cout << "Rodin installation verified!" << std::endl;
     std::cout << "Mesh has " << mesh.getCellCount() << " cells." << std::endl;

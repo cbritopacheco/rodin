@@ -71,7 +71,7 @@
   int main() {
     // Create a 2D uniform triangular mesh
     Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {10, 10});
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
 
     // Print mesh information
     std::cout << "Created a mesh with:" << std::endl;
@@ -94,8 +94,8 @@
   You should see output like:
   @code{.bash}
   Created a mesh with:
-    Vertices: 121
-    Cells: 200
+    Vertices: 81
+    Cells: 128
     Dimension: 2
   @endcode
 
