@@ -171,32 +171,40 @@ has the associated weak formulation:
 which can be quickly implemented via the following lines of code:
 
 ```c++
+#include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
+using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  Mesh Omega;
-  Omega = Omega.UniformGrid(Polytope::Type::Triangle, 16, 16);
-  mesh.getConnectivity().compute(1, 2);
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.getConnectivity().compute(1, 2); // Compute boundary
 
-  P1 Vh(Omega);
+  P1 vh(mesh);
 
-  TrialFunction u(Vh);
-  TestFunction v(Vh);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
 
-  Solver::SparseLU solver;
+  RealFunction f = 1;
 
+  // Apply Dirichlet conditions on the entire boundary.
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
-          - Integral(v)
+          - Integral(f, v)
           + DirichletBC(u, Zero());
-  poisson.solve(solver);
+  CG(poisson).solve();
+
+  // Save solution
+  u.getSolution().save("Poisson.gf");
+  mesh.save("Poisson.mesh");
 
   return 0;
 }
