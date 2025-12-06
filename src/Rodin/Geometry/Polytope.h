@@ -28,7 +28,6 @@
 namespace Rodin::Geometry
 {
   /**
-   * @ingroup RodinGeometry
    * @brief Base class for all geometric elements in finite element meshes.
    *
    * A Polytope represents a geometric entity in a finite element mesh, ranging

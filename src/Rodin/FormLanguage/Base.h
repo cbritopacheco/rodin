@@ -25,17 +25,6 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @defgroup RodinFormLanguage Form Language Module
-   * @brief Domain-specific language for expressing finite element forms and expressions.
-   *
-   * The FormLanguage module provides a comprehensive framework for expressing
-   * variational forms, mathematical expressions, and finite element operations
-   * using a high-level, expressive domain-specific language. This module forms
-   * the foundation for Rodin's symbolic computation capabilities.
-   */
-
-  /**
-   * @ingroup RodinFormLanguage
    * @brief Base class for all objects in Rodin's FormLanguage system.
    *
    * This class serves as the foundational base for all form language objects,

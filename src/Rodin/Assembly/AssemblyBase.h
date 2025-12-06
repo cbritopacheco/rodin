@@ -17,24 +17,6 @@
 namespace Rodin::Assembly
 {
   /**
-   * @defgroup RodinAssembly Assembly Module
-   * @brief Matrix and vector assembly infrastructure for finite element computations.
-   *
-   * The Assembly module provides the core infrastructure for assembling finite
-   * element matrices and vectors from variational forms. It supports both
-   * sequential and parallel assembly strategies, with specializations for
-   * different operator types and finite element spaces.
-   *
-   * ## Key Features
-   * - **Bilinear Form Assembly**: Efficient assembly of stiffness matrices
-   * - **Linear Form Assembly**: Assembly of load vectors and right-hand sides  
-   * - **Parallel Assembly**: Support for OpenMP-based parallel assembly
-   * - **Template Specialization**: Optimized assembly for different operator types
-   * - **Mixed Formulations**: Support for mixed finite element problems
-   */
-
-  /**
-   * @ingroup RodinAssembly
    * @brief Base class for bilinear form assembly operations.
    *
    * This template specialization handles the assembly of bilinear forms into
@@ -111,7 +93,6 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @ingroup RodinAssembly
    * @brief Base class for linear form assembly operations.
    *
    * This template specialization handles the assembly of linear forms into

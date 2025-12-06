@@ -11,7 +11,6 @@
 namespace Rodin::Assembly
 {
   /**
-   * @ingroup RodinAssembly
    * @brief Base class template for assembly operations.
    *
    * Provides the interface for assembling variational forms into discrete
@@ -25,7 +24,6 @@ namespace Rodin::Assembly
   class AssemblyBase;
 
   /**
-   * @ingroup RodinAssembly
    * @brief Sequential (single-threaded) assembly implementation.
    *
    * Implements assembly operations using sequential iteration over mesh elements.
@@ -39,7 +37,6 @@ namespace Rodin::Assembly
   class Sequential;
 
   /**
-   * @ingroup RodinAssembly
    * @brief Sequential mesh iteration strategy.
    *
    * Provides sequential iteration over mesh polytopes for assembly operations.
@@ -51,7 +48,6 @@ namespace Rodin::Assembly
   class SequentialIteration;
 
   /**
-   * @ingroup RodinAssembly
    * @brief Input data for bilinear form assembly.
    *
    * Encapsulates trial and test finite element spaces along with local and
@@ -64,7 +60,6 @@ namespace Rodin::Assembly
   class BilinearFormAssemblyInput;
 
   /**
-   * @ingroup RodinAssembly
    * @brief Input data for linear form assembly.
    *
    * Encapsulates the finite element space and linear form integrators
@@ -76,7 +71,6 @@ namespace Rodin::Assembly
   class LinearFormAssemblyInput;
 
   /**
-   * @ingroup RodinAssembly
    * @brief Input data for tuple of bilinear forms assembly.
    *
    * Handles assembly of multiple bilinear forms organized as a tuple,
@@ -88,7 +82,6 @@ namespace Rodin::Assembly
   class BilinearFormTupleAssemblyInput;
 
   /**
-   * @ingroup RodinAssembly
    * @brief Input data for Dirichlet boundary condition assembly.
    *
    * Encapsulates the trial function, boundary value function, and essential
@@ -103,7 +96,6 @@ namespace Rodin::Assembly
   class DirichletBCAssemblyInput;
 
   /**
-   * @ingroup RodinAssembly
    * @brief Default assembly strategy selector.
    *
    * Selects the default assembly implementation based on execution context.
@@ -116,7 +108,6 @@ namespace Rodin::Assembly
   class Default;
 
   /**
-   * @ingroup RodinAssembly
    * @brief Generic problem assembly implementation.
    *
    * Provides a complete assembly implementation for variational problems,
@@ -132,7 +123,6 @@ namespace Rodin::Assembly
 namespace Rodin::Assembly
 {
   /**
-   * @ingroup RodinAssembly
    * @brief OpenMP-based parallel assembly implementation.
    *
    * Implements multi-threaded assembly operations using OpenMP parallelization.
@@ -146,7 +136,6 @@ namespace Rodin::Assembly
   class OpenMP;
 
   /**
-   * @ingroup RodinAssembly
    * @brief OpenMP-based parallel mesh iteration strategy.
    *
    * Provides parallel iteration over mesh polytopes using OpenMP threading.

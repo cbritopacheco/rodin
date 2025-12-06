@@ -7,7 +7,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Templated text class for code identifiers with bold formatting.
-   * @ingroup AlertModule
    * @tparam Foreground The foreground color type.
    *
    * Specialized text class for displaying code identifiers (class names,
@@ -36,7 +35,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Namespace containing factory functions for code identifiers.
-   * @ingroup AlertModule
    *
    * Provides convenient factory functions for creating colored, bold
    * identifiers for different code elements (classes, namespaces, functions).

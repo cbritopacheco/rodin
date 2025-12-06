@@ -32,7 +32,6 @@
 namespace Rodin::Assembly
 {
   /**
-   * @ingroup RodinAssembly
    * @brief Input data for bilinear form assembly.
    *
    * This class encapsulates all data required to assemble a bilinear form
@@ -169,7 +168,6 @@ namespace Rodin::Assembly
     -> BilinearFormAssemblyInput<TrialFES, TestFES>;
 
   /**
-   * @ingroup RodinAssembly
    * @brief Input data for linear form assembly.
    *
    * This class encapsulates all data required to assemble a linear form
@@ -236,7 +234,6 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @ingroup RodinAssembly
    * @brief Input data for tuple of bilinear forms assembly.
    *
    * This class handles assembly of multiple bilinear forms organized as a tuple,
@@ -322,7 +319,6 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @ingroup RodinAssembly
    * @brief Input data for tuple of linear forms assembly.
    *
    * This class handles assembly of multiple linear forms organized as a tuple,
@@ -393,7 +389,6 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @ingroup RodinAssembly
    * @brief Input data for Dirichlet boundary condition assembly.
    *
    * This class encapsulates all data required to assemble essential (Dirichlet)
@@ -467,7 +462,6 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @ingroup RodinAssembly
    * @brief Input data for complete problem assembly.
    *
    * This class encapsulates all data required to assemble a complete variational

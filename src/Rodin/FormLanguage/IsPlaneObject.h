@@ -18,7 +18,6 @@ namespace Rodin::FormLanguage
   /**
    * @brief Type trait to identify Eigen plain object types.
    * @tparam T Type to check
-   * @ingroup RodinFormLanguage
    *
    * This trait determines whether a type is an Eigen plain object type that
    * owns its data storage, such as Matrix, Array, or Vector. Plain objects
@@ -46,7 +45,6 @@ namespace Rodin::FormLanguage
   /**
    * @brief General case: checks if type derives from Eigen::PlainObjectBase.
    * @tparam T Type to check
-   * @ingroup RodinFormLanguage
    */
   template <class T>
   struct IsPlainObject
@@ -60,7 +58,6 @@ namespace Rodin::FormLanguage
   /**
    * @brief Specialization for Eigen::PlainObjectBase types.
    * @tparam Derived Derived type parameter
-   * @ingroup RodinFormLanguage
    *
    * This specialization handles the case when T is exactly Eigen::PlainObjectBase<Derived>,
    * ensuring correct trait evaluation for base class references.

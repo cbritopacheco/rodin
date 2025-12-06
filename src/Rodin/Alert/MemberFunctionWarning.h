@@ -17,7 +17,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Warning type for issues occurring in member functions.
-   * @ingroup AlertModule
    * @tparam T The type of the class where the member function resides.
    * @tparam FuncName The type used to represent the function name.
    *

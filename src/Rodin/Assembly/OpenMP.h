@@ -29,7 +29,6 @@
 namespace Rodin::Assembly
 {
   /**
-   * @ingroup RodinAssembly
    * @brief OpenMP-based parallel mesh iteration for multi-threaded assembly.
    *
    * OpenMPIteration provides a parallel iteration strategy over mesh elements
@@ -98,7 +97,6 @@ namespace Rodin::Assembly
     -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
 
   /**
-   * @ingroup RodinAssembly
    * @brief OpenMP-based parallel assembly for bilinear forms.
    *
    * This class provides a multi-threaded assembly implementation for bilinear

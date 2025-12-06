@@ -15,7 +15,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Prefix class for success messages.
-   * @ingroup AlertModule
    *
    * Provides green-colored prefixing for success messages using "Success" as
    * the default prefix text.
@@ -38,7 +37,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Success message class with formatted output.
-   * @ingroup AlertModule
    *
    * A specialized message class for displaying success notifications with
    * green-colored formatting. Success messages indicate successful completion

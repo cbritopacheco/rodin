@@ -14,7 +14,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Empty tag type for resetting terminal formatting.
-   * @ingroup AlertModule
    *
    * Tag type used to reset all terminal text formatting and colors
    * back to default. This includes clearing any colors, bold, italic,
@@ -40,7 +39,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Instance of ResetT tag type.
-   * @ingroup AlertModule
    *
    * Constant instance of the ResetT tag type for convenient usage.
    * Use this to reset terminal formatting to default.
@@ -49,7 +47,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for ResetT.
-   * @ingroup AlertModule
    * @param os The output stream to write to.
    * @return Reference to the output stream.
    *

@@ -25,7 +25,6 @@
 namespace Rodin::Assembly
 {
   /**
-   * @ingroup RodinAssembly
    * @brief Generic assembly implementation for complete variational problems.
    *
    * This class provides a complete assembly implementation that handles all

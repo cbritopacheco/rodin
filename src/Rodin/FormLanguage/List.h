@@ -43,7 +43,6 @@ namespace Rodin::FormLanguage
   /**
    * @brief Polymorphic container for form language objects.
    * @tparam T Element type (must be derived from or compatible with Base)
-   * @ingroup RodinFormLanguage
    *
    * List provides a dynamic container for storing polymorphic form language
    * objects with value semantics. The container manages object lifetimes
@@ -81,7 +80,6 @@ namespace Rodin::FormLanguage
 
       /**
        * @brief Forward iterator for non-const List.
-       * @ingroup RodinFormLanguage
        *
        * Iterator provides forward iteration over the list elements,
        * automatically dereferencing the unique_ptr storage to access
@@ -134,7 +132,6 @@ namespace Rodin::FormLanguage
 
       /**
        * @brief Forward iterator for const List.
-       * @ingroup RodinFormLanguage
        *
        * ConstIterator provides forward iteration over const list elements,
        * ensuring read-only access to the contained objects.

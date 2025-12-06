@@ -20,10 +20,13 @@
 
   - @subpage guides-getting-started-installation - How to install Rodin and set up
     your development environment
+
   - @subpage guides-getting-started-first-steps - Basic concepts and your first Rodin
     program
+
   - @subpage guides-getting-started-first-problem - Solving a complete problem: the
     Poisson equation
+
   - @subpage guides-getting-started-core-concepts - Understanding meshes, finite
     element spaces, and variational formulations
 
@@ -61,6 +64,8 @@
   @section guides-fem-index The finite element method
 
   - @subpage fem-ciarlet
+
+  - @subpage fem-spaces
 
   @section guides-variational-index Weak formulations and variational problems
 

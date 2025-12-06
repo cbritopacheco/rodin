@@ -14,7 +14,6 @@ namespace Rodin::FormLanguage
   /**
    * @brief Template for debugging form language types.
    * @tparam T Type to debug
-   * @ingroup RodinFormLanguage
    *
    * The Debug template provides a mechanism for introspecting and debugging
    * form language types during compilation and runtime. Specialize this template

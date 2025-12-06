@@ -25,16 +25,6 @@ namespace Rodin::QF
   /**
    * @defgroup RodinQuadrature Quadrature formulae
    * @brief Quadrature formulae utilized by Rodin
-   *
-   * The QF (Quadrature Formula) module provides numerical integration rules
-   * for computing integrals over reference polytopes. These quadrature rules
-   * approximate integrals by weighted sums:
-   * @f[
-   *   \int_K f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
-   * @f]
-   * where @f$ K @f$ is a reference polytope, @f$ x_i @f$ are quadrature points,
-   * and @f$ w_i @f$ are associated weights.
-   *
    * @see QuadratureFormulaBase
    */
 
