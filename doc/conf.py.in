@@ -9,7 +9,7 @@ STYLESHEETS = [
 
 THEME_COLOR = '#22272e'
 
-FAVICON = 'favicon-dark.png'
+FAVICON = 'favicon.ico'
 
 LINKS_NAVBAR1 = [
     ("Pages", 'pages', [
