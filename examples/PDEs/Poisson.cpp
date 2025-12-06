@@ -21,23 +21,38 @@ int main(int, char**)
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
   mesh.getConnectivity().compute(1, 2);
 
-  P1 vh(mesh);
+  H1 vh(std::integral_constant<size_t, 12>{}, mesh);
+  // P1 vh(mesh);
+  GridFunction u(vh);
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-
-  RealFunction f = 1;
-
-  // Apply Dirichlet conditions on the entire boundary.
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-  CG(poisson).solve();
-
-  // Save solution
-  u.getSolution().save("Poisson.gf");
+  u = [](const Geometry::Point& p)
+  {
+    return std::sin(M_PI * p.x()) * std::cos(M_PI * p.y());
+    // return p.x() * (1 - p.x()) * p.y() * (1 - p.y());
+  };
+  std::cout << "Miaow\n";
+  u.save("Poisson.gf");
+  // u.load("Poisson.gf");
+  // u.save("Poisson2.gf");
   mesh.save("Poisson.mesh");
+
+  // P1 vh(mesh);
+
+  // TrialFunction u(vh);
+  // TestFunction  v(vh);
+
+  // RealFunction f = 1;
+
+  // // Apply Dirichlet conditions on the entire boundary.
+  // Problem poisson(u, v);
+  // poisson = Integral(Grad(u), Grad(v))
+  //         - Integral(f, v)
+  //         + DirichletBC(u, Zero());
+  // CG(poisson).solve();
+
+  // // Save solution
+  // u.getSolution().save("Poisson.gf");
+  // mesh.save("Poisson.mesh");
 
   return 0;
 }
