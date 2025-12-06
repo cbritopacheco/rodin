@@ -316,9 +316,8 @@ Rodin provides many powerful features for finite element analysis:
 
 **Finite Element Spaces:**
 - P1 (piecewise linear) elements
-- P2 (piecewise quadratic) elements
 - P0 (piecewise constant) elements
-- H1, L2, HDiv, and HCurl conforming spaces
+- H1
 
 **File Format Support:**
 - MFEM mesh and grid function formats
@@ -416,20 +415,6 @@ The generated documentation will be in the `doc/` directory. For more details, s
                   .setHausdorff(hausd) // curvature refinement
                   .optimize(Omega);
   ```
-
-## Roadmap
-
-List of features and modules that are in the works:
-  - Discontinuous Galerkin methods
-  - `Rodin::Plot` module
-  - H1
-  - L2
-  - HDiv
-  - HCurl
-  - P2
-  - P0
-  - PETSc
-  - METIS
 
 ## Requirements
 
