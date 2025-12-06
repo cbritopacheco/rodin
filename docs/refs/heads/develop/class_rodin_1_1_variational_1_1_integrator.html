@@ -71,8 +71,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md308">Integrator Types</a></li>
-            <li><a href="#autotoc_md309">Role in Assembly</a></li>
+            <li><a href="#autotoc_md312">Integrator Types</a></li>
+            <li><a href="#autotoc_md313">Role in Assembly</a></li>
             <li>
               Reference
               <ul>
@@ -85,7 +85,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a> class provides a common interface for all types of integrators used in finite element assembly. Integrators compute local (element-level) contributions that are then assembled into global matrices and vectors.</p><section id="autotoc_md308"><h3><a href="#autotoc_md308">Integrator Types</a></h3><p>There are two main types of integrators:</p><ul><li><strong>Linear Integrators</strong>: Compute contributions to the load vector (RHS)<ul><li>Example: <svg class="m-math" style="width: 7.574em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 72.710608 13.781784">
+<p>The <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a> class provides a common interface for all types of integrators used in finite element assembly. Integrators compute local (element-level) contributions that are then assembled into global matrices and vectors.</p><section id="autotoc_md312"><h3><a href="#autotoc_md312">Integrator Types</a></h3><p>There are two main types of integrators:</p><ul><li><strong>Linear Integrators</strong>: Compute contributions to the load vector (RHS)<ul><li>Example: <svg class="m-math" style="width: 7.574em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 72.710608 13.781784">
 <title>
 $ b_i = \int_K f \psi_i \, dx $
 </title>
@@ -147,7 +147,7 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
 <use x='100.481475' y='0' xlink:href='#eq2-g3-100'/>
 <use x='106.564168' y='0' xlink:href='#eq2-g3-120'/>
 </g>
-</svg></li></ul></li></ul></section><section id="autotoc_md309"><h3><a href="#autotoc_md309">Role in Assembly</a></h3><p>During the assembly process:</p><ol><li>Integrators are iterated over mesh elements</li><li>Local contributions are computed using numerical quadrature</li><li>Local contributions are mapped to global indices</li><li>Global matrix/vector is updated with local contributions</li></ol><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>, <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a></p></aside></section>
+</svg></li></ul></li></ul></section><section id="autotoc_md313"><h3><a href="#autotoc_md313">Role in Assembly</a></h3><p>During the assembly process:</p><ol><li>Integrators are iterated over mesh elements</li><li>Local contributions are computed using numerical quadrature</li><li>Local contributions are mapped to global indices</li><li>Global matrix/vector is updated with local contributions</li></ol><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>, <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

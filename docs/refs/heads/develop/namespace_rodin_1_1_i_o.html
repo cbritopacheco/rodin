@@ -89,6 +89,16 @@
             </dt>
             <dd><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> template for grid functions with specific file format.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_e25ce5570c0c5790351369eb032d2a12.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for loading H1 grid functions from MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_6ee8254a956b51895920e0e48fe4c901.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, Variational::P0&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> for P0 (piecewise constant) grid functions in MFEM format.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Range&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_f56c2f78720844daa893ee3a38efa37e.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, Variational::P1&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
             </dt>
@@ -109,10 +119,20 @@
             </dt>
             <dd>Final specialization for printing grid functions with vector data in MFEM format.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_154340b82701ef2fbaf99c4ee98756e99.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for printing H1 grid functions with vector data in MFEM format.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>
             </dt>
             <dd>Forward declaration of base class for printing grid functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range, class Context, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base_3_01_file_format_1_1_m_f_e_m_00_01_variationaa0f7bcc6d6b9a8ad6e584b65ca4654c5.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context&gt;&gt;, Data&gt;</a>
+            </dt>
+            <dd>Base class for printing H1 (continuous Lagrange) grid functions in MFEM format.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Range, class Context, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base_3_01_file_format_1_1_m_f_e_m_00_01_variationa37e9447436a2f9407877d38ac61d3fb4.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MFEM, Variational::P0&lt;Range, Geometry::Mesh&lt;Context&gt;&gt;, Data&gt;</a>

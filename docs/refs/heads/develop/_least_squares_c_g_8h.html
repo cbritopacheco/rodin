@@ -70,9 +70,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md189">Algorithm</a></li>
-            <li><a href="#autotoc_md190">Applicability</a></li>
-            <li><a href="#autotoc_md191">Usage Example</a></li>
+            <li><a href="#autotoc_md193">Algorithm</a></li>
+            <li><a href="#autotoc_md194">Applicability</a></li>
+            <li><a href="#autotoc_md195">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -82,7 +82,7 @@
             </li>
           </ul>
         </nav>
-<p>This header provides the LeastSquaresCG solver class for solving least-squares problems using the conjugate gradient method applied to the normal equations.</p><section id="autotoc_md189"><h3><a href="#autotoc_md189">Algorithm</a></h3><p>Solves the least-squares problem:</p><div class="m-math"><svg style="width: 7.574em; height: 1.796em;" viewBox="157.668326 -18.4411 72.708225 17.245586">
+<p>This header provides the LeastSquaresCG solver class for solving least-squares problems using the conjugate gradient method applied to the normal equations.</p><section id="autotoc_md193"><h3><a href="#autotoc_md193">Algorithm</a></h3><p>Solves the least-squares problem:</p><div class="m-math"><svg style="width: 7.574em; height: 1.796em;" viewBox="157.668326 -18.4411 72.708225 17.245586">
 <title>
 \[
   \min_x \|Ax - b\|^2
@@ -134,7 +134,7 @@ $ A^TAx = A^Tb $
 <use x='55.328928' y='-4.338437' xlink:href='#eq2-g0-84'/>
 <use x='61.933418' y='0' xlink:href='#eq2-g1-98'/>
 </g>
-</svg>.</p></section><section id="autotoc_md190"><h3><a href="#autotoc_md190">Applicability</a></h3><ul><li>Overdetermined systems (more equations than unknowns)</li><li>Rectangular matrices</li><li>Least-squares fitting problems</li><li>Problems where <svg class="m-math" style="width: 2.516em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 24.155184 9.784673">
+</svg>.</p></section><section id="autotoc_md194"><h3><a href="#autotoc_md194">Applicability</a></h3><ul><li>Overdetermined systems (more equations than unknowns)</li><li>Rectangular matrices</li><li>Least-squares fitting problems</li><li>Problems where <svg class="m-math" style="width: 2.516em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 24.155184 9.784673">
 <title>
 $ A^TA $
 </title>
@@ -147,7 +147,7 @@ $ A^TA $
 <use x='8.775347' y='-4.338437' xlink:href='#eq3-g0-84'/>
 <use x='15.379837' y='0' xlink:href='#eq3-g1-65'/>
 </g>
-</svg> is well-conditioned</li></ul></section><section id="autotoc_md191"><h3><a href="#autotoc_md191">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> is well-conditioned</li></ul></section><section id="autotoc_md195"><h3><a href="#autotoc_md195">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">LeastSquaresCG</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>

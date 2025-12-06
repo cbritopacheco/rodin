@@ -70,8 +70,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md386">Role in Problem Assembly</a></li>
-            <li><a href="#autotoc_md387">Design Pattern</a></li>
+            <li><a href="#autotoc_md390">Role in Problem Assembly</a></li>
+            <li><a href="#autotoc_md391">Design Pattern</a></li>
             <li>
               Reference
               <ul>
@@ -81,7 +81,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the ProblemBody class, which manages the collection of integrators (bilinear and linear forms) and boundary conditions that comprise a variational problem. The ProblemBody serves as a container and coordinator for all components of a finite element formulation.</p><section id="autotoc_md386"><h3><a href="#autotoc_md386">Role in Problem Assembly</a></h3><p>ProblemBody acts as an intermediate layer that:</p><ol><li>Collects all bilinear form integrators (matrix terms)</li><li>Collects all linear form integrators (load vector terms)</li><li>Manages essential (Dirichlet) boundary conditions</li><li>Manages periodic boundary conditions</li><li>Coordinates the assembly process</li></ol></section><section id="autotoc_md387"><h3><a href="#autotoc_md387">Design Pattern</a></h3><p>The separation of ProblemBody from Problem follows the Bridge pattern, allowing:</p><ul><li>Shared state between different problem types</li><li>Flexible composition of problem components</li><li>Independent evolution of assembly and solution strategies</li></ul></section>
+<p>This file defines the ProblemBody class, which manages the collection of integrators (bilinear and linear forms) and boundary conditions that comprise a variational problem. The ProblemBody serves as a container and coordinator for all components of a finite element formulation.</p><section id="autotoc_md390"><h3><a href="#autotoc_md390">Role in Problem Assembly</a></h3><p>ProblemBody acts as an intermediate layer that:</p><ol><li>Collects all bilinear form integrators (matrix terms)</li><li>Collects all linear form integrators (load vector terms)</li><li>Manages essential (Dirichlet) boundary conditions</li><li>Manages periodic boundary conditions</li><li>Coordinates the assembly process</li></ol></section><section id="autotoc_md391"><h3><a href="#autotoc_md391">Design Pattern</a></h3><p>The separation of ProblemBody from Problem follows the Bridge pattern, allowing:</p><ul><li>Shared state between different problem types</li><li>Flexible composition of problem components</li><li>Independent evolution of assembly and solution strategies</li></ul></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
