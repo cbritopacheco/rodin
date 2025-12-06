@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1765014255455,
+  "lastUpdate": 1765052198110,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -40390,6 +40390,162 @@ window.BENCHMARK_DATA = {
             "value": 49.64333165991705,
             "unit": "ns/iter",
             "extra": "iterations: 12471477\ncpu: 49.64399429193515 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "198982749+Copilot@users.noreply.github.com",
+            "name": "Copilot",
+            "username": "Copilot"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f9fc9bdbe9fed15088bcb8fddfc4f5939659968c",
+          "message": "Add comprehensive documentation for Getting Started and Meshes sections (#159)\n\n* Initial plan\n\n* Add comprehensive Getting Started documentation section\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix consistency issues in Getting Started examples\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Embed getting started section directly in GuidesIndex\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update doc\n\n* Update\n\n* Update doc\n\n* Update doc\n\n* Add comprehensive mesh documentation with subpages\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix documentation structure to follow convention\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update README with new documentation structure\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Consolidate and expand feature descriptions in README\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove roadmap from README\n\nRemoved roadmap section detailing future features.\n\n* Add favicon\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>",
+          "timestamp": "2025-12-06T21:10:47+01:00",
+          "tree_id": "38c2697d464d2086b9099703bd0385462ad1037f",
+          "url": "https://github.com/cbritopacheco/rodin/commit/f9fc9bdbe9fed15088bcb8fddfc4f5939659968c"
+        },
+        "date": 1765052190368,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.31868950099210647,
+            "unit": "ns/iter",
+            "extra": "iterations: 2237564792\ncpu: 0.3186588082496071 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.3112406746921902,
+            "unit": "ns/iter",
+            "extra": "iterations: 2248494676\ncpu: 0.31121619386925337 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.31077808530527384,
+            "unit": "ns/iter",
+            "extra": "iterations: 2251487116\ncpu: 0.31073362624563206 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.3114591588649238,
+            "unit": "ns/iter",
+            "extra": "iterations: 2173291556\ncpu: 0.31143500840068605 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 618.1920941810162,
+            "unit": "ns/iter",
+            "extra": "iterations: 1152164\ncpu: 618.1134248249377 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 127855.76089708103,
+            "unit": "ns/iter",
+            "extra": "iterations: 5529\ncpu: 127840.58762886596 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 555297.7870228676,
+            "unit": "ns/iter",
+            "extra": "iterations: 1310\ncpu: 555248.6244274812 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 1060.2311295324423,
+            "unit": "ns/iter",
+            "extra": "iterations: 665895\ncpu: 1060.1574137063647 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 224871.00767755584,
+            "unit": "ns/iter",
+            "extra": "iterations: 3126\ncpu: 224842.38483685258 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 970007.6675824721,
+            "unit": "ns/iter",
+            "extra": "iterations: 728\ncpu: 969935.3502747255 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 262157.7996240605,
+            "unit": "ns/iter",
+            "extra": "iterations: 2660\ncpu: 262136.53609022556 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 246056.15887521737,
+            "unit": "ns/iter",
+            "extra": "iterations: 2845\ncpu: 246035.9813708263 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 13668.05972709603,
+            "unit": "ns/iter",
+            "extra": "iterations: 51300\ncpu: 13667.397270955164 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 6017606.256410316,
+            "unit": "ns/iter",
+            "extra": "iterations: 117\ncpu: 6016405.427350423 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 111777.72676550144,
+            "unit": "ns/iter",
+            "extra": "iterations: 6273\ncpu: 111763.5705404114 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2114457.851963707,
+            "unit": "ns/iter",
+            "extra": "iterations: 331\ncpu: 2114202.8882175214 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9883565.027777763,
+            "unit": "ns/iter",
+            "extra": "iterations: 72\ncpu: 9882590.680555526 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 42511026.69230879,
+            "unit": "ns/iter",
+            "extra": "iterations: 13\ncpu: 42508113.15384613 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 295451431.0000036,
+            "unit": "ns/iter",
+            "extra": "iterations: 2\ncpu: 295430956.49999887 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_16x16",
+            "value": 48.59185582660896,
+            "unit": "ns/iter",
+            "extra": "iterations: 14402935\ncpu: 48.57561573387651 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_32x32",
+            "value": 48.764135608452854,
+            "unit": "ns/iter",
+            "extra": "iterations: 13963053\ncpu: 48.755351999308395 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_64x64",
+            "value": 49.90288795969527,
+            "unit": "ns/iter",
+            "extra": "iterations: 12515791\ncpu: 49.89407109786362 ns\nthreads: 1"
           }
         ]
       }
